@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_MORTAL_JINQUE_TEMPLE_001", "version": 1, "title": "荒祠梁上书", "body": "避雨荒祠时，一道雷光劈开朽梁。夹层里没有金银，只有一页以云纹封存的《后天灵箓》。",
+      "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.5,
+      "intent_weights": {"travel": 2.4, "rest": 0.5},
+      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "choices": [{"id": "take", "text": "拆下残页贴身收藏", "effects": [{"type": "add_random_jinque"}]}, {"id": "leave", "text": "不动神龛旧物", "effects": []}]
+    },
+    {
+      "id": "EVT_MORTAL_JINQUE_MARKET_001", "version": 1, "title": "鬼市残卷", "body": "夜半鬼市将散，一个瞎眼摊主只收你一枚旧铜钱，却把压箱底的金纹残页塞进你手里。",
+      "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.3,
+      "intent_weights": {"travel": 2.8, "treasure": 1.8},
+      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "choices": [{"id": "trade", "text": "收下这桩古怪交易", "effects": [{"type": "add_random_jinque"}]}, {"id": "refuse", "text": "转身离开鬼市", "effects": []}]
+    },
+    {
+      "id": "EVT_MORTAL_JINQUE_BATTLEFIELD_001", "version": 1, "title": "古战场遗页", "body": "荒草掩埋的断甲下，一截白骨仍紧攥着不朽残页。字迹在你触碰时重新亮起。",
+      "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.2,
+      "intent_weights": {"treasure": 3.0, "travel": 1.6},
+      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "choices": [{"id": "bury", "text": "埋葬遗骨，带走残页", "effects": [{"type": "add_karma", "value": -1}, {"type": "add_random_jinque"}]}, {"id": "leave", "text": "不扰亡者", "effects": []}]
+    },
+    {
+      "id": "EVT_MORTAL_JINQUE_DREAM_001", "version": 1, "title": "梦中授页", "body": "连下七夜细雨，你反复梦见一名无面道人。第八日醒来，枕边竟多了一页真实的《后天灵箓》。",
+      "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.0,
+      "intent_weights": {"rest": 3.2, "cultivate": 1.4},
+      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "choices": [{"id": "keep", "text": "将梦中残页收好", "effects": [{"type": "add_random_jinque"}]}]
+    },
+    {
+      "id": "EVT_MORTAL_JINQUE_ANCESTOR_001", "version": 1, "title": "族谱暗章", "body": "整理祖宅族谱时，你发现一张被先人反复缝入书脊的金色薄页。旁注只写着四字：后人自择。",
+      "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.1,
+      "intent_weights": {"rest": 2.0, "travel": 1.2},
+      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "choices": [{"id": "inherit", "text": "承下先人未竟之缘", "effects": [{"type": "add_random_jinque"}]}, {"id": "seal", "text": "暂将族谱封存", "effects": []}]
+    }
+  ]
+}

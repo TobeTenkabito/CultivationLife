@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "event_id":"EVT_NAMELESS_CITY_005","target_name":"百族围攻祖山","natural_terrain":"开阔","artificial_conditions":["禁空","大阵"],
+      "enemy_members":[{"name":"金羽族破山阵","share":0.30,"path":"dao","kind":"formation"},{"name":"苍角族护祖战士","share":0.26,"path":"dao"},{"name":"玄鳞族撞山兽","share":0.24,"path":"dao","kind":"artifact"},{"name":"失控祖血兽潮","share":0.20,"path":"ghost","kind":"environment"}],
+      "player_allies":[{"name":"守火老猿","power_ratio":0.06,"path":"dao"},{"name":"八族年轻妖修","power_ratio":0.04,"path":"dao"}],
+      "story_beats":["八族为争夺祖壁上的第一祖名同时攻山，沉睡的祖血兽潮也被惊醒。","各族长老认定只有本族精血能够续燃祖火，年轻妖修却在旧壁上发现百族共祭的痕迹。","守火老猿护住将熄的火种，你只破争夺祖位的战阵，不伤退下山道者。","越来越多妖修看见祖火正在吞噬胜者精血，围攻阵线由此动摇。","日出以前，必须迫使百族停手，并保住祖火中最后一缕未受污染的火苗。"]
+    },
+    {
+      "event_id":"EVT_NAMELESS_CITY_007","target_name":"无相妖祖与万骨妖潮","natural_terrain":"险要","artificial_conditions":["禁神识","大阵"],
+      "enemy_members":[{"name":"无相妖祖历代寄身","share":0.38,"path":"ghost","realm_offset":1,"full_power_multiplier":0.86},{"name":"万骨妖潮","share":0.26,"path":"ghost","kind":"environment"},{"name":"夺舍祖印","share":0.22,"path":"dao","kind":"artifact"},{"name":"祖火反噬","share":0.14,"path":"ghost","kind":"environment"}],
+      "player_allies":[{"name":"守火老猿","power_ratio":0.05,"path":"dao"},{"name":"百族停战妖修","power_ratio":0.08,"path":"dao"},{"name":"百族共血火阵","power_ratio":0.05,"path":"dao","kind":"formation"}],
+      "story_beats":["无相妖祖从历代最强者的遗骨中逐一显形，万骨妖潮冲下祖山。","被夺舍的残魂敌我不分，百族以各自一滴自愿献出的精血重燃真正祖火。","停战妖修压住外层兽潮，你转攻让妖祖轮回寄身的夺舍祖印。","妖祖企图占据当代最强血脉，祖壁却显出百族共同留下的第一道火痕。","胜负不只取决于杀伤：必须在祖火熄灭前斩断妖祖与历代寄身的联系。"]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "faction_presets": {
+      "monster": [
+        {"id": "monster_ten_thousand_court", "world": "monster_realm", "name": "万妖祖庭", "elders": ["玄岳妖圣", "青离夫人"]},
+        {"id": "monster_phantom_court", "world": "phantom_underworld", "name": "月下妖庭", "elders": ["月魄妖君"]}
+      ],
+      "clawkin": [{"id": "clawkin_mountain", "world": "monster_realm", "name": "裂岳兽宫", "elders": ["白额大圣"]}],
+      "foxkin": [{"id": "foxkin_mist", "world": "monster_realm", "name": "青丘雾宫", "elders": ["涂山月主", "绯烟夫人"]}],
+      "scalekin": [{"id": "scalekin_sea", "world": "monster_realm", "name": "苍鳞水府", "elders": ["玄鳞龙君"]}],
+      "hornkin": [{"id": "hornkin_peak", "world": "monster_realm", "name": "万角神山", "elders": ["负岳王"]}],
+      "skykin": [{"id": "skykin_plateau", "world": "monster_realm", "name": "雷羽天庭", "elders": ["惊霄羽皇"]}],
+      "chitinborn": [{"id": "chitinborn_hive", "world": "monster_realm", "name": "百蜕虫巢", "elders": ["金蜕母皇"]}],
+      "moonbeast": [{"id": "moonbeast_plain", "world": "phantom_underworld", "name": "月兽神庭", "elders": ["啸月神君"]}],
+      "dreamfox": [{"id": "dreamfox_palace", "world": "phantom_underworld", "name": "九梦狐宫", "elders": ["梦璃妖后"]}],
+      "treekin": [{"id": "treekin_forest", "world": "phantom_underworld", "name": "万灵古殿", "elders": ["岁木尊者"]}],
+      "boneborn": [{"id": "boneborn_ridge", "world": "phantom_underworld", "name": "天骨战盟", "elders": ["苍骨大圣"]}],
+      "tidephantom": [{"id": "tidephantom_sea", "world": "phantom_underworld", "name": "幻潮蜃宫", "elders": ["潮生幻主"]}],
+      "shadowwing": [{"id": "shadowwing_cliff", "world": "phantom_underworld", "name": "无月翼城", "elders": ["玄翼冥君"]}],
+      "primordial_true_spirit": [{"id": "true_spirit_ancestral_hall", "world": "nether", "name": "太初真灵殿", "elders": ["苍古龙祖", "元凤天母"]}],
+      "self_ancestor": [{"id": "self_lineage_pavilion", "world": "nether", "name": "自脉万祖阁", "elders": ["无名新祖"]}],
+      "worldtree_descendant": [{"id": "worldtree_root_court", "world": "nether", "name": "界树根庭", "elders": ["万年轮主"]}],
+      "chaos_beast": [{"id": "primordial_wild_court", "world": "nether", "name": "太荒兽庭", "elders": ["混沌兽皇"]}]
+    }
+  },
+  "races": [
+    {"id": "monster", "name": "妖族", "worlds": ["human", "spirit", "monster_realm", "phantom_underworld"], "description": "由天地生灵启智化形，肉身与血脉天赋强盛。"},
+    {"id": "clawkin", "name": "爪族", "worlds": ["monster_realm"], "description": "虎豹熊罴启智而成的百兽大族，崇尚正面搏杀与山林领地。"},
+    {"id": "foxkin", "name": "狐族", "worlds": ["monster_realm"], "description": "擅长幻术、气息辨识与族群谋略，青丘诸脉遍布妖界。"},
+    {"id": "scalekin", "name": "鳞族", "worlds": ["monster_realm"], "description": "统称蛇、蛟、鱼龙等水陆鳞裔，血脉分支极为繁复。"},
+    {"id": "hornkin", "name": "角族", "worlds": ["monster_realm"], "description": "以巨角承载地脉妖力，肉身沉重坚韧，守御冠绝同阶。"},
+    {"id": "skykin", "name": "天羽族", "worlds": ["monster_realm"], "description": "统御妖界高空与雷云的羽族联盟，以极速和远视闻名。"},
+    {"id": "chitinborn", "name": "甲虫族", "worlds": ["monster_realm"], "description": "通过蜕壳不断重塑妖躯，族群感知敏锐且擅长阵战。"},
+    {"id": "moonbeast", "name": "月兽族", "worlds": ["phantom_underworld"], "description": "受幻冥月华孕育的兽裔，月盛时妖力与感知一同高涨。"},
+    {"id": "dreamfox", "name": "梦狐族", "worlds": ["phantom_underworld"], "description": "能够穿行梦境与现实缝隙的狐裔，极少显露真实形体。"},
+    {"id": "treekin", "name": "古木灵族", "worlds": ["phantom_underworld"], "description": "万灵古林的年轮生灵，拥有漫长寿元和强盛恢复能力。"},
+    {"id": "boneborn", "name": "天骨族", "worlds": ["phantom_underworld"], "description": "自远古巨兽遗骨中诞灵，骨甲即是肉身也是传承。"},
+    {"id": "tidephantom", "name": "幻潮族", "worlds": ["phantom_underworld"], "description": "随幻冥潮汐聚散的水相生灵，难以被寻常兵刃锁定。"},
+    {"id": "shadowwing", "name": "冥翼族", "worlds": ["phantom_underworld"], "description": "栖息无月高空的暗羽生灵，擅长潜踪和俯冲猎杀。"},
+    {"id": "primordial_true_spirit", "name": "太初真灵", "worlds": ["nether"], "description": "保留第一代龙、凤、鲲、玄武等源流的上界真灵共同体。"},
+    {"id": "self_ancestor", "name": "自脉妖祖", "worlds": ["nether"], "description": "拒绝依附太古祖名、以自身开创全新生命谱系的妖祖后裔。"},
+    {"id": "worldtree_descendant", "name": "界树裔", "worlds": ["nether"], "description": "由诸界根网孕育的长生种，负责记录幽冥界的血脉迁徙。"},
+    {"id": "chaos_beast", "name": "太荒异兽", "worlds": ["nether"], "description": "诞生于物种定型之前的太荒生命，形态与能力从不遵循后世分类。"}
+  ]
+}

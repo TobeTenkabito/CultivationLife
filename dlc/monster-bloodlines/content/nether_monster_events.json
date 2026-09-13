@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "world": "nether",
+  "events": [
+    {
+      "id":"EVT_NETHER_ANCESTRAL_COURT_001","version":1,"title":"祖庭开谱",
+      "body":"幽冥祖庭将万族旧谱铺成一道星河。每一个名字都能追溯至某次远古蜕变，也有大片空白等待后来者书写。",
+      "category":"nether_bloodline","tags":["monster","nether","ancestral_court","treasure"],"weight":5,"repeat":"once",
+      "intent_weights":{"treasure":2.6,"travel":1.8},
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.realm_index","op":"gte","value":9}]},
+      "choices":[
+        {"id":"trace","text":"沿旧谱追溯远祖","effects":[{"type":"add_item","item_id":"ancestral_court_genealogy"},{"type":"add_opportunity","value":24}]},
+        {"id":"write","text":"在空白处写下自己的名字","effects":[{"type":"add_item","item_id":"self_lineage_dao_seed"},{"type":"add_opportunity","value":18}]}
+      ]
+    },
+    {
+      "id":"EVT_NETHER_TRUE_SPIRIT_BONE_001","version":1,"title":"真灵遗骨潮",
+      "body":"龙源祖海退潮，海床上露出一截仍有脉搏的真灵源骨。祖血在呼唤它，而你的本相也在衡量这份古老定义。",
+      "category":"nether_bloodline","tags":["monster","nether","true_spirit","treasure"],"weight":4,
+      "intent_weights":{"treasure":3.0},
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.realm_index","op":"gte","value":9}]},
+      "choices":[
+        {"id":"take","text":"承受源骨威压并将其取走","effects":[{"type":"damage","value":0.12},{"type":"add_item","item_id":"true_spirit_origin_bone"}]},
+        {"id":"observe","text":"只记录遗骨的生命纹路","effects":[{"type":"add_opportunity","value":28}]}
+      ]
+    },
+    {
+      "id":"EVT_NETHER_SELF_LINEAGE_001","version":1,"title":"无祖荒的第一声",
+      "body":"无祖新生荒没有任何远古气息。一只从未见于族谱的幼兽在你面前完成第一次呼吸，证明生命不必总从祖先那里获得名字。",
+      "category":"nether_bloodline","tags":["monster","nether","self_lineage","cultivation"],"weight":5,
+      "intent_weights":{"cultivate":2.4,"body_train":2.0,"travel":1.6},
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.realm_index","op":"gte","value":9}]},
+      "choices":[
+        {"id":"protect","text":"为新生异种护法","effects":[{"type":"add_karma","value":-4},{"type":"add_item","item_id":"primordial_life_core"}]},
+        {"id":"meditate","text":"体悟自成血脉之理","effects":[{"type":"add_opportunity","value":32}]}
+      ]
+    },
+    {
+      "id":"EVT_NETHER_JOIN_TRUE_SPIRIT_001","version":1,"title":"真灵殿问血",
+      "body":"太初真灵殿以祖源镜照向你的本相，邀请愿意追寻返祖之路的上界妖修留名。",
+      "category":"nether_faction","tags":["monster","nether","faction_join"],"weight":3,"repeat":"once",
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"在祖源镜前留名","effects":[{"type":"join_faction","faction_id":"primordial_true_spirit_hall"}]},{"id":"leave","text":"暂不接受祖庭定义","effects":[]}]
+    },
+    {
+      "id":"EVT_NETHER_JOIN_SELF_LINEAGE_001","version":1,"title":"万祖阁新谱",
+      "body":"自脉万祖阁不问祖先，只收录由今世生命亲手开创的谱系。阁中执笔人请你写下第一条血脉法则。",
+      "category":"nether_faction","tags":["monster","nether","faction_join"],"weight":3,"repeat":"once",
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"执笔开谱，加入万祖阁","effects":[{"type":"join_faction","faction_id":"self_lineage_pavilion"}]},{"id":"leave","text":"独自继续完善新血脉","effects":[{"type":"add_opportunity","value":8}]}]
+    },
+    {
+      "id":"EVT_NETHER_JOIN_WORLDTREE_001","version":1,"title":"根庭垂枝",
+      "body":"界树根庭垂下一条贯穿生灭的枝索，枝叶间浮现历代共生妖族留下的血脉回响。",
+      "category":"nether_faction","tags":["monster","nether","faction_join"],"weight":3,"repeat":"once",
+      "conditions":{"all":[{"path":"player.path","op":"eq","value":"monster"},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"沿枝索进入界树根庭","effects":[{"type":"join_faction","faction_id":"worldtree_root_court"}]},{"id":"leave","text":"向古树行礼后离开","effects":[{"type":"add_karma","value":-2}]}]
+    }
+  ]
+}

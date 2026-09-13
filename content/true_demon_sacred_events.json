@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "world": "true_demon",
+  "events": [
+    {
+      "id":"EVT_TRUE_DEMON_SACRED_001","version":1,"title":"烬沙回廊","body":"你循焚天门图抵达真魔界，落脚处却是吞噬神识的烬沙回廊。赤霄天君已派夺魄魔骑守住出口，绯月麾下斥候则在沙暴中接应下界来客；他们正在前往镇渊关，阻止赤霄与玄烬争夺原始魔胎。",
+      "tags":["realm:integration","story_chain","true_demon_sacred_adaptation","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"true_demon_sacred_eligible","base_chance":0.20,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"true_demon"},{"path":"player.realm_index","op":"eq","value":7}]},
+      "choices":[
+        {"id":"counter_hunt","text":"与斥候联手反杀夺魄魔骑（敌方总战力 6,200,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":6200000}],"failure_reason":"吞识沙暴截断退路，赤霄化身将你炼成魔胎养料","success_text":"夺魄魔印尽毁，绯月斥候愿意引你前往镇渊关。"},{"type":"set_flag","flag":"true_demon_baohua_contact","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_002","if_result":["check_success"]}]},
+        {"id":"follow_scout","text":"以神识锁住风眼，随斥候穿过沙暴（MP 95,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":95000},{"stat":"mp_ratio","op":"gte","value":0.60}],"failure_reason":"风眼提前闭合，你的神识被沙暴吞尽","success_text":"众人抢在沙暴合拢前穿过回廊，镇渊关已在前方。"},{"type":"restore_mp","value":-0.16,"if_result":["check_success"]},{"type":"set_flag","flag":"true_demon_baohua_contact","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_002","if_result":["check_success"]}]},
+        {"id":"leave","text":"不接绯月斥候的因果","effects":[{"type":"set_flag","flag":"true_demon_sacred_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_TRUE_DEMON_SACRED_002","version":1,"title":"镇渊关封锁","body":"镇渊关扼守魔胎祖地，是绯月旧部最后的据点。玄烬的巡天魔舟封死上空，赤霄麾下夺魄兽又从地底攻城；守关玄龟只能勉强托住城墙，你必须先击溃其中一路，才能进入魔胎祖地。",
+      "tags":["realm:integration","story_chain","true_demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"break_blockade","text":"与守关玄龟合击巡天魔舟（敌方总战力 7,400,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":7400000}],"failure_reason":"魔舟主炮击穿城墙，将你与玄龟一同轰入地底","success_text":"魔舟阵列崩溃，镇渊关上空出现缺口。"},{"type":"set_flag","flag":"true_demon_island_landed","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_003","if_result":["check_success"]}]},
+        {"id":"borrow_chart","text":"以焚天门图绕过地底禁制","conditions":{"has_item":"true_demon_gate_chart"},"disabled_reason":"你没有下界魔界取得的焚天门图","effects":[{"type":"add_opportunity","value":30},{"type":"set_flag","flag":"true_demon_island_landed"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_003"}]}
+      ]
+    },
+    {
+      "id":"EVT_TRUE_DEMON_SACRED_003","version":1,"title":"双祖夺胎","body":"魔胎祖地中，玄烬圣祖与赤霄天君的化身同时降临。玄烬想吞下魔胎补全魔功，赤霄则要借它重塑第二道身；两人都以法则锚锁住地脉，谁先得手都不会留下镇渊关。绯月牵制双祖化身，你必须毁去锚点。",
+      "tags":["realm:integration","story_chain","true_demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"break_anchors","text":"在绯月牵制下逐个破坏法则锚（敌方总战力 8,300,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":8300000}],"failure_reason":"两位圣祖化身同时出手，你被魔光碾为飞灰","success_text":"法则锚尽碎，双祖化身无法继续停留，绯月趁机夺回魔胎。"},{"type":"set_flag","flag":"true_demon_ancestor_blockade_broken","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_004","if_result":["check_success"]}]},
+        {"id":"bargain","text":"向玄烬交出无声魔窟路线，换取一次入池机会","effects":[{"type":"add_karma","value":12},{"type":"set_flag","flag":"true_demon_ancestor_bargain"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_004"}]}
+      ]
+    },
+    {
+      "id":"EVT_TRUE_DEMON_SACRED_004","version":1,"title":"魔胎祖地的造化","body":"双祖化身退去后，绯月打开祖地深处的万劫雷池，并取出一株太初魂芝作为酬谢。雷池炼体、魂芝养神，本可相辅相成；但两种造化同时入体会引发雷火焚魂，只有法体与神识皆足够强横才能兼得。",
+      "tags":["realm:integration","story_chain","true_demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"pool","text":"进入万劫雷池淬炼法体","effects":[{"type":"damage","value":0.20,"reason":"法体承受不住万劫雷火"},{"type":"add_item","item_id":"cleansed_spirit_mark","if_result":["injured"]},{"type":"set_flag","flag":"true_demon_spirit_cleansed","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_005","if_result":["injured"]}]},
+        {"id":"lotus","text":"只取一株成熟的太初魂芝","effects":[{"type":"add_item","item_id":"purifying_lotus"},{"type":"set_flag","flag":"true_demon_lotus_taken"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_005"}]},
+        {"id":"both","text":"引雷火炼体，同时服下太初魂芝","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":90000},{"stat":"mp","op":"gte","value":90000}],"failure_reason":"雷火与魂力同时失控，将你的法体与元神一同烧散","success_text":"魂芝护神、雷火炼体，两种造化终于在经脉中完成周天。"},{"type":"damage","value":0.24,"if_result":["check_success"]},{"type":"restore_mp","value":-0.22,"if_result":["injured"]},{"type":"add_item","item_id":"cleansed_spirit_mark","if_result":["injured"]},{"type":"add_item","item_id":"purifying_lotus","if_result":["injured"]},{"type":"set_flag","flag":"true_demon_spirit_cleansed","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_SACRED_005","if_result":["injured"]}]}
+      ]
+    },
+    {
+      "id":"EVT_TRUE_DEMON_SACRED_005","version":1,"title":"祖藤根窟","body":"魔胎被移开后，祖地最深处露出一截漆黑根须。绯月终于明白，北域灵脉枯竭并非天灾：蚀天祖藤早已寄生在魔胎上，玄烬正是想借吞噬魔胎把祖藤之力据为己有。根须即将破窟而出，必须趁双祖未返完成封印。",
+      "tags":["realm:integration","story_chain","true_demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"reseal","text":"斩断根须并重启封根古阵（敌方总战力 9,000,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":9000000}],"failure_reason":"祖藤根须借你的魔躯破窟而出，黑花妖雨席卷真魔界","success_text":"根须被压回地底，封根古阵重新闭合。"},{"type":"add_item","item_id":"origin_seal_fragment","if_result":["check_success"]},{"type":"add_karma","value":-18,"if_result":["check_success"]},{"type":"add_fame","value":38,"if_result":["check_success"]},{"type":"set_flag","flag":"true_demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"true_demon_origin_seal_restored","if_result":["check_success"]}]},
+        {"id":"take_fragment","text":"截取祖藤根晶后撤离（敌方总战力 8,600,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":8600000}],"failure_reason":"封根傀儡截断退路，你与根晶一同留在古窟中","success_text":"你带走根晶，但祖藤本体仍潜伏在界壁更深处。"},{"type":"add_item","item_id":"origin_seal_fragment","if_result":["check_success"]},{"type":"add_karma","value":15,"if_result":["check_success"]},{"type":"set_flag","flag":"true_demon_sacred_incomplete","if_result":["check_success"]}]}
+      ]
+    }
+  ]
+}

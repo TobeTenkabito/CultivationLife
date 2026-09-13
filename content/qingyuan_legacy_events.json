@@ -1,0 +1,35 @@
+{
+  "schema_version":1,
+  "events":[
+    {
+      "id":"EVT_QINGYUAN_SWORD_LEGACY","version":1,"title":"青崖剑痕","body":"你在荒山避雨时发现一面被古藤遮住的青崖。藤下剑痕历经千年仍有木灵流转：出剑如新枝破土，收剑如落叶归根，伤敌之后又能借散逸灵气温养自身。留下剑痕的前辈没有署名，只在崖底刻着一句‘草木亦可问长生’。","tags":["realm:qi","legacy","qingyuan"],"weight":3,"repeat":"once",
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":1},{"has_affinity":"wood"},{"not":{"knows_technique":"TECH_QINGYUAN_SWORD"}}]},
+      "choices":[
+        {"id":"study","text":"循着剑痕逐式参悟","effects":[{"type":"restore_mp","value":-0.15},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"},{"type":"add_opportunity","value":8}]},
+        {"id":"seek","text":"请附近老药农辨认崖上灵藤","conditions":{"has_item":"spirit_stone","quantity":6},"disabled_reason":"至少需要六枚灵石作为酬资","effects":[{"type":"remove_item","item_id":"spirit_stone","quantity":6},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"},{"type":"add_fame","value":1}]},
+        {"id":"trial","text":"引木灵力入剑，当场演练崖上剑意","effects":[{"type":"damage","value":0.08,"reason":"失控木剑贯伤经脉"},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"}]},
+        {"id":"leave","text":"以古藤重新遮住剑痕","effects":[{"type":"add_heart_demon","value":1}]}
+      ]
+    },
+    {
+      "id":"EVT_DAGENG_SWORD_ARRAY_INSIGHT","version":1,"title":"万剑生春","body":"青木归元剑修至深处，每一道剑气都能吞吐草木灵机。某次与强敌斗法，你的飞剑折损大半，散落山野的剑气却借枯枝重新凝形。你由此悟到，剑阵不必依赖固定阵眼，只要一缕木气未绝，万剑便能枯而复生。","tags":["realm:nascent","legacy","qingyuan","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"dageng_array_eligible","base_chance":0.14,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":4},{"knows_technique":"TECH_QINGYUAN_SWORD"},{"not":{"knows_technique":"TECH_DAGENG_SWORD_ARRAY"}}]},
+      "choices":[
+        {"id":"deduce","text":"分化神念，让每道剑气自行汲取木灵","effects":[{"type":"restore_mp","value":-0.20},{"type":"learn_technique","technique_id":"TECH_DAGENG_SWORD_ARRAY"},{"type":"add_opportunity","value":18}]},
+        {"id":"battle","text":"以残剑再战，验证枯而复生的剑理","effects":[{"type":"damage","value":0.10,"reason":"复生剑气失序，反噬元婴"},{"type":"learn_technique","technique_id":"TECH_DAGENG_SWORD_ARRAY"},{"type":"add_sha_qi","value":4}]},
+        {"id":"steady","text":"先以九剑成阵，再逐步扩为万木之势","effects":[{"type":"learn_technique","technique_id":"TECH_DAGENG_SWORD_ARRAY"},{"type":"add_heart_demon","value":-2}]},
+        {"id":"record","text":"记下剑气由枯转荣的时机","effects":[{"type":"learn_technique","technique_id":"TECH_DAGENG_SWORD_ARRAY"}]}
+      ]
+    },
+    {
+      "id":"EVT_QINGYUANZI_SWORD_ARRAY","version":1,"title":"古松问剑","body":"你在灵界苍梧岭遇见木离真人。他独守一株被天雷劈成两半的古松，百年间从未离山。见你施展万木生灭阵，他只问了一句：剑阵若只知生长，不知何时舍去枯枝，终有一日会不会反困其主？随后，他以老根演化守御之阵，又以新芽演化攻伐之域。","tags":["realm:integration","world:spirit","legacy","qingyuan","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"qingyuanzi_eligible","base_chance":0.10,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":7},{"path":"player.world","op":"eq","value":"spirit"},{"knows_technique":"TECH_DAGENG_SWORD_ARRAY"},{"not":{"knows_technique":"TECH_QINGPAN_SWORD_ARRAY"}}]},
+      "choices":[
+        {"id":"disciple","text":"替古松引泉三日，请木离真人完整演法","effects":[{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"},{"type":"add_karma","value":-3}]},
+        {"id":"exchange","text":"以自身剑阵心得与他平等论道","effects":[{"type":"add_opportunity","value":60},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]},
+        {"id":"contest","text":"主动撤去半数飞剑，请他破阵","effects":[{"type":"restore_mp","value":-0.18},{"type":"add_fame","value":8},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]},
+        {"id":"observe","text":"沉默旁观，将两套阵势尽数烙入识海","effects":[{"type":"add_heart_demon","value":-4},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id":"EVT_PERSONAL_AFFINITY_GIFT_001","version":1,"title":"故人来访",
+      "body":"{npc_name}与你素来亲厚，今日特意寻到洞府，带来一份与其修为相称的心意。",
+      "category":"relationship","tags":["manual_only","relationship","personal_affinity","positive"],"weight":0,
+      "choices":[
+        {"id":"accept","text":"坦然收下这份心意","effects":[{"type":"affinity_gift"}]},
+        {"id":"discuss","text":"不急着看礼物，先交流修炼心得","effects":[{"type":"affinity_gift","mode":"discuss"}]},
+        {"id":"share","text":"邀其共同参悟近期所得","effects":[{"type":"affinity_gift","mode":"share"}]},
+        {"id":"decline","text":"婉言谢绝，记下这份人情","effects":[{"type":"affinity_gift","mode":"decline"}]}
+      ]
+    },
+    {
+      "id":"EVT_PERSONAL_REVENGE_001","version":1,"title":"旧怨截杀",
+      "body":"{npc_name}对你的怨恨积压已久，终于趁你落单时封住退路。对方战力约{target_power}，这不是切磋，而是蓄谋已久的报复。",
+      "category":"relationship_combat","tags":["manual_only","relationship","personal_affinity","revenge","combat","negative"],"weight":0,
+      "choices":[
+        {"id":"fight","text":"正面应战，了结旧怨","effects":[{"type":"personal_revenge_response","mode":"fight"}]},
+        {"id":"escape","text":"以遁术强行突围","effects":[{"type":"personal_revenge_response","mode":"escape"}]},
+        {"id":"ally","text":"传讯请交好的修士驰援","effects":[{"type":"personal_revenge_response","mode":"ally"}]},
+        {"id":"sect","text":"亮明宗门身份，请同门接应","effects":[{"type":"personal_revenge_response","mode":"sect"}]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "items": [
+    {"id": "monster_tempering_blood", "name": "淬妖血露", "hp_bonus": 24, "description": "低阶妖族以百草和妖血炼成的淬体灵露，最大 HP +24。", "tags": ["monster", "market", "pill", "vitality"]},
+    {"id": "beast_pattern_bone", "name": "兽纹灵骨", "combat_bonus": 72, "description": "铭刻天然兽纹的灵骨，可作法器核心，战斗力 +72。", "tags": ["monster", "market", "equipment"]},
+    {"id": "moon_marrow_pearl", "name": "月髓珠", "mp_bonus": 180, "description": "吸纳月华而生的髓珠，最大 MP +180。", "tags": ["monster", "phantom", "mana"]},
+    {"id": "ancestral_beast_amber", "name": "祖兽血珀", "hp_bonus": 420, "description": "封存远古巨兽精血的琥珀，最大 HP +420。", "tags": ["monster", "vitality"]},
+    {"id": "thunder_plume_talisman", "name": "雷羽符骨", "combat_bonus": 2600, "description": "雷羽族以本命翎骨炼成的符器，战斗力 +2,600。", "tags": ["monster", "equipment", "thunder"]},
+    {"id": "azure_scale_heart", "name": "苍鳞海心", "opportunity_bonus": 0.25, "description": "苍鳞海万年潮眼凝成的水心，机缘效率 +25%。", "tags": ["monster", "opportunity", "water"]},
+    {"id": "phantom_tide_crystal", "name": "幻潮晶核", "mp_bonus": 6200, "description": "幻冥潮汐虚实交替时凝成的晶核，最大 MP +6,200。", "tags": ["monster", "phantom", "mana"]},
+    {"id": "heaven_bone_relic", "name": "天骨遗宝", "combat_bonus": 92000, "description": "天骨岭深处完整保存的巨兽骨兵，战斗力 +92,000。", "tags": ["monster", "phantom", "equipment"]},
+    {"id": "myriad_spirit_seed", "name": "万灵古种", "opportunity_bonus": 0.52, "description": "万灵古林最深处孕育的灵种，机缘效率 +52%。", "tags": ["monster", "phantom", "opportunity"]},
+    {"id": "ancestral_court_seal", "name": "祖庭万兽印", "combat_bonus": 720000, "description": "万妖祖庭册封大妖的重印，战斗力 +720,000。", "tags": ["monster", "equipment"]},
+    {"id": "primordial_beast_marrow", "name": "太古兽神髓", "hp_bonus": 280000, "description": "仅存于妖界祖兽山脉核心的神髓，最大 HP +280,000。", "tags": ["monster", "mahayana", "vitality"]},
+    {"id": "myriad_demon_crown", "name": "万妖帝冠", "combat_bonus": 4600000, "description": "以百族血契共同铸成的妖界帝器，战斗力 +4,600,000。", "tags": ["monster", "mahayana", "equipment"]},
+
+    {"id": "monster_meridian_pill", "name": "妖脉丹", "breakthrough_bonus": 0.16, "breakthrough_scope": "minor:2", "description": "梳理筑基期妖脉，用于境界内部冲关，成功率 +16 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "blood_core_pill", "name": "血核丹", "breakthrough_bonus": 0.14, "breakthrough_scope": "minor:3", "description": "稳固结丹期妖核，用于境界内部冲关，成功率 +14 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "beast_infant_pill", "name": "兽婴丹", "breakthrough_bonus": 0.12, "breakthrough_scope": "minor:4", "description": "调和元婴与妖躯，用于元婴境内部冲关，成功率 +12 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "ancestral_soul_marrow", "name": "祖魂髓", "breakthrough_bonus": 0.10, "breakthrough_scope": "minor:5", "description": "以本相承载祖魂回声，用于化神境内部冲关，成功率 +10 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "void_molt_pill", "name": "虚蜕丹", "breakthrough_bonus": 0.09, "breakthrough_scope": "minor:6", "description": "辅助妖躯完成虚实蜕壳，用于炼虚境内部冲关，成功率 +9 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "unity_blood_pill", "name": "合脉祖血丹", "breakthrough_bonus": 0.08, "breakthrough_scope": "minor:7", "description": "暂时令本相、妖魂与血脉归一，用于合体境内部冲关，成功率 +8 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+    {"id": "myriad_ancestor_pill", "name": "万祖归真丹", "breakthrough_bonus": 0.07, "breakthrough_scope": "minor:8", "description": "帮助大乘妖修梳理既有进化形态，用于大乘境内部冲关，成功率 +7 个百分点。", "tags": ["monster", "pill", "breakthrough", "minor"]},
+
+    {"id": "true_spirit_origin_bone", "name": "真灵源骨", "combat_bonus": 32000000, "hp_bonus": 1200000, "description": "幽冥界祖兽天苑保存的第一代真灵源骨。", "tags": ["monster", "nether", "true_spirit", "equipment"]},
+    {"id": "ancestral_court_genealogy", "name": "祖庭天谱", "opportunity_bonus": 0.36, "description": "记载诸族源流与失落旁支的上界谱牒，可帮助妖修辨认返祖方向。", "tags": ["monster", "nether", "ancestry", "treasure"]},
+    {"id": "primordial_life_core", "name": "太初命核", "hp_bonus": 8800000, "mp_bonus": 2600000, "description": "太荒幽域中自然形成的生命核心，内部仍演化着尚未定名的物种。", "tags": ["monster", "nether", "primordial", "rare"]},
+    {"id": "self_lineage_dao_seed", "name": "自脉道种", "combat_bonus": 5800000000, "opportunity_bonus": 0.55, "description": "不依赖任何太古祖名、只认可创造者自身的新血脉道种。", "tags": ["monster", "nether", "self_ancestor", "rare"]},
+    {"id": "myriad_beast_progeny_pill", "name": "万兽衍嗣丹", "conception_bonus": 0.14, "description": "妖界百族共用的衍嗣丹，下一次与道侣缠绵时孕育后代的概率 +14%。", "tags": ["monster", "market", "pill", "conception"]},
+    {"id": "phantom_womb_dew", "name": "幻胎月露", "conception_bonus": 0.18, "description": "幻冥界月潮凝成的生机灵露，下一次与道侣缠绵时孕育后代的概率 +18%。", "tags": ["monster", "phantom", "market", "pill", "conception"]},
+    {"id": "ancestral_lineage_seed_pill", "name": "祖血道胎丹", "conception_bonus": 0.25, "description": "幽冥祖庭以真灵源血炼成，下一次与道侣缠绵时孕育后代的概率 +25%。", "tags": ["monster", "nether", "market", "pill", "conception"]},
+    {"id":"rain_archive_lamp","name":"祖火灯","combat_bonus":520000,"mp_bonus":26000,"description":"以百族各自一滴自愿献出的精血重燃的祖火。火焰不认血脉尊卑，只护持愿意共同守山之人。","tags":["monster","story","integration","treasure"]},
+    {"id":"name_law_seal","name":"万兽骨印","combat_bonus":1350000,"opportunity_bonus":0.06,"description":"无相妖祖的夺舍祖印破碎后重铸而成，印中万兽残魂已获自由，可在危急时借出一缕祖力。","tags":["monster","story","integration","treasure"]}
+  ]
+}

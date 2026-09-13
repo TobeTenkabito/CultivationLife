@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "world": "spirit",
+  "events": [
+    {
+      "id":"EVT_SPIRIT_JOIN_TAIXUAN","version":1,"title":"九重浮陆的接引令","body":"太玄门巡界使在你的洞府外停下一艘星槎，邀你入门共同镇守跨界阵门。","tags":["faction_join","spirit_faction"],"weight":4,"repeat":"once",
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"gte","value":5},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"接下玄门玉令","effects":[{"type":"join_faction","faction_id":"taixuan"}]},{"id":"decline","text":"婉拒邀请，仍作散修","effects":[{"type":"restore_mp","value":0.08}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_JOIN_WANLING","version":1,"title":"万灵山盟帖","body":"一位羽民族使者送来百族盟帖。万灵山愿以客卿之礼接纳所有遵守人妖盟约的修士。","tags":["faction_join","spirit_faction"],"weight":4,"repeat":"once",
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"gte","value":5},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"在盟帖上留下神魂印记","effects":[{"type":"join_faction","faction_id":"wanlingshan"}]},{"id":"decline","text":"暂不受百族誓约拘束","effects":[{"type":"add_karma","value":-2}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_JOIN_XINGHE","version":1,"title":"星河书院问学帖","body":"星河书院沿界河散发问学帖，不论种族，只问是否愿意共录诸界典籍。","tags":["faction_join","spirit_faction"],"weight":4,"repeat":"once",
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"gte","value":5},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"执帖入院，列席讲坛","effects":[{"type":"join_faction","faction_id":"xinghe"}]},{"id":"decline","text":"留下拓本后告辞","effects":[{"type":"add_opportunity","value":4}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_TAIXUAN_GATE","version":1,"title":"巡查跨界阵门","body":"太玄门一座跨界阵门出现法则回流，需要门人逐层校正阵纹。","tags":["faction","faction_unique","faction:taixuan","duty","spirit_faction"],"weight":5,
+      "conditions":{"path":"player.faction_id","op":"eq","value":"taixuan"},
+      "choices":[{"id":"repair","text":"亲自梳理阵纹","effects":[{"type":"restore_mp","value":-0.12},{"type":"add_opportunity","value":8},{"type":"add_faction_contribution","value":7}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_WANLING_OATH","version":1,"title":"百族盟誓巡礼","body":"万灵山轮值主持盟誓巡礼，各族门人需护送盟碑穿过三处争议领地。","tags":["faction","faction_unique","faction:wanlingshan","duty","spirit_faction"],"weight":5,
+      "conditions":{"path":"player.faction_id","op":"eq","value":"wanlingshan"},
+      "choices":[{"id":"escort","text":"护送盟碑完成巡礼","effects":[{"type":"restore_hp","value":-0.10},{"type":"add_karma","value":-5},{"type":"add_faction_contribution","value":8}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_XINGHE_ARCHIVE","version":1,"title":"校勘失落星图","body":"星河书院从界河残骸中取得一卷失落星图，诸位讲席争论其中坐标真伪。","tags":["faction","faction_unique","faction:xinghe","duty","spirit_faction"],"weight":5,
+      "conditions":{"path":"player.faction_id","op":"eq","value":"xinghe"},
+      "choices":[{"id":"collate","text":"闭关校勘星图","effects":[{"type":"restore_mp","value":-0.10},{"type":"add_opportunity","value":10},{"type":"add_faction_contribution","value":6}]}]
+    }
+  ]
+}

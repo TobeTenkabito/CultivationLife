@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "world": "human",
+  "events": [
+    {
+      "id": "EVT_FACTION_COMMON_PATROL_001", "version": 1, "title": "巡山令", "body": "执事堂发布巡山任务。既受宗门供养，便需按令清查山门附近的邪祟与暗桩。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 8,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [
+        {"id": "careful", "text": "领命，谨慎巡查", "effects": [{"type": "restore_mp", "value": -0.08}, {"type": "add_faction_contribution", "value": 3}, {"type": "add_opportunity", "value": 2}]},
+        {"id": "sweep", "text": "领命，主动肃清隐患", "effects": [{"type": "damage", "value": 0.08}, {"type": "add_faction_contribution", "value": 5}, {"type": "add_opportunity", "value": 3}]}
+      ]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_ESCORT_001", "version": 1, "title": "护送灵材", "body": "一批宗门灵材需要押送至外院。执事将任务玉牌送到你手中，此行不可无故推诿。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 7,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [{"id": "escort", "text": "接取玉牌，即刻启程", "effects": [{"type": "restore_mp", "value": -0.06}, {"type": "add_faction_contribution", "value": 4}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 2}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_GARDEN_001", "version": 1, "title": "药园轮值", "body": "药园缺少照料灵植的人手。任务虽琐碎，却关系宗门丹药供给。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 7,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [{"id": "tend", "text": "接下轮值，细察灵植", "effects": [{"type": "add_faction_contribution", "value": 3}, {"type": "heal", "value": 0.08}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_TEACH_001", "version": 1, "title": "传道解惑", "body": "外门弟子修行受阻，传功院请你代为讲解一日吐纳要诀。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 6,
+      "conditions": {"all": [{"path": "player.faction_id", "op": "neq", "value": null}, {"path": "player.realm_index", "op": "gte", "value": 2}]},
+      "choices": [{"id": "teach", "text": "接下差事，开坛答疑", "effects": [{"type": "restore_mp", "value": -0.05}, {"type": "add_faction_contribution", "value": 4}, {"type": "add_karma", "value": -1}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_MINE_001", "version": 1, "title": "矿脉勘验", "body": "宗门矿脉灵气波动异常，你被列入勘验队伍，需要查明地下异动。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 6,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [{"id": "descend", "text": "领取阵盘，深入矿道", "effects": [{"type": "damage", "value": 0.06}, {"type": "add_faction_contribution", "value": 5}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 3}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_WAR_001", "version": 1, "title": "宗门大战", "body": "敌对势力压境，护山大阵已经升起。宗门令牌化作血色战帖，所有门人必须应召。元婴初期以下，皆有陨落之险。",
+      "tags": ["faction", "faction_common", "duty", "war", "negative"], "weight": 3,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [
+        {"id": "front", "text": "奉令正面迎战", "effects": [{"type": "faction_war", "contribution": 12}]},
+        {"id": "array", "text": "奉令镇守阵眼", "effects": [{"type": "faction_war", "contribution": 9}]}
+      ]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_LECTURE_001", "version": 1, "title": "长老讲法", "body": "宗门长老临时开坛，梳理破境关窍。你在蒲团间寻得一席。",
+      "tags": ["faction", "faction_common", "benefit"], "weight": 6,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [{"id": "listen", "text": "凝神听讲", "effects": [{"type": "add_opportunity", "value": 5}, {"type": "add_faction_contribution", "value": 1}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_SPARRING_001", "version": 1, "title": "同门切磋", "body": "演武场排定同门切磋。胜负不伤性命，却关系年度考功。",
+      "tags": ["faction", "faction_common", "training"], "weight": 6,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [
+        {"id": "steady", "text": "稳守自身所学", "effects": [{"type": "restore_mp", "value": -0.05}, {"type": "add_faction_contribution", "value": 2}]},
+        {"id": "bold", "text": "放手印证道法", "effects": [{"type": "damage", "value": 0.05}, {"type": "add_faction_contribution", "value": 4}, {"type": "add_opportunity", "value": 2}]}
+      ]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_SECRET_001", "version": 1, "title": "秘境名额", "body": "宗门分配一处小秘境的入场名额。入内所得归个人，但需上缴一份勘探记录。",
+      "tags": ["faction", "faction_common", "benefit"], "weight": 4,
+      "conditions": {"all": [{"path": "player.faction_id", "op": "neq", "value": null}, {"path": "player.faction_contribution", "op": "gte", "value": 10}]},
+      "choices": [{"id": "enter", "text": "接下勘探任务", "effects": [{"type": "restore_mp", "value": -0.12}, {"type": "add_item", "item_id": "fortune_talisman"}, {"type": "add_faction_contribution", "value": 3}]}]
+    },
+    {
+      "id": "EVT_FACTION_COMMON_REVIEW_001", "version": 1, "title": "年度考功", "body": "执事堂核验门人的任务玉牌与修行进境，你必须到场述职。",
+      "tags": ["faction", "faction_common", "duty"], "weight": 5,
+      "conditions": {"path": "player.faction_id", "op": "neq", "value": null},
+      "choices": [{"id": "report", "text": "如实呈报年度履职", "effects": [{"type": "add_faction_contribution", "value": 2}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 1}]}]
+    },
+
+    {
+      "id": "EVT_TIANJIAN_JOIN_001", "version": 1, "title": "剑门开山", "body": "天剑宗山门开启，问剑石映出你的道心。接引执事递来一枚试剑令。",
+      "tags": ["faction_join", "faction_unique", "faction:tianjian"], "weight": 5, "intent_weights": {"travel": 2.5, "cultivate": 1.2},
+      "conditions": {"all": [{"path":"player.world","op":"eq","value":"human"}, {"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.faction_id", "op": "eq", "value": null}, {"any": [{"path": "player.path", "op": "eq", "value": "dao"}, {"path": "player.path", "op": "eq", "value": "confucian"}, {"path": "player.path", "op": "eq", "value": "buddhist"}]}]},
+      "choices": [{"id": "join", "text": "持令入山，拜入天剑宗", "effects": [{"type": "join_faction", "faction_id": "tianjian"}]}, {"id": "leave", "text": "暂别剑门", "effects": []}]
+    },
+    {
+      "id": "EVT_TIANJIAN_TOMB_001", "version": 1, "title": "剑冢鸣锋", "body": "剑冢深处有古剑为你而鸣，守冢人允许你承受一缕残留剑意。",
+      "tags": ["faction", "faction_unique", "faction:tianjian", "benefit"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "tianjian"},
+      "choices": [{"id": "receive", "text": "引剑意入体", "effects": [{"type": "damage", "value": 0.10}, {"type": "add_opportunity", "value": 6}, {"type": "add_faction_contribution", "value": 3}]}]
+    },
+    {
+      "id": "EVT_TIANJIAN_STAIR_001", "version": 1, "title": "天梯问剑", "body": "九百石阶皆留有前人剑痕。宗门命弟子逐阶观剑，以验根基。",
+      "tags": ["faction", "faction_unique", "faction:tianjian", "duty"], "weight": 5,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "tianjian"},
+      "choices": [{"id": "climb", "text": "奉命登阶问剑", "effects": [{"type": "restore_mp", "value": -0.10}, {"type": "add_faction_contribution", "value": 5}, {"type": "add_opportunity", "value": 4}]}]
+    },
+    {
+      "id": "EVT_TIANJIAN_SLAYER_001", "version": 1, "title": "斩妖令", "body": "边境妖潮伤及凡城，天剑宗颁下斩妖令。你的名字也在出征玉册之上。",
+      "tags": ["faction", "faction_unique", "faction:tianjian", "duty"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "tianjian"},
+      "choices": [{"id": "obey", "text": "御剑赴边境", "effects": [{"type": "damage", "value": 0.12}, {"type": "add_karma", "value": -3}, {"type": "add_faction_contribution", "value": 7}]}]
+    },
+    {
+      "id": "EVT_TIANJIAN_CANON_001", "version": 1, "title": "万剑归宗", "body": "你积累的功绩换来一次观摩镇宗剑典的机会。《九霄御剑典》剑光浮于识海。",
+      "tags": ["faction", "faction_unique", "faction:tianjian", "technique", "rare"], "weight": 2, "repeat": "once",
+      "conditions": {"all": [{"path": "player.faction_id", "op": "eq", "value": "tianjian"}, {"path": "player.faction_contribution", "op": "gte", "value": 20}]},
+      "choices": [{"id": "main", "text": "将剑典立为主修", "effects": [{"type": "equip_technique", "technique_id": "TECH_TIANJIAN", "slot": "main"}]}, {"id": "combat", "text": "将剑典化为战斗功法", "effects": [{"type": "equip_technique", "technique_id": "TECH_TIANJIAN", "slot": "combat"}]}]
+    },
+
+    {
+      "id": "EVT_WANMO_JOIN_001", "version": 1, "title": "万魔招旗", "body": "万魔台使者以黑玉照见你的修行路数，邀你登台留名。此地只问本事，不问出身。",
+      "tags": ["faction_join", "faction_unique", "faction:wanmo"], "weight": 5, "intent_weights": {"travel": 2.5, "treasure": 1.6},
+      "conditions": {"all": [{"path":"player.world","op":"eq","value":"human"}, {"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.faction_id", "op": "eq", "value": null}, {"any": [{"path": "player.path", "op": "eq", "value": "demonic"}, {"path": "player.path", "op": "eq", "value": "ghost"}, {"path": "player.path", "op": "eq", "value": "monster"}]}]},
+      "choices": [{"id": "join", "text": "登台留名，加入万魔台", "effects": [{"type": "join_faction", "faction_id": "wanmo"}]}, {"id": "leave", "text": "不受此旗", "effects": []}]
+    },
+    {
+      "id": "EVT_WANMO_BLOOD_POOL_001", "version": 1, "title": "血池淬身", "body": "万魔台开启血池，入内者须承受煞气侵体，也可借此锤炼肉身。",
+      "tags": ["faction", "faction_unique", "faction:wanmo", "benefit"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "wanmo"},
+      "choices": [{"id": "enter", "text": "踏入血池", "effects": [{"type": "damage", "value": 0.14}, {"type": "heal", "value": 0.18}, {"type": "add_faction_contribution", "value": 3}]}]
+    },
+    {
+      "id": "EVT_WANMO_SOUL_LAMP_001", "version": 1, "title": "镇魂灯差", "body": "幽魂谷的镇魂灯将熄，护法命你携灯油前往。途中万鬼窥伺，不得误期。",
+      "tags": ["faction", "faction_unique", "faction:wanmo", "duty"], "weight": 5,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "wanmo"},
+      "choices": [{"id": "obey", "text": "领命入谷", "effects": [{"type": "restore_mp", "value": -0.14}, {"type": "add_faction_contribution", "value": 6}, {"type": "add_item", "item_id": "spirit_pearl"}]}]
+    },
+    {
+      "id": "EVT_WANMO_ARENA_001", "version": 1, "title": "十席夺位", "body": "内台十席重新排位。你可以堂堂正正登台，也可借此观察诸脉手段。",
+      "tags": ["faction", "faction_unique", "faction:wanmo", "training"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "wanmo"},
+      "choices": [{"id": "fight", "text": "登台夺席", "effects": [{"type": "damage", "value": 0.10}, {"type": "add_faction_contribution", "value": 7}, {"type": "add_karma", "value": 2}]}, {"id": "study", "text": "为执事记录胜负", "effects": [{"type": "add_faction_contribution", "value": 3}, {"type": "add_opportunity", "value": 3}]}]
+    },
+    {
+      "id": "EVT_WANMO_CANON_001", "version": 1, "title": "魔台化生碑", "body": "你的功绩足以换取一次碑前参悟。《万魔化生经》的总纲在魔火中显现。",
+      "tags": ["faction", "faction_unique", "faction:wanmo", "technique", "rare"], "weight": 2, "repeat": "once",
+      "conditions": {"all": [{"path": "player.faction_id", "op": "eq", "value": "wanmo"}, {"path": "player.faction_contribution", "op": "gte", "value": 20}]},
+      "choices": [{"id": "main", "text": "将魔经立为主修", "effects": [{"type": "equip_technique", "technique_id": "TECH_WANMO", "slot": "main"}]}, {"id": "support", "text": "将魔经立为辅修", "effects": [{"type": "equip_technique", "technique_id": "TECH_WANMO", "slot": "support"}]}]
+    },
+
+    {
+      "id": "EVT_PUTI_JOIN_001", "version": 1, "title": "菩提叩门", "body": "菩提寺山门前钟声自鸣，知客僧问你愿否守一分戒、担一分愿。",
+      "tags": ["faction_join", "faction_unique", "faction:puti"], "weight": 5, "intent_weights": {"travel": 2.2, "rest": 1.6},
+      "conditions": {"all": [{"path":"player.world","op":"eq","value":"human"}, {"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.faction_id", "op": "eq", "value": null}, {"path": "player.effective_karma", "op": "lt", "value": 50}, {"any": [{"path": "player.path", "op": "eq", "value": "buddhist"}, {"path": "player.path", "op": "eq", "value": "dao"}, {"path": "player.path", "op": "eq", "value": "confucian"}]}]},
+      "choices": [{"id": "join", "text": "合十受戒，入菩提寺修行", "effects": [{"type": "join_faction", "faction_id": "puti"}]}, {"id": "leave", "text": "礼佛后离去", "effects": []}]
+    },
+    {
+      "id": "EVT_PUTI_BODHI_001", "version": 1, "title": "菩提树下", "body": "古菩提树落下一叶，恰停在你的经卷上。方丈准你静坐一夜。",
+      "tags": ["faction", "faction_unique", "faction:puti", "benefit"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "puti"},
+      "choices": [{"id": "meditate", "text": "于树下观心", "effects": [{"type": "add_karma", "value": -5}, {"type": "add_opportunity", "value": 5}, {"type": "add_faction_contribution", "value": 2}]}]
+    },
+    {
+      "id": "EVT_PUTI_ALMS_001", "version": 1, "title": "行脚济世", "body": "山下灾年，寺中安排门人携药行脚。救治凡民是功课，也是必须承担的差事。",
+      "tags": ["faction", "faction_unique", "faction:puti", "duty"], "weight": 5,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "puti"},
+      "choices": [{"id": "obey", "text": "背起药箱下山", "effects": [{"type": "restore_mp", "value": -0.10}, {"type": "add_karma", "value": -4}, {"type": "add_faction_contribution", "value": 6}]}]
+    },
+    {
+      "id": "EVT_PUTI_VAJRA_001", "version": 1, "title": "金刚伏魔阵", "body": "寺外魔念滋生，戒律院点名诸弟子补全金刚阵位。阵成之前，无人可擅离。",
+      "tags": ["faction", "faction_unique", "faction:puti", "duty"], "weight": 4,
+      "conditions": {"path": "player.faction_id", "op": "eq", "value": "puti"},
+      "choices": [{"id": "hold", "text": "奉命守住阵位", "effects": [{"type": "damage", "value": 0.08}, {"type": "add_karma", "value": -3}, {"type": "add_faction_contribution", "value": 7}]}]
+    },
+    {
+      "id": "EVT_PUTI_CANON_001", "version": 1, "title": "无相经阁", "body": "你的愿行已足，获准进入经阁顶层。《菩提无相经》在晨钟中展开。",
+      "tags": ["faction", "faction_unique", "faction:puti", "technique", "rare"], "weight": 2, "repeat": "once",
+      "conditions": {"all": [{"path": "player.faction_id", "op": "eq", "value": "puti"}, {"path": "player.faction_contribution", "op": "gte", "value": 20}]},
+      "choices": [{"id": "main", "text": "将佛经立为主修", "effects": [{"type": "equip_technique", "technique_id": "TECH_PUTI", "slot": "main"}]}, {"id": "support", "text": "将佛经立为辅修", "effects": [{"type": "equip_technique", "technique_id": "TECH_PUTI", "slot": "support"}]}]
+    }
+  ]
+}

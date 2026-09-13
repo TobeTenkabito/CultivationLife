@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_WAR_VANGUARD_001",
+      "version": 1,
+      "title": "先锋对阵",
+      "body": "{attacker}与{defender}的战阵已经铺开。你须先迎击敌方先锋；此战胜负将直接修正我方初始士气。",
+      "tags": ["all_realms", "war", "diplomacy"],
+      "weight": 0,
+      "conditions": {"path": "player.age", "op": "lt", "value": 0},
+      "choices": [
+        {"id": "fight", "text": "率队出阵，正面击破敌军先锋", "effects": [{"type": "war_vanguard"}]},
+        {"id": "delay", "text": "暂缓出阵，重新整备", "effects": [{"type": "war_vanguard", "mode": "delay"}]}
+      ]
+    }
+  ]
+}

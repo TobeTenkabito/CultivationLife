@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "actions": {
+    "cultivate":{"name":"潜心修炼","opportunity":[8,15],"hp":0.03,"mp":0.15},
+    "travel":{"name":"下山游历","opportunity":[4,10],"hp":-0.02,"mp":-0.04},
+    "rest":{"name":"静养调息","opportunity":[1,4],"hp":0.35,"mp":0.45},
+    "treasure":{"name":"寻幽探宝","opportunity":[2,2],"hp":0.0,"mp":0.0},
+    "commission":{"name":"坊市委托","opportunity":[1,3],"hp":-0.02,"mp":-0.04},
+    "body_train":{"name":"淬炼肉身","opportunity":[0,0],"hp":-0.08,"mp":-0.02},
+    "sense_train":{"name":"锻炼神识","opportunity":[0,0],"hp":-0.02,"mp":-0.10},
+    "hunt_beast":{"name":"猎杀妖兽","opportunity":[2,5],"hp":0.0,"mp":0.0,"combat":{"combat_type":"beast","target_names":["裂岩妖狼","赤鳞妖蟒","噬金妖猿","幽泽毒蛟"],"power_multiplier":[0.25,0.58],"success_threshold":1.2,"sha_qi_gain":[2,5],"lethal":true,"kill_karma":false,"reward_stones":[3,8]}},
+    "spar":{"name":"同道切磋","opportunity":[3,7],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["游历剑修","宗门同道","坊市客卿","无名散修"],"realm_offsets":[[-1,0.15],[0,0.69],[1,0.15],[2,0.01]],"expectation_multiplier":1.0,"power_sigma":0.14,"power_bounds":[0.65,1.4],"lethal":false,"kill_karma":false}},
+    "slay":{"name":"灭杀修士","opportunity":[1,4],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["落单邪修","仇家门客","携宝散修","敌对修士"],"realm_offsets":[[-2,0.38],[-1,0.43],[0,0.18],[1,0.01]],"expectation_multiplier":0.88,"power_sigma":0.16,"power_bounds":[0.5,1.3],"lethal":true,"kill_karma":true,"reward_stones":[6,18]}},
+    "capture":{"name":"生擒修士","opportunity":[0,1],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["落单修士","负伤散修","宗门弃徒","游历客卿"],"realm_offsets":[[-2,0.42],[-1,0.40],[0,0.17],[1,0.01]],"expectation_multiplier":0.82,"power_sigma":0.14,"power_bounds":[0.45,1.2],"lethal":false,"capture":true,"kill_karma":false}}
+  },
+  "systems": {
+    "combat_expectations": {
+      "mortal":{"value":20},
+      "qi":{"base":100,"layer_step":15},
+      "foundation":{"early":600,"middle":1000,"late":1150},
+      "core":{"early":2500,"middle":6100,"late":8800},
+      "nascent":{"early":20500,"middle":42500,"late":64500},
+      "spirit":{"early":125000,"middle":170000,"late":190000},
+      "void":{"early":705000,"middle":1070000,"late":1400000},
+      "integration":{"early":4800000,"middle":7200000,"late":9000000},
+      "mahayana":{"early":33000000,"middle":49000000,"late":63000000},
+      "true_immortal":{"value":180000000},
+      "golden_immortal":{"value":950000000},
+      "taiyi":{"value":5200000000},
+      "daluo":{"value":30000000000}
+    },
+    "player_combat_recommendations": {
+      "mortal":{"value":20},
+      "qi":{"base":100,"layer_step":15},
+      "foundation":{"early":600,"middle":1000,"late":1150},
+      "core":{"early":2500,"middle":6100,"late":8800},
+      "nascent":{"early":20500,"middle":42500,"late":64500},
+      "spirit":{"early":125000,"middle":170000,"late":190000},
+      "void":{"early":705000,"middle":1070000,"late":1400000},
+      "integration":{"early":4800000,"middle":7200000,"late":9000000},
+      "mahayana":{"early":33000000,"middle":49000000,"late":63000000},
+      "true_immortal":{"value":180000000},
+      "golden_immortal":{"value":950000000},
+      "taiyi":{"value":5200000000},
+      "daluo":{"value":30000000000}
+    },
+    "player_combat_recommendation_basis": {
+      "resource_state":"full","opportunity_ratio":1.0,
+      "same_tier_market_equipment_copies":{"early":1,"middle":2,"late":3},
+      "combat_techniques":"all prior-tier route techniques; strongest current-tier technique at early, all current-tier route techniques at middle and late",
+      "story_rewards":"none at early, half of current-tier one-time rewards at middle, all at late",
+      "excluded":["unbounded duplicate farming","puppets","party members","faction bonuses"]
+    },
+    "relationship": {
+      "max_disciples": 8,
+      "master_request_acceptance": {"item": 0.6, "technique": 0.45},
+      "companion_proposal_base":0.42,"companion_request_item":0.58,"companion_request_technique":0.42,
+      "companion_heart_demon_intimacy":[1,3],"companion_heart_demon_entwine":[3,7],
+      "companion_breakthrough_bonus":0.05,"companion_interaction_cooldown_years":1
+      ,"friend_affinity_required":15,"friend_invite_base":0.58,"friend_interaction_cooldown_years":1,
+      "friend_spar_opportunity":[5,11],"friend_discuss_opportunity":[6,13],"friend_crossing_survival_chance":0.35,
+      "companion_separation_heart_demon":25,"master_departure_affinity":-45,"disciple_expulsion_affinity":-25,
+      "sect_departure_affinity":-15,"positive_affinity_threshold":30,"hostile_affinity_threshold":-25,
+      "positive_event_base_chance":0.08,"positive_event_per_person":0.02,
+      "revenge_base_chance":0.10,"revenge_affinity_scale":0.004,"ally_protection_per_person":0.12,"ally_protection_cap":0.55
+    },
+    "faction_conflict": {
+      "control_realm":{"human":4,"demon":4,"spirit":6,"true_demon":6,"celestial":9,"asura":9},
+      "wanted_threshold":100,"execution_threshold":165,"coalition_fame_threshold":400,"demonic_coalition_fame_threshold":1000,
+      "encounter_base_chance":0.18,"encounter_hostility_scale":0.003,
+      "fight_hostility_gain":12,"escape_hostility_gain":18,"kill_hostility_gain":30,
+      "prison_years":[3,12],"prison_breakthrough_loss_chance":0.12,
+      "treasure_rumor_chance":0.35,"world_npc_encounter_chance":0.20,
+      "sect_npc_encounter_chance":0.25,"npc_team_chance":0.28,
+      "fame_deterrence_threshold":50,
+      "kill_hostility_min_realm":{"human":3,"spirit":5,"celestial":9,"asura":9}
+    },
+    "fame": {"kill_gain_base":8,"kill_realm_scale":4,"respected_threshold":35,"alarmed_threshold":100},
+    "party": {"max_companions":2,"invite_base_chance":0.45,"single_coefficient":0.50,"double_coefficient":0.25,"same_or_lower_realm_bonus":0.12,"lower_realm_bonus_per_gap":0.04,"lower_realm_bonus_cap":0.22,"interaction_affinity":[4,8]},
+    "world_travel": {"required_realm":8,"human_suppression_realm":5,"human_suppression_layer":3,"celestial_required_realm":9,"spirit_suppression_realm":8,"spirit_suppression_layer":9,"lower_world_tribulation_multiplier":1.5},
+    "war_system": {
+      "truce_units":5,"white_peace_exhaustion":78,"annex_power_ratio":2.5,"stone_tribute":10000,
+      "dissolve_power_ratio":1.35,"ai_call_ally_score_threshold":-25,
+      "roster_cap":24,"ally_roster_cap":12,"coalition_roster_cap":48,
+      "ally_call_base_chance":0.68,"ally_call_cooldown_units":3,"ally_term_cost_multiplier":1.25,
+      "ai_total_power_weight":0.68,"ai_casualty_roll_chance":0.34,
+      "defender_power_bonus":0.10,"attacker_morale_shock_bonus":0.10
+    },
+    "auction_system": {
+      "trigger_chance_per_action":0.12,"notice_actions":2,"cooldown_actions":4,
+      "npc_lot_count":5,"auction_rounds":3,"commission_rate":0.30,
+      "consignment_min_price_ratio":0.25,"consignment_max_price_ratio":5.0,
+      "consignment_listing_fee_ratio":0.05,
+      "starting_price_multiplier":[0.72,0.95],
+      "minimum_increment_start_ratio":0.10,"minimum_increment_current_ratio":0.05,
+      "npc_outbid_chance":0.52,
+      "lower_world_tier_five_weight":0.08,"lower_world_higher_tier_weight":0.01,
+      "black_market_buy_multiplier":2.80,"black_market_sell_ratio":0.30,
+      "black_market_result_limit":20,
+      "player_aliases":["狻猊使者","百花仙子","青龙公子","朱雀公主"],
+      "bidder_aliases":["青衣客","覆面修士","天机阁执事","异族商旅","黑袍老者","赤足童子","负剑书生"],
+      "negotiation_affinity_gain":[8,16],"private_trade_buy_multiplier":1.15,
+      "private_trade_buy_affinity_gain":[2,5],
+      "private_trade_sell_multiplier":0.72,"private_trade_offer_count":3,
+      "bargain_success_base":0.48,"bargain_affinity_factor":0.003,
+      "bargain_buy_discount":[0.08,0.18],"bargain_sell_bonus":[0.10,0.25]
+    },
+    "spirit_field": {
+      "max_qing":8,"reclaim_base_stones":120,"reclaim_stone_growth":1.55,
+      "reclaim_years_per_qing":1,"irrigation_mp_ratio":0.12,"irrigation_target_fraction":0.05,
+      "irrigation_min_mp_ratio":0.05,"irrigation_max_mp_ratio":0.50,
+      "irrigation_years_by_realm":{"0":0.5,"1":2,"2":6,"3":18,"4":55,"5":180,"6":600,"7":1800,"8":6000,"9":12000,"10":30000,"11":70000,"12":160000},
+      "art_experience_base":100,"market_sell_ratio":1.0,"black_market_sell_ratio":1.35,
+      "plants": {
+        "dew_grass":{"name":"凝露草","seed_id":"dew_grass_seed","kind":"medicinal","optimal_years":10,"base_value":18,"harvest":{"ten":{"item_id":"dew_grass_ten","value":18},"hundred":{"item_id":"dew_grass_hundred","value":28},"thousand":{"item_id":"dew_grass_thousand","value":22},"myriad":{"item_id":"dew_grass_myriad","value":16}}},
+        "purple_cloud_ginseng":{"name":"紫云参","seed_id":"purple_cloud_ginseng_seed","kind":"medicinal","optimal_years":100,"base_value":24,"harvest":{"ten":{"item_id":"purple_cloud_ginseng_ten","value":24},"hundred":{"item_id":"purple_cloud_ginseng_hundred","value":110},"thousand":{"item_id":"purple_cloud_ginseng_thousand","value":64},"myriad":{"item_id":"purple_cloud_ginseng_myriad","value":38}}},
+        "earth_vein_lingzhi":{"name":"地脉芝","seed_id":"earth_vein_lingzhi_seed","kind":"medicinal","optimal_years":1000,"base_value":35,"harvest":{"ten":{"item_id":"earth_vein_lingzhi_ten","value":35},"hundred":{"item_id":"earth_vein_lingzhi_hundred","value":88},"thousand":{"item_id":"earth_vein_lingzhi_thousand","value":280},"myriad":{"item_id":"earth_vein_lingzhi_myriad","value":190}}},
+        "heaven_heart_lotus":{"name":"天心莲","seed_id":"heaven_heart_lotus_seed","kind":"medicinal","optimal_years":10000,"base_value":52,"harvest":{"ten":{"item_id":"heaven_heart_lotus_ten","value":52},"hundred":{"item_id":"heaven_heart_lotus_hundred","value":155},"thousand":{"item_id":"heaven_heart_lotus_thousand","value":460},"myriad":{"item_id":"heaven_heart_lotus_myriad","value":1500}}},
+        "nine_curve_herb":{"name":"抱婴参","seed_id":"nine_curve_herb_seed","kind":"medicinal","optimal_years":3000,"base_value":75,"harvest":{}},
+        "mystic_heaven_vine":{"name":"枯荣藤","seed_id":"mystic_heaven_vine_seed","kind":"special","optimal_years":10000,"base_value":600,"requires_booster":true,"use_years":10000,"use_reward":"mystic_heaven_sword","harvest":{}},
+        "golden_thunder_bamboo":{"name":"雷音竹","seed_id":"golden_thunder_bamboo_seed","kind":"special","optimal_years":10000,"base_value":260,"passive_years":10000,"harvest":{}},
+        "nebula_manjushaka":{"name":"渡劫花","seed_id":"nebula_manjushaka_seed","kind":"special","optimal_years":5000,"base_value":320,"use_years":5000,"thunder_reduction":0.10,"harvest":{}}
+      }
+    },
+    "performance": {"max_world_history_records":6000},
+    "player_faction": {"governance_threshold":{"human":4,"demon":4,"spirit":7,"true_demon":7,"celestial":9,"asura":9},"initial_followers":2,"pressure_chance_per_unit":0.35,"pressure_limit":3},
+    "family": {"conception_chance_by_realm":{"0":0.20,"1":0.14,"2":0.09,"3":0.05,"4":0.02,"5":0.0,"6":0.0,"7":0.0,"8":0.0},"spirit_root_inheritance_chance":0.90,"cultivation_start_age":8,"recruitment_interval_years":5,"max_members":36},
+    "time_units": {"0":1,"1":1,"2":1,"3":1,"4":5,"5":10,"6":20,"7":50,"8":100,"9":500,"10":500,"11":500,"12":500},
+    "immortal_power_conversion":{"time_unit_years":500,"min_gap_units":10,"base_chance":0.10,"chance_per_unit":0.02,"stages":5},
+    "natal_artifact":{
+      "minimum_realm":3,"max_level":12,"level_scale_per_level":0.12,"experience_base":3,"manual_refine_xp":1,"manual_refine_stone_base":18,
+      "eligible_item_ids":["starfall_blade","mountain_seal","boundary_blade","broken_god","celestial_star_array","wind_thunder_wings","eight_spirit_ruler","virtual_heaven_cauldron","north_pole_origin_mountain","yuan_magnetic_divine_mountain","taiyi_green_mountain","yuanhe_five_poles_mountain","xuanhuang_immortal_armor","heavenly_river_sword_embryo"],
+      "slot_unlocks":{"1":2,"3":3,"5":4,"7":5,"9":6,"12":7},
+      "materials":[
+        {"item_id":"star_pattern_copper","name":"星纹赤铜","minimum_realm":3,"effect":{"combat_bonus":220,"hp_bonus":300},"description":"结丹真火反复锻出的星纹灵铜，战斗力 +220、最大 HP +300。"},
+        {"item_id":"spirit_jade_sand","name":"涵灵玉髓","minimum_realm":3,"effect":{"mp_bonus":500,"opportunity_bonus":0.02},"description":"能温养金丹与器灵的细碎玉髓，最大 MP +500、机缘效率 +2%。"},
+        {"item_id":"geng_essence","name":"庚精","minimum_realm":4,"effect":{"combat_bonus":1800},"description":"元婴期罕见金行精粹，令本命法宝战斗力 +1,800。"},
+        {"item_id":"nascent_flame_crystal","name":"婴火玄晶","minimum_realm":4,"effect":{"combat_bonus":3200,"hp_bonus":2200},"description":"由元婴真火凝成的玄晶，战斗力 +3,200、最大 HP +2,200。"},
+        {"item_id":"thunder_calamity_jade","name":"避劫雷玉","minimum_realm":5,"effect":{"tribulation_reduction":0.03},"description":"分导劫雷，雷劫与天劫伤害减免 +3%。"},
+        {"item_id":"mind_settling_heartwood","name":"定神木心","minimum_realm":5,"combat_effect":{"player_stat_multipliers":{"sense":1.08}},"description":"生于养魂古木中心，可使战斗开始时神识提高 8%。"},
+        {"item_id":"void_spirit_silver","name":"虚灵银","minimum_realm":6,"effect":{"combat_bonus":42000,"mp_bonus":18000},"description":"随空间流转的灵银，战斗力 +42,000、最大 MP +18,000。"},
+        {"item_id":"mystic_gang_marrow","name":"玄罡髓","minimum_realm":6,"combat_effect":{"player_stat_multipliers":{"guard":1.08}},"description":"凝结于虚空罡层深处，使战斗开始时防护提高 8%。"},
+        {"item_id":"star_marrow_crystal","name":"星髓晶","minimum_realm":7,"effect":{"hp_bonus":120000,"combat_bonus":160000},"description":"星辰重压凝成的晶核，最大 HP +120,000、战斗力 +160,000。"},
+        {"item_id":"wind_thunder_plume","name":"风雷翎","minimum_realm":7,"combat_effect":{"player_stat_multipliers":{"mobility":1.08}},"description":"久经风雷淬炼的灵禽翎羽，使战斗开始时身法提高 8%。"},
+        {"item_id":"dao_pattern_gold","name":"道纹仙金","minimum_realm":8,"effect":{"combat_bonus":1200000,"opportunity_bonus":0.08},"description":"可自行生长道纹的仙金，战斗力 +1,200,000、机缘效率 +8%。"},
+        {"item_id":"myriad_law_glass","name":"万法琉璃","minimum_realm":8,"combat_effect":{"player_stat_multipliers":{"breach":1.10}},"description":"万种灵力熔合而成的琉璃，使战斗开始时破法提高 10%。"},
+        {"item_id":"immortal_aperture_jade","name":"仙窍玉","minimum_realm":9,"effect":{"combat_bonus":8000000,"mp_bonus":420000},"description":"从真仙仙窍中孕生的温润灵玉，战斗力 +8,000,000、最大仙灵力 +420,000。"},
+        {"item_id":"boundary_river_silver","name":"界河银","minimum_realm":9,"combat_effect":{"player_stat_multipliers":{"sustain":1.10}},"description":"界河潮落时析出的法则灵银，使战斗开始时续航提高 10%。"},
+        {"item_id":"dijiang_tear","name":"帝江之泪","minimum_realm":10,"combat_effect":{"traits":["enemy_escape_lock"]},"description":"上古真神帝江的一滴泪水，蕴含强力空间法则；参与战斗的对方必定无法逃脱。"},
+        {"item_id":"zhulong_breath","name":"烛龙之息","minimum_realm":10,"combat_effect":{"traits":["player_debuff_immunity"]},"description":"上古真神烛龙的一点吐息，蕴含强力时间法则；不会受到对方削弱属性的影响。"},
+        {"item_id":"jumang_feather","name":"句芒之羽","minimum_realm":10,"combat_effect":{"player_stat_multipliers":{"sense":1.20}},"description":"上古真神句芒的一片羽毛，蕴含强力木法则；战斗开始时神识提高 20%。"},
+        {"item_id":"rushou_scale","name":"蓐收之鳞","minimum_realm":10,"combat_effect":{"enemy_stat_multipliers":{"might":0.80}},"description":"上古真神蓐收的一枚鳞片，蕴含强力金法则；战斗开始时敌方威能降低 20%。"},
+        {"item_id":"gonggong_water","name":"共工之水","minimum_realm":10,"combat_effect":{"player_stat_multipliers":{"sustain":1.20}},"description":"上古真神共工的一分神水，蕴含强力水法则；战斗开始时续航提高 20%。"},
+        {"item_id":"zhurong_flame","name":"祝融之火","minimum_realm":10,"combat_effect":{"enemy_stat_multipliers":{"guard":0.80}},"description":"上古真神祝融的一点火苗，蕴含强力火法则；战斗开始时敌方防护降低 20%。"},
+        {"item_id":"qiangliang_thunder","name":"强良之雷","minimum_realm":10,"combat_effect":{"traits":["even_round_might_40"]},"description":"上古真神强良的一份天雷，蕴含强力雷法则；偶数轮己方威能提高 40%。"},
+        {"item_id":"xizi_lightning","name":"翕兹之电","minimum_realm":10,"combat_effect":{"traits":["odd_round_enemy_might_down_40"]},"description":"上古真神翕兹的一道神电，蕴含强力电法则；奇数轮敌方威能降低 40%。"},
+        {"item_id":"xuanming_rain","name":"玄冥之雨","minimum_realm":10,"combat_effect":{"enemy_stat_multipliers":{"mobility":0.80}},"description":"上古真神玄冥的一场玄雨，蕴含强力雨法则；战斗开始时敌方身法降低 20%。"},
+        {"item_id":"feilian_wind","name":"飞廉之风","minimum_realm":10,"combat_effect":{"player_stat_multipliers":{"mobility":1.20}},"description":"上古真神飞廉的一缕罡风，蕴含强力风法则；战斗开始时己方身法提高 20%。"},
+        {"item_id":"shebishi_orb","name":"奢比尸珠","minimum_realm":10,"combat_effect":{"traits":["enemy_buff_dispel"]},"description":"上古真神奢比尸的一枚眼珠，蕴含强力天气法则；每轮开始时消除敌方一个增益。"},
+        {"item_id":"houtu_clay","name":"后土之土","minimum_realm":10,"combat_effect":{"player_stat_multipliers":{"guard":1.20}},"description":"上古真神后土的一抔黄泥，蕴含强力土法则；战斗开始时己方防护提高 20%。"},
+        {"item_id":"taiyi_dao_marrow","name":"太乙道髓","minimum_realm":11,"combat_effect":{"player_stat_multipliers":{"might":1.08,"guard":1.08,"mobility":1.08,"sense":1.08,"sustain":1.08,"breach":1.08}},"description":"太乙修士以三花道韵温养的法则髓质，战斗六项属性提高 8%。"},
+        {"item_id":"primordial_mother_qi","name":"混元母气","minimum_realm":12,"combat_effect":{"player_stat_multipliers":{"might":1.12,"guard":1.12,"mobility":1.12,"sense":1.12,"sustain":1.12,"breach":1.12}},"description":"大罗道果附近偶尔凝结的一缕混元母气，战斗六项属性提高 12%。"}
+      ]
+    },
+    "heavenly_court":{
+      "seat_count":49,"term_units":7,"decree_duration_units":5,"base_treasury_income":100,"initial_treasury":2800,"initial_authority":100,"decree_authority_cost":12,"policy_treasury_cost":30,"election_treasury_cost":20,"base_decree_slots":1,"player_initial_grade":9,
+      "grade_merit_thresholds":{"8":20,"7":50,"6":90,"5":150,"4":240,"3":360,"2":520,"1":760},
+      "offices":[
+        {"id":"sun","name":"太阳星君","element":"日"},{"id":"moon","name":"太阴星君","element":"月"},{"id":"jupiter","name":"岁星君","element":"木"},{"id":"mars","name":"荧惑星君","element":"火"},{"id":"saturn","name":"镇星君","element":"土"},{"id":"venus","name":"太白星君","element":"金"},{"id":"mercury","name":"辰星君","element":"水"}
+      ],
+      "decrees":[
+        {"id":"levy","name":"征收令","authority_cost":12,"immediate_treasury":500,"support":-5},
+        {"id":"relief","name":"赈济令","authority_cost":12,"immediate_treasury":-400,"support":4},
+        {"id":"stimulate_demand","name":"提振需求","authority_cost":12,"income_multiplier":1.05,"support":-10},
+        {"id":"regulate_market","name":"规范市场","authority_cost":12,"income_multiplier":0.97,"support":4},
+        {"id":"war_readiness","name":"战备令","authority_cost":12,"immediate_equipment":100,"support":-5},
+        {"id":"direct_appointment","name":"任命天官","authority_cost":12,"requires_law":"direct_appointment_law","support":-10,"target":"npc"},
+        {"id":"recommend_official","name":"举荐天官","authority_cost":12,"requires_law":"recommendation_law","support":8,"target":"random_npc"},
+        {"id":"wanted","name":"通缉令","authority_cost":12,"forbidden_law":"universal_protection","target":"npc","wanted_damage_bonus":0.10},
+        {"id":"protect","name":"保护令","authority_cost":8,"target":"wanted_npc"}
+      ],
+      "laws":[
+        {"id":"universal_protection","name":"寰宇庇护法","description":"禁止修士私自斗法，切磋也可能导致通缉。"},
+        {"id":"immortal_slaughter","name":"仙域生杀法","description":"仙界修士斗法时因果减少 10。"},
+        {"id":"celestial_sects","name":"仙域诸天法","description":"大宗门每单位影响力 -5，中小宗门 +5。"},
+        {"id":"martial_gods","name":"诸圣武神法","description":"所有仙界战斗造成的伤害增加 10%。"},
+        {"id":"immortal_twofold","name":"仙元两度法","description":"仙界机缘获取增加 10%。"},
+        {"id":"direct_appointment_law","name":"天官直授法","description":"权威每单位 +5，天庭宗门影响力 -5。"},
+        {"id":"recommendation_law","name":"天官察举法","description":"天庭宗门影响力 +5，权威每单位 +5。"},
+        {"id":"wide_domain","name":"广域制","description":"权威每单位 +5，府库收入 -5%。"},
+        {"id":"traveling_palace","name":"行宫制","description":"权威每单位 -5，府库收入 +5%。"},
+        {"id":"official_system","name":"职官制","description":"决议效果增加 50%。"},
+        {"id":"assistant_officials","name":"辅官制","description":"决议槽位 +1。"}
+      ]
+    },
+    "breakthrough": {
+      "major_base": {
+        "1":{"acquired":0.10,"pseudo":0.10,"heavenly":0.28,"supreme":0.42,"mutated":0.58,"law":0.70,"otherworld":0.80},
+        "2":{"acquired":0.05,"pseudo":0.05,"heavenly":0.08,"supreme":0.11,"mutated":0.14,"law":0.17,"otherworld":0.20},
+        "3":{"acquired":0.01,"pseudo":0.01,"heavenly":0.02,"supreme":0.03,"mutated":0.04,"law":0.045,"otherworld":0.05},
+        "4":{"acquired":0.01,"pseudo":0.02,"heavenly":0.03,"supreme":0.04,"mutated":0.04,"law":0.05,"otherworld":0.06},
+        "5":{"acquired":0.01,"pseudo":0.02,"heavenly":0.03,"supreme":0.04,"mutated":0.04,"law":0.05,"otherworld":0.06},
+        "6":{"acquired":0.01,"pseudo":0.02,"heavenly":0.03,"supreme":0.04,"mutated":0.04,"law":0.05,"otherworld":0.06},
+        "7":{"acquired":0.01,"pseudo":0.02,"heavenly":0.03,"supreme":0.04,"mutated":0.04,"law":0.05,"otherworld":0.06}
+      },
+      "minor_base":{"2":0.58,"3":0.48,"4":0.38,"5":0.30,"6":0.22,"7":0.16,"8":0.10},
+      "minor_pity":{"eligible_source_layers":[1,2,4,5,7,8],"bonus_per_failure":0.04,"max_bonus":0.32},
+      "optimal_state":{"hp_ratio":0.8,"mp_ratio":0.8,"bonus":0.05},
+      "heart_demon_penalty_per_point":0.0005,
+      "heart_demon_penalty_cap":0.05,
+      "minor_failure_heart_demon":2,
+      "major_failure_heart_demon":5,
+      "trial_failure_heart_demon":8,
+      "minor_failure_retention":0.72,
+      "major_failure_retention":0.60,
+      "traditional": {
+        "hp_ratio":0.62,"mp_ratio":0.62,
+        "karma_limits":{"4":160,"5":120,"6":90,"7":75,"8":60},
+        "heart_demon_limits":{"4":45,"5":40,"6":35,"7":30,"8":25},
+        "drain_hp":[0.06,0.12],"drain_mp":[0.07,0.14]
+      },
+      "heavenly": {
+        "vitality_ratio":0.78,"combat_ratio":0.75,"karma_limit":80,"sha_qi_limit":120,"heart_demon_limit":30,
+        "drain_hp":[0.08,0.16],"drain_mp":[0.10,0.20]
+      },
+      "periodic_thunder": {
+        "interval_years":3000,"base_power":1000,"power_multiplier":2.0,
+        "hp_ratio":0.42,"mp_ratio":0.42,"power_hp_scale":0.55,"power_mp_scale":0.45,
+        "strike_multipliers":[1.0,1.25,1.55],"drain_hp":[0.12,0.22],"drain_mp":[0.14,0.25]
+      }
+    },
+    "body_cultivation": {
+      "max_layer":100,"progress_base":70,"progress_per_layer":3,"progress_per_year":[8,14],
+      "base_chance":{"1-20":0.68,"21-40":0.22,"41-60":0.15,"61-80":0.10,"81-100":0.06},
+      "failure_retention":0.70,"pity_start_target":21,"pity_bonus_per_failure":0.025,"pity_max_bonus":0.50,
+      "cultivation_breakthrough_bonus_per_20_layers":0.01,
+      "tribulation_reduction_start":50,"tribulation_reduction_step_layers":5,"tribulation_reduction_per_step":0.001
+    },
+    "monster_cultivation":{"lifespan_multiplier":3,"body_training_multiplier":1.5},
+    "qi_mastery":{"experience_base":25},
+    "demonic_cultivation":{
+      "devour_bonus_flat_increase":0.05,
+      "realm_names":{"1":"聚煞","2":"铸魔","3":"魔丹","4":"魔婴","5":"化魔","6":"炼魔","7":"真魔","8":"魔尊","9":"迦楼罗","10":"紧那罗","11":"摩睺罗","12":"阿修罗"},
+      "natural_cultivation_multiplier":0.10,"kill_opportunity_base":12,"kill_opportunity_per_realm":10,
+      "divine_sense_experience_base":20,"divine_sense_training_base":40,
+      "corpse_success_base":0.72,"living_success_base":0.38,"puppet_breakthrough_base":{"corpse":0.16,"living":0.34,"mechanical":0.0},
+      "corpse_power_inheritance":0.80,"living_power_inheritance":1.0,"living_control_loss_per_year":0.35,
+      "control_reinforce_mp_ratio":0.12,"control_reinforce_base":18,
+      "puppet_combat_contribution":{"mechanical":0.40,"corpse":0.60,"living":0.80},
+      "infusion_mp_ratio":0.12,"infusion_base":12,"pill_breakthrough_bonus":0.04,
+      "devour_bonus_per_realm":{"corpse":0.012,"living":0.025},"max_devour_bonus":0.55,
+      "soul_refine_progress":32,"soul_seclusion_time_multiplier":1.20,"soul_backlash_base":0.025,
+      "true_demon_ascension_demon_qi_level":8,"periodic_thunder_damage_multiplier":1.20,
+      "heavenly_demon_tribulation":{"base_rounds":5,"soul_lure_chance":0.28,"outer_demon_power_ratios":[0.52,0.60,0.68,0.76,0.84],"victory_opportunity_ratio":0.08,"hp_damage":[0.05,0.12],"mp_damage":[0.04,0.10]},
+      "asura_ascension":{"required_demon_qi_level":30,"combat_ratio":0.82,"karma_limit":260,"heart_demon_limit":70,"sha_qi_min":80},
+      "mechanical_recipe":{"spirit_stone":25,"spirit_sword":1}
+    },
+    "world_names": {"human":"人界","demon":"魔界","spirit":"灵界","true_demon":"真魔界","phantom_underworld":"幻冥界","hell":"地狱界","celestial":"仙界","asura":"修罗界","nether":"幽冥界","reincarnation":"轮回界"},
+    "world_profiles": {
+      "human":{"tier":1,"npc_realm_cap":5,"enabled":true,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":1,"demon":0.25,"monster":0.25,"yin":0.25}},
+      "demon":{"tier":1,"npc_realm_cap":5,"enabled":true,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":0.35,"demon":1.35,"monster":0.55,"yin":0.8}},
+      "spirit":{"tier":2,"npc_realm_cap":8,"enabled":true,"kind":"world","supports":["events","market","factions","races","ranking"],"qi_concentrations":{"spirit":2,"demon":0.5,"monster":0.75,"yin":0.5}},
+      "true_demon":{"tier":2,"npc_realm_cap":8,"enabled":true,"kind":"world","supports":["events","market","factions","races","ranking"],"qi_concentrations":{"spirit":0.25,"demon":2,"monster":0.5,"yin":0.75}},
+      "phantom_underworld":{"tier":2,"enabled":false,"kind":"world","supports":["events","market","factions","races"],"qi_concentrations":{"spirit":0.25,"demon":0.5,"monster":2,"yin":0.75}},
+      "hell":{"tier":2,"enabled":false,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":0.1,"demon":0.5,"monster":0.25,"yin":2}},
+      "celestial":{"tier":3,"npc_realm_cap":12,"enabled":true,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":4,"demon":0.25,"monster":0.5,"yin":0.5}},
+      "asura":{"tier":3,"npc_realm_cap":12,"enabled":true,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":0.25,"demon":4,"monster":1,"yin":1}},
+      "nether":{"tier":3,"enabled":false,"kind":"world","supports":["events","market","factions","races"],"qi_concentrations":{"spirit":0.1,"demon":0.5,"monster":4,"yin":2}},
+      "reincarnation":{"tier":3,"enabled":false,"kind":"world","supports":["events","market","factions"],"qi_concentrations":{"spirit":0.1,"demon":0.5,"monster":0.5,"yin":4}}
+    },
+    "start_worlds":{"dao":["human","spirit"],"buddhist":["human","spirit"],"confucian":["human","spirit"],"demonic":["human","demon"],"monster":["human","phantom_underworld"],"ghost":["human","hell"]},
+    "npc_mortality": {
+      "duel_lethal_chance":0.16,
+      "protected_duel_chance":{"human":{"5":0.00005},"spirit":{"7":0.001,"8":0.0005}},
+      "elite_war_chance":{"human":{"4":0.003,"5":0.00002},"spirit":{"6":0.005,"7":0.001,"8":0.0002}}
+    },
+    "cultivation_routes": {
+      "orthodox":{"name":"儒佛道修","paths":["dao","buddhist","confucian"],"stages":[{"world":"human","label":"人界","enabled":true},{"world":"spirit","label":"灵界","enabled":true},{"world":"celestial","label":"仙界","enabled":true},{"system":"heavens","label":"诸天系统","enabled":false}]},
+      "demonic":{"name":"魔修","paths":["demonic"],"stages":[{"world":"human","label":"人界","enabled":true},{"world":"demon","label":"魔界","enabled":true},{"world":"true_demon","label":"真魔界","enabled":true},{"world":"asura","label":"修罗界","enabled":true},{"system":"heavens","label":"诸天系统","enabled":false}]},
+      "monster":{"name":"妖修","paths":["monster"],"stages":[{"world":"human","label":"人界（妖界道统）","enabled":true},{"world":"phantom_underworld","label":"幻冥界","enabled":false},{"world":"nether","label":"幽冥界","enabled":false},{"system":"heavens","label":"诸天系统","enabled":false}]},
+      "ghost":{"name":"鬼修","paths":["ghost"],"stages":[{"world":"human","label":"人界（鬼界道统）","enabled":true},{"world":"hell","label":"地狱界","enabled":false},{"world":"reincarnation","label":"轮回界","enabled":false},{"system":"heavens","label":"诸天系统","enabled":false}]}
+    },
+    "heavens_framework": {
+      "id":"heavens","name":"诸天","enabled":false,"kind":"cross_world_system",
+      "description":"凌驾于仙界、修罗界、幽冥界与轮回界之上的跨界系统框架；未来承载诸界往来、战争、盟约与共同大事。",
+      "member_worlds":["celestial","asura","nether","reincarnation"]
+    },
+    "quick_start_presets": [
+      {"id":"core","name":"结丹初期","enabled":true,"realm_index":3,"layer":1,"age":260,"world":"human","race":"human","spirit_root":"supreme_metal","path":"dao","opportunity_fraction":0.25,"karma":8,"sha_qi":6,"story_flags":["wind_wings_completed"],"main_technique":"TECH_COMMON_CORE","support_technique":"TECH_COMMON_FOUNDATION","combat_techniques":["TECH_COMMON_CORE","TECH_COMMON_LUO","TECH_TIANJIAN"],"inventory":[{"id":"spirit_stone","quantity":120},{"id":"starfall_blade","quantity":1},{"id":"wind_thunder_wings","quantity":1}]},
+      {"id":"demonic_core","name":"魔修·魔丹初期","enabled":true,"realm_index":3,"layer":1,"age":240,"world":"demon","race":"human","spirit_root":"mutated_yin","path":"demonic","opportunity_fraction":0.25,"karma":18,"sha_qi":35,"story_flags":[],"main_technique":"TECH_WANMO","support_technique":"TECH_BLOOD_RIVER","combat_techniques":["TECH_CORPSE_YIN_CANON"],"inventory":[{"id":"spirit_stone","quantity":150},{"id":"soul_banner","quantity":1},{"id":"true_soul_pill","quantity":2}]},
+      {"id":"nascent","name":"元婴初期","enabled":true,"realm_index":4,"layer":1,"age":680,"world":"human","race":"human","spirit_root":"mutated_thunder","path":"dao","opportunity_fraction":0.25,"karma":12,"sha_qi":15,"story_flags":["wind_wings_completed","xutian_completed","kunwu_completed"],"main_technique":"TECH_COMMON_NASCENT","support_technique":"TECH_COMMON_CORE","combat_techniques":["TECH_COMMON_GUI"],"inventory":[{"id":"spirit_stone","quantity":360},{"id":"starfall_blade","quantity":1},{"id":"wind_thunder_wings","quantity":1},{"id":"virtual_heaven_cauldron","quantity":1},{"id":"eight_spirit_ruler","quantity":1},{"id":"mountain_seal","quantity":1},{"id":"phoenix_marrow","quantity":2},{"id":"void_soul_crystal","quantity":2}]},
+      {"id":"spirit","name":"化神初期","enabled":true,"realm_index":5,"layer":1,"age":1880,"world":"human","race":"human","spirit_root":"law_space","path":"dao","additional_roots":["metal","wood","water","fire","earth"],"opportunity_fraction":0.2,"karma":18,"sha_qi":30,"story_flags":["wind_wings_completed","xutian_completed","kunwu_completed","north_night_completed","star_palace_completed"],"main_technique":"TECH_COMMON_SPIRIT","support_technique":"TECH_COMMON_NASCENT","combat_techniques":["TECH_COMMON_GUI","TECH_DAGENG_SWORD_ARRAY","TECH_DRY_BLUE_ICE_FLAME","TECH_TAIYI_LIGHT","TECH_YUAN_MAGNETIC_LIGHT","TECH_YINYANG_BLISS"],"inventory":[{"id":"spirit_stone","quantity":1200},{"id":"starfall_blade","quantity":1},{"id":"wind_thunder_wings","quantity":1},{"id":"virtual_heaven_cauldron","quantity":1},{"id":"eight_spirit_ruler","quantity":1},{"id":"north_pole_origin_mountain","quantity":1},{"id":"yuan_magnetic_divine_mountain","quantity":1},{"id":"mountain_seal","quantity":1},{"id":"boundary_blade","quantity":1},{"id":"celestial_lotus","quantity":2},{"id":"spirit_origin_pearl","quantity":2},{"id":"spirit_node_info","quantity":1}]},
+      {"id":"void","name":"炼虚初期","enabled":true,"realm_index":6,"layer":1,"age":5200,"world":"spirit","race":"human","spirit_root":"mutated_wind","path":"dao","additional_roots":["metal","wood","water","fire","earth"],"opportunity_fraction":0.18,"karma":22,"sha_qi":45,"fame":48,"main_technique":"TECH_COMMON_VOID","support_technique":"TECH_COMMON_SPIRIT","combat_techniques":["TECH_EMPTY_VOID_CANON","TECH_SPIRIT_REFINING_ART","TECH_COMMON_VOID","TECH_Hexagram","TECH_TAIYI_LIGHT"],"inventory":[{"id":"spirit_stone","quantity":8000},{"id":"mystic_heaven_blood","quantity":2},{"id":"dharma_soul_pearl","quantity":2},{"id":"realm_severing_halberd","quantity":1},{"id":"empty_heaven_mirror","quantity":1},{"id":"lingxu_five_powders","quantity":1},{"id":"tribulation_vitality_pill","quantity":2},{"id":"tribulation_mana_dew","quantity":2}]},
+      {"id":"integration","name":"合体初期","enabled":true,"realm_index":7,"layer":1,"age":12800,"world":"spirit","race":"human","spirit_root":"law_space","path":"dao","additional_roots":["metal","wood","water","fire","earth"],"opportunity_fraction":0.15,"karma":28,"sha_qi":70,"fame":96,"main_technique":"TECH_COMMON_INTEGRATION","support_technique":"TECH_COMMON_VOID","combat_techniques":["TECH_QINGPAN_SWORD_ARRAY","TECH_NINE_TURN_UNITY","TECH_COMMON_INTEGRATION","TECH_EMPTY_VOID_CANON","TECH_SPIRIT_REFINING_ART","TECH_TAIYI_LIGHT"],"inventory":[{"id":"spirit_stone","quantity":42000},{"id":"imperishable_bone","quantity":2},{"id":"myriad_law_orb","quantity":2},{"id":"myriad_law_wheel","quantity":1},{"id":"clear_mind_lotus","quantity":1},{"id":"tribulation_vitality_pill","quantity":3},{"id":"tribulation_mana_dew","quantity":3}]},
+      {"id":"mahayana","name":"大乘初期","enabled":true,"realm_index":8,"layer":1,"age":31000,"world":"spirit","race":"human","spirit_root":"otherworld","path":"dao","additional_roots":["metal","wood","water","fire","earth"],"opportunity_fraction":0.12,"karma":35,"sha_qi":110,"fame":160,"main_technique":"TECH_COMMON_MAHAYANA","support_technique":"TECH_COMMON_INTEGRATION","combat_techniques":["TECH_CHAOS_OPENING","TECH_ORIGIN_GANG_SHIELD","TECH_QINGPAN_SWORD_ARRAY","TECH_CHUNLI_SWORD_ARRAY","TECH_NINE_TURN_UNITY","TECH_EMPTY_VOID_CANON","TECH_SPIRIT_REFINING_ART"],"inventory":[{"id":"spirit_stone","quantity":180000},{"id":"chaos_sacred_blood","quantity":2},{"id":"primordial_spirit_sea","quantity":2},{"id":"mystic_heaven_sword","quantity":1},{"id":"chaos_dao_bell","quantity":1},{"id":"yuanhe_five_poles_mountain","quantity":1},{"id":"mahayana_spirit_pill","quantity":1},{"id":"tribulation_vitality_pill","quantity":4},{"id":"tribulation_mana_dew","quantity":4}]},
+      {"id":"true_immortal","name":"真仙","enabled":true,"realm_index":9,"layer":1,"age":68000,"world":"celestial","race":"human","spirit_root":"otherworld","path":"dao","additional_roots":["metal","wood","water","fire","earth"],"opportunity_fraction":0.10,"karma":28,"sha_qi":120,"fame":0,"immortal_power_converted":true,"main_technique":"TECH_CELESTIAL_BREATHING","support_technique":"TECH_PRIMORDIAL_IMMORTAL_LIGHT","combat_techniques":["TECH_TAIYI_SWORD_CANON"],"inventory":[{"id":"spirit_stone","quantity":500000},{"id":"immortal_origin_stone","quantity":12},{"id":"law_crystal","quantity":3},{"id":"xuanhuang_immortal_armor","quantity":1},{"id":"heavenly_river_sword_embryo","quantity":1},{"id":"purple_cloud_immortal_dew","quantity":3}]}
+    ],
+    "stage_lifespan_bonus": {
+      "foundation":{"middle":[12,20],"late":[12,20]},
+      "core":{"middle":[25,40],"late":[25,40]},
+      "nascent":{"middle":[70,120],"late":[70,120]},
+      "spirit":{"middle":[180,260],"late":[180,260]}
+    }
+  },
+  "realms": [
+    {"id":"mortal","name":"凡人","layers":1,"base_power":10,"opportunity_base":30,"lifespan":[80,100],"kill_threshold":2.0},
+    {"id":"qi","name":"练气","layers":13,"base_power":35,"opportunity_base":24,"lifespan":[100,120],"kill_threshold":2.2},
+    {"id":"foundation","name":"筑基","layers":9,"base_power":170,"opportunity_base":85,"lifespan":[200,250],"kill_threshold":2.5},
+    {"id":"core","name":"结丹","layers":9,"base_power":850,"opportunity_base":300,"lifespan":[400,500],"kill_threshold":2.8},
+    {"id":"nascent","name":"元婴","layers":9,"base_power":4500,"opportunity_base":1100,"lifespan":[1000,1500],"kill_threshold":3.0},
+    {"id":"spirit","name":"化神","layers":9,"base_power":24000,"opportunity_base":4200,"lifespan":[3000,3200],"kill_threshold":3.5},
+    {"id":"void","name":"炼虚","layers":9,"base_power":140000,"opportunity_base":18000,"lifespan":null,"kill_threshold":4.0},
+    {"id":"integration","name":"合体","layers":9,"base_power":850000,"opportunity_base":80000,"lifespan":null,"kill_threshold":4.5},
+    {"id":"mahayana","name":"大乘","layers":9,"base_power":5500000,"opportunity_base":360000,"lifespan":null,"kill_threshold":5.0},
+    {"id":"true_immortal","name":"真仙","layers":1,"base_power":32000000,"opportunity_base":1800000,"lifespan":null,"kill_threshold":5.5},
+    {"id":"golden_immortal","name":"金仙","layers":1,"base_power":180000000,"opportunity_base":9000000,"lifespan":null,"kill_threshold":6.0},
+    {"id":"taiyi","name":"太乙","layers":1,"base_power":1000000000,"opportunity_base":45000000,"lifespan":null,"kill_threshold":6.5},
+    {"id":"daluo","name":"大罗","layers":1,"base_power":6000000000,"opportunity_base":250000000,"lifespan":null,"kill_threshold":7.0}
+  ],
+  "paths": {
+    "dao":{"name":"道修","karma_factor":1.0},
+    "demonic":{"name":"魔修","karma_factor":0.8},
+    "ghost":{"name":"鬼修","karma_factor":0.75},
+    "monster":{"name":"妖修","karma_factor":0.9},
+    "buddhist":{"name":"佛修","karma_factor":0.6},
+    "confucian":{"name":"儒修","karma_factor":0.95}
+  },
+  "affinities": {"metal":"金","wood":"木","water":"水","fire":"火","earth":"土","wind":"风","thunder":"雷","yin":"阴","yang":"阳","sex":"合欢","five_elements":"五行"},
+  "roots": {
+    "fixed": [
+      {"id":"otherworld","name":"异世界灵根","tier":"异世界灵根","efficiency":2.0,"elements":[],"creation":true},
+      {"id":"law_time","name":"时间灵根","tier":"法则灵根","efficiency":1.75,"elements":[],"creation":true},
+      {"id":"law_space","name":"空间灵根","tier":"法则灵根","efficiency":1.75,"elements":[],"creation":true},
+      {"id":"law_karma","name":"因果灵根","tier":"法则灵根","efficiency":1.75,"elements":[],"creation":true},
+      {"id":"mutated_wind","name":"风灵根","tier":"变异灵根","efficiency":1.5,"elements":["wind"],"creation":true},
+      {"id":"mutated_thunder","name":"雷灵根","tier":"变异灵根","efficiency":1.5,"elements":["thunder"],"creation":true},
+      {"id":"mutated_yin","name":"阴灵根","tier":"变异灵根","efficiency":1.5,"elements":["yin"],"creation":true},
+      {"id":"mutated_yang","name":"阳灵根","tier":"变异灵根","efficiency":1.5,"elements":["yang"],"creation":true},
+      {"id":"none","name":"无灵根","tier":"无灵根","efficiency":0.0,"elements":[],"creation":true}
+    ],
+    "five_element_families": [
+      {"prefix":"supreme","tier":"极品灵根","counts":[1],"efficiencies":{"1":1.3}},
+      {"prefix":"heavenly","tier":"天灵根","counts":[2,3],"efficiencies":{"2":1.15,"3":1.0}},
+      {"prefix":"pseudo","tier":"伪灵根","counts":[4,5],"efficiencies":{"4":0.85,"5":0.7}}
+    ],
+    "acquired": {"element_efficiency":0.6,"mutated_efficiency":0.7,"creation":false}
+  }
+}

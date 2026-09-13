@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "world": "demon",
+  "events": [
+    {
+      "id":"EVT_DEMON_SACRED_001","version":1,"title":"血月照界","body":"一轮血月毫无征兆地悬在魔界上空，三宗修士体内的魔气同时失控，纷纷朝北荒裂谷汇聚。上层魔域的赤霄天君宣称，下界魔修皆源自一枚失落魔胎；他要收回散落万年的魔气，重塑自己的第二具道身。",
+      "tags":["realm:spirit","story_chain","demon_sacred_adaptation","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_sacred_eligible","base_chance":0.20,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"demon"},{"path":"player.realm_index","op":"eq","value":5}]},
+      "choices":[
+        {"id":"rally","text":"召集魔界三宗，共同镇压失控魔气","effects":[{"type":"add_fame","value":12},{"type":"set_flag","flag":"demon_sacred_coalition"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
+        {"id":"infiltrate","text":"顺着血月牵引潜入裂谷，反查真魔坐标","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"demon_sacred_infiltrator"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
+        {"id":"seize","text":"等待双方交战，再夺取裂隙控制权","effects":[{"type":"add_karma","value":10},{"type":"set_flag","flag":"demon_sacred_opportunist"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
+        {"id":"avoid","text":"封闭洞府，不介入上界争端","effects":[{"type":"add_fame","value":-10},{"type":"set_flag","flag":"demon_sacred_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_SACRED_002","version":1,"title":"夺魄使降界","body":"赤霄天君的夺魄使率魔骑踏出裂谷。他们以引魂幡抽取三宗弟子体内的本命魔气，再送入血月投影；每多吞一人，投影便凝实一分。若不能拆散先锋编队，赤霄真身很快就能借魔胎降界。",
+      "tags":["realm:spirit","story_chain","demon_sacred_adaptation","manual_only"],"weight":0,
+      "conditions":{"has_flag":"demon_sacred_coalition"},
+      "choices":[
+        {"id":"break_vanguard","text":"按预案分割夺魄使与魔骑（敌方总战力 165,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":165000}],"failure_reason":"赤霄投影把你的魔躯炼入降界血阵","success_text":"投影与血阵的联系被切断，真魔先锋退入裂隙。"},{"type":"set_flag","flag":"demon_sacred_vanguard_broken","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_003","if_result":["check_success"]}]},
+        {"id":"invert_array","text":"反转地脉，迫使降界血阵自行崩解","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":16000},{"stat":"mp_ratio","op":"gte","value":0.65}],"failure_reason":"地脉魔气倒灌识海，你沦为赤霄天君的新道标","success_text":"血阵倒卷，敌军与本界之间出现断层。"},{"type":"restore_mp","value":-0.20,"if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_003","if_result":["check_success"]}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_SACRED_003","version":1,"title":"无声魔窟","body":"夺魄使死后留下的血符指向北荒深处。那里封着三宗祖师共同斩下的一块原始魔胎：他们当年并非被上界遗弃，而是主动割断赤霄控制，才让下界魔修拥有独立神智。古窟守卫受魔胎侵蚀，正试图重新接上血月。",
+      "tags":["realm:spirit","story_chain","demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"force_gate","text":"击溃魔胎守卫，强闯古窟（敌方总战力 185,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":185000}],"failure_reason":"魔胎唤醒你体内同源魔气，将你炼成新的守卫","success_text":"守卫尽灭，三宗祖师留下的断魂碑显出完整上界坐标。"},{"type":"set_flag","flag":"demon_sacred_vault_opened","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_004","if_result":["check_success"]}]},
+        {"id":"read_orders","text":"以神识唤醒断魂碑中的祖师残念（MP 至少 18,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":18000}],"failure_reason":"魔胎借祖师残念侵入识海，你沦为新的魔躯","success_text":"三位祖师残念同时苏醒，替你压住魔胎并指明上界来路。"},{"type":"add_opportunity","value":26,"if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_004","if_result":["check_success"]}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_SACRED_004","version":1,"title":"焚天魔门","body":"断魂碑显出一座通往真魔界的焚天魔门。赤霄天君要夺回魔胎完成第二道身，玄烬圣祖则想吞噬魔胎壮大自身；两道上界投影同时降临北荒。你可以击退双方，保留魔门日后上界，也可以彻底毁门，让魔胎与血月一同断绝。",
+      "tags":["realm:spirit","story_chain","demon_sacred_adaptation","manual_only"],"weight":0,
+      "choices":[
+        {"id":"keep_chart","text":"击退双方并保留焚天魔门坐标（敌方总战力 205,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":205000}],"failure_reason":"两位圣祖神念撕裂你的元神并夺走坐标","success_text":"你击碎两道投影，把焚天门图握在自己手中。"},{"type":"add_item","item_id":"true_demon_gate_chart","if_result":["check_success"]},{"type":"add_fame","value":28,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_secured","if_result":["check_success"]}]},
+        {"id":"destroy_chart","text":"毁掉坐标，让任何上界势力都无法长期降临（敌方总战力 190,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":190000}],"failure_reason":"坐标石先一步被上尊神念夺走","success_text":"坐标石化为齑粉，血月裂隙在两道怒吼中永久闭合。"},{"type":"add_karma","value":-12,"if_result":["check_success"]},{"type":"add_fame","value":20,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_destroyed","if_result":["check_success"]}]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_RELATION_CAPTURE_001",
+      "version": 1,
+      "title": "旧情化牢",
+      "body": "你已暗中锁定{target_name}的气机。师徒或道侣间本应毫无防备，一旦出手，无论成败，这段关系都再难回到从前。",
+      "tags": ["manual_only", "demonic", "relationship", "capture"],
+      "weight": 0,
+      "repeat": "repeatable",
+      "choices": [
+        {"id":"ambush","text":"借亲近之机骤然封脉","effects":[{"type":"relationship_capture_step","stage":"opening","method":"ambush"}]},
+        {"id":"direct","text":"以魔威正面镇压","effects":[{"type":"relationship_capture_step","stage":"opening","method":"direct"}]},
+        {"id":"abandon","text":"收起杀念，就此作罢","effects":[{"type":"relationship_capture_step","stage":"abandon"}]}
+      ]
+    },
+    {
+      "id": "EVT_RELATION_CAPTURE_002",
+      "version": 1,
+      "title": "元神相争",
+      "body": "{target_name}的肉身已经受制，元神却在识海中拼死冲撞。此刻若不能彻底封住神魂，对方仍有机会断去关系印记、远遁而走。",
+      "tags": ["manual_only", "demonic", "relationship", "capture"],
+      "weight": 0,
+      "repeat": "repeatable",
+      "choices": [
+        {"id":"soul_seal","text":"催动神识强行封魂","effects":[{"type":"relationship_capture_step","stage":"final","method":"soul_seal"}]},
+        {"id":"blood_mark","text":"燃烧精血加固魔禁","effects":[{"type":"relationship_capture_step","stage":"final","method":"blood_mark"}]},
+        {"id":"release","text":"在最后一刻放其离去","effects":[{"type":"relationship_capture_step","stage":"release"}]}
+      ]
+    },
+    {
+      "id":"EVT_BLOOD_PRISON_JOIN_001","version":1,"title":"血狱招魂幡",
+      "body":"血狱魔宗在赤髓城外竖起招魂幡，只问来者杀伐本领，不问旧日出身。执事允诺以战功兑换血池、魔经与傀儡资粮。",
+      "tags":["faction_join","faction_unique","faction:blood_prison","world:demon"],"weight":6,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"demon"},{"path":"player.realm_index","op":"gte","value":1},{"path":"player.faction_id","op":"eq","value":null},{"path":"player.path","op":"eq","value":"demonic"}]},
+      "choices":[{"id":"join","text":"以魔血留名，拜入血狱魔宗","effects":[{"type":"join_faction","faction_id":"blood_prison"}]},{"id":"leave","text":"不受招魂幡约束","effects":[]}]
+    },
+    {
+      "id":"EVT_CORPSE_HALL_JOIN_001","version":1,"title":"炼尸谷开殿",
+      "body":"阴尸殿山门在尸雾中显现。殿中御傀长老察觉你的神识根基，邀你入谷研习炼魂养尸之术。",
+      "tags":["faction_join","faction_unique","faction:corpse_hall","world:demon"],"weight":6,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"demon"},{"path":"player.realm_index","op":"gte","value":1},{"path":"player.faction_id","op":"eq","value":null},{"path":"player.path","op":"eq","value":"demonic"}]},
+      "choices":[{"id":"join","text":"踏入尸雾，拜入阴尸殿","effects":[{"type":"join_faction","faction_id":"corpse_hall"}]},{"id":"leave","text":"暂不入殿","effects":[]}]
+    },
+    {
+      "id":"EVT_HEAVEN_DEMON_PALACE_JOIN_001","version":1,"title":"天魔宫诏令",
+      "body":"渊极城上空浮现千重魔相，天魔宫使者持黑玉诏令而来，邀你入宫共参真魔大道。",
+      "tags":["faction_join","faction_unique","faction:heaven_demon_palace","world:true_demon"],"weight":6,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"true_demon"},{"path":"player.realm_index","op":"gte","value":6},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"接下魔诏，拜入天魔宫","effects":[{"type":"join_faction","faction_id":"heaven_demon_palace"}]},{"id":"leave","text":"婉拒魔诏","effects":[]}]
+    },
+    {
+      "id":"EVT_MYRIAD_SOUL_ABYSS_JOIN_001","version":1,"title":"万魂引路",
+      "body":"坠星魔海裂开一道幽暗魂径，万魂渊长老许你借阅炼魂秘卷，但须先在渊契上留下神识烙印。",
+      "tags":["faction_join","faction_unique","faction:myriad_soul_abyss","world:true_demon"],"weight":6,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"true_demon"},{"path":"player.realm_index","op":"gte","value":6},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"烙下魂印，加入万魂渊","effects":[{"type":"join_faction","faction_id":"myriad_soul_abyss"}]},{"id":"leave","text":"斩断魂径","effects":[]}]
+    },
+    {
+      "id":"EVT_BLACK_SUN_TEMPLE_JOIN_001","version":1,"title":"黑日血试",
+      "body":"黑日神殿在魔原设下血脉战台。无论出身种族，只要能承受黑日魔火，便可成为神殿门人。",
+      "tags":["faction_join","faction_unique","faction:black_sun_temple","world:true_demon"],"weight":6,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"true_demon"},{"path":"player.realm_index","op":"gte","value":6},{"path":"player.faction_id","op":"eq","value":null}]},
+      "choices":[{"id":"join","text":"登上血台，加入黑日神殿","effects":[{"type":"join_faction","faction_id":"black_sun_temple"}]},{"id":"leave","text":"离开血台","effects":[]}]
+    }
+  ]
+}
