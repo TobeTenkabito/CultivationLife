@@ -72,9 +72,10 @@ class BaseGameVersionTests(unittest.TestCase):
 
     def test_windows_build_metadata_uses_the_same_version_source(self):
         spec = (SOURCE_ROOT / "build" / "launcher.spec").read_text(encoding="utf-8")
-        self.assertIn("from cultivation_life.version import", spec)
+        self.assertIn('project_root / "cultivation_life" / "version.py"', spec)
+        self.assertIn("BASE_GAME_VERSION = version_module.BASE_GAME_VERSION", spec)
         self.assertIn("version=launcher_version", spec)
-        self.assertNotIn('StringStruct("ProductVersion", "1.0.0")', spec)
+        self.assertIsNone(re.search(r'StringStruct\("ProductVersion", "\d+\.\d+\.\d+"\)', spec))
 
 
 if __name__ == "__main__":

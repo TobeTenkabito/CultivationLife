@@ -411,7 +411,7 @@ function render(data) {
   ) : [];
   crossing.classList.toggle('hidden', !canCross);
   crossing.dataset.operation = canCelestialCross ? 'celestial-ascension' : canAsuraCross ? 'asura-ascension' : 'spirit-crossing';
-  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? `飞升${p.world === 'human' ? '魔界' : '真魔界'}` : '偷渡灵界';
+  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? `飞升${p.world === 'human' ? '魔界' : '真魔界'}` : `偷渡${p.path === 'ghost' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
   crossing.querySelector('span').textContent = canCelestialCross
     ? '开启九重飞升判定；第三、六、九关为可受雷伤减免影响的仙雷'
     : canAsuraCross
@@ -428,13 +428,13 @@ function render(data) {
   const crossWorldSecondary = $('#cross-world-secondary-action');
   const netherDestinations = worldTravel.can_descend_monster && worldTravel.can_descend_phantom
     ? ['monster_realm', 'phantom_underworld'] : [];
-  const crossDestination = netherDestinations[0] || (worldTravel.can_return_human ? 'human' : worldTravel.can_return_spirit ? 'spirit' : worldTravel.can_return_demon ? 'demon' : worldTravel.can_return_true_demon ? 'true_demon' : worldTravel.can_descend_spirit ? 'spirit' : worldTravel.can_return_celestial ? 'celestial' : worldTravel.can_descend_true_demon ? 'true_demon' : worldTravel.can_return_asura ? 'asura' : worldTravel.can_descend_phantom ? 'phantom_underworld' : worldTravel.can_return_nether ? 'nether' : '');
+  const crossDestination = netherDestinations[0] || (worldTravel.can_return_human ? 'human' : worldTravel.can_return_spirit ? 'spirit' : worldTravel.can_return_hell ? 'hell' : worldTravel.can_return_demon ? 'demon' : worldTravel.can_return_true_demon ? 'true_demon' : worldTravel.can_descend_spirit ? 'spirit' : worldTravel.can_return_celestial ? 'celestial' : worldTravel.can_descend_true_demon ? 'true_demon' : worldTravel.can_return_asura ? 'asura' : worldTravel.can_descend_phantom ? 'phantom_underworld' : worldTravel.can_return_nether ? 'nether' : '');
   crossWorld.classList.toggle('hidden', !crossDestination);
   crossWorld.dataset.destination = crossDestination;
   const secondaryDestination = netherDestinations[1] || '';
   crossWorldSecondary.classList.toggle('hidden', !secondaryDestination);
   crossWorldSecondary.dataset.destination = secondaryDestination;
-  const destinationNames = {human:'人界', spirit:'灵界', demon:'魔界', true_demon:'真魔界', celestial:'仙界', asura:'修罗界', monster_realm:'妖界', phantom_underworld:'幻冥界', nether:'幽冥界'};
+  const destinationNames = {human:'人界', spirit:'灵界', demon:'魔界', true_demon:'真魔界', hell:'地狱界', reincarnation:'轮回界', celestial:'仙界', asura:'修罗界', monster_realm:'妖界', phantom_underworld:'幻冥界', nether:'幽冥界'};
   $('#cross-world-title').textContent = crossDestination ? `${netherDestinations.length ? '下界' : '返回'}${destinationNames[crossDestination]}` : '跨界移动';
   $('#cross-world-secondary-title').textContent = secondaryDestination ? `下界${destinationNames[secondaryDestination]}` : '跨界移动';
   $('#cross-world-secondary-hint').textContent = '真灵道果将封存至大乘九层；可随时重返幽冥界';

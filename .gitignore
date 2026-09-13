@@ -1,7 +1,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-build/
+build/*
+!build/launcher.spec
 /launcher.exe
 data/saves/*.json
 !data/saves/.gitkeep

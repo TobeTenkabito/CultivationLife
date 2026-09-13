@@ -739,17 +739,17 @@ class ContentRegistry:
         realms: tuple[RealmDef, ...], roots: dict[str, dict[str, Any]], paths: dict[str, str],
         races: dict[str, dict[str, Any]],
     ) -> None:
-        required_ids = {"core", "demonic_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
+        required_ids = {"core", "demonic_core", "ghost_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
         if {str(entry.get("id", "")) for entry in presets} != required_ids:
-            raise ContentError("快速开局必须覆盖正统修仙七档与魔界魔丹预设")
+            raise ContentError("快速开局必须覆盖正统修仙七档、魔界魔丹与地狱界鬼修预设")
         if not all(bool(entry.get("enabled")) for entry in presets):
-            raise ContentError("八项快速开局预设均应处于开放状态")
+            raise ContentError("九项快速开局预设均应处于开放状态")
         for entry in presets:
             if not entry.get("enabled"):
                 continue
             if entry.get("spirit_root") not in roots or entry.get("path") not in paths:
                 raise ContentError(f"快速开局 {entry['id']} 的灵根或道路不存在")
-            if entry.get("race") not in races or entry.get("world") not in {"human", "demon", "spirit", "true_demon", "celestial", "asura"}:
+            if entry.get("race") not in races or entry.get("world") not in {"human", "demon", "spirit", "true_demon", "hell", "celestial", "asura"}:
                 raise ContentError(f"快速开局 {entry['id']} 的种族或世界不存在")
             if not 1 <= int(entry.get("layer", 0)) <= realms[int(entry["realm_index"])].layers:
                 raise ContentError(f"快速开局 {entry['id']} 的层数不合法")
@@ -931,6 +931,7 @@ class ContentRegistry:
             "blood_prison", "corpse_hall", "heaven_demon_palace", "myriad_soul_abyss", "black_sun_temple",
             "cloud_immortal_palace", "taiyi_pill_sect", "law_sea_pavilion",
             "asura_war_court", "blood_moon_palace", "annihilation_sea_sect",
+            "ghost_passage_court", "forgetful_river_archive", "iron_tree_prison_sect",
         }
         if not expected_factions <= set(faction_definitions):
             raise ContentError("人界、魔界、灵界与真魔界宗门定义不完整")
@@ -938,8 +939,9 @@ class ContentRegistry:
         if (
             worlds.count("human") < 3 or worlds.count("spirit") < 3 or worlds.count("demon") < 2
             or worlds.count("true_demon") < 3 or worlds.count("celestial") < 3 or worlds.count("asura") < 3
+            or worlds.count("hell") < 3
         ):
-            raise ContentError("宗门数量必须为人界三、魔界二、灵界三、真魔界三、仙界三、修罗界三")
+            raise ContentError("宗门数量必须覆盖人界、魔界、灵界、真魔界、地狱界、仙界与修罗界的既定下限")
 
     @staticmethod
     def _validate_systems(
