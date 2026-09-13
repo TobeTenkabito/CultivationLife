@@ -25,6 +25,11 @@ function toast(message) {
 async function boot() {
   const [config, saves, achievements] = await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
   configData = config;
+  const baseGame = config.base_game || {};
+  const versionLabel = baseGame.version_label || `本体 v${baseGame.version || '?'}`;
+  $('#base-game-version').textContent = versionLabel;
+  $('#settings-base-version').textContent = `${baseGame.name || '浮生问道'} · ${versionLabel}`;
+  document.title = `${baseGame.name || '浮生问道'} · v${baseGame.version || '?'}`;
   achievementCatalog = achievements;
   updateAchievementEntry();
   fillRootSelect(config);
@@ -43,7 +48,8 @@ async function boot() {
   const list = $('#save-list');
   saves.games.slice(0, 5).forEach(save => {
     const button = document.createElement('button');
-    button.textContent = `续接 · ${save.name}`;
+    const saveVersion = save.game_version && save.game_version !== 'pre-1.0.0' ? ` · v${save.game_version}` : '';
+    button.textContent = `续接 · ${save.name}${saveVersion}`;
     button.onclick = () => loadGame(save.id);
     list.appendChild(button);
   });
@@ -138,7 +144,8 @@ function showNextAchievementToast() {
 function renderExtensions(extensions) {
   const list = $('#extension-list'); list.innerHTML = '';
   const loaded = extensions.filter(extension => extension.status === 'loaded').length;
-  $('#extension-summary').textContent = extensions.length ? `已识别 ${extensions.length} · 已加载 ${loaded}` : '纯净本体';
+  const baseVersion = configData?.base_game?.version || '?';
+  $('#extension-summary').textContent = extensions.length ? `本体 v${baseVersion} · 已识别 ${extensions.length} · 已加载 ${loaded}` : `纯净本体 v${baseVersion}`;
   extensions.forEach(extension => {
     const row = document.createElement('div'); row.className = `extension-row ${extension.status}`;
     const status = extension.status === 'loaded' ? '已加载' : extension.status === 'disabled' ? '未启用' : '加载失败';

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=20260913-3">
+  <link rel="stylesheet" href="/style.css?v=20260913-4">
   <link rel="stylesheet" href="/panels.css?v=20260912-11">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <main class="shell">
     <header class="brand">
       <div class="seal">道</div>
-      <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p></div>
+      <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p><small id="base-game-version" class="base-game-version">本体版本读取中……</small></div>
       <button id="new-game-button" class="text-button hidden">另启一世</button>
     </header>
 
@@ -244,6 +244,7 @@
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
           <div class="settings-list">
+            <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
@@ -284,6 +285,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260912-9"></script>
-  <script src="/app.js?v=20260913-5"></script>
+  <script src="/app.js?v=20260913-6"></script>
 </body>
 </html>
