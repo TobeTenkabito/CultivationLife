@@ -260,6 +260,14 @@
     {"id":"yin_yang_creation_dew","name":"阴阳造化露","conception_bonus":0.16,"description":"调和阴阳生机，下一次与道侣缠绵时孕育后代的概率 +16%。","tags":["market","spirit_world","pill","conception"]},
     {"id":"heavenly_demon_heir_pill","name":"天魔蕴嗣丹","conception_bonus":0.18,"description":"以真魔元息逆转生命壁垒，下一次与道侣缠绵时孕育后代的概率 +18%。","tags":["market","true_demon","pill","conception"]},
     {"id":"immortal_embryo_elixir","name":"仙胎玉液","conception_bonus":0.24,"description":"以仙家造化之气护持血脉，下一次与道侣缠绵时孕育后代的概率 +24%。","tags":["market","celestial","pill","conception"]},
-    {"id":"war_soul_heir_pill","name":"战魂血嗣丹","conception_bonus":0.22,"description":"以不灭战意唤醒血脉生机，下一次与道侣缠绵时孕育后代的概率 +22%。","tags":["market","asura","pill","conception"]}
+    {"id":"war_soul_heir_pill","name":"战魂血嗣丹","conception_bonus":0.22,"description":"以不灭战意唤醒血脉生机，下一次与道侣缠绵时孕育后代的概率 +22%。","tags":["market","asura","pill","conception"]},
+    {"id":"blood_river_heart_scale","name":"血河心鳞","combat_bonus":180,"hp_bonus":120,"description":"赤渊古鲸心脏外剥落的一片血鳞，仍随魔界血河缓缓搏动。战斗力 +180，最大 HP +120。","tags":["story","demon_world","demonic","treasure"]},
+    {"id":"corpse_moon_orb","name":"尸月玄珠","combat_bonus":3200,"mp_bonus":4200,"opportunity_bonus":0.08,"description":"燕沉霜散去尸身前留下的月魄，阴寒却不含尸毒。战斗力 +3,200，最大 MP +4,200，机缘效率 +8%。","tags":["story","demon_world","ghost","treasure"]},
+    {"id":"rift_demon_bone","name":"界隙魔骨","combat_bonus":22000,"hp_bonus":9000,"description":"噬界兽虺空自行褪下的一截脊骨，骨纹中保留着穿行界壁的天赋。战斗力 +22,000，最大 HP +9,000。","tags":["story","demon_world","demonic","treasure"]},
+    {"id":"sky_devour_breath","name":"吞天胎息","mp_bonus":14000,"opportunity_bonus":0.16,"description":"幼年噬界兽吐出的第一缕界息，可助修士体悟虚空中灵机生灭。最大 MP +14,000，机缘效率 +16%。","tags":["story","demon_world","demonic","treasure"]},
+    {"id":"black_sun_origin_flame","name":"黑日元火","combat_bonus":260000,"hp_bonus":28000,"description":"三足魔乌曜烬自愿留下的一朵本命真火，外黑内金，可焚魔念而不伤神魂。战斗力 +260,000，最大 HP +28,000。","tags":["story","true_demon_world","demonic","treasure"]},
+    {"id":"star_womb_breath","name":"星胎元息","hp_bonus":65000,"mp_bonus":80000,"opportunity_bonus":0.12,"description":"太虚星兽幼胎沉睡时吐纳的一缕元息，内蕴未被任何世界驯化的生机。最大 HP +65,000，最大 MP +80,000，机缘效率 +12%。","tags":["story","true_demon_world","demonic","treasure"]},
+    {"id":"fallen_star_marrow","name":"坠星髓晶","combat_bonus":1200000,"mp_bonus":90000,"description":"老星兽遗骸中自然凝结的髓晶，不曾伤及其幼胎。战斗力 +1,200,000，最大 MP +90,000。","tags":["story","true_demon_world","demonic","treasure"]},
+    {"id":"abyss_demon_heart","name":"祖渊魔心","combat_bonus":6800000,"hp_bonus":420000,"mp_bonus":360000,"opportunity_bonus":0.18,"description":"魔岳祖根重新生长时凝成的界心结晶，能够调和真魔界狂暴地气。战斗力 +6,800,000，最大 HP +420,000，最大 MP +360,000，机缘效率 +18%。","tags":["story","true_demon_world","demonic","treasure"]}
   ]
 }

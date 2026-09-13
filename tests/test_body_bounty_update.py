@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cultivation_life.content_registry import MARKET_GOODS, TECHNIQUE_CATALOG
 from cultivation_life.engine import GameEngine, encode_rng
+from cultivation_life.event_repository import EventRepository
 from cultivation_life.models import SectNpc
 from cultivation_life.rules import assign_technique, max_hp, max_mp, technique_environment_multiplier
 
@@ -109,11 +110,18 @@ class BodyAndBountyUpdateTests(unittest.TestCase):
         player.body_training = 100
         self.assertAlmostEqual(self.engine._body_tribulation_damage_reduction(player), 0.011)
 
-    def test_every_body_manual_is_sold_in_a_market(self):
+    def test_every_body_manual_is_sold_or_granted_by_an_event(self):
         sold = {row["content_id"] for row in MARKET_GOODS if row["kind"] == "technique"}
         body_manuals = {key for key, value in TECHNIQUE_CATALOG.items() if value.category == "body"}
+        event_rewards = {
+            effect["technique_id"]
+            for event in EventRepository.load(SOURCE_ROOT / "content").events
+            for choice in event.get("choices", [])
+            for effect in choice.get("effects", [])
+            if effect.get("type") == "learn_technique"
+        }
         self.assertGreaterEqual(len(body_manuals), 6)
-        self.assertTrue(body_manuals <= sold)
+        self.assertTrue(body_manuals <= sold | event_rewards)
 
     def test_player_bounty_uses_real_hunters_and_can_cost_their_lives(self):
         created = self.engine.create_game("号令同族", "none", "dao", 1204, preset_id="mahayana")
