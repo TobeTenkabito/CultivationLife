@@ -779,6 +779,17 @@ class WarSystemMixin:
                         game.notable_npcs.setdefault(npc.id, npc)
                 detail = f"{loser_name}就地解散"
             loser_sect.extinct = True
+            own_id = game.player.faction_id
+            if own_id == winner_id and term == "annex":
+                game.player.milestones["annexed_faction"] = 1
+            wanted_key = f"sect:{loser_id}"
+            if (
+                own_id == winner_id and term == "dissolve"
+                and float(game.player.hostility.get(wanted_key, 0))
+                > float(WORLD_SYSTEMS["faction_conflict"]["wanted_threshold"])
+            ):
+                game.player.milestones["became_wanted_target"] = 1
+                game.player.milestones["dissolved_wanted_power"] = 1
             if game.player.faction_id == loser_id:
                 game.player.faction_id = winner_id if term == "annex" else None
         elif term != "white_peace":

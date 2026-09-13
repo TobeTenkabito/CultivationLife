@@ -82,14 +82,15 @@ def main() -> None:
                 assert "no-store" in response.headers.get("cache-control", "")
                 page.locator("#achievement-open").click()
                 page.locator("#achievement-screen").wait_for(state="visible")
-                assert page.locator(".achievement-row").count() == 21
+                achievement_count = len(engine.list_achievements()["achievements"])
+                assert page.locator(".achievement-row").count() == achievement_count
                 assert page.get_by_role("heading", name="本体成就").is_visible()
-                assert page.locator(".achievement-row.locked").count() == 21
+                assert page.locator(".achievement-row.locked").count() == achievement_count
                 assert "解锁条件：取得沧海玄鼎" in page.locator(".achievement-row").first.text_content()
                 page.locator("#achievement-close").click()
                 page.locator("#new-game-form").wait_for(state="visible")
-                assert page.locator(".quick-start-button").count() == 8
-                assert page.locator(".quick-start-button:not([disabled])").count() == 8
+                assert page.locator(".quick-start-button").count() == 9
+                assert page.locator(".quick-start-button:not([disabled])").count() == 9
                 assert page.locator(".quick-start-button[disabled]").count() == 0
                 page.locator("#path-select").select_option("monster")
                 assert page.locator("#monster-species-field").is_visible()

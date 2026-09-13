@@ -168,6 +168,110 @@
       "category": "cultivation",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},
       "condition": {"relationship": {"kind": "friend"}}
+    },
+    {
+      "id": "demonic_sixteen_corpses",
+      "name": "秦始皇陵兵马俑",
+      "description": "同时拥有超过十五具仍可驱策的炼尸",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"puppet_count": {"type": "corpse", "minimum": 16}}
+    },
+    {
+      "id": "demonic_companion_corpse",
+      "name": "生生世世爱",
+      "description": "将道侣化作炼尸",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "companion_turned_corpse", "value": 1}}
+    },
+    {
+      "id": "demonic_master_corpse",
+      "name": "欺师灭祖",
+      "description": "将师父化作炼尸",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "master_turned_corpse", "value": 1}}
+    },
+    {
+      "id": "cultivation_demonic_mahayana",
+      "name": "魔尊现世",
+      "description": "以魔修身份修炼到大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"realm_at_least": 8}]}
+    },
+    {
+      "id": "cultivation_monster_mahayana",
+      "name": "真灵之身",
+      "description": "以妖修身份修炼到大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "monster"}, {"realm_at_least": 8}]}
+    },
+    {
+      "id": "politics_wanted_target",
+      "name": "无妄之灾",
+      "description": "成为任一界面通缉令的目标",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"wanted_target": true}
+    },
+    {
+      "id": "politics_dissolve_wanted_power",
+      "name": "见一个杀一个",
+      "description": "在被宗门或家族通缉时解散该势力",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "dissolved_wanted_power", "value": 1}}
+    },
+    {
+      "id": "combat_enemy_initiative_five",
+      "name": "头晕目眩",
+      "description": "在一场战斗中连续五次由对面取得先手",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "enemy_initiative_streak", "value": 5}}
+    },
+    {
+      "id": "politics_annex_faction",
+      "name": "胃口真大",
+      "description": "吞并一个宗门",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "annexed_faction", "value": 1}}
+    },
+    {
+      "id": "artifact_village_best_sword",
+      "name": "全村最好的剑",
+      "description": "以青锋灵剑作为本命法宝，并使其战斗力加成达到一百万",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"natal_artifact": {"item_id": "spirit_sword", "minimum_combat_bonus": 1000000}}
+    },
+    {
+      "id": "court_one_luminary",
+      "name": "位列仙班",
+      "description": "荣登七曜之一",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"heavenly_court_controls": 1}
+    },
+    {
+      "id": "court_four_luminaries",
+      "name": "说一不二",
+      "description": "同时拥有七曜至少四个席位",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"heavenly_court_controls": 4}
+    },
+    {
+      "id": "court_all_luminaries",
+      "name": "共和国里当皇帝",
+      "description": "同时拥有七曜全部席位",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"heavenly_court_controls": 7}
     }
   ]
 }

@@ -277,8 +277,14 @@ class DemonicSystemMixin:
             "original_power": round(target_power, 1), "main_technique_id": technique_id,
             "control": round(control, 1), "cultivation_progress": 0.0, "breakthrough_bonus": 0.0,
             "created_age": player.age, "last_infusion_age": None, "alive": True,
+            "source": str(target.get("source", "combat")),
         }
         player.puppets.append(puppet)
+        source = str(target.get("source", ""))
+        if kind == "corpse" and source == "relationship:companion":
+            player.milestones["companion_turned_corpse"] = 1
+        elif kind == "corpse" and source == "relationship:master":
+            player.milestones["master_turned_corpse"] = 1
         npc = self._find_npc(game, str(target.get("npc_id") or target.get("id", "")))
         if npc:
             npc.alive = False

@@ -139,6 +139,8 @@ class AchievementSystem:
             return condition["flag"] in player.story_flags
         if "born_rootless" in condition:
             return player.born_rootless == bool(condition["born_rootless"])
+        if "path" in condition:
+            return player.path == str(condition["path"])
         if "realm_at_least" in condition:
             return player.realm_index >= int(condition["realm_at_least"])
         if "spirit_root" in condition:
@@ -195,6 +197,75 @@ class AchievementSystem:
             )
         if "ranking" in condition:
             return player_rank == int(condition["ranking"])
+        if "puppet_count" in condition:
+            expected = condition["puppet_count"]
+            kind = str(expected.get("type", ""))
+            count = sum(
+                1 for puppet in player.puppets
+                if puppet.get("alive", True) and (not kind or puppet.get("type") == kind)
+            )
+            return count >= int(expected.get("minimum", 1))
+        if "milestone_at_least" in condition:
+            expected = condition["milestone_at_least"]
+            return int(player.milestones.get(str(expected["id"]), 0)) >= int(expected.get("value", 1))
+        if "wanted_target" in condition:
+            threshold = 100.0
+            try:
+                from .content_registry import WORLD_SYSTEMS
+
+                threshold = float(WORLD_SYSTEMS["faction_conflict"]["wanted_threshold"])
+            except (ImportError, KeyError, TypeError, ValueError):
+                pass
+            return bool(
+                int(player.milestones.get("became_wanted_target", 0))
+                or any(float(value) > threshold for value in player.hostility.values())
+                or (game.heavenly_court and "player" in game.heavenly_court.get("wanted_ids", []))
+            )
+        if "natal_artifact" in condition:
+            expected = condition["natal_artifact"]
+            return bool(
+                game.natal_artifact
+                and game.natal_artifact.get("item_id") == expected.get("item_id")
+                and float(player.natal_artifact_combat_bonus) >= float(expected.get("minimum_combat_bonus", 0))
+            )
+        if "heavenly_court_controls" in condition:
+            offices = game.heavenly_court.get("offices", {}) if game.heavenly_court else {}
+            controlled = sum(
+                1 for office in offices.values()
+                if office and office.get("holder_id") == "player"
+            )
+            return controlled >= int(condition["heavenly_court_controls"])
+        if "monster_evolution_realm_at_least" in condition:
+            try:
+                from .content_registry import MONSTER_EVOLUTIONS
+
+                return any(
+                    int(MONSTER_EVOLUTIONS.get(evolution_id, {}).get("realm_index", -1))
+                    >= int(condition["monster_evolution_realm_at_least"])
+                    for evolution_id in player.monster_evolution_history
+                )
+            except ImportError:
+                return False
+        if "monster_atavism_completed" in condition:
+            return any(
+                evolution_id.endswith("_NETHER_TRUE_4")
+                for evolution_id in player.monster_evolution_history
+            )
+        if "monster_custom_lineage" in condition:
+            return bool(player.monster_custom_lineage_id and player.monster_custom_lineage)
+        if "monster_bloodline_trait_count" in condition:
+            try:
+                from .monster_bloodline_system import active_bloodline_profile
+
+                profile = active_bloodline_profile(player)
+                fixed = set(map(str, profile.get("traits", [])))
+                generated = {
+                    str(row.get("id") or row.get("slot_id"))
+                    for row in profile.get("generated_traits", []) if row.get("id") or row.get("slot_id")
+                }
+                return len(fixed | generated) >= int(condition["monster_bloodline_trait_count"])
+            except ImportError:
+                return False
         return False
 
 
