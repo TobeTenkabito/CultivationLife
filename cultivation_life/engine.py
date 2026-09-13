@@ -317,6 +317,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         total_gain = 0.0
         total_body_gain = 0.0
         total_sense_gain = 0.0
+        total_fame_reduction = 0.0
         treasure_results: list[str] = []
         commission_results: list[str] = []
         combat_results: list[str] = []
@@ -382,7 +383,17 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                     if not player.alive:
                         break
             else:
-                self._apply_action_resources(player, action, ledger.claim_resource_cost())
+                paid_cost = ledger.claim_resource_cost()
+                self._apply_action_resources(player, action, paid_cost)
+                if action == "befriend_neighbors" and paid_cost:
+                    fame_rules = WORLD_SYSTEMS["fame"]
+                    reduction = max(0.0, min(
+                        player.fame,
+                        float(fame_rules["reconciliation_base"])
+                        + player.realm_index * float(fame_rules["reconciliation_realm_scale"]),
+                    ))
+                    player.fame = max(0.0, player.fame - reduction)
+                    total_fame_reduction += reduction
                 if action == "rest" and player.heart_demon > 0:
                     player.heart_demon = max(0.0, player.heart_demon - 0.5)
             if not self._advance_world_year(game, rng, era_news):
@@ -404,12 +415,17 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                 if action == "sense_train"
                 else f"从 {start_age} 岁淬炼肉身至 {player.age} 岁，炼体积累 +{total_body_gain:.1f}；当前为 {player.body_training} 层。"
                 if action == "body_train"
+                else f"你主动收敛声势、修复近邻关系，威名 -{total_fame_reduction:.0f}；当前威名 {player.fame:.0f}。"
+                if action == "befriend_neighbors"
                 else f"从 {start_age} 岁修行至 {player.age} 岁，获得 {total_gain:.1f} 点机缘。"
             )
             game.history.append(HistoryRecord(
                 "ACT_" + action.upper(), 1, player.age, action_title, action, "completed",
                 action_summary,
-                {"age": [start_age, player.age], "opportunity": round(total_gain, 1)}, ["action", action],
+                {
+                    "age": [start_age, player.age], "opportunity": round(total_gain, 1),
+                    **({"fame_reduction": round(total_fame_reduction, 1)} if action == "befriend_neighbors" else {}),
+                }, ["action", action],
             ))
             if action == "treasure":
                 self._queue_followup_event(game, self._prepare_treasure_reward_event(game, rng))
@@ -1545,14 +1561,20 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                 f"你服下{item.name}，下次对应突破成功率 +{item.breakthrough_bonus:.0%}。",
                 {"scope": item.breakthrough_scope, "bonus": item.breakthrough_bonus}, ["system", "item", "breakthrough"],
             ))
-        elif item_id.startswith(("jinque_", "zique_", "moque_")):
+        elif item_id.startswith(("jinque_", "zique_", "moque_", "yaoque_", "mingque_")):
             is_zique = item_id.startswith("zique_")
             is_moque = item_id.startswith("moque_")
+            is_yaoque = item_id.startswith("yaoque_")
+            is_mingque = item_id.startswith("mingque_")
             if is_zique and (game.player.world != "spirit" or game.player.realm_index < 5):
-                raise ValueError("五行补篆须在灵界达到化神期后方能参悟")
+                raise ValueError("紫阙玉书须在灵界达到化神期后方能参悟")
             if is_moque and (game.player.world != "true_demon" or game.player.realm_index < 5):
-                raise ValueError("渊血补篆须在真魔界达到化魔期后方能参悟")
-            if not is_zique and not is_moque and game.player.realm_index < 4:
+                raise ValueError("魔阙须在真魔界达到化魔期后方能参悟")
+            if is_yaoque and (game.player.world not in {"monster_realm", "phantom_underworld"} or game.player.realm_index < 5):
+                raise ValueError("妖阙骨书须在妖界或幻冥界达到化神期后方能参悟")
+            if is_mingque and (game.player.world != "hell" or game.player.realm_index < 5):
+                raise ValueError("冥阙魂书须在地狱界达到化神期后方能参悟")
+            if not any((is_zique, is_moque, is_yaoque, is_mingque)) and game.player.realm_index < 4:
                 raise ValueError("上面记载的法门或者材料不是你现阶段能集齐的")
             affinity = item.root_grant
             if affinity in game.player.additional_roots or affinity in self._base_affinities(game.player):
@@ -1561,8 +1583,16 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             game.player.additional_roots.append(str(affinity))
             summary = f"你依《{item.name}》补全了{TECHNIQUE_ELEMENT_NAMES[str(affinity)]}灵根；原有灵根效率保持不变。"
             game.history.append(HistoryRecord(
-                "SYS_USE_MOQUE" if is_moque else "SYS_USE_ZIQUE" if is_zique else "SYS_USE_JINQUE", 1, game.player.age,
-                "魔阙补灵" if is_moque else "紫阙补灵" if is_zique else "补全天缺", item_id, "root_added", summary,
+                (
+                    "SYS_USE_MOQUE" if is_moque else "SYS_USE_ZIQUE" if is_zique
+                    else "SYS_USE_YAOQUE" if is_yaoque else "SYS_USE_MINGQUE" if is_mingque
+                    else "SYS_USE_JINQUE"
+                ), 1, game.player.age,
+                (
+                    "魔阙补灵" if is_moque else "紫阙补灵" if is_zique
+                    else "妖阙补灵" if is_yaoque else "冥阙补灵" if is_mingque
+                    else "补全天缺"
+                ), item_id, "root_added", summary,
                 {"additional_root": affinity}, ["system", "item", "root"],
             ))
         elif item_id == "healing_pill" and remove_item(game.player, item_id):
@@ -3136,6 +3166,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         for key, value in list(player.hostility.items()):
             if value <= float(config["wanted_threshold"]):
                 continue
+            player.milestones["became_wanted_target"] = 1
             state = self._hostility_entity_state(game, key)
             if state["status"] == "inactive":
                 continue
@@ -3315,6 +3346,8 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             if not entity or kind not in {"sect", "family"}:
                 raise ValueError("该类势力不能就地解散")
             entity.extinct = True
+            game.player.milestones["became_wanted_target"] = 1
+            game.player.milestones["dissolved_wanted_power"] = 1
             for npc in members:
                 npc.faction_id = None
                 game.notable_npcs.setdefault(npc.id, npc)
@@ -5953,6 +5986,19 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             "age": game.player.age,
         })
         game.last_combat_report = report
+        longest_enemy_streak = 0
+        current_enemy_streak = 0
+        for combat_round in report.get("rounds", []):
+            if combat_round.get("initiative") == "enemy":
+                current_enemy_streak += 1
+                longest_enemy_streak = max(longest_enemy_streak, current_enemy_streak)
+            else:
+                current_enemy_streak = 0
+        if longest_enemy_streak:
+            game.player.milestones["enemy_initiative_streak"] = max(
+                int(game.player.milestones.get("enemy_initiative_streak", 0)),
+                longest_enemy_streak,
+            )
 
     @staticmethod
     def _combat_report_lead(resolution: Any, hp_loss: float, mp_loss: float) -> str:
@@ -5996,6 +6042,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                 and "player" not in wanted_ids
             ):
                 game.heavenly_court["wanted_ids"].append("player")
+                player.milestones["became_wanted_target"] = 1
         equipped = [entry for entry in [player.technique, *(player.combat_techniques or [])] if entry]
         if any(not can_player_practice_technique(player, entry.element) for entry in equipped):
             return "technique_blocked", "灵根属性与五行功法不合，无法运转功法迎战。"
@@ -6097,6 +6144,25 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                 if treasure_id in ITEM_CATALOG and victim.get("npc_id") else ""
             )
             fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
+            victim_path = str(victim.get("path", "dao"))
+            if player.path == "monster" and victim_path != "monster":
+                sha_text = ""
+                if victim_path == "dao":
+                    fame_rules = WORLD_SYSTEMS["fame"]
+                    sha_gain = round(
+                        float(fame_rules["monster_dao_kill_sha_base"])
+                        + int(victim["realm_index"]) * float(fame_rules["monster_dao_kill_sha_realm_scale"])
+                    )
+                    player.sha_qi += sha_gain
+                    sha_text = f" 煞气 +{sha_gain}。"
+                result = "killed"
+                self._record_player_combat(game, target, resolution, result)
+                return (
+                    result,
+                    lead + f"你在追击阶段击杀了{victim['name']}；妖修猎杀异道不沾因果。"
+                    + sha_text + fame_text + spoils
+                    + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else ""),
+                )
             if target.get("kill_karma", True):
                 if victim.get("notorious"):
                     reduction = min(player.karma, max(35.0, float(victim.get("notoriety", 0)) * 0.45))

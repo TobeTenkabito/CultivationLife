@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "monster_atavism_complete",
+      "name": "返祖现象",
+      "description": "作为妖修走完任意一条返祖路线",
+      "category": "cultivation",
+      "condition": {"all": [{"path": "monster"}, {"monster_atavism_completed": true}]}
+    },
+    {
+      "id": "monster_custom_lineage_founded",
+      "name": "物种起源",
+      "description": "作为妖修创立自己的血脉",
+      "category": "cultivation",
+      "condition": {"all": [{"path": "monster"}, {"monster_custom_lineage": true}]}
+    },
+    {
+      "id": "monster_twelve_bloodline_traits",
+      "name": "光耀门楣",
+      "description": "作为妖修拥有十二种血脉特质",
+      "category": "cultivation",
+      "condition": {"all": [{"path": "monster"}, {"monster_bloodline_trait_count": 12}]}
+    }
+  ]
+}

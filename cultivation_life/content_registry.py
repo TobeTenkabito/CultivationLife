@@ -948,7 +948,7 @@ class ContentRegistry:
         actions: dict[str, Any], world: dict[str, Any], market: dict[str, Any], factions: dict[str, Any],
         items: dict[str, Item], faction_definitions: dict[str, dict[str, Any]],
     ) -> None:
-        required_actions = {"cultivate", "travel", "rest", "treasure", "commission", "hunt_beast", "spar", "slay"}
+        required_actions = {"cultivate", "travel", "rest", "treasure", "commission", "befriend_neighbors", "hunt_beast", "spar", "slay"}
         if not required_actions <= set(actions):
             raise ContentError("年度行动定义不完整")
         for action_id, action in actions.items():

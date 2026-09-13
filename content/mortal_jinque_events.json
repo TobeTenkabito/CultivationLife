@@ -2,7 +2,7 @@
   "schema_version": 1,
   "events": [
     {
-      "id": "EVT_MORTAL_JINQUE_TEMPLE_001", "version": 1, "title": "荒祠梁上书", "body": "避雨荒祠时，一道雷光劈开朽梁。夹层里没有金银，只有一页以云纹封存的《后天灵箓》。",
+      "id": "EVT_MORTAL_JINQUE_TEMPLE_001", "version": 1, "title": "荒祠梁上书", "body": "避雨荒祠时，一道雷光劈开朽梁。夹层里没有金银，只有一页以云纹封存的《金阙残书》。",
       "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.5,
       "intent_weights": {"travel": 2.4, "rest": 0.5},
       "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
@@ -23,7 +23,7 @@
       "choices": [{"id": "bury", "text": "埋葬遗骨，带走残页", "effects": [{"type": "add_karma", "value": -1}, {"type": "add_random_jinque"}]}, {"id": "leave", "text": "不扰亡者", "effects": []}]
     },
     {
-      "id": "EVT_MORTAL_JINQUE_DREAM_001", "version": 1, "title": "梦中授页", "body": "连下七夜细雨，你反复梦见一名无面道人。第八日醒来，枕边竟多了一页真实的《后天灵箓》。",
+      "id": "EVT_MORTAL_JINQUE_DREAM_001", "version": 1, "title": "梦中授页", "body": "连下七夜细雨，你反复梦见一名无面道人。第八日醒来，枕边竟多了一页真实的《金阙残书》。",
       "category": "mortal_story", "tags": ["mortal", "jinque", "jinque_acquisition", "rare"], "weight": 1.0,
       "intent_weights": {"rest": 3.2, "cultivate": 1.4},
       "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},

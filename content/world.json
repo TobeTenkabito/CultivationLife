@@ -8,6 +8,7 @@
     "commission":{"name":"坊市委托","opportunity":[1,3],"hp":-0.02,"mp":-0.04},
     "body_train":{"name":"淬炼肉身","opportunity":[0,0],"hp":-0.08,"mp":-0.02},
     "sense_train":{"name":"锻炼神识","opportunity":[0,0],"hp":-0.02,"mp":-0.10},
+    "befriend_neighbors":{"name":"修好睦邻","opportunity":[0,0],"hp":-0.01,"mp":-0.03},
     "hunt_beast":{"name":"猎杀妖兽","opportunity":[2,5],"hp":0.0,"mp":0.0,"combat":{"combat_type":"beast","target_names":["裂岩妖狼","赤鳞妖蟒","噬金妖猿","幽泽毒蛟"],"power_multiplier":[0.25,0.58],"success_threshold":1.2,"sha_qi_gain":[2,5],"lethal":true,"kill_karma":false,"reward_stones":[3,8]}},
     "spar":{"name":"同道切磋","opportunity":[3,7],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["游历剑修","宗门同道","坊市客卿","无名散修"],"realm_offsets":[[-1,0.15],[0,0.69],[1,0.15],[2,0.01]],"expectation_multiplier":1.0,"power_sigma":0.14,"power_bounds":[0.65,1.4],"lethal":false,"kill_karma":false}},
     "slay":{"name":"灭杀修士","opportunity":[1,4],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["落单邪修","仇家门客","携宝散修","敌对修士"],"realm_offsets":[[-2,0.38],[-1,0.43],[0,0.18],[1,0.01]],"expectation_multiplier":0.88,"power_sigma":0.16,"power_bounds":[0.5,1.3],"lethal":true,"kill_karma":true,"reward_stones":[6,18]}},
@@ -75,7 +76,7 @@
       "fame_deterrence_threshold":50,
       "kill_hostility_min_realm":{"human":3,"spirit":5,"celestial":9,"asura":9}
     },
-    "fame": {"kill_gain_base":8,"kill_realm_scale":4,"respected_threshold":35,"alarmed_threshold":100},
+    "fame": {"kill_gain_base":8,"kill_realm_scale":4,"reconciliation_base":15,"reconciliation_realm_scale":5,"monster_dao_kill_sha_base":4,"monster_dao_kill_sha_realm_scale":2,"respected_threshold":35,"alarmed_threshold":100},
     "party": {"max_companions":2,"invite_base_chance":0.45,"single_coefficient":0.50,"double_coefficient":0.25,"same_or_lower_realm_bonus":0.12,"lower_realm_bonus_per_gap":0.04,"lower_realm_bonus_cap":0.22,"interaction_affinity":[4,8]},
     "world_travel": {"required_realm":8,"human_suppression_realm":5,"human_suppression_layer":3,"celestial_required_realm":9,"spirit_suppression_realm":8,"spirit_suppression_layer":9,"lower_world_tribulation_multiplier":1.5},
     "war_system": {

@@ -314,7 +314,7 @@ class EngineTests(unittest.TestCase):
             {"type": "add_random_jinque"}, game, {"id": "EVT_MORTAL_JINQUE_FIND_001"}, random.Random(7)
         )
         self.assertEqual(result, "jinque_found")
-        self.assertIn("后天灵箓", summary)
+        self.assertIn("金阙残书", summary)
         self.assertTrue(any(item.id.startswith("jinque_") for item in game.player.inventory))
 
     def test_mortal_root_completion_starts_at_one_percent_from_age_thirty_five(self):

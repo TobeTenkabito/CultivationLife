@@ -300,6 +300,9 @@ function render(data) {
   if (!transformationAvailable) window.UtilityPanels?.close('transformation');
   $('#player-name').textContent = p.name; $('#avatar').textContent = p.name.slice(0,1);
   $('#player-subtitle').textContent = `${p.spirit_root_display || p.spirit_root_name} · ${p.path_name} · ${p.world_name} · ${p.location_name}`;
+  $('#slay-action span').textContent = p.path === 'monster'
+    ? '猎杀异道不沾因果；击杀道修额外增长煞气'
+    : '寻找弱者下手，夺宝但增加因果';
   $('#realm-name').textContent = p.awaiting_spirit_realm_crossing && p.world === 'human' ? `${p.realm_name} · 人界绝巅` : p.realm_name;
   $('#age-line').textContent = p.lifespan == null ? `${p.age} 岁 · 寿元无尽` : `${p.age} 岁 · 寿元 ${p.lifespan}`;
   const tribulationLine = $('#tribulation-line');
