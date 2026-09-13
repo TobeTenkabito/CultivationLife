@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "forms": [
+    {
+      "id": "FORM_TRUE_DRAGON",
+      "name": "真龙变",
+      "description": "以真龙精血重塑龙躯，六项根基均衡而破法尤盛。",
+      "realm_index": 8,
+      "layer": 3,
+      "stat_multipliers": {"might": 1.38, "guard": 1.32, "mobility": 1.18, "sense": 1.20, "sustain": 1.28, "breach": 1.42},
+      "traits": ["dragon_pressure"],
+      "trait_descriptions": ["压制同境界及以下的先手和战意。"],
+      "trait_purity_requirements": [0.45]
+    },
+    {
+      "id": "FORM_PHOENIX",
+      "name": "凤凰变",
+      "description": "燃烧真灵之血涅槃，在绝境中保住一线生机。",
+      "realm_index": 8,
+      "layer": 2,
+      "stat_multipliers": {"might": 1.24, "guard": 1.12, "mobility": 1.28, "sense": 1.20, "sustain": 1.48, "breach": 1.16},
+      "traits": ["prevent_defeat_once"],
+      "trait_descriptions": ["涅槃：每场战斗抵御一次本应导致陨落的战斗态势归零。"],
+      "trait_purity_requirements": [0.60]
+    },
+    {
+      "id": "FORM_KUNPENG",
+      "name": "鲲鹏变",
+      "description": "兼得鲲之巨力与鹏之极速，尤其擅长开阔战场。",
+      "realm_index": 8,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.30, "guard": 1.16, "mobility": 1.52, "sense": 1.26, "sustain": 1.20, "breach": 1.22},
+      "traits": ["airborne"],
+      "trait_descriptions": ["垂天：开阔场地中的先手能力更强。"],
+      "trait_purity_requirements": [0.40]
+    },
+    {
+      "id": "FORM_QILIN",
+      "name": "麒麟变",
+      "description": "引五行瑞气护体，长于防护、续航和场地适应。",
+      "realm_index": 8,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.16, "guard": 1.42, "mobility": 1.12, "sense": 1.24, "sustain": 1.38, "breach": 1.18},
+      "traits": ["steadfast"],
+      "trait_descriptions": ["镇元：战意不易跌至溃败临界点。"],
+      "trait_purity_requirements": [0.40]
+    },
+    {
+      "id": "FORM_AZURE_LUAN",
+      "name": "青鸾变",
+      "description": "借青鸾之形驾驭风势，偏重身法、感知与破法。",
+      "realm_index": 7,
+      "layer": 2,
+      "stat_multipliers": {"might": 1.12, "guard": 1.04, "mobility": 1.36, "sense": 1.24, "sustain": 1.10, "breach": 1.22},
+      "traits": ["airborne"],
+      "trait_descriptions": ["凌空：开阔场地中的先手能力更强。"],
+      "trait_purity_requirements": [0.35]
+    },
+    {
+      "id": "FORM_MOUNTAIN_APE",
+      "name": "山岳猿变",
+      "description": "法体如山，擅长正面承压和持久搏杀。",
+      "realm_index": 7,
+      "layer": 3,
+      "stat_multipliers": {"might": 1.32, "guard": 1.38, "mobility": 1.02, "sense": 1.06, "sustain": 1.30, "breach": 1.16},
+      "traits": ["steadfast"],
+      "trait_descriptions": ["镇岳：战意不易跌至溃败临界点。"],
+      "trait_purity_requirements": [0.35]
+    },
+    {
+      "id": "FORM_WHITE_TIGER",
+      "name": "白虎变",
+      "description": "引白虎杀伐本源入体，出手锋锐，尤其擅长撕开正面防线。",
+      "realm_index": 8,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.42, "guard": 1.18, "mobility": 1.30, "sense": 1.16, "sustain": 1.12, "breach": 1.40},
+      "traits": ["damage_bonus_5"],
+      "trait_descriptions": ["庚金杀伐：战斗中造成的战斗态势伤害增加 5%。"],
+      "trait_purity_requirements": [0.40]
+    },
+    {
+      "id": "FORM_VERMILION_BIRD",
+      "name": "朱雀变",
+      "description": "借朱雀南明真火维系生机，战至胶着时可不断重燃战斗态势。",
+      "realm_index": 8,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.30, "guard": 1.14, "mobility": 1.30, "sense": 1.22, "sustain": 1.46, "breach": 1.18},
+      "traits": ["round4_regen_10"],
+      "trait_descriptions": ["朱焰回生：从第四轮开始，每轮回复最大战斗态势的 10%。"],
+      "trait_purity_requirements": [0.55]
+    },
+    {
+      "id": "FORM_ASURA",
+      "name": "阿修罗变",
+      "description": "显化上界阿修罗战躯，越是面对强敌，杀伐意志越盛。",
+      "realm_index": 12,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.62, "guard": 1.32, "mobility": 1.40, "sense": 1.34, "sustain": 1.28, "breach": 1.58},
+      "traits": ["higher_realm_damage_10", "morale_drain_5"],
+      "trait_descriptions": ["逆境杀心：对境界高于自己的敌人造成伤害增加 10%。", "修罗战意：每轮固定削弱敌方 5 点战意。"],
+      "trait_purity_requirements": [0.50, 0.35]
+    },
+    {
+      "id": "FORM_XUANWU",
+      "name": "玄武变",
+      "description": "以玄武厚重本源镇住战阵，在交锋伊始形成不可撼动的完整态势。",
+      "realm_index": 8,
+      "layer": 1,
+      "stat_multipliers": {"might": 1.14, "guard": 1.52, "mobility": 1.04, "sense": 1.24, "sustain": 1.48, "breach": 1.12},
+      "traits": ["first_round_full_state"],
+      "trait_descriptions": ["玄武镇界：第一轮己方战斗态势固定为最大值。"],
+      "trait_purity_requirements": [0.45]
+    }
+  ]
+}

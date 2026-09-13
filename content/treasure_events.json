@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_TREASURE_REWARD_SELECT_001",
+      "version": 1,
+      "title": "遗藏择宝",
+      "body": "你循着灵光找到三处遗藏：一件法器、一部功法与一枚丹药。囿于残阵将合，你只能带走其中一项。",
+      "category": "treasure_reward",
+      "tags": ["manual_only", "all_realms", "treasure", "reward"],
+      "weight": 0,
+      "choices": [
+        {"id": "artifact", "text": "选择法器", "effects": [{"type": "treasure_reward_choice", "category": "artifact"}]},
+        {"id": "technique", "text": "选择功法", "effects": [{"type": "treasure_reward_choice", "category": "technique"}]},
+        {"id": "pill", "text": "选择丹药", "effects": [{"type": "treasure_reward_choice", "category": "pill"}]}
+      ]
+    }
+  ]
+}

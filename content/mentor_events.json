@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id":"EVT_MASTER_ENCOUNTER_001","version":1,"title":"高人驻足","body":"一位修为明显高于你的修士驻足听你论道。你若开口，也许能求得一段师徒缘法。",
+      "category":"relationship","tags":["cultivator","relationship","master"],"weight":2,
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":1},{"path":"player.realm_index","op":"lt","value":5},{"path":"player.has_master","op":"eq","value":false}]},
+      "choices":[{"id":"ask","text":"执弟子礼，诚心拜师","effects":[{"type":"gain_generated_master","accept_chance":0.55}]},{"id":"leave","text":"大道独行，不求师承","effects":[]}]
+    },
+    {
+      "id":"EVT_DISCIPLE_ENCOUNTER_001","version":2,"title":"后辈求道","body":"一名修为低于你的年轻修士追随数日，终于鼓起勇气，请求递上拜师帖。真正是否收入门下，仍由你亲自决断。",
+      "category":"relationship","tags":["cultivator","relationship","disciple"],"weight":3,
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":1},{"path":"player.disciple_total","op":"lt","value":8}]},
+      "choices":[{"id":"consider","text":"收下拜师帖，容后亲自决断","effects":[{"type":"gain_generated_disciple"}]},{"id":"decline","text":"当面婉拒，只赐几句指点","effects":[{"type":"add_karma","value":-1}]}]
+    }
+  ]
+}

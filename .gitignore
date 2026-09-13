@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+/launcher.exe
+data/saves/*.json
+!data/saves/.gitkeep

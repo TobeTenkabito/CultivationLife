@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_MONSTER_DRAGON_ANCESTRY_001",
+      "version": 1,
+      "title": "古蛟遗蜕",
+      "body": "你在残破洞窟中触及一枚古蛟逆鳞。它没有化作可反复炼化的资源，只在你的蛇属本体中唤醒了一段久远可能。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.7,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"serpent"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"dragon_ancestry"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"接受这段远祖回响","effects":[{"type":"grant_monster_imprint","imprint_id":"dragon_ancestry"}]},
+        {"id":"refuse","text":"保持本相，不让祖血定义自己","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_PHOENIX_LEGACY_001",
+      "version": 1,
+      "title": "不熄之羽",
+      "body": "一根历劫不毁的赤羽在掌中化灰，残留的并非力量，而是一种允许羽族走向涅槃的生命记忆。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.7,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"avian"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"phoenix_legacy"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"让不熄真意融入本体","effects":[{"type":"grant_monster_imprint","imprint_id":"phoenix_legacy"}]},
+        {"id":"refuse","text":"振翼离去，走自己的羽族道路","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_PRIMORDIAL_BLOOD_001",
+      "version": 1,
+      "title": "太古骨鸣",
+      "body": "天骨残片在你靠近时自行震鸣。那声音并未赠予修为，却让猿属筋骨记起一种早于文字与道统的生命姿态。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.7,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"ape"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"primordial_blood"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"记住太古战躯的回响","effects":[{"type":"grant_monster_imprint","imprint_id":"primordial_blood"}]},
+        {"id":"refuse","text":"以今世筋骨开创新路","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_NINE_TAIL_ANCESTRY_001",
+      "version": 1,
+      "title": "九尾旧梦",
+      "body": "你在一座无人梦城中看见九轮月亮。每轮月下都有一条狐尾留下的影子，等待今世狐属接续。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.65,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"fox"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"nine_tail_ancestry"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"把九轮旧梦收入本相","effects":[{"type":"grant_monster_imprint","imprint_id":"nine_tail_ancestry"}]},
+        {"id":"refuse","text":"醒来，并记住自己的名字","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_XUANWU_LEGACY_001",
+      "version": 1,
+      "title": "玄武残碑",
+      "body": "寒潭底部的无字碑在甲背映出龟蛇二相。它不赐修为，只让一条沉睡已久的镇海血路重新显形。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.65,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"turtle"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"xuanwu_legacy"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"承接龟蛇镇海之意","effects":[{"type":"grant_monster_imprint","imprint_id":"xuanwu_legacy"}]},
+        {"id":"refuse","text":"以自身甲纹承载岁月","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_MYRIAD_INSECT_CORE_001",
+      "version": 1,
+      "title": "群心律核",
+      "body": "一枚结晶母核保存着无数次孵化、蜕壳与分巢的共同记忆。它正等待一个新的群体意志。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.65,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"insect"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"myriad_insect_core"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"容纳亿万蜕变记忆","effects":[{"type":"grant_monster_imprint","imprint_id":"myriad_insect_core"}]},
+        {"id":"refuse","text":"维持独立的个体意志","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_KUN_ANCESTRY_001",
+      "version": 1,
+      "title": "界海胎鸣",
+      "body": "潮渊深处传来尚未出生的巨兽心跳。水族本相随之扩张，记起天空也曾是一片可以遨游的海。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.65,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"aquatic"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"kun_ancestry"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"回应界海中的胎鸣","effects":[{"type":"grant_monster_imprint","imprint_id":"kun_ancestry"}]},
+        {"id":"refuse","text":"守住当前水族真形","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_WORLD_TREE_SAP_001",
+      "version": 1,
+      "title": "界树祖液",
+      "body": "一滴不曾坠地的祖液悬在古藤尽头，其中映出无数已经枯荣的世界。草木本相可以选择将它化为新的年轮。",
+      "category": "bloodline",
+      "tags": ["monster", "bloodline", "treasure"],
+      "weight": 0.65,
+      "intent_weights": {"treasure": 3.2, "travel": 1.8},
+      "repeat": "once",
+      "conditions": {"all": [
+        {"path":"player.path","op":"eq","value":"monster"},
+        {"path":"player.monster_species_id","op":"eq","value":"flora"},
+        {"path":"player.realm_index","op":"gte","value":1},
+        {"not":{"path":"player.monster.imprints","op":"contains","value":"world_tree_sap"}}
+      ]},
+      "choices": [
+        {"id":"awaken","text":"让祖液化作一道新年轮","effects":[{"type":"grant_monster_imprint","imprint_id":"world_tree_sap"}]},
+        {"id":"refuse","text":"只从当世土壤中生长","effects":[{"type":"add_opportunity","value":8}]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "techniques": [
+    {
+      "id": "TECH_MONSTER_BREATHING",
+      "name": "万灵吐纳法",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 1,
+      "level": 1,
+      "opportunity_bonus": 0.1,
+      "hp_bonus": 0.12,
+      "mp_bonus": 0.08,
+      "combat_bonus": 24,
+      "karma_multiplier": 1.0,
+      "category": "spiritual",
+      "sources": {"monster": 1.0}
+    },
+    {
+      "id": "TECH_MONSTER_IRON_BONE", "name": "铁骨化妖经", "path": "monster", "element": "neutral",
+      "grade": 2, "level": 1, "opportunity_bonus": 0.18, "hp_bonus": 0.24, "mp_bonus": 0.12,
+      "combat_bonus": 58, "karma_multiplier": 1.0, "required_body_training": 5
+    },
+    {
+      "id": "TECH_MONSTER_DEMON_CORE", "name": "妖丹烘炉法", "path": "monster", "element": "neutral",
+      "grade": 3, "level": 1, "opportunity_bonus": 0.25, "hp_bonus": 0.32, "mp_bonus": 0.20,
+      "combat_bonus": 180, "karma_multiplier": 1.0, "required_body_training": 12
+    },
+    {
+      "id": "TECH_MONSTER_MOON_FORM", "name": "月兽真形录", "path": "monster", "element": "yin",
+      "grade": 4, "level": 1, "opportunity_bonus": 0.33, "hp_bonus": 0.42, "mp_bonus": 0.31,
+      "combat_bonus": 3100, "karma_multiplier": 1.0, "required_body_training": 20,
+      "sources": {"monster": 0.8, "yin": 0.2}
+    },
+    {
+      "id": "TECH_MONSTER_MYRIAD_SPIRITS", "name": "万灵吞月典", "path": "monster", "element": "neutral",
+      "grade": 5, "level": 1, "opportunity_bonus": 0.46, "hp_bonus": 0.56, "mp_bonus": 0.45,
+      "combat_bonus": 15800, "karma_multiplier": 1.0, "required_body_training": 30
+    },
+    {
+      "id": "TECH_MONSTER_HEAVEN_BONE", "name": "天骨镇界经", "path": "monster", "element": "earth",
+      "grade": 6, "level": 1, "opportunity_bonus": 0.60, "hp_bonus": 0.76, "mp_bonus": 0.50,
+      "combat_bonus": 118000, "karma_multiplier": 1.0, "required_body_training": 45,
+      "sources": {"monster": 0.85, "spirit": 0.15}
+    },
+    {
+      "id": "TECH_MONSTER_ANCESTRAL_COURT", "name": "万妖祖庭圣典", "path": "monster", "element": "neutral",
+      "grade": 7, "level": 1, "opportunity_bonus": 0.79, "hp_bonus": 0.92, "mp_bonus": 0.74,
+      "combat_bonus": 860000, "karma_multiplier": 1.0, "required_body_training": 60
+    },
+    {
+      "id": "TECH_MONSTER_PRIMORDIAL_BODY", "name": "太古万兽真经", "path": "monster", "element": "neutral",
+      "grade": 8, "level": 1, "opportunity_bonus": 1.02, "hp_bonus": 1.30, "mp_bonus": 0.91,
+      "combat_bonus": 6200000, "karma_multiplier": 1.0, "required_body_training": 80
+    },
+    {
+      "id": "TECH_MONSTER_HIDE_FORGING", "name": "百兽锻皮术", "path": "monster", "element": "neutral",
+      "grade": 1, "level": 1, "opportunity_bonus": 0.08, "hp_bonus": 0.16, "mp_bonus": 0.05,
+      "combat_bonus": 18, "karma_multiplier": 1.0, "category": "body",
+      "body_breakthrough_bonus": 0.10, "body_bonus_max_layer": 30
+    },
+    {
+      "id": "TECH_MONSTER_GREAT_STRENGTH_BODY", "name": "搬山大力妖身", "path": "monster", "element": "neutral",
+      "grade": 3, "level": 1, "opportunity_bonus": 0.20, "hp_bonus": 0.42, "mp_bonus": 0.12,
+      "combat_bonus": 260, "karma_multiplier": 1.0, "category": "body",
+      "body_breakthrough_bonus": 0.12, "body_bonus_max_layer": 60
+    },
+    {
+      "id": "TECH_MONSTER_IMMEMORIAL_BODY", "name": "太古不灭妖躯", "path": "monster", "element": "neutral",
+      "grade": 6, "level": 1, "opportunity_bonus": 0.40, "hp_bonus": 0.88, "mp_bonus": 0.28,
+      "combat_bonus": 150000, "karma_multiplier": 1.0, "category": "body",
+      "body_breakthrough_bonus": 0.11, "body_bonus_max_layer": 100
+    }
+  ]
+}

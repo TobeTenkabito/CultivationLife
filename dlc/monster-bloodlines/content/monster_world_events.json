@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_MONSTER_WORLD_BLOOD_MARKET_001", "version": 1, "title": "百族血市",
+      "body": "万兽天城的血市开门，各族只谈材料来路，不问化形后的容貌。",
+      "tags": ["monster", "world:monster_realm", "encounter"], "weight": 5,
+      "intent_weights": {"travel": 1.8, "commission": 2.0},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "work", "text": "替血市鉴别妖材", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 8}, {"type": "add_opportunity", "value": 5}]},
+        {"id": "observe", "text": "旁观百族交易规矩", "effects": [{"type": "add_opportunity", "value": 9}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_WORLD_ANCESTRAL_ROAR_001", "version": 1, "title": "祖山兽吼",
+      "body": "祖兽山脉深处传来横贯群峰的兽吼，体内妖血随之沸腾。",
+      "tags": ["monster", "world:monster_realm", "cultivation"], "weight": 5,
+      "intent_weights": {"cultivate": 2.3, "body_train": 2.4},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "answer", "text": "以本相回应祖兽", "effects": [{"type": "damage", "value": 0.08}, {"type": "add_opportunity", "value": 14}]},
+        {"id": "listen", "text": "伏地聆听骨鸣", "effects": [{"type": "restore_mp", "value": 0.12}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_WORLD_SCALE_TIDE_001", "version": 1, "title": "苍鳞潮汐",
+      "body": "苍鳞海退潮后，一枚刻满水纹的海心停在礁石之间。",
+      "tags": ["monster", "world:monster_realm", "treasure"], "weight": 3.5,
+      "intent_weights": {"treasure": 2.8, "travel": 1.6},
+      "conditions": {"all": [{"path": "player.path", "op": "eq", "value": "monster"}, {"path": "player.realm_index", "op": "gte", "value": 4}]},
+      "choices": [
+        {"id": "take", "text": "潜入潮眼取走海心", "effects": [{"type": "restore_mp", "value": -0.18}, {"type": "add_item", "item_id": "azure_scale_heart"}]},
+        {"id": "yield", "text": "不扰水府地脉", "effects": [{"type": "add_karma", "value": -3}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_WORLD_THUNDER_MOLT_001", "version": 1, "title": "雷原蜕羽",
+      "body": "雷羽高原落下一场带电的旧羽雨，蜕下的翎骨仍在彼此呼应。",
+      "tags": ["monster", "world:monster_realm", "treasure"], "weight": 4,
+      "intent_weights": {"treasure": 2.4},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "gather", "text": "冒雷收拢完整符骨", "effects": [{"type": "damage", "value": 0.12}, {"type": "add_item", "item_id": "thunder_plume_talisman"}]},
+        {"id": "temper", "text": "借余雷洗练妖气", "effects": [{"type": "add_opportunity", "value": 11}]}
+      ]
+    },
+    {
+      "id": "EVT_MONSTER_WORLD_TERRITORY_001", "version": 1, "title": "领地争界",
+      "body": "两支小族为一眼妖泉对峙，双方都请你评断旧血契的边界。",
+      "tags": ["monster", "world:monster_realm", "faction"], "weight": 5,
+      "intent_weights": {"travel": 1.8, "commission": 2.2},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "mediate", "text": "按旧契平分妖泉", "effects": [{"type": "add_karma", "value": -2}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 6}]},
+        {"id": "challenge", "text": "以实力夺泉后再定规矩", "effects": [{"type": "damage", "value": 0.10}, {"type": "add_opportunity", "value": 12}]}
+      ]
+    },
+    {
+      "id": "EVT_PHANTOM_MOON_TIDE_001", "version": 1, "title": "幻冥月潮",
+      "body": "月兽原上升起第二轮虚月，真实与倒影同时向你的本相投下妖光。",
+      "tags": ["monster", "world:phantom_underworld", "cultivation"], "weight": 6,
+      "intent_weights": {"cultivate": 2.5, "rest": 1.5},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "absorb", "text": "同时吞纳两轮月华", "effects": [{"type": "restore_mp", "value": -0.12}, {"type": "add_opportunity", "value": 15}]},
+        {"id": "reflect", "text": "只观倒影辨认幻实", "effects": [{"type": "restore_mp", "value": 0.16}]}
+      ]
+    },
+    {
+      "id": "EVT_PHANTOM_ANCIENT_FOREST_001", "version": 1, "title": "古林借路",
+      "body": "万灵古林主动挪开树根，为你露出一条只存在半日的年轮古道。",
+      "tags": ["monster", "world:phantom_underworld", "travel"], "weight": 5,
+      "intent_weights": {"travel": 2.5},
+      "conditions": {"path": "player.path", "op": "eq", "value": "monster"},
+      "choices": [
+        {"id": "enter", "text": "沿年轮古道深入", "effects": [{"type": "add_opportunity", "value": 12}, {"type": "add_item", "item_id": "monster_tempering_blood"}]},
+        {"id": "salute", "text": "向古林行礼后绕行", "effects": [{"type": "add_karma", "value": -2}]}
+      ]
+    },
+    {
+      "id": "EVT_PHANTOM_HEAVEN_BONE_001", "version": 1, "title": "天骨共鸣",
+      "body": "一截巨兽天骨在你经过时自行抬起，骨腔内响起沉闷战鼓。",
+      "tags": ["monster", "world:phantom_underworld", "body_training"], "weight": 4,
+      "intent_weights": {"body_train": 2.8, "treasure": 1.6},
+      "conditions": {"all": [{"path": "player.path", "op": "eq", "value": "monster"}, {"path": "player.body_training", "op": "gte", "value": 20}]},
+      "choices": [
+        {"id": "endure", "text": "以肉身承受天骨震鸣", "effects": [{"type": "damage", "value": 0.15}, {"type": "add_opportunity", "value": 18}]},
+        {"id": "record", "text": "拓下骨腔妖纹", "effects": [{"type": "add_item", "item_id": "beast_pattern_bone"}]}
+      ]
+    },
+    {
+      "id": "EVT_PHANTOM_TIDE_CORE_001", "version": 1, "title": "潮海虚晶",
+      "body": "幻冥潮海短暂凝固，一枚虚实相叠的潮晶在浪尖显形。",
+      "tags": ["monster", "world:phantom_underworld", "treasure"], "weight": 3,
+      "intent_weights": {"treasure": 3.0},
+      "conditions": {"all": [{"path": "player.path", "op": "eq", "value": "monster"}, {"path": "player.realm_index", "op": "gte", "value": 5}]},
+      "choices": [
+        {"id": "seize", "text": "在潮海复流前摄取晶核", "effects": [{"type": "restore_mp", "value": -0.20}, {"type": "add_item", "item_id": "phantom_tide_crystal"}]},
+        {"id": "study", "text": "观察虚实交替", "effects": [{"type": "add_opportunity", "value": 14}]}
+      ]
+    }
+  ]
+}

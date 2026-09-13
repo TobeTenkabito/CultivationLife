@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_QI_TIDE_001", "version": 1, "title": "灵潮入脉", "body": "练气尚浅，你恰逢山谷灵潮。若能稳住周天，此番吐纳胜过数月苦功。",
+      "tags": ["realm_exclusive", "realm:qi", "cultivation"], "weight": 6, "intent_weights": {"cultivate": 2.4},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "guide", "text": "依周天引灵入脉", "effects": [{"type": "restore_mp", "value": -0.08}, {"type": "add_opportunity", "value": 5}]}, {"id": "wait", "text": "根基未稳，不争此潮", "effects": [{"type": "restore_mp", "value": 0.08}]}]
+    },
+    {
+      "id": "EVT_QI_DEVIATION_001", "version": 1, "title": "行气岔脉", "body": "一缕灵力误入细脉，经络刺痛。练气修士最常见的危险，往往就藏在一次普通吐纳中。",
+      "tags": ["realm_exclusive", "realm:qi", "negative"], "weight": 5, "intent_weights": {"cultivate": 1.8},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "force", "text": "强行冲开滞塞", "effects": [{"type": "damage", "value": 0.08}, {"type": "add_opportunity", "value": 3}]}, {"id": "ease", "text": "散功调息", "effects": [{"type": "restore_mp", "value": -0.04}]}]
+    },
+    {
+      "id": "EVT_QI_MARKET_001", "version": 1, "title": "初识坊市", "body": "练气修士聚成的小坊市鱼龙混杂。你第一次见到灵石真正流通的模样。",
+      "tags": ["realm_exclusive", "realm:qi", "encounter"], "weight": 6, "intent_weights": {"travel": 2.3},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "work", "text": "替摊主搬运灵材", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 2}]}, {"id": "observe", "text": "只看不买，记下行情", "effects": [{"type": "add_opportunity", "value": 2}]}]
+    },
+    {
+      "id": "EVT_QI_NIGHT_HUNT_001", "version": 1, "title": "练气夜猎", "body": "低阶妖兽侵扰村寨。它并不强，却足以让未经斗法的练气修士丢掉性命。",
+      "tags": ["realm_exclusive", "realm:qi", "combat"], "weight": 4, "intent_weights": {"travel": 2.0},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "hunt", "text": "布置陷阱后出手", "effects": [{"type": "damage", "value": 0.10}, {"type": "add_item", "item_id": "blood_ginseng"}]}, {"id": "warn", "text": "示警村民避让", "effects": [{"type": "add_karma", "value": -1}]}]
+    },
+
+    {
+      "id": "EVT_FOUNDATION_CAVE_001", "version": 1, "title": "开辟洞府", "body": "筑基之后，散乱灵气已不足所需。你寻到一处地脉节点，可以开辟自己的第一座洞府。",
+      "tags": ["realm_exclusive", "realm:foundation", "cultivation"], "weight": 6, "intent_weights": {"rest": 1.8, "cultivate": 1.6},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "open", "text": "耗费法力开凿洞府", "effects": [{"type": "restore_mp", "value": -0.14}, {"type": "add_opportunity", "value": 7}]}, {"id": "yield", "text": "将位置记下，日后再来", "effects": [{"type": "add_opportunity", "value": 2}]}]
+    },
+    {
+      "id": "EVT_FOUNDATION_ARRAY_001", "version": 1, "title": "地脉阵眼", "body": "地脉翻涌冲击护城阵法，筑基修士正是修补阵眼的中坚。",
+      "tags": ["realm_exclusive", "realm:foundation", "duty"], "weight": 5, "intent_weights": {"travel": 1.8},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "repair", "text": "以自身灵力续接阵纹", "effects": [{"type": "restore_mp", "value": -0.16}, {"type": "add_karma", "value": -2}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 3}]}]
+    },
+    {
+      "id": "EVT_FOUNDATION_MARROW_001", "version": 1, "title": "道基洗炼", "body": "筑基道台浮出细小裂纹。此时洗炼尚可修补，等到结丹便再无回头余地。",
+      "tags": ["realm_exclusive", "realm:foundation", "negative"], "weight": 4, "intent_weights": {"cultivate": 2.0},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "temper", "text": "忍痛重炼道基", "effects": [{"type": "damage", "value": 0.12}, {"type": "add_opportunity", "value": 8}]}, {"id": "suppress", "text": "暂以法力压住裂纹", "effects": [{"type": "restore_mp", "value": -0.10}]}]
+    },
+    {
+      "id": "EVT_FOUNDATION_DEBATE_001", "version": 1, "title": "筑基论道", "body": "数名筑基同道围炉论法。此时所争的不是招式，而是哪一条道路能承载未来金丹。",
+      "tags": ["realm_exclusive", "realm:foundation", "encounter"], "weight": 5,
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "speak", "text": "坦陈自身见解", "effects": [{"type": "add_opportunity", "value": 5}]}, {"id": "listen", "text": "静听诸家之言", "effects": [{"type": "restore_mp", "value": 0.10}]}]
+    },
+
+    {
+      "id": "EVT_CORE_PATTERN_001", "version": 1, "title": "丹纹自鸣", "body": "金丹表面生出一道天然纹路，与天地灵机遥相呼应。结丹期的每一道丹纹都关乎未来元婴。",
+      "tags": ["realm_exclusive", "realm:core", "cultivation"], "weight": 6, "intent_weights": {"cultivate": 2.2},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "observe", "text": "内观丹纹变化", "effects": [{"type": "restore_mp", "value": -0.12}, {"type": "add_opportunity", "value": 11}]}]
+    },
+    {
+      "id": "EVT_CORE_FIRE_001", "version": 1, "title": "丹火灼心", "body": "金丹真火忽然反噬脏腑。若不能在结婴前理顺，心魔来时必成破绽。",
+      "tags": ["realm_exclusive", "realm:core", "negative"], "weight": 5, "intent_weights": {"cultivate": 1.7},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "quench", "text": "以法力强行淬丹", "effects": [{"type": "damage", "value": 0.14}, {"type": "add_opportunity", "value": 9}]}, {"id": "cool", "text": "停修一年温养金丹", "effects": [{"type": "restore_mp", "value": -0.08}, {"type": "heal", "value": 0.08}]}]
+    },
+    {
+      "id": "EVT_CORE_GUARD_001", "version": 1, "title": "金丹镇脉", "body": "大型灵矿暴动，只有金丹修士能压住地脉核心。各方请你出手，报酬已经备好。",
+      "tags": ["realm_exclusive", "realm:core", "duty"], "weight": 5, "intent_weights": {"travel": 1.9},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "guard", "text": "坐镇地脉七日", "effects": [{"type": "restore_mp", "value": -0.18}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 6}, {"type": "add_karma", "value": -1}]}]
+    },
+    {
+      "id": "EVT_CORE_CONCLAVE_001", "version": 1, "title": "丹师法会", "body": "百年一度的丹师法会只邀结丹同道。即使不通丹术，也可观摩他人如何驾驭金丹真火。",
+      "tags": ["realm_exclusive", "realm:core", "encounter"], "weight": 4,
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "watch", "text": "旁观控火之术", "effects": [{"type": "add_opportunity", "value": 7}, {"type": "add_item", "item_id": "healing_pill"}]}, {"id": "trade", "text": "与丹师交换灵药", "effects": [{"type": "add_item", "item_id": "blood_ginseng"}]}]
+    },
+
+    {
+      "id": "EVT_NASCENT_OUT_OF_BODY_001", "version": 1, "title": "元婴出窍", "body": "月华澄澈，元婴第一次离体远游。肉身与神魂之间那根无形丝线，在夜风中清晰可辨。",
+      "tags": ["realm_exclusive", "realm:nascent", "cultivation"], "weight": 6, "intent_weights": {"cultivate": 2.2, "rest": 1.5},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "travel", "text": "御婴巡游百里", "effects": [{"type": "restore_mp", "value": -0.16}, {"type": "add_opportunity", "value": 16}]}, {"id": "return", "text": "浅尝即止，归守肉身", "effects": [{"type": "restore_mp", "value": 0.12}]}]
+    },
+    {
+      "id": "EVT_NASCENT_OLD_DEBT_001", "version": 1, "title": "婴识照业", "body": "元婴澄澈如镜，旧日因果却在其中投下阴影。曾被忽略的业债主动找上门来。",
+      "tags": ["realm_exclusive", "realm:nascent", "karma", "negative"], "weight": 5,
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "repay", "text": "耗费修为偿还旧债", "effects": [{"type": "add_opportunity", "value": -8}, {"type": "add_karma", "value": -8}]}, {"id": "sever", "text": "斩断牵连", "effects": [{"type": "damage", "value": 0.10}, {"type": "add_karma", "value": 4}]}]
+    },
+    {
+      "id": "EVT_NASCENT_RIFT_001", "version": 1, "title": "虚空裂隙", "body": "一道细小虚空裂隙在荒原开启。只有元婴神识能在裂隙闭合前看清其中漂浮的古物。",
+      "tags": ["realm_exclusive", "realm:nascent", "treasure"], "weight": 4, "intent_weights": {"treasure": 2.5, "travel": 1.6},
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "reach", "text": "以神识摄取古物", "effects": [{"type": "restore_mp", "value": -0.20}, {"type": "add_item", "item_id": "ancient_jade"}]}, {"id": "mark", "text": "只记录空间坐标", "effects": [{"type": "add_opportunity", "value": 6}]}]
+    },
+    {
+      "id": "EVT_NASCENT_SPIRIT_ROAD_001", "version": 1, "title": "化神之问", "body": "元婴日益圆满，你开始感到人界法则的边缘。越过化神初期之后的道路，并不在这方天地之内。",
+      "tags": ["realm_exclusive", "realm:nascent", "milestone"], "weight": 4, "repeat": "once",
+      "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "prepare", "text": "记下界壁潮汐，先求化神", "effects": [{"type": "add_opportunity", "value": 12}]}, {"id": "steady", "text": "不急远行，先稳固元婴", "effects": [{"type": "restore_mp", "value": 0.18}]}]
+    }
+  ]
+}

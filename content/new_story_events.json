@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id":"EVT_XUTIAN_001","version":1,"title":"月沉沧海","body":"雾澜群岛流传着月沉海底、古宫开门的传说。这一夜，海上明月果然化作一道银色漩涡，沉没万年的沧海宫随之浮出水面。宫门只在月影最低时开启，各方结丹修士已经在海面等候多日。",
+      "tags":["realm:core","world:human","story_chain","xutian","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"xutian_eligible","base_chance":0.18,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":3}]},
+      "choices":[
+        {"id":"map","text":"依照残图，在月影中寻找正门","effects":[{"type":"set_flag","flag":"xutian_entered"},{"type":"queue_event","event_id":"EVT_XUTIAN_002"}]},
+        {"id":"crowd","text":"与诸修合力破开外宫水幕","effects":[{"type":"set_flag","flag":"xutian_entered"},{"type":"add_karma","value":2},{"type":"queue_event","event_id":"EVT_XUTIAN_002"}]},
+        {"id":"touch_seal","text":"趁禁制未稳，强闯月门","effects":[{"type":"damage","value":1.5,"reason":"被沧海宫外的重水禁制碾碎"}]},
+        {"id":"leave","text":"不入沧海宫","effects":[]}
+      ]
+    },
+    {
+      "id":"EVT_XUTIAN_002","version":1,"title":"三门夺路","body":"外宫尽头分出三条旧路：玄冰门直通丹殿，却有万载寒气封道；赤火门绕经地肺，路远但可借火炼体；白玉门看似最近，门后却不断传来失踪修士的求救声。",
+      "tags":["realm:core","world:human","story_chain","xutian","manual_only"],"weight":0,
+      "conditions":{"has_flag":"xutian_entered"},
+      "choices":[
+        {"id":"ice","text":"运功护住金丹，穿过玄冰门","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"xutian_ice_path"},{"type":"queue_event","event_id":"EVT_XUTIAN_003"}]},
+        {"id":"fire","text":"借熔岩火煞淬炼护体灵光","effects":[{"type":"damage","value":0.18,"reason":"葬身熔岩火煞"},{"type":"queue_event","event_id":"EVT_XUTIAN_003","if_result":["injured"]}]},
+        {"id":"jade","text":"推开白玉门，追寻求救声","effects":[{"type":"damage","value":1.5,"reason":"白玉门后并无道路，你坠入宫底空间裂缝"}]}
+      ]
+    },
+    {
+      "id":"EVT_XUTIAN_003","version":1,"title":"丹火同炉","body":"丹殿中央悬着一枚尚未开炉的归婴丹，炉下玄潮冷焰历经万年仍未熄灭。沧海宫主人当年在丹成前遭逢强敌，只来得及把控火法诀刻在炉壁；想取丹药，便必须先驯服这团能冻结神识的异火。",
+      "tags":["realm:core","world:human","story_chain","xutian","manual_only"],"weight":0,
+      "choices":[
+        {"id":"banner","text":"依炉壁法诀收服冷焰，再开炉取丹","effects":[{"type":"add_item","item_id":"repair_sky_pill"},{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
+        {"id":"study","text":"舍弃归婴丹，专心参悟控火法诀","effects":[{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"add_opportunity","value":12},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
+        {"id":"grab","text":"无视寒焰，直接抓取古丹","effects":[{"type":"damage","value":1.5,"reason":"被玄潮冷焰冻碎金丹与神魂"}]}
+      ]
+    },
+    {
+      "id":"EVT_XUTIAN_004","version":1,"title":"沧溟遗魂","body":"丹炉开启的一刻，沧海宫主人的残魂自玄鼎中醒来。他误以为当年的仇敌卷土重来，催动整座海宫下沉，要把所有闯入者永远葬在海底。同行修士只能勉强拖住水府傀儡，你必须在月门闭合前击败残魂。",
+      "tags":["realm:core","world:human","story_chain","xutian","manual_only"],"weight":0,
+      "choices":[
+        {"id":"fight","text":"以玄潮冷焰破去残魂护身水幕（战斗力至少 6,100）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":6100}],"failure_reason":"沧溟残魂引来万顷重水，将你的金丹与肉身一并压碎","success_text":"残魂恢复片刻清明，将控火术与沧海玄鼎一并托付给你。"},{"type":"learn_technique","technique_id":"TECH_DRY_BLUE_ICE_FLAME","if_result":["check_success"]},{"type":"add_item","item_id":"virtual_heaven_cauldron","if_result":["technique_learned","already_known"]},{"type":"set_flag","flag":"xutian_completed","if_result":["technique_learned","already_known"]}]},
+        {"id":"abandon","text":"舍弃沧海玄鼎，从崩塌侧殿遁走","effects":[{"type":"damage","value":0.28,"reason":"逃离沧海宫时伤重陨落"},{"type":"set_flag","flag":"xutian_incomplete","if_result":["injured"]}]}
+      ]
+    },
+    {
+      "id":"EVT_NORTH_NIGHT_PALACE_001","version":1,"title":"寒月宫地脉之变","body":"寒月宫地下冰脉忽然倒流，镇宫千年的寒魄山髓也随之生出凶性。宫主愿以此宝相赠，请你深入冰窟斩断污染山髓的地底煞根；若只从外面强行镇压，整条北原寒脉都会被冻死。",
+      "tags":["realm:nascent","world:human","story_chain","north_night","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"north_night_eligible","base_chance":0.18,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":4},{"path":"player.layer","op":"gte","value":4},{"path":"player.layer","op":"lte","value":6}]},
+      "choices":[
+        {"id":"suppress","text":"深入冰窟斩去煞根（战力至少 49,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":49000},{"stat":"mp_ratio","op":"gte","value":0.65}],"failure_reason":"煞根侵入元婴，你被永远封在冰脉之中","success_text":"煞根尽断，寒魄山髓恢复清明，寒月宫依约将其相赠。"},{"type":"add_item","item_id":"north_pole_origin_mountain","if_result":["check_success"]},{"type":"set_flag","flag":"north_night_completed","if_result":["check_success"]}]},
+        {"id":"withdraw","text":"冰脉过于凶险，婉拒寒月宫","effects":[]}
+      ]
+    },
+    {
+      "id":"EVT_STARPALACE_REQUEST_001","version":1,"title":"天衡山二老","body":"天衡山二老镇守地磁元胎已有千年，坐化前却发现门下三脉都想用此宝发动宗门内战。你孤身修道，与三脉皆无姻亲和旧怨，反而是唯一不受牵制的人。二老愿传你五行转岳诀，并托付元胎，换你把它带离天衡山。",
+      "tags":["realm:nascent","world:human","story_chain","star_palace","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"star_palace_eligible","base_chance":0.20,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":4},{"path":"player.layer","op":"gte","value":7},{"path":"player.has_companion","op":"eq","value":false}]},
+      "choices":[
+        {"id":"accept","text":"承下二老传承，带元胎离山","effects":[{"type":"learn_technique","technique_id":"TECH_YUAN_MAGNETIC_LIGHT"},{"type":"add_item","item_id":"yuan_magnetic_divine_mountain"},{"type":"set_flag","flag":"star_palace_completed"}]},
+        {"id":"decline","text":"不愿卷入天衡山内争","effects":[{"type":"add_karma","value":-2}]}
+      ]
+    },
+    {
+      "id":"EVT_GUANGHAN_001","version":1,"title":"青冥洞天开启","body":"灵界各族供奉的青冥古令同时发出清鸣，三千年一开的青冥洞天再次现世。此界曾是上古木修培育灵药之所，如今界树衰败、天幕开裂，最多只能维持百日。炼虚修士既为机缘而来，也都盯上了支撑洞天的最后一枚山灵。",
+      "tags":["realm:void","world:spirit","story_chain","guanghan","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"guanghan_eligible","base_chance":0.16,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"eq","value":6}]},
+      "choices":[
+        {"id":"enter","text":"持青冥古令进入洞天","effects":[{"type":"set_flag","flag":"guanghan_entered"},{"type":"queue_event","event_id":"EVT_GUANGHAN_002"}]},
+        {"id":"sell","text":"将入界名额换成修炼资粮","effects":[{"type":"add_item","item_id":"spirit_stone","quantity":1200}]},
+        {"id":"force","text":"强行撕开尚未稳定的界门","effects":[{"type":"damage","value":1.5,"reason":"被青冥洞天的空间风暴撕碎"}]}
+      ]
+    },
+    {
+      "id":"EVT_GUANGHAN_002","version":1,"title":"万木风廊","body":"通往内界的古路早已被参天灵木吞没，破碎天幕又不断灌入罡风。各族修士若合力护住界树幼根，便能借根系抵达深处；独行者则可以抢先一步，却必须独自承受撕裂元神的青冥罡风。",
+      "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
+      "choices":[
+        {"id":"cooperate","text":"与各族修士合力护住界树幼根","effects":[{"type":"restore_mp","value":-0.16},{"type":"add_karma","value":-3},{"type":"queue_event","event_id":"EVT_GUANGHAN_003"}]},
+        {"id":"alone","text":"独自以法力穿过罡风（MP 至少 22,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":22000}],"failure_reason":"法力耗尽后迷失在跨界罡风中","success_text":"你抢先进入果园深处。"},{"type":"queue_event","event_id":"EVT_GUANGHAN_003","if_result":["check_success"]}]},
+        {"id":"leave","text":"退出青冥洞天","effects":[{"type":"set_flag","flag":"guanghan_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_GUANGHAN_003","version":1,"title":"照神古碑","body":"界树下立着一面照神古碑，碑中封存的太虚分神篇能将一缕神念化作万千，分别照看每条受损根脉。古碑由木甲傀儡守护；静心参悟可以得到真意，强取碑文则会惊醒整座守碑大阵。",
+      "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
+      "choices":[
+        {"id":"study","text":"静心参悟后再取拓本","effects":[{"type":"add_opportunity","value":30},{"type":"set_flag","flag":"guanghan_spirit_art"},{"type":"queue_event","event_id":"EVT_GUANGHAN_004"}]},
+        {"id":"seize","text":"击碎傀儡强取拓本（战力至少 675,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":675000}],"failure_reason":"被守碑傀儡围杀于古碑之下","success_text":"你击碎傀儡，取得太虚分神篇全篇。"},{"type":"set_flag","flag":"guanghan_spirit_art","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_004","if_result":["check_success"]}]}
+      ]
+    },
+    {
+      "id":"EVT_GUANGHAN_004","version":1,"title":"山灵择主","body":"洞天中央的青岳灵胚已经生出朦胧灵智。它若留下，便会随洞天一同崩灭；若被带走，失去镇压的界树也会立刻枯死。数名炼虚后期修士已经布阵争夺，谁都没有耐心等山灵自己选择。",
+      "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
+      "choices":[
+        {"id":"break_array","text":"破阵夺取灵胚（HP 20,000；战力 720,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":20000},{"stat":"combat_power","op":"gte","value":720000}],"failure_reason":"在青冥洞天的群修战阵中陨落","success_text":"你击穿战阵，以法力护住青岳灵胚。"},{"type":"set_flag","flag":"guanghan_mountain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_005","if_result":["check_success"]}]},
+        {"id":"negotiate","text":"以分神之法护住界树，换众修让山灵自行择主","conditions":{"has_flag":"guanghan_spirit_art"},"disabled_reason":"你尚未悟得太虚分神篇","effects":[{"type":"add_karma","value":-5},{"type":"set_flag","flag":"guanghan_mountain"},{"type":"queue_event","event_id":"EVT_GUANGHAN_005"}]}
+      ]
+    },
+    {
+      "id":"EVT_GUANGHAN_005","version":1,"title":"洞天将合","body":"青岳灵胚离开地脉后，青冥洞天开始崩解。你以太虚分神篇同时护住元神、灵胚和沿途残存的界树幼根，在漫天坠落的山石与罡风之间赶往即将闭合的界门。",
+      "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
+      "choices":[
+        {"id":"return","text":"分神护住灵胚，穿过闭合界门（MP 至少 22,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":22000},{"stat":"mp_ratio","op":"gte","value":0.60}],"failure_reason":"未能赶上闭合界门，永远迷失在破碎小界","success_text":"你在最后一刻回到灵界，青岳灵胚也在掌中安然沉睡。"},{"type":"learn_technique","technique_id":"TECH_SPIRIT_REFINING_ART","if_result":["check_success"]},{"type":"add_item","item_id":"taiyi_green_mountain","if_result":["technique_learned","already_known"]},{"type":"set_flag","flag":"guanghan_completed","if_result":["technique_learned","already_known"]}]}
+      ]
+    },
+    {
+      "id":"EVT_FIVE_POLES_CRAFT_001","version":1,"title":"三元镇劫山","body":"寒魄山髓主静，地磁元胎主引，青岳灵胚主生。三件山灵奇物恰好暗合天地人三才，若以自身道火熔炼为一，便可铸成镇压雷劫与心魔的三元镇劫山。",
+      "tags":["manual_only","story_chain","artifact","world:global"],"weight":0,"repeat":"once",
+      "conditions":{"all":[{"has_item":"north_pole_origin_mountain"},{"has_item":"yuan_magnetic_divine_mountain"},{"has_item":"taiyi_green_mountain"}]},
+      "choices":[
+        {"id":"craft","text":"熔炼三件山灵奇物，铸成三元镇劫山","effects":[{"type":"remove_item","item_id":"north_pole_origin_mountain"},{"type":"remove_item","item_id":"yuan_magnetic_divine_mountain"},{"type":"remove_item","item_id":"taiyi_green_mountain"},{"type":"add_item","item_id":"yuanhe_five_poles_mountain"},{"type":"set_flag","flag":"five_poles_completed"}]},
+        {"id":"delay","text":"暂缓炼制，保留三材","effects":[]}
+      ]
+    }
+  ]
+}

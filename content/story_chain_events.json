@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "world": "human",
+  "events": [
+    {
+      "id":"EVT_WIND_WINGS_001","version":1,"title":"雷泽遗巢","body":"结丹游历途中，你发现荒岭上雷云三月不散。山腹藏着一座被劫雷劈开的妖禽遗巢，巢中青羽尚有余温，附近村镇的生灵却正被雷气侵蚀。石壁遗言表明，昔日的青翎妖王把未渡完的化形雷劫封在此处，只等后来者替它散尽。",
+      "tags":["realm:core","story_chain","wind_wings","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"wind_wings_eligible","base_chance":0.20,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":3},{"path":"player.layer","op":"gte","value":4},{"path":"player.layer","op":"lte","value":6}]},
+      "choices":[
+        {"id":"trace","text":"踏入雷巢，寻找散去劫雷之法","effects":[{"type":"set_flag","flag":"wind_wings_started","text":"你以护体灵光裹住全身，沿焦黑羽痕深入山腹。"},{"type":"queue_event","event_id":"EVT_WIND_WINGS_002"}]},
+        {"id":"leave","text":"封住山口，先疏散附近村镇","effects":[{"type":"restore_mp","value":0.08}]}
+      ]
+    },
+    {
+      "id":"EVT_WIND_WINGS_002","version":1,"title":"妖王遗蜕","body":"雷巢深处伏着青翎妖王的遗蜕。它当年渡劫失败，自知残躯一旦坐化便会引爆雷泽，于是将精血、风骨与残存神念炼入九根翎羽。残念愿将翎羽相赠，条件是你必须先承受它未尽的最后一重劫雷。",
+      "tags":["realm:core","story_chain","wind_wings","manual_only"],"weight":0,
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":3},{"has_flag":"wind_wings_started"}]},
+      "choices":[
+        {"id":"refine","text":"引劫入体，助九根妖翎完成最后一次淬炼（战力判定）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.45},{"stat":"combat_ratio","op":"gte","value":1.35},{"stat":"combat_power","op":"gte","value":8500}],"failure_reason":"青翎妖王残留的劫雷贯穿金丹，你与遗蜕一同化为焦土","success_text":"你顶住雷火，将九根妖翎炼成一件可御风引雷的遁宝。"},{"type":"set_flag","flag":"wind_wings_refined","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_WIND_WINGS_003","if_result":["check_success"]}]}
+      ]
+    },
+    {
+      "id":"EVT_WIND_WINGS_003","version":1,"title":"九霄试翼","body":"惊霄羽刚刚认主，雷泽中的劫云便尽数追来。若让雷劫落在山中，方圆百里仍难逃一劫；唯有借新炼遁宝直上云海，将最后的雷火引到九天之外，才算真正了结青翎妖王的因果。",
+      "tags":["realm:core","story_chain","wind_wings","manual_only"],"weight":0,
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":3},{"has_flag":"wind_wings_refined"}]},
+      "choices":[
+        {"id":"escape","text":"催动惊霄羽直上九天，引走雷劫（MP 判定）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.60}],"failure_reason":"法力在雷云中耗尽，你被青紫劫火打得神形俱灭","success_text":"你驾驭九道羽光穿透劫云，最后一道雷火在天外散尽。"},{"type":"restore_mp","value":-0.55,"if_result":["check_success"]},{"type":"add_item","item_id":"wind_thunder_wings","if_result":["check_success"]},{"type":"set_flag","flag":"wind_wings_completed","if_result":["check_success"],"text":"青翎妖王残念消散，惊霄羽自此真正认你为主。"}]}
+      ]
+    },
+
+    {
+      "id":"EVT_KUNWU_001","version":1,"title":"天裂古台现世","body":"元婴中期时，西荒群山忽然从中裂开，一座残破石台自万丈地底升起。古籍称它并非宗门洞府，而是上古修士用来缝合界壁的补天台。如今台下魔气冲霄，各方修士却只看见殿阁中堆积的古宝。",
+      "tags":["realm:nascent","story_chain","kunwu","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"kunwu_eligible","base_chance":0.20,"unit_increment":0.02},
+      "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":4},{"path":"player.layer","op":"gte","value":4},{"path":"player.layer","op":"lte","value":6}]},
+      "choices":[
+        {"id":"enter","text":"顶住界风，越过正在崩裂的外台（HP 比例及 4,000 固定值）","effects":[{"type":"set_flag","flag":"kunwu_participated"},{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.75},{"stat":"hp","op":"gte","value":4000}],"failure_reason":"界壁罡风撕开护体灵光，你连同元婴一起坠入天裂","success_text":"你踏过断裂石梁，在下一阵界风到来前进入内台。"},{"type":"set_flag","flag":"kunwu_entered","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_KUNWU_002","if_result":["check_success"]}]},
+        {"id":"withdraw","text":"记下天裂坐标，在古台外围退出","effects":[{"type":"set_flag","flag":"kunwu_participated"},{"type":"set_flag","flag":"kunwu_incomplete"},{"type":"set_milestone","milestone":"kunwu_incomplete"},{"type":"restore_mp","value":0.10}]}
+      ]
+    },
+    {
+      "id":"EVT_KUNWU_002","version":1,"title":"万修争门","body":"古台只剩一条石阶通往补天殿，几家元婴宗门为争先入殿当场翻脸。更深处的封印每受一次斗法冲击便松动一分，逸散魔气则附在死者尸身上重新起立。要继续深入，你必须从群修与魔尸之间杀出一条路。",
+      "tags":["realm:nascent","story_chain","kunwu","manual_only"],"weight":0,
+      "conditions":{"has_flag":"kunwu_entered"},
+      "choices":[
+        {"id":"break_line","text":"正面破开围杀（至少 73,000 战斗力）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_ratio","op":"gte","value":0.95},{"stat":"combat_power","op":"gte","value":73000}],"failure_reason":"你在群修与魔尸夹击下元婴溃散","success_text":"你以远超寻常元婴中期的底蕴镇住石阶，抢先踏入补天殿。"},{"type":"set_flag","flag":"kunwu_battle_passed","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_KUNWU_003","if_result":["check_success"]}]},
+        {"id":"retreat","text":"趁众修混战退出天裂谷","effects":[{"type":"set_flag","flag":"kunwu_incomplete"},{"type":"set_milestone","milestone":"kunwu_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_KUNWU_003","version":1,"title":"天魔借念","body":"补天殿中没有传承，只有一道被封了数万年的域外魔念。它无法越过古阵，便化作你最渴望得到的机缘，引诱你亲手拔去阵眼。神念一旦失守，你的元婴就会成为它降临人界的第一具肉身。",
+      "tags":["realm:nascent","story_chain","kunwu","manual_only"],"weight":0,
+      "conditions":{"has_flag":"kunwu_battle_passed"},
+      "choices":[
+        {"id":"guard_soul","text":"斩断魔念（MP 比例、4,000 固定值及因果判定）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.75},{"stat":"mp","op":"gte","value":4000},{"stat":"karma","op":"lte","value":90}],"failure_reason":"域外魔念循业障而入，吞噬了你的元婴","success_text":"你斩破心中幻象，逼得魔念退回天裂深处。"},{"type":"set_flag","flag":"kunwu_demon_passed","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_KUNWU_004","if_result":["check_success"]}]},
+        {"id":"seal_and_leave","text":"加固外层封印，趁魔念未醒退出古台","effects":[{"type":"set_flag","flag":"kunwu_incomplete"},{"type":"set_milestone","milestone":"kunwu_incomplete"},{"type":"add_karma","value":-4}]}
+      ]
+    },
+    {
+      "id":"EVT_KUNWU_004","version":1,"title":"镇虚古尺","body":"补天台的核心是一柄钉入界缝的镇虚尺。数万年侵蚀已令器灵敌我不分，而先前闯入的修士正合力拔尺夺宝。若镇虚尺离位，台下天裂会在数息内吞没整片西荒。",
+      "tags":["realm:nascent","story_chain","kunwu","manual_only"],"weight":0,
+      "conditions":{"has_flag":"kunwu_demon_passed"},
+      "choices":[{"id":"subdue","text":"镇压器灵，将古尺重新钉入界缝（HP 4,000；战力 73,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.70},{"stat":"hp","op":"gte","value":4000},{"stat":"combat_ratio","op":"gte","value":1.15},{"stat":"combat_power","op":"gte","value":73000}],"failure_reason":"镇虚尺引动整座古台之力，你被界压碾得神形俱灭","success_text":"器灵被你压服，古尺重新归位，暴涨的天裂终于开始闭合。"},{"type":"set_flag","flag":"kunwu_ruler_subdued","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_KUNWU_005","if_result":["check_success"]}]}]
+    },
+    {
+      "id":"EVT_KUNWU_005","version":1,"title":"归墟潮起","body":"天裂闭合之际，补天台也开始沉回地底。镇虚尺器灵为偿还你的救命之恩，分出一具尺身随你离去，并将历代修补界壁时测得的上界坐标印入其中。真正的危机，是在整座古台被归墟乱流吞没前活着离开。",
+      "tags":["realm:nascent","story_chain","kunwu","manual_only"],"weight":0,
+      "conditions":{"has_flag":"kunwu_ruler_subdued"},
+      "choices":[{"id":"escape","text":"护住镇虚尺，冲出归墟乱流（MP 4,000；战力 73,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.80},{"stat":"mp","op":"gte","value":4000},{"stat":"combat_ratio","op":"gte","value":1.30},{"stat":"combat_power","op":"gte","value":73000}],"failure_reason":"归墟乱流撕裂护体灵光，你与补天古台一同沉入天裂","success_text":"你在古台彻底下沉前冲出裂谷，并从镇虚尺中得到一处灵界节点。"},{"type":"add_item","item_id":"eight_spirit_ruler","if_result":["check_success"]},{"type":"add_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"set_flag","flag":"kunwu_completed","if_result":["check_success"],"text":"天裂重新闭合，镇虚尺自此归你所有。"}]}]
+    },
+
+    {
+      "id":"EVT_XIANG_NODE_001","version":1,"title":"顾长庚的破界图","body":"顾长庚曾在天裂谷外守候三十年，试图从界风变化中推算飞升之路。听闻你进入补天台后生还，他取出毕生绘成的破界图，愿与你互证那处古老的灵界坐标。",
+      "tags":["realm:spirit","world_npc","xiang_zhili","probability_gate","manual_only"],"weight":0,"repeat":"once","trigger":{"milestone":"xiang_node_eligible","base_chance":0.10,"unit_increment":0.01},
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":5},{"path":"player.layer","op":"gte","value":3},{"has_flag":"kunwu_incomplete"},{"not":{"has_flag":"kunwu_completed"}},{"world_npc":{"id":"xiang_zhili","alive":true,"world":"human"}}]},
+      "choices":[{"id":"exchange","text":"与顾长庚互证空间节点","effects":[{"type":"add_item","item_id":"spirit_node_info"},{"type":"set_flag","flag":"xiang_node_shared"},{"type":"add_opportunity","value":18}]}]
+    },
+
+    {
+      "id":"EVT_SPIRIT_CROSSING_001","version":1,"title":"节点启封","body":"你以化神神识触及界壁，空间乱流立刻吞没退路。第一关不是蛮力，而是找到灵界节点唯一稳定的潮汐缝隙。若无准确节点信息，必死无疑。",
+      "tags":["ascension","spirit_crossing","manual_only"],"weight":0,
+      "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":5}]},
+      "choices":[{"id":"locate","text":"校准灵界空间节点（必要钥匙判定）","effects":[{"type":"attribute_check","checks":[{"stat":"has_item","item_id":"spirit_node_info"}],"failure_reason":"没有空间节点信息，你误入虚空死域，神魂俱灭","success_text":"节点情报与眼前潮汐完全吻合。"},{"type":"remove_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_SPIRIT_CROSSING_002","if_result":["check_success"]}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_CROSSING_002","version":1,"title":"界壁炼身","body":"稳定缝隙只维持数息。跨界压力将肉身寸寸压碎，任何未愈的伤势都会在此刻扩大成致命裂口。",
+      "tags":["ascension","spirit_crossing","manual_only"],"weight":0,"conditions":{"path":"player.world","op":"eq","value":"human"},
+      "choices":[{"id":"endure","text":"以血肉硬渡界壁（HP 判定）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.85}],"failure_reason":"残损肉身在跨界重压下彻底崩溃","success_text":"你的肉身撑过最猛烈的界压。"},{"type":"damage","value":0.65,"if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_SPIRIT_CROSSING_003","if_result":["injured"]}]}]
+    },
+    {
+      "id":"EVT_SPIRIT_CROSSING_003","version":1,"title":"破界天光","body":"灵界天光已在乱流尽头显现，最后一道界面罡风却凝成无形天堑。唯有超越寻常化神初期的战力，才能正面将其击穿。",
+      "tags":["ascension","spirit_crossing","manual_only"],"weight":0,"conditions":{"path":"player.world","op":"eq","value":"human"},
+      "choices":[{"id":"break_boundary","text":"倾尽底牌击穿罡风（战斗力判定）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_ratio","op":"gte","value":1.40}],"failure_reason":"你的攻势未能击穿界面罡风，最终耗尽在空间乱流中","success_text":"界面被撕开一道仅容一人通过的裂口。"},{"type":"enter_spirit_realm","if_result":["check_success"]}]}]
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "story_virtual_heaven_cauldron",
+      "name": "月沉海宫",
+      "description": "取得沧海玄鼎",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"any": [{"item": "virtual_heaven_cauldron"}, {"flag": "xutian_completed"}]}
+    },
+    {
+      "id": "story_wind_thunder_wings",
+      "name": "九霄试翼",
+      "description": "炼成惊霄羽",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"any": [{"item": "wind_thunder_wings"}, {"flag": "wind_wings_completed"}]}
+    },
+    {
+      "id": "story_fall_in_kunwu",
+      "name": "天裂葬身",
+      "description": "在天裂古台中陨落",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"history": {"event_prefix": "EVT_KUNWU_", "result": "dead"}}
+    },
+    {
+      "id": "story_survive_kunwu",
+      "name": "补天遗客",
+      "description": "进入天裂古台并存活",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"flag": "kunwu_completed"}
+    },
+    {
+      "id": "story_ascend_spirit_realm",
+      "name": "越界者",
+      "description": "成功飞升灵界",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"history": {"event_id": "EVT_SPIRIT_CROSSING_003", "result": "entered_spirit_realm"}}
+    },
+    {
+      "id": "story_five_poles_mountain",
+      "name": "三元归一",
+      "description": "获得三元镇劫山",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"any": [{"item": "yuanhe_five_poles_mountain"}, {"flag": "five_poles_completed"}]}
+    },
+    {
+      "id": "story_cross_realm_legacy",
+      "name": "枯荣相生",
+      "description": "同时掌握苍木盘天阵与春生剑域",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"techniques": ["TECH_QINGPAN_SWORD_ARRAY", "TECH_CHUNLI_SWORD_ARRAY"]}
+    },
+    {
+      "id": "story_meet_baohua",
+      "name": "魔月同盟",
+      "description": "结识绯月圣祖",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"history": {"event_id": "EVT_TWO_REALMS_004", "exclude_results": ["dead"]}}
+    },
+    {
+      "id": "story_slay_ma_liang_solo",
+      "name": "凡躯斩仙",
+      "description": "正面击败洛天衡",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"history": {"event_id": "EVT_MA_LIANG_008", "choice_id": "solo_finish", "result": "check_success"}}
+    },
+    {
+      "id": "cultivation_rootless_nascent",
+      "name": "逆天改命",
+      "description": "以无灵根开局，修炼至元婴",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"born_rootless": true}, {"realm_at_least": 4}]}
+    },
+    {
+      "id": "cultivation_otherworld_root",
+      "name": "主角配置",
+      "description": "以异世界灵根开局",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"spirit_root": "otherworld"}
+    },
+    {
+      "id": "cultivation_all_five_elements",
+      "name": "五行缺德",
+      "description": "获取全部的后天五行灵根",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"affinities": ["metal", "wood", "water", "fire", "earth"]}
+    },
+    {
+      "id": "cultivation_nascent",
+      "name": "修仙大能",
+      "description": "修炼至元婴",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"realm_at_least": 4}
+    },
+    {
+      "id": "cultivation_mahayana",
+      "name": "一步之遥",
+      "description": "修炼至大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"realm_at_least": 8}
+    },
+    {
+      "id": "cultivation_rootless_legend",
+      "name": "传奇故事",
+      "description": "以无灵根开局，修炼至大乘并位列顺位榜第一",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"born_rootless": true}, {"realm_at_least": 8}, {"ranking": 1}]}
+    },
+    {
+      "id": "cultivation_otherworld_mahayana",
+      "name": "本该如此",
+      "description": "以异世界灵根开局，修炼至大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"spirit_root": "otherworld"}, {"realm_at_least": 8}]}
+    },
+    {
+      "id": "cultivation_companion",
+      "name": "初恋的感觉",
+      "description": "拥有一个道侣",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"relationship": {"kind": "companion"}}
+    },
+    {
+      "id": "cultivation_nascent_master",
+      "name": "我的元婴师傅",
+      "description": "在练气或筑基期拜师元婴及以上大能",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"relationship": {"kind": "master", "player_realms": [1, 2], "minimum_realm": 4}}
+    },
+    {
+      "id": "cultivation_disciple",
+      "name": "为人师表",
+      "description": "拥有一个弟子",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"relationship": {"kind": "disciple"}}
+    },
+    {
+      "id": "cultivation_found_sect",
+      "name": "开宗立派",
+      "description": "创立一个宗门",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"founded_faction": true}
+    },
+    {
+      "id": "cultivation_dao_friend",
+      "name": "三人行",
+      "description": "拥有一位道友",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"relationship": {"kind": "friend"}}
+    }
+  ]
+}

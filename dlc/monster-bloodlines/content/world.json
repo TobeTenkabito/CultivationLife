@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "world_names": {"monster_realm": "妖界"},
+    "world_profiles": {
+      "monster_realm": {
+        "tier": 2,
+        "npc_realm_cap": 8,
+        "enabled": true,
+        "kind": "world",
+        "supports": ["events", "market", "factions", "races"],
+        "qi_concentrations": {"spirit": 0.65, "demon": 0.45, "monster": 2.4, "yin": 0.55}
+      },
+      "phantom_underworld": {"npc_realm_cap": 8, "enabled": true},
+      "nether": {
+        "tier": 3,
+        "npc_realm_cap": 12,
+        "enabled": true,
+        "kind": "world",
+        "supports": ["events", "market", "factions", "races"],
+        "qi_concentrations": {"spirit": 0.1, "demon": 0.5, "monster": 4.0, "yin": 2.0}
+      }
+    },
+    "start_worlds": {
+      "monster": ["human", "monster_realm", "phantom_underworld"]
+    },
+    "cultivation_routes": {
+      "monster": {
+        "name": "妖修",
+        "paths": ["monster"],
+        "stages": [
+          {"world": "human", "label": "人界", "enabled": true},
+          {"world": "monster_realm", "label": "妖界", "enabled": true},
+          {"world": "phantom_underworld", "label": "幻冥界", "enabled": true},
+          {"world": "nether", "label": "幽冥界·寻祖", "enabled": true},
+          {"system": "heavens", "label": "诸天系统", "enabled": false}
+        ]
+      }
+    },
+    "faction_conflict": {
+      "control_realm": {"monster_realm": 6, "phantom_underworld": 6, "nether": 10},
+      "kill_hostility_min_realm": {"monster_realm": 5, "phantom_underworld": 5, "nether": 9}
+    }
+  }
+}

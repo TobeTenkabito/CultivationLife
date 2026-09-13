@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "recruitment_distribution_by_world": {
+      "monster_realm": [
+        {"upper": 0.03, "realm_index": 6}, {"upper": 0.18, "realm_index": 5},
+        {"upper": 0.48, "realm_index": 4}, {"upper": 0.78, "realm_index": 3},
+        {"upper": 1.0, "realm_index": 2}
+      ],
+      "phantom_underworld": [
+        {"upper": 0.03, "realm_index": 6}, {"upper": 0.18, "realm_index": 5},
+        {"upper": 0.48, "realm_index": 4}, {"upper": 0.78, "realm_index": 3},
+        {"upper": 1.0, "realm_index": 2}
+      ],
+      "nether": [
+        {"upper": 0.04, "realm_index": 12}, {"upper": 0.16, "realm_index": 11},
+        {"upper": 0.46, "realm_index": 10}, {"upper": 1.0, "realm_index": 9}
+      ]
+    },
+    "npc_path_distribution": {
+      "myriad_beast_court": {"monster": 0.88, "dao": 0.08, "buddhist": 0.04},
+      "qingqiu_mist_palace": {"monster": 0.76, "dao": 0.12, "ghost": 0.12},
+      "azure_scale_palace": {"monster": 0.84, "dao": 0.10, "demonic": 0.06},
+      "moonbeast_divine_court": {"monster": 0.82, "ghost": 0.12, "dao": 0.06},
+      "ancient_spirit_temple": {"monster": 0.68, "buddhist": 0.20, "dao": 0.12},
+      "heaven_bone_war_league": {"monster": 0.86, "demonic": 0.10, "ghost": 0.04},
+      "primordial_true_spirit_hall": {"monster": 0.94, "dao": 0.04, "buddhist": 0.02},
+      "self_lineage_pavilion": {"monster": 0.96, "dao": 0.02, "ghost": 0.02},
+      "worldtree_root_court": {"monster": 0.88, "buddhist": 0.08, "dao": 0.04}
+    }
+  },
+  "factions": [
+    {
+      "id": "myriad_beast_court", "name": "万妖祖庭", "world": "monster_realm",
+      "allegiance_race": "clawkin", "path": "妖界百兽共庭",
+      "description": "统筹万兽天城秩序的古老祖庭，以战功、护族和血契裁定席位。", "color": "#6f6338",
+      "npcs": [
+        {"id": "mbc_xuanyue", "name": "玄岳妖圣", "title": "祖庭大圣", "realm_index": 6, "layer": 4, "age": 8200, "lifespan": null, "spirit_root": "supreme_earth", "path": "monster", "race": "clawkin", "world": "monster_realm"},
+        {"id": "mbc_baihu", "name": "白额王", "title": "执律妖王", "realm_index": 5, "layer": 8, "age": 2860, "lifespan": 9480, "spirit_root": "mutated_wind", "path": "monster", "race": "clawkin", "world": "monster_realm"},
+        {"id": "mbc_jinchi", "name": "金翅侯", "title": "巡天使", "realm_index": 4, "layer": 7, "age": 910, "lifespan": 4380, "spirit_root": "mutated_thunder", "path": "monster", "race": "skykin", "world": "monster_realm"},
+        {"id": "mbc_shiqing", "name": "石青", "title": "血契行走", "realm_index": 3, "layer": 6, "age": 360, "lifespan": 1430, "spirit_root": "supreme_earth", "path": "monster", "race": "hornkin", "world": "monster_realm"}
+      ]
+    },
+    {
+      "id": "qingqiu_mist_palace", "name": "青丘雾宫", "world": "monster_realm",
+      "allegiance_race": "foxkin", "path": "幻心与血脉秘宗",
+      "description": "藏于万重青雾中的狐族宗门，擅长幻法、情报和血脉谱牒。", "color": "#805a72",
+      "npcs": [
+        {"id": "qmp_tushan", "name": "涂山月主", "title": "雾宫之主", "realm_index": 6, "layer": 2, "age": 7600, "lifespan": null, "spirit_root": "law_karma", "path": "monster", "race": "foxkin", "world": "monster_realm"},
+        {"id": "qmp_feiyan", "name": "绯烟夫人", "title": "传法长老", "realm_index": 5, "layer": 6, "age": 2480, "lifespan": 9360, "spirit_root": "mutated_yin", "path": "monster", "race": "foxkin", "world": "monster_realm"},
+        {"id": "qmp_linghu", "name": "灵狐照影", "title": "外务长老", "realm_index": 4, "layer": 5, "age": 840, "lifespan": 4260, "spirit_root": "law_space", "path": "dao", "race": "foxkin", "world": "monster_realm"},
+        {"id": "qmp_qingshuang", "name": "青霜", "title": "雾宫真传", "realm_index": 3, "layer": 8, "age": 390, "lifespan": 1470, "spirit_root": "supreme_water", "path": "monster", "race": "foxkin", "world": "monster_realm"}
+      ]
+    },
+    {
+      "id": "azure_scale_palace", "name": "苍鳞水府", "world": "monster_realm",
+      "allegiance_race": "scalekin", "path": "鳞族水脉道统",
+      "description": "统御苍鳞海诸水脉的鳞族宗门，保存大量蛟龙遗蜕与水行妖法。", "color": "#376f78",
+      "npcs": [
+        {"id": "asp_xuanlin", "name": "玄鳞龙君", "title": "水府之主", "realm_index": 6, "layer": 5, "age": 9100, "lifespan": null, "spirit_root": "supreme_water", "path": "monster", "race": "scalekin", "world": "monster_realm"},
+        {"id": "asp_cangjiao", "name": "苍蛟王", "title": "镇海妖王", "realm_index": 5, "layer": 9, "age": 3010, "lifespan": 9540, "spirit_root": "mutated_thunder", "path": "monster", "race": "scalekin", "world": "monster_realm"},
+        {"id": "asp_luoshui", "name": "洛水青鳞", "title": "司潮长老", "realm_index": 4, "layer": 6, "age": 890, "lifespan": 4410, "spirit_root": "supreme_water", "path": "monster", "race": "scalekin", "world": "monster_realm"},
+        {"id": "asp_leihua", "name": "雷花", "title": "巡海使", "realm_index": 3, "layer": 7, "age": 350, "lifespan": 1380, "spirit_root": "mutated_thunder", "path": "monster", "race": "scalekin", "world": "monster_realm"}
+      ]
+    },
+    {
+      "id": "moonbeast_divine_court", "name": "月兽神庭", "world": "phantom_underworld",
+      "allegiance_race": "moonbeast", "path": "月华兽相道统",
+      "description": "月兽原上最强盛的联盟，以月相周期决定祭典、征战和传承。", "color": "#65689a",
+      "npcs": [
+        {"id": "mdc_xiaoyue", "name": "啸月神君", "title": "神庭之主", "realm_index": 6, "layer": 3, "age": 8400, "lifespan": null, "spirit_root": "mutated_yin", "path": "monster", "race": "moonbeast", "world": "phantom_underworld"},
+        {"id": "mdc_yinhen", "name": "银痕妖王", "title": "月祭大司", "realm_index": 5, "layer": 7, "age": 2690, "lifespan": 9420, "spirit_root": "mutated_yang", "path": "monster", "race": "moonbeast", "world": "phantom_underworld"},
+        {"id": "mdc_mengli", "name": "梦璃", "title": "幻梦客卿", "realm_index": 4, "layer": 8, "age": 960, "lifespan": 4470, "spirit_root": "mutated_yin", "path": "ghost", "race": "dreamfox", "world": "phantom_underworld"},
+        {"id": "mdc_yueya", "name": "月牙", "title": "神庭行走", "realm_index": 3, "layer": 5, "age": 330, "lifespan": 1410, "spirit_root": "supreme_metal", "path": "monster", "race": "moonbeast", "world": "phantom_underworld"}
+      ]
+    },
+    {
+      "id": "ancient_spirit_temple", "name": "万灵古殿", "world": "phantom_underworld",
+      "allegiance_race": "treekin", "path": "古林生灵道统",
+      "description": "扎根万灵古林核心的活体宗门，殿柱与长老皆由年轮孕育。", "color": "#4d7654",
+      "npcs": [
+        {"id": "ast_suimu", "name": "岁木尊者", "title": "古殿守望者", "realm_index": 6, "layer": 6, "age": 19200, "lifespan": null, "spirit_root": "supreme_wood", "path": "buddhist", "race": "treekin", "world": "phantom_underworld"},
+        {"id": "ast_qingzhu", "name": "青株夫人", "title": "生机长老", "realm_index": 5, "layer": 9, "age": 4720, "lifespan": 9570, "spirit_root": "supreme_wood", "path": "monster", "race": "treekin", "world": "phantom_underworld"},
+        {"id": "ast_chaosheng", "name": "潮生幻主", "title": "护殿客卿", "realm_index": 4, "layer": 6, "age": 880, "lifespan": 4350, "spirit_root": "supreme_water", "path": "monster", "race": "tidephantom", "world": "phantom_underworld"},
+        {"id": "ast_muye", "name": "木叶", "title": "年轮行者", "realm_index": 3, "layer": 6, "age": 410, "lifespan": 1490, "spirit_root": "supreme_wood", "path": "monster", "race": "treekin", "world": "phantom_underworld"}
+      ]
+    },
+    {
+      "id": "heaven_bone_war_league", "name": "天骨战盟", "world": "phantom_underworld",
+      "allegiance_race": "boneborn", "path": "天骨炼体战宗",
+      "description": "以巨兽遗骨为山门的炼体战盟，只有经得住骨鸣淬炼者才可入内门。", "color": "#746b60",
+      "npcs": [
+        {"id": "hbw_canggu", "name": "苍骨大圣", "title": "战盟之主", "realm_index": 6, "layer": 7, "age": 10500, "lifespan": null, "spirit_root": "supreme_earth", "path": "monster", "race": "boneborn", "world": "phantom_underworld"},
+        {"id": "hbw_xuanyi", "name": "玄翼冥君", "title": "猎空长老", "realm_index": 5, "layer": 6, "age": 2570, "lifespan": 9330, "spirit_root": "mutated_wind", "path": "monster", "race": "shadowwing", "world": "phantom_underworld"},
+        {"id": "hbw_baigu", "name": "白骨重山", "title": "锻骨长老", "realm_index": 4, "layer": 9, "age": 990, "lifespan": 4500, "spirit_root": "supreme_earth", "path": "monster", "race": "boneborn", "world": "phantom_underworld"},
+        {"id": "hbw_duanya", "name": "断牙", "title": "战盟真传", "realm_index": 3, "layer": 9, "age": 430, "lifespan": 1500, "spirit_root": "supreme_metal", "path": "monster", "race": "boneborn", "world": "phantom_underworld"}
+      ]
+    },
+    {
+      "id": "primordial_true_spirit_hall", "name": "太初真灵殿", "world": "nether",
+      "allegiance_race": "primordial_true_spirit", "path": "返祖真灵道统",
+      "description": "守护第一代真灵源流的幽冥祖庭，只承认经完整返祖而来的生命。", "color": "#8b6d3f",
+      "npcs": [
+        {"id": "ptsh_canggu", "name": "苍古龙祖", "title": "真灵殿主", "realm_index": 12, "layer": 1, "age": 1800000, "lifespan": null, "spirit_root": "law_space", "path": "monster", "race": "primordial_true_spirit", "world": "nether"},
+        {"id": "ptsh_yuanfeng", "name": "元凤天母", "title": "涅槃祖母", "realm_index": 11, "layer": 1, "age": 920000, "lifespan": null, "spirit_root": "supreme_fire", "path": "monster", "race": "primordial_true_spirit", "world": "nether"},
+        {"id": "ptsh_xuanhai", "name": "玄海鲲君", "title": "界海司源", "realm_index": 10, "layer": 1, "age": 360000, "lifespan": null, "spirit_root": "supreme_water", "path": "monster", "race": "primordial_true_spirit", "world": "nether"}
+      ]
+    },
+    {
+      "id": "self_lineage_pavilion", "name": "自脉万祖阁", "world": "nether",
+      "allegiance_race": "self_ancestor", "path": "自成血脉道统",
+      "description": "为不愿追随旧祖的妖修保留名位；每一席都代表一条从未存在过的新血脉。", "color": "#705b82",
+      "npcs": [
+        {"id": "slp_wuming", "name": "无名新祖", "title": "万祖阁主", "realm_index": 12, "layer": 1, "age": 1300000, "lifespan": null, "spirit_root": "law_karma", "path": "monster", "race": "self_ancestor", "world": "nether"},
+        {"id": "slp_qianbian", "name": "千变妖祖", "title": "谱系开拓者", "realm_index": 11, "layer": 1, "age": 710000, "lifespan": null, "spirit_root": "mutated_yin", "path": "monster", "race": "self_ancestor", "world": "nether"},
+        {"id": "slp_wanyue", "name": "万岳新圣", "title": "极化护阁人", "realm_index": 9, "layer": 1, "age": 120000, "lifespan": null, "spirit_root": "supreme_earth", "path": "monster", "race": "self_ancestor", "world": "nether"}
+      ]
+    },
+    {
+      "id": "worldtree_root_court", "name": "界树根庭", "world": "nether",
+      "allegiance_race": "worldtree_descendant", "path": "血脉谱牒与诸界根网",
+      "description": "扎根界树最古老根系的祖庭，记录返祖、自成血脉与后代传承。", "color": "#426d52",
+      "npcs": [
+        {"id": "wrc_wannian", "name": "万年轮主", "title": "根庭之主", "realm_index": 12, "layer": 1, "age": 2400000, "lifespan": null, "spirit_root": "supreme_wood", "path": "monster", "race": "worldtree_descendant", "world": "nether"},
+        {"id": "wrc_genlu", "name": "根录尊者", "title": "诸脉史官", "realm_index": 10, "layer": 1, "age": 480000, "lifespan": null, "spirit_root": "law_karma", "path": "monster", "race": "worldtree_descendant", "world": "nether"},
+        {"id": "wrc_chunqiu", "name": "春秋木灵", "title": "后代谱官", "realm_index": 9, "layer": 1, "age": 150000, "lifespan": null, "spirit_root": "supreme_wood", "path": "monster", "race": "worldtree_descendant", "world": "nether"}
+      ]
+    }
+  ]
+}

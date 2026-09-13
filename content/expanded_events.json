@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_COMMON_ESCORT_002", "version": 1, "title": "灵材押运", "body": "一支商队招募同阶修士押送灵材，路程不远，报酬按坊市行情结算。",
+      "tags": ["cultivator", "common", "spirit_stone"], "weight": 5, "intent_weights": {"travel": 1.8, "commission": 2.2},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "escort", "text": "护送商队", "effects": [{"type": "restore_mp", "value": -0.05}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 3}]}, {"id": "decline", "text": "另有要事，婉拒委托", "effects": []}]
+    },
+    {
+      "id": "EVT_COMMON_PILL_WORK_002", "version": 1, "title": "丹房短工", "body": "坊市丹房缺少看炉修士。活计枯燥，却是稳定换取灵石的门路。",
+      "tags": ["cultivator", "common", "spirit_stone"], "weight": 5, "intent_weights": {"commission": 2.5, "rest": 1.2},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "work", "text": "守炉七日", "effects": [{"type": "restore_mp", "value": -0.07}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 2}]}, {"id": "learn", "text": "只观摩控火手法", "effects": [{"type": "add_opportunity", "value": 3}]}]
+    },
+    {
+      "id": "EVT_COMMON_ARRAY_TRACE_002", "version": 1, "title": "残阵留痕", "body": "荒坡上残留着一角古阵，阵主早已不知所终，纹路仍在吞吐微弱灵光。",
+      "tags": ["cultivator", "common", "encounter"], "weight": 5, "intent_weights": {"treasure": 1.7, "travel": 1.5},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "study", "text": "耗费法力拓印阵纹", "effects": [{"type": "restore_mp", "value": -0.08}, {"type": "add_opportunity", "value": 6}]}, {"id": "sell", "text": "将方位卖给阵师", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 2}]}]
+    },
+    {
+      "id": "EVT_COMMON_SPIRIT_BEAST_002", "version": 1, "title": "负伤灵兽", "body": "一头负伤灵兽伏在溪边，戒备地盯着你。它的皮毛下仍插着猎人的箭。",
+      "tags": ["cultivator", "common", "karma"], "weight": 4, "intent_weights": {"travel": 1.8},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "heal", "text": "替它拔箭疗伤", "effects": [{"type": "restore_mp", "value": -0.05}, {"type": "add_karma", "value": -2}, {"type": "add_opportunity", "value": 3}]}, {"id": "leave", "text": "不扰自然生灭", "effects": []}]
+    },
+    {
+      "id": "EVT_COMMON_OLD_LECTURE_002", "version": 1, "title": "古亭讲法", "body": "一位遮掩修为的老修士在古亭随口讲法，听者来去匆匆，无人知道他的来历。",
+      "tags": ["cultivator", "common", "cultivation"], "weight": 4, "intent_weights": {"cultivate": 1.8, "rest": 1.4},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "listen", "text": "席地静听", "effects": [{"type": "add_opportunity", "value": 7}]}, {"id": "offer", "text": "奉上一枚灵石请教", "conditions": {"has_item": "spirit_stone"}, "disabled_reason": "没有灵石", "effects": [{"type": "remove_item", "item_id": "spirit_stone", "quantity": 1}, {"type": "add_opportunity", "value": 10}]}]
+    },
+    {
+      "id": "EVT_COMMON_STAR_RAIN_002", "version": 1, "title": "星华垂野", "body": "子夜星华如雨，天地灵机短暂变得清澈，附近修士纷纷闭门参悟。",
+      "tags": ["cultivator", "common", "cultivation"], "weight": 4, "intent_weights": {"cultivate": 2.0},
+      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "choices": [{"id": "meditate", "text": "彻夜观星", "effects": [{"type": "restore_mp", "value": -0.06}, {"type": "add_opportunity", "value": 8}]}, {"id": "sleep", "text": "顺其自然，安睡养神", "effects": [{"type": "restore_mp", "value": 0.10}]}]
+    },
+
+    {
+      "id": "EVT_QI_MERIDIAN_002", "version": 1, "title": "细脉初开", "body": "练气时才会显露的一条细小经脉忽然松动，错过便会随肉身定型。",
+      "tags": ["realm_exclusive", "realm:qi"], "weight": 5, "intent_weights": {"cultivate": 2.0}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "open", "text": "引灵冲脉", "effects": [{"type": "restore_mp", "value": -0.09}, {"type": "add_opportunity", "value": 6}]}]
+    },
+    {
+      "id": "EVT_QI_TALISMAN_002", "version": 1, "title": "符坊学徒", "body": "低阶符坊临时招收练气学徒，以裁符纸的工钱换取两枚灵石。",
+      "tags": ["realm_exclusive", "realm:qi", "spirit_stone"], "weight": 5, "intent_weights": {"commission": 2.3}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 1},
+      "choices": [{"id": "work", "text": "接下活计", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 2}]}, {"id": "practice", "text": "观摩符师运笔", "effects": [{"type": "add_opportunity", "value": 4}]}]
+    },
+    {
+      "id": "EVT_FOUNDATION_PLATFORM_002", "version": 1, "title": "道台回响", "body": "筑基道台与山中地脉共鸣，这是校正根基、打磨道台的短暂契机。",
+      "tags": ["realm_exclusive", "realm:foundation"], "weight": 5, "intent_weights": {"cultivate": 2.0}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "temper", "text": "借地脉打磨道台", "effects": [{"type": "damage", "value": 0.06}, {"type": "add_opportunity", "value": 9}]}]
+    },
+    {
+      "id": "EVT_FOUNDATION_PATROL_002", "version": 1, "title": "灵田巡查", "body": "一片灵田需要筑基修士主持禁制，报酬由几家药铺共同支付。",
+      "tags": ["realm_exclusive", "realm:foundation", "spirit_stone"], "weight": 5, "intent_weights": {"commission": 2.2}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
+      "choices": [{"id": "guard", "text": "主持禁制", "effects": [{"type": "restore_mp", "value": -0.10}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 6}]}]
+    },
+    {
+      "id": "EVT_CORE_ECHO_002", "version": 1, "title": "金丹道音", "body": "你的金丹发出只有自身可闻的道音，结婴以前，这样的自省机会屈指可数。",
+      "tags": ["realm_exclusive", "realm:core"], "weight": 5, "intent_weights": {"cultivate": 2.0}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "listen", "text": "闭关聆听道音", "effects": [{"type": "restore_mp", "value": -0.12}, {"type": "add_opportunity", "value": 13}]}]
+    },
+    {
+      "id": "EVT_CORE_ALCHEMY_002", "version": 1, "title": "金丹炼师之约", "body": "一位炼丹师需要金丹真火完成最后一道火候，愿以灵石相酬。",
+      "tags": ["realm_exclusive", "realm:core", "spirit_stone"], "weight": 5, "intent_weights": {"commission": 2.2}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 3},
+      "choices": [{"id": "help", "text": "催动丹火相助", "effects": [{"type": "restore_mp", "value": -0.15}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 18}]}]
+    },
+    {
+      "id": "EVT_NASCENT_DREAM_002", "version": 1, "title": "婴神远梦", "body": "元婴出窍时梦见千里之外的山川。那不是幻觉，而是神识将要蜕变的征兆。",
+      "tags": ["realm_exclusive", "realm:nascent"], "weight": 5, "intent_weights": {"cultivate": 2.0}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "follow", "text": "循梦境淬炼神识", "effects": [{"type": "restore_mp", "value": -0.16}, {"type": "add_opportunity", "value": 18}]}, {"id": "return", "text": "及时收摄元婴", "effects": [{"type": "restore_mp", "value": 0.08}]}]
+    },
+    {
+      "id": "EVT_NASCENT_COUNCIL_002", "version": 1, "title": "一方议价", "body": "数家商会请你为一桩跨域交易作保。到了元婴境界，名望本身便能换取灵石。",
+      "tags": ["realm_exclusive", "realm:nascent", "spirit_stone"], "weight": 5, "intent_weights": {"commission": 2.4, "travel": 1.2}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
+      "choices": [{"id": "mediate", "text": "主持议价并作保", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 65}, {"type": "add_karma", "value": -1}]}, {"id": "decline", "text": "不沾商会因果", "effects": []}]
+    }
+  ]
+}
