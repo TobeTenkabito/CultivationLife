@@ -66,9 +66,15 @@ class MapTravelMixin:
         rng = decode_rng(game.seed, game.rng_state)
         start_age = player.age
         era_news: list[str] = []
-        for _ in range(plan.years):
+        time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
+        for elapsed_index in range(plan.years):
             player.age += 1
-            if not self._advance_world_year(game, rng, era_news, encounters=False):
+            continue_world = self._advance_world_year(game, rng, era_news, encounters=False)
+            # A special action that consumes even part of the current realm's
+            # duration counts as one game-time unit; longer journeys use ceil.
+            if elapsed_index % time_unit == 0 and player.alive:
+                self._apply_soul_erosion_units(game, 1)
+            if not continue_world or not player.alive:
                 break
         completed = player.alive and game.pending_event is None and player.age - start_age == plan.years
         if completed:

@@ -67,6 +67,8 @@
           <div><dt>炼体</dt><dd id="body-training"></dd></div>
           <div><dt>神识</dt><dd id="divine-sense"></dd></div>
           <div id="immortal-power-stat" class="hidden"><dt>仙灵力</dt><dd id="immortal-power-state"></dd></div>
+          <div id="ghost-erosion-stat" class="hidden"><dt>魂蚀率</dt><dd id="ghost-erosion"></dd></div>
+          <div id="ghost-wangsheng-stat" class="hidden"><dt>往生</dt><dd id="ghost-wangsheng"></dd></div>
           <div><dt>种族</dt><dd id="player-race"></dd></div>
         </dl>
         <details class="techniques compact-library"><summary>功法配置 <span id="equipped-technique-count"></span></summary><div id="technique-list"></div></details>
@@ -100,6 +102,13 @@
           <div id="body-breakthrough-panel" class="breakthrough-panel body-breakthrough-panel hidden">
             <div><b id="body-breakthrough-title">冲击炼体境界</b><span id="body-breakthrough-reason"></span></div>
             <button id="body-breakthrough-action" type="button">冲击下一层</button>
+          </div>
+          <div id="ghost-system-panel" class="breakthrough-panel ghost-system-panel hidden">
+            <div><b id="ghost-system-title">百鬼夜行:轮回往生</b><span id="ghost-system-summary"></span></div>
+            <div class="ghost-system-actions">
+              <button id="ghost-wangsheng-action" type="button">消耗往生</button>
+              <button id="ghost-reincarnate-action" type="button">舍此世修为，入轮回</button>
+            </div>
           </div>
           <div class="actions primary-actions">
             <button data-action="cultivate" id="cultivate-action"><b>潜心修炼</b><span>稳定积累机缘</span></button>
@@ -286,6 +295,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260912-9"></script>
-  <script src="/app.js?v=20260913-6"></script>
+  <script src="/app.js?v=20260914-1"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 from cultivation_life import server as server_module
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import REALMS
+from cultivation_life.ghost_system import grant_intrinsic_progression_if_new_highwater
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
 
 
@@ -246,8 +247,10 @@ def main() -> None:
 
                 page.locator("[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
-                assert "已识别 1" in page.locator("#extension-summary").text_content()
-                assert "妖修道途：血脉与进化" in page.locator("#extension-list").text_content()
+                assert "已识别 2" in page.locator("#extension-summary").text_content()
+                extension_text = page.locator("#extension-list").text_content()
+                assert "妖修道途：血脉与进化" in extension_text
+                assert "百鬼夜行:轮回往生" in extension_text
                 page.locator("#extension-toggle").click()
 
                 page.locator("[data-panel-target='captive']").click()
@@ -437,6 +440,35 @@ def main() -> None:
                 assert page.locator("#ranking-list .ranking-row").count() == 20
                 assert "排名" in page.locator("#ranking-player-status").text_content()
                 page.locator("#ranking-toggle").click()
+
+                ghost_created = engine.create_game(
+                    "鬼修烟测", "mutated_yin", "ghost", 99002, start_world="hell",
+                )
+                ghost_game = engine.store.load(ghost_created["id"])
+                ghost_game.player.realm_index = 3
+                ghost_game.player.layer = REALMS[3].layers
+                grant_intrinsic_progression_if_new_highwater(ghost_game.player)
+                ghost_game.player.opportunity = opportunity_required(ghost_game.player)
+                ghost_game.player.ghost_soul_erosion_rate_pp = 0.08
+                ghost_game.player.ghost_wangsheng_energy = 2
+                engine.store.save(ghost_game)
+                page.reload()
+                page.get_by_text("续接 · 鬼修烟测").click()
+                page.wait_for_function("!document.querySelector('#ghost-system-panel').classList.contains('hidden')")
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ghost-system-panel").is_visible()
+                assert page.locator("#ghost-erosion").text_content() == "0.0800%"
+                assert page.locator("#ghost-wangsheng").text_content() == "2"
+                with page.expect_response(lambda response: response.url.endswith("/ghost-wangsheng")):
+                    page.locator("#ghost-wangsheng-action").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ghost-erosion").text_content() == "0.0600%"
+                page.once("dialog", lambda dialog: dialog.accept())
+                with page.expect_response(lambda response: response.url.endswith("/ghost-reincarnate")):
+                    page.locator("#ghost-reincarnate-action").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert "练气1层" in page.locator("#realm-name").text_content()
+                assert page.locator("#ghost-reincarnate-action").is_hidden()
                 browser.close()
         finally:
             httpd.shutdown()
