@@ -32,10 +32,11 @@ class ContentRegistryTests(unittest.TestCase):
                 "blood_prison", "corpse_hall", "heaven_demon_palace", "myriad_soul_abyss", "black_sun_temple",
                 "cloud_immortal_palace", "taiyi_pill_sect", "law_sea_pavilion",
                 "asura_war_court", "blood_moon_palace", "annihilation_sea_sect",
+                "ghost_passage_court", "forgetful_river_archive", "iron_tree_prison_sect",
             } <= set(registry.faction_definitions),
         )
         self.assertIn("myriad_beast_court", registry.faction_definitions)
-        self.assertEqual([entry["enabled"] for entry in registry.world_systems["quick_start_presets"]], [True] * 8)
+        self.assertEqual([entry["enabled"] for entry in registry.world_systems["quick_start_presets"]], [True] * 9)
         self.assertEqual(registry.root_definitions["pseudo_all"]["efficiency"], 0.7)
         self.assertNotIn("qi", registry.world_systems["stage_lifespan_bonus"])
         self.assertEqual(registry.world_systems["stage_lifespan_bonus"]["foundation"]["middle"], [12, 20])
@@ -75,6 +76,9 @@ class ContentRegistryTests(unittest.TestCase):
             if "monster" in item.tags:
                 self.assertIn((item.id, source, "monster_realm"), sold, item.name)
                 self.assertIn((item.id, source, "phantom_underworld"), sold, item.name)
+                continue
+            if "ghost" in item.tags:
+                self.assertIn((item.id, source, "hell"), sold, item.name)
                 continue
             world = "human" if source <= 4 else "spirit"
             self.assertIn((item.id, source, world), sold, item.name)
@@ -119,7 +123,7 @@ class ContentRegistryTests(unittest.TestCase):
             for row in registry.market_goods
             if row["kind"] == "item" and registry.items[row["content_id"]].conception_bonus > 0
         }
-        self.assertEqual(sold_worlds, {"human", "demon", "spirit", "true_demon", "celestial", "asura", "monster_realm", "phantom_underworld", "nether"})
+        self.assertEqual(sold_worlds, {"human", "demon", "spirit", "true_demon", "hell", "celestial", "asura", "monster_realm", "phantom_underworld", "nether"})
         self.assertEqual(registry.world_systems["demonic_cultivation"]["divine_sense_training_base"], 40)
         self.assertEqual(registry.world_systems["family"]["conception_chance_by_realm"]["5"], 0.0)
 

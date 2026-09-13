@@ -195,6 +195,15 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             assign_technique(player, sense, "divine_sense")
             player.divine_sense_rank = 1
             player.divine_sense_experience = 0.0
+        if path == "ghost":
+            starter = copy.deepcopy(TECHNIQUE_CATALOG["TECH_GHOST_BREATHING"])
+            learn_technique(player, starter)
+            assign_technique(player, starter, "main")
+            sense = copy.deepcopy(TECHNIQUE_CATALOG["TECH_SOUL_ECHO_SENSE"])
+            learn_technique(player, sense)
+            assign_technique(player, sense, "divine_sense")
+            player.divine_sense_rank = 1
+            player.divine_sense_experience = 0.0
         if preset:
             player.realm_index = int(preset["realm_index"])
             player.layer = int(preset["layer"])
@@ -687,7 +696,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         destination_name = WORLD_SYSTEMS["world_names"][destination]
         event = self.events_by_id["EVT_SPIRIT_CROSSING_001"]
         game.pending_event = self._instantiate_event(event, game, rng)
-        if player.path == "monster":
+        if player.path in {"monster", "ghost"}:
             game.pending_event["title"] = f"偷渡{destination_name}"
             game.pending_event["body"] = str(game.pending_event.get("body", "")).replace("灵界", destination_name)
         game.history.append(HistoryRecord(
@@ -832,7 +841,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             raise ValueError("当前状态无法跨越界面")
         pairs = {
             "spirit": "human", "true_demon": "demon", "celestial": "spirit",
-            "asura": "true_demon", "nether": "phantom_underworld",
+            "asura": "true_demon", "nether": "phantom_underworld", "hell": "human",
         }
         nether_lower_worlds = {"monster_realm", "phantom_underworld"}
         reverse_pairs = {lower: upper for upper, lower in pairs.items()}
@@ -4632,6 +4641,8 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
     def _ascension_destination(path: str) -> str:
         if path == "demonic":
             return "demon"
+        if path == "ghost":
+            return "hell"
         if path == "monster" and "monster_realm" in WORLD_SYSTEMS.get("world_profiles", {}):
             return "monster_realm"
         return "spirit"
@@ -7436,11 +7447,18 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                     and not game.active_trial and game.player.alive
                 ),
                 "can_return_human": bool(
-                    game.player.world == "spirit"
+                    game.player.world in {"spirit", "hell"}
                     and game.player.realm_index == int(WORLD_SYSTEMS["world_travel"]["required_realm"])
                     and not game.player.sealed_cultivation and game.player.alive
                 ),
-                "can_return_spirit": bool(game.player.world == "human" and game.player.sealed_cultivation and game.player.alive),
+                "can_return_spirit": bool(
+                    game.player.world == "human" and game.player.sealed_cultivation
+                    and game.player.sealed_cultivation.get("upper_world") == "spirit" and game.player.alive
+                ),
+                "can_return_hell": bool(
+                    game.player.world == "human" and game.player.sealed_cultivation
+                    and game.player.sealed_cultivation.get("upper_world") == "hell" and game.player.alive
+                ),
                 "can_return_demon": bool(
                     game.player.world == "true_demon"
                     and game.player.realm_index == int(WORLD_SYSTEMS["world_travel"]["required_realm"])

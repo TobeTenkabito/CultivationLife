@@ -10,6 +10,7 @@
       "spirit":[{"upper":0.03,"realm_index":6},{"upper":0.18,"realm_index":5},{"upper":0.48,"realm_index":4},{"upper":0.78,"realm_index":3},{"upper":1.00,"realm_index":2}],
       "demon":[{"upper":0.02,"realm_index":5},{"upper":0.12,"realm_index":4},{"upper":0.42,"realm_index":3},{"upper":0.76,"realm_index":2},{"upper":1.00,"realm_index":1}],
       "true_demon":[{"upper":0.02,"realm_index":8},{"upper":0.10,"realm_index":7},{"upper":0.28,"realm_index":6},{"upper":0.55,"realm_index":5},{"upper":0.80,"realm_index":4},{"upper":1.00,"realm_index":3}],
+      "hell":[{"upper":0.03,"realm_index":8},{"upper":0.14,"realm_index":7},{"upper":0.34,"realm_index":6},{"upper":0.60,"realm_index":5},{"upper":0.82,"realm_index":4},{"upper":1.00,"realm_index":3}],
       "celestial":[{"upper":0.05,"realm_index":11},{"upper":0.25,"realm_index":10},{"upper":1.00,"realm_index":9}],
       "asura":[{"upper":0.03,"realm_index":11},{"upper":0.20,"realm_index":10},{"upper":1.00,"realm_index":9}]
     },
@@ -49,7 +50,10 @@
       "law_sea_pavilion":{"dao":0.65,"confucian":0.25,"buddhist":0.10},
       "asura_war_court":{"demonic":0.88,"monster":0.08,"ghost":0.04},
       "blood_moon_palace":{"demonic":0.72,"ghost":0.20,"monster":0.08},
-      "annihilation_sea_sect":{"demonic":0.80,"ghost":0.12,"dao":0.08}
+      "annihilation_sea_sect":{"demonic":0.80,"ghost":0.12,"dao":0.08},
+      "ghost_passage_court":{"ghost":0.74,"buddhist":0.16,"confucian":0.10},
+      "forgetful_river_archive":{"ghost":0.62,"confucian":0.22,"dao":0.16},
+      "iron_tree_prison_sect":{"ghost":0.72,"demonic":0.18,"dao":0.10}
     }
   },
   "rewards": {
@@ -235,6 +239,42 @@
         {"id":"ass_ning","name":"宁断潮","title":"摩睺罗刀尊","realm_index":11,"layer":1,"age":1320000,"lifespan":null,"spirit_root":"supreme_water","path":"demonic","race":"human","world":"asura"},
         {"id":"ass_wu","name":"巫照夜","title":"紧那罗护法","realm_index":10,"layer":1,"age":366000,"lifespan":null,"spirit_root":"law_space","path":"demonic","race":"human","world":"asura"},
         {"id":"ass_cang","name":"苍溟客","title":"迦楼罗巡海使","realm_index":9,"layer":1,"age":93000,"lifespan":null,"spirit_root":"heavenly_water_earth","path":"dao","race":"human","world":"asura"}
+      ]
+    },
+    {
+      "id":"ghost_passage_court","name":"幽关渡院","world":"hell","allegiance_race":"human","path":"渡魂守序道统","description":"镇守幽关与忘川渡口，记录来魂、护送迷魂，也追捕借尸夺舍者。","color":"#56677a",
+      "npcs":[
+        {"id":"gpc_lord","name":"沈照冥","title":"渡院山长","realm_index":8,"layer":5,"age":52000,"lifespan":null,"spirit_root":"law_karma","path":"ghost","race":"human","world":"hell"},
+        {"id":"gpc_wen","name":"闻灯","title":"守关大执事","realm_index":8,"layer":1,"age":37600,"lifespan":null,"spirit_root":"law_space","path":"ghost","race":"human","world":"hell"},
+        {"id":"gpc_su","name":"苏还真","title":"引渡长老","realm_index":7,"layer":7,"age":18400,"lifespan":null,"spirit_root":"supreme_water","path":"buddhist","race":"human","world":"hell"},
+        {"id":"gpc_yan","name":"晏无归","title":"巡关长老","realm_index":7,"layer":2,"age":12600,"lifespan":null,"spirit_root":"mutated_yin","path":"ghost","race":"human","world":"hell"},
+        {"id":"gpc_luo","name":"洛提灯","title":"渡魂使","realm_index":6,"layer":8,"age":7200,"lifespan":null,"spirit_root":"heavenly_water_earth","path":"ghost","race":"human","world":"hell"},
+        {"id":"gpc_ning","name":"宁问渡","title":"录籍使","realm_index":6,"layer":2,"age":4680,"lifespan":null,"spirit_root":"supreme_metal","path":"confucian","race":"human","world":"hell"},
+        {"id":"gpc_mu","name":"穆青灯","title":"外院行走","realm_index":5,"layer":6,"age":2380,"lifespan":3060,"spirit_root":"mutated_yin","path":"ghost","race":"human","world":"hell"}
+      ]
+    },
+    {
+      "id":"forgetful_river_archive","name":"忘川书楼","world":"hell","allegiance_race":"human","path":"记忆与神魂学宫","description":"书楼不收纸卷，只保存亡者自愿寄存的记忆；门人以辨念、补魂和勘验因果见长。","color":"#5d6184",
+      "npcs":[
+        {"id":"fra_lord","name":"江停月","title":"书楼主人","realm_index":8,"layer":6,"age":61000,"lifespan":null,"spirit_root":"law_time","path":"ghost","race":"human","world":"hell"},
+        {"id":"fra_gu","name":"顾观澜","title":"总校勘","realm_index":8,"layer":2,"age":41800,"lifespan":null,"spirit_root":"law_karma","path":"confucian","race":"human","world":"hell"},
+        {"id":"fra_bai","name":"白映川","title":"照魂长老","realm_index":7,"layer":8,"age":20600,"lifespan":null,"spirit_root":"mutated_yin","path":"ghost","race":"human","world":"hell"},
+        {"id":"fra_qiu","name":"秋知微","title":"藏忆长老","realm_index":7,"layer":3,"age":14100,"lifespan":null,"spirit_root":"supreme_wood","path":"dao","race":"human","world":"hell"},
+        {"id":"fra_xie","name":"谢临渊","title":"问心先生","realm_index":6,"layer":7,"age":6840,"lifespan":null,"spirit_root":"law_space","path":"ghost","race":"human","world":"hell"},
+        {"id":"fra_lan","name":"蓝书夜","title":"抄念使","realm_index":6,"layer":1,"age":4320,"lifespan":null,"spirit_root":"supreme_water","path":"confucian","race":"human","world":"hell"},
+        {"id":"fra_he","name":"何见昔","title":"寻忆弟子","realm_index":5,"layer":5,"age":2160,"lifespan":3020,"spirit_root":"mutated_yin","path":"ghost","race":"human","world":"hell"}
+      ]
+    },
+    {
+      "id":"iron_tree_prison_sect","name":"铁树狱门","world":"hell","allegiance_race":"human","path":"阴身与镇狱战宗","description":"山门扎根铁树荒原，以阴铁锻魂、以狱火炼身，负责封镇地狱界失控凶魂。","color":"#584c52",
+      "npcs":[
+        {"id":"itp_lord","name":"岳镇幽","title":"狱门之主","realm_index":8,"layer":7,"age":68000,"lifespan":null,"spirit_root":"law_space","path":"ghost","race":"human","world":"hell"},
+        {"id":"itp_chu","name":"楚横骨","title":"镇狱太上","realm_index":8,"layer":3,"age":45200,"lifespan":null,"spirit_root":"supreme_earth","path":"ghost","race":"human","world":"hell"},
+        {"id":"itp_ling","name":"凌夜刑","title":"执刑长老","realm_index":7,"layer":9,"age":22400,"lifespan":null,"spirit_root":"mutated_thunder","path":"demonic","race":"human","world":"hell"},
+        {"id":"itp_du","name":"杜沉锋","title":"锻魂长老","realm_index":7,"layer":4,"age":15200,"lifespan":null,"spirit_root":"supreme_metal","path":"ghost","race":"human","world":"hell"},
+        {"id":"itp_tang","name":"唐守一","title":"守狱使","realm_index":6,"layer":9,"age":7580,"lifespan":null,"spirit_root":"heavenly_fire_earth","path":"dao","race":"human","world":"hell"},
+        {"id":"itp_ye","name":"叶听雷","title":"巡刑使","realm_index":6,"layer":3,"age":4860,"lifespan":null,"spirit_root":"mutated_yin","path":"ghost","race":"human","world":"hell"},
+        {"id":"itp_qin","name":"秦砺魂","title":"内门弟子","realm_index":5,"layer":7,"age":2540,"lifespan":3120,"spirit_root":"supreme_earth","path":"ghost","race":"human","world":"hell"}
       ]
     }
   ]
