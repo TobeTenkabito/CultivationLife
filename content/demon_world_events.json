@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "world": "demon",
+  "events": [
+    {
+      "id":"EVT_DEMON_COMMON_001","version":1,"title":"煞原雷骨","body":"聚煞原一夜雷暴后，荒地上露出半截焦黑兽骨。骨中雷意仍在游走，附近魔物既畏惧又不肯离去。",
+      "tags":["demon_common","exploration"],"weight":6,"intent_weights":{"explore":1.8},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":1},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"temper","text":"以雷骨淬炼魔躯","effects":[{"type":"damage","value":0.08,"reason":"雷煞入体撕裂经脉"},{"type":"add_opportunity","value":8,"if_result":["injured"]}]},
+        {"id":"disperse","text":"引雷意劈散盘踞兽群","effects":[{"type":"add_fame","value":4},{"type":"add_karma","value":-2}]},
+        {"id":"leave","text":"不惊动荒原兽群","effects":[]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_COMMON_002","version":1,"title":"尸谷夜火","body":"炼尸谷深夜浮起数百点青火，每一点火光都照着一具尚未完全死去的古尸。它们没有扑杀生人，只朝同一座塌陷石门缓慢叩首。",
+      "tags":["demon_common","cultivation"],"weight":6,"intent_weights":{"cultivate":1.5,"explore":1.4},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":2},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"listen","text":"随古尸叩首，聆听地底魂音","effects":[{"type":"restore_mp","value":-0.10},{"type":"add_opportunity","value":10}]},
+        {"id":"extinguish","text":"熄灭尸火，令残魂安息","effects":[{"type":"add_karma","value":-4},{"type":"add_fame","value":3}]},
+        {"id":"harvest","text":"收取尸火炼入魂幡","effects":[{"type":"add_sha_qi","value":7},{"type":"add_karma","value":5}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_COMMON_003","version":1,"title":"赤髓斗炉","body":"赤髓城两名炼器师各执一尊魔炉，都说自己的火候能把同一块血髓炼得更纯。他们邀你亲自选炉，败者的炉火将归胜者吞噬。",
+      "tags":["demon_common","city"],"weight":5,"intent_weights":{"market":1.5,"commission":1.3},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":1},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"fierce","text":"选烈火快炼，以魔气压住炸炉","effects":[{"type":"damage","value":0.06,"reason":"血髓炸裂灼伤魔躯"},{"type":"add_fame","value":5,"if_result":["injured"]}]},
+        {"id":"slow","text":"选阴火慢炼，护住血髓灵性","effects":[{"type":"restore_mp","value":-0.08},{"type":"add_opportunity","value":7}]},
+        {"id":"stop","text":"指出两炉相吞会引爆整条火脉","effects":[{"type":"add_karma","value":-2},{"type":"add_fame","value":2}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_COMMON_004","version":1,"title":"裂谷魔风","body":"噬天裂谷吹出一阵带有哭声的黑风。风里并非亡魂，而是界壁另一侧尚未成形的灵气，被裂谷碾碎后发出的震鸣。",
+      "tags":["demon_common","exploration"],"weight":5,"intent_weights":{"explore":1.8,"treasure":1.4},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":3},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"face","text":"迎风参悟界壁生灭","effects":[{"type":"restore_mp","value":-0.14},{"type":"add_opportunity","value":14}]},
+        {"id":"seal","text":"以乱石暂堵风眼","effects":[{"type":"add_karma","value":-3},{"type":"add_fame","value":4}]},
+        {"id":"draw","text":"把界外浊气引入自身经脉","effects":[{"type":"add_sha_qi","value":10},{"type":"add_heart_demon","value":3}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_COMMON_005","version":1,"title":"血河浮棺","body":"一口乌木古棺逆着血河漂来，棺盖上生满白花。河中魔物不敢靠近，棺内却不断传出婴儿般的心跳。",
+      "tags":["demon_common","treasure"],"weight":5,"intent_weights":{"treasure":1.8,"explore":1.3},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":2},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"open","text":"开棺查看心跳来源","effects":[{"type":"damage","value":0.07,"reason":"棺中尸气骤然反噬"},{"type":"add_opportunity","value":9,"if_result":["injured"]}]},
+        {"id":"tow","text":"把古棺送回炼尸谷旧墓","effects":[{"type":"add_karma","value":-4},{"type":"add_fame","value":3}]},
+        {"id":"sink","text":"斩断白花，让古棺沉回河底","effects":[{"type":"add_sha_qi","value":5}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_COMMON_006","version":1,"title":"魔婴叩心","body":"闭关时，一道与你气息相同的幼小魔影出现在识海门外。它是修行中舍弃的欲念所化，既可能成为心魔，也可能替你指出道心裂缝。",
+      "tags":["demon_common","cultivation"],"weight":5,"intent_weights":{"cultivate":1.8,"seclusion":1.5},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":3},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"question","text":"问它自己究竟在恐惧什么","effects":[{"type":"add_heart_demon","value":-4},{"type":"add_opportunity","value":10}]},
+        {"id":"devour","text":"吞掉魔影，收回舍弃的欲念","effects":[{"type":"add_sha_qi","value":8},{"type":"add_heart_demon","value":2}]},
+        {"id":"dismiss","text":"守住本心，不与幻象纠缠","effects":[{"type":"restore_mp","value":0.08}]}
+      ]
+    },
+
+    {
+      "id":"EVT_DEMON_BLOOD_RIVER_001","version":1,"title":"血河逆流","body":"赤髓城外的血河突然倒流，沿岸魔植一夜枯死，沉在河底的兽骨却重新生出血肉。血狱魔宗正在封锁上游，阴尸殿则断言有人惊动了河源古尸。",
+      "tags":["story_chain","demon_blood_river","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_blood_river_eligible","base_chance":0.16,"unit_increment":0.03},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":2},{"path":"player.realm_index","op":"lte","value":3}]},
+      "choices":[
+        {"id":"upstream","text":"沿逆流追查河源","effects":[{"type":"set_flag","flag":"blood_river_traced_source"},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_002"}]},
+        {"id":"protect","text":"先护住赤髓城外的低阶魔修","effects":[{"type":"add_karma","value":-4},{"type":"set_flag","flag":"blood_river_saved_banks"},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_002"}]},
+        {"id":"absorb","text":"趁血河倒流汲取河底精气","effects":[{"type":"add_sha_qi","value":8},{"type":"set_flag","flag":"blood_river_stole_essence"},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_002"}]},
+        {"id":"leave","text":"远离逆流血河","effects":[{"type":"set_flag","flag":"demon_blood_river_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_BLOOD_RIVER_002","version":1,"title":"三脉争泉","body":"血河源头裸露出一座血色石窟。血狱魔宗想引走血泉炼体，阴尸殿要保住窟中的古尸，赤髓城散修则发现河水一旦断绝，全城护阵也会随之枯竭。三方尚未动手，石窟里的复生兽骨已先扑了出来。",
+      "tags":["story_chain","demon_blood_river","manual_only"],"weight":0,
+      "choices":[
+        {"id":"clear_beasts","text":"击退复生骨兽，让三方先停手（战斗力至少 1,050）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":1050}],"failure_reason":"骨兽撕开你的魔躯，将血肉拖回河源","success_text":"骨兽退回石窟，三方终于肯听你说完。"},{"type":"set_flag","flag":"blood_river_three_sides_paused","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_003","if_result":["check_success"]}]},
+        {"id":"dive","text":"潜入血泉寻找异变根源（HP 不低于 65%）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.65}],"failure_reason":"血泉中的万兽怨念吞没神智","success_text":"你穿过骨潮，在石窟底部看见一颗仍在跳动的巨心。"},{"type":"damage","value":0.12,"if_result":["check_success"]},{"type":"set_flag","flag":"blood_river_saw_heart","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_003","if_result":["injured"]}]},
+        {"id":"follow_hall","text":"随阴尸殿从古墓侧道入窟","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"blood_river_corpse_route"},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_003"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_BLOOD_RIVER_003","version":1,"title":"赤渊古鲸","body":"所谓河源古尸，其实是远古赤渊鲸遗留的心脏。它死后仍以最后一口气维持血河，数千年来各方采掘血髓，终于惊醒寄生在心室中的血河蜮。逆流不是古鲸复生，而是它在竭力把虫群推出自己的心脏。",
+      "tags":["story_chain","demon_blood_river","manual_only"],"weight":0,
+      "choices":[
+        {"id":"slay_brood","text":"杀入心室斩灭血河蜮母（敌方总战力 1,300）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":1300}],"failure_reason":"蜮母钻入心脉，将你化作新的虫巢","success_text":"蜮母伏诛，古鲸心脏重新泵出清亮血泉。"},{"type":"set_flag","flag":"blood_river_brood_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_004","if_result":["check_success"]}]},
+        {"id":"wake_echo","text":"以神识唤醒古鲸最后一缕残念（MP 不低于 70%）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.70}],"failure_reason":"古鲸临死痛苦冲碎你的识海","success_text":"古鲸残念指出七处虫巢，并请求你让心脏归于安眠。"},{"type":"restore_mp","value":-0.22,"if_result":["check_success"]},{"type":"set_flag","flag":"blood_river_heard_whale","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_004","if_result":["check_success"]}]},
+        {"id":"take_heart","text":"趁虫群外逃，切走一块古鲸心髓","effects":[{"type":"add_karma","value":10},{"type":"add_sha_qi","value":12},{"type":"set_flag","flag":"blood_river_cut_heart"},{"type":"queue_event","event_id":"EVT_DEMON_BLOOD_RIVER_004"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_BLOOD_RIVER_004","version":1,"title":"血河再生","body":"血河蜮失去母虫后纷纷枯死，古鲸心脏却已无法再支撑下一个千年。三方都在等待你的决定：让它安眠、以阵法延续血河，或把残存心髓炼成魔道资粮。",
+      "tags":["story_chain","demon_blood_river","manual_only"],"weight":0,
+      "choices":[
+        {"id":"release","text":"完成古鲸遗愿，让心脏归于安眠","conditions":{"has_flag":"blood_river_heard_whale"},"disabled_reason":"你没有听见古鲸最后的愿望","effects":[{"type":"add_item","item_id":"blood_river_heart_scale"},{"type":"add_karma","value":-10},{"type":"add_opportunity","value":18},{"type":"set_flag","flag":"demon_blood_river_completed"},{"type":"set_milestone","milestone":"demon_blood_river_completed"}]},
+        {"id":"renew","text":"清除虫巢，以三方魔力续接血河","effects":[{"type":"learn_technique","technique_id":"TECH_BLOOD_RIVER_REVERSION"},{"type":"add_fame","value":14},{"type":"add_karma","value":-4},{"type":"set_flag","flag":"demon_blood_river_completed"},{"type":"set_milestone","milestone":"demon_blood_river_completed"}]},
+        {"id":"refine","text":"炼化残存心髓，任血河逐年干涸","effects":[{"type":"add_item","item_id":"blood_river_heart_scale"},{"type":"learn_technique","technique_id":"TECH_BLOOD_RIVER_REVERSION"},{"type":"add_karma","value":14},{"type":"set_flag","flag":"demon_blood_river_completed"},{"type":"set_milestone","milestone":"demon_blood_river_completed"}]}
+      ]
+    },
+
+    {
+      "id":"EVT_DEMON_CORPSE_MOON_001","version":1,"title":"尸月照谷","body":"炼尸谷上空升起第二轮月亮。月光所及之处，古尸纷纷离棺，却没有袭击活人，而是列队走向谷底封了三千年的玄棺。阴尸殿急召门人，血狱魔宗也派人来夺传说中的尸王本源。",
+      "tags":["story_chain","demon_corpse_moon","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_corpse_moon_eligible","base_chance":0.14,"unit_increment":0.03},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":3},{"path":"player.realm_index","op":"lte","value":4}]},
+      "choices":[
+        {"id":"follow","text":"随行尸队伍进入谷底","effects":[{"type":"set_flag","flag":"corpse_moon_followed_dead"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_002"}]},
+        {"id":"hall","text":"协助阴尸殿封锁玄棺","effects":[{"type":"set_flag","flag":"corpse_moon_helped_hall"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_002"}]},
+        {"id":"blood","text":"与血狱修士抢先夺取尸王本源","effects":[{"type":"add_sha_qi","value":10},{"type":"set_flag","flag":"corpse_moon_sought_core"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_002"}]},
+        {"id":"leave","text":"避开尸月异象","effects":[{"type":"set_flag","flag":"demon_corpse_moon_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_CORPSE_MOON_002","version":1,"title":"万尸守棺","body":"玄棺周围没有夺舍大阵，只有层层向外的封毒阵纹。每一具行尸都把自己的阴气送入阵眼，像是在替棺中人压制某种东西。强行破棺者已经惊动尸群，谷底即将化为混战。",
+      "tags":["story_chain","demon_corpse_moon","manual_only"],"weight":0,
+      "choices":[
+        {"id":"read","text":"辨认玄棺外的封毒阵纹","effects":[{"type":"restore_mp","value":-0.14},{"type":"add_opportunity","value":16},{"type":"set_flag","flag":"corpse_moon_read_seal"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_003"}]},
+        {"id":"defend","text":"拦住抢夺尸王本源的修士（战斗力至少 7,500）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":7500}],"failure_reason":"争棺群修与尸潮将你围杀在谷底","success_text":"破棺者退去，尸群没有继续追杀。"},{"type":"set_flag","flag":"corpse_moon_defended_coffin","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_003","if_result":["check_success"]}]},
+        {"id":"break","text":"趁乱击碎玄棺","effects":[{"type":"add_karma","value":10},{"type":"set_flag","flag":"corpse_moon_broke_coffin"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_003"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_CORPSE_MOON_003","version":1,"title":"燕沉霜醒来","body":"玄棺中坐起一名白发女子，自称燕沉霜。三千年前尸瘟席卷魔界，她以自身吸尽疫毒，再命部属将自己和毒源同封谷底。今夜尸月并非召她复生，而是封印将破，旧部前来替她续阵。",
+      "tags":["story_chain","demon_corpse_moon","manual_only"],"weight":0,
+      "choices":[
+        {"id":"believe","text":"相信燕沉霜，寻找泄漏的尸瘟","conditions":{"has_flag":"corpse_moon_read_seal"},"disabled_reason":"你没有读懂玄棺外的封毒阵纹","effects":[{"type":"set_flag","flag":"corpse_moon_believed_yan"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_004"}]},
+        {"id":"test","text":"以自身魔气试探她体内疫毒","effects":[{"type":"damage","value":0.16,"reason":"三千年尸瘟侵入经脉"},{"type":"set_flag","flag":"corpse_moon_tested_plague","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_004","if_result":["injured"]}]},
+        {"id":"seize","text":"趁她虚弱强夺尸王月魄","effects":[{"type":"add_karma","value":16},{"type":"add_sha_qi","value":14},{"type":"set_flag","flag":"corpse_moon_attacked_yan"},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_004"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_CORPSE_MOON_004","version":1,"title":"尸瘟破封","body":"真正的尸瘟早已沿地下阴脉爬出玄棺，化作一头没有五官的疫尸。它故意引各宗破棺，只等燕沉霜失去压制便吞下她的尸王之躯。疫尸冲出谷底，沿途活人和行尸都开始腐化。",
+      "tags":["story_chain","demon_corpse_moon","manual_only"],"weight":0,
+      "choices":[
+        {"id":"joint","text":"与燕沉霜及万尸合力镇瘟（敌方总战力 9,500）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":9500}],"failure_reason":"疫尸吞下你的血肉，尸瘟借此冲出炼尸谷","success_text":"万尸锁住阴脉，你与燕沉霜击碎疫尸毒核。"},{"type":"set_flag","flag":"corpse_moon_plague_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_005","if_result":["check_success"]}]},
+        {"id":"burn","text":"引爆谷底阴火，将疫尸与玄棺一同焚尽（MP 不低于 65%）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.65}],"failure_reason":"阴火失控，连同你的元神一起点燃","success_text":"阴火烧穿毒核，燕沉霜也在火中散去尸身。"},{"type":"restore_mp","value":-0.25,"if_result":["check_success"]},{"type":"set_flag","flag":"corpse_moon_burned_valley","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_005","if_result":["check_success"]}]},
+        {"id":"devour","text":"让疫尸与燕沉霜互噬，再收取胜者本源","effects":[{"type":"damage","value":0.22,"reason":"两股尸王本源同时反噬"},{"type":"add_karma","value":20,"if_result":["injured"]},{"type":"set_flag","flag":"corpse_moon_devoured_remains","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_DEMON_CORPSE_MOON_005","if_result":["injured"]}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_CORPSE_MOON_005","version":1,"title":"月落尸眠","body":"尸月开始坠落，失去疫毒的行尸也逐一躺回旧墓。燕沉霜的神智正在消散，她不愿再以尸王之身留存，只求有人把这次尸瘟的根源传给后来者。",
+      "tags":["story_chain","demon_corpse_moon","manual_only"],"weight":0,
+      "choices":[
+        {"id":"inherit","text":"承下太阴照魂之法，送她安眠","effects":[{"type":"learn_technique","technique_id":"TECH_CORPSE_MOON_SOUL"},{"type":"add_karma","value":-8},{"type":"add_opportunity","value":24},{"type":"set_flag","flag":"demon_corpse_moon_completed"},{"type":"set_milestone","milestone":"demon_corpse_moon_completed"}]},
+        {"id":"orb","text":"收取无毒月魄，替万尸重立封阵","effects":[{"type":"add_item","item_id":"corpse_moon_orb"},{"type":"add_fame","value":18},{"type":"set_flag","flag":"demon_corpse_moon_completed"},{"type":"set_milestone","milestone":"demon_corpse_moon_completed"}]},
+        {"id":"take_all","text":"炼化月魄与残存尸王本源","conditions":{"has_flag":"corpse_moon_devoured_remains"},"disabled_reason":"两具尸王没有留下可供吞噬的完整本源","effects":[{"type":"add_item","item_id":"corpse_moon_orb"},{"type":"learn_technique","technique_id":"TECH_CORPSE_MOON_SOUL"},{"type":"add_karma","value":18},{"type":"set_flag","flag":"demon_corpse_moon_completed"},{"type":"set_milestone","milestone":"demon_corpse_moon_completed"}]}
+      ]
+    },
+
+    {
+      "id":"EVT_DEMON_RIFT_BEAST_001","version":1,"title":"裂谷兽鸣","body":"噬天裂谷连续七日传出低沉兽鸣，每一次震动都会让界壁裂开数丈。两宗都认定有上界异兽即将降临，已经在谷口布下猎阵；你却在震鸣间听见另一道微弱幼兽回应。",
+      "tags":["story_chain","demon_rift_beast","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_rift_beast_eligible","base_chance":0.14,"unit_increment":0.025},
+      "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":4},{"path":"player.realm_index","op":"lte","value":5}]},
+      "choices":[
+        {"id":"listen","text":"避开猎阵，寻找幼兽回应","effects":[{"type":"set_flag","flag":"rift_beast_heard_cub"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_002"}]},
+        {"id":"hunt","text":"加入两宗猎阵，等待异兽现身","effects":[{"type":"add_fame","value":8},{"type":"set_flag","flag":"rift_beast_joined_hunt"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_002"}]},
+        {"id":"enter","text":"直接跃入裂谷探查界壁背面","effects":[{"type":"damage","value":0.14,"reason":"界壁乱流割裂法体"},{"type":"set_flag","flag":"rift_beast_entered_void","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_002","if_result":["injured"]}]},
+        {"id":"leave","text":"不靠近正在扩张的裂谷","effects":[{"type":"set_flag","flag":"demon_rift_beast_incomplete"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_RIFT_BEAST_002","version":1,"title":"界胎受困","body":"裂谷背面蜷缩着一头尚未睁眼的噬界幼兽。它在穿越界壁时被上古封界钉卡住，母兽虺空并非要吞噬魔界，而是在外侧一遍遍撕咬界壁，试图救出幼崽。猎阵若在此刻发动，母兽必会与整个魔界拼命。",
+      "tags":["story_chain","demon_rift_beast","manual_only"],"weight":0,
+      "choices":[
+        {"id":"free","text":"设法拔出封界钉，放幼兽与母兽团聚","effects":[{"type":"restore_mp","value":-0.18},{"type":"set_flag","flag":"rift_beast_chose_rescue"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_003"}]},
+        {"id":"warn","text":"返回谷口，劝两宗暂缓猎杀","conditions":{"has_flag":"rift_beast_heard_cub"},"disabled_reason":"你没有分辨出幼兽的回应","effects":[{"type":"add_karma","value":-4},{"type":"set_flag","flag":"rift_beast_warned_sects"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_003"}]},
+        {"id":"bait","text":"以幼兽为饵，把母兽引入猎阵","effects":[{"type":"add_karma","value":18},{"type":"add_sha_qi","value":14},{"type":"set_flag","flag":"rift_beast_used_cub"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_003"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_RIFT_BEAST_003","version":1,"title":"虺空临界","body":"一只覆盖半边天幕的巨爪从裂谷外探入。虺空强忍猎阵轰击，只把利爪伸向幼兽；可封界钉已与幼兽脊骨长在一起，强行拔除会让界壁和幼兽同时崩裂。",
+      "tags":["story_chain","demon_rift_beast","manual_only"],"weight":0,
+      "choices":[
+        {"id":"cut_bone","text":"切下与封界钉相连的病骨（HP、MP 均不低于 60%）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.60},{"stat":"mp_ratio","op":"gte","value":0.60}],"failure_reason":"幼兽痛极挣扎，你与破碎界壁一同被虺空吞入腹中","success_text":"病骨脱落，幼兽虽受重伤却终于脱离封界钉。"},{"type":"damage","value":0.16,"if_result":["check_success"]},{"type":"restore_mp","value":-0.16,"if_result":["injured"]},{"type":"set_flag","flag":"rift_beast_cub_freed","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_004","if_result":["injured"]}]},
+        {"id":"turn_array","text":"反转猎阵，以阵力震出封界钉","conditions":{"has_flag":"rift_beast_warned_sects"},"disabled_reason":"两宗没有为你让出猎阵阵眼","effects":[{"type":"set_flag","flag":"rift_beast_array_turned"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_004"}]},
+        {"id":"strike_mother","text":"趁母兽护崽全力攻其咽喉","effects":[{"type":"add_karma","value":20},{"type":"set_flag","flag":"rift_beast_struck_mother"},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_004"}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_RIFT_BEAST_004","version":1,"title":"噬界风暴","body":"封界钉松动的一瞬，裂谷彻底张开。虺空的身躯、失控猎阵与倾泻而入的界外风暴同时挤在谷口；若不能立刻分出胜负，魔界北荒会被整个削去。",
+      "tags":["story_chain","demon_rift_beast","manual_only"],"weight":0,
+      "choices":[
+        {"id":"open_path","text":"护住幼兽，为虺空打开一条退路（敌方总战力 68,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":68000}],"failure_reason":"界外风暴与猎阵同时崩塌，将你撕碎在裂谷中","success_text":"你斩开猎阵锁链，虺空衔起幼兽退向虚空。"},{"type":"set_flag","flag":"rift_beast_family_saved","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_005","if_result":["check_success"]}]},
+        {"id":"slay","text":"联合两宗围杀负伤虺空（敌方总战力 72,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":72000}],"failure_reason":"虺空临死吞下整座猎阵，你也没能逃出兽口","success_text":"巨兽倒在裂谷边缘，庞大尸身暂时堵住了界外风暴。"},{"type":"set_flag","flag":"rift_beast_mother_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_005","if_result":["check_success"]}]},
+        {"id":"seal","text":"舍弃争斗，全力重钉界壁（MP 不低于 70%）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.70}],"failure_reason":"封界钉反震识海，你坠入无法闭合的界缝","success_text":"裂谷被重新钉住，虺空带着幼兽退回界外。"},{"type":"restore_mp","value":-0.30,"if_result":["check_success"]},{"type":"set_flag","flag":"rift_beast_rift_sealed","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_DEMON_RIFT_BEAST_005","if_result":["check_success"]}]}
+      ]
+    },
+    {
+      "id":"EVT_DEMON_RIFT_BEAST_005","version":1,"title":"裂谷余息","body":"噬天裂谷终于停止扩张。虺空若仍活着，便在界外褪下一截病骨作为回报；若它已经陨落，幼兽则蜷缩在尸身旁，发出尚未定形的第一缕胎息。",
+      "tags":["story_chain","demon_rift_beast","manual_only"],"weight":0,
+      "choices":[
+        {"id":"bone","text":"收下虺空褪下的界隙魔骨","conditions":{"any":[{"has_flag":"rift_beast_family_saved"},{"has_flag":"rift_beast_rift_sealed"}]},"disabled_reason":"虺空没有留下答谢之物","effects":[{"type":"add_item","item_id":"rift_demon_bone"},{"type":"learn_technique","technique_id":"TECH_RIFT_WALKER_BODY"},{"type":"add_fame","value":20},{"type":"set_flag","flag":"demon_rift_beast_completed"},{"type":"set_milestone","milestone":"demon_rift_beast_completed"}]},
+        {"id":"breath","text":"护住幼兽，收取自然逸散的吞天胎息","effects":[{"type":"add_item","item_id":"sky_devour_breath"},{"type":"add_karma","value":-8},{"type":"add_opportunity","value":30},{"type":"set_flag","flag":"demon_rift_beast_completed"},{"type":"set_milestone","milestone":"demon_rift_beast_completed"}]},
+        {"id":"carve","text":"从虺空尸身中炼取全部界骨","conditions":{"has_flag":"rift_beast_mother_slain"},"disabled_reason":"虺空并未陨落在裂谷","effects":[{"type":"add_item","item_id":"rift_demon_bone","quantity":2},{"type":"add_karma","value":16},{"type":"add_sha_qi","value":18},{"type":"set_flag","flag":"demon_rift_beast_completed"},{"type":"set_milestone","milestone":"demon_rift_beast_completed"}]}
+      ]
+    }
+  ]
+}

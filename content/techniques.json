@@ -84,6 +84,12 @@
     {"id":"TECH_MYRIAD_CALAMITY_DEMON_FORM","name":"万劫魔相","path":"demonic","element":"neutral","grade":8,"level":1,"opportunity_bonus":1.12,"hp_bonus":1.26,"mp_bonus":1.24,"combat_bonus":42000000,"karma_multiplier":0.74},
     {"id":"TECH_ANNIHILATION_SKY_BLADE","name":"寂灭天刀录","path":"demonic","element":"yin","grade":8,"level":1,"opportunity_bonus":1.06,"hp_bonus":0.98,"mp_bonus":1.16,"combat_bonus":68000000,"karma_multiplier":0.72},
     {"id":"TECH_WUSHENG_SOUL_CANON","name":"无生炼神典","path":"demonic","element":"neutral","grade":8,"level":1,"opportunity_bonus":1.12,"hp_bonus":0.92,"mp_bonus":1.44,"combat_bonus":36000000,"karma_multiplier":0.76,"category":"divine_sense","divine_sense_bonus":1.12},
-    {"id":"TECH_ASURA_TRUE_BODY","name":"阿修罗不灭身","path":"demonic","element":"neutral","grade":8,"level":1,"opportunity_bonus":0.96,"hp_bonus":1.62,"mp_bonus":0.86,"combat_bonus":50000000,"karma_multiplier":0.75,"category":"body","body_breakthrough_bonus":0.08,"body_bonus_max_layer":100}
+    {"id":"TECH_ASURA_TRUE_BODY","name":"阿修罗不灭身","path":"demonic","element":"neutral","grade":8,"level":1,"opportunity_bonus":0.96,"hp_bonus":1.62,"mp_bonus":0.86,"combat_bonus":50000000,"karma_multiplier":0.75,"category":"body","body_breakthrough_bonus":0.08,"body_bonus_max_layer":100},
+    {"id":"TECH_BLOOD_RIVER_REVERSION","name":"血河逆脉功","path":"demonic","element":"water","grade":2,"level":1,"opportunity_bonus":0.18,"hp_bonus":0.26,"mp_bonus":0.16,"combat_bonus":190,"karma_multiplier":0.86},
+    {"id":"TECH_CORPSE_MOON_SOUL","name":"太阴照魂篇","path":"demonic","element":"yin","grade":4,"level":1,"opportunity_bonus":0.34,"hp_bonus":0.24,"mp_bonus":0.46,"combat_bonus":3400,"karma_multiplier":0.84,"category":"divine_sense","divine_sense_bonus":0.40},
+    {"id":"TECH_RIFT_WALKER_BODY","name":"裂界行魔身","path":"demonic","element":"neutral","grade":5,"level":1,"opportunity_bonus":0.44,"hp_bonus":0.58,"mp_bonus":0.35,"combat_bonus":19000,"karma_multiplier":0.82,"category":"body","body_breakthrough_bonus":0.08,"body_bonus_max_layer":70},
+    {"id":"TECH_BLACK_SUN_TRUE_FLAME","name":"黑日焚心典","path":"demonic","element":"fire","grade":6,"level":1,"opportunity_bonus":0.60,"hp_bonus":0.62,"mp_bonus":0.58,"combat_bonus":180000,"karma_multiplier":0.80},
+    {"id":"TECH_STAR_DEVOURING_BODY","name":"吞星魔躯","path":"demonic","element":"neutral","grade":7,"level":1,"opportunity_bonus":0.76,"hp_bonus":0.92,"mp_bonus":0.60,"combat_bonus":1100000,"karma_multiplier":0.78,"category":"body","body_breakthrough_bonus":0.07,"body_bonus_max_layer":100},
+    {"id":"TECH_ABYSS_RETURN_CANON","name":"万魔归渊经","path":"demonic","element":"earth","grade":8,"level":1,"opportunity_bonus":1.02,"hp_bonus":1.08,"mp_bonus":1.12,"combat_bonus":6200000,"karma_multiplier":0.76}
   ]
 }

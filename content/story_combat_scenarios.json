@@ -200,6 +200,54 @@
       "enemy_members":[{"name":"蚀天祖藤残留分魂","share":0.42,"path":"monster"},{"name":"寄生古魔守卫","share":0.24,"path":"demonic"},{"name":"镇根古傀","share":0.20,"path":"dao","kind":"artifact"},{"name":"跨界根隙","share":0.14,"path":"ghost","kind":"environment"}],
       "player_allies":[{"name":"绯月圣祖","power_ratio":0.10,"path":"demonic","realm_offset":1,"full_power_multiplier":1.18},{"name":"守关玄龟","power_ratio":0.08,"path":"dao","realm_offset":1,"full_power_multiplier":1.10}],
       "story_beats":["祖藤根窟裂开，潜伏的藤魂借古魔尸骸复苏。","镇根古傀敌我不分，寄生守卫则试图扩大通往灵界的根隙。","绯月稳住界壁，守关玄龟正面承受古傀攻势。","你同时锁定祖藤分魂与跨界根隙，防止它回归灵界本体。","根窟重新闭合前，必须斩下祖藤根晶作为追索本体的线索。"]
+    },
+    {
+      "event_id":"EVT_DEMON_BLOOD_RIVER_002","target_name":"河源复生骨兽群","natural_terrain":"狭窄","artificial_conditions":["禁空"],
+      "enemy_members":[{"name":"赤髓骨兽","share":0.44,"path":"monster"},{"name":"血泉骨蛇","share":0.31,"path":"monster"},{"name":"复生兽骸","share":0.25,"path":"demonic"}],
+      "player_allies":[{"name":"赤髓城护河散修","power_ratio":0.06,"path":"demonic"}],
+      "story_beats":["逆流血泉托起成群兽骨，石窟入口随即被封死。","骨蛇沿岩壁包抄，赤髓骨兽从正面撞向三方修士。","你看出所有兽骸都受心室深处同一节律驱使。","击碎领头骨兽后，骨潮短暂停息，深入河源的通路显现。"]
+    },
+    {
+      "event_id":"EVT_DEMON_BLOOD_RIVER_003","target_name":"血河蜮母与心室虫群","natural_terrain":"狭窄","artificial_conditions":["禁空","禁神识"],
+      "enemy_members":[{"name":"血河蜮母","share":0.56,"path":"monster"},{"name":"心室虫巢","share":0.26,"path":"demonic","kind":"formation"},{"name":"寄生血蜮群","share":0.18,"path":"monster"}],
+      "player_allies":[{"name":"赤渊古鲸残念","power_ratio":0.05,"path":"monster"}],
+      "story_beats":["蜮母钻入古鲸心室，以每一次搏动孵化新虫。","寄生血蜮封住经脉般的岔道，虫巢开始喷出腐血。","古鲸残念强撑一次心跳，把蜮母逼出最深的血窍。","你必须在下一次心室收缩前斩断母虫与虫巢的联系。"]
+    },
+    {
+      "event_id":"EVT_DEMON_CORPSE_MOON_002","target_name":"争棺群修与失控尸潮","natural_terrain":"狭窄","artificial_conditions":["禁空","大阵"],
+      "enemy_members":[{"name":"夺棺魔修首领","share":0.38,"path":"demonic"},{"name":"惊醒的护棺尸群","share":0.34,"path":"ghost"},{"name":"破封尸火阵","share":0.28,"path":"demonic","kind":"formation"}],
+      "player_allies":[{"name":"阴尸殿守棺者","power_ratio":0.07,"path":"demonic"}],
+      "story_beats":["破棺者击断封毒阵角，护棺尸群立即从四面合围。","尸火阵敌我不分地抽取阴气，谷底退路逐段坍塌。","你越过争斗双方，先压住最危险的裂阵处。","尸群察觉封印暂稳，攻势随之放缓，群修终于被逼退。"]
+    },
+    {
+      "event_id":"EVT_DEMON_CORPSE_MOON_004","target_name":"无面疫尸","natural_terrain":"狭窄","artificial_conditions":["禁神识"],
+      "enemy_members":[{"name":"无面疫尸","share":0.58,"path":"ghost"},{"name":"尸瘟毒核","share":0.24,"path":"demonic","kind":"artifact"},{"name":"腐化尸群","share":0.18,"path":"ghost"}],
+      "player_allies":[{"name":"燕沉霜","power_ratio":0.09,"path":"ghost"},{"name":"守棺万尸","power_ratio":0.06,"path":"ghost"}],
+      "story_beats":["疫尸沿阴脉扩散腐气，活人与行尸同时失去控制。","燕沉霜以残躯压住毒潮，万尸则用锁链缠住疫尸四肢。","无面疫尸试图吞噬燕沉霜，借尸王之躯完成蜕变。","你穿过毒潮击碎核心，谷底尸月随之出现裂纹。"]
+    },
+    {
+      "event_id":"EVT_DEMON_RIFT_BEAST_004","target_name":"噬界风暴与界外猎群","natural_terrain":"险要","artificial_conditions":["禁空","禁神识"],
+      "enemy_members":[{"name":"界外猎群首兽","share":0.42,"path":"monster"},{"name":"噬界风暴核心","share":0.30,"path":"ghost","kind":"environment"},{"name":"乱流寄生兽","share":0.18,"path":"monster"},{"name":"失控封界钉","share":0.10,"path":"dao","kind":"artifact"}],
+      "player_allies":[{"name":"虺空母兽","power_ratio":0.10,"path":"monster"}],
+      "story_beats":["裂谷完全张开，界外猎群循幼兽气息蜂拥而入。","虺空母兽挡住首兽，噬界风暴却开始撕扯两界边缘。","失控封界钉不断扩大裂口，寄生兽则扑向受困幼兽。","你必须同时截断风暴核心和封界钉，才能重新合拢界壁。"]
+    },
+    {
+      "event_id":"EVT_TRUE_DEMON_BLACK_SUN_004","target_name":"四脉焚原火灵","natural_terrain":"开阔","artificial_conditions":["禁空"],
+      "enemy_members":[{"name":"东脉焚原火灵","share":0.28,"path":"demonic"},{"name":"西脉噬光火灵","share":0.26,"path":"demonic"},{"name":"南脉熔地火灵","share":0.24,"path":"demonic"},{"name":"北脉冻焰火灵","share":0.22,"path":"ghost"}],
+      "player_allies":[{"name":"曜烬残余日火","power_ratio":0.08,"path":"monster"},{"name":"噬火兽部族","power_ratio":0.06,"path":"monster"}],
+      "story_beats":["四条锁链同时崩裂，积压日火各自化形冲向冻原。","噬火兽群分流外焰，曜烬则压住仍与心脉相连的旧火。","四灵试图在旧巢上空合为新的无主黑日。","你逐一切断它们与锁链的联系，再将火种送入对应地脉。"]
+    },
+    {
+      "event_id":"EVT_TRUE_DEMON_FALLEN_STAR_003","target_name":"三宗逐星战阵","natural_terrain":"开阔","artificial_conditions":["禁空","大阵"],
+      "enemy_members":[{"name":"天魔宫炼胎阵","share":0.36,"path":"demonic","kind":"formation"},{"name":"万魂渊收魂使","share":0.26,"path":"ghost"},{"name":"黑日神殿拆骨战舟","share":0.24,"path":"demonic","kind":"artifact"},{"name":"失控星骨潮","share":0.14,"path":"monster","kind":"environment"}],
+      "player_allies":[{"name":"守灵海兽群","power_ratio":0.08,"path":"monster"}],
+      "story_beats":["炼胎阵、收魂幡与拆骨战舟同时启动，母兽遗骸开始崩裂。","守灵海兽撞向战舟，却被三宗阵光逼回魔海。","星胎心跳紊乱，失控星骨从海底刺向所有参战者。","你连续破坏三座阵法的供能节点，迫使三宗退出遗骸范围。"]
+    },
+    {
+      "event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_005","target_name":"三脉枯根渊兽","natural_terrain":"狭窄","artificial_conditions":["禁空","禁神识","大阵"],
+      "enemy_members":[{"name":"噬火渊兽","share":0.31,"path":"demonic"},{"name":"吞魂渊兽","share":0.29,"path":"ghost"},{"name":"食星渊兽","share":0.27,"path":"monster"},{"name":"崩裂祖根","share":0.13,"path":"demonic","kind":"environment"}],
+      "player_allies":[{"name":"渊极城老阵师","power_ratio":0.06,"path":"dao"},{"name":"三宗归脉法阵","power_ratio":0.09,"path":"demonic"}],
+      "story_beats":["三种归还本源唤醒枯根，三头渊兽从界柱井底同时成形。","噬火、吞魂与食星之力彼此增幅，渊极城倾斜得更加猛烈。","老阵师维持最后的扶界阵，三宗只能勉强守住归脉通路。","你逐头斩断渊兽与枯根的连接，把本源导向仍有生机的根节。","新根穿透石化外壳时，摇摇欲坠的城基终于停止下沉。"]
     }
   ]
 }
