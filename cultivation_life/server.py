@@ -192,6 +192,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.body_breakthrough(game_id)
             elif operation == "sense-breakthrough":
                 result = ENGINE.divine_sense_breakthrough(game_id)
+            elif operation == "ghost-reincarnate":
+                result = ENGINE.reincarnate_ghost(game_id)
+            elif operation == "ghost-wangsheng":
+                result = ENGINE.spend_wangsheng(game_id)
             elif operation == "captive-action":
                 result = ENGINE.captive_action(
                     game_id, payload.get("target_id", ""), payload.get("action", "")

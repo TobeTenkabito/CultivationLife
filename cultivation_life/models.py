@@ -229,6 +229,8 @@ class Player:
     heart_demon: float = 0.0
     hp: float = 100.0
     mp: float = 40.0
+    permanent_intrinsic_hp_bonus: float = 0.0
+    permanent_intrinsic_mp_bonus: float = 0.0
     path: str = "dao"
     technique: Technique | None = None
     support_technique: Technique | None = None
@@ -339,6 +341,20 @@ class Player:
     monster_lineage_deeds: dict[str, int] = field(default_factory=dict)
     monster_custom_lineage_id: str | None = None
     monster_custom_lineage: dict[str, Any] | None = None
+    # Optional ghost DLC state. These values remain serialized while the DLC is
+    # disabled, allowing the whole ruleset to freeze and later resume exactly.
+    ghost_intrinsic_hp_reference: float | None = None
+    ghost_intrinsic_mp_reference: float | None = None
+    ghost_intrinsic_hp_current: float | None = None
+    ghost_intrinsic_mp_current: float | None = None
+    ghost_soul_erosion_rate_pp: float = 0.0
+    ghost_wangsheng_energy: int = 0
+    ghost_reincarnation_imprints: dict[str, int] = field(default_factory=dict)
+    ghost_intrinsic_highwater_realm: int | None = None
+    ghost_intrinsic_highwater_layer: int | None = None
+    ghost_last_reincarnation_realm: int | None = None
+    ghost_last_reincarnation_layer: int | None = None
+    ghost_erosion_thresholds_seen: list[int] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -347,6 +363,25 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(value)
+        data["permanent_intrinsic_hp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_hp_bonus", 0.0)))
+        data["permanent_intrinsic_mp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_mp_bonus", 0.0)))
+        for key in (
+            "ghost_intrinsic_hp_reference", "ghost_intrinsic_mp_reference",
+            "ghost_intrinsic_hp_current", "ghost_intrinsic_mp_current",
+        ):
+            saved = data.get(key)
+            data[key] = max(0.0, float(saved)) if saved is not None else None
+        data["ghost_soul_erosion_rate_pp"] = max(0.0, float(data.get("ghost_soul_erosion_rate_pp", 0.0)))
+        data["ghost_wangsheng_energy"] = max(0, int(data.get("ghost_wangsheng_energy", 0)))
+        saved_imprints = data.get("ghost_reincarnation_imprints", {})
+        data["ghost_reincarnation_imprints"] = {
+            str(key): max(0, int(count))
+            for key, count in saved_imprints.items()
+            if str(key).isdigit()
+        } if isinstance(saved_imprints, dict) else {}
+        data["ghost_erosion_thresholds_seen"] = list(dict.fromkeys(
+            int(value) for value in data.get("ghost_erosion_thresholds_seen", [])
+        ))
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
             source: max(0.0, float(saved_qi.get(source, 0.0)))

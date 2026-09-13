@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.ghost-reincarnation",
+  "name": "百鬼夜行:轮回往生",
+  "version": "1.0.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 110,
+  "requires": [],
+  "description": "以魂蚀、轮回印记与往生为核心的鬼修大型系统 DLC。"
+}

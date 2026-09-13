@@ -353,9 +353,13 @@ class EconomySystemMixin:
         rng = decode_rng(game.seed, game.rng_state)
         start_age = player.age
         era_news: list[str] = []
-        for _ in range(years):
+        time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
+        for elapsed_index in range(years):
             player.age += 1
-            if not self._advance_world_year(game, rng, era_news, encounters=False):
+            continue_world = self._advance_world_year(game, rng, era_news, encounters=False)
+            if elapsed_index % time_unit == 0 and player.alive:
+                self._apply_soul_erosion_units(game, 1)
+            if not continue_world or not player.alive:
                 break
         completed = player.alive and not game.pending_event and player.age - start_age == years
         if completed:

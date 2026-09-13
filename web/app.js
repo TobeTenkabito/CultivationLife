@@ -327,6 +327,21 @@ function render(data) {
     const timing = wait > 0 ? `距下阶段最早触发还需 ${wait} 单位` : `当前触发率 ${chance}%`;
     $('#immortal-power-state').textContent = `转化 ${stage}/${total} · 可用上限 ${ratio}% · ${timing}`;
   }
+  const ghost = data.ghost_system || {};
+  $('#ghost-erosion-stat').classList.toggle('hidden', !ghost.available);
+  $('#ghost-wangsheng-stat').classList.toggle('hidden', !ghost.available);
+  $('#ghost-system-panel').classList.toggle('hidden', !ghost.available);
+  if (ghost.available) {
+    $('#ghost-erosion').textContent = `${Number(ghost.erosion_rate_pp || 0).toFixed(4)}%`;
+    $('#ghost-wangsheng').textContent = number(ghost.wangsheng || 0);
+    $('#ghost-system-title').textContent = ghost.name || '百鬼夜行:轮回往生';
+    const ihp = ghost.intrinsic_hp || {}, imp = ghost.intrinsic_mp || {};
+    const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
+    $('#ghost-system-summary').textContent = `魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
+    $('#ghost-wangsheng-action').textContent = `往生息蚀 · ${ghost.wangsheng_cost} 点`;
+    $('#ghost-wangsheng-action').title = `魂蚀率 -${Number(ghost.wangsheng_reduction_pp || 0).toFixed(4)} 个百分点；不恢复既有魂伤`;
+    $('#ghost-reincarnate-action').classList.toggle('hidden', !ghost.can_reincarnate);
+  }
   const combatNode = $('#combat-power');
   combatNode.textContent = number(p.combat_power);
   const combatHint = `当前境界期望战斗力：${number(p.expected_combat_power)}。${p.combat_power_assessment}`;
@@ -372,7 +387,7 @@ function render(data) {
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
@@ -1340,6 +1355,12 @@ $('#cross-world-action').onclick = () => mutate(`/api/games/${game.id}/cross-wor
 $('#cross-world-secondary-action').onclick = () => mutate(`/api/games/${game.id}/cross-world`, {destination:$('#cross-world-secondary-action').dataset.destination});
 $('#breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/breakthrough`, {});
 $('#body-breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/body-breakthrough`, {});
+$('#ghost-wangsheng-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {});
+$('#ghost-reincarnate-action').onclick = () => {
+  const ghost = game?.ghost_system || {};
+  const warning = `确认舍弃当前修为并回到练气一层？未使用往生将清零；魂蚀率与既有魂伤不会恢复；历史最高修为 ${ghost.highwater?.name || '保持不变'}。`;
+  if (window.confirm(warning)) mutate(`/api/games/${game.id}/ghost-reincarnate`, {});
+};
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
 
 function renderMap(map, auction) {
@@ -2374,6 +2395,8 @@ function renderButtons() {
   $('#cross-world-secondary-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   $('#breakthrough-action').disabled = busy || !game?.breakthrough?.enabled || !!game?.pending_event;
   $('#body-breakthrough-action').disabled = busy || !game?.body_cultivation?.ready || !!game?.pending_event || !!game?.imprisonment;
+  $('#ghost-wangsheng-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
+  $('#ghost-reincarnate-action').disabled = busy || !game?.ghost_system?.can_reincarnate;
   document.querySelectorAll('.map-travel').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1' || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });

@@ -12,6 +12,10 @@ from .content_registry import (
     WORLD_SYSTEMS,
 )
 from .models import Item, Player, RealmDef, Technique
+from .ghost_system import (
+    effective_intrinsic_hp, effective_intrinsic_mp, hp_carry_ratio,
+    intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
+)
 from .transformation_system import ensure_transformation_state, equip_transformation_technique
 
 
@@ -222,24 +226,38 @@ def opportunity_required(player: Player) -> int:
     return round(current.opportunity_base * (1 + 0.12 * (player.layer - 1)))
 
 
-def max_hp(player: Player) -> int:
-    current = realm(player)
-    base = 100 + int(math.sqrt(current.base_power) * 16) + player.layer * 8 + player.body_training * 12
+def raw_external_hp_bonus(player: Player) -> float:
+    reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
         support_bonus = player.support_technique.hp_bonus * technique_scale(player.support_technique)
-    return round(base * (1 + support_bonus) + sum(i.hp_bonus * i.quantity for i in player.inventory)
-                 + player.faction_hp_bonus + player.natal_artifact_hp_bonus)
+    return (
+        reference * support_bonus
+        + sum(i.hp_bonus * i.quantity for i in player.inventory)
+        + player.faction_hp_bonus
+        + player.natal_artifact_hp_bonus
+    )
 
 
-def max_mp(player: Player) -> int:
-    current = realm(player)
-    base = 40 + int(math.sqrt(current.base_power) * 20) + player.layer * 11
+def max_hp(player: Player) -> int:
+    return round(effective_intrinsic_hp(player) + raw_external_hp_bonus(player) * hp_carry_ratio(player))
+
+
+def raw_external_mp_bonus(player: Player) -> float:
+    reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
         support_bonus = player.support_technique.mp_bonus * technique_scale(player.support_technique)
-    return round(base * (1 + support_bonus) + sum(i.mp_bonus * i.quantity for i in player.inventory)
-                 + player.faction_mp_bonus + player.natal_artifact_mp_bonus)
+    return (
+        reference * support_bonus
+        + sum(i.mp_bonus * i.quantity for i in player.inventory)
+        + player.faction_mp_bonus
+        + player.natal_artifact_mp_bonus
+    )
+
+
+def max_mp(player: Player) -> int:
+    return round(effective_intrinsic_mp(player) + raw_external_mp_bonus(player) * mp_carry_ratio(player))
 
 
 def combat_power(player: Player) -> float:

@@ -78,6 +78,11 @@ from .monster_bloodline_system import (
     public_monster_bloodline,
 )
 from .monster_general_traits import grant_random_general_monster_trait
+from .ghost_system import (
+    GhostSystemMixin, ensure_ghost_cultivation_state, ghost_cultivation_active,
+    grant_intrinsic_growth, grant_intrinsic_progression_if_new_highwater,
+    grant_wangsheng, reincarnation_breakthrough_bonus,
+)
 
 
 OPS = {
@@ -113,7 +118,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -235,7 +240,10 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         player.lineage_race = player.race
         player.allegiance_race = player.race
         player.location_id = self.maps.default_location(player.world)
+        ensure_ghost_cultivation_state(player)
         player.lifespan = roll_lifespan(player, rng)
+        if ghost_cultivation_active(player):
+            player.lifespan = None
         if player.lifespan is not None:
             player.lifespan = max(player.lifespan, player.age + 1)
         player.hp = max_hp(player)
@@ -324,7 +332,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         era_news: list[str] = []
         start_age = player.age
         ledger = ActionUnitLedger(action, years)
-        for _ in range(years):
+        for elapsed_index in range(years):
             ledger.begin_year()
             player.age += 1
             low, high = ACTIONS[action]["opportunity"]
@@ -396,7 +404,10 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                     total_fame_reduction += reduction
                 if action == "rest" and player.heart_demon > 0:
                     player.heart_demon = max(0.0, player.heart_demon - 0.5)
-            if not self._advance_world_year(game, rng, era_news):
+            continue_world = self._advance_world_year(game, rng, era_news)
+            if (elapsed_index + 1) % time_unit == 0 and player.alive:
+                self._apply_soul_erosion_units(game, 1)
+            if not continue_world or not player.alive:
                 break
         if player.alive:
             action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
@@ -564,6 +575,9 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
                     result, summary = "failed", f"越狱失败，HP -{damage:.0f}，敌对值继续上升。"
         else:
             raise ValueError("未知牢狱行动")
+        if action == "endure" and player.alive and not self._apply_soul_erosion_units(game, 1):
+            result = "dead"
+            summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"
         game.history.append(HistoryRecord(
             "SYS_PRISON_ACTION", 1, player.age, "身陷囹圄", action, result, summary,
             {"imprisonment": copy.deepcopy(player.imprisonment)}, ["system", "prison", "wanted"],
@@ -1099,6 +1113,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         else:
             old = player.body_training
             player.body_training = target
+            grant_intrinsic_growth(player, hp=12.0)
             player.body_progress = 0.0
             player.awaiting_body_breakthrough = False
             player.body_breakthrough_pity.pop(key, None)
@@ -1539,6 +1554,8 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
             if game.player.path == "demonic":
                 raise ValueError("魔修不能依靠突破丹药提高自身突破率；可将丹药用于培养傀儡或弟子")
+            if ghost_cultivation_active(game.player):
+                raise ValueError("阴魂不受血肉丹火重塑，此物无法助你破境。鬼修唯有自渡轮回，方能熟悉来路。")
             scope_type, source_text = item.breakthrough_scope.split(":", 1)
             if game.player.path == "monster" and scope_type == "major" and bloodline_content_available():
                 raise ValueError("妖修大境界由血脉条件与生命经历决定，突破丹药不会开启进化路线")
@@ -6554,7 +6571,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             float(ITEM_CATALOG[item_id].breakthrough_bonus)
             for item_id in player.active_breakthrough_aids
             if item_id in ITEM_CATALOG and ITEM_CATALOG[item_id].breakthrough_scope == scope
-        ) if allow_aids and player.path != "demonic" else 0.0
+        ) if allow_aids and player.path != "demonic" and not ghost_cultivation_active(player) else 0.0
         devouring_bonus = player.devouring_breakthrough_bonus if player.path == "demonic" else 0.0
         companion_bonus = (
             float(WORLD_SYSTEMS["relationship"]["companion_breakthrough_bonus"])
@@ -6582,14 +6599,20 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             and player.mp >= max_mp(player) * float(optimal.get("mp_ratio", 0.8))
             else 0.0
         )
+        reincarnation_bonus = reincarnation_breakthrough_bonus(player, source)
+        final_cap = (
+            float(WORLD_SYSTEMS.get("ghost_cultivation", {}).get("reincarnation_final_probability_cap", 1.0))
+            if ghost_cultivation_active(player) else 0.98
+        )
         final = max(0.005, min(
-            0.98, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
-            + body_training_bonus + optimal_state_bonus + devouring_bonus - penalty,
+            final_cap, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
+            + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus - penalty,
         ))
         return {
             "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
             "artifact_bonus": artifact_bonus, "pity_bonus": pity_bonus,
             "devouring_bonus": devouring_bonus,
+            "reincarnation_bonus": reincarnation_bonus,
             "body_training_bonus": body_training_bonus, "optimal_state_bonus": optimal_state_bonus,
             "heart_demon_penalty": penalty, "final": final,
         }
@@ -6802,6 +6825,8 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         player.heart_demon = max(0.0, player.heart_demon - 5)
         player.realm_index += 1
         player.layer = 1
+        grant_intrinsic_progression_if_new_highwater(player)
+        grant_wangsheng(player)
         self._raise_divine_sense_one_level(player)
         if player.path == "demonic" and player.realm_index in {4, 7}:
             technique_id = "TECH_HEAVENLY_DEMON_SENSE" if player.realm_index == 4 else "TECH_MYRIAD_SOUL_SENSE"
@@ -6809,7 +6834,9 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             learn_technique(player, unlocked)
             assign_technique(player, unlocked, "divine_sense")
         rolled_lifespan = roll_lifespan(player, rng)
-        if rolled_lifespan is None:
+        if ghost_cultivation_active(player):
+            player.lifespan = None
+        elif rolled_lifespan is None:
             player.lifespan = None
         elif player.lifespan is None:
             player.lifespan = rolled_lifespan
@@ -6846,6 +6873,8 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         player.heart_demon = max(0.0, player.heart_demon - 1)
         old_realm = realm(player)
         player.layer += 1
+        grant_intrinsic_progression_if_new_highwater(player)
+        grant_wangsheng(player)
         self._raise_divine_sense_one_level(player)
         lifespan_gain = 0
         stage = "middle" if player.layer == 4 else "late" if player.layer == 7 else None
@@ -7493,6 +7522,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             "wanted": self._public_wanted(game),
             "imprisonment": copy.deepcopy(game.player.imprisonment),
             "demonic_system": self._public_demonic_system(game.player),
+            "ghost_system": self._public_ghost_system(game),
             "breakthrough": self._public_major_breakthrough(game.player),
             "body_cultivation": self._public_body_cultivation(game.player),
             "world_travel": {
@@ -8416,6 +8446,27 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
         game = self.store.load(game_id)
         conversion_migrated = False
         monster_lifespan_migrated = False
+        ghost_migrated = ensure_ghost_cultivation_state(game.player)
+        ghost_floor = float(WORLD_SYSTEMS.get("ghost_cultivation", {}).get("soul_death_intrinsic_floor", 1.0))
+        if (
+            ghost_cultivation_active(game.player) and game.player.alive
+            and (
+                float(game.player.ghost_intrinsic_hp_current or 0.0) < ghost_floor
+                or float(game.player.ghost_intrinsic_mp_current or 0.0) < ghost_floor
+            )
+        ):
+            self._die(game, "本体魂基已经低于存在界限，魂魄彻底消散", "SYS_GHOST_SOUL_DISPERSAL")
+            ghost_migrated = True
+        if ghost_cultivation_active(game.player) and game.player.active_breakthrough_aids:
+            game.player.active_breakthrough_aids = []
+            ghost_migrated = True
+        if (
+            game.player.path == "ghost" and not ghost_cultivation_active(game.player)
+            and game.player.ghost_intrinsic_hp_reference is not None
+            and game.player.lifespan is None and REALMS[game.player.realm_index].lifespan is not None
+        ):
+            game.player.lifespan = max(game.player.age + 1, int(REALMS[game.player.realm_index].lifespan[1]))
+            ghost_migrated = True
         if game.player.path == "monster" and not game.player.monster_lifespan_scaled:
             if game.player.lifespan is not None:
                 game.player.lifespan *= int(
@@ -8496,7 +8547,7 @@ class GameEngine(MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, Heavenly
             learn_technique(game.player, starter)
             assign_technique(game.player, starter, "main")
             version_changed = True
-        changed = conversion_migrated or monster_lifespan_migrated or version_changed or location_changed or bloodline_changed or before_known != tuple(technique.id for technique in game.player.known_techniques)
+        changed = ghost_migrated or conversion_migrated or monster_lifespan_migrated or version_changed or location_changed or bloodline_changed or before_known != tuple(technique.id for technique in game.player.known_techniques)
         if (
             game.player.body_technique and game.player.body_training < int(WORLD_SYSTEMS["body_cultivation"]["max_layer"])
             and game.player.body_progress >= self._body_progress_required(game.player)
