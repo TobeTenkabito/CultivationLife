@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .models import GameState
+from .version import BASE_GAME_VERSION
 
 
 class SaveStore:
@@ -17,6 +18,7 @@ class SaveStore:
         return self.directory / f"{game_id}.json"
 
     def save(self, game: GameState) -> None:
+        game.last_saved_with_game_version = BASE_GAME_VERSION
         path = self._path(game.id)
         temporary = path.with_suffix(".tmp")
         temporary.write_text(json.dumps(game.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
@@ -42,6 +44,7 @@ class SaveStore:
                     "id": data["id"],
                     "name": data["player"]["name"],
                     "updated_at": data["updated_at"],
+                    "game_version": str(data.get("last_saved_with_game_version", "pre-1.0.0")),
                 })
             except (KeyError, json.JSONDecodeError):
                 continue

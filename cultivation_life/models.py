@@ -4,6 +4,8 @@ import copy
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .version import BASE_GAME_VERSION
+
 
 @dataclass(frozen=True)
 class RealmDef:
@@ -507,6 +509,8 @@ class GameState:
         "auto_advance_player_wars": False,
     })
     world_rules_version: int = 9
+    created_with_game_version: str = BASE_GAME_VERSION
+    last_saved_with_game_version: str = BASE_GAME_VERSION
     version: int = 5
 
     def to_dict(self) -> dict[str, Any]:
@@ -546,6 +550,8 @@ class GameState:
             "last_combat_report": self.last_combat_report,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
+            "created_with_game_version": self.created_with_game_version,
+            "last_saved_with_game_version": self.last_saved_with_game_version,
             "version": self.version,
         }
 
@@ -591,5 +597,7 @@ class GameState:
                 "auto_advance_player_wars": bool(value.get("settings", {}).get("auto_advance_player_wars", False)),
             },
             world_rules_version=value.get("world_rules_version", 1),
+            created_with_game_version=str(value.get("created_with_game_version", "pre-1.0.0")),
+            last_saved_with_game_version=str(value.get("last_saved_with_game_version", "pre-1.0.0")),
             version=value.get("version", 1),
         )

@@ -96,6 +96,10 @@
 .settings-panel { left:50%; right:auto; top:auto; bottom:92px; width:min(520px,calc(100vw - 140px)); transform:translateX(-50%) translateY(20px) scale(.985); padding:30px 34px; }
 .settings-panel.panel-open { transform:translateX(-50%); }
 .settings-list { display:grid; gap:10px; margin-top:18px; }
+.settings-version { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:13px 14px; border-left:3px solid var(--gold); background:rgba(182,139,61,.09); }
+.settings-version b,.settings-version small { display:block; }
+.settings-version small { margin-top:4px; color:var(--muted); line-height:1.5; }
+.settings-version strong { color:var(--gold); font:700 9px Arial,sans-serif; letter-spacing:.14em; }
 .settings-row { display:flex; grid-template-columns:none; flex-direction:row; align-items:center; justify-content:space-between; gap:20px; padding:13px 14px; border:1px solid var(--line); background:rgba(255,255,255,.34); cursor:pointer; }
 .settings-row span { float:none; color:inherit; font-size:inherit; }
 .settings-row b,.settings-row small { display:block; }

@@ -23,6 +23,7 @@ from .content_registry import (
 from .engine import GameEngine
 from .extension_system import write_extension_preference
 from .rules import QI_SOURCE_NAMES
+from .version import BASE_GAME_VERSION, base_game_metadata
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -34,13 +35,14 @@ ENGINE = GameEngine(ENGINE_ROOT, APP_ROOT / "data" / "saves")
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "CultivationLife/1.0"
+    server_version = f"CultivationLife/{BASE_GAME_VERSION}"
 
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         try:
             if path == "/api/config":
                 self._json({
+                    "base_game": base_game_metadata(),
                     "spirit_roots": ROOT_NAMES,
                     "spirit_root_details": {
                         key: value for key, value in ROOT_DEFINITIONS.items() if value["creation"]
@@ -377,7 +379,7 @@ def main() -> None:
     args = parser.parse_args()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     if sys.stdout is not None:
-        print(f"《浮生问道》已启动：http://{args.host}:{args.port}")
+        print(f"《浮生问道》本体 v{BASE_GAME_VERSION} 已启动：http://{args.host}:{args.port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

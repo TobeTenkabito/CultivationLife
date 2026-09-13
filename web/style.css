@@ -13,6 +13,7 @@ body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity
 .shell { width:min(1180px, calc(100% - 32px)); margin:auto; padding:34px 0 60px; position:relative; z-index:1; }
 .brand { display:flex; align-items:center; gap:16px; margin:0 4px 30px; }
 .brand h1 { margin:0; letter-spacing:.18em; font-size:clamp(28px,4vw,43px); font-weight:600; }.brand p { margin:4px 0 0; color:var(--muted); }.brand .text-button { margin-left:auto; }
+.brand .base-game-version{display:inline-block;margin-top:7px;color:var(--gold);font:700 10px Arial,sans-serif;letter-spacing:.12em}
 .seal { width:60px; height:60px; display:grid; place-items:center; color:#f4ead4; background:var(--cinnabar); border:2px solid #8f3829; font-size:29px; box-shadow:inset 0 0 0 4px rgba(255,255,255,.15); transform:rotate(-2deg); }
 .paper { background:var(--paper); border:1px solid rgba(255,255,255,.72); box-shadow:var(--shadow); backdrop-filter:blur(15px); border-radius:3px; position:relative; overflow:hidden; }
 .paper::after { content:""; position:absolute; inset:8px; border:1px solid var(--line); pointer-events:none; }
