@@ -1524,6 +1524,8 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         item = ITEM_CATALOG.get(item_id)
         if not item or not has_item(game.player, item_id):
             raise ValueError("物品不存在")
+        if ghost_cultivation_active(game.player) and item.breakthrough_bonus > 0:
+            raise ValueError("阴魂不受血肉丹火重塑，此物无法助你破境。鬼修唯有自渡轮回，方能熟悉来路。")
         if game.pending_event:
             if not game.active_trial or (item.trial_restore_hp <= 0 and item.trial_restore_mp <= 0):
                 raise ValueError("当前事件中只能使用渡劫恢复道具")
@@ -1551,11 +1553,24 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 f"你服下{item.name}，下一次与道侣缠绵时的孕育概率 +{bonus:.0%}。",
                 {"bonus": bonus}, ["system", "item", "family", "offspring"],
             ))
+        elif item.permanent_intrinsic_hp_bonus > 0 or item.permanent_intrinsic_mp_bonus > 0:
+            player = game.player
+            ensure_ghost_cultivation_state(player)
+            hp_gain = max(0.0, float(item.permanent_intrinsic_hp_bonus))
+            mp_gain = max(0.0, float(item.permanent_intrinsic_mp_bonus))
+            remove_item(player, item_id)
+            player.permanent_intrinsic_hp_bonus += hp_gain
+            player.permanent_intrinsic_mp_bonus += mp_gain
+            grant_intrinsic_growth(player, hp_gain, mp_gain)
+            game.history.append(HistoryRecord(
+                "SYS_USE_PERMANENT_INTRINSIC_PILL", 1, player.age, "本源新生", item_id, "strengthened",
+                f"你服下{item.name}，永久获得本体 HP +{hp_gain:g}、MP +{mp_gain:g}；既有魂蚀损失没有恢复。",
+                {"intrinsic_hp_gain": hp_gain, "intrinsic_mp_gain": mp_gain},
+                ["system", "item", "pill", "intrinsic", "permanent"],
+            ))
         elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
             if game.player.path == "demonic":
                 raise ValueError("魔修不能依靠突破丹药提高自身突破率；可将丹药用于培养傀儡或弟子")
-            if ghost_cultivation_active(game.player):
-                raise ValueError("阴魂不受血肉丹火重塑，此物无法助你破境。鬼修唯有自渡轮回，方能熟悉来路。")
             scope_type, source_text = item.breakthrough_scope.split(":", 1)
             if game.player.path == "monster" and scope_type == "major" and bloodline_content_available():
                 raise ValueError("妖修大境界由血脉条件与生命经历决定，突破丹药不会开启进化路线")
@@ -8449,6 +8464,24 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         conversion_migrated = False
         monster_lifespan_migrated = False
         ghost_migrated = ensure_ghost_cultivation_state(game.player)
+        if ghost_cultivation_active(game.player):
+            old_intrinsic_state = (
+                game.player.ghost_intrinsic_hp_reference,
+                game.player.ghost_intrinsic_hp_current,
+                game.player.ghost_intrinsic_mp_reference,
+                game.player.ghost_intrinsic_mp_current,
+                game.player.ghost_intrinsic_highwater_realm,
+                game.player.ghost_intrinsic_highwater_layer,
+            )
+            grant_intrinsic_progression_if_new_highwater(game.player)
+            ghost_migrated = ghost_migrated or old_intrinsic_state != (
+                game.player.ghost_intrinsic_hp_reference,
+                game.player.ghost_intrinsic_hp_current,
+                game.player.ghost_intrinsic_mp_reference,
+                game.player.ghost_intrinsic_mp_current,
+                game.player.ghost_intrinsic_highwater_realm,
+                game.player.ghost_intrinsic_highwater_layer,
+            )
         ghost_floor = float(WORLD_SYSTEMS.get("ghost_cultivation", {}).get("soul_death_intrinsic_floor", 1.0))
         if (
             ghost_cultivation_active(game.player) and game.player.alive

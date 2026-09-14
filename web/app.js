@@ -339,19 +339,19 @@ function render(data) {
     const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
     const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}`;
     $('#ghost-system-summary').textContent = `${ghost.soul_integrity?.label || '魂基'} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
-    const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${percent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
-    const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${percent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
+    const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${precisePercent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
+    const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${precisePercent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
     $('#hp-text').title = hpDetail; $('#hp-text').dataset.tooltip = hpDetail;
     $('#mp-text').title = mpDetail; $('#mp-text').dataset.tooltip = mpDetail;
-    $('#ghost-integrity-detail').textContent = `魂体完整度 ${percent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
-    const imprintRows = (ghost.imprints || []).filter(row => Number(row.count) > 0);
+    $('#ghost-integrity-detail').textContent = `魂体完整度 ${precisePercent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
+    const imprintRows = ghost.imprints || [];
     $('#ghost-imprint-list').textContent = imprintRows.length
-      ? `轮回印记（共 ${number(ghost.total_imprints)}）：${imprintRows.map(row => `${row.realm_name}${row.layer}层 ×${row.count}`).join('；')}。当前道路有效 ${number(ghost.effective_marks)} 枚，经验加成 ${percent(ghost.breakthrough_bonus)}。`
-      : '轮回印记：尚未留下任何印记。';
+      ? `轮回印记（共 ${number(ghost.total_imprints)}）：${imprintRows.map(row => `${row.realm_name}${row.layer}层 ×${row.count}`).join('；')}。当前道路有效 ${number(ghost.effective_marks)} 枚，经验加成 ${percent(ghost.breakthrough_bonus)}。最近轮回锚点：${ghost.last_anchor?.name || '无'}。`
+      : '轮回印记：当前修炼体系没有可记录的瓶颈。';
     const preview = ghost.reincarnation_preview;
     $('#ghost-reincarnation-preview').classList.toggle('hidden', !preview);
     $('#ghost-reincarnation-preview').textContent = preview
-      ? `本次轮回预览：${preview.source} → ${preview.destination}；新增本境第 ${preview.next_imprint_count} 枚印记，${preview.affected_road}突破经验 +${percent(preview.added_bonus)}；往生 ${preview.wangsheng_before} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp).toFixed(4)}%；魂基 HP ${number(preview.intrinsic_hp_current)}、MP ${number(preview.intrinsic_mp_current)} 均不恢复。`
+      ? `本次轮回预览：${preview.source} → ${preview.destination}；新增本境第 ${preview.next_imprint_count} 枚印记，${preview.affected_road}突破经验 +${percent(preview.added_bonus)}；往生 ${preview.wangsheng_before} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp).toFixed(4)}%；魂基 HP ${number(preview.intrinsic_hp_current)}、MP ${number(preview.intrinsic_mp_current)} 均不恢复；本体成长最高水位保持 ${preview.highwater}，重新超过前不再获得重复境界的 Intrinsic HP/MP。`
       : '';
     $('#ghost-wangsheng-action').textContent = `往生息蚀 · ${ghost.wangsheng_cost} 点`;
     $('#ghost-wangsheng-action').title = `魂蚀率 -${Number(ghost.wangsheng_reduction_pp || 0).toFixed(4)} 个百分点；不恢复既有魂伤`;
@@ -1380,7 +1380,8 @@ $('#ghost-wangsheng-all-action').onclick = () => mutate(`/api/games/${game.id}/g
 $('#ghost-reincarnate-action').onclick = () => {
   const ghost = game?.ghost_system || {};
   const preview = ghost.reincarnation_preview || {};
-  const warning = `确认舍弃 ${preview.source || '当前修为'} 并回到 ${preview.destination || '练气一层'}？\n新增本境第 ${preview.next_imprint_count || 1} 枚轮回印记，${preview.affected_road || '已走过道路'}突破经验 +${percent(preview.added_bonus || .05)}。\n往生 ${preview.wangsheng_before ?? ghost.wangsheng ?? 0} → 0；魂蚀率与既有魂伤不会恢复；所有突破最终有效概率仍封顶 ${percent(ghost.breakthrough_probability_cap || .98)}。`;
+  const highwater = ghost.highwater?.name || '当前历史最高修为';
+  const warning = `确认舍弃 ${preview.source || '当前修为'} 并回到 ${preview.destination || '练气一层'}？\n新增本境第 ${preview.next_imprint_count || 1} 枚轮回印记，${preview.affected_road || '已走过道路'}突破经验 +${percent(preview.added_bonus || .05)}。\n往生 ${preview.wangsheng_before ?? ghost.wangsheng ?? 0} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp ?? ghost.erosion_rate_pp ?? 0).toFixed(4)}%；Intrinsic HP/MP 均不会恢复。\n本体成长最高水位保持 ${highwater}，重新超过该修为以前不会再次获得境界来源的 Intrinsic HP/MP。所有突破最终有效概率仍封顶 ${percent(ghost.breakthrough_probability_cap || .98)}。`;
   if (window.confirm(warning)) mutate(`/api/games/${game.id}/ghost-reincarnate`, {});
 };
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
@@ -1747,13 +1748,21 @@ function renderInventory(items) {
     text.append(name, effect); row.appendChild(text);
     const trialRecovery = (item.trial_restore_hp > 0 || item.trial_restore_mp > 0) && game.trial?.active;
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
-    const normalUse = item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || specialPlantUse;
+    const normalUse = item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse;
     if ((trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_')) use.textContent = '参悟';
       if (specialPlantUse) { use.textContent = '使用'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }
+      const ghostBreakthroughPill = Boolean(game.ghost_system?.available && item.breakthrough_bonus > 0);
+      if (ghostBreakthroughPill) {
+        use.textContent = '鬼修不可用';
+        use.disabled = true;
+        use.dataset.itemUnavailable = '1';
+        use.title = '阴魂不受血肉丹火重塑；鬼修只能通过轮回经验提高正常修为突破率';
+      }
       use.dataset.allowDuringTrial = trialRecovery ? '1' : '0';
-      if (!specialPlantUse) use.onclick = () => mutate(`/api/games/${game.id}/use-item`, {item_id:item.id}); row.appendChild(use);
+      if (!specialPlantUse && !ghostBreakthroughPill) use.onclick = () => mutate(`/api/games/${game.id}/use-item`, {item_id:item.id});
+      row.appendChild(use);
     }
       section.appendChild(row);
     });
@@ -2374,7 +2383,7 @@ function renderButtons() {
     button.disabled = button.dataset.available !== '1' || busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   document.querySelectorAll('.item-use').forEach(button => {
-    button.disabled = busy || !game?.player.alive || (!!game?.pending_event && button.dataset.allowDuringTrial !== '1');
+    button.disabled = button.dataset.itemUnavailable === '1' || busy || !game?.player.alive || (!!game?.pending_event && button.dataset.allowDuringTrial !== '1');
   });
   document.querySelectorAll('.relationship-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event;
@@ -2447,6 +2456,7 @@ function renderButtons() {
 
 function number(value) { return Math.round(Number(value)).toLocaleString('zh-CN'); }
 function percent(value) { return `${Math.round(Number(value) * 100)}%`; }
+function precisePercent(value) { return `${(Number(value || 0) * 100).toFixed(2)}%`; }
 function finePercent(value) {
   const amount = Number(value) * 100;
   return `${amount < 1 ? amount.toFixed(2) : amount.toFixed(1)}%`;

@@ -451,6 +451,7 @@ def main() -> None:
                 ghost_game.player.opportunity = opportunity_required(ghost_game.player)
                 ghost_game.player.ghost_soul_erosion_rate_pp = 0.08
                 ghost_game.player.ghost_wangsheng_energy = 5
+                add_item(ghost_game.player, "ghost_core_pill")
                 engine.store.save(ghost_game)
                 page.reload()
                 page.get_by_text("续接 · 鬼修烟测").click()
@@ -462,6 +463,13 @@ def main() -> None:
                 page.locator(".ghost-ledger summary").click()
                 assert "最终有效突破率封顶 98%" in page.locator("#ghost-system-summary").text_content()
                 assert "本次轮回预览" in page.locator("#ghost-reincarnation-preview").text_content()
+                assert "100.00%" in page.locator("#ghost-integrity-detail").text_content()
+                assert "练气13层 ×0" in page.locator("#ghost-imprint-list").text_content()
+                page.locator("[data-panel-target='inventory']").click()
+                page.locator("#inventory-card").wait_for(state="visible")
+                assert page.get_by_role("button", name="鬼修不可用").count() >= 1
+                assert page.get_by_role("button", name="鬼修不可用").first.is_disabled()
+                page.locator("#inventory-toggle").click()
                 with page.expect_response(lambda response: response.url.endswith("/ghost-wangsheng")):
                     page.locator("#ghost-wangsheng-all-action").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
