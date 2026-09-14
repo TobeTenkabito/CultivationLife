@@ -29,7 +29,11 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         config = WORLD_SYSTEMS["ghost_cultivation"]
         self.assertTrue(config["enabled"])
         self.assertEqual(config["erosion_growth_per_time_unit_pp"], 0.0002)
-        self.assertEqual(config["reincarnation_final_probability_cap"], 1.0)
+        self.assertEqual(config["reincarnation_final_probability_cap"], 0.98)
+        self.assertEqual(
+            next(row for row in self.engine.achievements.definitions if row["id"] == "ghost_first_reincarnation")["source"]["name"],
+            "百鬼夜行:轮回往生",
+        )
 
     def test_intrinsic_external_refactor_preserves_non_ghost_totals(self):
         player = Player("守常", "supreme_metal", realm_index=3, layer=5, body_training=7)
@@ -139,6 +143,12 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertAlmostEqual(reincarnation_breakthrough_bonus(player, 3), 0.10)
         self.assertAlmostEqual(reincarnation_breakthrough_bonus(player, 4), 0.0)
 
+    def test_v1_imprints_migrate_into_v2_achievement_milestone(self):
+        player = Player("旧魂", "mutated_yin", path="ghost", realm_index=3, layer=9)
+        player.ghost_reincarnation_imprints = {"1": 2, "2": 3, "3": 5}
+        ensure_ghost_cultivation_state(player)
+        self.assertEqual(player.milestones["ghost_reincarnations"], 10)
+
     def test_only_new_historical_height_adds_intrinsic_without_healing_old_loss(self):
         player = Player("越旧途", "mutated_yin", path="ghost", realm_index=3, layer=9)
         ensure_ghost_cultivation_state(player)
@@ -161,13 +171,13 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         )
         self.assertEqual((player.ghost_intrinsic_highwater_realm, player.ghost_intrinsic_highwater_layer), (4, 1))
 
-    def test_reincarnation_bonus_can_reach_but_not_exceed_one_hundred_percent(self):
+    def test_reincarnation_bonus_can_display_ten_thousand_percent_but_effective_chance_caps_at_98(self):
         player = Player("百炼", "mutated_yin", path="ghost", realm_index=3, layer=9)
         ensure_ghost_cultivation_state(player)
-        player.ghost_reincarnation_imprints = {"3": 30}
+        player.ghost_reincarnation_imprints = {"3": 2000}
         chance = self.engine._breakthrough_chance(player, major=True)
-        self.assertEqual(chance["reincarnation_bonus"], 1.5)
-        self.assertEqual(chance["final"], 1.0)
+        self.assertEqual(chance["reincarnation_bonus"], 100.0)
+        self.assertEqual(chance["final"], 0.98)
 
     def test_wangsheng_reduces_future_rate_without_healing_existing_damage(self):
         player = Player("往生", "mutated_yin", path="ghost", realm_index=3, layer=1)
@@ -182,6 +192,29 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertAlmostEqual(reduction, 0.02)
         self.assertAlmostEqual(player.ghost_soul_erosion_rate_pp, 0.06)
         self.assertEqual((player.ghost_intrinsic_hp_current, player.ghost_intrinsic_mp_current), before)
+
+    def test_v2_spend_all_wangsheng_and_reincarnation_preview(self):
+        shown = self.engine.create_game("万息", "mutated_yin", "ghost", 904, start_world="hell")
+        game = self.engine.store.load(shown["id"])
+        player = game.player
+        player.realm_index, player.layer = 3, REALMS[3].layers
+        grant_intrinsic_progression_if_new_highwater(player)
+        player.opportunity = opportunity_required(player)
+        player.ghost_soul_erosion_rate_pp = 0.05
+        player.ghost_wangsheng_energy = 5
+        self.engine.store.save(game)
+
+        before = self.engine.get_game(game.id)["ghost_system"]
+        self.assertEqual(before["wangsheng_available_uses"], 2)
+        self.assertEqual(before["reincarnation_preview"]["source"], "结丹9层")
+        self.assertEqual(before["reincarnation_preview"]["next_imprint_count"], 1)
+        self.assertEqual(before["breakthrough_probability_cap"], 0.98)
+
+        after = self.engine.spend_wangsheng(game.id, True)
+        self.assertEqual(after["ghost_system"]["wangsheng"], 1)
+        self.assertAlmostEqual(after["ghost_system"]["erosion_rate_pp"], 0.01)
+        saved = self.engine.store.load(game.id)
+        self.assertEqual(saved.player.milestones["ghost_wangsheng_spent"], 4)
 
     def test_disabling_dlc_freezes_ghost_state_and_restores_base_stat_formula(self):
         player = Player("封印", "mutated_yin", path="ghost", realm_index=2, layer=4)

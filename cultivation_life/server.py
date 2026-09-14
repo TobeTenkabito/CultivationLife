@@ -23,15 +23,17 @@ from .content_registry import (
 from .engine import GameEngine
 from .extension_system import write_extension_preference
 from .rules import QI_SOURCE_NAMES
+from .runtime import persistence_root
 from .version import BASE_GAME_VERSION, base_game_metadata
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
 APP_ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else SOURCE_ROOT
+PERSISTENCE_ROOT = persistence_root(APP_ROOT)
 BUNDLED_ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 ENGINE_ROOT = APP_ROOT if (APP_ROOT / "content").is_dir() else BUNDLED_ROOT
 WEB_ROOT = (APP_ROOT / "web") if (APP_ROOT / "web").is_dir() else (BUNDLED_ROOT / "web")
-ENGINE = GameEngine(ENGINE_ROOT, APP_ROOT / "data" / "saves")
+ENGINE = GameEngine(ENGINE_ROOT, PERSISTENCE_ROOT / "data" / "saves")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -81,7 +83,7 @@ class Handler(BaseHTTPRequestHandler):
                 package_id = unquote(path.removeprefix("/api/extensions/").strip("/"))
                 if not isinstance(payload.get("enabled"), bool):
                     raise ValueError("enabled 必须是布尔值")
-                write_extension_preference(APP_ROOT, package_id, payload["enabled"])
+                write_extension_preference(PERSISTENCE_ROOT, package_id, payload["enabled"])
                 self._json({
                     "id": package_id, "enabled": payload["enabled"], "restart_required": True,
                     "message": "扩展配置已保存，将在下次启动时生效。",
@@ -195,7 +197,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "ghost-reincarnate":
                 result = ENGINE.reincarnate_ghost(game_id)
             elif operation == "ghost-wangsheng":
-                result = ENGINE.spend_wangsheng(game_id)
+                result = ENGINE.spend_wangsheng(game_id, bool(payload.get("all", False)))
             elif operation == "captive-action":
                 result = ENGINE.captive_action(
                     game_id, payload.get("target_id", ""), payload.get("action", "")

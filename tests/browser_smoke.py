@@ -450,7 +450,7 @@ def main() -> None:
                 grant_intrinsic_progression_if_new_highwater(ghost_game.player)
                 ghost_game.player.opportunity = opportunity_required(ghost_game.player)
                 ghost_game.player.ghost_soul_erosion_rate_pp = 0.08
-                ghost_game.player.ghost_wangsheng_energy = 2
+                ghost_game.player.ghost_wangsheng_energy = 5
                 engine.store.save(ghost_game)
                 page.reload()
                 page.get_by_text("续接 · 鬼修烟测").click()
@@ -458,11 +458,15 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#ghost-system-panel").is_visible()
                 assert page.locator("#ghost-erosion").text_content() == "0.0800%"
-                assert page.locator("#ghost-wangsheng").text_content() == "2"
+                assert page.locator("#ghost-wangsheng").text_content() == "5"
+                page.locator(".ghost-ledger summary").click()
+                assert "最终有效突破率封顶 98%" in page.locator("#ghost-system-summary").text_content()
+                assert "本次轮回预览" in page.locator("#ghost-reincarnation-preview").text_content()
                 with page.expect_response(lambda response: response.url.endswith("/ghost-wangsheng")):
-                    page.locator("#ghost-wangsheng-action").click()
+                    page.locator("#ghost-wangsheng-all-action").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
-                assert page.locator("#ghost-erosion").text_content() == "0.0600%"
+                assert page.locator("#ghost-erosion").text_content() == "0.0400%"
+                assert page.locator("#ghost-wangsheng").text_content() == "1"
                 page.once("dialog", lambda dialog: dialog.accept())
                 with page.expect_response(lambda response: response.url.endswith("/ghost-reincarnate")):
                     page.locator("#ghost-reincarnate-action").click()

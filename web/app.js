@@ -337,10 +337,30 @@ function render(data) {
     $('#ghost-system-title').textContent = ghost.name || '百鬼夜行:轮回往生';
     const ihp = ghost.intrinsic_hp || {}, imp = ghost.intrinsic_mp || {};
     const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
-    $('#ghost-system-summary').textContent = `魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
+    const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}`;
+    $('#ghost-system-summary').textContent = `${ghost.soul_integrity?.label || '魂基'} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
+    const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${percent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
+    const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${percent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
+    $('#hp-text').title = hpDetail; $('#hp-text').dataset.tooltip = hpDetail;
+    $('#mp-text').title = mpDetail; $('#mp-text').dataset.tooltip = mpDetail;
+    $('#ghost-integrity-detail').textContent = `魂体完整度 ${percent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
+    const imprintRows = (ghost.imprints || []).filter(row => Number(row.count) > 0);
+    $('#ghost-imprint-list').textContent = imprintRows.length
+      ? `轮回印记（共 ${number(ghost.total_imprints)}）：${imprintRows.map(row => `${row.realm_name}${row.layer}层 ×${row.count}`).join('；')}。当前道路有效 ${number(ghost.effective_marks)} 枚，经验加成 ${percent(ghost.breakthrough_bonus)}。`
+      : '轮回印记：尚未留下任何印记。';
+    const preview = ghost.reincarnation_preview;
+    $('#ghost-reincarnation-preview').classList.toggle('hidden', !preview);
+    $('#ghost-reincarnation-preview').textContent = preview
+      ? `本次轮回预览：${preview.source} → ${preview.destination}；新增本境第 ${preview.next_imprint_count} 枚印记，${preview.affected_road}突破经验 +${percent(preview.added_bonus)}；往生 ${preview.wangsheng_before} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp).toFixed(4)}%；魂基 HP ${number(preview.intrinsic_hp_current)}、MP ${number(preview.intrinsic_mp_current)} 均不恢复。`
+      : '';
     $('#ghost-wangsheng-action').textContent = `往生息蚀 · ${ghost.wangsheng_cost} 点`;
     $('#ghost-wangsheng-action').title = `魂蚀率 -${Number(ghost.wangsheng_reduction_pp || 0).toFixed(4)} 个百分点；不恢复既有魂伤`;
+    $('#ghost-wangsheng-all-action').textContent = `尽数往生 · ${number(ghost.wangsheng_available_uses)} 次`;
+    $('#ghost-wangsheng-all-action').title = '一次消耗当前能够支付的全部往生次数；魂蚀率最低为 0，溢出的压制不会恢复魂基';
     $('#ghost-reincarnate-action').classList.toggle('hidden', !ghost.can_reincarnate);
+  } else {
+    $('#hp-text').removeAttribute('title'); $('#hp-text').removeAttribute('data-tooltip');
+    $('#mp-text').removeAttribute('title'); $('#mp-text').removeAttribute('data-tooltip');
   }
   const combatNode = $('#combat-power');
   combatNode.textContent = number(p.combat_power);
@@ -1356,9 +1376,11 @@ $('#cross-world-secondary-action').onclick = () => mutate(`/api/games/${game.id}
 $('#breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/breakthrough`, {});
 $('#body-breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/body-breakthrough`, {});
 $('#ghost-wangsheng-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {});
+$('#ghost-wangsheng-all-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {all:true});
 $('#ghost-reincarnate-action').onclick = () => {
   const ghost = game?.ghost_system || {};
-  const warning = `确认舍弃当前修为并回到练气一层？未使用往生将清零；魂蚀率与既有魂伤不会恢复；历史最高修为 ${ghost.highwater?.name || '保持不变'}。`;
+  const preview = ghost.reincarnation_preview || {};
+  const warning = `确认舍弃 ${preview.source || '当前修为'} 并回到 ${preview.destination || '练气一层'}？\n新增本境第 ${preview.next_imprint_count || 1} 枚轮回印记，${preview.affected_road || '已走过道路'}突破经验 +${percent(preview.added_bonus || .05)}。\n往生 ${preview.wangsheng_before ?? ghost.wangsheng ?? 0} → 0；魂蚀率与既有魂伤不会恢复；所有突破最终有效概率仍封顶 ${percent(ghost.breakthrough_probability_cap || .98)}。`;
   if (window.confirm(warning)) mutate(`/api/games/${game.id}/ghost-reincarnate`, {});
 };
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
@@ -2396,6 +2418,7 @@ function renderButtons() {
   $('#breakthrough-action').disabled = busy || !game?.breakthrough?.enabled || !!game?.pending_event;
   $('#body-breakthrough-action').disabled = busy || !game?.body_cultivation?.ready || !!game?.pending_event || !!game?.imprisonment;
   $('#ghost-wangsheng-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
+  $('#ghost-wangsheng-all-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-reincarnate-action').disabled = busy || !game?.ghost_system?.can_reincarnate;
   document.querySelectorAll('.map-travel').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1' || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;

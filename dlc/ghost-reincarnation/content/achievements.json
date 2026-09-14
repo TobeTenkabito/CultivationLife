@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "ghost_first_reincarnation",
+      "name": "再世为魂",
+      "description": "作为鬼修第一次舍世入轮回",
+      "category": "cultivation",
+      "condition": {
+        "all": [
+          {"path": "ghost"},
+          {"history": {"event_id": "SYS_GHOST_REINCARNATION", "result": "reincarnated"}}
+        ]
+      }
+    },
+    {
+      "id": "ghost_ten_reincarnations",
+      "name": "十世归途",
+      "description": "作为鬼修累计完成十次轮回",
+      "category": "cultivation",
+      "condition": {
+        "all": [
+          {"path": "ghost"},
+          {"milestone_at_least": {"id": "ghost_reincarnations", "value": 10}}
+        ]
+      }
+    },
+    {
+      "id": "ghost_half_soul_survivor",
+      "name": "残灯不灭",
+      "description": "魂体承载率首次跌破 50% 后仍未魂飞魄散",
+      "category": "cultivation",
+      "condition": {
+        "all": [
+          {"path": "ghost"},
+          {"history": {"event_id": "SYS_GHOST_EROSION_50", "result": "eroded"}}
+        ]
+      }
+    },
+    {
+      "id": "ghost_wangsheng_twenty",
+      "name": "往生有数",
+      "description": "累计消耗二十点往生压制魂蚀",
+      "category": "cultivation",
+      "condition": {
+        "all": [
+          {"path": "ghost"},
+          {"milestone_at_least": {"id": "ghost_wangsheng_spent", "value": 20}}
+        ]
+      }
+    }
+  ]
+}

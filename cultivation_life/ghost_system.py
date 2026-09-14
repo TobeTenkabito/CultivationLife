@@ -67,6 +67,12 @@ def ensure_ghost_cultivation_state(player: Player) -> bool:
         player.ghost_intrinsic_highwater_realm = player.realm_index
         player.ghost_intrinsic_highwater_layer = player.layer
         changed = True
+    # V2 reuses the base milestone map for achievements.  Derive the count from
+    # permanent V1 imprints so existing saves receive full credit on first load.
+    imprint_total = sum(max(0, int(count)) for count in player.ghost_reincarnation_imprints.values())
+    if int(player.milestones.get("ghost_reincarnations", 0)) < imprint_total:
+        player.milestones["ghost_reincarnations"] = imprint_total
+        changed = True
     if player.lifespan is not None:
         player.lifespan = None
         changed = True
@@ -220,18 +226,35 @@ def apply_soul_erosion(player: Player, units: int = 1) -> dict[str, Any]:
     }
 
 
-def spend_wangsheng_energy(player: Player) -> tuple[int, float]:
+def spend_wangsheng_energy(player: Player, uses: int = 1) -> tuple[int, float]:
     if not ghost_cultivation_active(player):
         raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
     config = ghost_cultivation_config()
-    cost = max(1, int(config.get("wangsheng_cost", 2)))
+    unit_cost = max(1, int(config.get("wangsheng_cost", 2)))
+    actual_uses = max(1, int(uses))
+    cost = unit_cost * actual_uses
     if player.ghost_wangsheng_energy < cost:
         raise ValueError(f"往生不足：需要 {cost} 点")
     before = max(0.0, float(player.ghost_soul_erosion_rate_pp))
-    reduction = max(0.0, float(config.get("wangsheng_erosion_reduction_pp", 0.02)))
+    reduction = max(0.0, float(config.get("wangsheng_erosion_reduction_pp", 0.02))) * actual_uses
     player.ghost_wangsheng_energy -= cost
     player.ghost_soul_erosion_rate_pp = max(0.0, before - reduction)
     return cost, before - player.ghost_soul_erosion_rate_pp
+
+
+def soul_integrity_label(ratio: float) -> str:
+    percent = max(0.0, min(1.0, float(ratio))) * 100
+    if percent >= 90:
+        return "魂火鼎盛"
+    if percent >= 75:
+        return "魂灯微晦"
+    if percent >= 50:
+        return "魂基受损"
+    if percent >= 25:
+        return "魂魄残缺"
+    if percent >= 10:
+        return "魂灯将熄"
+    return "魂飞魄散之兆"
 
 
 class GhostSystemMixin:
@@ -255,15 +278,20 @@ class GhostSystemMixin:
             return False
         return True
 
-    def spend_wangsheng(self, game_id: str) -> dict[str, Any]:
+    def spend_wangsheng(self, game_id: str, spend_all: bool = False) -> dict[str, Any]:
         game = self._load(game_id)
         if not game.player.alive or game.pending_event or game.player.imprisonment:
             raise ValueError("当前状态无法行往生法")
-        cost, reduction = spend_wangsheng_energy(game.player)
+        unit_cost = max(1, int(ghost_cultivation_config().get("wangsheng_cost", 2)))
+        uses = max(1, game.player.ghost_wangsheng_energy // unit_cost) if spend_all else 1
+        cost, reduction = spend_wangsheng_energy(game.player, uses)
+        game.player.milestones["ghost_wangsheng_spent"] = (
+            int(game.player.milestones.get("ghost_wangsheng_spent", 0)) + cost
+        )
         game.history.append(HistoryRecord(
             "SYS_GHOST_WANGSHENG", 1, game.player.age, "往生息蚀", None, "spent",
-            f"你消耗 {cost} 点往生，将魂蚀率降低 {reduction:.4f} 个百分点；既有魂伤并未复原。",
-            {"cost": cost, "erosion_reduction_pp": reduction},
+            f"你施行 {uses} 次往生，消耗 {cost} 点往生，将魂蚀率降低 {reduction:.4f} 个百分点；既有魂伤并未复原。",
+            {"cost": cost, "uses": uses, "erosion_reduction_pp": reduction},
             ["system", "ghost", "wangsheng"],
         ))
         game.updated_at = now_iso()
@@ -287,6 +315,9 @@ class GhostSystemMixin:
         source_label = f"{current_realm.name}{source_layer}层"
         key = str(source_realm)
         player.ghost_reincarnation_imprints[key] = int(player.ghost_reincarnation_imprints.get(key, 0)) + 1
+        player.milestones["ghost_reincarnations"] = (
+            int(player.milestones.get("ghost_reincarnations", 0)) + 1
+        )
         lost_wangsheng = player.ghost_wangsheng_energy
         player.ghost_last_reincarnation_realm = source_realm
         player.ghost_last_reincarnation_layer = source_layer
@@ -341,6 +372,25 @@ class GhostSystemMixin:
             and player.opportunity >= opportunity_required(player)
         )
         effective_marks = reincarnation_effective_marks(player, player.realm_index)
+        total_imprints = sum(max(0, int(row["count"])) for row in imprints)
+        integrity_ratio = min(hp_ratio, mp_ratio)
+        probability_cap = min(
+            0.98, max(0.005, float(config.get("reincarnation_final_probability_cap", 0.98))),
+        )
+        reincarnation_preview = None
+        if at_bottleneck:
+            source_count = int(player.ghost_reincarnation_imprints.get(str(player.realm_index), 0))
+            reincarnation_preview = {
+                "source": f"{REALMS[player.realm_index].name}{player.layer}层",
+                "destination": f"{REALMS[1].name}1层",
+                "next_imprint_count": source_count + 1,
+                "added_bonus": float(config.get("reincarnation_bonus_per_mark", 0.05)),
+                "affected_road": f"{REALMS[player.realm_index].name}及以下道路",
+                "wangsheng_before": player.ghost_wangsheng_energy,
+                "erosion_rate_pp": round(player.ghost_soul_erosion_rate_pp, 6),
+                "intrinsic_hp_current": round(effective_intrinsic_hp(player), 4),
+                "intrinsic_mp_current": round(effective_intrinsic_mp(player), 4),
+            }
         return {
             "available": True,
             "name": GHOST_DLC_NAME,
@@ -348,6 +398,9 @@ class GhostSystemMixin:
             "wangsheng": player.ghost_wangsheng_energy,
             "wangsheng_cost": int(config.get("wangsheng_cost", 2)),
             "wangsheng_reduction_pp": float(config.get("wangsheng_erosion_reduction_pp", 0.02)),
+            "wangsheng_available_uses": player.ghost_wangsheng_energy // max(
+                1, int(config.get("wangsheng_cost", 2)),
+            ),
             "can_spend_wangsheng": bool(
                 player.alive and not game.pending_event and not player.imprisonment
                 and player.ghost_wangsheng_energy >= int(config.get("wangsheng_cost", 2))
@@ -371,8 +424,15 @@ class GhostSystemMixin:
                 "external_effective": round(raw_external_mp_bonus(player) * mp_ratio, 4),
             },
             "imprints": imprints,
+            "total_imprints": total_imprints,
             "effective_marks": effective_marks,
             "breakthrough_bonus": reincarnation_breakthrough_bonus(player, player.realm_index),
+            "breakthrough_probability_cap": probability_cap,
+            "soul_integrity": {
+                "ratio": round(integrity_ratio, 6),
+                "label": soul_integrity_label(integrity_ratio),
+            },
+            "reincarnation_preview": reincarnation_preview,
             "highwater": {
                 "realm_index": player.ghost_intrinsic_highwater_realm,
                 "layer": player.ghost_intrinsic_highwater_layer,
