@@ -184,6 +184,41 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertEqual((player.ghost_intrinsic_hp_reference, player.ghost_intrinsic_mp_reference), reference)
         self.assertEqual(player.ghost_wangsheng_energy, 1)
 
+    def test_reincarnation_confirmation_is_a_persisted_game_event(self):
+        shown = self.engine.create_game("门前止步", "mutated_yin", "ghost", 902, start_world="hell")
+        game = self.engine.store.load(shown["id"])
+        game.player.realm_index, game.player.layer = 3, REALMS[3].layers
+        grant_intrinsic_progression_if_new_highwater(game.player)
+        game.player.opportunity = opportunity_required(game.player)
+        game.player.ghost_wangsheng_energy = 6
+        self.engine.store.save(game)
+
+        prompted = self.engine.prepare_ghost_reincarnation(game.id)
+        self.assertEqual(prompted["pending_event"]["id"], "SYS_GHOST_REINCARNATION")
+        self.assertIn("继续后", prompted["pending_event"]["body"])
+        self.assertEqual(
+            [choice["id"] for choice in prompted["pending_event"]["choices"]],
+            ["continue", "cancel"],
+        )
+        persisted = self.engine.store.load(game.id)
+        self.assertEqual(persisted.pending_event["title"], "轮回门前")
+
+        cancelled = self.engine.choose(game.id, "cancel")
+        self.assertIsNone(cancelled["pending_event"])
+        self.assertEqual((cancelled["player"]["realm_index"], cancelled["player"]["layer"]), (3, REALMS[3].layers))
+        self.assertEqual(cancelled["ghost_system"]["wangsheng"], 6)
+
+        self.engine.prepare_ghost_reincarnation(game.id)
+        continued = self.engine.choose(game.id, "continue")
+        self.assertEqual((continued["player"]["realm_index"], continued["player"]["layer"]), (1, 1))
+        self.assertEqual(continued["ghost_system"]["wangsheng"], 0)
+        history = self.engine.store.load(game.id).history
+        self.assertTrue(any(
+            record.event_id == "SYS_GHOST_REINCARNATION"
+            and record.choice_id == "continue" and record.result == "reincarnated"
+            for record in history
+        ))
+
     def test_player_only_reincarnation_transition_preserves_unrelated_progress(self):
         player = Player("百业不忘", "mutated_yin", path="ghost", realm_index=4, layer=9, age=777)
         ensure_ghost_cultivation_state(player)

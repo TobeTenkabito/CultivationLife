@@ -290,7 +290,7 @@ async function mutate(path, payload) {
 function showStart() {
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'captive', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   battleReportOpen = false;
   renderButtons();
 }
@@ -341,7 +341,7 @@ function render(data) {
   if (ghost.available) {
     $('#ghost-erosion').textContent = `${Number(ghost.erosion_rate_pp || 0).toFixed(4)}%`;
     $('#ghost-wangsheng').textContent = number(ghost.wangsheng || 0);
-    $('#ghost-system-title').textContent = ghost.name || '百鬼夜行:轮回往生';
+    $('#ghost-system-title').textContent = '魂蚀、往生与轮回';
     const ihp = ghost.intrinsic_hp || {}, imp = ghost.intrinsic_mp || {};
     const erosionTime = ghost.erosion_time || {};
     const erosionClock = `魂蚀计时 ${formatDecimal(erosionTime.elapsed_equivalent_years || 0)}/${number(erosionTime.time_unit_years || p.time_unit_years)} 年（${precisePercent(erosionTime.progress_ratio || 0)}）`;
@@ -373,6 +373,7 @@ function render(data) {
   } else {
     $('#hp-text').removeAttribute('title'); $('#hp-text').removeAttribute('data-tooltip');
     $('#mp-text').removeAttribute('title'); $('#mp-text').removeAttribute('data-tooltip');
+    renderGhostPhaseTwo({enabled:false});
   }
   const combatNode = $('#combat-power');
   combatNode.textContent = number(p.combat_power);
@@ -1408,21 +1409,27 @@ $('#breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/breakthr
 $('#body-breakthrough-action').onclick = () => mutate(`/api/games/${game.id}/body-breakthrough`, {});
 $('#ghost-wangsheng-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {});
 $('#ghost-wangsheng-all-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {all:true});
-$('#ghost-reincarnate-action').onclick = () => {
-  const ghost = game?.ghost_system || {};
-  const preview = ghost.reincarnation_preview || {};
-  const highwater = ghost.highwater?.name || '当前历史最高修为';
-  const warning = `确认舍弃 ${preview.source || '当前修为'} 并回到 ${preview.destination || '练气一层'}？\n新增本境第 ${preview.next_imprint_count || 1} 枚轮回印记，${preview.affected_road || '已走过道路'}突破经验 +${percent(preview.added_bonus || .05)}。\n往生 ${preview.wangsheng_before ?? ghost.wangsheng ?? 0} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp ?? ghost.erosion_rate_pp ?? 0).toFixed(4)}%；Intrinsic HP/MP 均不会恢复。\n本体成长最高水位保持 ${highwater}，重新超过该修为以前不会再次获得境界来源的 Intrinsic HP/MP。所有突破最终有效概率仍封顶 ${percent(ghost.breakthrough_probability_cap || .98)}。`;
-  if (window.confirm(warning)) mutate(`/api/games/${game.id}/ghost-reincarnate`, {});
-};
+$('#ghost-reincarnate-action').onclick = () => mutate(`/api/games/${game.id}/ghost-reincarnation-prompt`, {});
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
 
 function renderGhostPhaseTwo(system) {
-  const panel = $('#ghost-phase-two');
-  panel.classList.toggle('hidden', !system.enabled);
-  $('#ghost-attachment-panel').classList.toggle('hidden', !system.enabled);
-  if (!system.enabled) return;
+  const enabled = !!system.enabled;
+  const soulCard = $('#ghost-soul-card'), soulDock = document.querySelector('[data-panel-target="ghost-soul"]');
+  const attachmentCard = $('#ghost-attachment-card'), attachmentDock = document.querySelector('[data-panel-target="ghost-attachment"]');
+  soulCard.classList.toggle('hidden', !enabled); soulDock?.classList.toggle('hidden', !enabled);
+  attachmentCard.classList.toggle('hidden', !enabled); attachmentDock?.classList.toggle('hidden', !enabled);
+  const parade = system.parade || {};
+  const paradeVisible = enabled && !!parade.status && parade.status !== 'dormant';
+  const paradeCard = $('#ghost-parade-card'), paradeDock = document.querySelector('[data-panel-target="ghost-parade"]');
+  paradeCard.classList.toggle('hidden', !paradeVisible); paradeDock?.classList.toggle('hidden', !paradeVisible);
+  if (!enabled) {
+    ['ghost-soul','ghost-attachment','ghost-parade'].forEach(name => window.UtilityPanels?.close(name));
+    return;
+  }
+  if (!paradeVisible) window.UtilityPanels?.close('ghost-parade');
   const limit = system.possession_limit == null ? '无限' : system.possession_limit;
+  $('#ghost-soul-summary').textContent = `入位 ${number((system.slots || []).filter(slot => slot.soul).length)}/10 · 拘魂 ${number((system.bound_souls || []).length)}`;
+  $('#ghost-attachment-summary').textContent = system.state === 'attached' ? '当前已附灵' : system.state_name;
   $('#ghost-phase-state').textContent = `${system.state_name} · 魂压 ${Number(system.pressure || 0).toFixed(2)}（未来魂蚀增长 +${percent(system.pressure_modifier || 0)}） · 夺舍 ${number(system.possession_count)}/${limit}${system.souls_suspended ? ' · 宿身期间十魂与鬼魂核心全数沉寂' : ''}`;
   const constraints = $('#ghost-constraint-actions'); constraints.innerHTML = '';
   constraints.classList.toggle('hidden', system.state !== 'controlled');
@@ -1442,9 +1449,17 @@ function renderGhostPhaseTwo(system) {
     hostTools.append(note, leave);
   }
   const paradeList = $('#ghost-parade-list'); paradeList.innerHTML = '';
-  const parade = system.parade || {};
-  if (!parade.status || parade.status === 'dormant') paradeList.innerHTML = '<p class="empty">阴路平静，下一次异动尚未显形。</p>';
-  else {
+  if (paradeVisible) {
+    const live = parade.status === 'active';
+    $('#ghost-parade-summary').textContent = live ? '正在夜行' : `${timelineText(parade.start_age)}开启`;
+    $('#ghost-parade-description').textContent = live
+      ? `${parade.location_name || parade.location_id}阴门洞开；${parade.at_location ? '你已抵达会场，可以参悟、结交或拘魂。' : '你尚未抵达会场，请从地图赶往标记地点。'}`
+      : `阴司已在${parade.location_name || parade.location_id}留下预告。活动开启前可提前赶路，地图上已显示夜行标记。`;
+    paradeDock?.classList.add('notice'); paradeDock?.classList.toggle('live', live);
+    if (paradeDock) {
+      paradeDock.title = live ? '百鬼夜行正在发生' : '百鬼夜行预告';
+      const label = paradeDock.querySelector('small'); if (label) label.textContent = live ? '夜行中' : '预告';
+    }
     const intro = document.createElement('p'); intro.className = 'muted';
     intro.textContent = `${parade.location_name || parade.location_id} · ${parade.status === 'active' ? `正在夜行，${(parade.souls || []).length} 魂仍在` : `将于${timelineText(parade.start_age)}开启`} · ${parade.at_location ? '你正在会场' : '地图已有标记'}`; paradeList.appendChild(intro);
     if (parade.status === 'active' && parade.at_location && system.state === 'free') {
@@ -1458,10 +1473,12 @@ function renderGhostPhaseTwo(system) {
         row.appendChild(tools); paradeList.appendChild(row);
       });
     }
+  } else if (paradeDock) {
+    paradeDock.classList.remove('notice', 'live');
   }
   const slotList = $('#ghost-soul-slots'); slotList.innerHTML = '';
   (system.slots || []).forEach(slot => {
-    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · 当前加成 ${percent(slot.effect || 0)} · ${slot.soul.soul_trait?.name || '无性'}：${slot.soul.soul_trait?.description || '无额外规则'}` : '空位'}</small>`;
+    const row=document.createElement('div'); row.className=`captive-row ${slot.curve === 'unbounded_diminishing' ? 'three-soul' : 'seven-spirit'}`; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · 当前加成 ${percent(slot.effect || 0)} · ${slot.soul.soul_trait?.name || '无性'}：${slot.soul.soul_trait?.description || '无额外规则'}` : '空位'}</small>`;
     if (slot.soul && system.state !== 'possessed') { const b=document.createElement('button'); b.textContent='卸下'; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'unequip',soul_id:slot.soul.id,slot:slot.id}); row.appendChild(b); } slotList.appendChild(row);
   });
   const soulList=$('#ghost-bound-souls'); soulList.innerHTML='';

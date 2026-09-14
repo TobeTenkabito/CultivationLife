@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "SYS_GHOST_REINCARNATION",
+      "version": 2,
+      "title": "轮回门前",
+      "body": "轮回门在你识海深处开启。此念一旦落定，本世修为与未用往生都将散去；魂蚀、既有魂伤及本体成长最高水位不会重置。",
+      "category": "system",
+      "tags": ["all_realms", "ghost", "reincarnation", "manual_only"],
+      "weight": 0,
+      "conditions": {"path": "player.path", "op": "eq", "value": "ghost"},
+      "choices": [
+        {
+          "id": "continue",
+          "text": "继续轮回",
+          "effects": [{"type": "ghost_reincarnate"}]
+        },
+        {
+          "id": "cancel",
+          "text": "取消，暂留此世",
+          "result_text": "你收住轮回之念，仍以此身留驻当前道途。",
+          "effects": []
+        }
+      ]
+    }
+  ]
+}
