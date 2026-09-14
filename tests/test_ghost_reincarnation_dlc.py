@@ -8,6 +8,7 @@ from unittest.mock import patch
 from cultivation_life.content_registry import ITEM_CATALOG, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
 from cultivation_life.ghost_system import (
+    accumulate_soul_erosion_time,
     apply_soul_erosion,
     can_reincarnate,
     ensure_ghost_cultivation_state,
@@ -194,12 +195,14 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         player.inventory = [Item("keepsake", "旧世信物", quantity=2)]
         player.ghost_wangsheng_energy = 9
         player.ghost_soul_erosion_rate_pp = 0.1234
+        player.ghost_soul_erosion_time_progress = 0.5
         self.assertTrue(can_reincarnate(player))
         transition = perform_reincarnation(player)
         self.assertEqual((player.realm_index, player.layer, player.opportunity), (1, 1, 0))
         self.assertEqual((player.age, player.body_training, player.divine_sense_rank), (777, 33, 12))
         self.assertEqual((player.karma, player.sha_qi, player.inventory[0].quantity), (19, 23, 2))
         self.assertEqual(player.ghost_soul_erosion_rate_pp, 0.1234)
+        self.assertEqual(player.ghost_soul_erosion_time_progress, 0.5)
         self.assertEqual(transition["wangsheng_lost"], 9)
 
     def test_reincarnation_wangsheng_clearing_follows_dlc_config(self):
@@ -356,6 +359,61 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertAlmostEqual(saved.ghost_intrinsic_hp_current, expected.ghost_intrinsic_hp_current)
         self.assertAlmostEqual(saved.ghost_intrinsic_mp_current, expected.ghost_intrinsic_mp_current)
 
+    def test_all_time_sources_share_one_fractional_erosion_clock(self):
+        shown = self.engine.create_game("百年一蚀", "mutated_yin", "ghost", 914, start_world="hell")
+        game = self.engine.store.load(shown["id"])
+        game.player.realm_index, game.player.layer = 8, 1
+        grant_intrinsic_progression_if_new_highwater(game.player)
+        original_hp = game.player.ghost_intrinsic_hp_current
+
+        self.assertTrue(self.engine._advance_soul_erosion_time(game, 30))
+        self.assertAlmostEqual(game.player.ghost_soul_erosion_time_progress, 0.30)
+        self.assertEqual(game.player.ghost_soul_erosion_rate_pp, 0)
+        self.assertTrue(self.engine._advance_soul_erosion_time(game, 20))
+        self.assertAlmostEqual(game.player.ghost_soul_erosion_time_progress, 0.50)
+        self.assertTrue(self.engine._advance_soul_erosion_time(game, 49))
+        self.assertAlmostEqual(game.player.ghost_soul_erosion_time_progress, 0.99)
+        self.assertEqual(game.player.ghost_soul_erosion_rate_pp, 0)
+        self.assertTrue(self.engine._advance_soul_erosion_time(game, 1))
+        self.assertEqual(game.player.ghost_soul_erosion_time_progress, 0)
+        self.assertAlmostEqual(game.player.ghost_soul_erosion_rate_pp, 0.0002)
+        self.assertEqual(game.player.ghost_intrinsic_hp_current, original_hp)
+
+    def test_high_realm_travel_and_one_year_prison_accumulate_without_rounding_up(self):
+        shown = self.engine.create_game("寸年不欺", "mutated_yin", "ghost", 915, start_world="hell")
+        game = self.engine.store.load(shown["id"])
+        game.player.realm_index, game.player.layer = 8, 1
+        grant_intrinsic_progression_if_new_highwater(game.player)
+        self.engine.store.save(game)
+        travel_years = self.engine.maps.travel_plan(
+            "hell", game.player.location_id, "forgetful_river", game.player.realm_index,
+        ).years
+        self.assertLess(travel_years, 100)
+        with patch.object(self.engine, "_advance_world_year", return_value=True):
+            self.engine.travel_map(game.id, "forgetful_river")
+        after_travel = self.engine.store.load(game.id)
+        self.assertEqual(after_travel.player.ghost_soul_erosion_rate_pp, 0)
+        self.assertAlmostEqual(
+            after_travel.player.ghost_soul_erosion_time_progress, travel_years / 100,
+        )
+
+        after_travel.player.hostility["sect:ghost"] = 10
+        after_travel.player.imprisonment = {
+            "key": "sect:ghost", "name": "幽狱", "remaining_years": 1,
+            "captured_age": after_travel.player.age, "hostility": 10,
+            "sentence_years": 1, "hostility_reduction_per_year": 10,
+        }
+        self.engine.store.save(after_travel)
+        with patch.object(self.engine, "_check_tribulation", return_value=None):
+            result = self.engine.prison_action(game.id, "endure")
+        saved = self.engine.store.load(game.id).player
+        self.assertTrue(saved.alive)
+        self.assertEqual(saved.ghost_soul_erosion_rate_pp, 0)
+        self.assertAlmostEqual(
+            saved.ghost_soul_erosion_time_progress, (travel_years + 1) / 100,
+        )
+        self.assertEqual(result["ghost_system"]["erosion_time"]["time_unit_years"], 100)
+
     def test_travel_field_reclaim_and_prison_years_all_apply_erosion(self):
         travel = self.engine.create_game("远魂", "mutated_yin", "ghost", 906, start_world="hell")
         travel_game = self.engine.store.load(travel["id"])
@@ -456,6 +514,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             player.ghost_intrinsic_hp_current,
             player.ghost_intrinsic_mp_current,
             player.ghost_soul_erosion_rate_pp,
+            player.ghost_soul_erosion_time_progress,
         )
         config = WORLD_SYSTEMS["ghost_cultivation"]
         config["enabled"] = False
@@ -464,11 +523,13 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             expected = 100 + int(definition.base_power ** 0.5 * 16) + player.layer * 8
             self.assertEqual(max_hp(player), expected)
             self.assertFalse(apply_soul_erosion(player, 10)["active"])
+            self.assertEqual(accumulate_soul_erosion_time(player, 10), 0)
             self.assertEqual(
                 (
                     player.ghost_intrinsic_hp_current,
                     player.ghost_intrinsic_mp_current,
                     player.ghost_soul_erosion_rate_pp,
+                    player.ghost_soul_erosion_time_progress,
                 ),
                 frozen,
             )

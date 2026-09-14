@@ -336,14 +336,16 @@ function render(data) {
     $('#ghost-wangsheng').textContent = number(ghost.wangsheng || 0);
     $('#ghost-system-title').textContent = ghost.name || '百鬼夜行:轮回往生';
     const ihp = ghost.intrinsic_hp || {}, imp = ghost.intrinsic_mp || {};
+    const erosionTime = ghost.erosion_time || {};
+    const erosionClock = `魂蚀计时 ${formatDecimal(erosionTime.elapsed_equivalent_years || 0)}/${number(erosionTime.time_unit_years || p.time_unit_years)} 年（${precisePercent(erosionTime.progress_ratio || 0)}）`;
     const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
     const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}`;
-    $('#ghost-system-summary').textContent = `${ghost.soul_integrity?.label || '魂基'} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
+    $('#ghost-system-summary').textContent = `${ghost.soul_integrity?.label || '魂基'} · ${erosionClock} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
     const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${precisePercent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
     const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${precisePercent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
     $('#hp-text').title = hpDetail; $('#hp-text').dataset.tooltip = hpDetail;
     $('#mp-text').title = mpDetail; $('#mp-text').dataset.tooltip = mpDetail;
-    $('#ghost-integrity-detail').textContent = `魂体完整度 ${precisePercent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
+    $('#ghost-integrity-detail').textContent = `${erosionClock}；所有行动共享此进度，只有累计满一个当前境界时间单位才结算魂蚀。魂体完整度 ${precisePercent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
     const imprintRows = ghost.imprints || [];
     $('#ghost-imprint-list').textContent = imprintRows.length
       ? `轮回印记（共 ${number(ghost.total_imprints)}）：${imprintRows.map(row => `${row.realm_name}${row.layer}层 ×${row.count}`).join('；')}。当前道路有效 ${number(ghost.effective_marks)} 枚，经验加成 ${percent(ghost.breakthrough_bonus)}。最近轮回锚点：${ghost.last_anchor?.name || '无'}。`
@@ -2455,6 +2457,7 @@ function renderButtons() {
 }
 
 function number(value) { return Math.round(Number(value)).toLocaleString('zh-CN'); }
+function formatDecimal(value) { return Number(value || 0).toLocaleString('zh-CN', {maximumFractionDigits: 2}); }
 function percent(value) { return `${Math.round(Number(value) * 100)}%`; }
 function precisePercent(value) { return `${(Number(value || 0) * 100).toFixed(2)}%`; }
 function finePercent(value) {

@@ -450,6 +450,7 @@ def main() -> None:
                 grant_intrinsic_progression_if_new_highwater(ghost_game.player)
                 ghost_game.player.opportunity = opportunity_required(ghost_game.player)
                 ghost_game.player.ghost_soul_erosion_rate_pp = 0.08
+                ghost_game.player.ghost_soul_erosion_time_progress = 0.3
                 ghost_game.player.ghost_wangsheng_energy = 5
                 add_item(ghost_game.player, "ghost_core_pill")
                 engine.store.save(ghost_game)
@@ -464,6 +465,7 @@ def main() -> None:
                 assert "最终有效突破率封顶 98%" in page.locator("#ghost-system-summary").text_content()
                 assert "本次轮回预览" in page.locator("#ghost-reincarnation-preview").text_content()
                 assert "100.00%" in page.locator("#ghost-integrity-detail").text_content()
+                assert "所有行动共享此进度" in page.locator("#ghost-integrity-detail").text_content()
                 assert "练气13层 ×0" in page.locator("#ghost-imprint-list").text_content()
                 page.locator("[data-panel-target='inventory']").click()
                 page.locator("#inventory-card").wait_for(state="visible")
