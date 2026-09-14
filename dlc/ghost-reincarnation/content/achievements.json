@@ -48,6 +48,34 @@
           {"milestone_at_least": {"id": "ghost_wangsheng_spent", "value": 20}}
         ]
       }
+    },
+    {
+      "id": "ghost_first_bound_soul",
+      "name": "拘得真名",
+      "description": "在百鬼夜行中拘得第一道保留身份与魂性的真实魂魄",
+      "category": "cultivation",
+      "condition": {"history": {"event_id": "SYS_GHOST_PARADE_ACTION", "result": "captured"}}
+    },
+    {
+      "id": "ghost_ten_soul_thrones",
+      "name": "十魂归位",
+      "description": "完成一次十魂轮转",
+      "category": "cultivation",
+      "condition": {"milestone_at_least": {"id": "ghost_ten_soul_slots", "value": 1}}
+    },
+    {
+      "id": "ghost_first_attachment",
+      "name": "器中有灵",
+      "description": "第一次附入器物成为器灵",
+      "category": "cultivation",
+      "condition": {"history": {"event_id": "SYS_GHOST_ATTACHMENT", "result": "success"}}
+    },
+    {
+      "id": "ghost_first_possession",
+      "name": "借壳问道",
+      "description": "第一次成功夺取他人肉身",
+      "category": "cultivation",
+      "condition": {"milestone_at_least": {"id": "ghost_possessions", "value": 1}}
     }
   ]
 }

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "items": [
+    {"id":"ghost_nurturing_casket","name":"养魂木匣","erosion_growth_multiplier":0.72,"cultivation_efficiency_multiplier":0.82,"description":"温养游魂的普通死物载体；附灵后魂蚀增长 ×0.72、修炼效率 ×0.82。","tags":["ghost","ghost_vessel","market"]},
+    {"id":"nine_nether_soul_lamp","name":"九幽镇魂灯","mp_bonus":320,"erosion_growth_multiplier":0.48,"cultivation_efficiency_multiplier":0.68,"description":"以九幽灯火隔绝天地侵蚀；附灵后魂蚀增长 ×0.48、修炼效率 ×0.68。","tags":["ghost","ghost_vessel","market","equipment"]},
+    {"id":"yellow_spring_soul_boat","name":"黄泉渡魂舟","combat_bonus":96000,"erosion_growth_multiplier":0.32,"cultivation_efficiency_multiplier":0.62,"description":"往返黄泉的高阶养魂法器；附灵后魂蚀增长 ×0.32、修炼效率 ×0.62。","tags":["ghost","ghost_vessel","rare","equipment"]}
+  ]
+}

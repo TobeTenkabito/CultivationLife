@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=20260914-1">
+  <link rel="stylesheet" href="/style.css?v=20260914-2">
   <link rel="stylesheet" href="/panels.css?v=20260912-11">
 </head>
 <body>
@@ -74,6 +74,19 @@
         <details class="techniques compact-library"><summary>功法配置 <span id="equipped-technique-count"></span></summary><div id="technique-list"></div></details>
         <details class="technique-library compact-library"><summary>已悟功法 <span id="known-technique-count"></span></summary><div id="known-technique-list"></div></details>
         <div class="wanted"><h3>势力敌对</h3><div id="wanted-list"></div></div>
+        <details id="ghost-phase-two" class="ghost-ecology-ledger hidden">
+          <summary>魂魄</summary>
+          <p id="ghost-phase-state"></p>
+          <div id="ghost-constraint-actions" class="ghost-system-actions hidden"></div>
+          <div id="ghost-host-actions" class="ghost-system-actions hidden"></div>
+          <section><b>百鬼夜行</b><div id="ghost-parade-list"></div></section>
+          <section><b>十魂位（事件中仍可即时换魂）</b><div id="ghost-soul-slots"></div></section>
+          <section><b>拘魂册</b><div id="ghost-bound-souls"></div></section>
+        </details>
+        <details id="ghost-attachment-panel" class="ghost-ecology-ledger hidden">
+          <summary>附灵</summary>
+          <section><b>载体与器灵状态</b><div id="ghost-attachment-list"></div></section>
+        </details>
       </aside>
 
       <section class="main-column">
@@ -304,6 +317,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260912-9"></script>
-  <script src="/app.js?v=20260914-5"></script>
+  <script src="/app.js?v=20260914-6"></script>
 </body>
 </html>

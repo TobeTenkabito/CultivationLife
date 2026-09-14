@@ -12,7 +12,27 @@
       "wangsheng_per_layer": 1,
       "wangsheng_cost": 2,
       "wangsheng_erosion_reduction_pp": 0.02,
-      "clear_wangsheng_on_reincarnation": true
+      "clear_wangsheng_on_reincarnation": true,
+      "phase_two": {
+        "enabled": true,
+        "defeat_capture_chance": 0.45,
+        "pressure_modifier_per_point": 0.01,
+        "soul_pressure": {"base": 0.5, "power_cap": 2.0, "power_scale": 5000.0},
+        "soul_slots": {
+          "effect_cap": 0.25,
+          "power_scale": 2500.0,
+          "trait_ratio": 0.35
+        },
+        "parade": {
+          "enabled": true,
+          "min_interval_units": 5,
+          "max_interval_units": 9,
+          "duration_units": 2,
+          "soul_count": 6,
+          "participate_reduction_pp": 0.005,
+          "befriend_reduction_pp": 0.002
+        }
+      }
     }
   }
 }

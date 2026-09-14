@@ -826,6 +826,12 @@ class ContentRegistry:
                 raise ContentError(f"物品 {item.id} 的下一次孕育概率加成必须位于 [0, 1) 区间")
             if item.conception_bonus > 0 and not {"pill", "conception"} <= set(item.tags):
                 raise ContentError(f"孕育丹药 {item.id} 必须同时标记 pill 与 conception")
+            if not 0 < item.erosion_growth_multiplier <= 1 or not 0 < item.cultivation_efficiency_multiplier <= 1:
+                raise ContentError(f"物品 {item.id} 的附灵倍率必须位于 (0, 1] 区间")
+            if (
+                item.erosion_growth_multiplier != 1 or item.cultivation_efficiency_multiplier != 1
+            ) and "ghost_vessel" not in item.tags:
+                raise ContentError(f"附灵专属载体 {item.id} 必须标记 ghost_vessel")
             if not 0 <= item.tribulation_damage_reduction < 1 or item.passive_breakthrough_bonus < 0:
                 raise ContentError(f"物品 {item.id} 的减伤或常驻突破加成不合法")
             if item.passive_breakthrough_bonus > 0 and item.passive_breakthrough_max_realm is None:
@@ -881,6 +887,8 @@ class ContentRegistry:
                 raise ContentError(f"普通功法 {technique.id} 不能声明仙灵力消耗")
             if not 0 <= int(technique.required_body_training) <= 100:
                 raise ContentError(f"功法 {technique.id} 的炼体门槛必须位于零至一百层")
+            if int(technique.possession_limit_bonus) < 0:
+                raise ContentError(f"功法 {technique.id} 的夺舍次数加成不能为负数")
             if (
                 not technique.sources
                 or set(technique.sources) - allowed_sources

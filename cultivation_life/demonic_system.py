@@ -199,7 +199,7 @@ class DemonicSystemMixin:
         target = prisoner or disciple
         if not target:
             raise ValueError("目标俘虏或弟子不存在")
-        if action not in {"release", "torture", "corpse", "living"}:
+        if action not in {"release", "torture", "corpse", "living", "possess"}:
             raise ValueError("未知俘虏处置方式")
         if action in {"corpse", "living"} and player.path != "demonic":
             raise ValueError("只有魔修能够炼尸或种下活傀标记")
@@ -208,7 +208,32 @@ class DemonicSystemMixin:
 
         rng = decode_rng(game.seed, game.rng_state)
         name = str(target.get("name", "无名修士"))
-        if action == "release":
+        if action == "possess":
+            if disciple:
+                raise ValueError("夺舍入口只接受已经生擒的肉身")
+            from .possession_system import can_possess, enter_host_body
+            allowed, reason = can_possess(player, target)
+            if not allowed:
+                raise ValueError(reason)
+            target_power = max(1.0, float(target.get("combat_power", 1.0)))
+            own_power = max(1.0, combat_power(player))
+            chance = max(0.10, min(0.95, 0.55 + (own_power - target_power) / (own_power + target_power) * 0.35))
+            if rng.random() < chance:
+                player.prisoners.remove(target)
+                host = enter_host_body(player, target)
+                npc = self._find_npc(game, str(target.get("npc_id") or target.get("id", "")))
+                if npc:
+                    npc.alive = False
+                    npc.death_reason = f"被{player.name}夺舍，原神魂不复存在"
+                game.encounter_npc_cache = [
+                    row for row in game.encounter_npc_cache
+                    if str(row.get("id")) != str(target.get("npc_id") or target.get("id", ""))
+                ]
+                result, summary = "possessed", f"你以本魂压过{name}，成功夺取肉身（成功率 {chance:.0%}）；原 NPC 永久退场。"
+            else:
+                self._die(game, f"夺舍{name}失败，神魂遭宿主反噬而灭", "SYS_POSSESSION_FAILED")
+                result, summary = "dead", f"夺舍{name}失败，魂飞魄散（成功率 {chance:.0%}）。"
+        elif action == "release":
             if disciple:
                 raise ValueError("弟子不能通过俘虏释放")
             player.prisoners.remove(target)
@@ -698,9 +723,14 @@ class DemonicSystemMixin:
                 or (player.world == "demon" and player.realm_index == 5 and player.layer >= 1)
             )
         )
+        from .possession_system import can_possess
+        prisoners = []
+        for entry in player.prisoners:
+            allowed, reason = can_possess(player, entry)
+            prisoners.append(copy.deepcopy(entry) | {"can_possess": allowed, "possession_reason": reason})
         return {
             "is_demonic": player.path == "demonic", "capacity": puppet_capacity(player),
-            "used": len(player.puppets), "prisoners": copy.deepcopy(player.prisoners), "puppets": puppets,
+            "used": len(player.puppets), "prisoners": prisoners, "puppets": puppets,
             "foreign_souls": copy.deepcopy(player.foreign_souls),
             "secluded_refine_years": self._secluded_refining_years(player),
             "secluded_refine_multiplier": float(self._demonic_rules().get("soul_seclusion_time_multiplier", 1.2)),

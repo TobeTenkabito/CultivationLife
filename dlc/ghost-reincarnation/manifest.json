@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.ghost-reincarnation",
   "name": "百鬼夜行:轮回往生",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 110,
   "requires": [],
-  "description": "以魂蚀、轮回印记与往生为核心的鬼修大型系统 DLC。"
+  "description": "百鬼夜行、拘魂十槽、附灵、受制与夺舍完整生态，并保留魂蚀、轮回印记及往生系统。"
 }

@@ -340,7 +340,9 @@ function render(data) {
     const erosionClock = `魂蚀计时 ${formatDecimal(erosionTime.elapsed_equivalent_years || 0)}/${number(erosionTime.time_unit_years || p.time_unit_years)} 年（${precisePercent(erosionTime.progress_ratio || 0)}）`;
     const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
     const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}`;
-    $('#ghost-system-summary').textContent = `${ghost.soul_integrity?.label || '魂基'} · ${erosionClock} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
+    $('#ghost-system-summary').textContent = ghost.suspended
+      ? `${ghost.suspension_reason} · 本魂 HP ${number(ihp.current)}/${number(ihp.reference)} · MP ${number(imp.current)}/${number(imp.reference)} · ${capText}`
+      : `${ghost.soul_integrity?.label || '魂基'} · ${erosionClock} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
     const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${precisePercent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
     const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${precisePercent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
     $('#hp-text').title = hpDetail; $('#hp-text').dataset.tooltip = hpDetail;
@@ -360,6 +362,7 @@ function render(data) {
     $('#ghost-wangsheng-all-action').textContent = `尽数往生 · ${number(ghost.wangsheng_available_uses)} 次`;
     $('#ghost-wangsheng-all-action').title = '一次消耗当前能够支付的全部往生次数；魂蚀率最低为 0，溢出的压制不会恢复魂基';
     $('#ghost-reincarnate-action').classList.toggle('hidden', !ghost.can_reincarnate);
+    renderGhostPhaseTwo(ghost.phase_two || {});
   } else {
     $('#hp-text').removeAttribute('title'); $('#hp-text').removeAttribute('data-tooltip');
     $('#mp-text').removeAttribute('title'); $('#mp-text').removeAttribute('data-tooltip');
@@ -1388,6 +1391,68 @@ $('#ghost-reincarnate-action').onclick = () => {
 };
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
 
+function renderGhostPhaseTwo(system) {
+  const panel = $('#ghost-phase-two');
+  panel.classList.toggle('hidden', !system.enabled);
+  $('#ghost-attachment-panel').classList.toggle('hidden', !system.enabled);
+  if (!system.enabled) return;
+  const limit = system.possession_limit == null ? '无限' : system.possession_limit;
+  $('#ghost-phase-state').textContent = `${system.state_name} · 魂压 ${Number(system.pressure || 0).toFixed(2)}（未来魂蚀增长 +${percent(system.pressure_modifier || 0)}） · 夺舍 ${number(system.possession_count)}/${limit}${system.souls_suspended ? ' · 宿身期间十魂与鬼魂核心全数沉寂' : ''}`;
+  const constraints = $('#ghost-constraint-actions'); constraints.innerHTML = '';
+  constraints.classList.toggle('hidden', system.state !== 'controlled');
+  if (system.state === 'controlled') {
+    const note = document.createElement('span'); note.textContent = `拘魂者：${system.captor?.name || '未知'} · 失败的反抗与夺舍均会魂飞魄散`;
+    constraints.appendChild(note);
+    [['wait','忍耐一年'],['resist','反抗拘魂者'],['possess','夺舍拘魂者']].forEach(([action,label]) => {
+      const button = document.createElement('button'); button.textContent = label; button.disabled = busy || !game.player.alive;
+      button.onclick = () => mutate(`/api/games/${game.id}/ghost-constraint`, {action}); constraints.appendChild(button);
+    });
+  }
+  const hostTools = $('#ghost-host-actions'); hostTools.innerHTML = ''; hostTools.classList.toggle('hidden', system.state !== 'possessed');
+  if (system.state === 'possessed') {
+    const note = document.createElement('span'); note.textContent = `宿主：${system.host?.name || '未知'} · ${system.host?.path_name || ''}`;
+    const leave = document.createElement('button'); leave.textContent = '主动离舍'; leave.disabled = busy;
+    leave.onclick = () => window.confirm('离舍会永久毁去当前肉身，且不返还夺舍次数。确认继续？') && mutate(`/api/games/${game.id}/ghost-leave-host`, {});
+    hostTools.append(note, leave);
+  }
+  const paradeList = $('#ghost-parade-list'); paradeList.innerHTML = '';
+  const parade = system.parade || {};
+  if (!parade.status || parade.status === 'dormant') paradeList.innerHTML = '<p class="empty">阴路平静，下一次异动尚未显形。</p>';
+  else {
+    const intro = document.createElement('p'); intro.className = 'muted';
+    intro.textContent = `${parade.location_name || parade.location_id} · ${parade.status === 'active' ? `正在夜行，${(parade.souls || []).length} 魂仍在` : `将于 ${parade.start_age} 岁开启`} · ${parade.at_location ? '你正在会场' : '地图已有标记'}`; paradeList.appendChild(intro);
+    if (parade.status === 'active' && parade.at_location && system.state === 'free') {
+      const join = document.createElement('button'); join.textContent = parade.participated ? '本次已参悟' : '参悟夜行'; join.disabled = busy || parade.participated;
+      join.onclick = () => mutate(`/api/games/${game.id}/ghost-parade`, {action:'participate'}); paradeList.appendChild(join);
+      (parade.souls || []).forEach(soul => {
+        const row = document.createElement('div'); row.className = 'captive-row';
+        row.innerHTML = `<b>${soul.name}${soul.defeated ? ' · 已击溃' : ''}</b><small>境界 ${soul.realm_index}/${soul.layer} · 战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}：${soul.soul_trait?.description || ''}</small>`;
+        const tools = document.createElement('div'); tools.className = 'captive-tools';
+        [['befriend','结交'],[soul.defeated?'bind':'fight',soul.defeated?'拘魂':'交锋'],['capture','战而拘魂']].forEach(([action,label]) => { const b=document.createElement('button'); b.textContent=label; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-parade`,{action,soul_id:soul.id}); tools.appendChild(b); });
+        row.appendChild(tools); paradeList.appendChild(row);
+      });
+    }
+  }
+  const slotList = $('#ghost-soul-slots'); slotList.innerHTML = '';
+  (system.slots || []).forEach(slot => {
+    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · ${slot.soul.soul_trait?.name || '无性'}` : '空位'}</small>`;
+    if (slot.soul && system.state !== 'possessed') { const b=document.createElement('button'); b.textContent='卸下'; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'unequip',soul_id:slot.soul.id,slot:slot.id}); row.appendChild(b); } slotList.appendChild(row);
+  });
+  const soulList=$('#ghost-bound-souls'); soulList.innerHTML='';
+  (system.bound_souls || []).forEach(soul => {
+    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${soul.name}</b><small>战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}</small>`;
+    const tools=document.createElement('div'); tools.className='captive-tools'; const select=document.createElement('select');
+    (system.slots || []).forEach(slot=>{const o=document.createElement('option');o.value=slot.id;o.textContent=`${slot.id}·${slot.stat_name}${slot.soul?`（替换${slot.soul.name}）`:''}`;select.appendChild(o);});
+    const equip=document.createElement('button');equip.textContent='入魂位';equip.disabled=busy||system.state==='possessed';equip.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'equip',soul_id:soul.id,slot:select.value});
+    const release=document.createElement('button');release.textContent='放归';release.disabled=busy;release.onclick=()=>window.confirm(`永久放归${soul.name}？`)&&mutate(`/api/games/${game.id}/ghost-soul`,{action:'release',soul_id:soul.id});tools.append(select,equip,release);row.appendChild(tools);soulList.appendChild(row);
+  });
+  if (!soulList.children.length) soulList.innerHTML='<p class="empty">尚未拘得真实魂魄。</p>';
+  const attachment=$('#ghost-attachment-list'); attachment.innerHTML='';
+  if (system.attachment) { const p=document.createElement('p');p.textContent=`${system.attachment.spirit_name} · 魂蚀增长 ×${Number(system.attachment.erosion_growth_multiplier).toFixed(2)} · 修炼效率 ×${Number(system.attachment.cultivation_efficiency_multiplier).toFixed(2)}`; const b=document.createElement('button');b.textContent='离器';b.disabled=busy;b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'leave'});attachment.append(p,b); }
+  else (system.attachable_items || []).forEach(item=>{const b=document.createElement('button');b.textContent=`附入 ${item.name}`;b.disabled=busy||system.state!=='free';b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'attach',item_id:item.id});attachment.appendChild(b);});
+  if (!attachment.children.length) attachment.innerHTML='<p class="empty">行囊中没有可附灵器物。</p>';
+}
+
 function renderMap(map, auction) {
   if (!map) return;
   $('#map-title').textContent = `${map.world_name}地图`;
@@ -1407,6 +1472,12 @@ function renderMap(map, auction) {
       marker.textContent = auction.status === 'scheduled' ? `拍卖会预告 · ${auction.actions_until_open}个操作节点后开幕` : auction.status === 'open' ? '拍卖会正在举行' : '散场黑市正在开放';
       description.append(' ', marker);
     }
+    if (location.ghost_parade) {
+      const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
+      marker.textContent = location.ghost_parade.status === 'active'
+        ? '百鬼夜行正在发生' : `百鬼夜行预告 · ${location.ghost_parade.start_age} 岁开启`;
+      description.append(' ', marker);
+    }
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
     const qiEfficiency = document.createElement('small');
     qiEfficiency.textContent = `气经验：${Object.entries(location.qi_gain_efficiencies || {}).map(([source, value]) => `${qiNames[source] || source} ×${Number(value).toFixed(2)}`).join(' · ')}`;
@@ -1419,7 +1490,7 @@ function renderMap(map, auction) {
     button.dataset.travelStatus = location.travel_status;
     button.dataset.unavailable = location.current || location.travel_status === 'blocked' ? '1' : '0';
     button.textContent = location.current ? '所在地' : location.travel_status === 'blocked' ? '境界不足' : location.travel_status === 'lethal' ? '强行前往（必死）' : `前往 · ${location.travel_years}年`;
-    button.disabled = busy || location.current || location.travel_status === 'blocked' || !!game.pending_event || !!game.imprisonment || !game.player.alive;
+    button.disabled = busy || location.current || location.travel_status === 'blocked' || !!game.pending_event || !!game.imprisonment || game?.ghost_system?.phase_two?.state === 'controlled' || !game.player.alive;
     button.onclick = () => {
       if (location.travel_status === 'lethal' && !window.confirm(`${location.warning}。仍要强行前往吗？`)) return;
       mutate(`/api/games/${game.id}/map-travel`, {destination:location.id});
@@ -1782,9 +1853,11 @@ function renderDemonicSystem(system) {
     row.innerHTML = `<b>${person.name}</b><small>${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'captive-tools';
     const actions = [['release','释放'],['torture','拷打']];
+    if (game?.ghost_system?.available && !game?.ghost_system?.suspended) actions.push(['possess','夺舍']);
     if (system.is_demonic) actions.push(['corpse','直接炼化'],['living','种下标记']);
     actions.forEach(([action,label]) => {
       const button = document.createElement('button'); button.textContent = label; button.className = action === 'corpse' ? 'danger' : '';
+      if (action === 'possess') { button.disabled = busy || !person.can_possess; button.title = person.possession_reason || '夺舍失败将魂飞魄散'; }
       button.onclick = () => mutate(`/api/games/${game.id}/captive-action`, {target_id:person.id, action}); tools.appendChild(button);
     });
     row.appendChild(tools); captiveList.appendChild(row);
@@ -2351,7 +2424,8 @@ function renderButtons() {
     const mortalCombat = ['hunt_beast', 'spar', 'slay', 'capture'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
-    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation;
+    const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);

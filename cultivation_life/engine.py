@@ -274,6 +274,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             {"lifespan": player.lifespan}, ["system", "milestone"],
         ))
         self._ensure_market(game, rng)
+        self._ensure_ghost_parade(game, rng)
         game.rng_state = encode_rng(rng)
         self.store.save(game)
         self.achievements.ensure_global_metadata()
@@ -301,6 +302,8 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             raise ValueError("仙灵力尚未完全转化，当前只能修行、调息或承接坊市委托")
         if player.imprisonment:
             raise ValueError("你身陷大牢，只能选择服刑或尝试越狱")
+        if player.ghost_captor and action not in {"cultivate", "rest"}:
+            raise ValueError("魂印受制时只能等待、有限修炼、反抗或夺舍拘魂者")
         if action not in ACTIONS:
             raise ValueError("未知行动")
         if action == "commission" and player.realm_index == 0:
@@ -449,7 +452,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
                 era_news.extend(self._advance_heavenly_court_unit(game, rng))
             self._advance_player_bounties(game, rng)
-            if game.pending_event is None:
+            if game.pending_event is None and not player.ghost_captor:
                 if self._maybe_immortal_conversion_event(game, rng):
                     pass
                 elif self._maybe_personal_revenge(game, rng):
@@ -6135,10 +6138,15 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + f"你在切磋中败给了{target['target_name']}，预案及时收手，无人伤及性命。"
             if player.hp <= 0:
-                self._die(game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT")
-                result = "dead"
+                captured = self._capture_defeated_ghost(game, target, rng)
+                if not captured:
+                    self._die(game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT")
+                result = "controlled" if captured else "dead"
                 self._record_player_combat(game, target, resolution, result)
-                return result, lead + f"保命预案未能撕开退路，你败给{target['target_name']}并身死。"
+                return result, lead + (
+                    f"你败给{target['target_name']}，魂体被拘入禁制。"
+                    if captured else f"保命预案未能撕开退路，你败给{target['target_name']}并身死。"
+                )
             result = "defeat"
             self._record_player_combat(game, target, resolution, result)
             return result, lead + f"你败给了{target['target_name']}，预案保存主要力量后自动脱离。"
@@ -7358,6 +7366,19 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
     def _die(self, game: GameState, reason: str, event_id: str) -> None:
         if not game.player.alive:
             return
+        from .possession_system import is_possessed, leave_host_body
+        if is_possessed(game.player):
+            from .rules import max_hp, max_mp
+            host = leave_host_body(game.player)
+            game.player.hp = max(1.0, min(game.player.hp, max_hp(game.player)))
+            game.player.mp = max(0.0, min(game.player.mp, max_mp(game.player)))
+            game.pending_event = None
+            game.history.append(HistoryRecord(
+                "SYS_POSSESSED_BODY_DESTROYED", 1, game.player.age, "宿身崩毁", None, "returned_to_ghost",
+                f"{host.get('name', '宿主')}的肉身因“{reason}”毁灭；你的本魂脱出，夺舍次数不返还。",
+                {"host_id": host.get("id"), "source_event": event_id}, ["system", "ghost", "possession"],
+            ))
+            return
         game.player.alive = False
         game.player.hp = 0
         game.player.death_reason = reason
@@ -7518,11 +7539,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             "auction_system": self._public_auction(game),
             "spirit_field": self._public_spirit_field(game.player),
             "art_skills": self._public_art_skills(game.player),
-            "map": self.maps.public_map(
-                game.player.world, location_id, game.player.realm_index,
-                WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
-                lambda destination: self._monster_travel_multiplier(game.player, destination),
-            ),
+            "map": self._public_map_with_ghost_parade(game, location_id),
             "world_npcs": self._public_world_npcs(game),
             "spirit_ranking": ranking_data,
             "race_system": self._public_race_system(game),

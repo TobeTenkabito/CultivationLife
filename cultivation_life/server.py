@@ -102,6 +102,7 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
                 raise KeyError("接口不存在")
             game_id, operation = parts[2], parts[3]
+            ENGINE.assert_ghost_operation_allowed(game_id, operation)
             if operation == "advance":
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
             elif operation == "choice":
@@ -198,6 +199,22 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.reincarnate_ghost(game_id)
             elif operation == "ghost-wangsheng":
                 result = ENGINE.spend_wangsheng(game_id, bool(payload.get("all", False)))
+            elif operation == "ghost-parade":
+                result = ENGINE.ghost_parade_action(
+                    game_id, payload.get("soul_id", ""), payload.get("action", "")
+                )
+            elif operation == "ghost-soul":
+                result = ENGINE.ghost_soul_action(
+                    game_id, payload.get("soul_id", ""), payload.get("action", ""), payload.get("slot", "")
+                )
+            elif operation == "ghost-attachment":
+                result = ENGINE.ghost_attachment_action(
+                    game_id, payload.get("action", ""), payload.get("item_id", "")
+                )
+            elif operation == "ghost-constraint":
+                result = ENGINE.ghost_constraint_action(game_id, payload.get("action", ""))
+            elif operation == "ghost-leave-host":
+                result = ENGINE.leave_possessed_body(game_id)
             elif operation == "captive-action":
                 result = ENGINE.captive_action(
                     game_id, payload.get("target_id", ""), payload.get("action", "")

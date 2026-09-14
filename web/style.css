@@ -121,3 +121,7 @@ button { border:0; font:inherit; cursor:pointer; transition:.2s ease; }.primary 
 .custom-lineage-rule.frozen{opacity:.72}.custom-lineage-rule .rule-cost{font-size:.7rem;color:var(--cinnabar)}.custom-lineage-rule button{padding:.45rem}.custom-lineage-total{font-size:.76rem}.custom-lineage-controls{display:flex;gap:.45rem;flex-wrap:wrap}
 .custom-lineage-rule .rule-preview,.custom-lineage-rule .rule-invalid{grid-column:1/-1;margin:0}.custom-lineage-rule .rule-preview{padding:.4rem .5rem;background:rgba(182,139,61,.09);font-size:.73rem;line-height:1.55}.custom-lineage-rule .rule-invalid,.custom-lineage-invalid{color:var(--cinnabar);font-size:.69rem}.custom-lineage-rule .rule-invalid:empty{display:none}.custom-lineage-rule.invalid{border-color:var(--cinnabar);background:rgba(155,49,42,.06)}.custom-lineage-total.invalid{color:var(--cinnabar)}.custom-lineage-invalid.valid{color:var(--pine)}
 @media(max-width:800px){.custom-lineage-rule{grid-template-columns:1fr 1fr}.custom-lineage-retroactive{grid-template-columns:1fr}}
+.ghost-ecology-ledger section { margin-top: .75rem; padding-top: .6rem; border-top: 1px solid rgba(119, 91, 48, .2); }
+.ghost-ecology-ledger section > div { display: grid; gap: .4rem; margin-top: .4rem; }
+#ghost-soul-slots { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+#ghost-attachment-list, #ghost-constraint-actions, #ghost-host-actions { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
