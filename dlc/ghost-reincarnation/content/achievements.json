@@ -80,14 +80,14 @@
     {
       "id": "ghost_story_first_parade",
       "name": "今夜百鬼行",
-      "description": "亲身参与一次百鬼夜行",
+      "description": "以鬼修之身加入百鬼夜行",
       "category": "story",
       "condition": {"all": [{"path": "ghost"}, {"history": {"event_id": "SYS_GHOST_PARADE_ACTION", "result": "participated"}}]}
     },
     {
       "id": "ghost_others_attachment",
       "name": "胯下之辱",
-      "description": "战败后成为他人的附灵",
+      "description": "战败后沦为他人的法器器灵",
       "category": "cultivation",
       "condition": {"milestone_at_least": {"id": "ghost_became_others_attachment", "value": 1}}
     }
