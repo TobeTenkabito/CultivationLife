@@ -1,9 +1,11 @@
 import copy
+import random
 import tempfile
 import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
+from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.ghost_system import (
     SOUL_SLOTS, apply_soul_erosion, ensure_ghost_cultivation_state,
@@ -11,7 +13,8 @@ from cultivation_life.ghost_system import (
 )
 from cultivation_life.models import Item, Player
 from cultivation_life.possession_system import (
-    can_possess, enter_host_body, is_possessed, leave_host_body, possession_limit,
+    advance_player_age, can_possess, current_body_age, enter_host_body, is_possessed,
+    leave_host_body, migrate_possession_timeline, possession_limit,
 )
 from cultivation_life.rules import combat_power
 from cultivation_life.version import BASE_GAME_VERSION
@@ -40,9 +43,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.4.0")
+        self.assertEqual(BASE_GAME_VERSION, "1.4.1")
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
-        self.assertIn('"version": "3.1.0"', manifest)
+        self.assertIn('"version": "3.1.1"', manifest)
 
     def test_ten_fixed_slots_saturate_and_pressure_only_changes_future_growth(self):
         player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)
@@ -58,6 +61,58 @@ class GhostPhaseTwoTests(unittest.TestCase):
         result = apply_soul_erosion(player, 1)
         self.assertEqual(player.ghost_intrinsic_hp_current, hp_before)
         self.assertAlmostEqual(result["rate_pp"], 0.0002 * 1.02)
+
+    def test_three_souls_are_uncapped_while_seven_souls_keep_their_hard_cap(self):
+        player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)
+        ensure_ghost_cultivation_state(player)
+        player.ghost_bound_souls = [self._soul(power=10**12)]
+        player.ghost_soul_slots = {"胎光": "soul-a"}
+        three_soul_gain = ghost_soul_effects(player)["opportunity"]
+        self.assertGreater(three_soul_gain, 0.25)
+
+        player.ghost_soul_slots = {"伏矢": "soul-a"}
+        seven_soul_gain = ghost_soul_effects(player)["might"]
+        self.assertGreater(seven_soul_gain, 0)
+        self.assertLessEqual(seven_soul_gain, 0.25)
+        self.assertEqual(ghost_soul_effects(player)["opportunity"], 0)
+        self.assertAlmostEqual(ghost_opportunity_multiplier(player), 1.08)
+
+    def test_seven_souls_feed_distinct_combat_rules_instead_of_average_power(self):
+        player = Player("七魄", "mutated_yin", path="ghost", realm_index=3, layer=4)
+        ensure_ghost_cultivation_state(player)
+        player.ghost_bound_souls = [self._soul(power=10**9)]
+        base_power = combat_power(player)
+        unit = BattleUnit("player", player.name, "player", base_power, player.realm_index, player.path)
+        player.ghost_soul_slots = {}
+        base_stats = PlayerCombatSystem._aggregate_stats([unit], player=player, terrain_tags=["开阔"])
+        stat_by_slot = {}
+        for slot, stat in (("尸狗", "mobility"), ("伏矢", "might"), ("吞贼", "guard"),
+                           ("非毒", "sense"), ("除秽", "breach"), ("臭肺", "sustain")):
+            player.ghost_soul_slots = {slot: "soul-a"}
+            self.assertEqual(combat_power(player), base_power)
+            stats = PlayerCombatSystem._aggregate_stats([unit], player=player, terrain_tags=["开阔"])
+            stat_by_slot[slot] = stats
+            self.assertGreater(stats[stat], base_stats[stat])
+        self.assertGreater(stat_by_slot["伏矢"]["might"], stat_by_slot["尸狗"]["might"])
+        self.assertGreater(stat_by_slot["尸狗"]["mobility"], stat_by_slot["伏矢"]["mobility"])
+        self.assertGreater(stat_by_slot["臭肺"]["sustain"], stat_by_slot["吞贼"]["sustain"])
+
+        target = {
+            "target_name": "试魂傀", "target_power": base_power * 1.15,
+            "target_realm_index": 3, "target_layer": 4, "combat_type": "cultivator",
+            "path": "dao", "max_rounds": 5,
+        }
+        player.ghost_soul_slots = {"雀阴": "soul-a"}
+        resolved = PlayerCombatSystem.resolve(
+            player, [unit], target, True, random.Random(44),
+            current_hp_ratio=1.0, current_mp_ratio=1.0, battlefield_tags=["开阔"],
+        )
+        player.ghost_soul_slots = {}
+        baseline = PlayerCombatSystem.resolve(
+            player, [unit], target, True, random.Random(44),
+            current_hp_ratio=1.0, current_mp_ratio=1.0, battlefield_tags=["开阔"],
+        )
+        self.assertGreaterEqual(resolved.player_morale, baseline.player_morale)
 
     def test_souls_can_be_swapped_while_an_event_is_pending(self):
         game = self._game()
@@ -94,15 +149,16 @@ class GhostPhaseTwoTests(unittest.TestCase):
         enter_host_body(player, target)
         self.assertTrue(is_possessed(player))
         self.assertEqual(player.name, "沈青（无常）")
-        self.assertEqual((player.age, player.lifespan), (214, 730))
+        self.assertEqual((player.age, current_body_age(player), player.lifespan), (original_age, 214, 730))
         self.assertEqual(ghost_soul_effects(player)["might"], 0)
         self.assertFalse(apply_soul_erosion(player, 50)["active"])
         self.assertEqual(player.ghost_soul_erosion_rate_pp, rate)
         self.assertEqual(player.ghost_wangsheng_energy, 9)
         player.opportunity = 9999
+        advance_player_age(player, 10)
         leave_host_body(player)
         self.assertEqual((player.name, player.path, player.realm_index, player.layer, player.opportunity), ("无常", "ghost", 4, 5, 321))
-        self.assertEqual(player.age, original_age)
+        self.assertEqual(player.age, original_age + 10)
         self.assertEqual(player.possession_count, 1)
         self.assertEqual(player.ghost_reincarnation_imprints, {"3": 7})
 
@@ -150,6 +206,54 @@ class GhostPhaseTwoTests(unittest.TestCase):
         public = self.engine.present(game)
         marker = next(row for row in public["map"]["locations"] if row["id"] == game.ghost_parade["location_id"])
         self.assertEqual(marker["ghost_parade"]["status"], "active")
+
+    def test_each_parade_soul_can_only_be_befriended_once(self):
+        game = self._game()
+        soul = self._soul()
+        soul.update(defeated=False, is_bound_soul=False, befriended=False, personality="温和")
+        game.ghost_parade = {
+            "status": "active", "world": game.player.world,
+            "location_id": game.player.location_id, "announced": True,
+            "participated": False, "souls": [soul],
+            "start_age": game.player.age, "end_age": game.player.age + 100,
+        }
+        game.player.ghost_soul_erosion_rate_pp = 1.0
+        self.engine.store.save(game)
+        first = self.engine.ghost_parade_action(game.id, "soul-a", "befriend")
+        befriended = first["ghost_system"]["phase_two"]["parade"]["souls"][0]
+        self.assertTrue(befriended["befriended"])
+        affinity = befriended["affinity"]
+        erosion = first["ghost_system"]["erosion_rate_pp"]
+        with self.assertRaisesRegex(ValueError, "已经与这道游魂结交过"):
+            self.engine.ghost_parade_action(game.id, "soul-a", "befriend")
+        unchanged = self.engine.get_game(game.id)
+        self.assertEqual(unchanged["ghost_system"]["phase_two"]["parade"]["souls"][0]["affinity"], affinity)
+        self.assertEqual(unchanged["ghost_system"]["erosion_rate_pp"], erosion)
+
+    def test_possession_keeps_world_time_monotonic_and_migrates_legacy_timeline(self):
+        player = Player("旧魂", "mutated_yin", age=800, path="ghost", realm_index=4, layer=5)
+        ensure_ghost_cultivation_state(player)
+        target = {
+            "id": "young-host", "name": "年少宿主", "race": "human", "path": "dao",
+            "spirit_root": "supreme_water", "realm_index": 3, "layer": 2,
+            "age": 40, "lifespan": 500,
+        }
+        enter_host_body(player, target)
+        self.assertEqual((player.age, current_body_age(player)), (800, 40))
+        advance_player_age(player, 100)
+        self.assertEqual((player.age, current_body_age(player)), (900, 140))
+        leave_host_body(player)
+        self.assertEqual(player.age, 900)
+
+        legacy = Player("年少宿主（旧魂）", "supreme_water", age=140, path="dao", realm_index=3, layer=2)
+        legacy.ghost_host_body = {
+            "id": "legacy-host", "name": "年少宿主", "age": 40,
+            "entered_age": 800, "lifespan": 500,
+        }
+        legacy.ghost_core_state = {"name": "旧魂", "age": 800}
+        self.assertTrue(migrate_possession_timeline(legacy))
+        self.assertEqual((legacy.age, current_body_age(legacy)), (900, 140))
+        self.assertEqual(legacy.ghost_host_body["timeline_version"], 2)
 
     def test_new_state_round_trips_in_existing_save_object(self):
         game = self._game()

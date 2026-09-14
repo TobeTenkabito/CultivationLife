@@ -7,6 +7,7 @@ from .content_registry import WORLD_SYSTEMS
 from .map_system import MapContentError
 from .models import GameState, HistoryRecord
 from .runtime import decode_rng, encode_rng, now_iso
+from .possession_system import advance_player_age, current_body_age
 
 
 class MapTravelMixin:
@@ -24,7 +25,7 @@ class MapTravelMixin:
         self._check_tribulation(game, rng)
         if not player.alive or game.pending_event:
             return False
-        if player.lifespan is not None and player.age >= player.lifespan:
+        if player.lifespan is not None and current_body_age(player) >= player.lifespan:
             self._die(game, "寿元已尽", "SYS_LIFESPAN")
             return False
         era_news.extend(self._annual_sect_update(game, rng))
@@ -70,7 +71,7 @@ class MapTravelMixin:
         start_age = player.age
         era_news: list[str] = []
         for _ in range(plan.years):
-            player.age += 1
+            advance_player_age(player)
             continue_world = self._advance_world_year(game, rng, era_news, encounters=False)
             if player.alive:
                 self._advance_soul_erosion_time(game, 1)

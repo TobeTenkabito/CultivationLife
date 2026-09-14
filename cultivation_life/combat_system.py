@@ -7,6 +7,7 @@ from .combat_traits import COMBAT_TRAIT_REGISTRY
 from .content_registry import MONSTER_BLOODLINE_SETTINGS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from .models import Player, Technique
+from .ghost_system import active_soul_traits, ghost_soul_effects
 from .monster_bloodline_traits import (
     BLOODLINE_TRAIT_REGISTRY, bloodline_grants_hook, bloodline_hook_names,
     bloodline_stat_modifiers,
@@ -152,6 +153,9 @@ class PlayerCombatSystem:
         assessment = cls._assessment(ratio)
         player_stats = cls._aggregate_stats(player_units, player=player, terrain_tags=tags)
         enemy_stats = cls._aggregate_stats(enemy_units, terrain_tags=tags)
+        soul_effects = ghost_soul_effects(player)
+        soul_traits = active_soul_traits(player)
+        resolve_bonus = max(0.0, float(soul_effects.get("resolve", 0.0)))
         transformation = active_transformation_profile(player)
         for stat, multiplier in transformation["stat_multipliers"].items():
             player_stats[stat] *= multiplier
@@ -188,7 +192,11 @@ class PlayerCombatSystem:
             for debuff in player_debuffs:
                 stat = str(debuff.get("stat", ""))
                 if stat in player_stats:
-                    player_stats[stat] *= max(0.0, min(1.0, float(debuff.get("multiplier", 1.0))))
+                    multiplier = max(0.0, min(1.0, float(debuff.get("multiplier", 1.0))))
+                    resistance = min(0.35, resolve_bonus * 0.8)
+                    if "执念" in soul_traits:
+                        resistance = min(0.55, resistance + 0.20)
+                    player_stats[stat] *= 1.0 - (1.0 - multiplier) * (1.0 - resistance)
         enemy_buffs = []
         for raw_buff in target.get("enemy_buffs", []):
             buff = dict(raw_buff)
@@ -222,6 +230,9 @@ class PlayerCombatSystem:
             player_stats["breach"] *= 1.10
         faceted_sense_active = bloodline_active("forbidden_sense_resistance") and "禁神识" in artificial
         if faceted_sense_active:
+            player_stats["sense"] *= 0.94 / 0.86
+        lucid_soul_active = "明识" in soul_traits and "禁神识" in artificial
+        if lucid_soul_active:
             player_stats["sense"] *= 0.94 / 0.86
         earthroot_active = bloodline_active("rooted_terrain_guard_bonus") and natural in {"狭窄", "险要"}
         if earthroot_active:
@@ -281,6 +292,10 @@ class PlayerCombatSystem:
             key_events.append(f"{bloodline_name('open_terrain_breach_bonus')}借开阔天势俯冲，自身破法提高 10%。")
         if faceted_sense_active:
             key_events.append(f"{bloodline_name('forbidden_sense_resistance')}分担识海压力，禁神识惩罚由 14% 降至 6%。")
+        if soul_traits:
+            key_events.append(f"活跃魂性【{'、'.join(sorted(soul_traits))}】已接入逐轮规则结算。")
+        if lucid_soul_active:
+            key_events.append("魂性【明识】守住灵台，禁神识惩罚由 14% 降至 6%。")
         if earthroot_active:
             key_events.append(f"{bloodline_name('rooted_terrain_guard_bonus')}接通地脉，自身防护提高 10%。")
         if realm_delta:
@@ -299,6 +314,8 @@ class PlayerCombatSystem:
         support_updates: dict[str, dict[str, Any]] = {}
         death_prevented = False
         vitality_surge_used = False
+        undying_soul_used = False
+        devouring_soul_stacks = 0
         counterforce_ready = False
         burst_used = False
         quick = ratio >= 3.0 or ratio <= 1 / 3
@@ -330,6 +347,9 @@ class PlayerCombatSystem:
                     key_events.append(f"第{round_no}轮，{regen_event}")
             round_player_stats = dict(player_stats)
             round_enemy_stats = dict(enemy_stats)
+            if devouring_soul_stacks:
+                round_enemy_stats["guard"] *= 0.96 ** devouring_soul_stacks
+                events.append(f"魂性【噬灵】已侵蚀敌方防护 {devouring_soul_stacks * 4}%。")
             counterforce_active = counterforce_ready
             counterforce_ready = False
             custom_start = evaluate_custom_lineage_rules(
@@ -362,7 +382,9 @@ class PlayerCombatSystem:
             for stat, multiplier in generated_start["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"族血共鸣【{event}】" for event in generated_start["events"])
-            p_state = 0.42 + 0.40 * player_hp + 0.18 * player_mp
+            sustain_ratio = round_player_stats["sustain"] / max(1.0, player_power)
+            sustain_state_factor = 0.90 + 0.10 * cls._clamp(0.50, 1.50, sustain_ratio)
+            p_state = (0.42 + 0.40 * player_hp + 0.18 * player_mp) * sustain_state_factor
             e_state = 0.48 + 0.52 * enemy_hp
             p_init = round_player_stats["mobility"] * 0.58 + round_player_stats["sense"] * 0.42
             e_init = round_enemy_stats["mobility"] * 0.58 + round_enemy_stats["sense"] * 0.42
@@ -370,6 +392,8 @@ class PlayerCombatSystem:
                 e_init *= 1.20 if round_no == 1 else 1.0
             if target.get("player_ambush"):
                 p_init *= 1.20 if round_no == 1 else 1.0
+            if "迅影" in soul_traits and round_no <= 2:
+                p_init *= 1.12
             if round_no == 1 and natural == "开阔" and "airborne" in transformation_traits:
                 p_init *= 1.08
             player_first = (
@@ -438,6 +462,9 @@ class PlayerCombatSystem:
             if not player_first and bloodline_active("lost_initiative_guard_bonus"):
                 round_player_stats["guard"] *= 1.12
                 events.append(f"{bloodline_name('lost_initiative_guard_bonus')}预判敌方来势，本轮防护提高 12%。")
+            if not player_first and "寒魄" in soul_traits:
+                round_player_stats["guard"] *= 1.12
+                events.append("魂性【寒魄】凝结护体，本轮防护提高 12%。")
             if round_no % 2 == 0 and "even_round_might_40" in artifact_traits:
                 player_round_might *= 1.40
                 events.append("强良之雷应合偶数轮天机，本轮己方威能提高 40%。")
@@ -488,6 +515,9 @@ class PlayerCombatSystem:
             if enemy_hp <= 0.35 and bloodline_active("wounded_target_execution"):
                 dealt *= 1.18
                 events.append(f"{bloodline_name('wounded_target_execution')}锁定伤势，本轮伤害提高 18%。")
+            if enemy_hp <= 0.35 and "凶魂" in soul_traits:
+                dealt *= 1.15
+                events.append("魂性【凶魂】追逐败势，本轮造成的损耗提高 15%。")
 
             if player_hp <= 0.40 and bloodline_active("low_state_damage_reduction"):
                 received *= 0.88
@@ -529,6 +559,8 @@ class PlayerCombatSystem:
             actual_received = 0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received)
             enemy_hp = max(0.0, enemy_hp - dealt)
             player_hp = max(0.0, player_hp - actual_received)
+            if "噬灵" in soul_traits and dealt > 0 and devouring_soul_stacks < 3:
+                devouring_soul_stacks += 1
             if actual_received >= 0.12 and bloodline_active("damage_taken_counterforce"):
                 counterforce_ready = True
             base_cost = 0.025 + 0.025 * min(1.6, round_player_stats["might"] / max(1.0, player_power))
@@ -563,14 +595,36 @@ class PlayerCombatSystem:
                 player_hp += reclaimed
                 if reclaimed > 0:
                     events.append(f"{bloodline_name('received_damage_reclamation')}回收伤势，恢复 {reclaimed:.1%} 最大战斗态势。")
+            sustain_restore = min(0.02, max(0.0, sustain_ratio - 1.0) * 0.04)
+            if player_hp > 0 and sustain_restore > 0:
+                restored_state = min(sustain_restore, 1.0 - player_hp)
+                restored_mp = min(sustain_restore * 0.5, 1.0 - player_mp)
+                player_hp += restored_state
+                player_mp += restored_mp
+                if restored_state > 0 or restored_mp > 0:
+                    events.append(f"续航体系回稳，恢复 {restored_state:.1%} 战斗态势与 {restored_mp:.1%} 法力。")
+            if not undying_soul_used and 0 < player_hp <= 0.25 and "不灭" in soul_traits:
+                undying_soul_used = True
+                restored_state = min(0.08, 1.0 - player_hp)
+                restored_mp = min(0.05, 1.0 - player_mp)
+                player_hp += restored_state
+                player_mp += restored_mp
+                event = f"魂性【不灭】燃起残火，恢复 {restored_state:.0%} 战斗态势与 {restored_mp:.0%} 法力。"
+                events.append(event)
+                key_events.append(f"第{round_no}轮，{event}")
             morale_scale = 1.28 if objective == "repel" else 1.0
             enemy_morale = max(0.0, enemy_morale - dealt * 77 * morale_scale)
             if "morale_drain_5" in transformation_traits:
                 enemy_morale = max(0.0, enemy_morale - 5.0)
                 morale_name = transformation_trait_name("morale_drain_5")
                 events.append(f"{morale_name}侵蚀敌阵，本轮额外削弱敌方 5 点战意。")
-            player_morale = max(0.0, player_morale - actual_received * 70)
+            morale_loss = actual_received * 70 / (1.0 + resolve_bonus)
+            if "执念" in soul_traits:
+                morale_loss *= 0.75
+            player_morale = max(0.0, player_morale - morale_loss)
             if "steadfast" in transformation_traits:
+                player_morale = max(8.0, player_morale)
+            if "执念" in soul_traits:
                 player_morale = max(8.0, player_morale)
             generated_after_damage = evaluate_generated_traits(
                 generated_bloodline_traits, trigger="after_damage", context={
@@ -815,6 +869,11 @@ class PlayerCombatSystem:
             if player is not None and unit.kind == "player":
                 bloodline = active_bloodline_profile(player)
                 cls._multiply(factors, bloodline["stat_multipliers"])
+                soul_effects = ghost_soul_effects(player)
+                cls._multiply(factors, {
+                    key: 1.0 + max(0.0, float(soul_effects.get(key, 0.0)))
+                    for key in STAT_KEYS
+                })
                 natural = next((tag for tag in terrain_tags if tag in cls.NATURAL_TERRAINS), "开阔")
                 artificial = [tag for tag in terrain_tags if tag in cls.ARTIFICIAL_CONDITIONS]
                 bloodline_factors, _ = bloodline_stat_modifiers(

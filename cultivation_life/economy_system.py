@@ -11,6 +11,7 @@ from .content_registry import (
 )
 from .models import GameState, HistoryRecord, Item, Player
 from .runtime import decode_rng, encode_rng, now_iso
+from .possession_system import advance_player_age
 from .rules import (
     QI_SOURCE_NAMES, add_item, can_player_practice_technique, combat_requirement_display,
     learn_technique, max_hp, max_mp, remove_item,
@@ -354,7 +355,7 @@ class EconomySystemMixin:
         start_age = player.age
         era_news: list[str] = []
         for _ in range(years):
-            player.age += 1
+            advance_player_age(player)
             continue_world = self._advance_world_year(game, rng, era_news, encounters=False)
             if player.alive:
                 self._advance_soul_erosion_time(game, 1)

@@ -14,6 +14,7 @@ from .rules import (
     puppet_capacity, remove_item, technique_environment_multiplier, technique_scale,
 )
 from .runtime import decode_rng, encode_rng, now_iso
+from .possession_system import advance_player_age, current_body_age
 
 
 PUPPET_NAMES = {"corpse": "炼尸", "living": "活傀", "mechanical": "机关傀儡"}
@@ -55,7 +56,7 @@ class DemonicSystemMixin:
             None,
         )
         prisoner_id = str(npc_id or f"captive_{uuid.uuid4().hex[:12]}")
-        captive_age = int(npc.age if npc else victim.get("age", game.player.age))
+        captive_age = int(npc.age if npc else victim.get("age", current_body_age(game.player)))
         captive_lifespan = npc.lifespan if npc else victim.get("lifespan")
         game.player.prisoners.append({
             "id": prisoner_id, "npc_id": npc_id, "name": str(victim["name"]),
@@ -562,7 +563,7 @@ class DemonicSystemMixin:
         era_news: list[str] = []
         completed_count = 0
         for _ in range(planned_years):
-            player.age += 1
+            advance_player_age(player)
             if not self._advance_world_year(game, rng, era_news, encounters=False):
                 break
             budget = yearly_progress

@@ -15,9 +15,10 @@ from .models import Item, Player, RealmDef, Technique
 from .ghost_system import (
     effective_intrinsic_hp, effective_intrinsic_mp, hp_carry_ratio,
     intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
-    ghost_combat_multiplier, ghost_external_hp_bonus, ghost_external_mp_bonus,
+    ghost_external_hp_bonus, ghost_external_mp_bonus,
     ghost_opportunity_multiplier,
 )
+from .possession_system import current_body_age
 from .transformation_system import ensure_transformation_state, equip_transformation_technique
 
 
@@ -291,7 +292,7 @@ def combat_power(player: Player) -> float:
     total = comprehensive + technique_power + player.faction_combat_bonus + player.natal_artifact_combat_bonus
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
-    return round(total * ghost_combat_multiplier(player), 1)
+    return round(total, 1)
 
 
 def expected_combat_power(realm_index: int, layer: int) -> float:
@@ -556,6 +557,8 @@ def has_item(player: Player, item_id: str, quantity: int = 1) -> bool:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
+    data["world_age"] = player.age
+    data["age"] = current_body_age(player)
     data.pop("ghost_core_state", None)
     # Adaptation counters are deliberately hidden: the player sees acquired
     # life experiences, never another bar to grind.

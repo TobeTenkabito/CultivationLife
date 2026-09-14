@@ -83,6 +83,9 @@ from .ghost_system import (
     grant_intrinsic_growth, grant_intrinsic_progression_if_new_highwater,
     grant_wangsheng, reincarnation_breakthrough_bonus,
 )
+from .possession_system import (
+    advance_player_age, current_body_age, migrate_possession_timeline,
+)
 
 
 OPS = {
@@ -333,11 +336,12 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         commission_results: list[str] = []
         combat_results: list[str] = []
         era_news: list[str] = []
-        start_age = player.age
+        start_world_age = player.age
+        start_age = current_body_age(player)
         ledger = ActionUnitLedger(action, years)
         for elapsed_index in range(years):
             ledger.begin_year()
-            player.age += 1
+            advance_player_age(player)
             low, high = ACTIONS[action]["opportunity"]
             gain = rng.randint(low, high) * opportunity_multiplier(player)
             if action == "cultivate" and player.path == "demonic":
@@ -415,9 +419,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         if player.alive:
             action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
             action_summary = (
-                f"从 {start_age} 岁炼体至 {player.age} 岁；无灵根无法由吐纳获得机缘。"
+                f"从 {start_age} 岁炼体至 {current_body_age(player)} 岁；无灵根无法由吐纳获得机缘。"
                 if action == "cultivate" and player.spirit_root == "none"
-                else f"从 {start_age} 岁摸索至 {player.age} 岁；尚无主修功法，无法炼化机缘。"
+                else f"从 {start_age} 岁摸索至 {current_body_age(player)} 岁；尚无主修功法，无法炼化机缘。"
                 if action == "cultivate" and player.technique is None
                 else f"获得微量机缘 {total_gain:.1f}；{self._condense_action_results(treasure_results)}"
                 if action == "treasure"
@@ -425,25 +429,26 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 if action == "commission"
                 else self._condense_action_results(combat_results)
                 if ACTIONS[action].get("combat")
-                else f"从 {start_age} 岁锻炼识海至 {player.age} 岁，神识经验 +{total_sense_gain:.1f}；当前为 {divine_sense_level(player)} 级。"
+                else f"从 {start_age} 岁锻炼识海至 {current_body_age(player)} 岁，神识经验 +{total_sense_gain:.1f}；当前为 {divine_sense_level(player)} 级。"
                 if action == "sense_train"
-                else f"从 {start_age} 岁淬炼肉身至 {player.age} 岁，炼体积累 +{total_body_gain:.1f}；当前为 {player.body_training} 层。"
+                else f"从 {start_age} 岁淬炼肉身至 {current_body_age(player)} 岁，炼体积累 +{total_body_gain:.1f}；当前为 {player.body_training} 层。"
                 if action == "body_train"
                 else f"你主动收敛声势、修复近邻关系，威名 -{total_fame_reduction:.0f}；当前威名 {player.fame:.0f}。"
                 if action == "befriend_neighbors"
-                else f"从 {start_age} 岁修行至 {player.age} 岁，获得 {total_gain:.1f} 点机缘。"
+                else f"从 {start_age} 岁修行至 {current_body_age(player)} 岁，获得 {total_gain:.1f} 点机缘。"
             )
             game.history.append(HistoryRecord(
                 "ACT_" + action.upper(), 1, player.age, action_title, action, "completed",
                 action_summary,
                 {
-                    "age": [start_age, player.age], "opportunity": round(total_gain, 1),
+                    "age": [start_age, current_body_age(player)], "world_age": [start_world_age, player.age],
+                    "opportunity": round(total_gain, 1),
                     **({"fame_reduction": round(total_fame_reduction, 1)} if action == "befriend_neighbors" else {}),
                 }, ["action", action],
             ))
             if action == "treasure":
                 self._queue_followup_event(game, self._prepare_treasure_reward_event(game, rng))
-            completed_years = max(1, player.age - start_age)
+            completed_years = max(1, player.age - start_world_age)
             completed_units = max(1, (completed_years + time_unit - 1) // time_unit)
             artifact_news = self._advance_natal_artifact(game, action, completed_units)
             if artifact_news:
@@ -469,9 +474,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                     event = self._select_event(game, action, rng)
                     if event:
                         game.pending_event = self._instantiate_event(event, game, rng)
-            elapsed_years = player.age - start_age
+            elapsed_years = player.age - start_world_age
             if elapsed_years >= 5:
-                self._record_era_summary(game, start_age, era_news)
+                self._record_era_summary(game, start_world_age, era_news)
 
             self._advance_auction_clock(game, rng)
 
@@ -520,7 +525,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         rng = decode_rng(game.seed, game.rng_state)
         key = str(prison["key"])
         if action == "endure":
-            player.age += 1
+            advance_player_age(player)
             hp_loss = max_hp(player) * rng.uniform(0.08, 0.18)
             mp_loss = max_mp(player) * rng.uniform(0.06, 0.14)
             player.hp = max(1.0, player.hp - hp_loss)
@@ -543,7 +548,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             prison["hostility"] = round(player.hostility[key], 1)
             self._annual_sect_update(game, rng)
             self._annual_world_npc_update(game, rng)
-            if player.lifespan is not None and player.age >= player.lifespan:
+            if player.lifespan is not None and current_body_age(player) >= player.lifespan:
                 self._die(game, "囚禁期间寿元耗尽", "SYS_PRISON_LIFESPAN")
                 result, summary = "dead", "你未能熬到刑满，在大牢中寿尽坐化。"
             else:
@@ -5831,8 +5836,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             if player.realm_index != 0:
                 return None, "你已踏入仙途，凡俗炼体不再改变寿元。"
             amount = int(value)
-            old = int(player.lifespan or player.age)
-            player.lifespan = min(300, max(old, player.age + 1) + amount)
+            body_age = current_body_age(player)
+            old = int(player.lifespan or body_age)
+            player.lifespan = min(300, max(old, body_age + 1) + amount)
             return None, f"炼体延寿，寿元上限由 {old} 提升至 {player.lifespan} 岁。"
         if kind == "acquire_root":
             if player.spirit_root != "none":
@@ -7969,7 +7975,10 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 "race_name": RACE_DEFINITIONS.get(friend.get("race", "human"), {"name": "种族未明"})["name"],
                 "combat_power": self._relationship_combat_power(friend), "is_player": False,
             })
-        player_shell = SectNpc("player", game.player.name, "", game.player.realm_index, game.player.layer, game.player.age, game.player.lifespan)
+        player_shell = SectNpc(
+            "player", game.player.name, "", game.player.realm_index, game.player.layer,
+            current_body_age(game.player), game.player.lifespan,
+        )
         rows.append({
             "id": f"player:{game.id}", "name": game.player.name, "title": "玩家",
             "realm_index": game.player.realm_index, "layer": game.player.layer,
@@ -8381,7 +8390,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             "title": "议事长老" if unlocked else "门下弟子",
             "realm_index": player.realm_index,
             "layer": player.layer,
-            "age": player.age,
+            "age": current_body_age(player),
             "lifespan": player.lifespan,
             "alive": player.alive,
             "death_reason": player.death_reason,
@@ -8505,6 +8514,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         game = self.store.load(game_id)
         conversion_migrated = False
         monster_lifespan_migrated = False
+        possession_timeline_migrated = migrate_possession_timeline(game.player)
         ghost_migrated = ensure_ghost_cultivation_state(game.player)
         if ghost_cultivation_active(game.player):
             old_intrinsic_state = (
@@ -8624,7 +8634,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             learn_technique(game.player, starter)
             assign_technique(game.player, starter, "main")
             version_changed = True
-        changed = ghost_migrated or conversion_migrated or monster_lifespan_migrated or version_changed or location_changed or bloodline_changed or before_known != tuple(technique.id for technique in game.player.known_techniques)
+        changed = ghost_migrated or conversion_migrated or monster_lifespan_migrated or possession_timeline_migrated or version_changed or location_changed or bloodline_changed or before_known != tuple(technique.id for technique in game.player.known_techniques)
         if (
             game.player.body_technique and game.player.body_training < int(WORLD_SYSTEMS["body_cultivation"]["max_layer"])
             and game.player.body_progress >= self._body_progress_required(game.player)
