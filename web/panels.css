@@ -45,6 +45,14 @@
 .strategy-dock button small { font-size: 9px; }
 .strategy-dock button:hover, .strategy-dock button.active { color: #fff; background: var(--pine); transform: translateY(-2px); }
 .strategy-dock button:disabled { opacity: .38; cursor: wait; }
+
+.game-confirm-backdrop { position:fixed; z-index:120; inset:0; display:grid; place-items:center; padding:20px; background:rgba(23,28,25,.46); backdrop-filter:blur(4px); }
+.game-confirm-dialog { width:min(520px,calc(100vw - 32px)); padding:30px 34px; border-top:3px solid var(--cinnabar); box-shadow:0 30px 100px rgba(20,30,25,.38); }
+.game-confirm-dialog h2 { margin:4px 0 12px; font-size:21px; }
+.game-confirm-dialog>p:not(.eyebrow) { margin:0; color:#50564f; line-height:1.8; white-space:pre-line; }
+.game-confirm-actions { position:relative; z-index:2; display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+.game-confirm-actions button { padding:9px 16px; color:var(--pine); background:rgba(255,255,255,.55); border:1px solid var(--line); }
+.game-confirm-actions #game-confirm-accept { color:#fff; background:var(--cinnabar); border-color:var(--cinnabar); }
 .strategy-dock.left-dock {
   left:22px; right:auto; top:50%; transform:translateY(-50%);
   grid-template-columns:repeat(2,52px); gap:10px; border-radius:30px;

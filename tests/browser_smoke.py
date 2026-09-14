@@ -1,5 +1,6 @@
 """手动运行的前端烟雾测试；使用临时存档，不接触玩家数据。"""
 
+import copy
 import tempfile
 import threading
 import sys
@@ -464,7 +465,11 @@ def main() -> None:
                     ghost_game, random.Random(99002),
                 )
                 parade_trait_description = ghost_game.ghost_parade["souls"][0]["soul_trait"]["description"]
+                bound_soul = copy.deepcopy(ghost_game.ghost_parade["souls"].pop())
+                bound_soul.update(defeated=True, is_bound_soul=True)
+                ghost_game.player.ghost_bound_souls.append(bound_soul)
                 add_item(ghost_game.player, "ghost_core_pill")
+                add_item(ghost_game.player, "ghost_nurturing_casket")
                 engine.store.save(ghost_game)
                 page.reload()
                 page.get_by_text("续接 · 鬼修烟测").click()
@@ -486,10 +491,34 @@ def main() -> None:
                 page.locator("[data-panel-target='ghost-soul']").click()
                 page.locator("#ghost-soul-card").wait_for(state="visible")
                 assert page.locator("#ghost-soul-slots .captive-row").count() == 10
+                assert page.locator("#ghost-bound-souls .captive-row").count() == 1
+                page.locator("#ghost-bound-souls").get_by_role("button", name="放归").click()
+                page.locator("#game-confirm-dialog").wait_for(state="visible")
+                assert page.locator("#game-confirm-title").text_content() == "放归拘魂"
+                assert bound_soul["name"] in page.locator("#game-confirm-body").text_content()
+                page.locator("#game-confirm-cancel").click()
+                page.locator("#game-confirm-dialog").wait_for(state="hidden")
+                assert page.locator("#ghost-bound-souls .captive-row").count() == 1
+                page.locator("#ghost-bound-souls").get_by_role("button", name="放归").click()
+                with page.expect_response(lambda response: response.url.endswith("/ghost-soul")):
+                    page.locator("#game-confirm-accept").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ghost-bound-souls .captive-row").count() == 0
                 page.locator("#ghost-soul-toggle").click()
                 page.locator("[data-panel-target='ghost-attachment']").click()
                 page.locator("#ghost-attachment-card").wait_for(state="visible")
                 assert "载体与器灵状态" in page.locator("#ghost-attachment-card").text_content()
+                attach_button = page.locator("#ghost-attachment-list").get_by_role("button", name="附入 养魂木匣")
+                assert attach_button.is_enabled()
+                with page.expect_response(lambda response: response.url.endswith("/ghost-attachment")):
+                    attach_button.click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ghost-attachment-summary").text_content() == "当前已附灵"
+                assert "养魂木匣器灵" in page.locator("#ghost-attachment-list").text_content()
+                with page.expect_response(lambda response: response.url.endswith("/ghost-attachment")):
+                    page.locator("#ghost-attachment-list").get_by_role("button", name="离器").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ghost-attachment-summary").text_content() == "自由魂体"
                 page.locator("#ghost-attachment-toggle").click()
                 page.locator("[data-panel-target='ghost-parade']").click()
                 page.locator("#ghost-parade-card").wait_for(state="visible")

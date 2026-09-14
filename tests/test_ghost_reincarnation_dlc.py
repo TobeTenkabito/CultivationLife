@@ -225,6 +225,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         player.opportunity = opportunity_required(player)
         player.body_training = 33
         player.divine_sense_rank = 12
+        player.divine_sense_experience = 87
         player.karma = 19
         player.sha_qi = 23
         player.inventory = [Item("keepsake", "旧世信物", quantity=2)]
@@ -234,7 +235,10 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertTrue(can_reincarnate(player))
         transition = perform_reincarnation(player)
         self.assertEqual((player.realm_index, player.layer, player.opportunity), (1, 1, 0))
-        self.assertEqual((player.age, player.body_training, player.divine_sense_rank), (777, 33, 12))
+        self.assertEqual((player.age, player.body_training), (777, 33))
+        self.assertEqual((player.divine_sense_rank, player.divine_sense_experience), (1, 0))
+        self.assertEqual(transition["divine_sense_rank_before"], 12)
+        self.assertEqual(transition["divine_sense_experience_lost"], 87)
         self.assertEqual((player.karma, player.sha_qi, player.inventory[0].quantity), (19, 23, 2))
         self.assertEqual(player.ghost_soul_erosion_rate_pp, 0.1234)
         self.assertEqual(player.ghost_soul_erosion_time_progress, 0.5)

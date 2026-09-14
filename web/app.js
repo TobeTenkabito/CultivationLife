@@ -7,6 +7,7 @@ let battlePlaybackTimer = null;
 let battleReportOpen = false;
 let achievementCatalog = null;
 let achievementToastTimer = null;
+let gameConfirmAction = null;
 const achievementToastQueue = [];
 const historyFilters = new Set(['self', 'companion', 'friend', 'mentor', 'faction', 'race', 'other']);
 
@@ -27,6 +28,30 @@ function toast(message) {
   const node = $('#toast'); node.textContent = message; node.classList.add('show');
   setTimeout(() => node.classList.remove('show'), 2600);
 }
+
+function closeGameConfirm() {
+  gameConfirmAction = null;
+  $('#game-confirm-backdrop').classList.add('hidden');
+}
+
+function openGameConfirm({title, body, confirmText = '确认', onConfirm}) {
+  gameConfirmAction = onConfirm;
+  $('#game-confirm-title').textContent = title;
+  $('#game-confirm-body').textContent = body;
+  $('#game-confirm-accept').textContent = confirmText;
+  $('#game-confirm-backdrop').classList.remove('hidden');
+  $('#game-confirm-cancel').focus();
+}
+
+$('#game-confirm-cancel').onclick = closeGameConfirm;
+$('#game-confirm-accept').onclick = () => {
+  const action = gameConfirmAction;
+  closeGameConfirm();
+  if (action) action();
+};
+$('#game-confirm-backdrop').addEventListener('click', event => {
+  if (event.target === event.currentTarget) closeGameConfirm();
+});
 
 async function boot() {
   const [config, saves, achievements] = await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
@@ -288,6 +313,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
   ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
@@ -1487,12 +1513,12 @@ function renderGhostPhaseTwo(system) {
     const tools=document.createElement('div'); tools.className='captive-tools'; const select=document.createElement('select');
     (system.slots || []).forEach(slot=>{const o=document.createElement('option');o.value=slot.id;o.textContent=`${slot.id}·${slot.stat_name}${slot.soul?`（替换${slot.soul.name}）`:''}`;select.appendChild(o);});
     const equip=document.createElement('button');equip.textContent='入魂位';equip.disabled=busy||system.state==='possessed';equip.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'equip',soul_id:soul.id,slot:select.value});
-    const release=document.createElement('button');release.textContent='放归';release.disabled=busy;release.onclick=()=>window.confirm(`永久放归${soul.name}？`)&&mutate(`/api/games/${game.id}/ghost-soul`,{action:'release',soul_id:soul.id});tools.append(select,equip,release);row.appendChild(tools);soulList.appendChild(row);
+    const release=document.createElement('button');release.textContent='放归';release.disabled=busy;release.onclick=()=>openGameConfirm({title:'放归拘魂',body:`确认解除${soul.name}的魂印并永久放归？该魂会同时离开魂位与拘魂册，此操作不可撤销。`,confirmText:'确认放归',onConfirm:()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'release',soul_id:soul.id})});tools.append(select,equip,release);row.appendChild(tools);soulList.appendChild(row);
   });
   if (!soulList.children.length) soulList.innerHTML='<p class="empty">尚未拘得真实魂魄。</p>';
   const attachment=$('#ghost-attachment-list'); attachment.innerHTML='';
-  if (system.attachment) { const p=document.createElement('p');p.textContent=`${system.attachment.spirit_name} · 魂蚀增长 ×${Number(system.attachment.erosion_growth_multiplier).toFixed(2)} · 修炼效率 ×${Number(system.attachment.cultivation_efficiency_multiplier).toFixed(2)}`; const b=document.createElement('button');b.textContent='离器';b.disabled=busy;b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'leave'});attachment.append(p,b); }
-  else (system.attachable_items || []).forEach(item=>{const b=document.createElement('button');b.textContent=`附入 ${item.name}`;b.disabled=busy||system.state!=='free';b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'attach',item_id:item.id});attachment.appendChild(b);});
+  if (system.attachment) { const p=document.createElement('p');p.textContent=`${system.attachment.spirit_name} · 魂蚀增长 ×${Number(system.attachment.erosion_growth_multiplier).toFixed(2)} · 修炼效率 ×${Number(system.attachment.cultivation_efficiency_multiplier).toFixed(2)}`; const b=document.createElement('button');b.className='ghost-attachment-action';b.dataset.available='1';b.textContent='离器';b.disabled=busy;b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'leave'});attachment.append(p,b); }
+  else (system.attachable_items || []).forEach(item=>{const b=document.createElement('button');b.className='ghost-attachment-action';b.dataset.available=system.state==='free'?'1':'0';b.textContent=`附入 ${item.name}`;b.disabled=busy||b.dataset.available!=='1';b.onclick=()=>mutate(`/api/games/${game.id}/ghost-attachment`,{action:'attach',item_id:item.id});attachment.appendChild(b);});
   if (!attachment.children.length) attachment.innerHTML='<p class="empty">行囊中没有可附灵器物。</p>';
 }
 
@@ -2560,6 +2586,9 @@ function renderButtons() {
   if (senseBreakthrough) senseBreakthrough.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || !game?.player?.divine_sense?.breakthrough_ready;
   document.querySelectorAll('.captive-tools button, .puppet-tools button').forEach(button => {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
+  });
+  document.querySelectorAll('.ghost-attachment-action').forEach(button => {
+    button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1';
   });
   const demonic = game?.demonic_system || {};
   $('#craft-puppet').disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (demonic.used || 0) >= (demonic.capacity || 0);

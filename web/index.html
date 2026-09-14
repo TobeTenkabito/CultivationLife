@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260914-2">
-  <link rel="stylesheet" href="/panels.css?v=20260914-12">
+  <link rel="stylesheet" href="/panels.css?v=20260914-13">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -322,9 +322,17 @@
       </nav>
     </section>
   </main>
+  <div id="game-confirm-backdrop" class="game-confirm-backdrop hidden">
+    <section id="game-confirm-dialog" class="paper game-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="game-confirm-title" aria-describedby="game-confirm-body">
+      <p class="eyebrow">命途抉择</p>
+      <h2 id="game-confirm-title">确认操作</h2>
+      <p id="game-confirm-body"></p>
+      <div class="game-confirm-actions"><button id="game-confirm-cancel" type="button">取消</button><button id="game-confirm-accept" type="button">确认</button></div>
+    </section>
+  </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260914-10"></script>
-  <script src="/app.js?v=20260914-8"></script>
+  <script src="/app.js?v=20260914-9"></script>
 </body>
 </html>
