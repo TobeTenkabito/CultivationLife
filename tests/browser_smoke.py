@@ -453,13 +453,17 @@ def main() -> None:
                 ghost_game.player.ghost_soul_erosion_time_progress = 0.3
                 ghost_game.player.ghost_wangsheng_energy = 5
                 ghost_game.ghost_parade.update({
-                    "status":"scheduled", "announced":True,
+                    "status":"active", "announced":True,
                     "world":ghost_game.player.world,
                     "location_id":ghost_game.player.location_id,
-                    "start_age":ghost_game.player.age + 2,
+                    "start_age":ghost_game.player.age,
                     "end_age":ghost_game.player.age + 5,
-                    "participated":False, "souls":[],
+                    "participated":False,
                 })
+                ghost_game.ghost_parade["souls"] = engine._generate_parade_souls(
+                    ghost_game, random.Random(99002),
+                )
+                parade_trait_description = ghost_game.ghost_parade["souls"][0]["soul_trait"]["description"]
                 add_item(ghost_game.player, "ghost_core_pill")
                 engine.store.save(ghost_game)
                 page.reload()
@@ -489,7 +493,9 @@ def main() -> None:
                 page.locator("#ghost-attachment-toggle").click()
                 page.locator("[data-panel-target='ghost-parade']").click()
                 page.locator("#ghost-parade-card").wait_for(state="visible")
-                assert "预告" in page.locator("#ghost-parade-card").text_content()
+                assert "正在夜行" in page.locator("#ghost-parade-card").text_content()
+                assert page.locator("#ghost-parade-list .captive-row").count() >= 3
+                assert parade_trait_description in page.locator("#ghost-parade-card").text_content()
                 page.locator("#ghost-parade-toggle").click()
                 page.locator("[data-panel-target='inventory']").click()
                 page.locator("#inventory-card").wait_for(state="visible")

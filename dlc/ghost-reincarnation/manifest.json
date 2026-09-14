@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.ghost-reincarnation",
   "name": "百鬼夜行:轮回往生",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "kind": "dlc",
   "enabled": true,
   "load_order": 110,
   "requires": [],
-  "description": "百鬼夜行、拘魂十槽、附灵、受制与夺舍完整生态，并保留魂蚀、轮回印记及往生系统。"
+  "description": "百鬼夜行、随机组合魂性、拘魂十槽、附灵、受制与夺舍完整生态，并保留魂蚀、轮回印记及往生系统。"
 }
