@@ -46,6 +46,8 @@ class Item:
     transformation_form_id: str | None = None
     transformation_source: str | None = None
     transformation_purity: float = 0.0
+    erosion_growth_multiplier: float = 1.0
+    cultivation_efficiency_multiplier: float = 1.0
     description: str = ""
     tags: list[str] = field(default_factory=list)
 
@@ -82,6 +84,8 @@ class Technique:
     requires_immortal_power: bool = False
     immortal_power_cost: float = 0.0
     required_body_training: int = 0
+    possession_limit_bonus: int = 0
+    ignore_possession_limit: bool = False
 
     def __post_init__(self) -> None:
         # 旧存档与未显式标注的内容按道统补齐先天“源”；一旦写入存档，
@@ -360,6 +364,17 @@ class Player:
     ghost_last_reincarnation_realm: int | None = None
     ghost_last_reincarnation_layer: int | None = None
     ghost_erosion_thresholds_seen: list[int] = field(default_factory=list)
+    # V3 soul ecology.  These containers are deliberately append-only/defaulted
+    # so pre-V3 saves migrate without changing the on-disk save layout.
+    ghost_bound_souls: list[dict[str, Any]] = field(default_factory=list)
+    ghost_soul_slots: dict[str, str] = field(default_factory=dict)
+    ghost_attachment: dict[str, Any] | None = None
+    ghost_captor: dict[str, Any] | None = None
+    # Possession belongs to the base game.  The active Player fields describe
+    # the current body; this snapshot keeps the original ghost core intact.
+    ghost_core_state: dict[str, Any] | None = None
+    ghost_host_body: dict[str, Any] | None = None
+    possession_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -390,6 +405,16 @@ class Player:
         data["ghost_erosion_thresholds_seen"] = list(dict.fromkeys(
             int(value) for value in data.get("ghost_erosion_thresholds_seen", [])
         ))
+        data["ghost_bound_souls"] = [
+            copy.deepcopy(row) for row in data.get("ghost_bound_souls", []) if isinstance(row, dict)
+        ]
+        data["ghost_soul_slots"] = {
+            str(slot): str(soul_id) for slot, soul_id in data.get("ghost_soul_slots", {}).items()
+        } if isinstance(data.get("ghost_soul_slots", {}), dict) else {}
+        for key in ("ghost_attachment", "ghost_captor", "ghost_core_state", "ghost_host_body"):
+            saved = data.get(key)
+            data[key] = copy.deepcopy(saved) if isinstance(saved, dict) else None
+        data["possession_count"] = max(0, int(data.get("possession_count", 0)))
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
             source: max(0.0, float(saved_qi.get(source, 0.0)))
@@ -546,6 +571,7 @@ class GameState:
     heavenly_court: dict[str, Any] = field(default_factory=dict)
     natal_artifact: dict[str, Any] = field(default_factory=dict)
     last_combat_report: dict[str, Any] | None = None
+    ghost_parade: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -591,6 +617,7 @@ class GameState:
             "heavenly_court": self.heavenly_court,
             "natal_artifact": self.natal_artifact,
             "last_combat_report": self.last_combat_report,
+            "ghost_parade": self.ghost_parade,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -634,6 +661,7 @@ class GameState:
             heavenly_court=dict(value.get("heavenly_court", {})),
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),
+            ghost_parade=copy.deepcopy(value.get("ghost_parade", {})),
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

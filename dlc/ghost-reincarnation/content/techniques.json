@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "techniques": [
+    {
+      "id": "TECH_GHOST_BODY_THIEF",
+      "name": "无相夺舍经",
+      "path": "ghost",
+      "element": "yin",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.45,
+      "hp_bonus": 0.36,
+      "mp_bonus": 0.58,
+      "combat_bonus": 12800,
+      "karma_multiplier": 1.0,
+      "sources": {"yin": 1.0},
+      "possession_limit_bonus": 1
+    },
+    {
+      "id": "TECH_GHOST_TEN_THOUSAND_HOSTS",
+      "name": "万相寄生天书",
+      "path": "ghost",
+      "element": "yin",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 0.96,
+      "hp_bonus": 0.84,
+      "mp_bonus": 1.08,
+      "combat_bonus": 4800000,
+      "karma_multiplier": 1.0,
+      "sources": {"yin": 1.0},
+      "ignore_possession_limit": true
+    }
+  ]
+}

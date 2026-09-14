@@ -15,6 +15,8 @@ from .models import Item, Player, RealmDef, Technique
 from .ghost_system import (
     effective_intrinsic_hp, effective_intrinsic_mp, hp_carry_ratio,
     intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
+    ghost_combat_multiplier, ghost_external_hp_bonus, ghost_external_mp_bonus,
+    ghost_opportunity_multiplier,
 )
 from .transformation_system import ensure_transformation_state, equip_transformation_technique
 
@@ -56,6 +58,8 @@ def create_technique(
     requires_immortal_power: bool = False,
     immortal_power_cost: float = 0.0,
     required_body_training: int = 0,
+    possession_limit_bonus: int = 0,
+    ignore_possession_limit: bool = False,
 ) -> Technique:
     technique = Technique(
         id=technique_id, name=name, path=path, element=element, grade=grade, level=level,
@@ -72,6 +76,8 @@ def create_technique(
         requires_immortal_power=requires_immortal_power,
         immortal_power_cost=immortal_power_cost,
         required_body_training=required_body_training,
+        possession_limit_bonus=possession_limit_bonus,
+        ignore_possession_limit=ignore_possession_limit,
     )
     validate_technique(technique)
     return technique
@@ -107,6 +113,8 @@ def validate_technique(technique: Technique) -> None:
         raise ValueError("普通功法不能声明仙灵力消耗")
     if not 0 <= int(technique.required_body_training) <= 100:
         raise ValueError("功法炼体门槛必须位于零至一百层")
+    if int(technique.possession_limit_bonus) < 0:
+        raise ValueError("夺舍次数加成不能为负数")
     if not technique.sources or set(technique.sources) - set(QI_SOURCE_NAMES):
         raise ValueError("功法必须声明合法的先天源")
     if any(weight <= 0 for weight in technique.sources.values()):
@@ -142,6 +150,8 @@ def ensure_technique_set(player: Player) -> None:
             technique.combat_requirements = copy.deepcopy(TECHNIQUE_CATALOG[technique.id].combat_requirements)
         if technique and technique.id in TECHNIQUE_CATALOG:
             technique.required_body_training = int(TECHNIQUE_CATALOG[technique.id].required_body_training)
+            technique.possession_limit_bonus = int(TECHNIQUE_CATALOG[technique.id].possession_limit_bonus)
+            technique.ignore_possession_limit = bool(TECHNIQUE_CATALOG[technique.id].ignore_possession_limit)
     for technique in equipped:
         if technique and all(known.id != technique.id for known in player.known_techniques):
             player.known_techniques.append(copy.deepcopy(technique))
@@ -236,6 +246,7 @@ def raw_external_hp_bonus(player: Player) -> float:
         + sum(i.hp_bonus * i.quantity for i in player.inventory)
         + player.faction_hp_bonus
         + player.natal_artifact_hp_bonus
+        + ghost_external_hp_bonus(player)
     )
 
 
@@ -253,6 +264,7 @@ def raw_external_mp_bonus(player: Player) -> float:
         + sum(i.mp_bonus * i.quantity for i in player.inventory)
         + player.faction_mp_bonus
         + player.natal_artifact_mp_bonus
+        + ghost_external_mp_bonus(player)
     )
 
 
@@ -279,7 +291,7 @@ def combat_power(player: Player) -> float:
     total = comprehensive + technique_power + player.faction_combat_bonus + player.natal_artifact_combat_bonus
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
-    return round(total, 1)
+    return round(total * ghost_combat_multiplier(player), 1)
 
 
 def expected_combat_power(realm_index: int, layer: int) -> float:
@@ -468,7 +480,11 @@ def opportunity_multiplier(player: Player) -> float:
     main_bonus = player.technique.opportunity_bonus * technique_scale(player.technique)
     item_bonus = sum(item.opportunity_bonus * item.quantity for item in player.inventory) + player.natal_artifact_opportunity_bonus
     inner_multiplier = (1 + main_bonus) * (1 + item_bonus)
-    return root_efficiency * inner_multiplier * technique_environment_multiplier(player.technique, player.world)
+    return (
+        root_efficiency * inner_multiplier
+        * technique_environment_multiplier(player.technique, player.world)
+        * ghost_opportunity_multiplier(player)
+    )
 
 
 def root_definition(root_id: str) -> dict[str, Any]:
@@ -540,6 +556,7 @@ def has_item(player: Player, item_id: str, quantity: int = 1) -> bool:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
+    data.pop("ghost_core_state", None)
     # Adaptation counters are deliberately hidden: the player sees acquired
     # life experiences, never another bar to grind.
     data.pop("monster_adaptation_progress", None)

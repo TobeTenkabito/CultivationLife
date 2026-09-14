@@ -16,6 +16,7 @@ class MapTravelMixin:
         self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
     ) -> bool:
         player = game.player
+        self._advance_ghost_phase_two_year(game, rng)
         self._advance_monster_bloodline_year(game)
         self._resolve_breakthroughs(game, rng)
         if not player.alive or game.pending_event:
@@ -53,6 +54,8 @@ class MapTravelMixin:
             raise ValueError("请先处理当前事件")
         if player.imprisonment:
             raise ValueError("你身陷大牢，无法远行")
+        if player.ghost_captor:
+            raise ValueError("魂印受制于拘魂者，无法自行远行")
         try:
             plan = self.maps.travel_plan(
                 player.world, player.location_id or "", destination, player.realm_index,
