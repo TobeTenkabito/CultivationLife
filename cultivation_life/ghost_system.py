@@ -288,6 +288,27 @@ def apply_soul_erosion(player: Player, units: int = 1) -> dict[str, Any]:
     }
 
 
+def accumulate_soul_erosion_time(player: Player, elapsed_years: int = 1) -> int:
+    """Accumulate actual years and return newly completed erosion units.
+
+    The normalized fraction is shared by ordinary actions, travel, prison and
+    other time sources. Realm changes preserve the fraction instead of turning
+    partial high-realm time into a burst of low-realm erosion.
+    """
+    if not ghost_cultivation_active(player):
+        return 0
+    ensure_ghost_cultivation_state(player)
+    years = max(0, int(elapsed_years))
+    if not years:
+        return 0
+    time_unit = max(1, int(WORLD_SYSTEMS["time_units"][str(player.realm_index)]))
+    total = max(0.0, float(player.ghost_soul_erosion_time_progress)) + years / time_unit
+    completed_units = max(0, int(total + 1e-12))
+    remainder = total - completed_units
+    player.ghost_soul_erosion_time_progress = 0.0 if abs(remainder) < 1e-12 else remainder
+    return completed_units
+
+
 def spend_wangsheng_energy(player: Player, uses: int = 1) -> tuple[int, float]:
     if not ghost_cultivation_active(player):
         raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
@@ -320,6 +341,10 @@ def soul_integrity_label(ratio: float) -> str:
 
 
 class GhostSystemMixin:
+    def _advance_soul_erosion_time(self, game: GameState, elapsed_years: int = 1) -> bool:
+        completed_units = accumulate_soul_erosion_time(game.player, elapsed_years)
+        return not completed_units or self._apply_soul_erosion_units(game, completed_units)
+
     def _apply_soul_erosion_units(self, game: GameState, units: int = 1) -> bool:
         from .rules import max_hp, max_mp
 
@@ -419,6 +444,10 @@ class GhostSystemMixin:
         probability_cap = min(
             0.98, max(0.005, float(config.get("reincarnation_final_probability_cap", 0.98))),
         )
+        time_unit_years = max(1, int(WORLD_SYSTEMS["time_units"][str(player.realm_index)]))
+        erosion_time_progress = max(0.0, min(
+            0.999999999999, float(player.ghost_soul_erosion_time_progress),
+        ))
         reincarnation_preview = None
         if at_bottleneck:
             source_count = int(player.ghost_reincarnation_imprints.get(str(player.realm_index), 0))
@@ -442,6 +471,12 @@ class GhostSystemMixin:
             "available": True,
             "name": GHOST_DLC_NAME,
             "erosion_rate_pp": round(player.ghost_soul_erosion_rate_pp, 6),
+            "erosion_time": {
+                "progress_ratio": round(erosion_time_progress, 8),
+                "elapsed_equivalent_years": round(erosion_time_progress * time_unit_years, 6),
+                "time_unit_years": time_unit_years,
+                "remaining_equivalent_years": round((1.0 - erosion_time_progress) * time_unit_years, 6),
+            },
             "wangsheng": player.ghost_wangsheng_energy,
             "wangsheng_cost": int(config.get("wangsheng_cost", 2)),
             "wangsheng_reduction_pp": float(config.get("wangsheng_erosion_reduction_pp", 0.02)),

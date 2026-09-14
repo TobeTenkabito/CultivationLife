@@ -350,6 +350,9 @@ class Player:
     ghost_intrinsic_hp_current: float | None = None
     ghost_intrinsic_mp_current: float | None = None
     ghost_soul_erosion_rate_pp: float = 0.0
+    # Fraction of the next realm time unit already lived. Keeping this
+    # normalized lets every time source share one clock across realm changes.
+    ghost_soul_erosion_time_progress: float = 0.0
     ghost_wangsheng_energy: int = 0
     ghost_reincarnation_imprints: dict[str, int] = field(default_factory=dict)
     ghost_intrinsic_highwater_realm: int | None = None
@@ -374,6 +377,9 @@ class Player:
             saved = data.get(key)
             data[key] = max(0.0, float(saved)) if saved is not None else None
         data["ghost_soul_erosion_rate_pp"] = max(0.0, float(data.get("ghost_soul_erosion_rate_pp", 0.0)))
+        data["ghost_soul_erosion_time_progress"] = max(
+            0.0, float(data.get("ghost_soul_erosion_time_progress", 0.0)),
+        )
         data["ghost_wangsheng_energy"] = max(0, int(data.get("ghost_wangsheng_energy", 0)))
         saved_imprints = data.get("ghost_reincarnation_imprints", {})
         data["ghost_reincarnation_imprints"] = {

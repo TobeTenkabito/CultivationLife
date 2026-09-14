@@ -405,8 +405,8 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 if action == "rest" and player.heart_demon > 0:
                     player.heart_demon = max(0.0, player.heart_demon - 0.5)
             continue_world = self._advance_world_year(game, rng, era_news)
-            if (elapsed_index + 1) % time_unit == 0 and player.alive:
-                self._apply_soul_erosion_units(game, 1)
+            if player.alive:
+                self._advance_soul_erosion_time(game, 1)
             if not continue_world or not player.alive:
                 break
         if player.alive:
@@ -575,7 +575,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                     result, summary = "failed", f"越狱失败，HP -{damage:.0f}，敌对值继续上升。"
         else:
             raise ValueError("未知牢狱行动")
-        if action == "endure" and player.alive and not self._apply_soul_erosion_units(game, 1):
+        if action == "endure" and player.alive and not self._advance_soul_erosion_time(game, 1):
             result = "dead"
             summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"
         game.history.append(HistoryRecord(
