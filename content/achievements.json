@@ -272,6 +272,86 @@
       "category": "cultivation",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},
       "condition": {"heavenly_court_controls": 7}
+    },
+    {
+      "id": "story_demonic_gate",
+      "name": "我命由我",
+      "description": "以魔修身份完成焚天魔门剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "demon_sacred_completed"}]}
+    },
+    {
+      "id": "story_demonic_blood_river",
+      "name": "血河再生",
+      "description": "以魔修身份完成逆流血河剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "demon_blood_river_completed"}]}
+    },
+    {
+      "id": "story_demonic_corpse_moon",
+      "name": "月落尸眠",
+      "description": "以魔修身份完成尸月封瘟剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "demon_corpse_moon_completed"}]}
+    },
+    {
+      "id": "story_demonic_rift_beast",
+      "name": "裂谷余息",
+      "description": "以魔修身份完成裂谷界兽剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "demon_rift_beast_completed"}]}
+    },
+    {
+      "id": "story_true_demon_black_sun",
+      "name": "一羽新日",
+      "description": "以魔修身份完成黑日曜烬剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "true_demon_black_sun_completed"}]}
+    },
+    {
+      "id": "story_true_demon_fallen_star",
+      "name": "星子远行",
+      "description": "以魔修身份完成坠星遗胎剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "true_demon_fallen_star_completed"}]}
+    },
+    {
+      "id": "story_true_demon_abyss_axis",
+      "name": "祖渊重生",
+      "description": "以魔修身份完成渊极界柱剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "true_demon_abyss_axis_completed"}]}
+    },
+    {
+      "id": "story_true_demon_origin",
+      "name": "祖藤封根",
+      "description": "以魔修身份完成真魔界魔胎祖地剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "demonic"}, {"flag": "true_demon_sacred_completed"}]}
+    },
+    {
+      "id": "story_monster_slay_immortal",
+      "name": "万灵斩仙",
+      "description": "以妖修身份完成洛天衡下界剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "monster"}, {"flag": "ma_liang_completed"}]}
+    },
+    {
+      "id": "story_ghost_return_names",
+      "name": "忘川有名",
+      "description": "以鬼修身份走完忘川失名舟剧情",
+      "category": "story",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "ghost"}, {"any": [{"flag": "hell_memory_names_returned"}, {"flag": "hell_memory_archive_completed"}, {"flag": "hell_memory_case_erased"}]}]}
     }
   ]
 }

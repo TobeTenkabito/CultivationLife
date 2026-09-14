@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "妖修道途：血脉与进化",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,
