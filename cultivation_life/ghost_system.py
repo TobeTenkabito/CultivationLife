@@ -329,11 +329,19 @@ def perform_reincarnation(player: Player) -> dict[str, Any]:
         int(player.milestones.get("ghost_reincarnations", 0)) + 1
     )
     lost_wangsheng = player.ghost_wangsheng_energy
+    previous_divine_sense_rank = player.divine_sense_rank
+    previous_divine_sense_experience = player.divine_sense_experience
     player.ghost_last_reincarnation_realm = source_realm
     player.ghost_last_reincarnation_layer = source_layer
     player.realm_index = 1
     player.layer = 1
     player.opportunity = 0.0
+    # Divine-sense rank participates in cultivation and breakthrough systems;
+    # carrying it through repeated reincarnations would turn the reset into an
+    # unbounded permanent accelerator.  A ghost starts at rank 1, so return to
+    # that baseline and discard partial progress while retaining the manual.
+    player.divine_sense_rank = 1
+    player.divine_sense_experience = 0.0
     player.awaiting_major_breakthrough = False
     player.awaiting_minor_breakthrough = False
     player.awaiting_ascension = False
@@ -350,6 +358,8 @@ def perform_reincarnation(player: Player) -> dict[str, Any]:
         "source_label": f"{current_realm.name}{source_layer}层",
         "imprint_count": player.ghost_reincarnation_imprints[key],
         "wangsheng_lost": lost_wangsheng - player.ghost_wangsheng_energy,
+        "divine_sense_rank_before": previous_divine_sense_rank,
+        "divine_sense_experience_lost": previous_divine_sense_experience,
     }
 
 
@@ -991,6 +1001,7 @@ class GhostSystemMixin:
             f"留下本境第 {source_count + 1} 枚轮回印记，使本境及以下道路的突破经验增加 {bonus:.0%}。\n\n"
             f"未用往生 {player.ghost_wangsheng_energy} 点将归零；魂蚀率保持 "
             f"{player.ghost_soul_erosion_rate_pp:.4f}%，既有魂伤不会恢复；"
+            f"神识等级与已有神识经验将重置为初始的 1 级、0 经验；"
             f"本体成长最高水位仍为{highwater}，重新超过此前修为前不会再次获得境界来源的本源成长。"
             f"所有突破的最终有效概率仍封顶 98%。"
         )
@@ -1019,7 +1030,7 @@ class GhostSystemMixin:
         )
         summary = (
             f"你舍去{source_label}修为，重归练气一层；留下第 {transition['imprint_count']} "
-            f"道本境轮回印记，{wangsheng_summary}。魂蚀与既有魂伤均未复原。"
+            f"道本境轮回印记，{wangsheng_summary}。神识重归 1 级且经验清零；魂蚀与既有魂伤均未复原。"
         )
         transition["summary"] = summary
         if record_history:
