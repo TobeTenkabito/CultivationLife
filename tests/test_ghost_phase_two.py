@@ -8,8 +8,11 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.ghost_system import (
-    SOUL_SLOTS, apply_soul_erosion, ensure_ghost_cultivation_state,
+    SOUL_SLOTS, active_generated_soul_traits, apply_soul_erosion, ensure_ghost_cultivation_state,
     ghost_opportunity_multiplier, ghost_soul_effects, ghost_soul_pressure,
+)
+from cultivation_life.ghost_soul_traits import (
+    describe_generated_soul_trait, generated_soul_trait_id, validate_generated_soul_trait,
 )
 from cultivation_life.models import Item, Player
 from cultivation_life.possession_system import (
@@ -43,9 +46,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.4.2")
+        self.assertEqual(BASE_GAME_VERSION, "1.4.3")
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
-        self.assertIn('"version": "3.1.2"', manifest)
+        self.assertIn('"version": "3.1.3"', manifest)
 
     def test_ten_fixed_slots_saturate_and_pressure_only_changes_future_growth(self):
         player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)
@@ -203,9 +206,64 @@ class GhostPhaseTwoTests(unittest.TestCase):
         self.assertEqual(game.ghost_parade["status"], "active")
         self.assertTrue(game.ghost_parade["souls"])
         self.assertTrue(all("soul_trait" in row and "soul_pressure" in row for row in game.ghost_parade["souls"]))
+        traits = [row["soul_trait"] for row in game.ghost_parade["souls"]]
+        self.assertTrue(all(trait.get("generated") and trait.get("origin") == "ghost_parade" for trait in traits))
+        self.assertTrue(all(not validate_generated_soul_trait(trait) for trait in traits))
+        self.assertGreaterEqual(len({trait["id"] for trait in traits}), 2)
         public = self.engine.present(game)
         marker = next(row for row in public["map"]["locations"] if row["id"] == game.ghost_parade["location_id"])
         self.assertEqual(marker["ghost_parade"]["status"], "active")
+
+    def test_parade_trait_combinations_are_deterministic_and_persist_in_the_soul(self):
+        game = self._game()
+        first = self.engine._generate_parade_souls(game, random.Random(991))
+        repeated = self.engine._generate_parade_souls(game, random.Random(991))
+        self.assertEqual(first, repeated)
+        trait = copy.deepcopy(first[0]["soul_trait"])
+        self.assertEqual(
+            set(("prefix", "trigger", "schedule", "conditions", "effect")) - set(trait),
+            set(),
+        )
+        first[0].update(defeated=True, is_bound_soul=True)
+        game.player.ghost_bound_souls = [first[0]]
+        game.player.ghost_soul_slots = {"伏矢": first[0]["id"]}
+        self.engine.store.save(game)
+        loaded = self.engine.store.load(game.id)
+        self.assertEqual(loaded.player.ghost_bound_souls[0]["soul_trait"], trait)
+        self.assertEqual(active_generated_soul_traits(loaded.player), [trait])
+
+    def test_generated_soul_trait_enters_round_combat_resolution(self):
+        game = self._game()
+        bare = {
+            "schema_version": 1, "prefix": "守烛", "trigger": "round_start",
+            "schedule": "odd", "conditions": ["enemy_same_or_lower"], "effect": "might_05",
+        }
+        trait = {
+            **bare, "id": generated_soul_trait_id(bare), "name": "守烛·振威",
+            "description": describe_generated_soul_trait(bare), "generated": True,
+            "origin": "ghost_parade", "power": {"raw": 5.0},
+        }
+        self.assertEqual(validate_generated_soul_trait(trait), [])
+        soul = self._soul()
+        soul["soul_trait"] = trait
+        game.player.ghost_bound_souls = [soul]
+        game.player.ghost_soul_slots = {"伏矢": soul["id"]}
+        power = combat_power(game.player)
+        unit = BattleUnit("player", game.player.name, "player", power, game.player.realm_index, game.player.path)
+        report = PlayerCombatSystem.resolve(
+            game.player, [unit], {
+                "target_name": "照魂傀", "target_power": power,
+                "target_realm_index": game.player.realm_index, "target_layer": game.player.layer,
+                "combat_type": "cultivator", "path": "dao", "max_rounds": 3,
+            }, True, random.Random(52), current_hp_ratio=1.0, current_mp_ratio=1.0,
+            battlefield_tags=["开阔"],
+        )
+        combat_text = "\n".join([
+            *report.key_events,
+            *(event for battle_round in report.rounds for event in battle_round["events"]),
+        ])
+        self.assertIn("百鬼夜行复合魂性", combat_text)
+        self.assertIn("魂性共鸣【守烛·振威", combat_text)
 
     def test_each_parade_soul_can_only_be_befriended_once(self):
         game = self._game()

@@ -6,6 +6,7 @@ import random
 from typing import Any
 
 from .content_registry import REALMS, WORLD_SYSTEMS
+from .ghost_soul_traits import generate_soul_trait, validate_generated_soul_trait
 from .models import GameState, HistoryRecord, Player
 from .runtime import now_iso
 from .possession_system import (
@@ -24,6 +25,9 @@ SOUL_SLOTS = {
     "除秽": ("breach", "破防"), "臭肺": ("sustain", "续战"),
 }
 THREE_SOUL_STATS = frozenset({"opportunity", "external_mp", "external_hp"})
+# Legacy fixed soul traits remain executable so existing saves keep their exact
+# behavior.  Newly spawned night-parade souls use the generated rule grammar in
+# ghost_soul_traits.py instead.
 SOUL_TRAIT_RULES = {
     "寒魄": "失去先手时，本轮防护提高 12%",
     "执念": "受到的战意损失降低 25%，战意最低保留 8 点",
@@ -34,18 +38,6 @@ SOUL_TRAIT_RULES = {
     "凶魂": "敌方战斗态势不高于 35% 时，造成的损耗提高 15%",
     "明识": "禁神识环境的惩罚由 14% 降至 6%",
 }
-SOUL_TRAITS = (
-    ("寒魄", SOUL_TRAIT_RULES["寒魄"], "guard"),
-    ("执念", SOUL_TRAIT_RULES["执念"], "resolve"),
-    ("迅影", SOUL_TRAIT_RULES["迅影"], "mobility"),
-    ("噬灵", SOUL_TRAIT_RULES["噬灵"], "breach"),
-    ("宿慧", SOUL_TRAIT_RULES["宿慧"], "opportunity"),
-    ("不灭", SOUL_TRAIT_RULES["不灭"], "sustain"),
-    ("凶魂", SOUL_TRAIT_RULES["凶魂"], "might"),
-    ("明识", SOUL_TRAIT_RULES["明识"], "sense"),
-)
-
-
 def ghost_cultivation_config() -> dict[str, Any]:
     return WORLD_SYSTEMS.get("ghost_cultivation", {})
 
@@ -73,6 +65,16 @@ def active_soul_traits(player: Player) -> set[str]:
         for _, soul in active_bound_souls(player)
         if str(soul.get("soul_trait", {}).get("name", "")) in SOUL_TRAIT_RULES
     }
+
+
+def active_generated_soul_traits(player: Player) -> list[dict[str, Any]]:
+    return [
+        copy.deepcopy(trait)
+        for _, soul in active_bound_souls(player)
+        if isinstance((trait := soul.get("soul_trait")), dict)
+        and bool(trait.get("generated"))
+        and not validate_generated_soul_trait(trait)
+    ]
 
 
 def ghost_soul_effects(player: Player) -> dict[str, float]:
@@ -566,7 +568,7 @@ class GhostSystemMixin:
         for index in range(count):
             realm_index = max(0, min(len(REALMS) - 1, game.player.realm_index + rng.choice((-1, 0, 0, 1))))
             layer = rng.randint(1, REALMS[realm_index].layers)
-            trait_name, description, trait_stat = rng.choice(SOUL_TRAITS)
+            soul_trait = generate_soul_trait(rng)
             soul_power = round(expected_combat_power(realm_index, layer) * rng.uniform(0.72, 1.18), 1)
             pressure_rules = ghost_phase_two_config().get("soul_pressure", {})
             pressure = (
@@ -583,11 +585,11 @@ class GhostSystemMixin:
                 "affinity": rng.randint(-15, 25), "defeated": False, "befriended": False,
                 "is_bound_soul": False,
                 "personality": rng.choice(("执拗", "温和", "凶厉", "多疑", "洒脱")),
-                "npc_relations": [], "skills": [trait_name],
+                "npc_relations": [], "skills": [soul_trait["name"]],
                 "faction_inclination": rng.choice(("散魂", "阴司", "宗门故旧", "无阵营")),
                 "original_identity": f"{REALMS[realm_index].name}遗魂",
                 "soul_pressure": round(pressure, 2),
-                "soul_trait": {"name": trait_name, "description": description, "stat": trait_stat},
+                "soul_trait": soul_trait,
             })
         return souls
 
@@ -1058,6 +1060,11 @@ class GhostSystemMixin:
             if trait_name in SOUL_TRAIT_RULES:
                 trait["description"] = SOUL_TRAIT_RULES[trait_name]
                 trait["rule"] = SOUL_TRAIT_RULES[trait_name]
+                result["soul_trait"] = trait
+            elif trait.get("generated"):
+                reasons = validate_generated_soul_trait(trait)
+                trait["valid"] = not reasons
+                trait["invalid_reasons"] = reasons
                 result["soul_trait"] = trait
             return result
         slots = [{

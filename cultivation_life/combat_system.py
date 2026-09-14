@@ -7,7 +7,8 @@ from .combat_traits import COMBAT_TRAIT_REGISTRY
 from .content_registry import MONSTER_BLOODLINE_SETTINGS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from .models import Player, Technique
-from .ghost_system import active_soul_traits, ghost_soul_effects
+from .ghost_system import active_generated_soul_traits, active_soul_traits, ghost_soul_effects
+from .ghost_soul_traits import evaluate_generated_soul_traits
 from .monster_bloodline_traits import (
     BLOODLINE_TRAIT_REGISTRY, bloodline_grants_hook, bloodline_hook_names,
     bloodline_stat_modifiers,
@@ -155,6 +156,7 @@ class PlayerCombatSystem:
         enemy_stats = cls._aggregate_stats(enemy_units, terrain_tags=tags)
         soul_effects = ghost_soul_effects(player)
         soul_traits = active_soul_traits(player)
+        generated_soul_traits = active_generated_soul_traits(player)
         resolve_bonus = max(0.0, float(soul_effects.get("resolve", 0.0)))
         transformation = active_transformation_profile(player)
         for stat, multiplier in transformation["stat_multipliers"].items():
@@ -294,6 +296,8 @@ class PlayerCombatSystem:
             key_events.append(f"{bloodline_name('forbidden_sense_resistance')}分担识海压力，禁神识惩罚由 14% 降至 6%。")
         if soul_traits:
             key_events.append(f"活跃魂性【{'、'.join(sorted(soul_traits))}】已接入逐轮规则结算。")
+        if generated_soul_traits:
+            key_events.append(f"{len(generated_soul_traits)}项百鬼夜行复合魂性已接入逐轮规则结算。")
         if lucid_soul_active:
             key_events.append("魂性【明识】守住灵台，禁神识惩罚由 14% 降至 6%。")
         if earthroot_active:
@@ -382,6 +386,19 @@ class PlayerCombatSystem:
             for stat, multiplier in generated_start["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"族血共鸣【{event}】" for event in generated_start["events"])
+            soul_start = evaluate_generated_soul_traits(
+                generated_soul_traits, trigger="round_start", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                },
+            )
+            for stat, multiplier in soul_start["player_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            for stat, multiplier in soul_start["enemy_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            events.extend(f"魂性共鸣【{event}】" for event in soul_start["events"])
             sustain_ratio = round_player_stats["sustain"] / max(1.0, player_power)
             sustain_state_factor = 0.90 + 0.10 * cls._clamp(0.50, 1.50, sustain_ratio)
             p_state = (0.42 + 0.40 * player_hp + 0.18 * player_mp) * sustain_state_factor
@@ -416,6 +433,22 @@ class PlayerCombatSystem:
             generated_dealt_multiplier = float(generated_initiative["dealt_multiplier"])
             generated_received_multiplier = float(generated_initiative["received_multiplier"])
             events.extend(f"族血共鸣【{event}】" for event in generated_initiative["events"])
+            soul_initiative = evaluate_generated_soul_traits(
+                generated_soul_traits, trigger="initiative_resolved", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first,
+                },
+            )
+            for stat, multiplier in soul_initiative["player_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            for stat, multiplier in soul_initiative["enemy_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            soul_dealt_multiplier = float(soul_initiative["dealt_multiplier"])
+            soul_received_multiplier = float(soul_initiative["received_multiplier"])
+            events.extend(f"魂性共鸣【{event}】" for event in soul_initiative["events"])
 
             if regen_event:
                 events.append(regen_event)
@@ -541,6 +574,18 @@ class PlayerCombatSystem:
             if generated_before_damage["received_cap"] is not None:
                 received = min(received, float(generated_before_damage["received_cap"]))
             events.extend(f"族血共鸣【{event}】" for event in generated_before_damage["events"])
+            soul_before_damage = evaluate_generated_soul_traits(
+                generated_soul_traits, trigger="before_damage", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                },
+            )
+            dealt *= soul_dealt_multiplier * float(soul_before_damage["dealt_multiplier"])
+            received *= soul_received_multiplier * float(soul_before_damage["received_multiplier"])
+            events.extend(f"魂性共鸣【{event}】" for event in soul_before_damage["events"])
 
             if round_no == 1 and "first_round_full_state" in transformation_traits:
                 received = 0.0
@@ -642,6 +687,22 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_after_damage["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_after_damage["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_after_damage["events"])
+            soul_after_damage = evaluate_generated_soul_traits(
+                generated_soul_traits, trigger="after_damage", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                    "received": actual_received, "dealt": dealt,
+                },
+            )
+            if player_hp > 0:
+                player_hp = min(1.0, player_hp + soul_after_damage["player_state_restore"])
+            player_mp = min(1.0, player_mp + soul_after_damage["player_mp_restore"])
+            player_morale = cls._clamp(0.0, 100.0, player_morale + soul_after_damage["player_morale_delta"])
+            enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + soul_after_damage["enemy_morale_delta"])
+            events.extend(f"魂性共鸣【{event}】" for event in soul_after_damage["events"])
             if player_hp <= 0 and "prevent_defeat_once" in transformation_traits and not death_prevented:
                 death_prevented = True
                 player_hp = 0.12
@@ -680,6 +741,22 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_end["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_end["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_end["events"])
+            soul_end = evaluate_generated_soul_traits(
+                generated_soul_traits, trigger="round_end", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                    "received": actual_received, "dealt": dealt,
+                },
+            )
+            if player_hp > 0:
+                player_hp = min(1.0, player_hp + soul_end["player_state_restore"])
+            player_mp = min(1.0, player_mp + soul_end["player_mp_restore"])
+            player_morale = cls._clamp(0.0, 100.0, player_morale + soul_end["player_morale_delta"])
+            enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + soul_end["enemy_morale_delta"])
+            events.extend(f"魂性共鸣【{event}】" for event in soul_end["events"])
 
             if formation_name:
                 formation_integrity = max(0.0, formation_integrity - received * 0.34)
