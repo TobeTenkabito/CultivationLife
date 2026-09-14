@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=20260913-4">
+  <link rel="stylesheet" href="/style.css?v=20260914-1">
   <link rel="stylesheet" href="/panels.css?v=20260912-11">
 </head>
 <body>
@@ -104,9 +104,18 @@
             <button id="body-breakthrough-action" type="button">冲击下一层</button>
           </div>
           <div id="ghost-system-panel" class="breakthrough-panel ghost-system-panel hidden">
-            <div><b id="ghost-system-title">百鬼夜行:轮回往生</b><span id="ghost-system-summary"></span></div>
+            <div class="ghost-system-copy">
+              <b id="ghost-system-title">百鬼夜行:轮回往生</b><span id="ghost-system-summary"></span>
+              <details class="ghost-ledger">
+                <summary>展开魂基明细与轮回册</summary>
+                <p id="ghost-integrity-detail"></p>
+                <p id="ghost-imprint-list"></p>
+                <p id="ghost-reincarnation-preview" class="hidden"></p>
+              </details>
+            </div>
             <div class="ghost-system-actions">
               <button id="ghost-wangsheng-action" type="button">消耗往生</button>
+              <button id="ghost-wangsheng-all-action" type="button">尽数往生</button>
               <button id="ghost-reincarnate-action" type="button">舍此世修为，入轮回</button>
             </div>
           </div>
@@ -295,6 +304,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260912-9"></script>
-  <script src="/app.js?v=20260914-1"></script>
+  <script src="/app.js?v=20260914-2"></script>
 </body>
 </html>

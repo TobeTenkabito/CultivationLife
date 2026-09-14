@@ -6600,10 +6600,12 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             else 0.0
         )
         reincarnation_bonus = reincarnation_breakthrough_bonus(player, source)
-        final_cap = (
-            float(WORLD_SYSTEMS.get("ghost_cultivation", {}).get("reincarnation_final_probability_cap", 1.0))
-            if ghost_cultivation_active(player) else 0.98
-        )
+        # 轮回经验本身不封顶，但所有流派的最终有效突破率都必须保留
+        # 至少 2% 的失败风险；扩展配置也不能绕过这一全局硬上限。
+        configured_cap = float(
+            WORLD_SYSTEMS.get("ghost_cultivation", {}).get("reincarnation_final_probability_cap", 0.98)
+        ) if ghost_cultivation_active(player) else 0.98
+        final_cap = min(0.98, max(0.005, configured_cap))
         final = max(0.005, min(
             final_cap, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
             + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus - penalty,
