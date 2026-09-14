@@ -260,6 +260,8 @@ class ContentRegistry:
             world_doc.get("systems", {}).get("quick_start_presets", []), items, techniques,
             realms, root_definitions, path_names, race_definitions,
         )
+        if "crafting.json" in documents:
+            cls._validate_crafting(documents["crafting.json"])
         registry = cls(
             items=items, techniques=techniques, transformations=transformations,
             market_goods=market_goods, realms=realms,
@@ -281,6 +283,54 @@ class ContentRegistry:
 
             MapCatalog(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
         return registry
+
+    @staticmethod
+    def _validate_crafting(document: dict[str, Any]) -> None:
+        settings = document.get("settings", {})
+        stat_keys = {
+            "combat_power", "max_hp", "max_mp", "opportunity_efficiency",
+            "body_training_efficiency", "divine_sense_efficiency",
+            "tribulation_reduction", "breakthrough_bonus",
+        }
+        quality_keys = {"damaged", "rough", "normal", "excellent", "refined", "epic", "legendary"}
+        if (
+            len(settings.get("budget_by_realm", [])) != 13
+            or set(settings.get("stat_costs", {})) != stat_keys
+            or set(settings.get("stat_caps", {})) != stat_keys
+            or set(settings.get("quality_multipliers", {})) != quality_keys
+            or set(settings.get("quality_names", {})) != quality_keys
+        ):
+            raise ContentError("炼器配置必须完整声明十三境预算、八类属性与七档品质")
+        if float(settings["stat_caps"]["breakthrough_bonus"]) != 0.05:
+            raise ContentError("炼器法宝的单件突破属性硬上限必须为 5%")
+        molds = document.get("molds", [])
+        mold_ids = [str(row.get("id", "")) for row in molds]
+        if len(molds) != 12 or len(set(mold_ids)) != 12 or any(not row.get("rule", {}).get("description") for row in molds):
+            raise ContentError("炼器内容必须配置十二种唯一胎模及固定规则")
+        roles = {"primary", "secondary", "quench"}
+        material_ids: set[str] = set()
+        covered_worlds: set[str] = set()
+        for material in document.get("materials", []):
+            material_id = str(material.get("id", ""))
+            declared_roles = set(material.get("roles", []))
+            if (
+                not material_id or material_id in material_ids or not declared_roles
+                or not declared_roles <= roles or int(material.get("base_material_value", 0)) <= 0
+                or set(material.get("role_effects", {})) != declared_roles
+            ):
+                raise ContentError(f"炼器材料定义不合法：{material_id or material}")
+            material_ids.add(material_id)
+            covered_worlds.add(str(material.get("world", "")))
+        required_worlds = {
+            "human", "spirit", "demon", "true_demon", "monster_realm",
+            "phantom_underworld", "hell", "reincarnation",
+        }
+        if not required_worlds <= covered_worlds:
+            raise ContentError("炼器材料没有覆盖四条道途的本界与上位一界")
+        for plant in document.get("spirit_plants", []):
+            declared_roles = set(plant.get("roles", []))
+            if not plant.get("plant_id") or not declared_roles or not declared_roles <= roles or set(plant.get("role_effects", {})) != declared_roles:
+                raise ContentError("灵田炼器材料的位置效果定义不完整")
 
     @staticmethod
     def _build_monster_bloodlines(

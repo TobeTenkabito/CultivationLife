@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260914-2">
-  <link rel="stylesheet" href="/panels.css?v=20260914-13">
+  <link rel="stylesheet" href="/panels.css?v=20260914-14">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -278,6 +278,28 @@
           <div class="section-title"><div><p class="eyebrow">LIFEBOND ARTIFACT</p><h2>本命法宝</h2></div><div class="panel-heading"><span id="natal-artifact-heading"></span><button id="natal-artifact-toggle" type="button">关闭</button></div></div>
           <div id="natal-artifact-content"></div>
         </article>
+        <article id="crafting-card" class="paper utility-panel left-panel crafting-panel hidden" role="dialog" aria-modal="false" aria-label="组合炼器">
+          <div class="section-title"><div><p class="eyebrow">ARTIFACT FORGING</p><h2>组合炼器</h2></div><div class="panel-heading"><span id="crafting-heading"></span><button id="crafting-toggle" type="button">关闭</button></div></div>
+          <p class="muted">胎模定器类与固定规则，四份真实材料实例决定特性；属性由你分配，炼制不会彻底失败。</p>
+          <section class="crafting-workbench">
+            <h3>五位成器</h3>
+            <div class="crafting-five-slots">
+              <label>① 胎模<select id="crafting-mold"></select></label>
+              <label>② 主材<select id="crafting-primary"></select></label>
+              <label>③ 辅材甲<select id="crafting-secondary-a"></select></label>
+              <label>④ 辅材乙<select id="crafting-secondary-b"></select></label>
+              <label>⑤ 淬火<select id="crafting-quench"></select></label>
+            </div>
+            <div class="crafting-budget-head"><h3>属性预算</h3><strong id="crafting-budget"></strong></div>
+            <div id="crafting-allocations" class="crafting-allocations"></div>
+            <label class="crafting-name">成品名<input id="crafting-name" maxlength="20" placeholder="留空则依胎模命名"></label>
+            <div class="crafting-actions"><button id="crafting-preview" type="button">推演成器</button><button id="crafting-save-blueprint" type="button">保存图谱</button></div>
+            <div id="crafting-preview-result" class="crafting-preview-result"></div>
+          </section>
+          <section><h3>材料库</h3><div id="crafting-material-library" class="crafting-material-library"></div></section>
+          <section><h3>已炼法宝</h3><p class="section-note">至多三件同时生效；突破加成只取其中最高值。出售与寄拍都会移走该唯一实例。</p><div id="crafted-artifact-list" class="crafted-artifact-list"></div></section>
+          <section><h3>炼器图谱</h3><p class="section-note">图谱仅记录材料类型与属性设计，不记录材料品质及成品品质。</p><div id="crafting-blueprint-list" class="crafting-blueprint-list"></div></section>
+        </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
           <div class="settings-list">
@@ -299,6 +321,7 @@
         <button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
         <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
         <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
+        <button type="button" data-panel-target="crafting" title="组合炼器"><span>器</span><small>炼器</small></button>
         <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
@@ -332,7 +355,7 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260914-10"></script>
-  <script src="/app.js?v=20260914-9"></script>
+  <script src="/ui-panels.js?v=20260914-11"></script>
+  <script src="/app.js?v=20260914-10"></script>
 </body>
 </html>

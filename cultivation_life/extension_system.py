@@ -14,7 +14,7 @@ REGISTRY_DOCUMENTS = (
     "story_combat_scenarios.json",
 )
 CORE_DOCUMENTS = (*REGISTRY_DOCUMENTS, "maps.json")
-OPTIONAL_DOCUMENTS = ("monster_bloodlines.json", "achievements.json")
+OPTIONAL_DOCUMENTS = ("monster_bloodlines.json", "achievements.json", "crafting.json")
 PACKAGE_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,63}$")
 PREFERENCES_FILE = "extension_preferences.json"
 
@@ -107,6 +107,9 @@ def base_documents(content_root: Path) -> dict[str, dict[str, Any]]:
     achievements_path = content_root / "achievements.json"
     if achievements_path.is_file():
         documents[achievements_path.name] = read_json(achievements_path)
+    crafting_path = content_root / "crafting.json"
+    if crafting_path.is_file():
+        documents[crafting_path.name] = read_json(crafting_path)
     for path in sorted(content_root.glob("*_events.json")):
         documents[path.name] = read_json(path)
     events_path = content_root / "events.json"

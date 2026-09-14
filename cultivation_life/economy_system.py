@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import math
 import random
 import re
@@ -114,6 +115,9 @@ class EconomySystemMixin:
                 "world":player.world, "location_id":location_id,
                 "rare_next_tier":rare_next_tier, "sold":False,
             })
+        self._append_crafting_market_offers(
+            game, rng, offers, tier=tier, market_name=market_name, location_id=location_id,
+        )
         game.market_realm_index = tier
         game.market_world = player.world
         game.market_location_id = location_id
@@ -128,6 +132,7 @@ class EconomySystemMixin:
             return {"available":False, "spirit_stones":stones, "offers":[]}
         location_id = self.maps.normalize_location(player.world, player.location_id)
         offers = []
+        crafting_offers = []
         for offer in game.market_offers:
             if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
                 continue
@@ -140,13 +145,16 @@ class EconomySystemMixin:
                 offer["kind"] != "technique"
                 or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]].element)
             )
-            offers.append(shown)
+            if offer.get("kind") == "crafting_material":
+                crafting_offers.append(shown)
+            else:
+                offers.append(shown)
         location_name = self.maps.location(player.world, location_id)["name"]
         return {
             "available":True, "name":f"{location_name}·{REALMS[self._market_tier(player)].name}坊市",
             "realm_index":self._market_tier(player), "world":player.world,
             "location_id":location_id, "location_name":location_name,
-            "spirit_stones":stones, "offers":offers,
+            "spirit_stones":stones, "offers":offers, "crafting_material_offers":crafting_offers,
             "sellable_plants":[
                 {"id":item.id, "name":item.name, "quantity":item.quantity,
                  "price":max(1, round(int(self._plant_item_value(item) or 0) * float(self._spirit_field_rules()["market_sell_ratio"]))) }
@@ -717,11 +725,14 @@ class EconomySystemMixin:
                 tier=int(selected["tier"]), start_price=start, suffix=f"npc-{index}",
             ))
         for index, consignment in enumerate(state.get("consignments", [])):
-            lots.append(self._make_auction_lot(
-                game, rng, kind="item", content_id=str(consignment["content_id"]),
-                tier=int(consignment.get("tier", 1)), start_price=int(consignment["start_price"]),
-                seller="player", suffix=f"player-{index}", rated_price=int(consignment.get("rated_price", 0) or 0),
-            ))
+            if consignment.get("kind") == "crafted_artifact" and isinstance(consignment.get("artifact"), dict):
+                lots.append(self._make_crafted_auction_lot(game, rng, consignment, f"player-{index}"))
+            else:
+                lots.append(self._make_auction_lot(
+                    game, rng, kind="item", content_id=str(consignment["content_id"]),
+                    tier=int(consignment.get("tier", 1)), start_price=int(consignment["start_price"]),
+                    seller="player", suffix=f"player-{index}", rated_price=int(consignment.get("rated_price", 0) or 0),
+                ))
         candidates = [
             npc for npc in self._all_world_npcs(game)
             if npc.alive and npc.world == game.player.world
@@ -788,7 +799,10 @@ class EconomySystemMixin:
                 if lot.get("current_bidder") == "player":
                     add_item(game.player, "spirit_stone", int(lot.get("current_bid", 0)))
             for consignment in state.get("consignments", []):
-                add_item(game.player, str(consignment["content_id"]))
+                if consignment.get("kind") == "crafted_artifact" and isinstance(consignment.get("artifact"), dict):
+                    game.player.crafted_artifacts.append(copy.deepcopy(consignment["artifact"]))
+                else:
+                    add_item(game.player, str(consignment["content_id"]))
         game.auction_state = {
             "status":"cooldown", "actions_remaining":int(self._auction_rules()["cooldown_actions"]),
         }

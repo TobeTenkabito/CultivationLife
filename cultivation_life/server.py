@@ -177,6 +177,17 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.refine_pill(
                     game_id, payload.get("target_item_id", ""), payload.get("materials", [])
                 )
+            elif operation == "crafting-preview":
+                result = ENGINE.preview_crafting(game_id, payload)
+            elif operation == "crafting-forge":
+                result = ENGINE.forge_crafted_artifact(game_id, payload)
+            elif operation == "crafting-blueprint":
+                result = ENGINE.save_crafting_blueprint(game_id, payload)
+            elif operation == "crafted-artifact":
+                result = ENGINE.crafted_artifact_action(
+                    game_id, payload.get("artifact_id", ""), payload.get("action", ""),
+                    int(payload.get("start_price", 0) or 0),
+                )
             elif operation == "spirit-plant-use":
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":
