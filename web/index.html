@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260914-2">
-  <link rel="stylesheet" href="/panels.css?v=20260912-11">
+  <link rel="stylesheet" href="/panels.css?v=20260914-12">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -74,19 +74,6 @@
         <details class="techniques compact-library"><summary>功法配置 <span id="equipped-technique-count"></span></summary><div id="technique-list"></div></details>
         <details class="technique-library compact-library"><summary>已悟功法 <span id="known-technique-count"></span></summary><div id="known-technique-list"></div></details>
         <div class="wanted"><h3>势力敌对</h3><div id="wanted-list"></div></div>
-        <details id="ghost-phase-two" class="ghost-ecology-ledger hidden">
-          <summary>魂魄</summary>
-          <p id="ghost-phase-state"></p>
-          <div id="ghost-constraint-actions" class="ghost-system-actions hidden"></div>
-          <div id="ghost-host-actions" class="ghost-system-actions hidden"></div>
-          <section><b>百鬼夜行</b><div id="ghost-parade-list"></div></section>
-          <section><b>十魂位（事件中仍可即时换魂）</b><div id="ghost-soul-slots"></div></section>
-          <section><b>拘魂册</b><div id="ghost-bound-souls"></div></section>
-        </details>
-        <details id="ghost-attachment-panel" class="ghost-ecology-ledger hidden">
-          <summary>附灵</summary>
-          <section><b>载体与器灵状态</b><div id="ghost-attachment-list"></div></section>
-        </details>
       </aside>
 
       <section class="main-column">
@@ -196,6 +183,24 @@
           <section id="auction-log-section" class="hidden"><h3>场内竞价</h3><div id="auction-bid-logs" class="auction-bid-logs"></div></section>
           <section id="black-market-section" class="hidden"><h3>散场黑市</h3><p class="muted">输入普通字符串或正则表达式检索本界商品；黑市售价严重溢价。</p><form id="black-market-search-form" class="auction-inline-form"><input id="black-market-pattern" maxlength="40" placeholder="例如：丹|剑|神识"><button type="submit">检索</button></form><div id="black-market-results" class="auction-lots"></div><h3>出手资产</h3><div id="black-market-sellables" class="auction-sellables"></div><button id="black-market-leave" type="button">离开黑市</button></section>
         </article>
+        <article id="ghost-parade-card" class="paper utility-panel ghost-parade-panel hidden" role="dialog" aria-modal="false" aria-label="百鬼夜行">
+          <div class="section-title"><div><p class="eyebrow">NIGHT PARADE</p><h2>百鬼夜行</h2></div><div class="panel-heading"><span id="ghost-parade-summary"></span><button id="ghost-parade-toggle" type="button">关闭</button></div></div>
+          <p id="ghost-parade-description" class="muted"></p>
+          <div id="ghost-parade-list" class="ghost-parade-list"></div>
+        </article>
+        <article id="ghost-soul-card" class="paper utility-panel left-panel ghost-soul-panel hidden" role="dialog" aria-modal="false" aria-label="三魂七魄">
+          <div class="section-title"><div><p class="eyebrow">THREE SOULS · SEVEN SPIRITS</p><h2>三魂七魄</h2></div><div class="panel-heading"><span id="ghost-soul-summary"></span><button id="ghost-soul-toggle" type="button">关闭</button></div></div>
+          <p id="ghost-phase-state" class="muted"></p>
+          <div id="ghost-constraint-actions" class="ghost-system-actions hidden"></div>
+          <div id="ghost-host-actions" class="ghost-system-actions hidden"></div>
+          <section><h3>十魂位</h3><p class="section-note">三魂提供无硬上限的递减收益；七魄各自进入对应战斗规则。事件发生时仍可即时换魂。</p><div id="ghost-soul-slots" class="ghost-soul-slots"></div></section>
+          <section><h3>拘魂册</h3><div id="ghost-bound-souls" class="ghost-bound-souls"></div></section>
+        </article>
+        <article id="ghost-attachment-card" class="paper utility-panel left-panel ghost-attachment-panel hidden" role="dialog" aria-modal="false" aria-label="附灵">
+          <div class="section-title"><div><p class="eyebrow">SPIRIT ATTACHMENT</p><h2>附灵</h2></div><div class="panel-heading"><span id="ghost-attachment-summary"></span><button id="ghost-attachment-toggle" type="button">关闭</button></div></div>
+          <p class="muted">附入器物后仍可自由行动和离器，以修炼效率换取更慢的魂蚀增长。</p>
+          <section><h3>载体与器灵状态</h3><div id="ghost-attachment-list" class="ghost-attachment-list"></div></section>
+        </article>
         <article id="faction-card" class="paper faction-card utility-panel" role="dialog" aria-modal="false" aria-label="宗门势力">
           <div class="section-title"><div><p class="eyebrow">山门势力</p><h2 id="faction-title">人界宗门</h2></div><div class="faction-heading-actions"><span id="faction-role"></span><button id="faction-toggle" type="button">关闭</button></div></div>
           <div id="faction-content">
@@ -291,6 +296,8 @@
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
         <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden"><span>脉</span><small>血脉</small></button>
+        <button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
+        <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
         <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
         <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
@@ -299,6 +306,7 @@
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
+        <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
@@ -316,7 +324,7 @@
   </main>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260912-9"></script>
-  <script src="/app.js?v=20260914-7"></script>
+  <script src="/ui-panels.js?v=20260914-10"></script>
+  <script src="/app.js?v=20260914-8"></script>
 </body>
 </html>

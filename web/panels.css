@@ -170,6 +170,27 @@
 .item.natal-artifact-item { border-color:rgba(182,139,61,.52); border-left:4px solid var(--gold); background:linear-gradient(90deg,rgba(182,139,61,.18),rgba(255,255,255,.34)); box-shadow:inset 0 0 18px rgba(182,139,61,.08); }
 .item.natal-artifact-item b { color:#8b6424; }
 
+.ghost-soul-panel,.ghost-attachment-panel,.ghost-parade-panel { width:min(820px,calc(100vw - 140px)); padding:34px 38px; }
+.ghost-soul-panel .eyebrow,.ghost-attachment-panel .eyebrow,.ghost-parade-panel .eyebrow { color:#655078!important; }
+.ghost-soul-panel h3,.ghost-attachment-panel h3,.ghost-parade-panel h3 { margin:0 0 8px; font-size:14px; font-weight:500; }
+.ghost-soul-panel section,.ghost-attachment-panel section { margin-top:20px; }
+.ghost-soul-panel section+section { padding-top:16px; border-top:1px solid var(--line); }
+.ghost-soul-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.ghost-bound-souls,.ghost-parade-list { display:grid; gap:8px; }
+.ghost-soul-slots .captive-row,.ghost-bound-souls .captive-row,.ghost-parade-list .captive-row { margin:0; }
+.ghost-soul-slots .three-soul { border-left-color:#8a6b32; background:rgba(182,139,61,.09); }
+.ghost-soul-slots .seven-spirit { border-left-color:#655078; background:rgba(101,80,120,.08); }
+.ghost-attachment-list { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:16px; border-left:4px solid #655078; background:rgba(101,80,120,.08); }
+.ghost-attachment-list p { flex-basis:100%; margin:0; line-height:1.7; }
+.ghost-attachment-list button,.ghost-system-actions button,.ghost-parade-list>button { padding:8px 11px; color:#fff; background:#655078; }
+.ghost-system-actions { justify-content:flex-start; margin-top:10px; padding:12px; border-left:3px solid #655078; background:rgba(101,80,120,.07); }
+.strategy-dock button.ghost-dock-button { position:relative; color:#655078; border-color:rgba(101,80,120,.28); background:rgba(101,80,120,.10); }
+.strategy-dock button.ghost-dock-button:hover,.strategy-dock button.ghost-dock-button.active { color:#fff; background:#655078; }
+.strategy-dock button.ghost-parade-dock.notice { box-shadow:0 0 0 3px rgba(101,80,120,.15),0 8px 20px rgba(74,48,92,.18); }
+.strategy-dock button.ghost-parade-dock.notice::after { content:""; position:absolute; right:3px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--cinnabar); box-shadow:0 0 0 3px rgba(166,71,52,.16); }
+.strategy-dock button.ghost-parade-dock.live::after { animation:ghost-notice-pulse 1.35s ease-in-out infinite; }
+@keyframes ghost-notice-pulse { 50% { transform:scale(1.32); opacity:.66; } }
+
 @media(max-width: 800px) {
   .strategy-dock { top: auto; right: 50%; bottom: 12px; transform: translateX(50%); grid-auto-flow: column; border-radius: 34px; }
   .strategy-dock.left-dock { left:10px; right:auto; top:auto; bottom:72px; transform:none; grid-template-columns:repeat(4,48px); max-width:calc(100vw - 20px); }
@@ -186,4 +207,6 @@
   .natal-artifact-visual { height:430px; }
   .natal-sword,.natal-sword-shadow { top:7px; height:410px; }
   .natal-material-picker { inset:35px 25px; }
+  .ghost-soul-panel,.ghost-attachment-panel,.ghost-parade-panel { width:calc(100vw - 20px); }
+  .ghost-soul-slots { grid-template-columns:1fr; }
 }

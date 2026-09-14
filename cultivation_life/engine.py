@@ -5682,6 +5682,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             return self._relationship_capture_step(
                 game, pending, str(effect.get("stage", "")), str(effect.get("method", "")), rng,
             )
+        if kind == "ghost_reincarnate":
+            transition = self._complete_ghost_reincarnation(game, record_history=False)
+            return "reincarnated", str(transition["summary"])
         if kind == "queue_event":
             event_id = str(effect["event_id"])
             event = self.events_by_id.get(event_id)

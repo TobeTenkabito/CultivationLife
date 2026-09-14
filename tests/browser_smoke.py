@@ -452,6 +452,14 @@ def main() -> None:
                 ghost_game.player.ghost_soul_erosion_rate_pp = 0.08
                 ghost_game.player.ghost_soul_erosion_time_progress = 0.3
                 ghost_game.player.ghost_wangsheng_energy = 5
+                ghost_game.ghost_parade.update({
+                    "status":"scheduled", "announced":True,
+                    "world":ghost_game.player.world,
+                    "location_id":ghost_game.player.location_id,
+                    "start_age":ghost_game.player.age + 2,
+                    "end_age":ghost_game.player.age + 5,
+                    "participated":False, "souls":[],
+                })
                 add_item(ghost_game.player, "ghost_core_pill")
                 engine.store.save(ghost_game)
                 page.reload()
@@ -467,6 +475,22 @@ def main() -> None:
                 assert "100.00%" in page.locator("#ghost-integrity-detail").text_content()
                 assert "所有行动共享此进度" in page.locator("#ghost-integrity-detail").text_content()
                 assert "练气13层 ×0" in page.locator("#ghost-imprint-list").text_content()
+                assert page.locator("#ghost-phase-two").count() == 0
+                assert page.locator("[data-panel-target='ghost-soul']").is_visible()
+                assert page.locator("[data-panel-target='ghost-attachment']").is_visible()
+                assert page.locator("[data-panel-target='ghost-parade']").is_visible()
+                page.locator("[data-panel-target='ghost-soul']").click()
+                page.locator("#ghost-soul-card").wait_for(state="visible")
+                assert page.locator("#ghost-soul-slots .captive-row").count() == 10
+                page.locator("#ghost-soul-toggle").click()
+                page.locator("[data-panel-target='ghost-attachment']").click()
+                page.locator("#ghost-attachment-card").wait_for(state="visible")
+                assert "载体与器灵状态" in page.locator("#ghost-attachment-card").text_content()
+                page.locator("#ghost-attachment-toggle").click()
+                page.locator("[data-panel-target='ghost-parade']").click()
+                page.locator("#ghost-parade-card").wait_for(state="visible")
+                assert "预告" in page.locator("#ghost-parade-card").text_content()
+                page.locator("#ghost-parade-toggle").click()
                 page.locator("[data-panel-target='inventory']").click()
                 page.locator("#inventory-card").wait_for(state="visible")
                 assert page.get_by_role("button", name="鬼修不可用").count() >= 1
@@ -477,9 +501,22 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#ghost-erosion").text_content() == "0.0400%"
                 assert page.locator("#ghost-wangsheng").text_content() == "1"
-                page.once("dialog", lambda dialog: dialog.accept())
-                with page.expect_response(lambda response: response.url.endswith("/ghost-reincarnate")):
+                with page.expect_response(lambda response: response.url.endswith("/ghost-reincarnation-prompt")):
                     page.locator("#ghost-reincarnate-action").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                page.locator("#event-card").wait_for(state="visible")
+                assert page.locator("#event-title").text_content() == "轮回门前"
+                assert "最终有效概率仍封顶 98%" in page.locator("#event-body").text_content()
+                with page.expect_response(lambda response: response.url.endswith("/choice")):
+                    page.get_by_role("button", name="取消，暂留此世").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                cancelled_reincarnation = engine.store.load(ghost_created["id"])
+                assert (cancelled_reincarnation.player.realm_index, cancelled_reincarnation.player.layer) == (3, REALMS[3].layers)
+                with page.expect_response(lambda response: response.url.endswith("/ghost-reincarnation-prompt")):
+                    page.locator("#ghost-reincarnate-action").click()
+                page.locator("#event-card").wait_for(state="visible")
+                with page.expect_response(lambda response: response.url.endswith("/choice")):
+                    page.get_by_role("button", name="继续轮回", exact=True).click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert "练气1层" in page.locator("#realm-name").text_content()
                 assert page.locator("#ghost-reincarnate-action").is_hidden()

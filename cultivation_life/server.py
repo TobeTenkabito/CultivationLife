@@ -197,6 +197,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.divine_sense_breakthrough(game_id)
             elif operation == "ghost-reincarnate":
                 result = ENGINE.reincarnate_ghost(game_id)
+            elif operation == "ghost-reincarnation-prompt":
+                result = ENGINE.prepare_ghost_reincarnation(game_id)
             elif operation == "ghost-wangsheng":
                 result = ENGINE.spend_wangsheng(game_id, bool(payload.get("all", False)))
             elif operation == "ghost-parade":
