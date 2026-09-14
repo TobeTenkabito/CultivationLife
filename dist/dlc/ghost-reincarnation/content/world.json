@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "ghost_cultivation": {
+      "enabled": true,
+      "infinite_lifespan": true,
+      "erosion_growth_per_time_unit_pp": 0.0002,
+      "soul_death_intrinsic_floor": 1.0,
+      "carry_warning_thresholds": [90, 75, 50, 25, 10],
+      "reincarnation_bonus_per_mark": 0.05,
+      "reincarnation_final_probability_cap": 1.0,
+      "wangsheng_per_layer": 1,
+      "wangsheng_cost": 2,
+      "wangsheng_erosion_reduction_pp": 0.02,
+      "clear_wangsheng_on_reincarnation": true
+    }
+  }
+}
