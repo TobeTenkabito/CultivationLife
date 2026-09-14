@@ -72,6 +72,7 @@ from .world_state import (
 from .war_system import WarSystemMixin
 from .heavenly_court_system import HeavenlyCourtSystemMixin
 from .natal_artifact_system import NatalArtifactSystemMixin
+from .crafting_system import CraftingSystemMixin, crafted_artifact_bonuses, crafted_combat_effects
 from .monster_bloodline_system import (
     MonsterBloodlineSystemMixin, bloodline_content_available,
     ensure_monster_bloodline_state, initialize_monster_bloodline,
@@ -121,7 +122,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -362,6 +363,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                     * (1 + sense.divine_sense_bonus * technique_scale(sense))
                     * technique_environment_multiplier(sense, player.world)
                     * regional_multiplier
+                    * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
                 )
                 player.divine_sense_experience += sense_gain
                 total_sense_gain += sense_gain
@@ -376,6 +378,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                         float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))
                         if player.path == "monster" else 1.0
                     )
+                    * (1 + crafted_artifact_bonuses(player)["body_training_efficiency"])
                 )
                 player.body_progress = min(self._body_progress_required(player), player.body_progress + training_gain)
                 total_body_gain += training_gain
@@ -1666,7 +1669,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         price = int(offer["price"])
         if not remove_item(game.player, "spirit_stone", price):
             raise ValueError(f"需要 {price} 枚下品灵石")
-        if offer["kind"] == "item":
+        if offer["kind"] == "crafting_material":
+            summary = self._buy_crafting_material_offer(game, offer, price)
+        elif offer["kind"] == "item":
             add_item(game.player, offer["content_id"])
             summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得{offer['name']}。"
         else:
@@ -6075,7 +6080,9 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         their legacy aggregate-power logic.
         """
         player = game.player
-        target["natal_artifact_effects"] = self._natal_artifact_combat_effects(game)
+        target["natal_artifact_effects"] = [
+            *self._natal_artifact_combat_effects(game), *crafted_combat_effects(game.player),
+        ]
         if player.world == "celestial":
             if self._court_law_active(game, "martial_gods"):
                 target["global_damage_multiplier"] = 1.10
@@ -6635,6 +6642,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             and item.passive_breakthrough_max_realm is not None
             and source <= int(item.passive_breakthrough_max_realm)
         )
+        artifact_bonus += crafted_artifact_bonuses(player)["breakthrough_bonus"]
         penalty = min(
             float(config["heart_demon_penalty_cap"]),
             player.heart_demon * float(config["heart_demon_penalty_per_point"]),
@@ -7355,6 +7363,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         item_reduction = (
             sum(item.tribulation_damage_reduction * item.quantity for item in player.inventory)
             + player.natal_artifact_tribulation_reduction
+            + crafted_artifact_bonuses(player)["tribulation_reduction"]
         )
         one_time = player.next_thunder_damage_reduction if kind in {"periodic_thunder", "celestial_ascension", "asura_ascension"} else 0.0
         return min(0.75, item_reduction + self._body_tribulation_damage_reduction(player) + one_time)
@@ -7581,6 +7590,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             "world_route": self._public_world_route(game),
             "heavenly_court": self._public_heavenly_court(game),
             "natal_artifact": self._public_natal_artifact(game),
+            "crafting_system": self._public_crafting_system(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),

@@ -238,6 +238,7 @@ def opportunity_required(player: Player) -> int:
 
 
 def raw_external_hp_bonus(player: Player) -> float:
+    from .crafting_system import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
@@ -248,6 +249,7 @@ def raw_external_hp_bonus(player: Player) -> float:
         + player.faction_hp_bonus
         + player.natal_artifact_hp_bonus
         + ghost_external_hp_bonus(player)
+        + crafted_artifact_bonuses(player)["max_hp"]
     )
 
 
@@ -256,6 +258,7 @@ def max_hp(player: Player) -> int:
 
 
 def raw_external_mp_bonus(player: Player) -> float:
+    from .crafting_system import crafted_artifact_bonuses
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
@@ -266,6 +269,7 @@ def raw_external_mp_bonus(player: Player) -> float:
         + player.faction_mp_bonus
         + player.natal_artifact_mp_bonus
         + ghost_external_mp_bonus(player)
+        + crafted_artifact_bonuses(player)["max_mp"]
     )
 
 
@@ -274,6 +278,7 @@ def max_mp(player: Player) -> int:
 
 
 def combat_power(player: Player) -> float:
+    from .crafting_system import crafted_artifact_bonuses
     current = realm(player)
     hp_ratio = max(0.0, min(1.0, player.hp / max_hp(player)))
     mp_ratio = max(0.0, min(1.0, player.mp / max_mp(player)))
@@ -289,7 +294,10 @@ def combat_power(player: Player) -> float:
         and (not entry.requires_immortal_power or player.immortal_power_converted)
     )
     comprehensive = current.base_power * layer_factor * status + current.base_power * progress * 0.15 + item_power + player.body_training * 8
-    total = comprehensive + technique_power + player.faction_combat_bonus + player.natal_artifact_combat_bonus
+    total = (
+        comprehensive + technique_power + player.faction_combat_bonus
+        + player.natal_artifact_combat_bonus + crafted_artifact_bonuses(player)["combat_power"]
+    )
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
     return round(total, 1)
@@ -479,7 +487,12 @@ def opportunity_multiplier(player: Player) -> float:
     if player.technique is None:
         return 0.0
     main_bonus = player.technique.opportunity_bonus * technique_scale(player.technique)
-    item_bonus = sum(item.opportunity_bonus * item.quantity for item in player.inventory) + player.natal_artifact_opportunity_bonus
+    from .crafting_system import crafted_artifact_bonuses
+    item_bonus = (
+        sum(item.opportunity_bonus * item.quantity for item in player.inventory)
+        + player.natal_artifact_opportunity_bonus
+        + crafted_artifact_bonuses(player)["opportunity_efficiency"]
+    )
     inner_multiplier = (1 + main_bonus) * (1 + item_bonus)
     return (
         root_efficiency * inner_multiplier

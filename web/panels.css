@@ -199,6 +199,36 @@
 .strategy-dock button.ghost-parade-dock.live::after { animation:ghost-notice-pulse 1.35s ease-in-out infinite; }
 @keyframes ghost-notice-pulse { 50% { transform:scale(1.32); opacity:.66; } }
 
+.crafting-panel { width:min(900px,calc(100vw - 140px)); padding:34px 38px; }
+.crafting-panel section { margin-top:20px; }
+.crafting-workbench { padding:16px; border:1px solid rgba(182,139,61,.28); background:linear-gradient(135deg,rgba(182,139,61,.08),rgba(255,255,255,.2)); }
+.crafting-five-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.crafting-five-slots label:first-child { grid-column:1/-1; }
+.crafting-five-slots label,.crafting-name { display:grid; gap:5px; color:var(--muted); font-size:11px; }
+.crafting-five-slots select,.crafting-name input,.crafted-artifact-tools input { width:100%; padding:8px; border:1px solid var(--line); background:rgba(255,255,255,.62); }
+.crafting-budget-head { display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+.crafting-budget-head h3 { margin:0; }
+.crafting-budget-head strong.over { color:var(--cinnabar); }
+.crafting-allocations { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+.crafting-allocations label { display:grid; gap:4px; padding:7px; border:1px solid var(--line); background:rgba(255,255,255,.3); }
+.crafting-allocations span { min-height:26px; color:var(--muted); font-size:9px; line-height:1.4; }
+.crafting-allocations input { min-width:0; width:100%; padding:6px; }
+.crafting-name { margin-top:10px; }
+.crafting-actions,.crafted-artifact-tools { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.crafting-actions button,.crafted-artifact-tools button { padding:7px 10px; }
+.crafting-preview-result { margin-top:12px; padding:12px; border-left:3px solid var(--gold); background:rgba(255,255,255,.34); }
+.crafting-preview-result h4,.crafting-preview-result p { margin:0 0 7px; }
+.crafting-material-library,.crafted-artifact-list { display:grid; gap:8px; }
+.crafting-material-row,.crafted-artifact-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 12px; border-left:3px solid rgba(47,82,69,.45); background:rgba(47,82,69,.055); }
+.crafting-material-row { display:grid; }
+.crafting-material-row small,.crafted-artifact-row small { display:block; margin-top:4px; color:var(--muted); line-height:1.45; }
+.crafted-artifact-row.active { border-left-color:var(--gold); background:rgba(182,139,61,.11); }
+.crafted-artifact-row>div:first-child { min-width:0; flex:1; }
+.crafted-artifact-tools { justify-content:flex-end; max-width:310px; margin-top:0; }
+.crafted-artifact-tools input { max-width:110px; }
+.crafting-blueprint-list { display:flex; flex-wrap:wrap; gap:7px; }
+.crafting-blueprint { padding:8px 10px; border-color:rgba(182,139,61,.3); background:rgba(182,139,61,.08); }
+
 @media(max-width: 800px) {
   .strategy-dock { top: auto; right: 50%; bottom: 12px; transform: translateX(50%); grid-auto-flow: column; border-radius: 34px; }
   .strategy-dock.left-dock { left:10px; right:auto; top:auto; bottom:72px; transform:none; grid-template-columns:repeat(4,48px); max-width:calc(100vw - 20px); }
@@ -217,4 +247,8 @@
   .natal-material-picker { inset:35px 25px; }
   .ghost-soul-panel,.ghost-attachment-panel,.ghost-parade-panel { width:calc(100vw - 20px); }
   .ghost-soul-slots { grid-template-columns:1fr; }
+  .crafting-panel { width:calc(100vw - 20px); }
+  .crafting-five-slots,.crafting-allocations { grid-template-columns:1fr 1fr; }
+  .crafted-artifact-row { display:grid; }
+  .crafted-artifact-tools { justify-content:flex-start; max-width:none; }
 }

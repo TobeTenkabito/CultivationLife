@@ -316,7 +316,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   battleReportOpen = false;
   renderButtons();
 }
@@ -533,7 +533,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -558,6 +558,142 @@ function renderPostBattlePossession() {
   });
 }
 
+const craftingStatOrder = ['combat_power','max_hp','max_mp','opportunity_efficiency','body_training_efficiency','divine_sense_efficiency','tribulation_reduction','breakthrough_bonus'];
+
+function craftingPayload() {
+  const allocations = {};
+  document.querySelectorAll('#crafting-allocations input[data-stat]').forEach(input => allocations[input.dataset.stat] = Number(input.value || 0));
+  return {
+    mold_id:$('#crafting-mold').value, primary_id:$('#crafting-primary').value,
+    secondary_a_id:$('#crafting-secondary-a').value, secondary_b_id:$('#crafting-secondary-b').value,
+    quench_id:$('#crafting-quench').value, name:$('#crafting-name').value, allocations,
+  };
+}
+
+function craftingStatText(stat, value, names) {
+  const numeric = Number(value || 0);
+  const shown = stat.endsWith('efficiency') || stat.endsWith('reduction') || stat === 'breakthrough_bonus'
+    ? percent(numeric) : number(numeric);
+  return `${names[stat] || stat} +${shown}`;
+}
+
+function renderCrafting(system) {
+  const panel = $('#crafting-card'), dock = document.querySelector('[data-panel-target="crafting"]');
+  panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
+  if (!system.visible) { window.UtilityPanels?.close('crafting'); return; }
+  $('#crafting-heading').textContent = `炼器 ${system.active_count}/${system.active_slots} · 材料 ${system.materials?.length || 0}`;
+  const moldSelect = $('#crafting-mold'); moldSelect.innerHTML = '';
+  (system.molds || []).forEach(mold => {
+    const option = document.createElement('option'); option.value = mold.id;
+    option.textContent = `${mold.name} · ${mold.rule.name}：${mold.rule.description}`; moldSelect.appendChild(option);
+  });
+  const fillMaterials = (selector, role) => {
+    const select = $(selector); select.innerHTML = '';
+    const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = `选择${role === 'primary' ? '主材' : role === 'secondary' ? '辅材' : '淬火材料'}`; select.appendChild(placeholder);
+    (system.materials || []).filter(row => row.roles?.includes(role)).forEach(material => {
+      const option = document.createElement('option'); option.value = material.id;
+      const effect = material.role_effects?.[role]?.description || '';
+      option.textContent = `${material.name} · ${material.state} · 价值 ${number(material.material_value)} · ${effect}`;
+      select.appendChild(option);
+    });
+  };
+  fillMaterials('#crafting-primary', 'primary'); fillMaterials('#crafting-secondary-a', 'secondary');
+  fillMaterials('#crafting-secondary-b', 'secondary'); fillMaterials('#crafting-quench', 'quench');
+
+  const allocations = $('#crafting-allocations'); allocations.innerHTML = '';
+  craftingStatOrder.forEach(stat => {
+    const label = document.createElement('label'); const title = document.createElement('span');
+    const input = document.createElement('input'); const cost = Number(system.stat_costs?.[stat] || 1);
+    title.textContent = `${system.stat_names?.[stat] || stat} · 每点占 ${Number.isInteger(cost) ? cost : cost.toFixed(1)}`;
+    input.type = 'number'; input.min = '0'; input.max = String(system.budget || 0); input.step = '1'; input.value = '0'; input.dataset.stat = stat;
+    input.oninput = updateCraftingBudget; label.append(title, input); allocations.appendChild(label);
+  });
+  updateCraftingBudget();
+  $('#crafting-preview-result').innerHTML = '<p class="empty">选定五位与属性预算后，可先推演全部固定效果和品质概率。</p>';
+  $('#crafting-preview').onclick = previewCrafting;
+  $('#crafting-save-blueprint').onclick = () => mutate(`/api/games/${game.id}/crafting-blueprint`, craftingPayload());
+
+  const library = $('#crafting-material-library'); library.innerHTML = '';
+  (system.materials || []).forEach(material => {
+    const row = document.createElement('div'); row.className = 'crafting-material-row';
+    const name = document.createElement('b'); name.textContent = material.name;
+    const detail = document.createElement('small');
+    detail.textContent = `${material.state} · ${material.source} · 材料价值 ${number(material.material_value)} · ${material.roles.map(role => ({primary:'主材',secondary:'辅材',quench:'淬火'})[role]).join('、')}`;
+    row.append(name, detail); library.appendChild(row);
+  });
+  if (!system.materials?.length) library.innerHTML = '<p class="empty">暂无炼器材料。各界坊市每次换货会额外出现三份有独立品相的炼器材料；部分灵田实生灵植也可入器。</p>';
+
+  const artifactList = $('#crafted-artifact-list'); artifactList.innerHTML = '';
+  (system.artifacts || []).forEach(artifact => {
+    const row = document.createElement('div'); row.className = `crafted-artifact-row${artifact.equipped ? ' active' : ''}`;
+    const info = document.createElement('div'); const title = document.createElement('b'); const detail = document.createElement('small'); const stats = document.createElement('small');
+    title.textContent = `${artifact.is_natal ? '本命 · ' : ''}${artifact.name} · ${artifact.quality_name}`;
+    detail.textContent = `${artifact.mold_name} · 创制于 ${timelineText(artifact.created_year)} · 锚定价值 ${number(artifact.anchor_value)}灵石`;
+    stats.textContent = Object.entries(artifact.actual_stats || {}).filter(([,value]) => Number(value)).map(([key,value]) => craftingStatText(key,value,system.stat_names || {})).join(' · ') || '未分配常驻属性';
+    info.append(title, detail, stats);
+    const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
+    const equip = document.createElement('button'); equip.textContent = artifact.equipped ? '卸下' : '装备';
+    equip.disabled = artifact.is_natal; equip.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0'; equip.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.equipped ? 'unequip' : 'equip'});
+    const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
+    natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝本身不会消失。` : `确认将“${artifact.name}”设为唯一的组合式本命法宝？原有组合式本命关系会解除。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
+    const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
+    sell.disabled = artifact.equipped; sell.dataset.craftingUnavailable = artifact.equipped ? '1' : '0'; sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开存档，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
+    tools.append(equip, natal, sell);
+    if (system.auction_available && !artifact.equipped) {
+      const start = document.createElement('input'); start.type = 'number'; start.min = String(Math.ceil(artifact.anchor_value * .25)); start.max = String(Math.floor(artifact.anchor_value * 5)); start.value = String(Math.round(artifact.anchor_value * .8)); start.title = '寄拍起拍价';
+      const consign = document.createElement('button'); consign.textContent = '寄拍'; consign.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'consign', start_price:Number(start.value || 0)});
+      tools.append(start, consign);
+    }
+    row.append(info, tools); artifactList.appendChild(row);
+  });
+  if (!system.artifacts?.length) artifactList.innerHTML = '<p class="empty">尚未炼成组合式法宝。</p>';
+
+  const blueprints = $('#crafting-blueprint-list'); blueprints.innerHTML = '';
+  (system.blueprints || []).forEach(blueprint => {
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'crafting-blueprint';
+    button.textContent = `${blueprint.name} · ${blueprint.material_types.join(' / ')}`;
+    button.onclick = () => applyCraftingBlueprint(blueprint, system);
+    blueprints.appendChild(button);
+  });
+  if (!system.blueprints?.length) blueprints.innerHTML = '<p class="empty">暂无图谱。</p>';
+}
+
+function updateCraftingBudget() {
+  const system = game?.crafting_system || {}; let used = 0;
+  document.querySelectorAll('#crafting-allocations input[data-stat]').forEach(input => used += Number(input.value || 0) * Number(system.stat_costs?.[input.dataset.stat] || 1));
+  const label = $('#crafting-budget'); if (!label) return;
+  label.textContent = `${used.toFixed(1)} / ${number(system.budget || 0)}`; label.classList.toggle('over', used > Number(system.budget || 0));
+}
+
+async function previewCrafting() {
+  if (busy) return;
+  busy = true; document.body.classList.add('busy'); renderButtons();
+  try {
+    const preview = await api(`/api/games/${game.id}/crafting-preview`, {method:'POST', body:JSON.stringify(craftingPayload())});
+    const root = $('#crafting-preview-result'); root.innerHTML = '';
+    const title = document.createElement('h4'); title.textContent = `${preview.mold.rule.name} · 锚定价值 ${number(preview.anchor_value)}灵石`;
+    const effects = document.createElement('p'); effects.textContent = [preview.mold.rule.description, ...(preview.material_effects || []).map(row => `${row.name}：${row.description}`)].join(' ');
+    const normal = document.createElement('p'); normal.textContent = `普通品质：${Object.entries(preview.theoretical_stats.normal || {}).filter(([,value]) => Number(value)).map(([key,value]) => craftingStatText(key,value,game.crafting_system.stat_names || {})).join(' · ')}`;
+    const odds = document.createElement('p'); odds.className = 'muted'; odds.textContent = `品质概率：${Object.entries(preview.quality_probabilities).map(([key,value]) => `${preview.quality_names[key]} ${percent(value)}`).join(' · ')}`;
+    const forge = document.createElement('button'); forge.className = 'primary'; forge.textContent = '确认开炉';
+    forge.onclick = () => openGameConfirm({title:'确认组合炼器', body:`将永久消耗这四份具体材料实例，成品最低为残缺品质，不会彻底失败。锚定价值 ${number(preview.anchor_value)} 灵石。`, confirmText:'开炉炼器', onConfirm:()=>mutate(`/api/games/${game.id}/crafting-forge`, craftingPayload())});
+    root.append(title, effects, normal, odds, forge);
+  } catch (error) { toast(error.message); }
+  finally { busy = false; document.body.classList.remove('busy'); renderButtons(); }
+}
+
+function applyCraftingBlueprint(blueprint, system) {
+  $('#crafting-mold').value = blueprint.mold_id;
+  const used = new Set(); const selectors = ['#crafting-primary','#crafting-secondary-a','#crafting-secondary-b','#crafting-quench'];
+  blueprint.material_types.forEach((definitionId, index) => {
+    const material = (system.materials || []).find(row => row.definition_id === definitionId && !used.has(row.id));
+    $(selectors[index]).value = material?.id || ''; if (material) used.add(material.id);
+  });
+  document.querySelectorAll('#crafting-allocations input[data-stat]').forEach(input => input.value = String(blueprint.allocations?.[input.dataset.stat] || 0));
+  updateCraftingBudget();
+  toast('已按图谱填入当前拥有的同类材料；缺少的实例保持为空。');
+}
+
 function renderNatalArtifact(system) {
   const panel=$('#natal-artifact-card'), dock=document.querySelector('[data-panel-target="natal-artifact"]');
   panel.classList.toggle('hidden',!system.visible); dock?.classList.toggle('hidden',!system.visible);
@@ -565,7 +701,7 @@ function renderNatalArtifact(system) {
   const root=$('#natal-artifact-content');root.innerHTML='';
   if(!system.bound){
     $('#natal-artifact-heading').textContent='结丹后开放';
-    const lead=document.createElement('p');lead.className='muted';lead.textContent='选择一件法宝收入丹田。认主后不可交易，其原有属性将随祭炼等级持续成长。锻造系统将在后续版本接入。';root.appendChild(lead);
+    const lead=document.createElement('p');lead.className='muted';lead.textContent='选择一件传统法宝收入丹田。认主后不可交易，其原有属性将随祭炼等级持续成长；组合炼器成品请在“器”界面单独设置本命。';root.appendChild(lead);
     const candidates=document.createElement('div');candidates.className='natal-candidates';
     (system.candidates||[]).forEach(item=>{const row=document.createElement('div'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small'),button=document.createElement('button');name.textContent=item.name;detail.textContent=item.description;text.append(name,detail);button.className='natal-action';button.textContent='炼为本命';button.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'bind',item_id:item.id});row.append(text,button);candidates.appendChild(row);});
     if(!system.candidates?.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='背包中暂无可认主的法宝或装备。';candidates.appendChild(empty);}root.appendChild(candidates);return;
@@ -1575,7 +1711,7 @@ function renderMarket(market) {
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
   $('#market-description').textContent = `货物只在当前世界流通，灵石跨界通用；每件货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品，绝不会越过两个境界。坊市每年换货。`;
   const list = $('#market-offers'); list.innerHTML = '';
-  market.offers.forEach(offer => {
+  [...(market.offers || []), ...(market.crafting_material_offers || [])].forEach(offer => {
     const row = document.createElement('div'); row.className = `market-offer${offer.sold ? ' sold' : ''}`;
     const info = document.createElement('div'); const title = document.createElement('b');
     title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}`;
@@ -2510,7 +2646,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || game?.faction?.dispatch_used || (game?.faction?.contribution || 0) < (game?.faction?.dispatch_cost || 0);
   });
   document.querySelectorAll('.market-buy').forEach(button => {
-    const offer = game?.market?.offers?.find(entry => entry.id === button.dataset.offerId);
+    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.owned || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {
@@ -2566,6 +2702,9 @@ function renderButtons() {
   });
   document.querySelectorAll('#natal-artifact-card button').forEach(control => {
     if (control.id !== 'natal-artifact-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.natalUnavailable === '1';
+  });
+  document.querySelectorAll('#crafting-card button, #crafting-card input, #crafting-card select').forEach(control => {
+    if (control.id !== 'crafting-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.craftingUnavailable === '1';
   });
   $('#spirit-crossing-action').disabled = busy || !game?.player.alive || !!game?.pending_event;
   $('#cross-world-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;

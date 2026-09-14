@@ -375,6 +375,13 @@ class Player:
     ghost_core_state: dict[str, Any] | None = None
     ghost_host_body: dict[str, Any] | None = None
     possession_count: int = 0
+    # Base-game combination crafting.  Materials are true instances so origin,
+    # condition and spirit-plant age survive independently in old/new saves.
+    crafting_materials: list[dict[str, Any]] = field(default_factory=list)
+    crafted_artifacts: list[dict[str, Any]] = field(default_factory=list)
+    equipped_crafted_artifact_ids: list[str] = field(default_factory=list)
+    crafting_blueprints: list[dict[str, Any]] = field(default_factory=list)
+    crafting_sequence: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -415,6 +422,23 @@ class Player:
             saved = data.get(key)
             data[key] = copy.deepcopy(saved) if isinstance(saved, dict) else None
         data["possession_count"] = max(0, int(data.get("possession_count", 0)))
+        data["crafting_materials"] = [
+            copy.deepcopy(row) for row in data.get("crafting_materials", []) if isinstance(row, dict)
+        ]
+        data["crafted_artifacts"] = [
+            copy.deepcopy(row) for row in data.get("crafted_artifacts", []) if isinstance(row, dict)
+        ]
+        known_artifact_ids = {str(row.get("id")) for row in data["crafted_artifacts"]}
+        data["equipped_crafted_artifact_ids"] = list(dict.fromkeys(
+            str(value) for value in data.get("equipped_crafted_artifact_ids", [])
+            if str(value) in known_artifact_ids
+        ))[:3]
+        data["crafting_blueprints"] = [
+            copy.deepcopy(row) for row in data.get("crafting_blueprints", []) if isinstance(row, dict)
+        ]
+        data["crafting_sequence"] = max(
+            int(data.get("crafting_sequence", 0)), len(data["crafted_artifacts"]), 0,
+        )
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
             source: max(0.0, float(saved_qi.get(source, 0.0)))

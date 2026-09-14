@@ -187,6 +187,10 @@ class PlayerCombatSystem:
             for stat, multiplier in effect.get("enemy_stat_multipliers", {}).items():
                 if stat in enemy_stats:
                     enemy_stats[stat] *= max(0.0, float(multiplier))
+        if "crafted_sense_ward" in artifact_traits and "禁神识" in artificial:
+            # The umbrella mold negates the standard 14% forbidden-sense field
+            # penalty; its separate +5% sense multiplier remains meaningful.
+            player_stats["sense"] /= float(cls.TERRAIN_EFFECTS["禁神识"]["sense"])
 
         player_debuffs = [dict(row) for row in target.get("player_debuffs", [])]
         debuffs_blocked = bool(player_debuffs and "player_debuff_immunity" in artifact_traits)
