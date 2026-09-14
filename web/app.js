@@ -10,6 +10,12 @@ let achievementToastTimer = null;
 const achievementToastQueue = [];
 const historyFilters = new Set(['self', 'companion', 'friend', 'mentor', 'faction', 'race', 'other']);
 
+const worldClock = () => game?.player?.world_age ?? game?.player?.age ?? 0;
+const timelineText = value => (
+  game?.player?.world_age != null && game.player.world_age !== game.player.age
+    ? `纪年 ${value}` : `${value} 岁`
+);
+
 async function api(path, options = {}) {
   const response = await fetch(path, {headers: {'Content-Type': 'application/json'}, ...options});
   const data = await response.json();
@@ -304,7 +310,8 @@ function render(data) {
     ? '猎杀异道不沾因果；击杀道修额外增长煞气'
     : '寻找弱者下手，夺宝但增加因果';
   $('#realm-name').textContent = p.awaiting_spirit_realm_crossing && p.world === 'human' ? `${p.realm_name} · 人界绝巅` : p.realm_name;
-  $('#age-line').textContent = p.lifespan == null ? `${p.age} 岁 · 寿元无尽` : `${p.age} 岁 · 寿元 ${p.lifespan}`;
+  const worldAge = p.world_age !== p.age ? ` · 世界纪年 ${p.world_age}` : '';
+  $('#age-line').textContent = (p.lifespan == null ? `${p.age} 岁 · 寿元无尽` : `${p.age} 岁 · 寿元 ${p.lifespan}`) + worldAge;
   const tribulationLine = $('#tribulation-line');
   tribulationLine.classList.toggle('hidden', data.tribulation?.next_age == null);
   tribulationLine.textContent = data.tribulation?.next_age == null ? '' : `雷劫：${data.tribulation.years_remaining} 年后 · 已历 ${data.tribulation.count} 次 · 雷威 ${number(data.tribulation.power || 0)}`;
@@ -614,7 +621,7 @@ function renderFaction(faction) {
   $('#faction-title').textContent = faction.name; $('#faction-role').textContent = faction.role;
   $('#faction-description').textContent = faction.description;
   const details = document.createElement('p'); details.className = 'faction-meta';
-  details.textContent = `${faction.join_age} 岁入门 · 宗门贡献 ${faction.contribution}`; summary.appendChild(details);
+  details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution}`; summary.appendChild(details);
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);
@@ -645,7 +652,7 @@ function renderFaction(faction) {
     if (entry.recent_events?.length) {
       const news = document.createElement('div'); news.className = 'diplomacy-news';
       entry.recent_events.forEach(event => {
-        const line = document.createElement('small'); line.textContent = `${event.age}岁 · ${event.summary}`; news.appendChild(line);
+        const line = document.createElement('small'); line.textContent = `${timelineText(event.age)} · ${event.summary}`; news.appendChild(line);
       });
       card.appendChild(news);
     }
@@ -655,7 +662,7 @@ function renderFaction(faction) {
     const feed = document.createElement('section'); feed.className = 'diplomacy-news';
     const heading = document.createElement('h3'); heading.textContent = '近期宗门外交大事'; feed.appendChild(heading);
     faction.diplomacy_events.forEach(event => {
-      const line = document.createElement('small'); line.textContent = `${event.age}岁 · ${event.summary}`; feed.appendChild(line);
+      const line = document.createElement('small'); line.textContent = `${timelineText(event.age)} · ${event.summary}`; feed.appendChild(line);
     });
     diplomacyDetail.appendChild(feed);
   }
@@ -785,7 +792,7 @@ function renderWars(system) {
       const logs = document.createElement('details'); logs.className = 'war-logs'; logs.open = war.status !== 'ended';
       const logSummary = document.createElement('summary'); logSummary.textContent = `战报 ${war.logs.length} 条`;
       logs.appendChild(logSummary);
-      [...war.logs].reverse().forEach(log => { const line = document.createElement('small'); line.textContent = `${log.age}岁 · ${log.title}：${log.text}`; logs.appendChild(line); });
+      [...war.logs].reverse().forEach(log => { const line = document.createElement('small'); line.textContent = `${timelineText(log.age)} · ${log.title}：${log.text}`; logs.appendChild(line); });
       body.appendChild(logs);
     }
     card.append(summary, body); list.appendChild(card);
@@ -1085,7 +1092,7 @@ function renderRaceSystem(system) {
     events.innerHTML = '<h3>族群大事</h3>';
     if (!(race.recent_events || []).length) events.innerHTML += '<p class="empty">尚无载入史册的宣战、结盟、停战、依附或断盟。</p>';
     (race.recent_events || []).forEach(event => {
-      const row = document.createElement('p'); row.innerHTML = `<b>${event.age}岁</b><span>${event.summary}</span>`; events.appendChild(row);
+      const row = document.createElement('p'); row.innerHTML = `<b>${timelineText(event.age)}</b><span>${event.summary}</span>`; events.appendChild(row);
     });
     detail.append(heading, factions, relations, events);
     if (system.has_diplomatic_voice && race.id !== 'human') {
@@ -1439,7 +1446,7 @@ function renderGhostPhaseTwo(system) {
   if (!parade.status || parade.status === 'dormant') paradeList.innerHTML = '<p class="empty">阴路平静，下一次异动尚未显形。</p>';
   else {
     const intro = document.createElement('p'); intro.className = 'muted';
-    intro.textContent = `${parade.location_name || parade.location_id} · ${parade.status === 'active' ? `正在夜行，${(parade.souls || []).length} 魂仍在` : `将于 ${parade.start_age} 岁开启`} · ${parade.at_location ? '你正在会场' : '地图已有标记'}`; paradeList.appendChild(intro);
+    intro.textContent = `${parade.location_name || parade.location_id} · ${parade.status === 'active' ? `正在夜行，${(parade.souls || []).length} 魂仍在` : `将于${timelineText(parade.start_age)}开启`} · ${parade.at_location ? '你正在会场' : '地图已有标记'}`; paradeList.appendChild(intro);
     if (parade.status === 'active' && parade.at_location && system.state === 'free') {
       const join = document.createElement('button'); join.textContent = parade.participated ? '本次已参悟' : '参悟夜行'; join.disabled = busy || parade.participated;
       join.onclick = () => mutate(`/api/games/${game.id}/ghost-parade`, {action:'participate'}); paradeList.appendChild(join);
@@ -1447,14 +1454,14 @@ function renderGhostPhaseTwo(system) {
         const row = document.createElement('div'); row.className = 'captive-row';
         row.innerHTML = `<b>${soul.name}${soul.defeated ? ' · 已击溃' : ''}</b><small>境界 ${soul.realm_index}/${soul.layer} · 战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}：${soul.soul_trait?.description || ''}</small>`;
         const tools = document.createElement('div'); tools.className = 'captive-tools';
-        [['befriend','结交'],[soul.defeated?'bind':'fight',soul.defeated?'拘魂':'交锋'],['capture','战而拘魂']].forEach(([action,label]) => { const b=document.createElement('button'); b.textContent=label; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-parade`,{action,soul_id:soul.id}); tools.appendChild(b); });
+        [['befriend',soul.befriended?'本次已结交':'结交'],[soul.defeated?'bind':'fight',soul.defeated?'拘魂':'交锋'],['capture','战而拘魂']].forEach(([action,label]) => { const b=document.createElement('button'); b.textContent=label; b.disabled=busy || (action === 'befriend' && soul.befriended); b.onclick=()=>mutate(`/api/games/${game.id}/ghost-parade`,{action,soul_id:soul.id}); tools.appendChild(b); });
         row.appendChild(tools); paradeList.appendChild(row);
       });
     }
   }
   const slotList = $('#ghost-soul-slots'); slotList.innerHTML = '';
   (system.slots || []).forEach(slot => {
-    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · ${slot.soul.soul_trait?.name || '无性'}` : '空位'}</small>`;
+    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · 当前加成 ${percent(slot.effect || 0)} · ${slot.soul.soul_trait?.name || '无性'}：${slot.soul.soul_trait?.description || '无额外规则'}` : '空位'}</small>`;
     if (slot.soul && system.state !== 'possessed') { const b=document.createElement('button'); b.textContent='卸下'; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'unequip',soul_id:slot.soul.id,slot:slot.id}); row.appendChild(b); } slotList.appendChild(row);
   });
   const soulList=$('#ghost-bound-souls'); soulList.innerHTML='';
@@ -1494,7 +1501,7 @@ function renderMap(map, auction) {
     if (location.ghost_parade) {
       const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
       marker.textContent = location.ghost_parade.status === 'active'
-        ? '百鬼夜行正在发生' : `百鬼夜行预告 · ${location.ghost_parade.start_age} 岁开启`;
+        ? '百鬼夜行正在发生' : `百鬼夜行预告 · ${timelineText(location.ghost_parade.start_age)}开启`;
       description.append(' ', marker);
     }
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
@@ -2130,8 +2137,8 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     const requested = person.last_requests || {};
     actions.append(
-      interactionButton('索要物品', requested.item === game.player.age ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
-      interactionButton('请教功法', requested.technique === game.player.age ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
+      interactionButton('索要物品', requested.item === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
+      interactionButton('请教功法', requested.technique === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
     );
     if (person.can_invite_faction) actions.appendChild(interactionButton('引荐入宗', '1', () => mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:person.id})));
     if (game.player.path === 'demonic') actions.appendChild(interactionButton('尝试生擒师父', '1', () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'master'}), 'danger'));
@@ -2196,10 +2203,10 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
     const last = companion.last_interactions || {};
     actions.append(
       companionButton(companion.in_party ? '暂离队伍' : '邀请同行', companion.in_party || companion.can_invite_party ? '1' : '0', {party_action:companion.in_party ? 'leave' : 'invite'}),
-      companionButton('亲密交谈', last.intimacy === game.player.age ? '0' : '1', {action:'intimacy'}),
-      companionButton('缠绵共参', last.entwine === game.player.age ? '0' : '1', {action:'entwine'}),
-      companionButton('索要物品', last.request_item === game.player.age ? '0' : '1', {action:'request_item'}),
-      companionButton('索要功法', last.request_technique === game.player.age ? '0' : '1', {action:'request_technique'}),
+      companionButton('亲密交谈', last.intimacy === worldClock() ? '0' : '1', {action:'intimacy'}),
+      companionButton('缠绵共参', last.entwine === worldClock() ? '0' : '1', {action:'entwine'}),
+      companionButton('索要物品', last.request_item === worldClock() ? '0' : '1', {action:'request_item'}),
+      companionButton('索要功法', last.request_technique === worldClock() ? '0' : '1', {action:'request_technique'}),
     );
     if (companion.can_invite_faction) actions.appendChild(companionButton('引荐入宗', '1', {faction_invite:true}));
     if (game.player.path === 'demonic') {
@@ -2259,12 +2266,12 @@ function renderDaoFriends(friends) {
         tools.appendChild(button);
       };
       add(friend.in_party ? '暂离队伍' : '邀请同行', 'party', friend.in_party || friend.can_invite_party);
-      add('点到切磋', 'spar', last.spar !== game.player.age);
-      add('交流心得', 'discuss', last.discuss !== game.player.age);
+      add('点到切磋', 'spar', last.spar !== worldClock());
+      add('交流心得', 'discuss', last.discuss !== worldClock());
       if (friend.can_invite_faction) add('引荐入宗', 'faction');
       if (game.player.path === 'demonic') {
         const capture = document.createElement('button'); capture.className = 'friend-action danger'; capture.textContent = '尝试生擒';
-        capture.dataset.available = last.capture_attempt === game.player.age ? '0' : '1';
+        capture.dataset.available = last.capture_attempt === worldClock() ? '0' : '1';
         capture.onclick = () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'friend', target_id:friend.id});
         tools.appendChild(capture);
       }
@@ -2306,7 +2313,7 @@ function renderHistory(history) {
     const primary = priority.find(category => categories.includes(category)) || 'self';
     if (!historyFilters.has(primary)) return;
     const row = document.createElement('div'); row.className = `record record-${primary}`;
-    const year = document.createElement('div'); year.className = 'year'; year.textContent = `${record.age}岁`;
+    const year = document.createElement('div'); year.className = 'year'; year.textContent = timelineText(record.age);
     const story = document.createElement('div'); story.className = 'story';
     const title = document.createElement('h3'); title.textContent = record.title;
     const summary = document.createElement('p'); summary.textContent = record.summary;

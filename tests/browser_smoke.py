@@ -493,6 +493,7 @@ def main() -> None:
                 engine._die(
                     fallen, "烟测非剧情战陨落", "SYS_COMBAT", offer_captive_possession=True,
                 )
+                pre_possession_world_age = fallen.player.age
                 engine.store.save(fallen)
                 page.reload()
                 page.get_by_text("续接 · 鬼修烟测").click()
@@ -503,7 +504,12 @@ def main() -> None:
                     page.get_by_role("button", name="夺舍 还魂烟测 · 练气1层 · 37岁").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#ending-card").is_hidden()
-                assert page.locator("#age-line").text_content() == "37 岁 · 寿元 118"
+                age_line = page.locator("#age-line").text_content()
+                assert "37 岁 · 寿元 118" in age_line
+                assert f"世界纪年 {pre_possession_world_age}" in age_line
+                possessed = engine.store.load(ghost_created["id"])
+                assert possessed.player.age == pre_possession_world_age
+                assert possessed.player.ghost_host_body["age"] == 37
                 browser.close()
         finally:
             httpd.shutdown()

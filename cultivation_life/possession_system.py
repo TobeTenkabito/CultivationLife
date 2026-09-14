@@ -9,7 +9,7 @@ from .models import Player, Technique
 
 _BODY_FIELDS = (
     "name", "spirit_root", "additional_roots", "acquired_root", "born_rootless",
-    "realm_index", "layer", "age", "lifespan", "opportunity",
+    "realm_index", "layer", "lifespan", "opportunity",
     "qi_experience", "path", "race", "hp", "mp", "body_training", "body_progress",
     "technique", "support_technique", "combat_techniques", "known_techniques",
     "body_technique", "divine_sense_technique", "transformation_technique",
@@ -24,6 +24,45 @@ def is_possessed(player: Player) -> bool:
 
 def has_ghost_core(player: Player) -> bool:
     return player.path == "ghost" or is_possessed(player)
+
+
+def current_body_age(player: Player) -> int:
+    """Return biological age without repurposing the monotonic world clock."""
+    if is_possessed(player):
+        return max(0, int((player.ghost_host_body or {}).get("age", player.age)))
+    return max(0, int(player.age))
+
+
+def advance_player_age(player: Player, years: int = 1) -> None:
+    """Advance world time and, while possessed, the host body in parallel."""
+    elapsed = max(0, int(years))
+    player.age += elapsed
+    if is_possessed(player):
+        host = player.ghost_host_body or {}
+        host["age"] = max(0, int(host.get("age", player.age - elapsed))) + elapsed
+
+
+def migrate_possession_timeline(player: Player) -> bool:
+    """Separate legacy saves where player.age was overwritten by host age."""
+    if not is_possessed(player):
+        return False
+    host = player.ghost_host_body or {}
+    core = player.ghost_core_state or {}
+    if int(host.get("timeline_version", 0)) >= 2:
+        return False
+
+    # Legacy saves advanced player.age as the host's biological age while the
+    # original world coordinate remained in entered_age/core.age.
+    legacy_body_age = max(0, int(player.age))
+    initial_body_age = max(0, int(host.get("age", legacy_body_age)))
+    entered_world_age = max(0, int(host.get("entered_age", core.get("age", legacy_body_age))))
+    elapsed = max(0, legacy_body_age - initial_body_age)
+    player.age = entered_world_age + elapsed
+    host["age"] = legacy_body_age
+    host["timeline_version"] = 2
+    host["entered_world_age"] = entered_world_age
+    core.pop("age", None)
+    return True
 
 
 def _snapshot_body(player: Player) -> dict[str, Any]:
@@ -95,6 +134,7 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         "id": str(target.get("id") or target.get("npc_id") or "host"),
         "npc_id": target.get("npc_id"), "name": target_name,
         "original_ghost_name": original_name, "entered_age": world_age,
+        "entered_world_age": world_age, "timeline_version": 2,
         "age": target_age, "lifespan": target.get("lifespan"),
         "source": str(target.get("source", "captive")),
         "path": target_path, "path_name": PATH_NAMES.get(target_path, target_path),
@@ -107,14 +147,13 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     player.born_rootless = player.spirit_root == "none"
     player.realm_index = realm_index
     player.layer = layer
-    player.age = target_age
     player.path = target_path
     player.race = str(target.get("race", "human"))
     player.lifespan = target.get("lifespan")
     if player.lifespan is None:
         realm_lifespan = REALMS[realm_index].lifespan
         player.lifespan = (
-            max(player.age + 1, int(realm_lifespan[1]))
+            max(target_age + 1, int(realm_lifespan[1]))
             if realm_lifespan else None
         )
     player.opportunity = float(target.get("opportunity", 0.0))

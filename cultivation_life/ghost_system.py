@@ -9,8 +9,8 @@ from .content_registry import REALMS, WORLD_SYSTEMS
 from .models import GameState, HistoryRecord, Player
 from .runtime import now_iso
 from .possession_system import (
-    can_possess, enter_host_body, has_ghost_core, is_possessed, leave_host_body,
-    possession_limit,
+    advance_player_age, can_possess, current_body_age, enter_host_body, has_ghost_core,
+    is_possessed, leave_host_body, possession_limit,
 )
 
 
@@ -23,11 +23,26 @@ SOUL_SLOTS = {
     "吞贼": ("guard", "护御"), "非毒": ("sense", "神识"),
     "除秽": ("breach", "破防"), "臭肺": ("sustain", "续战"),
 }
+THREE_SOUL_STATS = frozenset({"opportunity", "external_mp", "external_hp"})
+SOUL_TRAIT_RULES = {
+    "寒魄": "失去先手时，本轮防护提高 12%",
+    "执念": "受到的战意损失降低 25%，战意最低保留 8 点",
+    "迅影": "前两轮争夺先手时，身法判定提高 12%",
+    "噬灵": "每次有效攻势侵蚀敌方 4% 防护，最多叠加三层",
+    "宿慧": "所有机缘获取额外提高 8%",
+    "不灭": "每场战斗首次陷入危局时，恢复 8% 战斗态势与 5% 法力",
+    "凶魂": "敌方战斗态势不高于 35% 时，造成的损耗提高 15%",
+    "明识": "禁神识环境的惩罚由 14% 降至 6%",
+}
 SOUL_TRAITS = (
-    ("寒魄", "受击时更擅护御", "guard"), ("执念", "意志凝实，强化定力", "resolve"),
-    ("迅影", "魂影迅捷，强化身法", "mobility"), ("噬灵", "侵蚀灵机，强化破防", "breach"),
-    ("宿慧", "前尘未泯，强化机缘", "opportunity"), ("不灭", "魂火绵长，强化续战", "sustain"),
-    ("凶魂", "杀念炽盛，强化威能", "might"), ("明识", "灵台清明，强化神识", "sense"),
+    ("寒魄", SOUL_TRAIT_RULES["寒魄"], "guard"),
+    ("执念", SOUL_TRAIT_RULES["执念"], "resolve"),
+    ("迅影", SOUL_TRAIT_RULES["迅影"], "mobility"),
+    ("噬灵", SOUL_TRAIT_RULES["噬灵"], "breach"),
+    ("宿慧", SOUL_TRAIT_RULES["宿慧"], "opportunity"),
+    ("不灭", SOUL_TRAIT_RULES["不灭"], "sustain"),
+    ("凶魂", SOUL_TRAIT_RULES["凶魂"], "might"),
+    ("明识", SOUL_TRAIT_RULES["明识"], "sense"),
 )
 
 
@@ -52,9 +67,18 @@ def active_bound_souls(player: Player) -> list[tuple[str, dict[str, Any]]]:
             if slot in SOUL_SLOTS and soul_id in by_id]
 
 
+def active_soul_traits(player: Player) -> set[str]:
+    return {
+        str(soul.get("soul_trait", {}).get("name", ""))
+        for _, soul in active_bound_souls(player)
+        if str(soul.get("soul_trait", {}).get("name", "")) in SOUL_TRAIT_RULES
+    }
+
+
 def ghost_soul_effects(player: Player) -> dict[str, float]:
     config = ghost_phase_two_config().get("soul_slots", {})
-    cap = max(0.0, float(config.get("effect_cap", 0.25)))
+    seven_cap = max(0.0, float(config.get("seven_effect_cap", config.get("effect_cap", 0.25))))
+    three_coefficient = max(0.0, float(config.get("three_soul_log_coefficient", 0.18)))
     scale = max(1.0, float(config.get("power_scale", 2500.0)))
     result = {key: 0.0 for key in {
         "opportunity", "external_mp", "external_hp", "mobility", "might",
@@ -63,11 +87,12 @@ def ghost_soul_effects(player: Player) -> dict[str, float]:
     for slot, soul in active_bound_souls(player):
         stat = SOUL_SLOTS[slot][0]
         power = max(0.0, float(soul.get("combat_power", 0.0)))
-        value = cap * (1.0 - math.exp(-power / scale))
+        value = (
+            three_coefficient * math.log1p(power / scale)
+            if stat in THREE_SOUL_STATS
+            else seven_cap * (1.0 - math.exp(-power / scale))
+        )
         result[stat] += value
-        trait_stat = str(soul.get("soul_trait", {}).get("stat", ""))
-        if trait_stat in result:
-            result[trait_stat] += value * float(config.get("trait_ratio", 0.35))
     return result
 
 
@@ -90,15 +115,11 @@ def ghost_external_mp_bonus(player: Player) -> float:
 
 def ghost_opportunity_multiplier(player: Player) -> float:
     multiplier = 1.0 + ghost_soul_effects(player)["opportunity"]
+    if "宿慧" in active_soul_traits(player):
+        multiplier *= 1.08
     if ghost_cultivation_active(player) and player.ghost_attachment:
         multiplier *= max(0.0, float(player.ghost_attachment.get("cultivation_efficiency_multiplier", 1.0)))
     return multiplier
-
-
-def ghost_combat_multiplier(player: Player) -> float:
-    effects = ghost_soul_effects(player)
-    combat_stats = ("mobility", "might", "resolve", "guard", "sense", "breach", "sustain")
-    return 1.0 + sum(effects[key] for key in combat_stats) / len(combat_stats)
 
 
 def canonical_intrinsic_hp(
@@ -501,7 +522,8 @@ class GhostSystemMixin:
             f"战陨之际，你舍弃旧躯并夺取{host['name']}的肉身；年龄与寿元均以这具肉身为准。",
             {
                 "host_id": host.get("id"), "source_event": source_event,
-                "age": player.age, "lifespan": player.lifespan,
+                "body_age": current_body_age(player), "world_age": player.age,
+                "lifespan": player.lifespan,
                 "possession_count": player.possession_count,
             },
             ["system", "ghost", "possession", "combat", "resurrection"],
@@ -558,7 +580,8 @@ class GhostSystemMixin:
                 "name": f"{rng.choice(surnames)}{rng.choice(given)}", "path": "ghost", "race": "human",
                 "realm_index": realm_index, "layer": layer,
                 "combat_power": soul_power,
-                "affinity": rng.randint(-15, 25), "defeated": False, "is_bound_soul": False,
+                "affinity": rng.randint(-15, 25), "defeated": False, "befriended": False,
+                "is_bound_soul": False,
                 "personality": rng.choice(("执拗", "温和", "凶厉", "多疑", "洒脱")),
                 "npc_relations": [], "skills": [trait_name],
                 "faction_inclination": rng.choice(("散魂", "阴司", "宗门故旧", "无阵营")),
@@ -658,6 +681,9 @@ class GhostSystemMixin:
             if not soul:
                 raise ValueError("这道游魂已经离开夜行")
             if action == "befriend":
+                if soul.get("befriended"):
+                    raise ValueError("本次百鬼夜行已经与这道游魂结交过")
+                soul["befriended"] = True
                 soul["affinity"] = min(100, float(soul.get("affinity", 0)) + rng.randint(8, 18))
                 personality_bonus = 0.10 if soul.get("personality") in {"温和", "洒脱"} else -0.08 if soul.get("personality") in {"凶厉", "多疑"} else 0
                 realm_bonus = max(-0.08, min(0.08, (player.realm_index - int(soul.get("realm_index", 0))) * 0.02))
@@ -800,7 +826,7 @@ class GhostSystemMixin:
         target_power = max(1.0, float(captor.get("combat_power", 1.0)))
         chance = max(0.05, min(0.9, combat_power(player) / (combat_power(player) + target_power)))
         if action == "wait":
-            player.age += 1
+            advance_player_age(player)
             self._advance_world_year(game, rng, [], encounters=False)
             if player.alive:
                 self._advance_soul_erosion_time(game, 1)
@@ -975,15 +1001,29 @@ class GhostSystemMixin:
         effects = ghost_soul_effects(player)
         pressure, pressure_modifier = ghost_soul_pressure(player)
         by_id = {str(row.get("id")): row for row in player.ghost_bound_souls}
+        def public_soul(raw: dict[str, Any] | None) -> dict[str, Any] | None:
+            if not raw:
+                return None
+            result = copy.deepcopy(raw)
+            trait = result.get("soul_trait") or {}
+            trait_name = str(trait.get("name", ""))
+            if trait_name in SOUL_TRAIT_RULES:
+                trait["description"] = SOUL_TRAIT_RULES[trait_name]
+                trait["rule"] = SOUL_TRAIT_RULES[trait_name]
+                result["soul_trait"] = trait
+            return result
         slots = [{
             "id": slot, "stat": stat, "stat_name": label,
             "soul_id": player.ghost_soul_slots.get(slot),
-            "soul": copy.deepcopy(by_id.get(player.ghost_soul_slots.get(slot, ""))),
+            "effect": round(effects.get(stat, 0.0), 6),
+            "curve": "unbounded_diminishing" if stat in THREE_SOUL_STATS else "capped_saturation",
+            "soul": public_soul(by_id.get(player.ghost_soul_slots.get(slot, ""))),
         } for slot, (stat, label) in SOUL_SLOTS.items()]
         parade = copy.deepcopy(game.ghost_parade)
         if parade and not parade.get("announced"):
             parade = {"status": "dormant", "announced": False}
         elif parade:
+            parade["souls"] = [public_soul(row) for row in parade.get("souls", [])]
             parade["at_location"] = bool(
                 parade.get("world") == player.world and parade.get("location_id") == player.location_id
             )
@@ -1005,7 +1045,7 @@ class GhostSystemMixin:
         return {
             "enabled": bool(ghost_phase_two_config().get("enabled", False)), "state": state,
             "state_name": {"free": "自由魂体", "attached": "附灵器魂", "controlled": "受制拘魂", "possessed": "夺舍寄身"}[state],
-            "slots": slots, "bound_souls": copy.deepcopy(player.ghost_bound_souls),
+            "slots": slots, "bound_souls": [public_soul(row) for row in player.ghost_bound_souls],
             "effects": {key: round(value, 6) for key, value in effects.items()},
             "pressure": round(pressure, 4), "pressure_modifier": round(pressure_modifier, 6),
             "parade": parade, "attachment": copy.deepcopy(player.ghost_attachment),
