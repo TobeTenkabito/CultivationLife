@@ -1508,7 +1508,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             "combat_type":"cultivator", "race":npc.race, "race_name":race["name"],
             "race_description":race["description"], "world":npc.world, "npc_id":npc.id,
             "faction_id":sect.id, "path":npc.path, "treasure_item_id":npc.treasure_item_id,
-            "kill_karma":True, "action":"slay",
+            "kill_karma":True, "action":"slay", "non_story_combat":True,
         }
         result, summary = self._combat(game, target, True, rng)
         summary = self._apply_combat_action_rewards(game, "slay", result, summary, rng)
@@ -3546,6 +3546,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         config = WORLD_SYSTEMS["faction_conflict"]
         if response == "fight":
             target["kill_karma"] = True
+            target["non_story_combat"] = True
             result, summary = self._combat(game, target, True, rng)
             game.player.hostility[key] = game.player.hostility.get(key, 0) + float(config["fight_hostility_gain"])
             if result == "defeat" and game.player.alive:
@@ -5178,7 +5179,10 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             npc.treasure_item_id = self._select_npc_treasure(npc, rng)
             base_power = max(1.0, self._npc_power(npc))
             npc.combat_factor = max(0.1, float(member["power"]) / base_power)
-            member.update(name=name, npc_id=npc_id, treasure_item_id=npc.treasure_item_id, path=npc.path)
+            member.update(
+                name=name, npc_id=npc_id, treasure_item_id=npc.treasure_item_id, path=npc.path,
+                age=npc.age, lifespan=npc.lifespan, spirit_root=npc.spirit_root,
+            )
             entry = {
                 "id": npc_id, "npc": npc.to_dict(), "combat_power": float(member["power"]),
                 "seen_count": 1, "first_seen_age": game.player.age, "last_seen_age": game.player.age,
@@ -5481,6 +5485,8 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             target = copy.deepcopy(pending.get("runtime") or {})
             if not target:
                 raise ValueError("遭遇目标已经不存在")
+            event_tags = self.events_by_id.get(str(pending.get("id", "")), {}).get("tags", [])
+            target["non_story_combat"] = "story_chain" not in event_tags
             action = str(target.get("action", "slay"))
             result, summary = self._combat(game, target, bool(effect.get("lethal", False)), rng)
             return result, self._apply_combat_action_rewards(game, action, result, summary, rng)
@@ -5924,6 +5930,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 "objective": "repel",
                 "enemy_objective": "repel",
                 "max_rounds": 5,
+                "non_story_combat": True,
                 "artificial_conditions": ["大阵"] if formation_duty else [],
             }, True, rng)
             if combat_result == "dead":
@@ -5934,7 +5941,10 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             player.faction_contribution += int(effect.get("contribution", 12))
             return "victory", summary + " 你完成会战目标，宗门贡献有所增加。"
         if kind == "combat":
-            return self._combat(game, pending["runtime"], bool(effect.get("lethal")), rng)
+            target = pending["runtime"]
+            event_tags = self.events_by_id.get(str(pending.get("id", "")), {}).get("tags", [])
+            target["non_story_combat"] = "story_chain" not in event_tags
+            return self._combat(game, target, bool(effect.get("lethal")), rng)
         raise ValueError(f"未知效果类型：{kind}")
 
     def _player_combat_units(self, game: GameState, target: dict[str, Any] | None = None) -> list[BattleUnit]:
@@ -6124,7 +6134,10 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                     + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
                 )
             if player.hp <= 0:
-                self._die(game, f"猎妖时不敌{target['target_name']}，身死道消", "SYS_BEAST_HUNT")
+                self._die(
+                    game, f"猎妖时不敌{target['target_name']}，身死道消", "SYS_BEAST_HUNT",
+                    offer_captive_possession=bool(target.get("non_story_combat")),
+                )
                 result = "dead"
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + f"你未能完成对妖兽的压制，反被{target['target_name']}所杀。"
@@ -6138,9 +6151,16 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + f"你在切磋中败给了{target['target_name']}，预案及时收手，无人伤及性命。"
             if player.hp <= 0:
-                captured = self._capture_defeated_ghost(game, target, rng)
+                can_take_captive = bool(
+                    target.get("non_story_combat")
+                    and self._post_battle_possession_candidates(game)
+                )
+                captured = False if can_take_captive else self._capture_defeated_ghost(game, target, rng)
                 if not captured:
-                    self._die(game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT")
+                    self._die(
+                        game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT",
+                        offer_captive_possession=can_take_captive,
+                    )
                 result = "controlled" if captured else "dead"
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + (
@@ -7363,7 +7383,10 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             {"power": power, "base_power":base_power, "world_power_multiplier":world_multiplier, "tribulation_count": player.tribulation_count}, ["system", "tribulation"],
         ))
 
-    def _die(self, game: GameState, reason: str, event_id: str) -> None:
+    def _die(
+        self, game: GameState, reason: str, event_id: str, *,
+        offer_captive_possession: bool = False,
+    ) -> None:
         if not game.player.alive:
             return
         from .possession_system import is_possessed, leave_host_body
@@ -7387,6 +7410,8 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
             event_id, 1, game.player.age, "此生落幕", None, "dead", reason,
             {"alive": [True, False]}, ["system", "death"],
         ))
+        if offer_captive_possession:
+            self._prepare_post_battle_possession(game, event_id)
 
     @staticmethod
     def _snapshot(player: Player) -> dict[str, Any]:
@@ -8661,6 +8686,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         if changed:
             self.store.save(game)
         if game.pending_event:
+            post_battle_possession = game.pending_event.get("id") == "SYS_POST_BATTLE_POSSESSION"
             event = self.events_by_id.get(game.pending_event.get("id"))
             is_mortal_event = bool(event and "mortal" in event.get("tags", []))
             saved_choices = {choice.get("id") for choice in game.pending_event.get("choices", [])}
@@ -8669,7 +8695,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
                 tags = event.get("tags", [])
                 if game.player.realm_index >= 4 and "faction" in tags and "duty" in tags and "war" not in tags:
                     current_choices.update({"__delegate_faction_task", "__decline_faction_task"})
-            incompatible = (
+            incompatible = not post_battle_possession and (
                 event is None or ("all_realms" not in (event.get("tags", []) if event else []) and (game.player.realm_index == 0) != is_mortal_event)
                 or not saved_choices <= current_choices
             )
@@ -8718,6 +8744,7 @@ class GameEngine(GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSys
         target["kill_karma"] = bool(settings.get("kill_karma", True))
         target["capture"] = bool(settings.get("capture", False))
         target["action"] = action
+        target["non_story_combat"] = True
         if target.get("combat_type") == "cultivator" and len(target.get("members", [])) > 1 and action in {"spar", "slay"}:
             event_id = "EVT_TEAM_SPAR_PREVIEW_001" if action == "spar" else "EVT_TEAM_SLAY_PREVIEW_001"
             event = self.events_by_id[event_id]

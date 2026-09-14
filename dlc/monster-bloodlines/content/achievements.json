@@ -21,6 +21,13 @@
       "description": "作为妖修拥有十二种血脉特质",
       "category": "cultivation",
       "condition": {"all": [{"path": "monster"}, {"monster_bloodline_trait_count": 12}]}
+    },
+    {
+      "id": "monster_story_nameless_city",
+      "name": "百族立碑",
+      "description": "走完无名祖城剧情并决定祖山的归宿",
+      "category": "story",
+      "condition": {"all": [{"path": "monster"}, {"any": [{"flag": "nameless_city_completed"}, {"flag": "nameless_city_ruled"}]}]}
     }
   ]
 }

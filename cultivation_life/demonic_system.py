@@ -55,6 +55,8 @@ class DemonicSystemMixin:
             None,
         )
         prisoner_id = str(npc_id or f"captive_{uuid.uuid4().hex[:12]}")
+        captive_age = int(npc.age if npc else victim.get("age", game.player.age))
+        captive_lifespan = npc.lifespan if npc else victim.get("lifespan")
         game.player.prisoners.append({
             "id": prisoner_id, "npc_id": npc_id, "name": str(victim["name"]),
             "realm_index": int(victim["realm_index"]), "layer": int(victim.get("layer", 1)),
@@ -62,6 +64,7 @@ class DemonicSystemMixin:
             "path": path, "path_name": PATH_NAMES.get(path, path), "race": str(victim.get("race", "human")),
             "affinity": affinity - 12, "combat_power": round(float(victim["power"]), 1),
             "main_technique_id": technique.id if technique else None,
+            "age": captive_age, "lifespan": captive_lifespan,
             "captured_age": game.player.age, "source": "combat",
         })
         if npc:
@@ -162,6 +165,7 @@ class DemonicSystemMixin:
             "path_name":PATH_NAMES.get(str(relation.get("path", "dao")), str(relation.get("path", "dao"))),
             "race":str(relation.get("race", "human")), "affinity":-100.0,
             "combat_power":round(target_power, 1), "main_technique_id":relation.get("main_technique_id"),
+            "age":int(relation.get("age", player.age)), "lifespan":relation.get("lifespan"),
             "captured_age":player.age, "source":f"relationship:{kind}",
         }
         player.prisoners.append(prisoner)

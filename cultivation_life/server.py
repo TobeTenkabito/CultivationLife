@@ -215,6 +215,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.ghost_constraint_action(game_id, payload.get("action", ""))
             elif operation == "ghost-leave-host":
                 result = ENGINE.leave_possessed_body(game_id)
+            elif operation == "post-battle-possession":
+                result = ENGINE.post_battle_possess(game_id, payload.get("target_id", ""))
             elif operation == "captive-action":
                 result = ENGINE.captive_action(
                     game_id, payload.get("target_id", ""), payload.get("action", "")

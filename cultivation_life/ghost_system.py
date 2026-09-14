@@ -435,6 +435,81 @@ class GhostSystemMixin:
         }:
             raise ValueError("魂印受制于拘魂者，当前功能要求自由行动主体，因而不可使用")
 
+    @staticmethod
+    def _post_battle_possession_candidates(game: GameState) -> list[dict[str, Any]]:
+        """Return captives that can save a free ghost at a routine battle death."""
+        player = game.player
+        if not has_ghost_core(player) or player.ghost_captor or is_possessed(player):
+            return []
+        candidates: list[dict[str, Any]] = []
+        for prisoner in player.prisoners:
+            allowed, _ = can_possess(player, prisoner)
+            if allowed:
+                candidates.append(copy.deepcopy(prisoner))
+        return candidates
+
+    def _prepare_post_battle_possession(self, game: GameState, source_event: str) -> bool:
+        candidates = self._post_battle_possession_candidates(game)
+        if not candidates:
+            return False
+        choices = [{
+            "id": str(row.get("id")),
+            "text": (
+                f"夺舍 {row.get('name', '无名俘虏')} · "
+                f"{REALMS[int(row.get('realm_index', 0))].name}{int(row.get('layer', 1))}层 · "
+                f"{int(row.get('age', game.player.age))}岁"
+            ),
+            "enabled": True,
+        } for row in candidates]
+        game.pending_event = {
+            "id": "SYS_POST_BATTLE_POSSESSION",
+            "version": 1,
+            "title": "战陨夺舍",
+            "body": "肉身已在非剧情战中陨灭，但本魂尚有一线余地。你可以消耗一次夺舍次数，占据一名不高于自身境界的俘虏；也可以放弃并结束此生。",
+            "choices": choices,
+            "runtime": {
+                "source_event": source_event,
+                "source_realm": game.player.realm_index,
+                "prisoner_ids": [choice["id"] for choice in choices],
+            },
+        }
+        return True
+
+    def post_battle_possess(self, game_id: str, target_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        pending = game.pending_event or {}
+        if player.alive or pending.get("id") != "SYS_POST_BATTLE_POSSESSION":
+            raise ValueError("当前没有可结算的战陨夺舍")
+        permitted = {str(value) for value in pending.get("runtime", {}).get("prisoner_ids", [])}
+        if target_id not in permitted:
+            raise ValueError("该俘虏不在本次战陨夺舍候选中")
+        target = next((row for row in player.prisoners if str(row.get("id")) == target_id), None)
+        if target is None:
+            raise ValueError("目标俘虏已经不存在")
+        allowed, reason = can_possess(player, target)
+        if not allowed:
+            raise ValueError(reason)
+        source_event = str(pending.get("runtime", {}).get("source_event", "SYS_COMBAT"))
+        player.alive = True
+        player.death_reason = None
+        player.prisoners.remove(target)
+        host = enter_host_body(player, target)
+        game.pending_event = None
+        game.history.append(HistoryRecord(
+            "SYS_POST_BATTLE_POSSESSION", 1, player.age, "借尸还魂", target_id, "possessed",
+            f"战陨之际，你舍弃旧躯并夺取{host['name']}的肉身；年龄与寿元均以这具肉身为准。",
+            {
+                "host_id": host.get("id"), "source_event": source_event,
+                "age": player.age, "lifespan": player.lifespan,
+                "possession_count": player.possession_count,
+            },
+            ["system", "ghost", "possession", "combat", "resurrection"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
     def _ensure_ghost_parade(self, game: GameState, rng: random.Random) -> None:
         config = ghost_phase_two_config().get("parade", {})
         if not config.get("enabled", False) or game.ghost_parade:
@@ -789,10 +864,15 @@ class GhostSystemMixin:
             "controlled_form": rng.choice(("拘魂", "法器器灵", "魂幡附庸")),
             "capture_chance": capture_chance,
         }
+        if player.ghost_captor["controlled_form"] == "法器器灵":
+            player.milestones["ghost_became_others_attachment"] = 1
         game.history.append(HistoryRecord(
             "SYS_GHOST_CAPTURED", 1, player.age, "败亡拘魂", None, "controlled",
             f"{player.ghost_captor['name']}没有立刻灭杀你，而是以魂印拘束本魂；失败的反抗与夺舍都会真正魂飞魄散。",
-            {"captor_id": player.ghost_captor["id"]}, ["system", "ghost", "controlled", "negative"],
+            {
+                "captor_id": player.ghost_captor["id"],
+                "controlled_form": player.ghost_captor["controlled_form"],
+            }, ["system", "ghost", "controlled", "negative"],
         ))
         return True
 

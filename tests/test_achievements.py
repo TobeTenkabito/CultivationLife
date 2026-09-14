@@ -65,6 +65,18 @@ class AchievementSystemTests(unittest.TestCase):
         self.assertFalse(changed["settings"]["achievement_popup"])
         self.assertFalse(self.engine.get_game(created["id"])["settings"]["achievement_popup"])
 
+    def test_demonic_monster_and_ghost_story_achievements_have_correct_sources(self):
+        catalog = {row["name"]: row for row in self.engine.list_achievements()["achievements"]}
+        base_story = {
+            "我命由我", "血河再生", "月落尸眠", "裂谷余息", "一羽新日",
+            "星子远行", "祖渊重生", "祖藤封根", "万灵斩仙", "忘川有名",
+        }
+        self.assertTrue(base_story <= set(catalog))
+        self.assertTrue(all(catalog[name]["source"]["kind"] == "base" for name in base_story))
+        self.assertEqual(catalog["百族立碑"]["source"]["id"], "official.monster-bloodlines")
+        self.assertEqual(catalog["今夜百鬼行"]["source"]["id"], "official.ghost-reincarnation")
+        self.assertEqual(catalog["胯下之辱"]["source"]["id"], "official.ghost-reincarnation")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,7 +9,7 @@ from .models import Player, Technique
 
 _BODY_FIELDS = (
     "name", "spirit_root", "additional_roots", "acquired_root", "born_rootless",
-    "realm_index", "layer", "lifespan", "opportunity",
+    "realm_index", "layer", "age", "lifespan", "opportunity",
     "qi_experience", "path", "race", "hp", "mp", "body_training", "body_progress",
     "technique", "support_technique", "combat_techniques", "known_techniques",
     "body_technique", "divine_sense_technique", "transformation_technique",
@@ -89,10 +89,13 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     if technique_id in TECHNIQUE_CATALOG:
         target_technique = copy.deepcopy(TECHNIQUE_CATALOG[str(technique_id)])
     player.ghost_core_state = core
+    world_age = player.age
+    target_age = max(0, int(target.get("age", world_age)))
     player.ghost_host_body = {
         "id": str(target.get("id") or target.get("npc_id") or "host"),
         "npc_id": target.get("npc_id"), "name": target_name,
-        "original_ghost_name": original_name, "entered_age": player.age,
+        "original_ghost_name": original_name, "entered_age": world_age,
+        "age": target_age, "lifespan": target.get("lifespan"),
         "source": str(target.get("source", "captive")),
         "path": target_path, "path_name": PATH_NAMES.get(target_path, target_path),
         "realm_index": realm_index, "layer": layer,
@@ -104,11 +107,16 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     player.born_rootless = player.spirit_root == "none"
     player.realm_index = realm_index
     player.layer = layer
+    player.age = target_age
     player.path = target_path
     player.race = str(target.get("race", "human"))
     player.lifespan = target.get("lifespan")
     if player.lifespan is None:
-        player.lifespan = player.age + max(20, 70 + realm_index * 80)
+        realm_lifespan = REALMS[realm_index].lifespan
+        player.lifespan = (
+            max(player.age + 1, int(realm_lifespan[1]))
+            if realm_lifespan else None
+        )
     player.opportunity = float(target.get("opportunity", 0.0))
     player.qi_experience = {"spirit": 0.0, "demon": 0.0, "monster": 0.0, "yin": 0.0}
     player.body_training = max(0, int(target.get("body_training", realm_index * 2)))

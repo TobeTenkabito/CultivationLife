@@ -483,6 +483,27 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert "练气1层" in page.locator("#realm-name").text_content()
                 assert page.locator("#ghost-reincarnate-action").is_hidden()
+
+                fallen = engine.store.load(ghost_created["id"])
+                fallen.player.prisoners = [{
+                    "id":"afterlife-host", "name":"还魂烟测", "race":"human", "path":"dao",
+                    "spirit_root":"supreme_water", "realm_index":1, "layer":1,
+                    "age":37, "lifespan":118, "combat_power":180,
+                }]
+                engine._die(
+                    fallen, "烟测非剧情战陨落", "SYS_COMBAT", offer_captive_possession=True,
+                )
+                engine.store.save(fallen)
+                page.reload()
+                page.get_by_text("续接 · 鬼修烟测").click()
+                page.locator("#ending-card").wait_for(state="visible")
+                assert page.locator("#post-battle-possession").is_visible()
+                assert page.get_by_role("button", name="夺舍 还魂烟测 · 练气1层 · 37岁").is_visible()
+                with page.expect_response(lambda response: response.url.endswith("/post-battle-possession")):
+                    page.get_by_role("button", name="夺舍 还魂烟测 · 练气1层 · 37岁").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#ending-card").is_hidden()
+                assert page.locator("#age-line").text_content() == "37 岁 · 寿元 118"
                 browser.close()
         finally:
             httpd.shutdown()

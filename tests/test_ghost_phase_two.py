@@ -40,9 +40,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.3.0")
+        self.assertEqual(BASE_GAME_VERSION, "1.4.0")
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
-        self.assertIn('"version": "3.0.0"', manifest)
+        self.assertIn('"version": "3.1.0"', manifest)
 
     def test_ten_fixed_slots_saturate_and_pressure_only_changes_future_growth(self):
         player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)
@@ -87,12 +87,14 @@ class GhostPhaseTwoTests(unittest.TestCase):
         player.ghost_bound_souls = [self._soul()]
         player.ghost_soul_slots = {"伏矢": "soul-a"}
         rate = player.ghost_soul_erosion_rate_pp = 0.25
-        target = {"id": "host-a", "name": "沈青", "race": "human", "path": "dao", "spirit_root": "supreme_metal", "realm_index": 3, "layer": 2, "combat_power": 2000}
+        target = {"id": "host-a", "name": "沈青", "race": "human", "path": "dao", "spirit_root": "supreme_metal", "realm_index": 3, "layer": 2, "age": 214, "lifespan": 730, "combat_power": 2000}
+        original_age = player.age
         allowed, _ = can_possess(player, target)
         self.assertTrue(allowed)
         enter_host_body(player, target)
         self.assertTrue(is_possessed(player))
         self.assertEqual(player.name, "沈青（无常）")
+        self.assertEqual((player.age, player.lifespan), (214, 730))
         self.assertEqual(ghost_soul_effects(player)["might"], 0)
         self.assertFalse(apply_soul_erosion(player, 50)["active"])
         self.assertEqual(player.ghost_soul_erosion_rate_pp, rate)
@@ -100,6 +102,7 @@ class GhostPhaseTwoTests(unittest.TestCase):
         player.opportunity = 9999
         leave_host_body(player)
         self.assertEqual((player.name, player.path, player.realm_index, player.layer, player.opportunity), ("无常", "ghost", 4, 5, 321))
+        self.assertEqual(player.age, original_age)
         self.assertEqual(player.possession_count, 1)
         self.assertEqual(player.ghost_reincarnation_imprints, {"3": 7})
 
@@ -159,6 +162,72 @@ class GhostPhaseTwoTests(unittest.TestCase):
         self.assertEqual(loaded.player.ghost_soul_slots, {"胎光": "soul-a"})
         self.assertEqual(loaded.player.ghost_attachment["name"], "魂灯")
         self.assertTrue(loaded.ghost_parade)
+
+    def test_routine_battle_death_offers_eligible_captive_and_uses_npc_life(self):
+        game = self._game()
+        game.player.realm_index = 3
+        game.player.layer = 7
+        game.player.age = 480
+        game.player.prisoners = [
+            {
+                "id": "eligible", "name": "陆还真", "race": "human", "path": "dao",
+                "spirit_root": "supreme_water", "realm_index": 3, "layer": 2,
+                "age": 196, "lifespan": 812, "combat_power": 2800,
+            },
+            {
+                "id": "too-high", "name": "越境者", "race": "human", "path": "dao",
+                "spirit_root": "supreme_fire", "realm_index": 4, "layer": 1,
+                "age": 620, "lifespan": 1350, "combat_power": 20000,
+            },
+        ]
+        self.engine._die(
+            game, "非剧情战陨落", "SYS_COMBAT", offer_captive_possession=True,
+        )
+        self.assertFalse(game.player.alive)
+        self.assertEqual(game.pending_event["id"], "SYS_POST_BATTLE_POSSESSION")
+        self.assertEqual([row["id"] for row in game.pending_event["choices"]], ["eligible"])
+
+        self.engine.store.save(game)
+        reloaded = self.engine._load(game.id)
+        self.assertEqual(reloaded.pending_event["id"], "SYS_POST_BATTLE_POSSESSION")
+        result = self.engine.post_battle_possess(game.id, "eligible")
+        self.assertTrue(result["player"]["alive"])
+        self.assertEqual((result["player"]["age"], result["player"]["lifespan"]), (196, 812))
+        self.assertEqual(result["ghost_system"]["phase_two"]["possession_count"], 1)
+        self.assertIsNone(result["pending_event"])
+
+        restored = self.engine.leave_possessed_body(game.id)
+        self.assertEqual(restored["player"]["age"], 480)
+
+    def test_story_or_noncombat_death_does_not_offer_captive_possession(self):
+        game = self._game()
+        game.player.prisoners = [{
+            "id": "body", "name": "顾青", "race": "human", "path": "dao",
+            "realm_index": 0, "layer": 1, "age": 25, "lifespan": 82,
+        }]
+        self.engine._die(game, "剧情战陨落", "EVT_STORY_DEATH")
+        self.assertFalse(game.player.alive)
+        self.assertIsNone(game.pending_event)
+
+    def test_becoming_an_npc_artifact_spirit_records_humiliation_milestone(self):
+        game = self._game()
+
+        class CapturingRng:
+            @staticmethod
+            def random():
+                return 0.0
+
+            @staticmethod
+            def choice(_values):
+                return "法器器灵"
+
+        captured = self.engine._capture_defeated_ghost(game, {
+            "target_name": "拘魂人", "target_power": 9999, "target_realm_index": 3,
+            "target_layer": 4, "combat_type": "cultivator", "race": "human", "path": "ghost",
+        }, CapturingRng())
+        self.assertTrue(captured)
+        self.assertEqual(game.player.ghost_captor["controlled_form"], "法器器灵")
+        self.assertEqual(game.player.milestones["ghost_became_others_attachment"], 1)
 
 
 if __name__ == "__main__":

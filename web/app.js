@@ -502,7 +502,26 @@ function render(data) {
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
+  renderPostBattlePossession();
   renderButtons();
+}
+
+function renderPostBattlePossession() {
+  const pending = game?.pending_event;
+  const active = !game?.player?.alive && pending?.id === 'SYS_POST_BATTLE_POSSESSION';
+  const panel = $('#post-battle-possession');
+  const choices = $('#post-battle-possession-choices');
+  panel.classList.toggle('hidden', !active);
+  choices.innerHTML = '';
+  if (!active) return;
+  (pending.choices || []).forEach(choice => {
+    const button = document.createElement('button');
+    button.className = 'post-battle-possession-choice';
+    button.textContent = choice.text;
+    button.disabled = busy || choice.enabled === false;
+    button.onclick = () => mutate(`/api/games/${game.id}/post-battle-possession`, {target_id:choice.id});
+    choices.appendChild(button);
+  });
 }
 
 function renderNatalArtifact(system) {
@@ -2404,10 +2423,11 @@ function renderBattleRoundProgress(report, shouldPlay) {
 
 function renderEvent() {
   const event = game.pending_event;
-  $('#event-card').classList.toggle('hidden', !event);
+  const postBattlePossession = event?.id === 'SYS_POST_BATTLE_POSSESSION';
+  $('#event-card').classList.toggle('hidden', !event || postBattlePossession);
   $('#action-card').classList.toggle('hidden', !!event || !game.player.alive);
   const choices = $('#event-choices'); choices.innerHTML = '';
-  if (!event) return;
+  if (!event || postBattlePossession) return;
   $('#event-title').textContent = event.title;
   $('#event-body').textContent = `${event.body}${game.trial?.active ? `（当前第 ${game.trial.step}/${game.trial.total_steps} 关）` : ''}`;
   event.choices.forEach(choice => {
@@ -2524,6 +2544,7 @@ function renderButtons() {
   $('#world-news-debug').disabled = busy || !game;
   document.querySelectorAll('.strategy-dock button, .utility-panel .panel-heading button, #faction-toggle, #market-toggle').forEach(button => button.disabled = busy);
   $('#restart-button').disabled = busy;
+  document.querySelectorAll('.post-battle-possession-choice').forEach(button => button.disabled = busy);
   document.querySelectorAll('#new-game-form button, #save-list button, .quick-start-button').forEach(button => {
     const preset = configData?.quick_starts?.find(entry => entry.id === button.dataset.presetId);
     button.disabled = busy || (preset ? !preset.enabled : false);
