@@ -26,6 +26,8 @@ class Item:
     combat_bonus: float = 0.0
     hp_bonus: int = 0
     mp_bonus: int = 0
+    permanent_intrinsic_hp_bonus: float = 0.0
+    permanent_intrinsic_mp_bonus: float = 0.0
     opportunity_bonus: float = 0.0
     root_grant: str | None = None
     breakthrough_bonus: float = 0.0

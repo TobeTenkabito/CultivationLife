@@ -73,7 +73,7 @@ def ensure_ghost_cultivation_state(player: Player) -> bool:
     if int(player.milestones.get("ghost_reincarnations", 0)) < imprint_total:
         player.milestones["ghost_reincarnations"] = imprint_total
         changed = True
-    if player.lifespan is not None:
+    if ghost_cultivation_config().get("infinite_lifespan", True) and player.lifespan is not None:
         player.lifespan = None
         changed = True
     return changed
@@ -140,18 +140,26 @@ def grant_intrinsic_progression_if_new_highwater(player: Player) -> tuple[float,
         int(player.ghost_intrinsic_highwater_realm or 0),
         int(player.ghost_intrinsic_highwater_layer or 1),
     )
+    # Body cultivation and permanent intrinsic consumables are independent new
+    # growth.  If they changed while the DLC was disabled, reconcile them on
+    # re-enable without touching the historical realm high-water mark.
+    highwater_hp = canonical_intrinsic_hp(player, realm_index=highwater[0], layer=highwater[1])
+    highwater_mp = canonical_intrinsic_mp(player, realm_index=highwater[0], layer=highwater[1])
+    independent_hp = max(0.0, highwater_hp - float(player.ghost_intrinsic_hp_reference or 0.0))
+    independent_mp = max(0.0, highwater_mp - float(player.ghost_intrinsic_mp_reference or 0.0))
+    grant_intrinsic_growth(player, independent_hp, independent_mp)
     current = (player.realm_index, player.layer)
     if current <= highwater:
-        return (0.0, 0.0)
-    old_hp = canonical_intrinsic_hp(player, realm_index=highwater[0], layer=highwater[1])
-    old_mp = canonical_intrinsic_mp(player, realm_index=highwater[0], layer=highwater[1])
+        return (independent_hp, independent_mp)
+    old_hp = highwater_hp
+    old_mp = highwater_mp
     new_hp = canonical_intrinsic_hp(player)
     new_mp = canonical_intrinsic_mp(player)
-    hp_gain, mp_gain = max(0.0, new_hp - old_hp), max(0.0, new_mp - old_mp)
-    grant_intrinsic_growth(player, hp_gain, mp_gain)
+    realm_hp, realm_mp = max(0.0, new_hp - old_hp), max(0.0, new_mp - old_mp)
+    grant_intrinsic_growth(player, realm_hp, realm_mp)
     player.ghost_intrinsic_highwater_realm = current[0]
     player.ghost_intrinsic_highwater_layer = current[1]
-    return (hp_gain, mp_gain)
+    return (independent_hp + realm_hp, independent_mp + realm_mp)
 
 
 def grant_wangsheng(player: Player, amount: int | None = None) -> int:
@@ -184,6 +192,60 @@ def reincarnation_breakthrough_bonus(player: Player, realm_index: int) -> float:
         reincarnation_effective_marks(player, realm_index)
         * float(ghost_cultivation_config().get("reincarnation_bonus_per_mark", 0.05))
     )
+
+
+def can_reincarnate(player: Player) -> bool:
+    if not ghost_cultivation_active(player) or not player.alive or player.realm_index < 1:
+        return False
+    current_realm = REALMS[player.realm_index]
+    from .rules import opportunity_required
+
+    return bool(
+        player.layer >= current_realm.layers
+        and player.opportunity >= opportunity_required(player)
+    )
+
+
+def perform_reincarnation(player: Player) -> dict[str, Any]:
+    """Apply the player-only, persistent part of reincarnation.
+
+    Game-level blockers and history remain the mixin's responsibility, keeping
+    this state transition directly testable and reusable without duplicating
+    the three distinct reincarnation records.
+    """
+    if not can_reincarnate(player):
+        raise ValueError("只有抵达大境界最终瓶颈并将机缘修至圆满，方可入轮回")
+    ensure_ghost_cultivation_state(player)
+    current_realm = REALMS[player.realm_index]
+    source_realm, source_layer = player.realm_index, player.layer
+    key = str(source_realm)
+    player.ghost_reincarnation_imprints[key] = int(player.ghost_reincarnation_imprints.get(key, 0)) + 1
+    player.milestones["ghost_reincarnations"] = (
+        int(player.milestones.get("ghost_reincarnations", 0)) + 1
+    )
+    lost_wangsheng = player.ghost_wangsheng_energy
+    player.ghost_last_reincarnation_realm = source_realm
+    player.ghost_last_reincarnation_layer = source_layer
+    player.realm_index = 1
+    player.layer = 1
+    player.opportunity = 0.0
+    player.awaiting_major_breakthrough = False
+    player.awaiting_minor_breakthrough = False
+    player.awaiting_ascension = False
+    player.awaiting_spirit_realm_crossing = False
+    player.active_breakthrough_aids = []
+    player.breakthrough_pity = {}
+    player.joint_companion_breakthrough = None
+    if ghost_cultivation_config().get("clear_wangsheng_on_reincarnation", True):
+        player.ghost_wangsheng_energy = 0
+    player.lifespan = None
+    return {
+        "source_realm": source_realm,
+        "source_layer": source_layer,
+        "source_label": f"{current_realm.name}{source_layer}层",
+        "imprint_count": player.ghost_reincarnation_imprints[key],
+        "wangsheng_lost": lost_wangsheng - player.ghost_wangsheng_energy,
+    }
 
 
 def apply_soul_erosion(player: Player, units: int = 1) -> dict[str, Any]:
@@ -299,7 +361,7 @@ class GhostSystemMixin:
         return self.present(game)
 
     def reincarnate_ghost(self, game_id: str) -> dict[str, Any]:
-        from .rules import max_hp, max_mp, opportunity_required
+        from .rules import max_hp, max_mp
 
         game = self._load(game_id)
         player = game.player
@@ -307,37 +369,21 @@ class GhostSystemMixin:
             raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
         if not player.alive or game.pending_event or game.active_trial or player.imprisonment or player.sealed_cultivation:
             raise ValueError("当前状态无法进入轮回")
-        current_realm = REALMS[player.realm_index]
-        if player.realm_index < 1 or player.layer < current_realm.layers or player.opportunity < opportunity_required(player):
-            raise ValueError("只有抵达大境界最终瓶颈并将机缘修至圆满，方可入轮回")
-        ensure_ghost_cultivation_state(player)
-        source_realm, source_layer = player.realm_index, player.layer
-        source_label = f"{current_realm.name}{source_layer}层"
+        transition = perform_reincarnation(player)
+        source_realm = int(transition["source_realm"])
+        source_layer = int(transition["source_layer"])
+        source_label = str(transition["source_label"])
         key = str(source_realm)
-        player.ghost_reincarnation_imprints[key] = int(player.ghost_reincarnation_imprints.get(key, 0)) + 1
-        player.milestones["ghost_reincarnations"] = (
-            int(player.milestones.get("ghost_reincarnations", 0)) + 1
-        )
-        lost_wangsheng = player.ghost_wangsheng_energy
-        player.ghost_last_reincarnation_realm = source_realm
-        player.ghost_last_reincarnation_layer = source_layer
-        player.realm_index = 1
-        player.layer = 1
-        player.opportunity = 0.0
-        player.awaiting_major_breakthrough = False
-        player.awaiting_minor_breakthrough = False
-        player.awaiting_ascension = False
-        player.awaiting_spirit_realm_crossing = False
-        player.active_breakthrough_aids = []
-        player.breakthrough_pity = {}
-        player.joint_companion_breakthrough = None
-        player.ghost_wangsheng_energy = 0
-        player.lifespan = None
+        lost_wangsheng = int(transition["wangsheng_lost"])
         player.hp = min(player.hp, max_hp(player))
         player.mp = min(player.mp, max_mp(player))
+        wangsheng_summary = (
+            f"未用往生 {lost_wangsheng} 点尽数散失"
+            if lost_wangsheng else "未用往生依当前规则没有损失"
+        )
         game.history.append(HistoryRecord(
             "SYS_GHOST_REINCARNATION", 1, player.age, "舍世入轮回", key, "reincarnated",
-            f"你舍去{source_label}修为，重归练气一层；留下第 {player.ghost_reincarnation_imprints[key]} 道本境轮回印记，未用往生 {lost_wangsheng} 点尽数散失。魂蚀与既有魂伤均未复原。",
+            f"你舍去{source_label}修为，重归练气一层；留下第 {transition['imprint_count']} 道本境轮回印记，{wangsheng_summary}。魂蚀与既有魂伤均未复原。",
             {
                 "source_realm": source_realm, "source_layer": source_layer,
                 "imprints": dict(player.ghost_reincarnation_imprints), "wangsheng_lost": lost_wangsheng,
@@ -349,7 +395,7 @@ class GhostSystemMixin:
         return self.present(game)
 
     def _public_ghost_system(self, game: GameState) -> dict[str, Any]:
-        from .rules import opportunity_required, raw_external_hp_bonus, raw_external_mp_bonus
+        from .rules import raw_external_hp_bonus, raw_external_mp_bonus
 
         player = game.player
         if not ghost_cultivation_active(player):
@@ -364,13 +410,9 @@ class GhostSystemMixin:
                 "layer": REALMS[index].layers,
                 "count": int(player.ghost_reincarnation_imprints.get(str(index), 0)),
             }
-            for index in range(1, min(9, len(REALMS)))
+            for index in range(1, len(REALMS))
         ]
-        at_bottleneck = bool(
-            player.realm_index >= 1
-            and player.layer >= REALMS[player.realm_index].layers
-            and player.opportunity >= opportunity_required(player)
-        )
+        at_bottleneck = can_reincarnate(player)
         effective_marks = reincarnation_effective_marks(player, player.realm_index)
         total_imprints = sum(max(0, int(row["count"])) for row in imprints)
         integrity_ratio = min(hp_ratio, mp_ratio)
@@ -390,6 +432,11 @@ class GhostSystemMixin:
                 "erosion_rate_pp": round(player.ghost_soul_erosion_rate_pp, 6),
                 "intrinsic_hp_current": round(effective_intrinsic_hp(player), 4),
                 "intrinsic_mp_current": round(effective_intrinsic_mp(player), 4),
+                "highwater": (
+                    f"{REALMS[int(player.ghost_intrinsic_highwater_realm)].name}"
+                    f"{int(player.ghost_intrinsic_highwater_layer or 1)}层"
+                ),
+                "repeated_realm_growth_frozen": True,
             }
         return {
             "available": True,

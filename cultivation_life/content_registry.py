@@ -816,6 +816,12 @@ class ContentRegistry:
         for item in items.values():
             if item.breakthrough_bonus < 0 or item.trial_restore_hp < 0 or item.trial_restore_mp < 0:
                 raise ContentError(f"物品 {item.id} 的突破或渡劫恢复数值不得为负")
+            if item.permanent_intrinsic_hp_bonus < 0 or item.permanent_intrinsic_mp_bonus < 0:
+                raise ContentError(f"物品 {item.id} 的永久本体增益不得为负")
+            if (
+                item.permanent_intrinsic_hp_bonus > 0 or item.permanent_intrinsic_mp_bonus > 0
+            ) and not {"pill", "permanent_intrinsic"} <= set(item.tags):
+                raise ContentError(f"永久本体丹药 {item.id} 必须标记 pill 与 permanent_intrinsic")
             if not 0 <= item.conception_bonus < 1:
                 raise ContentError(f"物品 {item.id} 的下一次孕育概率加成必须位于 [0, 1) 区间")
             if item.conception_bonus > 0 and not {"pill", "conception"} <= set(item.tags):
