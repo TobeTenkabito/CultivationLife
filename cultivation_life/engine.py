@@ -74,7 +74,8 @@ from .heavenly_court_system import HeavenlyCourtSystemMixin
 from .natal_artifact_system import NatalArtifactSystemMixin
 from .crafting_system import CraftingSystemMixin, crafted_artifact_bonuses, crafted_combat_effects
 from .formation_system import (
-    FormationSystemMixin, active_formation_profile, formation_battle_experience_gain,
+    FormationSystemMixin, active_formation_profile, ensure_formation_state,
+    formation_battle_experience_gain,
 )
 from .monster_bloodline_system import (
     MonsterBloodlineSystemMixin, bloodline_content_available,
@@ -265,6 +266,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         game.world_npcs = self._new_world_npcs()
         self._ensure_sects(game)
         self._ensure_world_npcs(game)
+        self._ensure_npc_formations(game)
         if player.world == "celestial":
             self._ensure_heavenly_court(game, rng)
         self._ensure_race_relations(game)
@@ -1676,6 +1678,8 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             summary = self._buy_crafting_material_offer(game, offer, price)
         elif offer["kind"] == "formation_material":
             summary = self._buy_formation_material_offer(game, offer, price)
+        elif offer["kind"] == "formation_supply":
+            summary = self._buy_formation_supply_offer(game, offer, price)
         elif offer["kind"] == "item":
             add_item(game.player, offer["content_id"])
             summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得{offer['name']}。"
@@ -5911,13 +5915,46 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
                     "target_name": "来犯山门的敌修", "target_power": required,
                     "target_realm_index": player.realm_index, "target_layer": player.layer,
                     "combat_type": "cultivator", "action": "repel",
-                    "enemy_objective": "break_formation", "artificial_conditions": ["大阵"],
+                    "enemy_objective": "break_formation",
                 }, False, rng)
                 success = combat_result == "victory"
                 detail = combat_summary
             elif mode == "formation":
-                success = remove_item(player, "formation_plate")
-                detail = "护山阵盘已经发动" if success else "你并无可用的护山阵盘"
+                guard_array = self._sect_guard_array(game, sect.id)
+                required = float(runtime.get("required_power", 1))
+                if guard_array:
+                    profile = self._ground_profile(player, guard_array)
+                    defense_power = self._sect_guard_power(game, sect.id)
+                    variance = rng.uniform(
+                        float(self._formation_rules().get("sect_defense_variance_min", 0.94)),
+                        float(self._formation_rules().get("sect_defense_variance_max", 1.06)),
+                    )
+                    effective_power = defense_power * variance
+                    success = effective_power >= required
+                    wear = float(self._formation_rules().get(
+                        "sect_defense_success_wear" if success else "sect_defense_failure_wear",
+                        7.0 if success else 15.0,
+                    ))
+                    # A badly outmatched assault strains the anchor further,
+                    # but one event can never delete more than 25 durability.
+                    wear *= min(1.65, max(0.75, required / max(1.0, defense_power)))
+                    guard_array["durability"] = round(max(
+                        0.0, float(guard_array.get("durability", 0.0)) - min(25.0, wear),
+                    ), 4)
+                    guard_array["battles"] = int(guard_array.get("battles", 0)) + 1
+                    detail = (
+                        f"真实护山阵“{guard_array['name']}”以 {effective_power:.0f} 阵力对抗"
+                        f" {required:.0f} 来犯战力，永久完整度降至 {guard_array['durability']:.1f}%"
+                    )
+                    if success:
+                        gain = min(
+                            float(self._formation_rules().get("ground_experience_cap", 55.0)),
+                            18.0 + profile.get("occupied_count", 0) * 2.5 + min(12.0, required / max(1.0, defense_power) * 8.0),
+                        )
+                        self._grant_art_experience(player, "formation", gain)
+                else:
+                    success = False
+                    detail = "宗门没有以真实阵材镇下护山阵；旧阵盘不能再直接替代整座大阵"
             elif mode == "appease":
                 cost = 80 if player.world == "human" else 800
                 success = remove_item(player, "spirit_stone", cost)
@@ -6085,6 +6122,29 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         their legacy aggregate-power logic.
         """
         player = game.player
+        ensure_formation_state(player)
+        portable_formation = active_formation_profile(player)
+        ground_array = None if portable_formation.get("active") else self._local_ground_formation(game)
+        if ground_array:
+            ground_profile = self._ground_profile(player, ground_array)
+            target["allied_formation_profile"] = ground_profile
+            target["formation_initial_integrity"] = float(ground_array.get("durability", 0.0)) / 100.0
+            target["ground_formation_id"] = str(ground_array["id"])
+        ground_array_id = str(ground_array.get("id", "")) if ground_array else ""
+        npc_ids = [str(target.get("npc_id", "")), *(
+            str(member.get("npc_id", "")) for member in target.get("members", [])
+        )]
+        npc_ids = [npc_id for npc_id in dict.fromkeys(npc_ids) if npc_id in game.npc_formations]
+        enemy_formation_id = max(
+            npc_ids, key=lambda npc_id: self._npc_formation_power_multiplier(game, npc_id), default="",
+        )
+        if enemy_formation_id:
+            enemy_entry = game.npc_formations[enemy_formation_id]
+            enemy_profile = self._npc_formation_profile(game, enemy_formation_id)
+            if enemy_profile.get("active"):
+                target["enemy_formation_profile"] = enemy_profile
+                target["enemy_formation_initial_integrity"] = float(enemy_entry.get("durability", 0.0)) / 100.0
+                target["enemy_formation_npc_id"] = enemy_formation_id
         target["natal_artifact_effects"] = [
             *self._natal_artifact_combat_effects(game), *crafted_combat_effects(game.player),
         ]
@@ -6125,15 +6185,46 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             current_mp_ratio=player.mp / max(1.0, mp_max),
             battlefield_tags=self._combat_battlefield_tags(game, target),
         )
-        formation_gain = formation_battle_experience_gain(
-            active_formation_profile(player), len(resolution.rounds), ratio,
+        used_formation = (
+            target.get("allied_formation_profile", {})
+            if ground_array else portable_formation
         )
+        formation_gain = formation_battle_experience_gain(used_formation, len(resolution.rounds), ratio)
         if formation_gain > 0:
             self._grant_art_experience(player, "formation", formation_gain)
             # Formation experience changes long-range attenuation. Rebuild the
             # cached matrix on the next read, never in the middle of this fight.
             player.formation_profile_cache = {}
             resolution.formation_experience_gain = formation_gain
+        if ground_array_id and resolution.formation_integrity_end is not None:
+            # Combat profile reads normalize old formation state and may
+            # replace list dictionaries. Reacquire the persistent object by
+            # identity before writing permanent wear.
+            ground_array = next(
+                (row for row in player.formation_ground_arrays if row.get("id") == ground_array_id), None,
+            )
+        if ground_array and resolution.formation_integrity_end is not None:
+            before = max(0.0, min(100.0, float(ground_array.get("durability", 0.0))))
+            simulated = max(0.0, min(100.0, float(resolution.formation_integrity_end) * 100.0))
+            raw_wear = max(0.0, before - simulated)
+            settings = self._formation_rules()
+            wear = min(float(settings.get("ground_battle_max_wear", 26.0)), raw_wear)
+            if before > 0:
+                wear = max(float(settings.get("ground_battle_min_wear", 1.0)), wear)
+            ground_array["durability"] = round(max(0.0, before - wear), 4)
+            ground_array["battles"] = int(ground_array.get("battles", 0)) + 1
+        if enemy_formation_id and resolution.enemy_formation_integrity_end is not None:
+            enemy_entry = game.npc_formations.get(enemy_formation_id)
+            if enemy_entry:
+                before = max(0.0, min(100.0, float(enemy_entry.get("durability", 0.0))))
+                simulated = max(0.0, min(100.0, float(resolution.enemy_formation_integrity_end) * 100.0))
+                raw_wear = max(0.0, before - simulated)
+                settings = self._formation_rules()
+                wear = min(float(settings.get("ground_battle_max_wear", 26.0)), raw_wear)
+                if before > 0:
+                    wear = max(float(settings.get("ground_battle_min_wear", 1.0)), wear)
+                enemy_entry["durability"] = round(max(0.0, before - wear), 4)
+                enemy_entry["battles"] = int(enemy_entry.get("battles", 0)) + 1
         loss_scale = max(0.0, float(target.get("loss_scale", 1.0)))
         hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
         mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
@@ -7825,7 +7916,18 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
                 "world": npc.world if same_world else None,
                 "world_name": WORLD_SYSTEMS["world_names"].get(npc.world, npc.world) if same_world else "去向不明",
                 "perceived_alive": perceived_alive, "status": status,
-                "combat_power": self._npc_power(npc) if same_world and npc.alive else None,
+                "combat_power": (
+                    self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
+                    if same_world and npc.alive else None
+                ),
+                "formation": (
+                    {
+                        "name": game.npc_formations[npc.id]["name"],
+                        "durability": round(float(game.npc_formations[npc.id].get("durability", 0.0)), 1),
+                        "bonus": round((self._npc_formation_power_multiplier(game, npc.id) - 1.0) * 100.0, 2),
+                    }
+                    if same_world and npc.alive and npc.id in game.npc_formations else None
+                ),
                 "attitude": attitude_label(
                     npc.affinity or 0,
                     game.player.hostility.get(self._hostility_key("race", npc.race), 0),
@@ -8692,6 +8794,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         self._ensure_sects(game)
         changed = self._ensure_world_npcs(game) or changed
         changed = self._enforce_world_realm_caps(game) or changed
+        changed = self._ensure_npc_formations(game) or changed
         changed = self._migrate_true_demon_races(game) or changed
         if game.player.faction_id in game.sects:
             sect_allegiance = game.sects[game.player.faction_id].allegiance_race

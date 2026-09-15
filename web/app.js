@@ -712,7 +712,7 @@ function renderFormation(system) {
   const panel = $('#formation-card'), dock = document.querySelector('[data-panel-target="formation"]');
   panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
   if (!system.visible) { window.UtilityPanels?.close('formation'); return; }
-  $('#formation-heading').textContent = `阵法 ${system.level || 0}级 · 传导 ${percent(system.alpha || 0)}`;
+  $('#formation-heading').textContent = `V${system.system_version || 1} · 阵法 ${system.level || 0}级 · 传导 ${percent(system.alpha || 0)}`;
   const grid = $('#formation-grid'); grid.innerHTML = '';
   const activeBySlot = new Map((system.active_bindings || []).filter(Boolean).map(row => [Number(row.slot), row.id]));
   const materials = system.materials || [];
@@ -723,6 +723,7 @@ function renderFormation(system) {
     materials.forEach(material => {
       const option = document.createElement('option'); option.value = material.id;
       option.textContent = `${material.name} · ${material.nature_name} ${Number(material.formation_value).toFixed(1)}${material.occupied ? ' · 占用中' : ''}`;
+      option.dataset.locked = material.locked ? '1' : '0'; option.disabled = !!material.locked;
       select.appendChild(option);
     });
     select.value = activeBySlot.get(index) || '';
@@ -738,7 +739,7 @@ function renderFormation(system) {
     cell.ondrop = event => {
       event.preventDefault(); cell.classList.remove('drag-over');
       const materialId = event.dataTransfer.getData('text/formation-material');
-      if (materials.some(row => row.id === materialId)) {
+      if (materials.some(row => row.id === materialId && !row.locked)) {
         select.value = materialId; updateHint(); syncFormationSelects(); scheduleFormationPreview();
       }
     };
@@ -761,19 +762,72 @@ function renderFormation(system) {
     title:'收起当前阵法', body:'确认收阵？所有被占用的真实阵材实例都会原样返回材料库与行囊。', confirmText:'收阵',
     onConfirm:()=>mutate(`/api/games/${game.id}/formation-deactivate`, {}),
   });
+  const deployPersonal = $('#formation-ground-personal');
+  deployPersonal.dataset.formationUnavailable = system.can_deploy_personal ? '0' : '1';
+  deployPersonal.disabled = !system.can_deploy_personal;
+  deployPersonal.onclick = () => openGameConfirm({
+    title:'镇下此地私阵',
+    body:`将当前随身阵的全部真实阵材留在${system.current_location?.location_name || '此地'}。阵势完整度将跨战斗保存，远行后材料不会自动回到行囊。`,
+    confirmText:'镇下私阵',
+    onConfirm:()=>mutate(`/api/games/${game.id}/formation-ground-deploy`, {owner_kind:'player'}),
+  });
+  const deploySect = $('#formation-ground-sect');
+  deploySect.dataset.formationUnavailable = system.can_deploy_sect ? '0' : '1';
+  deploySect.disabled = !system.can_deploy_sect;
+  deploySect.onclick = () => openGameConfirm({
+    title:'设为宗门护山阵',
+    body:'当前随身阵将成为本宗真实护山阵，进入宗门防守和离屏战争结算。宗门交战期间不可撤阵。',
+    confirmText:'镇守山门',
+    onConfirm:()=>mutate(`/api/games/${game.id}/formation-ground-deploy`, {owner_kind:'sect'}),
+  });
 
   const library = $('#formation-material-library'); library.innerHTML = '';
   materials.forEach(material => {
     const row = document.createElement('div'); row.className = `formation-material-row${material.occupied ? ' occupied' : ''}`;
-    row.draggable = true; row.dataset.materialId = material.id;
-    row.ondragstart = event => event.dataTransfer.setData('text/formation-material', material.id);
-    const title = document.createElement('b'); title.textContent = `${material.name}${material.occupied ? ' · 占用中' : ''}`;
+    row.draggable = !material.locked; row.dataset.materialId = material.id;
+    row.ondragstart = event => {
+      if (material.locked) { event.preventDefault(); return; }
+      event.dataTransfer.setData('text/formation-material', material.id);
+    };
+    const title = document.createElement('b'); title.textContent = `${material.name}${material.occupied ? (material.locked ? ' · 镇地占用' : ' · 随身占用') : ''}`;
     const detail = document.createElement('small');
     const sourceNames = {formation_material:'专用阵材',crafting_material:'炼器共用',inventory:'行囊共用'};
     detail.textContent = `${material.nature_name}性 · 固有阵值 ${Number(material.formation_value).toFixed(1)} · ${sourceNames[material.source_kind] || material.source_kind} · ${material.source || '未知来源'}`;
     row.append(title, detail); library.appendChild(row);
   });
   if (!materials.length) library.innerHTML = '<p class="empty">暂无阵材。各界坊市每次换货会出现专用阵材，少量阵盘、灵植与炼器资源也能共用。</p>';
+
+  const supplies = $('#formation-repair-supplies'); supplies.innerHTML = '';
+  (system.repair_supplies || []).forEach(supply => {
+    const chip = document.createElement('span');
+    chip.textContent = `${supply.name} ×${supply.quantity} · 修复 ${Number(supply.repair_value).toFixed(0)}%`;
+    supplies.appendChild(chip);
+  });
+  if (!system.repair_supplies?.length) supplies.innerHTML = '<span>暂无修阵资源，可在当前界面坊市购得。</span>';
+  const groundList = $('#formation-ground-list'); groundList.innerHTML = '';
+  (system.ground_arrays || []).forEach(array => {
+    const row = document.createElement('div');
+    row.className = `formation-ground-row${array.local ? ' local' : ''}${Number(array.durability) <= 0 ? ' broken' : ''}`;
+    const info = document.createElement('span'); const title = document.createElement('b'); const detail = document.createElement('small');
+    title.textContent = `${array.name} · ${array.owner_kind === 'sect' ? `护山阵（${array.owner_name}）` : '私阵'}`;
+    detail.textContent = `${array.world_name} · ${array.location_name} · 永久完整度 ${Number(array.durability).toFixed(1)}% · 护阵战力 ${number(array.defense_power)} · 经历 ${array.battles || 0} 战${array.local ? ' · 你正在此地' : ''}`;
+    info.append(title, detail);
+    const tools = document.createElement('div'); tools.className = 'formation-ground-tools';
+    const matching = (system.repair_supplies || []).filter(supply => supply.world === array.world);
+    const repairSelect = document.createElement('select');
+    matching.forEach(supply => { const option=document.createElement('option'); option.value=supply.id; option.textContent=`${supply.name} ×${supply.quantity}`; repairSelect.appendChild(option); });
+    repairSelect.dataset.formationUnavailable = array.local && matching.length ? '0' : '1';
+    const repair = document.createElement('button'); repair.textContent = '修阵';
+    repair.dataset.formationUnavailable = array.local && matching.length && Number(array.durability) < 100 ? '0' : '1';
+    repair.disabled = !array.local || !matching.length || Number(array.durability) >= 100;
+    repair.onclick = () => mutate(`/api/games/${game.id}/formation-ground-repair`, {ground_formation_id:array.id,supply_id:repairSelect.value,quantity:1});
+    const withdraw = document.createElement('button'); withdraw.textContent = '撤阵归库';
+    withdraw.dataset.formationUnavailable = array.local ? '0' : '1'; withdraw.disabled = !array.local;
+    withdraw.onclick = () => openGameConfirm({title:'撤除镇地阵',body:`确认撤去“${array.name}”？所有真实阵材会原样返回，但已损失的阵势完整度不会转化为材料损伤。`,confirmText:'撤阵',onConfirm:()=>mutate(`/api/games/${game.id}/formation-ground-withdraw`,{ground_formation_id:array.id})});
+    if (matching.length) tools.append(repairSelect);
+    tools.append(repair, withdraw); row.append(info, tools); groundList.appendChild(row);
+  });
+  if (!system.ground_arrays?.length) groundList.innerHTML = '<p class="empty">尚未布置镇地阵。先启用一份阵法预设，再把它镇入当前地域。</p>';
 
   const loadouts = $('#formation-loadout-list'); loadouts.innerHTML = '';
   (system.loadouts || []).forEach(loadout => {
@@ -797,7 +851,7 @@ function syncFormationSelects() {
   const selects = [...document.querySelectorAll('#formation-grid select')];
   const values = selects.map(select => select.value).filter(Boolean);
   selects.forEach(select => [...select.options].forEach(option => {
-    option.disabled = !!option.value && option.value !== select.value && values.includes(option.value);
+    option.disabled = option.dataset.locked === '1' || (!!option.value && option.value !== select.value && values.includes(option.value));
   }));
 }
 
@@ -1331,6 +1385,7 @@ function renderWorldNpcs(npcs) {
     detail.textContent = `${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}`;
     const combat = npc.combat_power == null ? '' : ` · 战力 ${number(npc.combat_power)} · 好感 ${number(npc.affinity)} / ${npc.attitude}`;
     detail.textContent += combat;
+    if (npc.formation) detail.textContent += ` · 阵法 ${npc.formation.name}（完整度 ${Number(npc.formation.durability).toFixed(0)}%，离屏战力 +${Number(npc.formation.bonus).toFixed(2)}%）`;
     const controls = document.createElement('div'); controls.className = 'world-npc-controls';
     const status = document.createElement('span'); status.textContent = npc.status; controls.appendChild(status);
     if (npc.in_party || npc.can_invite_party) {
@@ -1873,6 +1928,13 @@ function renderMap(map, auction) {
       const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
       marker.textContent = location.ghost_parade.status === 'active'
         ? '百鬼夜行正在发生' : `百鬼夜行预告 · ${timelineText(location.ghost_parade.start_age)}开启`;
+      description.append(' ', marker);
+    }
+    if (location.ground_formations?.length) {
+      const marker = document.createElement('strong'); marker.className = 'auction-map-marker formation-map-marker';
+      marker.textContent = location.ground_formations.map(array =>
+        `${array.name} · ${array.owner_kind === 'sect' ? `${array.owner_name}护山阵` : '私阵'} · 完整度${Number(array.durability).toFixed(0)}%`
+      ).join(' / ');
       description.append(' ', marker);
     }
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
@@ -2712,7 +2774,11 @@ function renderBattleReport(report) {
   const natural = report.natural_terrain || report.battlefield_tags?.[0] || '开阔';
   const artificial = report.artificial_conditions?.length
     ? report.artificial_conditions.join('、') : '无';
-  $('#battle-report-summary').textContent = `${report.mode || '标准自动战斗'} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}。开战后完全由预案自动执行。`;
+  const formationSummary = [
+    report.formation_profile?.name ? `你方阵法 ${report.formation_profile.name}（终局完整度 ${percent(report.formation_integrity_end || 0)}）` : '',
+    report.enemy_formation_profile?.name ? `敌方阵法 ${report.enemy_formation_profile.name}（终局完整度 ${percent(report.enemy_formation_integrity_end || 0)}）` : '',
+  ].filter(Boolean).join(' · ');
+  $('#battle-report-summary').textContent = `${report.mode || '标准自动战斗'} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。开战后完全由预案自动执行。`;
   const rosters = $('#battle-rosters'); rosters.innerHTML = '';
   [
     ['你方参战', report.player_roster || []],

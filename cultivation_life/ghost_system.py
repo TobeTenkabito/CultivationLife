@@ -1135,6 +1135,22 @@ class GhostSystemMixin:
                         "status": parade.get("status"), "start_age": parade.get("start_age"),
                         "end_age": parade.get("end_age"), "label": "百鬼夜行",
                     }
+        # V2 ground arrays are map fixtures rather than invisible status
+        # bonuses. Publish a compact marker without copying their material
+        # snapshots into every map row.
+        for location in data.get("locations", []):
+            arrays = [
+                row for row in game.player.formation_ground_arrays
+                if row.get("world") == game.player.world
+                and row.get("location_id") == location.get("id")
+            ]
+            if arrays:
+                location["ground_formations"] = [{
+                    "id": str(row.get("id", "")), "name": str(row.get("name", "镇地阵")),
+                    "owner_kind": str(row.get("owner_kind", "player")),
+                    "owner_name": str(row.get("owner_name", game.player.name)),
+                    "durability": round(float(row.get("durability", 0.0)), 1),
+                } for row in arrays]
         return data
 
     def _public_ghost_system(self, game: GameState) -> dict[str, Any]:

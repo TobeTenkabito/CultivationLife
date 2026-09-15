@@ -151,7 +151,7 @@ class EconomySystemMixin:
             )
             if offer.get("kind") == "crafting_material":
                 crafting_offers.append(shown)
-            elif offer.get("kind") == "formation_material":
+            elif offer.get("kind") in {"formation_material", "formation_supply"}:
                 formation_offers.append(shown)
             else:
                 offers.append(shown)

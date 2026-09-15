@@ -7,7 +7,7 @@
       "tags":["faction","player_faction","sect_defense","manual_only","world:global"],"weight":0,
       "choices":[
         {"id":"fight","text":"亲自出山，以战力守住匾额","effects":[{"type":"sect_defense","mode":"fight"}]},
-        {"id":"formation","text":"启用护山阵盘","effects":[{"type":"sect_defense","mode":"formation"}]},
+        {"id":"formation","text":"催动真实护山阵固守山门","effects":[{"type":"sect_defense","mode":"formation"}]},
         {"id":"appease","text":"以灵石请中人平息争端","effects":[{"type":"sect_defense","mode":"appease"}]},
         {"id":"abandon","text":"承认无力立派，主动遣散门人","effects":[{"type":"sect_defense","mode":"abandon"}]}
       ]
@@ -18,7 +18,7 @@
       "tags":["faction","player_faction","sect_defense","manual_only","world:global"],"weight":0,
       "choices":[
         {"id":"fight","text":"率门人迎战，以战力破敌","effects":[{"type":"sect_defense","mode":"fight"}]},
-        {"id":"formation","text":"消耗阵盘固守山门","effects":[{"type":"sect_defense","mode":"formation"}]},
+        {"id":"formation","text":"调动真实护山阵承压守御","effects":[{"type":"sect_defense","mode":"formation"}]},
         {"id":"appease","text":"付出灵石换取喘息之机","effects":[{"type":"sect_defense","mode":"appease"}]},
         {"id":"abandon","text":"保存门人性命，解散宗门","effects":[{"type":"sect_defense","mode":"abandon"}]}
       ]
@@ -29,7 +29,7 @@
       "tags":["faction","player_faction","sect_defense","manual_only","world:global"],"weight":0,
       "choices":[
         {"id":"fight","text":"尽出底牌，决战山门之前","effects":[{"type":"sect_defense","mode":"fight"}]},
-        {"id":"formation","text":"以护山阵盘作最后屏障","effects":[{"type":"sect_defense","mode":"formation"}]},
+        {"id":"formation","text":"以真实护山阵作最后屏障","effects":[{"type":"sect_defense","mode":"formation"}]},
         {"id":"appease","text":"倾尽灵石寻求外援调停","effects":[{"type":"sect_defense","mode":"appease"}]},
         {"id":"abandon","text":"不再让门人为此流血","effects":[{"type":"sect_defense","mode":"abandon"}]}
       ]

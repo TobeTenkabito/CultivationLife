@@ -198,6 +198,15 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.deactivate_formation(game_id)
             elif operation == "formation-delete":
                 result = ENGINE.delete_formation(game_id, payload.get("formation_id", ""))
+            elif operation == "formation-ground-deploy":
+                result = ENGINE.deploy_ground_formation(game_id, payload.get("owner_kind", "player"))
+            elif operation == "formation-ground-withdraw":
+                result = ENGINE.withdraw_ground_formation(game_id, payload.get("ground_formation_id", ""))
+            elif operation == "formation-ground-repair":
+                result = ENGINE.repair_ground_formation(
+                    game_id, payload.get("ground_formation_id", ""), payload.get("supply_id", ""),
+                    int(payload.get("quantity", 1) or 1),
+                )
             elif operation == "spirit-plant-use":
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":

@@ -27,7 +27,7 @@ def main() -> None:
         created = engine.create_game("前端烟测", "supreme_metal", "dao", 99001)
         game = engine.store.load(created["id"])
         game.player.realm_index = 1
-        add_item(game.player, "spirit_stone", 100)
+        add_item(game.player, "spirit_stone", 10_000)
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_BASIC_QI"])
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"])
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_BEAST_TRANSFORMATION"])
@@ -241,6 +241,23 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert "当前启用" in page.locator("#formation-loadout-list").text_content()
                 assert all(row.get("occupied") for row in page.evaluate("game.formation_system.materials"))
+                page.locator("#formation-ground-personal").click()
+                page.locator("#game-confirm-dialog").wait_for(state="visible")
+                assert "镇下此地私阵" == page.locator("#game-confirm-title").text_content()
+                with page.expect_response(lambda response: response.url.endswith("/formation-ground-deploy")):
+                    page.locator("#game-confirm-accept").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#formation-ground-list .formation-ground-row").count() == 1
+                assert "永久完整度 100.0%" in page.locator("#formation-ground-list").text_content()
+                assert "镇地占用" in page.locator("#formation-material-library").text_content()
+                assert "前端九宫阵" in page.locator("#map-locations .formation-map-marker").text_content()
+                page.locator("#formation-ground-list").get_by_role("button", name="撤阵归库").click()
+                page.locator("#game-confirm-dialog").wait_for(state="visible")
+                with page.expect_response(lambda response: response.url.endswith("/formation-ground-withdraw")):
+                    page.locator("#game-confirm-accept").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#formation-ground-list .formation-ground-row").count() == 0
+                assert all(not row.get("occupied") for row in page.evaluate("game.formation_system.materials"))
                 page.locator("#formation-toggle").click()
 
                 page.locator("[data-panel-target='transformation']").click()
@@ -368,7 +385,7 @@ def main() -> None:
 
                 first = page.locator(".market-buy:not([disabled])").first
                 first.click()
-                page.wait_for_timeout(150)
+                page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator(".market-buy:not([disabled])").count() >= 1
                 assert page.locator("#market-toggle").is_enabled()
                 assert page.locator("#faction-toggle").is_enabled()

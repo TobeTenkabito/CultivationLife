@@ -345,15 +345,26 @@ class ContentRegistry:
             "experience_base", "alpha_min", "alpha_max", "alpha_level_scale",
             "market_material_offers", "metric_softcap_per_node", "stat_bonus_cap",
             "enemy_stat_reduction_cap", "change_round_cap", "field_structure_threshold",
-            "field_node_ratio", "cycle_weights",
+            "field_node_ratio", "cycle_weights", "repair_market_offers",
+            "ground_power_ratio_min", "ground_power_ratio_max", "ground_power_hard_cap_ratio",
+            "npc_formation_bonus_cap", "npc_formation_min_realm",
+            "sect_defense_variance_min", "sect_defense_variance_max",
+            "sect_defense_success_wear", "sect_defense_failure_wear",
+            "war_guard_wear_per_battle", "ground_battle_min_wear",
+            "ground_battle_max_wear", "ground_experience_cap",
         }
-        if set(settings) != required_settings:
-            raise ContentError("阵法设置必须完整声明熟练度、广播软上限、效果硬上限与场域阈值")
+        if int(document.get("system_version", 0)) != 2 or set(settings) != required_settings:
+            raise ContentError("阵法 V2 设置必须完整声明熟练度、广播上限、镇地阵、修阵与 NPC 参数")
         if not (
             0 < float(settings["alpha_min"]) < float(settings["alpha_max"]) < 1
             and 0 < float(settings["stat_bonus_cap"]) <= 0.16
             and 0 <= float(settings["enemy_stat_reduction_cap"]) <= 0.08
             and 0 <= float(settings["change_round_cap"]) <= 0.10
+            and 0 < float(settings["ground_power_ratio_min"]) <= float(settings["ground_power_ratio_max"])
+            <= float(settings["ground_power_hard_cap_ratio"]) <= 0.60
+            and 0 <= float(settings["npc_formation_bonus_cap"]) <= 0.10
+            and 0 < float(settings["ground_battle_min_wear"]) <= float(settings["ground_battle_max_wear"]) <= 30
+            and 0 < float(settings["sect_defense_success_wear"]) < float(settings["sect_defense_failure_wear"]) <= 25
             and set(settings["cycle_weights"]) == {"2", "3", "4"}
             and abs(sum(map(float, settings["cycle_weights"].values())) - 1.0) <= 1e-9
         ):
@@ -401,6 +412,22 @@ class ContentRegistry:
         }
         if not required_worlds <= covered_worlds:
             raise ContentError("专用阵材没有覆盖本体十个可达界面")
+        repair_ids: set[str] = set()
+        repair_worlds: set[str] = set()
+        for resource in document.get("maintenance_resources", []):
+            identifier = str(resource.get("id", ""))
+            world = str(resource.get("world", ""))
+            if (
+                not identifier or identifier in repair_ids or world not in required_worlds
+                or int(resource.get("base_value", 0)) <= 0
+                or int(resource.get("tier", -1)) not in range(13)
+                or not 0 < float(resource.get("repair_value", 0)) <= 40
+            ):
+                raise ContentError(f"阵法修复资源不合法：{identifier or resource}")
+            repair_ids.add(identifier)
+            repair_worlds.add(world)
+        if repair_worlds != required_worlds:
+            raise ContentError("阵法修复资源必须覆盖本体十个可达界面")
 
         crafting_ids = {str(row.get("id")) for row in crafting.get("materials", [])}
         for row in document.get("crafting_materials", []):
