@@ -318,7 +318,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -536,7 +536,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -980,6 +980,140 @@ function renderHeavenlyCourt(court) {
   (court.laws||[]).forEach(law=>{const row=document.createElement('div'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small'),button=document.createElement('button');row.className=`court-law ${law.active?'active':''}`;name.textContent=`${law.name} · ${law.active?'施行中':'未施行'}`;detail.textContent=law.description;text.append(name,detail);button.className='court-action';button.textContent=law.active?'提请废除':'提请施行';button.dataset.courtUnavailable=court.player_controls<1?'1':'0';button.onclick=()=>mutate(`/api/games/${game.id}/heavenly-court`,{action:`law:${law.id}`,enact:!law.active,influence_spend:Number(influence.value)||0});row.append(text,button);lawSection.appendChild(row);});
   policies.append(decreeSection,lawSection);root.appendChild(policies);
   if(court.pledges?.length){const pledges=document.createElement('p');pledges.className='court-pledges';pledges.textContent=`尚待兑现：${court.pledges.map(row=>`${row.kind==='law'?'天条':'决议'} ${row.id}（第${row.deadline_unit}单位前）`).join('、')}`;root.appendChild(pledges);}
+}
+
+function renderIntrigue(system) {
+  const panel = $('#intrigue-card');
+  const dock = document.querySelector('[data-panel-target="intrigue"]');
+  const content = $('#intrigue-content');
+  const enabled = !!system?.enabled;
+  panel.classList.toggle('hidden', !enabled); dock?.classList.toggle('hidden', !enabled);
+  if (!enabled) { window.UtilityPanels?.close('intrigue'); content.innerHTML = ''; return; }
+  content.innerHTML = '';
+  $('#intrigue-heading').textContent = `${(system.sections || []).length} 个相关势力 · 一人一票`;
+  const locked = () => !!game?.pending_event || !!game?.imprisonment || !game?.player?.alive;
+
+  if ((system.player_guest_roles || []).length) {
+    const roles=document.createElement('div');roles.className='intrigue-guest-roles';
+    roles.textContent=`你的外部身份：${system.player_guest_roles.map(row=>`${row.faction_name}${row.title}`).join('、')}。受攻时你将取得守方参战入口，但不获得该势力控制权。`;
+    content.appendChild(roles);
+  }
+
+  if (system.pending_guest_invitation) {
+    const invite = document.createElement('section'); invite.className = 'intrigue-invitation';
+    const text = document.createElement('span'); text.textContent = `${system.pending_guest_invitation.faction_name}邀你担任${system.pending_guest_invitation.title}。防御战争必须出战，进攻战争可以拒绝。`;
+    const accept = document.createElement('button'); accept.textContent = '接受'; accept.className = 'primary';
+    accept.onclick = () => mutate(`/api/games/${game.id}/intrigue-guest`, {action:'accept_invitation'});
+    const decline = document.createElement('button'); decline.textContent = '谢绝';
+    decline.onclick = () => mutate(`/api/games/${game.id}/intrigue-guest`, {action:'decline_invitation'});
+    accept.disabled = decline.disabled = locked(); invite.append(text, accept, decline); content.appendChild(invite);
+  }
+
+  (system.sections || []).forEach(section => {
+    const block = document.createElement('section'); block.className = `intrigue-faction intrigue-${section.kind}`;
+    const head = document.createElement('div'); head.className = 'intrigue-faction-head';
+    const title = document.createElement('div'); const h3 = document.createElement('h3'); const meta = document.createElement('small');
+    h3.textContent = `${section.kind_name} · ${section.name}`;
+    meta.textContent = `控制者：${section.controller_name} · 主政：${section.policy} · 不满 ${section.unrest} · 敬畏 ${section.fear}`;
+    title.append(h3, meta);
+    const seals = document.createElement('span'); seals.className = 'intrigue-authority';
+    seals.textContent = `${section.control_authority ? '有控制权' : '无控制权'} · ${section.decision_authority ? '有决策权' : `决策权需境界 ${section.decision_threshold}`}`;
+    head.append(title, seals); block.appendChild(head);
+
+    if (!section.positionless_race) {
+      const positions = document.createElement('div'); positions.className = 'intrigue-position-grid';
+      (section.positions || []).forEach(position => {
+        const row = document.createElement('div'); row.className = `intrigue-position${position.holder_id ? ' occupied' : ''}`;
+        const info = document.createElement('span'); const name = document.createElement('b'); const detail = document.createElement('small');
+        name.textContent = `${position.name}：${position.holder_name}`; detail.textContent = `${position.duty} · 最低境界序 ${position.minimum_realm}`; info.append(name, detail); row.appendChild(info);
+        if (section.control_authority && !['leader','family_head','guest_elder','guest_retainer'].includes(position.id)) {
+          const select = document.createElement('select');
+          const empty = document.createElement('option'); empty.value = ''; empty.textContent = '选择候选人'; select.appendChild(empty);
+          (section.members || []).filter(member => member.realm_index >= Number(position.minimum_realm) && !member.imprisoned).forEach(member => {
+            const option = document.createElement('option'); option.value = member.id; option.textContent = `${member.name} · ${member.realm_name}`; select.appendChild(option);
+          });
+          const appoint = document.createElement('button'); appoint.textContent = '任命/调任'; appoint.onclick = () => {
+            if (select.value) mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action:'appoint', npc_id:select.value, position_id:position.id});
+          };
+          appoint.disabled = locked(); row.append(select, appoint);
+        }
+        positions.appendChild(row);
+      });
+      block.appendChild(positions);
+    } else {
+      const raceNote = document.createElement('p'); raceNote.className = 'muted'; raceNote.textContent = '种族势力只开放高阶成员议事与卿族身份，不产生玩家控制权，也不开放种族监狱。'; block.appendChild(raceNote);
+    }
+
+    const memberDetails = document.createElement('details'); memberDetails.className = 'intrigue-details';
+    const memberSummary = document.createElement('summary'); memberSummary.textContent = `在册成员与性格（${section.members.length}）`; memberDetails.appendChild(memberSummary);
+    const memberList = document.createElement('div'); memberList.className = 'intrigue-member-list';
+    (section.members || []).forEach(member => {
+      const row = document.createElement('div'); row.className = `intrigue-member${member.imprisoned ? ' imprisoned' : ''}`;
+      const info = document.createElement('span'); const name = document.createElement('b'); const detail = document.createElement('small');
+      name.textContent = `${member.name} · ${member.position}`;
+      detail.textContent = `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
+      info.append(name, detail); row.appendChild(info);
+      if (section.control_authority) {
+        const tools = document.createElement('div'); tools.className = 'intrigue-member-tools';
+        [['reward','赏'],['punish','罚'],['dismiss','撤职'],['expel','逐出']].forEach(([action,label]) => {
+          const button = document.createElement('button'); button.textContent = label;
+          button.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action, npc_id:member.id});
+          button.disabled = locked() || member.imprisoned; tools.appendChild(button);
+        });
+        const prison = document.createElement('button'); prison.textContent = member.imprisoned ? '释放' : '关押';
+        prison.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action:member.imprisoned ? 'release' : 'imprison', npc_id:member.id, years:10, reason:'违抗势力法令'});
+        prison.disabled = locked(); tools.appendChild(prison); row.appendChild(tools);
+      }
+      memberList.appendChild(row);
+    });
+    memberDetails.appendChild(memberList); block.appendChild(memberDetails);
+
+    {
+      const guests = document.createElement('details'); guests.className = 'intrigue-details';
+      const guestSummary = document.createElement('summary'); guestSummary.textContent = `${section.kind === 'race' ? '卿族' : section.kind === 'family' ? '家族供奉' : '客卿长老'}（${section.guests.length}）`; guests.appendChild(guestSummary);
+      const guestList = document.createElement('div'); guestList.className = 'intrigue-guest-list';
+      (section.guests || []).forEach(guest => {
+        const row = document.createElement('div'); row.className = 'intrigue-guest'; const label = document.createElement('span'); label.textContent = `${guest.name} · 守土必至 / 征伐自愿`; row.appendChild(label);
+        if (section.control_authority && guest.npc_id !== 'player') {
+          [['regularize','转正'],['remove','撤销']].forEach(([action,text]) => { const button=document.createElement('button'); button.textContent=text; button.disabled=locked(); button.onclick=()=>mutate(`/api/games/${game.id}/intrigue-guest`,{kind:section.kind,action,npc_id:guest.npc_id}); row.appendChild(button); });
+        }
+        guestList.appendChild(row);
+      });
+      if (!section.guests.length) { const empty=document.createElement('p'); empty.className='empty'; empty.textContent='暂无客卿。'; guestList.appendChild(empty); }
+      if (section.kind !== 'race' && section.control_authority && section.guest_candidates.length) {
+        const inviteRow=document.createElement('div'); inviteRow.className='intrigue-guest-invite'; const select=document.createElement('select');
+        section.guest_candidates.forEach(candidate=>{const option=document.createElement('option');option.value=candidate.id;option.textContent=`${candidate.name} · 好感 ${candidate.affinity} · 境界序 ${candidate.realm_index}`;select.appendChild(option);});
+        const button=document.createElement('button');button.textContent='邀请客卿';button.disabled=locked();button.onclick=()=>mutate(`/api/games/${game.id}/intrigue-guest`,{kind:section.kind,action:'invite',npc_id:select.value});inviteRow.append(select,button);guestList.appendChild(inviteRow);
+      }
+      guests.appendChild(guestList); block.appendChild(guests);
+    }
+
+    const vote = document.createElement('form'); vote.className = 'intrigue-resolution-form';
+    const voteTitle = document.createElement('b'); voteTitle.textContent = '发起重大决议';
+    const type = document.createElement('select');
+    Object.entries(system.resolution_types || {}).filter(([id]) => section.kind !== 'family' || ['mass_recruitment','relocate','investment','policy'].includes(id)).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    const target = document.createElement('select');
+    const playerChoice = document.createElement('select'); [['1','投赞成票'],['0','投反对票']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;playerChoice.appendChild(option);});
+    const refreshTargets = () => {
+      target.innerHTML=''; let rows=[];
+      if (['declare_war','make_peace','form_alliance','break_alliance'].includes(type.value)) rows=section.resolution_targets || [];
+      else if (type.value === 'policy') rows=Object.entries(system.styles || {}).map(([id,name])=>({id,name}));
+      else if (type.value === 'relocate') rows=system.available_worlds || [];
+      else if (type.value === 'intervene_war') rows=section.war_targets || [];
+      if (!rows.length) rows=[{id:'',name:'无需指定目标'}];
+      rows.forEach(row=>{const option=document.createElement('option');option.value=row.id;option.textContent=row.name;target.appendChild(option);});
+    };
+    type.onchange=refreshTargets; refreshTargets();
+    const submit=document.createElement('button');submit.textContent='提交议事';submit.className='primary';submit.dataset.intrigueUnavailable=section.decision_authority?'0':'1';submit.disabled=locked()||!section.decision_authority;
+    vote.onsubmit=event=>{event.preventDefault();mutate(`/api/games/${game.id}/intrigue-resolution`,{kind:section.kind,resolution_type:type.value,target_id:target.value,player_vote:playerChoice.value==='1'});};
+    vote.append(voteTitle,type,target,playerChoice,submit);block.appendChild(vote);
+    content.appendChild(block);
+  });
+
+  if ((system.resolutions || []).length) {
+    const log=document.createElement('section');log.className='intrigue-resolution-log';const h3=document.createElement('h3');h3.textContent='近期议决';log.appendChild(h3);
+    system.resolutions.forEach(resolution=>{const row=document.createElement('div');const title=document.createElement('b');const detail=document.createElement('small');title.textContent=`${resolution.faction_name} · ${resolution.type_name} · ${resolution.result==='passed'?'通过':'否决'}`;detail.textContent=`${resolution.yes}/${resolution.total} 票赞成 · ${resolution.age} 岁`;row.append(title,detail);log.appendChild(row);});content.appendChild(log);
+  }
 }
 
 function renderFaction(faction) {
@@ -1447,10 +1581,16 @@ function renderPrison(prison) {
   $('#prison-title').textContent = `${prison.name}大牢`;
   const liveHostility = prison.hostility ?? game?.player?.hostility?.[prison.key] ?? 0;
   const cultivationRisk = game?.player?.realm_index >= 9 ? '真仙及以上不会跌落境界' : '服刑可能导致修为倒退';
-  $('#prison-description').textContent = `尚余刑期 ${prison.remaining_years} 年，当前敌对值 ${number(liveHostility)}。每次服刑都会降低敌意；${cultivationRisk}，越狱失败则会加重敌对值。`;
+  const factionPrison = prison.facility === 'faction_prison';
+  $('#prison-description').textContent = factionPrison
+    ? `你被实际收押在该势力的监狱，尚余刑期 ${prison.remaining_years} 年。可服刑、静待或在禁制下受限修炼；V1 不开放越狱。`
+    : `尚余刑期 ${prison.remaining_years} 年，当前敌对值 ${number(liveHostility)}。每次服刑都会降低敌意；${cultivationRisk}，越狱失败则会加重敌对值。`;
+  $('#prison-wait').classList.toggle('hidden', !factionPrison); $('#prison-cultivate').classList.toggle('hidden', !factionPrison); $('#prison-escape').classList.toggle('hidden', factionPrison);
 }
 
 $('#prison-endure').onclick = () => mutate(`/api/games/${game.id}/prison-action`, {action:'endure'});
+$('#prison-wait').onclick = () => mutate(`/api/games/${game.id}/prison-action`, {action:'wait'});
+$('#prison-cultivate').onclick = () => mutate(`/api/games/${game.id}/prison-action`, {action:'cultivate'});
 $('#prison-escape').onclick = () => mutate(`/api/games/${game.id}/prison-action`, {action:'escape'});
 
 function renderRaceSystem(system) {
@@ -1488,11 +1628,11 @@ function renderRaceSystem(system) {
       const row = document.createElement('p'); row.innerHTML = `<b>${timelineText(event.age)}</b><span>${event.summary}</span>`; events.appendChild(row);
     });
     detail.append(heading, factions, relations, events);
-    if (system.has_diplomatic_voice && race.id !== 'human') {
-      const humanRelation = (race.relations || []).find(entry => entry.race === 'human') || {status_name:'中立'};
+    if (system.has_diplomatic_voice && race.id !== system.player_race) {
+      const ownRelation = (race.relations || []).find(entry => entry.race === system.player_race) || {status_name:'中立'};
       detail.appendChild(diplomacyForm(
-        [{target_id:race.id, target_name:race.name, status_name:humanRelation.status_name}],
-        `/api/games/${game.id}/race-diplomacy`, '发起人族大乘议会'
+        [{target_id:race.id, target_name:race.name, status_name:ownRelation.status_name}],
+        `/api/games/${game.id}/race-diplomacy`, `发起${system.player_race_name}大乘议会`
       ));
       const transfer = (system.vassal_transfers || []).find(entry => entry.target_id === race.id);
       if (transfer) detail.appendChild(vassalTransferForm('race', transfer.target_id, transfer.target_name, transfer.candidates));
@@ -2989,7 +3129,7 @@ function renderButtons() {
   document.querySelectorAll('.companion-select').forEach(select => {
     select.disabled = busy || !game?.player.alive || !!game?.pending_event || select.dataset.available !== '1';
   });
-  ['#prison-endure', '#prison-escape'].forEach(selector => {
+  ['#prison-endure', '#prison-wait', '#prison-cultivate', '#prison-escape'].forEach(selector => {
     $(selector).disabled = busy || !game?.player.alive || !game?.imprisonment || !!game?.pending_event;
   });
   document.querySelectorAll('.relationship-interaction').forEach(button => {
@@ -3000,6 +3140,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.governance-form input, .governance-form select, .governance-form button').forEach(control => {
     control.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
+  });
+  document.querySelectorAll('#intrigue-card button, #intrigue-card select, #intrigue-card input').forEach(control => {
+    if (control.id !== 'intrigue-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.intrigueUnavailable === '1';
   });
   document.querySelectorAll('#heavenly-court-card button, #heavenly-court-card select, #heavenly-court-card input').forEach(control => {
     if (control.id !== 'heavenly-court-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.courtUnavailable === '1';

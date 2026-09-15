@@ -1,5 +1,5 @@
 (() => {
-  const panelNames = ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
+  const panelNames = ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
 
   function card(name) { return document.querySelector(`#${name}-card`); }
   function dockButton(name) { return document.querySelector(`[data-panel-target="${name}"]`); }

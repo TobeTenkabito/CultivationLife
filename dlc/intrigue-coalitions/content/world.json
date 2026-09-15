@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "intrigue_dlc": {
+      "enabled": true,
+      "decision_thresholds": {
+        "sect": 4,
+        "family": 3,
+        "race": 8
+      },
+      "positions": {
+        "sect": {
+          "leader": {"name": "宗主 / 掌门", "minimum_realm": 1, "duty": "最高行政与控制顺位"},
+          "grand_elder": {"name": "大长老", "minimum_realm": 4, "duty": "议事与内部稳定"},
+          "enforcement_elder": {"name": "执法长老", "minimum_realm": 3, "duty": "戒律、通缉与监狱日常"},
+          "teaching_elder": {"name": "传功长老", "minimum_realm": 3, "duty": "招收、培养与传功"},
+          "foreign_elder": {"name": "外务长老", "minimum_realm": 3, "duty": "外交、联盟与客卿往来"},
+          "war_elder": {"name": "战堂长老", "minimum_realm": 3, "duty": "防务与战争调动"},
+          "affairs_elder": {"name": "庶务长老", "minimum_realm": 2, "duty": "资源与日常内政"},
+          "guest_elder": {"name": "客卿长老", "minimum_realm": 4, "duty": "防御义务与对外威慑"}
+        },
+        "family": {
+          "family_head": {"name": "家主", "minimum_realm": 1, "duty": "最高行政与控制顺位"},
+          "grand_clan_elder": {"name": "大族老", "minimum_realm": 3, "duty": "议事与传承稳定"},
+          "enforcement_clan_elder": {"name": "执法族老", "minimum_realm": 2, "duty": "族规与监狱日常"},
+          "foreign_clan_elder": {"name": "外务族老", "minimum_realm": 2, "duty": "家族外交与供奉往来"},
+          "war_clan_elder": {"name": "战务族老", "minimum_realm": 2, "duty": "家族防务"},
+          "affairs_clan_elder": {"name": "庶务族老", "minimum_realm": 1, "duty": "产业与日常内政"},
+          "guest_retainer": {"name": "家族供奉", "minimum_realm": 3, "duty": "防御义务与威慑"}
+        },
+        "race": {}
+      }
+    }
+  }
+}

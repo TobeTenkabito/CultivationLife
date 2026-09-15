@@ -373,6 +373,21 @@ class Handler(BaseHTTPRequestHandler):
                 )
             elif operation == "faction-intercept":
                 result = ENGINE.intercept_faction_npc(game_id, payload.get("npc_id", ""))
+            elif operation == "intrigue-personnel":
+                result = ENGINE.intrigue_personnel_action(
+                    game_id, payload.get("kind", ""), payload.get("action", ""),
+                    payload.get("npc_id", ""), payload.get("position_id", ""),
+                    int(payload.get("years", 1) or 1), payload.get("reason", ""),
+                )
+            elif operation == "intrigue-guest":
+                result = ENGINE.intrigue_guest_action(
+                    game_id, payload.get("kind", ""), payload.get("action", ""), payload.get("npc_id", "")
+                )
+            elif operation == "intrigue-resolution":
+                result = ENGINE.intrigue_propose_resolution(
+                    game_id, payload.get("kind", ""), payload.get("resolution_type", ""),
+                    payload.get("target_id", ""), bool(payload.get("player_vote", True)),
+                )
             elif operation == "breakthrough":
                 result = ENGINE.breakthrough(game_id)
             elif operation == "monster-evolve":

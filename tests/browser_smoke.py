@@ -301,11 +301,17 @@ def main() -> None:
 
                 page.locator("[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
-                assert "已识别 2" in page.locator("#extension-summary").text_content()
+                assert "已识别 3" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
                 assert "妖修道途：血脉与进化" in extension_text
-                assert "百鬼夜行:轮回往生" in extension_text
+                assert "百鬼夜行：轮回往生" in extension_text
+                assert "明争暗斗：合纵连横" in extension_text
                 page.locator("#extension-toggle").click()
+
+                page.locator("[data-panel-target='intrigue']").click()
+                page.locator("#intrigue-card").wait_for(state="visible")
+                assert "职位、控制权与决策权彼此独立" in page.locator("#intrigue-card").text_content()
+                page.locator("#intrigue-toggle").click()
 
                 page.locator("[data-panel-target='captive']").click()
                 page.locator("#captive-card").wait_for(state="visible")

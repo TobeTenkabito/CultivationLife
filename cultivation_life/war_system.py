@@ -72,7 +72,10 @@ class WarSystemMixin:
         else:
             people = [npc for npc in self._all_world_npcs(game) if npc.race == side_id]
         # 战场只记录最强二十四人；这是可解释的参战名册，也是稳定的性能上限。
-        unique = {npc.id: npc for npc in people if npc.alive and npc.world == world}
+        unique = {
+            npc.id: npc for npc in people
+            if npc.alive and npc.world == world and not self._intrigue_is_imprisoned(game, npc.id)
+        }
         return sorted(unique.values(), key=self._npc_power, reverse=True)[:int(self._war_rules().get("roster_cap", 24))]
 
     def _ensure_war_shape(self, game: GameState, war: dict[str, Any]) -> bool:
@@ -220,7 +223,7 @@ class WarSystemMixin:
             return None
         self._ensure_war_shape(game, war)
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
-        return self._participant_side(war, own_id)
+        return self._participant_side(war, own_id) or self._intrigue_player_guest_side(game, war)
 
     def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
         side = self._player_war_side(game, war)
@@ -242,6 +245,12 @@ class WarSystemMixin:
         world = self._war_world(game, kind, attacker)
         attacker_roster = [npc.id for npc in self._war_side_members(game, kind, attacker, world)]
         defender_roster = [npc.id for npc in self._war_side_members(game, kind, defender, world)]
+        # DLC guest elders / family retainers / race guests are defensive
+        # guarantees.  They enter the defending roster, never the attacker's
+        # compulsory levy.
+        defensive_guests = self._intrigue_defensive_guest_ids(game, kind, defender, world)
+        attacker_roster = [npc_id for npc_id in attacker_roster if npc_id not in defensive_guests]
+        defender_roster.extend(npc_id for npc_id in defensive_guests if npc_id not in defender_roster)
         war = {
             "id": f"war_{uuid.uuid4().hex[:12]}", "kind": kind, "world": world,
             "attacker_id": attacker, "defender_id": defender, "status": "active",
@@ -298,7 +307,8 @@ class WarSystemMixin:
         escaped = set(war.get("escaped", {}).get(side, []))
         return [npc for npc_id in war.get("roster", {}).get(side, [])
                 if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
-                and (npc := self._war_npc(game, npc_id)) and npc.alive]
+                and (npc := self._war_npc(game, npc_id)) and npc.alive
+                and not self._intrigue_is_imprisoned(game, npc.id)]
 
     def _war_total_power(
         self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
@@ -1114,6 +1124,18 @@ class WarSystemMixin:
             cost = int(round(cost * float(self._war_rules().get("ally_term_cost_multiplier", 1.25))))
         if not concede and term != "white_peace" and effective_score < cost:
             raise ValueError(f"当前战争分数 {effective_score:.0f}，不足以提出该条款（需要 {cost}）")
+        if self._intrigue_enabled():
+            own_id = str(war[f"{player_side}_id"])
+            opposing_id = str(war[f"{'defender' if player_side == 'attacker' else 'attacker'}_id"])
+            vote_rng = decode_rng(game.seed, game.rng_state)
+            resolution = self._intrigue_resolve(
+                game, str(war["kind"]), own_id, "make_peace", opposing_id, True, "player", vote_rng,
+            )
+            game.rng_state = encode_rng(vote_rng)
+            if resolution["result"] != "passed":
+                game.updated_at = now_iso()
+                self.store.save(game)
+                return self.present(game)
         self._conclude_war(game, war, term, beneficiary, target_id=target_id, target_power_id=selected_power,
                            third_party_id=third_party_id, third_status=third_status)
         game.updated_at = now_iso()

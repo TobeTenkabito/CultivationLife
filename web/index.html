@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260915-3">
-  <link rel="stylesheet" href="/panels.css?v=20260915-4">
+  <link rel="stylesheet" href="/panels.css?v=20260916-5">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -79,7 +79,7 @@
       <section class="main-column">
         <article id="prison-card" class="paper prison-card hidden">
           <p class="eyebrow">身陷囹圄</p><h2 id="prison-title">势力大牢</h2><p id="prison-description"></p>
-          <div class="choices"><button id="prison-endure">忍受一年刑狱</button><button id="prison-escape">冒险越狱</button></div>
+          <div class="choices"><button id="prison-endure">忍受一年刑狱</button><button id="prison-wait" class="hidden">静待一年</button><button id="prison-cultivate" class="hidden">受限修炼一年</button><button id="prison-escape">冒险越狱</button></div>
         </article>
         <article id="event-card" class="paper event-card hidden">
           <p class="eyebrow">命途有变</p><h2 id="event-title"></h2><p id="event-body"></p><div id="event-choices" class="choices"></div>
@@ -216,6 +216,11 @@
         <article id="inventory-card" class="paper utility-panel left-panel inventory-panel" role="dialog" aria-modal="false" aria-label="分类行囊">
           <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>分类行囊</h2></div><div class="panel-heading"><span>同名常驻属性按数量叠加</span><button id="inventory-toggle" type="button">关闭</button></div></div>
           <div id="inventory-list" class="inventory-groups"></div>
+        </article>
+        <article id="intrigue-card" class="paper utility-panel intrigue-panel hidden" role="dialog" aria-modal="false" aria-label="势力内政">
+          <div class="section-title"><div><p class="eyebrow">COALITIONS &amp; INTRIGUE</p><h2>明争暗斗：合纵连横</h2></div><div class="panel-heading"><span id="intrigue-heading">职位、决议与人事</span><button id="intrigue-toggle" type="button">关闭</button></div></div>
+          <p class="muted">职位、控制权与决策权彼此独立。重大公共事务一人一票；内部任免与赏罚由控制者直接执行，但会留下真实后果。</p>
+          <div id="intrigue-content"></div>
         </article>
         <article id="spirit-field-card" class="paper utility-panel left-panel spirit-field-panel" role="dialog" aria-modal="false" aria-label="灵田">
           <div class="section-title"><div><p class="eyebrow">洞府沃土</p><h2>灵田</h2></div><div class="panel-heading"><span id="spirit-field-summary"></span><button id="spirit-field-toggle" type="button">关闭</button></div></div>
@@ -354,6 +359,7 @@
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
+        <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
         <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
@@ -378,7 +384,7 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260915-1"></script>
-  <script src="/app.js?v=20260916-2"></script>
+  <script src="/ui-panels.js?v=20260916-2"></script>
+  <script src="/app.js?v=20260916-3"></script>
 </body>
 </html>
