@@ -89,12 +89,30 @@ class CraftingSystemTests(unittest.TestCase):
         self.assertEqual(restored.player.crafting_materials, [])
         self.assertEqual(restored.version, game.version)
 
-    def test_material_catalog_covers_four_routes_and_their_upper_worlds(self):
-        worlds = {row["world"] for row in crafting_material_definitions().values()}
-        self.assertTrue({
-            "human", "spirit", "demon", "true_demon", "monster_realm", "phantom_underworld", "nether",
-            "hell", "reincarnation",
-        } <= worlds)
+    def test_material_catalog_has_basic_five_slot_choices_in_every_world(self):
+        definitions = crafting_material_definitions().values()
+        required_worlds = {
+            "human", "spirit", "celestial", "demon", "true_demon", "asura",
+            "monster_realm", "phantom_underworld", "nether", "hell", "reincarnation",
+        }
+        for world in required_worlds:
+            local = [row for row in definitions if row["world"] == world]
+            self.assertGreaterEqual(len(local), 2, world)
+            self.assertEqual(
+                {"primary", "secondary", "quench"},
+                {role for row in local for role in row["roles"]},
+                world,
+            )
+
+        common_ids = {
+            "human_refined_bronze", "spirit_cloud_iron", "celestial_cloud_jade",
+            "demon_bone_steel", "true_demon_black_sinew", "asura_blood_steel",
+            "monster_common_horn", "monster_shadow_hide", "nether_ancient_bone",
+            "hell_yin_clay", "reincarnation_shore_stone",
+        }
+        common = [row for row in definitions if row["id"] in common_ids]
+        self.assertEqual(len(common), len(required_worlds))
+        self.assertTrue(all(row["allow_duplicate_type"] for row in common))
 
     def test_forge_equip_and_sell_destroy_only_the_selected_instance(self):
         instances = self._give_human_recipe()

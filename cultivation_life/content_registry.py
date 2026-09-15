@@ -326,11 +326,11 @@ class ContentRegistry:
             material_ids.add(material_id)
             covered_worlds.add(str(material.get("world", "")))
         required_worlds = {
-            "human", "spirit", "demon", "true_demon", "monster_realm",
-            "phantom_underworld", "hell", "reincarnation",
+            "human", "spirit", "celestial", "demon", "true_demon", "asura",
+            "monster_realm", "phantom_underworld", "nether", "hell", "reincarnation",
         }
         if not required_worlds <= covered_worlds:
-            raise ContentError("炼器材料没有覆盖四条道途的本界与上位一界")
+            raise ContentError("炼器材料没有覆盖十一处本体与官方道途界面")
         for plant in document.get("spirit_plants", []):
             declared_roles = set(plant.get("roles", []))
             if not plant.get("plant_id") or not declared_roles or not declared_roles <= roles or set(plant.get("role_effects", {})) != declared_roles:
@@ -408,10 +408,10 @@ class ContentRegistry:
             covered_worlds.add(str(material.get("world", "")))
         required_worlds = {
             "human", "spirit", "celestial", "demon", "true_demon", "asura",
-            "phantom_underworld", "nether", "hell", "reincarnation",
+            "monster_realm", "phantom_underworld", "nether", "hell", "reincarnation",
         }
         if not required_worlds <= covered_worlds:
-            raise ContentError("专用阵材没有覆盖本体十个可达界面")
+            raise ContentError("专用阵材没有覆盖十一处本体与官方道途界面")
         repair_ids: set[str] = set()
         repair_worlds: set[str] = set()
         for resource in document.get("maintenance_resources", []):
@@ -427,7 +427,7 @@ class ContentRegistry:
             repair_ids.add(identifier)
             repair_worlds.add(world)
         if repair_worlds != required_worlds:
-            raise ContentError("阵法修复资源必须覆盖本体十个可达界面")
+            raise ContentError("阵法修复资源必须覆盖十一处本体与官方道途界面")
 
         crafting_ids = {str(row.get("id")) for row in crafting.get("materials", [])}
         for row in document.get("crafting_materials", []):

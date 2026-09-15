@@ -263,9 +263,21 @@ class FormationIntegrationTests(unittest.TestCase):
         self.assertEqual(config["system_version"], 2)
         worlds = set(config["world_names"]) if "world_names" in config else {
             "human", "spirit", "celestial", "demon", "true_demon", "asura",
-            "phantom_underworld", "nether", "hell", "reincarnation",
+            "monster_realm", "phantom_underworld", "nether", "hell", "reincarnation",
         }
         self.assertEqual({row["world"] for row in formation_maintenance_definitions().values()}, worlds)
+        definitions = formation_material_definitions().values()
+        for world in worlds:
+            self.assertGreaterEqual(len([row for row in definitions if row["world"] == world]), 2, world)
+        basic_ids = {
+            "human_black_iron_flag", "spirit_greenwood_token", "celestial_white_gold_token",
+            "demon_yin_bone_flag", "true_demon_blood_wood_stake", "asura_blood_iron_flag",
+            "monster_bone_token", "phantom_mist_water_orb", "nether_primordial_iron_token",
+            "hell_yin_earth_stake", "reincarnation_shore_wood_token",
+        }
+        basics = [row for row in definitions if row["id"] in basic_ids]
+        self.assertEqual(len(basics), len(worlds))
+        self.assertTrue(all(row["field_hook"] is None and not row["relation_overrides"] for row in basics))
         self.assertLessEqual(config["settings"]["ground_power_hard_cap_ratio"], .60)
         self.assertLessEqual(config["settings"]["npc_formation_bonus_cap"], .10)
 
