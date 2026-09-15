@@ -676,6 +676,10 @@ class GameState:
     # NPC arrays are compact, deterministic blueprints keyed by persistent NPC
     # id. They do not consume the player's material instances.
     npc_formations: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # Optional NPC/governance DLC state.  Keeping every political record under
+    # one additive key means disabling the DLC freezes it without rewriting
+    # sect, family, race or legacy save structures.
+    intrigue_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -723,6 +727,7 @@ class GameState:
             "last_combat_report": self.last_combat_report,
             "ghost_parade": self.ghost_parade,
             "npc_formations": self.npc_formations,
+            "intrigue_state": self.intrigue_state,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -772,6 +777,8 @@ class GameState:
                 for npc_id, formation in value.get("npc_formations", {}).items()
                 if isinstance(formation, dict)
             } if isinstance(value.get("npc_formations", {}), dict) else {},
+            intrigue_state=copy.deepcopy(value.get("intrigue_state", {}))
+            if isinstance(value.get("intrigue_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

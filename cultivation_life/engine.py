@@ -88,6 +88,7 @@ from .ghost_system import (
     grant_intrinsic_growth, grant_intrinsic_progression_if_new_highwater,
     grant_wangsheng, reincarnation_breakthrough_bonus,
 )
+from .intrigue_system import IntrigueSystemMixin
 from .possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
@@ -126,7 +127,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -468,6 +469,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             for _ in range(completed_units):
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
                 era_news.extend(self._advance_heavenly_court_unit(game, rng))
+                era_news.extend(self._advance_intrigue_unit(game, rng))
             self._advance_player_bounties(game, rng)
             if game.pending_event is None and not player.ghost_captor:
                 if self._maybe_immortal_conversion_event(game, rng):
@@ -572,18 +574,47 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
                 if key.startswith("world:"):
                     self._record_world_coalition_amnesty(player, key.split(":", 1)[1])
                 player.imprisonment = None
+                self._intrigue_sync_player_prison(game)
                 result = "released"
                 summary = "刑期已满，旧案已经服结，对你的敌意与通缉归零。"
             else:
                 result = "degraded" if degraded else "endured"
                 summary = f"你熬过一年刑狱折磨，尚余 {prison['remaining_years']} 年。" + (" 酷刑令你的修为倒退。" if degraded else "")
+        elif action in {"wait", "cultivate"}:
+            if prison.get("facility") != "faction_prison":
+                raise ValueError("当前牢狱不允许此项行动")
+            advance_player_age(player)
+            gain = 0.0
+            if action == "cultivate":
+                gain = self._add_opportunity(player, max(0.2, opportunity_required(player) * 0.01))
+                player.mp = max(0.0, player.mp - max_mp(player) * 0.04)
+            prison["remaining_years"] = max(0, int(prison["remaining_years"]) - 1)
+            hostility_reduction = float(prison.get("hostility_reduction_per_year", 4.0))
+            player.hostility[key] = max(0.0, player.hostility.get(key, 0) - hostility_reduction)
+            prison["hostility"] = round(player.hostility[key], 1)
+            self._annual_sect_update(game, rng)
+            self._annual_world_npc_update(game, rng)
+            if player.lifespan is not None and current_body_age(player) >= player.lifespan:
+                self._die(game, "囚禁期间寿元耗尽", "SYS_PRISON_LIFESPAN")
+                result, summary = "dead", "你未能熬到刑满，在大牢中寿尽坐化。"
+            elif prison["remaining_years"] <= 0:
+                player.hostility[key] = 0.0
+                player.imprisonment = None
+                self._intrigue_sync_player_prison(game)
+                result, summary = "released", "刑期已满，你获准离开势力监狱。"
+            else:
+                result = "cultivated" if action == "cultivate" else "waited"
+                summary = (f"你在禁制下完成一年受限修炼，机缘 +{gain:.1f}；" if action == "cultivate" else "你静待一年；") + f"尚余 {prison['remaining_years']} 年刑期。"
         elif action == "escape":
+            if prison.get("facility") == "faction_prison":
+                raise ValueError("势力监狱 V1 暂不开放越狱")
             guard_power = expected_combat_power(player.realm_index, max(1, player.layer)) * (1 + player.hostility.get(key, 0) / 160)
             own_power = self._player_intrinsic_combat_power(player)
             chance = max(0.05, min(0.78, 0.18 + own_power / max(1.0, guard_power) * 0.28))
             player.hostility[key] = player.hostility.get(key, 0) + float(WORLD_SYSTEMS["faction_conflict"]["escape_hostility_gain"])
             if rng.random() < chance:
                 player.imprisonment = None
+                self._intrigue_sync_player_prison(game)
                 result, summary = "escaped", f"你趁守卫换岗杀出大牢（成功率 {chance:.0%}），但通缉进一步加重。"
             else:
                 damage = max_hp(player) * rng.uniform(0.25, 0.45)
@@ -595,9 +626,10 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
                     result, summary = "failed", f"越狱失败，HP -{damage:.0f}，敌对值继续上升。"
         else:
             raise ValueError("未知牢狱行动")
-        if action == "endure" and player.alive and not self._advance_soul_erosion_time(game, 1):
+        if action in {"endure", "wait", "cultivate"} and player.alive and not self._advance_soul_erosion_time(game, 1):
             result = "dead"
             summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"
+        self._intrigue_sync_player_prison(game)
         game.history.append(HistoryRecord(
             "SYS_PRISON_ACTION", 1, player.age, "身陷囹圄", action, result, summary,
             {"imprisonment": copy.deepcopy(player.imprisonment)}, ["system", "prison", "wanted"],
@@ -1298,6 +1330,10 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         return max(0.08, min(0.92, base + voter_affinity / 500))
 
     def propose_race_diplomacy(self, game_id: str, target_race: str, status: str) -> dict[str, Any]:
+        if self._intrigue_enabled():
+            resolution_type = {"war": "declare_war", "alliance": "form_alliance", "truce": "make_peace", "neutral": "break_alliance"}.get(status)
+            if resolution_type:
+                return self.intrigue_propose_resolution(game_id, "race", resolution_type, target_race, True)
         game = self._load(game_id)
         player = game.player
         if game.pending_event or player.imprisonment:
@@ -1343,6 +1379,10 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         return self.present(game)
 
     def propose_sect_diplomacy(self, game_id: str, target_faction: str, status: str) -> dict[str, Any]:
+        if self._intrigue_enabled():
+            resolution_type = {"war": "declare_war", "alliance": "form_alliance", "truce": "make_peace", "neutral": "break_alliance"}.get(status)
+            if resolution_type:
+                return self.intrigue_propose_resolution(game_id, "sect", resolution_type, target_faction, True)
         game = self._load(game_id)
         player = game.player
         if game.pending_event or player.imprisonment:
@@ -3025,6 +3065,9 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         return changed
 
     def _has_race_voice(self, game: GameState) -> bool:
+        if self._intrigue_enabled():
+            race_id = self._player_allegiance_race(game.player)
+            return self._world_supports(game.player.world, "races") and self._intrigue_has_decision_authority(game, "race", race_id)
         realm_index, _ = self._actual_player_realm(game.player)
         required = int(WORLD_SYSTEMS["world_travel"]["required_realm"])
         return self._world_supports(game.player.world, "races") and self._player_allegiance_race(game.player) == "human" and realm_index >= required
@@ -3032,15 +3075,18 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
     def _has_sect_voice(self, game: GameState) -> bool:
         player = game.player
         sect = game.sects.get(player.faction_id or "")
+        if self._intrigue_enabled():
+            return bool(sect and self._intrigue_has_decision_authority(game, "sect", sect.id))
         realm_index, _ = self._actual_player_realm(player)
         return bool(
             sect and not sect.extinct and sect.world == player.world
             and (sect.founded_by_player or realm_index >= self._governance_threshold(player.world))
         )
 
-    @staticmethod
-    def _has_family_voice(game: GameState) -> bool:
+    def _has_family_voice(self, game: GameState) -> bool:
         family = game.family
+        if self._intrigue_enabled():
+            return bool(family and self._intrigue_has_decision_authority(game, "family", family.id))
         return bool(family and not family.extinct and family.founded_by_player)
 
     @staticmethod
@@ -3270,6 +3316,13 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             if world_tags and f"world:{game.player.world}" not in world_tags:
                 continue
             if "faction" not in tags or "faction_join" in tags:
+                continue
+            if self._intrigue_enabled() and any(
+                marker in f"{event.get('title', '')}{event.get('body', '')}"
+                for marker in ("争位", "夺位", "排挤", "竞争")
+            ) and not self._intrigue_pressure_position_occupied(game, faction_id):
+                # With the DLC, political rivals must occupy a scarce office;
+                # an empty seat never invents an imaginary competitor.
                 continue
             if "faction_unique" in tags and f"faction:{faction_id}" not in tags:
                 continue
@@ -3699,6 +3752,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             "sentence_years": years,
             "hostility_reduction_per_year": max(4.0, hostility / max(1, years)),
         }
+        self._intrigue_record_player_prison(game, key, years)
         player.party = []
         return f"你被押入{self._hostility_name(key, game)}大牢，刑期 {years} 年。"
 
@@ -4108,6 +4162,11 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
                 if not npc.alive or npc.world != sect.world:
                     continue
                 npc.age += 1
+                if self._intrigue_is_imprisoned(game, npc.id):
+                    if npc.lifespan is not None and npc.age >= npc.lifespan:
+                        npc.alive = False
+                        npc.death_reason = "服刑期间寿元耗尽"
+                    continue
                 if npc.wounds > 0 and rng.random() < 0.35:
                     npc.wounds -= 1
                 tribulation = self._resolve_npc_periodic_tribulation(game, npc, rng, sect.name)
@@ -4241,6 +4300,11 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             if not npc.alive:
                 continue
             npc.age += 1
+            if self._intrigue_is_imprisoned(game, npc.id):
+                if npc.lifespan is not None and npc.age >= npc.lifespan:
+                    npc.alive = False
+                    npc.death_reason = "服刑期间寿元耗尽"
+                continue
             if npc.wounds > 0 and rng.random() < 0.35:
                 npc.wounds -= 1
             tribulation = self._resolve_npc_periodic_tribulation(game, npc, rng, npc.title)
@@ -4293,7 +4357,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         }
         villains = [
             npc for npc in game.world_npcs.values()
-            if npc.alive and not npc.encountered_player
+            if npc.alive and not npc.encountered_player and not self._intrigue_is_imprisoned(game, npc.id)
             and (npc.notorious or npc.path == "demonic")
             and rng.random() < (0.014 if npc.path == "demonic" else 0.004)
         ]
@@ -7794,6 +7858,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             "natal_artifact": self._public_natal_artifact(game),
             "crafting_system": self._public_crafting_system(game),
             "formation_system": self._public_formation_system(game),
+            "intrigue_system": self._public_intrigue_system(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),

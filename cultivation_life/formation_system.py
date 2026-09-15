@@ -1084,7 +1084,11 @@ class FormationSystemMixin:
             sect = game.sects.get(player.faction_id or "")
             if not sect or sect.extinct or sect.world != player.world:
                 raise ValueError("当前没有可布置护山阵的本界宗门")
-            if not self._has_sect_voice(game):
+            can_manage_sect = (
+                self._intrigue_has_control(game, "sect", sect.id)
+                if self._intrigue_enabled() else self._has_sect_voice(game)
+            )
+            if not can_manage_sect:
                 raise ValueError("只有开山祖师或拥有宗门话语权者才能更换护山阵")
             owner_id, owner_name = sect.id, sect.name
         elif owner_kind == "player":
@@ -1137,7 +1141,10 @@ class FormationSystemMixin:
             creator_id = str(array.get("creator_id", ""))
             created_by_player = not creator_id or creator_id == game.id
             current_sect_authority = (
-                array.get("owner_id") == game.player.faction_id and self._has_sect_voice(game)
+                array.get("owner_id") == game.player.faction_id and (
+                    self._intrigue_has_control(game, "sect", str(game.player.faction_id))
+                    if self._intrigue_enabled() else self._has_sect_voice(game)
+                )
             )
             if not created_by_player and not current_sect_authority:
                 raise ValueError("你无权处置这座宗门护山阵")
@@ -1369,5 +1376,8 @@ class FormationSystemMixin:
                 "location_name": self.maps.location(player.world, player.location_id)["name"],
             },
             "can_deploy_personal": bool(profile.get("active")),
-            "can_deploy_sect": bool(profile.get("active") and self._has_sect_voice(game)),
+            "can_deploy_sect": bool(profile.get("active") and game.player.faction_id and (
+                self._intrigue_has_control(game, "sect", str(game.player.faction_id))
+                if self._intrigue_enabled() else self._has_sect_voice(game)
+            )),
         }
