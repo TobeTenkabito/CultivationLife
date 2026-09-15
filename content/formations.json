@@ -61,6 +61,34 @@
     "law": {"law": 0.5, "space": -0.5, "soul": -0.5, "star": 0.5},
     "neutral": {"neutral": 0.5}
   },
+  "material_progression": {
+    "natures": ["metal","wood","water","fire","earth","yin","yang","wind","thunder","soul","space","star","law","neutral"],
+    "nature_names": {
+      "metal":"庚金阵筹","wood":"青木阵桩","water":"玄水阵珠","fire":"赤焰阵石","earth":"厚土阵盘","yin":"玄阴阵旗","yang":"烈阳阵镜","wind":"罡风阵翎","thunder":"雷纹阵鼓","soul":"镇魂阵铃","space":"锁空阵钉","star":"星辉阵砂","law":"法纹阵简","neutral":"混元阵核"
+    },
+    "nature_value_multipliers": {
+      "metal":1.02,"wood":0.98,"water":1.0,"fire":1.01,"earth":0.97,"yin":1.0,"yang":1.02,"wind":1.01,"thunder":1.04,"soul":1.03,"space":1.05,"star":1.05,"law":1.05,"neutral":0.96
+    },
+    "tiers": {
+      "1":{"label":"一阶","base_value":18,"formation_value":2.0},
+      "2":{"label":"二阶","base_value":60,"formation_value":3.0},
+      "3":{"label":"三阶","base_value":360,"formation_value":3.6},
+      "4":{"label":"四阶","base_value":1400,"formation_value":4.4},
+      "5":{"label":"五阶","base_value":7800,"formation_value":5.1},
+      "6":{"label":"六阶","base_value":68000,"formation_value":5.8},
+      "7":{"label":"七阶","base_value":260000,"formation_value":6.7},
+      "8":{"label":"八阶","base_value":900000,"formation_value":7.5}
+    },
+    "worlds": {
+      "human":{"prefix":"凡尘","tiers":[1,2,3,4,5],"value_multiplier":1.0},
+      "demon":{"prefix":"魔渊","tiers":[1,2,3,4,5],"value_multiplier":1.06},
+      "spirit":{"prefix":"灵霄","tiers":[1,2,3,4,5,6,7,8],"value_multiplier":1.0},
+      "true_demon":{"prefix":"真魔","tiers":[5,6,7,8],"value_multiplier":1.15},
+      "monster_realm":{"prefix":"百兽","tiers":[1,2,3,4,5,6,7,8],"value_multiplier":1.04},
+      "phantom_underworld":{"prefix":"幻冥","tiers":[1,2,3,4,5,6,7,8],"value_multiplier":1.08},
+      "hell":{"prefix":"阴司","tiers":[1,2,3,4,5,6,7,8],"value_multiplier":1.1}
+    }
+  },
   "maintenance_resources": [
     {"id":"human_array_marrow","name":"地脉阵髓","world":"human","tier":1,"base_value":35,"repair_value":18},
     {"id":"spirit_cloud_resin","name":"云脉灵脂","world":"spirit","tier":6,"base_value":68000,"repair_value":24},

@@ -281,6 +281,49 @@ class FormationIntegrationTests(unittest.TestCase):
         self.assertLessEqual(config["settings"]["ground_power_hard_cap_ratio"], .60)
         self.assertLessEqual(config["settings"]["npc_formation_bonus_cap"], .10)
 
+    def test_every_target_world_stage_has_all_fourteen_basic_natures(self):
+        definitions = list(formation_material_definitions().values())
+        all_natures = set(formation_config()["nature_channels"])
+        target_tiers = {
+            "human":range(1, 6), "demon":range(1, 6),
+            "spirit":range(1, 9), "true_demon":range(5, 9),
+            "monster_realm":range(1, 9), "phantom_underworld":range(1, 9),
+            "hell":range(1, 9),
+        }
+        for world, tiers in target_tiers.items():
+            for tier in tiers:
+                covered = {
+                    row["nature"] for row in definitions
+                    if row["world"] == world and int(row["tier"]) == tier
+                }
+                self.assertEqual(covered, all_natures, f"{world} tier {tier}")
+        self.assertEqual(len(definitions), 663)
+
+    def test_generated_progression_materials_are_monotone_and_rule_neutral(self):
+        generated = [
+            row for row in formation_material_definitions().values()
+            if row["id"].startswith("progression_")
+        ]
+        self.assertTrue(generated)
+        self.assertTrue(all(row["field_hook"] is None and not row["relation_overrides"] for row in generated))
+        for world in {row["world"] for row in generated}:
+            by_tier = {}
+            for row in generated:
+                if row["world"] == world:
+                    by_tier.setdefault(int(row["tier"]), []).append(row)
+            prices = [min(row["base_value"] for row in by_tier[tier]) for tier in sorted(by_tier)]
+            values = [min(row["formation_value"] for row in by_tier[tier]) for tier in sorted(by_tier)]
+            self.assertEqual(prices, sorted(prices))
+            self.assertEqual(values, sorted(values))
+
+    def test_excluded_upper_world_formation_catalogs_are_unchanged(self):
+        definitions = list(formation_material_definitions().values())
+        expected = {"celestial":5, "asura":4, "nether":5, "reincarnation":5}
+        self.assertEqual(
+            {world:sum(row["world"] == world for row in definitions) for world in expected},
+            expected,
+        )
+
     def test_ground_array_transfers_exact_instances_repairs_and_withdraws(self):
         instances = self._give_array()
         self._save_active(instances)

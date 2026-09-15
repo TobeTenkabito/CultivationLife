@@ -12,13 +12,22 @@
         {"id":"muling_desert","name":"穆陵沙漠","description":"古战场与流沙遗迹纵横，火土材料常见，探宝风险较高。","themes":["遗迹","火土"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.75,"demon":0.85,"monster":0.45,"yin":0.55}},
         {"id":"lanjiang_steppe","name":"岚疆草原","description":"风脉贯穿草海，游牧修士与灵兽群落逐水草迁徙。","themes":["风脉","灵兽"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.9,"demon":0.5,"monster":1.15,"yin":0.45}},
         {"id":"whisper_archipelago","name":"风语群岛","description":"岛链受罡风环绕，水风功法、海贸法器在此流通。","themes":["海贸","风水"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.05,"demon":0.4,"monster":0.65,"yin":0.75}},
-        {"id":"lancang_sea","name":"澜沧海","description":"横跨人界东境的无边灵海，低阶修士难以维持长途遁光。","themes":["深海","上古洞府"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.25,"demon":0.35,"monster":0.85,"yin":0.9},"min_realm_index":4,"failure":"lethal","failure_reason":"元婴以下修士横渡澜沧海时法力枯竭，最终葬身无边海域"}
+        {"id":"lancang_sea","name":"澜沧海","description":"横跨人界东境的无边灵海，低阶修士难以维持长途遁光。","themes":["深海","上古洞府"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.25,"demon":0.35,"monster":0.85,"yin":0.9},"min_realm_index":4,"failure":"lethal","failure_reason":"元婴以下修士横渡澜沧海时法力枯竭，最终葬身无边海域"},
+        {"id":"cangwu_mountains","name":"苍梧群山","description":"青石山脉间散布古修洞府，山腹金土脉络适合寻矿与布阵。","themes":["山岳","矿脉"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.08,"demon":0.4,"monster":0.72,"yin":0.58},"min_realm_index":2,"failure":"blocked"},
+        {"id":"mirror_lake","name":"镜湖水府","description":"澄湖下有水族旧府，月夜时湖底阵纹会倒映至水面。","themes":["水府","月华"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.12,"demon":0.38,"monster":0.78,"yin":0.82}},
+        {"id":"frost_reed_marsh","name":"寒芦泽","description":"万里芦海受阴寒水汽滋养，散修沿古堤经营药圃与渡口。","themes":["湿地","灵药"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.96,"demon":0.48,"monster":0.74,"yin":1.02}},
+        {"id":"skyfire_crater","name":"天火陨坑","description":"陨星撞出的赤色盆地仍有地火喷涌，结丹修士常来淬器。","themes":["陨星","地火"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.02,"demon":0.68,"monster":0.62,"yin":0.35},"min_realm_index":3,"failure":"blocked"},
+        {"id":"border_void_watch","name":"界门古塞","description":"人界边缘的残破界门与古塞相连，只有化神修士能承受持续界风。","themes":["界门","古塞"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.42,"demon":0.52,"monster":0.9,"yin":0.88},"min_realm_index":5,"failure":"blocked"}
       ],
       "routes":[
         {"from":"wudi_plain","to":"muling_desert","years":4},{"from":"wudi_plain","to":"lanjiang_steppe","years":3},
         {"from":"wudi_plain","to":"whisper_archipelago","years":7},{"from":"muling_desert","to":"lanjiang_steppe","years":5},
         {"from":"lanjiang_steppe","to":"whisper_archipelago","years":6},{"from":"whisper_archipelago","to":"lancang_sea","years":8},
-        {"from":"wudi_plain","to":"lancang_sea","years":14}
+        {"from":"wudi_plain","to":"lancang_sea","years":14},
+        {"from":"muling_desert","to":"cangwu_mountains","years":4},{"from":"cangwu_mountains","to":"skyfire_crater","years":6},
+        {"from":"lanjiang_steppe","to":"mirror_lake","years":4},{"from":"mirror_lake","to":"frost_reed_marsh","years":3},
+        {"from":"frost_reed_marsh","to":"whisper_archipelago","years":5},{"from":"lancang_sea","to":"border_void_watch","years":11},
+        {"from":"skyfire_crater","to":"border_void_watch","years":13}
       ]
     },
     "spirit": {
@@ -28,12 +37,21 @@
         {"id":"thunder_continent","name":"霆潮陆","description":"雷暴终年不息，雷属性法器与淬体资粮丰富。","themes":["雷泽","淬体"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.15,"demon":0.8,"monster":1.1,"yin":0.6}},
         {"id":"mist_sea_isles","name":"海雾诸岛","description":"浮海灵潮遮蔽神识，水系材料与隐匿功法盛行。","themes":["浮海","幻雾"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.3,"demon":0.55,"monster":0.95,"yin":1}},
         {"id":"guanghan_wilds","name":"青冥荒域","description":"靠近青冥洞天裂隙的寒寂边荒，炼虚以下难以抵御空间寒潮。","themes":["界隙","寒潮"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.55,"demon":0.65,"monster":1.1,"yin":1.2},"min_realm_index":6,"failure":"blocked"},
-        {"id":"hundred_race_city","name":"百族天城","description":"二十族共同维持的巨型天城，高阶拍卖与外交使团云集。","themes":["万族","拍卖"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.25,"demon":0.75,"monster":1.05,"yin":0.8}}
+        {"id":"hundred_race_city","name":"百族天城","description":"二十族共同维持的巨型天城，高阶拍卖与外交使团云集。","themes":["万族","拍卖"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.25,"demon":0.75,"monster":1.05,"yin":0.8}},
+        {"id":"jade_bamboo_domain","name":"玉竹灵域","description":"通天玉竹构成层叠灵域，竹节间沉积着纯净木灵气。","themes":["灵竹","木灵"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.48,"demon":0.42,"monster":1.18,"yin":0.62}},
+        {"id":"floating_star_fjord","name":"星槎浮港","description":"浮空港湾连接百族星槎，异域商队与阵师终年往来。","themes":["浮港","星舟"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.4,"demon":0.66,"monster":1.0,"yin":0.78}},
+        {"id":"five_thunder_basin","name":"五雷天池","description":"五色雷霆在天池上空轮转，炼虚以下难以靠近核心雷眼。","themes":["雷池","天劫"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.68,"demon":0.72,"monster":1.22,"yin":0.5},"min_realm_index":6,"failure":"blocked"},
+        {"id":"hundred_medicine_valley","name":"百药天谷","description":"百族药师共同维护的悬谷，灵田沿云瀑逐层展开。","themes":["灵药","云瀑"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.52,"demon":0.45,"monster":1.12,"yin":0.74}},
+        {"id":"void_whale_trench","name":"虚鲸海沟","description":"巨型虚鲸循空间洋流迁徙，合体以下只能在外围观测。","themes":["虚空","巨兽"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":1.82,"demon":0.6,"monster":1.4,"yin":1.05},"min_realm_index":7,"failure":"blocked"}
       ],
       "routes":[
         {"from":"tianyuan_realm","to":"thunder_continent","years":18},{"from":"tianyuan_realm","to":"mist_sea_isles","years":25},
         {"from":"tianyuan_realm","to":"hundred_race_city","years":32},{"from":"thunder_continent","to":"guanghan_wilds","years":38},
-        {"from":"mist_sea_isles","to":"guanghan_wilds","years":28},{"from":"guanghan_wilds","to":"hundred_race_city","years":45}
+        {"from":"mist_sea_isles","to":"guanghan_wilds","years":28},{"from":"guanghan_wilds","to":"hundred_race_city","years":45},
+        {"from":"tianyuan_realm","to":"jade_bamboo_domain","years":16},{"from":"jade_bamboo_domain","to":"hundred_medicine_valley","years":21},
+        {"from":"hundred_medicine_valley","to":"hundred_race_city","years":24},{"from":"hundred_race_city","to":"floating_star_fjord","years":19},
+        {"from":"thunder_continent","to":"five_thunder_basin","years":26},{"from":"five_thunder_basin","to":"floating_star_fjord","years":31},
+        {"from":"mist_sea_isles","to":"void_whale_trench","years":33},{"from":"void_whale_trench","to":"guanghan_wilds","years":36}
       ]
     },
     "demon": {
@@ -41,16 +59,26 @@
         {"id":"gathering_baleful_plain","name":"聚煞原","description":"魔界外围煞风汇聚之地，低阶魔修常在此淬炼魔躯。","themes":["煞风","荒原"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.45,"demon":1.25,"monster":0.65,"yin":0.8}},
         {"id":"corpse_refining_valley","name":"炼尸谷","description":"阴煞地脉纵横，炼尸与傀儡材料交易暗中兴盛。","themes":["阴煞","傀儡"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.3,"demon":1.45,"monster":0.5,"yin":1.25}},
         {"id":"red_marrow_city","name":"赤髓城","description":"以血髓矿和魔器工坊闻名的边荒巨城。","themes":["魔器","血髓"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.4,"demon":1.35,"monster":0.75,"yin":0.9}},
-        {"id":"heaven_devouring_rift","name":"吞天裂谷","description":"通往真魔界的界壁裂隙，化魔以下无法承受其中乱流。","themes":["界壁","吞噬"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.25,"demon":1.65,"monster":0.7,"yin":1.1},"min_realm_index":5,"failure":"blocked"}
-      ],"routes":[{"from":"gathering_baleful_plain","to":"corpse_refining_valley","years":8},{"from":"gathering_baleful_plain","to":"red_marrow_city","years":6},{"from":"corpse_refining_valley","to":"heaven_devouring_rift","years":18},{"from":"red_marrow_city","to":"heaven_devouring_rift","years":15}]
+        {"id":"heaven_devouring_rift","name":"吞天裂谷","description":"通往真魔界的界壁裂隙，化魔以下无法承受其中乱流。","themes":["界壁","吞噬"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.25,"demon":1.65,"monster":0.7,"yin":1.1},"min_realm_index":5,"failure":"blocked"},
+        {"id":"nine_yin_marsh","name":"九阴泽","description":"九股阴河在黑泽交汇，毒瘴与阴魂共同滋养魔植。","themes":["阴河","毒泽"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.22,"demon":1.5,"monster":0.58,"yin":1.48}},
+        {"id":"bone_sand_sea","name":"白骨沙海","description":"风化兽骨堆成苍白沙丘，骨砂下埋着历代魔军遗物。","themes":["骨海","遗物"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.2,"demon":1.58,"monster":0.92,"yin":1.15}},
+        {"id":"blood_moon_fort","name":"血月关","description":"镇守魔界腹地的血色雄关，魔宗在此交换军需与战俘。","themes":["魔关","军镇"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.28,"demon":1.52,"monster":0.7,"yin":1.0}},
+        {"id":"soul_eating_mine","name":"噬魂矿窟","description":"矿脉能吞噬神念，结丹以下修士无法保持清醒。","themes":["矿窟","噬魂"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.18,"demon":1.72,"monster":0.5,"yin":1.42},"min_realm_index":3,"failure":"blocked"},
+        {"id":"shattered_gate","name":"破界古门","description":"残缺古门通向界壁暗流，化神魔修才有资格在此勘验真魔坐标。","themes":["古门","界壁"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.16,"demon":1.88,"monster":0.66,"yin":1.28},"min_realm_index":5,"failure":"blocked"}
+      ],"routes":[{"from":"gathering_baleful_plain","to":"corpse_refining_valley","years":8},{"from":"gathering_baleful_plain","to":"red_marrow_city","years":6},{"from":"corpse_refining_valley","to":"heaven_devouring_rift","years":18},{"from":"red_marrow_city","to":"heaven_devouring_rift","years":15},{"from":"gathering_baleful_plain","to":"nine_yin_marsh","years":7},{"from":"nine_yin_marsh","to":"soul_eating_mine","years":11},{"from":"corpse_refining_valley","to":"soul_eating_mine","years":9},{"from":"red_marrow_city","to":"blood_moon_fort","years":8},{"from":"blood_moon_fort","to":"bone_sand_sea","years":10},{"from":"bone_sand_sea","to":"shattered_gate","years":16},{"from":"shattered_gate","to":"heaven_devouring_rift","years":9}]
     },
     "true_demon": {
       "default":"black_sun_plain","locations":[
         {"id":"black_sun_plain","name":"黑日原","description":"真魔界黑日照耀下的辽阔魔原。","themes":["魔气","商路"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.45,"demon":1.25,"monster":0.65,"yin":0.8}},
         {"id":"bloodflame_range","name":"血焰山脉","description":"血焰矿脉与魔火洞窟遍布。","themes":["魔火","矿脉"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.35,"demon":1.55,"monster":0.55,"yin":0.9}},
         {"id":"abyss_city","name":"渊极城","description":"诸魔道统交换功法和战利品的巨城。","themes":["魔城","交易"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.55,"demon":1.35,"monster":0.75,"yin":1}},
-        {"id":"fallen_star_sea","name":"坠星魔海","description":"破碎星骸沉没的危险魔海。","themes":["星骸","魔海"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.4,"demon":1.7,"monster":0.9,"yin":1.25},"min_realm_index":6,"failure":"blocked"}
-      ],"routes":[{"from":"black_sun_plain","to":"bloodflame_range","years":20},{"from":"black_sun_plain","to":"abyss_city","years":14},{"from":"abyss_city","to":"fallen_star_sea","years":36},{"from":"bloodflame_range","to":"fallen_star_sea","years":42}]
+        {"id":"fallen_star_sea","name":"坠星魔海","description":"破碎星骸沉没的危险魔海。","themes":["星骸","魔海"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.4,"demon":1.7,"monster":0.9,"yin":1.25},"min_realm_index":6,"failure":"blocked"},
+        {"id":"abyss_blood_lake","name":"无间血湖","description":"湖水由凝固魔血化成，潮落时会露出古魔祭坛。","themes":["血湖","祭坛"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.22,"demon":1.82,"monster":0.7,"yin":1.38}},
+        {"id":"fallen_god_ridge","name":"堕神岭","description":"陨落异神的骨骼横亘山岭，法则残响令道路不断变形。","themes":["神骸","法则"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.3,"demon":1.92,"monster":0.82,"yin":1.18},"min_realm_index":6,"failure":"blocked"},
+        {"id":"black_lotus_city","name":"黑莲魔城","description":"城基是一朵万丈黑莲，各层花瓣由不同魔族分据。","themes":["魔城","黑莲"],"combat_terrain":"狭窄","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.34,"demon":1.76,"monster":0.62,"yin":1.22}},
+        {"id":"void_storm_eye","name":"虚风魔眼","description":"空间风暴围绕寂静风眼旋转，合体以下只能绕行。","themes":["虚风","界隙"],"combat_terrain":"开阔","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.26,"demon":2.08,"monster":0.88,"yin":1.32},"min_realm_index":7,"failure":"blocked"},
+        {"id":"ancient_demon_grave","name":"太古魔冢","description":"大乘古魔自封于黑石陵群，墓道随魔念周期性开启。","themes":["魔冢","太古"],"combat_terrain":"险要","combat_conditions":[],"qi_gain_efficiencies":{"spirit":0.18,"demon":2.25,"monster":0.76,"yin":1.58},"min_realm_index":8,"failure":"blocked"}
+      ],"routes":[{"from":"black_sun_plain","to":"bloodflame_range","years":20},{"from":"black_sun_plain","to":"abyss_city","years":14},{"from":"abyss_city","to":"fallen_star_sea","years":36},{"from":"bloodflame_range","to":"fallen_star_sea","years":42},{"from":"black_sun_plain","to":"abyss_blood_lake","years":18},{"from":"abyss_blood_lake","to":"black_lotus_city","years":22},{"from":"abyss_city","to":"black_lotus_city","years":17},{"from":"bloodflame_range","to":"fallen_god_ridge","years":24},{"from":"fallen_god_ridge","to":"void_storm_eye","years":39},{"from":"fallen_star_sea","to":"void_storm_eye","years":31},{"from":"void_storm_eye","to":"ancient_demon_grave","years":58},{"from":"black_lotus_city","to":"ancient_demon_grave","years":72}]
     },
     "phantom_underworld": {
       "default":"moonbeast_plain","locations":[

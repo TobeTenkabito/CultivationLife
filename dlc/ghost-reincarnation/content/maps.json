@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "worlds": {
+    "hell": {
+      "locations": [
+        {
+          "id": "yin_market_capital", "name": "阴市都",
+          "description": "层层魂市围绕阴司旧都展开，鬼修以香火、记忆与灵石交换资粮。",
+          "themes": ["魂市", "阴都"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.22, "demon": 0.72, "monster": 0.48, "yin": 1.62}
+        },
+        {
+          "id": "soul_lantern_harbor", "name": "魂灯渡",
+          "description": "引魂灯船沿忘川支流往来，渡口会替无名亡魂暂存一缕身份。",
+          "themes": ["魂灯", "渡口", "阴水"], "combat_terrain": "开阔", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.28, "demon": 0.58, "monster": 0.52, "yin": 1.72}
+        },
+        {
+          "id": "frost_mirror_prison", "name": "霜镜狱",
+          "description": "冰镜映出魂魄生前执念，心神不定者会被自己的倒影困住。",
+          "themes": ["冰狱", "执念", "镜界"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.18, "demon": 0.7, "monster": 0.4, "yin": 1.88},
+          "min_realm_index": 3, "failure": "blocked"
+        },
+        {
+          "id": "karmic_flame_field", "name": "业火原",
+          "description": "暗红业火随魂债起伏，不焚草木，只灼烧未偿的因果。",
+          "themes": ["业火", "因果", "荒原"], "combat_terrain": "开阔", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.16, "demon": 0.92, "monster": 0.46, "yin": 1.76},
+          "min_realm_index": 4, "failure": "blocked"
+        },
+        {
+          "id": "ghost_cypress_forest", "name": "鬼柏林",
+          "description": "古柏以残念为年轮，林中每条小径都会通向一段被遗忘的往事。",
+          "themes": ["鬼木", "残念", "古林"], "combat_terrain": "险要", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.32, "demon": 0.55, "monster": 0.5, "yin": 1.68}
+        },
+        {
+          "id": "wailing_mine", "name": "哀鸣矿井",
+          "description": "冥铁矿脉受万魂哭声震荡，矿石天然带有层叠魂纹。",
+          "themes": ["冥铁", "矿井", "魂纹"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.14, "demon": 0.88, "monster": 0.42, "yin": 1.82},
+          "min_realm_index": 2, "failure": "blocked"
+        },
+        {
+          "id": "judge_tablet_mountain", "name": "判碑山",
+          "description": "无数残缺判词叠成黑山，化神鬼修可从碑隙窥见因果脉络。",
+          "themes": ["判碑", "因果", "山岳"], "combat_terrain": "险要", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.12, "demon": 0.76, "monster": 0.38, "yin": 2.02},
+          "min_realm_index": 5, "failure": "blocked"
+        },
+        {
+          "id": "bottomless_abyss", "name": "无底冥渊",
+          "description": "冥渊吞没光线与回声，合体鬼修才能凭魂火辨认下行石阶。",
+          "themes": ["冥渊", "魂火", "界隙"], "combat_terrain": "险要", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.08, "demon": 0.82, "monster": 0.32, "yin": 2.22},
+          "min_realm_index": 7, "failure": "blocked"
+        }
+      ],
+      "routes": [
+        {"from":"ghost_gate","to":"forgetful_river","years":12},
+        {"from":"ghost_gate","to":"iron_tree_wastes","years":18},
+        {"from":"forgetful_river","to":"ninefold_prison","years":40},
+        {"from":"iron_tree_wastes","to":"ninefold_prison","years":33},
+        {"from":"ghost_gate","to":"yin_market_capital","years":9},
+        {"from":"yin_market_capital","to":"soul_lantern_harbor","years":8},
+        {"from":"soul_lantern_harbor","to":"forgetful_river","years":7},
+        {"from":"iron_tree_wastes","to":"wailing_mine","years":12},
+        {"from":"wailing_mine","to":"frost_mirror_prison","years":15},
+        {"from":"frost_mirror_prison","to":"ghost_cypress_forest","years":13},
+        {"from":"ghost_cypress_forest","to":"forgetful_river","years":11},
+        {"from":"yin_market_capital","to":"karmic_flame_field","years":17},
+        {"from":"karmic_flame_field","to":"judge_tablet_mountain","years":26},
+        {"from":"judge_tablet_mountain","to":"ninefold_prison","years":29},
+        {"from":"ninefold_prison","to":"bottomless_abyss","years":46}
+      ]
+    }
+  }
+}
