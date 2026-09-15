@@ -6,6 +6,7 @@ import uuid
 from typing import Any
 
 from .content_registry import ITEM_CATALOG, MARKET_GOODS, RACE_DEFINITIONS, REALMS, WORLD_SYSTEMS
+from .formation_system import formation_config
 from .models import GameState, HistoryRecord, SectNpc
 from .npc_system import npc_team_combat_power
 from .rules import add_item, remove_item
@@ -299,14 +300,19 @@ class WarSystemMixin:
                 if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
                 and (npc := self._war_npc(game, npc_id)) and npc.alive]
 
-    def _war_total_power(self, game: GameState, war: dict[str, Any], side: str) -> float:
+    def _war_total_power(
+        self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
+    ) -> float:
         members = self._available_warriors(game, war, side)
         powers = [
             self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
             for npc in members
         ]
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
-        if game.player.alive and game.player.world == war.get("world") and own_id in self._coalition_ids(war, side):
+        if (
+            include_player and game.player.alive and game.player.world == war.get("world")
+            and own_id in self._coalition_ids(war, side)
+        ):
             powers.append(self._player_intrinsic_combat_power(game.player))
         guard_power = 0.0
         if side == "defender" and war.get("kind") == "sect":
@@ -319,15 +325,156 @@ class WarSystemMixin:
             power *= 1 + float(self._war_rules().get("defender_power_bonus", 0.10))
         return power
 
-    def _war_power_profile(self, game: GameState, war: dict[str, Any], side: str) -> dict[str, float | int]:
+    @staticmethod
+    def _war_formation_metric_score(profile: dict[str, Any], side: str) -> float:
+        metrics = {
+            key: max(0.0, min(1.0, float(value) / 100.0))
+            for key, value in profile.get("metrics", {}).items()
+        }
+        weights = (
+            {"kill": .34, "focus": .20, "change": .18, "cycle": .14, "balance": .08, "growth": .06}
+            if side == "attacker"
+            else {"growth": .28, "balance": .26, "cycle": .16, "focus": .12, "change": .10, "kill": .08}
+        )
+        return sum(metrics.get(key, 0.0) * weight for key, weight in weights.items())
+
+    def _war_side_formation(self, game: GameState, war: dict[str, Any], side: str) -> dict[str, Any]:
+        """Pick one command array for the side; formations never stack by headcount."""
+        candidates: list[dict[str, Any]] = []
+        for npc in self._available_warriors(game, war, side):
+            entry = game.npc_formations.get(npc.id, {})
+            profile = self._npc_formation_profile(game, npc.id)
+            if profile.get("active") and float(entry.get("durability", 0.0)) > 0:
+                candidates.append({
+                    "profile": profile, "name": profile.get("name", "九宫阵"),
+                    "owner_name": npc.name, "source_kind": "npc", "source_id": npc.id,
+                    "integrity": max(0.0, min(1.0, float(entry.get("durability", 0.0)) / 100.0)),
+                })
+        if side == "defender" and war.get("kind") == "sect":
+            for sect_id in self._coalition_ids(war, side):
+                array = self._sect_guard_array(game, sect_id)
+                if not array:
+                    continue
+                profile = self._ground_profile(game.player, array)
+                if profile.get("active"):
+                    candidates.append({
+                        "profile": profile, "name": profile.get("name", "护山阵"),
+                        "owner_name": self._war_side_name(game, war["kind"], sect_id),
+                        "source_kind": "sect_guard", "source_id": str(array.get("id", "")),
+                        "integrity": max(0.0, min(1.0, float(array.get("durability", 0.0)) / 100.0)),
+                    })
+        if not candidates:
+            return {
+                "active": False, "name": "无阵", "owner_name": "", "source_kind": "none",
+                "source_id": "", "integrity": 0.0, "modifier": 1.0, "conditions": [],
+                "stability": "未成阵", "core_nature": "", "metrics": {}, "profile": {},
+            }
+
+        def command_score(row: dict[str, Any]) -> float:
+            profile = row["profile"]
+            static = sum(
+                max(0.0, float(value) - 1.0)
+                for value in profile.get("static_player_multipliers", {}).values()
+            ) / 6.0
+            return row["integrity"] * (
+                self._war_formation_metric_score(profile, side) + min(.14, static)
+            )
+
+        selected = max(candidates, key=command_score)
+        profile = selected["profile"]
+        selected.update({
+            "active": True,
+            "conditions": [
+                str(value) for value in profile.get("artificial_conditions", []) if str(value) != "大阵"
+            ],
+            "stability": str(profile.get("stability", "低")),
+            "core_nature": str((profile.get("core_node") or {}).get("nature", "")),
+            "metrics": copy.deepcopy(profile.get("metrics", {})),
+        })
+        return selected
+
+    def _war_formation_modifier(
+        self, own: dict[str, Any], opponent: dict[str, Any], side: str,
+    ) -> float:
+        if not own.get("active"):
+            return 1.0
+        profile = own["profile"]
+        rules = self._war_rules()
+        metric_score = self._war_formation_metric_score(profile, side)
+        static_score = min(1.0, sum(
+            max(0.0, float(value) - 1.0)
+            for value in profile.get("static_player_multipliers", {}).values()
+        ) / (6.0 * .14))
+        round_rules = profile.get("round_rules", {})
+        rule_score = min(1.0, (
+            float(round_rules.get("dealt_bonus", 0.0)) / .025
+            + float(round_rules.get("enemy_morale_loss", 0.0)) / 2.4
+            + float(round_rules.get("player_morale_loss_reduction", 0.0)) / .20
+        ) / 3.0)
+        integrity = max(0.0, min(1.0, float(own.get("integrity", 0.0))))
+        bonus = integrity * (
+            float(rules.get("formation_metric_weight", .075)) * metric_score
+            + float(rules.get("formation_static_weight", .025)) * static_score
+            + float(rules.get("formation_round_rule_weight", .015)) * rule_score
+            + float(rules.get("formation_condition_weight", .010)) * len(own.get("conditions", []))
+        )
+        stability = own.get("stability")
+        bonus += integrity * ({"高": .008, "中": .004, "低": 0.0}.get(stability, 0.0))
+        if opponent.get("active") and own.get("core_nature") and opponent.get("core_nature"):
+            relation = float(
+                formation_config().get("relations", {})
+                .get(own["core_nature"], {})
+                .get(opponent["core_nature"], 0.0)
+            )
+            bonus += (
+                float(rules.get("formation_relation_weight", .015))
+                * relation * integrity * float(opponent.get("integrity", 0.0))
+            )
+        cap = max(0.0, float(rules.get("formation_war_bonus_cap", .12)))
+        return round(1.0 + max(-cap, min(cap, bonus)), 6)
+
+    def _war_formation_contexts(self, game: GameState, war: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        contexts = {
+            side: self._war_side_formation(game, war, side) for side in ("attacker", "defender")
+        }
+        contexts["attacker"]["modifier"] = self._war_formation_modifier(
+            contexts["attacker"], contexts["defender"], "attacker",
+        )
+        contexts["defender"]["modifier"] = self._war_formation_modifier(
+            contexts["defender"], contexts["attacker"], "defender",
+        )
+        return contexts
+
+    @staticmethod
+    def _war_formation_text(contexts: dict[str, dict[str, Any]]) -> str:
+        labels = {"attacker": "攻方", "defender": "守方"}
+        details = []
+        for side in ("attacker", "defender"):
+            row = contexts[side]
+            if not row.get("active"):
+                details.append(f"{labels[side]}无统御阵势")
+                continue
+            conditions = f"，条件：{'、'.join(row['conditions'])}" if row.get("conditions") else ""
+            details.append(
+                f"{labels[side]}“{row['name']}”完整度 {float(row['integrity']):.0%}，"
+                f"战役修正 {(float(row['modifier']) - 1.0):+.1%}{conditions}"
+            )
+        return "阵势权重：" + "；".join(details) + "。"
+
+    def _war_power_profile(
+        self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
+    ) -> dict[str, float | int]:
         members = self._available_warriors(game, war, side)
-        total = self._war_total_power(game, war, side)
+        total = self._war_total_power(game, war, side, include_player=include_player)
         elite_rows = [(
             npc.realm_index,
             self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id),
         ) for npc in members]
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
-        if game.player.alive and game.player.world == war.get("world") and own_id in self._coalition_ids(war, side):
+        if (
+            include_player and game.player.alive and game.player.world == war.get("world")
+            and own_id in self._coalition_ids(war, side)
+        ):
             elite_rows.append((game.player.realm_index, self._player_intrinsic_combat_power(game.player)))
         elites = sorted(elite_rows, reverse=True)[:3]
         elite = npc_team_combat_power(power for _, power in elites) if elites else 0.0
@@ -386,7 +533,10 @@ class WarSystemMixin:
         signed = loss + gain
         war["war_score"] = max(-100.0, min(100.0, float(war["war_score"]) + (signed if winner == "attacker" else -signed)))
 
-    def _resolve_field_attack(self, game: GameState, war: dict[str, Any], attacking: str, rng: random.Random) -> str:
+    def _resolve_field_attack(
+        self, game: GameState, war: dict[str, Any], attacking: str, rng: random.Random,
+        formation_contexts: dict[str, dict[str, Any]] | None = None,
+    ) -> str:
         defending = "defender" if attacking == "attacker" else "attacker"
         attackers = self._available_warriors(game, war, attacking)
         defenders = self._available_warriors(game, war, defending)
@@ -400,6 +550,9 @@ class WarSystemMixin:
         defend_power = self._npc_power(target) * self._npc_formation_power_multiplier(game, target.id)
         attack_power *= defense_bonus if attacking == "defender" else 1.0
         defend_power *= defense_bonus if defending == "defender" else 1.0
+        contexts = formation_contexts or self._war_formation_contexts(game, war)
+        attack_power *= float(contexts[attacking].get("modifier", 1.0))
+        defend_power *= float(contexts[defending].get("modifier", 1.0))
         ratio = attack_power * rng.uniform(0.85, 1.18) / max(1.0, defend_power)
         if ratio < 1:
             return f"{striker.name}攻势受阻，{target.name}守住阵线。"
@@ -418,6 +571,78 @@ class WarSystemMixin:
         war.setdefault("escaped", {}).setdefault(defending, []).append(target.id)
         self._shift_war_morale(war, defending, 12.0, 3.0)
         return f"{target.name}不敌{striker.name}，脱离战场逃遁。"
+
+    def _resolve_player_war_round(
+        self, game: GameState, war: dict[str, Any], side: str, rng: random.Random,
+    ) -> None:
+        enemy = "defender" if side == "attacker" else "attacker"
+        candidates = self._available_warriors(game, war, enemy)
+        if not candidates:
+            war["morale"][enemy] = 0.0
+            self._finish_war_by_morale(game, war)
+            return
+        if not war.get("preliminary_resolved"):
+            war["preliminary_resolved"] = True
+            war["vanguard_skipped"] = True
+            self._append_war_log(
+                game, war, "转入主力会战",
+                "你越过单独先锋战，选择直接在本轮主力会战中亲自出阵。",
+            )
+        contexts = self._war_formation_contexts(game, war)
+        pool = candidates[:min(12, len(candidates))]
+        team_size = min(len(pool), rng.randint(1, 3))
+        opponents = rng.sample(pool, team_size)
+        formation_owner = str(contexts[enemy].get("source_id", ""))
+        if formation_owner and contexts[enemy].get("source_kind") == "npc":
+            bearer = next((npc for npc in pool if npc.id == formation_owner), None)
+            if bearer and bearer not in opponents:
+                opponents[-1] = bearer
+        required = npc_team_combat_power(self._npc_power(npc) for npc in opponents)
+        if enemy == "defender":
+            required *= 1 + float(self._war_rules().get("defender_power_bonus", 0.10))
+        members = [{
+            "name": npc.name, "power": self._npc_power(npc),
+            "realm_index": npc.realm_index, "layer": npc.layer, "npc_id": npc.id,
+            "faction_id": self._npc_faction_id(game, npc.id), "path": npc.path, "race": npc.race,
+        } for npc in opponents]
+        target = {
+            "target_name": f"{self._war_side_name(game, war['kind'], war[f'{enemy}_id'])}会战队",
+            "target_power": max(1.0, required),
+            "target_realm_index": max((npc.realm_index for npc in opponents), default=game.player.realm_index),
+            "target_layer": max((npc.layer for npc in opponents), default=1),
+            "combat_type": "cultivator", "members": members, "action": "repel",
+            "enemy_objective": "repel", "max_rounds": 8,
+        }
+        # A portable/player-local formation still takes precedence inside the
+        # detailed resolver. Without one, the side's command array supports the
+        # player so that both armies retain their formation identity.
+        if contexts[side].get("active"):
+            target["allied_formation_profile"] = copy.deepcopy(contexts[side]["profile"])
+            target["formation_initial_integrity"] = float(contexts[side]["integrity"])
+        result, combat_text = self._combat(game, target, False, rng)
+        won = result == "victory"
+        if won:
+            self._shift_war_morale(war, enemy, 12.0, 3.0)
+            outcome = "你亲自击退敌方会战队，我方取得本轮主动。"
+        else:
+            self._shift_war_morale(war, side, 10.0, 2.0)
+            outcome = "你未能击穿敌阵，本方主力接应后退守下一道战线。"
+        if not self._finish_war_by_morale(game, war):
+            counter = self._resolve_field_attack(game, war, enemy, rng, contexts)
+        else:
+            counter = ""
+        war["battles"] = int(war.get("battles", 0)) + 1
+        self._wear_war_guard_arrays(game, war)
+        for battle_side in ("attacker", "defender"):
+            war["exhaustion"][battle_side] = min(
+                100.0, float(war["exhaustion"][battle_side]) + 7.0,
+            )
+        self._finish_war_by_morale(game, war)
+        formation_text = self._war_formation_text(contexts)
+        self._append_war_log(
+            game, war, f"玩家参战·第{war['battles']}场会战",
+            f"{formation_text} {outcome} {combat_text}" + (f" 其余战线：{counter}" if counter else ""),
+        )
 
     def _finish_war_by_morale(self, game: GameState, war: dict[str, Any]) -> bool:
         if war.get("status") == "peace_ready":
@@ -445,13 +670,19 @@ class WarSystemMixin:
             raise ValueError("这场战争已经结束或不存在")
         if game.pending_event or not game.player.alive or game.player.imprisonment:
             raise ValueError("当前状态无法处理征伐")
-        if war.get("controller") != "player" or not self._player_has_war_voice(game, war):
-            raise ValueError("你尚未取得本势力的战争指挥权")
         side = self._player_war_side(game, war)
         if not side:
             raise ValueError("你并非这场战争的参战方")
+        if action != "participate_round" and (
+            war.get("controller") != "player" or not self._player_has_war_voice(game, war)
+        ):
+            raise ValueError("你尚未取得本势力的战争指挥权")
         rng = decode_rng(game.seed, game.rng_state)
-        if action == "call_allies":
+        if action == "participate_round":
+            if war.get("status") != "active":
+                raise ValueError("战场胜负已定，无法再次参战")
+            self._resolve_player_war_round(game, war, side, rng)
+        elif action == "call_allies":
             if war.get("status") != "active":
                 raise ValueError("胜负已定后不能再召集盟友")
             if not ally_id:
@@ -496,9 +727,11 @@ class WarSystemMixin:
                 war["preliminary_resolved"] = True
                 war["vanguard_skipped"] = True
                 self._append_war_log(game, war, "放弃先锋战", "你没有亲自参加先锋遭遇，直接命双方主力推进会战；本场不获得先锋士气修正。")
-            lines = [self._resolve_field_attack(game, war, "attacker", rng)]
+            contexts = self._war_formation_contexts(game, war)
+            lines = [self._war_formation_text(contexts)]
+            lines.append(self._resolve_field_attack(game, war, "attacker", rng, contexts))
             if not self._finish_war_by_morale(game, war):
-                lines.append(self._resolve_field_attack(game, war, "defender", rng))
+                lines.append(self._resolve_field_attack(game, war, "defender", rng, contexts))
             war["battles"] = int(war.get("battles", 0)) + 1
             self._wear_war_guard_arrays(game, war)
             war["exhaustion"]["attacker"] = min(100.0, float(war["exhaustion"]["attacker"]) + 7.0)
@@ -586,9 +819,11 @@ class WarSystemMixin:
                         war["preliminary_resolved"] = True
                         war["vanguard_skipped"] = True
                         self._append_war_log(game, war, "自动略过先锋战", "自动推进仅调度势力主力，玩家本人没有出阵。")
-                    lines = [self._resolve_field_attack(game, war, "attacker", rng)]
+                    contexts = self._war_formation_contexts(game, war)
+                    lines = [self._war_formation_text(contexts)]
+                    lines.append(self._resolve_field_attack(game, war, "attacker", rng, contexts))
                     if not self._finish_war_by_morale(game, war):
-                        lines.append(self._resolve_field_attack(game, war, "defender", rng))
+                        lines.append(self._resolve_field_attack(game, war, "defender", rng, contexts))
                     war["battles"] = int(war.get("battles", 0)) + 1
                     self._wear_war_guard_arrays(game, war)
                     for side in ("attacker", "defender"):
@@ -604,10 +839,17 @@ class WarSystemMixin:
                 self._call_war_allies(game, war, "attacker", rng, limit=1)
             if -float(war.get("war_score", 0)) < threshold:
                 self._call_war_allies(game, war, "defender", rng, limit=1)
-            attack_profile = self._war_power_profile(game, war, "attacker")
-            defend_profile = self._war_power_profile(game, war, "defender")
-            attack_power = max(1.0, float(attack_profile["composite"]))
-            defend_power = max(1.0, float(defend_profile["composite"]))
+            # The player contributes personal combat power only after choosing
+            # to participate through the detailed battle action.
+            attack_profile = self._war_power_profile(game, war, "attacker", include_player=False)
+            defend_profile = self._war_power_profile(game, war, "defender", include_player=False)
+            contexts = self._war_formation_contexts(game, war)
+            attack_power = max(
+                1.0, float(attack_profile["composite"]) * float(contexts["attacker"]["modifier"]),
+            )
+            defend_power = max(
+                1.0, float(defend_profile["composite"]) * float(contexts["defender"]["modifier"]),
+            )
             ratio = attack_power * rng.uniform(0.86, 1.16) / defend_power
             if ratio >= 1:
                 loss = min(24.0, 7.0 + (ratio - 1) * 9.0)
@@ -625,7 +867,8 @@ class WarSystemMixin:
             loser = "defender" if victor == "attacker" else "attacker"
             outcome = self._resolve_abstract_defeat(game, war, loser, rng)
             text = (
-                f"综合双方总战力与前三位高阶修士战力结算，"
+                f"综合双方总战力、前三位高阶修士与阵势条件权重结算。"
+                f"{self._war_formation_text(contexts)} "
                 f"{self._war_side_name(game, war['kind'], war[f'{victor}_id'])}在本行动单位占据上风。"
                 + (f" {outcome}" if outcome else "")
             )
@@ -887,6 +1130,10 @@ class WarSystemMixin:
             public["defender_name"] = self._war_side_name(game, war["kind"], war["defender_id"])
             public["player_side"] = self._player_war_side(game, war)
             public["player_controls"] = war.get("status") in {"active", "peace_ready"} and self._player_has_war_voice(game, war)
+            public["can_participate"] = bool(
+                war.get("status") == "active" and public["player_side"]
+                and game.player.alive and not game.player.imprisonment and not game.pending_event
+            )
             public["can_negotiate"] = int(war.get("battles", 0)) >= 2 or war.get("status") == "peace_ready"
             public["coalitions"] = {
                 side: [{**row, "name": self._war_side_name(game, war["kind"], row["id"])}
@@ -911,6 +1158,21 @@ class WarSystemMixin:
             public["power_summary"] = {
                 side: self._war_power_profile(game, war, side) for side in ("attacker", "defender")
             }
+            formation_contexts = self._war_formation_contexts(game, war)
+            public["formation_summary"] = {}
+            for formation_side in ("attacker", "defender"):
+                context = formation_contexts[formation_side]
+                public["formation_summary"][formation_side] = {
+                    key: copy.deepcopy(context.get(key)) for key in (
+                        "active", "name", "owner_name", "source_kind", "source_id", "integrity",
+                        "modifier", "conditions", "stability", "core_nature", "metrics",
+                    )
+                }
+                public["power_summary"][formation_side]["formation_modifier"] = float(context["modifier"])
+                public["power_summary"][formation_side]["effective_composite"] = round(
+                    float(public["power_summary"][formation_side]["composite"])
+                    * float(context["modifier"]), 1,
+                )
             if war["kind"] == "race":
                 public["third_parties"] = [
                     {"id": race_id, "name": row["name"]} for race_id, row in RACE_DEFINITIONS.items()

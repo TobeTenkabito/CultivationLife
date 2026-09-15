@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
+from cultivation_life.formation_system import formation_material_definitions, make_formation_material_instance
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, assign_technique, max_hp, max_mp
 
 
@@ -33,6 +34,18 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         self.engine._set_diplomatic_relation(game, relation, "war", "tianjian", "wanmo", "sect", -75)
         self.engine.store.save(game)
         return made["id"], game.wars[0]["id"]
+
+    def _equip_basic_formation(self, game_id):
+        game = self.engine.store.load(game_id)
+        definitions = formation_material_definitions()
+        instances = [
+            make_formation_material_instance(definitions[material_id], source="战役测试", origin_world="human")
+            for material_id in ("human_greenwood_stake", "human_red_sun_sand", "human_xuanyin_stone")
+        ]
+        game.player.formation_materials.extend(instances)
+        self.engine.store.save(game)
+        slots = [row["id"] for row in instances] + [None] * 6
+        self.engine.save_formation(game_id, {"name":"三才战阵", "slots":slots, "activate":True})
 
     def test_declared_war_uses_vanguard_event_morale_and_collapsible_public_state(self):
         game_id, war_id = self._sect_war()
@@ -221,6 +234,76 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         self.assertTrue(war["preliminary_resolved"])
         self.assertTrue(war["vanguard_skipped"])
         self.assertEqual(war["battles"], 1)
+
+    def test_player_can_personally_join_every_battle_without_command_authority(self):
+        game_id, war_id = self._sect_war(voice=False)
+        self._equip_basic_formation(game_id)
+        before = self.engine.get_game(game_id)
+        before_war = next(row for row in before["war_system"]["wars"] if row["id"] == war_id)
+        self.assertFalse(before_war["player_controls"])
+        self.assertTrue(before_war["can_participate"])
+        first = self.engine.war_action(game_id, war_id, "participate_round")
+        first_war = next(row for row in first["war_system"]["wars"] if row["id"] == war_id)
+        self.assertEqual(first_war["controller"], "ai")
+        self.assertEqual(first_war["battles"], 1)
+        self.assertIsNotNone(first["last_combat_report"]["formation_profile"])
+        self.assertTrue(any(row["title"] == "玩家参战·第1场会战" for row in first_war["logs"]))
+
+        second = self.engine.war_action(game_id, war_id, "participate_round")
+        second_war = next(row for row in second["war_system"]["wars"] if row["id"] == war_id)
+        self.assertEqual(second_war["battles"], 2)
+        self.assertTrue(any(row["title"] == "玩家参战·第2场会战" for row in second_war["logs"]))
+
+    def test_offscreen_campaign_uses_formation_metrics_conditions_and_matchup_weight(self):
+        game_id, war_id = self._sect_war(voice=False)
+        game = self.engine.store.load(game_id)
+        war = game.wars[0]
+        game.npc_formations = {}
+        attacker_id = war["roster"]["attacker"][0]
+        game.npc_formations[attacker_id] = {
+            "name":"九钉锁虚阵", "world":"human", "realm_index":3,
+            "slots":["human_void_lock_nail"] * 9, "alpha":.82,
+            "durability":100.0, "battles":0, "last_maintenance_year":game.player.age,
+        }
+        contexts = self.engine._war_formation_contexts(game, war)
+        self.assertTrue(contexts["attacker"]["active"])
+        self.assertIn("禁空", contexts["attacker"]["conditions"])
+        self.assertGreater(contexts["attacker"]["modifier"], 1.0)
+        self.assertEqual(contexts["defender"]["modifier"], 1.0)
+        without_player = self.engine._war_power_profile(game, war, "attacker", include_player=False)
+        with_player = self.engine._war_power_profile(game, war, "attacker", include_player=True)
+        self.assertEqual(with_player["members"], without_player["members"] + 1)
+
+        self.engine._advance_wars_unit(game, random.Random(17))
+        report = next(row for row in reversed(war["logs"]) if row["title"] == "AI 战报")
+        self.assertIn("阵势条件权重", report["text"])
+        self.assertIn("禁空", report["text"])
+
+    def test_campaign_formation_weight_is_capped_and_core_matchup_is_directional(self):
+        profile = {
+            "active":True,
+            "metrics":{key:100 for key in ("growth", "kill", "focus", "balance", "cycle", "change")},
+            "static_player_multipliers":{key:1.14 for key in ("might", "guard", "mobility", "sense", "sustain", "breach")},
+            "round_rules":{"dealt_bonus":.025, "enemy_morale_loss":2.4, "player_morale_loss_reduction":.20},
+        }
+        own = {
+            "active":True, "profile":profile, "integrity":1.0,
+            "conditions":["禁空", "禁神识"], "stability":"高", "core_nature":"space",
+        }
+        capped_modifier = self.engine._war_formation_modifier(own, {"active":False}, "attacker")
+        directional = copy.deepcopy(own)
+        directional["profile"]["metrics"] = {key:20 for key in profile["metrics"]}
+        directional["profile"]["static_player_multipliers"] = {key:1.0 for key in profile["static_player_multipliers"]}
+        directional["profile"]["round_rules"] = {}
+        directional["conditions"] = []
+        directional["stability"] = "低"
+        favorable = {"active":True, "integrity":1.0, "core_nature":"star"}
+        hostile = {"active":True, "integrity":1.0, "core_nature":"law"}
+        favorable_modifier = self.engine._war_formation_modifier(directional, favorable, "attacker")
+        hostile_modifier = self.engine._war_formation_modifier(directional, hostile, "attacker")
+        self.assertGreater(favorable_modifier, hostile_modifier)
+        self.assertLessEqual(capped_modifier, 1.12)
+        self.assertGreaterEqual(hostile_modifier, .88)
 
     def test_ai_calls_one_ally_only_after_its_score_falls_below_minus_25(self):
         game_id, _ = self._sect_war(voice=False)

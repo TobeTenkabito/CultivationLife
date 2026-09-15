@@ -85,7 +85,10 @@
       "roster_cap":24,"ally_roster_cap":12,"coalition_roster_cap":48,
       "ally_call_base_chance":0.68,"ally_call_cooldown_units":3,"ally_term_cost_multiplier":1.25,
       "ai_total_power_weight":0.68,"ai_casualty_roll_chance":0.34,
-      "defender_power_bonus":0.10,"attacker_morale_shock_bonus":0.10
+      "defender_power_bonus":0.10,"attacker_morale_shock_bonus":0.10,
+      "formation_metric_weight":0.075,"formation_static_weight":0.025,
+      "formation_round_rule_weight":0.015,"formation_condition_weight":0.010,
+      "formation_relation_weight":0.015,"formation_war_bonus_cap":0.12
     },
     "auction_system": {
       "trigger_chance_per_action":0.12,"notice_actions":2,"cooldown_actions":4,
