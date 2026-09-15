@@ -371,8 +371,16 @@ def main() -> None:
 
                 page.locator("[data-panel-target='map']").click()
                 page.locator("#map-card").wait_for(state="visible")
-                assert page.locator("#map-locations .map-location").count() == 5
-                grassland = page.locator("#map-locations .map-location", has_text="岚疆草原")
+                assert page.locator("#map-locations .map-location").count() == 10
+                lethal_button = page.locator(".map-travel[data-destination='border_void_watch']")
+                assert lethal_button.is_enabled()
+                assert lethal_button.text_content() == "强行前往（必死）"
+                lethal_button.click()
+                page.locator("#game-confirm-dialog").wait_for(state="visible")
+                assert page.locator("#game-confirm-title").text_content() == "强行前往凶地"
+                assert "必定死亡" in page.locator("#game-confirm-body").text_content()
+                page.locator("#game-confirm-cancel").click()
+                grassland = page.locator(".map-travel[data-destination='lanjiang_steppe']").locator("xpath=..")
                 assert "气经验：" in grassland.text_content()
                 grassland.locator(".map-travel").click()
                 page.get_by_text("当前：岚疆草原", exact=True).wait_for()

@@ -647,7 +647,7 @@ class GhostSystemMixin:
                 locations = [row["id"] for row in self.maps.public_map(
                     game.player.world, game.player.location_id, game.player.realm_index,
                     WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
-                ).get("locations", []) if row.get("travel_status") != "blocked"]
+                ).get("locations", []) if row.get("travel_status") in {"ok", "current"}]
                 if locations:
                     captor["location_id"] = phase_rng.choice(locations)
             game.player.location_id = captor.get("location_id", game.player.location_id)

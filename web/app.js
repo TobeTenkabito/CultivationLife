@@ -1955,12 +1955,21 @@ function renderMap(map, auction) {
     const button = document.createElement('button');
     button.className = 'map-travel'; button.dataset.destination = location.id;
     button.dataset.travelStatus = location.travel_status;
-    button.dataset.unavailable = location.current || location.travel_status === 'blocked' ? '1' : '0';
-    button.textContent = location.current ? '所在地' : location.travel_status === 'blocked' ? '境界不足' : location.travel_status === 'lethal' ? '强行前往（必死）' : `前往 · ${location.travel_years}年`;
-    button.disabled = busy || location.current || location.travel_status === 'blocked' || !!game.pending_event || !!game.imprisonment || game?.ghost_system?.phase_two?.state === 'controlled' || !game.player.alive;
+    button.dataset.unavailable = location.current ? '1' : '0';
+    button.textContent = location.current ? '所在地' : location.travel_status === 'lethal' ? '强行前往（必死）' : `前往 · ${location.travel_years}年`;
+    button.disabled = busy || location.current || !!game.pending_event || !!game.imprisonment || game?.ghost_system?.phase_two?.state === 'controlled' || !game.player.alive;
     button.onclick = () => {
-      if (location.travel_status === 'lethal' && !window.confirm(`${location.warning}。仍要强行前往吗？`)) return;
-      mutate(`/api/games/${game.id}/map-travel`, {destination:location.id});
+      const travel = () => mutate(`/api/games/${game.id}/map-travel`, {destination:location.id});
+      if (location.travel_status === 'lethal') {
+        openGameConfirm({
+          title:'强行前往凶地',
+          body:`${location.warning}。此行不是低概率冒险：一旦完成旅途并抵达目的地，角色必定死亡。`,
+          confirmText:'仍然前往',
+          onConfirm:travel,
+        });
+        return;
+      }
+      travel();
     };
     row.append(heading, description, qiEfficiency, route, button); list.appendChild(row);
   });
