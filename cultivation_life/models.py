@@ -48,6 +48,10 @@ class Item:
     transformation_purity: float = 0.0
     erosion_growth_multiplier: float = 1.0
     cultivation_efficiency_multiplier: float = 1.0
+    # Combination-forged artifacts are ordinary unique inventory equipment.
+    # Their full immutable recipe/result remains in crafted_artifacts; this ID
+    # links the bag entry without flattening generated rules into Item fields.
+    crafted_artifact_id: str | None = None
     description: str = ""
     tags: list[str] = field(default_factory=list)
 
@@ -585,6 +589,35 @@ class Player:
             if known.category == "transformation":
                 known.initial_transformations = []
         data["inventory"] = [Item.from_dict(item) for item in data.get("inventory", [])]
+        mirrored_artifact_ids = {
+            str(item.crafted_artifact_id) for item in data["inventory"] if item.crafted_artifact_id
+        }
+        for artifact in data["crafted_artifacts"]:
+            artifact_id = str(artifact.get("id", ""))
+            if not artifact_id or artifact_id in mirrored_artifact_ids:
+                continue
+            description = str(artifact.get("description", "")).strip()
+            if not description:
+                effect_text = "；".join(
+                    str(row.get("description", "")).strip()
+                    for row in artifact.get("material_effects", [])
+                    if isinstance(row, dict) and str(row.get("description", "")).strip()
+                )
+                description = (
+                    f"{artifact.get('quality_name', '')}{artifact.get('mold_name', '组合式法宝')}，"
+                    "原有炼制属性、胎模规则与材料词条均按旧档保留。"
+                    + (f" 材料器纹：{effect_text}" if effect_text else "")
+                )
+                artifact["description"] = description
+            data["inventory"].append(Item(
+                id=artifact_id,
+                name=str(artifact.get("name", "无名法宝")),
+                quantity=1,
+                crafted_artifact_id=artifact_id,
+                description=description,
+                tags=["artifact", "equipment", "crafted_artifact"],
+            ))
+            mirrored_artifact_ids.add(artifact_id)
         return cls(**data)
 
 

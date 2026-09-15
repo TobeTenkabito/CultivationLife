@@ -909,7 +909,8 @@ class EconomySystemMixin:
                     add_item(game.player, "spirit_stone", int(lot.get("current_bid", 0)))
             for consignment in state.get("consignments", []):
                 if consignment.get("kind") == "crafted_artifact" and isinstance(consignment.get("artifact"), dict):
-                    game.player.crafted_artifacts.append(copy.deepcopy(consignment["artifact"]))
+                    from .crafting_system import store_crafted_artifact
+                    store_crafted_artifact(game.player, copy.deepcopy(consignment["artifact"]))
                 else:
                     add_item(game.player, str(consignment["content_id"]))
         game.auction_state = {
@@ -934,6 +935,8 @@ class EconomySystemMixin:
         item = next((entry for entry in game.player.inventory if entry.id == item_id and entry.quantity > 0), None)
         if not item or item_id == "spirit_stone":
             raise ValueError("该物品无法送拍")
+        if item.crafted_artifact_id:
+            raise ValueError("组合炼器法宝请使用包裹内该物品自己的寄拍按钮")
         base_price = self._plant_item_value(item) or self._catalog_price("item", item_id)
         rules = self._auction_rules()
         minimum = max(1, math.ceil(base_price * float(rules["consignment_min_price_ratio"])))
@@ -1166,6 +1169,8 @@ class EconomySystemMixin:
         item = next((row for row in game.player.inventory if row.id == item_id and row.quantity > 0), None)
         if not item or item_id == "spirit_stone":
             raise ValueError("这件物品无法私下出售")
+        if item.crafted_artifact_id:
+            raise ValueError("组合炼器法宝须按其唯一实例价值出售或寄拍")
         base = self._plant_item_value(item) or self._catalog_price("item", item_id)
         multiplier = float(self._auction_rules()["private_trade_sell_multiplier"])
         multiplier *= float(attendee.get("sell_bargains", {}).get(item_id, 1.0))
@@ -1200,7 +1205,7 @@ class EconomySystemMixin:
         elif side == "sell":
             item = next((row for row in game.player.inventory if row.id == asset_id and row.quantity > 0), None)
             attempts = attendee.setdefault("sell_bargain_attempts", [])
-            if not item or asset_id in attempts:
+            if not item or item.crafted_artifact_id or asset_id in attempts:
                 raise ValueError("这件物品已经没有继续还价的余地")
             attempts.append(asset_id)
             if success:
@@ -1282,7 +1287,7 @@ class EconomySystemMixin:
         ratio = float(self._auction_rules()["black_market_sell_ratio"])
         if kind == "item":
             item = next((row for row in game.player.inventory if row.id == asset_id and row.quantity > 0), None)
-            if not item or asset_id == "spirit_stone" or not remove_item(game.player, asset_id):
+            if not item or item.crafted_artifact_id or asset_id == "spirit_stone" or not remove_item(game.player, asset_id):
                 raise ValueError("该物品无法在黑市出手")
             name = item.name
             plant_value = self._plant_item_value(item)
@@ -1344,7 +1349,8 @@ class EconomySystemMixin:
                  float(self._spirit_field_rules()["black_market_sell_ratio"])
                  if self._plant_item_value(item) is not None else float(self._auction_rules()["black_market_sell_ratio"])
              ))) }
-            for item in game.player.inventory if item.id != "spirit_stone" and item.quantity > 0
+            for item in game.player.inventory
+            if item.id != "spirit_stone" and item.quantity > 0 and not item.crafted_artifact_id
         ]
         consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG]
         sellable_puppets = [

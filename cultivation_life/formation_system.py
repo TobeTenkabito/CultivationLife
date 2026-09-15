@@ -125,6 +125,8 @@ def ensure_formation_state(player: Player) -> None:
             "owner_kind": owner_kind,
             "owner_id": str(raw.get("owner_id", "player")),
             "owner_name": str(raw.get("owner_name", "自身")),
+            "creator_id": str(raw.get("creator_id", "")),
+            "creator_name": str(raw.get("creator_name", "")),
             "world": world,
             "location_id": location_id,
             "bindings": [copy.deepcopy(binding) if isinstance(binding, dict) else None for binding in bindings],
@@ -1010,6 +1012,7 @@ class FormationSystemMixin:
         return {
             key: copy.deepcopy(array.get(key)) for key in (
                 "id", "name", "loadout_id", "owner_kind", "owner_id", "owner_name",
+                "creator_id", "creator_name",
                 "world", "location_id", "durability", "created_year", "last_repaired_year", "battles",
             )
         } | {
@@ -1053,6 +1056,7 @@ class FormationSystemMixin:
             "id": f"ground-formation-{game.id}-{player.formation_ground_sequence}",
             "name": profile["name"], "loadout_id": player.active_formation_id or "",
             "owner_kind": owner_kind, "owner_id": owner_id, "owner_name": owner_name,
+            "creator_id": game.id, "creator_name": player.name,
             "world": player.world, "location_id": location_id,
             "bindings": copy.deepcopy(player.formation_active_bindings),
             "durability": 100.0, "created_year": player.age,
@@ -1080,10 +1084,17 @@ class FormationSystemMixin:
         array = next((row for row in game.player.formation_ground_arrays if row.get("id") == ground_id), None)
         if not array:
             raise ValueError("未找到这座镇地阵")
-        if array.get("owner_kind") == "sect" and (
-            array.get("owner_id") != game.player.faction_id or not self._has_sect_voice(game)
-        ):
-            raise ValueError("你无权处置这座宗门护山阵")
+        if array.get("owner_kind") == "sect":
+            # The real materials always belong to the cultivator who carried
+            # and deployed them.  Losing a war, changing allegiance or seeing
+            # the sect become extinct must not orphan those instances.
+            creator_id = str(array.get("creator_id", ""))
+            created_by_player = not creator_id or creator_id == game.id
+            current_sect_authority = (
+                array.get("owner_id") == game.player.faction_id and self._has_sect_voice(game)
+            )
+            if not created_by_player and not current_sect_authority:
+                raise ValueError("你无权处置这座宗门护山阵")
         if array.get("world") != game.player.world or array.get("location_id") != game.player.location_id:
             raise ValueError("必须亲临镇地阵所在地域才能维护或撤除")
         return array
