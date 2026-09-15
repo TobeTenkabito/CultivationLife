@@ -1160,7 +1160,12 @@ function renderWars(system) {
     const morale = document.createElement('div'); morale.className = 'war-morale';
     const attackPower = war.power_summary?.attacker || {};
     const defendPower = war.power_summary?.defender || {};
-    morale.innerHTML = `<div><b>${war.attacker_name || '未知进攻方'}</b><span>士气 ${number(war.morale.attacker)} · 厌战 ${number(war.exhaustion.attacker)}%</span><small>总战力 ${number(attackPower.total || 0)} · 高阶战力 ${number(attackPower.elite || 0)}</small><i style="width:${Math.min(100, war.morale.attacker)}%"></i></div><div><b>${war.defender_name || '未知防御方'}（守方战力 +10%）</b><span>士气 ${number(war.morale.defender)} · 厌战 ${number(war.exhaustion.defender)}%</span><small>总战力 ${number(defendPower.total || 0)} · 高阶战力 ${number(defendPower.elite || 0)}</small><i style="width:${Math.min(100, war.morale.defender)}%"></i></div>`;
+    const attackFormation = war.formation_summary?.attacker || {};
+    const defendFormation = war.formation_summary?.defender || {};
+    const formationLine = formation => formation.active
+      ? `${formation.name} · 完整度 ${percent(formation.integrity || 0)} · 战役修正 ${formation.modifier >= 1 ? '+' : ''}${percent((formation.modifier || 1) - 1)}${formation.conditions?.length ? ` · ${formation.conditions.join('、')}` : ''}`
+      : '无统御阵势';
+    morale.innerHTML = `<div><b>${war.attacker_name || '未知进攻方'}</b><span>士气 ${number(war.morale.attacker)} · 厌战 ${number(war.exhaustion.attacker)}%</span><small>总战力 ${number(attackPower.total || 0)} · 高阶战力 ${number(attackPower.elite || 0)} · 阵势后 ${number(attackPower.effective_composite || attackPower.composite || 0)}</small><small>${formationLine(attackFormation)}</small><i style="width:${Math.min(100, war.morale.attacker)}%"></i></div><div><b>${war.defender_name || '未知防御方'}（守方战力 +10%）</b><span>士气 ${number(war.morale.defender)} · 厌战 ${number(war.exhaustion.defender)}%</span><small>总战力 ${number(defendPower.total || 0)} · 高阶战力 ${number(defendPower.elite || 0)} · 阵势后 ${number(defendPower.effective_composite || defendPower.composite || 0)}</small><small>${formationLine(defendFormation)}</small><i style="width:${Math.min(100, war.morale.defender)}%"></i></div>`;
     body.appendChild(morale);
     const coalitions = document.createElement('div'); coalitions.className = 'war-coalitions';
     ['attacker', 'defender'].forEach(side => {
@@ -1185,18 +1190,21 @@ function renderWars(system) {
       rosters.appendChild(column);
     });
     body.appendChild(rosters);
+    const actions = document.createElement('div'); actions.className = 'war-actions';
+    if (war.can_participate && war.status === 'active') {
+      actions.appendChild(warButton(war.id, 'participate_round', `亲自参加第 ${Number(war.battles || 0) + 1} 场会战`));
+    }
     if (war.player_controls && war.status !== 'ended') {
-      const actions = document.createElement('div'); actions.className = 'war-actions';
       if (war.can_call_allies && war.status === 'active') actions.appendChild(warAllyForm(war));
       if (!war.preliminary_resolved && war.status === 'active') actions.appendChild(warButton(war.id, 'conquest', '先锋出阵'));
-      if (war.status === 'active') actions.appendChild(warButton(war.id, 'round', war.preliminary_resolved ? '推进一场会战' : '跳过先锋战，直接会战'));
+      if (war.status === 'active') actions.appendChild(warButton(war.id, 'round', war.preliminary_resolved ? '命主力会战（本人不参战）' : '跳过先锋，命主力会战'));
       if (war.status === 'active') actions.appendChild(warButton(war.id, 'retreat', '主动撤退', true));
-      body.appendChild(actions);
       if (war.peace_offer?.recipient_side === war.player_side) body.appendChild(warPeaceOffer(war));
       else if (war.can_negotiate) body.appendChild(warPeaceForm(war, system.terms || {}));
     } else if (war.status !== 'ended' && war.player_side) {
-      const hint = document.createElement('p'); hint.className = 'muted'; hint.textContent = '你属于参战方，但尚无势力话语权；战争暂由决策者按总战力演算。取得话语权后将自动接管并补录此前战报。'; body.appendChild(hint);
+      const hint = document.createElement('p'); hint.className = 'muted'; hint.textContent = '你属于参战方，可以随时亲自参加下一场会战；但尚无势力话语权，不能调度主力、召集盟友或签署和约。'; body.appendChild(hint);
     }
+    if (actions.children.length) body.appendChild(actions);
     if (war.logs?.length) {
       const logs = document.createElement('details'); logs.className = 'war-logs'; logs.open = war.status !== 'ended';
       const logSummary = document.createElement('summary'); logSummary.textContent = `战报 ${war.logs.length} 条`;
