@@ -188,6 +188,16 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("artifact_id", ""), payload.get("action", ""),
                     int(payload.get("start_price", 0) or 0),
                 )
+            elif operation == "formation-preview":
+                result = ENGINE.preview_formation(game_id, payload)
+            elif operation == "formation-save":
+                result = ENGINE.save_formation(game_id, payload)
+            elif operation == "formation-activate":
+                result = ENGINE.activate_formation(game_id, payload.get("formation_id", ""))
+            elif operation == "formation-deactivate":
+                result = ENGINE.deactivate_formation(game_id)
+            elif operation == "formation-delete":
+                result = ENGINE.delete_formation(game_id, payload.get("formation_id", ""))
             elif operation == "spirit-plant-use":
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":

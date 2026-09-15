@@ -382,6 +382,14 @@ class Player:
     equipped_crafted_artifact_ids: list[str] = field(default_factory=list)
     crafting_blueprints: list[dict[str, Any]] = field(default_factory=list)
     crafting_sequence: int = 0
+    # Base-game nine-palace formation system. Presets remember only material
+    # types; the active binding list holds the real occupied instances.
+    formation_materials: list[dict[str, Any]] = field(default_factory=list)
+    formation_loadouts: list[dict[str, Any]] = field(default_factory=list)
+    active_formation_id: str | None = None
+    formation_active_bindings: list[dict[str, Any] | None] = field(default_factory=list)
+    formation_profile_cache: dict[str, Any] = field(default_factory=dict)
+    formation_sequence: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -438,6 +446,25 @@ class Player:
         ]
         data["crafting_sequence"] = max(
             int(data.get("crafting_sequence", 0)), len(data["crafted_artifacts"]), 0,
+        )
+        data["formation_materials"] = [
+            copy.deepcopy(row) for row in data.get("formation_materials", []) if isinstance(row, dict)
+        ]
+        data["formation_loadouts"] = [
+            copy.deepcopy(row) for row in data.get("formation_loadouts", []) if isinstance(row, dict)
+        ]
+        active_formation_id = data.get("active_formation_id")
+        data["active_formation_id"] = str(active_formation_id) if active_formation_id else None
+        data["formation_active_bindings"] = [
+            copy.deepcopy(row) if isinstance(row, dict) else None
+            for row in data.get("formation_active_bindings", [])
+        ][:9]
+        saved_formation_profile = data.get("formation_profile_cache", {})
+        data["formation_profile_cache"] = (
+            copy.deepcopy(saved_formation_profile) if isinstance(saved_formation_profile, dict) else {}
+        )
+        data["formation_sequence"] = max(
+            int(data.get("formation_sequence", 0)), len(data["formation_loadouts"]), 0,
         )
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {

@@ -3,6 +3,5 @@ __pycache__/
 .pytest_cache/
 build/*
 !build/launcher.spec
-/launcher.exe
 data/saves/*.json
 !data/saves/.gitkeep

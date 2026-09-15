@@ -262,6 +262,10 @@ class ContentRegistry:
         )
         if "crafting.json" in documents:
             cls._validate_crafting(documents["crafting.json"])
+        if "formations.json" in documents:
+            cls._validate_formations(
+                documents["formations.json"], documents.get("crafting.json", {}), items,
+            )
         registry = cls(
             items=items, techniques=techniques, transformations=transformations,
             market_goods=market_goods, realms=realms,
@@ -331,6 +335,86 @@ class ContentRegistry:
             declared_roles = set(plant.get("roles", []))
             if not plant.get("plant_id") or not declared_roles or not declared_roles <= roles or set(plant.get("role_effects", {})) != declared_roles:
                 raise ContentError("灵田炼器材料的位置效果定义不完整")
+
+    @staticmethod
+    def _validate_formations(
+        document: dict[str, Any], crafting: dict[str, Any], items: dict[str, Item],
+    ) -> None:
+        settings = document.get("settings", {})
+        required_settings = {
+            "experience_base", "alpha_min", "alpha_max", "alpha_level_scale",
+            "market_material_offers", "metric_softcap_per_node", "stat_bonus_cap",
+            "enemy_stat_reduction_cap", "change_round_cap", "field_structure_threshold",
+            "field_node_ratio", "cycle_weights",
+        }
+        if set(settings) != required_settings:
+            raise ContentError("阵法设置必须完整声明熟练度、广播软上限、效果硬上限与场域阈值")
+        if not (
+            0 < float(settings["alpha_min"]) < float(settings["alpha_max"]) < 1
+            and 0 < float(settings["stat_bonus_cap"]) <= 0.16
+            and 0 <= float(settings["enemy_stat_reduction_cap"]) <= 0.08
+            and 0 <= float(settings["change_round_cap"]) <= 0.10
+            and set(settings["cycle_weights"]) == {"2", "3", "4"}
+            and abs(sum(map(float, settings["cycle_weights"].values())) - 1.0) <= 1e-9
+        ):
+            raise ContentError("阵法传导系数或双侧广播硬上限不合法")
+        natures = {
+            "metal", "wood", "water", "fire", "earth", "yin", "yang",
+            "wind", "thunder", "soul", "space", "star", "law", "neutral",
+        }
+        stat_keys = {"might", "guard", "mobility", "sense", "sustain", "breach"}
+        if set(document.get("relations", {})) != natures:
+            raise ContentError("阵法关系表必须为十四种阵性各声明一个有向关系行")
+        if set(document.get("nature_channels", {})) != natures or any(
+            set(channels) - stat_keys for channels in document.get("nature_channels", {}).values()
+        ):
+            raise ContentError("阵性到六维战斗通道的映射不完整")
+        for source, targets in document["relations"].items():
+            if set(targets) - natures or any(not -1.0 <= float(value) <= 1.0 for value in targets.values()):
+                raise ContentError(f"阵性 {source} 的有向关系超出 V1 档位")
+
+        identifiers: set[str] = set()
+        hooks = {None, "forbidden_air", "forbidden_sense"}
+
+        def validate_profile(row: dict[str, Any], label: str) -> None:
+            identifier = str(row.get("id", ""))
+            nature = str(row.get("nature", ""))
+            if (
+                not identifier or identifier in identifiers or nature not in natures
+                or float(row.get("formation_value", 0)) <= 0
+                or row.get("field_hook") not in hooks
+                or set(row.get("relation_overrides", {})) - natures
+                or any(not -1.2 <= float(value) <= 1.2 for value in row.get("relation_overrides", {}).values())
+            ):
+                raise ContentError(f"{label}阵法 Profile 不合法：{identifier or row}")
+            identifiers.add(identifier)
+
+        covered_worlds: set[str] = set()
+        for material in document.get("materials", []):
+            validate_profile(material, "专用")
+            if int(material.get("base_value", 0)) <= 0 or int(material.get("tier", -1)) not in range(13):
+                raise ContentError(f"阵材价格或境界不合法：{material.get('id')}")
+            covered_worlds.add(str(material.get("world", "")))
+        required_worlds = {
+            "human", "spirit", "celestial", "demon", "true_demon", "asura",
+            "phantom_underworld", "nether", "hell", "reincarnation",
+        }
+        if not required_worlds <= covered_worlds:
+            raise ContentError("专用阵材没有覆盖本体十个可达界面")
+
+        crafting_ids = {str(row.get("id")) for row in crafting.get("materials", [])}
+        for row in document.get("crafting_materials", []):
+            validate_profile(row, "炼器共用")
+            if str(row.get("crafting_material_id")) not in crafting_ids:
+                raise ContentError(f"阵法引用了不存在的炼器材料：{row.get('crafting_material_id')}")
+        for row in document.get("inventory_items", []):
+            validate_profile(row, "行囊共用")
+            if str(row.get("item_id")) not in items:
+                raise ContentError(f"阵法引用了不存在的行囊物品：{row.get('item_id')}")
+        for row in document.get("spirit_plants", []):
+            validate_profile(row, "灵植共用")
+            if not row.get("plant_id"):
+                raise ContentError("阵法灵植 Profile 缺少 plant_id")
 
     @staticmethod
     def _build_monster_bloodlines(

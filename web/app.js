@@ -8,6 +8,8 @@ let battleReportOpen = false;
 let achievementCatalog = null;
 let achievementToastTimer = null;
 let gameConfirmAction = null;
+let formationDraftProfile = null;
+let formationPreviewTimer = null;
 const achievementToastQueue = [];
 const historyFilters = new Set(['self', 'companion', 'friend', 'mentor', 'faction', 'race', 'other']);
 
@@ -316,7 +318,8 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
 }
@@ -533,7 +536,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -693,6 +696,195 @@ function applyCraftingBlueprint(blueprint, system) {
   updateCraftingBudget();
   toast('已按图谱填入当前拥有的同类材料；缺少的实例保持为空。');
 }
+
+const formationMetricOrder = ['growth','kill','focus','balance','cycle','change'];
+const formationPalaces = ['坎一','坤二','震三','巽四','中五','乾六','兑七','艮八','离九'];
+
+function formationPayload(activate = false) {
+  return {
+    name: $('#formation-name').value,
+    slots: [...document.querySelectorAll('#formation-grid select')].map(select => select.value || null),
+    activate,
+  };
+}
+
+function renderFormation(system) {
+  const panel = $('#formation-card'), dock = document.querySelector('[data-panel-target="formation"]');
+  panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
+  if (!system.visible) { window.UtilityPanels?.close('formation'); return; }
+  $('#formation-heading').textContent = `阵法 ${system.level || 0}级 · 传导 ${percent(system.alpha || 0)}`;
+  const grid = $('#formation-grid'); grid.innerHTML = '';
+  const activeBySlot = new Map((system.active_bindings || []).filter(Boolean).map(row => [Number(row.slot), row.id]));
+  const materials = system.materials || [];
+  for (let index = 0; index < 9; index += 1) {
+    const cell = document.createElement('label'); cell.className = 'formation-slot'; cell.dataset.palace = formationPalaces[index]; cell.dataset.slot = String(index);
+    const select = document.createElement('select'); select.dataset.slot = String(index); select.setAttribute('aria-label', `${formationPalaces[index]}阵材`);
+    const empty = document.createElement('option'); empty.value = ''; empty.textContent = '空位'; select.appendChild(empty);
+    materials.forEach(material => {
+      const option = document.createElement('option'); option.value = material.id;
+      option.textContent = `${material.name} · ${material.nature_name} ${Number(material.formation_value).toFixed(1)}${material.occupied ? ' · 占用中' : ''}`;
+      select.appendChild(option);
+    });
+    select.value = activeBySlot.get(index) || '';
+    const hint = document.createElement('small');
+    const updateHint = () => {
+      const material = materials.find(row => row.id === select.value);
+      hint.textContent = material ? `${material.nature_name}性 · 阵值 ${Number(material.formation_value).toFixed(1)}` : '尚未布材';
+    };
+    select.onchange = () => { updateHint(); syncFormationSelects(); scheduleFormationPreview(); };
+    updateHint(); cell.append(select, hint);
+    cell.ondragover = event => { event.preventDefault(); cell.classList.add('drag-over'); };
+    cell.ondragleave = () => cell.classList.remove('drag-over');
+    cell.ondrop = event => {
+      event.preventDefault(); cell.classList.remove('drag-over');
+      const materialId = event.dataTransfer.getData('text/formation-material');
+      if (materials.some(row => row.id === materialId)) {
+        select.value = materialId; updateHint(); syncFormationSelects(); scheduleFormationPreview();
+      }
+    };
+    grid.appendChild(cell);
+  }
+  const activeLoadout = (system.loadouts || []).find(row => row.id === system.active_formation_id);
+  $('#formation-name').value = activeLoadout?.name || '';
+  $('#formation-name').oninput = scheduleFormationPreview;
+  syncFormationSelects();
+  formationDraftProfile = system.profile || null;
+  renderFormationReading(formationDraftProfile);
+
+  $('#formation-preview').onclick = () => previewFormation(true);
+  $('#formation-save').onclick = () => mutate(`/api/games/${game.id}/formation-save`, formationPayload(false));
+  $('#formation-save-activate').onclick = () => mutate(`/api/games/${game.id}/formation-save`, formationPayload(true));
+  const deactivate = $('#formation-deactivate');
+  deactivate.dataset.formationUnavailable = system.active_formation_id ? '0' : '1';
+  deactivate.disabled = !system.active_formation_id;
+  deactivate.onclick = () => openGameConfirm({
+    title:'收起当前阵法', body:'确认收阵？所有被占用的真实阵材实例都会原样返回材料库与行囊。', confirmText:'收阵',
+    onConfirm:()=>mutate(`/api/games/${game.id}/formation-deactivate`, {}),
+  });
+
+  const library = $('#formation-material-library'); library.innerHTML = '';
+  materials.forEach(material => {
+    const row = document.createElement('div'); row.className = `formation-material-row${material.occupied ? ' occupied' : ''}`;
+    row.draggable = true; row.dataset.materialId = material.id;
+    row.ondragstart = event => event.dataTransfer.setData('text/formation-material', material.id);
+    const title = document.createElement('b'); title.textContent = `${material.name}${material.occupied ? ' · 占用中' : ''}`;
+    const detail = document.createElement('small');
+    const sourceNames = {formation_material:'专用阵材',crafting_material:'炼器共用',inventory:'行囊共用'};
+    detail.textContent = `${material.nature_name}性 · 固有阵值 ${Number(material.formation_value).toFixed(1)} · ${sourceNames[material.source_kind] || material.source_kind} · ${material.source || '未知来源'}`;
+    row.append(title, detail); library.appendChild(row);
+  });
+  if (!materials.length) library.innerHTML = '<p class="empty">暂无阵材。各界坊市每次换货会出现专用阵材，少量阵盘、灵植与炼器资源也能共用。</p>';
+
+  const loadouts = $('#formation-loadout-list'); loadouts.innerHTML = '';
+  (system.loadouts || []).forEach(loadout => {
+    const row = document.createElement('div'); row.className = `formation-loadout${loadout.id === system.active_formation_id ? ' active' : ''}`;
+    const info = document.createElement('div'); const title = document.createElement('b'); const detail = document.createElement('small');
+    title.textContent = `${loadout.name}${loadout.id === system.active_formation_id ? ' · 当前启用' : ''}`;
+    detail.textContent = `${(loadout.slots || []).filter(Boolean).length} 处阵基 · 只记录材料类型`;
+    info.append(title, detail);
+    const tools = document.createElement('div'); tools.className = 'formation-loadout-tools';
+    const fill = document.createElement('button'); fill.textContent = '装入九宫'; fill.onclick = () => loadFormationPreset(loadout, system);
+    const activate = document.createElement('button'); activate.textContent = loadout.id === system.active_formation_id ? '重新绑定' : '启阵';
+    activate.onclick = () => mutate(`/api/games/${game.id}/formation-activate`, {formation_id:loadout.id});
+    const remove = document.createElement('button'); remove.textContent = '删除';
+    remove.onclick = () => openGameConfirm({title:'删除阵法预设', body:`确认删除“${loadout.name}”？若它正在运行会先自动收阵，真实材料不会丢失。`, confirmText:'删除', onConfirm:()=>mutate(`/api/games/${game.id}/formation-delete`, {formation_id:loadout.id})});
+    tools.append(fill, activate, remove); row.append(info, tools); loadouts.appendChild(row);
+  });
+  if (!system.loadouts?.length) loadouts.innerHTML = '<p class="empty">尚未保存阵法预设。先排布至少两个能产生关系的节点。</p>';
+}
+
+function syncFormationSelects() {
+  const selects = [...document.querySelectorAll('#formation-grid select')];
+  const values = selects.map(select => select.value).filter(Boolean);
+  selects.forEach(select => [...select.options].forEach(option => {
+    option.disabled = !!option.value && option.value !== select.value && values.includes(option.value);
+  }));
+}
+
+function scheduleFormationPreview() {
+  clearTimeout(formationPreviewTimer);
+  formationPreviewTimer = setTimeout(() => previewFormation(false), 240);
+}
+
+async function previewFormation(showError = false) {
+  if (!game || busy) return;
+  try {
+    formationDraftProfile = await api(`/api/games/${game.id}/formation-preview`, {method:'POST', body:JSON.stringify(formationPayload(false))});
+    renderFormationReading(formationDraftProfile);
+  } catch (error) {
+    if (showError) toast(error.message);
+  }
+}
+
+function renderFormationReading(profile) {
+  const metrics = $('#formation-metrics'); metrics.innerHTML = '';
+  formationMetricOrder.forEach(key => {
+    const value = Math.max(0, Math.min(100, Number(profile?.metrics?.[key] || 0)));
+    const row = document.createElement('div'); row.className = 'formation-metric'; row.style.setProperty('--metric', `${value}%`);
+    const label = document.createElement('span'); const name = document.createElement('b'); const score = document.createElement('strong');
+    name.textContent = profile?.metric_names?.[key] || key; score.textContent = key === 'change' && profile?.active ? `${value.toFixed(0)} · ${profile.change_mode_name}` : value.toFixed(0);
+    label.append(name, score); const bar = document.createElement('i'); row.append(label, bar); metrics.appendChild(row);
+  });
+  const effects = $('#formation-effects'); effects.innerHTML = '';
+  const title = document.createElement('h4'); title.textContent = profile?.active ? `主要效果 · ${profile.name}` : '尚未形成有效阵势';
+  const summary = document.createElement('p'); summary.textContent = profile?.active && profile.effects?.length ? profile.effects.join(' · ') : '放入至少两份能够相生、相克或同调的阵材后，系统会实时解析灵流。';
+  const detail = document.createElement('small');
+  detail.textContent = profile?.active
+    ? `预计稳定性：${profile.stability} · 当前阵眼：${formationPalaces[Number(profile.core_node?.index || 0)]} · ${profile.core_node?.name || '未知'}（${profile.core_node?.nature_name || '中'}性） · 完整度归零后全部效果停止`
+    : '阵法不会增加战斗力生命池；禁空与禁神识若被激活，会对敌我双方同时生效。';
+  effects.append(title, summary, detail);
+  const advanced = profile?.advanced || {};
+  const matrixText = (advanced.matrix || []).map(row => row.map(value => Number(value).toFixed(2).padStart(8)).join(' ')).join('\n');
+  const eigenText = (advanced.eigenvalues || []).map(value => `${Number(value.real).toFixed(3)}${Number(value.imag) >= 0 ? '+' : ''}${Number(value.imag).toFixed(3)}i`).join(', ');
+  $('#formation-advanced').textContent = profile?.active
+    ? `邻接传导 α = ${Number(profile.alpha).toFixed(4)}\n原始生势 = ${Number(advanced.raw_growth || 0).toFixed(3)}\n原始杀势 = ${Number(advanced.raw_kill || 0).toFixed(3)}\n主导特征值：${eigenText || '0'}\n\nM = DBD\n${matrixText}`
+    : '当前没有可显示的作用矩阵。';
+  requestAnimationFrame(() => drawFormationLines(profile));
+}
+
+function drawFormationLines(profile) {
+  const svg = $('#formation-flow-lines'), wrapper = $('#formation-grid-wrap');
+  svg.replaceChildren();
+  if (!profile?.active || !wrapper) return;
+  const cells = [...document.querySelectorAll('.formation-slot')];
+  if (cells.length !== 9) return;
+  const width = wrapper.clientWidth, height = wrapper.clientHeight;
+  if (!width || !height) return;
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  const ns = 'http://www.w3.org/2000/svg'; const defs = document.createElementNS(ns, 'defs');
+  const colors = {green:'#3d745d', red:'#a64734', gray:'#8a8d86'};
+  Object.entries(colors).forEach(([name, color]) => {
+    const marker = document.createElementNS(ns, 'marker'); marker.id = `formation-arrow-${name}`; marker.setAttribute('markerWidth','6'); marker.setAttribute('markerHeight','6'); marker.setAttribute('refX','5'); marker.setAttribute('refY','3'); marker.setAttribute('orient','auto'); marker.setAttribute('markerUnits','strokeWidth');
+    const tip = document.createElementNS(ns, 'path'); tip.setAttribute('d','M0,0 L6,3 L0,6 Z'); tip.setAttribute('fill',color); marker.appendChild(tip); defs.appendChild(marker);
+  });
+  svg.appendChild(defs);
+  const wrapRect = wrapper.getBoundingClientRect();
+  const centers = cells.map(cell => { const rect = cell.getBoundingClientRect(); return {x:rect.left-wrapRect.left+rect.width/2,y:rect.top-wrapRect.top+rect.height/2}; });
+  const matrix = profile.advanced?.matrix || [], adjacency = profile.advanced?.adjacency || [];
+  const maximum = Math.max(...matrix.flat().map(value => Math.abs(Number(value || 0))), 0);
+  if (!maximum) return;
+  for (let from = 0; from < 9; from += 1) for (let to = 0; to < 9; to += 1) {
+    const value = Number(matrix[from]?.[to] || 0), relative = Math.abs(value) / maximum;
+    if (!value || relative < .12) continue;
+    const start = centers[from], end = centers[to]; const dx = end.x-start.x, dy = end.y-start.y; const length = Math.hypot(dx,dy) || 1;
+    const bend = (from < to ? 1 : -1) * Math.min(18, length * .09); const cx = (start.x+end.x)/2 - dy/length*bend, cy = (start.y+end.y)/2 + dx/length*bend;
+    const weak = Math.abs(Number(adjacency[from]?.[to] || 0)) <= .55; const colorName = value < 0 ? 'red' : weak ? 'gray' : 'green';
+    const path = document.createElementNS(ns, 'path'); path.setAttribute('d',`M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`); path.setAttribute('fill','none'); path.setAttribute('stroke',colors[colorName]); path.setAttribute('stroke-width',String(1+relative*3.2)); path.setAttribute('stroke-opacity',String(.42+relative*.42)); path.setAttribute('marker-end',`url(#formation-arrow-${colorName})`); svg.appendChild(path);
+  }
+}
+
+function loadFormationPreset(loadout, system) {
+  const used = new Set(); const selects = [...document.querySelectorAll('#formation-grid select')];
+  (loadout.slots || []).forEach((definitionId, index) => {
+    const material = definitionId ? (system.materials || []).find(row => row.definition_id === definitionId && !used.has(row.id)) : null;
+    selects[index].value = material?.id || ''; if (material) used.add(material.id);
+    selects[index].dispatchEvent(new Event('change'));
+  });
+  $('#formation-name').value = loadout.name; scheduleFormationPreview();
+  toast('已按预设类型绑定当前拥有的真实阵材；缺少的阵材保持为空。');
+}
+
+window.addEventListener('resize', () => drawFormationLines(formationDraftProfile));
 
 function renderNatalArtifact(system) {
   const panel=$('#natal-artifact-card'), dock=document.querySelector('[data-panel-target="natal-artifact"]');
@@ -1711,7 +1903,7 @@ function renderMarket(market) {
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
   $('#market-description').textContent = `货物只在当前世界流通，灵石跨界通用；每件货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品，绝不会越过两个境界。坊市每年换货。`;
   const list = $('#market-offers'); list.innerHTML = '';
-  [...(market.offers || []), ...(market.crafting_material_offers || [])].forEach(offer => {
+  [...(market.offers || []), ...(market.crafting_material_offers || []), ...(market.formation_material_offers || [])].forEach(offer => {
     const row = document.createElement('div'); row.className = `market-offer${offer.sold ? ' sold' : ''}`;
     const info = document.createElement('div'); const title = document.createElement('b');
     title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}`;
@@ -2646,7 +2838,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || game?.faction?.dispatch_used || (game?.faction?.contribution || 0) < (game?.faction?.dispatch_cost || 0);
   });
   document.querySelectorAll('.market-buy').forEach(button => {
-    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
+    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.owned || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {
@@ -2705,6 +2897,9 @@ function renderButtons() {
   });
   document.querySelectorAll('#crafting-card button, #crafting-card input, #crafting-card select').forEach(control => {
     if (control.id !== 'crafting-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.craftingUnavailable === '1';
+  });
+  document.querySelectorAll('#formation-card button, #formation-card input, #formation-card select').forEach(control => {
+    if (control.id !== 'formation-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.formationUnavailable === '1';
   });
   $('#spirit-crossing-action').disabled = busy || !game?.player.alive || !!game?.pending_event;
   $('#cross-world-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
