@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import MARKET_GOODS, WORLD_SYSTEMS
+from cultivation_life.crafting_system import store_crafted_artifact
 from cultivation_life.rules import add_item, combat_power
 
 
@@ -105,6 +106,41 @@ class NatalArtifactSystemTests(unittest.TestCase):
         effects = self.engine._natal_artifact_combat_effects(game)
         self.assertIn("enemy_escape_lock", effects[0]["traits"])
         self.assertEqual(effects[1]["player_stat_multipliers"]["sense"], 1.2)
+
+    def test_combination_artifact_uses_the_same_natal_levels_and_sockets(self):
+        game = self.engine.store.load(self.game_id)
+        artifact = {
+            "id":"crafted-natal-test", "name":"玄元试剑", "quality_name":"精制",
+            "mold_name":"剑器胎模", "actual_stats":{
+                "combat_power":1000, "max_hp":200, "max_mp":300,
+                "opportunity_efficiency":.02, "tribulation_reduction":.01,
+            },
+            "combat_effects":[], "anchor_value":10000, "description":"原始炼制描述不得丢失。",
+            "is_natal":False,
+        }
+        store_crafted_artifact(game.player, artifact)
+        self.engine.store.save(game)
+        before = self.engine.get_game(self.game_id)["player"]["combat_power"]
+
+        bound = self.engine.crafted_artifact_action(self.game_id, artifact["id"], "natal")
+        self.assertEqual(bound["natal_artifact"]["crafted_artifact_id"], artifact["id"])
+        self.assertEqual(bound["natal_artifact"]["description"], artifact["description"])
+        self.assertEqual(bound["player"]["combat_power"], before)
+        for _ in range(3):
+            refined = self.engine.natal_artifact_action(self.game_id, "refine")
+        self.assertEqual(refined["natal_artifact"]["level"], 2)
+        self.assertGreater(refined["player"]["combat_power"], before)
+
+        game = self.engine.store.load(self.game_id)
+        game.player.realm_index = 4
+        add_item(game.player, "geng_essence")
+        self.engine.store.save(game)
+        socketed = self.engine.natal_artifact_action(self.game_id, "socket", "geng_essence", 0)
+        self.assertEqual(socketed["natal_artifact"]["slots"][0]["name"], "庚精")
+        unbound = self.engine.crafted_artifact_action(self.game_id, artifact["id"], "unbind_natal")
+        self.assertFalse(unbound["natal_artifact"]["bound"])
+        self.assertTrue(any(row["id"] == artifact["id"] for row in unbound["player"]["inventory"]))
+        self.assertTrue(any(row["id"] == "geng_essence" for row in unbound["player"]["inventory"]))
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cultivation_life.content_registry import FACTION_DEFINITIONS
+from cultivation_life.content_registry import FACTION_DEFINITIONS, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine, encode_rng
 from cultivation_life.models import HistoryRecord
 from cultivation_life.rules import (
@@ -1284,6 +1284,7 @@ class EngineTests(unittest.TestCase):
                 "yuan_magnetic_divine_mountain": "star_palace_completed",
             }
             inventory_ids = {item["id"] for item in player["inventory"]}
+            self.assertIn("spirit_sword", inventory_ids, preset_id)
             for item_id, story_flag in rewarded_story_flags.items():
                 if item_id in inventory_ids and realm_index <= 5:
                     self.assertIn(story_flag, player["story_flags"], preset_id)
@@ -1291,6 +1292,24 @@ class EngineTests(unittest.TestCase):
                 self.assertEqual(player["world"], "spirit")
                 self.assertTrue({"metal", "wood", "water", "fire", "earth"} <= set(player["additional_roots"]))
                 self.assertIsNotNone(result["tribulation"]["next_age"])
+
+    def test_mortal_start_begins_with_qingfeng_spirit_sword_equipped_in_inventory(self):
+        result = self.engine.create_game("执剑凡人", "supreme_metal", "dao", 311)
+        sword = next(row for row in result["player"]["inventory"] if row["id"] == "spirit_sword")
+        self.assertEqual(sword["quantity"], 1)
+        self.assertIn("equipment", sword["tags"])
+        self.assertEqual(sword["combat_bonus"], 22)
+
+    def test_every_enabled_quick_start_includes_qingfeng_spirit_sword(self):
+        for index, preset in enumerate(WORLD_SYSTEMS["quick_start_presets"]):
+            if not preset.get("enabled"):
+                continue
+            result = self.engine.create_game(
+                f"速启持剑{index}", "none", "dao", 400 + index, preset_id=preset["id"],
+            )
+            self.assertIn(
+                "spirit_sword", {row["id"] for row in result["player"]["inventory"]}, preset["id"],
+            )
 
     def test_spirit_world_exposes_three_joinable_sects_with_raced_rosters(self):
         created = self.engine.create_game("灵界门人", "supreme_metal", "dao", 310)
