@@ -268,6 +268,10 @@ def main() -> None:
                 assert page.locator("#transformation-stored .transformation-progress").count() == 2
                 assert page.locator("#transformation-stored .transformation-stat-bars").count() == 2
                 assert page.locator("#transformation-stored .transformation-stat-bar").count() == 12
+                stat_colors = page.locator("#transformation-stored .transformation-stat-bar").evaluate_all(
+                    "nodes => nodes.slice(0, 6).map(node => getComputedStyle(node.querySelector('.transformation-stat-track i')).backgroundImage)"
+                )
+                assert len(set(stat_colors)) == 6
                 assert page.locator("#transformation-materials .transformation-material").count() == 1
                 assert page.locator("#transformation-materials select").count() == 1
                 assert "直接培养" in page.locator("#transformation-materials").text_content()

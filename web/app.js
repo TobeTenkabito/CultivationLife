@@ -2534,6 +2534,7 @@ function transformationFormCard(form, system, isStored) {
   const statGrid = document.createElement('div'); statGrid.className = 'transformation-stat-bars';
   (form.stats || []).forEach(stat => {
     const statRow = document.createElement('div'); statRow.className = 'transformation-stat-bar';
+    statRow.dataset.stat = stat.id;
     const statHead = document.createElement('div');
     const statName = document.createElement('span'); statName.textContent = stat.name;
     const statValue = document.createElement('b');
