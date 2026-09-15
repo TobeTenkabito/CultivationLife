@@ -7,6 +7,7 @@ import uuid
 from typing import Any
 
 from .content_registry import CONTENT_DOCUMENTS, REALMS, WORLD_SYSTEMS
+from .formation_content import expanded_formation_materials
 from .models import GameState, HistoryRecord, Item, Player
 from .runtime import now_iso
 from .rules import expected_combat_power
@@ -32,7 +33,7 @@ def formation_config() -> dict[str, Any]:
 
 
 def formation_material_definitions() -> dict[str, dict[str, Any]]:
-    return {str(row["id"]): row for row in formation_config().get("materials", [])}
+    return {str(row["id"]): row for row in expanded_formation_materials(formation_config())}
 
 
 def formation_maintenance_definitions() -> dict[str, dict[str, Any]]:

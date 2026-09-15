@@ -79,6 +79,32 @@
           "description": "现实与梦境在黑水上交替显现，错误的倒影会把旅者引向界隙。",
           "themes": ["幻境", "阴影", "湿地"], "combat_terrain": "狭窄", "combat_conditions": [],
           "qi_gain_efficiencies": {"spirit": 0.5, "demon": 0.55, "monster": 1.85, "yin": 1.25}
+        },
+        {
+          "id": "tiger_roar_cliff", "name": "虎啸天崖",
+          "description": "罡风沿万丈断崖昼夜回旋，爪族以啸声划分猎场与试炼层级。",
+          "themes": ["断崖", "罡风", "爪族"], "combat_terrain": "险要", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.55, "demon": 0.55, "monster": 2.18, "yin": 0.5},
+          "min_realm_index": 2, "failure": "blocked"
+        },
+        {
+          "id": "coiling_dragon_wetland", "name": "蟠龙泽",
+          "description": "蜿蜒水脉形似盘龙，鳞族幼兽会沿潮线完成第一次蜕鳞。",
+          "themes": ["湿地", "龙脉", "鳞族"], "combat_terrain": "开阔", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.72, "demon": 0.4, "monster": 2.05, "yin": 0.92}
+        },
+        {
+          "id": "ant_queen_red_mound", "name": "赤蚁王丘",
+          "description": "赤色丘陵内部是纵横百里的蚁城，矿砂与食物沿巢道精准调配。",
+          "themes": ["虫巢", "赤土", "矿脉"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.38, "demon": 0.72, "monster": 2.22, "yin": 0.76},
+          "min_realm_index": 1, "failure": "blocked"
+        },
+        {
+          "id": "moonwell_grove", "name": "月泉古林",
+          "description": "银泉从古木根部涌出，月相变化会唤醒不同的林中血脉。",
+          "themes": ["月泉", "古木", "血脉"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.88, "demon": 0.32, "monster": 2.12, "yin": 1.08}
         }
       ],
       "routes": [
@@ -99,7 +125,15 @@
         {"from": "ember_plume_volcano", "to": "golden_waste", "years": 15},
         {"from": "starfall_grass_sea", "to": "golden_waste", "years": 12},
         {"from": "starfall_grass_sea", "to": "dreamshadow_marsh", "years": 14},
-        {"from": "worldwood_stair", "to": "dreamshadow_marsh", "years": 21}
+        {"from": "worldwood_stair", "to": "dreamshadow_marsh", "years": 21},
+        {"from": "ancestral_mountain", "to": "tiger_roar_cliff", "years": 13},
+        {"from": "tiger_roar_cliff", "to": "golden_waste", "years": 16},
+        {"from": "azure_scale_sea", "to": "coiling_dragon_wetland", "years": 9},
+        {"from": "coiling_dragon_wetland", "to": "black_shell_cold_lake", "years": 12},
+        {"from": "myriad_insect_cavern", "to": "ant_queen_red_mound", "years": 8},
+        {"from": "ant_queen_red_mound", "to": "golden_waste", "years": 14},
+        {"from": "qingqiu_mist_marsh", "to": "moonwell_grove", "years": 10},
+        {"from": "moonwell_grove", "to": "worldwood_stair", "years": 15}
       ]
     },
     "phantom_underworld": {
@@ -153,6 +187,32 @@
           "themes": ["古木", "界树", "高空"], "combat_terrain": "险要", "combat_conditions": [],
           "qi_gain_efficiencies": {"spirit": 0.75, "demon": 0.4, "monster": 1.8, "yin": 1.2},
           "min_realm_index": 2, "failure": "blocked"
+        },
+        {
+          "id": "inverted_sky_forest", "name": "倒悬天林",
+          "description": "整片森林根系扎入天穹，枝冠向无底虚空垂落，飞行方向时常倒置。",
+          "themes": ["倒悬", "古木", "高空"], "combat_terrain": "险要", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.68, "demon": 0.48, "monster": 1.92, "yin": 1.38},
+          "min_realm_index": 4, "failure": "blocked"
+        },
+        {
+          "id": "beast_soul_lantern_city", "name": "兽魂灯城",
+          "description": "万盏祖魂灯沿城墙明灭，妖族以魂火亮度记录血脉谱系。",
+          "themes": ["魂灯", "城邦", "祖血"], "combat_terrain": "狭窄", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.46, "demon": 0.58, "monster": 1.82, "yin": 1.62}
+        },
+        {
+          "id": "hollow_moon_chasm", "name": "空月裂谷",
+          "description": "裂谷上方悬着中空月影，空间潮汐会把远方兽吼折入谷底。",
+          "themes": ["空月", "界隙", "裂谷"], "combat_terrain": "开阔", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.38, "demon": 0.7, "monster": 2.02, "yin": 1.7},
+          "min_realm_index": 6, "failure": "blocked"
+        },
+        {
+          "id": "mirage_bone_field", "name": "蜃骨原",
+          "description": "巨蜃遗骨投射出层层幻景，真实道路只在阴潮最低时显现。",
+          "themes": ["蜃骨", "幻境", "荒原"], "combat_terrain": "开阔", "combat_conditions": [],
+          "qi_gain_efficiencies": {"spirit": 0.42, "demon": 0.66, "monster": 1.88, "yin": 1.58}
         }
       ],
       "routes": [
@@ -174,7 +234,13 @@
         {"from": "moon_insect_cavern", "to": "ancient_vine_bridge", "years": 17},
         {"from": "mirror_moon_sandbar", "to": "kun_shadow_abyss", "years": 22},
         {"from": "mirror_moon_sandbar", "to": "silent_shadow_valley", "years": 15},
-        {"from": "sleepless_flower_sea", "to": "ancient_vine_bridge", "years": 13}
+        {"from": "sleepless_flower_sea", "to": "ancient_vine_bridge", "years": 13},
+        {"from": "ancient_vine_bridge", "to": "inverted_sky_forest", "years": 16},
+        {"from": "inverted_sky_forest", "to": "hollow_moon_chasm", "years": 27},
+        {"from": "nine_tail_dream_city", "to": "beast_soul_lantern_city", "years": 11},
+        {"from": "beast_soul_lantern_city", "to": "mirage_bone_field", "years": 14},
+        {"from": "mirror_moon_sandbar", "to": "mirage_bone_field", "years": 10},
+        {"from": "hollow_moon_chasm", "to": "kun_shadow_abyss", "years": 20}
       ]
     },
     "nether": {

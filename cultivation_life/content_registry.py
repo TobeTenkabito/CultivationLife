@@ -13,6 +13,7 @@ from .models import Item, RealmDef, SectNpc, Technique, TransformationForm
 from .combat_traits import COMBAT_TRAIT_REGISTRY
 from .monster_bloodline_traits import BLOODLINE_TRAIT_REGISTRY
 from .monster_bloodline_rules import validate_rule_catalog
+from .formation_content import expanded_formation_materials
 
 
 class ContentError(ValueError):
@@ -313,8 +314,30 @@ class ContentRegistry:
             raise ContentError("炼器内容必须配置十二种唯一胎模及固定规则")
         roles = {"primary", "secondary", "quench"}
         material_ids: set[str] = set()
+        progression = document.get("material_progression", {})
+        progression_natures = list(map(str, progression.get("natures", [])))
+        progression_worlds = progression.get("worlds", {})
+        progression_tiers = progression.get("tiers", {})
+        if progression and (
+            set(progression_natures) != natures
+            or set(progression.get("nature_names", {})) != natures
+            or set(progression.get("nature_value_multipliers", {})) != natures
+            or not isinstance(progression_worlds, dict) or not progression_worlds
+            or any(
+                not row.get("prefix") or float(row.get("value_multiplier", 0)) <= 0
+                or not row.get("tiers") or any(str(int(tier)) not in progression_tiers for tier in row.get("tiers", []))
+                for row in progression_worlds.values()
+            )
+            or any(
+                not row.get("label") or int(row.get("base_value", 0)) <= 0
+                or float(row.get("formation_value", 0)) <= 0
+                for row in progression_tiers.values()
+            )
+        ):
+            raise ContentError("阶段阵材族必须完整声明十四阵性、界面阶段与正数价值")
+
         covered_worlds: set[str] = set()
-        for material in document.get("materials", []):
+        for material in expanded_formation_materials(document):
             material_id = str(material.get("id", ""))
             declared_roles = set(material.get("roles", []))
             if (

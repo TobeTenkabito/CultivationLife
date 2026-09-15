@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 from cultivation_life.content_registry import CONTENT_DOCUMENTS, MARKET_GOODS, WORLD_SYSTEMS
@@ -19,7 +20,32 @@ class MapCatalogTests(unittest.TestCase):
     def test_all_world_interfaces_have_connected_maps(self):
         self.assertEqual(set(self.catalog.worlds), set(WORLD_SYSTEMS["world_profiles"]))
         human_names = {row["name"] for row in self.catalog.public_map("human", "wudi_plain", 4, "人界")["locations"]}
-        self.assertEqual(human_names, {"无棣原", "穆陵沙漠", "岚疆草原", "风语群岛", "澜沧海"})
+        self.assertTrue({"无棣原", "穆陵沙漠", "岚疆草原", "风语群岛", "澜沧海"}.issubset(human_names))
+        self.assertEqual(len(human_names), 10)
+
+    def test_lower_and_middle_world_maps_expand_while_upper_worlds_stay_fixed(self):
+        expected_counts = {
+            "human":10, "spirit":10, "demon":9, "true_demon":9,
+            "monster_realm":16, "phantom_underworld":16, "hell":12,
+        }
+        self.assertEqual(
+            {world:len(self.catalog.worlds[world]["locations"]) for world in expected_counts},
+            expected_counts,
+        )
+        self.assertEqual(
+            {world:len(self.catalog.worlds[world]["locations"]) for world in ("celestial", "asura", "nether", "reincarnation")},
+            {"celestial":3, "asura":5, "nether":9, "reincarnation":3},
+        )
+
+    def test_monster_and_ghost_map_additions_live_in_their_dlc_packages(self):
+        base = json.loads((SOURCE_ROOT / "content" / "maps.json").read_text(encoding="utf-8"))
+        monster = json.loads((SOURCE_ROOT / "dlc" / "monster-bloodlines" / "content" / "maps.json").read_text(encoding="utf-8"))
+        ghost = json.loads((SOURCE_ROOT / "dlc" / "ghost-reincarnation" / "content" / "maps.json").read_text(encoding="utf-8"))
+        self.assertNotIn("monster_realm", base["worlds"])
+        self.assertNotIn("yin_market_capital", {row["id"] for row in base["worlds"]["hell"]["locations"]})
+        self.assertIn("tiger_roar_cliff", {row["id"] for row in monster["worlds"]["monster_realm"]["locations"]})
+        self.assertIn("hollow_moon_chasm", {row["id"] for row in monster["worlds"]["phantom_underworld"]["locations"]})
+        self.assertIn("yin_market_capital", {row["id"] for row in ghost["worlds"]["hell"]["locations"]})
 
     def test_every_location_has_distinct_four_qi_gain_efficiencies(self):
         expected = {"spirit", "demon", "monster", "yin"}
