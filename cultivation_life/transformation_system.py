@@ -168,6 +168,10 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
         public_form(TRANSFORMATION_CATALOG[form_id], player)
         for form_id in player.known_transformations if form_id in TRANSFORMATION_CATALOG
     ]
+    knows_technique = any(
+        technique_entry.id == "TECH_BEAST_TRANSFORMATION"
+        for technique_entry in player.known_techniques
+    )
     materials = [
         {
             "id": item.id, "name": item.name, "quantity": item.quantity,
@@ -185,7 +189,14 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
         for item in player.inventory
         if item.quantity > 0 and item.transformation_form_id in TRANSFORMATION_CATALOG and item.transformation_purity > 0
     ]
-    base = {"available": True, "disabled_reason": "", "materials": materials}
+    base = {
+        "available": True, "disabled_reason": "", "materials": materials,
+        "acquisition_hint": (
+            "你已掌握《百兽化形诀》，请在功法栏将它配置到“变”槽。"
+            if knows_technique else
+            "《百兽化形诀》已实装：人界结丹或灵界化神及以上的一般坊市会保底出现，购得后在功法栏配置到“变”槽。"
+        ),
+    }
     if not technique:
         return base | {
             "technique": None, "capacity": 0, "space": 0, "stored": [],

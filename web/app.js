@@ -1971,21 +1971,35 @@ function renderMarket(market) {
   if (!market?.available) return;
   $('#market-title').textContent = market.name;
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
-  $('#market-description').textContent = `货物只在当前世界流通，灵石跨界通用；每件货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品，绝不会越过两个境界。坊市每年换货。`;
-  const list = $('#market-offers'); list.innerHTML = '';
-  [...(market.offers || []), ...(market.crafting_material_offers || []), ...(market.formation_material_offers || [])].forEach(offer => {
+  $('#market-description').textContent = `一般坊市与材料坊市各有六个货位，每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
+  const renderShelf = (selector, offers) => {
+    const list = $(selector); list.innerHTML = '';
+    offers.forEach(offer => {
     const row = document.createElement('div'); row.className = `market-offer${offer.sold ? ' sold' : ''}`;
+    if (offer.locked) row.classList.add('locked');
     const info = document.createElement('div'); const title = document.createElement('b');
-    title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}`;
+    title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}${offer.featured ? ' · 保底传承' : ''}`;
     const detail = document.createElement('small');
     detail.textContent = `${offer.tier_name} · ${offer.description}${offer.kind === 'technique' && !offer.compatible ? ' · 灵根不符，购得后暂不可修炼' : ''}`;
     info.append(title, detail);
+    const controls = document.createElement('div'); controls.className = 'market-offer-actions';
+    const lock = document.createElement('button'); lock.className = `market-lock${offer.locked ? ' active' : ''}`;
+    lock.textContent = offer.locked ? '已锁定' : '锁定';
+    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
+    lock.disabled = busy || offer.sold || !!game.pending_event || !game.player.alive;
+    lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
     const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : offer.owned ? '已掌握' : `${offer.price} 灵石`;
     buy.className = 'market-buy'; buy.dataset.offerId = offer.id;
     buy.disabled = busy || offer.sold || offer.owned || market.spirit_stones < offer.price || !!game.pending_event || !game.player.alive;
     buy.onclick = () => mutate(`/api/games/${game.id}/market-buy`, {offer_id:offer.id});
-    row.append(info, buy); list.appendChild(row);
-  });
+    controls.append(lock, buy); row.append(info, controls); list.appendChild(row);
+    });
+    if (!list.children.length) list.innerHTML = '<p class="empty">此地暂时没有可交易的货物。</p>';
+  };
+  renderShelf('#market-offers', market.offers || []);
+  renderShelf('#material-market-offers', market.material_offers || [
+    ...(market.crafting_material_offers || []), ...(market.formation_material_offers || []),
+  ]);
   const plantSection = $('#market-plant-sell-section');
   const plantSellables = $('#market-plant-sellables'); plantSellables.innerHTML = '';
   const plants = market.sellable_plants || [];
@@ -2465,7 +2479,7 @@ function renderTransformationSystem(system) {
     : '尚未配置变身功法';
   $('#transformation-note').textContent = technique
     ? `功法只提供容量与战斗空间，不再预设形态。启用顺序决定权重：${(system.stored || []).filter(form => form.active).map(form => `${form.name} ${percent(form.weight)}`).join('、') || '尚未启用'}。开战后全程自动。`
-    : '先炼化真灵之血、精魄或元神解锁形态；配置变身功法后才能存放并加入自动战斗预案。';
+    : `先炼化真灵之血、精魄或元神解锁形态；配置变身功法后才能存放并加入自动战斗预案。${system.acquisition_hint || ''}`;
   const combined = $('#transformation-combined'); combined.innerHTML = '';
   (system.combined_stats || []).forEach(stat => {
     const row = document.createElement('div'); row.className = 'transformation-stat';
@@ -2510,8 +2524,20 @@ function transformationFormCard(form, system, isStored) {
   title.textContent = `${form.name} · ${form.realm_name} · 属性圆满度 ${percent(form.completion)} · 距离满属性 ${percent(form.remaining)}${form.active ? ` · 权重 ${percent(form.weight)}` : ''}`;
   const progress = document.createElement('div'); progress.className = 'transformation-progress'; progress.title = `距离满属性还有 ${percent(form.remaining)}`;
   const progressFill = document.createElement('i'); progressFill.style.width = `${Math.max(0, Math.min(100, Number(form.completion) * 100))}%`; progress.appendChild(progressFill);
-  const stats = (form.stats || []).map(stat => `${stat.name}${percent(stat.progress)}·×${Number(stat.multiplier).toFixed(2)}/上限${Number(stat.cap).toFixed(2)}`).join(' · ');
-  const detail = document.createElement('small'); detail.textContent = `${form.description} 当前生效：${stats}`;
+  const detail = document.createElement('small'); detail.textContent = form.description;
+  const statGrid = document.createElement('div'); statGrid.className = 'transformation-stat-bars';
+  (form.stats || []).forEach(stat => {
+    const statRow = document.createElement('div'); statRow.className = 'transformation-stat-bar';
+    const statHead = document.createElement('div');
+    const statName = document.createElement('span'); statName.textContent = stat.name;
+    const statValue = document.createElement('b');
+    statValue.textContent = `${percent(stat.progress)} · ×${Number(stat.multiplier).toFixed(2)} / 上限 ${Number(stat.cap).toFixed(2)}`;
+    const statTrack = document.createElement('div'); statTrack.className = 'transformation-stat-track';
+    const statFill = document.createElement('i');
+    statFill.style.width = `${Math.max(0, Math.min(100, Number(stat.progress) * 100))}%`;
+    statTrack.appendChild(statFill); statHead.append(statName, statValue); statRow.append(statHead, statTrack);
+    statGrid.appendChild(statRow);
+  });
   const traits = document.createElement('small'); traits.textContent = (form.traits || []).length
     ? `特质：${form.traits.map(trait => `${trait.unlocked ? '已解锁' : `需${percent(trait.required_purity)}`}·${trait.name}`).join('；')}` : '无独立特质';
   const tools = document.createElement('div'); tools.className = 'transformation-form-tools';
@@ -2533,7 +2559,7 @@ function transformationFormCard(form, system, isStored) {
     addButton('启用', 'activate', (system.active?.length || 0) >= system.space);
     addButton('移除', 'remove');
   }
-  row.append(title, progress, detail, traits, tools);
+  row.append(title, progress, detail, statGrid, traits, tools);
   return row;
 }
 

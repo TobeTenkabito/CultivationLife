@@ -1,4 +1,4 @@
-{"schema_version":1,"settings":{"offer_count":6,"next_tier_chance":0.02,"price_multiplier":[0.9,1.1],"commission_stones":{"1":[2,5],"2":[8,16],"3":[28,55],"4":[110,220],"5":[420,760],"6":[1800,3200],"7":[9000,16000],"8":[45000,80000],"9":[260000,480000],"10":[1500000,2800000],"11":[9000000,16000000],"12":[52000000,90000000]}},"goods":[
+{"schema_version":1,"settings":{"offer_count":6,"material_offer_count":6,"next_tier_chance":0.02,"price_multiplier":[0.9,1.1],"commission_stones":{"1":[2,5],"2":[8,16],"3":[28,55],"4":[110,220],"5":[420,760],"6":[1800,3200],"7":[9000,16000],"8":[45000,80000],"9":[260000,480000],"10":[1500000,2800000],"11":[9000000,16000000],"12":[52000000,90000000]}},"goods":[
 {"world":"human","kind":"item","content_id":"qi_gathering_bead","tier":1,"price":4},
 {"world":"human","kind":"item","content_id":"iron_skin_talisman","tier":1,"price":5},
 {"world":"human","kind":"item","content_id":"cloudstep_boots","tier":1,"price":6},

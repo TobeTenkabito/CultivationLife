@@ -266,6 +266,8 @@ def main() -> None:
                 assert page.locator("#transformation-stored .transformation-form").count() == 2
                 assert page.locator("#transformation-stored .transformation-form.active").count() == 2
                 assert page.locator("#transformation-stored .transformation-progress").count() == 2
+                assert page.locator("#transformation-stored .transformation-stat-bars").count() == 2
+                assert page.locator("#transformation-stored .transformation-stat-bar").count() == 12
                 assert page.locator("#transformation-materials .transformation-material").count() == 1
                 assert page.locator("#transformation-materials select").count() == 1
                 assert "直接培养" in page.locator("#transformation-materials").text_content()
@@ -373,6 +375,10 @@ def main() -> None:
 
                 page.locator("[data-panel-target='market']").click()
                 assert "panel-open" in page.locator("#market-card").get_attribute("class")
+                assert page.locator("#market-offers .market-offer").count() == 6
+                assert page.locator("#material-market-offers .market-offer").count() == 6
+                assert page.locator("#market-offers .market-lock").count() == 6
+                assert page.locator("#material-market-offers .market-lock").count() == 6
                 page.locator("#market-toggle").click()
                 assert "panel-open" not in page.locator("#market-card").get_attribute("class")
                 page.locator("[data-panel-target='market']").click()

@@ -113,6 +113,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.set_faction_reward(game_id, payload.get("reward_id", ""))
             elif operation == "market-buy":
                 result = ENGINE.buy_market_offer(game_id, payload.get("offer_id", ""))
+            elif operation == "market-lock":
+                result = ENGINE.toggle_market_offer_lock(game_id, payload.get("offer_id", ""))
             elif operation == "market-sell-plant":
                 result = ENGINE.sell_spirit_plant(game_id, payload.get("item_id", ""))
             elif operation == "auction-consign":

@@ -221,7 +221,7 @@ class FormationIntegrationTests(unittest.TestCase):
         offers = shown["market"]["formation_material_offers"]
         materials = [row for row in offers if row["kind"] == "formation_material"]
         supplies = [row for row in offers if row["kind"] == "formation_supply"]
-        self.assertEqual(len(materials), 3)
+        self.assertEqual(len(materials), 2)
         self.assertEqual(len(supplies), 1)
         game = self.engine.store.load(self.game_id)
         add_item(game.player, "spirit_stone", materials[0]["price"])
