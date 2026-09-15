@@ -361,6 +361,32 @@ class FormationIntegrationTests(unittest.TestCase):
         restored_ids = {row["storage_id"] for row in withdrawn["formation_system"]["materials"]}
         self.assertEqual(restored_ids, {row["id"] for row in instances})
 
+    def test_creator_can_reclaim_sect_array_after_sect_falls_and_allegiance_changes(self):
+        instances = self._give_array()
+        self._save_active(instances, "覆宗归器阵")
+        game = self.engine.store.load(self.game_id)
+        game.player.faction_id = "tianjian"
+        game.sects["tianjian"].founded_by_player = True
+        game.sects["tianjian"].founder_player_id = game.id
+        self.engine.store.save(game)
+        shown = self.engine.deploy_ground_formation(self.game_id, "sect")
+        array = shown["formation_system"]["ground_arrays"][0]
+        game = self.engine.store.load(self.game_id)
+        original_sect_id = str(array["owner_id"])
+        game.sects[original_sect_id].extinct = True
+        game.player.faction_id = next(
+            sect_id for sect_id, sect in game.sects.items()
+            if sect_id != original_sect_id and sect.world == game.player.world
+        )
+        self.engine.store.save(game)
+
+        withdrawn = self.engine.withdraw_ground_formation(self.game_id, array["id"])
+        self.assertEqual(withdrawn["formation_system"]["ground_arrays"], [])
+        self.assertEqual(
+            {row["storage_id"] for row in withdrawn["formation_system"]["materials"]},
+            {row["id"] for row in instances},
+        )
+
     def test_ground_power_and_persistent_combat_wear_are_bounded(self):
         instances = self._give_array()
         self._save_active(instances)

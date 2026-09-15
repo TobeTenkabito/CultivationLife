@@ -584,7 +584,7 @@ function renderCrafting(system) {
   const panel = $('#crafting-card'), dock = document.querySelector('[data-panel-target="crafting"]');
   panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
   if (!system.visible) { window.UtilityPanels?.close('crafting'); return; }
-  $('#crafting-heading').textContent = `炼器 ${system.active_count}/${system.active_slots} · 材料 ${system.materials?.length || 0}`;
+  $('#crafting-heading').textContent = `炼器 · 材料 ${system.materials?.length || 0} · 包裹成品 ${system.active_count || 0}`;
   const moldSelect = $('#crafting-mold'); moldSelect.innerHTML = '';
   (system.molds || []).forEach(mold => {
     const option = document.createElement('option'); option.value = mold.id;
@@ -625,31 +625,6 @@ function renderCrafting(system) {
     row.append(name, detail); library.appendChild(row);
   });
   if (!system.materials?.length) library.innerHTML = '<p class="empty">暂无炼器材料。各界坊市每次换货会额外出现三份有独立品相的炼器材料；部分灵田实生灵植也可入器。</p>';
-
-  const artifactList = $('#crafted-artifact-list'); artifactList.innerHTML = '';
-  (system.artifacts || []).forEach(artifact => {
-    const row = document.createElement('div'); row.className = `crafted-artifact-row${artifact.equipped ? ' active' : ''}`;
-    const info = document.createElement('div'); const title = document.createElement('b'); const detail = document.createElement('small'); const stats = document.createElement('small');
-    title.textContent = `${artifact.is_natal ? '本命 · ' : ''}${artifact.name} · ${artifact.quality_name}`;
-    detail.textContent = `${artifact.mold_name} · 创制于 ${timelineText(artifact.created_year)} · 锚定价值 ${number(artifact.anchor_value)}灵石`;
-    stats.textContent = Object.entries(artifact.actual_stats || {}).filter(([,value]) => Number(value)).map(([key,value]) => craftingStatText(key,value,system.stat_names || {})).join(' · ') || '未分配常驻属性';
-    info.append(title, detail, stats);
-    const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
-    const equip = document.createElement('button'); equip.textContent = artifact.equipped ? '卸下' : '装备';
-    equip.disabled = artifact.is_natal; equip.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0'; equip.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.equipped ? 'unequip' : 'equip'});
-    const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
-    natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝本身不会消失。` : `确认将“${artifact.name}”设为唯一的组合式本命法宝？原有组合式本命关系会解除。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
-    const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
-    sell.disabled = artifact.equipped; sell.dataset.craftingUnavailable = artifact.equipped ? '1' : '0'; sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开存档，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
-    tools.append(equip, natal, sell);
-    if (system.auction_available && !artifact.equipped) {
-      const start = document.createElement('input'); start.type = 'number'; start.min = String(Math.ceil(artifact.anchor_value * .25)); start.max = String(Math.floor(artifact.anchor_value * 5)); start.value = String(Math.round(artifact.anchor_value * .8)); start.title = '寄拍起拍价';
-      const consign = document.createElement('button'); consign.textContent = '寄拍'; consign.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'consign', start_price:Number(start.value || 0)});
-      tools.append(start, consign);
-    }
-    row.append(info, tools); artifactList.appendChild(row);
-  });
-  if (!system.artifacts?.length) artifactList.innerHTML = '<p class="empty">尚未炼成组合式法宝。</p>';
 
   const blueprints = $('#crafting-blueprint-list'); blueprints.innerHTML = '';
   (system.blueprints || []).forEach(blueprint => {
@@ -947,7 +922,7 @@ function renderNatalArtifact(system) {
   const root=$('#natal-artifact-content');root.innerHTML='';
   if(!system.bound){
     $('#natal-artifact-heading').textContent='结丹后开放';
-    const lead=document.createElement('p');lead.className='muted';lead.textContent='选择一件传统法宝收入丹田。认主后不可交易，其原有属性将随祭炼等级持续成长；组合炼器成品请在“器”界面单独设置本命。';root.appendChild(lead);
+    const lead=document.createElement('p');lead.className='muted';lead.textContent='选择一件传统法宝收入丹田。认主后不可交易，其原有属性将随祭炼等级持续成长；组合炼器成品可直接在包裹中设置本命。';root.appendChild(lead);
     const candidates=document.createElement('div');candidates.className='natal-candidates';
     (system.candidates||[]).forEach(item=>{const row=document.createElement('div'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small'),button=document.createElement('button');name.textContent=item.name;detail.textContent=item.description;text.append(name,detail);button.className='natal-action';button.textContent='炼为本命';button.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'bind',item_id:item.id});row.append(text,button);candidates.appendChild(row);});
     if(!system.candidates?.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='背包中暂无可认主的法宝或装备。';candidates.appendChild(empty);}root.appendChild(candidates);return;
@@ -2304,15 +2279,33 @@ function renderInventory(items) {
     const section = document.createElement('section'); section.className = 'inventory-category';
     const heading = document.createElement('h3'); heading.textContent = `${categoryName} · ${groupItems.length}`; section.appendChild(heading);
     groupItems.forEach(item => {
-    const row = document.createElement('div'); row.className = `item${item.is_natal_artifact ? ' natal-artifact-item' : ''}`;
+    const artifact = item.crafted_artifact_id
+      ? (game?.crafting_system?.artifacts || []).find(entry => entry.id === item.crafted_artifact_id)
+      : null;
+    const row = document.createElement('div'); row.className = `item${item.is_natal_artifact ? ' natal-artifact-item' : ''}${artifact ? ' crafted-artifact-item' : ''}`;
     const text = document.createElement('span');
-    const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
+    const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact || artifact?.is_natal ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
     const effect = document.createElement('small'); effect.textContent = item.description || '可用于特定事件。';
     text.append(name, effect); row.appendChild(text);
+    if (artifact) {
+      const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
+      const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
+      natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效。` : `确认将“${artifact.name}”设为唯一的组合式本命法宝？原有组合式本命关系会解除。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
+      const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
+      sell.disabled = Boolean(artifact.is_natal); sell.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0';
+      sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开包裹，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
+      tools.append(natal, sell);
+      if (game?.crafting_system?.auction_available && !artifact.is_natal) {
+        const start = document.createElement('input'); start.type = 'number'; start.min = String(Math.ceil(artifact.anchor_value * .25)); start.max = String(Math.floor(artifact.anchor_value * 5)); start.value = String(Math.round(artifact.anchor_value * .8)); start.title = '寄拍起拍价';
+        const consign = document.createElement('button'); consign.textContent = '寄拍'; consign.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'consign', start_price:Number(start.value || 0)});
+        tools.append(start, consign);
+      }
+      row.appendChild(tools);
+    }
     const trialRecovery = (item.trial_restore_hp > 0 || item.trial_restore_mp > 0) && game.trial?.active;
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const normalUse = item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse;
-    if ((trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
+    if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_')) use.textContent = '参悟';
       if (specialPlantUse) { use.textContent = '使用'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }

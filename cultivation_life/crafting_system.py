@@ -25,10 +25,74 @@ def crafting_config() -> dict[str, Any]:
 
 
 def active_crafted_artifacts(player: Player) -> list[dict[str, Any]]:
-    active_ids = set(map(str, player.equipped_crafted_artifact_ids))
+    active_ids = {
+        str(item.crafted_artifact_id)
+        for item in player.inventory
+        if item.quantity > 0 and item.crafted_artifact_id
+    }
+    # In-memory legacy fixtures may not have passed through Player.from_dict;
+    # the new rule is that every owned crafted artifact is automatically live.
+    if not active_ids and player.crafted_artifacts:
+        active_ids = {str(row.get("id", "")) for row in player.crafted_artifacts}
     return [
         row for row in player.crafted_artifacts
-        if isinstance(row, dict) and (str(row.get("id")) in active_ids or bool(row.get("is_natal")))
+        if isinstance(row, dict) and str(row.get("id")) in active_ids
+    ]
+
+
+def crafted_artifact_description(artifact: dict[str, Any]) -> str:
+    preserved = str(artifact.get("description", "")).strip()
+    if preserved:
+        return preserved
+    rule = str(artifact.get("mold_rule_description", "")).strip()
+    material_lines = [
+        str(row.get("description", "")).strip()
+        for row in artifact.get("material_effects", [])
+        if isinstance(row, dict) and str(row.get("description", "")).strip()
+    ]
+    pieces = [
+        f"{artifact.get('quality_name', '')}{artifact.get('mold_name', '组合式法宝')}",
+        f"常驻属性：{artifact_summary(artifact)}",
+    ]
+    if rule:
+        pieces.append(f"胎模器纹：{rule}")
+    if material_lines:
+        pieces.append("材料器纹：" + "；".join(material_lines))
+    pieces.append(
+        f"由{artifact.get('creator_name', '无名器师')}炼于纪年 {artifact.get('created_year', '?')}，"
+        f"锚定价值 {int(artifact.get('anchor_value', 1)):,} 灵石"
+    )
+    return "。".join(pieces) + "。"
+
+
+def store_crafted_artifact(player: Player, artifact: dict[str, Any]) -> None:
+    artifact_id = str(artifact.get("id", ""))
+    if not artifact_id:
+        raise ValueError("炼器法宝缺少唯一实例 ID")
+    artifact["description"] = crafted_artifact_description(artifact)
+    if not any(str(row.get("id")) == artifact_id for row in player.crafted_artifacts):
+        player.crafted_artifacts.append(artifact)
+    if not any(item.crafted_artifact_id == artifact_id for item in player.inventory):
+        player.inventory.append(Item(
+            id=artifact_id,
+            name=str(artifact.get("name", "无名法宝")),
+            quantity=1,
+            crafted_artifact_id=artifact_id,
+            description=str(artifact["description"]),
+            tags=["artifact", "equipment", "crafted_artifact"],
+        ))
+
+
+def remove_crafted_artifact(player: Player, artifact: dict[str, Any]) -> None:
+    artifact_id = str(artifact.get("id", ""))
+    player.crafted_artifacts = [
+        row for row in player.crafted_artifacts if str(row.get("id", "")) != artifact_id
+    ]
+    player.equipped_crafted_artifact_ids = [
+        value for value in player.equipped_crafted_artifact_ids if value != artifact_id
+    ]
+    player.inventory = [
+        item for item in player.inventory if item.crafted_artifact_id != artifact_id
     ]
 
 
@@ -237,9 +301,23 @@ class CraftingSystemMixin:
             raise ValueError("至少为法宝分配一项属性")
         if used > budget + 1e-9:
             raise ValueError(f"属性预算超出上限：已用 {used:.1f} / {budget}")
-        expected = expected_combat_power(player.realm_index, player.layer)
+        primary_tier = int(selected[0][1].get("acquired_tier", player.realm_index))
+        scaling_realm_index = max(0, min(player.realm_index, primary_tier, len(REALMS) - 1))
+        scaling_layer = (
+            player.layer if scaling_realm_index == player.realm_index
+            else max(1, REALMS[scaling_realm_index].layers)
+        )
+        # Anchor absolute output to the recipe's main-material stage, not a
+        # flat +1 and not the wearer's already-equipped bonuses.  This keeps
+        # Qi artifacts legible while making immortal artifacts scale against
+        # immortal combat numbers without recursive forge-to-forge inflation.
+        benchmark = Player(
+            "炼器境界基准", player.spirit_root,
+            realm_index=scaling_realm_index, layer=scaling_layer, path=player.path,
+        )
+        expected = expected_combat_power(scaling_realm_index, scaling_layer)
         stat_bases = {
-            "combat_power": expected, "max_hp": max_hp(player), "max_mp": max_mp(player),
+            "combat_power": expected, "max_hp": max_hp(benchmark), "max_mp": max_mp(benchmark),
             "opportunity_efficiency": 1.0, "body_training_efficiency": 1.0,
             "divine_sense_efficiency": 1.0, "tribulation_reduction": 1.0,
             "breakthrough_bonus": 1.0,
@@ -290,6 +368,12 @@ class CraftingSystemMixin:
             "mold": copy.deepcopy(mold), "selected_materials": [copy.deepcopy(row) for _, row in selected],
             "material_effects": material_effects, "allocations": allocations,
             "budget": budget, "budget_used": round(used, 2), "designed_stats": {key: round(value, 4) for key, value in designed.items()},
+            "scaling_realm_index": scaling_realm_index,
+            "scaling_realm_name": REALMS[scaling_realm_index].name,
+            "scaling_benchmarks": {
+                "combat_power": round(expected, 1),
+                "max_hp": max_hp(benchmark), "max_mp": max_mp(benchmark),
+            },
             "special_stats": {key: round(value, 4) for key, value in special_stats.items()},
             "quality_probabilities": probabilities, "quality_names": copy.deepcopy(rules["quality_names"]),
             "quality_multipliers": copy.deepcopy(rules["quality_multipliers"]),
@@ -331,6 +415,9 @@ class CraftingSystemMixin:
             "quality_name": preview["quality_names"][quality],
             "quality_multiplier": float(preview["quality_multipliers"][quality]),
             "creator_name": player.name, "creator_id": game.id, "created_year": player.age,
+            "scaling_realm_index": preview["scaling_realm_index"],
+            "scaling_realm_name": preview["scaling_realm_name"],
+            "scaling_benchmarks": preview["scaling_benchmarks"],
             "materials": [{key: row.get(key) for key in (
                 "id", "definition_id", "name", "quality", "state", "source", "origin_world", "material_value"
             )} for row in preview["selected_materials"]],
@@ -338,9 +425,10 @@ class CraftingSystemMixin:
             "designed_stats": preview["designed_stats"],
             "actual_stats": preview["theoretical_stats"][quality],
             "combat_effects": preview["combat_effects"], "anchor_value": preview["anchor_value"],
+            "mold_rule_description": str(preview["mold"]["rule"].get("description", "")),
             "is_natal": False,
         }
-        player.crafted_artifacts.append(artifact)
+        store_crafted_artifact(player, artifact)
         self._grant_art_experience(player, "refining", float(self._crafting_rules().get("refining_experience_per_craft", 30)))
         game.history.append(HistoryRecord(
             "SYS_ARTIFACT_FORGE", 1, player.age, "组合炼器", artifact_id, "forged",
@@ -373,31 +461,21 @@ class CraftingSystemMixin:
         artifact = next((row for row in player.crafted_artifacts if str(row.get("id")) == artifact_id), None)
         if not artifact:
             raise ValueError("这件炼器法宝不存在")
-        equipped = player.equipped_crafted_artifact_ids
         if action == "equip":
-            if artifact_id not in equipped:
-                if len(equipped) >= int(self._crafting_rules().get("active_slots", 3)):
-                    raise ValueError("同时生效的炼器法宝已达三件上限")
-                equipped.append(artifact_id)
+            raise ValueError("炼器法宝收入包裹后自动生效，无需另行装备")
         elif action == "unequip":
-            if artifact.get("is_natal"):
-                raise ValueError("本命法宝须先解除本命关系才能卸下")
-            player.equipped_crafted_artifact_ids = [value for value in equipped if value != artifact_id]
+            raise ValueError("炼器法宝与普通装备相同，留在包裹中即自动生效")
         elif action == "natal":
             for row in player.crafted_artifacts:
                 row["is_natal"] = False
             artifact["is_natal"] = True
-            if artifact_id not in equipped:
-                if len(equipped) >= int(self._crafting_rules().get("active_slots", 3)):
-                    player.equipped_crafted_artifact_ids = player.equipped_crafted_artifact_ids[1:]
-                player.equipped_crafted_artifact_ids.append(artifact_id)
         elif action == "unbind_natal":
             artifact["is_natal"] = False
         elif action == "sell":
-            if artifact_id in equipped or artifact.get("is_natal"):
-                raise ValueError("正在生效或已设为本命的法宝不能出售")
+            if artifact.get("is_natal"):
+                raise ValueError("已设为本命的法宝不能出售")
             price = max(1, round(int(artifact["anchor_value"]) * float(self._crafting_rules()["ordinary_sell_ratio"])))
-            player.crafted_artifacts.remove(artifact)
+            remove_crafted_artifact(player, artifact)
             add_item(player, "spirit_stone", price)
             game.history.append(HistoryRecord(
                 "SYS_ARTIFACT_SELL", 1, player.age, "坊市出售法宝", artifact_id, "sold",
@@ -415,8 +493,8 @@ class CraftingSystemMixin:
     def _consign_crafted_artifact(self, game: GameState, artifact: dict[str, Any], start_price: int) -> None:
         state = self._require_auction_access(game, {"scheduled", "open"})
         artifact_id = str(artifact["id"])
-        if artifact_id in game.player.equipped_crafted_artifact_ids or artifact.get("is_natal"):
-            raise ValueError("正在生效或已设为本命的法宝不能送拍")
+        if artifact.get("is_natal"):
+            raise ValueError("已设为本命的法宝不能送拍")
         base_price = max(1, int(artifact["anchor_value"]))
         minimum = max(1, math.ceil(base_price * float(self._auction_rules()["consignment_min_price_ratio"])))
         maximum = max(minimum, math.floor(base_price * float(self._auction_rules()["consignment_max_price_ratio"])))
@@ -427,7 +505,7 @@ class CraftingSystemMixin:
         if not remove_item(game.player, "spirit_stone", fee):
             raise ValueError(f"上拍前须支付 {fee:,} 枚灵石占位费")
         snapshot = copy.deepcopy(artifact)
-        game.player.crafted_artifacts.remove(artifact)
+        remove_crafted_artifact(game.player, artifact)
         consignment = {
             "kind":"crafted_artifact", "content_id":artifact_id, "artifact":snapshot,
             "start_price":start_price, "tier":game.player.realm_index,
@@ -465,16 +543,14 @@ class CraftingSystemMixin:
         player = game.player
         rules = self._crafting_rules()
         candidates = self._crafting_material_candidates(player)
-        equipped = set(player.equipped_crafted_artifact_ids)
         return {
             "visible": bool(crafting_config()) and player.realm_index >= int(rules.get("minimum_realm", 1)),
             "molds": list(copy.deepcopy(self._crafting_molds()).values()),
             "materials": candidates, "artifacts":[
-                copy.deepcopy(row) | {"equipped":str(row.get("id")) in equipped or bool(row.get("is_natal"))}
-                for row in player.crafted_artifacts
+                copy.deepcopy(row) | {"equipped":True}
+                for row in active_crafted_artifacts(player)
             ],
             "blueprints": copy.deepcopy(player.crafting_blueprints),
-            "active_slots": int(rules.get("active_slots", 3)),
             "active_count": len(active_crafted_artifacts(player)),
             "budget": int(rules.get("budget_by_realm", [40] * 13)[max(0, min(12, player.realm_index))]),
             "stat_costs": copy.deepcopy(rules.get("stat_costs", {})),
