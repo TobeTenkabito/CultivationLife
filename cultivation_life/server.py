@@ -149,6 +149,11 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.absorb_transformation_material(
                     game_id, payload.get("item_id", ""), True, payload.get("stat_id", "")
                 )
+            elif operation == "transformation-batch":
+                result = ENGINE.batch_absorb_transformation_material(
+                    game_id, payload.get("item_id", ""), payload.get("mode", "direct"),
+                    payload.get("stat_id", ""),
+                )
             elif operation == "settings":
                 result = ENGINE.update_setting(
                     game_id, payload.get("setting", ""), bool(payload.get("enabled", False))

@@ -44,7 +44,7 @@ def main() -> None:
         game.player.transformation_loadouts["TECH_BEAST_TRANSFORMATION"]["active"] = [
             "FORM_PHOENIX", "FORM_AZURE_LUAN",
         ]
-        add_item(game.player, "true_dragon_blood_trace", 2)
+        add_item(game.player, "true_dragon_blood_trace", 5)
         game.player.divine_sense_rank = 1
         game.player.divine_sense_experience = 20
         formation_defs = formation_material_definitions()
@@ -271,7 +271,14 @@ def main() -> None:
                 assert page.locator("#transformation-materials .transformation-material").count() == 1
                 assert page.locator("#transformation-materials select").count() == 1
                 assert "直接培养" in page.locator("#transformation-materials").text_content()
+                assert "额外 30%" in page.locator("#transformation-materials").text_content()
+                assert page.get_by_role("button", name="一键炼化").is_enabled()
+                assert page.get_by_role("button", name="一键合炼").is_enabled()
                 assert "67%" in page.locator("#transformation-note").text_content()
+                with page.expect_response(lambda response: response.url.endswith("/transformation-batch")):
+                    page.get_by_role("button", name="一键合炼").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#transformation-materials .transformation-material").count() == 0
                 page.locator("#transformation-toggle").click()
 
                 page.locator("[data-panel-target='settings']").click()

@@ -582,7 +582,7 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(purchased["sold"])
         self.assertFalse(purchased["locked"])
 
-    def test_transformation_manual_is_implemented_and_guaranteed_after_market_threshold(self):
+    def test_transformation_manuals_are_ordinary_random_market_goods(self):
         created = self.engine.create_game(
             "寻变化术", "supreme_water", "dao", 218, preset_id="core",
         )
@@ -593,14 +593,8 @@ class EngineTests(unittest.TestCase):
         self.engine._ensure_market(game, random.Random(218))
         self.engine.store.save(game)
         shown = self.engine.get_game(created["id"])
-        manuals = [
-            row for row in shown["market"]["offers"]
-            if row["content_id"] == "TECH_BEAST_TRANSFORMATION"
-        ]
-        self.assertEqual(len(manuals), 1)
-        self.assertTrue(manuals[0]["featured"])
-        self.assertIn("变身容量 3", manuals[0]["description"])
-        self.assertIn("已实装", shown["transformation_system"]["acquisition_hint"])
+        self.assertTrue(all("featured" not in row for row in shown["market"]["offers"]))
+        self.assertIn("随机流通", shown["transformation_system"]["acquisition_hint"])
 
     def test_market_purchase_deducts_stones_and_learns_technique(self):
         created = self.engine.create_game("买经", "supreme_metal", "dao", 221)

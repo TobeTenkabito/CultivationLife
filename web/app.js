@@ -1978,7 +1978,7 @@ function renderMarket(market) {
     const row = document.createElement('div'); row.className = `market-offer${offer.sold ? ' sold' : ''}`;
     if (offer.locked) row.classList.add('locked');
     const info = document.createElement('div'); const title = document.createElement('b');
-    title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}${offer.featured ? ' · 保底传承' : ''}`;
+    title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}`;
     const detail = document.createElement('small');
     detail.textContent = `${offer.tier_name} · ${offer.description}${offer.kind === 'technique' && !offer.compatible ? ' · 灵根不符，购得后暂不可修炼' : ''}`;
     info.append(title, detail);
@@ -2491,7 +2491,7 @@ function renderTransformationSystem(system) {
     const row = document.createElement('div'); row.className = 'transformation-form transformation-material';
     const title = document.createElement('b'); title.textContent = `${material.name} ×${material.quantity}`;
     const detail = document.createElement('small');
-    detail.textContent = `${material.form_name} · ${material.source_type} · 原纯度 ${finePercent(material.purity)} · 直接培养 +${finePercent(material.direct_gain)} · 两份提纯后 +${finePercent(material.purified_gain)}`;
+    detail.textContent = `${material.form_name} · ${material.source_type} · 原纯度 ${finePercent(material.purity)} · 直接培养 +${finePercent(material.direct_gain)} · 两份提纯后 +${finePercent(material.purified_gain)}${material.batch_pair_bonus_active ? ` · 一键合炼每组 +${finePercent(material.batch_pair_gain)}（额外 30%）` : ''}`;
     const target = document.createElement('select'); target.setAttribute('aria-label', '选择培养属性');
     const statNames = {might:'威能', guard:'防护', mobility:'身法', sense:'神识', sustain:'续航', breach:'破法'};
     Object.entries(statNames).forEach(([id, name]) => {
@@ -2507,7 +2507,13 @@ function renderTransformationSystem(system) {
     const purify = document.createElement('button'); purify.textContent = '两份合炼提纯'; purify.dataset.available = material.can_purify ? '1' : '0';
     purify.disabled = !material.can_purify || busy || !!game.pending_event || !game.player.alive;
     purify.onclick = () => mutate(`/api/games/${game.id}/transformation-purify`, {item_id:material.id, stat_id:target.value});
-    tools.append(absorb, purify); row.append(title, detail, target, tools); materials.appendChild(row);
+    const batchAbsorb = document.createElement('button'); batchAbsorb.textContent = '一键炼化'; batchAbsorb.dataset.available = material.can_batch_absorb ? '1' : '0';
+    batchAbsorb.disabled = !material.can_batch_absorb || busy || !!game.pending_event || !game.player.alive;
+    batchAbsorb.onclick = () => mutate(`/api/games/${game.id}/transformation-batch`, {item_id:material.id, stat_id:target.value, mode:'direct'});
+    const batchPurify = document.createElement('button'); batchPurify.textContent = '一键合炼'; batchPurify.dataset.available = material.can_batch_purify ? '1' : '0';
+    batchPurify.disabled = !material.can_batch_purify || busy || !!game.pending_event || !game.player.alive;
+    batchPurify.onclick = () => mutate(`/api/games/${game.id}/transformation-batch`, {item_id:material.id, stat_id:target.value, mode:'purified'});
+    tools.append(absorb, purify, batchAbsorb, batchPurify); row.append(title, detail, target, tools); materials.appendChild(row);
   });
   if (!materials.children.length) materials.innerHTML = '<p class="empty">行囊中没有真灵之血、精魄或元神。</p>';
   const stored = $('#transformation-stored'); stored.innerHTML = '';

@@ -15,6 +15,7 @@ REALM_NAMES = ("凡人", "练气", "筑基", "结丹", "元婴", "化神", "炼�
 REALM_POTENCY = (0.03, 0.06, 0.11, 0.18, 0.28, 0.40, 0.54, 0.72, 1.0, 1.0, 1.0, 1.0, 1.0)
 DIRECT_ABSORPTION_EFFICIENCY = 0.45
 PURIFIED_ABSORPTION_EFFICIENCY = 0.92
+BATCH_PAIR_BONUS = 0.30
 
 
 def normalized_transformation_weights(count: int) -> list[float]:
@@ -168,10 +169,10 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
         public_form(TRANSFORMATION_CATALOG[form_id], player)
         for form_id in player.known_transformations if form_id in TRANSFORMATION_CATALOG
     ]
-    knows_technique = any(
-        technique_entry.id == "TECH_BEAST_TRANSFORMATION"
-        for technique_entry in player.known_techniques
-    )
+    known_manuals = [
+        technique_entry for technique_entry in player.known_techniques
+        if technique_entry.category == "transformation"
+    ]
     materials = [
         {
             "id": item.id, "name": item.name, "quantity": item.quantity,
@@ -182,9 +183,15 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
             "purified_purity": round(purified_material_purity(item.transformation_purity), 8),
             "direct_gain": round(absorption_gain(item.transformation_purity), 8),
             "purified_gain": round(absorption_gain(item.transformation_purity, True), 8),
+            "batch_pair_gain": round(
+                absorption_gain(item.transformation_purity, True) * (1 + BATCH_PAIR_BONUS), 8,
+            ),
+            "batch_pair_bonus_active": item.quantity > 2,
             "stat_progress": {stat: round(value, 8) for stat, value in form_stat_progress(player, item.transformation_form_id).items()},
             "can_improve": any(value < 1 - 1e-9 for value in form_stat_progress(player, item.transformation_form_id).values()),
             "can_purify": item.quantity >= 2 and any(value < 1 - 1e-9 for value in form_stat_progress(player, item.transformation_form_id).values()),
+            "can_batch_absorb": any(value < 1 - 1e-9 for value in form_stat_progress(player, item.transformation_form_id).values()),
+            "can_batch_purify": item.quantity >= 2 and any(value < 1 - 1e-9 for value in form_stat_progress(player, item.transformation_form_id).values()),
         }
         for item in player.inventory
         if item.quantity > 0 and item.transformation_form_id in TRANSFORMATION_CATALOG and item.transformation_purity > 0
@@ -192,9 +199,9 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
     base = {
         "available": True, "disabled_reason": "", "materials": materials,
         "acquisition_hint": (
-            "你已掌握《百兽化形诀》，请在功法栏将它配置到“变”槽。"
-            if knows_technique else
-            "《百兽化形诀》已实装：人界结丹或灵界化神及以上的一般坊市会保底出现，购得后在功法栏配置到“变”槽。"
+            f"你已掌握《{known_manuals[-1].name}》，请在功法栏将变身功法配置到“变”槽。"
+            if known_manuals else
+            "变身功法自元婴起随机流通于人界、灵界、魔界和真魔界的一般坊市；境界越高，容量与战斗空间通常越大。"
         ),
     }
     if not technique:

@@ -96,28 +96,13 @@ class EconomySystemMixin:
         general_count = int(MARKET_SETTINGS["offer_count"])
         fresh_general_count = max(0, general_count - len(general_locked))
         retained_content_ids = {str(row.get("content_id", "")) for row in retained}
-        known_techniques = {known.id for known in player.known_techniques}
-        featured_transformation = next((
-            entry for entry in world_goods
-            if entry.get("kind") == "technique"
-            and entry.get("content_id") == "TECH_BEAST_TRANSFORMATION"
-            and int(entry.get("tier", 99)) <= tier
-            and "TECH_BEAST_TRANSFORMATION" not in known_techniques
-            and "TECH_BEAST_TRANSFORMATION" not in retained_content_ids
-            and player.path != "monster"
-        ), None)
         for index in range(fresh_general_count):
             seed_pool = [
                 entry for entry in world_goods
                 if entry["kind"] == "item" and "seed" in ITEM_CATALOG[entry["content_id"]].tags
                 and str(entry["content_id"]) not in retained_content_ids
             ]
-            if featured_transformation is not None and index == fresh_general_count - 1:
-                good = featured_transformation
-                offer_tier = tier
-                rare_next_tier = False
-                featured_transformation = None
-            elif index == 0 and seed_pool:
+            if index == 0 and seed_pool:
                 good = rng.choice(seed_pool)
                 offer_tier = tier
                 rare_next_tier = False
@@ -140,20 +125,12 @@ class EconomySystemMixin:
                     entry for entry in world_goods
                     if entry["tier"] == offer_tier
                     and str(entry["content_id"]) not in retained_content_ids
-                    and (
-                        featured_transformation is None
-                        or entry["content_id"] != featured_transformation["content_id"]
-                    )
                 ]
                 if not pool:
                     pool = [
                         entry for entry in world_goods
                         if entry["tier"] == tier
                         and str(entry["content_id"]) not in retained_content_ids
-                        and (
-                            featured_transformation is None
-                            or entry["content_id"] != featured_transformation["content_id"]
-                        )
                     ]
                     offer_tier = tier
                     rare_next_tier = False
@@ -189,7 +166,6 @@ class EconomySystemMixin:
                 "tier_name":REALMS[offer_tier].name, "market_name":market_name,
                 "world":player.world, "location_id":location_id,
                 "rare_next_tier":rare_next_tier, "sold":False, "locked":False,
-                "featured": good["content_id"] == "TECH_BEAST_TRANSFORMATION",
             })
         material_candidates: list[dict[str, Any]] = []
         self._append_crafting_market_offers(
