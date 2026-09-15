@@ -532,6 +532,76 @@ class EngineTests(unittest.TestCase):
             if realm_index == 3:
                 self.assertNotIn(5, tiers)
 
+    def test_general_and_material_markets_have_six_slots_and_independent_locks(self):
+        created = self.engine.create_game(
+            "锁市", "supreme_metal", "dao", 219, preset_id="core",
+        )
+        shown = self.engine.get_game(created["id"])
+        market = shown["market"]
+        self.assertEqual(len(market["offers"]), 6)
+        self.assertEqual(len(market["material_offers"]), 6)
+        general = market["offers"][0]
+        material = market["material_offers"][0]
+        self.engine.toggle_market_offer_lock(created["id"], general["id"])
+        locked = self.engine.toggle_market_offer_lock(created["id"], material["id"])
+        self.assertEqual(sum(row["locked"] for row in locked["market"]["offers"]), 1)
+        self.assertEqual(sum(row["locked"] for row in locked["market"]["material_offers"]), 1)
+
+        old_general = next(row for row in locked["market"]["offers"] if row["locked"])
+        old_material = next(row for row in locked["market"]["material_offers"] if row["locked"])
+        game = self.engine.store.load(created["id"])
+        game.player.age += 1
+        self.engine._ensure_market(game, random.Random(220))
+        self.engine.store.save(game)
+        refreshed = self.engine.get_game(created["id"])["market"]
+        self.assertEqual(len(refreshed["offers"]), 6)
+        self.assertEqual(len(refreshed["material_offers"]), 6)
+        self.assertEqual(
+            next(row for row in refreshed["offers"] if row["locked"])["id"],
+            old_general["id"],
+        )
+        retained_material = next(row for row in refreshed["material_offers"] if row["locked"])
+        self.assertEqual(retained_material["id"], old_material["id"])
+        self.assertEqual(retained_material["price"], old_material["price"])
+
+    def test_each_market_shelf_allows_only_one_lock_and_purchase_releases_it(self):
+        created = self.engine.create_game(
+            "换锁", "supreme_fire", "dao", 220, preset_id="core",
+        )
+        market = self.engine.get_game(created["id"])["market"]
+        first, second = [row for row in market["offers"] if not row["owned"]][:2]
+        self.engine.toggle_market_offer_lock(created["id"], first["id"])
+        switched = self.engine.toggle_market_offer_lock(created["id"], second["id"])
+        locked_ids = {row["id"] for row in switched["market"]["offers"] if row["locked"]}
+        self.assertEqual(locked_ids, {second["id"]})
+        game = self.engine.store.load(created["id"])
+        add_item(game.player, "spirit_stone", second["price"])
+        self.engine.store.save(game)
+        bought = self.engine.buy_market_offer(created["id"], second["id"])
+        purchased = next(row for row in bought["market"]["offers"] if row["id"] == second["id"])
+        self.assertTrue(purchased["sold"])
+        self.assertFalse(purchased["locked"])
+
+    def test_transformation_manual_is_implemented_and_guaranteed_after_market_threshold(self):
+        created = self.engine.create_game(
+            "寻变化术", "supreme_water", "dao", 218, preset_id="core",
+        )
+        game = self.engine.store.load(created["id"])
+        game.player.realm_index = 5
+        game.player.age += 1
+        self.engine._clear_market(game)
+        self.engine._ensure_market(game, random.Random(218))
+        self.engine.store.save(game)
+        shown = self.engine.get_game(created["id"])
+        manuals = [
+            row for row in shown["market"]["offers"]
+            if row["content_id"] == "TECH_BEAST_TRANSFORMATION"
+        ]
+        self.assertEqual(len(manuals), 1)
+        self.assertTrue(manuals[0]["featured"])
+        self.assertIn("变身容量 3", manuals[0]["description"])
+        self.assertIn("已实装", shown["transformation_system"]["acquisition_hint"])
+
     def test_market_purchase_deducts_stones_and_learns_technique(self):
         created = self.engine.create_game("买经", "supreme_metal", "dao", 221)
         game = self.engine.store.load(created["id"])

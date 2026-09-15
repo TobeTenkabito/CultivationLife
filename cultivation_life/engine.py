@@ -1687,6 +1687,7 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             learn_technique(game.player, TECHNIQUE_CATALOG[offer["content_id"]])
             summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得《{offer['name']}》传承玉简。"
         offer["sold"] = True
+        offer["locked"] = False
         game.history.append(HistoryRecord(
             "SYS_MARKET_BUY", 1, game.player.age, "坊市交易", offer_id, "purchased", summary,
             {"spirit_stone": -price, "content_id": offer["content_id"]}, ["system", "market"],
