@@ -158,8 +158,11 @@ class MapCatalog:
         required = int(target.get("min_realm_index", 0))
         status, warning = "ok", ""
         if realm_index < required:
-            status = str(target.get("failure", "blocked"))
-            warning = str(target.get("failure_reason") or f"至少需要境界序号 {required} 才能安全抵达")
+            status = "lethal"
+            warning = str(
+                target.get("failure_reason")
+                or f"你的境界低于此地要求（境界序号 {required}），抵达后必然身死道消"
+            )
         return TravelPlan(origin, destination, base_years, years, tuple(route), status, warning)
 
     def localize_goods(

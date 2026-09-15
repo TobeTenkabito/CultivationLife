@@ -63,10 +63,13 @@ class MapCatalogTests(unittest.TestCase):
     def test_distance_speed_and_lethal_realm_gate(self):
         near = self.catalog.travel_plan("human", "wudi_plain", "lanjiang_steppe", 1)
         far = self.catalog.travel_plan("human", "wudi_plain", "lancang_sea", 1)
+        formerly_blocked = self.catalog.travel_plan("human", "wudi_plain", "cangwu_mountains", 1)
         fast = self.catalog.travel_plan("human", "wudi_plain", "lanjiang_steppe", 4)
         self.assertLess(near.years, far.years)
         self.assertLess(fast.years, near.years)
         self.assertEqual(far.status, "lethal")
+        self.assertEqual(formerly_blocked.status, "lethal")
+        self.assertIn("必然身死道消", formerly_blocked.warning)
         self.assertEqual(self.catalog.travel_plan("human", "wudi_plain", "lancang_sea", 4).status, "ok")
 
     def test_market_and_treasure_sources_are_regionally_partitioned(self):
@@ -100,6 +103,17 @@ class MapEngineTests(unittest.TestCase):
         self.assertFalse(result["player"]["alive"])
         self.assertEqual(result["player"]["location_id"], "lancang_sea")
         self.assertIn("澜沧海", result["player"]["death_reason"])
+
+    def test_low_realm_can_enter_any_gated_map_but_dies_on_arrival(self):
+        created = self.engine.create_game("越境者", "supreme_earth", "dao", 2305)
+        result = self.engine.travel_map(created["id"], "cangwu_mountains")
+        self.assertFalse(result["player"]["alive"])
+        self.assertEqual(result["player"]["location_id"], "cangwu_mountains")
+        self.assertIn("境界低于此地要求", result["player"]["death_reason"])
+        self.assertTrue(any(
+            row["event_id"] == "SYS_MAP_TRAVEL" and row["result"] == "dead"
+            for row in result["history"]
+        ))
 
     def test_legacy_save_without_location_is_migrated(self):
         created = self.engine.create_game("旧卷", "supreme_earth", "dao", 2303)
