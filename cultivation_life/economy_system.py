@@ -782,14 +782,30 @@ class EconomySystemMixin:
                 unique[key] = dict(row)
         return list(unique.values())
 
-    @staticmethod
-    def _is_world_market_good(world: str, kind: str, content_id: str) -> bool:
-        return any(
+    def _is_world_market_good(self, world: str, kind: str, content_id: str) -> bool:
+        if any(
             str(row.get("world", "human")) == world
             and str(row.get("kind")) == kind
             and str(row.get("content_id")) == content_id
             for row in MARKET_GOODS
-        )
+        ):
+            return True
+        if kind == "crafting_material":
+            return any(
+                str(row.get("world")) == world and str(row.get("id")) == content_id
+                for row in self._crafting_material_defs().values()
+            )
+        if kind == "formation_material":
+            return any(
+                str(row.get("world")) == world and str(row.get("id")) == content_id
+                for row in self._formation_material_defs().values()
+            )
+        if kind == "formation_supply":
+            return any(
+                str(row.get("world")) == world and str(row.get("id")) == content_id
+                for row in self._formation_maintenance_defs().values()
+            )
+        return False
 
     def _auction_good_weight(self, world: str, tier: int) -> float:
         weight = 1.0 / max(1, tier)
@@ -1236,6 +1252,52 @@ class EconomySystemMixin:
         for row in MARKET_GOODS:
             if row.get("world", "human") == game.player.world:
                 unique[(str(row["kind"]), str(row["content_id"]))] = dict(row)
+        # Material stalls are generated outside MARKET_GOODS because each
+        # crafting/formation piece is a real unique instance. Black-market
+        # search still exposes the complete world-local catalog and freezes
+        # the generated instance in the saved search result until purchase.
+        material_rng = random.Random(
+            f"{game.seed}:black-market-material:{state.get('id', '')}:{pattern}"
+        )
+        material_rows: list[dict[str, Any]] = []
+        for definition in self._crafting_material_defs().values():
+            if str(definition.get("world")) != game.player.world:
+                continue
+            from .crafting_system import make_crafting_material_instance
+            instance = make_crafting_material_instance(
+                definition, material_rng, source="黑市购得", origin_world=game.player.world,
+            )
+            material_rows.append({
+                "kind":"crafting_material", "content_id":str(definition["id"]),
+                "name":str(definition["name"]),
+                "description":f"炼器材料 · {instance['state']} · 材料价值 {int(instance['material_value']):,}",
+                "tier":int(definition.get("tier", 1)),
+                "base_price":int(instance["material_value"]), "material_instance":instance,
+            })
+        for definition in self._formation_material_defs().values():
+            if str(definition.get("world")) != game.player.world:
+                continue
+            from .formation_system import NATURE_NAMES, make_formation_material_instance
+            instance = make_formation_material_instance(
+                definition, source="黑市购得", origin_world=game.player.world,
+            )
+            material_rows.append({
+                "kind":"formation_material", "content_id":str(definition["id"]),
+                "name":str(definition["name"]),
+                "description":f"阵法材料 · {NATURE_NAMES.get(str(definition.get('nature')), definition.get('nature'))}性 · 固有阵值 {float(definition.get('formation_value', 0)):g}",
+                "tier":int(definition.get("tier", 1)),
+                "base_price":int(definition.get("base_value", 1)), "formation_material_instance":instance,
+            })
+        for definition in self._formation_maintenance_defs().values():
+            if str(definition.get("world")) != game.player.world:
+                continue
+            material_rows.append({
+                "kind":"formation_supply", "content_id":str(definition["id"]),
+                "name":str(definition["name"]),
+                "description":f"修阵材料 · 恢复 {float(definition.get('repair_value', 0)):g}% 镇地阵完整度",
+                "tier":int(definition.get("tier", 1)),
+                "base_price":int(definition.get("base_value", 1)),
+            })
         results = []
         multiplier = float(self._auction_rules()["black_market_buy_multiplier"])
         for (kind, content_id), row in unique.items():
@@ -1247,6 +1309,16 @@ class EconomySystemMixin:
                 "name":name, "description":description, "tier":int(row["tier"]),
                 "tier_name":REALMS[int(row["tier"])].name,
                 "price":max(1, round(self._catalog_price(kind, content_id) * multiplier)),
+            })
+        for row in material_rows:
+            if not matcher.search(f"{row['name']} {row['description']}"):
+                continue
+            tier = max(0, min(len(REALMS) - 1, int(row["tier"])))
+            results.append({
+                **row,
+                "id":f"black-{row['kind']}-{row['content_id']}",
+                "tier":tier, "tier_name":REALMS[tier].name,
+                "price":max(1, round(int(row["base_price"]) * multiplier)),
             })
         results.sort(key=lambda row: (row["tier"], row["name"]))
         state["black_market_results"] = results[:int(self._auction_rules()["black_market_result_limit"])]
@@ -1270,7 +1342,24 @@ class EconomySystemMixin:
             raise ValueError("你已经掌握这部功法")
         if not remove_item(game.player, "spirit_stone", int(result["price"])):
             raise ValueError(f"需要 {result['price']} 枚下品灵石")
-        self._grant_auction_content(game.player, str(result["kind"]), str(result["content_id"]))
+        kind = str(result["kind"])
+        if kind == "crafting_material":
+            instance = copy.deepcopy(result.get("material_instance"))
+            if not isinstance(instance, dict):
+                raise ValueError("这份黑市炼器材料已经失去灵性")
+            game.player.crafting_materials.append(instance)
+        elif kind == "formation_material":
+            instance = copy.deepcopy(result.get("formation_material_instance"))
+            if not isinstance(instance, dict):
+                raise ValueError("这份黑市阵材已经失去阵性")
+            game.player.formation_materials.append(instance)
+        elif kind == "formation_supply":
+            supply_id = str(result["content_id"])
+            game.player.formation_repair_supplies[supply_id] = (
+                int(game.player.formation_repair_supplies.get(supply_id, 0)) + 1
+            )
+        else:
+            self._grant_auction_content(game.player, kind, str(result["content_id"]))
         game.history.append(HistoryRecord(
             "SYS_BLACK_MARKET_BUY", 1, game.player.age, "黑市补缺", result_id, "purchased",
             f"你以严重溢价支付 {result['price']} 枚灵石，购得{result['name']}。",

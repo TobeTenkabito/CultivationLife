@@ -206,13 +206,9 @@ class AuctionUpdateTests(unittest.TestCase):
         self.engine.store.save(game)
         before_age = game.player.age
         shown = self.engine.search_black_market(made["id"], ".*")
-        human_goods = {
-            (str(row["kind"]), str(row["content_id"]))
-            for row in MARKET_GOODS if row.get("world", "human") == "human"
-        }
         self.assertTrue(shown["auction_system"]["black_market_results"])
         self.assertTrue(all(
-            (row["kind"], row["content_id"]) in human_goods
+            self.engine._is_world_market_good("human", row["kind"], row["content_id"])
             for row in shown["auction_system"]["black_market_results"]
         ))
         self.assertEqual(shown["player"]["age"], before_age)
@@ -220,6 +216,36 @@ class AuctionUpdateTests(unittest.TestCase):
         self.assertEqual(sold["player"]["age"], before_age)
         with self.assertRaisesRegex(ValueError, "不接收活傀"):
             self.engine.sell_black_market_asset(made["id"], "puppet", "living-1")
+
+    def test_black_market_search_and_buy_supports_unique_crafting_and_formation_materials(self):
+        made = self.engine.create_game("暗市寻材", "supreme_metal", "dao", 11061, preset_id="core")
+        game = self._open_local_auction(made["id"])
+        game.auction_state["status"] = "black_market"
+        add_item(game.player, "spirit_stone", 1_000_000)
+        self.engine.store.save(game)
+
+        shown = self.engine.search_black_market(made["id"], "寒潭玄铁")
+        result = next(row for row in shown["auction_system"]["black_market_results"] if row["kind"] == "crafting_material")
+        bought = self.engine.buy_black_market_item(made["id"], result["id"])
+        self.assertTrue(any(row["definition_id"] == "human_cold_iron" for row in bought["crafting_system"]["materials"]))
+
+        formation_name = next(
+            row["name"] for row in self.engine._formation_material_defs().values()
+            if row.get("world") == "human"
+        )
+        shown = self.engine.search_black_market(made["id"], formation_name)
+        result = next(row for row in shown["auction_system"]["black_market_results"] if row["kind"] == "formation_material")
+        bought = self.engine.buy_black_market_item(made["id"], result["id"])
+        self.assertTrue(any(row["storage_id"] == result["formation_material_instance"]["id"] for row in bought["formation_system"]["materials"]))
+
+        supply_name = next(
+            row["name"] for row in self.engine._formation_maintenance_defs().values()
+            if row.get("world") == "human"
+        )
+        shown = self.engine.search_black_market(made["id"], supply_name)
+        result = next(row for row in shown["auction_system"]["black_market_results"] if row["kind"] == "formation_supply")
+        bought = self.engine.buy_black_market_item(made["id"], result["id"])
+        self.assertTrue(any(row["id"] == result["content_id"] for row in bought["formation_system"]["repair_supplies"]))
 
     def test_crossing_world_after_settlement_does_not_refund_closed_lots(self):
         made = self.engine.create_game("散场越界", "none", "dao", 11007, preset_id="mahayana")

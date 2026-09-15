@@ -422,6 +422,17 @@ class FormationIntegrationTests(unittest.TestCase):
         self.assertEqual(entry["durability"], 32.0)
         self.assertEqual(entry["slots"], original["slots"])
 
+    def test_offscreen_npc_profile_skips_full_spectrum_but_preserves_battle_rules(self):
+        game = self.engine.store.load(self.game_id)
+        npc_id = next(iter(game.npc_formations))
+        fast = self.engine._npc_formation_profile(game, npc_id)
+        detailed = self.engine._npc_formation_profile(game, npc_id, detailed_spectrum=True)
+        self.assertEqual(fast["advanced"]["eigenvalues"], [])
+        self.assertTrue(detailed["advanced"]["eigenvalues"])
+        self.assertEqual(fast["static_player_multipliers"], detailed["static_player_multipliers"])
+        self.assertEqual(fast["static_enemy_multipliers"], detailed["static_enemy_multipliers"])
+        self.assertEqual(fast["round_rules"], detailed["round_rules"])
+
     def test_enemy_array_broadcasts_once_and_persists_its_wear(self):
         game = self.engine.store.load(self.game_id)
         npc_id = next(iter(game.npc_formations))

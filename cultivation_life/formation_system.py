@@ -4,6 +4,7 @@ import copy
 import math
 import random
 import uuid
+from functools import lru_cache
 from typing import Any
 
 from .content_registry import CONTENT_DOCUMENTS, REALMS, WORLD_SYSTEMS
@@ -32,6 +33,7 @@ def formation_config() -> dict[str, Any]:
     return CONTENT_DOCUMENTS.get("formations.json", {})
 
 
+@lru_cache(maxsize=1)
 def formation_material_definitions() -> dict[str, dict[str, Any]]:
     return {str(row["id"]): row for row in expanded_formation_materials(formation_config())}
 
@@ -269,6 +271,31 @@ def qr_eigenvalues(matrix: list[list[float]], iterations: int = 96) -> list[comp
     return values
 
 
+def _fast_spectral_radius(square: list[list[float]], iterations: int = 12) -> float:
+    """Estimate |lambda|max from M² for off-screen formation comparisons.
+
+    M² keeps negative and rotating eigenmodes measurable without paying for a
+    full shifted QR decomposition. Detailed player-involved combat still uses
+    ``qr_eigenvalues`` and exposes the exact spectrum in the formation panel.
+    """
+    size = len(square)
+    if not size:
+        return 0.0
+    vector = [1.0 / math.sqrt(size)] * size
+    squared_radius = 0.0
+    for _ in range(iterations):
+        next_vector = [
+            sum(square[row][column] * vector[column] for column in range(size))
+            for row in range(size)
+        ]
+        norm = math.sqrt(sum(value * value for value in next_vector))
+        if norm < 1e-12:
+            return 0.0
+        vector = [value / norm for value in next_vector]
+        squared_radius = norm
+    return math.sqrt(max(0.0, squared_radius))
+
+
 def empty_formation_profile(name: str = "") -> dict[str, Any]:
     return {
         "active": False, "name": name, "occupied_count": 0, "alpha": 0.0,
@@ -285,7 +312,7 @@ def empty_formation_profile(name: str = "") -> dict[str, Any]:
 
 def calculate_formation_profile(
     nodes: list[dict[str, Any] | None], *, alpha: float, name: str = "无名阵",
-    config: dict[str, Any] | None = None,
+    config: dict[str, Any] | None = None, detailed_spectrum: bool = True,
 ) -> dict[str, Any]:
     config = config or formation_config()
     settings = config.get("settings", {})
@@ -332,15 +359,20 @@ def calculate_formation_profile(
         else "none"
     )
 
-    eigenvalues = qr_eigenvalues(normalized)
-    dominant = max(eigenvalues, key=abs, default=0j)
-    radius = min(1.0, abs(dominant))
-    if abs(dominant.imag) >= max(0.05, abs(dominant.real) * 0.18):
-        change_mode = "rotating"
-    elif dominant.real < -0.04 or kill_raw > growth_raw * 1.15:
-        change_mode = "negative"
+    if detailed_spectrum:
+        eigenvalues = qr_eigenvalues(normalized)
+        dominant = max(eigenvalues, key=abs, default=0j)
+        radius = min(1.0, abs(dominant))
+        if abs(dominant.imag) >= max(0.05, abs(dominant.real) * 0.18):
+            change_mode = "rotating"
+        elif dominant.real < -0.04 or kill_raw > growth_raw * 1.15:
+            change_mode = "negative"
+        else:
+            change_mode = "positive"
     else:
-        change_mode = "positive"
+        eigenvalues = []
+        radius = min(1.0, _fast_spectral_radius(square))
+        change_mode = "negative" if kill_raw > growth_raw * 1.15 else "positive"
 
     softcap = max(1.0, float(settings.get("metric_softcap_per_node", 50.0)) * count)
     activity = min(1.0, math.tanh(total / softcap))
@@ -354,7 +386,6 @@ def calculate_formation_profile(
         "growth": growth, "kill": kill, "focus": focus_score,
         "balance": balance_score, "cycle": cycle_score, "change": change_score,
     }
-
     bonuses = {key: 0.0 for key in STAT_NAMES}
     bonuses["sustain"] += 0.075 * growth
     bonuses["might"] += 0.065 * kill
@@ -458,6 +489,21 @@ def calculate_formation_profile(
             ],
         },
     }
+
+
+@lru_cache(maxsize=4096)
+def _cached_npc_formation_profile(
+    slot_ids: tuple[str | None, ...], alpha: float, name: str, detailed_spectrum: bool,
+) -> dict[str, Any]:
+    definitions = formation_material_definitions()
+    nodes = [
+        copy.deepcopy(definitions[definition_id]) if definition_id in definitions else None
+        for definition_id in slot_ids[:9]
+    ]
+    nodes.extend([None] * (9 - len(nodes)))
+    return calculate_formation_profile(
+        nodes, alpha=alpha, name=name, detailed_spectrum=detailed_spectrum,
+    )
 
 
 def formation_round_effects(profile: dict[str, Any], round_no: int, integrity: float) -> dict[str, Any]:
@@ -1193,19 +1239,20 @@ class FormationSystemMixin:
                 array["durability"] = round(max(0.0, float(array.get("durability", 0.0)) - wear), 4)
                 array["battles"] = int(array.get("battles", 0)) + 1
 
-    def _npc_formation_profile(self, game: GameState, npc_id: str) -> dict[str, Any]:
+    def _npc_formation_profile(
+        self, game: GameState, npc_id: str, *, detailed_spectrum: bool = False,
+    ) -> dict[str, Any]:
         entry = game.npc_formations.get(str(npc_id), {})
         if not entry or float(entry.get("durability", 0.0)) <= 0:
             return empty_formation_profile(str(entry.get("name", "")))
-        definitions = self._formation_material_defs()
-        nodes = [
-            (copy.deepcopy(definitions[definition_id]) if definition_id in definitions else None)
-            for definition_id in list(entry.get("slots", []))[:9]
-        ]
-        nodes.extend([None] * (9 - len(nodes)))
-        return calculate_formation_profile(
-            nodes, alpha=float(entry.get("alpha", 0.55)), name=str(entry.get("name", "无名九宫阵")),
+        slots = tuple(
+            str(value) if value is not None else None
+            for value in list(entry.get("slots", []))[:9]
         )
+        return copy.deepcopy(_cached_npc_formation_profile(
+            slots, round(float(entry.get("alpha", 0.55)), 8),
+            str(entry.get("name", "无名九宫阵")), detailed_spectrum,
+        ))
 
     def _npc_formation_power_multiplier(self, game: GameState, npc_id: str) -> float:
         entry = game.npc_formations.get(str(npc_id), {})

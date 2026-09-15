@@ -466,11 +466,9 @@ class CraftingSystemMixin:
         elif action == "unequip":
             raise ValueError("炼器法宝与普通装备相同，留在包裹中即自动生效")
         elif action == "natal":
-            for row in player.crafted_artifacts:
-                row["is_natal"] = False
-            artifact["is_natal"] = True
+            self._bind_crafted_natal_artifact(game, artifact)
         elif action == "unbind_natal":
-            artifact["is_natal"] = False
+            self._unbind_crafted_natal_artifact(game, artifact_id)
         elif action == "sell":
             if artifact.get("is_natal"):
                 raise ValueError("已设为本命的法宝不能出售")

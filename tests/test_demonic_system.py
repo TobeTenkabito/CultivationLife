@@ -224,7 +224,6 @@ class DemonicSystemTests(unittest.TestCase):
     def test_mechanical_puppet_uses_recipe_and_capacity(self):
         game_id, game = self.demonic_game()
         add_item(game.player, "spirit_stone", 25)
-        add_item(game.player, "spirit_sword", 1)
         self.engine.store.save(game)
         shown = self.engine.craft_mechanical_puppet(game_id)
         self.assertEqual(shown["demonic_system"]["puppets"][0]["type"], "mechanical")

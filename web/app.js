@@ -2290,7 +2290,10 @@ function renderInventory(items) {
     if (artifact) {
       const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
       const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
-      natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效。` : `确认将“${artifact.name}”设为唯一的组合式本命法宝？原有组合式本命关系会解除。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
+      const natalOccupied = Boolean(game?.natal_artifact?.bound && !artifact.is_natal);
+      natal.disabled = natalOccupied; natal.dataset.craftingUnavailable = natalOccupied ? '1' : '0';
+      if (natalOccupied) natal.title = `已有本命法宝“${game.natal_artifact.name}”，不能重复认主`;
+      natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效，已镶材料会全部退回。` : `确认将“${artifact.name}”纳入本命法宝系统？认主后可在“本命”界面温养升级并镶嵌材料。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
       const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
       sell.disabled = Boolean(artifact.is_natal); sell.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0';
       sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开包裹，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});

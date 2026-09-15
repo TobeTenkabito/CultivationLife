@@ -245,6 +245,10 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
             for item in preset.get("inventory", []):
                 add_item(player, item["id"], int(item["quantity"]))
             player.opportunity = round(opportunity_required(player) * float(preset.get("opportunity_fraction", 0)), 1)
+        # Every life begins with one ordinary weapon already in the equipment
+        # section, including mortal creation and every quick-start preset.
+        if not has_item(player, "spirit_sword"):
+            add_item(player, "spirit_sword")
         player.lineage_race = player.race
         player.allegiance_race = player.race
         player.location_id = self.maps.default_location(player.world)
@@ -6231,7 +6235,9 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         )
         if enemy_formation_id:
             enemy_entry = game.npc_formations[enemy_formation_id]
-            enemy_profile = self._npc_formation_profile(game, enemy_formation_id)
+            enemy_profile = self._npc_formation_profile(
+                game, enemy_formation_id, detailed_spectrum=True,
+            )
             if enemy_profile.get("active"):
                 target["enemy_formation_profile"] = enemy_profile
                 target["enemy_formation_initial_integrity"] = float(enemy_entry.get("durability", 0.0)) / 100.0

@@ -17,10 +17,49 @@ class NatalArtifactSystemMixin:
 
     def _natal_artifact_candidate(self, item: Any) -> bool:
         tags = set(item.tags)
-        return item.combat_bonus > 0 and (
+        return bool(getattr(item, "crafted_artifact_id", None)) or item.combat_bonus > 0 and (
             bool(tags.intersection({"artifact", "equipment"}))
             or item.id in self._natal_artifact_config().get("eligible_item_ids", [])
         )
+
+    @staticmethod
+    def _crafted_natal_source(game: GameState) -> dict[str, Any] | None:
+        artifact_id = str(game.natal_artifact.get("crafted_artifact_id", "")) if game.natal_artifact else ""
+        if not artifact_id and game.natal_artifact and game.natal_artifact.get("item_id") not in ITEM_CATALOG:
+            artifact_id = str(game.natal_artifact.get("item_id", ""))
+        return next(
+            (row for row in game.player.crafted_artifacts if str(row.get("id", "")) == artifact_id),
+            None,
+        )
+
+    def _bind_crafted_natal_artifact(self, game: GameState, artifact: dict[str, Any]) -> None:
+        artifact_id = str(artifact.get("id", ""))
+        current_id = str(game.natal_artifact.get("crafted_artifact_id", "")) if game.natal_artifact else ""
+        if game.natal_artifact and current_id != artifact_id:
+            raise ValueError("已有本命法宝，不能重新认主")
+        if current_id == artifact_id:
+            return
+        for row in game.player.crafted_artifacts:
+            row["is_natal"] = str(row.get("id", "")) == artifact_id
+        game.natal_artifact = {
+            "item_id":artifact_id, "crafted_artifact_id":artifact_id,
+            "name":str(artifact.get("name", "无名法宝")), "level":1,
+            "experience":0, "bound_age":game.player.age, "slots":[None] * 7,
+        }
+        self._sync_natal_artifact_bonuses(game)
+
+    def _unbind_crafted_natal_artifact(self, game: GameState, artifact_id: str) -> None:
+        current = str(game.natal_artifact.get("crafted_artifact_id", "")) if game.natal_artifact else ""
+        if current != str(artifact_id):
+            raise ValueError("这件法宝并非当前本命法宝")
+        for material_id in game.natal_artifact.get("slots", []):
+            if material_id:
+                add_item(game.player, str(material_id))
+        for row in game.player.crafted_artifacts:
+            if str(row.get("id", "")) == str(artifact_id):
+                row["is_natal"] = False
+        game.natal_artifact = {}
+        self._sync_natal_artifact_bonuses(game)
 
     def _natal_slots_for_level(self, level: int) -> int:
         unlocks = self._natal_artifact_config()["slot_unlocks"]
@@ -32,7 +71,37 @@ class NatalArtifactSystemMixin:
     def _ensure_natal_artifact(self, game: GameState) -> bool:
         artifact = game.natal_artifact
         changed = False
+        if not artifact:
+            # v1.10 briefly stored combination-artifact natal status only on
+            # the forge record. Promote that state into the unified natal
+            # system without touching the save location or losing the item.
+            legacy = next((row for row in game.player.crafted_artifacts if row.get("is_natal")), None)
+            if legacy:
+                self._bind_crafted_natal_artifact(game, legacy)
+                artifact = game.natal_artifact
+                changed = True
         if artifact:
+            crafted = self._crafted_natal_source(game)
+            crafted_id = str(artifact.get("crafted_artifact_id", ""))
+            if not crafted_id and crafted and artifact.get("item_id") not in ITEM_CATALOG:
+                crafted_id = str(crafted.get("id", ""))
+                artifact["crafted_artifact_id"] = crafted_id
+                changed = True
+            if crafted_id and not crafted:
+                game.natal_artifact = {}
+                self._sync_natal_artifact_bonuses(game)
+                return True
+            elif crafted:
+                for row in game.player.crafted_artifacts:
+                    expected = str(row.get("id", "")) == crafted_id
+                    if bool(row.get("is_natal")) != expected:
+                        row["is_natal"] = expected
+                        changed = True
+            else:
+                for row in game.player.crafted_artifacts:
+                    if row.get("is_natal"):
+                        row["is_natal"] = False
+                        changed = True
             artifact.setdefault("level", 1)
             artifact.setdefault("experience", 0)
             slots = list(artifact.get("slots", []))[:7]
@@ -52,18 +121,35 @@ class NatalArtifactSystemMixin:
         player.natal_artifact_opportunity_bonus = 0.0
         player.natal_artifact_tribulation_reduction = 0.0
         artifact = game.natal_artifact
-        if not artifact or artifact.get("item_id") not in ITEM_CATALOG:
+        if not artifact:
             return
-        base = ITEM_CATALOG[str(artifact["item_id"])]
         level = max(1, int(artifact.get("level", 1)))
         scale = 1.0 + float(self._natal_artifact_config()["level_scale_per_level"]) * (level - 1)
-        totals = {
-            "hp_bonus": float(base.hp_bonus) * scale,
-            "mp_bonus": float(base.mp_bonus) * scale,
-            "combat_bonus": float(base.combat_bonus) * scale,
-            "opportunity_bonus": float(base.opportunity_bonus) * scale,
-            "tribulation_reduction": float(base.tribulation_damage_reduction) * scale,
-        }
+        crafted = self._crafted_natal_source(game)
+        if crafted:
+            stats = crafted.get("actual_stats", {})
+            # The base forge stats already apply while the unique item remains
+            # in the bag. Natal fields therefore carry only level growth plus
+            # socket bonuses, avoiding accidental double application.
+            growth = max(0.0, scale - 1.0)
+            totals = {
+                "hp_bonus":float(stats.get("max_hp", 0.0)) * growth,
+                "mp_bonus":float(stats.get("max_mp", 0.0)) * growth,
+                "combat_bonus":float(stats.get("combat_power", 0.0)) * growth,
+                "opportunity_bonus":float(stats.get("opportunity_efficiency", 0.0)) * growth,
+                "tribulation_reduction":float(stats.get("tribulation_reduction", 0.0)) * growth,
+            }
+        elif artifact.get("item_id") in ITEM_CATALOG:
+            base = ITEM_CATALOG[str(artifact["item_id"])]
+            totals = {
+                "hp_bonus":float(base.hp_bonus) * scale,
+                "mp_bonus":float(base.mp_bonus) * scale,
+                "combat_bonus":float(base.combat_bonus) * scale,
+                "opportunity_bonus":float(base.opportunity_bonus) * scale,
+                "tribulation_reduction":float(base.tribulation_damage_reduction) * scale,
+            }
+        else:
+            return
         definitions = {row["item_id"]: row for row in self._natal_artifact_config()["materials"]}
         for material_id in artifact.get("slots", []):
             definition = definitions.get(material_id)
@@ -145,12 +231,21 @@ class NatalArtifactSystemMixin:
             item = next((row for row in player.inventory if row.id == item_id and row.quantity > 0), None)
             if not item or not self._natal_artifact_candidate(item):
                 raise ValueError("必须选择背包中的法宝或装备认主")
-            if not remove_item(player, item_id):
-                raise ValueError("法宝已经不在背包中")
-            game.natal_artifact = {
-                "item_id": item_id, "name": item.name, "level": 1,
-                "experience": 0, "bound_age": player.age, "slots": [None] * 7,
-            }
+            if item.crafted_artifact_id:
+                crafted = next(
+                    (row for row in player.crafted_artifacts if str(row.get("id", "")) == item.crafted_artifact_id),
+                    None,
+                )
+                if not crafted:
+                    raise ValueError("这件炼器法宝的唯一实例已经损坏")
+                self._bind_crafted_natal_artifact(game, crafted)
+            else:
+                if not remove_item(player, item_id):
+                    raise ValueError("法宝已经不在背包中")
+                game.natal_artifact = {
+                    "item_id":item_id, "name":item.name, "level":1,
+                    "experience":0, "bound_age":player.age, "slots":[None] * 7,
+                }
             summary = f"你将{item.name}收入丹田，以精血和金丹真火炼为本命法宝。"
             result = "bound"
         elif action == "refine":
@@ -216,7 +311,13 @@ class NatalArtifactSystemMixin:
         self._ensure_natal_artifact(game)
         candidates = [
             {"id": item.id, "name": item.name, "quantity": item.quantity,
-             "combat_bonus": item.combat_bonus, "description": item.description}
+             "combat_bonus": (
+                 float(crafted.get("actual_stats", {}).get("combat_power", 0.0))
+                 if item.crafted_artifact_id and (crafted := next((
+                     row for row in player.crafted_artifacts
+                     if str(row.get("id", "")) == item.crafted_artifact_id
+                 ), None)) else item.combat_bonus
+             ), "description": item.description}
             for item in player.inventory if self._natal_artifact_candidate(item)
         ]
         artifact = game.natal_artifact
@@ -241,11 +342,28 @@ class NatalArtifactSystemMixin:
                 "name": definition["name"] if definition else None,
                 "description": definition["description"] if definition else None,
             })
-        base = ITEM_CATALOG[artifact["item_id"]]
+        crafted = self._crafted_natal_source(game)
+        if crafted:
+            description = str(crafted.get("description", "组合式炼器本命法宝"))
+            stats = crafted.get("actual_stats", {})
+            displayed_base = {
+                "combat_bonus":float(stats.get("combat_power", 0.0)),
+                "hp_bonus":float(stats.get("max_hp", 0.0)),
+                "mp_bonus":float(stats.get("max_mp", 0.0)),
+                "opportunity_bonus":float(stats.get("opportunity_efficiency", 0.0)),
+                "tribulation_reduction":float(stats.get("tribulation_reduction", 0.0)),
+            }
+        else:
+            base = ITEM_CATALOG[artifact["item_id"]]
+            description = base.description
+            displayed_base = {key:0.0 for key in (
+                "combat_bonus", "hp_bonus", "mp_bonus", "opportunity_bonus", "tribulation_reduction",
+            )}
         maximum = int(self._natal_artifact_config()["max_level"])
         return {
             "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
-            "description": base.description, "level": level, "max_level": maximum,
+            "crafted_artifact_id":artifact.get("crafted_artifact_id"),
+            "description":description, "level": level, "max_level": maximum,
             "experience": int(artifact["experience"]),
             "experience_required": self._natal_level_required(level) if level < maximum else 0,
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
@@ -254,15 +372,17 @@ class NatalArtifactSystemMixin:
                 player, "spirit_stone", int(self._natal_artifact_config()["manual_refine_stone_base"]) * level,
             ),
             "bonuses": {
-                "combat_bonus": round(player.natal_artifact_combat_bonus, 1),
-                "hp_bonus": round(player.natal_artifact_hp_bonus, 1),
-                "mp_bonus": round(player.natal_artifact_mp_bonus, 1),
-                "opportunity_bonus": round(player.natal_artifact_opportunity_bonus, 4),
-                "tribulation_reduction": round(player.natal_artifact_tribulation_reduction, 4),
+                "combat_bonus":round(player.natal_artifact_combat_bonus + displayed_base["combat_bonus"], 1),
+                "hp_bonus":round(player.natal_artifact_hp_bonus + displayed_base["hp_bonus"], 1),
+                "mp_bonus":round(player.natal_artifact_mp_bonus + displayed_base["mp_bonus"], 1),
+                "opportunity_bonus":round(player.natal_artifact_opportunity_bonus + displayed_base["opportunity_bonus"], 4),
+                "tribulation_reduction":round(player.natal_artifact_tribulation_reduction + displayed_base["tribulation_reduction"], 4),
             },
         }
 
     def _natal_artifact_inventory_item(self, game: GameState) -> dict[str, Any] | None:
+        if game.natal_artifact.get("crafted_artifact_id"):
+            return None
         if not game.natal_artifact or game.natal_artifact.get("item_id") not in ITEM_CATALOG:
             return None
         item = ITEM_CATALOG[game.natal_artifact["item_id"]].to_dict()
