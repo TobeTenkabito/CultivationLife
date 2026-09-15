@@ -10,11 +10,12 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.formation_system import (
     active_formation_profile, adjacency_matrix, calculate_formation_profile,
     effect_matrix, formation_alpha, formation_battle_experience_gain,
-    formation_material_definitions, formation_round_effects,
+    formation_config, formation_maintenance_definitions, formation_material_definitions,
+    formation_round_effects, ground_formation_power,
     make_formation_material_instance, qr_eigenvalues,
 )
 from cultivation_life.models import Player
-from cultivation_life.rules import add_item, combat_power, max_hp, max_mp
+from cultivation_life.rules import add_item, combat_power, expected_combat_power, max_hp, max_mp
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -218,13 +219,21 @@ class FormationIntegrationTests(unittest.TestCase):
     def test_market_has_separate_formation_stock_and_purchase_keeps_instance(self):
         shown = self.engine.get_game(self.game_id)
         offers = shown["market"]["formation_material_offers"]
-        self.assertEqual(len(offers), 3)
+        materials = [row for row in offers if row["kind"] == "formation_material"]
+        supplies = [row for row in offers if row["kind"] == "formation_supply"]
+        self.assertEqual(len(materials), 3)
+        self.assertEqual(len(supplies), 1)
         game = self.engine.store.load(self.game_id)
-        add_item(game.player, "spirit_stone", offers[0]["price"])
+        add_item(game.player, "spirit_stone", materials[0]["price"])
         self.engine.store.save(game)
-        bought = self.engine.buy_market_offer(self.game_id, offers[0]["id"])
+        bought = self.engine.buy_market_offer(self.game_id, materials[0]["id"])
         material = next(row for row in bought["formation_system"]["materials"] if not row["occupied"])
-        self.assertEqual(material["storage_id"], offers[0]["formation_material_instance"]["id"])
+        self.assertEqual(material["storage_id"], materials[0]["formation_material_instance"]["id"])
+        game = self.engine.store.load(self.game_id)
+        add_item(game.player, "spirit_stone", supplies[0]["price"])
+        self.engine.store.save(game)
+        bought = self.engine.buy_market_offer(self.game_id, supplies[0]["id"])
+        self.assertEqual(bought["formation_system"]["repair_supplies"][0]["quantity"], 1)
 
     def test_old_save_defaults_without_moving_save_schema(self):
         game = self.engine.store.load(self.game_id)
@@ -232,17 +241,170 @@ class FormationIntegrationTests(unittest.TestCase):
         for key in (
             "formation_materials", "formation_loadouts", "active_formation_id",
             "formation_active_bindings", "formation_profile_cache", "formation_sequence",
+            "formation_ground_arrays", "formation_repair_supplies", "formation_ground_sequence",
         ):
             raw["player"].pop(key, None)
+        raw.pop("npc_formations", None)
         restored = type(game).from_dict(copy.deepcopy(raw))
         self.assertEqual(restored.player.formation_materials, [])
         self.assertEqual(restored.player.formation_loadouts, [])
+        self.assertEqual(restored.player.formation_ground_arrays, [])
+        self.assertEqual(restored.player.formation_repair_supplies, {})
+        self.assertEqual(restored.npc_formations, {})
         self.assertEqual(restored.version, game.version)
 
     def test_experience_formula_is_bounded(self):
         profile = calculate_formation_profile([node("wood", 7), node("fire", 7)] + [None] * 7, alpha=.7)
         self.assertEqual(formation_battle_experience_gain(profile, 0, 1), 0)
         self.assertLessEqual(formation_battle_experience_gain(profile, 8, .01), 45)
+
+    def test_v2_content_covers_every_world_and_keeps_caps_tight(self):
+        config = formation_config()
+        self.assertEqual(config["system_version"], 2)
+        worlds = set(config["world_names"]) if "world_names" in config else {
+            "human", "spirit", "celestial", "demon", "true_demon", "asura",
+            "phantom_underworld", "nether", "hell", "reincarnation",
+        }
+        self.assertEqual({row["world"] for row in formation_maintenance_definitions().values()}, worlds)
+        self.assertLessEqual(config["settings"]["ground_power_hard_cap_ratio"], .60)
+        self.assertLessEqual(config["settings"]["npc_formation_bonus_cap"], .10)
+
+    def test_ground_array_transfers_exact_instances_repairs_and_withdraws(self):
+        instances = self._give_array()
+        self._save_active(instances)
+        shown = self.engine.deploy_ground_formation(self.game_id, "player")
+        system = shown["formation_system"]
+        self.assertIsNone(system["active_formation_id"])
+        self.assertEqual(len(system["ground_arrays"]), 1)
+        self.assertEqual(sum(row["locked"] for row in system["materials"]), 3)
+        array = system["ground_arrays"][0]
+        map_location = next(row for row in shown["map"]["locations"] if row["id"] == array["location_id"])
+        self.assertEqual(map_location["ground_formations"][0]["id"], array["id"])
+
+        game = self.engine.store.load(self.game_id)
+        other_location = next(
+            location_id for location_id in self.engine.maps.worlds["human"]["locations"]
+            if location_id["id"] != game.player.location_id
+        )["id"]
+        game.player.location_id = other_location
+        self.engine.store.save(game)
+        with self.assertRaisesRegex(ValueError, "亲临"):
+            self.engine.withdraw_ground_formation(self.game_id, array["id"])
+
+        game = self.engine.store.load(self.game_id)
+        game.player.location_id = array["location_id"]
+        game.player.formation_ground_arrays[0]["durability"] = 50.0
+        game.player.formation_repair_supplies["human_array_marrow"] = 1
+        self.engine.store.save(game)
+        repaired = self.engine.repair_ground_formation(
+            self.game_id, array["id"], "human_array_marrow", 1,
+        )
+        self.assertEqual(repaired["formation_system"]["ground_arrays"][0]["durability"], 68.0)
+        self.assertEqual(repaired["formation_system"]["repair_supplies"], [])
+        withdrawn = self.engine.withdraw_ground_formation(self.game_id, array["id"])
+        self.assertEqual(withdrawn["formation_system"]["ground_arrays"], [])
+        restored_ids = {row["storage_id"] for row in withdrawn["formation_system"]["materials"]}
+        self.assertEqual(restored_ids, {row["id"] for row in instances})
+
+    def test_ground_power_and_persistent_combat_wear_are_bounded(self):
+        instances = self._give_array()
+        self._save_active(instances)
+        self.engine.deploy_ground_formation(self.game_id, "player")
+        game = self.engine.store.load(self.game_id)
+        array = game.player.formation_ground_arrays[0]
+        profile = self.engine._ground_profile(game.player, array)
+        median_tier = sorted(binding["acquired_tier"] for binding in array["bindings"] if binding)[1]
+        hard_cap = expected_combat_power(median_tier, 1) * formation_config()["settings"]["ground_power_hard_cap_ratio"]
+        self.assertLessEqual(ground_formation_power(array, profile), hard_cap + .01)
+        before = array["durability"]
+        self.engine._combat(game, {
+            "target_name":"镇地试阵者", "target_power":combat_power(game.player),
+            "target_realm_index":game.player.realm_index, "target_layer":game.player.layer,
+            "combat_type":"cultivator", "objective":"repel", "max_rounds":8,
+        }, False, random.Random(112))
+        array = next(row for row in game.player.formation_ground_arrays if row["id"] == array["id"])
+        wear = before - array["durability"]
+        self.assertGreaterEqual(wear, formation_config()["settings"]["ground_battle_min_wear"])
+        self.assertLessEqual(wear, formation_config()["settings"]["ground_battle_max_wear"])
+        self.assertEqual(array["battles"], 1)
+
+    def test_npc_arrays_are_persistent_capped_and_maintained_by_world_time(self):
+        game = self.engine.store.load(self.game_id)
+        self.assertTrue(game.npc_formations)
+        npc_id, entry = next(iter(game.npc_formations.items()))
+        original = copy.deepcopy(entry)
+        self.assertLessEqual(self.engine._npc_formation_power_multiplier(game, npc_id), 1.08 + 1e-9)
+        entry["durability"] = 20.0
+        entry["last_maintenance_year"] = game.player.age
+        game.player.age += 100
+        self.assertTrue(self.engine._ensure_npc_formations(game))
+        self.assertEqual(entry["durability"], 32.0)
+        self.assertEqual(entry["slots"], original["slots"])
+
+    def test_enemy_array_broadcasts_once_and_persists_its_wear(self):
+        game = self.engine.store.load(self.game_id)
+        npc_id = next(iter(game.npc_formations))
+        npc = self.engine._find_npc(game, npc_id)
+        before = float(game.npc_formations[npc_id]["durability"])
+        self.engine._combat(game, {
+            "target_name":npc.name, "target_power":self.engine._npc_power(npc),
+            "target_realm_index":npc.realm_index, "target_layer":npc.layer,
+            "npc_id":npc.id, "combat_type":"cultivator", "objective":"repel", "max_rounds":5,
+        }, False, random.Random(902))
+        report = game.last_combat_report
+        self.assertIsNotNone(report["enemy_formation_profile"])
+        self.assertTrue(any(
+            "敌方" in event and "阵" in event
+            for round_row in report["rounds"] for event in round_row["events"]
+        ))
+        wear = before - game.npc_formations[npc_id]["durability"]
+        self.assertGreaterEqual(wear, 1.0)
+        self.assertLessEqual(wear, 26.0)
+
+    def test_real_sect_guard_adds_independent_war_power_and_wears(self):
+        instances = self._give_array()
+        self._save_active(instances, "天剑护山阵")
+        game = self.engine.store.load(self.game_id)
+        game.player.faction_id = "tianjian"
+        game.sects["tianjian"].founded_by_player = True
+        game.sects["tianjian"].founder_player_id = game.id
+        self.engine.store.save(game)
+        shown = self.engine.deploy_ground_formation(self.game_id, "sect")
+        guard_id = shown["formation_system"]["ground_arrays"][0]["id"]
+        game = self.engine.store.load(self.game_id)
+        relation = self.engine._war_relation(game, "sect", "wanmo", "tianjian")
+        self.engine._set_diplomatic_relation(game, relation, "war", "wanmo", "tianjian", "sect", -80)
+        war = game.wars[-1]
+        with_guard = self.engine._war_total_power(game, war, "defender")
+        guard = next(row for row in game.player.formation_ground_arrays if row["id"] == guard_id)
+        before = guard["durability"]
+        guard_power = self.engine._sect_guard_power(game, "tianjian")
+        self.assertGreater(guard_power, 0)
+        self.engine._wear_war_guard_arrays(game, war)
+        self.assertEqual(before - guard["durability"], 2.5)
+        guard["durability"] = 0
+        without_guard = self.engine._war_total_power(game, war, "defender")
+        self.assertGreater(with_guard, without_guard)
+
+    def test_random_ground_arrays_never_break_absolute_power_cap(self):
+        definitions = list(formation_material_definitions().values())
+        rng = random.Random(20260915)
+        for _ in range(1200):
+            selected = [copy.deepcopy(rng.choice(definitions)) for _ in range(rng.randint(2, 9))]
+            slots = [None] * 9
+            for position, definition in zip(rng.sample(range(9), len(selected)), selected):
+                slots[position] = {
+                    "name":definition["name"], "acquired_tier":definition["tier"],
+                    "formation_profile":definition,
+                }
+            array = {"bindings":slots, "durability":rng.uniform(1, 100)}
+            profile = calculate_formation_profile(
+                [binding["formation_profile"] if binding else None for binding in slots],
+                alpha=rng.uniform(.5, .9), name="压力阵",
+            )
+            median = sorted(definition["tier"] for definition in selected)[len(selected) // 2]
+            cap = expected_combat_power(median, 1) * formation_config()["settings"]["ground_power_hard_cap_ratio"]
+            self.assertLessEqual(ground_formation_power(array, profile), cap + .01)
 
 
 if __name__ == "__main__":

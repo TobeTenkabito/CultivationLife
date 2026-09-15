@@ -390,6 +390,12 @@ class Player:
     formation_active_bindings: list[dict[str, Any] | None] = field(default_factory=list)
     formation_profile_cache: dict[str, Any] = field(default_factory=dict)
     formation_sequence: int = 0
+    # V2 persistent arrays keep their exact material snapshots at a map
+    # location. Repair supplies are consumable counts and never masquerade as
+    # reusable nine-palace nodes.
+    formation_ground_arrays: list[dict[str, Any]] = field(default_factory=list)
+    formation_repair_supplies: dict[str, int] = field(default_factory=dict)
+    formation_ground_sequence: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -465,6 +471,17 @@ class Player:
         )
         data["formation_sequence"] = max(
             int(data.get("formation_sequence", 0)), len(data["formation_loadouts"]), 0,
+        )
+        data["formation_ground_arrays"] = [
+            copy.deepcopy(row) for row in data.get("formation_ground_arrays", []) if isinstance(row, dict)
+        ]
+        data["formation_repair_supplies"] = {
+            str(key): max(0, int(quantity))
+            for key, quantity in data.get("formation_repair_supplies", {}).items()
+            if int(quantity) > 0
+        } if isinstance(data.get("formation_repair_supplies", {}), dict) else {}
+        data["formation_ground_sequence"] = max(
+            int(data.get("formation_ground_sequence", 0)), len(data["formation_ground_arrays"]), 0,
         )
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
@@ -623,6 +640,9 @@ class GameState:
     natal_artifact: dict[str, Any] = field(default_factory=dict)
     last_combat_report: dict[str, Any] | None = None
     ghost_parade: dict[str, Any] = field(default_factory=dict)
+    # NPC arrays are compact, deterministic blueprints keyed by persistent NPC
+    # id. They do not consume the player's material instances.
+    npc_formations: dict[str, dict[str, Any]] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -669,6 +689,7 @@ class GameState:
             "natal_artifact": self.natal_artifact,
             "last_combat_report": self.last_combat_report,
             "ghost_parade": self.ghost_parade,
+            "npc_formations": self.npc_formations,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -713,6 +734,11 @@ class GameState:
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),
             ghost_parade=copy.deepcopy(value.get("ghost_parade", {})),
+            npc_formations={
+                str(npc_id): copy.deepcopy(formation)
+                for npc_id, formation in value.get("npc_formations", {}).items()
+                if isinstance(formation, dict)
+            } if isinstance(value.get("npc_formations", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

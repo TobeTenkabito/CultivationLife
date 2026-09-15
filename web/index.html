@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260914-2">
-  <link rel="stylesheet" href="/panels.css?v=20260915-1">
+  <link rel="stylesheet" href="/panels.css?v=20260915-2">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -301,7 +301,7 @@
           <section><h3>炼器图谱</h3><p class="section-note">图谱仅记录材料类型与属性设计，不记录材料品质及成品品质。</p><div id="crafting-blueprint-list" class="crafting-blueprint-list"></div></section>
         </article>
         <article id="formation-card" class="paper utility-panel left-panel formation-panel hidden" role="dialog" aria-modal="false" aria-label="九宫阵法">
-          <div class="section-title"><div><p class="eyebrow">NINE PALACE MATRIX</p><h2>九宫阵法</h2></div><div class="panel-heading"><span id="formation-heading"></span><button id="formation-toggle" type="button">关闭</button></div></div>
+          <div class="section-title"><div><p class="eyebrow">NINE PALACE MATRIX V2</p><h2>九宫阵法</h2></div><div class="panel-heading"><span id="formation-heading"></span><button id="formation-toggle" type="button">关闭</button></div></div>
           <p class="muted">阵材位置决定有向灵流。绿色为相生，红色为冲克，灰色为弱关系；阵法效果只向敌我两侧各广播一次。</p>
           <div class="formation-layout">
             <section class="formation-workbench">
@@ -319,6 +319,7 @@
             </section>
           </div>
           <section><h3>阵材库</h3><p class="section-note">可拖入九宫，也可直接使用格内选择框；“占用中”的真实实例已从炼器、出售与其他阵法中移出。</p><div id="formation-material-library" class="formation-material-library"></div></section>
+          <section class="formation-ground-section"><h3>镇地阵域</h3><p class="section-note">把当前随身阵的真实阵基永久留在所在地域。私阵可在当地斗法时自动接管；护山阵进入宗门防守与离屏战争。完整度跨战斗保存，必须使用本界修阵资源恢复。</p><div class="formation-ground-actions"><button id="formation-ground-personal" type="button">镇为此地私阵</button><button id="formation-ground-sect" type="button">镇为宗门护山阵</button></div><div id="formation-repair-supplies" class="formation-repair-supplies"></div><div id="formation-ground-list" class="formation-ground-list"></div></section>
           <section><h3>阵法预设</h3><p class="section-note">预设只保存位置、材料类型与名称；启阵时重新绑定你实际拥有的实例。</p><div id="formation-loadout-list" class="formation-loadout-list"></div></section>
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
@@ -378,6 +379,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260915-1"></script>
-  <script src="/app.js?v=20260915-1"></script>
+  <script src="/app.js?v=20260915-2"></script>
 </body>
 </html>

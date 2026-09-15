@@ -301,11 +301,20 @@ class WarSystemMixin:
 
     def _war_total_power(self, game: GameState, war: dict[str, Any], side: str) -> float:
         members = self._available_warriors(game, war, side)
-        powers = [self._npc_power(npc) for npc in members]
+        powers = [
+            self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
+            for npc in members
+        ]
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
         if game.player.alive and game.player.world == war.get("world") and own_id in self._coalition_ids(war, side):
             powers.append(self._player_intrinsic_combat_power(game.player))
-        power = npc_team_combat_power(powers) if powers else 0.0
+        guard_power = 0.0
+        if side == "defender" and war.get("kind") == "sect":
+            for sect_id in self._coalition_ids(war, side):
+                guard_power += self._sect_guard_power(game, sect_id)
+        # Guard arrays are anchored battlefield infrastructure, not a fourth
+        # cultivator competing for one of the aggregate roster's three slots.
+        power = (npc_team_combat_power(powers) if powers else 0.0) + guard_power
         if side == "defender":
             power *= 1 + float(self._war_rules().get("defender_power_bonus", 0.10))
         return power
@@ -313,7 +322,10 @@ class WarSystemMixin:
     def _war_power_profile(self, game: GameState, war: dict[str, Any], side: str) -> dict[str, float | int]:
         members = self._available_warriors(game, war, side)
         total = self._war_total_power(game, war, side)
-        elite_rows = [(npc.realm_index, self._npc_power(npc)) for npc in members]
+        elite_rows = [(
+            npc.realm_index,
+            self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id),
+        ) for npc in members]
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
         if game.player.alive and game.player.world == war.get("world") and own_id in self._coalition_ids(war, side):
             elite_rows.append((game.player.realm_index, self._player_intrinsic_combat_power(game.player)))
@@ -329,11 +341,18 @@ class WarSystemMixin:
         }
 
     def _war_entity_power(self, game: GameState, war: dict[str, Any], side: str, power_id: str) -> float:
-        powers = [self._npc_power(npc) for npc in self._available_warriors(game, war, side, power_id)]
+        powers = [
+            self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
+            for npc in self._available_warriors(game, war, side, power_id)
+        ]
         own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
         if game.player.alive and game.player.world == war.get("world") and own_id == power_id:
             powers.append(self._player_intrinsic_combat_power(game.player))
-        return npc_team_combat_power(powers) if powers else 0.0
+        guard_power = (
+            self._sect_guard_power(game, power_id)
+            if side == "defender" and war.get("kind") == "sect" else 0.0
+        )
+        return (npc_team_combat_power(powers) if powers else 0.0) + guard_power
 
     def _resolve_abstract_defeat(self, game: GameState, war: dict[str, Any], loser: str, rng: random.Random) -> str:
         candidates = self._available_warriors(game, war, loser)
@@ -377,8 +396,10 @@ class WarSystemMixin:
         striker = rng.choice(attackers[:min(8, len(attackers))])
         target = rng.choice(defenders[:min(12, len(defenders))])
         defense_bonus = 1 + float(self._war_rules().get("defender_power_bonus", 0.10))
-        attack_power = self._npc_power(striker) * (defense_bonus if attacking == "defender" else 1.0)
-        defend_power = self._npc_power(target) * (defense_bonus if defending == "defender" else 1.0)
+        attack_power = self._npc_power(striker) * self._npc_formation_power_multiplier(game, striker.id)
+        defend_power = self._npc_power(target) * self._npc_formation_power_multiplier(game, target.id)
+        attack_power *= defense_bonus if attacking == "defender" else 1.0
+        defend_power *= defense_bonus if defending == "defender" else 1.0
         ratio = attack_power * rng.uniform(0.85, 1.18) / max(1.0, defend_power)
         if ratio < 1:
             return f"{striker.name}攻势受阻，{target.name}守住阵线。"
@@ -456,6 +477,10 @@ class WarSystemMixin:
                 return self.present(game)
             team_size = min(len(candidates), rng.randint(1, 3))
             opponents = rng.sample(candidates[:min(12, len(candidates))], team_size)
+            # Player-involved vanguard combat resolves the strongest enemy
+            # formation through the detailed bilateral broadcaster.  Keep the
+            # base team power raw here so that the same array is not counted a
+            # second time by the off-screen abstraction multiplier.
             required = npc_team_combat_power(self._npc_power(npc) for npc in opponents)
             if enemy == "defender":
                 required *= 1 + float(self._war_rules().get("defender_power_bonus", 0.10))
@@ -475,6 +500,7 @@ class WarSystemMixin:
             if not self._finish_war_by_morale(game, war):
                 lines.append(self._resolve_field_attack(game, war, "defender", rng))
             war["battles"] = int(war.get("battles", 0)) + 1
+            self._wear_war_guard_arrays(game, war)
             war["exhaustion"]["attacker"] = min(100.0, float(war["exhaustion"]["attacker"]) + 7.0)
             war["exhaustion"]["defender"] = min(100.0, float(war["exhaustion"]["defender"]) + 7.0)
             self._finish_war_by_morale(game, war)
@@ -564,6 +590,7 @@ class WarSystemMixin:
                     if not self._finish_war_by_morale(game, war):
                         lines.append(self._resolve_field_attack(game, war, "defender", rng))
                     war["battles"] = int(war.get("battles", 0)) + 1
+                    self._wear_war_guard_arrays(game, war)
                     for side in ("attacker", "defender"):
                         war["exhaustion"][side] = min(100.0, float(war["exhaustion"][side]) + 7.0)
                     self._finish_war_by_morale(game, war)
@@ -592,6 +619,7 @@ class WarSystemMixin:
                 victor = "defender"
             war["abstract_rounds"] = int(war.get("abstract_rounds", 0)) + 1
             war["battles"] = int(war.get("battles", 0)) + 1
+            self._wear_war_guard_arrays(game, war)
             for side in ("attacker", "defender"):
                 war["exhaustion"][side] = min(100.0, float(war["exhaustion"][side]) + rng.uniform(6, 10))
             loser = "defender" if victor == "attacker" else "attacker"

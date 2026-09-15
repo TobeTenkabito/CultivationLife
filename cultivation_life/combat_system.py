@@ -77,6 +77,9 @@ class CombatResolution:
     player_roster: list[dict[str, Any]]
     enemy_roster: list[dict[str, Any]]
     formation_profile: dict[str, Any] | None = None
+    enemy_formation_profile: dict[str, Any] | None = None
+    formation_integrity_end: float | None = None
+    enemy_formation_integrity_end: float | None = None
     formation_experience_gain: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -145,9 +148,26 @@ class PlayerCombatSystem:
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
         natural = next((tag for tag in normalized if tag in cls.NATURAL_TERRAINS), "开阔")
         artificial = list(dict.fromkeys(tag for tag in normalized if tag in cls.ARTIFICIAL_CONDITIONS))
-        formation_profile = active_formation_profile(player)
+        portable_formation = active_formation_profile(player)
+        field_formation = target.get("allied_formation_profile", {})
+        formation_profile = (
+            dict(field_formation)
+            if isinstance(field_formation, dict) and field_formation.get("active")
+            and not portable_formation.get("active")
+            else portable_formation
+        )
+        enemy_formation_profile = (
+            dict(target.get("enemy_formation_profile", {}))
+            if isinstance(target.get("enemy_formation_profile"), dict) else {}
+        )
         formation_name = str(formation_profile.get("name", "")) if formation_profile.get("active") else None
+        enemy_formation_name = (
+            str(enemy_formation_profile.get("name", "")) if enemy_formation_profile.get("active") else None
+        )
         for condition in formation_profile.get("artificial_conditions", []):
+            if condition in cls.ARTIFICIAL_CONDITIONS and condition not in artificial:
+                artificial.append(condition)
+        for condition in enemy_formation_profile.get("artificial_conditions", []):
             if condition in cls.ARTIFICIAL_CONDITIONS and condition not in artificial:
                 artificial.append(condition)
         tags = [natural, *artificial]
@@ -253,7 +273,14 @@ class PlayerCombatSystem:
         cls._apply_objective(player_stats, objective)
         cls._apply_enemy_objective(enemy_stats, str(target.get("enemy_objective", "kill" if lethal else "test")))
 
-        formation_integrity = 1.0 if formation_name else 0.0
+        formation_integrity = (
+            cls._clamp(0.0, 1.0, float(target.get("formation_initial_integrity", 1.0)))
+            if formation_name else 0.0
+        )
+        enemy_formation_integrity = (
+            cls._clamp(0.0, 1.0, float(target.get("enemy_formation_initial_integrity", 1.0)))
+            if enemy_formation_name else 0.0
+        )
         # Combat power is the battle durability pool. Character HP is only
         # converted from unabsorbed body damage after the fight.
         player_hp = cls._clamp(0.0, 1.0, player_power / player_power_max)
@@ -361,12 +388,24 @@ class PlayerCombatSystem:
             round_player_stats = dict(player_stats)
             round_enemy_stats = dict(enemy_stats)
             formation_effect = formation_round_effects(formation_profile, round_no, formation_integrity)
+            enemy_formation_effect = formation_round_effects(
+                enemy_formation_profile, round_no, enemy_formation_integrity,
+            )
             for stat, multiplier in formation_effect["player_stat_multipliers"].items():
                 round_player_stats[stat] *= multiplier
             for stat, multiplier in formation_effect["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
+            # The enemy's matrix uses the same owner/opponent channels in the
+            # opposite direction. Results are applied once and never fed back
+            # into either matrix, preserving V1's non-recursive broadcast cap.
+            for stat, multiplier in enemy_formation_effect["player_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            for stat, multiplier in enemy_formation_effect["enemy_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
             if formation_effect["change_event"]:
                 events.append(f"阵法变势：{formation_effect['change_event']}")
+            if enemy_formation_effect["change_event"]:
+                events.append(f"敌阵变势：{enemy_formation_effect['change_event']}")
             if devouring_soul_stacks:
                 round_enemy_stats["guard"] *= 0.96 ** devouring_soul_stacks
                 events.append(f"魂性【噬灵】已侵蚀敌方防护 {devouring_soul_stacks * 4}%。")
@@ -472,7 +511,9 @@ class PlayerCombatSystem:
             if round_no <= len(story_beats):
                 events.append(f"剧情推进：{story_beats[round_no - 1]}")
             if round_no == 1 and formation_name:
-                events.append(f"{formation_name}展开，阵势完整度 100%。")
+                events.append(f"{formation_name}展开，阵势完整度 {formation_integrity:.0%}。")
+            if round_no == 1 and enemy_formation_name:
+                events.append(f"敌方{enemy_formation_name}展开，阵势完整度 {enemy_formation_integrity:.0%}。")
             if dragon_pressure_active and round_no <= 2:
                 pressure_name = transformation_trait_name("dragon_pressure")
                 events.append(f"{pressure_name}镇住敌方气机，本轮由你方强制取得先手。")
@@ -600,6 +641,7 @@ class PlayerCombatSystem:
             dealt *= soul_dealt_multiplier * float(soul_before_damage["dealt_multiplier"])
             received *= soul_received_multiplier * float(soul_before_damage["received_multiplier"])
             dealt *= float(formation_effect["dealt_multiplier"])
+            received *= float(enemy_formation_effect["dealt_multiplier"])
             events.extend(f"魂性共鸣【{event}】" for event in soul_before_damage["events"])
 
             if round_no == 1 and "first_round_full_state" in transformation_traits:
@@ -670,6 +712,11 @@ class PlayerCombatSystem:
                 player_mp += restored_mp
                 if restored_state > 0 or restored_mp > 0:
                     events.append(f"阵中生流回返，恢复 {restored_state:.1%} 战斗态势与 {restored_mp:.1%} 法力。")
+            if enemy_hp > 0 and enemy_formation_effect["state_restore"] > 0:
+                restored_enemy = min(float(enemy_formation_effect["state_restore"]), 1.0 - enemy_hp)
+                enemy_hp += restored_enemy
+                if restored_enemy > 0:
+                    events.append(f"敌阵生流回返，恢复敌方 {restored_enemy:.1%} 战斗态势。")
             if not undying_soul_used and 0 < player_hp <= 0.25 and "不灭" in soul_traits:
                 undying_soul_used = True
                 restored_state = min(0.08, 1.0 - player_hp)
@@ -690,6 +737,9 @@ class PlayerCombatSystem:
                 events.append(f"{morale_name}侵蚀敌阵，本轮额外削弱敌方 5 点战意。")
             morale_loss = actual_received * 70 / (1.0 + resolve_bonus)
             morale_loss *= float(formation_effect["player_morale_loss_multiplier"])
+            morale_loss += float(enemy_formation_effect["enemy_morale_loss"])
+            enemy_morale_loss_multiplier = float(enemy_formation_effect["player_morale_loss_multiplier"])
+            enemy_morale = min(100.0, enemy_morale + dealt * 77 * morale_scale * (1.0 - enemy_morale_loss_multiplier))
             if "执念" in soul_traits:
                 morale_loss *= 0.75
             player_morale = max(0.0, player_morale - morale_loss)
@@ -801,6 +851,20 @@ class PlayerCombatSystem:
                 if formation_integrity < 0.50 and not any("阵势跌破" in event for row in rounds for event in row["events"]):
                     events.append("阵势完整度跌破 50%，预案收缩阵线维持核心加成。")
                     key_events.append(f"第{round_no}轮，{formation_name}受创后自动收缩阵线。")
+            if enemy_formation_name and enemy_formation_integrity > 0:
+                before_enemy_integrity = enemy_formation_integrity
+                enemy_formation_integrity = max(
+                    0.0,
+                    enemy_formation_integrity
+                    - dealt * 0.34 * float(enemy_formation_effect["integrity_decay_multiplier"])
+                    - float(enemy_formation_effect["integrity_extra_loss"]),
+                )
+                if enemy_formation_integrity > 0 and enemy_formation_effect["integrity_restore"] > 0:
+                    enemy_formation_integrity = min(
+                        1.0, enemy_formation_integrity + float(enemy_formation_effect["integrity_restore"]),
+                    )
+                if abs(enemy_formation_integrity - before_enemy_integrity) >= 0.005:
+                    events.append(f"敌阵完整度结算为 {enemy_formation_integrity:.0%}。")
 
             events.append(
                 f"{'你方' if player_first else '敌方'}抢得先手；你方削去敌方 {dealt * enemy_power:.0f} 战斗态势，承受 {actual_received * player_power_max:.0f} 战斗态势损耗。"
@@ -821,6 +885,9 @@ class PlayerCombatSystem:
                 "player_morale": round(player_morale, 1),
                 "enemy_morale": round(enemy_morale, 1),
                 "formation_integrity": round(formation_integrity, 4) if formation_name else None,
+                "enemy_formation_integrity": (
+                    round(enemy_formation_integrity, 4) if enemy_formation_name else None
+                ),
             })
             if enemy_hp <= 0.12 or enemy_morale <= 8 or player_hp <= 0 or player_morale <= 5:
                 break
@@ -930,6 +997,20 @@ class PlayerCombatSystem:
                     "core_node": formation_profile.get("core_node"),
                 }
                 if formation_profile.get("active") else None
+            ),
+            enemy_formation_profile=(
+                {
+                    "name": enemy_formation_profile["name"],
+                    "metrics": dict(enemy_formation_profile.get("metrics", {})),
+                    "change_mode": enemy_formation_profile.get("change_mode"),
+                    "change_mode_name": enemy_formation_profile.get("change_mode_name"),
+                    "core_node": enemy_formation_profile.get("core_node"),
+                }
+                if enemy_formation_profile.get("active") else None
+            ),
+            formation_integrity_end=(round(formation_integrity, 4) if formation_name else None),
+            enemy_formation_integrity_end=(
+                round(enemy_formation_integrity, 4) if enemy_formation_name else None
             ),
         )
 
