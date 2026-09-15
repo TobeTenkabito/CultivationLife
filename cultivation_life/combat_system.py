@@ -20,6 +20,7 @@ from .monster_general_traits import (
     GENERAL_MONSTER_TRAIT_REGISTRY, active_general_monster_traits,
     general_monster_trait_modifiers,
 )
+from .formation_system import active_formation_profile, formation_round_effects
 
 
 STAT_KEYS = ("might", "guard", "mobility", "sense", "sustain", "breach")
@@ -75,6 +76,8 @@ class CombatResolution:
     death_prevented: bool
     player_roster: list[dict[str, Any]]
     enemy_roster: list[dict[str, Any]]
+    formation_profile: dict[str, Any] | None = None
+    formation_experience_gain: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -142,9 +145,11 @@ class PlayerCombatSystem:
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
         natural = next((tag for tag in normalized if tag in cls.NATURAL_TERRAINS), "开阔")
         artificial = list(dict.fromkeys(tag for tag in normalized if tag in cls.ARTIFICIAL_CONDITIONS))
-        formation_name = cls._formation_name(player)
-        if formation_name and "大阵" not in artificial:
-            artificial.append("大阵")
+        formation_profile = active_formation_profile(player)
+        formation_name = str(formation_profile.get("name", "")) if formation_profile.get("active") else None
+        for condition in formation_profile.get("artificial_conditions", []):
+            if condition in cls.ARTIFICIAL_CONDITIONS and condition not in artificial:
+                artificial.append(condition)
         tags = [natural, *artificial]
         enemy_units = cls._enemy_units(target)
         player_power_max = max(1.0, sum(unit.power for unit in player_units))
@@ -213,8 +218,6 @@ class PlayerCombatSystem:
             buff.update(stat=stat, multiplier=multiplier)
             enemy_stats[stat] *= multiplier
             enemy_buffs.append(buff)
-        if "大阵" in artificial:
-            player_stats["guard"] *= 1.12
         enemy_realm = max(unit.realm_index for unit in enemy_units)
         realm_delta = player.realm_index - enemy_realm
         _, triggered_general_traits = general_monster_trait_modifiers(
@@ -328,6 +331,8 @@ class PlayerCombatSystem:
         burst_used = False
         quick = ratio >= 3.0 or ratio <= 1 / 3
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
+        last_round_player_stats = dict(player_stats)
+        last_round_enemy_stats = dict(enemy_stats)
 
         # Hunting retains its advertised strict preparation threshold, while the
         # exchanges and losses are still resolved through the detailed model.
@@ -355,6 +360,13 @@ class PlayerCombatSystem:
                     key_events.append(f"第{round_no}轮，{regen_event}")
             round_player_stats = dict(player_stats)
             round_enemy_stats = dict(enemy_stats)
+            formation_effect = formation_round_effects(formation_profile, round_no, formation_integrity)
+            for stat, multiplier in formation_effect["player_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            for stat, multiplier in formation_effect["enemy_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            if formation_effect["change_event"]:
+                events.append(f"阵法变势：{formation_effect['change_event']}")
             if devouring_soul_stacks:
                 round_enemy_stats["guard"] *= 0.96 ** devouring_soul_stacks
                 events.append(f"魂性【噬灵】已侵蚀敌方防护 {devouring_soul_stacks * 4}%。")
@@ -486,8 +498,6 @@ class PlayerCombatSystem:
                 resource = "仙灵力" if art.requires_immortal_power else "法力"
                 events.append(f"预案自动发动{label}，以 {cost:.0%} 最大{resource}换取本轮爆发。")
 
-            formation_attack = 1.0 + 0.12 * formation_integrity
-            formation_guard = 1.0 + 0.10 * formation_integrity
             player_round_might = 1.0
             enemy_round_might = 1.0
             if counterforce_active:
@@ -508,8 +518,8 @@ class PlayerCombatSystem:
             if round_no % 2 == 1 and "odd_round_enemy_might_down_40" in artifact_traits:
                 enemy_round_might *= 0.60
                 events.append("翕兹之电截断奇数轮气机，本轮敌方威能降低 40%。")
-            p_attack = round_player_stats["might"] * player_round_might * p_state * burst_factor * formation_attack
-            p_defense = round_player_stats["guard"] * (0.72 + 0.28 * player_hp) * formation_guard
+            p_attack = round_player_stats["might"] * player_round_might * p_state * burst_factor
+            p_defense = round_player_stats["guard"] * (0.72 + 0.28 * player_hp)
             e_attack = round_enemy_stats["might"] * enemy_round_might * e_state
             e_defense = round_enemy_stats["guard"] * (0.72 + 0.28 * enemy_hp)
             p_breach = round_player_stats["breach"] / max(1.0, round_enemy_stats["guard"])
@@ -589,6 +599,7 @@ class PlayerCombatSystem:
             )
             dealt *= soul_dealt_multiplier * float(soul_before_damage["dealt_multiplier"])
             received *= soul_received_multiplier * float(soul_before_damage["received_multiplier"])
+            dealt *= float(formation_effect["dealt_multiplier"])
             events.extend(f"魂性共鸣【{event}】" for event in soul_before_damage["events"])
 
             if round_no == 1 and "first_round_full_state" in transformation_traits:
@@ -652,6 +663,13 @@ class PlayerCombatSystem:
                 player_mp += restored_mp
                 if restored_state > 0 or restored_mp > 0:
                     events.append(f"续航体系回稳，恢复 {restored_state:.1%} 战斗态势与 {restored_mp:.1%} 法力。")
+            if player_hp > 0 and formation_effect["state_restore"] > 0:
+                restored_state = min(float(formation_effect["state_restore"]), 1.0 - player_hp)
+                restored_mp = min(float(formation_effect["mp_restore"]), 1.0 - player_mp)
+                player_hp += restored_state
+                player_mp += restored_mp
+                if restored_state > 0 or restored_mp > 0:
+                    events.append(f"阵中生流回返，恢复 {restored_state:.1%} 战斗态势与 {restored_mp:.1%} 法力。")
             if not undying_soul_used and 0 < player_hp <= 0.25 and "不灭" in soul_traits:
                 undying_soul_used = True
                 restored_state = min(0.08, 1.0 - player_hp)
@@ -663,11 +681,15 @@ class PlayerCombatSystem:
                 key_events.append(f"第{round_no}轮，{event}")
             morale_scale = 1.28 if objective == "repel" else 1.0
             enemy_morale = max(0.0, enemy_morale - dealt * 77 * morale_scale)
+            if formation_effect["enemy_morale_loss"] > 0:
+                enemy_morale = max(0.0, enemy_morale - float(formation_effect["enemy_morale_loss"]))
+                events.append(f"杀势压阵，敌方额外损失 {formation_effect['enemy_morale_loss']:.1f} 点战意。")
             if "morale_drain_5" in transformation_traits:
                 enemy_morale = max(0.0, enemy_morale - 5.0)
                 morale_name = transformation_trait_name("morale_drain_5")
                 events.append(f"{morale_name}侵蚀敌阵，本轮额外削弱敌方 5 点战意。")
             morale_loss = actual_received * 70 / (1.0 + resolve_bonus)
+            morale_loss *= float(formation_effect["player_morale_loss_multiplier"])
             if "执念" in soul_traits:
                 morale_loss *= 0.75
             player_morale = max(0.0, player_morale - morale_loss)
@@ -762,8 +784,20 @@ class PlayerCombatSystem:
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + soul_end["enemy_morale_delta"])
             events.extend(f"魂性共鸣【{event}】" for event in soul_end["events"])
 
-            if formation_name:
-                formation_integrity = max(0.0, formation_integrity - received * 0.34)
+            if formation_name and formation_integrity > 0:
+                before_integrity = formation_integrity
+                formation_integrity = max(
+                    0.0,
+                    formation_integrity
+                    - actual_received * 0.34 * float(formation_effect["integrity_decay_multiplier"])
+                    - float(formation_effect["integrity_extra_loss"]),
+                )
+                if formation_integrity > 0 and formation_effect["integrity_restore"] > 0:
+                    formation_integrity = min(
+                        1.0, formation_integrity + float(formation_effect["integrity_restore"]),
+                    )
+                if abs(formation_integrity - before_integrity) >= 0.005:
+                    events.append(f"阵势完整度结算为 {formation_integrity:.0%}。")
                 if formation_integrity < 0.50 and not any("阵势跌破" in event for row in rounds for event in row["events"]):
                     events.append("阵势完整度跌破 50%，预案收缩阵线维持核心加成。")
                     key_events.append(f"第{round_no}轮，{formation_name}受创后自动收缩阵线。")
@@ -771,6 +805,8 @@ class PlayerCombatSystem:
             events.append(
                 f"{'你方' if player_first else '敌方'}抢得先手；你方削去敌方 {dealt * enemy_power:.0f} 战斗态势，承受 {actual_received * player_power_max:.0f} 战斗态势损耗。"
             )
+            last_round_player_stats = dict(round_player_stats)
+            last_round_enemy_stats = dict(round_enemy_stats)
             rounds.append({
                 "round": round_no,
                 "initiative": "player" if player_first else "enemy",
@@ -825,8 +861,8 @@ class PlayerCombatSystem:
         else:
             key_events.append("预案判断继续纠缠的代价过高，自动转入脱离与保命流程。")
 
-        speed_edge = player_stats["mobility"] / max(1.0, enemy_stats["mobility"])
-        sense_edge = player_stats["sense"] / max(1.0, enemy_stats["sense"])
+        speed_edge = last_round_player_stats["mobility"] / max(1.0, last_round_enemy_stats["mobility"])
+        sense_edge = last_round_player_stats["sense"] / max(1.0, last_round_enemy_stats["sense"])
         decisive = ratio > 1.12 and (enemy_hp <= 0.46 or enemy_morale <= 22)
         pursuit = speed_edge * 0.55 + sense_edge * 0.30 + max(0, player.realm_index - enemy_realm) * 0.08
         escape_locked = "enemy_escape_lock" in artifact_traits
@@ -874,8 +910,8 @@ class PlayerCombatSystem:
             battlefield_tags=tags,
             natural_terrain=natural,
             artificial_conditions=artificial,
-            player_stats={key: round(value, 1) for key, value in player_stats.items()},
-            enemy_stats={key: round(value, 1) for key, value in enemy_stats.items()},
+            player_stats={key: round(value, 1) for key, value in last_round_player_stats.items()},
+            enemy_stats={key: round(value, 1) for key, value in last_round_enemy_stats.items()},
             active_transformations=[
                 {"id": form.id, "name": form.name, "weight": round(weight, 6)}
                 for form, weight in zip(transformation["forms"], transformation["weights"])
@@ -886,6 +922,15 @@ class PlayerCombatSystem:
             death_prevented=death_prevented,
             player_roster=cls._public_roster(player_units),
             enemy_roster=cls._public_roster(enemy_units),
+            formation_profile=(
+                {
+                    "name": formation_profile["name"], "metrics": dict(formation_profile.get("metrics", {})),
+                    "change_mode": formation_profile.get("change_mode"),
+                    "change_mode_name": formation_profile.get("change_mode_name"),
+                    "core_node": formation_profile.get("core_node"),
+                }
+                if formation_profile.get("active") else None
+            ),
         )
 
     @staticmethod
@@ -1077,8 +1122,8 @@ class PlayerCombatSystem:
 
     @classmethod
     def _formation_name(cls, player: Player) -> str | None:
-        arrays = [item.name for item in player.inventory if "阵" in item.name or "array" in item.id or "formation" in item.id]
-        return arrays[0] if arrays else None
+        profile = active_formation_profile(player)
+        return str(profile.get("name")) if profile.get("active") else None
 
     @staticmethod
     def _objective(target: dict[str, Any], lethal: bool) -> str:

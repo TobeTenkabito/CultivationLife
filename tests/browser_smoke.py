@@ -17,6 +17,7 @@ from cultivation_life import server as server_module
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import REALMS
 from cultivation_life.ghost_system import grant_intrinsic_progression_if_new_highwater
+from cultivation_life.formation_system import formation_material_definitions, make_formation_material_instance
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
 
 
@@ -46,6 +47,11 @@ def main() -> None:
         add_item(game.player, "true_dragon_blood_trace", 2)
         game.player.divine_sense_rank = 1
         game.player.divine_sense_experience = 20
+        formation_defs = formation_material_definitions()
+        game.player.formation_materials.extend([
+            make_formation_material_instance(formation_defs[material_id], source="前端烟测", origin_world="human")
+            for material_id in ("human_greenwood_stake", "human_red_sun_sand", "human_xuanyin_stone")
+        ])
         engine._combat(game, {
             "target_name":"烟测木偶", "target_power":1, "target_realm_index":0,
             "target_layer":1, "combat_type":"cultivator", "action":"spar",
@@ -219,6 +225,23 @@ def main() -> None:
                 assert page.get_by_role("button", name="赠物").is_enabled()
                 assert page.get_by_role("button", name="传功").is_enabled()
                 page.locator("#relationship-toggle").click()
+
+                page.locator("[data-panel-target='formation']").click()
+                page.locator("#formation-card").wait_for(state="visible")
+                assert page.locator("#formation-grid .formation-slot").count() == 9
+                assert page.locator("#formation-material-library .formation-material-row").count() == 3
+                material_ids = [row["id"] for row in page.evaluate("game.formation_system.materials")]
+                for index, material_id in enumerate(material_ids):
+                    page.locator("#formation-grid select").nth(index).select_option(material_id)
+                page.locator("#formation-name").fill("前端九宫阵")
+                page.locator("#formation-preview").click()
+                page.wait_for_function("document.querySelectorAll('#formation-flow-lines path').length > 0")
+                assert page.locator("#formation-metrics .formation-metric").count() == 6
+                page.locator("#formation-save-activate").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert "当前启用" in page.locator("#formation-loadout-list").text_content()
+                assert all(row.get("occupied") for row in page.evaluate("game.formation_system.materials"))
+                page.locator("#formation-toggle").click()
 
                 page.locator("[data-panel-target='transformation']").click()
                 page.locator("#transformation-card").wait_for(state="visible")

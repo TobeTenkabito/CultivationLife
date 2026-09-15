@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "experience_base": 100,
+    "alpha_min": 0.5,
+    "alpha_max": 0.9,
+    "alpha_level_scale": 12,
+    "market_material_offers": 3,
+    "metric_softcap_per_node": 50,
+    "stat_bonus_cap": 0.14,
+    "enemy_stat_reduction_cap": 0.06,
+    "change_round_cap": 0.08,
+    "field_structure_threshold": 0.35,
+    "field_node_ratio": 0.55,
+    "cycle_weights": {"2": 0.5, "3": 0.3, "4": 0.2}
+  },
+  "nature_channels": {
+    "metal": ["breach"],
+    "wood": ["sustain"],
+    "water": ["sustain"],
+    "fire": ["might"],
+    "earth": ["guard"],
+    "yin": ["sense"],
+    "yang": ["guard"],
+    "wind": ["mobility"],
+    "thunder": ["might", "mobility"],
+    "soul": ["sense"],
+    "space": ["mobility"],
+    "star": ["might", "guard", "mobility", "sense", "sustain", "breach"],
+    "law": ["sense", "breach"],
+    "neutral": []
+  },
+  "relations": {
+    "metal": {"metal": 0.5, "water": 1.0, "wood": -1.0, "earth": 0.5, "thunder": 0.5},
+    "wood": {"wood": 0.5, "fire": 1.0, "earth": -1.0, "water": 0.5, "wind": 0.5},
+    "water": {"water": 0.5, "wood": 1.0, "fire": -1.0, "metal": 0.5, "yin": 0.5},
+    "fire": {"fire": 0.5, "earth": 1.0, "metal": -1.0, "wood": 0.5, "yang": 0.5},
+    "earth": {"earth": 0.5, "metal": 1.0, "water": -1.0, "fire": 0.5, "law": 0.5},
+    "yin": {"yin": 0.5, "soul": 1.0, "yang": -1.0, "water": 0.5},
+    "yang": {"yang": 0.5, "yin": -1.0, "soul": -1.0, "fire": 0.5, "earth": 0.5},
+    "wind": {"wind": 0.5, "fire": 0.5, "space": 0.5, "earth": -0.5},
+    "thunder": {"thunder": 0.5, "wood": 0.5, "fire": 0.5, "earth": -0.5, "space": 0.5},
+    "soul": {"soul": 0.5, "yin": 1.0, "yang": -0.5, "law": -0.5},
+    "space": {"space": 0.5, "wind": 0.5, "star": 1.0, "law": -0.5},
+    "star": {"star": 0.5, "space": 0.5, "law": 1.0, "neutral": 0.5},
+    "law": {"law": 0.5, "space": -0.5, "soul": -0.5, "star": 0.5},
+    "neutral": {"neutral": 0.5}
+  },
+  "materials": [
+    {"id":"human_xuanyin_stone","name":"玄阴石","world":"human","tier":1,"base_value":18,"formation_value":2.2,"nature":"yin","relation_overrides":{},"field_hook":null},
+    {"id":"human_red_sun_sand","name":"赤阳砂","world":"human","tier":1,"base_value":22,"formation_value":2.5,"nature":"fire","relation_overrides":{},"field_hook":null},
+    {"id":"human_greenwood_stake","name":"青木阵桩","world":"human","tier":2,"base_value":48,"formation_value":3.1,"nature":"wood","relation_overrides":{},"field_hook":null},
+    {"id":"human_void_lock_nail","name":"锁虚钉","world":"human","tier":3,"base_value":135,"formation_value":3.6,"nature":"space","relation_overrides":{"wind":0.75},"field_hook":"forbidden_air"},
+    {"id":"human_quiet_soul_mirror","name":"寂识镜片","world":"human","tier":4,"base_value":620,"formation_value":4.0,"nature":"soul","relation_overrides":{"yang":-0.75},"field_hook":"forbidden_sense"},
+
+    {"id":"spirit_tide_pearl","name":"沧溟阵珠","world":"spirit","tier":6,"base_value":52000,"formation_value":5.8,"nature":"water","relation_overrides":{},"field_hook":null},
+    {"id":"spirit_cloud_pivot","name":"九霄风枢","world":"spirit","tier":7,"base_value":180000,"formation_value":6.5,"nature":"wind","relation_overrides":{"space":0.75},"field_hook":null},
+    {"id":"spirit_five_phase_core","name":"五行归元核","world":"spirit","tier":8,"base_value":680000,"formation_value":7.2,"nature":"neutral","relation_overrides":{"metal":0.5,"wood":0.5,"water":0.5,"fire":0.5,"earth":0.5},"field_hook":null},
+
+    {"id":"celestial_sun_law_crystal","name":"日律仙晶","world":"celestial","tier":9,"base_value":9200000,"formation_value":8.2,"nature":"yang","relation_overrides":{"law":0.75},"field_hook":null},
+    {"id":"celestial_constellation_axis","name":"天宿星轴","world":"celestial","tier":10,"base_value":72000000,"formation_value":9.2,"nature":"star","relation_overrides":{"space":0.75},"field_hook":"forbidden_air"},
+    {"id":"celestial_silence_edict","name":"寂识天敕","world":"celestial","tier":11,"base_value":460000000,"formation_value":10.2,"nature":"law","relation_overrides":{"soul":-0.75},"field_hook":"forbidden_sense"},
+
+    {"id":"demon_blood_array_copper","name":"血阵魔铜","world":"demon","tier":2,"base_value":72,"formation_value":3.2,"nature":"metal","relation_overrides":{"soul":-0.5},"field_hook":null},
+    {"id":"demon_corpse_flame_lamp","name":"尸焰阵灯","world":"demon","tier":4,"base_value":1600,"formation_value":4.6,"nature":"fire","relation_overrides":{"yin":0.5},"field_hook":null},
+    {"id":"demon_nightmare_eye","name":"梦魇禁识眸","world":"demon","tier":5,"base_value":8800,"formation_value":5.3,"nature":"soul","relation_overrides":{"yang":-1.0},"field_hook":"forbidden_sense"},
+
+    {"id":"true_demon_abyss_anchor","name":"无间镇界锚","world":"true_demon","tier":6,"base_value":84000,"formation_value":6.1,"nature":"earth","relation_overrides":{"space":-0.75},"field_hook":"forbidden_air"},
+    {"id":"true_demon_eclipse_banner","name":"蚀日阵幡","world":"true_demon","tier":7,"base_value":290000,"formation_value":7.0,"nature":"yin","relation_overrides":{"yang":-1.2},"field_hook":null},
+    {"id":"true_demon_extinction_brand","name":"寂灭魔律印","world":"true_demon","tier":8,"base_value":1050000,"formation_value":7.8,"nature":"law","relation_overrides":{"star":-0.75},"field_hook":"forbidden_sense"},
+
+    {"id":"asura_war_thunder_drum","name":"修罗战雷鼓","world":"asura","tier":9,"base_value":10800000,"formation_value":8.6,"nature":"thunder","relation_overrides":{"fire":0.75},"field_hook":null},
+    {"id":"asura_severing_pillar","name":"断空血柱","world":"asura","tier":11,"base_value":510000000,"formation_value":10.5,"nature":"space","relation_overrides":{"law":-0.75},"field_hook":"forbidden_air"},
+
+    {"id":"phantom_moonbone_token","name":"月骨阵筹","world":"phantom_underworld","tier":5,"base_value":9200,"formation_value":5.2,"nature":"yin","relation_overrides":{"soul":0.75},"field_hook":null},
+    {"id":"phantom_ancestral_vine_knot","name":"祖藤灵结","world":"phantom_underworld","tier":6,"base_value":61000,"formation_value":6.0,"nature":"wood","relation_overrides":{"water":0.75},"field_hook":null},
+    {"id":"phantom_mirage_prism","name":"幻冥折空棱","world":"phantom_underworld","tier":8,"base_value":980000,"formation_value":7.7,"nature":"space","relation_overrides":{"wind":0.75},"field_hook":"forbidden_air"},
+
+    {"id":"nether_worldtree_stake","name":"界树祖阵桩","world":"nether","tier":9,"base_value":9800000,"formation_value":8.5,"nature":"wood","relation_overrides":{"law":0.5},"field_hook":null},
+    {"id":"nether_primordial_starbone","name":"太初星骨枢","world":"nether","tier":10,"base_value":86000000,"formation_value":9.6,"nature":"star","relation_overrides":{"soul":0.5},"field_hook":null},
+    {"id":"nether_world_sealing_law","name":"封界幽律碑","world":"nether","tier":11,"base_value":540000000,"formation_value":10.7,"nature":"law","relation_overrides":{"space":-1.0},"field_hook":"forbidden_air"},
+
+    {"id":"hell_forgetful_river_stone","name":"忘川镇魂石","world":"hell","tier":3,"base_value":460,"formation_value":3.8,"nature":"water","relation_overrides":{"soul":0.5},"field_hook":null},
+    {"id":"hell_soul_chain_node","name":"锁魂链枢","world":"hell","tier":5,"base_value":8200,"formation_value":5.5,"nature":"soul","relation_overrides":{"yang":-0.75},"field_hook":"forbidden_sense"},
+    {"id":"hell_karmic_fire_beacon","name":"业火阵烽","world":"hell","tier":6,"base_value":92000,"formation_value":6.3,"nature":"fire","relation_overrides":{"yin":-0.75},"field_hook":null},
+
+    {"id":"reincarnation_other_shore_petal","name":"彼岸轮生瓣","world":"reincarnation","tier":9,"base_value":11600000,"formation_value":8.7,"nature":"soul","relation_overrides":{"water":0.75},"field_hook":null},
+    {"id":"reincarnation_wheel_spoke","name":"轮回道轮辐","world":"reincarnation","tier":10,"base_value":90000000,"formation_value":9.8,"nature":"law","relation_overrides":{"star":0.75},"field_hook":null},
+    {"id":"reincarnation_six_paths_gate","name":"六道封识门","world":"reincarnation","tier":11,"base_value":580000000,"formation_value":10.9,"nature":"space","relation_overrides":{"soul":-0.75},"field_hook":"forbidden_sense"}
+  ],
+  "crafting_materials": [
+    {"id":"shared_spirit_bitter_bamboo","name":"苦寒天竹","crafting_material_id":"spirit_bitter_bamboo","formation_value":6.2,"nature":"wood","relation_overrides":{"yin":0.5},"field_hook":null},
+    {"id":"shared_spirit_star_gold","name":"星髓道金","crafting_material_id":"spirit_star_gold","formation_value":6.6,"nature":"metal","relation_overrides":{"star":0.75},"field_hook":null},
+    {"id":"shared_reincarnation_wheel_gold","name":"轮回道金","crafting_material_id":"reincarnation_wheel_gold","formation_value":9.4,"nature":"law","relation_overrides":{"soul":0.5},"field_hook":null}
+  ],
+  "inventory_items": [
+    {"id":"legacy_formation_plate","name":"玄罡阵盘","item_id":"formation_plate","formation_value":3.4,"nature":"earth","relation_overrides":{},"field_hook":null},
+    {"id":"legacy_celestial_star_array","name":"周天星斗盘","item_id":"celestial_star_array","formation_value":8.8,"nature":"star","relation_overrides":{"space":0.75},"field_hook":null}
+  ],
+  "spirit_plants": [
+    {"id":"shared_golden_thunder_bamboo","name":"雷音竹","plant_id":"golden_thunder_bamboo","formation_value":6.0,"nature":"thunder","relation_overrides":{"wood":0.75},"field_hook":null},
+    {"id":"shared_mystic_heaven_vine","name":"枯荣藤","plant_id":"mystic_heaven_vine","formation_value":5.8,"nature":"wood","relation_overrides":{"water":0.75},"field_hook":null}
+  ]
+}

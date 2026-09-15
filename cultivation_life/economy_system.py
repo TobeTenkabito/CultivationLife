@@ -118,6 +118,9 @@ class EconomySystemMixin:
         self._append_crafting_market_offers(
             game, rng, offers, tier=tier, market_name=market_name, location_id=location_id,
         )
+        self._append_formation_market_offers(
+            game, rng, offers, tier=tier, market_name=market_name, location_id=location_id,
+        )
         game.market_realm_index = tier
         game.market_world = player.world
         game.market_location_id = location_id
@@ -133,6 +136,7 @@ class EconomySystemMixin:
         location_id = self.maps.normalize_location(player.world, player.location_id)
         offers = []
         crafting_offers = []
+        formation_offers = []
         for offer in game.market_offers:
             if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
                 continue
@@ -147,6 +151,8 @@ class EconomySystemMixin:
             )
             if offer.get("kind") == "crafting_material":
                 crafting_offers.append(shown)
+            elif offer.get("kind") == "formation_material":
+                formation_offers.append(shown)
             else:
                 offers.append(shown)
         location_name = self.maps.location(player.world, location_id)["name"]
@@ -155,6 +161,7 @@ class EconomySystemMixin:
             "realm_index":self._market_tier(player), "world":player.world,
             "location_id":location_id, "location_name":location_name,
             "spirit_stones":stones, "offers":offers, "crafting_material_offers":crafting_offers,
+            "formation_material_offers":formation_offers,
             "sellable_plants":[
                 {"id":item.id, "name":item.name, "quantity":item.quantity,
                  "price":max(1, round(int(self._plant_item_value(item) or 0) * float(self._spirit_field_rules()["market_sell_ratio"]))) }

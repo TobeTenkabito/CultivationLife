@@ -73,6 +73,9 @@ from .war_system import WarSystemMixin
 from .heavenly_court_system import HeavenlyCourtSystemMixin
 from .natal_artifact_system import NatalArtifactSystemMixin
 from .crafting_system import CraftingSystemMixin, crafted_artifact_bonuses, crafted_combat_effects
+from .formation_system import (
+    FormationSystemMixin, active_formation_profile, formation_battle_experience_gain,
+)
 from .monster_bloodline_system import (
     MonsterBloodlineSystemMixin, bloodline_content_available,
     ensure_monster_bloodline_state, initialize_monster_bloodline,
@@ -122,7 +125,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -1671,6 +1674,8 @@ class GameEngine(CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMi
             raise ValueError(f"需要 {price} 枚下品灵石")
         if offer["kind"] == "crafting_material":
             summary = self._buy_crafting_material_offer(game, offer, price)
+        elif offer["kind"] == "formation_material":
+            summary = self._buy_formation_material_offer(game, offer, price)
         elif offer["kind"] == "item":
             add_item(game.player, offer["content_id"])
             summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得{offer['name']}。"
@@ -6120,6 +6125,15 @@ class GameEngine(CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMi
             current_mp_ratio=player.mp / max(1.0, mp_max),
             battlefield_tags=self._combat_battlefield_tags(game, target),
         )
+        formation_gain = formation_battle_experience_gain(
+            active_formation_profile(player), len(resolution.rounds), ratio,
+        )
+        if formation_gain > 0:
+            self._grant_art_experience(player, "formation", formation_gain)
+            # Formation experience changes long-range attenuation. Rebuild the
+            # cached matrix on the next read, never in the middle of this fight.
+            player.formation_profile_cache = {}
+            resolution.formation_experience_gain = formation_gain
         loss_scale = max(0.0, float(target.get("loss_scale", 1.0)))
         hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
         mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
@@ -7591,6 +7605,7 @@ class GameEngine(CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMi
             "heavenly_court": self._public_heavenly_court(game),
             "natal_artifact": self._public_natal_artifact(game),
             "crafting_system": self._public_crafting_system(game),
+            "formation_system": self._public_formation_system(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),
