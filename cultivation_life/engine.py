@@ -1771,6 +1771,96 @@ class GameEngine(FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, Mo
         self.store.save(game)
         return self.present(game)
 
+    def batch_absorb_transformation_material(
+        self, game_id: str, item_id: str, mode: str = "direct", stat_id: str = "",
+    ) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        if player.path == "monster":
+            raise ValueError("妖修不能炼化真灵素材进行变身；请通过血脉进化强化本体")
+        if game.pending_event or not player.alive or player.imprisonment:
+            raise ValueError("当前状态无法炼化真灵素材")
+        if mode not in {"direct", "purified"}:
+            raise ValueError("未知的一键培养方式")
+        item = next((entry for entry in player.inventory if entry.id == item_id and entry.quantity > 0), None)
+        if not item or item.transformation_form_id not in TRANSFORMATION_CATALOG or item.transformation_purity <= 0:
+            raise ValueError("行囊中没有可炼化的真灵素材")
+        if mode == "purified" and item.quantity < 2:
+            raise ValueError("一键合炼至少需要两份相同的真灵素材")
+        form_id = str(item.transformation_form_id)
+        ensure_transformation_state(player)
+        progress = form_stat_progress(player, form_id)
+        if stat_id not in progress:
+            stat_id = min(progress, key=progress.get)
+        current = progress[stat_id]
+        if current >= 1 - 1e-9:
+            raise ValueError("所选变身属性已经圆满，请改选其他属性")
+
+        available = int(item.quantity)
+        remaining = available
+        consumed = 0
+        pair_count = 0
+        single_count = 0
+        improved = current
+        pair_bonus_active = mode == "purified" and available > 2
+        direct_gain = absorption_gain(float(item.transformation_purity), False)
+        pair_gain = absorption_gain(float(item.transformation_purity), True)
+        if pair_bonus_active:
+            pair_gain *= 1.30
+
+        if mode == "purified":
+            while remaining >= 2 and improved < 1 - 1e-9:
+                improved = min(1.0, improved + pair_gain)
+                remaining -= 2
+                consumed += 2
+                pair_count += 1
+            if remaining and improved < 1 - 1e-9:
+                improved = min(1.0, improved + direct_gain)
+                remaining -= 1
+                consumed += 1
+                single_count += 1
+        else:
+            while remaining and improved < 1 - 1e-9:
+                improved = min(1.0, improved + direct_gain)
+                remaining -= 1
+                consumed += 1
+                single_count += 1
+
+        if consumed <= 0 or not remove_item(player, item_id, consumed):
+            raise ValueError("真灵素材数量不足")
+        form = TRANSFORMATION_CATALOG[form_id]
+        progress[stat_id] = improved
+        mastery = player.transformation_mastery.setdefault(form_id, {})
+        mastery.update({
+            "stats": {key: round(value, 8) for key, value in progress.items()},
+            "purity": round(sum(progress.values()) / len(progress), 8),
+            "material_id": item_id,
+            "source_type": f"批量合炼{item.transformation_source}" if mode == "purified" else f"批量炼化{item.transformation_source}",
+        })
+        if form_id not in player.known_transformations:
+            player.known_transformations.append(form_id)
+        ensure_transformation_state(player)
+        stat_name = {"might":"威能", "guard":"防护", "mobility":"身法", "sense":"神识", "sustain":"续航", "breach":"破法"}[stat_id]
+        process = (
+            f"合炼 {pair_count} 组" + ("（每组额外提升 30%）" if pair_bonus_active else "")
+            + (f"，并炼化余下 {single_count} 份" if single_count else "")
+            if mode == "purified" else f"连续炼化 {single_count} 份"
+        )
+        game.history.append(HistoryRecord(
+            "SYS_TRANSFORMATION_MATERIAL_BATCH", 1, player.age, "一键培养精魄", item_id,
+            "batch_purified" if mode == "purified" else "batch_absorbed",
+            f"你以{item.name}{process}，将{form.name}的{stat_name}圆满度由 {current:.2%} 提升至 {improved:.2%}。",
+            {
+                "form_id":form_id, "stat_id":stat_id, "old_progress":current,
+                "new_progress":improved, "quantity":-consumed, "pairs":pair_count,
+                "singles":single_count, "pair_bonus":0.30 if pair_bonus_active else 0.0,
+            },
+            ["system", "transformation", "true_spirit", "batch"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
     def update_setting(self, game_id: str, setting: str, enabled: bool) -> dict[str, Any]:
         game = self._load(game_id)
         if setting not in {"combat_popup", "achievement_popup", "auto_advance_player_wars"}:

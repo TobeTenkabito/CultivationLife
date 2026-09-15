@@ -3,11 +3,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.content_registry import TECHNIQUE_CATALOG
+from cultivation_life.content_registry import MARKET_GOODS, TECHNIQUE_CATALOG
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, assign_technique, learn_technique
 from cultivation_life.transformation_system import (
-    active_transformation_profile, form_potency, normalized_transformation_weights,
+    BATCH_PAIR_BONUS, absorption_gain, active_transformation_profile, form_potency,
+    normalized_transformation_weights,
 )
 from cultivation_life.content_registry import TRANSFORMATION_CATALOG
 from cultivation_life.combat_traits import COMBAT_TRAIT_REGISTRY
@@ -113,6 +114,69 @@ class TransformationSystemTests(unittest.TestCase):
         self.assertAlmostEqual(mastery["stats"]["guard"], 0.036432)
         self.assertAlmostEqual(mastery["purity"], 0.006072)
         self.assertGreater(0.036432, 2 * 0.02 * 0.45)
+
+    def test_transformation_manual_progression_covers_upper_and_demonic_worlds(self):
+        transformation_ids = {
+            technique_id for technique_id, technique in TECHNIQUE_CATALOG.items()
+            if technique.category == "transformation"
+        }
+        self.assertEqual(len(transformation_ids), 11)
+        market_rows = [
+            row for row in MARKET_GOODS
+            if row["kind"] == "technique" and row["content_id"] in transformation_ids
+        ]
+        self.assertTrue({"human", "spirit", "demon", "true_demon"}.issubset({row["world"] for row in market_rows}))
+        self.assertTrue(all(int(row["tier"]) >= 4 for row in market_rows))
+        self.assertEqual(TECHNIQUE_CATALOG["TECH_PRIMORDIAL_DEMON_TRANSFORMATION"].transformation_capacity, 10)
+        self.assertEqual(TECHNIQUE_CATALOG["TECH_PRIMORDIAL_DEMON_TRANSFORMATION"].transformation_space, 5)
+        for technique_id in transformation_ids:
+            technique = TECHNIQUE_CATALOG[technique_id]
+            self.assertLessEqual(technique.transformation_space, technique.transformation_capacity)
+
+    def test_batch_purification_uses_thirty_percent_pair_bonus_and_odd_tail(self):
+        game = self.engine.store.load(self.created["id"])
+        game.player.transformation_mastery.pop("FORM_MOUNTAIN_APE", None)
+        game.player.known_transformations.remove("FORM_MOUNTAIN_APE")
+        game.player.inventory = [item for item in game.player.inventory if item.id != "mountain_ape_soul"]
+        add_item(game.player, "mountain_ape_blood", 5)
+        self.engine.store.save(game)
+
+        shown = self.engine.batch_absorb_transformation_material(
+            self.created["id"], "mountain_ape_blood", "purified", "guard",
+        )
+        standard_pair = absorption_gain(0.02, True)
+        expected = standard_pair * (1 + BATCH_PAIR_BONUS) * 2 + absorption_gain(0.02)
+        form = next(entry for entry in shown["transformation_system"]["known"] if entry["id"] == "FORM_MOUNTAIN_APE")
+        guard = next(stat for stat in form["stats"] if stat["id"] == "guard")
+        self.assertAlmostEqual(guard["progress"], expected, places=6)
+        reloaded = self.engine.store.load(self.created["id"])
+        self.assertFalse(any(item.id == "mountain_ape_blood" for item in reloaded.player.inventory))
+        record = reloaded.history[-1]
+        self.assertEqual(record.event_id, "SYS_TRANSFORMATION_MATERIAL_BATCH")
+        self.assertEqual(record.state_diff["pairs"], 2)
+        self.assertEqual(record.state_diff["singles"], 1)
+        self.assertEqual(record.state_diff["pair_bonus"], 0.30)
+
+    def test_batch_absorption_stops_as_soon_as_selected_stat_is_full(self):
+        game = self.engine.store.load(self.created["id"])
+        stats = game.player.transformation_mastery["FORM_PHOENIX"]["stats"]
+        stats["might"] = 0.9999
+        add_item(game.player, "phoenix_blood", 10)
+        self.engine.store.save(game)
+
+        shown = self.engine.batch_absorb_transformation_material(
+            self.created["id"], "phoenix_blood", "direct", "might",
+        )
+        form = next(
+            entry for entry in [*shown["transformation_system"]["known"], *shown["transformation_system"]["stored"]]
+            if entry["id"] == "FORM_PHOENIX"
+        )
+        might = next(stat for stat in form["stats"] if stat["id"] == "might")
+        self.assertEqual(might["progress"], 1.0)
+        reloaded = self.engine.store.load(self.created["id"])
+        remaining = next(item.quantity for item in reloaded.player.inventory if item.id == "phoenix_blood")
+        self.assertEqual(remaining, 9)
+        self.assertEqual(reloaded.history[-1].state_diff["quantity"], -1)
 
 
 if __name__ == "__main__":
