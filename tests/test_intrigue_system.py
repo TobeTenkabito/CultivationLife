@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from cultivation_life.content_registry import WORLD_SYSTEMS
+from cultivation_life.content_registry import ROOT_DEFINITIONS, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
 
 
@@ -100,6 +100,58 @@ def test_founder_control_does_not_bypass_decision_realm(tmp_path: Path) -> None:
     assert section["decision_authority"] is False
     with pytest.raises(ValueError, match="决策权"):
         engine.intrigue_propose_resolution(created["id"], "sect", "investment", "", True)
+
+
+def test_filtered_disciple_recruitment_votes_then_lets_player_choose(
+    intrigue_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = intrigue_game
+    proposed = engine.intrigue_recruitment_action(game_id, "propose", {
+        "spirit_root": "any", "realm_index": "any", "path": "any",
+        "combat": "any", "gender": "any",
+    })
+    section = _sect_section(proposed)
+    pending = section["disciple_recruitment"]["pending"]
+    assert proposed["intrigue_system"]["resolutions"][0]["type"] == "disciple_recruitment"
+    assert proposed["intrigue_system"]["resolutions"][0]["result"] == "passed"
+    assert 0 <= len(pending["candidates"]) <= 5
+    assert all(row["realm_index"] < section["decision_threshold"] for row in pending["candidates"])
+
+    chosen = [row["id"] for row in pending["candidates"][:2]]
+    before = len(section["members"])
+    confirmed = engine.intrigue_recruitment_action(game_id, "confirm", candidate_ids=chosen)
+    after = _sect_section(confirmed)
+    assert len(after["members"]) == before + len(chosen)
+    assert after["disciple_recruitment"]["pending"] is None
+    assert set(chosen).issubset({row["id"] for row in after["members"]})
+
+
+def test_disciple_filters_reject_decision_realm_and_enforce_strict_matches(
+    intrigue_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = intrigue_game
+    with pytest.raises(ValueError, match="决策权"):
+        engine.intrigue_recruitment_action(game_id, "propose", {
+            "spirit_root": "any", "realm_index": "4", "path": "any",
+            "combat": "any", "gender": "any",
+        })
+
+    shown = engine.intrigue_recruitment_action(game_id, "propose", {
+        "spirit_root": "heavenly", "realm_index": "3", "path": "ghost",
+        "combat": "prodigy", "gender": "female",
+    })
+    pending = _sect_section(shown)["disciple_recruitment"]["pending"]
+    assert len(pending["candidates"]) <= 5
+    if not pending["candidates"]:
+        assert "要求太苛刻" in pending["message"]
+    for row in pending["candidates"]:
+        assert row["realm_index"] == 3
+        assert row["path"] == "ghost"
+        assert row["gender"] == "female"
+        assert row["combat_ratio"] >= 1.25
+        assert ROOT_DEFINITIONS[row["spirit_root"]]["tier"] == "天灵根"
+    closed = engine.intrigue_recruitment_action(game_id, "confirm", candidate_ids=[])
+    assert _sect_section(closed)["disciple_recruitment"]["pending"] is None
 
 
 def test_wanted_sentence_uses_real_faction_prison_and_limited_actions(intrigue_game: tuple[GameEngine, str]) -> None:

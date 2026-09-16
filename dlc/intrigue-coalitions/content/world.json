@@ -8,6 +8,17 @@
         "family": 3,
         "race": 8
       },
+      "disciple_recruitment": {
+        "max_candidates": 5,
+        "applicant_pool": [6, 12],
+        "appearance_chance": 0.78,
+        "combat_filters": {
+          "any": {"name": "不筛选", "minimum_ratio": 0.0},
+          "qualified": {"name": "同境合格（基准 70%）", "minimum_ratio": 0.7},
+          "elite": {"name": "同境精锐（基准 100%）", "minimum_ratio": 1.0},
+          "prodigy": {"name": "同境翘楚（基准 125%）", "minimum_ratio": 1.25}
+        }
+      },
       "positions": {
         "sect": {
           "leader": {"name": "宗主 / 掌门", "minimum_realm": 1, "duty": "最高行政与控制顺位"},

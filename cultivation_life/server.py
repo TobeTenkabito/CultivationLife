@@ -395,6 +395,11 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("kind", ""), payload.get("resolution_type", ""),
                     payload.get("target_id", ""), bool(payload.get("player_vote", True)),
                 )
+            elif operation == "intrigue-recruitment":
+                result = ENGINE.intrigue_recruitment_action(
+                    game_id, payload.get("action", ""), payload.get("filters"),
+                    payload.get("candidate_ids"), bool(payload.get("player_vote", True)),
+                )
             elif operation == "breakthrough":
                 result = ENGINE.breakthrough(game_id)
             elif operation == "monster-evolve":

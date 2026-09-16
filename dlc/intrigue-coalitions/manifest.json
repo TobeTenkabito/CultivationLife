@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.intrigue-coalitions",
   "name": "明争暗斗：合纵连横",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 120,
   "requires": [],
-  "description": "NPC 性格与执政倾向、职位和一人一票决议、客卿防务、势力人事赏罚及宗门家族监狱。"
+  "description": "NPC 性格与执政倾向、职位和一人一票决议、筛选扩招弟子、客卿防务、势力人事赏罚及宗门家族监狱。"
 }

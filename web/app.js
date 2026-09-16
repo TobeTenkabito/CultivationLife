@@ -1090,10 +1090,38 @@ function renderIntrigue(system) {
       guests.appendChild(guestList); block.appendChild(guests);
     }
 
+    if (section.kind === 'sect' && section.disciple_recruitment) {
+      const recruitment=section.disciple_recruitment, area=document.createElement('section');area.className='intrigue-recruitment';
+      const heading=document.createElement('h4');heading.textContent='内政决议 · 扩招徒弟';area.appendChild(heading);
+      if (recruitment.pending) {
+        const note=document.createElement('p');note.className='muted';note.textContent=`${recruitment.pending.filter_summary}。${recruitment.pending.message}`;area.appendChild(note);
+        const list=document.createElement('div');list.className='intrigue-recruitment-candidates';
+        (recruitment.pending.candidates||[]).forEach(candidate=>{
+          const label=document.createElement('label'),check=document.createElement('input'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small');
+          label.className='intrigue-recruitment-candidate';check.type='checkbox';check.value=candidate.id;check.disabled=locked();name.textContent=`${candidate.name} · ${candidate.realm_name} · ${candidate.gender_name}`;
+          detail.textContent=`${candidate.spirit_root_name} · ${candidate.path_name} · 战力 ${number(candidate.combat_power)}（同境基准 ${Math.round(candidate.combat_ratio*100)}%） · ${candidate.age}岁${candidate.lifespan?` / 寿元 ${candidate.lifespan}`:' / 寿元无尽'}`;
+          text.append(name,detail);label.append(check,text);list.appendChild(label);
+        });
+        if (!(recruitment.pending.candidates||[]).length) { const empty=document.createElement('p');empty.className='empty';empty.textContent='宗门要求太苛刻，暂无散修符合。';list.appendChild(empty); }
+        const confirm=document.createElement('button');confirm.className='primary';confirm.textContent=(recruitment.pending.candidates||[]).length?'录取所选弟子':'结束本次招募';confirm.disabled=locked();confirm.onclick=()=>{
+          const ids=[...list.querySelectorAll('input[type="checkbox"]:checked')].map(node=>node.value);
+          mutate(`/api/games/${game.id}/intrigue-recruitment`,{action:'confirm',candidate_ids:ids});
+        };area.append(list,confirm);
+      } else {
+        const note=document.createElement('p');note.className='muted';note.textContent=`决议通过后最多出现 ${recruitment.max_candidates} 名候选散修；条件越苛刻，越可能招不满或无人符合。战力筛选按候选人的自身境界基准计算。`;area.appendChild(note);
+        const form=document.createElement('form');form.className='intrigue-recruitment-form';
+        const makeSelect=(label,rows)=>{const wrap=document.createElement('label'),span=document.createElement('span'),select=document.createElement('select');span.textContent=label;(rows||[]).forEach(row=>{const option=document.createElement('option');option.value=row.id;option.textContent=row.name;select.appendChild(option);});wrap.append(span,select);form.appendChild(wrap);return select;};
+        const root=makeSelect('灵根筛选',recruitment.spirit_root_options),realm=makeSelect('修为筛选',recruitment.realm_options),path=makeSelect('修炼功法',recruitment.path_options),combat=makeSelect('战斗力筛选',recruitment.combat_options),gender=makeSelect('性别筛选',recruitment.gender_options);
+        const submit=document.createElement('button');submit.type='submit';submit.className='primary';submit.textContent='提交扩招决议';submit.disabled=locked()||!recruitment.available;
+        form.onsubmit=event=>{event.preventDefault();mutate(`/api/games/${game.id}/intrigue-recruitment`,{action:'propose',player_vote:true,filters:{spirit_root:root.value,realm_index:realm.value,path:path.value,combat:combat.value,gender:gender.value}});};form.appendChild(submit);area.appendChild(form);
+      }
+      block.appendChild(area);
+    }
+
     const vote = document.createElement('form'); vote.className = 'intrigue-resolution-form';
     const voteTitle = document.createElement('b'); voteTitle.textContent = '发起重大决议';
     const type = document.createElement('select');
-    Object.entries(system.resolution_types || {}).filter(([id]) => section.kind !== 'family' || ['mass_recruitment','relocate','investment','policy'].includes(id)).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    Object.entries(system.resolution_types || {}).filter(([id]) => id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','relocate','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
     const target = document.createElement('select');
     const playerChoice = document.createElement('select'); [['1','投赞成票'],['0','投反对票']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;playerChoice.appendChild(option);});
     const refreshTargets = () => {

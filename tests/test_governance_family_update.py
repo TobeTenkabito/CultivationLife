@@ -142,6 +142,22 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         self.assertTrue(sect.extinct)
         self.assertIsNone(game.player.faction_id)
 
+    def test_new_faction_followers_keep_safe_remaining_lifespan(self):
+        created = self.engine.create_game("迟暮开宗", "supreme_metal", "dao", 1904)
+        game = self.engine.store.load(created["id"])
+        game.player.realm_index = 4
+        game.player.layer = 1
+        game.player.age = 980
+        self.engine.store.save(game)
+        founded = self.engine.create_faction(created["id"], "长青门")
+        game = self.engine.store.load(created["id"])
+        followers = game.sects[founded["faction"]["id"]].npcs
+        self.assertTrue(followers)
+        for npc in followers:
+            self.assertEqual(npc.realm_index, 3)
+            self.assertIsNotNone(npc.lifespan)
+            self.assertGreaterEqual(npc.lifespan - npc.age, int(npc.lifespan * 0.25))
+
     def test_weak_player_sect_requires_three_failed_defense_events(self):
         created = self.engine.create_game("三守山门", "supreme_metal", "dao", 916, preset_id="core")
         self.engine.create_faction(created["id"], "三守门")
