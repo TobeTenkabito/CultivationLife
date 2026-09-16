@@ -59,6 +59,41 @@ class PlayerCombatSystemTests(unittest.TestCase):
         )
         self.assertIsNone(game.pending_event)
 
+    def test_overwhelming_lethal_enemy_makes_retreat_plan_fail_certainly(self):
+        game = self._game()
+        own = self.engine._player_battle_power(game)
+        result, summary = self.engine._combat(game, {
+            "target_name": "碾压强敌", "target_power": own * 4,
+            "target_realm_index": game.player.realm_index,
+            "target_layer": game.player.layer, "combat_type": "cultivator",
+            "path": "dao", "enemy_objective": "kill",
+        }, True, random.Random(17))
+
+        self.assertEqual(result, "dead")
+        self.assertFalse(game.player.alive)
+        self.assertTrue(game.last_combat_report["retreat_impossible"])
+        self.assertEqual(game.last_combat_report["result_grade"], "溃败")
+        self.assertIn("保命预案必定失败", summary)
+        self.assertTrue(any(
+            "逃脱预案必定失败" in event
+            for event in game.last_combat_report["key_events"]
+        ))
+
+    def test_overwhelming_nonlethal_spar_does_not_kill_player(self):
+        game = self._game()
+        own = self.engine._player_battle_power(game)
+        result, summary = self.engine._combat(game, {
+            "target_name": "点到即止的前辈", "target_power": own * 4,
+            "target_realm_index": game.player.realm_index,
+            "target_layer": game.player.layer, "combat_type": "cultivator",
+            "path": "dao", "enemy_objective": "test",
+        }, False, random.Random(17))
+
+        self.assertEqual(result, "defeat")
+        self.assertTrue(game.player.alive)
+        self.assertFalse(game.last_combat_report["retreat_impossible"])
+        self.assertIn("无人伤及性命", summary)
+
     def test_true_dragon_forces_first_two_rounds_and_suppresses_equal_realm_morale(self):
         game = self._game()
         assign_technique(game.player, copy.deepcopy(TECHNIQUE_CATALOG["TECH_BEAST_TRANSFORMATION"]), "transformation")
