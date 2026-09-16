@@ -1157,7 +1157,10 @@ class WarSystemMixin:
 
     def _public_war_system(self, game: GameState) -> dict[str, Any]:
         wars = []
-        visible_wars = [war for war in game.wars if war.get("world") == game.player.world]
+        visible_wars = [
+            war for war in game.wars
+            if game.debug_world_news or war.get("world") == game.player.world
+        ]
         for war in reversed(visible_wars[-20:]):
             self._ensure_war_shape(game, war)
             public = copy.deepcopy(war)

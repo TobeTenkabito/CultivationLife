@@ -106,6 +106,11 @@ class MapTravelMixin:
             for _ in range(completed_units):
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
                 self._advance_concubine_aftermath(game, rng)
+                era_news.extend(self._advance_heavenly_court_unit(game, rng))
+                era_news.extend(self._advance_intrigue_unit(game, rng))
+            artifact_news = self._advance_natal_artifact(game, "travel", completed_units)
+            if artifact_news:
+                era_news.append(artifact_news)
             self._advance_concubine_status(game, completed_units)
             self._advance_player_bounties(game, rng)
             if elapsed >= 5:

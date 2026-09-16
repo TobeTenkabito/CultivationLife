@@ -453,7 +453,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         )
         self.assertEqual(result["ghost_system"]["erosion_time"]["time_unit_years"], 100)
 
-    def test_travel_field_reclaim_and_prison_years_all_apply_erosion(self):
+    def test_travel_and_prison_apply_erosion_but_instant_field_reclaim_does_not(self):
         travel = self.engine.create_game("远魂", "mutated_yin", "ghost", 906, start_world="hell")
         travel_game = self.engine.store.load(travel["id"])
         travel_years = self.engine.maps.travel_plan(
@@ -474,8 +474,8 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.engine.store.save(field_game)
         with patch.object(self.engine, "_advance_world_year", return_value=True):
             result = self.engine.reclaim_spirit_field(field_game.id)
-        self.assertGreater(result["player"]["age"], field_game.player.age)
-        self.assertGreater(self.engine.store.load(field_game.id).player.ghost_soul_erosion_rate_pp, 0)
+        self.assertEqual(result["player"]["age"], field_game.player.age)
+        self.assertEqual(self.engine.store.load(field_game.id).player.ghost_soul_erosion_rate_pp, 0)
 
         prison = self.engine.create_game(
             "狱魂", "mutated_yin", "ghost", 908, preset_id="ghost_core", start_world="hell",

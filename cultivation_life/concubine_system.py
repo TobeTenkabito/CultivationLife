@@ -478,6 +478,11 @@ class ConcubineSystemMixin:
             if not existing:
                 raise ValueError("侍妾名册中没有此人")
             name = str(existing.get("name", "无名修士"))
+            npc = self._find_npc(game, str(existing.get("npc_id", target_id)))
+            alive = bool(npc.alive) if npc else bool(existing.get("alive", True))
+            world = str(npc.world) if npc else str(existing.get("world", ""))
+            if action in {"cauldron", "corpse"} and (not alive or world != player.world):
+                raise ValueError("此人已经陨落或不在当前界面，无法处置")
             if action == "cauldron":
                 if existing.get("last_cauldron_unit") == game.diplomacy_unit:
                     raise ValueError("本行动单位已经以此人作过炉鼎")
@@ -537,7 +542,10 @@ class ConcubineSystemMixin:
         if not status or units <= 0:
             return 0.0
         owner = self._find_npc(game, str(status.get("owner_id", "")))
-        if owner and not owner.alive:
+        if owner and (not owner.alive or owner.world != game.player.world):
+            game.player.concubine_status = None
+            return 0.0
+        if not owner and str(status.get("owner_world", game.player.world)) != game.player.world:
             game.player.concubine_status = None
             return 0.0
         angered = int(status.get("angered_until_unit", -1)) >= game.diplomacy_unit
@@ -896,8 +904,25 @@ class ConcubineSystemMixin:
         rows = []
         for entry in game.player.concubines:
             row = copy.deepcopy(entry)
+            npc = self._find_npc(game, str(row.get("npc_id", row.get("id", ""))))
+            if npc:
+                row.update(
+                    realm_index=npc.realm_index, layer=npc.layer,
+                    realm_name=self._npc_realm_name(npc), age=npc.age,
+                    lifespan=npc.lifespan, spirit_root=npc.spirit_root,
+                    path=npc.path, path_name=PATH_NAMES.get(npc.path, npc.path),
+                    race=npc.race,
+                    race_name=RACE_DEFINITIONS.get(npc.race, {"name": npc.race})["name"],
+                    world=npc.world, alive=npc.alive, death_reason=npc.death_reason,
+                    combat_power=round(self._npc_power(npc), 1),
+                )
             row["gender_name"] = gender_name(str(row.get("gender", "female")))
-            row["can_use_cauldron"] = row.get("last_cauldron_unit") != game.diplomacy_unit
+            row["spirit_root_name"] = self._npc_root_name(str(row.get("spirit_root", "none")))
+            row["same_world"] = str(row.get("world", "")) == game.player.world
+            row["can_use_cauldron"] = bool(
+                row.get("alive", True) and row["same_world"]
+                and row.get("last_cauldron_unit") != game.diplomacy_unit
+            )
             rows.append(row)
         status = copy.deepcopy(game.player.concubine_status)
         if status:

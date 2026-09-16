@@ -503,18 +503,9 @@ class MonsterBloodlineSystemMixin:
                 ["system", "monster", "bloodline", "trait", "major", "milestone"],
             ))
         if old_realm_index == 8 and player.realm_index == 9:
-            self._cancel_auction_for_world_change(game)
+            self._prepare_permanent_world_transition(game)
             player.world = "nether"
             player.location_id = self.maps.default_location("nether")
-            player.faction_id = None
-            player.faction_join_age = None
-            player.faction_reward_preference = None
-            player.master = None
-            player.disciples = []
-            player.disciple_requests = []
-            player.relationship_attempts = []
-            player.party = []
-            player.fame = 0.0
             self._clear_market(game)
             game.history.append(HistoryRecord(
                 "SYS_MONSTER_NETHER_ASCENSION", 1, player.age, "飞升幽冥界", evolution_id, "ascended",

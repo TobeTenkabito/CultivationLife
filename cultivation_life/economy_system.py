@@ -252,7 +252,7 @@ class EconomySystemMixin:
 
     def toggle_market_offer_lock(self, game_id: str, offer_id: str) -> dict[str, Any]:
         game = self._load(game_id)
-        if game.pending_event or not game.player.alive:
+        if game.pending_event or not game.player.alive or game.player.imprisonment:
             raise ValueError("当前状态无法锁定坊市货物")
         location_id = self.maps.normalize_location(game.player.world, game.player.location_id)
         offer = next((entry for entry in game.market_offers if entry.get("id") == offer_id), None)
@@ -440,7 +440,7 @@ class EconomySystemMixin:
             "max_qing":int(rules["max_qing"]), "reclaimed_qing":reclaimed,
             "free_qing":max(0, reclaimed - len(plots)), "plots":plots, "seeds":seeds,
             "can_reclaim":reclaimed < int(rules["max_qing"]), "reclaim_cost":reclaim_cost,
-            "reclaim_years":int(rules["reclaim_years_per_qing"]) * next_qing,
+            "reclaim_years":0,
             "spirit_stones":self._spirit_stones(player), "mp":round(player.mp, 1),
             "max_mp":round(max_mp(player), 1),
             "irrigation_min_mp":round(max(1.0, max_mp(player) * float(rules["irrigation_min_mp_ratio"])), 1),
@@ -467,36 +467,15 @@ class EconomySystemMixin:
         cost = max(1, round(float(rules["reclaim_base_stones"]) * float(rules["reclaim_stone_growth"]) ** reclaimed))
         if not remove_item(player, "spirit_stone", cost):
             raise ValueError(f"开垦下一顷灵田需要 {cost} 枚下品灵石")
-        years = int(rules["reclaim_years_per_qing"]) * (reclaimed + 1)
-        rng = decode_rng(game.seed, game.rng_state)
-        start_age = player.age
-        era_news: list[str] = []
-        for _ in range(years):
-            advance_player_age(player)
-            continue_world = self._advance_world_year(game, rng, era_news, encounters=False)
-            if player.alive:
-                self._advance_soul_erosion_time(game, 1)
-            if not continue_world or not player.alive:
-                break
-        completed = player.alive and not game.pending_event and player.age - start_age == years
-        if completed:
-            player.spirit_field["reclaimed_qing"] = reclaimed + 1
-            self._grant_art_experience(player, "formation", 12 + 4 * reclaimed)
-        else:
-            add_item(player, "spirit_stone", cost)
-        summary = (
-            f"你耗费 {cost} 枚灵石与 {years} 年布置聚灵、沃土诸阵，开垦了第 {reclaimed + 1} 顷灵田。"
-            if completed else "开垦灵田被突发变故打断，预备灵石已经收回。"
-        )
+        player.spirit_field["reclaimed_qing"] = reclaimed + 1
+        self._grant_art_experience(player, "formation", 12 + 4 * reclaimed)
+        summary = f"你耗费 {cost} 枚灵石布置聚灵、沃土诸阵，立即开垦了第 {reclaimed + 1} 顷灵田。"
         game.history.append(HistoryRecord(
             "SYS_SPIRIT_FIELD_RECLAIM", 1, player.age, "开垦灵田", None,
-            "reclaimed" if completed else "interrupted", summary,
-            {"cost":-cost if completed else 0, "years":player.age - start_age}, ["system", "spirit_field"],
+            "reclaimed", summary,
+            {"cost":-cost, "years":0}, ["system", "spirit_field"],
         ))
-        if player.age > start_age and player.alive:
-            self._advance_auction_clock(game, rng)
         game.updated_at = now_iso()
-        game.rng_state = encode_rng(rng)
         self.store.save(game)
         return self.present(game)
 

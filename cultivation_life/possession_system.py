@@ -8,13 +8,15 @@ from .models import Player, Technique
 
 
 _BODY_FIELDS = (
-    "name", "spirit_root", "additional_roots", "acquired_root", "born_rootless",
+    "name", "gender", "spirit_root", "additional_roots", "acquired_root", "born_rootless",
     "realm_index", "layer", "lifespan", "opportunity",
     "qi_experience", "path", "race", "hp", "mp", "body_training", "body_progress",
     "technique", "support_technique", "combat_techniques", "known_techniques",
     "body_technique", "divine_sense_technique", "transformation_technique",
+    "known_transformations", "transformation_mastery", "transformation_loadouts",
     "divine_sense_rank", "divine_sense_experience", "awaiting_major_breakthrough",
-    "awaiting_minor_breakthrough", "active_breakthrough_aids", "breakthrough_pity",
+    "awaiting_minor_breakthrough", "awaiting_body_breakthrough",
+    "active_breakthrough_aids", "breakthrough_pity", "body_breakthrough_pity",
 )
 
 
@@ -141,6 +143,7 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         "realm_index": realm_index, "layer": layer,
     }
     player.name = f"{target_name}（{original_name}）"
+    player.gender = str(target.get("gender", "male"))
     player.spirit_root = str(target.get("spirit_root", "none"))
     player.additional_roots = list(target.get("additional_roots", []))
     player.acquired_root = bool(target.get("acquired_root", False))
@@ -167,10 +170,15 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     player.body_technique = None
     player.divine_sense_technique = None
     player.transformation_technique = None
+    player.known_transformations = []
+    player.transformation_mastery = {}
+    player.transformation_loadouts = {}
     player.awaiting_major_breakthrough = False
     player.awaiting_minor_breakthrough = False
+    player.awaiting_body_breakthrough = False
     player.active_breakthrough_aids = []
     player.breakthrough_pity = {}
+    player.body_breakthrough_pity = {}
     player.ghost_attachment = None
     player.ghost_captor = None
     player.possession_count += 1

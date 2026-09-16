@@ -757,6 +757,164 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             tail = tail["_followup_event"]
         tail["_followup_event"] = event
 
+    def _handover_faction_for_ascension(self, game: GameState) -> dict[str, Any] | None:
+        """Remove the player from a lower-world faction and leave a real NPC ruler."""
+        player = game.player
+        sect = game.sects.get(player.faction_id or "")
+        if not sect or sect.extinct:
+            return None
+        record = self._intrigue_state(game).get("factions", {}).get(self._intrigue_key("sect", sect.id), {})
+        controlled = bool(sect.founded_by_player or record.get("controller_id") == "player")
+        plan = self._intrigue_state(game).setdefault("succession_plans", {}).get(sect.id, {})
+        successor_id = str(plan.get("successor_id", "")) if plan.get("arranged") else ""
+        members = [npc for npc in self._sect_members(game, sect) if npc.alive and npc.world == sect.world]
+        successor = next((npc for npc in members if npc.id == successor_id), None)
+        if not successor:
+            successor = max(members, key=lambda npc: (npc.realm_index, npc.layer, -npc.age), default=None)
+        if controlled:
+            was_founder = bool(sect.founded_by_player and sect.founder_player_id == game.id)
+            arranged = bool(plan.get("arranged") and successor)
+            sect.founded_by_player = False
+            sect.founded_by_npc = bool(successor)
+            sect.founder_npc_id = successor.id if successor else None
+            # Only an explicitly arranged succession preserves the historical
+            # founder link required by the later 寻觅祖师 event.
+            sect.founder_player_id = game.id if was_founder and arranged else None
+            if record:
+                record["controller_id"] = successor.id if successor else None
+                positions = record.setdefault("positions", {})
+                if positions:
+                    leader = next(iter(self._intrigue_position_specs("sect")), "")
+                    if leader:
+                        positions[leader] = successor.id if successor else None
+            plan.update({
+                "arranged": arranged, "eligible_return": bool(was_founder and arranged),
+                "successor_id": successor.id if successor else None,
+                "origin_world": sect.world, "ascended_age": player.age,
+            })
+            self._intrigue_state(game).setdefault("succession_plans", {})[sect.id] = plan
+        return {
+            "sect_id": sect.id, "sect_name": sect.name, "controlled": controlled,
+            "arranged": bool(plan.get("arranged")),
+            "successor_name": successor.name if successor else None,
+        }
+
+    def _prepare_permanent_world_transition(
+        self, game: GameState, *, keep_companion: bool = False,
+        keep_friend_ids: set[str] | None = None,
+    ) -> dict[str, Any]:
+        """Apply the shared, irreversible cleanup required by every ascension."""
+        player = game.player
+        keep_friend_ids = keep_friend_ids or set()
+        handover = self._handover_faction_for_ascension(game)
+        removed = {
+            "puppets": len(player.puppets), "prisoners": len(player.prisoners),
+            "concubines": len(player.concubines),
+        }
+        player.puppets = []
+        player.prisoners = []
+        player.concubines = []
+        player.concubine_status = None
+        player.concubine_rejection_aftermath = []
+        player.master = None
+        player.disciples = []
+        player.disciple_requests = []
+        player.relationship_attempts = []
+        player.dao_friends = [
+            row for row in player.dao_friends if str(row.get("id")) in keep_friend_ids
+        ]
+        if not keep_companion:
+            player.dao_companion = None
+        player.joint_spirit_crossing = None
+        player.joint_friend_crossing = []
+        player.party = []
+        player.faction_id = None
+        player.faction_join_age = None
+        player.faction_contribution = 0
+        player.faction_reward_preference = None
+        player.allegiance_race = player.lineage_race or player.race
+        player.fame = 0.0
+        if player.imprisonment:
+            player.imprisonment = None
+            self._intrigue_sync_player_prison(game)
+        for record in self._intrigue_state(game).get("factions", {}).values():
+            record["guests"] = [
+                row for row in record.get("guests", []) if row.get("npc_id") != "player"
+            ]
+        self._intrigue_state(game)["pending_guest_invitation"] = None
+        self._cancel_auction_for_world_change(game)
+        return {"removed": removed, "faction_handover": handover}
+
+    def _resolve_selected_ascension_entourage(
+        self, game: GameState, destination: str, rng: random.Random,
+    ) -> tuple[bool, set[str], list[str], list[str]]:
+        """Resolve explicitly invited partner/friends before permanent cleanup."""
+        player = game.player
+        companion = player.dao_companion
+        companion_kept = bool(
+            companion and player.joint_spirit_crossing
+            and str(companion.get("id")) == str(player.joint_spirit_crossing.get("id"))
+            and not player.joint_spirit_crossing.get("declined")
+            and self._party_crossing_candidate(game, str(companion.get("id", "")))
+        )
+        if companion_kept and companion:
+            companion["world"] = destination
+            npc = self._find_npc(game, str(companion.get("id", "")))
+            if npc:
+                npc.world = destination
+                npc.departed_age = npc.age
+                npc.departure_reason = f"与{player.name}共同飞升{WORLD_SYSTEMS['world_names'][destination]}"
+        survivors: set[str] = set()
+        survivor_names: list[str] = []
+        fallen_names: list[str] = []
+        chance = float(WORLD_SYSTEMS["relationship"]["friend_crossing_survival_chance"])
+        selected = {str(row.get("id", "")) for row in player.joint_friend_crossing}
+        for npc_id in selected:
+            if not any(str(row.get("id")) == npc_id for row in player.party):
+                continue
+            candidate = self._party_crossing_candidate(game, npc_id)
+            friend = next((row for row in player.dao_friends if str(row.get("id")) == npc_id), None)
+            if not candidate or not friend:
+                continue
+            npc = self._find_npc(game, npc_id)
+            if rng.random() < chance:
+                friend["world"] = destination
+                survivors.add(npc_id)
+                survivor_names.append(str(friend.get("name", candidate["name"])))
+                if npc:
+                    npc.world = destination
+                    npc.departed_age = npc.age
+                    npc.departure_reason = f"与{player.name}共同飞升{WORLD_SYSTEMS['world_names'][destination]}"
+            else:
+                friend["alive"] = False
+                friend["death_reason"] = "飞升界壁时迷失于空间风暴"
+                fallen_names.append(str(friend.get("name", candidate["name"])))
+                if npc:
+                    npc.alive = False
+                    npc.death_reason = "飞升界壁时迷失于空间风暴"
+        return companion_kept, survivors, survivor_names, fallen_names
+
+    def _maybe_founder_return_event(self, game: GameState, rng: random.Random) -> bool:
+        if game.pending_event or game.player.faction_id:
+            return False
+        plans = self._intrigue_state(game).get("succession_plans", {})
+        candidates = [
+            (sect_id, plan) for sect_id, plan in plans.items()
+            if plan.get("eligible_return")
+            and (sect := game.sects.get(sect_id)) is not None
+            and not sect.extinct and sect.world == game.player.world
+            and sect.founder_player_id == game.id
+        ]
+        if not candidates or rng.random() >= 0.5:
+            return False
+        sect_id, _ = candidates[0]
+        sect = game.sects[sect_id]
+        event = self._instantiate_event(self.events_by_id["EVT_FOUNDER_RETURN_001"], game, rng)
+        event["body"] = str(event.get("body", "")).replace("{sect_name}", sect.name)
+        event["runtime"] = {"sect_id": sect.id, "sect_name": sect.name}
+        game.pending_event = event
+        return True
+
     def begin_spirit_crossing(self, game_id: str) -> dict[str, Any]:
         game = self._load(game_id)
         player = game.player
@@ -767,6 +925,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         if player.sealed_cultivation:
             raise ValueError("当前身处下界且真实道果处于封印中，只能重返原上界")
         if player.path == "demonic":
+            if player.imprisonment:
+                raise ValueError("服刑期间只能尝试人界偷渡，无法走魔界飞升通道")
             return self._complete_demonic_ascension(game)
         if player.world != "human":
             raise ValueError("你已经脱离人界")
@@ -783,8 +943,18 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             and int(companion.get("realm_index", -1)) == 5
             and int(companion.get("layer", 99)) <= 3
         )
+        companion_selected = bool(
+            can_cross_together
+            and (
+                player.joint_spirit_crossing is None
+                or (
+                    str(player.joint_spirit_crossing.get("id")) == str(companion.get("id"))
+                    and not player.joint_spirit_crossing.get("declined")
+                )
+            )
+        )
         player.joint_spirit_crossing = (
-            {"id": companion["id"], "name": companion["name"]} if can_cross_together else None
+            {"id": companion["id"], "name": companion["name"]} if companion_selected else None
         )
         selected_ids = {str(entry.get("id")) for entry in player.joint_friend_crossing}
         player.joint_friend_crossing = [
@@ -802,7 +972,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         game.history.append(HistoryRecord(
             "SYS_SPIRIT_CROSSING_BEGIN", 1, player.age, "破界之举", None, "started",
             f"你已锁定空间乱流，踏出后便再无回头路。偷渡{destination_name}的机会只有这一次。"
-            + (f" {companion['name']}与你同为化神初期，将与你共同闯过界壁。" if can_cross_together else "")
+            + (f" {companion['name']}接受了你的邀请，将与你共同闯过界壁。" if companion_selected else "")
             + (f" 你还邀上了{len(player.joint_friend_crossing)}位同境队友；他们没有道侣契约庇护，极可能陨落。" if player.joint_friend_crossing else ""),
             {"spirit_realm_attempted": [False, True]}, ["system", "ascension", "milestone"],
         ))
@@ -819,6 +989,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("此生已经结束")
         if game.pending_event or game.active_trial:
             raise ValueError("请先处理当前事件")
+        if player.imprisonment:
+            raise ValueError("身陷牢狱时无法渡劫飞升")
         if player.sealed_cultivation:
             raise ValueError("真实道果正受下界压制，不能在封印状态下飞升")
         if player.path not in {"dao", "buddhist", "confucian"}:
@@ -853,6 +1025,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("此生已经结束")
         if game.pending_event or game.active_trial:
             raise ValueError("请先处理当前事件")
+        if player.imprisonment:
+            raise ValueError("身陷牢狱时无法渡劫飞升")
         if player.sealed_cultivation:
             raise ValueError("真实道果正受下界压制，不能在封印状态下飞升")
         if player.path != "demonic":
@@ -902,29 +1076,30 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         origin = player.world
         old_fame = player.fame
         lost_puppets = len(player.puppets)
-        player.puppets = []
+        rng = decode_rng(game.seed, game.rng_state)
+        companion_kept, friend_ids, friend_names, fallen_names = self._resolve_selected_ascension_entourage(
+            game, destination, rng,
+        )
+        self._prepare_permanent_world_transition(
+            game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
+        )
         player.world = destination
         player.location_id = self.maps.default_location(destination)
         player.awaiting_ascension = False
         player.awaiting_spirit_realm_crossing = False
-        player.faction_id = None
-        player.faction_join_age = None
-        player.faction_reward_preference = None
-        player.master = None
-        player.disciples = []
-        player.disciple_requests = []
-        player.relationship_attempts = []
-        player.party = []
-        player.fame = 0.0
         self._clear_market(game)
-        rng = decode_rng(game.seed, game.rng_state)
         self._ensure_market(game, rng)
         origin_name = WORLD_SYSTEMS["world_names"][origin]
         destination_name = WORLD_SYSTEMS["world_names"][destination]
         puppet_text = f" 受界壁排斥，{lost_puppets}具傀儡全部遗失。" if lost_puppets else ""
+        entourage_text = (
+            (f" 道侣与你一同抵达。" if companion_kept else "")
+            + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")
+            + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else "")
+        )
         game.history.append(HistoryRecord(
             "SYS_DEMONIC_ASCENSION", 1, player.age, f"飞升{destination_name}", destination, "ascended",
-            f"你撕开{origin_name}界壁，降临{destination_name}。{puppet_text}",
+            f"你撕开{origin_name}界壁，降临{destination_name}。{puppet_text}{entourage_text}",
             {"world": [origin, destination], "lost_puppets": lost_puppets, "fame": [old_fame, 0]},
             ["system", "ascension", "demonic", "world:global"],
         ))
@@ -1029,6 +1204,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             ["system", "world_crossing", "world:global"],
         ))
         rng = decode_rng(game.seed, game.rng_state)
+        if descending:
+            self._maybe_founder_return_event(game, rng)
         self._ensure_market(game, rng)
         game.rng_state = encode_rng(rng)
         game.updated_at = now_iso()
@@ -1042,6 +1219,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("此生已经结束")
         if game.pending_event:
             raise ValueError("请先处理当前事件")
+        if player.imprisonment:
+            raise ValueError("身陷牢狱时无法正常突破")
         if player.sealed_cultivation:
             raise ValueError("当前修为受下界法则压制，不能在封印状态下突破")
         current = realm(player)
@@ -2060,6 +2239,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("只有加入宗门后才能直接向宗门 NPC 提出师徒请求")
         if role not in {"master", "disciple"}:
             raise ValueError("未知师徒关系类型")
+        if any(str(entry.get("id")) == npc_id for entry in player.concubines):
+            raise ValueError("侍妾不是道侣或师徒，必须先解除侍妾名分")
         sect = game.sects.get(player.faction_id)
         npc = next(
             (entry for entry in self._sect_members(game, sect) if entry.id == npc_id and entry.alive),
@@ -2270,6 +2451,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             npc = self._find_npc(game, npc_id) or self._promote_cached_npc(game, npc_id, "结为道侣")
             if not npc or not npc.alive or npc.world != player.world:
                 raise ValueError("此人当前无法回应结侣请求")
+            if any(str(entry.get("id")) == npc.id for entry in player.concubines):
+                raise ValueError("侍妾不是道侣，必须先解除侍妾名分")
             if player.master and player.master.get("id") == npc.id or any(entry.get("id") == npc.id for entry in player.disciples):
                 raise ValueError("已有师徒名分，不能再结为道侣")
             realm_gap = abs(npc.realm_index - player.realm_index)
@@ -2401,6 +2584,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             npc = self._find_npc(game, npc_id) or self._promote_cached_npc(game, npc_id, "结为道友")
             if not npc or not npc.alive or npc.world != player.world:
                 raise ValueError("此人当前无法回应")
+            if any(str(entry.get("id")) == npc.id for entry in player.concubines):
+                raise ValueError("已有侍妾名分，不能同时结为道友")
             if (player.dao_companion and player.dao_companion.get("id") == npc.id) or (player.master and player.master.get("id") == npc.id) or any(row.get("id") == npc.id for row in player.disciples):
                 raise ValueError("你们已经有更紧密的人际名分")
             required = float(WORLD_SYSTEMS["relationship"]["friend_affinity_required"])
@@ -2554,11 +2739,40 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         player.faction_id = None
         player.allegiance_race = player.lineage_race or player.race
         player.faction_join_age = None
+        player.faction_contribution = 0
         player.faction_reward_preference = None
         game.history.append(HistoryRecord(
             "SYS_PLAYER_LEAVE_FACTION",1,player.age,"退出宗门",old_id,"left",
             f"你退出{old_name}，与旧日同门的好感统一重置为中立，不会因退宗立即遭到寻仇。",
             {"faction_id":old_id,"affinity_reset":release_affinity},["system","faction","relationship"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def arrange_faction_succession(self, game_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        sect = game.sects.get(player.faction_id or "")
+        if game.pending_event or player.imprisonment:
+            raise ValueError("当前状态无法安排宗门后事")
+        if not sect or sect.extinct or not sect.founded_by_player or sect.founder_player_id != game.id:
+            raise ValueError("只有仍在执掌亲手创建宗门时才能安排让权")
+        members = [npc for npc in self._sect_members(game, sect) if npc.alive and npc.world == sect.world]
+        successor = max(members, key=lambda npc: (npc.realm_index, npc.layer, -npc.age), default=None)
+        if not successor:
+            raise ValueError("宗门中没有能够承接权柄的在世门人")
+        plan = {
+            "arranged": True, "eligible_return": False,
+            "successor_id": successor.id, "successor_name": successor.name,
+            "origin_world": sect.world, "arranged_age": player.age,
+        }
+        self._intrigue_state(game).setdefault("succession_plans", {})[sect.id] = plan
+        game.history.append(HistoryRecord(
+            "SYS_FACTION_SUCCESSION_PLAN", 1, player.age, "安排宗门后事", sect.id, "arranged",
+            f"你指定{successor.name}在自己飞升后接掌{sect.name}；若宗门延续至你重返下界，门人可能寻觅祖师，请你重新执掌大权。",
+            {"sect_id": sect.id, "successor_id": successor.id},
+            ["system", "faction", "succession", f"world:{sect.world}"],
         ))
         game.updated_at = now_iso()
         self.store.save(game)
@@ -2609,17 +2823,30 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 raise ValueError("只有当前队友可以随行飞升")
             candidate = self._party_crossing_candidate(game, npc_id)
             if not candidate:
-                raise ValueError("此队友尚未达到可共同偷渡灵界的境界")
-            player.joint_friend_crossing = [entry for entry in player.joint_friend_crossing if entry.get("id") != npc_id]
-            if action == "crossing_add":
-                player.joint_friend_crossing.append({"id":npc_id, "name":candidate["name"]})
-                result, summary = "crossing_selected", f"你邀请{candidate['name']}在偷渡灵界时与你一同闯过界壁。"
+                raise ValueError("此队友尚未达到可共同飞升的境界")
+            is_companion = bool(player.dao_companion and str(player.dao_companion.get("id")) == npc_id)
+            if is_companion:
+                player.joint_spirit_crossing = (
+                    {"id": npc_id, "name": candidate["name"]}
+                    if action == "crossing_add"
+                    else {"id": npc_id, "name": candidate["name"], "declined": True}
+                )
             else:
-                result, summary = "crossing_removed", f"你取消了与{candidate['name']}共同偷渡的安排。"
+                player.joint_friend_crossing = [entry for entry in player.joint_friend_crossing if entry.get("id") != npc_id]
+                if action == "crossing_add":
+                    player.joint_friend_crossing.append({"id":npc_id, "name":candidate["name"]})
+            if action == "crossing_add":
+                result, summary = "crossing_selected", f"你邀请{candidate['name']}在飞升时与你一同闯过界壁。"
+            else:
+                result, summary = "crossing_removed", f"你取消了与{candidate['name']}共同飞升的安排。"
         elif action == "leave":
             before = len(player.party)
             player.party = [entry for entry in player.party if entry.get("id") != npc_id]
             player.joint_friend_crossing = [entry for entry in player.joint_friend_crossing if entry.get("id") != npc_id]
+            if player.dao_companion and str(player.dao_companion.get("id")) == npc_id:
+                player.joint_spirit_crossing = {
+                    "id": npc_id, "name": str(player.dao_companion.get("name", "道侣")), "declined": True,
+                }
             if len(player.party) == before:
                 raise ValueError("此人不在队伍中")
             summary = "你与队友暂且分别。"
@@ -2702,14 +2929,24 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
 
     def _party_crossing_candidate(self, game: GameState, npc_id: str) -> dict[str, Any] | None:
         player = game.player
-        if player.dao_companion and str(player.dao_companion.get("id")) == npc_id:
-            return None
         npc = self._find_npc(game, npc_id)
-        relation = next((entry for entry in [player.master, *player.dao_friends, *player.disciples] if entry and str(entry.get("id")) == npc_id), None)
+        relation = next((entry for entry in [player.dao_companion, *player.dao_friends] if entry and str(entry.get("id")) == npc_id), None)
         source = relation or (npc.to_dict() if npc else None)
-        if not source or not source.get("alive", True) or source.get("world") != "human":
+        if not source or not source.get("alive", True) or source.get("world") != player.world:
             return None
-        if int(source.get("realm_index", -1)) != 5 or int(source.get("layer", 99)) > 3:
+        requirements = {
+            "human": (5, lambda layer: layer <= 3),
+            "demon": (5, lambda layer: layer >= 1),
+            "spirit": (8, lambda layer: layer == REALMS[8].layers),
+            "true_demon": (8, lambda layer: layer == REALMS[8].layers),
+        }
+        required = requirements.get(player.world)
+        if (
+            not required or player.realm_index != required[0]
+            or not required[1](player.layer)
+        ):
+            return None
+        if not required or int(source.get("realm_index", -1)) != required[0] or not required[1](int(source.get("layer", 99))):
             return None
         return {"id":npc_id, "name":str(source.get("name", "无名队友"))}
 
@@ -3108,8 +3345,14 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
     def _has_family_voice(self, game: GameState) -> bool:
         family = game.family
         if self._intrigue_enabled():
-            return bool(family and self._intrigue_has_decision_authority(game, "family", family.id))
-        return bool(family and not family.extinct and family.founded_by_player)
+            return bool(
+                family and family.world == game.player.world
+                and self._intrigue_has_decision_authority(game, "family", family.id)
+            )
+        return bool(
+            family and not family.extinct and family.founded_by_player
+            and family.world == game.player.world
+        )
 
     @staticmethod
     def _select_npc_treasure(npc: SectNpc, rng: random.Random) -> str | None:
@@ -4069,6 +4312,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         summary = f"{sect.name}最后一盏 NPC 魂灯熄灭，传承断绝，宗门正式灭亡。"
         if game.player.faction_id == sect.id:
             game.player.faction_id = None
+            game.player.faction_join_age = None
+            game.player.faction_contribution = 0
             game.player.faction_reward_preference = None
         game.history.append(HistoryRecord(
             "SYS_SECT_EXTINCT",1,game.player.age,"宗门灭亡",sect.id,"extinct",summary,
@@ -4085,6 +4330,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 game.notable_npcs.setdefault(npc.id, npc)
         if game.player.faction_id == sect.id:
             game.player.faction_id = None
+            game.player.faction_join_age = None
+            game.player.faction_contribution = 0
             game.player.faction_reward_preference = None
         game.history.append(HistoryRecord(
             "SYS_PLAYER_SECT_DISSOLVED",1,game.player.age,"山门解散",sect.id,"dissolved",
@@ -5109,14 +5356,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
     def _sync_relationship_records(self, game: GameState) -> bool:
         """补齐旧存档字段，并让宗门师徒信息跟随真实 NPC。"""
         changed = False
-        relations = [entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples, *game.player.disciple_requests] if entry]
+        relations = [entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.concubines, *game.player.disciples, *game.player.disciple_requests] if entry]
         for relation in relations:
             before = copy.deepcopy(relation)
             source = relation.get("source", "event")
-            npc = (
-                self._find_npc(game, str(relation.get("id"))) if source == "world"
-                else next((entry for entry in game.sects.get(source, SectState(source, "")).npcs if entry.id == relation.get("id")), None)
-            )
+            npc = self._find_npc(game, str(relation.get("npc_id") or relation.get("id")))
+            if not npc and source not in {"world", "event", "captive", "relationship"}:
+                npc = next((entry for entry in game.sects.get(source, SectState(source, "")).npcs if entry.id == relation.get("id")), None)
             if npc:
                 relation.update(
                     realm_index=npc.realm_index, layer=npc.layer, realm_name=self._npc_realm_name(npc),
@@ -5173,7 +5419,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         self._sync_relationship_records(game)
         player = game.player
         rng = rng or random.Random(f"relationships:{game.seed}:{player.age}")
-        event_relations = [entry for entry in [player.master, player.dao_companion, *player.dao_friends, *player.disciples, *player.disciple_requests] if entry and entry.get("source") == "event"]
+        event_relations = [
+            entry for entry in [player.master, player.dao_companion, *player.dao_friends, *player.concubines, *player.disciples, *player.disciple_requests]
+            if entry and not self._find_npc(game, str(entry.get("npc_id") or entry.get("id", "")))
+        ]
         for relation in event_relations:
             if not relation.get("alive", True):
                 continue
@@ -5184,10 +5433,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 relation["death_reason"] = "寿元耗尽，坐化尘世"
                 is_companion = relation is player.dao_companion
                 is_friend = relation in player.dao_friends
+                is_concubine = relation in player.concubines
                 game.history.append(HistoryRecord(
-                    "SYS_RELATION_FALL", 1, player.age, "道侣坐化" if is_companion else "道友坐化" if is_friend else "师门故人坐化", None, "relation_fallen",
+                    "SYS_RELATION_FALL", 1, player.age, "道侣坐化" if is_companion else "道友坐化" if is_friend else "侍妾坐化" if is_concubine else "师门故人坐化", None, "relation_fallen",
                     f"{relation['name']}寿元已尽，这段尘缘只余旧忆。",
-                    {"relation_id": relation["id"], "alive": [True, False]}, ["system", "relationship", "friend" if is_friend else "dao_companion" if is_companion else "master", "death"],
+                    {"relation_id": relation["id"], "alive": [True, False]}, ["system", "relationship", "friend" if is_friend else "dao_companion" if is_companion else "concubine" if is_concubine else "master", "death"],
                 ))
                 continue
             shell = SectNpc(
@@ -5223,10 +5473,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             if breakthrough:
                 is_companion = relation is player.dao_companion
                 is_friend = relation in player.dao_friends
+                is_concubine = relation in player.concubines
                 game.history.append(HistoryRecord(
-                    "SYS_RELATION_BREAKTHROUGH", 1, player.age, "道侣破境" if is_companion else "道友破境" if is_friend else "师门破境", None, "npc_breakthrough",
+                    "SYS_RELATION_BREAKTHROUGH", 1, player.age, "道侣破境" if is_companion else "道友破境" if is_friend else "侍妾破境" if is_concubine else "师门破境", None, "npc_breakthrough",
                     f"{relation['name']}凭借{relation['spirit_root_name']}由{breakthrough['old']}突破至{breakthrough['new']}。",
-                    {"relation_id": relation["id"], "realm": [breakthrough["old"], breakthrough["new"]]}, ["system", "relationship", "friend" if is_friend else "dao_companion" if is_companion else "master", "npc"],
+                    {"relation_id": relation["id"], "realm": [breakthrough["old"], breakthrough["new"]]}, ["system", "relationship", "friend" if is_friend else "dao_companion" if is_companion else "concubine" if is_concubine else "master", "npc"],
                 ))
         expired = [entry for entry in player.disciple_requests if not entry.get("alive", True)]
         if expired:
@@ -5932,6 +6183,29 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             milestone = str(effect["milestone"])
             player.milestones.setdefault(milestone, player.age)
             return None, effect.get("text", "这一年被记入命途节点。")
+        if kind == "restore_faction_control":
+            sect_id = str(pending.get("runtime", {}).get("sect_id", ""))
+            sect = game.sects.get(sect_id)
+            plan = self._intrigue_state(game).get("succession_plans", {}).get(sect_id, {})
+            if not sect or sect.extinct or sect.world != player.world or not plan.get("eligible_return"):
+                return "faction_return_expired", "旧宗已经不复存在，祖师之约就此作罢。"
+            plan["eligible_return"] = False
+            if not bool(effect.get("accept", False)):
+                return "faction_return_declined", f"你谢绝了{sect.name}门人的迎请，让后辈继续执掌宗门。"
+            player.faction_id = sect.id
+            player.faction_join_age = player.age
+            player.faction_contribution = 0
+            player.allegiance_race = sect.allegiance_race or player.race
+            sect.founded_by_player = True
+            sect.founder_player_id = game.id
+            sect.founded_by_npc = False
+            record = self._ensure_intrigue_faction(game, "sect", sect.id)
+            record["controller_id"] = "player"
+            positions = record.setdefault("positions", {})
+            leader = next(iter(self._intrigue_position_specs("sect")), "")
+            if leader:
+                positions[leader] = "player"
+            return "faction_control_restored", f"你重返{sect.name}祖庭，门人奉还印玺，你重新执掌宗门大权。"
         if kind == "grant_monster_imprint":
             imprint_id = str(effect["imprint_id"])
             gained = self.grant_monster_imprint(player, imprint_id)
@@ -6009,21 +6283,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             return None, effect.get("text", "新的险局接踵而至。")
         if kind == "enter_spirit_realm":
             destination = self._ascension_destination(player.path)
-            player.fame = 0.0
             lost_puppets = len(player.puppets)
-            player.puppets = []
-            player.world = destination
-            player.location_id = self.maps.default_location(destination)
             player.awaiting_spirit_realm_crossing = False
-            player.faction_id = None
-            player.allegiance_race = player.lineage_race or player.race
-            player.faction_join_age = None
-            player.faction_reward_preference = None
-            player.master = None
-            player.disciples = []
-            player.disciple_requests = []
-            player.relationship_attempts = []
-            player.party = []
             joint_crossing = player.joint_spirit_crossing
             companion = player.dao_companion
             crossed_together = bool(
@@ -6039,9 +6300,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     npc.departure_reason = f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}"
             else:
                 player.dao_companion = None
-            player.joint_spirit_crossing = None
             crossing_friends = list(player.joint_friend_crossing)
             friend_survivors: list[str] = []
+            friend_survivor_ids: set[str] = set()
             friend_fallen: list[str] = []
             survival_chance = float(WORLD_SYSTEMS["relationship"]["friend_crossing_survival_chance"])
             for candidate in crossing_friends:
@@ -6056,6 +6317,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     if friend:
                         friend["world"] = destination
                     friend_survivors.append(name)
+                    friend_survivor_ids.add(str(candidate.get("id", "")))
                     if npc:
                         npc.world = destination
                         npc.departed_age = npc.age
@@ -6068,7 +6330,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     if npc:
                         npc.alive = False
                         npc.death_reason = "偷渡界壁时迷失于空间风暴"
-            player.joint_friend_crossing = []
+            self._prepare_permanent_world_transition(
+                game, keep_companion=crossed_together,
+                keep_friend_ids=friend_survivor_ids,
+            )
+            player.world = destination
+            player.location_id = self.maps.default_location(destination)
             self._clear_market(game)
             destination_name = WORLD_SYSTEMS["world_names"][destination]
             companion_text = f" {companion['name']}也与你一同落地，道侣关系得以保留。" if crossed_together else ""
@@ -7576,6 +7843,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             return "trial_step_success", f"第 {trial['step_index']}/9 关通过（{detail}），HP -{hp_loss:.0f}、MP -{mp_loss:.0f}{reduction_text}。"
 
         origin = player.world
+        companion_kept, friend_ids, friend_names, fallen_names = self._resolve_selected_ascension_entourage(
+            game, "celestial", rng,
+        )
+        self._prepare_permanent_world_transition(
+            game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
+        )
         player.world = "celestial"
         player.location_id = self.maps.default_location("celestial")
         player.realm_index = 9
@@ -7584,14 +7857,6 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         player.awaiting_ascension = False
         player.awaiting_major_breakthrough = False
         player.awaiting_minor_breakthrough = False
-        player.faction_id = None
-        player.faction_join_age = None
-        player.faction_reward_preference = None
-        player.master = None
-        player.disciples = []
-        player.disciple_requests = []
-        player.party = []
-        player.fame = 0.0
         player.immortal_power_converted = False
         player.immortal_conversion_stage = 0
         player.immortal_conversion_last_age = player.age
@@ -7601,14 +7866,16 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         player.tribulation_power = None
         player.hp = max_hp(player)
         player.mp = 0.0
-        self._cancel_auction_for_world_change(game)
         self._clear_market(game)
         self._ensure_heavenly_court(game, rng)
         game.active_trial = None
         game.pending_event = None
         game.history.append(HistoryRecord(
             "SYS_CELESTIAL_ASCENSION_COMPLETE", 1, player.age, "飞升仙界", None, "ascended",
-            "你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个长期阶段逐步转化为仙灵力。首次机缘最早在十个仙界时间单位后出现。",
+            "你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个长期阶段逐步转化为仙灵力。首次机缘最早在十个仙界时间单位后出现。"
+            + (" 道侣与你一同登临仙界。" if companion_kept else "")
+            + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")
+            + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else ""),
             {"world":[origin, "celestial"], "realm_index":[8, 9]},
             ["system", "ascension", "celestial", "milestone"],
         ))
@@ -7686,7 +7953,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
 
         origin = player.world
         lost_puppets = len(player.puppets)
-        player.puppets = []
+        companion_kept, friend_ids, friend_names, fallen_names = self._resolve_selected_ascension_entourage(
+            game, "asura", rng,
+        )
+        self._prepare_permanent_world_transition(
+            game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
+        )
         player.world = "asura"
         player.location_id = self.maps.default_location("asura")
         player.realm_index = 9
@@ -7695,21 +7967,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         player.awaiting_ascension = False
         player.awaiting_major_breakthrough = False
         player.awaiting_minor_breakthrough = False
-        player.faction_id = None
-        player.faction_join_age = None
-        player.faction_reward_preference = None
-        player.master = None
-        player.disciples = []
-        player.disciple_requests = []
-        player.relationship_attempts = []
-        player.party = []
-        player.fame = 0.0
         player.next_thunder_damage_reduction = 0.0
         player.next_tribulation_age = None
         player.tribulation_power = None
         player.hp = max_hp(player)
         player.mp = max_mp(player)
-        self._cancel_auction_for_world_change(game)
         self._clear_market(game)
         self._ensure_market(game, rng)
         game.active_trial = None
@@ -7717,7 +7979,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         game.history.append(HistoryRecord(
             "SYS_ASURA_ASCENSION_COMPLETE", 1, player.age, "飞升修罗界", None, "ascended",
             "你渡过九重修罗天魔劫，自真魔界登临修罗界并成就迦楼罗。四大修罗境界已经确立，但境界突破规则暂未开放。"
-            + (f" 受天关排斥，{lost_puppets}具傀儡未能同行。" if lost_puppets else ""),
+            + (f" 受天关排斥，{lost_puppets}具傀儡未能同行。" if lost_puppets else "")
+            + (" 道侣与你一同登临修罗界。" if companion_kept else "")
+            + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")
+            + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else ""),
             {"world":[origin, "asura"], "realm_index":[8, 9], "lost_puppets":lost_puppets},
             ["system", "ascension", "asura", "demonic", "milestone"],
         ))
@@ -8296,6 +8561,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     and not (game.player.dao_companion and game.player.dao_companion.get("alive", True))
                     and not (game.player.master and game.player.master.get("id") == npc.id)
                     and not any(entry.get("id") == npc.id for entry in game.player.disciples)
+                    and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
                 ),
                 "can_befriend": bool(
                     same_world and npc.alive
@@ -8304,6 +8570,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     and not (game.player.dao_companion and game.player.dao_companion.get("id") == npc.id)
                     and not (game.player.master and game.player.master.get("id") == npc.id)
                     and not any(entry.get("id") == npc.id for entry in game.player.disciples)
+                    and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
                 ),
                 "can_recruit_concubine": bool(
                     same_world and npc.alive and npc.gender == "female"
@@ -8521,7 +8788,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                         "combat_power": self._relationship_combat_power(companion),
                         "affinity": round(float(companion.get("affinity", 0)), 1), "attitude": "道侣",
                         "can_interact":game.governance_actions.get(f"party_interaction:{companion['id']}") != game.player.age,
-                        "can_cross_spirit":False, "selected_for_crossing":False,
+                        "can_cross_spirit":bool(self._party_crossing_candidate(game, str(companion["id"]))),
+                        "selected_for_crossing":bool(
+                            game.player.joint_spirit_crossing
+                            and str(game.player.joint_spirit_crossing.get("id")) == str(companion["id"])
+                            and not game.player.joint_spirit_crossing.get("declined")
+                        ),
                     })
                 continue
             npc = self._find_npc(game, str(reference.get("id", "")))
@@ -8544,10 +8816,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             else:
                 continue
             row["can_interact"] = game.governance_actions.get(f"party_interaction:{row['id']}") != game.player.age
-            row["can_cross_spirit"] = bool(
-                game.player.world == "human" and game.player.realm_index == 5 and game.player.layer <= 3
-                and self._party_crossing_candidate(game, row["id"])
-            )
+            row["can_cross_spirit"] = bool(self._party_crossing_candidate(game, row["id"]))
             row["selected_for_crossing"] = any(str(entry.get("id")) == row["id"] for entry in game.player.joint_friend_crossing)
             result.append(row)
         return result
@@ -8769,7 +9038,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 "offspring":offspring, "world":player.world, "has_voice":False, "roster":[],
             }
         roster = []
-        for npc in sorted(family.npcs, key=lambda row:(-row.realm_index,-row.layer,row.name)):
+        visible_family = family.world == player.world or game.debug_world_news
+        for npc in sorted(family.npcs if visible_family else [], key=lambda row:(-row.realm_index,-row.layer,row.name)):
             roster.append({
                 **npc.to_dict(), "realm_name":self._npc_realm_name(npc),
                 "spirit_root_name":self._npc_root_name(npc.spirit_root),
@@ -8780,7 +9050,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             "exists":True, "id":family.id, "name":family.name, "description":family.description,
             "world":family.world, "same_world":family.world == player.world, "extinct":family.extinct,
             "has_voice":self._has_family_voice(game), "offspring":offspring, "roster":roster,
-            "living_count":sum(npc.alive for npc in family.npcs),
+            "living_count":sum(npc.alive for npc in family.npcs) if visible_family else None,
         }
 
     def _public_governance(self, game: GameState) -> dict[str, Any]:
@@ -8860,6 +9130,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         master_id = player.master["id"] if player.master else None
         disciple_ids = {entry["id"] for entry in player.disciples}
         friend_ids = {entry["id"] for entry in player.dao_friends}
+        concubine_ids = {str(entry.get("id")) for entry in player.concubines}
         for entry in roster:
             npc = npc_by_id[entry["id"]]
             npc_rank = (entry["realm_index"], entry["layer"])
@@ -8880,10 +9151,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             entry["can_propose_companion"] = bool(
                 not (player.dao_companion and player.dao_companion.get("alive", True))
                 and not entry["is_master"] and not entry["is_disciple"]
+                and entry["id"] not in concubine_ids
             )
             unrelated = not entry["is_master"] and not entry["is_disciple"]
             entry["can_befriend"] = bool(
-                unrelated and not entry["is_friend"]
+                unrelated and not entry["is_friend"] and entry["id"] not in concubine_ids
                 and not (player.dao_companion and player.dao_companion.get("id") == entry["id"])
                 and float(npc.affinity or 0) >= float(WORLD_SYSTEMS["relationship"]["friend_affinity_required"])
             )
@@ -8894,11 +9166,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             )
             entry["can_intercept"] = True
             entry["can_request_master"] = (
-                unrelated and player.master is None and npc_rank > player_rank
+                unrelated and entry["id"] not in concubine_ids
+                and player.master is None and npc_rank > player_rank
                 and f"master:{entry['id']}" not in player.relationship_attempts
             )
             entry["can_accept_disciple"] = (
-                unrelated
+                unrelated and entry["id"] not in concubine_ids
                 and len(player.disciples) + len(player.disciple_requests) < int(WORLD_SYSTEMS["relationship"]["max_disciples"])
                 and npc_rank < player_rank
                 and f"disciple:{entry['id']}" not in player.relationship_attempts
@@ -8968,6 +9241,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             "can_leave": True,
             "hostility": round(sect_hostility, 1),
             "founded_by_player": sect.founded_by_player,
+            "can_arrange_succession": bool(
+                sect.founded_by_player and sect.founder_player_id == game.id
+                and any(npc.alive and npc.world == sect.world for npc in sect_members)
+            ),
+            "succession_plan": copy.deepcopy(
+                self._intrigue_state(game).get("succession_plans", {}).get(sect.id)
+            ),
             "pressure": sect.pressure,
             "pressure_limit": int(WORLD_SYSTEMS["player_faction"]["pressure_limit"]),
             "has_diplomatic_voice": self._has_sect_voice(game),

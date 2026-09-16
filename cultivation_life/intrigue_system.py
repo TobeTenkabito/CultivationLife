@@ -99,7 +99,11 @@ class IntrigueSystemMixin:
         if kind == "sect":
             return game.player.faction_id
         if kind == "family":
-            return game.family.id if game.family and not game.family.extinct else None
+            return (
+                game.family.id
+                if game.family and not game.family.extinct and game.family.world == game.player.world
+                else None
+            )
         if kind == "race":
             return self._player_allegiance_race(game.player)
         return None
@@ -165,7 +169,8 @@ class IntrigueSystemMixin:
         controller = str(record.get("controller_id") or "")
         valid_npc_ids = {npc.id for npc in members}
         player_controls = bool(
-            entity and entity.founded_by_player and entity.founder_player_id == game.id and game.player.alive
+            entity and entity.world == game.player.world
+            and entity.founded_by_player and entity.founder_player_id == game.id and game.player.alive
         )
         player_is_member = self._intrigue_player_faction_id(game, kind) == faction_id and game.player.alive
         player_realm, player_layer = self._actual_player_realm(game.player)
@@ -212,7 +217,9 @@ class IntrigueSystemMixin:
         if member_id == PLAYER_ID:
             own_id = self._intrigue_player_faction_id(game, kind)
             realm_index, _ = self._actual_player_realm(game.player)
-            return bool(own_id == faction_id and game.player.alive and realm_index >= threshold)
+            entity = self._intrigue_entity(game, kind, faction_id)
+            same_world = not entity or entity.world == game.player.world
+            return bool(own_id == faction_id and same_world and game.player.alive and realm_index >= threshold)
         npc = self._intrigue_find_npc(game, member_id)
         return bool(npc and npc.alive and npc.realm_index >= threshold and not self._intrigue_is_imprisoned(game, npc.id))
 
@@ -463,6 +470,17 @@ class IntrigueSystemMixin:
             ],
         }
 
+    def _public_guest_invitation(self, game: GameState) -> dict[str, Any] | None:
+        invitation = self._intrigue_state(game).get("pending_guest_invitation")
+        if not isinstance(invitation, dict):
+            return None
+        entity = self._intrigue_entity(
+            game, str(invitation.get("kind", "")), str(invitation.get("faction_id", "")),
+        )
+        if game.debug_world_news or (entity and not entity.extinct and entity.world == game.player.world):
+            return copy.deepcopy(invitation)
+        return None
+
     def _public_intrigue_system(self, game: GameState) -> dict[str, Any]:
         if not self._intrigue_enabled():
             return {"enabled": False, "name": "明争暗斗：合纵连横"}
@@ -471,10 +489,12 @@ class IntrigueSystemMixin:
             if kind == "race" and not self._world_supports(game.player.world, "races"):
                 continue
             faction_id = self._intrigue_player_faction_id(game, kind)
+            if game.debug_world_news and kind == "family" and game.family and not game.family.extinct:
+                faction_id = game.family.id
             if not faction_id:
                 continue
             entity = self._intrigue_entity(game, kind, faction_id)
-            if entity and entity.extinct:
+            if entity and (entity.extinct or (entity.world != game.player.world and not game.debug_world_news)):
                 continue
             record = self._ensure_intrigue_faction(game, kind, faction_id)
             members = [self._intrigue_public_member(game, npc, record) for npc in self._intrigue_members(game, kind, faction_id) if npc.alive]
@@ -551,10 +571,19 @@ class IntrigueSystemMixin:
                     if kind == "sect" else None
                 ),
             })
-        recent = [copy.deepcopy(row) for row in self._intrigue_state(game).get("resolutions", [])[-16:]][::-1]
+        recent = []
+        for row in reversed(self._intrigue_state(game).get("resolutions", [])[-48:]):
+            entity = self._intrigue_entity(game, str(row.get("kind", "")), str(row.get("faction_id", "")))
+            if game.debug_world_news or not entity or entity.world == game.player.world:
+                recent.append(copy.deepcopy(row))
+            if len(recent) >= 16:
+                break
         player_guest_roles = []
         for record in self._intrigue_state(game).get("factions", {}).values():
             if any(row.get("npc_id") == PLAYER_ID for row in record.get("guests", [])):
+                entity = self._intrigue_entity(game, str(record.get("kind", "")), str(record.get("id", "")))
+                if not game.debug_world_news and entity and entity.world != game.player.world:
+                    continue
                 player_guest_roles.append({
                     "kind": record.get("kind"), "faction_id": record.get("id"),
                     "faction_name": self._intrigue_faction_name(game, str(record.get("kind")), str(record.get("id"))),
@@ -563,7 +592,7 @@ class IntrigueSystemMixin:
         return {
             "enabled": True, "name": "明争暗斗：合纵连横", "sections": sections,
             "resolutions": recent,
-            "pending_guest_invitation": copy.deepcopy(self._intrigue_state(game).get("pending_guest_invitation")),
+            "pending_guest_invitation": self._public_guest_invitation(game),
             "player_guest_roles": player_guest_roles,
             "resolution_types": RESOLUTION_LABELS, "styles": STYLE_LABELS,
             "available_worlds": [
@@ -680,6 +709,12 @@ class IntrigueSystemMixin:
             invitation = state.get("pending_guest_invitation")
             if not invitation:
                 raise ValueError("当前没有待回应的客卿邀请")
+            entity = self._intrigue_entity(game, str(invitation["kind"]), str(invitation["faction_id"]))
+            if not entity or entity.extinct or entity.world != game.player.world:
+                state["pending_guest_invitation"] = None
+                game.updated_at = now_iso()
+                self.store.save(game)
+                raise ValueError("这份客卿邀请来自其他界面，已经失效")
             record = self._ensure_intrigue_faction(game, str(invitation["kind"]), str(invitation["faction_id"]))
             if action == "accept_invitation":
                 record["guests"].append({"npc_id": PLAYER_ID, "name": game.player.name, "defense_required": True, "offense_opt_in": False})
@@ -687,6 +722,16 @@ class IntrigueSystemMixin:
             else:
                 summary = f"你谢绝了{invitation['faction_name']}的{invitation['title']}之邀。"
             state["pending_guest_invitation"] = None
+        elif action == "resign":
+            faction_id = npc_id
+            record = self._intrigue_state(game).get("factions", {}).get(self._intrigue_key(kind, faction_id))
+            if not record:
+                raise ValueError("没有找到这份客卿身份")
+            before = len(record.get("guests", []))
+            record["guests"] = [row for row in record.get("guests", []) if row.get("npc_id") != PLAYER_ID]
+            if len(record["guests"]) == before:
+                raise ValueError("你并非该势力客卿")
+            summary = f"你辞去了{self._intrigue_faction_name(game, kind, faction_id)}的客卿身份。"
         else:
             faction_id = self._intrigue_player_faction_id(game, kind)
             if not faction_id or not self._intrigue_has_control(game, kind, faction_id):
@@ -871,10 +916,12 @@ class IntrigueSystemMixin:
         state_diff = copy.deepcopy(resolution)
         if diplomacy_resolution and target_id:
             state_diff["races" if kind == "race" else "sects"] = [faction_id, target_id]
+        entity = self._intrigue_entity(game, kind, faction_id)
+        event_world = entity.world if entity else game.player.world
         game.history.append(HistoryRecord(
             event_id, 1, game.player.age, "势力决议", resolution_type,
             "passed" if passed else "rejected", summary, state_diff,
-            ["system", "intrigue", "vote", kind, *( ["diplomacy"] if diplomacy_resolution else [] ), "world_news", f"world:{game.player.world}"],
+            ["system", "intrigue", "vote", kind, *( ["diplomacy"] if diplomacy_resolution else [] ), "world_news", f"world:{event_world}"],
         ))
         return resolution
 
@@ -1147,7 +1194,7 @@ class IntrigueSystemMixin:
                     candidates.append(sect)
             if candidates:
                 sect = rng.choice(candidates)
-                state["pending_guest_invitation"] = {"kind": "sect", "faction_id": sect.id, "faction_name": sect.name, "title": "客卿长老"}
+                state["pending_guest_invitation"] = {"kind": "sect", "faction_id": sect.id, "faction_name": sect.name, "title": "客卿长老", "world": sect.world}
                 news.append(f"{sect.name}看重你的修为，遣使邀你担任客卿长老。")
         # One NPC-led faction may act per three units: O(members), never O(N²).
         if game.diplomacy_unit % 3 == 0:
@@ -1172,7 +1219,8 @@ class IntrigueSystemMixin:
                         else:
                             target_id = rng.choice(possible)
                     resolution = self._intrigue_resolve(game, "sect", sect.id, resolution_type, target_id, None, controller.id, rng)
-                    news.append(f"{sect.name}在{STYLE_LABELS[style]}主政下提出{RESOLUTION_LABELS[resolution_type]}，决议{('通过' if resolution['result'] == 'passed' else '遭否决')}。")
+                    if game.debug_world_news or sect.world == game.player.world:
+                        news.append(f"{sect.name}在{STYLE_LABELS[style]}主政下提出{RESOLUTION_LABELS[resolution_type]}，决议{('通过' if resolution['result'] == 'passed' else '遭否决')}。")
         return news
 
     def _intrigue_pressure_position_occupied(self, game: GameState, faction_id: str) -> bool:

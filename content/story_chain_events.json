@@ -90,6 +90,14 @@
       "id":"EVT_SPIRIT_CROSSING_003","version":1,"title":"破界天光","body":"灵界天光已在乱流尽头显现，最后一道界面罡风却凝成无形天堑。唯有超越寻常化神初期的战力，才能正面将其击穿。",
       "tags":["ascension","spirit_crossing","manual_only"],"weight":0,"conditions":{"path":"player.world","op":"eq","value":"human"},
       "choices":[{"id":"break_boundary","text":"倾尽底牌击穿罡风（战斗力判定）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_ratio","op":"gte","value":1.40}],"failure_reason":"你的攻势未能击穿界面罡风，最终耗尽在空间乱流中","success_text":"界面被撕开一道仅容一人通过的裂口。"},{"type":"enter_spirit_realm","if_result":["check_success"]}]}]
+    },
+    {
+      "id":"EVT_FOUNDER_RETURN_001","version":1,"title":"寻觅祖师","body":"你重返下界不久，{sect_name}门人循祖师画像与旧日信物寻到你的行踪。宗门历经数代仍未断绝，如今后辈愿奉还祖师印玺，请你重新执掌大权。",
+      "tags":["faction","succession","founder_return","manual_only","all_realms"],"weight":0,"repeat":"once",
+      "choices":[
+        {"id":"return","text":"接回祖师印玺，重新执掌宗门","effects":[{"type":"restore_faction_control","accept":true}]},
+        {"id":"decline","text":"让后辈继续执掌宗门","effects":[{"type":"restore_faction_control","accept":false}]}
+      ]
     }
   ]
 }
