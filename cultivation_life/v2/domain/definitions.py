@@ -39,6 +39,9 @@ class TechniqueDefinition:
     grade: int
     level: int
     opportunity_bonus: float
+    hp_bonus: float
+    mp_bonus: float
+    combat_bonus: float
     category: str
     sources: dict[str, float]
 
@@ -142,6 +145,40 @@ class FactionDefinition:
 
 
 @dataclass(frozen=True, slots=True)
+class ItemDefinition:
+    id: str
+    name: str
+    description: str
+    tags: tuple[str, ...]
+    combat_bonus: float
+    hp_bonus: float
+    mp_bonus: float
+    opportunity_bonus: float
+
+
+@dataclass(frozen=True, slots=True)
+class MarketGoodDefinition:
+    world_id: str
+    kind: str
+    content_id: str
+    tier: int
+    price: int
+
+
+@dataclass(frozen=True, slots=True)
+class ExtensionDefinition:
+    id: str
+    name: str
+    version: str
+    kind: str
+    enabled: bool
+    status: str
+    load_order: int
+    description: str
+    error: str = ""
+
+
+@dataclass(frozen=True, slots=True)
 class GameDefinitions:
     realms: tuple[RealmDefinition, ...]
     roots: dict[str, RootDefinition]
@@ -149,12 +186,18 @@ class GameDefinitions:
     techniques: dict[str, TechniqueDefinition]
     worlds: dict[str, WorldDefinition]
     factions: dict[str, FactionDefinition]
+    items: dict[str, ItemDefinition]
+    market_goods: tuple[MarketGoodDefinition, ...]
+    market_settings: dict[str, Any]
     actions: dict[str, dict[str, Any]]
     time_units: dict[int, int]
     travel_speeds: dict[int, float]
     start_worlds: dict[str, tuple[str, ...]]
     breakthrough: dict[str, Any]
     stage_lifespan_bonus: dict[str, dict[str, tuple[int, int]]]
+    systems: dict[str, Any]
+    extensions: tuple[ExtensionDefinition, ...]
+    extension_documents: dict[str, dict[str, Any]]
 
     def realm_index(self, realm_id: str) -> int:
         for index, definition in enumerate(self.realms):

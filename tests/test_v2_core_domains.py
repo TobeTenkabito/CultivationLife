@@ -84,7 +84,7 @@ class V2CoreDomainTests(unittest.TestCase):
             spirit_root="supreme_fire",
             start_world="demon",
         )
-        self.assertEqual(game["schema_version"], 2)
+        self.assertEqual(game["schema_version"], 3)
         self.assertEqual(game["player"]["gender"], "female")
         self.assertEqual(game["player"]["cultivation"]["path"], "demonic")
         self.assertEqual(
@@ -244,7 +244,7 @@ class V2CoreDomainTests(unittest.TestCase):
 
 
 class V2SchemaMigrationTests(unittest.TestCase):
-    def test_schema_one_snapshot_is_migrated_and_rewritten_as_schema_two(self):
+    def test_schema_one_snapshot_is_migrated_and_rewritten_as_current_schema(self):
         with tempfile.TemporaryDirectory() as directory:
             database = Path(directory) / "old.sqlite3"
             engine = V2GameEngine(database)
@@ -303,7 +303,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                         ),
                     )
             migrated = engine.get_game(game_id)
-            self.assertEqual(migrated["schema_version"], 2)
+            self.assertEqual(migrated["schema_version"], 3)
             self.assertEqual(migrated["player"]["gender"], "male")
             self.assertEqual(migrated["player"]["cultivation"]["opportunity"], 4)
             engine.perform_timed_action(game_id, "rest", 1)
@@ -311,7 +311,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                 stored_version = connection.execute(
                     "SELECT schema_version FROM games WHERE game_id = ?", (game_id,)
                 ).fetchone()[0]
-            self.assertEqual(stored_version, 2)
+            self.assertEqual(stored_version, 3)
 
 
 if __name__ == "__main__":

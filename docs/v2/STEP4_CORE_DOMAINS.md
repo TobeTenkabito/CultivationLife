@@ -29,7 +29,7 @@
 
 ## 内容数据边界
 
-V2内容加载器目前读取`world.json`、`maps.json`、`factions.json`和`techniques.json`，并验证重复键、引用、路线和灵气来源等约束。它不导入V1 Python运行时；共用的只是可版本化内容文档。
+V2内容加载器的核心定义读取`world.json`、`maps.json`、`factions.json`、`techniques.json`、`items.json`和`market.json`，并验证重复键、引用、路线和灵气来源等约束。第5步起还会在每个DLC/MOD合并后重新验证这些定义。它不导入V1 Python运行时；共用的只是可版本化内容文档。
 
 ## 尚未迁移的边界
 

@@ -76,7 +76,38 @@ def _schema_1_to_2(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
-MIGRATIONS: dict[int, SnapshotMigration] = {1: _schema_1_to_2}
+def _schema_2_to_3(source: dict[str, Any]) -> dict[str, Any]:
+    """Add economy and combat components without importing domain code."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault("economy.inventory", {"items": {}, "reserved": {}})
+        components.setdefault("economy.market", {"revision": 0, "offers": []})
+        components.setdefault("combat.condition", {"hp_ratio": 1.0, "mp_ratio": 1.0})
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "core": 2,
+        "character": 2,
+        "cultivation": 1,
+        "world": 1,
+        "relations": 1,
+        "factions": 1,
+        "economy": 1,
+        "combat": 1,
+        "extensions": 1,
+    }
+    value.setdefault("content_packages", {})
+    value["schema_version"] = 3
+    return value
+
+
+MIGRATIONS: dict[int, SnapshotMigration] = {
+    1: _schema_1_to_2,
+    2: _schema_2_to_3,
+}
 
 
 def migrate_snapshot(source: dict[str, Any]) -> dict[str, Any]:

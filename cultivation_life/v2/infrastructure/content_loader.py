@@ -1,20 +1,23 @@
 from __future__ import annotations
 
-import json
 from itertools import combinations
 from pathlib import Path
 from typing import Any
 
 from ..domain.definitions import (
+    ExtensionDefinition,
     FactionDefinition,
     GameDefinitions,
+    ItemDefinition,
     LocationDefinition,
+    MarketGoodDefinition,
     QI_SOURCES,
     RealmDefinition,
     RootDefinition,
     TechniqueDefinition,
     WorldDefinition,
 )
+from .extension_loader import load_extension_documents, read_json_document
 
 
 class V2ContentError(ValueError):
@@ -24,16 +27,36 @@ class V2ContentError(ValueError):
 class V2ContentLoader:
     """Strict adapter from immutable V1 content documents to V2 definitions."""
 
-    REQUIRED_FILES = ("world.json", "maps.json", "factions.json", "techniques.json")
+    REQUIRED_FILES = (
+        "world.json", "maps.json", "factions.json", "techniques.json",
+        "items.json", "market.json",
+    )
 
     @classmethod
-    def load(cls, directory: Path) -> GameDefinitions:
+    def load(
+        cls, directory: Path, *, project_root: Path | None = None,
+    ) -> GameDefinitions:
         directory = Path(directory)
         documents = {name: cls._read(directory / name) for name in cls.REQUIRED_FILES}
+        documents, extensions = load_extension_documents(
+            documents,
+            Path(project_root) if project_root is not None else directory.parent,
+            validator=lambda candidate: cls._build(candidate, ()),
+        )
+        return cls._build(documents, extensions)
+
+    @classmethod
+    def _build(
+        cls,
+        documents: dict[str, dict[str, Any]],
+        extensions: tuple[ExtensionDefinition, ...],
+    ) -> GameDefinitions:
         world_doc = documents["world.json"]
         maps_doc = documents["maps.json"]
         faction_doc = documents["factions.json"]
         technique_doc = documents["techniques.json"]
+        item_doc = documents["items.json"]
+        market_doc = documents["market.json"]
 
         realms = tuple(cls._realm(row) for row in world_doc.get("realms", []))
         if not realms or len({realm.id for realm in realms}) != len(realms):
@@ -44,6 +67,8 @@ class V2ContentLoader:
         }
         roots = cls._roots(dict(world_doc.get("roots", {})), dict(world_doc.get("affinities", {})))
         techniques = cls._techniques(technique_doc, paths)
+        items = cls._items(item_doc)
+        market_goods = cls._market_goods(market_doc, items, techniques)
         worlds = cls._worlds(world_doc, maps_doc)
         factions = cls._factions(faction_doc, worlds)
         systems = dict(world_doc.get("systems", {}))
@@ -76,12 +101,22 @@ class V2ContentLoader:
             techniques=techniques,
             worlds=worlds,
             factions=factions,
+            items=items,
+            market_goods=market_goods,
+            market_settings=dict(market_doc.get("settings", {})),
             actions={str(key): dict(value) for key, value in dict(world_doc["actions"]).items()},
             time_units=time_units,
             travel_speeds=travel_speeds,
             start_worlds=start_worlds,
             breakthrough=dict(systems["breakthrough"]),
             stage_lifespan_bonus=stage_bonus,
+            systems=systems,
+            extensions=extensions,
+            extension_documents={
+                name: document
+                for name, document in documents.items()
+                if name not in cls.REQUIRED_FILES
+            },
         )
 
     @staticmethod
@@ -172,10 +207,64 @@ class V2ContentLoader:
                 grade=int(row.get("grade", 1)),
                 level=int(row.get("level", 1)),
                 opportunity_bonus=float(row.get("opportunity_bonus", 0)),
+                hp_bonus=float(row.get("hp_bonus", 0)),
+                mp_bonus=float(row.get("mp_bonus", 0)),
+                combat_bonus=float(row.get("combat_bonus", 0)),
                 category=str(row.get("category", "spiritual")),
                 sources=sources,
             )
         return result
+
+    @staticmethod
+    def _items(document: dict[str, Any]) -> dict[str, ItemDefinition]:
+        result: dict[str, ItemDefinition] = {}
+        for source in document.get("items", []):
+            row = dict(source)
+            item_id = str(row["id"])
+            if item_id in result:
+                raise V2ContentError(f"物品ID重复：{item_id}")
+            result[item_id] = ItemDefinition(
+                id=item_id,
+                name=str(row["name"]),
+                description=str(row.get("description", "")),
+                tags=tuple(map(str, row.get("tags", []))),
+                combat_bonus=float(row.get("combat_bonus", 0)),
+                hp_bonus=float(row.get("hp_bonus", 0)),
+                mp_bonus=float(row.get("mp_bonus", 0)),
+                opportunity_bonus=float(row.get("opportunity_bonus", 0)),
+            )
+        if "spirit_stone" not in result or "currency" not in result["spirit_stone"].tags:
+            raise V2ContentError("物品表缺少灵石货币定义")
+        return result
+
+    @staticmethod
+    def _market_goods(
+        document: dict[str, Any],
+        items: dict[str, ItemDefinition],
+        techniques: dict[str, TechniqueDefinition],
+    ) -> tuple[MarketGoodDefinition, ...]:
+        result: list[MarketGoodDefinition] = []
+        seen: set[tuple[str, str, str, int]] = set()
+        for source in document.get("goods", []):
+            row = dict(source)
+            kind = str(row["kind"])
+            content_id = str(row["content_id"])
+            world_id = str(row.get("world", "human"))
+            tier = int(row["tier"])
+            price = int(row["price"])
+            key = (world_id, kind, content_id, tier)
+            catalog = items if kind == "item" else techniques if kind == "technique" else None
+            if key in seen or catalog is None or content_id not in catalog or tier < 1 or price <= 0:
+                raise V2ContentError(f"坊市货物定义无效：{key}")
+            seen.add(key)
+            result.append(MarketGoodDefinition(
+                world_id=world_id,
+                kind=kind,
+                content_id=content_id,
+                tier=tier,
+                price=price,
+            ))
+        return tuple(result)
 
     @staticmethod
     def _worlds(world_doc: dict[str, Any], maps_doc: dict[str, Any]) -> dict[str, WorldDefinition]:
@@ -252,22 +341,8 @@ class V2ContentLoader:
     def _read(path: Path) -> dict[str, Any]:
         if not path.is_file():
             raise V2ContentError(f"缺少V2内容文件：{path.name}")
-        duplicates: list[str] = []
-
-        def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-            result: dict[str, Any] = {}
-            for key, value in pairs:
-                if key in result:
-                    duplicates.append(key)
-                result[key] = value
-            return result
-
         try:
-            value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
-        except json.JSONDecodeError as error:
-            raise V2ContentError(f"内容文件JSON无效：{path.name}: {error}") from error
-        if duplicates:
-            raise V2ContentError(f"内容文件包含重复键：{path.name}: {sorted(set(duplicates))}")
-        if not isinstance(value, dict):
-            raise V2ContentError(f"内容文件顶层必须为对象：{path.name}")
-        return value
+            return read_json_document(path)
+        except ValueError as error:
+            raise V2ContentError(str(error)) from error
+    MarketGoodDefinition,

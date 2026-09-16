@@ -63,7 +63,7 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
     }
     starter_id = starters.get(path)
     if starter_id and starter_id not in definitions.techniques:
-        raise ValueError(f"缺少开局功法：{starter_id}")
+        starter_id = None
     practice = {
         "known_techniques": [starter_id] if starter_id else [],
         "main_technique_id": starter_id,
@@ -236,7 +236,18 @@ def _cultivation_gain(
         weight * _qi_environment_multiplier(world.qi_concentrations[source])
         for source, weight in technique.sources.items()
     )
-    multiplier = root.efficiency * (1 + technique.opportunity_bonus * technique.scale) * environment
+    inventory = context.state.entities.get(actor_id, "economy.inventory") or {"items": {}}
+    item_bonus = sum(
+        definitions.items[item_id].opportunity_bonus * int(quantity)
+        for item_id, quantity in dict(inventory.get("items", {})).items()
+        if item_id in definitions.items
+    )
+    multiplier = (
+        root.efficiency
+        * (1 + technique.opportunity_bonus * technique.scale)
+        * max(0.0, 1 + item_bonus)
+        * environment
+    )
     if action == "cultivate" and cultivation["path"] == "demonic":
         multiplier *= 0.1
     return float(base) * multiplier
@@ -380,6 +391,19 @@ def _equip_technique_handler(definitions: GameDefinitions):
             scope=EventScope.entity(command.actor_id),
             payload={"entity_id": command.actor_id, "technique_id": command.technique_id},
         )
+
+    return handler
+
+
+def _on_technique_purchased(definitions: GameDefinitions):
+    grant = _grant_technique_handler(definitions)
+
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        grant(context, GrantTechnique(
+            actor_id=str(event.payload["entity_id"]),
+            technique_id=str(event.payload["technique_id"]),
+            equip_main=False,
+        ))
 
     return handler
 
@@ -558,6 +582,7 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     bus.register(EquipMainTechnique, _equip_technique_handler(definitions))
     bus.register(AttemptBreakthrough, _attempt_breakthrough_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created(definitions))
+    bus.event_bus.register("economy.technique.purchased", _on_technique_purchased(definitions))
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
     bus.event_bus.register("character.died", _on_character_died)
 

@@ -20,22 +20,43 @@ from .domain.factions import (
     LeaveFaction,
     TransferFactionControl,
 )
+from .domain.combat import ResolveCombat, RestoreCombatCondition
+from .domain.economy import (
+    BuyMarketOffer,
+    GrantItem,
+    RefreshMarket,
+    ToggleMarketOfferLock,
+)
+from .domain.extensions import (
+    AssignFactionPosition,
+    ConfigureMonsterBloodline,
+    SpendWangsheng,
+)
 from .domain.relations import EndRelationship, FormRelationship
 from .domain.world import TravelWithinWorld
 
 __all__ = [
     "AttemptBreakthrough",
+    "AssignFactionPosition",
+    "BuyMarketOffer",
     "ChangeContribution",
+    "ConfigureMonsterBloodline",
     "EndRelationship",
     "EquipMainTechnique",
     "FormRelationship",
     "FoundFaction",
+    "GrantItem",
     "GrantTechnique",
     "JoinFaction",
     "LeaveFaction",
     "PerformActionUnits",
     "PerformTimedAction",
+    "RefreshMarket",
     "RegisterCharacter",
+    "ResolveCombat",
+    "RestoreCombatCondition",
+    "SpendWangsheng",
+    "ToggleMarketOfferLock",
     "TransferFactionControl",
     "TravelWithinWorld",
     "V2GameEngine",
