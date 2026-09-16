@@ -63,7 +63,9 @@
       "companion_separation_heart_demon":25,"master_departure_affinity":-45,"disciple_expulsion_affinity":-25,
       "sect_departure_affinity":-15,"positive_affinity_threshold":30,"hostile_affinity_threshold":-25,
       "positive_event_base_chance":0.08,"positive_event_per_person":0.02,
-      "revenge_base_chance":0.10,"revenge_affinity_scale":0.004,"ally_protection_per_person":0.12,"ally_protection_cap":0.55
+      "revenge_base_chance":0.10,"revenge_affinity_scale":0.004,"ally_protection_per_person":0.12,"ally_protection_cap":0.55,
+      "revenge_cooldown_base_units":3,"revenge_cooldown_increment_units":2,"revenge_cooldown_max_units":15,
+      "relationship_release_affinity":0,"sanction_affinity_relief":8
     },
     "faction_conflict": {
       "control_realm":{"human":4,"demon":4,"spirit":6,"true_demon":6,"celestial":9,"asura":9},

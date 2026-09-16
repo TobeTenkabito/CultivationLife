@@ -366,7 +366,7 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         self.assertEqual(member["faction_id"], "tianjian")
         self.assertFalse(shown["dao_friends"][0]["can_invite_faction"])
 
-    def test_relationship_departures_apply_distinct_consequences(self):
+    def test_relationship_departures_reset_affinity_but_keep_other_consequences(self):
         created = self.engine.create_game("缘起缘灭", "supreme_metal", "dao", 922, preset_id="core")
         game = self.engine.store.load(created["id"])
         game.player.dao_companion = self.engine._generated_relationship(game.player, "companion", random.Random(4))
@@ -380,14 +380,16 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         after_companion = self.engine.store.load(created["id"])
         self.assertEqual(after_companion.player.heart_demon, initial_demon + 25)
         self.assertIsNone(after_companion.player.dao_companion)
-        self.assertEqual(after_companion.notable_npcs[companion_id].affinity, -18)
+        self.assertEqual(after_companion.notable_npcs[companion_id].affinity, 0)
 
         shown = self.engine.leave_relationship(created["id"], "master")
-        self.assertIsNone(self.engine.store.load(created["id"]).player.master)
+        after_master = self.engine.store.load(created["id"])
+        self.assertIsNone(after_master.player.master)
+        self.assertEqual(after_master.notable_npcs[master_id].affinity, 0)
         hostile_ids = {entry["id"] for entry in shown["personal_relations"]["low"]}
-        self.assertIn(master_id, hostile_ids)
+        self.assertNotIn(master_id, hostile_ids)
 
-    def test_leaving_sect_reduces_every_members_affinity(self):
+    def test_leaving_sect_resets_every_members_affinity(self):
         created = self.engine.create_game("辞山而去", "supreme_metal", "dao", 923, preset_id="core")
         game = self.engine.store.load(created["id"])
         game.player.faction_id = "tianjian"
@@ -398,7 +400,7 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         shown = self.engine.leave_faction(created["id"])
         saved = self.engine.store.load(created["id"])
         self.assertFalse(shown["faction"]["member"])
-        self.assertTrue(all(npc.affinity == -5 for npc in saved.sects["tianjian"].npcs))
+        self.assertTrue(all(npc.affinity == 0 for npc in saved.sects["tianjian"].npcs))
 
     def test_affinity_events_offer_gifts_and_allied_revenge_choices(self):
         created = self.engine.create_game("恩怨有报", "supreme_metal", "dao", 924, preset_id="core")

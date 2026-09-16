@@ -103,6 +103,7 @@ class ConcubineSystemMixin:
             if game.diplomacy_unit >= int(game.governance_actions.get(
                 f"relationship_sanction:{row['role']}:{row['id']}", -1,
             ))
+            and self._revenge_ready(game, "relationship_sanction", str(row["id"]))
         ]
 
     def _maybe_relationship_sanction(self, game: GameState, rng: random.Random) -> bool:
@@ -131,9 +132,10 @@ class ConcubineSystemMixin:
         event["runtime"] = {**copy.deepcopy(selected), "demand": demand}
         if selected["role"] in {"concubine_owner", "ghost_captor"}:
             event["body"] += f" 对方开出的价码是下品灵石 ×{demand}；不足部分会以机缘抵偿。"
-        game.governance_actions[
-            f"relationship_sanction:{selected['role']}:{selected['id']}"
-        ] = game.diplomacy_unit + 2
+        interval = self._record_revenge_trigger(
+            game, "relationship_sanction", str(selected["id"]),
+        )
+        event["runtime"]["revenge_cooldown_units"] = interval
         game.pending_event = event
         return True
 
@@ -145,14 +147,22 @@ class ConcubineSystemMixin:
             relation = player.master
             if relation:
                 player.party = [row for row in player.party if str(row.get("id")) != str(relation.get("id"))]
+                self._set_person_affinity(
+                    game, str(relation.get("id", "")),
+                    float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
+                )
             player.master = None
-            return "expelled", f"{name}将你逐出门墙；师徒关系就此解除。"
+            return "expelled", f"{name}将你逐出门墙；师徒关系就此解除，双方好感重置为中立。"
         relation = player.dao_companion
         if relation:
             player.party = [row for row in player.party if str(row.get("id")) != str(relation.get("id"))]
+            self._set_person_affinity(
+                game, str(relation.get("id", "")),
+                float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
+            )
         player.dao_companion = None
         player.heart_demon += float(WORLD_SYSTEMS["relationship"]["companion_separation_heart_demon"])
-        return "separated", f"{name}收回道侣信物、解散誓约；关系解除，心魔随之增长。"
+        return "separated", f"{name}收回道侣信物、解散誓约；双方好感重置为中立，心魔随之增长。"
 
     def _resolve_relationship_sanction(
         self, game: GameState, pending: dict[str, Any], role: str, mode: str,
@@ -221,13 +231,14 @@ class ConcubineSystemMixin:
                 return "appeased", f"你的解释暂时说动{name}（成功率 {chance:.0%}），这次索偿被撤回。"
             mode = "defy"
         if mode == "defy":
-            new_affinity = max(-100.0, affinity - 10)
+            relief = float(WORLD_SYSTEMS["relationship"].get("sanction_affinity_relief", 8))
+            new_affinity = min(100.0, affinity + relief)
             if npc:
                 npc.affinity = new_affinity
             status["affinity"] = new_affinity
             status["angered_until_unit"] = game.diplomacy_unit + 2
             game.player.hp = max(1.0, game.player.hp - max_hp(game.player) * 0.10)
-            return "defied", f"{name}因你的拒绝震怒，以主仆约束惩戒于你；HP 损失 10%，震怒持续两个行动单位。"
+            return "defied", f"{name}以主仆约束惩戒于你；HP 损失 10%，震怒持续两个行动单位。怒气宣泄后，双方好感缓和 {relief:g} 点。"
         raise ValueError("未知的主仆问罪应对")
 
     def _relationship_protectors(
@@ -504,8 +515,11 @@ class ConcubineSystemMixin:
                 if npc and existing.get("source") == "captive":
                     npc.alive = True
                     npc.death_reason = None
-                    npc.affinity = float(existing.get("affinity", 0))
-                result, summary = "dismissed", f"你遣散了{name}，此后不再以侍妾名分相待。"
+                self._set_person_affinity(
+                    game, str(existing.get("npc_id", target_id)),
+                    float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
+                )
+                result, summary = "dismissed", f"你遣散了{name}，双方好感重置为中立，此后不再以侍妾名分相待。"
             else:
                 raise ValueError("未知侍妾操作")
 
@@ -639,7 +653,11 @@ class ConcubineSystemMixin:
             if not owner or not owner.alive or owner.world != game.player.world or current_unit > expires:
                 continue
             record["last_checked_unit"] = current_unit
-            if triggered is None and rng.random() < self._proposal_revenge_chance(game, owner):
+            if (
+                triggered is None
+                and self._revenge_ready(game, "rejected_suitor", owner.id)
+                and rng.random() < self._proposal_revenge_chance(game, owner)
+            ):
                 triggered = record, owner
                 continue
             if current_unit < expires:
@@ -651,6 +669,9 @@ class ConcubineSystemMixin:
         event = self._instantiate_event(self.events_by_id["SYS_CONCUBINE_REVENGE"], game, rng)
         event["body"] = event["body"].replace("{owner_name}", owner.name)
         event["runtime"] = copy.deepcopy(record)
+        event["runtime"]["revenge_cooldown_units"] = self._record_revenge_trigger(
+            game, "rejected_suitor", owner.id,
+        )
         game.pending_event = event
         return True
 
@@ -683,25 +704,28 @@ class ConcubineSystemMixin:
         name = str(runtime.get("owner_name", "一位高阶修士"))
         if not owner or not owner.alive or owner.world != game.player.world:
             return "owner_absent", "追来之人已经离开当前界面，这场逼迫不了了之。"
+        relief = float(WORLD_SYSTEMS["relationship"].get("sanction_affinity_relief", 8))
         if method == "submit":
+            owner.affinity = min(100.0, float(owner.affinity or 0) + relief)
             self._set_concubine_status(game, runtime, forced=True)
-            return "submitted", f"你暂时向{name}低头，被强行带回府中；仍可在“缘·侍妾”中谋求脱身。"
+            return "submitted", f"你暂时向{name}低头，被强行带回府中；对方怒意缓和 {relief:g} 点，仍可在“缘·侍妾”中谋求脱身。"
         if method != "resist":
             raise ValueError("未知的逼迫应对方式")
         player_power = max(1.0, combat_power(game.player))
         owner_power = max(1.0, self._npc_power(owner))
         chance = max(0.08, min(0.75, 0.16 + 0.42 * player_power / (player_power + owner_power)))
         if rng.random() < chance:
-            owner.affinity = float(owner.affinity or 0) - 30
+            owner.affinity = min(100.0, float(owner.affinity or 0) + relief)
             game.player.concubine_escape_reputation += 1
             return "escaped_revenge", (
-                f"你拼死突破{name}的围堵，保住自由（成功率 {chance:.0%}）。此事传开，往后高阶修士强取你的概率大幅降低。"
+                f"你拼死突破{name}的围堵，保住自由（成功率 {chance:.0%}）。冲突过后双方好感缓和 {relief:g} 点；"
+                "此事传开，往后高阶修士强取你的概率大幅降低。"
             )
-        owner.affinity = float(owner.affinity or 0) - 18
+        owner.affinity = min(100.0, float(owner.affinity or 0) + relief)
         game.player.hp = max(1.0, game.player.hp - max_hp(game.player) * 0.22)
         self._set_concubine_status(game, runtime, forced=True)
         game.player.concubine_status["angered_until_unit"] = game.diplomacy_unit + 2
-        return "captured", f"反抗失败，你负伤后被{name}强行带走；对方震怒，两个行动单位内机缘抽取会更重。"
+        return "captured", f"反抗失败，你负伤后被{name}强行带走；冲突令双方好感缓和 {relief:g} 点，但两个行动单位内机缘抽取仍会更重。"
 
     def _escape_chance(
         self, game: GameState, owner: SectNpc, status: dict[str, Any], method: str,
@@ -743,12 +767,12 @@ class ConcubineSystemMixin:
             raise ValueError("未知的脱身方式")
         chance = self._escape_chance(game, owner, status, method)
         if rng.random() < chance:
-            owner.affinity = float(owner.affinity or 0) - (8 if method == "plead" else 25)
+            owner.affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
             game.player.concubine_status = None
             game.player.concubine_escape_reputation += 1
             return "escaped", (
                 f"你成功{'说服' if method == 'plead' else '逃离'}{owner.name}，重获自由（成功率 {chance:.0%}）。"
-                "消息传开，高阶修士顾忌名声，今后强取你的概率大幅降低。"
+                "双方好感重置为中立；消息传开，高阶修士顾忌名声，今后强取你的概率大幅降低。"
             )
         owner.affinity = float(owner.affinity or 0) - 18
         status["failed_escape_count"] = int(status.get("failed_escape_count", 0)) + 1

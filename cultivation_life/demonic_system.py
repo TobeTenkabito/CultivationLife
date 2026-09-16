@@ -194,7 +194,7 @@ class DemonicSystemMixin:
                 npc.alive = False
                 npc.death_reason = f"被{player.name}背叛并生擒"
             else:
-                npc.affinity = -100.0
+                npc.affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
 
     def captive_action(self, game_id: str, target_id: str, action: str) -> dict[str, Any]:
         game = self._load(game_id)

@@ -314,6 +314,7 @@ def test_low_affinity_master_uses_expulsion_event_instead_of_ambush(
     engine.store.save(game)
     resolved = engine.choose(game_id, "leave")
     assert resolved["player"]["master"] is None
+    assert engine._load(game_id).world_npcs[master.id].affinity == 0
 
 
 def test_owner_and_ghost_captor_use_dedicated_demand_event(
@@ -386,3 +387,53 @@ def test_defeated_ghost_captor_can_transfer_control(
     assert summary
     assert game.player.ghost_captor["npc_id"] == winner.id
     assert game.player.ghost_captor["controlled_form"] == "法器器灵"
+
+
+def test_revenge_cooldown_is_global_and_escalates_between_triggers(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    enemies = list(game.world_npcs.values())[:2]
+    for npc in game.world_npcs.values():
+        npc.affinity = 0
+        npc.world = game.player.world
+    for enemy in enemies:
+        enemy.affinity = -100
+
+    assert engine._maybe_personal_revenge(game, _AlwaysTrigger())
+    first_runtime = game.pending_event["runtime"]
+    assert first_runtime["revenge_cooldown_units"] == 3
+    first_next = game.governance_actions["revenge_cooldown:next"]
+    game.pending_event = None
+    assert not engine._maybe_personal_revenge(game, _AlwaysTrigger())
+
+    game.diplomacy_unit = first_next - 1
+    assert not engine._maybe_personal_revenge(game, _AlwaysTrigger())
+    game.diplomacy_unit = first_next
+    assert engine._maybe_personal_revenge(game, _AlwaysTrigger())
+    assert game.pending_event["runtime"]["revenge_cooldown_units"] == 5
+    assert game.governance_actions["revenge_cooldown:next"] == first_next + 5
+
+
+def test_owner_sanction_relief_softens_affinity_even_after_defiance(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    owner = next(iter(game.world_npcs.values()))
+    owner.affinity = -90
+    owner.world = game.player.world
+    engine._set_concubine_status(game, {
+        "owner_id": owner.id, "owner_name": owner.name,
+        "owner_realm_index": owner.realm_index, "owner_layer": owner.layer,
+        "owner_realm_name": engine._npc_realm_name(owner), "owner_world": owner.world,
+    })
+    pending = {"runtime": {
+        "role": "concubine_owner", "id": owner.id, "name": owner.name,
+    }}
+    result, _ = engine._resolve_relationship_sanction(
+        game, pending, "owner", "defy", _AlwaysTrigger(),
+    )
+    assert result == "defied"
+    assert owner.affinity == -82
