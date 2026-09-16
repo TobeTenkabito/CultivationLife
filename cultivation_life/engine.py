@@ -2060,7 +2060,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("只有加入宗门后才能直接向宗门 NPC 提出师徒请求")
         if role not in {"master", "disciple"}:
             raise ValueError("未知师徒关系类型")
-        npc = next((entry for entry in game.sects[player.faction_id].npcs if entry.id == npc_id and entry.alive), None)
+        sect = game.sects.get(player.faction_id)
+        npc = next(
+            (entry for entry in self._sect_members(game, sect) if entry.id == npc_id and entry.alive),
+            None,
+        ) if sect and not sect.extinct else None
         if not npc:
             raise ValueError("该宗门人物不存在或已经陨落")
         attempt_key = f"{role}:{npc_id}"
@@ -2426,13 +2430,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 low, high = WORLD_SYSTEMS["relationship"]["friend_spar_opportunity"]
                 gain = rng.randint(int(low), int(high))
                 self._add_opportunity(player, gain)
-                friend["affinity"] = float(friend.get("affinity", 20)) + 1
+                self._adjust_person_affinity(game, npc_id, 1)
                 result, summary = "friend_sparred", f"你与{friend['name']}点到为止地切磋数场，彼此印证招式，机缘 +{gain}。"
             elif action == "discuss":
                 low, high = WORLD_SYSTEMS["relationship"]["friend_discuss_opportunity"]
                 gain = rng.randint(int(low), int(high))
                 self._add_opportunity(player, gain)
-                friend["affinity"] = float(friend.get("affinity", 20)) + 2
+                self._adjust_person_affinity(game, npc_id, 2)
                 result, summary = "friend_discussed", f"你与{friend['name']}交换修炼心得，解开数处疑难，机缘 +{gain}。"
             else:
                 raise ValueError("未知道友互动")
@@ -3192,7 +3196,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
     def _adjust_person_affinity(self, game: GameState, npc_id: str, delta: float) -> float:
         npc = self._find_npc(game, npc_id)
         relation = next((entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
-        base = float(npc.affinity or 0) if npc else float(relation.get("affinity", 0) if relation else 0)
+        base = float(relation.get("affinity", 0)) if relation else float(npc.affinity or 0) if npc else 0.0
         value = base + float(delta)
         if npc:
             npc.affinity = value
@@ -7933,6 +7937,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         for relation in [player_data.get("master"), *player_data.get("disciples", [])]:
             if relation:
                 relation["can_invite_faction"] = self._relationship_can_join_faction(game, relation)
+                relation["can_invite_guest"] = self._intrigue_can_invite_guest(
+                    game, str(relation.get("id", "")),
+                )
                 relation["gender"] = str(relation.get("gender") or self._stable_gender(str(relation.get("id", ""))))
                 relation["gender_name"] = gender_name(relation["gender"])
                 relation["can_recruit_concubine"] = bool(
@@ -8303,6 +8310,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     and (npc.realm_index, npc.layer) <= (game.player.realm_index, game.player.layer)
                     and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
                 ),
+                "can_invite_guest": self._intrigue_can_invite_guest(game, npc.id),
             })
         return result
 
@@ -8334,6 +8342,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             and len(game.player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
         )
         result["can_invite_faction"] = self._relationship_can_join_faction(game, companion)
+        result["can_invite_guest"] = self._intrigue_can_invite_guest(
+            game, str(companion.get("id", "")),
+        )
         return result
 
     def _public_dao_friends(self, game: GameState) -> list[dict[str, Any]]:
@@ -8357,6 +8368,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 and len(game.player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
             )
             row["can_invite_faction"] = self._relationship_can_join_faction(game, friend)
+            row["can_invite_guest"] = self._intrigue_can_invite_guest(
+                game, str(friend.get("id", "")),
+            )
             result.append(row)
         return result
 
@@ -8399,6 +8413,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 npc.gender == "female" and self._rank(npc) <= self._rank(game.player)
                 and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
             ),
+            "can_invite_guest":self._intrigue_can_invite_guest(game, npc.id),
             "relationship":relationship_labels.get(npc.id,"相识"),
             "faction_name":self._faction_meta(game, self._npc_faction_id(game,npc.id))["name"] if self._npc_faction_id(game,npc.id) else None,
         } for npc in people.values() if float(npc.affinity or 0) >= high_threshold or float(npc.affinity or 0) <= low_threshold]

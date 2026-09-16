@@ -221,6 +221,44 @@ class IntrigueSystemMixin:
             return False
         return self._ensure_intrigue_faction(game, kind, faction_id).get("controller_id") == PLAYER_ID
 
+    @staticmethod
+    def _intrigue_player_relation(game: GameState, npc_id: str) -> dict[str, Any] | None:
+        relations = [
+            game.player.master, game.player.dao_companion,
+            *game.player.dao_friends, *game.player.disciples,
+        ]
+        return next(
+            (row for row in relations if row and str(row.get("id", "")) == npc_id),
+            None,
+        )
+
+    def _intrigue_can_invite_guest(
+        self, game: GameState, npc_id: str, kind: str = "sect",
+    ) -> bool:
+        if not self._intrigue_enabled() or not npc_id or kind == "race":
+            return False
+        faction_id = self._intrigue_player_faction_id(game, kind)
+        if not faction_id or not self._intrigue_has_control(game, kind, faction_id):
+            return False
+        record = self._ensure_intrigue_faction(game, kind, faction_id)
+        if any(str(row.get("npc_id", "")) == npc_id for row in record.get("guests", [])):
+            return False
+        if any(row.id == npc_id for row in self._intrigue_members(game, kind, faction_id)):
+            return False
+        npc = self._intrigue_find_npc(game, npc_id)
+        relation = self._intrigue_player_relation(game, npc_id)
+        source: Any = npc or relation
+        if not source:
+            return False
+        alive = source.alive if isinstance(source, SectNpc) else bool(source.get("alive", True))
+        world = source.world if isinstance(source, SectNpc) else str(source.get("world", game.player.world))
+        if not alive or world != game.player.world or self._intrigue_is_imprisoned(game, npc_id):
+            return False
+        npc_affinity = float(npc.affinity or 0) if npc else -100.0
+        relation_affinity = float(relation.get("affinity", 0)) if relation else -100.0
+        is_friend = any(str(row.get("id", "")) == npc_id for row in game.player.dao_friends)
+        return is_friend or max(npc_affinity, relation_affinity) >= 30.0
+
     def _intrigue_position_specs(self, kind: str) -> dict[str, dict[str, Any]]:
         return dict(intrigue_rules().get("positions", {}).get(kind, {}))
 
@@ -457,12 +495,31 @@ class IntrigueSystemMixin:
                 guests.append({**copy.deepcopy(guest), "name": name})
             candidates = []
             if kind != "race" and self._intrigue_has_control(game, kind, faction_id):
-                existing = {str(row.get("npc_id")) for row in record.get("guests", [])}
-                for npc in self._all_world_npcs(game):
-                    if (npc.alive and npc.world == game.player.world and npc.id not in existing
-                            and npc.id not in {row["id"] for row in members} and float(npc.affinity or 0) >= 30
-                            and not self._intrigue_is_imprisoned(game, npc.id)):
-                        candidates.append({"id": npc.id, "name": npc.name, "affinity": round(float(npc.affinity or 0), 1), "realm_index": npc.realm_index})
+                sources: dict[str, Any] = {npc.id: npc for npc in self._all_world_npcs(game)}
+                for relation in [
+                    game.player.master, game.player.dao_companion,
+                    *game.player.dao_friends, *game.player.disciples,
+                ]:
+                    if relation:
+                        sources.setdefault(str(relation.get("id", "")), relation)
+                for npc_id, source in sources.items():
+                    if not self._intrigue_can_invite_guest(game, npc_id, kind):
+                        continue
+                    relation = self._intrigue_player_relation(game, npc_id)
+                    if isinstance(source, SectNpc):
+                        name, realm_index = source.name, source.realm_index
+                        affinity = float(source.affinity or 0)
+                    else:
+                        name = str(source.get("name", "无名修士"))
+                        realm_index = int(source.get("realm_index", 0))
+                        affinity = float(source.get("affinity", 0))
+                    if relation:
+                        affinity = max(affinity, float(relation.get("affinity", 0)))
+                    candidates.append({
+                        "id": npc_id, "name": name, "affinity": round(affinity, 1),
+                        "realm_index": realm_index,
+                        "relationship": "道友" if any(str(row.get("id", "")) == npc_id for row in game.player.dao_friends) else "故交",
+                    })
                 candidates.sort(key=lambda row: (-row["affinity"], -row["realm_index"]))
             sections.append({
                 "kind": kind, "kind_name": {"sect": "宗门", "family": "家族", "race": "种族"}[kind],
@@ -637,11 +694,16 @@ class IntrigueSystemMixin:
             record = self._ensure_intrigue_faction(game, kind, faction_id)
             guests = record["guests"]
             if action == "invite":
+                if not self._intrigue_can_invite_guest(game, npc_id, kind):
+                    raise ValueError("目标不是当前界面的高好感人物或道友，或其身份不符合客卿邀请条件")
                 npc = self._intrigue_find_npc(game, npc_id)
-                if not npc or not npc.alive or npc.world != game.player.world or float(npc.affinity or 0) < 30:
-                    raise ValueError("目标关系、状态或所在界域不符合邀请条件")
-                if any(row.get("npc_id") == npc.id for row in guests):
-                    raise ValueError("目标已经是本势力客卿")
+                relation = self._intrigue_player_relation(game, npc_id)
+                if not npc and relation:
+                    npc = self._persist_relationship_npc(game, relation, "受邀担任客卿")
+                if not npc:
+                    raise ValueError("目标人物已经失联")
+                if relation:
+                    npc.affinity = max(float(npc.affinity or 0), float(relation.get("affinity", 0)))
                 personality = self._ensure_intrigue_personality(game, npc)
                 chance = 0.48 + float(npc.affinity or 0) / 180 + (0.08 if personality["primary"] in {"smooth", "open", "greedy"} else 0) - (0.12 if personality["primary"] in {"suspicious", "conservative"} else 0)
                 source_faction = self._npc_faction_id(game, npc.id)
