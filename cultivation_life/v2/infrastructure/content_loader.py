@@ -15,6 +15,9 @@ from ..domain.definitions import (
     RealmDefinition,
     RootDefinition,
     TechniqueDefinition,
+    StoryChoiceDefinition,
+    StoryEffectDefinition,
+    StoryEventDefinition,
     WorldDefinition,
 )
 from .extension_loader import load_extension_documents, read_json_document
@@ -38,6 +41,10 @@ class V2ContentLoader:
     ) -> GameDefinitions:
         directory = Path(directory)
         documents = {name: cls._read(directory / name) for name in cls.REQUIRED_FILES}
+        event_paths = [directory / "events.json", *sorted(directory.glob("*_events.json"))]
+        for path in event_paths:
+            if path.is_file():
+                documents[path.name] = cls._read(path)
         documents, extensions = load_extension_documents(
             documents,
             Path(project_root) if project_root is not None else directory.parent,
@@ -71,6 +78,7 @@ class V2ContentLoader:
         market_goods = cls._market_goods(market_doc, items, techniques)
         worlds = cls._worlds(world_doc, maps_doc)
         factions = cls._factions(faction_doc, worlds)
+        story_events = cls._story_events(documents, items, techniques, factions)
         faction_rewards = {
             str(reward_id): dict(reward)
             for reward_id, reward in dict(faction_doc.get("rewards", {})).items()
@@ -127,7 +135,94 @@ class V2ContentLoader:
                 for name, document in documents.items()
                 if name not in cls.REQUIRED_FILES
             },
+            story_events=story_events,
         )
+
+    @staticmethod
+    def _story_events(
+        documents: dict[str, dict[str, Any]],
+        items: dict[str, ItemDefinition],
+        techniques: dict[str, TechniqueDefinition],
+        factions: dict[str, FactionDefinition],
+    ) -> dict[str, StoryEventDefinition]:
+        result: dict[str, StoryEventDefinition] = {}
+        queue_references: list[tuple[str, str]] = []
+        for filename in sorted(
+            name for name in documents
+            if name == "events.json" or name.endswith("_events.json")
+        ):
+            document = documents[filename]
+            rows = document.get("events", [])
+            if not isinstance(rows, list):
+                raise V2ContentError(f"事件文件 {filename} 缺少events数组")
+            document_world = str(document.get("world", ""))
+            for raw in rows:
+                if not isinstance(raw, dict):
+                    raise V2ContentError(f"事件文件 {filename} 包含非对象事件")
+                event_id = str(raw.get("id", ""))
+                if not event_id or event_id in result:
+                    raise V2ContentError(f"事件ID缺失或重复：{event_id}")
+                raw_choices = raw.get("choices", [])
+                if not raw.get("title") or not isinstance(raw_choices, list) or not raw_choices:
+                    raise V2ContentError(f"事件 {event_id} 缺少标题或选项")
+                choices: list[StoryChoiceDefinition] = []
+                choice_ids: set[str] = set()
+                for raw_choice in raw_choices:
+                    if not isinstance(raw_choice, dict):
+                        raise V2ContentError(f"事件 {event_id} 包含非对象选项")
+                    choice_id = str(raw_choice.get("id", ""))
+                    if not choice_id or choice_id in choice_ids:
+                        raise V2ContentError(f"事件 {event_id} 的选项ID缺失或重复")
+                    choice_ids.add(choice_id)
+                    effects: list[StoryEffectDefinition] = []
+                    for raw_effect in raw_choice.get("effects", []):
+                        if not isinstance(raw_effect, dict) or not raw_effect.get("type"):
+                            raise V2ContentError(f"事件 {event_id} 包含无类型效果")
+                        payload = {
+                            str(key): value for key, value in raw_effect.items()
+                            if key != "type"
+                        }
+                        kind = str(raw_effect["type"])
+                        if kind in {"add_item", "remove_item"} and str(payload.get("item_id")) not in items:
+                            raise V2ContentError(f"事件 {event_id} 引用未知物品")
+                        if kind in {"learn_technique", "equip_technique"} and str(payload.get("technique_id")) not in techniques:
+                            raise V2ContentError(f"事件 {event_id} 引用未知功法")
+                        if kind == "join_faction" and str(payload.get("faction_id")) not in factions:
+                            raise V2ContentError(f"事件 {event_id} 引用未知势力")
+                        if kind == "queue_event":
+                            queue_references.append((event_id, str(payload.get("event_id", ""))))
+                        effects.append(StoryEffectDefinition(kind=kind, payload=payload))
+                    choices.append(StoryChoiceDefinition(
+                        id=choice_id,
+                        text=str(raw_choice.get("text", choice_id)),
+                        effects=tuple(effects),
+                        conditions=dict(raw_choice.get("conditions", {})),
+                        disabled_reason=str(raw_choice.get("disabled_reason", "当前条件不满足")),
+                        result_text=str(raw_choice.get("result_text", "你做出了选择。")),
+                    ))
+                tags = list(map(str, raw.get("tags", [])))
+                if document_world:
+                    tags.append(f"world:{document_world}")
+                result[event_id] = StoryEventDefinition(
+                    id=event_id,
+                    version=int(raw.get("version", 1)),
+                    title=str(raw["title"]),
+                    body=str(raw.get("body", "")),
+                    category=str(raw.get("category", "story")),
+                    tags=tuple(dict.fromkeys(tags)),
+                    weight=float(raw.get("weight", 1)),
+                    intent_weights={
+                        str(key): float(value)
+                        for key, value in dict(raw.get("intent_weights", {})).items()
+                    },
+                    repeat=str(raw.get("repeat", "repeatable")),
+                    conditions=dict(raw.get("conditions", {})),
+                    choices=tuple(choices),
+                )
+        for source_id, target_id in queue_references:
+            if target_id not in result:
+                raise V2ContentError(f"事件 {source_id} 排入未知后续事件：{target_id}")
+        return result
 
     @staticmethod
     def _realm(row: dict[str, Any]) -> RealmDefinition:

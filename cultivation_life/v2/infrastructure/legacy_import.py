@@ -19,6 +19,7 @@ from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
 from ..domain.extensions import GHOST_SOUL, MONSTER_BLOODLINE
 from ..domain.factions import FACTION_GOVERNANCE, FACTION_PROFILE, MEMBERSHIP
+from ..domain.story import STORY_STATE
 from ..domain.world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState
@@ -230,7 +231,7 @@ class LegacyV1Importer:
 
     _MAPPED_TOP_LEVEL = {
         "id", "seed", "player", "created_at", "updated_at", "rng_state",
-        "version",
+        "version", "history", "story_trigger_attempts",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -249,6 +250,7 @@ class LegacyV1Importer:
         "ghost_soul_erosion_time_progress", "ghost_wangsheng_energy",
         "ghost_reincarnation_imprints", "ghost_intrinsic_highwater_realm",
         "ghost_intrinsic_highwater_layer",
+        "story_flags", "milestones", "karma", "fame", "sha_qi",
     }
 
     def __init__(self, definitions: GameDefinitions, commands: CommandBus):
@@ -347,6 +349,7 @@ class LegacyV1Importer:
         self._import_faction(state, actor_id, source, player, report)
         self._import_extensions(state, actor_id, player, report)
         self._import_combat_condition(state, actor_id, player, report)
+        self._import_story(state, actor_id, source, player, report)
         self._audit_deferred_fields(source, player, report)
 
         report.imported_counts.setdefault("characters", 1)
@@ -885,6 +888,53 @@ class LegacyV1Importer:
         if hp > float(snapshot["max_hp"]) or mp > float(snapshot["max_mp"]):
             report.warn("combat_stat_clamped", "player.hp/mp", "V1绝对战斗资源超过V2派生上限，已按满状态导入")
         state.entities.put(actor_id, CONDITION, {"hp_ratio": hp_ratio, "mp_ratio": mp_ratio})
+
+    def _import_story(
+        self,
+        state: WorldState,
+        actor_id: str,
+        source: dict[str, Any],
+        player: dict[str, Any],
+        report: LegacyImportReport,
+    ) -> None:
+        history: list[dict[str, Any]] = []
+        for raw in source.get("history", []):
+            if not isinstance(raw, dict) or not str(raw.get("event_id", "")):
+                continue
+            history.append({
+                "event_id": str(raw["event_id"]),
+                "version": int(raw.get("version", 1)),
+                "year": max(0, int(raw.get("age", state.clock.year))),
+                "title": str(raw.get("title", "")),
+                "choice_id": raw.get("choice_id"),
+                "result": str(raw.get("result", "legacy")),
+                "summary": str(raw.get("summary", "")),
+                "tags": list(map(str, raw.get("tags", []))),
+                "imported": True,
+            })
+        flags = list(dict.fromkeys(map(str, player.get("story_flags", []))))
+        milestones = {
+            str(key): max(0, int(value))
+            for key, value in dict(player.get("milestones", {})).items()
+        }
+        state.entities.put(actor_id, STORY_STATE, {
+            "pending": None,
+            "queue": [],
+            "history": history,
+            "flags": flags,
+            "milestones": milestones,
+            "attributes": {
+                "karma": max(0.0, _safe_float(player.get("karma", 0), "player.karma")),
+                "fame": max(0.0, _safe_float(player.get("fame", 0), "player.fame")),
+                "sha_qi": max(0.0, _safe_float(player.get("sha_qi", 0), "player.sha_qi")),
+            },
+            "trigger_attempts": {
+                str(key): max(0, int(value))
+                for key, value in dict(source.get("story_trigger_attempts", {})).items()
+            },
+        })
+        report.imported_counts["story_history"] = len(history)
+        report.imported_counts["story_flags"] = len(flags)
 
     def _audit_deferred_fields(
         self,

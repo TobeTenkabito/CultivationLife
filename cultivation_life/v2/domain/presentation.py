@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from .character import IDENTITY
 from .definitions import GameDefinitions
@@ -45,12 +45,14 @@ class UpdateSetting:
     actor_id: str
     setting: str
     enabled: bool
+    allow_during_interaction: ClassVar[bool] = True
 
 
 @dataclass(frozen=True, slots=True)
 class SetWorldNewsDebug:
     actor_id: str
     enabled: bool
+    allow_during_interaction: ClassVar[bool] = True
 
 
 @dataclass(frozen=True, slots=True)

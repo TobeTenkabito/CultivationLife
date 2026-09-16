@@ -179,6 +179,37 @@ class ExtensionDefinition:
 
 
 @dataclass(frozen=True, slots=True)
+class StoryEffectDefinition:
+    kind: str
+    payload: dict[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class StoryChoiceDefinition:
+    id: str
+    text: str
+    effects: tuple[StoryEffectDefinition, ...]
+    conditions: dict[str, Any]
+    disabled_reason: str
+    result_text: str
+
+
+@dataclass(frozen=True, slots=True)
+class StoryEventDefinition:
+    id: str
+    version: int
+    title: str
+    body: str
+    category: str
+    tags: tuple[str, ...]
+    weight: float
+    intent_weights: dict[str, float]
+    repeat: str
+    conditions: dict[str, Any]
+    choices: tuple[StoryChoiceDefinition, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class GameDefinitions:
     realms: tuple[RealmDefinition, ...]
     roots: dict[str, RootDefinition]
@@ -199,6 +230,7 @@ class GameDefinitions:
     systems: dict[str, Any]
     extensions: tuple[ExtensionDefinition, ...]
     extension_documents: dict[str, dict[str, Any]]
+    story_events: dict[str, StoryEventDefinition]
 
     def realm_index(self, realm_id: str) -> int:
         for index, definition in enumerate(self.realms):

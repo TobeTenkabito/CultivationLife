@@ -36,6 +36,7 @@ from .domain.extensions import (
 )
 from .domain.relations import EndRelationship, FormRelationship
 from .domain.world import TravelWithinWorld
+from .domain.story import QueueStoryEvent, ResolveStoryChoice
 
 __all__ = [
     "AttemptBreakthrough",
@@ -56,6 +57,8 @@ __all__ = [
     "PerformActionUnits",
     "PerformTimedAction",
     "RefreshMarket",
+    "ResolveStoryChoice",
+    "QueueStoryEvent",
     "RegisterCharacter",
     "ResolveCombat",
     "RestoreCombatCondition",

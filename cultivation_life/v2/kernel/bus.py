@@ -12,6 +12,7 @@ from .model import EventEnvelope, EventScope, WorldState
 
 CommandHandler = Callable[["SimulationContext", object], None]
 EventHandler = Callable[["SimulationContext", EventEnvelope], None]
+CommandGuard = Callable[[WorldState, object], None]
 
 
 class EventBus:
@@ -95,6 +96,12 @@ class CommandBus:
     def __init__(self, event_bus: EventBus | None = None) -> None:
         self.event_bus = event_bus or EventBus()
         self._handlers: dict[type[object], CommandHandler] = {}
+        self._guards: list[CommandGuard] = []
+
+    def add_guard(self, guard: CommandGuard) -> None:
+        if guard in self._guards:
+            raise ValueError("命令守卫重复注册")
+        self._guards.append(guard)
 
     def register(self, command_type: type[object], handler: CommandHandler) -> None:
         if command_type in self._handlers:
@@ -105,6 +112,8 @@ class CommandBus:
         handler = self._handlers.get(type(command))
         if handler is None:
             raise ValueError(f"未注册的V2命令：{type(command).__name__}")
+        for guard in self._guards:
+            guard(state, command)
         context = SimulationContext(state=state, event_bus=self.event_bus)
         handler(context, command)
         context.persist_rng()

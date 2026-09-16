@@ -13,6 +13,12 @@ from .domain.character import (
     character_view,
     register_character_domain,
 )
+from .domain.actions import (
+    action_invariants,
+    action_view,
+    reconcile_action_runtime,
+    register_action_domain,
+)
 from .domain.cultivation import (
     AttemptBreakthrough,
     PerformActionUnits,
@@ -59,6 +65,14 @@ from .domain.presentation import (
     register_presentation_domain,
 )
 from .domain.world import TravelWithinWorld, register_world_domain, world_invariants, world_view
+from .domain.story import (
+    QueueStoryEvent,
+    ResolveStoryChoice,
+    reconcile_story_state,
+    register_story_domain,
+    story_invariants,
+    story_view,
+)
 from .infrastructure.content_loader import V2ContentLoader
 from .infrastructure.legacy_import import (
     LEGACY_AUDIT,
@@ -109,6 +123,7 @@ class V2GameEngine:
         self.commands = CommandBus()
         self.invariants = InvariantRegistry()
         register_character_domain(self.commands, self.definitions)
+        register_action_domain(self.commands)
         register_cultivation_domain(self.commands, self.definitions)
         register_world_domain(self.commands, self.definitions)
         register_relationship_domain(self.commands)
@@ -117,7 +132,9 @@ class V2GameEngine:
         register_combat_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
+        self.story_effects = register_story_domain(self.commands, self.definitions)
         self.invariants.register("character", character_invariants)
+        self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
         self.invariants.register("world", world_invariants(self.definitions))
         self.invariants.register("relations", relationship_invariants)
@@ -126,6 +143,7 @@ class V2GameEngine:
         self.invariants.register("combat", combat_invariants)
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
+        self.invariants.register("story", story_invariants(self.definitions))
 
     def create_game(
         self,
@@ -152,6 +170,8 @@ class V2GameEngine:
         ))
         reconcile_extension_state(state, self.definitions)
         reconcile_presentation_state(state)
+        reconcile_action_runtime(state)
+        reconcile_story_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -184,6 +204,8 @@ class V2GameEngine:
         state = result.state
         reconcile_extension_state(state, self.definitions)
         reconcile_presentation_state(state)
+        reconcile_action_runtime(state)
+        reconcile_story_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -226,6 +248,8 @@ class V2GameEngine:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_presentation_state(state)
+        reconcile_action_runtime(state)
+        reconcile_story_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -361,10 +385,33 @@ class V2GameEngine:
             ),
         )
 
+    def choose(self, game_id: str, choice_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, ResolveStoryChoice(actor_id=actor_id, choice_id=choice_id),
+        )
+
+    def queue_story_event(
+        self, game_id: str, event_id: str, *, reason: str = "scripted",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            QueueStoryEvent(actor_id=actor_id, event_id=event_id, reason=reason),
+        )
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_presentation_state(state)
+        reconcile_action_runtime(state)
+        reconcile_story_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -379,7 +426,10 @@ class V2GameEngine:
         cultivation = cultivation_view(state, self.definitions)
         current_world = world_view(state, self.definitions)
         presentation = presentation_view(state)
+        story = story_view(state)
+        action = action_view(state)
         alive = bool(player["alive"])
+        interaction_open = story["pending_event"] is not None
         return {
             "format": "cultivation-life-v2",
             "id": state.game_id,
@@ -398,30 +448,39 @@ class V2GameEngine:
             "settings": presentation["settings"],
             "debug_world_news": presentation["debug_world_news"],
             "world_news": presentation["world_news"],
+            "pending_event": story["pending_event"],
+            "story": {
+                "queued_event_count": story["queued_event_count"],
+                "history": story["history"],
+                "flags": story["flags"],
+                "milestones": story["milestones"],
+                "attributes": story["attributes"],
+            },
+            "action": action,
             "capabilities": {
                 "character.cultivate": {
-                    "enabled": alive,
-                    "reason": None if alive else "角色已经死亡",
+                    "enabled": alive and not interaction_open,
+                    "reason": "请先处理当前事件" if interaction_open else None if alive else "角色已经死亡",
                 },
                 "character.rest": {
-                    "enabled": alive,
-                    "reason": None if alive else "角色已经死亡",
+                    "enabled": alive and not interaction_open,
+                    "reason": "请先处理当前事件" if interaction_open else None if alive else "角色已经死亡",
                 },
                 "cultivation.breakthrough": {
-                    "enabled": alive and cultivation["bottleneck"] in {"minor", "major"},
-                    "reason": None if alive and cultivation["bottleneck"] else "尚未抵达突破瓶颈",
+                    "enabled": alive and not interaction_open and cultivation["bottleneck"] in {"minor", "major"},
+                    "reason": "请先处理当前事件" if interaction_open else None if alive and cultivation["bottleneck"] else "尚未抵达突破瓶颈",
                 },
                 "world.travel": {
-                    "enabled": alive,
-                    "reason": None if alive else "角色已经死亡",
+                    "enabled": alive and not interaction_open,
+                    "reason": "请先处理当前事件" if interaction_open else None if alive else "角色已经死亡",
                 },
                 "economy.market": {
-                    "enabled": alive and cultivation["realm_index"] > 0,
-                    "reason": None if alive and cultivation["realm_index"] > 0 else "凡人或死亡角色无法进入坊市",
+                    "enabled": alive and not interaction_open and cultivation["realm_index"] > 0,
+                    "reason": "请先处理当前事件" if interaction_open else None if alive and cultivation["realm_index"] > 0 else "凡人或死亡角色无法进入坊市",
                 },
                 "combat.initiate": {
-                    "enabled": alive,
-                    "reason": None if alive else "角色已经死亡",
+                    "enabled": alive and not interaction_open,
+                    "reason": "请先处理当前事件" if interaction_open else None if alive else "角色已经死亡",
                 },
             },
         }

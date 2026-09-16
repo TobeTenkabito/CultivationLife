@@ -107,6 +107,20 @@ def _on_character_created(context: SimulationContext, event: EventEnvelope) -> N
     context.state.entities.put(entity_id, MARKET, {"revision": 0, "offers": []})
 
 
+def _on_story_inventory_changed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        _change_item(
+            context,
+            definitions,
+            str(event.payload["entity_id"]),
+            str(event.payload["item_id"]),
+            int(event.payload["quantity"]),
+            str(event.payload.get("reason", "story")),
+        )
+
+    return handler
+
+
 def _grant_item_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, GrantItem):
@@ -391,6 +405,9 @@ def register_economy_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.register(ToggleMarketOfferLock, _toggle_lock)
     bus.register(BuyMarketOffer, _buy_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created)
+    bus.event_bus.register(
+        "story.effect.inventory.changed", _on_story_inventory_changed(definitions)
+    )
 
 
 def inventory_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):

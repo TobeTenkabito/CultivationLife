@@ -37,8 +37,17 @@ class TimeService:
     def advance(context: SimulationContext, years: int, *, source: str) -> None:
         if not isinstance(years, int) or isinstance(years, bool) or years <= 0:
             raise ValueError("耗时必须是正整数年")
+        TimeService.advance_to(
+            context, context.state.clock.year + years, source=source,
+        )
+
+    @staticmethod
+    def advance_to(context: SimulationContext, target_year: int, *, source: str) -> None:
+        if not isinstance(target_year, int) or isinstance(target_year, bool):
+            raise ValueError("目标年份必须是整数")
         start_year = context.state.clock.year
-        target_year = start_year + years
+        if target_year < start_year:
+            raise ValueError("模拟时钟不能倒退")
         cursor = start_year
         while not context.time_halted:
             scheduled = context.state.scheduler.next_due_through(target_year)
@@ -88,7 +97,10 @@ def validate_kernel_state(state: WorldState) -> list[str]:
     scheduled_sequences = [event.sequence for event in state.scheduler.events]
     if len(scheduled_sequences) != len(set(scheduled_sequences)):
         errors.append("调度事件序号重复")
-    if any(event.due_year <= state.clock.year for event in state.scheduler.events):
+    # An interaction may halt time immediately after the clock reaches a year
+    # but before all work scheduled for that year has run.  Such events are
+    # resumable; only events strictly in the past are corrupt.
+    if any(event.due_year < state.clock.year for event in state.scheduler.events):
         errors.append("存在未结算的过期调度事件")
     relation_ids = list(state.relations.edges)
     if len(relation_ids) != len(set(relation_ids)):

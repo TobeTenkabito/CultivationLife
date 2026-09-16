@@ -40,6 +40,13 @@ class V2CoreDomainTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def _resolve_pending(self, game_id: str) -> dict:
+        game = self.engine.get_game(game_id)
+        while game["pending_event"] is not None:
+            choice = next(row for row in game["pending_event"]["choices"] if row["enabled"])
+            game = self.engine.choose(game_id, choice["id"]).game
+        return game
+
     def _register_npc(
         self,
         game_id: str,
@@ -84,7 +91,7 @@ class V2CoreDomainTests(unittest.TestCase):
             spirit_root="supreme_fire",
             start_world="demon",
         )
-        self.assertEqual(game["schema_version"], 4)
+        self.assertEqual(game["schema_version"], 5)
         self.assertEqual(game["player"]["gender"], "female")
         self.assertEqual(game["player"]["cultivation"]["path"], "demonic")
         self.assertEqual(
@@ -110,6 +117,7 @@ class V2CoreDomainTests(unittest.TestCase):
         self.assertEqual(trained["player"]["cultivation"]["bottleneck"], "major")
         self.assertEqual(trained["player"]["cultivation"]["opportunity"], 30)
 
+        self._resolve_pending(game["id"])
         broken = self.engine.attempt_breakthrough(game["id"])
         self.assertEqual(broken.game["player"]["cultivation"]["realm_id"], "qi")
         self.assertEqual(broken.game["player"]["cultivation"]["layer"], 1)
@@ -141,7 +149,10 @@ class V2CoreDomainTests(unittest.TestCase):
         self.assertEqual(travelled.game["clock"]["year"], 3)
         self.assertEqual(travelled.game["player"]["age"], 19)
         self.assertEqual(travelled.game["world"]["location_id"], "lanjiang_steppe")
-        self.assertEqual(travelled.events[-1]["event_type"], "world.travel.arrived")
+        self.assertTrue(any(
+            event["event_type"] == "world.travel.arrived" for event in travelled.events
+        ))
+        self.assertEqual(travelled.events[-1]["event_type"], "story.interaction.opened")
 
     def test_lifespan_stops_long_action_at_exact_year_and_cancels_remaining_ticks(self):
         game = self.engine.create_game("寿尽", seed=505)
@@ -346,6 +357,7 @@ class V2CoreDomainTests(unittest.TestCase):
         self.assertEqual(
             rewarded["combat"]["snapshot"]["power"], before_power + 3 * elapsed
         )
+        self._resolve_pending(game["id"])
         left = self.engine.execute(
             game["id"], LeaveFaction(character_id=actor_id)
         ).game
@@ -415,7 +427,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                         ),
                     )
             migrated = engine.get_game(game_id)
-            self.assertEqual(migrated["schema_version"], 4)
+            self.assertEqual(migrated["schema_version"], 5)
             self.assertEqual(migrated["player"]["gender"], "male")
             self.assertEqual(migrated["player"]["cultivation"]["opportunity"], 4)
             engine.perform_timed_action(game_id, "rest", 1)
@@ -423,7 +435,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                 stored_version = connection.execute(
                     "SELECT schema_version FROM games WHERE game_id = ?", (game_id,)
                 ).fetchone()[0]
-            self.assertEqual(stored_version, 4)
+            self.assertEqual(stored_version, 5)
 
 
 if __name__ == "__main__":

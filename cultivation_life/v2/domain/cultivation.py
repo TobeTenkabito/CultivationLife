@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .character import ACTIVITY, IDENTITY, LIFE, PerformTimedAction
+from .actions import begin_action, complete_action
 from .definitions import GameDefinitions, QI_SOURCES, RootDefinition, TechniqueDefinition
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -107,7 +108,13 @@ def _schedule_action(
         raise ValueError("未知的V2耗时行动")
     if not isinstance(years, int) or isinstance(years, bool) or not 1 <= years <= 1_000:
         raise ValueError("单次行动必须耗时1至1000年")
-    action_token = f"action:{context.state.next_event_sequence}:{actor_id}"
+    action_token = begin_action(
+        context,
+        actor_id=actor_id,
+        action=action,
+        years=years,
+        source=f"cultivation.action.{action}",
+    )
     start_year = context.state.clock.year
     for offset in range(1, years + 1):
         context.state.scheduler.schedule(
@@ -302,6 +309,7 @@ def _on_action_tick(definitions: GameDefinitions):
             activity["rest_years"] = int(activity["rest_years"]) + 1
         if final:
             activity["actions_completed"] = int(activity["actions_completed"]) + 1
+            context.state.entities.put(actor_id, ACTIVITY, activity)
             context.emit(
                 "cultivation.action.completed",
                 source="cultivation",
@@ -313,7 +321,14 @@ def _on_action_tick(definitions: GameDefinitions):
                     "action_token": event.payload["action_token"],
                 },
             )
-        context.state.entities.put(actor_id, ACTIVITY, activity)
+            complete_action(
+                context,
+                actor_id=actor_id,
+                token=str(event.payload["action_token"]),
+                metadata={"cultivation_gain": gain},
+            )
+        else:
+            context.state.entities.put(actor_id, ACTIVITY, activity)
 
     return handler
 
@@ -412,6 +427,51 @@ def _on_technique_purchased(definitions: GameDefinitions):
             technique_id=str(event.payload["technique_id"]),
             equip_main=False,
         ))
+
+    return handler
+
+
+def _on_story_cultivation_changed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        field = str(event.payload["field"])
+        if field not in {"opportunity", "heart_demon"}:
+            raise ValueError("未知剧情修炼字段")
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        cultivation[field] = max(
+            0.0, float(cultivation.get(field, 0)) + float(event.payload["amount"])
+        )
+        if field == "opportunity":
+            _mark_bottleneck(context, definitions, actor_id, cultivation)
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+
+    return handler
+
+
+def _on_story_technique_learned(definitions: GameDefinitions):
+    grant = _grant_technique_handler(definitions)
+
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        grant(context, GrantTechnique(
+            actor_id=str(event.payload["entity_id"]),
+            technique_id=str(event.payload["technique_id"]),
+            equip_main=False,
+        ))
+
+    return handler
+
+
+def _on_story_technique_equipped(definitions: GameDefinitions):
+    grant = _grant_technique_handler(definitions)
+    equip = _equip_technique_handler(definitions)
+
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        technique_id = str(event.payload["technique_id"])
+        grant(context, GrantTechnique(
+            actor_id=actor_id, technique_id=technique_id, equip_main=False,
+        ))
+        equip(context, EquipMainTechnique(actor_id=actor_id, technique_id=technique_id))
 
     return handler
 
@@ -591,6 +651,15 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     bus.register(AttemptBreakthrough, _attempt_breakthrough_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created(definitions))
     bus.event_bus.register("economy.technique.purchased", _on_technique_purchased(definitions))
+    bus.event_bus.register(
+        "story.effect.cultivation.changed", _on_story_cultivation_changed(definitions)
+    )
+    bus.event_bus.register(
+        "story.effect.technique.learned", _on_story_technique_learned(definitions)
+    )
+    bus.event_bus.register(
+        "story.effect.technique.equipped", _on_story_technique_equipped(definitions)
+    )
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
     bus.event_bus.register("character.died", _on_character_died)
 

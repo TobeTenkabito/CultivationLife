@@ -46,6 +46,11 @@ class V2LegacyImportTests(unittest.TestCase):
         game.player.faction_hp_bonus = 6
         game.player.faction_mp_bonus = 8
         game.player.faction_combat_bonus = 9
+        game.player.story_flags = ["legacy_story_flag"]
+        game.player.milestones = {"legacy_milestone": 22}
+        game.player.karma = 7
+        game.player.fame = 11
+        game.player.sha_qi = 13
         game.player.dao_friends = [{
             "id": "friend-old-1",
             "name": "旧雨",
@@ -90,6 +95,13 @@ class V2LegacyImportTests(unittest.TestCase):
             {row["id"]: row["quantity"] for row in result.game["inventory"]},
             {"spirit_sword": 1},
         )
+        self.assertIn("legacy_story_flag", result.game["story"]["flags"])
+        self.assertEqual(result.game["story"]["milestones"]["legacy_milestone"], 22)
+        self.assertEqual(
+            result.game["story"]["attributes"],
+            {"karma": 7.0, "fame": 11.0, "sha_qi": 13.0},
+        )
+        self.assertTrue(result.game["story"]["history"])
         self.assertEqual(result.report["source_version"], 5)
         self.assertEqual(result.report["imported_counts"]["relationships"], 1)
         self.assertTrue(result.report["source_sha256"])
@@ -258,7 +270,7 @@ class V1V2ShadowTests(unittest.TestCase):
             report.steps[0].v2["inventory"],
             {"spirit_sword": 1},
         )
-        self.assertEqual(report.status, "diverged")
+        self.assertEqual(report.status, "matched")
 
     def test_creation_failure_is_reported_instead_of_crashing_harness(self):
         runner = ShadowRunner(

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .character import IDENTITY, LIFE
+from .actions import begin_action, complete_action
 from .definitions import GameDefinitions
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState
@@ -59,6 +60,14 @@ def _travel_handler(definitions: GameDefinitions):
         target = world.locations[command.destination_id]
         if not plan.accessible and target.failure != "lethal":
             raise ValueError(plan.warning)
+        action_token = begin_action(
+            context,
+            actor_id=command.actor_id,
+            action="travel",
+            years=plan.years,
+            source="world.travel",
+            metadata={"destination_id": plan.destination},
+        )
         context.state.scheduler.schedule(
             due_year=context.state.clock.year + plan.years,
             event_type=TRAVEL_DUE,
@@ -73,6 +82,7 @@ def _travel_handler(definitions: GameDefinitions):
                 "years": plan.years,
                 "lethal": not plan.accessible,
                 "warning": plan.warning,
+                "action_token": action_token,
             },
         )
         TimeService.advance(context, plan.years, source="world.travel")
@@ -104,6 +114,12 @@ def _on_travel_due(context: SimulationContext, event: EventEnvelope) -> None:
         source="world",
         scope=EventScope.entity(actor_id),
         payload=dict(event.payload),
+    )
+    complete_action(
+        context,
+        actor_id=actor_id,
+        token=str(event.payload["action_token"]),
+        metadata={"destination_id": event.payload["destination_id"]},
     )
     if bool(event.payload.get("lethal")):
         context.emit(
