@@ -92,6 +92,14 @@ from .domain.story import (
     story_invariants,
     story_view,
 )
+from .domain.trials import (
+    BeginAscensionTrial,
+    reconcile_trial_state,
+    register_trial_domain,
+    register_trial_story_effects,
+    trial_invariants,
+    trial_view,
+)
 from .infrastructure.content_loader import V2ContentLoader
 from .infrastructure.legacy_import import (
     LEGACY_AUDIT,
@@ -145,6 +153,7 @@ class V2GameEngine:
         register_action_domain(self.commands)
         register_cultivation_domain(self.commands, self.definitions)
         register_advanced_cultivation_domain(self.commands, self.definitions)
+        register_trial_domain(self.commands, self.definitions)
         register_world_domain(self.commands, self.definitions)
         register_relationship_domain(self.commands)
         register_faction_domain(self.commands, self.definitions)
@@ -153,12 +162,14 @@ class V2GameEngine:
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
+        register_trial_story_effects(self.story_effects, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
         self.invariants.register(
             "advanced_cultivation", advanced_cultivation_invariants(self.definitions)
         )
+        self.invariants.register("trials", trial_invariants(self.definitions))
         self.invariants.register("world", world_invariants(self.definitions))
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
@@ -197,6 +208,7 @@ class V2GameEngine:
         reconcile_story_state(state)
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
+        reconcile_trial_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -233,6 +245,7 @@ class V2GameEngine:
         reconcile_story_state(state)
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
+        reconcile_trial_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -279,6 +292,7 @@ class V2GameEngine:
         reconcile_story_state(state)
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
+        reconcile_trial_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -389,6 +403,18 @@ class V2GameEngine:
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, CrossWorld(actor_id, destination_world_id))
+
+    def begin_ascension_trial(
+        self, game_id: str, destination_world_id: str,
+        *, invited_ids: tuple[str, ...] = (),
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, BeginAscensionTrial(actor_id, destination_world_id, invited_ids)
+        )
 
     def refresh_market(self, game_id: str, *, force: bool = False) -> CommandExecution:
         state = self.store.load(game_id)
@@ -506,6 +532,7 @@ class V2GameEngine:
         reconcile_story_state(state)
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
+        reconcile_trial_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -552,6 +579,7 @@ class V2GameEngine:
                 "attributes": story["attributes"],
             },
             "action": action,
+            "trial": trial_view(state),
             "capabilities": {
                 "character.cultivate": {
                     "enabled": alive and not interaction_open,

@@ -534,10 +534,9 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         major = kind == "major"
         realm_index = definitions.realm_index(str(cultivation["realm_id"]))
         old_layer = int(cultivation["layer"])
-        if (major and realm_index >= 3) or (
+        requires_trial = (major and realm_index >= 3) or (
             not major and realm_index >= 6 and old_layer in {3, 6}
-        ):
-            raise ValueError("当前突破必须经过尚未迁移的专属试炼")
+        )
         if major and realm_index >= len(definitions.realms) - 1:
             raise ValueError("已经达到当前境界体系终点")
         required = _opportunity_required(definitions, cultivation)
@@ -565,6 +564,41 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
                 source="cultivation",
                 scope=EventScope.entity(command.actor_id),
                 payload={"entity_id": command.actor_id, "kind": kind, "chance": chance},
+            )
+            return
+
+        if requires_trial:
+            cultivation["opportunity"] = max(
+                0.0, float(cultivation["opportunity"]) - required
+            )
+            cultivation["bottleneck"] = None
+            if not major:
+                pity = dict(cultivation["breakthrough_pity"])
+                pity.pop(pity_key, None)
+                cultivation["breakthrough_pity"] = pity
+            context.state.entities.put(command.actor_id, CULTIVATION, cultivation)
+            trial_kind = (
+                "traditional"
+                if not major
+                else "heavenly_demon"
+                if cultivation["path"] == "demonic" and realm_index >= 6
+                else "heavenly" if realm_index >= 6 else "traditional"
+            )
+            context.emit(
+                "cultivation.trial.start.requested",
+                source="cultivation",
+                scope=EventScope.entity(command.actor_id),
+                payload={
+                    "entity_id": command.actor_id,
+                    "kind": trial_kind,
+                    "source_realm_index": realm_index,
+                    "source_layer": old_layer,
+                    "target_realm_index": realm_index + 1 if major else realm_index,
+                    "target_layer": 1 if major else old_layer + 1,
+                    "major": major,
+                    "lethal": realm_index == 3 or realm_index >= 6,
+                    "chance": chance,
+                },
             )
             return
 
@@ -629,6 +663,144 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
     return handler
 
 
+def _on_trial_failed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        trial = dict(event.payload["trial"])
+        if bool(trial.get("lethal")):
+            return
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        major = bool(trial["major"])
+        required = _opportunity_required(definitions, cultivation)
+        retention_key = "major_failure_retention" if major else "minor_failure_retention"
+        cultivation["opportunity"] = required * float(definitions.breakthrough[retention_key])
+        cultivation["heart_demon"] = float(cultivation["heart_demon"]) + float(
+            definitions.breakthrough["trial_failure_heart_demon"]
+        )
+        cultivation["bottleneck"] = None
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+
+    return handler
+
+
+def _on_trial_completed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        trial = dict(event.payload["trial"])
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        life = context.state.entities.require(actor_id, LIFE)
+        old_realm = str(cultivation["realm_id"])
+        old_layer = int(cultivation["layer"])
+        major = bool(trial["major"])
+        lifespan_gain = 0
+        if major:
+            target = definitions.realms[int(trial["target_realm_index"])]
+            cultivation["realm_id"] = target.id
+            cultivation["layer"] = int(trial["target_layer"])
+            if target.lifespan is None:
+                life["lifespan"] = None
+            elif life.get("lifespan") is not None:
+                rolled = context.rng.randint(*target.lifespan)
+                if cultivation["path"] == "monster":
+                    rolled *= 3
+                before = int(life["lifespan"])
+                life["lifespan"] = max(before, rolled)
+                lifespan_gain = int(life["lifespan"]) - before
+        else:
+            cultivation["layer"] = int(trial["target_layer"])
+            stage = "middle" if cultivation["layer"] == 4 else "late" if cultivation["layer"] == 7 else None
+            span = definitions.stage_lifespan_bonus.get(old_realm, {}).get(stage or "")
+            if span and life.get("lifespan") is not None:
+                lifespan_gain = context.rng.randint(*span)
+                if cultivation["path"] == "monster":
+                    lifespan_gain *= 3
+                life["lifespan"] = int(life["lifespan"]) + lifespan_gain
+        cultivation["heart_demon"] = max(
+            0.0, float(cultivation["heart_demon"]) - (5.0 if major else 1.0)
+        )
+        cultivation["bottleneck"] = None
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+        context.state.entities.put(actor_id, LIFE, life)
+        context.emit(
+            "combat.condition.reset.requested",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={
+                "entity_id": actor_id, "hp_ratio": 1.0,
+                "mp_ratio": 1.0, "reason": "breakthrough",
+            },
+        )
+        context.emit(
+            "character.lifespan.changed",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={"entity_id": actor_id, "lifespan": life.get("lifespan")},
+        )
+        context.emit(
+            "cultivation.breakthrough.succeeded",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={
+                "entity_id": actor_id, "kind": "major" if major else "minor",
+                "from_realm_id": old_realm, "from_layer": old_layer,
+                "to_realm_id": cultivation["realm_id"],
+                "to_layer": cultivation["layer"],
+                "lifespan_gain": lifespan_gain, "trial": trial["kind"],
+                "automatic": False,
+            },
+        )
+
+    return handler
+
+
+def _on_ascension_completed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        trial = dict(event.payload["trial"])
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        target = definitions.realms[int(trial["target_realm_index"])]
+        cultivation.update(
+            realm_id=target.id,
+            layer=int(trial["target_layer"]),
+            opportunity=0.0,
+            bottleneck=None,
+        )
+        cultivation["heart_demon"] = max(0.0, float(cultivation["heart_demon"]) - 5.0)
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+        life = context.state.entities.require(actor_id, LIFE)
+        if target.lifespan is None:
+            life["lifespan"] = None
+            context.state.entities.put(actor_id, LIFE, life)
+            context.emit(
+                "character.lifespan.changed",
+                source="cultivation",
+                scope=EventScope.entity(actor_id),
+                payload={"entity_id": actor_id, "lifespan": None},
+            )
+        destination = str(trial["destination_world_id"])
+        context.emit(
+            "combat.condition.reset.requested",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={
+                "entity_id": actor_id, "hp_ratio": 1.0,
+                "mp_ratio": 0.0 if destination == "celestial" else 1.0,
+                "reason": "ascension",
+            },
+        )
+        context.emit(
+            "cultivation.ascension.succeeded",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={
+                "entity_id": actor_id, "destination_world_id": destination,
+                "to_realm_id": target.id, "trial": trial["kind"],
+            },
+        )
+
+    return handler
+
+
 def cultivation_invariants(definitions: GameDefinitions):
     def validate(state: WorldState) -> list[str]:
         errors: list[str] = []
@@ -682,6 +854,11 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     )
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register("cultivation.trial.failed", _on_trial_failed(definitions))
+    bus.event_bus.register("cultivation.trial.completed", _on_trial_completed(definitions))
+    bus.event_bus.register(
+        "cultivation.ascension.completed", _on_ascension_completed(definitions)
+    )
 
 
 def cultivation_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None) -> dict[str, Any]:

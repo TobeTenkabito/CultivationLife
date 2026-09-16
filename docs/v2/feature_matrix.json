@@ -35,7 +35,7 @@
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
       ],
-      "notes": "Schema 5 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 134 of 363 loaded events are currently executable through 19 migrated effect kinds; combat, trials and other owner-domain effects remain blocked rather than partially executed."
+      "notes": "Schema 5 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 165 of 363 loaded events are currently executable through 20 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
     },
     {
       "id": "inventory.item_use",
@@ -70,14 +70,17 @@
     {
       "id": "cultivation.realm_breakthrough",
       "domain": "cultivation",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["breakthrough"],
       "evidence": [
         "tests/test_v2_core_domains.py::V2CoreDomainTests::test_action_units_cultivation_and_guaranteed_mortal_breakthrough",
-        "tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_upper_realm_normal_layer_uses_probability_but_trial_gate_is_explicit"
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_upper_realm_normal_layer_and_trial_breakthrough_both_complete",
+        "tests/test_v2_trials.py::V2TrialRuntimeTests::test_nonlethal_trial_failure_is_persisted_and_releases_interaction",
+        "tests/test_v2_trials.py::V2TrialRuntimeTests::test_heavenly_and_heavenly_demon_trials_complete_all_stages",
+        "tests/test_v2_trials.py::V2TrialRuntimeTests::test_lethal_trial_failure_clears_active_trial_when_character_dies"
       ],
-      "notes": "Probability breakthroughs, pity, lifespan gains and non-trial upper-realm layers work; dedicated traditional/heavenly trials, tribulations and ascension gates remain."
+      "notes": "Probability breakthroughs, pity, lifespan gains and non-trial upper-realm layers are covered. Traditional three-stage trials, heavenly five-stage trials and repeated heavenly-demon rounds persist between commands and have explicit lethal/nonlethal failure cleanup."
     },
     {
       "id": "cultivation.body",
@@ -121,16 +124,19 @@
     {
       "id": "world.realm_crossing",
       "domain": "world",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["spirit-crossing", "celestial-ascension", "asura-ascension", "cross-world"],
       "evidence": [
         "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_permanent_crossing_requires_all_domain_acks_and_cleans_relations",
         "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_concubine_cannot_be_invited",
         "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_human_smuggling_releases_player_from_prison",
-        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_lower_world_return_suppresses_and_restores_cultivation"
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_lower_world_return_suppresses_and_restores_cultivation",
+        "tests/test_v2_trials.py::V2AscensionTrialTests::test_celestial_nine_stage_trial_commits_shared_cleanup_transaction",
+        "tests/test_v2_trials.py::V2AscensionTrialTests::test_asura_nine_stage_trial_enforces_resources_then_ascends",
+        "tests/test_v2_trials.py::V2AscensionTrialTests::test_failed_ascension_is_lethal_and_never_commits_world_transition"
       ],
-      "notes": "Human/demon lower ascensions and reversible lower-world travel are transactional. Relations, faction, economy and combat must acknowledge cleanup; only eligible companions/friends may be invited. Celestial/Asura nine-stage ascension trials remain."
+      "notes": "Lower ascensions, Celestial/Asura nine-stage ascension trials and reversible lower-world travel are transactional. Relations, faction, economy and combat must acknowledge cleanup; the final acknowledgement commits event-nested ascensions atomically. Only eligible companions/friends may be invited."
     },
     {
       "id": "economy.market_purchase_lock",

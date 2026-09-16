@@ -64,22 +64,37 @@ def _on_character_created(definitions: GameDefinitions):
     return handler
 
 
-def _transition_ack(context: SimulationContext, event: EventEnvelope) -> None:
-    actor_id = str(event.payload["actor_id"])
-    transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
-    transaction = transition.get("last_transaction")
-    if not isinstance(transaction, dict) or transaction.get("id") != event.payload.get("transaction_id"):
-        raise ValueError("跨界清理回执不属于当前事务")
-    domain = str(event.payload["domain"])
-    if domain not in transaction.get("required_domains", []):
-        raise ValueError(f"跨界事务收到未声明领域回执：{domain}")
-    acknowledgements = list(transaction.get("acknowledgements", []))
-    if domain in acknowledgements:
-        raise ValueError(f"跨界领域重复回执：{domain}")
-    acknowledgements.append(domain)
-    transaction["acknowledgements"] = acknowledgements
-    transition["last_transaction"] = transaction
-    context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
+def _transition_ack(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
+        transaction = transition.get("last_transaction")
+        if not isinstance(transaction, dict) or transaction.get("id") != event.payload.get("transaction_id"):
+            raise ValueError("跨界清理回执不属于当前事务")
+        domain = str(event.payload["domain"])
+        if domain not in transaction.get("required_domains", []):
+            raise ValueError(f"跨界事务收到未声明领域回执：{domain}")
+        acknowledgements = list(transaction.get("acknowledgements", []))
+        if domain in acknowledgements:
+            raise ValueError(f"跨界领域重复回执：{domain}")
+        acknowledgements.append(domain)
+        transaction["acknowledgements"] = acknowledgements
+        transition["last_transaction"] = transaction
+        context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
+        if (
+            transaction.get("status") == "preparing"
+            and bool(transaction.get("commit_after_ack"))
+            and set(acknowledgements) == set(transaction.get("required_domains", []))
+        ):
+            _commit_transition(
+                context,
+                definitions,
+                actor_id=actor_id,
+                destination=str(transaction["destination"]),
+                transaction_id=str(transaction["id"]),
+            )
+
+    return handler
 
 
 def _eligible_entourage(
@@ -131,6 +146,7 @@ def _begin_cleanup_transaction(
     destination: str,
     keep_ids: list[str],
     fallen_ids: list[str],
+    commit_after_ack: bool = False,
 ) -> str:
     transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
     previous = transition.get("last_transaction")
@@ -147,6 +163,7 @@ def _begin_cleanup_transaction(
         "acknowledgements": [],
         "keep_ids": list(keep_ids),
         "fallen_ids": list(fallen_ids),
+        "commit_after_ack": commit_after_ack,
     }
     context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
     context.emit(
@@ -165,7 +182,7 @@ def _begin_cleanup_transaction(
     transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
     transaction = dict(transition["last_transaction"])
     missing = set(required) - set(transaction.get("acknowledgements", []))
-    if missing:
+    if missing and not commit_after_ack:
         raise ValueError(f"跨界清理未完成：{', '.join(sorted(missing))}")
     return transaction_id
 
@@ -252,7 +269,7 @@ def _ascend_handler(definitions: GameDefinitions):
             raise ValueError("服刑期间只能尝试人界偷渡灵界")
         if not allowed or realm_index != required_realm or layer > max_start_layer:
             if (origin, destination) in {("spirit", "celestial"), ("true_demon", "asura")}:
-                raise ValueError("该飞升路线必须先完成尚未迁移的九重飞升试炼")
+                raise ValueError("该飞升路线必须通过九重飞升试炼，请使用飞升试炼入口")
             raise ValueError("当前道统、境界或界面不满足飞升条件")
         if destination not in definitions.worlds or not definitions.worlds[destination].enabled:
             raise ValueError("目标界面尚未开放")
@@ -266,6 +283,35 @@ def _ascend_handler(definitions: GameDefinitions):
         _commit_transition(
             context, definitions, actor_id=command.actor_id,
             destination=destination, transaction_id=transaction_id,
+        )
+
+    return handler
+
+
+def _on_ascension_commit_requested(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        location = context.state.entities.require(actor_id, LOCATION)
+        origin = str(location["world_id"])
+        destination = str(event.payload["destination_world_id"])
+        expected = {("spirit", "celestial"), ("true_demon", "asura")}
+        if (origin, destination) not in expected:
+            raise ValueError("飞升试炼的起点与目标界面不匹配")
+        keep, fallen = _eligible_entourage(
+            context,
+            definitions,
+            actor_id,
+            tuple(map(str, event.payload.get("invited_ids", []))),
+            origin,
+        )
+        _begin_cleanup_transaction(
+            context,
+            actor_id=actor_id,
+            origin=origin,
+            destination=destination,
+            keep_ids=keep,
+            fallen_ids=fallen,
+            commit_after_ack=True,
         )
 
     return handler
@@ -471,8 +517,12 @@ def world_invariants(definitions: GameDefinitions):
             elif location_id not in definitions.worlds[world_id].locations:
                 errors.append(f"角色 {entity_id} 位于未知地点 {location_id}")
             transaction = transition.get("last_transaction")
-            if isinstance(transaction, dict) and transaction.get("status") == "committed":
-                if set(transaction.get("acknowledgements", [])) != set(transaction.get("required_domains", [])):
+            if isinstance(transaction, dict):
+                if transaction.get("status") == "preparing":
+                    errors.append(f"角色 {entity_id} 的跨界事务尚未完成")
+                elif transaction.get("status") != "committed":
+                    errors.append(f"角色 {entity_id} 的跨界事务状态无效")
+                elif set(transaction.get("acknowledgements", [])) != set(transaction.get("required_domains", [])):
                     errors.append(f"角色 {entity_id} 的跨界事务缺少领域回执")
         return errors
 
@@ -486,7 +536,12 @@ def register_world_domain(bus: CommandBus, definitions: GameDefinitions) -> None
     bus.event_bus.register("character.created", _on_character_created(definitions))
     bus.event_bus.register(TRAVEL_DUE, _on_travel_due)
     bus.event_bus.register("character.died", _on_character_died)
-    bus.event_bus.register("world.transition.acknowledged", _transition_ack)
+    bus.event_bus.register(
+        "world.transition.acknowledged", _transition_ack(definitions)
+    )
+    bus.event_bus.register(
+        "world.ascension.commit.requested", _on_ascension_commit_requested(definitions)
+    )
 
 
 def world_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None) -> dict[str, Any]:

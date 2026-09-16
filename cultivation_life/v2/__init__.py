@@ -44,6 +44,7 @@ from .domain.extensions import (
 from .domain.relations import EndRelationship, FormRelationship
 from .domain.world import AscendWorld, CrossWorld, TravelWithinWorld
 from .domain.story import QueueStoryEvent, ResolveStoryChoice
+from .domain.trials import BeginAscensionTrial
 
 __all__ = [
     "AttemptBreakthrough",
@@ -53,6 +54,7 @@ __all__ = [
     "AbsorbTransformationMaterial",
     "AssignFactionPosition",
     "BuyMarketOffer",
+    "BeginAscensionTrial",
     "ChangeContribution",
     "ConfigureMonsterBloodline",
     "CrossWorld",
