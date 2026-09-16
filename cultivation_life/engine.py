@@ -2489,34 +2489,35 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 raise ValueError("你当前没有道侣")
             npc = self._persist_relationship_npc(game, relation, "道侣决裂")
             player.heart_demon += float(rules["companion_separation_heart_demon"])
-            npc.affinity = min(float(npc.affinity or 0), -18.0)
+            npc.affinity = float(rules.get("relationship_release_affinity", 0))
             player.dao_companion = None
-            summary = f"你与{relation['name']}斩断道侣誓约，心魔骤增 {rules['companion_separation_heart_demon']:g}。"
+            summary = f"你与{relation['name']}斩断道侣誓约，双方好感重置为中立；心魔骤增 {rules['companion_separation_heart_demon']:g}。"
             tags = ["system","relationship","dao_companion","negative"]
         elif kind == "master":
             relation = player.master
             if not relation:
                 raise ValueError("你当前没有师父")
             npc = self._persist_relationship_npc(game, relation, "脱离师门")
-            npc.affinity = float(npc.affinity or relation.get("affinity", 0)) + float(rules["master_departure_affinity"])
+            npc.affinity = float(rules.get("relationship_release_affinity", 0))
             player.master = None
-            summary = f"你执意脱离{relation['name']}门下，对方好感降至 {npc.affinity:.0f}；若由此结怨，日后可能报复。"
+            summary = f"你脱离{relation['name']}门下，双方好感重置为中立，不会因这次离门立即遭到寻仇。"
             tags = ["system","relationship","master","negative"]
         elif kind == "friend":
             relation = next((entry for entry in player.dao_friends if entry.get("id") == npc_id), None)
             if not relation:
                 raise ValueError("此人并非你的道友")
             player.dao_friends.remove(relation)
-            summary = f"你与{relation['name']}收回道友信符，此后仍只是寻常相识。"
+            self._set_person_affinity(game, str(relation.get("id", "")), float(rules.get("relationship_release_affinity", 0)))
+            summary = f"你与{relation['name']}收回道友信符，双方好感重置为中立，此后只是寻常相识。"
             tags = ["system","relationship","friend"]
         elif kind == "disciple":
             relation = next((entry for entry in player.disciples if entry.get("id") == npc_id), None)
             if not relation:
                 raise ValueError("此人并非你的弟子")
             npc = self._persist_relationship_npc(game, relation, "逐出师门")
-            npc.affinity = float(npc.affinity or relation.get("affinity", 0)) + float(rules["disciple_expulsion_affinity"])
+            npc.affinity = float(rules.get("relationship_release_affinity", 0))
             player.disciples.remove(relation)
-            summary = f"你将{relation['name']}逐出门下，对方好感降至 {npc.affinity:.0f}。"
+            summary = f"你将{relation['name']}逐出门下，双方好感重置为中立。"
             tags = ["system","relationship","disciple","negative"]
         else:
             raise ValueError("未知人际关系类型")
@@ -2537,10 +2538,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("当前状态无法退出宗门")
         if not sect or sect.extinct:
             raise ValueError("你当前没有可以退出的宗门")
-        penalty = float(WORLD_SYSTEMS["relationship"]["sect_departure_affinity"])
+        release_affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
         members = self._sect_members(game, sect)
         for npc in members:
-            npc.affinity = float(npc.affinity or 0) + penalty
+            npc.affinity = release_affinity
         self._sync_relationship_records(game)
         old_id, old_name = sect.id, sect.name
         if sect.founded_by_player:
@@ -2555,8 +2556,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         player.faction_reward_preference = None
         game.history.append(HistoryRecord(
             "SYS_PLAYER_LEAVE_FACTION",1,player.age,"退出宗门",old_id,"left",
-            f"你退出{old_name}，全宗门人好感均降低 {abs(penalty):g}；旧日同门会记住这次离去。",
-            {"faction_id":old_id,"affinity_delta":penalty},["system","faction","relationship","negative"],
+            f"你退出{old_name}，与旧日同门的好感统一重置为中立，不会因退宗立即遭到寻仇。",
+            {"faction_id":old_id,"affinity_reset":release_affinity},["system","faction","relationship"],
         ))
         game.updated_at = now_iso()
         self.store.save(game)
@@ -3203,6 +3204,53 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 relation["affinity"] = value
         return value
 
+    def _set_person_affinity(self, game: GameState, npc_id: str, value: float) -> float:
+        """Set, rather than add, affinity on both the persistent NPC and relation snapshot."""
+        affinity = max(-100.0, min(100.0, float(value)))
+        npc = self._find_npc(game, npc_id)
+        if npc:
+            npc.affinity = affinity
+        for relation in [
+            game.player.master, game.player.dao_companion,
+            *game.player.dao_friends, *game.player.disciples,
+        ]:
+            if relation and str(relation.get("id")) == npc_id:
+                relation["affinity"] = affinity
+        return affinity
+
+    @staticmethod
+    def _revenge_cooldown_key(scope: str, family: str = "", adversary_id: str = "") -> str:
+        suffix = ":".join(part for part in (family, adversary_id) if part)
+        return f"revenge_cooldown:{scope}" + (f":{suffix}" if suffix else "")
+
+    def _revenge_ready(self, game: GameState, family: str, adversary_id: str) -> bool:
+        """All revenge sources share one global gate and also retain per-source gates."""
+        global_next = int(game.governance_actions.get(self._revenge_cooldown_key("next"), -1))
+        source_next = int(game.governance_actions.get(
+            self._revenge_cooldown_key("next", family, adversary_id), -1,
+        ))
+        return game.diplomacy_unit >= max(global_next, source_next)
+
+    def _record_revenge_trigger(self, game: GameState, family: str, adversary_id: str) -> int:
+        """Start an escalating action-unit cooldown after a revenge event is opened."""
+        rules = WORLD_SYSTEMS["relationship"]
+        base = max(1, int(rules.get("revenge_cooldown_base_units", 3)))
+        increment = max(0, int(rules.get("revenge_cooldown_increment_units", 2)))
+        maximum = max(base, int(rules.get("revenge_cooldown_max_units", 15)))
+        global_count_key = self._revenge_cooldown_key("count")
+        source_count_key = self._revenge_cooldown_key("count", family, adversary_id)
+        global_count = int(game.governance_actions.get(global_count_key, 0)) + 1
+        source_count = int(game.governance_actions.get(source_count_key, 0)) + 1
+        game.governance_actions[global_count_key] = global_count
+        game.governance_actions[source_count_key] = source_count
+        interval = min(maximum, base + (global_count - 1) * increment)
+        next_unit = game.diplomacy_unit + interval
+        game.governance_actions[self._revenge_cooldown_key("next")] = next_unit
+        game.governance_actions[
+            self._revenge_cooldown_key("next", family, adversary_id)
+        ] = next_unit
+        return interval
+
     @staticmethod
     def _random_npc_path(faction_id: str, rng: random.Random) -> str:
         weights = FACTION_SYSTEMS["npc_path_distribution"].get(
@@ -3338,6 +3386,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 continue
             if "faction" not in tags or "faction_join" in tags:
                 continue
+            if "revenge" in tags and not self._revenge_ready(game, "faction", str(event["id"])):
+                continue
             if self._intrigue_enabled() and any(
                 marker in f"{event.get('title', '')}{event.get('body', '')}"
                 for marker in ("争位", "夺位", "排挤", "竞争")
@@ -3360,8 +3410,15 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             roll -= weight
             if roll <= 0:
                 game.pending_event = self._instantiate_event(event, game, rng)
+                if "revenge" in event.get("tags", []):
+                    interval = self._record_revenge_trigger(game, "faction", str(event["id"]))
+                    game.pending_event.setdefault("runtime", {})["revenge_cooldown_units"] = interval
                 return True
-        game.pending_event = self._instantiate_event(candidates[-1][0], game, rng)
+        selected = candidates[-1][0]
+        game.pending_event = self._instantiate_event(selected, game, rng)
+        if "revenge" in selected.get("tags", []):
+            interval = self._record_revenge_trigger(game, "faction", str(selected["id"]))
+            game.pending_event.setdefault("runtime", {})["revenge_cooldown_units"] = interval
         return True
 
     def _maybe_wanted_encounter(self, game: GameState, rng: random.Random) -> bool:
@@ -3405,6 +3462,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             ):
                 self._queue_wanted_settlement(game, key, state, rng, fallen=False)
                 return True
+            if not self._revenge_ready(game, "wanted", key):
+                continue
             hostiles.append((key, value))
         if not hostiles:
             return False
@@ -3421,6 +3480,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         game.pending_event["body"] = game.pending_event["body"].replace("{pursuer}", self._hostility_name(key, game))
         if len(target.get("members", [])) > 1:
             game.pending_event["body"] += f" 此次追兵共有{len(target['members'])}人，合计战斗力约{target['target_power']:.0f}。"
+        interval = self._record_revenge_trigger(game, "wanted", key)
+        game.pending_event["runtime"]["revenge_cooldown_units"] = interval
         return True
 
     @staticmethod
@@ -3649,6 +3710,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         enemies = [
             npc for npc in self._personal_npcs(game)
             if float(npc.affinity or 0) <= threshold and npc.id not in protected_ids
+            and self._revenge_ready(game, "personal", npc.id)
         ]
         enemies = self._filter_personal_revenge_by_protection(game, enemies, rng)
         if not enemies:
@@ -3691,6 +3753,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             elif choice["id"] == "sect":
                 choice["enabled"] = bool(sect_defenders)
                 if not sect_defenders: choice["disabled_reason"] = "当前没有可接应你的宗门同道"
+        interval = self._record_revenge_trigger(game, "personal", enemy.id)
+        game.pending_event["runtime"]["revenge_cooldown_units"] = interval
         return True
 
     def _wanted_target(
@@ -4804,6 +4868,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             enemy = second if first == player_race else first
             if player.world not in RACE_DEFINITIONS.get(enemy, {}).get("worlds", []):
                 continue
+            if not self._revenge_ready(game, "race_war", enemy):
+                continue
             enemies.append(enemy)
         chance = float(RACE_SYSTEMS.get("diplomacy", {}).get("war_ambush_chance", 0.08))
         if not enemies or rng.random() >= chance:
@@ -4820,6 +4886,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             f"两族正在交战，{RACE_DEFINITIONS[enemy]['name']}修士循踪截住了你。"
             f"来者修为{target['target_realm_display']}，战斗力约{target['target_power']:.0f}。你必须立即应对。"
         )
+        interval = self._record_revenge_trigger(game, "race_war", enemy)
+        ambush.setdefault("runtime", {})["revenge_cooldown_units"] = interval
         game.pending_event = ambush
         return True
 
@@ -5230,6 +5298,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 continue
             if "manual_only" in tags:
                 continue
+            if "revenge" in tags and not self._revenge_ready(game, "ambient", str(event["id"])):
+                continue
             if "jinque_acquisition" in tags and game.player.realm_index >= 3:
                 continue
             if "probability_gate" in tags:
@@ -5261,8 +5331,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         for event, weight in candidates:
             roll -= weight
             if roll <= 0:
+                if "revenge" in event.get("tags", []):
+                    self._record_revenge_trigger(game, "ambient", str(event["id"]))
                 return event
-        return candidates[-1][0]
+        selected = candidates[-1][0]
+        if "revenge" in selected.get("tags", []):
+            self._record_revenge_trigger(game, "ambient", str(selected["id"]))
+        return selected
 
     @staticmethod
     def _event_weight(event: dict[str, Any], game: GameState, action: str) -> float:

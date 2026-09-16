@@ -875,8 +875,14 @@ class GhostSystemMixin:
             result, summary = "waited", "你在拘魂禁制中熬过一年，并随拘魂者一同行动。"
         elif action == "resist":
             if rng.random() < chance:
+                captor_id = str(captor.get("npc_id") or captor.get("id", ""))
+                captor_npc = self._find_npc(game, captor_id)
+                if captor_npc:
+                    captor_npc.affinity = float(
+                        WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)
+                    )
                 player.ghost_captor = None
-                result, summary = "escaped", f"你击破拘魂禁制，重获自由（胜算 {chance:.0%}）。"
+                result, summary = "escaped", f"你击破拘魂禁制，重获自由（胜算 {chance:.0%}）；双方好感重置为中立。"
             else:
                 self._die(game, "反抗拘魂者失败，魂印崩碎，魂飞魄散", "SYS_GHOST_RESIST_FAILED")
                 result, summary = "dead", f"反抗失败，魂体被禁制磨灭（胜算 {chance:.0%}）。"
