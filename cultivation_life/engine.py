@@ -6418,6 +6418,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
         mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
         player.hp = max(0.0 if lethal else 1.0, player.hp - hp_loss)
+        if resolution.retreat_impossible and not resolution.death_prevented:
+            # Ordinary battle injury is capped, but an overwhelmingly stronger
+            # lethal pursuer leaves no valid route for that generic retreat.
+            player.hp = 0.0
         if resolution.death_prevented:
             player.hp = max(1.0, player.hp)
         player.mp = max(0.0, player.mp - mp_loss)
@@ -6443,6 +6447,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     f" 威名 +{fame_gain:.0f}。"
                     + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
                 )
+            if resolution.retreat_impossible and resolution.death_prevented:
+                result = "defeat_survived"
+                self._record_player_combat(game, target, resolution, result)
+                return result, lead + (
+                    f"{target['target_name']}以三倍以上战力封死退路，逃脱预案失败；"
+                    "涅槃类能力替你承受了必死一击，但狩猎目标未能完成。"
+                )
             if player.hp <= 0:
                 self._die(
                     game, f"猎妖时不敌{target['target_name']}，身死道消", "SYS_BEAST_HUNT",
@@ -6460,6 +6471,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 result = "defeat"
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + f"你在切磋中败给了{target['target_name']}，预案及时收手，无人伤及性命。"
+            if resolution.retreat_impossible and resolution.death_prevented:
+                result = "defeat_survived"
+                self._record_player_combat(game, target, resolution, result)
+                return result, lead + (
+                    f"{target['target_name']}以三倍以上战力封死所有退路，逃脱预案失败；"
+                    "涅槃类能力替你承受了必死一击，才没有当场陨落。"
+                )
             if player.hp <= 0:
                 can_take_captive = bool(
                     target.get("non_story_combat")
@@ -6475,7 +6493,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 self._record_player_combat(game, target, resolution, result)
                 return result, lead + (
                     f"你败给{target['target_name']}，魂体被拘入禁制。"
-                    if captured else f"保命预案未能撕开退路，你败给{target['target_name']}并身死。"
+                    if captured else (
+                        f"敌方战力达到你方三倍以上，保命预案必定失败；你败给{target['target_name']}并身死。"
+                        if resolution.retreat_impossible
+                        else f"保命预案未能撕开退路，你败给{target['target_name']}并身死。"
+                    )
                 )
             result = "defeat"
             self._record_player_combat(game, target, resolution, result)

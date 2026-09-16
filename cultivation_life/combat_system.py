@@ -74,6 +74,7 @@ class CombatResolution:
     bloodline_traits: list[str]
     general_monster_traits: list[str]
     death_prevented: bool
+    retreat_impossible: bool
     player_roster: list[dict[str, Any]]
     enemy_roster: list[dict[str, Any]]
     formation_profile: dict[str, Any] | None = None
@@ -130,6 +131,11 @@ class PlayerCombatSystem:
         "禁神识": {"sense": 0.86},
         "大阵": {},
     }
+    # The existing quick-resolution boundary also defines a truly
+    # overwhelming pursuit: at three times the player's active total power,
+    # a lethal opponent can seal every route instead of letting the generic
+    # post-defeat retreat text grant an effectively free escape.
+    OVERWHELMING_RETREAT_RATIO = 1 / 3
 
     @classmethod
     def resolve(
@@ -356,7 +362,7 @@ class PlayerCombatSystem:
         devouring_soul_stacks = 0
         counterforce_ready = False
         burst_used = False
-        quick = ratio >= 3.0 or ratio <= 1 / 3
+        quick = ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
         last_round_player_stats = dict(player_stats)
         last_round_enemy_stats = dict(enemy_stats)
@@ -899,9 +905,21 @@ class PlayerCombatSystem:
                 rounds[-1]["enemy_hp_ratio"] = round(enemy_hp, 4)
                 rounds[-1]["enemy_combat_state"] = round(enemy_power * enemy_hp, 1)
                 rounds[-1]["enemy_morale"] = round(enemy_morale, 1)
-        elif quick and ratio <= 1 / 3:
+        elif quick and ratio <= cls.OVERWHELMING_RETREAT_RATIO:
             player_morale = min(player_morale, 5.0)
+            if lethal:
+                if "prevent_defeat_once" in transformation_traits and not death_prevented:
+                    death_prevented = True
+                    player_hp = max(0.12, player_hp)
+                    revival_name = transformation_trait_name("prevent_defeat_once")
+                    key_events.append(
+                        f"敌方封死全部退路后，{revival_name}替你承受了必死一击；这不是逃脱成功。"
+                    )
+                else:
+                    player_hp = 0.0
             if rounds:
+                rounds[-1]["player_hp_ratio"] = round(player_hp, 4)
+                rounds[-1]["player_combat_state"] = round(player_power_max * player_hp, 1)
                 rounds[-1]["player_morale"] = round(player_morale, 1)
 
         if forced_outcome:
@@ -919,8 +937,17 @@ class PlayerCombatSystem:
             else:
                 outcome = "victory" if margin > 0 else "defeat"
 
+        retreat_impossible = bool(
+            lethal and outcome == "defeat"
+            and ratio <= cls.OVERWHELMING_RETREAT_RATIO
+        )
         if quick:
             key_events.insert(0, "双方综合差距超过三倍，预案自动采用快速结算。")
+        if retreat_impossible:
+            key_events.insert(
+                1 if quick else 0,
+                "敌方总战力达到你方三倍，已封死所有退路；逃脱预案必定失败。",
+            )
         if burst_used and rounds:
             key_events.append(f"第{rounds[-1]['round']}轮前，战斗预案自动调度了高消耗术式。")
         if outcome == "victory":
@@ -949,6 +976,10 @@ class PlayerCombatSystem:
         if outcome == "victory":
             losses = max(0.0, initial_hp - player_hp)
             grade = "完胜" if losses < 0.08 else "胜利" if losses < 0.24 else "惨胜"
+        elif retreat_impossible and death_prevented:
+            grade = "涅槃生还"
+        elif retreat_impossible:
+            grade = "溃败"
         elif player_hp > 0.35:
             grade = "有序撤退"
         else:
@@ -987,6 +1018,7 @@ class PlayerCombatSystem:
             bloodline_traits=[*bloodline_traits, *(str(rule["id"]) for rule in generated_bloodline_traits)],
             general_monster_traits=list(general_monster_traits),
             death_prevented=death_prevented,
+            retreat_impossible=retreat_impossible,
             player_roster=cls._public_roster(player_units),
             enemy_roster=cls._public_roster(enemy_units),
             formation_profile=(
