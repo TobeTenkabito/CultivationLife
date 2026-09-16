@@ -1,3 +1,4 @@
+import copy
 import json
 import tempfile
 import unittest
@@ -5,6 +6,7 @@ from pathlib import Path
 from unittest import mock
 
 from cultivation_life.engine import GameEngine
+from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.migration import ShadowCharacterSpec, ShadowCommand, ShadowRunner
 from cultivation_life.v2 import V2GameEngine
 from cultivation_life.v2.infrastructure import (
@@ -51,6 +53,21 @@ class V2LegacyImportTests(unittest.TestCase):
         game.player.karma = 7
         game.player.fame = 11
         game.player.sha_qi = 13
+        game.player.body_training = 5
+        game.player.body_progress = 42.0
+        game.player.body_technique = copy.deepcopy(TECHNIQUE_CATALOG["TECH_BODY_MORTAL"])
+        game.player.divine_sense_rank = 2
+        game.player.divine_sense_experience = 17.0
+        game.player.divine_sense_technique = copy.deepcopy(TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"])
+        transformation_id = "TECH_MYRIAD_FORM_SPECTRUM"
+        game.player.transformation_technique = copy.deepcopy(TECHNIQUE_CATALOG[transformation_id])
+        game.player.known_transformations = ["FORM_PHOENIX"]
+        game.player.transformation_mastery = {
+            "FORM_PHOENIX": {"purity": 0.3, "source_type": "旧档测试"}
+        }
+        game.player.transformation_loadouts = {
+            transformation_id: {"stored": ["FORM_PHOENIX"], "active": ["FORM_PHOENIX"]}
+        }
         game.player.dao_friends = [{
             "id": "friend-old-1",
             "name": "旧雨",
@@ -100,6 +117,13 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(
             result.game["story"]["attributes"],
             {"karma": 7.0, "fame": 11.0, "sha_qi": 13.0},
+        )
+        self.assertEqual(result.game["player"]["body"]["layer"], 5)
+        self.assertEqual(result.game["player"]["body"]["progress"], 42.0)
+        self.assertEqual(result.game["player"]["divine_sense"]["rank"], 2)
+        self.assertEqual(result.game["player"]["divine_sense"]["experience"], 17.0)
+        self.assertEqual(
+            result.game["player"]["transformations"]["active"], ["FORM_PHOENIX"]
         )
         self.assertTrue(result.game["story"]["history"])
         self.assertEqual(result.report["source_version"], 5)

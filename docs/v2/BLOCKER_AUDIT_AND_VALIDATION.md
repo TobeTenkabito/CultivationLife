@@ -2,22 +2,26 @@
 
 ## 结论
 
-原有的 44 个阻断项不是 44 个独立回归错误，而是功能矩阵中所有尚未达到 `pass` 的必需功能。此次复核修复了三个完整功能项，并将阻断数降为 41：
+原有的 44 个阻断项不是 44 个独立回归错误，而是功能矩阵中所有尚未达到 `pass` 的必需功能。前两批迁移已将阻断数降为 38；本批新增三个完整功能项，并把跨界从 `missing` 推进为 `partial`：
 
 - `presentation.settings_debug`：Schema 4 持久化界面设置；异界消息继续模拟但默认不投影，Debug 模式才显示全部世界。
 - `relations.faction_invitation`：只有当前世界中存活的师父、道侣或道友可被引荐入宗；弟子、侍妾和无关系人物不能借此加入。
 - `factions.rewards`：元婴及以上成员可固定年度奖励；每年结算贡献与收益，永久属性在退宗后仍保留。
+- `cultivation.body`：炼体训练、圆满、分段概率、失败保留、保底和每层固有气血成长进入独立组件。
+- `cultivation.divine_sense`：神识训练与手动升级进入独立组件，突破仅扣当前等级所需经验。
+- `cultivation.transformations`：真灵素材直接/提纯/批量炼化、六维圆满度、容量和战斗空间编队闭环完成。
+- `world.realm_crossing`：下界飞升、邀请过滤、跨领域清理事务以及下界封印/返回已经完成；仙界、修罗界九重飞升仍阻断该项转为 `pass`。
 
 另修复两个不属于独立矩阵行、但会污染平价校验的缺陷：V2 新角色缺少初始灵剑；妖修开局没有装配 DLC 指定的 `TECH_MONSTER_BREATHING`，导致修炼行动零收益。
 
-当前矩阵为 53 项：12 项 `pass`、12 项 `partial`、29 项 `missing`。101 个冻结的 V1 公共操作仍被完整且唯一归档，矩阵结构无错误。V2 仍不可正式切换。
+当前矩阵为 53 项：15 项 `pass`、13 项 `partial`、25 项 `missing`。101 个冻结的 V1 公共操作仍被完整且唯一归档，矩阵结构无错误。V2 仍不可正式切换。
 
-## 41 项的共同根因
+## 38 项的共同根因
 
 | 根因组 | 数量 | 阻断项 |
 |---|---:|---|
 | 共享运行时缺口 | 4 | `core.action_loop`、`story.interactive_events`、`verification.shadow_coverage`、`interface.http_frontend` |
-| 修炼与跨界事务 | 5 | `cultivation.realm_breakthrough`、`cultivation.body`、`cultivation.divine_sense`、`cultivation.transformations`、`world.realm_crossing` |
+| 修炼与跨界事务 | 2 | `cultivation.realm_breakthrough`、`world.realm_crossing` |
 | 实例资产与经济模型 | 9 | `inventory.item_use`、`economy.spirit_plant_sale`、`economy.auction`、`economy.black_market`、`economy.spirit_field`、`crafting.alchemy`、`crafting.artifacts`、`formation.nine_palace`、`artifact.natal` |
 | 关系与治理事务 | 10 | `relations.lifecycle`、`relations.dao_companion`、`relations.dao_friend`、`relations.master_disciple`、`relations.concubines`、`relations.capture`、`factions.succession`、`factions.family`、`factions.npc_operations`、`factions.diplomacy` |
 | 战斗、战争与魔道聚合 | 6 | `party.management`、`combat.automatic_resolution`、`war.aggregate`、`demonic.prison`、`demonic.captives`、`demonic.puppets_souls` |
@@ -44,9 +48,9 @@
 1. 通用交互队列、条件求值器和类型化效果注册表已经落地；领域专属效果随对应系统迁移注册。
 2. 扩展统一行动适配器到V1剩余行动种类，并完成战斗/试炼效果，使`advance`与`choice`达到完整语义覆盖。
 3. 建立实例资产仓库、统一预留/托管账本和长期事务状态机，再迁移物品、灵植、拍卖、炼丹、炼器和阵法。
-4. 迁移高阶修炼、试炼与永久/临时跨界事务；把关系、势力、拍卖、监禁、傀儡清理由领域事件统一编排。
+4. 永久/临时跨界事务已经落地；继续迁移传统/天劫突破试炼与仙界、修罗界九重飞升。
 5. 在同一关系与治理模型上完成关系交互、家族、宗门经营、外交和继承，不再保存 NPC 副本。
 6. 扩展战斗快照到队伍、地形、阵法和战争；随后迁移魔道聚合。
 7. 最后迁移 DLC 深层状态机、正式 HTTP/前端，并把影子适配器扩展到全部 101 个操作。
 
-每一项只能在命令、权威状态、跨领域事件、失败原子性、不变量、存档迁移和具体测试节点全部存在后改为 `pass`。在 41 项真正清零前，Step 10 继续保持禁止状态。
+每一项只能在命令、权威状态、跨领域事件、失败原子性、不变量、存档迁移和具体测试节点全部存在后改为 `pass`。在 38 项真正清零前，Step 10 继续保持禁止状态。

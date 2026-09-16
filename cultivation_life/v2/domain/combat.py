@@ -348,6 +348,26 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
         )
 
 
+def _on_permanent_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    released: list[str] = []
+    for edge in list(context.state.relations.involving(actor_id, kind=PRISONER)):
+        ended = context.state.relations.end(edge.relation_id, ended_year=context.state.clock.year)
+        metadata = dict(ended.metadata)
+        metadata["end_reason"] = "permanent_world_transition"
+        context.state.relations.replace_metadata(ended.relation_id, metadata)
+        released.append(edge.relation_id)
+    context.emit(
+        "world.transition.acknowledged",
+        source="combat",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": event.payload["transaction_id"],
+            "actor_id": actor_id, "domain": "combat", "released_ids": released,
+        },
+    )
+
+
 def combat_invariants(state: WorldState) -> list[str]:
     errors: list[str] = []
     for entity_id in state.entities.with_component(IDENTITY):
@@ -409,6 +429,7 @@ def register_combat_domain(bus: CommandBus, definitions: GameDefinitions) -> Non
     bus.event_bus.register(
         "story.effect.combat_condition.changed", _on_story_condition_changed
     )
+    bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
 
 
 def combat_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):

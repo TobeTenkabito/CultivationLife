@@ -104,7 +104,7 @@ def _schedule_action(
     action: str,
     years: int,
 ) -> None:
-    if action not in {"cultivate", "rest"}:
+    if action not in {"cultivate", "rest", "body_train", "sense_train"}:
         raise ValueError("未知的V2耗时行动")
     if not isinstance(years, int) or isinstance(years, bool) or not 1 <= years <= 1_000:
         raise ValueError("单次行动必须耗时1至1000年")
@@ -149,6 +149,16 @@ def _perform_units_handler(definitions: GameDefinitions):
         if not isinstance(command.units, int) or isinstance(command.units, bool) or not 1 <= command.units <= 10:
             raise ValueError("行动单位必须为1至10")
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        if command.action == "body_train":
+            body = context.state.entities.require(command.actor_id, "cultivation.body")
+            if not body.get("technique_id"):
+                raise ValueError("必须先配置一部炼体功法")
+            if bool(body.get("ready")):
+                raise ValueError("炼体积累已经圆满，请先破境")
+        elif command.action == "sense_train":
+            sense = context.state.entities.require(command.actor_id, "cultivation.divine_sense")
+            if not sense.get("technique_id"):
+                raise ValueError("必须先配置一部神识功法")
         years = definitions.action_time(str(cultivation["realm_id"]), command.units)
         _schedule_action(context, actor_id=command.actor_id, action=command.action, years=years)
 
@@ -287,6 +297,9 @@ def _on_action_tick(definitions: GameDefinitions):
                 )
             return
         action = str(event.payload["action"])
+        # Specialized cultivation subscribers own their state and completion.
+        if action in {"body_train", "sense_train"}:
+            return
         activity = context.state.entities.require(actor_id, ACTIVITY)
         cultivation = context.state.entities.require(actor_id, CULTIVATION)
         gain = _cultivation_gain(context, definitions, actor_id, action)
@@ -487,8 +500,6 @@ def _breakthrough_chance(definitions: GameDefinitions, cultivation: dict[str, An
         group = _root_probability_group(definitions.roots[str(cultivation["spirit_root"])])
         base = float(table.get(group, table.get("default", 0.01)))
     else:
-        if realm_index >= 6:
-            raise ValueError("当前小境界突破需要尚未迁移的专属试炼")
         base = float(definitions.breakthrough["minor_base"].get(str(realm_index), 1.0))
     penalty = min(
         float(definitions.breakthrough["heart_demon_penalty_cap"]),
@@ -512,11 +523,21 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
             raise TypeError("命令类型错误")
         _ensure_controllable_alive(context, command.actor_id)
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        transition = context.state.entities.get(command.actor_id, "world.transition") or {}
+        if transition.get("sealed_cultivation") is not None:
+            raise ValueError("当前修为受下界法则压制，不能突破")
+        if context.state.relations.find(target_id=command.actor_id, kind="combat_prisoner"):
+            raise ValueError("身陷牢狱时无法正常突破")
         kind = cultivation.get("bottleneck")
         if kind not in {"minor", "major"}:
             raise ValueError("尚未抵达需要手动突破的瓶颈")
         major = kind == "major"
         realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+        old_layer = int(cultivation["layer"])
+        if (major and realm_index >= 3) or (
+            not major and realm_index >= 6 and old_layer in {3, 6}
+        ):
+            raise ValueError("当前突破必须经过尚未迁移的专属试炼")
         if major and realm_index >= len(definitions.realms) - 1:
             raise ValueError("已经达到当前境界体系终点")
         required = _opportunity_required(definitions, cultivation)
@@ -524,7 +545,6 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
             raise ValueError("机缘尚未圆满")
         chance = _breakthrough_chance(definitions, cultivation, major)
         old_realm = str(cultivation["realm_id"])
-        old_layer = int(cultivation["layer"])
         pity_key = f"minor:{realm_index}:{old_layer}"
         success = context.rng.random() < chance
         if not success:

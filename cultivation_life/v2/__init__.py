@@ -13,6 +13,13 @@ from .domain.cultivation import (
     GrantTechnique,
     PerformActionUnits,
 )
+from .domain.advanced_cultivation import (
+    AbsorbTransformationMaterial,
+    AttemptBodyBreakthrough,
+    AttemptDivineSenseBreakthrough,
+    EquipSpecialTechnique,
+    ManageTransformation,
+)
 from .domain.factions import (
     ChangeContribution,
     FoundFaction,
@@ -35,22 +42,29 @@ from .domain.extensions import (
     SpendWangsheng,
 )
 from .domain.relations import EndRelationship, FormRelationship
-from .domain.world import TravelWithinWorld
+from .domain.world import AscendWorld, CrossWorld, TravelWithinWorld
 from .domain.story import QueueStoryEvent, ResolveStoryChoice
 
 __all__ = [
     "AttemptBreakthrough",
+    "AttemptBodyBreakthrough",
+    "AttemptDivineSenseBreakthrough",
+    "AscendWorld",
+    "AbsorbTransformationMaterial",
     "AssignFactionPosition",
     "BuyMarketOffer",
     "ChangeContribution",
     "ConfigureMonsterBloodline",
+    "CrossWorld",
     "EndRelationship",
     "EquipMainTechnique",
+    "EquipSpecialTechnique",
     "FormRelationship",
     "FoundFaction",
     "GrantItem",
     "GrantTechnique",
     "JoinFaction",
+    "ManageTransformation",
     "InviteRelationshipToFaction",
     "SetFactionRewardPreference",
     "LeaveFaction",

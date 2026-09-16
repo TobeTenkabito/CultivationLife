@@ -6,7 +6,7 @@ from typing import Any
 from .character import IDENTITY, LIFE, character_view
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
-from ..kernel.model import EventScope, RelationEdge, WorldState
+from ..kernel.model import EventEnvelope, EventScope, RelationEdge, WorldState
 
 
 SOCIAL_KINDS = {"friend", "dao_companion", "master_disciple", "concubine"}
@@ -119,6 +119,32 @@ def _end_relationship(context: SimulationContext, command: object) -> None:
     )
 
 
+def _on_permanent_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    keep_ids = set(map(str, event.payload.get("keep_relationship_ids", [])))
+    ended: list[str] = []
+    for edge in list(context.state.relations.involving(actor_id)):
+        if edge.kind not in SOCIAL_KINDS:
+            continue
+        other_id = edge.target_id if edge.source_id == actor_id else edge.source_id
+        if other_id in keep_ids and edge.kind in {"friend", "dao_companion"}:
+            continue
+        closed = context.state.relations.end(edge.relation_id, ended_year=context.state.clock.year)
+        metadata = dict(closed.metadata)
+        metadata["end_reason"] = "permanent_world_transition"
+        context.state.relations.replace_metadata(closed.relation_id, metadata)
+        ended.append(edge.relation_id)
+    context.emit(
+        "world.transition.acknowledged",
+        source="relations",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": event.payload["transaction_id"],
+            "actor_id": actor_id, "domain": "relations", "ended_ids": ended,
+        },
+    )
+
+
 def relationship_invariants(state: WorldState) -> list[str]:
     errors: list[str] = []
     active = [edge for edge in state.relations.find() if edge.kind in SOCIAL_KINDS]
@@ -161,6 +187,7 @@ def relationship_invariants(state: WorldState) -> list[str]:
 def register_relationship_domain(bus: CommandBus) -> None:
     bus.register(FormRelationship, _form_relationship)
     bus.register(EndRelationship, _end_relationship)
+    bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
 
 
 def relationship_view(state: Any, entity_id: str | None = None) -> list[dict[str, Any]]:

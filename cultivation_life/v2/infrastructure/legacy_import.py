@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..domain.character import ACTIVITY, IDENTITY, LIFE, BootstrapGame, LIFESPAN_DUE
+from ..domain.advanced_cultivation import BODY, DIVINE_SENSE, TRANSFORMATIONS
 from ..domain.combat import CONDITION, combat_snapshot
 from ..domain.cultivation import CULTIVATION, PRACTICE, QI_SOURCES
 from ..domain.definitions import GameDefinitions
@@ -251,6 +252,11 @@ class LegacyV1Importer:
         "ghost_reincarnation_imprints", "ghost_intrinsic_highwater_realm",
         "ghost_intrinsic_highwater_layer",
         "story_flags", "milestones", "karma", "fame", "sha_qi",
+        "body_training", "body_progress", "body_technique",
+        "awaiting_body_breakthrough", "body_breakthrough_pity",
+        "divine_sense_technique", "divine_sense_rank", "divine_sense_experience",
+        "transformation_technique", "known_transformations",
+        "transformation_mastery", "transformation_loadouts",
     }
 
     def __init__(self, definitions: GameDefinitions, commands: CommandBus):
@@ -520,6 +526,105 @@ class LegacyV1Importer:
             PRACTICE,
             {"known_techniques": known, "main_technique_id": main_id or None},
         )
+        slot_ids: dict[str, str | None] = {}
+        for field, category in (
+            ("body_technique", "body"),
+            ("divine_sense_technique", "divine_sense"),
+            ("transformation_technique", "transformation"),
+        ):
+            raw = player.get(field)
+            technique_id = str(raw.get("id", "")) if isinstance(raw, dict) else ""
+            definition = self.definitions.techniques.get(technique_id)
+            if technique_id and (definition is None or definition.category != category):
+                report.warn("unknown_technique", f"player.{field}", f"槽位功法 {technique_id} 无法映射")
+                technique_id = ""
+            if technique_id and technique_id not in known:
+                known.append(technique_id)
+            slot_ids[field] = technique_id or None
+        state.entities.put(
+            actor_id, PRACTICE,
+            {"known_techniques": known, "main_technique_id": main_id or None},
+        )
+        body_layer = max(0, min(
+            int(self.definitions.systems["body_cultivation"]["max_layer"]),
+            _safe_int(player.get("body_training", 0), "player.body_training"),
+        ))
+        body_progress = max(0.0, _safe_float(player.get("body_progress", 0), "player.body_progress"))
+        state.entities.put(actor_id, BODY, {
+            "technique_id": slot_ids["body_technique"],
+            "layer": body_layer,
+            "progress": body_progress,
+            "ready": bool(player.get("awaiting_body_breakthrough", False)),
+            "breakthrough_pity": {
+                str(key): max(0, int(value))
+                for key, value in dict(player.get("body_breakthrough_pity", {})).items()
+            },
+            "intrinsic_hp_bonus": body_layer * 12.0,
+        })
+        state.entities.put(actor_id, DIVINE_SENSE, {
+            "technique_id": slot_ids["divine_sense_technique"],
+            "rank": max(0, _safe_int(player.get("divine_sense_rank", 0), "player.divine_sense_rank")),
+            "experience": max(0.0, _safe_float(
+                player.get("divine_sense_experience", 0), "player.divine_sense_experience"
+            )),
+        })
+        mastery = {
+            str(form_id): copy.deepcopy(value)
+            for form_id, value in dict(player.get("transformation_mastery", {})).items()
+            if str(form_id) in self.definitions.transformations and isinstance(value, dict)
+        }
+        legacy_known = set(map(str, player.get("known_transformations", [])))
+        for form_id in legacy_known & set(self.definitions.transformations):
+            mastery.setdefault(form_id, {
+                "purity": 0.25,
+                "stats": {key: 0.25 for key in (
+                    "might", "guard", "mobility", "sense", "sustain", "breach"
+                )},
+                "material_id": "legacy",
+                "source_type": "旧存档传承",
+            })
+        unknown_forms = (
+            set(map(str, dict(player.get("transformation_mastery", {})))) | legacy_known
+        ) - set(self.definitions.transformations)
+        if unknown_forms:
+            report.warn(
+                "unknown_transformation", "player.transformation_mastery",
+                f"无法识别的变化形态未导入：{', '.join(sorted(unknown_forms))}",
+            )
+        loadouts: dict[str, dict[str, list[str]]] = {}
+        for technique_id, raw in dict(player.get("transformation_loadouts", {})).items():
+            definition = self.definitions.techniques.get(str(technique_id))
+            if definition is None or definition.category != "transformation" or not isinstance(raw, dict):
+                continue
+            candidates = [
+                str(value) for value in [
+                    *raw.get("stored", raw.get("forms", [])), *raw.get("active", []),
+                ]
+            ]
+            for form_id in candidates:
+                if form_id in self.definitions.transformations:
+                    mastery.setdefault(form_id, {
+                        "purity": 0.25,
+                        "stats": {key: 0.25 for key in (
+                            "might", "guard", "mobility", "sense", "sustain", "breach"
+                        )},
+                        "material_id": "legacy",
+                        "source_type": "旧存档传承",
+                    })
+            stored = [str(value) for value in raw.get("stored", raw.get("forms", [])) if str(value) in mastery]
+            active = [str(value) for value in raw.get("active", []) if str(value) in stored]
+            loadouts[str(technique_id)] = {
+                "stored": list(dict.fromkeys(stored))[:definition.transformation_capacity],
+                "active": list(dict.fromkeys(active))[:definition.transformation_space],
+            }
+        transformation_id = slot_ids["transformation_technique"]
+        if transformation_id:
+            loadouts.setdefault(str(transformation_id), {"stored": [], "active": []})
+        state.entities.put(actor_id, TRANSFORMATIONS, {
+            "technique_id": transformation_id,
+            "mastery": mastery,
+            "loadouts": loadouts,
+        })
         world_id = str(player.get("world", "human"))
         location_id = str(player.get("location_id") or "")
         if location_id not in self.definitions.worlds[world_id].locations:
@@ -531,6 +636,7 @@ class LegacyV1Importer:
             location_id = fallback
         state.entities.put(actor_id, LOCATION, {"world_id": world_id, "location_id": location_id})
         report.imported_counts["techniques"] = len(known)
+        report.imported_counts["transformations"] = len(mastery)
 
     def _import_rng(
         self, state: WorldState, source: dict[str, Any], report: LegacyImportReport,
