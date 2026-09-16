@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_MASTER_SANCTION_001",
+      "version": 1,
+      "title": "师门问罪",
+      "body": "{npc_name}对你积怨已深，不再以寻常仇家的方式截杀，而是以师长身份当面问罪，勒令你退出门墙。",
+      "category": "relationship",
+      "tags": ["manual_only", "all_realms", "relationship", "master", "sanction", "negative"],
+      "weight": 0,
+      "choices": [
+        {"id": "leave", "text": "领命退出师门", "effects": [{"type": "relationship_sanction", "role": "master", "mode": "accept"}]},
+        {"id": "apologize", "text": "叩首请罪，请求再给一次机会", "effects": [{"type": "relationship_sanction", "role": "master", "mode": "appease"}]}
+      ]
+    },
+    {
+      "id": "EVT_COMPANION_SANCTION_001",
+      "version": 1,
+      "title": "道誓将断",
+      "body": "{npc_name}将昔日信物放在你面前。积怨已经压过旧情，对方不愿像外人一般寻仇，只要求立即解散道侣关系。",
+      "category": "relationship",
+      "tags": ["manual_only", "all_realms", "relationship", "dao_companion", "sanction", "negative"],
+      "weight": 0,
+      "choices": [
+        {"id": "separate", "text": "归还信物，解除道侣关系", "effects": [{"type": "relationship_sanction", "role": "companion", "mode": "accept"}]},
+        {"id": "apologize", "text": "挽回旧情，请求暂缓决裂", "effects": [{"type": "relationship_sanction", "role": "companion", "mode": "appease"}]}
+      ]
+    },
+    {
+      "id": "EVT_OWNER_SANCTION_001",
+      "version": 1,
+      "title": "正主索偿",
+      "body": "{npc_name}对你的不满已经不再掩饰。主仆名分尚在，对方没有像仇家一样截杀你，而是以魂印或身份相逼，索要一笔资源作为补偿。",
+      "category": "relationship",
+      "tags": ["manual_only", "all_realms", "relationship", "owner", "sanction", "negative"],
+      "weight": 0,
+      "choices": [
+        {"id": "comply", "text": "交出资源，暂息其怒", "effects": [{"type": "relationship_sanction", "role": "owner", "mode": "comply"}]},
+        {"id": "plead", "text": "低头解释，请求宽限", "effects": [{"type": "relationship_sanction", "role": "owner", "mode": "appease"}]},
+        {"id": "defy", "text": "拒绝索要，任其处置", "effects": [{"type": "relationship_sanction", "role": "owner", "mode": "defy"}]}
+      ]
+    }
+  ]
+}

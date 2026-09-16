@@ -267,3 +267,122 @@ def test_depending_and_requesting_resources_from_owner(
     assert stones["quantity"] >= 3
     with pytest.raises(ValueError, match="本行动单位"):
         engine.manage_concubine_status(game_id, "request_stones")
+
+
+def test_stronger_owner_blocks_revenge_and_can_clear_the_feud(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    people = list(game.world_npcs.values())
+    owner, enemy = people[0], people[1]
+    for npc in people:
+        npc.affinity = 0
+        npc.world = game.player.world
+    owner.realm_index, owner.layer, owner.gender = 4, 1, "male"
+    enemy.realm_index, enemy.layer, enemy.affinity = 1, 1, -100
+    engine._set_concubine_status(game, {
+        "owner_id": owner.id, "owner_name": owner.name,
+        "owner_realm_index": owner.realm_index, "owner_layer": owner.layer,
+        "owner_realm_name": engine._npc_realm_name(owner), "owner_world": owner.world,
+    })
+
+    assert not engine._maybe_personal_revenge(game, _AlwaysTrigger())
+    assert game.pending_event is None
+    assert enemy.affinity > float(engine.events_by_id["EVT_PERSONAL_REVENGE_001"].get("threshold", -25))
+    assert any(row.event_id == "SYS_RELATION_PROTECTS_FROM_REVENGE" for row in game.history)
+
+
+def test_low_affinity_master_uses_expulsion_event_instead_of_ambush(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    master = next(iter(game.world_npcs.values()))
+    for npc in game.world_npcs.values():
+        npc.affinity = 0
+    master.affinity = -100
+    master.world = game.player.world
+    game.player.master = engine._relationship_snapshot(
+        master.id, master.name, master.realm_index, master.layer, "world",
+        master.age, master.lifespan, affinity=-100, world=master.world,
+    )
+
+    assert not engine._maybe_personal_revenge(game, _AlwaysTrigger())
+    assert engine._maybe_relationship_sanction(game, _AlwaysTrigger())
+    assert game.pending_event["id"] == "EVT_MASTER_SANCTION_001"
+    engine.store.save(game)
+    resolved = engine.choose(game_id, "leave")
+    assert resolved["player"]["master"] is None
+
+
+def test_owner_and_ghost_captor_use_dedicated_demand_event(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, _ = concubine_game
+    game = engine._load(concubine_game[1])
+    owner = next(iter(game.world_npcs.values()))
+    owner.affinity = -90
+    owner.world = game.player.world
+    engine._set_concubine_status(game, {
+        "owner_id": owner.id, "owner_name": owner.name,
+        "owner_realm_index": owner.realm_index, "owner_layer": owner.layer,
+        "owner_realm_name": engine._npc_realm_name(owner), "owner_world": owner.world,
+    })
+    assert engine._maybe_relationship_sanction(game, _AlwaysTrigger())
+    assert game.pending_event["id"] == "EVT_OWNER_SANCTION_001"
+    assert game.pending_event["runtime"]["role"] == "concubine_owner"
+
+    game.pending_event = None
+    game.player.concubine_status = None
+    game.player.ghost_captor = {
+        "id": owner.id, "npc_id": owner.id, "name": owner.name,
+        "realm_index": owner.realm_index, "layer": owner.layer,
+        "affinity": -90, "controlled_form": "法器器灵",
+    }
+    game.governance_actions.clear()
+    assert engine._maybe_relationship_sanction(game, _AlwaysTrigger())
+    assert game.pending_event["id"] == "EVT_OWNER_SANCTION_001"
+    assert game.pending_event["runtime"]["role"] == "ghost_captor"
+
+
+def test_defeated_owner_can_transfer_player_to_winner(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    owner, winner = list(game.world_npcs.values())[:2]
+    owner.world = winner.world = game.player.world
+    owner.realm_index, winner.realm_index = 2, 3
+    engine._set_concubine_status(game, {
+        "owner_id": owner.id, "owner_name": owner.name,
+        "owner_realm_index": owner.realm_index, "owner_layer": owner.layer,
+        "owner_realm_name": engine._npc_realm_name(owner), "owner_world": owner.world,
+    })
+    summary = engine._maybe_transfer_player_dependency(
+        game, owner, winner, _AlwaysTrigger(), context="test_duel",
+    )
+    assert summary
+    assert game.player.concubine_status["owner_id"] == winner.id
+    assert game.player.concubine_status["forced"] is True
+    assert any(row.event_id == "SYS_DEPENDENT_TRANSFERRED" for row in game.history)
+
+
+def test_defeated_ghost_captor_can_transfer_control(
+    concubine_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = concubine_game
+    game = engine._load(game_id)
+    owner, winner = list(game.world_npcs.values())[:2]
+    owner.world = winner.world = game.player.world
+    game.player.ghost_captor = {
+        "id": owner.id, "npc_id": owner.id, "name": owner.name,
+        "realm_index": owner.realm_index, "layer": owner.layer,
+        "combat_power": engine._npc_power(owner), "controlled_form": "法器器灵",
+    }
+    summary = engine._maybe_transfer_player_dependency(
+        game, owner, winner, _AlwaysTrigger(), context="test_duel",
+    )
+    assert summary
+    assert game.player.ghost_captor["npc_id"] == winner.id
+    assert game.player.ghost_captor["controlled_form"] == "法器器灵"
