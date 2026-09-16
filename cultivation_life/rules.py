@@ -498,6 +498,7 @@ def opportunity_multiplier(player: Player) -> float:
         root_efficiency * inner_multiplier
         * technique_environment_multiplier(player.technique, player.world)
         * ghost_opportunity_multiplier(player)
+        * (0.8 if player.concubine_status else 1.0)
     )
 
 
@@ -622,6 +623,7 @@ def public_player(player: Player) -> dict[str, Any]:
         return result
 
     data.update(
+        gender_name="女" if player.gender == "female" else "男",
         realm_id=realm(player).id,
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),

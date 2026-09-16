@@ -9,7 +9,7 @@ from __future__ import annotations
 
 BASE_GAME_ID = "cultivation-life"
 BASE_GAME_NAME = "浮生问道"
-BASE_GAME_VERSION = "1.12.0"
+BASE_GAME_VERSION = "1.13.0"
 BASE_GAME_VERSION_TUPLE = tuple(int(part) for part in BASE_GAME_VERSION.split("."))
 
 

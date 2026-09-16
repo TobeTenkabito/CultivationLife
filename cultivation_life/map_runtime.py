@@ -102,8 +102,10 @@ class MapTravelMixin:
         elapsed = player.age - start_age
         if elapsed:
             time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
-            for _ in range(max(1, (elapsed + time_unit - 1) // time_unit)):
+            completed_units = max(1, (elapsed + time_unit - 1) // time_unit)
+            for _ in range(completed_units):
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
+            self._advance_concubine_status(game, completed_units)
             self._advance_player_bounties(game, rng)
             if elapsed >= 5:
                 self._record_era_summary(game, start_age, era_news)

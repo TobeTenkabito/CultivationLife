@@ -89,6 +89,7 @@ from .ghost_system import (
     grant_wangsheng, reincarnation_breakthrough_bonus,
 )
 from .intrigue_system import IntrigueSystemMixin
+from .concubine_system import ConcubineSystemMixin, gender_name
 from .possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
@@ -127,7 +128,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -162,6 +163,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         self, name: str, spirit_root: str, path: str, seed: int | None = None,
         technique_element: str | None = None, preset_id: str | None = None,
         start_world: str | None = None, monster_species_id: str | None = None,
+        gender: str = "male",
     ) -> dict[str, Any]:
         preset = next(
             (entry for entry in WORLD_SYSTEMS.get("quick_start_presets", []) if entry["id"] == preset_id),
@@ -178,6 +180,8 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             raise ValueError("未知灵根")
         if path not in PATH_NAMES:
             raise ValueError("未知主修类型")
+        if gender not in {"male", "female"}:
+            raise ValueError("未知性别")
         if path == "monster" and not bloodline_content_available():
             raise ValueError("妖修开局需要安装并启用【妖修道途：血脉与进化】DLC")
         allowed_start_worlds = WORLD_SYSTEMS.get("start_worlds", {}).get(path, ["human"])
@@ -188,7 +192,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         actual_seed = seed if seed is not None else random.SystemRandom().randrange(1, 2**31)
         rng = random.Random(actual_seed)
         player = Player(
-            name=clean_name, spirit_root=spirit_root, path=path,
+            name=clean_name, spirit_root=spirit_root, path=path, gender=gender,
             born_rootless=spirit_root == "none",
             world=selected_start_world,
         )
@@ -282,7 +286,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                 f"{clean_name}以快速开局承接既有因果，当前为{self._npc_realm_name(SectNpc('', '', '', player.realm_index, player.layer, 0, 1))}，"
                 f"身具{ROOT_NAMES[spirit_root]}，已配置默认功法、属性与行囊。"
                 if preset else
-                f"{clean_name}生于{WORLD_SYSTEMS['world_names'].get(player.world, player.world)}，身具{ROOT_NAMES[spirit_root]}，"
+                f"{clean_name}以{'女' if gender == 'female' else '男'}身生于{WORLD_SYSTEMS['world_names'].get(player.world, player.world)}，身具{ROOT_NAMES[spirit_root]}，"
                 f"心向{PATH_NAMES[path]}，但尚未获得任何功法。"
             ),
             {"lifespan": player.lifespan}, ["system", "milestone"],
@@ -470,9 +474,14 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
                 era_news.extend(self._advance_heavenly_court_unit(game, rng))
                 era_news.extend(self._advance_intrigue_unit(game, rng))
+            drained = self._advance_concubine_status(game, completed_units)
+            if drained:
+                era_news.append(f"{player.age}岁：侍妾名分被抽走机缘 {drained:.1f}")
             self._advance_player_bounties(game, rng)
             if game.pending_event is None and not player.ghost_captor:
                 if self._maybe_immortal_conversion_event(game, rng):
+                    pass
+                elif self._maybe_concubine_proposal(game, rng):
                     pass
                 elif self._maybe_personal_revenge(game, rng):
                     pass
@@ -629,6 +638,10 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         if action in {"endure", "wait", "cultivate"} and player.alive and not self._advance_soul_erosion_time(game, 1):
             result = "dead"
             summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"
+        if action in {"endure", "wait", "cultivate"} and player.alive:
+            drained = self._advance_concubine_status(game, 1)
+            if drained:
+                summary += f" 侍妾名分仍在，机缘又被抽走 {drained:.1f}。"
         self._intrigue_sync_player_prison(game)
         game.history.append(HistoryRecord(
             "SYS_PRISON_ACTION", 1, player.age, "身陷囹圄", action, result, summary,
@@ -1043,6 +1056,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         rng = decode_rng(game.seed, game.rng_state)
         old_label = public_player(player)["realm_name"]
         chance = self._breakthrough_chance(player, major=major)
+        player.concubine_breakthrough_bonus = 0.0
         if player.path == "demonic":
             player.devouring_breakthrough_bonus = 0.0
         if major:
@@ -1304,6 +1318,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                 int(child.get("layer", 1)), int(child.get("age", 8)), child.get("lifespan"),
                 spirit_root=root, path=str(child.get("path", family.path)), race=player.race,
                 world=player.world, affinity=60.0,
+                gender=str(child.get("gender") or self._stable_gender(str(child.get("id", "")))),
             )
             family.npcs.append(npc)
         game.family = family
@@ -3160,6 +3175,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             path=str(relation.get("path", "dao")), race=str(relation.get("race", "human")),
             world=str(relation.get("world", game.player.world)), alive=bool(relation.get("alive", True)),
             death_reason=relation.get("death_reason"), affinity=float(relation.get("affinity", 0)),
+            gender=str(relation.get("gender", "")),
             treasure_item_id=next(iter(relation.get("items", {})), None),
             next_tribulation_age=relation.get("next_tribulation_age"),
             tribulation_count=int(relation.get("tribulation_count", 0)),
@@ -3799,6 +3815,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             "spirit_root_name":self._npc_root_name(child_root), "cultivation_started":False,
             "realm_index":0, "layer":1, "path":player.technique.path if player.technique else player.path,
             "lifespan":rng.randint(80, 100), "parents":[player.name, str(companion.get("name", "道侣"))],
+            "gender":rng.choice(["male", "female"]),
         }
         lineage_text = ""
         inheritance = MONSTER_BLOODLINE_SETTINGS.get("inheritance", {})
@@ -3875,6 +3892,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                     cultivation_progress=float(child.get("cultivation_progress", 0)),
                     path=str(child.get("path", player.path)), race=player.race,
                     world=str(child.get("world", player.world)),
+                    gender=str(child.get("gender") or self._stable_gender(str(child.get("id", "")))),
                     next_tribulation_age=child.get("next_tribulation_age"),
                     tribulation_count=int(child.get("tribulation_count", 0)),
                     tribulation_power=child.get("tribulation_power"),
@@ -4933,11 +4951,12 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         spirit_root: str = "", cultivation_progress: float = 0.0,
         path: str = "dao", race: str = "human", world: str = "human",
         main_technique_id: str | None = None, affinity: float = 20.0,
+        gender: str = "",
     ) -> dict[str, Any]:
         shell = SectNpc(
             person_id, name, "", realm_index, layer, age, int(lifespan or age + 1),
             spirit_root=spirit_root, cultivation_progress=cultivation_progress,
-            path=path, race=race, world=world,
+            path=path, race=race, world=world, gender=gender,
         )
         return {
             "id": person_id, "name": name, "realm_index": realm_index, "layer": layer,
@@ -4949,6 +4968,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             "race_name": RACE_DEFINITIONS.get(race, {"name": race})["name"], "world": world,
             "items": {}, "techniques": [], "last_requests": {}, "last_interactions": {},
             "main_technique_id": main_technique_id, "affinity": affinity,
+            "gender": shell.gender, "gender_name": gender_name(shell.gender),
             "next_tribulation_age": None, "tribulation_count": 0, "tribulation_power": None,
         }
 
@@ -5360,6 +5380,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             member.update(
                 name=name, npc_id=npc_id, treasure_item_id=npc.treasure_item_id, path=npc.path,
                 age=npc.age, lifespan=npc.lifespan, spirit_root=npc.spirit_root,
+                gender=npc.gender,
             )
             entry = {
                 "id": npc_id, "npc": npc.to_dict(), "combat_power": float(member["power"]),
@@ -5614,6 +5635,8 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             self._add_opportunity(player, amount)
             sign = "+" if amount >= 0 else ""
             return None, f"机缘 {sign}{amount}。"
+        if kind == "concubine_proposal":
+            return self._resolve_concubine_proposal(game, pending, bool(effect.get("accept", False)))
         if kind == "add_karma":
             player.karma = max(0, player.karma + float(value))
             sign = "+" if value >= 0 else ""
@@ -6891,6 +6914,16 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             base = float(table.get(self._root_probability_group(player), table.get("default", 0.01)))
         else:
             base = 1.0 if source == 1 else float(config["minor_base"].get(str(source), 1.0))
+        dependent_bonus = 0.0
+        if player.concubine_status:
+            owner_rank = (
+                int(player.concubine_status.get("owner_realm_index", 0)),
+                int(player.concubine_status.get("owner_layer", 1)),
+            )
+            if (player.realm_index, player.layer) < owner_rank:
+                dependent_bonus = 0.02
+        concubine_base_bonus = min(0.02, player.concubine_breakthrough_bonus) + dependent_bonus
+        base += concubine_base_bonus
         scope = f"{'major' if major else 'minor'}:{source}"
         aid_bonus = sum(
             float(ITEM_CATALOG[item_id].breakthrough_bonus)
@@ -6938,6 +6971,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         ))
         return {
             "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
+            "concubine_base_bonus": concubine_base_bonus,
             "artifact_bonus": artifact_bonus, "pity_bonus": pity_bonus,
             "devouring_bonus": devouring_bonus,
             "reincarnation_bonus": reincarnation_bonus,
@@ -7762,6 +7796,12 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         for relation in [player_data.get("master"), *player_data.get("disciples", [])]:
             if relation:
                 relation["can_invite_faction"] = self._relationship_can_join_faction(game, relation)
+                relation["gender"] = str(relation.get("gender") or self._stable_gender(str(relation.get("id", ""))))
+                relation["gender_name"] = gender_name(relation["gender"])
+                relation["can_recruit_concubine"] = bool(
+                    relation["gender"] == "female" and self._rank(relation) <= self._rank(game.player)
+                    and not any(str(row.get("id")) == str(relation.get("id")) for row in game.player.concubines)
+                )
         sealed = game.player.sealed_cultivation
         player_data["cultivation_suppressed"] = bool(sealed)
         if sealed:
@@ -7864,6 +7904,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
             "dao_companion": self._public_dao_companion(game),
             "dao_friends": self._public_dao_friends(game),
             "personal_relations": self._public_personal_relations(game),
+            "concubine_system": self._public_concubine_system(game),
             "party": party,
             "wanted": self._public_wanted(game),
             "imprisonment": copy.deepcopy(game.player.imprisonment),
@@ -8054,6 +8095,11 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
     def _public_world_npcs(self, game: GameState) -> list[dict[str, Any]]:
         result: list[dict[str, Any]] = []
         world_people = {**game.world_npcs, **game.notable_npcs}
+        for cached in game.encounter_npc_cache:
+            saved = cached.get("npc")
+            if isinstance(saved, dict):
+                npc = SectNpc.from_dict(saved)
+                world_people.setdefault(npc.id, npc)
         for npc in sorted(world_people.values(), key=lambda value: (-value.realm_index, -value.layer, value.name)):
             same_world = npc.world == game.player.world
             if not same_world and npc.departed_age is None:
@@ -8072,6 +8118,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                 public_npc["departure_reason"] = None
             result.append({
                 **public_npc, "realm_name": self._npc_realm_name(npc),
+                "gender_name": gender_name(npc.gender),
                 "spirit_root_name": self._npc_root_name(npc.spirit_root),
                 "path_name": PATH_NAMES.get(npc.path, npc.path),
                 "race_name": RACE_DEFINITIONS.get(npc.race, {"name": npc.race})["name"],
@@ -8114,6 +8161,11 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                     and not (game.player.master and game.player.master.get("id") == npc.id)
                     and not any(entry.get("id") == npc.id for entry in game.player.disciples)
                 ),
+                "can_recruit_concubine": bool(
+                    same_world and npc.alive and npc.gender == "female"
+                    and (npc.realm_index, npc.layer) <= (game.player.realm_index, game.player.layer)
+                    and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
+                ),
             })
         return result
 
@@ -8122,6 +8174,12 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         if not companion:
             return None
         result = copy.deepcopy(companion)
+        result["gender"] = str(result.get("gender") or self._stable_gender(str(result.get("id", ""))))
+        result["gender_name"] = gender_name(result["gender"])
+        result["can_recruit_concubine"] = bool(
+            result["gender"] == "female" and self._rank(result) <= self._rank(game.player)
+            and not any(str(row.get("id")) == str(result.get("id")) for row in game.player.concubines)
+        )
         technique_id = result.get("main_technique_id")
         result["main_technique_name"] = (
             TECHNIQUE_CATALOG[technique_id].name if technique_id in TECHNIQUE_CATALOG else "尚无主修功法"
@@ -8145,6 +8203,12 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         result: list[dict[str, Any]] = []
         for friend in game.player.dao_friends:
             row = copy.deepcopy(friend)
+            row["gender"] = str(row.get("gender") or self._stable_gender(str(row.get("id", ""))))
+            row["gender_name"] = gender_name(row["gender"])
+            row["can_recruit_concubine"] = bool(
+                row["gender"] == "female" and self._rank(row) <= self._rank(game.player)
+                and not any(str(entry.get("id")) == str(row.get("id")) for entry in game.player.concubines)
+            )
             technique_id = str(row.get("main_technique_id", ""))
             row["main_technique_name"] = (
                 TECHNIQUE_CATALOG[technique_id].name if technique_id in TECHNIQUE_CATALOG else "主修未明"
@@ -8193,6 +8257,11 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         rows = [{
             "id":npc.id,"name":npc.name,"affinity":round(float(npc.affinity or 0),1),
             "attitude":attitude_label(npc.affinity or 0,0),"realm_name":self._npc_realm_name(npc),
+            "gender":npc.gender,"gender_name":gender_name(npc.gender),
+            "can_recruit_concubine":bool(
+                npc.gender == "female" and self._rank(npc) <= self._rank(game.player)
+                and not any(str(entry.get("id")) == npc.id for entry in game.player.concubines)
+            ),
             "relationship":relationship_labels.get(npc.id,"相识"),
             "faction_name":self._faction_meta(game, self._npc_faction_id(game,npc.id))["name"] if self._npc_faction_id(game,npc.id) else None,
         } for npc in people.values() if float(npc.affinity or 0) >= high_threshold or float(npc.affinity or 0) <= low_threshold]
@@ -8529,6 +8598,7 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         offspring = [
             {
                 **copy.deepcopy(child),
+                "gender_name": gender_name(str(child.get("gender") or self._stable_gender(str(child.get("id", ""))))),
                 "spirit_root_name": self._npc_root_name(str(child.get("spirit_root", "none"))),
                 "realm_name": (
                     self._npc_realm_name(SectNpc(
@@ -8665,6 +8735,11 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
                 and not (player.dao_companion and player.dao_companion.get("id") == entry["id"])
                 and float(npc.affinity or 0) >= float(WORLD_SYSTEMS["relationship"]["friend_affinity_required"])
             )
+            entry["gender_name"] = gender_name(npc.gender)
+            entry["can_recruit_concubine"] = bool(
+                npc.gender == "female" and npc_rank <= player_rank
+                and not any(str(row.get("id")) == npc.id for row in player.concubines)
+            )
             entry["can_intercept"] = True
             entry["can_request_master"] = (
                 unrelated and player.master is None and npc_rank > player_rank
@@ -8679,6 +8754,8 @@ class GameEngine(IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin,
         roster.append({
             "id": f"player:{game.id}",
             "name": player.name,
+            "gender": player.gender,
+            "gender_name": gender_name(player.gender),
             "title": "议事长老" if unlocked else "门下弟子",
             "realm_index": player.realm_index,
             "layer": player.layer,

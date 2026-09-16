@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=20260915-3">
+  <link rel="stylesheet" href="/style.css?v=20260916-4">
   <link rel="stylesheet" href="/panels.css?v=20260916-5">
 </head>
 <body>
@@ -25,6 +25,7 @@
       <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，主修决定因果如何回响。随机种子可以复现同一条时间线。</p><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取成就中……</small></button></div>
       <form id="new-game-form">
         <label>道号<input name="name" maxlength="16" placeholder="无名散修"></label>
+        <label>性别<select name="gender" id="gender-select"><option value="male">男</option><option value="female">女</option></select></label>
         <label>灵根<select name="spirit_root" id="root-select"></select></label>
         <label>修行道统倾向<select name="path" id="path-select"></select></label>
         <label id="monster-species-field" class="hidden">妖修本源种<select name="monster_species_id" id="monster-species-select"></select><span>政治身份仍为妖族；本源种只决定生命谱系。</span></label>
@@ -70,6 +71,7 @@
           <div id="ghost-erosion-stat" class="hidden"><dt>魂蚀率</dt><dd id="ghost-erosion"></dd></div>
           <div id="ghost-wangsheng-stat" class="hidden"><dt>往生</dt><dd id="ghost-wangsheng"></dd></div>
           <div><dt>种族</dt><dd id="player-race"></dd></div>
+          <div><dt>性别</dt><dd id="player-gender"></dd></div>
         </dl>
         <details class="techniques compact-library"><summary>功法配置 <span id="equipped-technique-count"></span></summary><div id="technique-list"></div></details>
         <details class="technique-library compact-library"><summary>已悟功法 <span id="known-technique-count"></span></summary><div id="known-technique-list"></div></details>
@@ -229,7 +231,8 @@
           <details class="alchemy-workbench"><summary>丹炉 · 任意药材配伍</summary><p class="muted">勾选任意品种与数量的药材，再选择目标丹药。成功率由丹药品阶、炼丹等级、投入数量与药材年份品质共同决定。</p><select id="alchemy-target"></select><div id="alchemy-materials" class="alchemy-materials"></div><button id="alchemy-refine" type="button">开炉炼丹</button></details>
         </article>
         <article id="relationship-card" class="paper utility-panel left-panel relationship-panel" role="dialog" aria-modal="false" aria-label="人际关系">
-          <div class="section-title"><div><p class="eyebrow">尘缘牵系</p><h2>人际关系</h2></div><div class="panel-heading"><span>师徒、道友、道侣与同行</span><button id="relationship-toggle" type="button">关闭</button></div></div>
+          <div class="section-title"><div><p class="eyebrow">尘缘牵系</p><h2>人际关系</h2></div><div class="panel-heading"><span>师徒、道友、道侣、侍妾与同行</span><button id="relationship-toggle" type="button">关闭</button></div></div>
+          <section class="concubines"><h3>侍妾</h3><div id="concubine-status"></div><div id="concubine-list"></div></section>
           <section class="dao-companion"><h3>道侣</h3><div id="dao-companion-list"></div></section>
           <section class="dao-friends"><h3>道友</h3><div id="dao-friend-list"></div></section>
           <section class="relationships"><h3>师徒</h3><div id="relationship-list"></div></section>
@@ -385,6 +388,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260916-2"></script>
-  <script src="/app.js?v=20260916-3"></script>
+  <script src="/app.js?v=20260916-4"></script>
 </body>
 </html>

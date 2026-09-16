@@ -156,6 +156,12 @@ class SectNpc:
     notoriety: int = 0
     encountered_player: bool = False
     wounds: int = 0
+    gender: str = ""
+
+    def __post_init__(self) -> None:
+        if self.gender not in {"male", "female"}:
+            identity = self.id or self.name
+            self.gender = "female" if sum(ord(char) for char in identity) % 2 else "male"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -218,6 +224,7 @@ class SectState:
 class Player:
     name: str
     spirit_root: str
+    gender: str = "male"
     age: int = 16
     realm_index: int = 0
     layer: int = 1
@@ -303,6 +310,9 @@ class Player:
     master: dict[str, Any] | None = None
     disciples: list[dict[str, Any]] = field(default_factory=list)
     dao_friends: list[dict[str, Any]] = field(default_factory=list)
+    concubines: list[dict[str, Any]] = field(default_factory=list)
+    concubine_status: dict[str, Any] | None = None
+    concubine_breakthrough_bonus: float = 0.0
     disciple_requests: list[dict[str, Any]] = field(default_factory=list)
     relationship_attempts: list[str] = field(default_factory=list)
     story_flags: list[str] = field(default_factory=list)
@@ -408,6 +418,19 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(value)
+        data["gender"] = str(data.get("gender", "male"))
+        if data["gender"] not in {"male", "female"}:
+            data["gender"] = "male"
+        data["concubines"] = [
+            copy.deepcopy(row) for row in data.get("concubines", []) if isinstance(row, dict)
+        ]
+        saved_concubine_status = data.get("concubine_status")
+        data["concubine_status"] = (
+            copy.deepcopy(saved_concubine_status) if isinstance(saved_concubine_status, dict) else None
+        )
+        data["concubine_breakthrough_bonus"] = max(
+            0.0, min(0.02, float(data.get("concubine_breakthrough_bonus", 0.0)))
+        )
         data["permanent_intrinsic_hp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_hp_bonus", 0.0)))
         data["permanent_intrinsic_mp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_mp_bonus", 0.0)))
         for key in (

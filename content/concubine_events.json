@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "SYS_CONCUBINE_PROPOSAL",
+      "version": 1,
+      "title": "高门垂青",
+      "body": "{owner_realm}修士{owner_name}遣人送来华服与信物，邀你入府充作侍妾。对方看中的既是你的姿容，也是尚可塑造的道途。",
+      "category": "relationship",
+      "tags": ["manual_only", "relationship", "concubine"],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "accept",
+          "text": "接下信物，成为其侍妾",
+          "effects": [{"type": "concubine_proposal", "accept": true}]
+        },
+        {
+          "id": "refuse",
+          "text": "退回信物，拒绝拉拢",
+          "effects": [{"type": "concubine_proposal", "accept": false}]
+        }
+      ]
+    }
+  ]
+}
