@@ -1,11 +1,33 @@
 from __future__ import annotations
 
 from .bus import SimulationContext
+from collections.abc import Callable
+
 from .model import EventScope, WorldState
 
 
 class InvariantViolation(RuntimeError):
     pass
+
+
+InvariantValidator = Callable[[WorldState], list[str]]
+
+
+class InvariantRegistry:
+    def __init__(self) -> None:
+        self._validators: dict[str, InvariantValidator] = {}
+
+    def register(self, name: str, validator: InvariantValidator) -> None:
+        if name in self._validators:
+            raise ValueError(f"不变量检查器重复注册：{name}")
+        self._validators[name] = validator
+
+    def validate(self, state: WorldState) -> None:
+        errors = validate_kernel_state(state)
+        for name, validator in self._validators.items():
+            errors.extend(f"{name}: {error}" for error in validator(state))
+        if errors:
+            raise InvariantViolation("；".join(errors))
 
 
 class TimeService:
@@ -18,7 +40,10 @@ class TimeService:
         start_year = context.state.clock.year
         target_year = start_year + years
         cursor = start_year
-        for scheduled in context.state.scheduler.pop_due_through(target_year):
+        while not context.time_halted:
+            scheduled = context.state.scheduler.next_due_through(target_year)
+            if scheduled is None:
+                break
             if scheduled.due_year < cursor:
                 raise InvariantViolation("调度器中存在已经过期的事件")
             if scheduled.due_year > cursor:
@@ -30,13 +55,16 @@ class TimeService:
                     payload={"from_year": cursor, "to_year": scheduled.due_year},
                 )
                 cursor = scheduled.due_year
+                if context.time_halted:
+                    break
+            scheduled = context.state.scheduler.pop(scheduled.sequence)
             context.emit(
                 scheduled.event_type,
                 source=scheduled.source,
                 scope=scheduled.scope,
                 payload=scheduled.payload,
             )
-        if cursor < target_year:
+        if not context.time_halted and cursor < target_year:
             context.state.clock = context.state.clock.at(target_year)
             context.emit(
                 "core.time.advanced",
@@ -46,7 +74,7 @@ class TimeService:
             )
 
 
-def validate_world_state(state: WorldState) -> None:
+def validate_kernel_state(state: WorldState) -> list[str]:
     errors: list[str] = []
     if state.clock.year < 0:
         errors.append("世界时间小于零")
@@ -55,21 +83,32 @@ def validate_world_state(state: WorldState) -> None:
     if state.next_event_sequence < 1:
         errors.append("事件序号非法")
     controlled = state.controlled_entity_id
-    if not controlled:
-        errors.append("没有受控角色")
-    elif not state.entities.exists(controlled):
+    if controlled and not state.entities.exists(controlled):
         errors.append("受控角色实体不存在")
-    else:
-        for component in ("core.identity", "character.life", "character.activity"):
-            if state.entities.get(controlled, component) is None:
-                errors.append(f"受控角色缺少组件：{component}")
-        life = state.entities.get(controlled, "character.life")
-        if life is not None and int(life.get("birth_year", 1)) > state.clock.year:
-            errors.append("角色出生时间晚于当前世界时间")
     scheduled_sequences = [event.sequence for event in state.scheduler.events]
     if len(scheduled_sequences) != len(set(scheduled_sequences)):
         errors.append("调度事件序号重复")
     if any(event.due_year <= state.clock.year for event in state.scheduler.events):
         errors.append("存在未结算的过期调度事件")
+    relation_ids = list(state.relations.edges)
+    if len(relation_ids) != len(set(relation_ids)):
+        errors.append("关系ID重复")
+    for relation_id, edge in state.relations.edges.items():
+        if relation_id != edge.relation_id:
+            errors.append(f"关系索引不一致：{relation_id}")
+        if not state.entities.exists(edge.source_id) or not state.entities.exists(edge.target_id):
+            errors.append(f"关系引用不存在的实体：{relation_id}")
+        if edge.ended_year is not None and edge.ended_year < edge.created_year:
+            errors.append(f"关系时间非法：{relation_id}")
+    return errors
+
+
+def validate_world_state(state: WorldState) -> None:
+    """Backward-compatible kernel-only validation entry point.
+
+    Application code uses ``InvariantRegistry`` so each domain owns its own
+    rules.  This function remains useful for storage and low-level tests.
+    """
+    errors = validate_kernel_state(state)
     if errors:
         raise InvariantViolation("；".join(errors))

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from ..kernel.model import EventEnvelope, V2_FORMAT_ID, V2_SCHEMA_VERSION, WorldState
+from .migrations import migrate_snapshot
 
 
 class ConcurrentWriteError(RuntimeError):
@@ -131,10 +132,13 @@ class SQLiteSaveStore:
                     connection.execute(
                         """
                         UPDATE games
-                        SET revision = ?, player_name = ?, updated_at = ?, snapshot_json = ?
+                        SET format_id = ?, schema_version = ?, revision = ?, player_name = ?,
+                            updated_at = ?, snapshot_json = ?
                         WHERE game_id = ? AND revision = ?
                         """,
                         (
+                            V2_FORMAT_ID,
+                            V2_SCHEMA_VERSION,
                             new_revision,
                             player_name,
                             state.updated_at,
@@ -171,9 +175,10 @@ class SQLiteSaveStore:
             ).fetchone()
         if row is None:
             raise KeyError("V2存档不存在")
-        if row["format_id"] != V2_FORMAT_ID or int(row["schema_version"]) != V2_SCHEMA_VERSION:
+        if row["format_id"] != V2_FORMAT_ID:
             raise ValueError("V2存档格式不受支持")
-        state = WorldState.from_dict(json.loads(str(row["snapshot_json"])))
+        snapshot = migrate_snapshot(json.loads(str(row["snapshot_json"])))
+        state = WorldState.from_dict(snapshot)
         if state.game_id != game_id or state.revision != int(row["revision"]):
             raise ValueError("V2存档索引与快照不一致")
         return state

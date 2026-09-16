@@ -34,6 +34,8 @@ class SimulationContext:
     emitted_events: list[EventEnvelope] = field(default_factory=list)
     _pending_events: deque[EventEnvelope] = field(default_factory=deque)
     _dispatching: bool = False
+    time_halted: bool = False
+    time_halt_reason: str | None = None
     _rng: random.Random = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -47,6 +49,10 @@ class SimulationContext:
 
     def persist_rng(self) -> None:
         self.state.rng_state = repr(self._rng.getstate())
+
+    def halt_time(self, reason: str) -> None:
+        self.time_halted = True
+        self.time_halt_reason = reason
 
     def emit(
         self,
