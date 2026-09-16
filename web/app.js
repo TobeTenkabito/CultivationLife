@@ -1084,7 +1084,7 @@ function renderIntrigue(system) {
       if (!section.guests.length) { const empty=document.createElement('p'); empty.className='empty'; empty.textContent='暂无客卿。'; guestList.appendChild(empty); }
       if (section.kind !== 'race' && section.control_authority && section.guest_candidates.length) {
         const inviteRow=document.createElement('div'); inviteRow.className='intrigue-guest-invite'; const select=document.createElement('select');
-        section.guest_candidates.forEach(candidate=>{const option=document.createElement('option');option.value=candidate.id;option.textContent=`${candidate.name} · 好感 ${candidate.affinity} · 境界序 ${candidate.realm_index}`;select.appendChild(option);});
+        section.guest_candidates.forEach(candidate=>{const option=document.createElement('option');option.value=candidate.id;option.textContent=`${candidate.name} · ${candidate.relationship || '故交'} · 好感 ${candidate.affinity} · 境界序 ${candidate.realm_index}`;select.appendChild(option);});
         const button=document.createElement('button');button.textContent='邀请客卿';button.disabled=locked();button.onclick=()=>mutate(`/api/games/${game.id}/intrigue-guest`,{kind:section.kind,action:'invite',npc_id:select.value});inviteRow.append(select,button);guestList.appendChild(inviteRow);
       }
       guests.appendChild(guestList); block.appendChild(guests);
@@ -1553,6 +1553,11 @@ function renderWorldNpcs(npcs) {
     if (npc.can_befriend) {
       const button = document.createElement('button'); button.className = 'friend-action'; button.textContent = '结为道友';
       button.onclick = () => mutate(`/api/games/${game.id}/dao-friend`, {npc_id:npc.id, action:'befriend'});
+      controls.appendChild(button);
+    }
+    if (npc.can_invite_guest) {
+      const button = document.createElement('button'); button.className = 'relationship-action'; button.textContent = '邀请客卿';
+      button.onclick = () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:npc.id});
       controls.appendChild(button);
     }
     if (npc.can_recruit_concubine) {
@@ -2800,6 +2805,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
       interactionButton('请教功法', requested.technique === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
     );
     if (person.can_invite_faction) actions.appendChild(interactionButton('引荐入宗', '1', () => mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:person.id})));
+    if (person.can_invite_guest) actions.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
     if (game.player.path === 'demonic') actions.appendChild(interactionButton('尝试生擒师父', '1', () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'master'}), 'danger'));
     if (person.can_recruit_concubine) actions.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
     actions.appendChild(interactionButton('脱离师门', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'master', npc_id:person.id}), 'danger'));
@@ -2822,6 +2828,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
       );
     }
     if (person.can_recruit_concubine) tools.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
+    if (person.can_invite_guest) tools.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
     tools.appendChild(interactionButton('逐出门下', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'disciple', npc_id:person.id}), 'danger'));
     return tools;
   }
@@ -2870,6 +2877,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
       companionButton('索要功法', last.request_technique === worldClock() ? '0' : '1', {action:'request_technique'}),
     );
     if (companion.can_invite_faction) actions.appendChild(companionButton('引荐入宗', '1', {faction_invite:true}));
+    if (companion.can_invite_guest) actions.appendChild(companionButton('邀请客卿', '1', {guest_invite:true}));
     if (companion.can_recruit_concubine) {
       const concubine = companionButton('纳为侍妾', '1', null);
       concubine.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:companion.id, action:'recruit'});
@@ -2896,6 +2904,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
     button.dataset.available = available; button.disabled = available !== '1';
     if (payload?.party_action) button.onclick = () => mutate(`/api/games/${game.id}/party`, {npc_id:companion.id, action:payload.party_action});
     else if (payload?.faction_invite) button.onclick = () => mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:companion.id});
+    else if (payload?.guest_invite) button.onclick = () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:companion.id});
     else if (payload?.relationship_exit) button.onclick = () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:payload.relationship_exit, npc_id:companion.id});
     else if (payload) button.onclick = () => mutate(`/api/games/${game.id}/dao-companion`, payload);
     return button;
@@ -2927,6 +2936,7 @@ function renderDaoFriends(friends) {
         button.onclick = () => action === 'party'
           ? mutate(`/api/games/${game.id}/party`, {npc_id:friend.id, action:friend.in_party ? 'leave' : 'invite'})
           : action === 'faction' ? mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:friend.id})
+          : action === 'guest' ? mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:friend.id})
           : action === 'exit' ? mutate(`/api/games/${game.id}/relationship-exit`, {kind:'friend', npc_id:friend.id})
           : mutate(`/api/games/${game.id}/dao-friend`, {npc_id:friend.id, action});
         tools.appendChild(button);
@@ -2935,6 +2945,7 @@ function renderDaoFriends(friends) {
       add('点到切磋', 'spar', last.spar !== worldClock());
       add('交流心得', 'discuss', last.discuss !== worldClock());
       if (friend.can_invite_faction) add('引荐入宗', 'faction');
+      if (friend.can_invite_guest) add('邀请客卿', 'guest');
       if (friend.can_recruit_concubine) {
         const concubine = document.createElement('button'); concubine.className = 'friend-action'; concubine.textContent = '纳为侍妾';
         concubine.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:friend.id, action:'recruit'});
@@ -2965,6 +2976,11 @@ function renderPersonalRelations(relations) {
       if (person.can_recruit_concubine) {
         const button = document.createElement('button'); button.className = 'relationship-interaction'; button.textContent = '纳为侍妾';
         button.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'});
+        row.appendChild(button);
+      }
+      if (person.can_invite_guest) {
+        const button = document.createElement('button'); button.className = 'relationship-interaction'; button.textContent = '邀请客卿';
+        button.onclick = () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id});
         row.appendChild(button);
       }
       list.appendChild(row);

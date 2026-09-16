@@ -382,6 +382,35 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         self.assertEqual(member["faction_id"], "tianjian")
         self.assertFalse(shown["dao_friends"][0]["can_invite_faction"])
 
+    def test_world_npc_party_friend_sect_and_master_chain_uses_one_member_lookup(self):
+        created = self.engine.create_game("携友拜师", "supreme_metal", "dao", 1921, preset_id="core")
+        game = self.engine.store.load(created["id"])
+        game.player.realm_index, game.player.layer = 4, 3
+        self.engine.store.save(game)
+        founded = self.engine.create_faction(created["id"], "同游宗")
+        game = self.engine.store.load(created["id"])
+        npc = SectNpc(
+            "world_friend_master", "闻道玄", "游方真人", 5, 2, 960, 2800,
+            spirit_root="supreme_water", path="dao", race="human", world="human",
+            affinity=100,
+        )
+        game.notable_npcs[npc.id] = npc
+        game.rng_state = encode_rng(random.Random(1))
+        self.engine.store.save(game)
+
+        joined = self.engine.manage_party(created["id"], npc.id, "invite")
+        self.assertEqual(joined["party"][0]["id"], npc.id)
+        self.engine.manage_party(created["id"], npc.id, "interact")
+        befriended = self.engine.manage_dao_friend(created["id"], npc.id, "befriend")
+        self.assertEqual(befriended["dao_friends"][0]["id"], npc.id)
+        invited = self.engine.invite_relationship_to_faction(created["id"], npc.id)
+        self.assertIn(npc.id, {row["id"] for row in invited["faction"]["roster"]})
+        self.assertEqual(self.engine.store.load(created["id"]).notable_npcs[npc.id].faction_id, founded["faction"]["id"])
+
+        result = self.engine.manage_faction_relationship(created["id"], npc.id, "master")
+        self.assertIn(f"master:{npc.id}", self.engine.store.load(created["id"]).player.relationship_attempts)
+        self.assertIn(result["history"][0]["result"], {"master_accepted", "rejected"})
+
     def test_relationship_departures_reset_affinity_but_keep_other_consequences(self):
         created = self.engine.create_game("缘起缘灭", "supreme_metal", "dao", 922, preset_id="core")
         game = self.engine.store.load(created["id"])

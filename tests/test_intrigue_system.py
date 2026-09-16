@@ -7,6 +7,8 @@ import pytest
 
 from cultivation_life.content_registry import ROOT_DEFINITIONS, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
+from cultivation_life.models import SectNpc
+from cultivation_life.runtime import encode_rng
 
 
 @pytest.fixture()
@@ -78,6 +80,45 @@ def test_one_person_one_vote_and_defensive_guest(intrigue_game: tuple[GameEngine
     war = engine._start_war(game, "sect", own_id, target.id)
     assert guest.id in war["roster"]["defender"]
     assert guest.id not in war["roster"]["attacker"]
+
+
+def test_controller_can_directly_invite_high_affinity_person_or_dao_friend_as_guest(
+    intrigue_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = intrigue_game
+    game = engine._load(game_id)
+    friendly = SectNpc(
+        "friendly_guest", "顾清衡", "散修", 3, 8, 260, 480,
+        spirit_root="supreme_wood", path="dao", world=game.player.world, affinity=70,
+    )
+    friend = SectNpc(
+        "dao_friend_guest", "苏照雪", "道友", 3, 6, 230, 470,
+        spirit_root="supreme_water", path="dao", world=game.player.world, affinity=10,
+    )
+    game.notable_npcs[friendly.id] = friendly
+    game.notable_npcs[friend.id] = friend
+    game.player.dao_friends.append(engine._relationship_snapshot(
+        friend.id, friend.name, friend.realm_index, friend.layer, "world",
+        friend.age, friend.lifespan, True, None, friend.spirit_root,
+        friend.cultivation_progress, friend.path, friend.race, friend.world,
+        affinity=friend.affinity,
+    ))
+    game.rng_state = encode_rng(__import__("random").Random(1))
+    engine.store.save(game)
+
+    shown = engine.get_game(game_id)
+    world_rows = {row["id"]: row for row in shown["world_npcs"]}
+    assert world_rows[friendly.id]["can_invite_guest"] is True
+    assert world_rows[friend.id]["can_invite_guest"] is True
+    assert shown["dao_friends"][0]["can_invite_guest"] is True
+    candidates = {row["id"]: row for row in _sect_section(shown)["guest_candidates"]}
+    assert candidates[friendly.id]["relationship"] == "故交"
+    assert candidates[friend.id]["relationship"] == "道友"
+
+    invited = engine.intrigue_guest_action(game_id, "sect", "invite", friend.id)
+    guest_ids = {row["npc_id"] for row in _sect_section(invited)["guests"]}
+    assert friend.id in guest_ids
+    assert next(row for row in invited["dao_friends"] if row["id"] == friend.id)["can_invite_guest"] is False
 
 
 def test_disabled_dlc_freezes_state(intrigue_game: tuple[GameEngine, str], monkeypatch: pytest.MonkeyPatch) -> None:
