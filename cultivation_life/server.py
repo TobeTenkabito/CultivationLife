@@ -95,6 +95,7 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("path", "dao"), payload.get("seed"), payload.get("technique_element", "neutral"),
                     payload.get("preset_id"), payload.get("start_world"),
                     payload.get("monster_species_id"),
+                    payload.get("gender", "male"),
                 )
                 self._json(result, HTTPStatus.CREATED)
                 return
@@ -258,6 +259,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.post_battle_possess(game_id, payload.get("target_id", ""))
             elif operation == "captive-action":
                 result = ENGINE.captive_action(
+                    game_id, payload.get("target_id", ""), payload.get("action", "")
+                )
+            elif operation == "concubine-action":
+                result = ENGINE.manage_concubine(
                     game_id, payload.get("target_id", ""), payload.get("action", "")
                 )
             elif operation == "relationship-capture":

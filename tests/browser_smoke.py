@@ -104,6 +104,7 @@ def main() -> None:
                 assert page.locator("#monster-species-field").is_visible()
                 assert page.locator("#monster-species-select option").count() == 8
                 page.locator("#monster-species-select").select_option("avian")
+                page.locator("#gender-select").select_option("female")
                 page.locator("#new-game-form input[name='name']").fill("羽族烟测")
                 page.locator("#new-game-form button[type='submit']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
@@ -115,6 +116,7 @@ def main() -> None:
                 assert page.locator("#bloodline-profile").count() == 0
                 assert page.locator(".bloodline-profile > span").count() == 6
                 monster_game_id = page.evaluate("game.id")
+                assert engine.store.load(monster_game_id).player.gender == "female"
                 page.evaluate("""renderMonsterBloodline({
                     visible:true, available:false,
                     reason:'血脉冻结测试', general_trait_pool_size:16,
@@ -304,7 +306,7 @@ def main() -> None:
                 assert "已识别 3" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
                 assert "妖修道途：血脉与进化" in extension_text
-                assert "百鬼夜行：轮回往生" in extension_text
+                assert "百鬼夜行:轮回往生" in extension_text
                 assert "明争暗斗：合纵连横" in extension_text
                 page.locator("#extension-toggle").click()
 

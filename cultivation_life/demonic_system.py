@@ -66,6 +66,7 @@ class DemonicSystemMixin:
             "affinity": affinity - 12, "combat_power": round(float(victim["power"]), 1),
             "main_technique_id": technique.id if technique else None,
             "age": captive_age, "lifespan": captive_lifespan,
+            "gender": npc.gender if npc else str(victim.get("gender") or self._stable_gender(prisoner_id)),
             "captured_age": game.player.age, "source": "combat",
         })
         if npc:
@@ -167,6 +168,7 @@ class DemonicSystemMixin:
             "race":str(relation.get("race", "human")), "affinity":-100.0,
             "combat_power":round(target_power, 1), "main_technique_id":relation.get("main_technique_id"),
             "age":int(relation.get("age", player.age)), "lifespan":relation.get("lifespan"),
+            "gender":str(relation.get("gender") or self._stable_gender(str(relation.get("id", "")))),
             "captured_age":player.age, "source":f"relationship:{kind}",
         }
         player.prisoners.append(prisoner)
@@ -732,7 +734,12 @@ class DemonicSystemMixin:
         prisoners = []
         for entry in player.prisoners:
             allowed, reason = can_possess(player, entry)
-            prisoners.append(copy.deepcopy(entry) | {"can_possess": allowed, "possession_reason": reason})
+            gender = str(entry.get("gender") or self._stable_gender(str(entry.get("id", ""))))
+            prisoners.append(copy.deepcopy(entry) | {
+                "gender": gender, "gender_name": "女" if gender == "female" else "男",
+                "can_possess": allowed, "possession_reason": reason,
+                "can_recruit_concubine": gender == "female",
+            })
         return {
             "is_demonic": player.path == "demonic", "capacity": puppet_capacity(player),
             "used": len(player.puppets), "prisoners": prisoners, "puppets": puppets,

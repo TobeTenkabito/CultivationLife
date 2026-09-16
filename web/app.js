@@ -237,7 +237,7 @@ function renderQuickStarts(presets) {
 
 async function startQuickGame(presetId) {
   const form = new FormData($('#new-game-form'));
-  const payload = {name: form.get('name') || '', preset_id: presetId};
+  const payload = {name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId};
   if (form.get('seed')) payload.seed = Number(form.get('seed'));
   await mutate('/api/games', payload);
 }
@@ -425,6 +425,7 @@ function render(data) {
   renderDaoCompanion(data.dao_companion, p.inventory || [], p.known_techniques || [], Number(p.next_companion_conception_bonus || 0));
   renderDaoFriends(data.dao_friends || []);
   renderPersonalRelations(data.personal_relations || {high:[], low:[]});
+  renderConcubines(data.concubine_system || {});
   renderParty(data.party || []);
   renderWanted(data.wanted || []);
   renderPrison(data.imprisonment);
@@ -443,13 +444,14 @@ function render(data) {
   $('#player-race').textContent = p.lineage_race_name === p.allegiance_race_name
     ? p.lineage_race_name
     : `血缘 ${p.lineage_race_name} · 势力 ${p.allegiance_race_name}`;
+  $('#player-gender').textContent = p.gender_name || (p.gender === 'female' ? '女' : '男');
   $('#action-heading').textContent = p.time_unit_years === 1 ? '这一年，你将如何度过？' : `未来 ${p.time_unit_years} 年，你将如何度过？`;
   $('#time-unit-hint').textContent = `当前境界每个行动单位流逝 ${p.time_unit_years} 年；期间收益、寿元、NPC 修炼、突破与陨落均逐年结算。重大事件会在发生年份中断本期行动。`;
   const breakthrough = data.breakthrough || {};
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
@@ -1212,7 +1214,7 @@ function renderFaction(faction) {
     if (npc.is_player) row.classList.add('self');
     const order = document.createElement('i'); order.textContent = String(index + 1).padStart(2, '0');
     const relation = npc.is_master ? ' · 师父' : npc.is_disciple ? ' · 弟子' : npc.is_friend ? ' · 道友' : '';
-    const identity = document.createElement('span'); identity.innerHTML = `<b>${npc.name}${npc.is_player ? '（你）' : ''}${relation}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}</b><small>${npc.title} · ${npc.race_name || '种族未明'} · ${npc.path_name || '道统未明'} · ${npc.spirit_root_name || '灵根未明'} · ${npc.age} 岁 · 寿元 ${npc.lifespan == null ? '无尽' : npc.lifespan}</small><small>战力 ${number(npc.combat_power || 0)} · ${npc.breakthrough_chance == null ? '当前无瓶颈' : `突破率 ${percent(npc.breakthrough_chance)}`} · ${npc.affinity == null ? '' : `好感 ${number(npc.affinity)} / ${npc.attitude}`}${npc.treasure_name ? ` · 重宝 ${npc.treasure_name}` : ''}</small>`;
+    const identity = document.createElement('span'); identity.innerHTML = `<b>${npc.name}${npc.is_player ? '（你）' : ''}${relation}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}</b><small>${npc.title} · ${npc.gender_name || '性别未明'} · ${npc.race_name || '种族未明'} · ${npc.path_name || '道统未明'} · ${npc.spirit_root_name || '灵根未明'} · ${npc.age} 岁 · 寿元 ${npc.lifespan == null ? '无尽' : npc.lifespan}</small><small>战力 ${number(npc.combat_power || 0)} · ${npc.breakthrough_chance == null ? '当前无瓶颈' : `突破率 ${percent(npc.breakthrough_chance)}`} · ${npc.affinity == null ? '' : `好感 ${number(npc.affinity)} / ${npc.attitude}`}${npc.treasure_name ? ` · 重宝 ${npc.treasure_name}` : ''}</small>`;
     const cultivation = document.createElement('strong'); cultivation.textContent = npc.realm_name;
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
     if (npc.can_request_master) controls.appendChild(relationshipButton(npc, 'master', '拜师'));
@@ -1221,6 +1223,10 @@ function renderFaction(faction) {
     else if (npc.can_invite_party) controls.appendChild(partyButton(npc, 'invite', '邀请同行'));
     if (npc.can_propose_companion) controls.appendChild(companionProposalButton(npc));
     if (npc.can_befriend) controls.appendChild(friendButton(npc));
+    if (npc.can_recruit_concubine) {
+      const concubine = document.createElement('button'); concubine.className = 'relationship-action'; concubine.textContent = '纳为侍妾';
+      concubine.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:npc.id, action:'recruit'}); controls.appendChild(concubine);
+    }
     if (npc.can_intercept) {
       const intercept = document.createElement('button'); intercept.className = 'relationship-action danger'; intercept.textContent = '截杀';
       intercept.dataset.available = '1';
@@ -1499,7 +1505,7 @@ function renderWorldNpcs(npcs) {
     const info = document.createElement('div');
     const name = document.createElement('b'); name.textContent = `${npc.name} · ${npc.title}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}`;
     const detail = document.createElement('small');
-    detail.textContent = `${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}`;
+    detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}`;
     const combat = npc.combat_power == null ? '' : ` · 战力 ${number(npc.combat_power)} · 好感 ${number(npc.affinity)} / ${npc.attitude}`;
     detail.textContent += combat;
     if (npc.formation) detail.textContent += ` · 阵法 ${npc.formation.name}（完整度 ${Number(npc.formation.durability).toFixed(0)}%，离屏战力 +${Number(npc.formation.bonus).toFixed(2)}%）`;
@@ -1519,6 +1525,11 @@ function renderWorldNpcs(npcs) {
     if (npc.can_befriend) {
       const button = document.createElement('button'); button.className = 'friend-action'; button.textContent = '结为道友';
       button.onclick = () => mutate(`/api/games/${game.id}/dao-friend`, {npc_id:npc.id, action:'befriend'});
+      controls.appendChild(button);
+    }
+    if (npc.can_recruit_concubine) {
+      const button = document.createElement('button'); button.className = 'companion-action'; button.textContent = '纳为侍妾';
+      button.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:npc.id, action:'recruit'});
       controls.appendChild(button);
     }
     info.append(name, detail); row.append(info, controls); list.appendChild(row);
@@ -2476,15 +2487,16 @@ function renderDemonicSystem(system) {
   const captiveList = $('#captive-list'); captiveList.innerHTML = '';
   (system.prisoners || []).forEach(person => {
     const row = document.createElement('div'); row.className = 'captive-row';
-    row.innerHTML = `<b>${person.name}</b><small>${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
+    row.innerHTML = `<b>${person.name}</b><small>${person.gender_name || '性别未明'} · ${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'captive-tools';
     const actions = [['release','释放'],['torture','拷打']];
     if (game?.ghost_system?.available && !game?.ghost_system?.suspended) actions.push(['possess','夺舍']);
     if (system.is_demonic) actions.push(['corpse','直接炼化'],['living','种下标记']);
+    if (person.can_recruit_concubine) actions.push(['concubine','纳为侍妾']);
     actions.forEach(([action,label]) => {
       const button = document.createElement('button'); button.textContent = label; button.className = action === 'corpse' ? 'danger' : '';
       if (action === 'possess') { button.disabled = busy || !person.can_possess; button.title = person.possession_reason || '夺舍失败将魂飞魄散'; }
-      button.onclick = () => mutate(`/api/games/${game.id}/captive-action`, {target_id:person.id, action}); tools.appendChild(button);
+      button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
     row.appendChild(tools); captiveList.appendChild(row);
   });
@@ -2731,7 +2743,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     if (!person.alive) row.classList.add('fallen');
     const name = document.createElement('b'); name.textContent = `${role} · ${person.name}${person.alive ? '' : '（已故）'}`;
     const detail = document.createElement('small');
-    detail.textContent = `${person.realm_name} · ${person.path_name || '道统未明'} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan == null ? '无尽' : person.lifespan} · ${person.source === 'event' ? '游历结缘' : '宗门结缘'}`;
+    detail.textContent = `${person.gender_name || '性别未明'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan == null ? '无尽' : person.lifespan} · ${person.source === 'event' ? '游历结缘' : '宗门结缘'}`;
     row.append(name, detail);
     if (role === '师父' && person.alive) row.appendChild(masterActions(person));
     if (role === '弟子' && person.alive) row.appendChild(discipleActions(person));
@@ -2761,6 +2773,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     );
     if (person.can_invite_faction) actions.appendChild(interactionButton('引荐入宗', '1', () => mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:person.id})));
     if (game.player.path === 'demonic') actions.appendChild(interactionButton('尝试生擒师父', '1', () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'master'}), 'danger'));
+    if (person.can_recruit_concubine) actions.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
     actions.appendChild(interactionButton('脱离师门', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'master', npc_id:person.id}), 'danger'));
     return actions;
   }
@@ -2780,6 +2793,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
         interactionButton('种下傀印', '1', () => mutate(`/api/games/${game.id}/captive-action`, {target_id:person.id, action:'living'})),
       );
     }
+    if (person.can_recruit_concubine) tools.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
     tools.appendChild(interactionButton('逐出门下', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'disciple', npc_id:person.id}), 'danger'));
     return tools;
   }
@@ -2811,7 +2825,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
   }
   const row = document.createElement('div'); row.className = `companion-row${companion.alive ? '' : ' fallen'}`;
   const same = companion.same_cultivation ? ` · 同法同境，突破 +${percent(companion.breakthrough_bonus)}` : '';
-  row.innerHTML = `<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
+  row.innerHTML = `<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
   if (conceptionBonus > 0) {
     const medicine = document.createElement('small'); medicine.className = 'positive';
     medicine.textContent = `孕育药力：下一次缠绵的后代概率 +${percent(conceptionBonus)}`;
@@ -2828,6 +2842,11 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
       companionButton('索要功法', last.request_technique === worldClock() ? '0' : '1', {action:'request_technique'}),
     );
     if (companion.can_invite_faction) actions.appendChild(companionButton('引荐入宗', '1', {faction_invite:true}));
+    if (companion.can_recruit_concubine) {
+      const concubine = companionButton('纳为侍妾', '1', null);
+      concubine.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:companion.id, action:'recruit'});
+      actions.appendChild(concubine);
+    }
     if (game.player.path === 'demonic') {
       const capture = companionButton('尝试生擒道侣', '1', null, 'danger');
       capture.onclick = () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'companion'}); actions.appendChild(capture);
@@ -2871,7 +2890,7 @@ function renderDaoFriends(friends) {
   friends.forEach(friend => {
     const row = document.createElement('div'); row.className = `friend-row${friend.alive ? '' : ' fallen'}`;
     const status = friend.alive ? (friend.world === game.player.world ? '' : ` · 身在${friend.world === 'spirit' ? '灵界' : '人界'}`) : ` · ${friend.death_reason || '已经陨落'}`;
-    row.innerHTML = `<b>${friend.name}${friend.alive ? '' : '（已故）'}</b><small>${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
+    row.innerHTML = `<b>${friend.name}${friend.alive ? '' : '（已故）'}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
     if (friend.alive && friend.world === game.player.world) {
       const tools = document.createElement('div'); tools.className = 'friend-tools';
       const last = friend.last_interactions || {};
@@ -2888,6 +2907,11 @@ function renderDaoFriends(friends) {
       add('点到切磋', 'spar', last.spar !== worldClock());
       add('交流心得', 'discuss', last.discuss !== worldClock());
       if (friend.can_invite_faction) add('引荐入宗', 'faction');
+      if (friend.can_recruit_concubine) {
+        const concubine = document.createElement('button'); concubine.className = 'friend-action'; concubine.textContent = '纳为侍妾';
+        concubine.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:friend.id, action:'recruit'});
+        tools.appendChild(concubine);
+      }
       if (game.player.path === 'demonic') {
         const capture = document.createElement('button'); capture.className = 'friend-action danger'; capture.textContent = '尝试生擒';
         capture.dataset.available = last.capture_attempt === worldClock() ? '0' : '1';
@@ -2908,12 +2932,48 @@ function renderPersonalRelations(relations) {
     people.forEach(person => {
       const row = document.createElement('div'); row.className = `affinity-row ${person.affinity < 0 ? 'hostile' : 'friendly'}`;
       const name = document.createElement('b'); name.textContent = `${person.name} · ${person.relationship}`;
-      const detail = document.createElement('small'); detail.textContent = `${person.realm_name} · 好感 ${number(person.affinity)} / ${person.attitude}${person.faction_name ? ` · ${person.faction_name}` : ''}`;
-      row.append(name,detail); list.appendChild(row);
+      const detail = document.createElement('small'); detail.textContent = `${person.gender_name || '性别未明'} · ${person.realm_name} · 好感 ${number(person.affinity)} / ${person.attitude}${person.faction_name ? ` · ${person.faction_name}` : ''}`;
+      row.append(name,detail);
+      if (person.can_recruit_concubine) {
+        const button = document.createElement('button'); button.className = 'relationship-interaction'; button.textContent = '纳为侍妾';
+        button.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'});
+        row.appendChild(button);
+      }
+      list.appendChild(row);
     });
   };
   renderList('#high-affinity-list', relations.high || [], '暂无达到“颇有好感”的人物。');
   renderList('#low-affinity-list', relations.low || [], '暂无明确敌视你的人物。');
+}
+
+function renderConcubines(system) {
+  const statusNode = $('#concubine-status');
+  const list = $('#concubine-list');
+  statusNode.innerHTML = ''; list.innerHTML = '';
+  if (system.status) {
+    const status = document.createElement('div'); status.className = 'concubine-status active';
+    const bonus = system.status.breakthrough_bonus_active ? ' · 低于对方境界时基础突破 +2%' : '';
+    status.innerHTML = `<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}</small>`;
+    statusNode.appendChild(status);
+  } else {
+    statusNode.innerHTML = '<p class="empty">你当前不受任何高阶修士的侍妾名分约束。</p>';
+  }
+  (system.concubines || []).forEach(person => {
+    const row = document.createElement('div'); row.className = 'concubine-row';
+    row.innerHTML = `<b>${person.name}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
+    const tools = document.createElement('div'); tools.className = 'relationship-tools';
+    const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
+    cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});
+    tools.appendChild(cauldron);
+    if (game.player.path === 'demonic') {
+      const corpse = document.createElement('button'); corpse.className = 'danger'; corpse.textContent = '炼尸';
+      corpse.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'corpse'}); tools.appendChild(corpse);
+    }
+    const dismiss = document.createElement('button'); dismiss.textContent = '遣散'; dismiss.className = 'danger';
+    dismiss.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'dismiss'}); tools.appendChild(dismiss);
+    row.appendChild(tools); list.appendChild(row);
+  });
+  if (!(system.concubines || []).length) list.innerHTML = '<p class="empty">侍妾名册为空；可从女性俘虏、低阶修士或可互动人物中招纳，数量不限。</p>';
 }
 
 function renderHistory(history) {
