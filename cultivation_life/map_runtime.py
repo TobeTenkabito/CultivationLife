@@ -105,6 +105,7 @@ class MapTravelMixin:
             completed_units = max(1, (elapsed + time_unit - 1) // time_unit)
             for _ in range(completed_units):
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
+                self._advance_concubine_aftermath(game, rng)
             self._advance_concubine_status(game, completed_units)
             self._advance_player_bounties(game, rng)
             if elapsed >= 5:

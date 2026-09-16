@@ -472,6 +472,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 era_news.append(artifact_news)
             for _ in range(completed_units):
                 era_news.extend(self._advance_diplomacy_unit(game, rng))
+                self._advance_concubine_aftermath(game, rng)
                 era_news.extend(self._advance_heavenly_court_unit(game, rng))
                 era_news.extend(self._advance_intrigue_unit(game, rng))
             drained = self._advance_concubine_status(game, completed_units)
@@ -5637,6 +5638,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             return None, f"机缘 {sign}{amount}。"
         if kind == "concubine_proposal":
             return self._resolve_concubine_proposal(game, pending, bool(effect.get("accept", False)))
+        if kind == "concubine_revenge":
+            return self._resolve_concubine_revenge(game, pending, str(effect.get("method", "")), rng)
+        if kind == "concubine_escape":
+            return self._resolve_concubine_escape(game, pending, str(effect.get("method", "")), rng)
         if kind == "add_karma":
             player.karma = max(0, player.karma + float(value))
             sign = "+" if value >= 0 else ""

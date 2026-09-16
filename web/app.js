@@ -2953,10 +2953,30 @@ function renderConcubines(system) {
   if (system.status) {
     const status = document.createElement('div'); status.className = 'concubine-status active';
     const bonus = system.status.breakthrough_bonus_active ? ' · 低于对方境界时基础突破 +2%' : '';
-    status.innerHTML = `<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}</small>`;
+    const relation = system.status.dependent ? ' · 已主动依附' : '';
+    const anger = system.status.angered ? ' · 正主震怒：本期机缘抽取提高至 3%' : '';
+    status.innerHTML = `<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}${relation}${anger}</small>`;
+    const tools = document.createElement('div'); tools.className = 'relationship-tools';
+    const statusAction = (label, action, available = true, danger = false) => {
+      const button = document.createElement('button'); button.className = `concubine-owner-action${danger ? ' danger' : ''}`;
+      button.textContent = label; button.dataset.available = available ? '1' : '0';
+      button.onclick = () => mutate(`/api/games/${game.id}/concubine-status`, {action});
+      tools.appendChild(button);
+    };
+    statusAction('谋求脱身', 'escape', true, true);
+    statusAction(system.status.dependent ? '已经依附' : '主动依附', 'depend', !system.status.dependent);
+    statusAction(system.status.request_available?.technique ? '索要功法' : '本期已索功法', 'request_technique', system.status.request_available?.technique);
+    statusAction(system.status.request_available?.stones ? '索要灵石' : '本期已索灵石', 'request_stones', system.status.request_available?.stones);
+    statusAction(system.status.request_available?.equipment ? '索要装备' : '本期已索装备', 'request_equipment', system.status.request_available?.equipment);
+    status.appendChild(tools);
     statusNode.appendChild(status);
   } else {
     statusNode.innerHTML = '<p class="empty">你当前不受任何高阶修士的侍妾名分约束。</p>';
+  }
+  if (system.escape_reputation > 0) {
+    const reputation = document.createElement('p'); reputation.className = 'hint';
+    reputation.textContent = `脱身名声 ${number(system.escape_reputation)}：高阶修士强取提议概率降至原来的 ${percent(system.future_proposal_multiplier)}。`;
+    statusNode.appendChild(reputation);
   }
   (system.concubines || []).forEach(person => {
     const row = document.createElement('div'); row.className = 'concubine-row';
@@ -3193,6 +3213,9 @@ function renderButtons() {
     $(selector).disabled = busy || !game?.player.alive || !game?.imprisonment || !!game?.pending_event;
   });
   document.querySelectorAll('.relationship-interaction').forEach(button => {
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || button.dataset.available !== '1';
+  });
+  document.querySelectorAll('.concubine-owner-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || button.dataset.available !== '1';
   });
   document.querySelectorAll('.relationship-select').forEach(select => {

@@ -313,6 +313,8 @@ class Player:
     concubines: list[dict[str, Any]] = field(default_factory=list)
     concubine_status: dict[str, Any] | None = None
     concubine_breakthrough_bonus: float = 0.0
+    concubine_rejection_aftermath: list[dict[str, Any]] = field(default_factory=list)
+    concubine_escape_reputation: int = 0
     disciple_requests: list[dict[str, Any]] = field(default_factory=list)
     relationship_attempts: list[str] = field(default_factory=list)
     story_flags: list[str] = field(default_factory=list)
@@ -431,6 +433,11 @@ class Player:
         data["concubine_breakthrough_bonus"] = max(
             0.0, min(0.02, float(data.get("concubine_breakthrough_bonus", 0.0)))
         )
+        data["concubine_rejection_aftermath"] = [
+            copy.deepcopy(row)
+            for row in data.get("concubine_rejection_aftermath", []) if isinstance(row, dict)
+        ]
+        data["concubine_escape_reputation"] = max(0, int(data.get("concubine_escape_reputation", 0)))
         data["permanent_intrinsic_hp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_hp_bonus", 0.0)))
         data["permanent_intrinsic_mp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_mp_bonus", 0.0)))
         for key in (
