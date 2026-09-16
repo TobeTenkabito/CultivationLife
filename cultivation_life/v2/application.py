@@ -49,6 +49,12 @@ from .domain.factions import (
 from .domain.relations import relationship_invariants, relationship_view, register_relationship_domain
 from .domain.world import TravelWithinWorld, register_world_domain, world_invariants, world_view
 from .infrastructure.content_loader import V2ContentLoader
+from .infrastructure.legacy_import import (
+    LEGACY_AUDIT,
+    LegacyImportError,
+    LegacyV1Importer,
+    load_legacy_save,
+)
 from .infrastructure.sqlite_store import SQLiteSaveStore
 from .kernel.bus import CommandBus
 from .kernel.model import WorldState
@@ -63,6 +69,12 @@ def _now_iso() -> str:
 class CommandExecution:
     game: dict[str, Any]
     events: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class LegacyImportExecution:
+    game: dict[str, Any]
+    report: dict[str, Any]
 
 
 class V2GameEngine:
@@ -119,6 +131,45 @@ class V2GameEngine:
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
         return self._present(state)
+
+    def import_v1_save(
+        self,
+        source_path: Path,
+        *,
+        target_game_id: str | None = None,
+    ) -> LegacyImportExecution:
+        """Import one legacy JSON save without changing the source file."""
+        source = Path(source_path)
+        document, source_sha256 = load_legacy_save(source)
+        for saved in self.store.list_games():
+            existing = self.store.load(str(saved["game_id"]))
+            actor_id = existing.controlled_entity_id
+            audit = existing.entities.get(actor_id, LEGACY_AUDIT) if actor_id else None
+            if audit and audit.get("source_sha256") == source_sha256:
+                raise LegacyImportError(
+                    f"该V1存档已经导入为V2存档：{existing.game_id}"
+                )
+        importer = LegacyV1Importer(self.definitions, self.commands)
+        result = importer.import_document(
+            document,
+            source_name=source.name,
+            source_sha256=source_sha256,
+            target_game_id=target_game_id,
+        )
+        state = result.state
+        reconcile_extension_state(state, self.definitions)
+        self.invariants.validate(state)
+        player = character_view(state)
+        self.store.create(state, list(result.events), player_name=player["name"])
+        return LegacyImportExecution(game=self._present(state), report=result.report.to_dict())
+
+    def legacy_import_report(self, game_id: str) -> dict[str, Any]:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        report = state.entities.get(actor_id, LEGACY_AUDIT) if actor_id else None
+        if report is None:
+            raise KeyError("该V2存档不是由V1导入的")
+        return report
 
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)

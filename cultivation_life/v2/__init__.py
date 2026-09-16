@@ -5,7 +5,7 @@ does not import legacy models or save stores, which lets the new runtime be
 built and verified without changing existing saves.
 """
 
-from .application import V2GameEngine
+from .application import LegacyImportExecution, V2GameEngine
 from .domain.character import PerformTimedAction, RegisterCharacter
 from .domain.cultivation import (
     AttemptBreakthrough,
@@ -60,4 +60,5 @@ __all__ = [
     "TransferFactionControl",
     "TravelWithinWorld",
     "V2GameEngine",
+    "LegacyImportExecution",
 ]
