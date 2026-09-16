@@ -997,7 +997,8 @@ function renderIntrigue(system) {
 
   if ((system.player_guest_roles || []).length) {
     const roles=document.createElement('div');roles.className='intrigue-guest-roles';
-    roles.textContent=`你的外部身份：${system.player_guest_roles.map(row=>`${row.faction_name}${row.title}`).join('、')}。受攻时你将取得守方参战入口，但不获得该势力控制权。`;
+    const label=document.createElement('span'); label.textContent='你的外部身份（受攻时需协防，不获得控制权）：'; roles.appendChild(label);
+    system.player_guest_roles.forEach(role=>{const button=document.createElement('button');button.textContent=`辞去${role.faction_name}${role.title}`;button.disabled=locked();button.onclick=()=>mutate(`/api/games/${game.id}/intrigue-guest`,{kind:role.kind,action:'resign',npc_id:role.faction_id});roles.appendChild(button);});
     content.appendChild(roles);
   }
 
@@ -1173,6 +1174,15 @@ function renderFaction(faction) {
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);
+  }
+  if (faction.can_arrange_succession) {
+    const succession = document.createElement('button'); succession.className = 'relationship-action';
+    succession.textContent = faction.succession_plan?.arranged
+      ? `已安排${faction.succession_plan.successor_name || '门人'}继任`
+      : '安排后事并指定继任者';
+    succession.disabled = !!faction.succession_plan?.arranged;
+    succession.onclick = () => mutate(`/api/games/${game.id}/faction-succession`, {});
+    summary.appendChild(succession);
   }
   if (faction.founded_by_player && faction.pressure > 0) {
     const warning = document.createElement('p'); warning.className = 'governance-warning';
@@ -1470,7 +1480,9 @@ function vassalTransferForm(kind, targetId, targetName, candidates) {
 
 function renderFamily(family, governance) {
   const content = $('#family-content'); content.innerHTML = '';
-  $('#family-status').textContent = family?.exists ? (family.extinct ? '传承已绝' : `${family.living_count} 人在册`) : '尚未立族';
+  $('#family-status').textContent = family?.exists
+    ? (family.extinct ? '传承已绝' : family.same_world ? `${family.living_count} 人在册` : '身处其他界面')
+    : '尚未立族';
   $('#family-title').textContent = family?.exists ? family.name : '修仙家族';
   $('#family-description').textContent = family?.exists
     ? family.description
@@ -1491,6 +1503,7 @@ function renderFamily(family, governance) {
   if (family?.exists) {
     const roster = document.createElement('div'); roster.className = 'family-list';
     roster.innerHTML = '<h3>家族名册</h3>';
+    if (!family.same_world && !(family.roster || []).length) roster.innerHTML += '<p class="empty">界面阻隔，无法获知下界家族近况；开启跨界 Debug 后可查看。</p>';
     (family.roster || []).forEach(member => {
       const row = document.createElement('div'); row.className = `family-row${member.alive ? '' : ' fallen'}`;
       row.innerHTML = `<b>${member.name} · ${member.member_type}${member.wounds ? `（负伤${member.wounds}级）` : ''}</b><small>${member.realm_name} · ${member.spirit_root_name} · ${member.age} 岁 · 战力 ${number(member.combat_power)}</small>`;
@@ -2382,7 +2395,7 @@ function renderSpiritField(field) {
   $('#spirit-field-summary').textContent = `${number(field.reclaimed_qing || 0)}/${number(field.max_qing || 0)} 顷`;
   $('#spirit-field-note').textContent = field.reclaimed_qing
     ? `已有 ${field.free_qing} 顷空闲。按数量级向下取整：201 年记作 200 年，2,001 年记作 2,000 年；年份更高不保证品质更好。`
-    : '尚未开垦。开垦消耗时间与灵石，期间世界正常演进。';
+    : '尚未开垦。开垦只消耗灵石，视为瞬间完成，不推进任何时间单位。';
   const plots = $('#spirit-field-plots'); plots.innerHTML = '';
   for (let index = 0; index < Number(field.max_qing || 0); index += 1) {
     const crop = (field.plots || []).find(entry => Number(entry.slot) === index);
@@ -2390,7 +2403,7 @@ function renderSpiritField(field) {
     const tileNo = document.createElement('i'); tileNo.textContent = `${index + 1}`; row.appendChild(tileNo);
     if (index >= field.reclaimed_qing) {
       const locked = document.createElement('b'); locked.textContent = '荒地'; row.appendChild(locked);
-      const detail = document.createElement('small'); detail.textContent = index === field.reclaimed_qing && field.can_reclaim ? `${number(field.reclaim_cost)} 灵石 · ${number(field.reclaim_years)} 年` : '须依次开垦'; row.appendChild(detail);
+      const detail = document.createElement('small'); detail.textContent = index === field.reclaimed_qing && field.can_reclaim ? `${number(field.reclaim_cost)} 灵石 · 瞬间完成` : '须依次开垦'; row.appendChild(detail);
       if (index === field.reclaimed_qing && field.can_reclaim) {
         const reclaim = document.createElement('button'); reclaim.textContent = '开垦此顷';
         reclaim.disabled = field.spirit_stones < field.reclaim_cost; reclaim.dataset.actionUnavailable = reclaim.disabled ? '1' : '0';
@@ -3024,13 +3037,16 @@ function renderConcubines(system) {
   }
   (system.concubines || []).forEach(person => {
     const row = document.createElement('div'); row.className = 'concubine-row';
-    row.innerHTML = `<b>${person.name}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
+    const life = person.lifespan == null ? '无尽' : person.lifespan;
+    const whereabouts = !person.alive ? ` · ${person.death_reason || '已经陨落'}` : person.same_world ? '' : ' · 身处其他界面';
+    row.innerHTML = `<b>${person.name}${person.alive ? '' : '（已故）'}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
     cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});
     tools.appendChild(cauldron);
     if (game.player.path === 'demonic') {
       const corpse = document.createElement('button'); corpse.className = 'danger'; corpse.textContent = '炼尸';
+      corpse.disabled = !person.alive || !person.same_world;
       corpse.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'corpse'}); tools.appendChild(corpse);
     }
     const dismiss = document.createElement('button'); dismiss.textContent = '遣散'; dismiss.className = 'danger';
@@ -3217,6 +3233,9 @@ function renderButtons() {
     const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.owned || game.market.spirit_stones < offer.price;
   });
+  document.querySelectorAll('.market-lock').forEach(button => {
+    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
+  });
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {
     if (control.id !== 'auction-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.auctionUnavailable === '1';
   });
@@ -3286,7 +3305,7 @@ function renderButtons() {
   $('#spirit-crossing-action').disabled = busy || !game?.player.alive || !!game?.pending_event;
   $('#cross-world-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   $('#cross-world-secondary-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
-  $('#breakthrough-action').disabled = busy || !game?.breakthrough?.enabled || !!game?.pending_event;
+  $('#breakthrough-action').disabled = busy || !game?.breakthrough?.enabled || !!game?.pending_event || !!game?.imprisonment;
   $('#body-breakthrough-action').disabled = busy || !game?.body_cultivation?.ready || !!game?.pending_event || !!game?.imprisonment;
   $('#ghost-wangsheng-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-wangsheng-all-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
