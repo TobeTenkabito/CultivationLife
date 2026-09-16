@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.v2 import V2GameEngine
-from cultivation_life.v2.infrastructure import ConcurrentWriteError
+from cultivation_life.v2.infrastructure import ConcurrentWriteError, V2ContentLoader
 from cultivation_life.v2.domain.character import BootstrapGame, register_character_domain
 from cultivation_life.v2.kernel.bus import CommandBus, SimulationContext
 from cultivation_life.v2.kernel.model import EntityStore, EventScope, WorldState
@@ -56,7 +56,9 @@ class V2FoundationTests(unittest.TestCase):
         self.temp.cleanup()
 
     def test_create_action_event_save_and_reload_vertical_slice(self):
-        created = self.engine.create_game("问心", seed=20260916)
+        created = self.engine.create_game(
+            "问心", seed=20260916, path="demonic", spirit_root="supreme_fire"
+        )
         self.assertEqual(created["format"], "cultivation-life-v2")
         self.assertEqual(created["revision"], 1)
         self.assertEqual(created["clock"]["year"], 0)
@@ -67,24 +69,18 @@ class V2FoundationTests(unittest.TestCase):
         self.assertEqual(execution.game["clock"]["year"], 3)
         self.assertEqual(execution.game["player"]["age"], 19)
         self.assertEqual(execution.game["player"]["activity"]["actions_completed"], 1)
-        self.assertGreaterEqual(execution.game["player"]["activity"]["cultivation_progress"], 3)
-        self.assertLessEqual(execution.game["player"]["activity"]["cultivation_progress"], 9)
-        self.assertEqual(
-            [event["event_type"] for event in execution.events],
-            ["core.time.advanced", "character.timed_action.completed"],
-        )
+        self.assertGreater(execution.game["player"]["cultivation"]["opportunity"], 0)
+        event_types = [event["event_type"] for event in execution.events]
+        self.assertEqual(event_types.count("core.time.advanced"), 3)
+        self.assertEqual(event_types.count("cultivation.action.tick"), 3)
+        self.assertEqual(event_types[-1], "cultivation.action.completed")
 
         reloaded_engine = V2GameEngine(self.database)
         self.assertEqual(reloaded_engine.get_game(created["id"]), execution.game)
-        self.assertEqual(
-            [event["event_type"] for event in reloaded_engine.event_journal(created["id"])],
-            [
-                "core.game.created",
-                "character.created",
-                "core.time.advanced",
-                "character.timed_action.completed",
-            ],
-        )
+        journal_types = [event["event_type"] for event in reloaded_engine.event_journal(created["id"])]
+        self.assertEqual(journal_types[0], "character.created")
+        self.assertIn("core.game.created", journal_types)
+        self.assertEqual(journal_types[-1], "cultivation.action.completed")
 
     def test_failed_command_does_not_change_snapshot_or_journal(self):
         created = self.engine.create_game("守界", seed=1)
@@ -98,8 +94,8 @@ class V2FoundationTests(unittest.TestCase):
     def test_rng_is_deterministic_across_reload_boundaries(self):
         other_database = Path(self.temp.name) / "other" / "saves.sqlite3"
         other = V2GameEngine(other_database)
-        left = self.engine.create_game("甲", seed=99)
-        right = other.create_game("乙", seed=99)
+        left = self.engine.create_game("甲", seed=99, path="demonic", spirit_root="supreme_fire")
+        right = other.create_game("乙", seed=99, path="demonic", spirit_root="supreme_fire")
 
         self.engine.perform_timed_action(left["id"], "cultivate", 2)
         reloaded = V2GameEngine(self.database)
@@ -108,8 +104,8 @@ class V2FoundationTests(unittest.TestCase):
         other.perform_timed_action(right["id"], "cultivate", 2)
         right_result = other.perform_timed_action(right["id"], "cultivate", 3).game
         self.assertEqual(
-            left_result["player"]["activity"]["cultivation_progress"],
-            right_result["player"]["activity"]["cultivation_progress"],
+            left_result["player"]["cultivation"]["opportunity"],
+            right_result["player"]["cultivation"]["opportunity"],
         )
 
     def test_stale_snapshot_cannot_overwrite_newer_revision(self):
@@ -124,14 +120,19 @@ class V2FoundationTests(unittest.TestCase):
 
     def test_event_journal_can_be_read_incrementally(self):
         created = self.engine.create_game("观史", seed=5)
+        initial_last = self.engine.event_journal(created["id"])[-1]["sequence"]
         self.engine.perform_timed_action(created["id"], "rest", 1)
-        tail = self.engine.event_journal(created["id"], after_sequence=2)
-        self.assertEqual([event["sequence"] for event in tail], [3, 4])
+        tail = self.engine.event_journal(created["id"], after_sequence=initial_last)
+        self.assertEqual(
+            [event["sequence"] for event in tail],
+            list(range(initial_last + 1, initial_last + 4)),
+        )
         self.assertEqual(tail[-1]["payload"]["action"], "rest")
 
     def test_scheduler_processes_events_in_chronological_order(self):
         bus = CommandBus()
-        register_character_domain(bus)
+        definitions = V2ContentLoader.load(SOURCE_ROOT / "content")
+        register_character_domain(bus, definitions)
         state = WorldState.new(seed=10, created_at="2026-09-16T00:00:00+00:00")
         bus.execute(state, BootstrapGame(name="守时"))
         state.scheduler.schedule(
