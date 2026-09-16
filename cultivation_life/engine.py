@@ -1261,16 +1261,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         for index in range(int(WORLD_SYSTEMS["player_faction"]["initial_followers"])):
             realm_index = 0 if player.realm_index == 0 else max(1, player.realm_index - 1)
             layer = 1 if realm_index == 0 else rng.randint(1, min(REALMS[realm_index].layers, 3))
-            age = rng.randint(18, 45) if realm_index <= 1 else max(30, player.age - rng.randint(5, 35))
-            span = REALMS[realm_index].lifespan
-            lifespan = max(age + 1, rng.randint(*span)) if span else None
+            age, lifespan = self._roll_recruit_age_lifespan(realm_index, path, rng, young=True)
             npc = SectNpc(
                 f"{sect_id}_founder_{index}", rng.choice(["沈砚", "叶舟", "顾青", "陆遥", "白川", "楚宁"]),
                 "开山门人", realm_index, layer, age, lifespan,
                 spirit_root=self._random_npc_root(realm_index, rng) if realm_index else "none",
                 path=path, race=player.race, world=player.world, affinity=rng.uniform(28, 48),
             )
-            npc.lifespan = self._scale_npc_lifespan(npc.lifespan, npc.path, npc.age)
             npc.treasure_item_id = self._select_npc_treasure(npc, rng)
             sect.npcs.append(npc)
         game.sects[sect_id] = sect
@@ -5242,22 +5239,39 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 return int(entry["realm_index"])
         raise ValueError("宗门招募概率表未覆盖完整区间")
 
+    @classmethod
+    def _roll_recruit_age_lifespan(
+        cls, realm_index: int, path: str, rng: random.Random, *, young: bool = False,
+    ) -> tuple[int, int | None]:
+        """Generate recruits with a meaningful amount of lifespan still remaining."""
+        age_ranges = {
+            0: (16, 36), 1: (18, 72), 2: (45, 150), 3: (120, 330),
+            4: (280, 850), 5: (750, 2300), 6: (2200, 5800),
+            7: (6000, 21000), 8: (14000, 80000), 9: (40000, 150000),
+            10: (120000, 520000), 11: (420000, 1500000), 12: (1000000, 4200000),
+        }
+        low, high = age_ranges.get(realm_index, (18, 80))
+        if young:
+            high = low + max(6, (high - low) // 2)
+        lifespan_range = REALMS[realm_index].lifespan
+        if lifespan_range is None:
+            return rng.randint(low, high), None
+        lifespan = rng.randint(*lifespan_range) * cls._npc_lifespan_multiplier(path)
+        minimum_remaining = max(12, int(lifespan * 0.25))
+        safe_high = max(low, min(high, lifespan - minimum_remaining))
+        safe_low = min(low, safe_high)
+        age = rng.randint(safe_low, safe_high)
+        return age, lifespan
+
     def _recruit_sect_npc(self, sect: SectState, world_age: int, rng: random.Random) -> SectNpc:
         realm_index = self._recruit_realm_index(rng.random(), sect.world)
         surnames = ["顾", "叶", "陆", "楚", "白", "谢", "云", "林", "江", "闻"]
         given = ["玄", "宁", "川", "微", "岳", "霜", "澄", "昭", "离", "砚"]
         name = rng.choice(surnames) + rng.choice(given)
         layer = rng.randint(1, REALMS[realm_index].layers)
-        age_ranges = {
-            1: (18, 80), 2: (55, 180), 3: (180, 390), 4: (420, 980),
-            5: (1100, 2700), 6: (2600, 6500), 7: (7000, 24000),
-            8: (15000, 90000), 9: (50000, 180000), 10: (150000, 600000),
-            11: (500000, 1800000), 12: (1200000, 5000000),
-        }
-        age = rng.randint(*age_ranges[realm_index])
-        lifespan_range = REALMS[realm_index].lifespan
-        lifespan = max(age + 1, rng.randint(*lifespan_range)) if lifespan_range else None
         title = "仙宫供奉" if realm_index >= 9 else "跨域客卿" if realm_index >= 5 else "加盟客卿" if realm_index >= 3 else "新晋内门" if realm_index == 2 else "新入门弟子"
+        path = self._random_npc_path(sect.id, rng)
+        age, lifespan = self._roll_recruit_age_lifespan(realm_index, path, rng)
         race = "human"
         if self._world_supports(sect.world, "races"):
             race = rng.choice([
@@ -5268,9 +5282,8 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             id=f"{sect.id}_recruit_{world_age}_{len(sect.npcs)}", name=name, title=title,
             realm_index=realm_index, layer=layer, age=age, lifespan=lifespan,
             spirit_root=self._random_npc_root(realm_index, rng),
-            path=self._random_npc_path(sect.id, rng), race=race, world=sect.world,
+            path=path, race=race, world=sect.world,
         )
-        npc.lifespan = self._scale_npc_lifespan(npc.lifespan, npc.path, npc.age)
         npc.affinity = rng.uniform(-6, 10)
         npc.treasure_item_id = self._select_npc_treasure(npc, rng)
         sect.npcs.append(npc)
