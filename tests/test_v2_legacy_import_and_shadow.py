@@ -2,6 +2,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.migration import ShadowCharacterSpec, ShadowCommand, ShadowRunner
@@ -83,9 +84,16 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(result.report["source_version"], 5)
         self.assertEqual(result.report["imported_counts"]["relationships"], 1)
         self.assertTrue(result.report["source_sha256"])
+        backup = Path(result.report["backup_path"])
+        self.assertTrue(result.report["backup_created"])
+        self.assertEqual(result.report["backup_sha256"], result.report["source_sha256"])
+        self.assertEqual(backup.read_bytes(), before)
+        self.assertEqual(backup.parent, self.v2_database.parent / "legacy-v1-backups")
         self.assertEqual(self.v2.legacy_import_report(result.game["id"]), result.report)
         events = self.v2.event_journal(result.game["id"])
-        self.assertEqual(events[-1]["event_type"], "migration.v1.imported")
+        self.assertTrue(any(row["event_type"] == "migration.v1.imported" for row in events))
+        self.assertEqual(events[-1]["event_type"], "migration.v1.backup.verified")
+        self.assertEqual(events[-1]["payload"]["backup_sha256"], result.report["source_sha256"])
 
     def test_duplicate_target_is_atomic_and_does_not_overwrite(self):
         source = self._legacy_save()
@@ -110,6 +118,46 @@ class V2LegacyImportTests(unittest.TestCase):
         paths = {issue.path for issue in raised.exception.issues}
         self.assertEqual(paths, {"pending_event", "auction_state"})
         self.assertEqual(self.v2.list_games(), [])
+
+    def test_backup_is_durable_even_if_target_database_write_fails(self):
+        source = self._legacy_save()
+        before = source.read_bytes()
+        with mock.patch.object(self.v2.store, "create", side_effect=RuntimeError("write failed")):
+            with self.assertRaisesRegex(RuntimeError, "write failed"):
+                self.v2.import_v1_save(source)
+        backups = list((self.v2_database.parent / "legacy-v1-backups").glob("*.v1.json"))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(backups[0].read_bytes(), before)
+        self.assertEqual(self.v2.list_games(), [])
+
+    def test_backup_failure_prevents_target_database_write(self):
+        source = self._legacy_save()
+        invalid_backup_directory = self.root / "not-a-directory"
+        invalid_backup_directory.write_text("occupied", encoding="utf-8")
+        engine = V2GameEngine(
+            self.root / "other.sqlite3",
+            legacy_backup_directory=invalid_backup_directory,
+        )
+        with self.assertRaises(OSError):
+            engine.import_v1_save(source)
+        self.assertEqual(engine.list_games(), [])
+
+    def test_existing_identical_backup_is_reused_without_overwrite(self):
+        source = self._legacy_save()
+        backup_directory = self.root / "shared-backups"
+        first_engine = V2GameEngine(
+            self.root / "first.sqlite3", legacy_backup_directory=backup_directory
+        )
+        first = first_engine.import_v1_save(source, target_game_id="first-import")
+        backup = Path(first.report["backup_path"])
+        before_mtime = backup.stat().st_mtime_ns
+        second_engine = V2GameEngine(
+            self.root / "second.sqlite3", legacy_backup_directory=backup_directory
+        )
+        second = second_engine.import_v1_save(source, target_game_id="second-import")
+        self.assertFalse(second.report["backup_created"])
+        self.assertEqual(Path(second.report["backup_path"]), backup)
+        self.assertEqual(backup.stat().st_mtime_ns, before_mtime)
 
     def test_duplicate_json_keys_are_rejected_before_write(self):
         source = self.root / "duplicate.json"

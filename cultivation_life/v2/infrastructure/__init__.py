@@ -9,7 +9,9 @@ from .legacy_import import (
     LegacyImportIssue,
     LegacyImportReport,
     LegacyImportResult,
+    LegacyBackup,
     LegacyV1Importer,
+    backup_legacy_save,
     load_legacy_save,
 )
 
@@ -18,5 +20,5 @@ __all__ = [
     "V2ContentLoader", "V2ExtensionError",
     "LegacyImportBlockedError", "LegacyImportError", "LegacyImportIssue",
     "LegacyImportReport", "LegacyImportResult", "LegacyV1Importer",
-    "load_legacy_save",
+    "LegacyBackup", "backup_legacy_save", "load_legacy_save",
 ]

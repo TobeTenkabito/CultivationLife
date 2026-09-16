@@ -53,11 +53,12 @@ from .infrastructure.legacy_import import (
     LEGACY_AUDIT,
     LegacyImportError,
     LegacyV1Importer,
+    backup_legacy_save,
     load_legacy_save,
 )
 from .infrastructure.sqlite_store import SQLiteSaveStore
-from .kernel.bus import CommandBus
-from .kernel.model import WorldState
+from .kernel.bus import CommandBus, SimulationContext
+from .kernel.model import EventScope, WorldState
 from .kernel.services import InvariantRegistry
 
 
@@ -80,10 +81,20 @@ class LegacyImportExecution:
 class V2GameEngine:
     """Transactional application boundary for the V2 simulation."""
 
-    def __init__(self, database_path: Path, *, content_directory: Path | None = None):
+    def __init__(
+        self,
+        database_path: Path,
+        *,
+        content_directory: Path | None = None,
+        legacy_backup_directory: Path | None = None,
+    ):
         default_content = Path(__file__).resolve().parents[2] / "content"
         self.definitions = V2ContentLoader.load(content_directory or default_content)
+        database_path = Path(database_path)
         self.store = SQLiteSaveStore(database_path)
+        self.legacy_backup_directory = Path(
+            legacy_backup_directory or database_path.parent / "legacy-v1-backups"
+        )
         self.commands = CommandBus()
         self.invariants = InvariantRegistry()
         register_character_domain(self.commands, self.definitions)
@@ -160,7 +171,32 @@ class V2GameEngine:
         reconcile_extension_state(state, self.definitions)
         self.invariants.validate(state)
         player = character_view(state)
-        self.store.create(state, list(result.events), player_name=player["name"])
+        backup = backup_legacy_save(
+            source,
+            self.legacy_backup_directory,
+            expected_sha256=source_sha256,
+        )
+        result.report.backup_path = str(backup.path)
+        result.report.backup_sha256 = backup.sha256
+        result.report.backup_created = backup.created
+        state.entities.put(str(state.controlled_entity_id), LEGACY_AUDIT, result.report.to_dict())
+        backup_context = SimulationContext(state=state, event_bus=self.commands.event_bus)
+        backup_context.emit(
+            "migration.v1.backup.verified",
+            source="legacy_import",
+            scope=EventScope.entity(str(state.controlled_entity_id)),
+            payload={
+                "backup_path": str(backup.path),
+                "backup_sha256": backup.sha256,
+                "backup_created": backup.created,
+            },
+        )
+        backup_context.persist_rng()
+        self.store.create(
+            state,
+            [*result.events, *backup_context.emitted_events],
+            player_name=player["name"],
+        )
         return LegacyImportExecution(game=self._present(state), report=result.report.to_dict())
 
     def legacy_import_report(self, game_id: str) -> dict[str, Any]:
