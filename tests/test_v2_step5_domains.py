@@ -199,6 +199,12 @@ class V2StepFiveDomainTests(unittest.TestCase):
             "青蛇", seed=805, path="monster", spirit_root="supreme_wood",
             start_world="monster_realm",
         )
+        self.assertEqual(
+            monster["player"]["cultivation"]["main_technique"]["id"],
+            "TECH_MONSTER_BREATHING",
+        )
+        cultivated = monster_engine.perform_action(monster["id"], "cultivate", 1).game
+        self.assertGreater(cultivated["player"]["cultivation"]["opportunity"], 0)
         actor_id = monster["player"]["id"]
         configured = monster_engine.execute(
             monster["id"], ConfigureMonsterBloodline(actor_id=actor_id, species_id="serpent")

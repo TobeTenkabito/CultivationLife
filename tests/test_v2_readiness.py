@@ -49,7 +49,9 @@ class V2ReadinessMatrixTests(unittest.TestCase):
         document = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
         for feature in document["features"]:
             feature["status"] = "pass"
-            feature["evidence"] = ["tests/test_v2_readiness.py"]
+            feature["evidence"] = [
+                "tests/test_v2_readiness.py::V2ReadinessMatrixTests::test_default_matrix_covers_every_frozen_operation_exactly_once"
+            ]
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "all-pass.json"
             path.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
@@ -85,6 +87,20 @@ class V2ReadinessMatrixTests(unittest.TestCase):
             path.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
             report = FeatureMatrix.load(path, project_root=SOURCE_ROOT).assess()
         self.assertTrue(any("证据文件不存在" in error for error in report.structural_errors))
+        self.assertFalse(report.ready)
+
+    def test_passed_v1_operation_requires_a_real_test_node(self):
+        document = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+        passed = next(
+            feature for feature in document["features"]
+            if feature["status"] == "pass" and feature["v1_operations"]
+        )
+        passed["evidence"] = ["tests/test_v2_readiness.py::MissingClass::test_not_here"]
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "bad-node.json"
+            path.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+            report = FeatureMatrix.load(path, project_root=SOURCE_ROOT).assess()
+        self.assertTrue(any("测试证据节点不存在" in error for error in report.structural_errors))
         self.assertFalse(report.ready)
 
 

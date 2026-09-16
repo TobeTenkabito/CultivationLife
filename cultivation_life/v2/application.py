@@ -41,12 +41,23 @@ from .domain.extensions import (
     register_extension_domains,
 )
 from .domain.factions import (
+    InviteRelationshipToFaction,
+    SetFactionRewardPreference,
     faction_catalog_view,
     faction_invariants,
     faction_view,
     register_faction_domain,
 )
 from .domain.relations import relationship_invariants, relationship_view, register_relationship_domain
+from .domain.presentation import (
+    RecordWorldNews,
+    SetWorldNewsDebug,
+    UpdateSetting,
+    presentation_invariants,
+    presentation_view,
+    reconcile_presentation_state,
+    register_presentation_domain,
+)
 from .domain.world import TravelWithinWorld, register_world_domain, world_invariants, world_view
 from .infrastructure.content_loader import V2ContentLoader
 from .infrastructure.legacy_import import (
@@ -105,6 +116,7 @@ class V2GameEngine:
         register_economy_domain(self.commands, self.definitions)
         register_combat_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
+        register_presentation_domain(self.commands, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
         self.invariants.register("world", world_invariants(self.definitions))
@@ -113,6 +125,7 @@ class V2GameEngine:
         self.invariants.register("economy", economy_invariants(self.definitions))
         self.invariants.register("combat", combat_invariants)
         self.invariants.register("extensions", extension_invariants(self.definitions))
+        self.invariants.register("presentation", presentation_invariants(self.definitions))
 
     def create_game(
         self,
@@ -138,6 +151,7 @@ class V2GameEngine:
             start_world=start_world,
         ))
         reconcile_extension_state(state, self.definitions)
+        reconcile_presentation_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -169,6 +183,7 @@ class V2GameEngine:
         )
         state = result.state
         reconcile_extension_state(state, self.definitions)
+        reconcile_presentation_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -210,6 +225,7 @@ class V2GameEngine:
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
+        reconcile_presentation_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -282,9 +298,73 @@ class V2GameEngine:
             ResolveCombat(attacker_id=actor_id, target_id=target_id, objective=objective),
         )
 
+    def invite_relationship_to_faction(
+        self, game_id: str, target_id: str
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            InviteRelationshipToFaction(actor_id=actor_id, target_id=target_id),
+        )
+
+    def set_faction_reward(self, game_id: str, reward_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            SetFactionRewardPreference(actor_id=actor_id, reward_id=reward_id),
+        )
+
+    def update_setting(self, game_id: str, setting: str, enabled: bool) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            UpdateSetting(actor_id=actor_id, setting=setting, enabled=enabled),
+        )
+
+    def set_world_news_debug(self, game_id: str, enabled: bool) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, SetWorldNewsDebug(actor_id=actor_id, enabled=enabled))
+
+    def record_world_news(
+        self,
+        game_id: str,
+        world_id: str,
+        title: str,
+        summary: str,
+        *,
+        tags: tuple[str, ...] = (),
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            RecordWorldNews(
+                actor_id=actor_id,
+                world_id=world_id,
+                title=title,
+                summary=summary,
+                tags=tags,
+            ),
+        )
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
+        reconcile_presentation_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -298,6 +378,7 @@ class V2GameEngine:
         player = character_view(state)
         cultivation = cultivation_view(state, self.definitions)
         current_world = world_view(state, self.definitions)
+        presentation = presentation_view(state)
         alive = bool(player["alive"])
         return {
             "format": "cultivation-life-v2",
@@ -308,12 +389,15 @@ class V2GameEngine:
             "player": {**player, "cultivation": cultivation},
             "world": current_world,
             "relationships": relationship_view(state),
-            "faction": faction_view(state),
+            "faction": faction_view(state, self.definitions),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),
             "inventory": inventory_view(state, self.definitions),
             "market": market_view(state, self.definitions),
             "combat": combat_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
+            "settings": presentation["settings"],
+            "debug_world_news": presentation["debug_world_news"],
+            "world_news": presentation["world_news"],
             "capabilities": {
                 "character.cultivate": {
                     "enabled": alive,

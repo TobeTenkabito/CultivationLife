@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -37,6 +38,29 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise FeatureMatrixError(f"JSON根节点必须是对象：{path}")
     return value
+
+
+def _test_node_exists(path: Path, selectors: list[str]) -> bool:
+    if not selectors or not selectors[-1].startswith("test_") or path.suffix != ".py":
+        return False
+    try:
+        body = ast.parse(path.read_text(encoding="utf-8"), filename=str(path)).body
+    except (OSError, SyntaxError, UnicodeError):
+        return False
+    nodes: list[ast.stmt] = list(body)
+    for selector in selectors:
+        match = next(
+            (
+                node for node in nodes
+                if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == selector
+            ),
+            None,
+        )
+        if match is None:
+            return False
+        nodes = list(match.body) if isinstance(match, ast.ClassDef) else []
+    return True
 
 
 @dataclass(frozen=True, slots=True)
@@ -198,7 +222,8 @@ class FeatureMatrix:
             if feature.status == "retired" and feature.required_for_cutover:
                 errors.append(f"废弃功能必须显式移出切换必需项：{label}")
             for evidence in feature.evidence:
-                evidence_path = evidence.split("::", 1)[0]
+                evidence_parts = evidence.split("::")
+                evidence_path = evidence_parts[0]
                 target = (self.project_root / evidence_path).resolve()
                 try:
                     target.relative_to(self.project_root)
@@ -207,6 +232,17 @@ class FeatureMatrix:
                     continue
                 if not target.is_file():
                     errors.append(f"证据文件不存在：{label}: {evidence}")
+                    continue
+                if len(evidence_parts) > 1:
+                    if not evidence_parts[-1].startswith("test_"):
+                        errors.append(f"测试证据选择器非法：{label}: {evidence}")
+                        continue
+                    if not _test_node_exists(target, evidence_parts[1:]):
+                        errors.append(f"测试证据节点不存在：{label}: {evidence}")
+            if feature.status == "pass" and not any(
+                "::test_" in evidence for evidence in feature.evidence
+            ):
+                errors.append(f"已通过功能缺少具体测试节点：{label}")
             status_counts[feature.status] = status_counts.get(feature.status, 0) + 1
             per_domain = domain_counts.setdefault(feature.domain, {})
             per_domain[feature.status] = per_domain.get(feature.status, 0) + 1

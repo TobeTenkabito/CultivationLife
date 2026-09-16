@@ -1,0 +1,49 @@
+# V1/V2 阻断项根因审计与校验基线
+
+## 结论
+
+原有的 44 个阻断项不是 44 个独立回归错误，而是功能矩阵中所有尚未达到 `pass` 的必需功能。此次复核修复了三个完整功能项，并将阻断数降为 41：
+
+- `presentation.settings_debug`：Schema 4 持久化界面设置；异界消息继续模拟但默认不投影，Debug 模式才显示全部世界。
+- `relations.faction_invitation`：只有当前世界中存活的师父、道侣或道友可被引荐入宗；弟子、侍妾和无关系人物不能借此加入。
+- `factions.rewards`：元婴及以上成员可固定年度奖励；每年结算贡献与收益，永久属性在退宗后仍保留。
+
+另修复两个不属于独立矩阵行、但会污染平价校验的缺陷：V2 新角色缺少初始灵剑；妖修开局没有装配 DLC 指定的 `TECH_MONSTER_BREATHING`，导致修炼行动零收益。
+
+当前矩阵为 53 项：12 项 `pass`、11 项 `partial`、30 项 `missing`。101 个冻结的 V1 公共操作仍被完整且唯一归档，矩阵结构无错误。V2 仍不可正式切换。
+
+## 41 项的共同根因
+
+| 根因组 | 数量 | 阻断项 |
+|---|---:|---|
+| 共享运行时缺口 | 4 | `core.action_loop`、`story.interactive_events`、`verification.shadow_coverage`、`interface.http_frontend` |
+| 修炼与跨界事务 | 5 | `cultivation.realm_breakthrough`、`cultivation.body`、`cultivation.divine_sense`、`cultivation.transformations`、`world.realm_crossing` |
+| 实例资产与经济模型 | 9 | `inventory.item_use`、`economy.spirit_plant_sale`、`economy.auction`、`economy.black_market`、`economy.spirit_field`、`crafting.alchemy`、`crafting.artifacts`、`formation.nine_palace`、`artifact.natal` |
+| 关系与治理事务 | 10 | `relations.lifecycle`、`relations.dao_companion`、`relations.dao_friend`、`relations.master_disciple`、`relations.concubines`、`relations.capture`、`factions.succession`、`factions.family`、`factions.npc_operations`、`factions.diplomacy` |
+| 战斗、战争与魔道聚合 | 6 | `party.management`、`combat.automatic_resolution`、`war.aggregate`、`demonic.prison`、`demonic.captives`、`demonic.puppets_souls` |
+| DLC 深层状态机 | 7 | `ghost.reincarnation`、`ghost.soul_ecology`、`ghost.attachment_possession`、`monster.evolution_lineage`、`celestial.court`、`intrigue.personnel`、`intrigue.guests_decisions` |
+
+这些分组揭示了实际瓶颈：不能按页面逐个复制按钮。若先迁移拍卖、炼器或 DLC 页面，却没有通用交互事件、实例资产、托管账本和长期事务，跨系统清理问题会再次出现。
+
+## 校验结果与边界
+
+本轮建立 `tools/audit_v1_v2.py`，同时执行以下检查：
+
+1. 从 V1 HTTP 分派源码重新提取公共操作，与冻结清单逐项比较；当前为 101/101，无新增、遗漏或重复。
+2. AST 扫描 V2 包，禁止导入 V1 `engine`、`models`、`storage`；当前违规数为 0。
+3. 校验矩阵覆盖、证据文件及具体测试节点。`pass` 不再能仅引用一个存在但无关的测试文件。
+4. 使用道修、魔修、妖修、鬼修，多种种子分别执行 `rest` 与 `cultivate` 影子场景。每个命令从全新同源角色开始，避免 V1 待处理事件把下一命令误报为执行失败。
+5. 完整运行仓库回归测试；它验证 V1 自身稳定、V2 已迁移切片稳定以及导入/存档迁移安全，但不能替代尚未实现操作的平价测试。
+
+影子校验已确认：人物身份、初始寿命、初始世界、初始行囊及已共享的基础状态能够对齐；剩余稳定差异主要是 V2 尚无随机事件队列。鬼修个别机缘数值还会因两套运行时的随机数消费顺序不同而产生告警，必须在事件运行时迁移后重新定基线，不能通过忽略字段消除。
+
+## 后续修复顺序
+
+1. 建立通用交互队列、条件求值器和有类型的效果命令，先消除所有行动后的 `pending_event` 差异。
+2. 建立实例资产仓库、统一预留/托管账本和长期事务状态机，再迁移物品、灵植、拍卖、炼丹、炼器和阵法。
+3. 迁移高阶修炼、试炼与永久/临时跨界事务；把关系、势力、拍卖、监禁、傀儡清理由领域事件统一编排。
+4. 在同一关系与治理模型上完成关系交互、家族、宗门经营、外交和继承，不再保存 NPC 副本。
+5. 扩展战斗快照到队伍、地形、阵法和战争；随后迁移魔道聚合。
+6. 最后迁移 DLC 深层状态机、正式 HTTP/前端，并把影子适配器扩展到全部 101 个操作。
+
+每一项只能在命令、权威状态、跨领域事件、失败原子性、不变量、存档迁移和具体测试节点全部存在后改为 `pass`。在 41 项真正清零前，Step 10 继续保持禁止状态。

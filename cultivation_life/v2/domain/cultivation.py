@@ -61,6 +61,14 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
         "demonic": "TECH_DEMON_BREATHING",
         "ghost": "TECH_GHOST_BREATHING",
     }
+    if path == "monster":
+        monster_document = dict(
+            definitions.extension_documents.get("monster_bloodlines.json", {})
+        )
+        monster_settings = dict(monster_document.get("settings", {}))
+        configured = str(monster_settings.get("starter_technique_id", ""))
+        if configured:
+            starters["monster"] = configured
     starter_id = starters.get(path)
     if starter_id and starter_id not in definitions.techniques:
         starter_id = None

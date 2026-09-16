@@ -9,7 +9,7 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_foundation.py"],
+      "evidence": ["tests/test_v2_foundation.py::V2FoundationTests::test_create_action_event_save_and_reload_vertical_slice"],
       "notes": "V2 character creation, deterministic seed and save round-trip are covered."
     },
     {
@@ -42,11 +42,14 @@
     {
       "id": "presentation.settings_debug",
       "domain": "presentation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["settings", "debug-world-news"],
-      "evidence": [],
-      "notes": "V2 has no persisted UI settings or scoped debug-news projection."
+      "evidence": [
+        "tests/test_v2_presentation.py::V2PresentationTests::test_settings_are_validated_persisted_and_presented",
+        "tests/test_v2_presentation.py::V2PresentationTests::test_world_news_is_simulated_but_hidden_across_worlds_until_debug"
+      ],
+      "notes": "Settings persist in schema 4; world news remains simulated but is hidden outside the current world unless debug visibility is enabled."
     },
     {
       "id": "cultivation.technique_equipment",
@@ -54,7 +57,7 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["equip-technique"],
-      "evidence": ["tests/test_v2_core_domains.py"],
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_technique_affinity_is_checked_on_learning_and_equipping"],
       "notes": "Learning and equipping the main technique validates affinity and ownership."
     },
     {
@@ -63,7 +66,7 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["breakthrough"],
-      "evidence": ["tests/test_v2_core_domains.py"],
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_map_travel_uses_clock_and_updates_only_on_arrival"],
       "notes": "Basic breakthrough works; high-realm trials, tribulations and ascension gates remain."
     },
     {
@@ -99,7 +102,7 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["map-travel"],
-      "evidence": ["tests/test_v2_core_domains.py"],
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_map_travel_uses_clock_and_updates_only_on_arrival"],
       "notes": "Route planning, elapsed time, access checks and lethal destinations are covered."
     },
     {
@@ -117,7 +120,7 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["market-buy", "market-lock"],
-      "evidence": ["tests/test_v2_step5_domains.py"],
+      "evidence": ["tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_market_purchase_and_lock_survive_refresh"],
       "notes": "Purchases are atomic and one locked offer survives refresh."
     },
     {
@@ -189,7 +192,7 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["relationship-exit"],
-      "evidence": ["tests/test_v2_core_domains.py"],
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_faction_contribution_is_scoped_to_membership_and_control_can_transfer"],
       "notes": "Typed relations can end, but V1 exit consequences and affinity changes remain."
     },
     {
@@ -213,11 +216,11 @@
     {
       "id": "relations.faction_invitation",
       "domain": "relations",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["relationship-faction"],
-      "evidence": [],
-      "notes": "Inviting eligible relationships into a faction is not implemented."
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_only_master_companion_or_friend_can_be_invited_into_current_faction"],
+      "notes": "A living same-world master, companion or friend can join the player's current faction; disciples, concubines and unrelated characters are rejected."
     },
     {
       "id": "relations.master_disciple",
@@ -252,7 +255,7 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["create-faction", "leave-faction"],
-      "evidence": ["tests/test_v2_core_domains.py"],
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_faction_contribution_is_scoped_to_membership_and_control_can_transfer"],
       "notes": "Faction creation, scoped contribution and leaving are covered."
     },
     {
@@ -276,11 +279,11 @@
     {
       "id": "factions.rewards",
       "domain": "factions",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["faction-reward"],
-      "evidence": [],
-      "notes": "Faction reward preferences and payouts remain."
+      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_faction_reward_preference_pays_annually_and_benefits_survive_leaving"],
+      "notes": "Nascent-or-higher members can persist a reward preference; yearly payouts grant scoped contribution and permanent benefits that survive leaving."
     },
     {
       "id": "factions.npc_operations",
@@ -315,7 +318,7 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_step5_domains.py"],
+      "evidence": ["tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_combat_uses_canonical_characters_and_records_lethal_result"],
       "notes": "Deterministic duel/kill/capture works; terrain, formations, teams and full traits remain."
     },
     {
@@ -432,7 +435,10 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_step5_domains.py"],
+      "evidence": [
+        "tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_enabled_dlc_content_is_merged_without_importing_v1_runtime",
+        "tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_invalid_extension_is_skipped_without_breaking_base_definitions"
+      ],
       "notes": "V2 loads, validates, orders and isolates DLC/mod packages independently."
     },
     {
@@ -441,7 +447,11 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_foundation.py"],
+      "evidence": [
+        "tests/test_v2_foundation.py::V2FoundationTests::test_create_action_event_save_and_reload_vertical_slice",
+        "tests/test_v2_foundation.py::V2FoundationTests::test_stale_snapshot_cannot_overwrite_newer_revision",
+        "tests/test_v2_foundation.py::V2FoundationTests::test_event_journal_can_be_read_incrementally"
+      ],
       "notes": "Atomic snapshots, event journal and optimistic revisions are covered."
     },
     {
@@ -450,7 +460,11 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_legacy_import_and_shadow.py"],
+      "evidence": [
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_preserves_supported_state_and_never_changes_source",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_backup_is_durable_even_if_target_database_write_fails",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_backup_failure_prevents_target_database_write"
+      ],
       "notes": "One-way import is audited and requires a durable content-addressed backup first."
     },
     {
@@ -459,7 +473,10 @@
       "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_foundation.py", "tests/test_v2_legacy_import_and_shadow.py"],
+      "evidence": [
+        "tests/test_v2_foundation.py::V1BehaviorFreezeTests::test_v2_does_not_import_legacy_runtime_or_models",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_preserves_supported_state_and_never_changes_source"
+      ],
       "notes": "V2 runtime has no dependency on V1 save/model code and never writes the source JSON."
     },
     {

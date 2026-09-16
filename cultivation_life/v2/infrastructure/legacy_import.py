@@ -238,7 +238,9 @@ class LegacyV1Importer:
         "path", "technique", "known_techniques", "additional_roots", "inventory",
         "alive", "death_reason", "breakthrough_pity", "awaiting_major_breakthrough",
         "awaiting_minor_breakthrough", "world", "location_id", "race", "faction_id",
-        "faction_join_age", "faction_contribution", "master", "disciples",
+        "faction_join_age", "faction_contribution", "faction_reward_preference",
+        "faction_hp_bonus", "faction_mp_bonus", "faction_combat_bonus",
+        "master", "disciples",
         "dao_friends", "concubines", "dao_companion", "monster_species_id",
         "monster_evolution_id", "monster_evolution_history", "monster_adaptations",
         "monster_adaptation_progress", "monster_bloodline_imprints",
@@ -773,7 +775,20 @@ class LegacyV1Importer:
             target_id=target_id,
             kind=MEMBERSHIP,
             created_year=max(0, state.clock.year - max(0, int(player.get("age", 16)) - int(player.get("faction_join_age") or player.get("age", 16)))),
-            metadata={"role": role, "contribution": max(0, int(player.get("faction_contribution", 0)))},
+            metadata={
+                "role": role,
+                "contribution": max(0, int(player.get("faction_contribution", 0))),
+                "reward_preference": (
+                    str(player["faction_reward_preference"])
+                    if player.get("faction_reward_preference") in self.definitions.faction_rewards
+                    else None
+                ),
+                "permanent_benefits": {
+                    "hp": max(0.0, float(player.get("faction_hp_bonus", 0))),
+                    "mp": max(0.0, float(player.get("faction_mp_bonus", 0))),
+                    "combat": max(0.0, float(player.get("faction_combat_bonus", 0))),
+                },
+            },
         )
         if founded:
             governance = state.entities.require(target_id, FACTION_GOVERNANCE)

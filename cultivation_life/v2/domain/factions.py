@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .character import IDENTITY
+from .character import IDENTITY, LIFE
+from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -47,6 +48,18 @@ class TransferFactionControl:
     actor_id: str
     faction_id: str
     successor_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class InviteRelationshipToFaction:
+    actor_id: str
+    target_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class SetFactionRewardPreference:
+    actor_id: str
+    reward_id: str
 
 
 def _create_faction_entity(
@@ -128,6 +141,8 @@ def _add_membership(
 ) -> str:
     if role not in {"member", "guest", "leader", "founder"}:
         raise ValueError("未知势力身份")
+    if not bool(context.state.entities.require(character_id, LIFE).get("alive")):
+        raise ValueError("死亡角色不能加入势力")
     if _active_membership(context.state, character_id):
         raise ValueError("角色已经拥有有效势力身份")
     character_location = context.state.entities.require(character_id, LOCATION)
@@ -269,6 +284,10 @@ def _transfer_control(context: SimulationContext, command: object) -> None:
     governance = context.state.entities.require(command.faction_id, FACTION_GOVERNANCE)
     if governance.get("controller_id") != command.actor_id:
         raise ValueError("当前角色没有该势力控制权")
+    profile = context.state.entities.require(command.faction_id, FACTION_PROFILE)
+    actor_location = context.state.entities.require(command.actor_id, LOCATION)
+    if actor_location.get("world_id") != profile.get("world_id"):
+        raise ValueError("身处其他世界时不能控制该势力")
     successor = _active_membership(context.state, command.successor_id)
     if successor is None or successor.target_id != command.faction_id:
         raise ValueError("继任者不是该势力成员")
@@ -285,6 +304,143 @@ def _transfer_control(context: SimulationContext, command: object) -> None:
             "to_id": command.successor_id,
         },
     )
+
+
+def _invite_relationship(context: SimulationContext, command: object) -> None:
+    if not isinstance(command, InviteRelationshipToFaction):
+        raise TypeError("命令类型错误")
+    if command.actor_id != context.state.controlled_entity_id:
+        raise ValueError("只能由当前角色引荐入宗")
+    membership = _active_membership(context.state, command.actor_id)
+    if membership is None:
+        raise ValueError("当前角色没有可以引荐他人的势力")
+    profile = context.state.entities.require(membership.target_id, FACTION_PROFILE)
+    actor_location = context.state.entities.require(command.actor_id, LOCATION)
+    if actor_location.get("world_id") != profile.get("world_id"):
+        raise ValueError("当前世界没有可以引荐他人的势力")
+    eligible = None
+    for edge in context.state.relations.involving(command.actor_id):
+        other_id = edge.target_id if edge.source_id == command.actor_id else edge.source_id
+        if other_id != command.target_id:
+            continue
+        if edge.kind in {"friend", "dao_companion"}:
+            eligible = edge
+            break
+        # V1 permits inviting one's master, but not one's disciples.
+        if (
+            edge.kind == "master_disciple"
+            and edge.source_id == command.target_id
+            and edge.target_id == command.actor_id
+        ):
+            eligible = edge
+            break
+    if eligible is None:
+        raise ValueError("只能邀请当前世界中存活的师父、道侣或道友")
+    metadata = dict(eligible.metadata)
+    metadata["affinity"] = float(metadata.get("affinity", 0.0)) + 4.0
+    context.state.relations.replace_metadata(eligible.relation_id, metadata)
+    relation_id = _add_membership(
+        context,
+        character_id=command.target_id,
+        faction_id=membership.target_id,
+        role="member",
+    )
+    context.emit(
+        "faction.relationship.invited",
+        source="factions",
+        scope=EventScope("faction", membership.target_id),
+        payload={
+            "actor_id": command.actor_id,
+            "character_id": command.target_id,
+            "faction_id": membership.target_id,
+            "membership_id": relation_id,
+            "relationship_id": eligible.relation_id,
+        },
+    )
+
+
+def _set_reward_preference(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, SetFactionRewardPreference):
+            raise TypeError("命令类型错误")
+        if command.actor_id != context.state.controlled_entity_id:
+            raise ValueError("只能设置当前角色的宗门奖励")
+        membership = _active_membership(context.state, command.actor_id)
+        if membership is None:
+            raise ValueError("当前角色没有宗门身份")
+        cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        if definitions.realm_index(str(cultivation["realm_id"])) < 4:
+            raise ValueError("进入元婴初期后方可固定年度奖励")
+        if command.reward_id not in definitions.faction_rewards:
+            raise ValueError("未知宗门奖励")
+        metadata = dict(membership.metadata)
+        metadata["reward_preference"] = command.reward_id
+        context.state.relations.replace_metadata(membership.relation_id, metadata)
+        context.emit(
+            "faction.reward.preference.changed",
+            source="factions",
+            scope=EventScope("faction", membership.target_id),
+            payload={
+                "character_id": command.actor_id,
+                "faction_id": membership.target_id,
+                "reward_id": command.reward_id,
+            },
+        )
+
+    return handler
+
+
+def _on_time_advanced(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = context.state.controlled_entity_id
+        if actor_id is None:
+            return
+        elapsed = int(event.payload["to_year"]) - int(event.payload["from_year"])
+        membership = _active_membership(context.state, actor_id)
+        if elapsed <= 0 or membership is None:
+            return
+        life = context.state.entities.require(actor_id, LIFE)
+        if not bool(life.get("alive")):
+            return
+        profile = context.state.entities.require(membership.target_id, FACTION_PROFILE)
+        location = context.state.entities.require(actor_id, LOCATION)
+        if not bool(profile.get("active")) or profile.get("world_id") != location.get("world_id"):
+            return
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+        metadata = dict(membership.metadata)
+        benefits = dict(metadata.get("permanent_benefits", {}))
+        rewards = sorted(definitions.faction_rewards)
+        for offset in range(1, elapsed + 1):
+            preferred = str(metadata.get("reward_preference", ""))
+            reward_id = preferred if realm_index >= 4 and preferred in definitions.faction_rewards else context.rng.choice(rewards)
+            effect = dict(definitions.faction_rewards[reward_id]["effect"])
+            opportunity = float(effect.get("opportunity", 0))
+            if opportunity:
+                cultivation["opportunity"] = max(
+                    0.0, float(cultivation.get("opportunity", 0.0)) + opportunity
+                )
+            for key in ("hp", "mp", "combat"):
+                amount = float(effect.get(key, 0))
+                if amount:
+                    benefits[key] = float(benefits.get(key, 0.0)) + amount
+            metadata["contribution"] = int(metadata.get("contribution", 0)) + 1
+            context.emit(
+                "faction.reward.granted",
+                source="factions",
+                scope=EventScope("faction", membership.target_id),
+                payload={
+                    "character_id": actor_id,
+                    "faction_id": membership.target_id,
+                    "reward_id": reward_id,
+                    "year": int(event.payload["from_year"]) + offset,
+                },
+            )
+        metadata["permanent_benefits"] = benefits
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+        context.state.relations.replace_metadata(membership.relation_id, metadata)
+
+    return handler
 
 
 def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None:
@@ -332,6 +488,15 @@ def faction_invariants(definitions: GameDefinitions):
                 errors.append(f"成员关系指向非势力实体：{edge.relation_id}")
             if int(edge.metadata.get("contribution", -1)) < 0:
                 errors.append(f"势力贡献非法：{edge.relation_id}")
+            preference = edge.metadata.get("reward_preference")
+            if preference is not None and preference not in definitions.faction_rewards:
+                errors.append(f"势力奖励偏好非法：{edge.relation_id}")
+            benefits = dict(edge.metadata.get("permanent_benefits", {}))
+            if set(benefits) - {"hp", "mp", "combat"} or any(
+                not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0
+                for value in benefits.values()
+            ):
+                errors.append(f"势力永久奖励非法：{edge.relation_id}")
         if any(count > 1 for count in membership_counts.values()):
             errors.append("角色同时拥有多个有效势力身份")
         return errors
@@ -345,11 +510,16 @@ def register_faction_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.register(LeaveFaction, _leave_faction)
     bus.register(ChangeContribution, _change_contribution)
     bus.register(TransferFactionControl, _transfer_control)
+    bus.register(InviteRelationshipToFaction, _invite_relationship)
+    bus.register(SetFactionRewardPreference, _set_reward_preference(definitions))
     bus.event_bus.register("core.game.created", _on_game_created(definitions))
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
 
 
-def faction_view(state: Any, entity_id: str | None = None) -> dict[str, Any] | None:
+def faction_view(
+    state: Any, definitions: GameDefinitions, entity_id: str | None = None,
+) -> dict[str, Any] | None:
     actor_id = entity_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
@@ -357,7 +527,17 @@ def faction_view(state: Any, entity_id: str | None = None) -> dict[str, Any] | N
     if membership is None:
         return None
     profile = state.entities.require(membership.target_id, FACTION_PROFILE)
+    location = state.entities.require(actor_id, LOCATION)
+    if location.get("world_id") != profile.get("world_id"):
+        return None
     governance = state.entities.require(membership.target_id, FACTION_GOVERNANCE)
+    permanent_benefits = {"hp": 0.0, "mp": 0.0, "combat": 0.0}
+    for historical in state.relations.find(
+        source_id=actor_id, kind=MEMBERSHIP, active_only=False
+    ):
+        for key, value in dict(historical.metadata.get("permanent_benefits", {})).items():
+            if key in permanent_benefits:
+                permanent_benefits[key] += float(value)
     return {
         "id": membership.target_id,
         "external_id": profile.get("external_id"),
@@ -367,6 +547,15 @@ def faction_view(state: Any, entity_id: str | None = None) -> dict[str, Any] | N
         "contribution": int(membership.metadata["contribution"]),
         "controller_id": governance.get("controller_id"),
         "controlled_by_player": governance.get("controller_id") == actor_id,
+        "reward_preference": membership.metadata.get("reward_preference"),
+        "reward_options": {
+            reward_id: {
+                "name": reward["name"],
+                "description": reward.get("description", ""),
+            }
+            for reward_id, reward in definitions.faction_rewards.items()
+        },
+        "permanent_benefits": permanent_benefits,
     }
 
 
