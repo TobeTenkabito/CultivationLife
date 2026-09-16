@@ -31,9 +31,6 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "cultivation_and_world": (
         "cultivation.realm_breakthrough",
-        "cultivation.body",
-        "cultivation.divine_sense",
-        "cultivation.transformations",
         "world.realm_crossing",
     ),
     "asset_and_economy_model": (

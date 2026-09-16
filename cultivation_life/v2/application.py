@@ -19,6 +19,17 @@ from .domain.actions import (
     reconcile_action_runtime,
     register_action_domain,
 )
+from .domain.advanced_cultivation import (
+    AbsorbTransformationMaterial,
+    AttemptBodyBreakthrough,
+    AttemptDivineSenseBreakthrough,
+    EquipSpecialTechnique,
+    ManageTransformation,
+    advanced_cultivation_invariants,
+    advanced_cultivation_view,
+    reconcile_advanced_cultivation,
+    register_advanced_cultivation_domain,
+)
 from .domain.cultivation import (
     AttemptBreakthrough,
     PerformActionUnits,
@@ -64,7 +75,15 @@ from .domain.presentation import (
     reconcile_presentation_state,
     register_presentation_domain,
 )
-from .domain.world import TravelWithinWorld, register_world_domain, world_invariants, world_view
+from .domain.world import (
+    AscendWorld,
+    CrossWorld,
+    TravelWithinWorld,
+    reconcile_world_state,
+    register_world_domain,
+    world_invariants,
+    world_view,
+)
 from .domain.story import (
     QueueStoryEvent,
     ResolveStoryChoice,
@@ -125,6 +144,7 @@ class V2GameEngine:
         register_character_domain(self.commands, self.definitions)
         register_action_domain(self.commands)
         register_cultivation_domain(self.commands, self.definitions)
+        register_advanced_cultivation_domain(self.commands, self.definitions)
         register_world_domain(self.commands, self.definitions)
         register_relationship_domain(self.commands)
         register_faction_domain(self.commands, self.definitions)
@@ -136,6 +156,9 @@ class V2GameEngine:
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
+        self.invariants.register(
+            "advanced_cultivation", advanced_cultivation_invariants(self.definitions)
+        )
         self.invariants.register("world", world_invariants(self.definitions))
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
@@ -172,6 +195,8 @@ class V2GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        reconcile_advanced_cultivation(state, self.definitions)
+        reconcile_world_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -206,6 +231,8 @@ class V2GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        reconcile_advanced_cultivation(state, self.definitions)
+        reconcile_world_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -250,6 +277,8 @@ class V2GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        reconcile_advanced_cultivation(state, self.definitions)
+        reconcile_world_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -291,12 +320,75 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, AttemptBreakthrough(actor_id=actor_id))
 
+    def equip_special_technique(
+        self, game_id: str, technique_id: str, slot: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, EquipSpecialTechnique(actor_id, technique_id, slot))
+
+    def attempt_body_breakthrough(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, AttemptBodyBreakthrough(actor_id))
+
+    def attempt_divine_sense_breakthrough(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, AttemptDivineSenseBreakthrough(actor_id))
+
+    def absorb_transformation_material(
+        self, game_id: str, item_id: str, *, mode: str = "direct",
+        stat_id: str = "", batch: bool = False,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, AbsorbTransformationMaterial(
+            actor_id, item_id, mode, stat_id, batch,
+        ))
+
+    def manage_transformation(
+        self, game_id: str, form_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ManageTransformation(actor_id, form_id, action))
+
     def travel(self, game_id: str, destination_id: str) -> CommandExecution:
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, TravelWithinWorld(actor_id=actor_id, destination_id=destination_id))
+
+    def ascend_world(
+        self, game_id: str, destination_world_id: str,
+        *, invited_ids: tuple[str, ...] = (),
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, AscendWorld(actor_id, destination_world_id, invited_ids)
+        )
+
+    def cross_world(self, game_id: str, destination_world_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, CrossWorld(actor_id, destination_world_id))
 
     def refresh_market(self, game_id: str, *, force: bool = False) -> CommandExecution:
         state = self.store.load(game_id)
@@ -412,6 +504,8 @@ class V2GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        reconcile_advanced_cultivation(state, self.definitions)
+        reconcile_world_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -424,6 +518,7 @@ class V2GameEngine:
     def _present(self, state: WorldState) -> dict[str, Any]:
         player = character_view(state)
         cultivation = cultivation_view(state, self.definitions)
+        advanced_cultivation = advanced_cultivation_view(state, self.definitions)
         current_world = world_view(state, self.definitions)
         presentation = presentation_view(state)
         story = story_view(state)
@@ -436,7 +531,7 @@ class V2GameEngine:
             "revision": state.revision,
             "schema_version": state.schema_version,
             "clock": {"year": state.clock.year},
-            "player": {**player, "cultivation": cultivation},
+            "player": {**player, "cultivation": cultivation, **advanced_cultivation},
             "world": current_world,
             "relationships": relationship_view(state),
             "faction": faction_view(state, self.definitions),

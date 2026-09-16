@@ -12,6 +12,7 @@ from ..kernel.services import TimeService
 
 
 LOCATION = "world.location"
+WORLD_TRANSITION = "world.transition"
 TRAVEL_DUE = "world.travel.due"
 
 
@@ -19,6 +20,27 @@ TRAVEL_DUE = "world.travel.due"
 class TravelWithinWorld:
     actor_id: str
     destination_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class AscendWorld:
+    actor_id: str
+    destination_world_id: str
+    invited_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CrossWorld:
+    actor_id: str
+    destination_world_id: str
+
+
+def reconcile_world_state(state: WorldState) -> None:
+    for entity_id in state.entities.with_component(IDENTITY):
+        if state.entities.get(entity_id, WORLD_TRANSITION) is None:
+            state.entities.put(entity_id, WORLD_TRANSITION, {
+                "sealed_cultivation": None, "last_transaction": None, "history": [],
+            })
 
 
 def _on_character_created(definitions: GameDefinitions):
@@ -31,6 +53,289 @@ def _on_character_created(definitions: GameDefinitions):
             {
                 "world_id": world_id,
                 "location_id": definitions.default_location(world_id),
+            },
+        )
+        context.state.entities.put(
+            entity_id,
+            WORLD_TRANSITION,
+            {"sealed_cultivation": None, "last_transaction": None, "history": []},
+        )
+
+    return handler
+
+
+def _transition_ack(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
+    transaction = transition.get("last_transaction")
+    if not isinstance(transaction, dict) or transaction.get("id") != event.payload.get("transaction_id"):
+        raise ValueError("跨界清理回执不属于当前事务")
+    domain = str(event.payload["domain"])
+    if domain not in transaction.get("required_domains", []):
+        raise ValueError(f"跨界事务收到未声明领域回执：{domain}")
+    acknowledgements = list(transaction.get("acknowledgements", []))
+    if domain in acknowledgements:
+        raise ValueError(f"跨界领域重复回执：{domain}")
+    acknowledgements.append(domain)
+    transaction["acknowledgements"] = acknowledgements
+    transition["last_transaction"] = transaction
+    context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
+
+
+def _eligible_entourage(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    invited_ids: tuple[str, ...],
+    origin: str,
+) -> tuple[list[str], list[str]]:
+    invited = list(dict.fromkeys(map(str, invited_ids)))
+    if len(invited) != len(invited_ids):
+        raise ValueError("同行邀请不能重复")
+    keep: list[str] = []
+    fallen: list[str] = []
+    relation_by_other = {}
+    for edge in context.state.relations.involving(actor_id):
+        if edge.kind not in {"friend", "dao_companion"}:
+            continue
+        other_id = edge.target_id if edge.source_id == actor_id else edge.source_id
+        relation_by_other[other_id] = edge
+    actor_cultivation = context.state.entities.require(actor_id, "cultivation.state")
+    actor_realm = definitions.realm_index(str(actor_cultivation["realm_id"]))
+    chance = float(definitions.systems.get("relationship", {}).get(
+        "friend_crossing_survival_chance", 0.35
+    ))
+    for other_id in invited:
+        edge = relation_by_other.get(other_id)
+        if edge is None:
+            raise ValueError("只有道侣和好友可以受邀同行")
+        life = context.state.entities.require(other_id, LIFE)
+        location = context.state.entities.require(other_id, LOCATION)
+        cultivation = context.state.entities.require(other_id, "cultivation.state")
+        if not bool(life.get("alive")) or location.get("world_id") != origin:
+            raise ValueError("受邀者已经死亡或不在同一界面")
+        if definitions.realm_index(str(cultivation["realm_id"])) < actor_realm:
+            raise ValueError("受邀者境界不足，无法穿过界壁")
+        if edge.kind == "dao_companion" or context.rng.random() < chance:
+            keep.append(other_id)
+        else:
+            fallen.append(other_id)
+    return keep, fallen
+
+
+def _begin_cleanup_transaction(
+    context: SimulationContext,
+    *,
+    actor_id: str,
+    origin: str,
+    destination: str,
+    keep_ids: list[str],
+    fallen_ids: list[str],
+) -> str:
+    transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
+    previous = transition.get("last_transaction")
+    if isinstance(previous, dict) and previous.get("status") == "preparing":
+        raise ValueError("已有跨界事务正在处理")
+    transaction_id = f"crossing:{context.state.next_event_sequence:010d}"
+    required = ["relations", "factions", "economy", "combat"]
+    transition["last_transaction"] = {
+        "id": transaction_id,
+        "status": "preparing",
+        "origin": origin,
+        "destination": destination,
+        "required_domains": required,
+        "acknowledgements": [],
+        "keep_ids": list(keep_ids),
+        "fallen_ids": list(fallen_ids),
+    }
+    context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
+    context.emit(
+        "world.permanent_transition.requested",
+        source="world",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": transaction_id,
+            "actor_id": actor_id,
+            "origin_world_id": origin,
+            "destination_world_id": destination,
+            "keep_relationship_ids": list(keep_ids),
+            "fallen_ids": list(fallen_ids),
+        },
+    )
+    transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
+    transaction = dict(transition["last_transaction"])
+    missing = set(required) - set(transaction.get("acknowledgements", []))
+    if missing:
+        raise ValueError(f"跨界清理未完成：{', '.join(sorted(missing))}")
+    return transaction_id
+
+
+def _commit_transition(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    *, actor_id: str, destination: str, transaction_id: str,
+) -> None:
+    location = context.state.entities.require(actor_id, LOCATION)
+    origin = str(location["world_id"])
+    location.update(
+        world_id=destination,
+        location_id=definitions.default_location(destination),
+    )
+    context.state.entities.put(actor_id, LOCATION, location)
+    transition = context.state.entities.require(actor_id, WORLD_TRANSITION)
+    transaction = dict(transition["last_transaction"])
+    if transaction.get("id") != transaction_id:
+        raise ValueError("跨界事务在提交前被替换")
+    transaction["status"] = "committed"
+    transaction["committed_year"] = context.state.clock.year
+    transition["last_transaction"] = transaction
+    history = list(transition.get("history", []))
+    history.append({
+        "transaction_id": transaction_id, "kind": "permanent",
+        "origin": origin, "destination": destination,
+        "year": context.state.clock.year,
+    })
+    transition["history"] = history[-50:]
+    context.state.entities.put(actor_id, WORLD_TRANSITION, transition)
+    for other_id in transaction.get("keep_ids", []):
+        other_location = context.state.entities.require(str(other_id), LOCATION)
+        other_location.update(
+            world_id=destination,
+            location_id=definitions.default_location(destination),
+        )
+        context.state.entities.put(str(other_id), LOCATION, other_location)
+    for other_id in transaction.get("fallen_ids", []):
+        context.emit(
+            "character.lethal_hazard",
+            source="world",
+            scope=EventScope.entity(str(other_id)),
+            payload={"entity_id": str(other_id), "reason": "穿越界壁时失陷于空间风暴"},
+        )
+    context.emit(
+        "world.permanent_transition.committed",
+        source="world",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": transaction_id, "actor_id": actor_id,
+            "origin_world_id": origin, "destination_world_id": destination,
+        },
+    )
+
+
+def _ascend_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, AscendWorld):
+            raise TypeError("命令类型错误")
+        if command.actor_id != context.state.controlled_entity_id:
+            raise ValueError("只能控制当前角色飞升")
+        if not bool(context.state.entities.require(command.actor_id, LIFE).get("alive")):
+            raise ValueError("死亡角色不能飞升")
+        location = context.state.entities.require(command.actor_id, LOCATION)
+        origin = str(location["world_id"])
+        destination = command.destination_world_id
+        cultivation = context.state.entities.require(command.actor_id, "cultivation.state")
+        realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+        layer = int(cultivation["layer"])
+        path = str(cultivation["path"])
+        routes = {
+            ("human", "spirit"): (path in {"dao", "buddhist", "confucian"}, 5, 3),
+            ("human", "demon"): (path == "demonic", 5, 3),
+            ("demon", "true_demon"): (path == "demonic", 5, 1),
+        }
+        allowed, required_realm, max_start_layer = routes.get(
+            (origin, destination), (False, -1, -1)
+        )
+        imprisoned = bool(context.state.relations.find(
+            target_id=command.actor_id, kind="combat_prisoner"
+        ))
+        if imprisoned and (origin, destination) != ("human", "spirit"):
+            raise ValueError("服刑期间只能尝试人界偷渡灵界")
+        if not allowed or realm_index != required_realm or layer > max_start_layer:
+            if (origin, destination) in {("spirit", "celestial"), ("true_demon", "asura")}:
+                raise ValueError("该飞升路线必须先完成尚未迁移的九重飞升试炼")
+            raise ValueError("当前道统、境界或界面不满足飞升条件")
+        if destination not in definitions.worlds or not definitions.worlds[destination].enabled:
+            raise ValueError("目标界面尚未开放")
+        keep, fallen = _eligible_entourage(
+            context, definitions, command.actor_id, command.invited_ids, origin,
+        )
+        transaction_id = _begin_cleanup_transaction(
+            context, actor_id=command.actor_id, origin=origin, destination=destination,
+            keep_ids=keep, fallen_ids=fallen,
+        )
+        _commit_transition(
+            context, definitions, actor_id=command.actor_id,
+            destination=destination, transaction_id=transaction_id,
+        )
+
+    return handler
+
+
+def _cross_world_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, CrossWorld):
+            raise TypeError("命令类型错误")
+        if command.actor_id != context.state.controlled_entity_id:
+            raise ValueError("只能控制当前角色跨界")
+        if not bool(context.state.entities.require(command.actor_id, LIFE).get("alive")):
+            raise ValueError("死亡角色不能跨界")
+        if context.state.relations.find(target_id=command.actor_id, kind="combat_prisoner"):
+            raise ValueError("服刑期间不能正常跨界")
+        location = context.state.entities.require(command.actor_id, LOCATION)
+        origin, destination = str(location["world_id"]), command.destination_world_id
+        pairs = {
+            "spirit": "human", "true_demon": "demon", "celestial": "spirit",
+            "asura": "true_demon", "hell": "human",
+        }
+        reverse = {lower: upper for upper, lower in pairs.items()}
+        transition = context.state.entities.require(command.actor_id, WORLD_TRANSITION)
+        cultivation = context.state.entities.require(command.actor_id, "cultivation.state")
+        sealed = transition.get("sealed_cultivation")
+        if origin in pairs and destination == pairs[origin]:
+            if sealed is not None:
+                raise ValueError("当前已经处于下界封印状态")
+            required = int(definitions.systems["world_travel"][
+                "celestial_required_realm" if origin in {"celestial", "asura"} else "required_realm"
+            ])
+            if definitions.realm_index(str(cultivation["realm_id"])) < required:
+                raise ValueError("境界不足，无法逆穿界壁")
+            transition["sealed_cultivation"] = {
+                "realm_id": cultivation["realm_id"], "layer": cultivation["layer"],
+                "upper_world": origin, "lower_world": destination,
+            }
+            suppressed_index = int(definitions.systems["world_travel"][
+                "spirit_suppression_realm" if origin in {"celestial", "asura"} else "human_suppression_realm"
+            ])
+            cultivation["realm_id"] = definitions.realms[suppressed_index].id
+            cultivation["layer"] = int(definitions.systems["world_travel"][
+                "spirit_suppression_layer" if origin in {"celestial", "asura"} else "human_suppression_layer"
+            ])
+            cultivation["bottleneck"] = None
+        elif sealed and origin == sealed.get("lower_world") and destination == sealed.get("upper_world"):
+            cultivation["realm_id"] = sealed["realm_id"]
+            cultivation["layer"] = int(sealed["layer"])
+            cultivation["bottleneck"] = None
+            transition["sealed_cultivation"] = None
+        else:
+            expected = reverse.get(origin)
+            if expected == destination:
+                raise ValueError("没有可在目标上界复原的封存道果")
+            raise ValueError("目标界面不是当前界面的合法往返对象")
+        location.update(
+            world_id=destination,
+            location_id=definitions.default_location(destination),
+        )
+        context.state.entities.put(command.actor_id, LOCATION, location)
+        context.state.entities.put(command.actor_id, "cultivation.state", cultivation)
+        context.state.entities.put(command.actor_id, WORLD_TRANSITION, transition)
+        context.emit(
+            "world.temporary_transition.committed",
+            source="world",
+            scope=EventScope.entity(command.actor_id),
+            payload={
+                "actor_id": command.actor_id, "origin_world_id": origin,
+                "destination_world_id": destination,
+                "suppressed": transition.get("sealed_cultivation") is not None,
             },
         )
 
@@ -155,7 +460,8 @@ def world_invariants(definitions: GameDefinitions):
         errors: list[str] = []
         for entity_id in state.entities.with_component(IDENTITY):
             location = state.entities.get(entity_id, LOCATION)
-            if location is None:
+            transition = state.entities.get(entity_id, WORLD_TRANSITION)
+            if location is None or transition is None:
                 errors.append(f"角色 {entity_id} 缺少位置组件")
                 continue
             world_id = str(location.get("world_id", ""))
@@ -164,6 +470,10 @@ def world_invariants(definitions: GameDefinitions):
                 errors.append(f"角色 {entity_id} 位于未知世界 {world_id}")
             elif location_id not in definitions.worlds[world_id].locations:
                 errors.append(f"角色 {entity_id} 位于未知地点 {location_id}")
+            transaction = transition.get("last_transaction")
+            if isinstance(transaction, dict) and transaction.get("status") == "committed":
+                if set(transaction.get("acknowledgements", [])) != set(transaction.get("required_domains", [])):
+                    errors.append(f"角色 {entity_id} 的跨界事务缺少领域回执")
         return errors
 
     return validate
@@ -171,9 +481,12 @@ def world_invariants(definitions: GameDefinitions):
 
 def register_world_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
     bus.register(TravelWithinWorld, _travel_handler(definitions))
+    bus.register(AscendWorld, _ascend_handler(definitions))
+    bus.register(CrossWorld, _cross_world_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created(definitions))
     bus.event_bus.register(TRAVEL_DUE, _on_travel_due)
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register("world.transition.acknowledged", _transition_ack)
 
 
 def world_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None) -> dict[str, Any]:
@@ -212,4 +525,5 @@ def world_view(state: Any, definitions: GameDefinitions, entity_id: str | None =
         "location_id": location_id,
         "location_name": world.locations[location_id].name,
         "destinations": destinations,
+        "transition": state.entities.require(actor_id, WORLD_TRANSITION),
     }

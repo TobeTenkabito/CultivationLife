@@ -44,6 +44,11 @@ class TechniqueDefinition:
     combat_bonus: float
     category: str
     sources: dict[str, float]
+    body_breakthrough_bonus: float = 0.0
+    body_bonus_max_layer: int = 0
+    divine_sense_bonus: float = 0.0
+    transformation_capacity: int = 0
+    transformation_space: int = 0
 
     @property
     def scale(self) -> float:
@@ -154,6 +159,23 @@ class ItemDefinition:
     hp_bonus: float
     mp_bonus: float
     opportunity_bonus: float
+    transformation_form_id: str | None = None
+    transformation_source: str = ""
+    transformation_purity: float = 0.0
+
+
+@dataclass(frozen=True, slots=True)
+class TransformationDefinition:
+    id: str
+    name: str
+    description: str
+    realm_index: int
+    layer: int
+    stat_multipliers: dict[str, float]
+    traits: tuple[str, ...]
+    trait_descriptions: tuple[str, ...]
+    trait_purity_requirements: tuple[float, ...]
+    incompatible_with: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,6 +241,7 @@ class GameDefinitions:
     factions: dict[str, FactionDefinition]
     faction_rewards: dict[str, dict[str, Any]]
     items: dict[str, ItemDefinition]
+    transformations: dict[str, TransformationDefinition]
     market_goods: tuple[MarketGoodDefinition, ...]
     market_settings: dict[str, Any]
     actions: dict[str, dict[str, Any]]

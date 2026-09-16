@@ -165,11 +165,41 @@ def _schema_4_to_5(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_5_to_6(source: dict[str, Any]) -> dict[str, Any]:
+    """Add independent body, divine-sense and transformation components."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault("cultivation.body", {
+            "technique_id": None, "layer": 0, "progress": 0.0,
+            "ready": False, "breakthrough_pity": {}, "intrinsic_hp_bonus": 0.0,
+        })
+        components.setdefault("cultivation.divine_sense", {
+            "technique_id": None, "rank": 0, "experience": 0.0,
+        })
+        components.setdefault("cultivation.transformations", {
+            "technique_id": None, "mastery": {}, "loadouts": {},
+        })
+        components.setdefault("world.transition", {
+            "sealed_cultivation": None, "last_transaction": None, "history": [],
+        })
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "advanced_cultivation": 1, "world": 2,
+    }
+    value["schema_version"] = 6
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
     3: _schema_3_to_4,
     4: _schema_4_to_5,
+    5: _schema_5_to_6,
 }
 
 

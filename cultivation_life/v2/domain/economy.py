@@ -121,6 +121,53 @@ def _on_story_inventory_changed(definitions: GameDefinitions):
     return handler
 
 
+def _on_inventory_consume_requested(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        quantity = int(event.payload["quantity"])
+        if quantity <= 0:
+            raise ValueError("消耗数量必须为正数")
+        _change_item(
+            context,
+            definitions,
+            str(event.payload["entity_id"]),
+            str(event.payload["item_id"]),
+            -quantity,
+            str(event.payload.get("reason", "consume")),
+        )
+
+    return handler
+
+
+def _on_permanent_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    inventory = context.state.entities.require(actor_id, INVENTORY)
+    released = dict(inventory.get("reserved", {}))
+    inventory["reserved"] = {}
+    context.state.entities.put(actor_id, INVENTORY, inventory)
+    market = context.state.entities.require(actor_id, MARKET)
+    market.update({"offers": [], "world_id": None, "location_id": None})
+    context.state.entities.put(actor_id, MARKET, market)
+    context.emit(
+        "world.transition.acknowledged",
+        source="economy",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": event.payload["transaction_id"],
+            "actor_id": actor_id, "domain": "economy", "released": released,
+        },
+    )
+
+
+def _on_temporary_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    inventory = context.state.entities.require(actor_id, INVENTORY)
+    inventory["reserved"] = {}
+    context.state.entities.put(actor_id, INVENTORY, inventory)
+    market = context.state.entities.require(actor_id, MARKET)
+    market.update({"offers": [], "world_id": None, "location_id": None})
+    context.state.entities.put(actor_id, MARKET, market)
+
+
 def _grant_item_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, GrantItem):
@@ -408,6 +455,11 @@ def register_economy_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.event_bus.register(
         "story.effect.inventory.changed", _on_story_inventory_changed(definitions)
     )
+    bus.event_bus.register(
+        "economy.inventory.consume.requested", _on_inventory_consume_requested(definitions)
+    )
+    bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
+    bus.event_bus.register("world.temporary_transition.committed", _on_temporary_world_transition)
 
 
 def inventory_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):

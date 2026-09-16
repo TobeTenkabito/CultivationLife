@@ -474,6 +474,47 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
     )
 
 
+def _on_permanent_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["actor_id"])
+    membership = _active_membership(context.state, actor_id)
+    handover: dict[str, Any] | None = None
+    if membership is not None:
+        faction_id = membership.target_id
+        governance = context.state.entities.require(faction_id, FACTION_GOVERNANCE)
+        successor_id = governance.get("designated_successor_id")
+        successor = _active_membership(context.state, str(successor_id)) if successor_id else None
+        arranged = bool(successor and successor.target_id == faction_id)
+        controlled = governance.get("controller_id") == actor_id
+        if controlled:
+            governance["controller_id"] = str(successor_id) if arranged else None
+        governance["last_ascension_handover"] = {
+            "founder_id": actor_id if governance.get("creator_id") == actor_id else None,
+            "successor_id": str(successor_id) if arranged else None,
+            "arranged": arranged,
+            "return_eligible": bool(arranged and governance.get("creator_id") == actor_id),
+            "origin_world_id": event.payload["origin_world_id"],
+            "year": context.state.clock.year,
+        }
+        context.state.entities.put(faction_id, FACTION_GOVERNANCE, governance)
+        closed = context.state.relations.end(membership.relation_id, ended_year=context.state.clock.year)
+        metadata = dict(closed.metadata)
+        metadata["end_reason"] = "ascension"
+        context.state.relations.replace_metadata(closed.relation_id, metadata)
+        handover = {
+            "faction_id": faction_id, "controlled": controlled,
+            "arranged": arranged, "successor_id": successor_id if arranged else None,
+        }
+    context.emit(
+        "world.transition.acknowledged",
+        source="factions",
+        scope=EventScope.entity(actor_id),
+        payload={
+            "transaction_id": event.payload["transaction_id"],
+            "actor_id": actor_id, "domain": "factions", "handover": handover,
+        },
+    )
+
+
 def faction_invariants(definitions: GameDefinitions):
     def validate(state: WorldState) -> list[str]:
         errors: list[str] = []
@@ -531,6 +572,7 @@ def register_faction_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.event_bus.register(
         "story.effect.faction_contribution.changed", _on_story_contribution_changed
     )
+    bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
 
 
 def faction_view(

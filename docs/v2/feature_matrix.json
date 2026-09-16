@@ -73,35 +73,41 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["breakthrough"],
-      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_map_travel_uses_clock_and_updates_only_on_arrival"],
-      "notes": "Basic breakthrough works; high-realm trials, tribulations and ascension gates remain."
+      "evidence": [
+        "tests/test_v2_core_domains.py::V2CoreDomainTests::test_action_units_cultivation_and_guaranteed_mortal_breakthrough",
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_upper_realm_normal_layer_uses_probability_but_trial_gate_is_explicit"
+      ],
+      "notes": "Probability breakthroughs, pity, lifespan gains and non-trial upper-realm layers work; dedicated traditional/heavenly trials, tribulations and ascension gates remain."
     },
     {
       "id": "cultivation.body",
       "domain": "cultivation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["body-breakthrough"],
-      "evidence": [],
-      "notes": "Body cultivation has not been migrated."
+      "evidence": [
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_body_and_divine_sense_use_independent_state_and_unified_time",
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_body_breakthrough_tracks_pity_and_intrinsic_growth"
+      ],
+      "notes": "Body training uses the unified clock; progress, manual breakthrough, tiered probability, pity and intrinsic growth are persisted independently."
     },
     {
       "id": "cultivation.divine_sense",
       "domain": "cultivation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["sense-breakthrough"],
-      "evidence": [],
-      "notes": "Divine-sense progression has not been migrated."
+      "evidence": ["tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_body_and_divine_sense_use_independent_state_and_unified_time"],
+      "notes": "Divine-sense training uses the unified clock and manual rank-up consumes only the quadratic threshold cost while retaining surplus experience."
     },
     {
       "id": "cultivation.transformations",
       "domain": "cultivation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["transformation", "transformation-absorb", "transformation-purify", "transformation-batch"],
-      "evidence": [],
-      "notes": "Transformation acquisition, mastery and loadouts are not implemented."
+      "evidence": ["tests/test_v2_advanced_cultivation_and_crossing.py::V2AdvancedCultivationTests::test_transformation_material_consumption_and_loadout_are_atomic"],
+      "notes": "Direct, purified and batch material absorption use the economy ledger; per-stat mastery and capacity/space constrained active loadouts persist."
     },
     {
       "id": "world.map_travel",
@@ -115,11 +121,16 @@
     {
       "id": "world.realm_crossing",
       "domain": "world",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["spirit-crossing", "celestial-ascension", "asura-ascension", "cross-world"],
-      "evidence": [],
-      "notes": "Ascension, invitations, cleanup and return-to-lower-world rules remain."
+      "evidence": [
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_permanent_crossing_requires_all_domain_acks_and_cleans_relations",
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_concubine_cannot_be_invited",
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_human_smuggling_releases_player_from_prison",
+        "tests/test_v2_advanced_cultivation_and_crossing.py::V2WorldCrossingTests::test_lower_world_return_suppresses_and_restores_cultivation"
+      ],
+      "notes": "Human/demon lower ascensions and reversible lower-world travel are transactional. Relations, faction, economy and combat must acknowledge cleanup; only eligible companions/friends may be invited. Celestial/Asura nine-stage ascension trials remain."
     },
     {
       "id": "economy.market_purchase_lock",

@@ -18,6 +18,7 @@ from ..domain.definitions import (
     StoryChoiceDefinition,
     StoryEffectDefinition,
     StoryEventDefinition,
+    TransformationDefinition,
     WorldDefinition,
 )
 from .extension_loader import load_extension_documents, read_json_document
@@ -32,7 +33,7 @@ class V2ContentLoader:
 
     REQUIRED_FILES = (
         "world.json", "maps.json", "factions.json", "techniques.json",
-        "items.json", "market.json",
+        "items.json", "market.json", "transformations.json",
     )
 
     @classmethod
@@ -63,6 +64,7 @@ class V2ContentLoader:
         faction_doc = documents["factions.json"]
         technique_doc = documents["techniques.json"]
         item_doc = documents["items.json"]
+        transformation_doc = documents["transformations.json"]
         market_doc = documents["market.json"]
 
         realms = tuple(cls._realm(row) for row in world_doc.get("realms", []))
@@ -74,7 +76,8 @@ class V2ContentLoader:
         }
         roots = cls._roots(dict(world_doc.get("roots", {})), dict(world_doc.get("affinities", {})))
         techniques = cls._techniques(technique_doc, paths)
-        items = cls._items(item_doc)
+        transformations = cls._transformations(transformation_doc, len(realms))
+        items = cls._items(item_doc, transformations)
         market_goods = cls._market_goods(market_doc, items, techniques)
         worlds = cls._worlds(world_doc, maps_doc)
         factions = cls._factions(faction_doc, worlds)
@@ -120,6 +123,7 @@ class V2ContentLoader:
             factions=factions,
             faction_rewards=faction_rewards,
             items=items,
+            transformations=transformations,
             market_goods=market_goods,
             market_settings=dict(market_doc.get("settings", {})),
             actions={str(key): dict(value) for key, value in dict(world_doc["actions"]).items()},
@@ -317,11 +321,18 @@ class V2ContentLoader:
                 combat_bonus=float(row.get("combat_bonus", 0)),
                 category=str(row.get("category", "spiritual")),
                 sources=sources,
+                body_breakthrough_bonus=float(row.get("body_breakthrough_bonus", 0)),
+                body_bonus_max_layer=int(row.get("body_bonus_max_layer", 0)),
+                divine_sense_bonus=float(row.get("divine_sense_bonus", 0)),
+                transformation_capacity=int(row.get("transformation_capacity", 0)),
+                transformation_space=int(row.get("transformation_space", 0)),
             )
         return result
 
     @staticmethod
-    def _items(document: dict[str, Any]) -> dict[str, ItemDefinition]:
+    def _items(
+        document: dict[str, Any], transformations: dict[str, TransformationDefinition],
+    ) -> dict[str, ItemDefinition]:
         result: dict[str, ItemDefinition] = {}
         for source in document.get("items", []):
             row = dict(source)
@@ -337,9 +348,67 @@ class V2ContentLoader:
                 hp_bonus=float(row.get("hp_bonus", 0)),
                 mp_bonus=float(row.get("mp_bonus", 0)),
                 opportunity_bonus=float(row.get("opportunity_bonus", 0)),
+                transformation_form_id=(
+                    str(row["transformation_form_id"])
+                    if row.get("transformation_form_id") else None
+                ),
+                transformation_source=str(row.get("transformation_source", "")),
+                transformation_purity=float(row.get("transformation_purity", 0)),
             )
+            form_id = result[item_id].transformation_form_id
+            if form_id is not None and (
+                form_id not in transformations
+                or not 0 < result[item_id].transformation_purity <= 1
+            ):
+                raise V2ContentError(f"真灵素材定义无效：{item_id}")
         if "spirit_stone" not in result or "currency" not in result["spirit_stone"].tags:
             raise V2ContentError("物品表缺少灵石货币定义")
+        return result
+
+    @staticmethod
+    def _transformations(
+        document: dict[str, Any], realm_count: int,
+    ) -> dict[str, TransformationDefinition]:
+        stats = {"might", "guard", "mobility", "sense", "sustain", "breach"}
+        result: dict[str, TransformationDefinition] = {}
+        for source in document.get("forms", []):
+            row = dict(source)
+            form_id = str(row["id"])
+            multipliers = {
+                str(key): float(value)
+                for key, value in dict(row.get("stat_multipliers", {})).items()
+            }
+            traits = tuple(map(str, row.get("traits", [])))
+            descriptions = tuple(map(str, row.get("trait_descriptions", [])))
+            requirements = tuple(map(float, row.get("trait_purity_requirements", [])))
+            if not requirements:
+                requirements = tuple(0.5 for _ in traits)
+            realm_index = int(row.get("realm_index", 0))
+            if (
+                form_id in result or set(multipliers) != stats
+                or any(value < 1 for value in multipliers.values())
+                or len(traits) != len(descriptions) or len(traits) != len(requirements)
+                or not 0 <= realm_index < realm_count
+                or any(not 0 <= value <= 1 for value in requirements)
+            ):
+                raise V2ContentError(f"变化形态定义无效：{form_id}")
+            result[form_id] = TransformationDefinition(
+                id=form_id,
+                name=str(row["name"]),
+                description=str(row.get("description", "")),
+                realm_index=realm_index,
+                layer=int(row.get("layer", 1)),
+                stat_multipliers=multipliers,
+                traits=traits,
+                trait_descriptions=descriptions,
+                trait_purity_requirements=requirements,
+                incompatible_with=tuple(map(str, row.get("incompatible_with", []))),
+            )
+        if not result:
+            raise V2ContentError("变化形态表为空")
+        for form in result.values():
+            if set(form.incompatible_with) - set(result):
+                raise V2ContentError(f"变化形态互斥引用无效：{form.id}")
         return result
 
     @staticmethod
