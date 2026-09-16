@@ -31,6 +31,14 @@ class V2StepFiveDomainTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    @staticmethod
+    def _resolve_pending(engine: V2GameEngine, game_id: str) -> dict:
+        game = engine.get_game(game_id)
+        while game["pending_event"] is not None:
+            choice = next(row for row in game["pending_event"]["choices"] if row["enabled"])
+            game = engine.choose(game_id, choice["id"]).game
+        return game
+
     def _reach_qi(self, game: dict) -> dict:
         actor_id = game["player"]["id"]
         self.engine.execute(
@@ -38,6 +46,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
             GrantTechnique(actor_id=actor_id, technique_id="TECH_BASIC_QI", equip_main=True),
         )
         self.engine.perform_action(game["id"], "cultivate", 3)
+        self._resolve_pending(self.engine, game["id"])
         return self.engine.attempt_breakthrough(game["id"]).game
 
     def _register_character(
@@ -205,6 +214,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
         )
         cultivated = monster_engine.perform_action(monster["id"], "cultivate", 1).game
         self.assertGreater(cultivated["player"]["cultivation"]["opportunity"], 0)
+        self._resolve_pending(monster_engine, monster["id"])
         actor_id = monster["player"]["id"]
         configured = monster_engine.execute(
             monster["id"], ConfigureMonsterBloodline(actor_id=actor_id, species_id="serpent")

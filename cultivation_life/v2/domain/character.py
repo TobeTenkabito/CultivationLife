@@ -294,6 +294,21 @@ def _on_lethal_hazard(context: SimulationContext, event: EventEnvelope) -> None:
     _kill_character(context, entity_id, str(event.payload["reason"]))
 
 
+def _on_story_lifespan_extended(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload["entity_id"])
+    life = context.state.entities.require(entity_id, LIFE)
+    if life.get("lifespan") is None:
+        return
+    life["lifespan"] = max(1, int(life["lifespan"]) + int(event.payload["amount"]))
+    context.state.entities.put(entity_id, LIFE, life)
+    context.emit(
+        "character.lifespan.changed",
+        source="character",
+        scope=EventScope.entity(entity_id),
+        payload={"entity_id": entity_id},
+    )
+
+
 def character_invariants(state: WorldState) -> list[str]:
     errors: list[str] = []
     if not state.controlled_entity_id:
@@ -324,6 +339,7 @@ def register_character_domain(bus: CommandBus, definitions: GameDefinitions) -> 
     bus.event_bus.register(LIFESPAN_DUE, _on_lifespan_due)
     bus.event_bus.register("character.lifespan.changed", _on_lifespan_changed)
     bus.event_bus.register("character.lethal_hazard", _on_lethal_hazard)
+    bus.event_bus.register("story.effect.lifespan.extended", _on_story_lifespan_extended)
 
 
 def character_view(state: Any, entity_id: str | None = None) -> dict[str, Any]:

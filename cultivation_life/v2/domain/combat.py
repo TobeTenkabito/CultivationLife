@@ -377,12 +377,38 @@ def combat_invariants(state: WorldState) -> list[str]:
     return errors
 
 
+def _on_story_condition_changed(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload["entity_id"])
+    kind = str(event.payload["kind"])
+    amount = float(event.payload["amount"])
+    condition = context.state.entities.require(entity_id, CONDITION)
+    if kind == "damage":
+        condition["hp_ratio"] = max(0.0, float(condition["hp_ratio"]) - amount)
+    elif kind in {"heal", "restore_hp"}:
+        condition["hp_ratio"] = min(1.0, max(0.0, float(condition["hp_ratio"]) + amount))
+    elif kind == "restore_mp":
+        condition["mp_ratio"] = min(1.0, max(0.0, float(condition["mp_ratio"]) + amount))
+    else:
+        raise ValueError("未知剧情战斗资源效果")
+    context.state.entities.put(entity_id, CONDITION, condition)
+    if kind == "damage" and float(condition["hp_ratio"]) <= 0:
+        context.emit(
+            "character.lethal_hazard",
+            source="combat",
+            scope=EventScope.entity(entity_id),
+            payload={"entity_id": entity_id, "reason": str(event.payload["reason"])},
+        )
+
+
 def register_combat_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
     bus.register(ResolveCombat, _resolve_handler(definitions))
     bus.register(RestoreCombatCondition, _restore)
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("cultivation.action.completed", _on_action_completed)
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register(
+        "story.effect.combat_condition.changed", _on_story_condition_changed
+    )
 
 
 def combat_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):

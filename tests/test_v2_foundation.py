@@ -55,6 +55,14 @@ class V2FoundationTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    @staticmethod
+    def _resolve_pending(engine: V2GameEngine, game_id: str) -> dict:
+        game = engine.get_game(game_id)
+        while game["pending_event"] is not None:
+            choice = next(row for row in game["pending_event"]["choices"] if row["enabled"])
+            game = engine.choose(game_id, choice["id"]).game
+        return game
+
     def test_create_action_event_save_and_reload_vertical_slice(self):
         created = self.engine.create_game(
             "问心", seed=20260916, path="demonic", spirit_root="supreme_fire"
@@ -73,14 +81,16 @@ class V2FoundationTests(unittest.TestCase):
         event_types = [event["event_type"] for event in execution.events]
         self.assertEqual(event_types.count("core.time.advanced"), 3)
         self.assertEqual(event_types.count("cultivation.action.tick"), 3)
-        self.assertEqual(event_types[-1], "cultivation.action.completed")
+        self.assertIn("core.action.completed", event_types)
+        self.assertEqual(event_types[-1], "story.interaction.opened")
+        self.assertIsNotNone(execution.game["pending_event"])
 
         reloaded_engine = V2GameEngine(self.database)
         self.assertEqual(reloaded_engine.get_game(created["id"]), execution.game)
         journal_types = [event["event_type"] for event in reloaded_engine.event_journal(created["id"])]
         self.assertEqual(journal_types[0], "character.created")
         self.assertIn("core.game.created", journal_types)
-        self.assertEqual(journal_types[-1], "cultivation.action.completed")
+        self.assertEqual(journal_types[-1], "story.interaction.opened")
 
     def test_failed_command_does_not_change_snapshot_or_journal(self):
         created = self.engine.create_game("守界", seed=1)
@@ -98,10 +108,12 @@ class V2FoundationTests(unittest.TestCase):
         right = other.create_game("乙", seed=99, path="demonic", spirit_root="supreme_fire")
 
         self.engine.perform_timed_action(left["id"], "cultivate", 2)
+        self._resolve_pending(self.engine, left["id"])
         reloaded = V2GameEngine(self.database)
         left_result = reloaded.perform_timed_action(left["id"], "cultivate", 3).game
 
         other.perform_timed_action(right["id"], "cultivate", 2)
+        self._resolve_pending(other, right["id"])
         right_result = other.perform_timed_action(right["id"], "cultivate", 3).game
         self.assertEqual(
             left_result["player"]["cultivation"]["opportunity"],
@@ -125,9 +137,14 @@ class V2FoundationTests(unittest.TestCase):
         tail = self.engine.event_journal(created["id"], after_sequence=initial_last)
         self.assertEqual(
             [event["sequence"] for event in tail],
-            list(range(initial_last + 1, initial_last + 4)),
+            list(range(initial_last + 1, initial_last + 1 + len(tail))),
         )
-        self.assertEqual(tail[-1]["payload"]["action"], "rest")
+        self.assertEqual(tail[-1]["event_type"], "story.interaction.opened")
+        self.assertTrue(any(
+            event["event_type"] == "cultivation.action.completed"
+            and event["payload"]["action"] == "rest"
+            for event in tail
+        ))
 
     def test_scheduler_processes_events_in_chronological_order(self):
         bus = CommandBus()

@@ -79,7 +79,7 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
 }
 
 GROUP_CAUSES = {
-    "shared_runtime": "缺少通用交互事件/效果执行层、完整行动适配器或正式HTTP入口。",
+    "shared_runtime": "通用行动与交互内核已经建立，但领域专属效果、完整行动适配器、全操作影子覆盖及正式HTTP入口尚未完成。",
     "cultivation_and_world": "基础修炼已迁移，但高阶试炼、跨界事务和附属修炼状态仍依赖V1总引擎。",
     "asset_and_economy_model": "V2当前仅支持可堆叠物品；实例资产、托管账本、配方和长期生产聚合尚未建立。",
     "relations_and_governance": "关系边与成员身份已规范化，但好感、请求、NPC自治及跨界治理事务尚未迁移。",

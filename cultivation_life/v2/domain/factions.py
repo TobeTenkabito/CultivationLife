@@ -278,6 +278,19 @@ def _change_contribution(context: SimulationContext, command: object) -> None:
     )
 
 
+def _on_story_contribution_changed(context: SimulationContext, event: EventEnvelope) -> None:
+    character_id = str(event.payload["entity_id"])
+    membership = _active_membership(context.state, character_id)
+    if membership is None:
+        raise ValueError("当前没有可结算贡献的势力身份")
+    _change_contribution(context, ChangeContribution(
+        character_id=character_id,
+        faction_id=membership.target_id,
+        amount=int(event.payload["amount"]),
+        reason="story",
+    ))
+
+
 def _transfer_control(context: SimulationContext, command: object) -> None:
     if not isinstance(command, TransferFactionControl):
         raise TypeError("命令类型错误")
@@ -515,6 +528,9 @@ def register_faction_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.event_bus.register("core.game.created", _on_game_created(definitions))
     bus.event_bus.register("character.died", _on_character_died)
     bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
+    bus.event_bus.register(
+        "story.effect.faction_contribution.changed", _on_story_contribution_changed
+    )
 
 
 def faction_view(

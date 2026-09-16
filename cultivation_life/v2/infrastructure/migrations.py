@@ -133,10 +133,43 @@ def _schema_3_to_4(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_4_to_5(source: dict[str, Any]) -> dict[str, Any]:
+    """Persist the unified action state and interactive story queue."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault(
+            "core.action_runtime",
+            {"active": None, "next_sequence": 1, "last_completed": None},
+        )
+        components.setdefault(
+            "story.state",
+            {
+                "pending": None,
+                "queue": [],
+                "history": [],
+                "flags": [],
+                "milestones": {},
+                "attributes": {"karma": 0.0, "fame": 0.0, "sha_qi": 0.0},
+            },
+        )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "actions": 1,
+        "story": 1,
+    }
+    value["schema_version"] = 5
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
     3: _schema_3_to_4,
+    4: _schema_4_to_5,
 }
 
 

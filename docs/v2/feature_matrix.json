@@ -18,17 +18,24 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["advance"],
-      "evidence": ["tests/test_v2_core_domains.py"],
-      "notes": "Cultivate and rest are available; V1's remaining action kinds are not migrated."
+      "evidence": [
+        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_interaction_can_pause_and_resume_an_active_timed_action",
+        "tests/test_v2_core_domains.py::V2CoreDomainTests::test_lifespan_stops_long_action_at_exact_year_and_cancels_remaining_ticks"
+      ],
+      "notes": "All migrated timed actions use a persisted action token, target year and common completion event; interactions can pause and resume them. V1's remaining action kinds are not migrated."
     },
     {
       "id": "story.interactive_events",
       "domain": "story",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["choice"],
-      "evidence": [],
-      "notes": "Typed interaction queue and effect commands are not implemented."
+      "evidence": [
+        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_content_is_typed_and_action_opens_persisted_interaction",
+        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
+        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
+      ],
+      "notes": "Schema 5 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 134 of 363 loaded events are currently executable through 19 migrated effect kinds; combat, trials and other owner-domain effects remain blocked rather than partially executed."
     },
     {
       "id": "inventory.item_use",

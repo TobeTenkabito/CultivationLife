@@ -371,5 +371,5 @@ class ShadowRunner:
                 }
                 if game["faction"] else None
             ),
-            "pending_event": False,
+            "pending_event": bool(game.get("pending_event")),
         }
