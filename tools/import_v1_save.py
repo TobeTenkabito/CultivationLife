@@ -17,11 +17,16 @@ def main() -> int:
     parser.add_argument("source", type=Path, help="V1 JSON存档")
     parser.add_argument("--database", type=Path, default=Path("data/v2/saves.sqlite3"))
     parser.add_argument("--content", type=Path, default=Path("content"))
+    parser.add_argument("--backup-directory", type=Path, default=None)
     parser.add_argument("--target-id", default=None)
     parser.add_argument("--report", type=Path, default=None, help="可选的JSON导入报告输出路径")
     args = parser.parse_args()
 
-    engine = V2GameEngine(args.database, content_directory=args.content)
+    engine = V2GameEngine(
+        args.database,
+        content_directory=args.content,
+        legacy_backup_directory=args.backup_directory,
+    )
     result = engine.import_v1_save(args.source, target_game_id=args.target_id)
     payload = json.dumps(result.report, ensure_ascii=False, indent=2)
     if args.report:

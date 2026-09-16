@@ -5,7 +5,9 @@ import copy
 import hashlib
 import json
 import math
+import os
 import random
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -50,6 +52,9 @@ class LegacyImportReport:
     source_version: int
     source_game_id: str
     target_game_id: str
+    backup_path: str | None = None
+    backup_sha256: str | None = None
+    backup_created: bool = False
     status: str = "imported"
     imported_counts: dict[str, int] = field(default_factory=dict)
     issues: list[LegacyImportIssue] = field(default_factory=list)
@@ -64,6 +69,9 @@ class LegacyImportReport:
             "source_version": self.source_version,
             "source_game_id": self.source_game_id,
             "target_game_id": self.target_game_id,
+            "backup_path": self.backup_path,
+            "backup_sha256": self.backup_sha256,
+            "backup_created": self.backup_created,
             "status": self.status,
             "imported_counts": dict(self.imported_counts),
             "issues": [issue.to_dict() for issue in self.issues],
@@ -75,6 +83,13 @@ class LegacyImportResult:
     state: WorldState
     events: tuple[EventEnvelope, ...]
     report: LegacyImportReport
+
+
+@dataclass(frozen=True, slots=True)
+class LegacyBackup:
+    path: Path
+    sha256: str
+    created: bool
 
 
 class LegacyImportError(ValueError):
@@ -126,6 +141,52 @@ def load_legacy_save(path: Path) -> tuple[dict[str, Any], str]:
     if not isinstance(document, dict):
         raise LegacyImportError("旧存档根节点必须是对象")
     return document, hashlib.sha256(payload).hexdigest()
+
+
+def backup_legacy_save(
+    source_path: Path,
+    backup_directory: Path,
+    *,
+    expected_sha256: str,
+) -> LegacyBackup:
+    """Create or verify an immutable content-addressed V1 backup.
+
+    The source is read again immediately before backup so a concurrent edit
+    cannot make the validated document differ from the preserved bytes.
+    """
+    source = Path(source_path)
+    if not source.is_file() or not 0 < source.stat().st_size <= MAX_LEGACY_SAVE_BYTES:
+        raise LegacyImportError("旧存档在备份前消失、变空或超过64 MiB安全上限")
+    payload = source.read_bytes()
+    actual_sha256 = hashlib.sha256(payload).hexdigest()
+    if actual_sha256 != expected_sha256:
+        raise LegacyImportError("旧存档在校验后发生变化，已停止导入")
+    destination_directory = Path(backup_directory)
+    destination_directory.mkdir(parents=True, exist_ok=True)
+    safe_stem = (
+        re.sub(r"[^0-9A-Za-z._-]+", "_", source.stem).strip("._")[:80]
+        or "legacy-save"
+    )
+    backup_path = destination_directory / f"{safe_stem}-{actual_sha256[:16]}.v1.json"
+    if source.resolve() == backup_path.resolve():
+        raise LegacyImportError("备份目标不能与旧存档源文件相同")
+    if backup_path.exists():
+        existing_sha256 = hashlib.sha256(backup_path.read_bytes()).hexdigest()
+        if existing_sha256 != actual_sha256:
+            raise LegacyImportError("同名旧存档备份内容不一致，拒绝覆盖")
+        return LegacyBackup(path=backup_path.resolve(), sha256=actual_sha256, created=False)
+    created = False
+    try:
+        with backup_path.open("xb") as stream:
+            created = True
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+    except Exception:
+        if created:
+            backup_path.unlink(missing_ok=True)
+        raise
+    return LegacyBackup(path=backup_path.resolve(), sha256=actual_sha256, created=True)
 
 
 def _meaningful(value: Any) -> bool:
