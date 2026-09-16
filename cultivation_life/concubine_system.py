@@ -4,10 +4,16 @@ import copy
 import random
 from typing import Any
 
-from .content_registry import PATH_NAMES, RACE_DEFINITIONS, REALMS, WORLD_SYSTEMS
+from .content_registry import (
+    ITEM_CATALOG, MARKET_GOODS, PATH_NAMES, RACE_DEFINITIONS, REALMS,
+    TECHNIQUE_CATALOG, WORLD_SYSTEMS,
+)
 from .models import GameState, HistoryRecord, Player, SectNpc
 from .possession_system import current_body_age
-from .rules import max_hp, max_mp, opportunity_required
+from .rules import (
+    add_item, can_player_practice_technique, combat_power, learn_technique,
+    max_hp, max_mp, opportunity_required,
+)
 from .runtime import decode_rng, encode_rng, now_iso
 
 
@@ -199,9 +205,10 @@ class ConcubineSystemMixin:
         if owner and not owner.alive:
             game.player.concubine_status = None
             return 0.0
+        angered = int(status.get("angered_until_unit", -1)) >= game.diplomacy_unit
         drain = min(
             game.player.opportunity,
-            opportunity_required(game.player) * 0.02 * units,
+            opportunity_required(game.player) * (0.03 if angered else 0.02) * units,
         )
         game.player.opportunity = max(0.0, game.player.opportunity - drain)
         status["last_drain"] = round(drain, 1)
@@ -210,7 +217,11 @@ class ConcubineSystemMixin:
 
     def _maybe_concubine_proposal(self, game: GameState, rng: random.Random) -> bool:
         player = game.player
-        if player.gender != "female" or player.concubine_status or player.realm_index >= self._world_realm_cap(player.world) - 1:
+        if (
+            player.gender != "female" or player.concubine_status
+            or player.concubine_rejection_aftermath
+            or player.realm_index >= self._world_realm_cap(player.world) - 1
+        ):
             return False
         candidates = [
             npc for npc in self._all_world_npcs(game)
@@ -222,7 +233,8 @@ class ConcubineSystemMixin:
         candidates.sort(key=lambda npc: (npc.realm_index, npc.layer), reverse=True)
         owner = rng.choice(candidates[: min(8, len(candidates))])
         gap = max(1, owner.realm_index - player.realm_index)
-        chance = min(0.32, 0.05 + gap * 0.035)
+        reputation_multiplier = max(0.01, 0.20 ** player.concubine_escape_reputation)
+        chance = min(0.32, 0.05 + gap * 0.035) * reputation_multiplier
         if rng.random() >= chance:
             return False
         event = self._instantiate_event(self.events_by_id["SYS_CONCUBINE_PROPOSAL"], game, rng)
@@ -247,14 +259,293 @@ class ConcubineSystemMixin:
             return "owner_absent", "提议者已经离开当前界面，这桩拉拢自然作罢。"
         if not accept:
             owner.affinity = float(owner.affinity or 0) - 8
-            return "refused", f"你拒绝成为{name}的侍妾；对方虽有不悦，却暂未强留。"
-        game.player.concubine_status = {
-            **copy.deepcopy(runtime), "started_age": game.player.age, "turns": 0, "last_drain": 0.0,
-        }
+            player = game.player
+            player.concubine_rejection_aftermath = [
+                row for row in player.concubine_rejection_aftermath
+                if str(row.get("owner_id", "")) != owner.id
+            ]
+            player.concubine_rejection_aftermath.append({
+                **copy.deepcopy(runtime),
+                "declined_unit": game.diplomacy_unit,
+                "expires_unit": game.diplomacy_unit + 2,
+                "last_checked_unit": game.diplomacy_unit,
+            })
+            return "refused", (
+                f"你拒绝成为{name}的侍妾；对方心意难测。若其意图报复，只会在接下来的两个行动单位内发作。"
+            )
+        self._set_concubine_status(game, runtime)
         return "accepted", (
             f"你接受{name}的拉拢，成为其侍妾。此后每回合会被抽取机缘，机缘获取效率降至 80%；"
             "修为仍低于对方时，基础突破概率 +2%。"
         )
+
+    @staticmethod
+    def _personality_score(personality: dict[str, Any], scores: dict[str, float], default: float = 0.0) -> float:
+        primary = scores.get(str(personality.get("primary")), default)
+        secondary = scores.get(str(personality.get("secondary")), default)
+        return primary + secondary * 0.35
+
+    def _owner_personality(self, game: GameState, owner: SectNpc) -> dict[str, Any]:
+        return self._ensure_intrigue_personality(game, owner) if self._intrigue_enabled() else {}
+
+    def _proposal_revenge_chance(self, game: GameState, owner: SectNpc) -> float:
+        if not self._intrigue_enabled():
+            return 0.30
+        scores = {
+            "fanatical": 0.68, "warlike": 0.64, "forceful": 0.56,
+            "paranoid": 0.49, "suspicious": 0.42, "greedy": 0.36,
+            "smooth": 0.25, "conservative": 0.23, "cautious": 0.16,
+            "open": 0.13, "restrained": 0.10, "generous": 0.07,
+        }
+        chance = self._personality_score(self._owner_personality(game, owner), scores, 0.25)
+        chance -= max(-0.05, min(0.05, float(owner.affinity or 0) / 1000))
+        return max(0.04, min(0.78, chance))
+
+    def _advance_concubine_aftermath(self, game: GameState, rng: random.Random) -> bool:
+        """Roll a rejected suitor once per unit, and only for the next two units."""
+        if game.pending_event or not game.player.concubine_rejection_aftermath:
+            return False
+        current_unit = game.diplomacy_unit
+        kept: list[dict[str, Any]] = []
+        triggered: tuple[dict[str, Any], SectNpc] | None = None
+        for record in game.player.concubine_rejection_aftermath:
+            declined = int(record.get("declined_unit", current_unit))
+            expires = int(record.get("expires_unit", declined + 2))
+            if current_unit <= int(record.get("last_checked_unit", declined)):
+                kept.append(record)
+                continue
+            owner = self._find_npc(game, str(record.get("owner_id", "")))
+            if not owner or not owner.alive or owner.world != game.player.world or current_unit > expires:
+                continue
+            record["last_checked_unit"] = current_unit
+            if triggered is None and rng.random() < self._proposal_revenge_chance(game, owner):
+                triggered = record, owner
+                continue
+            if current_unit < expires:
+                kept.append(record)
+        game.player.concubine_rejection_aftermath = kept
+        if not triggered:
+            return False
+        record, owner = triggered
+        event = self._instantiate_event(self.events_by_id["SYS_CONCUBINE_REVENGE"], game, rng)
+        event["body"] = event["body"].replace("{owner_name}", owner.name)
+        event["runtime"] = copy.deepcopy(record)
+        game.pending_event = event
+        return True
+
+    @staticmethod
+    def _runtime_from_status(status: dict[str, Any]) -> dict[str, Any]:
+        return {
+            key: copy.deepcopy(status[key])
+            for key in (
+                "owner_id", "owner_name", "owner_realm_index", "owner_layer",
+                "owner_realm_name", "owner_world",
+            )
+            if key in status
+        }
+
+    def _set_concubine_status(
+        self, game: GameState, runtime: dict[str, Any], *, forced: bool = False,
+    ) -> None:
+        game.player.concubine_status = {
+            **self._runtime_from_status(runtime),
+            "started_age": game.player.age, "turns": 0, "last_drain": 0.0,
+            "dependent": False, "forced": forced, "failed_escape_count": 0,
+            "last_requests": {}, "angered_until_unit": -1,
+        }
+
+    def _resolve_concubine_revenge(
+        self, game: GameState, pending: dict[str, Any], method: str, rng: random.Random,
+    ) -> tuple[str, str]:
+        runtime = pending.get("runtime", {})
+        owner = self._find_npc(game, str(runtime.get("owner_id", "")))
+        name = str(runtime.get("owner_name", "一位高阶修士"))
+        if not owner or not owner.alive or owner.world != game.player.world:
+            return "owner_absent", "追来之人已经离开当前界面，这场逼迫不了了之。"
+        if method == "submit":
+            self._set_concubine_status(game, runtime, forced=True)
+            return "submitted", f"你暂时向{name}低头，被强行带回府中；仍可在“缘·侍妾”中谋求脱身。"
+        if method != "resist":
+            raise ValueError("未知的逼迫应对方式")
+        player_power = max(1.0, combat_power(game.player))
+        owner_power = max(1.0, self._npc_power(owner))
+        chance = max(0.08, min(0.75, 0.16 + 0.42 * player_power / (player_power + owner_power)))
+        if rng.random() < chance:
+            owner.affinity = float(owner.affinity or 0) - 30
+            game.player.concubine_escape_reputation += 1
+            return "escaped_revenge", (
+                f"你拼死突破{name}的围堵，保住自由（成功率 {chance:.0%}）。此事传开，往后高阶修士强取你的概率大幅降低。"
+            )
+        owner.affinity = float(owner.affinity or 0) - 18
+        game.player.hp = max(1.0, game.player.hp - max_hp(game.player) * 0.22)
+        self._set_concubine_status(game, runtime, forced=True)
+        game.player.concubine_status["angered_until_unit"] = game.diplomacy_unit + 2
+        return "captured", f"反抗失败，你负伤后被{name}强行带走；对方震怒，两个行动单位内机缘抽取会更重。"
+
+    def _escape_chance(
+        self, game: GameState, owner: SectNpc, status: dict[str, Any], method: str,
+    ) -> float:
+        if method == "plead":
+            scores = {
+                "generous": 0.30, "open": 0.25, "restrained": 0.19,
+                "smooth": 0.14, "cautious": 0.08, "conservative": 0.04,
+                "greedy": -0.02, "suspicious": -0.08, "paranoid": -0.12,
+                "forceful": -0.14, "warlike": -0.16, "fanatical": -0.20,
+            }
+            chance = 0.18 + float(owner.affinity or 0) / 300
+            if self._intrigue_enabled():
+                chance += self._personality_score(self._owner_personality(game, owner), scores)
+            if status.get("dependent"):
+                chance += 0.10
+            return max(0.05, min(0.82, chance))
+        player_power = max(1.0, combat_power(game.player))
+        owner_power = max(1.0, self._npc_power(owner))
+        chance = 0.10 + 0.52 * player_power / (player_power + owner_power)
+        chance += min(0.12, int(status.get("turns", 0)) * 0.015)
+        if status.get("dependent"):
+            chance -= 0.06
+        return max(0.06, min(0.78, chance))
+
+    def _resolve_concubine_escape(
+        self, game: GameState, pending: dict[str, Any], method: str, rng: random.Random,
+    ) -> tuple[str, str]:
+        status = game.player.concubine_status
+        if not status:
+            return "already_free", "你已经不再受侍妾名分约束。"
+        if method == "abandon":
+            return "abandoned", "你按下念头，继续等待更合适的脱身时机。"
+        owner = self._find_npc(game, str(status.get("owner_id", "")))
+        if not owner or not owner.alive or owner.world != game.player.world:
+            game.player.concubine_status = None
+            return "owner_absent", "正主已无法再约束你，你顺势恢复自由。"
+        if method not in {"covert", "plead"}:
+            raise ValueError("未知的脱身方式")
+        chance = self._escape_chance(game, owner, status, method)
+        if rng.random() < chance:
+            owner.affinity = float(owner.affinity or 0) - (8 if method == "plead" else 25)
+            game.player.concubine_status = None
+            game.player.concubine_escape_reputation += 1
+            return "escaped", (
+                f"你成功{'说服' if method == 'plead' else '逃离'}{owner.name}，重获自由（成功率 {chance:.0%}）。"
+                "消息传开，高阶修士顾忌名声，今后强取你的概率大幅降低。"
+            )
+        owner.affinity = float(owner.affinity or 0) - 18
+        status["failed_escape_count"] = int(status.get("failed_escape_count", 0)) + 1
+        status["angered_until_unit"] = game.diplomacy_unit + 2
+        return "escape_failed", (
+            f"脱身失败（成功率 {chance:.0%}），{owner.name}被彻底激怒；两个行动单位内每期机缘抽取由 2% 提高至 3%。"
+        )
+
+    def _owner_request_chance(
+        self, game: GameState, owner: SectNpc, status: dict[str, Any], kind: str,
+    ) -> float:
+        base = {"technique": 0.27, "stones": 0.55, "equipment": 0.34}[kind]
+        base += float(owner.affinity or 0) / 350
+        if status.get("dependent"):
+            base += 0.22
+        if self._intrigue_enabled():
+            scores = {
+                "generous": 0.16, "open": 0.10, "smooth": 0.07,
+                "greedy": -0.14, "suspicious": -0.08, "paranoid": -0.09,
+                "restrained": -0.03,
+            }
+            base += self._personality_score(self._owner_personality(game, owner), scores)
+        return max(0.08, min(0.92, base))
+
+    def _owner_technique_candidates(self, player: Player, owner: SectNpc) -> list[str]:
+        return [
+            technique_id for technique_id, technique in TECHNIQUE_CATALOG.items()
+            if technique.grade <= max(1, owner.realm_index + 1)
+            and can_player_practice_technique(player, technique.element)
+            and all(known.id != technique_id for known in player.known_techniques)
+        ]
+
+    @staticmethod
+    def _owner_equipment_candidates(owner: SectNpc) -> list[str]:
+        market_ids = {
+            str(row["content_id"]) for row in MARKET_GOODS
+            if row.get("kind") == "item" and int(row.get("tier", 1)) <= max(1, owner.realm_index + 1)
+        }
+        return sorted(
+            item_id for item_id in market_ids
+            if item_id in ITEM_CATALOG and ITEM_CATALOG[item_id].combat_bonus > 0
+            and not {"currency", "pill", "material", "formation_material", "crafting_material"}.intersection(
+                ITEM_CATALOG[item_id].tags
+            )
+        )
+
+    def manage_concubine_status(self, game_id: str, action: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        status = player.concubine_status
+        if not player.alive or game.pending_event or player.imprisonment:
+            raise ValueError("当前状态无法处理侍妾处境")
+        if not status:
+            raise ValueError("你当前并非他人的侍妾")
+        owner = self._find_npc(game, str(status.get("owner_id", "")))
+        if not owner or not owner.alive or owner.world != player.world:
+            player.concubine_status = None
+            game.updated_at = now_iso()
+            self.store.save(game)
+            return self.present(game)
+        rng = decode_rng(game.seed, game.rng_state)
+        result: str
+        summary: str
+        details: dict[str, Any] = {"action": action, "owner_id": owner.id}
+        if action == "escape":
+            event = self._instantiate_event(self.events_by_id["SYS_CONCUBINE_ESCAPE"], game, rng)
+            event["body"] = event["body"].replace("{owner_name}", owner.name)
+            event["runtime"] = self._runtime_from_status(status)
+            game.pending_event = event
+            result, summary = "escape_planned", "你开始寻找脱身机会；具体方式将在游戏内事件中选择。"
+        elif action == "depend":
+            if status.get("dependent"):
+                raise ValueError("你已经选择依附正主")
+            status["dependent"] = True
+            owner.affinity = float(owner.affinity or 0) + 10
+            result, summary = "dependent", f"你主动依附{owner.name}，对方好感提高；今后索取资源与请求放手更容易获准。"
+        elif action in {"request_technique", "request_stones", "request_equipment"}:
+            kind = action.removeprefix("request_")
+            last_requests = status.setdefault("last_requests", {})
+            if int(last_requests.get(kind, -1)) == game.diplomacy_unit:
+                raise ValueError("本行动单位已经索要过这类资源")
+            technique_candidates = self._owner_technique_candidates(player, owner) if kind == "technique" else []
+            equipment_candidates = self._owner_equipment_candidates(owner) if kind == "equipment" else []
+            if kind == "technique" and not technique_candidates:
+                raise ValueError("正主手中已无适合你的新功法")
+            if kind == "equipment" and not equipment_candidates:
+                raise ValueError("正主手中没有适合赐下的装备")
+            last_requests[kind] = game.diplomacy_unit
+            chance = self._owner_request_chance(game, owner, status, kind)
+            details["accept_chance"] = chance
+            if rng.random() >= chance:
+                owner.affinity = float(owner.affinity or 0) - 3
+                result, summary = "request_refused", f"{owner.name}拒绝了你的索求（同意率 {chance:.0%}），并对你的贪求略感不悦。"
+            elif kind == "technique":
+                content_id = rng.choice(technique_candidates)
+                learn_technique(player, TECHNIQUE_CATALOG[content_id])
+                details["content_id"] = content_id
+                result, summary = "technique_given", f"{owner.name}传下《{TECHNIQUE_CATALOG[content_id].name}》，功法已收入已悟列表。"
+            elif kind == "equipment":
+                content_id = rng.choice(equipment_candidates)
+                add_item(player, content_id)
+                details["content_id"] = content_id
+                result, summary = "equipment_given", f"{owner.name}赐下{ITEM_CATALOG[content_id].name}，装备已放入包裹。"
+            else:
+                amount = max(3, int(4 * (max(1, owner.realm_index) ** 2) * rng.uniform(0.8, 1.25)))
+                add_item(player, "spirit_stone", amount)
+                details["quantity"] = amount
+                result, summary = "stones_given", f"{owner.name}赐下下品灵石 ×{amount}。"
+        else:
+            raise ValueError("未知侍妾处境操作")
+        game.history.append(HistoryRecord(
+            "SYS_CONCUBINE_STATUS", 1, player.age, "侍妾处境", action, result, summary,
+            details, ["system", "relationship", "concubine"],
+        ))
+        game.updated_at = now_iso()
+        game.rng_state = encode_rng(rng)
+        self.store.save(game)
+        return self.present(game)
 
     def _public_concubine_system(self, game: GameState) -> dict[str, Any]:
         rows = []
@@ -268,8 +559,17 @@ class ConcubineSystemMixin:
             status["breakthrough_bonus_active"] = self._rank(game.player) < (
                 int(status.get("owner_realm_index", 0)), int(status.get("owner_layer", 1)),
             )
+            status["angered"] = int(status.get("angered_until_unit", -1)) >= game.diplomacy_unit
+            status["request_available"] = {
+                kind: int(status.get("last_requests", {}).get(kind, -1)) != game.diplomacy_unit
+                for kind in ("technique", "stones", "equipment")
+            }
+        reputation = game.player.concubine_escape_reputation
         return {
             "concubines": rows, "status": status,
             "cauldron_breakthrough_bonus": round(game.player.concubine_breakthrough_bonus, 4),
             "opportunity_efficiency_multiplier": 0.8 if status else 1.0,
+            "escape_reputation": reputation,
+            "future_proposal_multiplier": round(max(0.01, 0.20 ** reputation), 4),
+            "rejection_aftermath": copy.deepcopy(game.player.concubine_rejection_aftermath),
         }

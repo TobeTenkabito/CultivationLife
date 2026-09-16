@@ -265,6 +265,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.manage_concubine(
                     game_id, payload.get("target_id", ""), payload.get("action", "")
                 )
+            elif operation == "concubine-status":
+                result = ENGINE.manage_concubine_status(game_id, payload.get("action", ""))
             elif operation == "relationship-capture":
                 result = ENGINE.begin_relationship_capture(
                     game_id, payload.get("kind", ""), payload.get("target_id", "")

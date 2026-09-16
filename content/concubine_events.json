@@ -7,7 +7,7 @@
       "title": "高门垂青",
       "body": "{owner_realm}修士{owner_name}遣人送来华服与信物，邀你入府充作侍妾。对方看中的既是你的姿容，也是尚可塑造的道途。",
       "category": "relationship",
-      "tags": ["manual_only", "relationship", "concubine"],
+      "tags": ["manual_only", "all_realms", "relationship", "concubine"],
       "weight": 0,
       "choices": [
         {
@@ -20,6 +20,33 @@
           "text": "退回信物，拒绝拉拢",
           "effects": [{"type": "concubine_proposal", "accept": false}]
         }
+      ]
+    },
+    {
+      "id": "SYS_CONCUBINE_REVENGE",
+      "version": 1,
+      "title": "高门逼迫",
+      "body": "你拒绝{owner_name}已有一段时日，对方终究咽不下这口气，亲自带人截住去路。此事若再拖延，便不再是拉拢，而是强取。",
+      "category": "relationship",
+      "tags": ["manual_only", "all_realms", "relationship", "concubine", "revenge", "negative"],
+      "weight": 0,
+      "choices": [
+        {"id": "resist", "text": "拼死反抗，闯出包围", "effects": [{"type": "concubine_revenge", "method": "resist"}]},
+        {"id": "submit", "text": "暂且低头，随其入府", "effects": [{"type": "concubine_revenge", "method": "submit"}]}
+      ]
+    },
+    {
+      "id": "SYS_CONCUBINE_ESCAPE",
+      "version": 1,
+      "title": "金笼觅隙",
+      "body": "{owner_name}的府邸禁制森严，但世上没有永不松动的牢笼。你可以暗中筹划远遁，也可以试着说服对方放手；一旦失败，正主必会被激怒。",
+      "category": "relationship",
+      "tags": ["manual_only", "all_realms", "relationship", "concubine", "escape"],
+      "weight": 0,
+      "choices": [
+        {"id": "covert", "text": "暗中布置，伺机远遁", "effects": [{"type": "concubine_escape", "method": "covert"}]},
+        {"id": "plead", "text": "请求正主放你自由", "effects": [{"type": "concubine_escape", "method": "plead"}]},
+        {"id": "abandon", "text": "时机未到，暂缓计划", "effects": [{"type": "concubine_escape", "method": "abandon"}]}
       ]
     }
   ]
