@@ -12,7 +12,7 @@ from .models import GameState, HistoryRecord, Player, SectNpc
 from .possession_system import current_body_age
 from .rules import (
     add_item, can_player_practice_technique, combat_power, learn_technique,
-    max_hp, max_mp, opportunity_required,
+    max_hp, max_mp, opportunity_required, remove_item,
 )
 from .runtime import decode_rng, encode_rng, now_iso
 
@@ -42,6 +42,327 @@ class ConcubineSystemMixin:
         return next(
             (row for row in relations if row and str(row.get("id")) == target_id), None,
         )
+
+    def _retaliatory_relationship_ids(self, game: GameState) -> set[str]:
+        """Relationships retaliate through role-specific events, never ambushes."""
+        player = game.player
+        values = [
+            player.master, player.dao_companion, player.concubine_status,
+            player.ghost_captor,
+        ]
+        return {
+            str(row.get("id") or row.get("owner_id") or row.get("npc_id"))
+            for row in values if row and (row.get("id") or row.get("owner_id") or row.get("npc_id"))
+        }
+
+    def _relationship_sanction_candidates(self, game: GameState) -> list[dict[str, Any]]:
+        player = game.player
+        threshold = float(WORLD_SYSTEMS["relationship"]["hostile_affinity_threshold"])
+        candidates: list[dict[str, Any]] = []
+        for role, relation in (("master", player.master), ("companion", player.dao_companion)):
+            if not relation:
+                continue
+            npc = self._find_npc(game, str(relation.get("id", "")))
+            alive = npc.alive if npc else bool(relation.get("alive", True))
+            world = npc.world if npc else str(relation.get("world", player.world))
+            if not alive or world != player.world:
+                continue
+            affinity = float(npc.affinity or 0) if npc else float(relation.get("affinity", 0))
+            relation["affinity"] = affinity
+            if affinity <= threshold:
+                candidates.append({
+                    "role": role, "id": str(relation.get("id", "")),
+                    "name": str(relation.get("name", "故人")), "affinity": affinity,
+                    "realm_index": npc.realm_index if npc else int(relation.get("realm_index", 0)),
+                })
+        status = player.concubine_status
+        if status:
+            owner = self._find_npc(game, str(status.get("owner_id", "")))
+            affinity = float(owner.affinity or 0) if owner else float(status.get("owner_affinity", 0))
+            if affinity <= threshold:
+                candidates.append({
+                    "role": "concubine_owner", "id": str(status.get("owner_id", "")),
+                    "name": str(status.get("owner_name", "正主")), "affinity": affinity,
+                    "realm_index": int(status.get("owner_realm_index", 0)),
+                })
+        captor = player.ghost_captor
+        if captor:
+            captor_id = str(captor.get("npc_id") or captor.get("id", ""))
+            captor_npc = self._find_npc(game, captor_id)
+            affinity = float(captor_npc.affinity or 0) if captor_npc else float(captor.get("affinity", 0))
+            captor["affinity"] = affinity
+            if affinity <= threshold:
+                candidates.append({
+                    "role": "ghost_captor", "id": captor_id,
+                    "name": captor_npc.name if captor_npc else str(captor.get("name", "拘魂者")),
+                    "affinity": affinity,
+                    "realm_index": captor_npc.realm_index if captor_npc else int(captor.get("realm_index", 0)),
+                })
+        return [
+            row for row in candidates
+            if game.diplomacy_unit >= int(game.governance_actions.get(
+                f"relationship_sanction:{row['role']}:{row['id']}", -1,
+            ))
+        ]
+
+    def _maybe_relationship_sanction(self, game: GameState, rng: random.Random) -> bool:
+        if game.pending_event:
+            return False
+        candidates = self._relationship_sanction_candidates(game)
+        if not candidates:
+            return False
+        threshold = float(WORLD_SYSTEMS["relationship"]["hostile_affinity_threshold"])
+        severity = max(0.0, max(threshold - float(row["affinity"]) for row in candidates))
+        chance = min(0.68, 0.18 + severity * 0.006)
+        if rng.random() >= chance:
+            return False
+        selected = rng.choices(
+            candidates, weights=[max(1.0, abs(float(row["affinity"]))) for row in candidates], k=1,
+        )[0]
+        event_id = {
+            "master": "EVT_MASTER_SANCTION_001",
+            "companion": "EVT_COMPANION_SANCTION_001",
+            "concubine_owner": "EVT_OWNER_SANCTION_001",
+            "ghost_captor": "EVT_OWNER_SANCTION_001",
+        }[str(selected["role"])]
+        event = self._instantiate_event(self.events_by_id[event_id], game, rng)
+        event["body"] = event["body"].replace("{npc_name}", str(selected["name"]))
+        demand = max(5, (int(selected["realm_index"]) + 1) ** 2 * 4)
+        event["runtime"] = {**copy.deepcopy(selected), "demand": demand}
+        if selected["role"] in {"concubine_owner", "ghost_captor"}:
+            event["body"] += f" 对方开出的价码是下品灵石 ×{demand}；不足部分会以机缘抵偿。"
+        game.governance_actions[
+            f"relationship_sanction:{selected['role']}:{selected['id']}"
+        ] = game.diplomacy_unit + 2
+        game.pending_event = event
+        return True
+
+    def _end_sanctioned_relationship(
+        self, game: GameState, role: str, name: str,
+    ) -> tuple[str, str]:
+        player = game.player
+        if role == "master":
+            relation = player.master
+            if relation:
+                player.party = [row for row in player.party if str(row.get("id")) != str(relation.get("id"))]
+            player.master = None
+            return "expelled", f"{name}将你逐出门墙；师徒关系就此解除。"
+        relation = player.dao_companion
+        if relation:
+            player.party = [row for row in player.party if str(row.get("id")) != str(relation.get("id"))]
+        player.dao_companion = None
+        player.heart_demon += float(WORLD_SYSTEMS["relationship"]["companion_separation_heart_demon"])
+        return "separated", f"{name}收回道侣信物、解散誓约；关系解除，心魔随之增长。"
+
+    def _resolve_relationship_sanction(
+        self, game: GameState, pending: dict[str, Any], role: str, mode: str,
+        rng: random.Random,
+    ) -> tuple[str, str]:
+        runtime = pending.get("runtime", {})
+        actual_role = str(runtime.get("role", role))
+        name = str(runtime.get("name", "对方"))
+        target_id = str(runtime.get("id", ""))
+        threshold = float(WORLD_SYSTEMS["relationship"]["hostile_affinity_threshold"])
+        if actual_role in {"master", "companion"}:
+            relation = game.player.master if actual_role == "master" else game.player.dao_companion
+            if not relation or str(relation.get("id", "")) != target_id:
+                return "relationship_absent", "这段关系已经先一步结束，问罪之事自然作罢。"
+            if mode == "accept":
+                return self._end_sanctioned_relationship(game, actual_role, name)
+            if mode != "appease":
+                raise ValueError("未知的关系问罪应对")
+            affinity = float(relation.get("affinity", 0))
+            chance = max(0.08, min(0.72, 0.34 + affinity / 250 + game.player.realm_index * 0.025))
+            if rng.random() < chance:
+                relation["affinity"] = threshold + 6
+                npc = self._find_npc(game, target_id)
+                if npc:
+                    npc.affinity = relation["affinity"]
+                return "appeased", f"你暂时平息{name}的怒意（成功率 {chance:.0%}）；关系得以保留。"
+            return self._end_sanctioned_relationship(game, actual_role, name)
+
+        if actual_role not in {"concubine_owner", "ghost_captor"}:
+            raise ValueError("未知的主仆问罪来源")
+        status = game.player.concubine_status if actual_role == "concubine_owner" else game.player.ghost_captor
+        if not status:
+            return "relationship_absent", "主仆约束已经解除，这次索偿自然作罢。"
+        npc = self._find_npc(game, target_id)
+        affinity = float(npc.affinity or 0) if npc else float(status.get("affinity", 0))
+        if mode == "comply":
+            demand = max(1, int(runtime.get("demand", 5)))
+            stones = next((item.quantity for item in game.player.inventory if item.id == "spirit_stone"), 0)
+            paid = min(demand, stones)
+            if paid:
+                remove_item(game.player, "spirit_stone", paid)
+            shortfall = demand - paid
+            opportunity_paid = 0.0
+            if shortfall:
+                opportunity_paid = min(
+                    game.player.opportunity,
+                    opportunity_required(game.player) * min(0.08, 0.02 + shortfall / max(1, demand) * 0.04),
+                )
+                game.player.opportunity -= opportunity_paid
+            new_affinity = min(100.0, affinity + (18 if not shortfall else 10))
+            if npc:
+                npc.affinity = new_affinity
+            status["affinity"] = new_affinity
+            return "complied", (
+                f"你向{name}交出下品灵石 ×{paid}"
+                + (f"，并以机缘 {opportunity_paid:.1f} 抵偿不足" if shortfall else "")
+                + "；对方暂且收回威胁。"
+            )
+        if mode == "appease":
+            chance = max(0.08, min(0.70, 0.30 + affinity / 260 + game.player.realm_index * 0.02))
+            if rng.random() < chance:
+                new_affinity = threshold + 5
+                if npc:
+                    npc.affinity = new_affinity
+                status["affinity"] = new_affinity
+                return "appeased", f"你的解释暂时说动{name}（成功率 {chance:.0%}），这次索偿被撤回。"
+            mode = "defy"
+        if mode == "defy":
+            new_affinity = max(-100.0, affinity - 10)
+            if npc:
+                npc.affinity = new_affinity
+            status["affinity"] = new_affinity
+            status["angered_until_unit"] = game.diplomacy_unit + 2
+            game.player.hp = max(1.0, game.player.hp - max_hp(game.player) * 0.10)
+            return "defied", f"{name}因你的拒绝震怒，以主仆约束惩戒于你；HP 损失 10%，震怒持续两个行动单位。"
+        raise ValueError("未知的主仆问罪应对")
+
+    def _relationship_protectors(
+        self, game: GameState, enemy: SectNpc,
+    ) -> list[dict[str, Any]]:
+        player = game.player
+        threshold = float(WORLD_SYSTEMS["relationship"]["hostile_affinity_threshold"])
+        protectors: list[dict[str, Any]] = []
+
+        def add_relation(role: str, relation: dict[str, Any] | None, *, unconditional: bool = False) -> None:
+            if not relation:
+                return
+            identity = str(relation.get("id") or relation.get("owner_id") or "")
+            if not identity or identity == enemy.id:
+                return
+            npc = self._find_npc(game, identity)
+            alive = npc.alive if npc else bool(relation.get("alive", True))
+            world = npc.world if npc else str(
+                relation.get("world", relation.get("owner_world", player.world))
+            )
+            if not alive or world != player.world:
+                return
+            affinity = (
+                float(npc.affinity or 0) if npc
+                else float(relation.get("affinity", relation.get("owner_affinity", 20)))
+            )
+            if not unconditional and affinity <= threshold:
+                return
+            rank = (
+                self._rank(npc) if npc else (
+                    int(relation.get("realm_index", relation.get("owner_realm_index", 0))),
+                    int(relation.get("layer", relation.get("owner_layer", 1))),
+                )
+            )
+            if rank > self._rank(enemy):
+                protectors.append({
+                    "id": identity,
+                    "name": npc.name if npc else str(relation.get("name") or relation.get("owner_name") or role),
+                    "role": role, "rank": rank,
+                })
+
+        add_relation("正主", player.concubine_status, unconditional=True)
+        add_relation("道侣", player.dao_companion)
+        add_relation("师父", player.master)
+        sect = game.sects.get(player.faction_id or "")
+        if sect and not sect.extinct:
+            members = [
+                npc for npc in self._sect_members(game, sect)
+                if npc.alive and npc.world == player.world and npc.id != enemy.id
+                and self._rank(npc) > self._rank(enemy)
+            ]
+            if members:
+                strongest = max(members, key=self._rank)
+                protectors.append({"id": strongest.id, "name": strongest.name, "role": "师门", "rank": self._rank(strongest)})
+        unique: dict[str, dict[str, Any]] = {}
+        for row in protectors:
+            unique.setdefault(str(row["id"]), row)
+        return list(unique.values())
+
+    def _filter_personal_revenge_by_protection(
+        self, game: GameState, enemies: list[SectNpc], rng: random.Random,
+    ) -> list[SectNpc]:
+        remaining: list[SectNpc] = []
+        threshold = float(WORLD_SYSTEMS["relationship"]["hostile_affinity_threshold"])
+        for enemy in enemies:
+            protectors = self._relationship_protectors(game, enemy)
+            if not protectors:
+                remaining.append(enemy)
+                continue
+            protector = max(protectors, key=lambda row: row["rank"])
+            realm_gap = max(1, int(protector["rank"][0]) - enemy.realm_index)
+            chance = min(0.82, 0.30 + realm_gap * 0.09)
+            if rng.random() < chance:
+                enemy.affinity = max(threshold + 8, -10.0)
+                summary = (
+                    f"{enemy.name}本欲寻仇，却因{protector['role']}{protector['name']}修为更高而退让；"
+                    "对方出面斡旋，暂时化解了这桩私怨。"
+                )
+                game.history.append(HistoryRecord(
+                    "SYS_RELATION_PROTECTS_FROM_REVENGE", 1, game.player.age, "强援解怨",
+                    enemy.id, "resolved", summary,
+                    {"enemy_id": enemy.id, "protector_id": protector["id"], "chance": chance},
+                    ["system", "relationship", "protection", "revenge"],
+                ))
+            # A weaker enemy never attacks while a stronger protector remains,
+            # even when this unit's mediation roll does not clear the feud.
+        return remaining
+
+    def _maybe_transfer_player_dependency(
+        self, game: GameState, loser: SectNpc, winner: SectNpc, rng: random.Random,
+        *, context: str,
+    ) -> str:
+        if not winner.alive or winner.id == loser.id:
+            return ""
+        player = game.player
+        relationship = ""
+        if player.concubine_status and str(player.concubine_status.get("owner_id", "")) == loser.id:
+            relationship = "侍妾"
+        elif player.ghost_captor and str(player.ghost_captor.get("npc_id") or player.ghost_captor.get("id", "")) == loser.id:
+            relationship = str(player.ghost_captor.get("controlled_form", "魂仆"))
+        if not relationship:
+            return ""
+        ratio = self._npc_power(winner) / max(1.0, self._npc_power(loser))
+        chance = max(0.12, min(0.62, 0.24 + max(0.0, ratio - 1.0) * 0.12))
+        if rng.random() >= chance:
+            return ""
+        if player.concubine_status and str(player.concubine_status.get("owner_id", "")) == loser.id:
+            self._set_concubine_status(game, {
+                "owner_id": winner.id, "owner_name": winner.name,
+                "owner_realm_index": winner.realm_index, "owner_layer": winner.layer,
+                "owner_realm_name": self._npc_realm_name(winner), "owner_world": winner.world,
+            }, forced=True)
+        else:
+            old_form = str(player.ghost_captor.get("controlled_form", "魂仆"))
+            player.ghost_captor = {
+                "id": winner.id, "npc_id": winner.id, "name": winner.name,
+                "realm_index": winner.realm_index, "layer": winner.layer,
+                "path": winner.path, "race": winner.race, "spirit_root": winner.spirit_root,
+                "combat_power": self._npc_power(winner),
+                "main_technique_id": self._default_npc_main_technique(winner),
+                "location_id": player.location_id, "source": f"transfer:{context}",
+                "followed_years": 0, "controlled_form": old_form,
+                "capture_chance": 1.0, "affinity": 0.0,
+            }
+        summary = (
+            f"{loser.name}败给{winner.name}后，将身为{relationship}的你作为战后筹码转交给对方；"
+            f"你的正主已经变为{winner.name}。"
+        )
+        game.history.append(HistoryRecord(
+            "SYS_DEPENDENT_TRANSFERRED", 1, player.age, "败后易主", winner.id,
+            "transferred", summary,
+            {"old_owner_id": loser.id, "new_owner_id": winner.id, "chance": chance, "context": context},
+            ["system", "relationship", "owner", "transfer", "negative"],
+        ))
+        return summary
 
     def _concubine_target(
         self, game: GameState, target_id: str,

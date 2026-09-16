@@ -523,11 +523,18 @@ class WarSystemMixin:
             target.alive = False
             target.death_reason = "势力征伐中阵亡"
             return f"{target.name}在溃阵中陨落。"
+        winner_side = "defender" if loser == "attacker" else "attacker"
+        victors = self._available_warriors(game, war, winner_side)
+        victor = max(victors, key=self._npc_power, default=None)
+        transfer = (
+            self._maybe_transfer_player_dependency(game, target, victor, rng, context="war_defeat")
+            if victor else ""
+        )
         if roll < death_chance + escape_chance:
             war.setdefault("escaped", {}).setdefault(loser, []).append(target.id)
-            return f"{target.name}败退后脱离战场。"
+            return f"{target.name}败退后脱离战场。" + (f" {transfer}" if transfer else "")
         target.wounds = min(4, target.wounds + 2)
-        return f"{target.name}在败退中遭到重创。"
+        return f"{target.name}在败退中遭到重创。" + (f" {transfer}" if transfer else "")
 
     @staticmethod
     def _war_defeat_probabilities(realm_index: int) -> tuple[float, float]:
@@ -577,10 +584,16 @@ class WarSystemMixin:
         if ratio >= 1.35 and rng.random() < max(0.28, 0.68 - highness * 0.34):
             target.wounds = min(4, target.wounds + 2)
             self._shift_war_morale(war, defending, 9.0, 2.0)
-            return f"{striker.name}重创{target.name}，后者被迫退入后阵。"
+            transfer = self._maybe_transfer_player_dependency(
+                game, target, striker, rng, context="war_field",
+            )
+            return f"{striker.name}重创{target.name}，后者被迫退入后阵。" + (f" {transfer}" if transfer else "")
         war.setdefault("escaped", {}).setdefault(defending, []).append(target.id)
         self._shift_war_morale(war, defending, 12.0, 3.0)
-        return f"{target.name}不敌{striker.name}，脱离战场逃遁。"
+        transfer = self._maybe_transfer_player_dependency(
+            game, target, striker, rng, context="war_field",
+        )
+        return f"{target.name}不敌{striker.name}，脱离战场逃遁。" + (f" {transfer}" if transfer else "")
 
     def _resolve_player_war_round(
         self, game: GameState, war: dict[str, Any], side: str, rng: random.Random,

@@ -479,8 +479,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             if drained:
                 era_news.append(f"{player.age}岁：侍妾名分被抽走机缘 {drained:.1f}")
             self._advance_player_bounties(game, rng)
-            if game.pending_event is None and not player.ghost_captor:
-                if self._maybe_immortal_conversion_event(game, rng):
+            if game.pending_event is None and player.ghost_captor:
+                self._maybe_relationship_sanction(game, rng)
+            elif game.pending_event is None:
+                if self._maybe_relationship_sanction(game, rng):
+                    pass
+                elif self._maybe_immortal_conversion_event(game, rng):
                     pass
                 elif self._maybe_concubine_proposal(game, rng):
                     pass
@@ -3450,6 +3454,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             protected.update(npc.id for npc in self._sect_members(game, own_sect) if npc.alive)
         if game.family and not game.family.extinct:
             protected.update(npc.id for npc in game.family.npcs if npc.alive)
+        protected.update(self._retaliatory_relationship_ids(game))
         return protected
 
     def _hostility_entity_members(self, game: GameState, kind: str, entity_id: str) -> list[SectNpc]:
@@ -3640,7 +3645,12 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
     def _maybe_personal_revenge(self, game: GameState, rng: random.Random) -> bool:
         rules = WORLD_SYSTEMS["relationship"]
         threshold = float(rules["hostile_affinity_threshold"])
-        enemies = [npc for npc in self._personal_npcs(game) if float(npc.affinity or 0) <= threshold]
+        protected_ids = self._retaliatory_relationship_ids(game)
+        enemies = [
+            npc for npc in self._personal_npcs(game)
+            if float(npc.affinity or 0) <= threshold and npc.id not in protected_ids
+        ]
+        enemies = self._filter_personal_revenge_by_protection(game, enemies, rng)
         if not enemies:
             return False
         allies = self._high_affinity_npcs(game)
@@ -4606,9 +4616,13 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             loser.alive = False
             loser.death_reason = f"与{winner.name}斗法时陨落"
             outcome = f"{loser.name}未能脱身，当场陨落"
+            transfer_summary = ""
         else:
             loser.wounds = min(4, loser.wounds + 1)
             outcome = f"{loser.name}负伤退走"
+            transfer_summary = self._maybe_transfer_player_dependency(
+                game, loser, winner, rng, context="cultivator_duel",
+            )
         faction_ids = {self._npc_faction_id(game, first.id), self._npc_faction_id(game, second.id)} - {None}
         tags = ["system","world_npc","duel","world_news",f"world:{world}"]
         if game.player.faction_id in faction_ids:
@@ -4623,7 +4637,11 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         ):
             tags.extend(["relationship", "master"])
         cause = "由魔修主动挑衅引发斗法" if first.path == "demonic" else "因旧怨斗法"
-        summary = f"{first.name}（{self._npc_realm_name(first)}）与{second.name}（{self._npc_realm_name(second)}）{cause}，{winner.name}占据上风，{outcome}。"
+        summary = (
+            f"{first.name}（{self._npc_realm_name(first)}）与{second.name}（{self._npc_realm_name(second)}）"
+            f"{cause}，{winner.name}占据上风，{outcome}。"
+            + (f" {transfer_summary}" if transfer_summary else "")
+        )
         game.history.append(HistoryRecord(
             "SYS_CULTIVATOR_DUEL",1,game.player.age,"修士斗法",winner.id,"fatal" if lethal else "injured",summary,
             {"npcs":[first.id,second.id],"winner":winner.id,"loser":loser.id},tags,
@@ -5642,6 +5660,10 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             return self._resolve_concubine_revenge(game, pending, str(effect.get("method", "")), rng)
         if kind == "concubine_escape":
             return self._resolve_concubine_escape(game, pending, str(effect.get("method", "")), rng)
+        if kind == "relationship_sanction":
+            return self._resolve_relationship_sanction(
+                game, pending, str(effect.get("role", "")), str(effect.get("mode", "")), rng,
+            )
         if kind == "add_karma":
             player.karma = max(0, player.karma + float(value))
             sign = "+" if value >= 0 else ""

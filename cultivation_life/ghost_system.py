@@ -7,7 +7,7 @@ from typing import Any
 
 from .content_registry import REALMS, WORLD_SYSTEMS
 from .ghost_soul_traits import generate_soul_trait, validate_generated_soul_trait
-from .models import GameState, HistoryRecord, Player
+from .models import GameState, HistoryRecord, Player, SectNpc
 from .runtime import now_iso
 from .possession_system import (
     advance_player_age, can_possess, current_body_age, enter_host_body, has_ghost_core,
@@ -655,13 +655,43 @@ class GhostSystemMixin:
                 from .rules import combat_power
                 contribution = combat_power(game.player)
                 captor_power = max(1.0, float(captor.get("combat_power", 1.0)))
-                won = phase_rng.random() < min(0.92, (captor_power + contribution * 0.45) / (captor_power + contribution * 0.45 + captor_power * phase_rng.uniform(0.55, 1.25)))
+                owner_id = str(captor.get("npc_id") or captor.get("id", ""))
+                owner = self._find_npc(game, owner_id) or SectNpc(
+                    owner_id or f"ghost_owner_{game.seed}_{game.player.age}",
+                    str(captor.get("name", "拘魂者")), "拘魂者",
+                    int(captor.get("realm_index", game.player.realm_index)),
+                    int(captor.get("layer", 1)), game.player.age, None,
+                    spirit_root=str(captor.get("spirit_root", "none")),
+                    path=str(captor.get("path", "dao")), race=str(captor.get("race", "human")),
+                    world=game.player.world,
+                )
+                opponents = [
+                    npc for npc in self._all_world_npcs(game)
+                    if npc.alive and npc.world == game.player.world and npc.id != owner.id
+                ]
+                opponent = phase_rng.choice(opponents) if opponents else None
+                opponent_power = self._npc_power(opponent) if opponent else captor_power * phase_rng.uniform(0.55, 1.25)
+                won = phase_rng.random() < min(
+                    0.92,
+                    (captor_power + contribution * 0.45)
+                    / (captor_power + contribution * 0.45 + opponent_power),
+                )
+                transfer = (
+                    self._maybe_transfer_player_dependency(
+                        game, owner, opponent, phase_rng, context="ghost_vassal_battle",
+                    )
+                    if not won and opponent else ""
+                )
                 game.history.append(HistoryRecord(
                     "SYS_GHOST_VASSAL_BATTLE", 1, game.player.age, "魂仆随战", None,
                     "victory" if won else "defeat",
                     f"{captor.get('name', '拘魂者')}卷入争斗，你被魂印强制召出参战；"
-                    + ("合力压下了对手。" if won else "主仆皆负伤退走。"),
-                    {"ghost_contribution": contribution, "captor_power": captor_power},
+                    + ("合力压下了对手。" if won else "主仆皆负伤退走。")
+                    + (f" {transfer}" if transfer else ""),
+                    {
+                        "ghost_contribution": contribution, "captor_power": captor_power,
+                        "opponent_id": opponent.id if opponent else None,
+                    },
                     ["system", "ghost", "controlled", "combat"],
                 ))
 
@@ -900,7 +930,7 @@ class GhostSystemMixin:
             "main_technique_id": target.get("main_technique_id"),
             "location_id": player.location_id, "source": "defeat_capture", "followed_years": 0,
             "controlled_form": rng.choice(("拘魂", "法器器灵", "魂幡附庸")),
-            "capture_chance": capture_chance,
+            "capture_chance": capture_chance, "affinity": float(target.get("affinity", 0)),
         }
         if player.ghost_captor["controlled_form"] == "法器器灵":
             player.milestones["ghost_became_others_attachment"] = 1
