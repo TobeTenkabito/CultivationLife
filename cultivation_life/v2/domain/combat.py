@@ -1,0 +1,374 @@
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import Any
+
+from .character import IDENTITY, LIFE
+from .cultivation import CULTIVATION, PRACTICE
+from .definitions import GameDefinitions
+from .economy import INVENTORY
+from .world import LOCATION
+from ..kernel.bus import CommandBus, SimulationContext
+from ..kernel.model import EventEnvelope, EventScope, WorldState
+
+
+CONDITION = "combat.condition"
+REPORT = "combat.report"
+PRISONER = "combat_prisoner"
+STAT_KEYS = ("might", "guard", "mobility", "sense", "sustain", "breach")
+
+
+@dataclass(frozen=True, slots=True)
+class ResolveCombat:
+    attacker_id: str
+    target_id: str
+    objective: str = "duel"
+
+
+@dataclass(frozen=True, slots=True)
+class RestoreCombatCondition:
+    actor_id: str
+    hp_ratio: float = 1.0
+    mp_ratio: float = 1.0
+    reason: str = "recovery"
+
+
+PATH_FACTORS: dict[str, dict[str, float]] = {
+    "dao": {},
+    "demonic": {"might": 1.12, "guard": 0.94, "sustain": 1.10},
+    "ghost": {"might": 0.96, "mobility": 0.94, "sense": 1.22, "sustain": 1.08},
+    "monster": {"might": 1.06, "guard": 1.16, "sense": 0.86, "sustain": 1.18},
+    "buddhist": {"might": 0.92, "guard": 1.18, "sense": 1.10, "sustain": 1.12},
+    "confucian": {"might": 0.96, "sense": 1.14, "breach": 1.12},
+}
+
+
+def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
+    context.state.entities.put(
+        str(event.payload["entity_id"]), CONDITION,
+        {"hp_ratio": 1.0, "mp_ratio": 1.0},
+    )
+
+
+def _item_bonuses(state: WorldState, definitions: GameDefinitions, entity_id: str):
+    inventory = state.entities.require(entity_id, INVENTORY)
+    combat = hp = mp = 0.0
+    for item_id, quantity in dict(inventory.get("items", {})).items():
+        definition = definitions.items[item_id]
+        combat += definition.combat_bonus * int(quantity)
+        hp += definition.hp_bonus * int(quantity)
+        mp += definition.mp_bonus * int(quantity)
+    return combat, hp, mp
+
+
+def combat_snapshot(
+    state: WorldState, definitions: GameDefinitions, entity_id: str,
+) -> dict[str, Any]:
+    identity = state.entities.require(entity_id, IDENTITY)
+    life = state.entities.require(entity_id, LIFE)
+    cultivation = state.entities.require(entity_id, CULTIVATION)
+    practice = state.entities.require(entity_id, PRACTICE)
+    condition = state.entities.require(entity_id, CONDITION)
+    realm = definitions.realm(str(cultivation["realm_id"]))
+    layer = int(cultivation["layer"])
+    progression = 1.0 + 0.12 * (layer - 1)
+    technique_bonus = hp_bonus = mp_bonus = 0.0
+    main_id = practice.get("main_technique_id")
+    if main_id:
+        technique = definitions.techniques[str(main_id)]
+        technique_bonus += technique.combat_bonus
+        hp_bonus += technique.hp_bonus
+        mp_bonus += technique.mp_bonus
+    item_combat, item_hp, item_mp = _item_bonuses(state, definitions, entity_id)
+    power = max(1.0, realm.base_power * progression + technique_bonus + item_combat)
+    max_hp = max(10.0, 100.0 + math.sqrt(power) * 18.0) * max(0.1, 1 + hp_bonus + item_hp)
+    max_mp = max(10.0, 80.0 + math.sqrt(power) * 15.0) * max(0.1, 1 + mp_bonus + item_mp)
+    stats = {
+        "might": power * 1.02,
+        "guard": power * 0.98,
+        "mobility": power,
+        "sense": power,
+        "sustain": power,
+        "breach": power * 0.96,
+    }
+    for stat, factor in PATH_FACTORS.get(str(cultivation["path"]), {}).items():
+        stats[stat] *= factor
+    return {
+        "entity_id": entity_id,
+        "name": str(identity["name"]),
+        "alive": bool(life["alive"]),
+        "realm_id": realm.id,
+        "realm_index": definitions.realm_index(realm.id),
+        "layer": layer,
+        "path": cultivation["path"],
+        "power": round(power, 4),
+        "max_hp": round(max_hp, 4),
+        "max_mp": round(max_mp, 4),
+        "hp_ratio": float(condition["hp_ratio"]),
+        "mp_ratio": float(condition["mp_ratio"]),
+        "stats": {key: round(value, 4) for key, value in stats.items()},
+    }
+
+
+def _damage(
+    context: SimulationContext, attacker: dict[str, Any], defender: dict[str, Any],
+    attacker_mp_ratio: float,
+) -> float:
+    offense = float(attacker["stats"]["might"]) * 0.68 + float(attacker["stats"]["breach"]) * 0.32
+    defense = float(defender["stats"]["guard"]) * 0.78 + float(defender["stats"]["sense"]) * 0.22
+    ratio = max(0.05, offense / max(1.0, defense))
+    mana_factor = 0.72 + 0.28 * max(0.0, min(1.0, attacker_mp_ratio))
+    fraction = max(0.035, min(0.34, 0.115 * math.sqrt(ratio) * mana_factor))
+    return float(defender["max_hp"]) * fraction * context.rng.uniform(0.88, 1.12)
+
+
+def _resolve_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, ResolveCombat):
+            raise TypeError("命令类型错误")
+        if command.attacker_id != context.state.controlled_entity_id:
+            raise ValueError("玩家只能以当前角色发起战斗")
+        if command.attacker_id == command.target_id:
+            raise ValueError("不能与自己战斗")
+        if command.objective not in {"duel", "kill", "capture"}:
+            raise ValueError("未知战斗目标")
+        for entity_id in (command.attacker_id, command.target_id):
+            if not context.state.entities.exists(entity_id):
+                raise ValueError("战斗参与者不存在")
+            if not bool(context.state.entities.require(entity_id, LIFE).get("alive")):
+                raise ValueError("死亡角色无法参与战斗")
+        attacker_location = context.state.entities.require(command.attacker_id, LOCATION)
+        target_location = context.state.entities.require(command.target_id, LOCATION)
+        if attacker_location != target_location:
+            raise ValueError("战斗参与者必须位于同一地点")
+
+        attacker = combat_snapshot(context.state, definitions, command.attacker_id)
+        target = combat_snapshot(context.state, definitions, command.target_id)
+        hp = {
+            command.attacker_id: attacker["max_hp"] * attacker["hp_ratio"],
+            command.target_id: target["max_hp"] * target["hp_ratio"],
+        }
+        mp = {
+            command.attacker_id: float(attacker["mp_ratio"]),
+            command.target_id: float(target["mp_ratio"]),
+        }
+        first_attacker = (
+            attacker["stats"]["mobility"] + attacker["stats"]["sense"]
+            >= target["stats"]["mobility"] + target["stats"]["sense"]
+        )
+        order = (
+            ((command.attacker_id, attacker), (command.target_id, target))
+            if first_attacker else
+            ((command.target_id, target), (command.attacker_id, attacker))
+        )
+        rounds: list[dict[str, Any]] = []
+        for round_number in range(1, 13):
+            exchanges: list[dict[str, Any]] = []
+            for acting, acting_snapshot in order:
+                defending = command.target_id if acting == command.attacker_id else command.attacker_id
+                defending_snapshot = target if defending == command.target_id else attacker
+                if hp[acting] <= 0 or hp[defending] <= 0:
+                    continue
+                dealt = min(hp[defending], _damage(
+                    context, acting_snapshot, defending_snapshot, mp[acting]
+                ))
+                hp[defending] -= dealt
+                mp[acting] = max(0.0, mp[acting] - 0.045)
+                exchanges.append({
+                    "attacker_id": acting,
+                    "defender_id": defending,
+                    "damage": round(dealt, 4),
+                    "defender_hp_ratio": round(
+                        hp[defending] / float(defending_snapshot["max_hp"]), 6
+                    ),
+                })
+            rounds.append({"round": round_number, "exchanges": exchanges})
+            if hp[command.attacker_id] <= 0 or hp[command.target_id] <= 0:
+                break
+
+        if hp[command.target_id] <= 0:
+            outcome = "victory"
+            loser_id = command.target_id
+        elif hp[command.attacker_id] <= 0:
+            outcome = "defeat"
+            loser_id = command.attacker_id
+        else:
+            attacker_ratio = hp[command.attacker_id] / float(attacker["max_hp"])
+            target_ratio = hp[command.target_id] / float(target["max_hp"])
+            outcome = "victory" if attacker_ratio > target_ratio + 0.05 else "defeat" if target_ratio > attacker_ratio + 0.05 else "stalemate"
+            loser_id = command.target_id if outcome == "victory" else command.attacker_id if outcome == "defeat" else None
+
+        lethal = command.objective == "kill"
+        for entity_id, snapshot in ((command.attacker_id, attacker), (command.target_id, target)):
+            hp_ratio = max(0.0, min(1.0, hp[entity_id] / float(snapshot["max_hp"])))
+            if entity_id == loser_id and not lethal:
+                hp_ratio = max(0.1, hp_ratio)
+            context.state.entities.put(entity_id, CONDITION, {
+                "hp_ratio": hp_ratio,
+                "mp_ratio": max(0.0, min(1.0, mp[entity_id])),
+            })
+
+        captured = False
+        if command.objective == "capture" and outcome == "victory":
+            held_by = context.state.relations.find(target_id=command.target_id, kind=PRISONER)
+            if held_by and held_by[0].source_id != command.attacker_id:
+                raise ValueError("目标已被其他人拘押")
+            existing = context.state.relations.find(
+                source_id=command.attacker_id, target_id=command.target_id, kind=PRISONER
+            )
+            if not existing:
+                edge = context.state.relations.add(
+                    source_id=command.attacker_id,
+                    target_id=command.target_id,
+                    kind=PRISONER,
+                    created_year=context.state.clock.year,
+                    metadata={"status": "confined"},
+                )
+                context.emit(
+                    "combat.prisoner.captured",
+                    source="combat",
+                    scope=EventScope.entity(command.attacker_id),
+                    payload=edge.to_dict(),
+                )
+            captured = True
+
+        report_id = context.state.entities.create("combat")
+        report = {
+            "attacker_id": command.attacker_id,
+            "target_id": command.target_id,
+            "objective": command.objective,
+            "outcome": outcome,
+            "rounds": rounds,
+            "captured": captured,
+            "started_year": context.state.clock.year,
+            "ended_year": context.state.clock.year,
+            "attacker": attacker,
+            "target": target,
+            "final_hp_ratios": {
+                command.attacker_id: context.state.entities.require(command.attacker_id, CONDITION)["hp_ratio"],
+                command.target_id: context.state.entities.require(command.target_id, CONDITION)["hp_ratio"],
+            },
+        }
+        context.state.entities.put(report_id, REPORT, report)
+        context.emit(
+            "combat.resolved",
+            source="combat",
+            scope=EventScope.entity(command.attacker_id),
+            payload={"report_id": report_id, **{key: report[key] for key in ("attacker_id", "target_id", "objective", "outcome", "captured")}},
+        )
+        if lethal and loser_id is not None:
+            context.emit(
+                "character.lethal_hazard",
+                source="combat",
+                scope=EventScope.entity(loser_id),
+                payload={"entity_id": loser_id, "reason": "战斗身亡"},
+            )
+
+    return handler
+
+
+def _restore(context: SimulationContext, command: object) -> None:
+    if not isinstance(command, RestoreCombatCondition):
+        raise TypeError("命令类型错误")
+    if not bool(context.state.entities.require(command.actor_id, LIFE).get("alive")):
+        raise ValueError("死亡角色无法恢复")
+    if not 0 <= command.hp_ratio <= 1 or not 0 <= command.mp_ratio <= 1:
+        raise ValueError("恢复比例必须位于0到1之间")
+    before = context.state.entities.require(command.actor_id, CONDITION)
+    after = {
+        "hp_ratio": max(float(before["hp_ratio"]), command.hp_ratio),
+        "mp_ratio": max(float(before["mp_ratio"]), command.mp_ratio),
+    }
+    context.state.entities.put(command.actor_id, CONDITION, after)
+    context.emit(
+        "combat.condition.restored",
+        source="combat",
+        scope=EventScope.entity(command.actor_id),
+        payload={"entity_id": command.actor_id, "before": before, "after": after, "reason": command.reason},
+    )
+
+
+def _on_action_completed(context: SimulationContext, event: EventEnvelope) -> None:
+    if event.payload.get("action") != "rest":
+        return
+    actor_id = str(event.payload["actor_id"])
+    condition = context.state.entities.require(actor_id, CONDITION)
+    condition["hp_ratio"] = min(1.0, float(condition["hp_ratio"]) + 0.35)
+    condition["mp_ratio"] = min(1.0, float(condition["mp_ratio"]) + 0.45)
+    context.state.entities.put(actor_id, CONDITION, condition)
+
+
+def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload["entity_id"])
+    condition = context.state.entities.get(entity_id, CONDITION)
+    if condition is not None:
+        condition["hp_ratio"] = 0.0
+        context.state.entities.put(entity_id, CONDITION, condition)
+    for edge in context.state.relations.involving(entity_id, kind=PRISONER):
+        ended = context.state.relations.end(
+            edge.relation_id, ended_year=context.state.clock.year
+        )
+        metadata = dict(ended.metadata)
+        metadata["end_reason"] = "related_character_died"
+        context.state.relations.replace_metadata(edge.relation_id, metadata)
+        context.emit(
+            "combat.prisoner.released",
+            source="combat",
+            scope=EventScope.entity(edge.target_id),
+            payload={
+                "relation_id": edge.relation_id,
+                "captor_id": edge.source_id,
+                "prisoner_id": edge.target_id,
+                "reason": "related_character_died",
+            },
+        )
+
+
+def combat_invariants(state: WorldState) -> list[str]:
+    errors: list[str] = []
+    for entity_id in state.entities.with_component(IDENTITY):
+        condition = state.entities.get(entity_id, CONDITION)
+        if condition is None:
+            errors.append(f"角色 {entity_id} 缺少战斗状态")
+            continue
+        for key in ("hp_ratio", "mp_ratio"):
+            value = float(condition.get(key, -1))
+            if not 0 <= value <= 1:
+                errors.append(f"角色 {entity_id} 战斗状态 {key} 非法")
+    for report_id in state.entities.with_component(REPORT):
+        report = state.entities.require(report_id, REPORT)
+        for key in ("attacker_id", "target_id"):
+            if state.entities.get(str(report.get(key, "")), IDENTITY) is None:
+                errors.append(f"战报 {report_id} 引用非角色实体")
+    prisoner_counts: dict[str, int] = {}
+    for edge in state.relations.find(kind=PRISONER):
+        if (
+            state.entities.get(edge.source_id, IDENTITY) is None
+            or state.entities.get(edge.target_id, IDENTITY) is None
+        ):
+            errors.append(f"俘虏关系端点不是角色：{edge.relation_id}")
+        prisoner_counts[edge.target_id] = prisoner_counts.get(edge.target_id, 0) + 1
+    if any(count > 1 for count in prisoner_counts.values()):
+        errors.append("同一角色同时被多人拘押")
+    return errors
+
+
+def register_combat_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
+    bus.register(ResolveCombat, _resolve_handler(definitions))
+    bus.register(RestoreCombatCondition, _restore)
+    bus.event_bus.register("character.created", _on_character_created)
+    bus.event_bus.register("cultivation.action.completed", _on_action_completed)
+    bus.event_bus.register("character.died", _on_character_died)
+
+
+def combat_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):
+    actor_id = entity_id or state.controlled_entity_id
+    if actor_id is None:
+        raise ValueError("游戏尚未初始化")
+    latest = None
+    for report_id in state.entities.with_component(REPORT):
+        report = state.entities.require(report_id, REPORT)
+        if actor_id in {report.get("attacker_id"), report.get("target_id")}:
+            latest = {"id": report_id, **report}
+    return {"snapshot": combat_snapshot(state, definitions, actor_id), "last_report": latest}

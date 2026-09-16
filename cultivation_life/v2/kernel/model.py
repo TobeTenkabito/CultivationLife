@@ -8,7 +8,7 @@ from typing import Any
 
 
 V2_FORMAT_ID = "cultivation-life-v2"
-V2_SCHEMA_VERSION = 2
+V2_SCHEMA_VERSION = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -425,7 +425,11 @@ class WorldState:
         "world": 1,
         "relations": 1,
         "factions": 1,
+        "economy": 1,
+        "combat": 1,
+        "extensions": 1,
     })
+    content_packages: dict[str, str] = field(default_factory=dict)
     next_event_sequence: int = 1
 
     @classmethod
@@ -453,6 +457,7 @@ class WorldState:
             "relations": self.relations.to_dict(),
             "scheduler": self.scheduler.to_dict(),
             "module_versions": dict(self.module_versions),
+            "content_packages": dict(self.content_packages),
             "next_event_sequence": self.next_event_sequence,
         }
 
@@ -476,5 +481,9 @@ class WorldState:
             relations=RelationStore.from_dict(dict(value.get("relations", {}))),
             scheduler=Scheduler.from_dict(dict(value["scheduler"])),
             module_versions={str(key): int(version) for key, version in dict(value["module_versions"]).items()},
+            content_packages={
+                str(package_id): str(version)
+                for package_id, version in dict(value.get("content_packages", {})).items()
+            },
             next_event_sequence=int(value.get("next_event_sequence", 1)),
         )

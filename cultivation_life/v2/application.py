@@ -20,6 +20,26 @@ from .domain.cultivation import (
     cultivation_view,
     register_cultivation_domain,
 )
+from .domain.combat import (
+    ResolveCombat,
+    combat_invariants,
+    combat_view,
+    register_combat_domain,
+)
+from .domain.economy import (
+    BuyMarketOffer,
+    RefreshMarket,
+    economy_invariants,
+    inventory_view,
+    market_view,
+    register_economy_domain,
+)
+from .domain.extensions import (
+    extension_invariants,
+    extension_view,
+    reconcile_extension_state,
+    register_extension_domains,
+)
 from .domain.factions import (
     faction_catalog_view,
     faction_invariants,
@@ -59,11 +79,17 @@ class V2GameEngine:
         register_world_domain(self.commands, self.definitions)
         register_relationship_domain(self.commands)
         register_faction_domain(self.commands, self.definitions)
+        register_economy_domain(self.commands, self.definitions)
+        register_combat_domain(self.commands, self.definitions)
+        register_extension_domains(self.commands, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
         self.invariants.register("world", world_invariants(self.definitions))
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
+        self.invariants.register("economy", economy_invariants(self.definitions))
+        self.invariants.register("combat", combat_invariants)
+        self.invariants.register("extensions", extension_invariants(self.definitions))
 
     def create_game(
         self,
@@ -88,6 +114,7 @@ class V2GameEngine:
             path=path,
             start_world=start_world,
         ))
+        reconcile_extension_state(state, self.definitions)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -95,6 +122,7 @@ class V2GameEngine:
 
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
+        reconcile_extension_state(state, self.definitions)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -143,8 +171,33 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, TravelWithinWorld(actor_id=actor_id, destination_id=destination_id))
 
+    def refresh_market(self, game_id: str, *, force: bool = False) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RefreshMarket(actor_id=actor_id, force=force))
+
+    def buy_market_offer(self, game_id: str, offer_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, BuyMarketOffer(actor_id=actor_id, offer_id=offer_id))
+
+    def fight(self, game_id: str, target_id: str, *, objective: str = "duel") -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            ResolveCombat(attacker_id=actor_id, target_id=target_id, objective=objective),
+        )
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
+        reconcile_extension_state(state, self.definitions)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -170,6 +223,10 @@ class V2GameEngine:
             "relationships": relationship_view(state),
             "faction": faction_view(state),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),
+            "inventory": inventory_view(state, self.definitions),
+            "market": market_view(state, self.definitions),
+            "combat": combat_view(state, self.definitions),
+            "extensions": extension_view(state, self.definitions),
             "capabilities": {
                 "character.cultivate": {
                     "enabled": alive,
@@ -184,6 +241,14 @@ class V2GameEngine:
                     "reason": None if alive and cultivation["bottleneck"] else "尚未抵达突破瓶颈",
                 },
                 "world.travel": {
+                    "enabled": alive,
+                    "reason": None if alive else "角色已经死亡",
+                },
+                "economy.market": {
+                    "enabled": alive and cultivation["realm_index"] > 0,
+                    "reason": None if alive and cultivation["realm_index"] > 0 else "凡人或死亡角色无法进入坊市",
+                },
+                "combat.initiate": {
                     "enabled": alive,
                     "reason": None if alive else "角色已经死亡",
                 },
