@@ -420,6 +420,26 @@ def _on_story_condition_changed(context: SimulationContext, event: EventEnvelope
         )
 
 
+def _on_condition_drain_requested(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload["entity_id"])
+    condition = context.state.entities.require(entity_id, CONDITION)
+    condition["hp_ratio"] = max(
+        0.01, float(condition["hp_ratio"]) - max(0.0, float(event.payload["hp_ratio"]))
+    )
+    condition["mp_ratio"] = max(
+        0.0, float(condition["mp_ratio"]) - max(0.0, float(event.payload["mp_ratio"]))
+    )
+    context.state.entities.put(entity_id, CONDITION, condition)
+
+
+def _on_condition_reset_requested(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload["entity_id"])
+    condition = context.state.entities.require(entity_id, CONDITION)
+    condition["hp_ratio"] = max(0.0, min(1.0, float(event.payload["hp_ratio"])))
+    condition["mp_ratio"] = max(0.0, min(1.0, float(event.payload["mp_ratio"])))
+    context.state.entities.put(entity_id, CONDITION, condition)
+
+
 def register_combat_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
     bus.register(ResolveCombat, _resolve_handler(definitions))
     bus.register(RestoreCombatCondition, _restore)
@@ -430,6 +450,8 @@ def register_combat_domain(bus: CommandBus, definitions: GameDefinitions) -> Non
         "story.effect.combat_condition.changed", _on_story_condition_changed
     )
     bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
+    bus.event_bus.register("combat.condition.drain.requested", _on_condition_drain_requested)
+    bus.event_bus.register("combat.condition.reset.requested", _on_condition_reset_requested)
 
 
 def combat_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None):

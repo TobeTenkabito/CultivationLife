@@ -110,7 +110,7 @@ class V2AdvancedCultivationTests(unittest.TestCase):
             ["FORM_PHOENIX"],
         )
 
-    def test_upper_realm_normal_layer_uses_probability_but_trial_gate_is_explicit(self):
+    def test_upper_realm_normal_layer_and_trial_breakthrough_both_complete(self):
         state = self.engine.store.load(self.game_id)
         cultivation = state.entities.require(self.actor_id, CULTIVATION)
         cultivation.update(
@@ -134,8 +134,19 @@ class V2AdvancedCultivationTests(unittest.TestCase):
         self.engine.store.save(
             state, [], player_name="进阶修士", expected_revision=state.revision
         )
-        with self.assertRaisesRegex(ValueError, "专属试炼"):
-            self.engine.attempt_breakthrough(self.game_id)
+        old_chance = self.engine.definitions.breakthrough["minor_base"]["6"]
+        self.engine.definitions.breakthrough["minor_base"]["6"] = 1.0
+        try:
+            started = self.engine.attempt_breakthrough(self.game_id)
+        finally:
+            self.engine.definitions.breakthrough["minor_base"]["6"] = old_chance
+        self.assertEqual(started.game["trial"]["active"]["kind"], "traditional")
+        self.assertEqual(started.game["pending_event"]["id"], "EVT_BREAKTHROUGH_TRADITIONAL_001")
+        self.engine.choose(self.game_id, "endure")
+        self.engine.choose(self.game_id, "face_karma")
+        completed = self.engine.choose(self.game_id, "face_demon")
+        self.assertIsNone(completed.game["trial"]["active"])
+        self.assertEqual(completed.game["player"]["cultivation"]["layer"], 4)
 
 
 class V2WorldCrossingTests(unittest.TestCase):

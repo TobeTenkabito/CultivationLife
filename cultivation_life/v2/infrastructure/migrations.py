@@ -194,12 +194,29 @@ def _schema_5_to_6(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_6_to_7(source: dict[str, Any]) -> dict[str, Any]:
+    """Persist interactive breakthrough and ascension trial state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault("cultivation.trial", {"active": None, "history": []})
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "trials": 1,
+    }
+    value["schema_version"] = 7
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
     3: _schema_3_to_4,
     4: _schema_4_to_5,
     5: _schema_5_to_6,
+    6: _schema_6_to_7,
 }
 
 
