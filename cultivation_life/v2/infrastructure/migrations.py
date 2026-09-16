@@ -104,9 +104,39 @@ def _schema_2_to_3(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_3_to_4(source: dict[str, Any]) -> dict[str, Any]:
+    """Add persisted presentation preferences and the scoped news feed."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault(
+            "presentation.preferences",
+            {
+                "combat_popup": True,
+                "achievement_popup": True,
+                "auto_advance_player_wars": False,
+                "debug_world_news": False,
+            },
+        )
+        components.setdefault(
+            "presentation.world_news",
+            {"next_sequence": 1, "entries": []},
+        )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "presentation": 1,
+    }
+    value["schema_version"] = 4
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
+    3: _schema_3_to_4,
 }
 
 

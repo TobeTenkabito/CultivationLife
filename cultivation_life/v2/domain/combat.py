@@ -62,6 +62,17 @@ def _item_bonuses(state: WorldState, definitions: GameDefinitions, entity_id: st
     return combat, hp, mp
 
 
+def _faction_benefits(state: WorldState, entity_id: str) -> tuple[float, float, float]:
+    benefits = {"combat": 0.0, "hp": 0.0, "mp": 0.0}
+    for membership in state.relations.find(
+        source_id=entity_id, kind="faction_membership", active_only=False
+    ):
+        for key, value in dict(membership.metadata.get("permanent_benefits", {})).items():
+            if key in benefits:
+                benefits[key] += float(value)
+    return benefits["combat"], benefits["hp"], benefits["mp"]
+
+
 def combat_snapshot(
     state: WorldState, definitions: GameDefinitions, entity_id: str,
 ) -> dict[str, Any]:
@@ -81,9 +92,21 @@ def combat_snapshot(
         hp_bonus += technique.hp_bonus
         mp_bonus += technique.mp_bonus
     item_combat, item_hp, item_mp = _item_bonuses(state, definitions, entity_id)
-    power = max(1.0, realm.base_power * progression + technique_bonus + item_combat)
-    max_hp = max(10.0, 100.0 + math.sqrt(power) * 18.0) * max(0.1, 1 + hp_bonus + item_hp)
-    max_mp = max(10.0, 80.0 + math.sqrt(power) * 15.0) * max(0.1, 1 + mp_bonus + item_mp)
+    faction_combat, faction_hp, faction_mp = _faction_benefits(state, entity_id)
+    power = max(
+        1.0,
+        realm.base_power * progression + technique_bonus + item_combat + faction_combat,
+    )
+    max_hp = (
+        max(10.0, 100.0 + math.sqrt(power) * 18.0)
+        * max(0.1, 1 + hp_bonus + item_hp)
+        + faction_hp
+    )
+    max_mp = (
+        max(10.0, 80.0 + math.sqrt(power) * 15.0)
+        * max(0.1, 1 + mp_bonus + item_mp)
+        + faction_mp
+    )
     stats = {
         "might": power * 1.02,
         "guard": power * 0.98,

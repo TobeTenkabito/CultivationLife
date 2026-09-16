@@ -186,6 +186,7 @@ class GameDefinitions:
     techniques: dict[str, TechniqueDefinition]
     worlds: dict[str, WorldDefinition]
     factions: dict[str, FactionDefinition]
+    faction_rewards: dict[str, dict[str, Any]]
     items: dict[str, ItemDefinition]
     market_goods: tuple[MarketGoodDefinition, ...]
     market_settings: dict[str, Any]

@@ -84,7 +84,7 @@ class V2CoreDomainTests(unittest.TestCase):
             spirit_root="supreme_fire",
             start_world="demon",
         )
-        self.assertEqual(game["schema_version"], 3)
+        self.assertEqual(game["schema_version"], 4)
         self.assertEqual(game["player"]["gender"], "female")
         self.assertEqual(game["player"]["cultivation"]["path"], "demonic")
         self.assertEqual(
@@ -242,6 +242,118 @@ class V2CoreDomainTests(unittest.TestCase):
         self.assertEqual(transferred["faction"]["controller_id"], npc_id)
         self.assertFalse(transferred["faction"]["controlled_by_player"])
 
+    def test_only_master_companion_or_friend_can_be_invited_into_current_faction(self):
+        game = self.engine.create_game("引路", seed=708)
+        actor_id = game["player"]["id"]
+        faction_id = next(
+            row["id"] for row in game["available_factions"]
+            if row["external_id"] == "tianjian"
+        )
+        self.engine.execute(
+            game["id"], JoinFaction(character_id=actor_id, faction_id=faction_id)
+        )
+        friend_id = self._register_npc(game["id"], "故交")
+        outsider_id = self._register_npc(game["id"], "路人")
+        concubine_id = self._register_npc(game["id"], "侍者")
+        formed = self.engine.execute(
+            game["id"],
+            FormRelationship(source_id=actor_id, target_id=friend_id, kind="friend"),
+        ).game
+        friend_relation_id = formed["relationships"][0]["relation_id"]
+        self.engine.execute(
+            game["id"],
+            FormRelationship(source_id=actor_id, target_id=concubine_id, kind="concubine"),
+        )
+
+        invited = self.engine.invite_relationship_to_faction(game["id"], friend_id)
+        state = self.engine.store.load(game["id"])
+        membership = state.relations.find(
+            source_id=friend_id, kind="faction_membership"
+        )[0]
+        self.assertEqual(membership.target_id, faction_id)
+        self.assertEqual(
+            state.relations.require(friend_relation_id).metadata["affinity"], 4.0
+        )
+        self.assertTrue(
+            any(
+                row["event_type"] == "faction.relationship.invited"
+                for row in invited.events
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "师父、道侣或道友"):
+            self.engine.invite_relationship_to_faction(game["id"], outsider_id)
+        with self.assertRaisesRegex(ValueError, "师父、道侣或道友"):
+            self.engine.invite_relationship_to_faction(game["id"], concubine_id)
+
+    def test_faction_projection_and_control_are_isolated_by_world(self):
+        game = self.engine.create_game("越界掌门", seed=709)
+        actor_id = game["player"]["id"]
+        founded = self.engine.execute(
+            game["id"], FoundFaction(founder_id=actor_id, name="界下宗")
+        ).game
+        faction_id = founded["faction"]["id"]
+        state = self.engine.store.load(game["id"])
+        location = state.entities.require(actor_id, LOCATION)
+        location.update(world_id="spirit", location_id="tianyuan_realm")
+        state.entities.put(actor_id, LOCATION, location)
+        self.engine.store.save(
+            state, [], player_name="越界掌门", expected_revision=state.revision
+        )
+
+        self.assertIsNone(self.engine.get_game(game["id"])["faction"])
+        with self.assertRaisesRegex(ValueError, "其他世界"):
+            self.engine.execute(
+                game["id"],
+                TransferFactionControl(
+                    actor_id=actor_id,
+                    faction_id=faction_id,
+                    successor_id=actor_id,
+                ),
+            )
+
+    def test_faction_reward_preference_pays_annually_and_benefits_survive_leaving(self):
+        game = self.engine.create_game("受禄长老", seed=710)
+        actor_id = game["player"]["id"]
+        state = self.engine.store.load(game["id"])
+        cultivation = state.entities.require(actor_id, "cultivation.state")
+        cultivation.update(realm_id="nascent", layer=1, opportunity=0.0, bottleneck=None)
+        state.entities.put(actor_id, "cultivation.state", cultivation)
+        self.engine.store.save(
+            state, [], player_name="受禄长老", expected_revision=state.revision
+        )
+        current = self.engine.get_game(game["id"])
+        faction_id = next(
+            row["id"] for row in current["available_factions"]
+            if row["external_id"] == "tianjian"
+        )
+        joined = self.engine.execute(
+            game["id"], JoinFaction(character_id=actor_id, faction_id=faction_id)
+        ).game
+        before_power = joined["combat"]["snapshot"]["power"]
+        selected = self.engine.set_faction_reward(game["id"], "combat").game
+        self.assertEqual(selected["faction"]["reward_preference"], "combat")
+        self.assertEqual(set(selected["faction"]["reward_options"]), {
+            "opportunity", "vitality", "mana", "combat",
+        })
+
+        rewarded = self.engine.perform_action(game["id"], "rest", 1).game
+        elapsed = rewarded["clock"]["year"] - selected["clock"]["year"]
+        self.assertEqual(rewarded["faction"]["contribution"], elapsed)
+        self.assertEqual(
+            rewarded["faction"]["permanent_benefits"]["combat"],
+            3 * elapsed,
+        )
+        self.assertEqual(
+            rewarded["combat"]["snapshot"]["power"], before_power + 3 * elapsed
+        )
+        left = self.engine.execute(
+            game["id"], LeaveFaction(character_id=actor_id)
+        ).game
+        self.assertIsNone(left["faction"])
+        self.assertEqual(
+            left["combat"]["snapshot"]["power"], before_power + 3 * elapsed
+        )
+
 
 class V2SchemaMigrationTests(unittest.TestCase):
     def test_schema_one_snapshot_is_migrated_and_rewritten_as_current_schema(self):
@@ -303,7 +415,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                         ),
                     )
             migrated = engine.get_game(game_id)
-            self.assertEqual(migrated["schema_version"], 3)
+            self.assertEqual(migrated["schema_version"], 4)
             self.assertEqual(migrated["player"]["gender"], "male")
             self.assertEqual(migrated["player"]["cultivation"]["opportunity"], 4)
             engine.perform_timed_action(game_id, "rest", 1)
@@ -311,7 +423,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                 stored_version = connection.execute(
                     "SELECT schema_version FROM games WHERE game_id = ?", (game_id,)
                 ).fetchone()[0]
-            self.assertEqual(stored_version, 3)
+            self.assertEqual(stored_version, 4)
 
 
 if __name__ == "__main__":

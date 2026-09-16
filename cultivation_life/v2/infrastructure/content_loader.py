@@ -71,6 +71,15 @@ class V2ContentLoader:
         market_goods = cls._market_goods(market_doc, items, techniques)
         worlds = cls._worlds(world_doc, maps_doc)
         factions = cls._factions(faction_doc, worlds)
+        faction_rewards = {
+            str(reward_id): dict(reward)
+            for reward_id, reward in dict(faction_doc.get("rewards", {})).items()
+        }
+        if not faction_rewards or any(
+            not str(reward.get("name", "")) or not dict(reward.get("effect", {}))
+            for reward in faction_rewards.values()
+        ):
+            raise V2ContentError("势力年度奖励定义无效")
         systems = dict(world_doc.get("systems", {}))
         time_units = {int(index): int(years) for index, years in dict(systems["time_units"]).items()}
         travel_speeds = {
@@ -101,6 +110,7 @@ class V2ContentLoader:
             techniques=techniques,
             worlds=worlds,
             factions=factions,
+            faction_rewards=faction_rewards,
             items=items,
             market_goods=market_goods,
             market_settings=dict(market_doc.get("settings", {})),

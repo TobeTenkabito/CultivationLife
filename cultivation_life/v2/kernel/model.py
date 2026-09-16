@@ -8,7 +8,7 @@ from typing import Any
 
 
 V2_FORMAT_ID = "cultivation-life-v2"
-V2_SCHEMA_VERSION = 3
+V2_SCHEMA_VERSION = 4
 
 
 @dataclass(frozen=True, slots=True)
@@ -428,6 +428,7 @@ class WorldState:
         "economy": 1,
         "combat": 1,
         "extensions": 1,
+        "presentation": 1,
     })
     content_packages: dict[str, str] = field(default_factory=dict)
     next_event_sequence: int = 1

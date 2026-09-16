@@ -39,7 +39,7 @@ presentation → application → domain modules → kernel
 ## 存档边界
 
 - 格式标识：`cultivation-life-v2`
-- 当前V2 Schema：`3`
+- 当前V2 Schema：`4`
 - 默认建议路径：`data/v2/saves.sqlite3`
 - V1和V2不共享表、不共享文件、不互相覆盖。
 - 核心和每个领域/DLC分别持有模块版本；后续迁移按模块注册。

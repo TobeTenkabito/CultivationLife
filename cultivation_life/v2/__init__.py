@@ -17,6 +17,8 @@ from .domain.factions import (
     ChangeContribution,
     FoundFaction,
     JoinFaction,
+    InviteRelationshipToFaction,
+    SetFactionRewardPreference,
     LeaveFaction,
     TransferFactionControl,
 )
@@ -48,6 +50,8 @@ __all__ = [
     "GrantItem",
     "GrantTechnique",
     "JoinFaction",
+    "InviteRelationshipToFaction",
+    "SetFactionRewardPreference",
     "LeaveFaction",
     "PerformActionUnits",
     "PerformTimedAction",

@@ -42,6 +42,10 @@ class V2LegacyImportTests(unittest.TestCase):
         game.player.faction_id = "tianjian"
         game.player.faction_join_age = 20
         game.player.faction_contribution = 73
+        game.player.faction_reward_preference = "mana"
+        game.player.faction_hp_bonus = 6
+        game.player.faction_mp_bonus = 8
+        game.player.faction_combat_bonus = 9
         game.player.dao_friends = [{
             "id": "friend-old-1",
             "name": "旧雨",
@@ -75,6 +79,11 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(result.game["player"]["cultivation"]["opportunity"], 37.5)
         self.assertEqual(result.game["faction"]["external_id"], "tianjian")
         self.assertEqual(result.game["faction"]["contribution"], 73)
+        self.assertEqual(result.game["faction"]["reward_preference"], "mana")
+        self.assertEqual(
+            result.game["faction"]["permanent_benefits"],
+            {"hp": 6.0, "mp": 8.0, "combat": 9.0},
+        )
         self.assertEqual(result.game["relationships"][0]["kind"], "friend")
         self.assertEqual(result.game["relationships"][0]["other"]["name"], "旧雨")
         self.assertEqual(
@@ -240,13 +249,15 @@ class V1V2ShadowTests(unittest.TestCase):
         self.assertFalse(first.steps[0].v1_error)
         self.assertFalse(first.steps[0].v2_error)
 
-    def test_shadow_projection_ignores_ids_but_exposes_real_behavior_gaps(self):
+    def test_shadow_projection_ignores_ids_and_matches_initial_inventory(self):
         report = self._run("gap")
         create_differences = [row for row in report.differences if row.step == 0]
         self.assertFalse(any(row.severity == "error" for row in create_differences))
-        inventory_gap = next(row for row in create_differences if row.path == "inventory")
-        self.assertEqual(inventory_gap.v1, {"spirit_sword": 1})
-        self.assertEqual(inventory_gap.v2, {})
+        self.assertFalse(any(row.path == "inventory" for row in create_differences))
+        self.assertEqual(
+            report.steps[0].v2["inventory"],
+            {"spirit_sword": 1},
+        )
         self.assertEqual(report.status, "diverged")
 
     def test_creation_failure_is_reported_instead_of_crashing_harness(self):

@@ -95,7 +95,15 @@ def _change_item(
 
 def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
     entity_id = str(event.payload["entity_id"])
-    context.state.entities.put(entity_id, INVENTORY, {"items": {}, "reserved": {}})
+    # V1 gives the controlled character one starter spirit sword.  Keeping the
+    # grant in the economy subscriber (rather than BootstrapGame) preserves a
+    # single owner for inventory state while NPC creation remains unaffected.
+    starting_items = {"spirit_sword": 1} if bool(event.payload.get("controlled")) else {}
+    context.state.entities.put(
+        entity_id,
+        INVENTORY,
+        {"items": starting_items, "reserved": {}},
+    )
     context.state.entities.put(entity_id, MARKET, {"revision": 0, "offers": []})
 
 

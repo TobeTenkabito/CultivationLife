@@ -57,10 +57,10 @@
     }
   },
   "rewards": {
-    "opportunity":{"name":"悟道玉简","description":"每年固定获得 3 点机缘。"},
-    "vitality":{"name":"淬体灵液","description":"每年永久增加 2 点 HP 上限。"},
-    "mana":{"name":"蕴神灵露","description":"每年永久增加 2 点 MP 上限。"},
-    "combat":{"name":"护道法印","description":"每年永久增加 3 点独立战斗力。"}
+    "opportunity":{"name":"悟道玉简","description":"每年固定获得 3 点机缘。","effect":{"opportunity":3}},
+    "vitality":{"name":"淬体灵液","description":"每年永久增加 2 点 HP 上限。","effect":{"hp":2}},
+    "mana":{"name":"蕴神灵露","description":"每年永久增加 2 点 MP 上限。","effect":{"mp":2}},
+    "combat":{"name":"护道法印","description":"每年永久增加 3 点独立战斗力。","effect":{"combat":3}}
   },
   "factions": [
     {
