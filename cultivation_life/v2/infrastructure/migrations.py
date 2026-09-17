@@ -414,6 +414,35 @@ def _schema_14_to_15(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_15_to_16(source: dict[str, Any]) -> dict[str, Any]:
+    """Add canonical ghost ecology, reincarnation and possession body state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        ghost = components.get("dlc.ghost.soul")
+        if not isinstance(ghost, dict):
+            continue
+        ghost.setdefault("intrinsic_hp_reference", float(ghost.get("intrinsic_hp", 100.0)))
+        ghost.setdefault("intrinsic_mp_reference", float(ghost.get("intrinsic_mp", 100.0)))
+        ghost.setdefault("erosion_thresholds_seen", [])
+        ghost.setdefault("last_reincarnation", None)
+        components.setdefault("dlc.ghost.ecology", {
+            "slots": {},
+            "parade": None,
+            "attachment": None,
+            "captor": None,
+            "pending_capture_revive": False,
+        })
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "ghost": 1,
+        "demonic": 2,
+    }
+    value["schema_version"] = 16
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -429,6 +458,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     12: _schema_12_to_13,
     13: _schema_13_to_14,
     14: _schema_14_to_15,
+    15: _schema_15_to_16,
 }
 
 

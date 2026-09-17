@@ -177,6 +177,21 @@ def combat_snapshot(
         stats[stat] *= factor
     for stat, factor in dict(artifact["player_multipliers"]).items():
         stats[stat] *= float(factor)
+    ghost_details: dict[str, Any] | None = None
+    if state.entities.get(entity_id, "dlc.ghost.soul") is not None:
+        from .ghost import ghost_combat_modifiers
+
+        ghost_details = ghost_combat_modifiers(
+            state, definitions, entity_id
+        )
+        max_hp = (
+            max_hp + float(ghost_details["external_hp"])
+        ) * float(ghost_details["hp_multiplier"])
+        max_mp = (
+            max_mp + float(ghost_details["external_mp"])
+        ) * float(ghost_details["mp_multiplier"])
+        for stat, factor in dict(ghost_details["stats"]).items():
+            stats[stat] *= float(factor)
     return {
         "entity_id": entity_id,
         "name": str(identity["name"]),
@@ -194,6 +209,7 @@ def combat_snapshot(
         "enemy_multipliers": dict(artifact["enemy_multipliers"]),
         "artifact_traits": list(dict.fromkeys(artifact["traits"])),
         "puppet_contribution": puppet_contribution,
+        "ghost_contribution": ghost_details,
         "tribulation_reduction": float(artifact["tribulation_reduction"]),
     }
 

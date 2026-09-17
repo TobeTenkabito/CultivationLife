@@ -51,11 +51,15 @@ def _new_ghost_state(realm_id: str, layer: int) -> dict[str, Any]:
     return {
         "intrinsic_hp": 100.0,
         "intrinsic_mp": 100.0,
+        "intrinsic_hp_reference": 100.0,
+        "intrinsic_mp_reference": 100.0,
         "erosion_rate_pp": 0.0,
         "erosion_time_progress": 0.0,
+        "erosion_thresholds_seen": [],
         "wangsheng": 0,
         "reincarnation_imprints": {},
         "historical_peak": {"realm_id": realm_id, "layer": layer},
+        "last_reincarnation": None,
     }
 
 
@@ -98,13 +102,17 @@ def reconcile_extension_state(state: WorldState, definitions: GameDefinitions) -
         if cultivation is None:
             continue
         path = str(cultivation.get("path", ""))
-        if (
-            path == "ghost" and _loaded(definitions, GHOST_DLC)
-            and state.entities.get(entity_id, GHOST_SOUL) is None
-        ):
-            state.entities.put(entity_id, GHOST_SOUL, _new_ghost_state(
+        if path == "ghost" and _loaded(definitions, GHOST_DLC):
+            defaults = _new_ghost_state(
                 str(cultivation["realm_id"]), int(cultivation["layer"])
-            ))
+            )
+            ghost = state.entities.get(entity_id, GHOST_SOUL)
+            if ghost is None:
+                state.entities.put(entity_id, GHOST_SOUL, defaults)
+            else:
+                for key, value in defaults.items():
+                    ghost.setdefault(key, value)
+                state.entities.put(entity_id, GHOST_SOUL, ghost)
         if (
             path == "monster" and _loaded(definitions, MONSTER_DLC)
             and state.entities.get(entity_id, MONSTER_BLOODLINE) is None
@@ -157,6 +165,11 @@ def _on_time_advanced(definitions: GameDefinitions):
                 life = context.state.entities.require(entity_id, LIFE)
                 if not bool(life.get("alive")):
                     continue
+                possession = context.state.entities.get(
+                    entity_id, "demonic.possession"
+                ) or {}
+                if possession.get("host"):
+                    continue
                 soul = context.state.entities.require(entity_id, GHOST_SOUL)
                 cultivation = context.state.entities.require(entity_id, CULTIVATION)
                 unit_years = definitions.action_time(str(cultivation["realm_id"]), 1)
@@ -168,7 +181,29 @@ def _on_time_advanced(definitions: GameDefinitions):
                     factor = max(0.0, 1.0 - rate / 100.0)
                     soul["intrinsic_hp"] = float(soul["intrinsic_hp"]) * factor
                     soul["intrinsic_mp"] = float(soul["intrinsic_mp"]) * factor
-                    soul["erosion_rate_pp"] = rate + growth
+                    pressure = 0.0
+                    ecology = context.state.entities.get(entity_id, "dlc.ghost.ecology") or {}
+                    bound = {
+                        edge.target_id for edge in context.state.relations.find(
+                            source_id=entity_id, kind="dlc.ghost.soul_control"
+                        )
+                    }
+                    for soul_id in dict(ecology.get("slots", {})).values():
+                        if soul_id not in bound:
+                            continue
+                        bound_soul = context.state.entities.get(
+                            str(soul_id), "dlc.ghost.bound_soul"
+                        ) or {}
+                        pressure += max(0.0, float(bound_soul.get("soul_pressure", 0.0)))
+                    phase_two = dict(config.get("phase_two", {}))
+                    pressure_growth = 1.0 + pressure * max(
+                        0.0, float(phase_two.get("pressure_modifier_per_point", 0.01))
+                    )
+                    attachment = dict(ecology.get("attachment") or {})
+                    attachment_growth = max(
+                        0.0, float(attachment.get("erosion_growth_multiplier", 1.0))
+                    )
+                    soul["erosion_rate_pp"] = rate + growth * pressure_growth * attachment_growth
                 context.state.entities.put(entity_id, GHOST_SOUL, soul)
                 if completed:
                     context.emit(

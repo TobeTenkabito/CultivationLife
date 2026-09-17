@@ -35,7 +35,7 @@
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
       ],
-      "notes": "Schema 15 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 194 of 363 loaded events are currently executable through 26 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
+      "notes": "V2 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 195 of 363 loaded events are currently executable through 27 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
     },
     {
       "id": "inventory.item_use",
@@ -440,29 +440,38 @@
     {
       "id": "ghost.reincarnation",
       "domain": "ghost_dlc",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["ghost-reincarnate", "ghost-reincarnation-prompt", "ghost-wangsheng"],
-      "evidence": ["tests/test_v2_step5_domains.py"],
-      "notes": "Wangsheng spending and erosion exist; full reincarnation flow remains."
+      "evidence": [
+        "tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_ghost_and_monster_dlc_keep_separate_components",
+        "tests/test_v2_ghost_batch8.py::V2GhostBatchEightTests::test_reincarnation_prompt_resets_progress_but_preserves_soul_damage"
+      ],
+      "notes": "Wangsheng, erosion, typed confirmation, reincarnation imprints, soul-damage preservation and breakthrough bonuses share one persistent component."
     },
     {
       "id": "ghost.soul_ecology",
       "domain": "ghost_dlc",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["ghost-parade", "ghost-soul"],
-      "evidence": [],
-      "notes": "Night parade, bound souls and soul slots are not implemented."
+      "evidence": [
+        "tests/test_v2_ghost_batch8.py::V2GhostBatchEightTests::test_parade_is_scheduled_spawned_and_exposed_as_canonical_souls",
+        "tests/test_v2_ghost_batch8.py::V2GhostBatchEightTests::test_bound_soul_slots_modify_real_combat_and_release_cleanly"
+      ],
+      "notes": "Night parades, persistent soul entities, typed control relations, ten soul slots, soul pressure and real cultivation/combat modifiers are implemented."
     },
     {
       "id": "ghost.attachment_possession",
       "domain": "ghost_dlc",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["ghost-attachment", "ghost-constraint", "ghost-leave-host"],
-      "evidence": [],
-      "notes": "Attachment, constraint and leaving a host are not implemented."
+      "evidence": [
+        "tests/test_v2_ghost_batch8.py::V2GhostBatchEightTests::test_attachment_constraint_and_leave_possession_are_real_states",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_supported_ghost_and_monster_state_is_mapped_to_separate_components"
+      ],
+      "notes": "Attachment, captor command restrictions, controlled waiting/resistance/possession and lossless restoration when leaving a host are persisted and importable."
     },
     {
       "id": "monster.evolution_lineage",
