@@ -99,6 +99,7 @@ def _start_trial(
     lethal: bool,
     invited_ids: tuple[str, ...] = (),
     destination_world_id: str | None = None,
+    joint_companion_id: str | None = None,
 ) -> None:
     state = context.state.entities.require(actor_id, TRIAL)
     if state.get("active") is not None:
@@ -119,6 +120,7 @@ def _start_trial(
         "event_ids": event_ids,
         "invited_ids": list(invited_ids),
         "destination_world_id": destination_world_id,
+        "joint_companion_id": joint_companion_id,
         "started_year": context.state.clock.year,
     }
     context.state.entities.put(actor_id, TRIAL, state)
@@ -146,6 +148,10 @@ def _on_breakthrough_trial_requested(definitions: GameDefinitions):
             target_layer=int(event.payload["target_layer"]),
             major=bool(event.payload["major"]),
             lethal=bool(event.payload["lethal"]),
+            joint_companion_id=(
+                str(event.payload["joint_companion_id"])
+                if event.payload.get("joint_companion_id") else None
+            ),
         )
 
     return handler

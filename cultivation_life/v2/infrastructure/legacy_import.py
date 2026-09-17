@@ -20,6 +20,8 @@ from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
 from ..domain.extensions import GHOST_SOUL, MONSTER_BLOODLINE
 from ..domain.factions import FACTION_GOVERNANCE, FACTION_PROFILE, MEMBERSHIP
+from ..domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE, PARENT_CHILD
+from ..domain.concubines import CONCUBINE_STATE
 from ..domain.story import STORY_STATE
 from ..domain.world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -232,7 +234,7 @@ class LegacyV1Importer:
 
     _MAPPED_TOP_LEVEL = {
         "id", "seed", "player", "created_at", "updated_at", "rng_state",
-        "version", "history", "story_trigger_attempts",
+        "version", "history", "story_trigger_attempts", "family",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -244,6 +246,8 @@ class LegacyV1Importer:
         "faction_hp_bonus", "faction_mp_bonus", "faction_combat_bonus",
         "master", "disciples",
         "dao_friends", "concubines", "dao_companion", "monster_species_id",
+        "offspring", "next_companion_conception_bonus", "concubine_status",
+        "concubine_breakthrough_bonus", "concubine_escape_reputation",
         "monster_evolution_id", "monster_evolution_history", "monster_adaptations",
         "monster_adaptation_progress", "monster_bloodline_imprints",
         "monster_acquired_bloodline_traits", "ghost_intrinsic_hp_current",
@@ -351,7 +355,10 @@ class LegacyV1Importer:
         self._import_player_core(state, actor_id, player, realm.id, report)
         self._import_rng(state, source, report)
         self._import_inventory(state, actor_id, player, report)
-        self._import_relations(state, actor_id, player, report)
+        legacy_entities = self._import_relations(state, actor_id, player, report)
+        self._import_family_and_concubine_state(
+            state, actor_id, source, player, legacy_entities, report
+        )
         self._import_faction(state, actor_id, source, player, report)
         self._import_extensions(state, actor_id, player, report)
         self._import_combat_condition(state, actor_id, player, report)
@@ -688,7 +695,7 @@ class LegacyV1Importer:
         actor_id: str,
         player: dict[str, Any],
         report: LegacyImportReport,
-    ) -> None:
+    ) -> dict[str, str]:
         rows: list[tuple[str, dict[str, Any], str]] = []
         companion = player.get("dao_companion")
         if isinstance(companion, dict):
@@ -727,16 +734,210 @@ class LegacyV1Importer:
                 source_id, target_id = npc_id, actor_id
             elif kind in {"friend", "dao_companion"}:
                 source_id, target_id = sorted((actor_id, npc_id))
+            metadata: dict[str, Any] = {"legacy_id": legacy_id, "imported": True}
+            if kind == "concubine":
+                metadata.update({
+                    "joined_year": state.clock.year,
+                    "last_cauldron_unit": raw.get("last_cauldron_unit"),
+                    "cauldron_uses": max(0, int(raw.get("cauldron_uses", 0))),
+                    "affinity": float(raw.get("affinity", 0.0)),
+                    "source": str(raw.get("source", "legacy")),
+                })
             state.relations.add(
                 source_id=source_id,
                 target_id=target_id,
                 kind=kind,
                 created_year=state.clock.year,
-                metadata={"legacy_id": legacy_id, "imported": True},
+                metadata=metadata,
             )
             imported += 1
         report.imported_counts["related_characters"] = len(legacy_entities)
         report.imported_counts["relationships"] = imported
+        return legacy_entities
+
+    def _import_family_and_concubine_state(
+        self,
+        state: WorldState,
+        actor_id: str,
+        source: dict[str, Any],
+        player: dict[str, Any],
+        legacy_entities: dict[str, str],
+        report: LegacyImportReport,
+    ) -> None:
+        lineage = state.entities.require(actor_id, LINEAGE)
+        lineage["next_conception_bonus"] = max(
+            0.0,
+            min(
+                0.95,
+                _safe_float(
+                    player.get("next_companion_conception_bonus", 0.0),
+                    "player.next_companion_conception_bonus",
+                ),
+            ),
+        )
+        child_ids: list[str] = []
+        for index, raw in enumerate(player.get("offspring", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_offspring", f"player.offspring[{index}]",
+                    "非对象后代记录未导入",
+                )
+                continue
+            legacy_id = str(raw.get("id", "")).strip() or f"offspring:{index}"
+            child_id = legacy_entities.get(legacy_id)
+            if child_id is None:
+                child_id = self._create_related_character(
+                    state, raw, legacy_id, report
+                )
+                legacy_entities[legacy_id] = child_id
+            if not any(
+                edge.target_id == child_id
+                for edge in state.relations.find(
+                    source_id=actor_id, kind=PARENT_CHILD
+                )
+            ):
+                state.relations.add(
+                    source_id=actor_id,
+                    target_id=child_id,
+                    kind=PARENT_CHILD,
+                    created_year=state.clock.year,
+                    metadata={"role": "parent", "imported": True},
+                )
+            child_ids.append(child_id)
+        lineage["child_ids"] = list(dict.fromkeys(child_ids))
+
+        legacy_family = source.get("family")
+        if isinstance(legacy_family, dict) and not bool(legacy_family.get("extinct", False)):
+            family_id = state.entities.create("family")
+            family_world = str(legacy_family.get("world", player.get("world", "human")))
+            if family_world not in self.definitions.worlds:
+                family_world = str(player.get("world", "human"))
+                report.warn(
+                    "family_world_default", "family.world",
+                    "家族所在世界无法映射，已使用玩家当前世界",
+                )
+            state.entities.put(family_id, FAMILY_PROFILE, {
+                "name": str(legacy_family.get("name", "旧档家族")),
+                "world_id": family_world,
+                "path": str(legacy_family.get("path", player.get("path", "dao"))),
+                "allegiance_race": str(
+                    legacy_family.get("allegiance_race", player.get("race", "human"))
+                ),
+                "creator_id": actor_id,
+                "controller_id": actor_id,
+                "active": True,
+                "founded_year": state.clock.year,
+                "legacy_id": str(legacy_family.get("id", "")),
+            })
+            state.relations.add(
+                source_id=actor_id,
+                target_id=family_id,
+                kind="family_founder",
+                created_year=state.clock.year,
+                metadata={"imported": True},
+            )
+            for index, raw in enumerate(legacy_family.get("members", [])):
+                if not isinstance(raw, dict):
+                    continue
+                legacy_id = str(raw.get("id", "")).strip() or f"family-member:{index}"
+                member_id = legacy_entities.get(legacy_id)
+                if member_id is None:
+                    member_id = self._create_related_character(
+                        state, raw, legacy_id, report
+                    )
+                    legacy_entities[legacy_id] = member_id
+                if not state.relations.find(
+                    source_id=member_id,
+                    target_id=family_id,
+                    kind=FAMILY_MEMBERSHIP,
+                ):
+                    state.relations.add(
+                        source_id=member_id,
+                        target_id=family_id,
+                        kind=FAMILY_MEMBERSHIP,
+                        created_year=state.clock.year,
+                        metadata={
+                            "role": str(raw.get("member_type", "member")),
+                            "imported": True,
+                        },
+                    )
+            lineage["family_id"] = family_id
+            report.imported_counts["families"] = 1
+        else:
+            report.imported_counts["families"] = 0
+        state.entities.put(actor_id, LINEAGE, lineage)
+        report.imported_counts["offspring"] = len(child_ids)
+
+        concubine_state = state.entities.require(actor_id, CONCUBINE_STATE)
+        concubine_state["cauldron_breakthrough_bonus"] = max(
+            0.0,
+            min(
+                0.02,
+                _safe_float(
+                    player.get("concubine_breakthrough_bonus", 0.0),
+                    "player.concubine_breakthrough_bonus",
+                ),
+            ),
+        )
+        concubine_state["escape_reputation"] = max(
+            0, int(player.get("concubine_escape_reputation", 0))
+        )
+        state.entities.put(actor_id, CONCUBINE_STATE, concubine_state)
+
+        status = player.get("concubine_status")
+        if isinstance(status, dict):
+            legacy_owner_id = str(status.get("owner_id", "")).strip()
+            owner_id = legacy_entities.get(legacy_owner_id)
+            if owner_id is None:
+                owner_raw = {
+                    "name": status.get("owner_name", "旧档正主"),
+                    "gender": "male",
+                    "age": status.get("owner_age", 30),
+                    "lifespan": status.get("owner_lifespan"),
+                    "alive": True,
+                    "world": status.get("owner_world", player.get("world", "human")),
+                    "race": status.get("owner_race", "human"),
+                    "path": status.get("owner_path", "dao"),
+                    "spirit_root": status.get("owner_spirit_root", "supreme_wood"),
+                    "realm_index": status.get("owner_realm_index", 1),
+                    "layer": status.get("owner_layer", 1),
+                }
+                owner_id = self._create_related_character(
+                    state, owner_raw, legacy_owner_id or "concubine-owner", report
+                )
+                if legacy_owner_id:
+                    legacy_entities[legacy_owner_id] = owner_id
+            pair_conflict = any(
+                {edge.source_id, edge.target_id} == {actor_id, owner_id}
+                for edge in state.relations.find()
+            )
+            if pair_conflict:
+                report.warn(
+                    "relationship_conflict", "player.concubine_status",
+                    "正主与玩家已有其他规范关系，侍妾处境未重复导入",
+                )
+            else:
+                state.relations.add(
+                    source_id=owner_id,
+                    target_id=actor_id,
+                    kind="concubine",
+                    created_year=state.clock.year,
+                    metadata={
+                        "joined_year": state.clock.year,
+                        "turns": max(0, int(status.get("turns", 0))),
+                        "last_drain": max(0.0, float(status.get("last_drain", 0.0))),
+                        "dependent": bool(status.get("dependent", False)),
+                        "forced": bool(status.get("forced", False)),
+                        "failed_escape_count": max(
+                            0, int(status.get("failed_escape_count", 0))
+                        ),
+                        "last_requests": dict(status.get("last_requests", {})),
+                        "angered_until_unit": int(status.get("angered_until_unit", -1)),
+                        "imported": True,
+                    },
+                )
+                report.imported_counts["concubine_status"] = 1
+        report.imported_counts.setdefault("concubine_status", 0)
 
     def _create_related_character(
         self,
@@ -771,6 +972,14 @@ class LegacyV1Importer:
             "alive": alive,
             "death_reason": raw.get("death_reason"),
         })
+        if alive and lifespan is not None:
+            state.scheduler.schedule(
+                due_year=state.clock.year - age + lifespan,
+                event_type=LIFESPAN_DUE,
+                source="legacy_import",
+                scope=EventScope.entity(entity_id),
+                payload={"entity_id": entity_id},
+            )
         state.entities.put(entity_id, ACTIVITY, {"rest_years": 0, "actions_completed": 0})
         root = str(raw.get("spirit_root", "supreme_wood"))
         if root not in self.definitions.roots:

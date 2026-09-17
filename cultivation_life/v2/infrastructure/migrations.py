@@ -310,6 +310,33 @@ def _schema_10_to_11(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_11_to_12(source: dict[str, Any]) -> dict[str, Any]:
+    """Add canonical lineage and concubine lifecycle state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" in components:
+            components.setdefault(
+                "family.lineage",
+                {
+                    "child_ids": [],
+                    "family_id": None,
+                    "next_conception_bonus": 0.0,
+                    "conceptions_attempted": 0,
+                },
+            )
+            components.setdefault(
+                "relations.concubine_state",
+                {"cauldron_breakthrough_bonus": 0.0, "escape_reputation": 0},
+            )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "family": 1, "relations": 3,
+    }
+    value["schema_version"] = 12
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -321,6 +348,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     8: _schema_8_to_9,
     9: _schema_9_to_10,
     10: _schema_10_to_11,
+    11: _schema_11_to_12,
 }
 
 

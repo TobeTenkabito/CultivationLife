@@ -162,6 +162,16 @@ def _change_affinity(state: WorldState, observer_id: str, subject_id: str, amoun
     )
 
 
+def relationship_affinity(state: WorldState, observer_id: str, subject_id: str) -> float:
+    return _affinity(state, observer_id, subject_id)
+
+
+def set_relationship_affinity(
+    state: WorldState, observer_id: str, subject_id: str, value: float,
+) -> float:
+    return _set_affinity(state, observer_id, subject_id, value)
+
+
 def _sync_edge_affinity(state: WorldState, edge: RelationEdge, actor_id: str) -> RelationEdge:
     other_id = edge.target_id if edge.source_id == actor_id else edge.source_id
     metadata = dict(edge.metadata)
@@ -251,6 +261,8 @@ def _add_relationship(context: SimulationContext, command: FormRelationship) -> 
             if context.state.relations.involving(entity_id, kind="dao_companion"):
                 raise ValueError("道侣关系具有唯一性")
     if command.kind == "concubine":
+        if context.state.entities.require(target_id, IDENTITY).get("gender") != "female":
+            raise ValueError("侍妾名分只可由女性角色承受")
         if context.state.relations.find(target_id=target_id, kind="concubine"):
             raise ValueError("该人物已有侍奉对象")
     if command.kind == "master_disciple":
