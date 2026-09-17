@@ -679,6 +679,12 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         cauldron_bonus = min(
             0.02, max(0.0, float(concubine_state.get("cauldron_breakthrough_bonus", 0.0)))
         )
+        demonic_state = context.state.entities.get(
+            command.actor_id, "demonic.state"
+        ) or {}
+        devouring_bonus = max(
+            0.0, float(demonic_state.get("devouring_breakthrough_bonus", 0.0))
+        )
         dependent_bonus = 0.0
         owner_edge = next(iter(context.state.relations.find(
             target_id=command.actor_id, kind="concubine"
@@ -700,13 +706,22 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
             0.005,
             min(
                 0.98,
-                chance + companion_bonus + cauldron_bonus + dependent_bonus,
+                chance
+                + companion_bonus
+                + cauldron_bonus
+                + dependent_bonus
+                + devouring_bonus,
             ),
         )
         if concubine_state:
             concubine_state["cauldron_breakthrough_bonus"] = 0.0
             context.state.entities.put(
                 command.actor_id, "relations.concubine_state", concubine_state
+            )
+        if demonic_state:
+            demonic_state["devouring_breakthrough_bonus"] = 0.0
+            context.state.entities.put(
+                command.actor_id, "demonic.state", demonic_state
             )
         cultivation["active_breakthrough_aids"] = []
         old_realm = str(cultivation["realm_id"])

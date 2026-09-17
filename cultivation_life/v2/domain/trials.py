@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .character import IDENTITY, LIFE
-from .combat import CONDITION, combat_snapshot
+from .combat import combat_snapshot
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions, StoryEffectDefinition
 from .story import EffectOutcome, StoryEffectRegistry, STORY_STATE, queue_story_event
@@ -255,7 +255,6 @@ def _evaluate_step(
     attributes = _story_attributes(context, actor_id)
     cultivation = context.state.entities.require(actor_id, CULTIVATION)
     heart = float(cultivation.get("heart_demon", 0))
-    source = int(trial["source_realm_index"])
     target = int(trial["target_realm_index"])
     thunder = "thunder" in step
     if step == "vitality":

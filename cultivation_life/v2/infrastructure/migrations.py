@@ -387,6 +387,33 @@ def _schema_13_to_14(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_14_to_15(source: dict[str, Any]) -> dict[str, Any]:
+    """Add canonical imprisonment, puppet/soul and possession aggregate state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault("demonic.state", {
+            "devouring_breakthrough_bonus": 0.0,
+            "pending_post_battle_possession": None,
+        })
+        components.setdefault("demonic.imprisonment", {
+            "active": None, "last_result": None,
+        })
+        components.setdefault("demonic.possession", {
+            "host": None, "count": 0, "core": None,
+        })
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "combat": 3,
+        "demonic": 1,
+    }
+    value["schema_version"] = 15
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -401,6 +428,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     11: _schema_11_to_12,
     12: _schema_12_to_13,
     13: _schema_13_to_14,
+    14: _schema_14_to_15,
 }
 
 

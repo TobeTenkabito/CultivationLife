@@ -5,12 +5,10 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.v2 import FormRelationship, GrantItem, RegisterCharacter, V2GameEngine
-from cultivation_life.v2.domain.character import LIFE
 from cultivation_life.v2.domain.combat import CONDITION
 from cultivation_life.v2.domain.cultivation import CULTIVATION
 from cultivation_life.v2.domain.story import STORY_STATE
-from cultivation_life.v2.domain.trials import TRIAL
-from cultivation_life.v2.domain.world import LOCATION, WORLD_TRANSITION
+from cultivation_life.v2.domain.world import LOCATION
 
 
 class V2TrialRuntimeTests(unittest.TestCase):
@@ -232,7 +230,7 @@ class V2AscensionTrialTests(unittest.TestCase):
             set(transaction["acknowledgements"]),
             {
                 "relations", "factions", "economy", "assets", "auction",
-                "artifacts", "combat", "party",
+                "artifacts", "combat", "party", "demonic",
             },
         )
         state = engine.store.load(game_id)

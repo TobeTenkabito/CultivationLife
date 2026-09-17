@@ -281,7 +281,7 @@ class V2AuctionAndBlackMarketTests(unittest.TestCase):
             row["id"] == asset["id"] for row in sold.game["assets"]["instances"]
         ))
         self.assertGreater(sold.game["market"]["spirit_stones"], before_sale)
-        with self.assertRaisesRegex(ValueError, "傀儡领域"):
+        with self.assertRaisesRegex(ValueError, "傀儡资产不存在"):
             self.engine.sell_black_market_asset(self.game_id, "puppet", "not-migrated")
         left = self.engine.leave_black_market(self.game_id)
         self.assertEqual(left.game["auction"]["status"], "cooldown")

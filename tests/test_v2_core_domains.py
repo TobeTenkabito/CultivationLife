@@ -90,7 +90,7 @@ class V2CoreDomainTests(unittest.TestCase):
             spirit_root="supreme_fire",
             start_world="demon",
         )
-        self.assertEqual(game["schema_version"], 14)
+        self.assertEqual(game["schema_version"], 15)
         self.assertEqual(game["player"]["gender"], "female")
         self.assertEqual(game["player"]["cultivation"]["path"], "demonic")
         self.assertEqual(
@@ -426,7 +426,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                         ),
                     )
             migrated = engine.get_game(game_id)
-            self.assertEqual(migrated["schema_version"], 14)
+            self.assertEqual(migrated["schema_version"], 15)
             self.assertEqual(migrated["player"]["gender"], "male")
             self.assertEqual(migrated["player"]["cultivation"]["opportunity"], 4)
             self.assertEqual(migrated["trial"], {"active": None, "history": []})
@@ -436,7 +436,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
                 stored_version = connection.execute(
                     "SELECT schema_version FROM games WHERE game_id = ?", (game_id,)
                 ).fetchone()[0]
-            self.assertEqual(stored_version, 14)
+            self.assertEqual(stored_version, 15)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
       ],
-      "notes": "Schema 14 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 194 of 363 loaded events are currently executable through 26 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
+      "notes": "Schema 15 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 194 of 363 loaded events are currently executable through 26 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
     },
     {
       "id": "inventory.item_use",
@@ -179,11 +179,14 @@
     {
       "id": "economy.black_market",
       "domain": "economy",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["black-market-search", "black-market-buy", "black-market-sell", "black-market-leave"],
-      "evidence": ["tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_private_trade_and_black_market_unique_material_round_trip"],
-      "notes": "Regex discovery, stack goods, techniques and generated crafting/formation material instances can be bought and sold through the shared asset ledger. Demonic puppet sale remains blocked until the puppet/soul aggregate is migrated."
+      "evidence": [
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_private_trade_and_black_market_unique_material_round_trip",
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_mechanical_puppet_black_market_sale_and_ascension_cleanup"
+      ],
+      "notes": "Regex discovery, stack goods, techniques, generated crafting/formation materials, mechanical puppets and corpse puppets can be bought or sold atomically. Living puppets are intentionally rejected."
     },
     {
       "id": "economy.spirit_field",
@@ -280,16 +283,17 @@
     {
       "id": "relations.concubines",
       "domain": "relations",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["concubine-action", "concubine-status"],
       "evidence": [
         "tests/test_v2_concubines.py::V2ConcubineTests::test_recruitment_creates_a_distinct_concubine_relationship",
         "tests/test_v2_concubines.py::V2ConcubineTests::test_cauldron_cooldown_live_view_and_breakthrough_bonus_consumption",
         "tests/test_v2_concubines.py::V2ConcubineTests::test_player_concubine_status_drains_and_manages_owner_dependency",
-        "tests/test_v2_concubines.py::V2ConcubineTests::test_automatic_proposal_refusal_and_two_unit_revenge_are_persisted"
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_automatic_proposal_refusal_and_two_unit_revenge_are_persisted",
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_concubine_corpse_conversion_is_not_a_companion_relation"
       ],
-      "notes": "Recruitment, distinct relationship semantics, canonical live information, cauldron cooldown/restoration/affinity, breakthrough bonuses, dismissal, dependent efficiency and drain, owner requests, escape resolution, automatic stronger-owner proposals and the persisted two-action rejection/revenge chain are migrated. Demonic corpse conversion remains an explicit dependency on the puppet/soul aggregate."
+      "notes": "Recruitment, distinct relationship semantics, canonical live information, cauldron cooldown/restoration/affinity, breakthrough bonuses, dismissal, dependent efficiency and drain, owner requests, escape resolution, automatic stronger-owner proposals and the persisted two-action rejection/revenge chain are migrated. Demonic corpse conversion closes the concubine edge and creates one canonical corpse puppet."
     },
     {
       "id": "relations.capture",
@@ -399,29 +403,39 @@
     {
       "id": "demonic.prison",
       "domain": "demonic",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["prison-action"],
-      "evidence": [],
-      "notes": "Player imprisonment lifecycle is not represented in V2."
+      "evidence": [
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_imprisonment_uses_time_and_releases_canonical_relation",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_translates_demonic_entities_and_active_imprisonment"
+      ],
+      "notes": "Imprisonment owns a canonical captor relation, restricts available commands, advances the common clock for annual prison actions, supports facility-specific escape rules, and closes cleanly on sentence completion, death or permanent crossing."
     },
     {
       "id": "demonic.captives",
       "domain": "demonic",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["captive-action", "post-battle-possession"],
-      "evidence": [],
-      "notes": "Capture relation exists, but captive actions and possession do not."
+      "evidence": [
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_captive_living_puppet_soul_and_breakthrough_bonus_loop",
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_lethal_defeat_preserves_captive_for_one_post_battle_possession"
+      ],
+      "notes": "Canonical prisoners can be released, tortured, converted to corpse/living puppets or possessed. A ghost killed in a lethal defeat retains eligible captives for one persisted post-battle possession decision."
     },
     {
       "id": "demonic.puppets_souls",
       "domain": "demonic",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["puppet-action", "craft-puppet", "refine-souls", "secluded-refine-souls"],
-      "evidence": [],
-      "notes": "Puppets, foreign souls and refining loops remain."
+      "evidence": [
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_captive_living_puppet_soul_and_breakthrough_bonus_loop",
+        "tests/test_v2_demonic_batch7.py::V2DemonicBatchSevenTests::test_mechanical_puppet_black_market_sale_and_ascension_cleanup",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_translates_demonic_entities_and_active_imprisonment"
+      ],
+      "notes": "Mechanical, corpse and living puppets are canonical controlled entities with capacity, training, pills, techniques, control decay, revolt, combat contribution, sale and crossing cleanup. Devouring creates foreign souls; immediate and secluded refining feed a bounded one-shot breakthrough bonus."
     },
     {
       "id": "ghost.reincarnation",
