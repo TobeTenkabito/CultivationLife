@@ -204,7 +204,7 @@ class V2WorldCrossingTests(unittest.TestCase):
         self.assertEqual(transaction["status"], "committed")
         self.assertEqual(
             set(transaction["acknowledgements"]),
-            {"relations", "factions", "economy", "combat"},
+            {"relations", "factions", "economy", "assets", "auction", "combat"},
         )
         self.assertEqual(crossed.game["world"]["world_id"], "spirit")
         self.assertIsNone(crossed.game["faction"])

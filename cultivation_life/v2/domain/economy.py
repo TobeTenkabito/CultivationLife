@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from .character import IDENTITY, LIFE
 from .cultivation import CULTIVATION, PRACTICE
@@ -42,6 +42,13 @@ class BuyMarketOffer:
     offer_id: str
 
 
+@dataclass(frozen=True, slots=True)
+class UseItem:
+    actor_id: str
+    item_id: str
+    allow_during_interaction: ClassVar[bool] = True
+
+
 def _inventory(state: WorldState, actor_id: str) -> dict[str, Any]:
     return state.entities.require(actor_id, INVENTORY)
 
@@ -52,6 +59,12 @@ def _quantity(inventory: dict[str, Any], item_id: str, *, spendable: bool = Fals
         return owned
     reserved = int(dict(inventory.get("reserved", {})).get(item_id, 0))
     return owned - reserved
+
+
+def inventory_quantity(
+    state: WorldState, actor_id: str, item_id: str, *, spendable: bool = False,
+) -> int:
+    return _quantity(_inventory(state, actor_id), item_id, spendable=spendable)
 
 
 def _change_item(
@@ -91,6 +104,17 @@ def _change_item(
             "reason": reason,
         },
     )
+
+
+def change_inventory_item(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    item_id: str,
+    quantity: int,
+    reason: str,
+) -> None:
+    _change_item(context, definitions, actor_id, item_id, quantity, reason)
 
 
 def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
@@ -177,6 +201,154 @@ def _grant_item_handler(definitions: GameDefinitions):
         _change_item(
             context, definitions, command.actor_id, command.item_id,
             command.quantity, command.reason,
+        )
+
+    return handler
+
+
+def _use_item_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, UseItem):
+            raise TypeError("命令类型错误")
+        if command.actor_id != context.state.controlled_entity_id:
+            raise ValueError("只能为当前角色使用物品")
+        if not bool(context.state.entities.require(command.actor_id, LIFE).get("alive")):
+            raise ValueError("死亡角色不能使用物品")
+        item = definitions.items.get(command.item_id)
+        if item is None or inventory_quantity(
+            context.state, command.actor_id, command.item_id, spendable=True
+        ) < 1:
+            raise ValueError("物品不存在")
+        story = context.state.entities.get(command.actor_id, "story.state") or {}
+        pending = story.get("pending")
+        trial = context.state.entities.get(command.actor_id, "cultivation.trial") or {}
+        active_trial = trial.get("active")
+        cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        result = ""
+        if pending is not None:
+            if (
+                not isinstance(active_trial, dict)
+                or (item.trial_restore_hp <= 0 and item.trial_restore_mp <= 0)
+            ):
+                raise ValueError("当前事件中只能使用渡劫恢复道具")
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1,
+                "trial_recovery",
+            )
+            if item.trial_restore_hp:
+                context.emit(
+                    "story.effect.combat_condition.changed",
+                    source="economy",
+                    scope=EventScope.entity(command.actor_id),
+                    payload={
+                        "entity_id": command.actor_id, "kind": "restore_hp",
+                        "amount": item.trial_restore_hp, "reason": "trial_recovery",
+                    },
+                )
+            if item.trial_restore_mp:
+                context.emit(
+                    "story.effect.combat_condition.changed",
+                    source="economy",
+                    scope=EventScope.entity(command.actor_id),
+                    payload={
+                        "entity_id": command.actor_id, "kind": "restore_mp",
+                        "amount": item.trial_restore_mp, "reason": "trial_recovery",
+                    },
+                )
+            result = "trial_recovery"
+        elif command.item_id == "healing_pill":
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1, "healing"
+            )
+            context.emit(
+                "story.effect.combat_condition.changed",
+                source="economy",
+                scope=EventScope.entity(command.actor_id),
+                payload={
+                    "entity_id": command.actor_id, "kind": "restore_hp",
+                    "amount": 0.35, "reason": "healing_pill",
+                },
+            )
+            result = "healed"
+        elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
+            if cultivation["path"] == "ghost":
+                raise ValueError("阴魂不受血肉丹火重塑，此物无法助你破境")
+            if cultivation["path"] == "demonic":
+                raise ValueError("魔修不能依靠突破丹药提高自身突破率")
+            scope, source = item.breakthrough_scope.split(":", 1)
+            realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+            if cultivation["path"] == "monster" and scope == "major":
+                raise ValueError("妖修大境界由血脉条件与生命经历决定")
+            if cultivation.get("bottleneck") not in {"major", "minor"}:
+                raise ValueError("尚未抵达可服用突破丹药的瓶颈")
+            expected = "major" if cultivation.get("bottleneck") == "major" else "minor"
+            if int(source) != realm_index or scope != expected:
+                raise ValueError("这枚丹药不适用于当前突破瓶颈")
+            aids = list(map(str, cultivation.get("active_breakthrough_aids", [])))
+            if command.item_id in aids:
+                raise ValueError("本次冲关已经服用过同一种丹药")
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1,
+                "breakthrough_aid",
+            )
+            aids.append(command.item_id)
+            cultivation["active_breakthrough_aids"] = aids
+            context.state.entities.put(command.actor_id, CULTIVATION, cultivation)
+            result = "breakthrough_aid"
+        elif item.root_grant:
+            location = context.state.entities.require(command.actor_id, LOCATION)
+            realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+            prefix = command.item_id.split("_", 1)[0]
+            requirements = {
+                "zique": ("spirit", 5), "moque": ("true_demon", 5),
+                "yaoque": ("monster_realm", 5), "mingque": ("hell", 5),
+            }
+            if prefix in requirements:
+                world_id, minimum = requirements[prefix]
+                valid_world = location["world_id"] == world_id or (
+                    prefix == "yaoque" and location["world_id"] == "phantom_underworld"
+                )
+                if not valid_world or realm_index < minimum:
+                    raise ValueError("当前界面或境界不足以参悟此法门")
+            elif prefix == "jinque" and realm_index < 4:
+                raise ValueError("当前境界不足以参悟此法门")
+            roots = list(map(str, cultivation.get("additional_roots", [])))
+            base_elements = definitions.roots[str(cultivation["spirit_root"])].elements
+            if item.root_grant in roots or item.root_grant in base_elements:
+                raise ValueError("你已经拥有对应灵根")
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1,
+                "root_manual",
+            )
+            roots.append(item.root_grant)
+            cultivation["additional_roots"] = roots
+            context.state.entities.put(command.actor_id, CULTIVATION, cultivation)
+            result = "root_added"
+        elif item.permanent_intrinsic_hp_bonus > 0 or item.permanent_intrinsic_mp_bonus > 0:
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1,
+                "intrinsic_growth",
+            )
+            cultivation["intrinsic_hp_bonus"] = float(
+                cultivation.get("intrinsic_hp_bonus", 0)
+            ) + item.permanent_intrinsic_hp_bonus
+            cultivation["intrinsic_mp_bonus"] = float(
+                cultivation.get("intrinsic_mp_bonus", 0)
+            ) + item.permanent_intrinsic_mp_bonus
+            context.state.entities.put(command.actor_id, CULTIVATION, cultivation)
+            result = "intrinsic_growth"
+        elif item.conception_bonus > 0:
+            raise ValueError("孕育药力将在家族生命周期迁移后开放")
+        else:
+            raise ValueError("该物品当前不能使用")
+        context.emit(
+            "economy.item.used",
+            source="economy",
+            scope=EventScope.entity(command.actor_id),
+            payload={
+                "entity_id": command.actor_id, "item_id": command.item_id,
+                "result": result,
+            },
         )
 
     return handler
@@ -448,6 +620,7 @@ def economy_invariants(definitions: GameDefinitions):
 
 def register_economy_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
     bus.register(GrantItem, _grant_item_handler(definitions))
+    bus.register(UseItem, _use_item_handler(definitions))
     bus.register(RefreshMarket, _refresh_market_handler(definitions))
     bus.register(ToggleMarketOfferLock, _toggle_lock)
     bus.register(BuyMarketOffer, _buy_handler(definitions))

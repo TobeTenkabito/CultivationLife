@@ -40,11 +40,15 @@
     {
       "id": "inventory.item_use",
       "domain": "economy",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["use-item", "spirit-plant-use"],
-      "evidence": [],
-      "notes": "Inventory ownership exists, but consumable effects do not."
+      "evidence": [
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_healing_and_breakthrough_items_are_consumed_atomically",
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_trial_recovery_item_can_be_used_without_resolving_pending_choice",
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_irrigation_harvest_and_alchemy_share_instance_assets"
+      ],
+      "notes": "Healing, breakthrough aids, trial recovery, root manuals, permanent intrinsic pills and active harvested-plant effects are migrated. Conception pills remain blocked until the family lifecycle has a V2 authority state."
     },
     {
       "id": "presentation.settings_debug",
@@ -150,47 +154,56 @@
     {
       "id": "economy.spirit_plant_sale",
       "domain": "economy",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["market-sell-plant"],
-      "evidence": [],
-      "notes": "Instance-valued spirit plants are not represented in V2 inventory."
+      "evidence": ["tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_spirit_field_is_instant_to_reclaim_and_grows_on_unified_clock"],
+      "notes": "Harvests are instance assets with rounded age, quality and value; market sale consumes the exact instance and credits stones atomically. Black-market sale remains isolated under the black-market blocker."
     },
     {
       "id": "economy.auction",
       "domain": "economy",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["auction-consign", "auction-bid", "auction-advance", "auction-negotiate", "auction-identity", "auction-private-buy", "auction-private-sell", "auction-private-bargain"],
-      "evidence": [],
-      "notes": "Escrow, consignments, private trades and cancellation refunds remain."
+      "evidence": [
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_bid_is_escrowed_then_released_when_an_npc_outbids",
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_consignment_uses_asset_escrow_and_crossing_releases_it_immediately",
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_winning_bid_settles_stones_and_delivers_exact_content",
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_consignment_settlement_consumes_escrow_and_pays_net_commission",
+        "tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_private_trade_and_black_market_unique_material_round_trip"
+      ],
+      "notes": "The scheduled/open/black-market/cooldown state machine uses an auction-specific deterministic random stream. Bids and consignments use the shared reservation ledger; settlement, outbid refunds, world-crossing cancellation, identity, negotiation, private buy/sell and bargaining are atomic and persisted."
     },
     {
       "id": "economy.black_market",
       "domain": "economy",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["black-market-search", "black-market-buy", "black-market-sell", "black-market-leave"],
-      "evidence": [],
-      "notes": "Black-market discovery and transactions are not migrated."
+      "evidence": ["tests/test_v2_auction_black_market.py::V2AuctionAndBlackMarketTests::test_private_trade_and_black_market_unique_material_round_trip"],
+      "notes": "Regex discovery, stack goods, techniques and generated crafting/formation material instances can be bought and sold through the shared asset ledger. Demonic puppet sale remains blocked until the puppet/soul aggregate is migrated."
     },
     {
       "id": "economy.spirit_field",
       "domain": "economy",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["spirit-field-reclaim", "spirit-field-plant", "spirit-field-irrigate", "spirit-field-harvest"],
-      "evidence": [],
-      "notes": "Instant reclamation and scheduled plant growth remain."
+      "evidence": [
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_spirit_field_is_instant_to_reclaim_and_grows_on_unified_clock",
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_irrigation_harvest_and_alchemy_share_instance_assets"
+      ],
+      "notes": "Reclamation is instantaneous, while crop growth uses the unified clock. Planting, MP irrigation, boosters, bounded plots, five-art experience and exact-instance harvesting are persisted."
     },
     {
       "id": "crafting.alchemy",
       "domain": "crafting",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["alchemy"],
-      "evidence": [],
-      "notes": "Alchemy recipes, materials and products are not implemented."
+      "evidence": ["tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_irrigation_harvest_and_alchemy_share_instance_assets"],
+      "notes": "Alchemy accepts stack herbs and harvested instances, validates all inputs before mutation, consumes 15% MP, uses deterministic success rolls and persists experience/products."
     },
     {
       "id": "crafting.artifacts",

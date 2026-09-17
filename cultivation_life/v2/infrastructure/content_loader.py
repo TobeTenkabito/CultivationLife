@@ -33,7 +33,8 @@ class V2ContentLoader:
 
     REQUIRED_FILES = (
         "world.json", "maps.json", "factions.json", "techniques.json",
-        "items.json", "market.json", "transformations.json",
+        "items.json", "market.json", "transformations.json", "crafting.json",
+        "formations.json",
     )
 
     @classmethod
@@ -66,6 +67,8 @@ class V2ContentLoader:
         item_doc = documents["items.json"]
         transformation_doc = documents["transformations.json"]
         market_doc = documents["market.json"]
+        crafting_doc = documents["crafting.json"]
+        formation_doc = documents["formations.json"]
 
         realms = tuple(cls._realm(row) for row in world_doc.get("realms", []))
         if not realms or len({realm.id for realm in realms}) != len(realms):
@@ -92,6 +95,23 @@ class V2ContentLoader:
         ):
             raise V2ContentError("势力年度奖励定义无效")
         systems = dict(world_doc.get("systems", {}))
+        systems["crafting"] = {
+            "settings": dict(crafting_doc.get("settings", {})),
+            "molds": [dict(row) for row in crafting_doc.get("molds", [])],
+            "materials": [dict(row) for row in crafting_doc.get("materials", [])],
+            "spirit_plants": [
+                dict(row) for row in crafting_doc.get("spirit_plants", [])
+            ],
+        }
+        systems["formations"] = {
+            "settings": dict(formation_doc.get("settings", {})),
+            "materials": [dict(row) for row in formation_doc.get("materials", [])],
+            "maintenance_resources": [
+                dict(row) for row in formation_doc.get("maintenance_resources", [])
+            ],
+            "nature_channels": dict(formation_doc.get("nature_channels", {})),
+            "relations": dict(formation_doc.get("relations", {})),
+        }
         time_units = {int(index): int(years) for index, years in dict(systems["time_units"]).items()}
         travel_speeds = {
             int(index): float(multiplier)
@@ -354,6 +374,21 @@ class V2ContentLoader:
                 ),
                 transformation_source=str(row.get("transformation_source", "")),
                 transformation_purity=float(row.get("transformation_purity", 0)),
+                breakthrough_bonus=float(row.get("breakthrough_bonus", 0)),
+                breakthrough_scope=str(row.get("breakthrough_scope", "")),
+                trial_restore_hp=float(row.get("trial_restore_hp", 0)),
+                trial_restore_mp=float(row.get("trial_restore_mp", 0)),
+                root_grant=str(row.get("root_grant", "")),
+                conception_bonus=float(row.get("conception_bonus", 0)),
+                permanent_intrinsic_hp_bonus=float(
+                    row.get("permanent_intrinsic_hp_bonus", 0)
+                ),
+                permanent_intrinsic_mp_bonus=float(
+                    row.get("permanent_intrinsic_mp_bonus", 0)
+                ),
+                tribulation_damage_reduction=float(
+                    row.get("tribulation_damage_reduction", 0)
+                ),
             )
             form_id = result[item_id].transformation_form_id
             if form_id is not None and (
