@@ -370,6 +370,23 @@ def _schema_12_to_13(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_13_to_14(source: dict[str, Any]) -> dict[str, Any]:
+    """Add canonical party-combat and war/bounty aggregate state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" in components:
+            components.setdefault(
+                "governance.bounties", {"next_sequence": 1, "orders": []}
+            )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "combat": 2, "war": 1,
+    }
+    value["schema_version"] = 14
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -383,6 +400,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     10: _schema_10_to_11,
     11: _schema_11_to_12,
     12: _schema_12_to_13,
+    13: _schema_13_to_14,
 }
 
 

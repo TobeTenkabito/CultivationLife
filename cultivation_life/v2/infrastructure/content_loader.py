@@ -32,7 +32,7 @@ class V2ContentLoader:
     """Strict adapter from immutable V1 content documents to V2 definitions."""
 
     REQUIRED_FILES = (
-        "world.json", "maps.json", "factions.json", "techniques.json",
+        "world.json", "races.json", "maps.json", "factions.json", "techniques.json",
         "items.json", "market.json", "transformations.json", "crafting.json",
         "formations.json",
     )
@@ -61,6 +61,7 @@ class V2ContentLoader:
         extensions: tuple[ExtensionDefinition, ...],
     ) -> GameDefinitions:
         world_doc = documents["world.json"]
+        races_doc = documents["races.json"]
         maps_doc = documents["maps.json"]
         faction_doc = documents["factions.json"]
         technique_doc = documents["techniques.json"]
@@ -83,6 +84,14 @@ class V2ContentLoader:
         items = cls._items(item_doc, transformations)
         market_goods = cls._market_goods(market_doc, items, techniques)
         worlds = cls._worlds(world_doc, maps_doc, len(realms))
+        races = {
+            str(row["id"]): dict(row) for row in races_doc.get("races", [])
+        }
+        if not races or any(
+            not str(row.get("name", "")) or not list(row.get("worlds", []))
+            for row in races.values()
+        ):
+            raise V2ContentError("种族定义为空或不完整")
         factions = cls._factions(faction_doc, worlds)
         story_events = cls._story_events(documents, items, techniques, factions)
         faction_rewards = {
@@ -141,6 +150,7 @@ class V2ContentLoader:
             paths=paths,
             techniques=techniques,
             worlds=worlds,
+            races=races,
             factions=factions,
             faction_rewards=faction_rewards,
             items=items,

@@ -43,6 +43,23 @@ from .domain.combat import (
     combat_view,
     register_combat_domain,
 )
+from .domain.party import (
+    ManageParty,
+    party_crossing_ids,
+    party_invariants,
+    party_view,
+    register_party_domain,
+)
+from .domain.war import (
+    IssueBounty,
+    WarAction,
+    WarPeace,
+    reconcile_war_state,
+    register_war_domain,
+    register_war_story_effects,
+    war_invariants,
+    war_view,
+)
 from .domain.economy import (
     BuyMarketOffer,
     RefreshMarket,
@@ -270,6 +287,8 @@ class V2GameEngine:
         register_auction_domain(self.commands, self.definitions)
         register_artifact_domains(self.commands, self.definitions)
         register_combat_domain(self.commands, self.definitions)
+        register_party_domain(self.commands, self.definitions)
+        register_war_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
@@ -277,6 +296,7 @@ class V2GameEngine:
         register_relationship_story_effects(self.story_effects, self.definitions)
         register_faction_story_effects(self.story_effects)
         register_concubine_story_effects(self.story_effects, self.definitions)
+        register_war_story_effects(self.story_effects, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
@@ -295,6 +315,8 @@ class V2GameEngine:
         self.invariants.register("auction", auction_invariants)
         self.invariants.register("artifacts", artifact_invariants(self.definitions))
         self.invariants.register("combat", combat_invariants)
+        self.invariants.register("party", party_invariants)
+        self.invariants.register("war", war_invariants(self.definitions))
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
@@ -336,6 +358,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_war_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -380,6 +403,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_war_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -434,6 +458,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_war_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -653,6 +678,57 @@ class V2GameEngine:
             TransferVassalPersonnel(actor_id, normalized, target_id, character_id),
         )
 
+    def manage_party(
+        self, game_id: str, target_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ManageParty(actor_id, target_id, action))
+
+    def war_action(
+        self, game_id: str, war_id: str, action: str, *, ally_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, WarAction(actor_id, war_id, action, ally_id))
+
+    def war_peace(
+        self,
+        game_id: str,
+        war_id: str,
+        term: str = "white_peace",
+        *,
+        target_id: str = "",
+        target_power_id: str = "",
+        third_party_id: str = "",
+        third_status: str = "neutral",
+        concede: bool = False,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            WarPeace(
+                actor_id, war_id, term, target_id, target_power_id,
+                third_party_id, third_status, concede,
+            ),
+        )
+
+    def issue_bounty(
+        self, game_id: str, target_id: str, authority: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, IssueBounty(actor_id, target_id, authority))
+
     def manage_concubine(
         self, game_id: str, target_id: str, action: str,
     ) -> CommandExecution:
@@ -757,6 +833,8 @@ class V2GameEngine:
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
+        if not invited_ids:
+            invited_ids = party_crossing_ids(state, actor_id)
         return self.execute(
             game_id, AscendWorld(actor_id, destination_world_id, invited_ids)
         )
@@ -776,6 +854,8 @@ class V2GameEngine:
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
+        if not invited_ids:
+            invited_ids = party_crossing_ids(state, actor_id)
         return self.execute(
             game_id, BeginAscensionTrial(actor_id, destination_world_id, invited_ids)
         )
@@ -1224,6 +1304,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_war_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -1267,6 +1348,8 @@ class V2GameEngine:
             "natal_artifact": natal_view(state, self.definitions),
             "market": market_view(state, self.definitions),
             "combat": combat_view(state, self.definitions),
+            "party": party_view(state, self.definitions),
+            "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],
             "debug_world_news": presentation["debug_world_news"],

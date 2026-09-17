@@ -154,7 +154,8 @@ def _begin_cleanup_transaction(
         raise ValueError("已有跨界事务正在处理")
     transaction_id = f"crossing:{context.state.next_event_sequence:010d}"
     required = [
-        "relations", "factions", "economy", "assets", "auction", "artifacts", "combat"
+        "relations", "factions", "economy", "assets", "auction", "artifacts",
+        "combat", "party",
     ]
     transition["last_transaction"] = {
         "id": transaction_id,

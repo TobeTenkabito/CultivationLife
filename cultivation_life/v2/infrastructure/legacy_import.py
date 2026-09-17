@@ -24,7 +24,9 @@ from ..domain.factions import (
 )
 from ..domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE, PARENT_CHILD
 from ..domain.concubines import CONCUBINE_STATE
+from ..domain.party import PARTY_MEMBER
 from ..domain.story import STORY_STATE
+from ..domain.war import BOUNTY_STATE, WAR_PROFILE
 from ..domain.world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState
@@ -236,7 +238,8 @@ class LegacyV1Importer:
 
     _MAPPED_TOP_LEVEL = {
         "id", "seed", "player", "created_at", "updated_at", "rng_state",
-        "version", "history", "story_trigger_attempts", "family",
+        "version", "history", "story_trigger_attempts", "family", "sects",
+        "race_relations", "sect_relations", "player_bounties", "wars",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -264,6 +267,7 @@ class LegacyV1Importer:
         "divine_sense_technique", "divine_sense_rank", "divine_sense_experience",
         "transformation_technique", "known_transformations",
         "transformation_mastery", "transformation_loadouts",
+        "party", "joint_spirit_crossing", "joint_friend_crossing",
     }
 
     def __init__(self, definitions: GameDefinitions, commands: CommandBus):
@@ -363,6 +367,9 @@ class LegacyV1Importer:
             state, actor_id, source, player, legacy_entities, report
         )
         self._import_faction(
+            state, actor_id, source, player, legacy_entities, report
+        )
+        self._import_party_wars_and_bounties(
             state, actor_id, source, player, legacy_entities, report
         )
         self._import_extensions(state, actor_id, player, report)
@@ -1251,6 +1258,266 @@ class LegacyV1Importer:
                 }
         diplomacy["relations"] = relations
         state.entities.put(actor_id, DIPLOMACY_STATE, diplomacy)
+
+    def _import_party_wars_and_bounties(
+        self,
+        state: WorldState,
+        actor_id: str,
+        source: dict[str, Any],
+        player: dict[str, Any],
+        legacy_entities: dict[str, str],
+        report: LegacyImportReport,
+    ) -> None:
+        npc_rows: dict[str, dict[str, Any]] = {}
+
+        def collect(rows: object) -> None:
+            if isinstance(rows, dict):
+                iterable = list(rows.values())
+            elif isinstance(rows, (list, tuple)):
+                iterable = rows
+            else:
+                return
+            for raw in iterable:
+                if isinstance(raw, dict) and str(raw.get("id", "")).strip():
+                    npc_rows[str(raw["id"])] = raw
+
+        # Keep lookup construction inert: these rows become canonical entities
+        # only when a migrated party, bounty or war actually references them.
+        collect(source.get("world_npcs", {}))
+        collect(source.get("notable_npcs", {}))
+        collect(source.get("encounter_npc_cache", []))
+        sects = source.get("sects", {})
+        if isinstance(sects, dict):
+            for raw_sect in sects.values():
+                if isinstance(raw_sect, dict):
+                    collect(raw_sect.get("npcs", []))
+
+        def canonical_character(legacy_id: str, fallback: dict[str, Any] | None = None) -> str:
+            existing = legacy_entities.get(legacy_id)
+            if existing is not None:
+                return existing
+            raw = npc_rows.get(legacy_id) or fallback or {"id": legacy_id}
+            entity_id = self._create_related_character(
+                state, raw, legacy_id, report
+            )
+            legacy_entities[legacy_id] = entity_id
+            return entity_id
+
+        selected_crossing = {
+            str(row.get("id"))
+            for row in player.get("joint_friend_crossing", [])
+            if isinstance(row, dict) and row.get("id")
+        }
+        companion_crossing = player.get("joint_spirit_crossing")
+        if isinstance(companion_crossing, dict) and companion_crossing.get("id"):
+            selected_crossing.add(str(companion_crossing["id"]))
+        imported_party = 0
+        seen_party: set[str] = set()
+        actor_world = state.entities.require(actor_id, LOCATION)["world_id"]
+        for index, raw in enumerate(player.get("party", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_party_member", f"player.party[{index}]",
+                    "非对象队友记录未导入",
+                )
+                continue
+            legacy_id = str(raw.get("id", "")).strip()
+            if not legacy_id or legacy_id in seen_party:
+                continue
+            seen_party.add(legacy_id)
+            member_id = canonical_character(legacy_id, raw)
+            member_life = state.entities.require(member_id, LIFE)
+            member_world = state.entities.require(member_id, LOCATION)["world_id"]
+            if not bool(member_life.get("alive")) or member_world != actor_world:
+                report.warn(
+                    "party_member_unavailable", f"player.party[{index}]",
+                    "死亡或异界队友未恢复为活动队伍成员",
+                )
+                continue
+            if imported_party >= 2:
+                report.warn(
+                    "party_capacity", f"player.party[{index}]",
+                    "旧档队伍超过V2上限，多余队友未恢复",
+                )
+                continue
+            state.relations.add(
+                source_id=actor_id,
+                target_id=member_id,
+                kind=PARTY_MEMBER,
+                created_year=state.clock.year,
+                metadata={
+                    "joined_year": state.clock.year,
+                    "source": "legacy",
+                    "last_interaction_unit": -1,
+                    "crossing_selected": legacy_id in selected_crossing,
+                    "legacy_id": legacy_id,
+                    "imported": True,
+                },
+            )
+            imported_party += 1
+        report.imported_counts["party_members"] = imported_party
+
+        faction_ids = {
+            str(state.entities.require(entity_id, FACTION_PROFILE).get("external_id")): entity_id
+            for entity_id in state.entities.with_component(FACTION_PROFILE)
+        }
+
+        def canonical_faction(legacy_id: str, world_id: str) -> str:
+            existing = faction_ids.get(legacy_id)
+            if existing is not None:
+                return existing
+            raw = sects.get(legacy_id, {}) if isinstance(sects, dict) else {}
+            profile_world = str(raw.get("world", world_id))
+            if profile_world not in self.definitions.worlds:
+                profile_world = world_id
+            entity_id = state.entities.create("faction")
+            state.entities.put(entity_id, FACTION_PROFILE, {
+                "external_id": legacy_id,
+                "name": str(raw.get("name", legacy_id)),
+                "world_id": profile_world,
+                "path": str(raw.get("path", "dao")),
+                "allegiance_race": str(raw.get("allegiance_race") or "human"),
+                "description": str(raw.get("description", "")),
+                "color": "#888888",
+                "active": not bool(raw.get("extinct", False)),
+                "roster_seeded": True,
+            })
+            state.entities.put(entity_id, FACTION_GOVERNANCE, {
+                "creator_id": None,
+                "controller_id": None,
+                "designated_successor_id": None,
+                "last_ascension_handover": None,
+            })
+            faction_ids[legacy_id] = entity_id
+            return entity_id
+
+        def map_power(kind: str, legacy_id: object, world_id: str) -> str:
+            value = str(legacy_id or "")
+            return canonical_faction(value, world_id) if kind == "faction" else value
+
+        imported_wars = 0
+        for index, raw in enumerate(source.get("wars", [])):
+            if not isinstance(raw, dict):
+                report.warn("invalid_war", f"wars[{index}]", "非对象战争记录未导入")
+                continue
+            kind = "faction" if str(raw.get("kind")) == "sect" else str(raw.get("kind"))
+            world_id = str(raw.get("world", raw.get("world_id", actor_world)))
+            if kind not in {"faction", "race"} or world_id not in self.definitions.worlds:
+                report.warn("invalid_war", f"wars[{index}]", "战争类型或世界无法映射")
+                continue
+            attacker_id = map_power(kind, raw.get("attacker_id"), world_id)
+            defender_id = map_power(kind, raw.get("defender_id"), world_id)
+            if not attacker_id or not defender_id or attacker_id == defender_id:
+                report.warn("invalid_war", f"wars[{index}]", "战争双方无法映射")
+                continue
+            roster: dict[str, list[str]] = {"attacker": [], "defender": []}
+            for side in ("attacker", "defender"):
+                for legacy_member_id in raw.get("roster", {}).get(side, []):
+                    member_id = canonical_character(str(legacy_member_id))
+                    if member_id not in roster[side]:
+                        roster[side].append(member_id)
+            roster_owner: dict[str, str] = {}
+            old_owners = raw.get("roster_owner", {})
+            for side in ("attacker", "defender"):
+                default_owner = attacker_id if side == "attacker" else defender_id
+                for member_id in roster[side]:
+                    legacy_member_id = str(
+                        state.entities.require(member_id, LEGACY_AUDIT).get(
+                            "legacy_entity_id", ""
+                        )
+                    )
+                    roster_owner[member_id] = map_power(
+                        kind, old_owners.get(legacy_member_id, default_owner), world_id
+                    )
+
+            def coalition(side: str, leader_id: str) -> list[str]:
+                result = [leader_id]
+                for row in raw.get("coalitions", {}).get(side, []):
+                    old_id = row.get("id") if isinstance(row, dict) else row
+                    mapped = map_power(kind, old_id, world_id)
+                    if mapped and mapped not in result:
+                        result.append(mapped)
+                return result
+
+            current_age = max(0, int(player.get("age", 16)))
+            start_age = max(0, int(raw.get("start_age", current_age)))
+            status = str(raw.get("status", "active"))
+            if status not in {"active", "peace_ready", "ended"}:
+                status = "ended"
+            war = {
+                "kind": kind,
+                "world_id": world_id,
+                "attacker_id": attacker_id,
+                "defender_id": defender_id,
+                "status": status,
+                "start_year": max(0, state.clock.year - max(0, current_age - start_age)),
+                "start_unit": max(0, int(raw.get("start_unit", 0))),
+                "morale": {
+                    side: max(0.0, min(150.0, float(raw.get("morale", {}).get(side, 100.0))))
+                    for side in ("attacker", "defender")
+                },
+                "exhaustion": {
+                    side: max(0.0, min(100.0, float(raw.get("exhaustion", {}).get(side, 0.0))))
+                    for side in ("attacker", "defender")
+                },
+                "war_score": float(raw.get("war_score", 0.0)),
+                "battles": max(0, int(raw.get("battles", 0))),
+                "abstract_rounds": max(0, int(raw.get("abstract_rounds", 0))),
+                "preliminary_resolved": bool(raw.get("preliminary_resolved", False)),
+                "roster": roster,
+                "roster_owner": roster_owner,
+                "coalitions": {
+                    "attacker": coalition("attacker", attacker_id),
+                    "defender": coalition("defender", defender_id),
+                },
+                "called_allies": copy.deepcopy(raw.get("called_allies", {})),
+                "escaped": {"attacker": [], "defender": []},
+                "logs": copy.deepcopy(raw.get("logs", []))[-80:],
+                "controller_id": actor_id if raw.get("controller") == "player" else None,
+                "peace_terms": copy.deepcopy(raw.get("peace_terms", [])),
+                "imported": True,
+            }
+            for side in ("attacker", "defender"):
+                for legacy_member_id in raw.get("escaped", {}).get(side, []):
+                    member_id = legacy_entities.get(str(legacy_member_id))
+                    if member_id:
+                        war["escaped"][side].append(member_id)
+            war_id = state.entities.create("war")
+            state.entities.put(war_id, WAR_PROFILE, war)
+            imported_wars += 1
+        report.imported_counts["wars"] = imported_wars
+
+        bounty_state = state.entities.get(actor_id, BOUNTY_STATE) or {
+            "next_sequence": 1, "orders": [],
+        }
+        orders = []
+        for index, raw in enumerate(source.get("player_bounties", [])):
+            if not isinstance(raw, dict) or not str(raw.get("target_id", "")).strip():
+                report.warn(
+                    "invalid_bounty", f"player_bounties[{index}]",
+                    "通缉记录缺少目标，未导入",
+                )
+                continue
+            legacy_id = str(raw["target_id"])
+            target_id = canonical_character(legacy_id, raw)
+            target = state.entities.require(target_id, IDENTITY)
+            orders.append({
+                "id": f"bounty:{len(orders) + 1}",
+                "target_id": target_id,
+                "name": str(raw.get("name", target["name"])),
+                "world_id": str(raw.get("world", actor_world)),
+                "status": str(raw.get("status", "active")),
+                "issued_year": state.clock.year,
+                "attempts": max(0, int(raw.get("attempts", 0))),
+                "target_power": max(0.0, float(raw.get("target_power", 0.0))),
+                "authority": str(raw.get("authority", "legacy")),
+                "issuer_name": str(raw.get("issuer_name", "旧档势力")),
+                "imported": True,
+            })
+        bounty_state["orders"] = orders
+        bounty_state["next_sequence"] = len(orders) + 1
+        state.entities.put(actor_id, BOUNTY_STATE, bounty_state)
+        report.imported_counts["bounties"] = len(orders)
 
     def _import_extensions(
         self,

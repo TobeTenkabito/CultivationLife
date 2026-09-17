@@ -230,6 +230,75 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(result.report["imported_counts"]["families"], 1)
         self.assertEqual(result.report["imported_counts"]["concubine_status"], 1)
 
+    def test_import_preserves_party_active_war_and_bounties(self):
+        source = self._legacy_save()
+        document = json.loads(source.read_text(encoding="utf-8"))
+        friend = document["player"]["dao_friends"][0]
+        document["player"]["party"] = [{"id": friend["id"], "name": friend["name"]}]
+        document["player"]["joint_friend_crossing"] = [
+            {"id": friend["id"], "name": friend["name"]}
+        ]
+        defender_id = document["sects"]["wanmo"]["npcs"][0]["id"]
+        document["wars"] = [{
+            "id": "legacy-war",
+            "kind": "sect",
+            "world": "human",
+            "attacker_id": "tianjian",
+            "defender_id": "wanmo",
+            "status": "active",
+            "start_age": 23,
+            "start_unit": 3,
+            "morale": {"attacker": 88, "defender": 77},
+            "exhaustion": {"attacker": 12, "defender": 19},
+            "war_score": 6,
+            "battles": 2,
+            "roster": {
+                "attacker": [friend["id"]],
+                "defender": [defender_id],
+            },
+            "roster_owner": {
+                friend["id"]: "tianjian",
+                defender_id: "wanmo",
+            },
+            "coalitions": {
+                "attacker": [{"id": "tianjian"}],
+                "defender": [{"id": "wanmo"}],
+            },
+            "controller": "player",
+        }]
+        document["player_bounties"] = [{
+            "id": "legacy-bounty",
+            "target_id": defender_id,
+            "name": "旧敌",
+            "world": "human",
+            "status": "active",
+            "attempts": 2,
+            "target_power": 123,
+            "authority": "sect",
+            "issuer_name": "天剑宗",
+        }]
+        source.write_text(
+            json.dumps(document, ensure_ascii=False), encoding="utf-8"
+        )
+
+        result = self.v2.import_v1_save(source)
+
+        self.assertEqual(len(result.game["party"]["members"]), 1)
+        self.assertEqual(result.game["party"]["members"][0]["name"], "旧雨")
+        self.assertTrue(result.game["party"]["members"][0]["crossing_selected"])
+        self.assertEqual(len(result.game["war_system"]["wars"]), 1)
+        war = result.game["war_system"]["wars"][0]
+        self.assertEqual(war["kind"], "faction")
+        self.assertEqual(war["battles"], 2)
+        self.assertEqual(war["morale"], {"attacker": 88.0, "defender": 77.0})
+        self.assertEqual(len(war["roster"]["attacker"]), 1)
+        self.assertEqual(len(war["roster"]["defender"]), 1)
+        self.assertEqual(len(result.game["war_system"]["bounties"]), 1)
+        self.assertEqual(result.game["war_system"]["bounties"][0]["attempts"], 2)
+        self.assertEqual(result.report["imported_counts"]["party_members"], 1)
+        self.assertEqual(result.report["imported_counts"]["wars"], 1)
+        self.assertEqual(result.report["imported_counts"]["bounties"], 1)
+
     def test_live_workflows_and_frozen_auction_assets_block_import(self):
         source = self._legacy_save()
         document = json.loads(source.read_text(encoding="utf-8"))
