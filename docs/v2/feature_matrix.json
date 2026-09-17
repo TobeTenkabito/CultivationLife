@@ -208,29 +208,32 @@
     {
       "id": "crafting.artifacts",
       "domain": "crafting",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["crafting-preview", "crafting-forge", "crafting-blueprint", "crafted-artifact"],
-      "evidence": [],
-      "notes": "Material instances, generated artifacts and equipment integration remain."
+      "evidence": [
+        "tests/test_v2_artifacts_formations_natal.py::V2ArtifactsFormationsNatalTests::test_crafting_preview_blueprint_forge_and_sale_use_exact_instances",
+        "tests/test_v2_artifacts_formations_natal.py::V2ArtifactsFormationsNatalTests::test_normal_market_delivers_unique_crafting_and_formation_assets"
+      ],
+      "notes": "Preview and forging validate four exact material instances before mutation, persist blueprints and generated artifact metadata, use quality-weighted deterministic RNG, grant refining experience and feed static/combat effects into the V2 combat snapshot. Artifacts can be sold, consigned through the shared escrow ledger or bound as natal artifacts."
     },
     {
       "id": "formation.nine_palace",
       "domain": "formation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["formation-preview", "formation-save", "formation-activate", "formation-deactivate", "formation-delete", "formation-ground-deploy", "formation-ground-withdraw", "formation-ground-repair"],
-      "evidence": [],
-      "notes": "Loadouts, bindings, ground arrays and repair are not migrated."
+      "evidence": ["tests/test_v2_artifacts_formations_natal.py::V2ArtifactsFormationsNatalTests::test_formation_activation_ground_repair_and_withdraw_preserve_escrow"],
+      "notes": "Nine-node previews derive six metrics and combat modifiers from typed material relations. Loadouts store material definitions rather than copied instances; activation and ground deployment reserve exact assets, switching is atomic, repair consumes exact supply instances and withdrawal releases every reservation."
     },
     {
       "id": "relations.lifecycle",
       "domain": "relations",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["relationship-exit"],
-      "evidence": ["tests/test_v2_core_domains.py::V2CoreDomainTests::test_faction_contribution_is_scoped_to_membership_and_control_can_transfer"],
-      "notes": "Typed relations can end, but V1 exit consequences and affinity changes remain."
+      "evidence": ["tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_companion_interactions_use_canonical_entities_and_lifecycle_rules"],
+      "notes": "Relationship exit now closes only the canonical edge, resets the other character's persisted affinity and applies the configured companion-separation heart-demon penalty. Public projections retain canonical life and lifespan data."
     },
     {
       "id": "relations.dao_companion",
@@ -238,17 +241,17 @@
       "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["dao-companion"],
-      "evidence": ["tests/test_v2_core_domains.py"],
-      "notes": "Canonical companion relation exists; interactions and joint breakthroughs remain."
+      "evidence": ["tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_companion_interactions_use_canonical_entities_and_lifecycle_rules"],
+      "notes": "Proposal rules, affinity, yearly cooldowns, intimacy/dual-cultivation effects, item and technique exchange, requests and separation consequences operate over canonical character entities. Conception is emitted as a typed family-domain request; synchronized companion breakthrough remains to be connected to the cultivation trial state machine."
     },
     {
       "id": "relations.dao_friend",
       "domain": "relations",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["dao-friend"],
-      "evidence": ["tests/test_v2_core_domains.py"],
-      "notes": "Canonical friendship exists; gifts, affinity and invitation flows remain."
+      "evidence": ["tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_friend_interactions_award_opportunity_and_enforce_cooldown"],
+      "notes": "Friend formation uses persisted affinity; sparring and discussion grant opportunity, update affinity and enforce per-action yearly cooldowns. Faction invitation updates the same canonical affinity profile."
     },
     {
       "id": "relations.faction_invitation",
@@ -262,11 +265,11 @@
     {
       "id": "relations.master_disciple",
       "domain": "relations",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["disciple-request", "master-request", "disciple-gift"],
-      "evidence": [],
-      "notes": "The relation type exists, but requests, teaching and gifts do not."
+      "evidence": ["tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_disciple_requests_master_requests_and_gifts_are_persistent"],
+      "notes": "Direct same-faction mentorship requests, persisted incoming disciple petitions, accept/decline, master item/technique requests, disciple item gifts and technique teaching are implemented with rank, life, world, capacity and cooldown checks."
     },
     {
       "id": "relations.concubines",
@@ -442,11 +445,11 @@
     {
       "id": "artifact.natal",
       "domain": "artifact",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["natal-artifact"],
-      "evidence": [],
-      "notes": "Natal artifact growth and binding are not implemented."
+      "evidence": ["tests/test_v2_artifacts_formations_natal.py::V2ArtifactsFormationsNatalTests::test_crafted_natal_artifact_levels_and_sockets_without_duplication"],
+      "notes": "Ordinary or generated artifacts can be bound once, refined through manual and cultivation experience, and fitted into level-gated unique sockets. Crafted bases are not double-counted; growth, socket stats, combat modifiers and tribulation reduction are projected dynamically, while natal assets cannot be sold or consigned."
     },
     {
       "id": "intrigue.personnel",

@@ -32,15 +32,9 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
     "asset_and_economy_model": (
         "inventory.item_use",
         "economy.black_market",
-        "crafting.artifacts",
-        "formation.nine_palace",
-        "artifact.natal",
     ),
     "relations_and_governance": (
-        "relations.lifecycle",
         "relations.dao_companion",
-        "relations.dao_friend",
-        "relations.master_disciple",
         "relations.concubines",
         "relations.capture",
         "factions.succession",
@@ -69,8 +63,8 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
 
 GROUP_CAUSES = {
     "shared_runtime": "通用行动与交互内核已经建立，但领域专属效果、完整行动适配器、全操作影子覆盖及正式HTTP入口尚未完成。",
-    "asset_and_economy_model": "实例资产、统一预留账本和拍卖已经建立；黑市仍缺傀儡交易，炼器、阵法、本命法宝及依赖家族生命周期的物品效果尚未完整接入。",
-    "relations_and_governance": "关系边与成员身份已规范化，但好感、请求、NPC自治及跨界治理事务尚未迁移。",
+    "asset_and_economy_model": "实例资产、统一预留账本、拍卖、炼器、阵法和本命法宝已经建立；黑市仍缺傀儡交易，孕育丹仍依赖家族生命周期。",
+    "relations_and_governance": "关系生命周期、好感、道侣/道友互动和师徒请求已迁移；侍妾、俘虏、家族、NPC自治及治理事务仍待完成。",
     "combat_and_demonic": "单场一对一结算存在，但队伍、战场、持续囚禁/魂魄/傀儡聚合尚未迁移。",
     "dlc_depth": "扩展加载和首层状态存在，DLC专属状态机及交互命令仍缺失。",
 }

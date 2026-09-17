@@ -380,7 +380,13 @@ def _trial_step_handler(definitions: GameDefinitions):
 
         hp_drain, mp_drain = drain
         if thunder:
-            reduction = _body_thunder_reduction(context, definitions, actor_id)
+            reduction = min(
+                0.90,
+                _body_thunder_reduction(context, definitions, actor_id)
+                + float(combat_snapshot(
+                    context.state, definitions, actor_id
+                ).get("tribulation_reduction", 0)),
+            )
             hp_drain *= 1 - reduction
             mp_drain *= 1 - reduction
         context.emit(

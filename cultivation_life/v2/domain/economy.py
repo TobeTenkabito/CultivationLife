@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from .character import IDENTITY, LIFE
+from .assets import create_asset
 from .cultivation import CULTIVATION, PRACTICE
 from .definitions import GameDefinitions, MarketGoodDefinition
 from .world import LOCATION
@@ -457,6 +459,82 @@ def _refresh_market_handler(definitions: GameDefinitions):
                 "locked": False,
                 "sold": False,
             })
+        specialty_rng = random.Random(
+            f"{context.state.seed}:specialty-market:{world_id}:{location_id}:"
+            f"{context.state.clock.year}:{revision}"
+        )
+        crafting = definitions.systems["crafting"]
+        crafting_pool = [
+            dict(row) for row in crafting["materials"]
+            if row.get("world") == world_id and int(row.get("tier", 1)) <= tier + 1
+        ]
+        specialty_rng.shuffle(crafting_pool)
+        for index, definition in enumerate(crafting_pool[:int(crafting["settings"].get("market_material_offers", 3))]):
+            quality = max(0.65, min(1.25, specialty_rng.triangular(0.65, 1.25, 1.0)))
+            value = max(1, round(int(definition["base_material_value"]) * quality))
+            offers.append({
+                "id": f"market:{command.actor_id}:{revision}:crafting:{index + 1}",
+                "kind": "crafting_material", "content_id": definition["id"],
+                "name": definition["name"], "group": "crafting", "tier": definition["tier"],
+                "price": max(1, round(value * specialty_rng.uniform(0.9, 1.1))),
+                "asset_blueprint": {
+                    "kind": "crafting_material", "definition_id": definition["id"],
+                    "name": definition["name"],
+                    "metadata": {
+                        "tier": definition["tier"], "world_id": world_id,
+                        "quality_multiplier": round(quality, 4), "material_value": value,
+                        "roles": list(definition.get("roles", [])),
+                        "tags": list(definition.get("tags", [])), "source": "market",
+                    },
+                },
+                "locked": False, "sold": False,
+            })
+        formations = definitions.systems["formations"]
+        formation_pool = [
+            dict(row) for row in formations["materials"]
+            if row.get("world") == world_id and int(row.get("tier", 1)) <= tier + 1
+        ]
+        specialty_rng.shuffle(formation_pool)
+        for index, definition in enumerate(formation_pool[:int(formations["settings"].get("market_material_offers", 3))]):
+            offers.append({
+                "id": f"market:{command.actor_id}:{revision}:formation:{index + 1}",
+                "kind": "formation_material", "content_id": definition["id"],
+                "name": definition["name"], "group": "formation", "tier": definition["tier"],
+                "price": max(1, round(int(definition["base_value"]) * specialty_rng.uniform(0.9, 1.1))),
+                "asset_blueprint": {
+                    "kind": "formation_material", "definition_id": definition["id"],
+                    "name": definition["name"],
+                    "metadata": {
+                        "tier": definition["tier"], "world_id": world_id,
+                        "base_value": definition["base_value"],
+                        "formation_value": definition["formation_value"],
+                        "nature": definition.get("nature", "neutral"), "source": "market",
+                    },
+                },
+                "locked": False, "sold": False,
+            })
+        supply_pool = [
+            dict(row) for row in formations["maintenance_resources"]
+            if row.get("world") == world_id and int(row.get("tier", 1)) <= tier + 1
+        ]
+        specialty_rng.shuffle(supply_pool)
+        for index, definition in enumerate(supply_pool[:int(formations["settings"].get("repair_market_offers", 1))]):
+            offers.append({
+                "id": f"market:{command.actor_id}:{revision}:formation-supply:{index + 1}",
+                "kind": "formation_supply", "content_id": definition["id"],
+                "name": definition["name"], "group": "formation_supply", "tier": definition["tier"],
+                "price": int(definition["base_value"]),
+                "asset_blueprint": {
+                    "kind": "formation_supply", "definition_id": definition["id"],
+                    "name": definition["name"],
+                    "metadata": {
+                        "tier": definition["tier"], "world_id": world_id,
+                        "base_value": definition["base_value"],
+                        "repair_value": definition["repair_value"], "source": "market",
+                    },
+                },
+                "locked": False, "sold": False,
+            })
         market = {
             "revision": revision,
             "world_id": world_id,
@@ -561,6 +639,17 @@ def _buy_handler(definitions: GameDefinitions):
                     "technique_id": offer["content_id"],
                     "offer_id": command.offer_id,
                 },
+            )
+        elif offer["kind"] in {
+            "crafting_material", "formation_material", "formation_supply"
+        }:
+            blueprint = offer.get("asset_blueprint")
+            if not isinstance(blueprint, dict):
+                raise ValueError("坊市实例货物蓝图已经失效")
+            create_asset(
+                context, command.actor_id, kind=str(blueprint["kind"]),
+                definition_id=str(blueprint["definition_id"]),
+                name=str(blueprint["name"]), metadata=dict(blueprint["metadata"]),
             )
         else:
             raise ValueError("坊市货物类型尚未迁移")

@@ -271,10 +271,13 @@ def _cultivation_gain(
         for item_id, quantity in dict(inventory.get("items", {})).items()
         if item_id in definitions.items
     )
+    artifact_bonus, _ = _artifact_progression_bonuses(
+        context.state, definitions, actor_id
+    )
     multiplier = (
         root.efficiency
         * (1 + technique.opportunity_bonus * technique.scale)
-        * max(0.0, 1 + item_bonus)
+        * max(0.0, 1 + item_bonus + artifact_bonus)
         * environment
     )
     if action == "cultivate" and cultivation["path"] == "demonic":
@@ -465,6 +468,41 @@ def _on_story_cultivation_changed(definitions: GameDefinitions):
     return handler
 
 
+def _on_relationship_cultivation_changed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        if "opportunity" in event.payload:
+            cultivation["opportunity"] = max(
+                0.0,
+                float(cultivation.get("opportunity", 0.0))
+                + float(event.payload["opportunity"]),
+            )
+            _mark_bottleneck(context, definitions, actor_id, cultivation)
+        if "heart_demon" in event.payload:
+            cultivation["heart_demon"] = max(
+                0.0,
+                float(cultivation.get("heart_demon", 0.0))
+                + float(event.payload["heart_demon"]),
+            )
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
+
+    return handler
+
+
+def _on_relationship_technique_granted(definitions: GameDefinitions):
+    grant = _grant_technique_handler(definitions)
+
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        grant(context, GrantTechnique(
+            actor_id=str(event.payload["entity_id"]),
+            technique_id=str(event.payload["technique_id"]),
+            equip_main=bool(event.payload.get("equip_main", False)),
+        ))
+
+    return handler
+
+
 def _on_story_technique_learned(definitions: GameDefinitions):
     grant = _grant_technique_handler(definitions)
 
@@ -493,7 +531,51 @@ def _on_story_technique_equipped(definitions: GameDefinitions):
     return handler
 
 
-def _breakthrough_chance(definitions: GameDefinitions, cultivation: dict[str, Any], major: bool) -> float:
+def _artifact_progression_bonuses(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> tuple[float, float]:
+    ledger = state.entities.get(actor_id, "economy.asset_ledger") or {}
+    instances = dict(ledger.get("instances", {}))
+    opportunity = 0.0
+    breakthroughs = []
+    for asset in instances.values():
+        if asset.get("kind") != "crafted_artifact":
+            continue
+        stats = dict(dict(asset.get("metadata", {})).get("actual_stats", {}))
+        opportunity += max(0.0, float(stats.get("opportunity_efficiency", 0)))
+        breakthroughs.append(min(
+            0.05, max(0.0, float(stats.get("breakthrough_bonus", 0)))
+        ))
+    natal = state.entities.get(actor_id, "artifact.natal") or {}
+    artifact = natal.get("artifact")
+    if isinstance(artifact, dict):
+        config = dict(definitions.systems["natal_artifact"])
+        scale = 1 + float(config["level_scale_per_level"]) * (
+            max(1, int(artifact.get("level", 1))) - 1
+        )
+        asset_id = artifact.get("asset_id")
+        if asset_id and asset_id in instances:
+            stats = dict(dict(instances[asset_id].get("metadata", {})).get("actual_stats", {}))
+            opportunity += max(
+                0.0, float(stats.get("opportunity_efficiency", 0))
+            ) * (scale - 1)
+        else:
+            item = definitions.items.get(str(artifact.get("item_id", "")))
+            if item:
+                opportunity += item.opportunity_bonus * scale
+        materials = {
+            str(row["item_id"]): dict(row) for row in config.get("materials", [])
+        }
+        for material_id in artifact.get("slots", []):
+            effect = dict(materials.get(str(material_id), {}).get("effect", {}))
+            opportunity += float(effect.get("opportunity_bonus", 0))
+    return opportunity, max(breakthroughs, default=0.0)
+
+
+def _breakthrough_chance(
+    definitions: GameDefinitions, cultivation: dict[str, Any], major: bool,
+    artifact_bonus: float = 0.0,
+) -> float:
     realm_index = definitions.realm_index(str(cultivation["realm_id"]))
     if major and realm_index == 0:
         base = 1.0
@@ -523,7 +605,9 @@ def _breakthrough_chance(definitions: GameDefinitions, cultivation: dict[str, An
         for item_id in cultivation.get("active_breakthrough_aids", [])
         if item_id in definitions.items
     )
-    return max(0.005, min(0.98, base + pity + aid_bonus - penalty))
+    return max(
+        0.005, min(0.98, base + pity + aid_bonus + artifact_bonus - penalty)
+    )
 
 
 def _attempt_breakthrough_handler(definitions: GameDefinitions):
@@ -551,7 +635,12 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         required = _opportunity_required(definitions, cultivation)
         if float(cultivation["opportunity"]) < required:
             raise ValueError("机缘尚未圆满")
-        chance = _breakthrough_chance(definitions, cultivation, major)
+        _, artifact_breakthrough = _artifact_progression_bonuses(
+            context.state, definitions, command.actor_id
+        )
+        chance = _breakthrough_chance(
+            definitions, cultivation, major, artifact_breakthrough
+        )
         cultivation["active_breakthrough_aids"] = []
         old_realm = str(cultivation["realm_id"])
         pity_key = f"minor:{realm_index}:{old_layer}"
@@ -861,6 +950,14 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     )
     bus.event_bus.register(
         "story.effect.technique.equipped", _on_story_technique_equipped(definitions)
+    )
+    bus.event_bus.register(
+        "relationship.cultivation.changed",
+        _on_relationship_cultivation_changed(definitions),
+    )
+    bus.event_bus.register(
+        "relationship.technique.granted",
+        _on_relationship_technique_granted(definitions),
     )
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
     bus.event_bus.register("character.died", _on_character_died)

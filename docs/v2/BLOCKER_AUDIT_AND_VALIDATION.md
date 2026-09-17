@@ -2,7 +2,7 @@
 
 ## 结论
 
-原有的 44 个阻断项不是 44 个独立回归错误，而是功能矩阵中所有尚未达到 `pass` 的必需功能。第二批迁移完成后阻断数降为 36；第三批第一阶段降为 33，第三批第二阶段继续降为 32。迄今转为完整通过的功能包括：
+原有的 44 个阻断项不是 44 个独立回归错误，而是功能矩阵中所有尚未达到 `pass` 的必需功能。第二批迁移完成后阻断数降为 36；第三批三个阶段依次降为 33、32 和 29；第四批首阶段降为26。迄今转为完整通过的功能包括：
 
 - `presentation.settings_debug`：Schema 4 持久化界面设置；异界消息继续模拟但默认不投影，Debug 模式才显示全部世界。
 - `relations.faction_invitation`：只有当前世界中存活的师父、道侣或道友可被引荐入宗；弟子、侍妾和无关系人物不能借此加入。
@@ -16,20 +16,28 @@
 - `economy.spirit_field`：瞬时开垦、播种、统一时钟生长、MP灌溉、造化灵液、采收与五艺经验形成闭环。
 - `crafting.alchemy`：堆叠药材和实例灵植共用材料校验与消费路径，MP、随机结果、产物和经验原子提交。
 - `economy.auction`：预告、开场、竞价、结拍和黑市阶段进入可保存状态机；竞价与寄拍复用统一托管账本，跨界取消立即退款，匿名身份、交涉和私下买卖均已接入。
+- `crafting.artifacts`：四个精确材料实例的预览、品质抽取、锻造、图谱、出售、寄拍和战斗属性形成闭环。
+- `formation.nine_palace`：九宫推演、预设、真实实例启阵、收阵、删除、镇地、修复和撤阵全部复用托管账本。
+- `artifact.natal`：普通/炼器法宝认主、祭炼成长、等级槽位、唯一镶嵌、解绑返还及战斗/渡劫效果完成。
+- `relations.lifecycle`：解除关系结束唯一关系边、重置规范好感；解除道侣时按配置增加心魔，人物投影直接读取规范寿命与生死状态。
+- `relations.dao_friend`：结交门槛、切磋/论道、机缘、好感和年度冷却完成，并与引荐入宗共享同一好感档案。
+- `relations.master_disciple`：同宗师徒请求、拜师帖决断、向师父索取、向弟子赠物/传功及对应限制完成。
 
 另修复两个不属于独立矩阵行、但会污染平价校验的缺陷：V2 新角色缺少初始灵剑；妖修开局没有装配 DLC 指定的 `TECH_MONSTER_BREATHING`，导致修炼行动零收益。
 
 `inventory.item_use`从`missing`推进为`partial`：治疗、突破辅助、劫中恢复、补灵根、永久本源和主动灵植效果已接入；孕育丹仍依赖尚未迁移的家族生命周期，不能提前宣告完成。`economy.black_market`也推进为`partial`：检索、购买、离开以及堆叠物/实例资产出售已完成，但傀儡出售仍等待魔道傀儡与魂魄聚合迁移。
 
-当前矩阵为 53 项：21 项 `pass`、13 项 `partial`、19 项 `missing`。101 个冻结的 V1 公共操作仍被完整且唯一归档，矩阵结构无错误。V2 仍不可正式切换。
+`relations.dao_companion`已完成结侣、好感、冷却、亲密/缠绵、索取、赠物和传功；孕育请求已移交家族领域，但同步突破尚未接入修炼试炼状态机，因此保持`partial`。
 
-## 32 项的共同根因
+当前矩阵为 53 项：27 项 `pass`、11 项 `partial`、15 项 `missing`。101 个冻结的 V1 公共操作仍被完整且唯一归档，矩阵结构无错误。V2 仍不可正式切换。
+
+## 26 项的共同根因
 
 | 根因组 | 数量 | 阻断项 |
 |---|---:|---|
 | 共享运行时缺口 | 4 | `core.action_loop`、`story.interactive_events`、`verification.shadow_coverage`、`interface.http_frontend` |
-| 实例资产与经济模型 | 5 | `inventory.item_use`、`economy.black_market`、`crafting.artifacts`、`formation.nine_palace`、`artifact.natal` |
-| 关系与治理事务 | 10 | `relations.lifecycle`、`relations.dao_companion`、`relations.dao_friend`、`relations.master_disciple`、`relations.concubines`、`relations.capture`、`factions.succession`、`factions.family`、`factions.npc_operations`、`factions.diplomacy` |
+| 实例资产与经济模型 | 2 | `inventory.item_use`、`economy.black_market` |
+| 关系与治理事务 | 7 | `relations.dao_companion`、`relations.concubines`、`relations.capture`、`factions.succession`、`factions.family`、`factions.npc_operations`、`factions.diplomacy` |
 | 战斗、战争与魔道聚合 | 6 | `party.management`、`combat.automatic_resolution`、`war.aggregate`、`demonic.prison`、`demonic.captives`、`demonic.puppets_souls` |
 | DLC 深层状态机 | 7 | `ghost.reincarnation`、`ghost.soul_ecology`、`ghost.attachment_possession`、`monster.evolution_lineage`、`celestial.court`、`intrigue.personnel`、`intrigue.guests_decisions` |
 
@@ -53,10 +61,10 @@
 
 1. 通用交互队列、条件求值器和类型化效果注册表已经落地；领域专属效果随对应系统迁移注册。
 2. 扩展统一行动适配器到V1剩余行动种类，并完成战斗/试炼效果，使`advance`与`choice`达到完整语义覆盖。
-3. 实例资产仓库、统一预留/托管账本、物品首批效果、灵田、炼丹和拍卖已经落地；黑市除傀儡外已复用同一账本，下一阶段继续迁移炼器、阵法、本命法宝与魔道傀儡。
+3. 实例资产仓库、统一预留/托管账本、物品首批效果、灵田、炼丹、拍卖、炼器、阵法和本命法宝已经落地；黑市除傀儡外已复用同一账本。剩余两项分别随家族生命周期和魔道傀儡聚合收束，不再阻塞资产基础设施。
 4. 永久/临时跨界及全部高阶突破、飞升试炼已经落地；后续跨界玩法必须复用同一回执事务，不得直接清理其他领域状态。
-5. 在同一关系与治理模型上完成关系交互、家族、宗门经营、外交和继承，不再保存 NPC 副本。
+5. 关系生命周期、道侣/好友和师徒已经复用规范人物及关系边；继续在同一模型上完成侍妾、俘虏、家族、宗门经营、外交和继承，不保存 NPC 副本。
 6. 扩展战斗快照到队伍、地形、阵法和战争；随后迁移魔道聚合。
 7. 最后迁移 DLC 深层状态机、正式 HTTP/前端，并把影子适配器扩展到全部 101 个操作。
 
-每一项只能在命令、权威状态、跨领域事件、失败原子性、不变量、存档迁移和具体测试节点全部存在后改为 `pass`。在 32 项真正清零前，Step 10 继续保持禁止状态。
+每一项只能在命令、权威状态、跨领域事件、失败原子性、不变量、存档迁移和具体测试节点全部存在后改为 `pass`。在 26 项真正清零前，Step 10 继续保持禁止状态。
