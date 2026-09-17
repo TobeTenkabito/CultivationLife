@@ -30,9 +30,6 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
         "interface.http_frontend",
     ),
     "dlc_depth": (
-        "ghost.reincarnation",
-        "ghost.soul_ecology",
-        "ghost.attachment_possession",
         "monster.evolution_lineage",
         "celestial.court",
         "intrigue.personnel",

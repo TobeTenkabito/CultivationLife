@@ -8,6 +8,7 @@ from unittest import mock
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.migration import ShadowCharacterSpec, ShadowCommand, ShadowRunner
+from cultivation_life.possession_system import enter_host_body
 from cultivation_life.v2 import V2GameEngine
 from cultivation_life.v2.infrastructure import (
     LegacyImportBlockedError,
@@ -454,12 +455,64 @@ class V2LegacyImportTests(unittest.TestCase):
         ghost.player.ghost_wangsheng_energy = 9
         ghost.player.ghost_intrinsic_hp_current = 73.0
         ghost.player.ghost_intrinsic_mp_current = 61.0
+        ghost.player.ghost_intrinsic_hp_reference = 120.0
+        ghost.player.ghost_intrinsic_mp_reference = 115.0
+        ghost.player.ghost_bound_souls = [{
+            "id": "old-soul-1",
+            "name": "旧魂侍",
+            "realm_index": 2,
+            "layer": 3,
+            "combat_power": 800.0,
+            "soul_pressure": 1.25,
+            "soul_trait": {"name": "宿慧"},
+        }]
+        ghost.player.ghost_soul_slots = {"胎光": "old-soul-1"}
+        ghost.player.ghost_attachment = {
+            "item_id": "spirit_sword", "name": "灵木剑",
+            "erosion_growth_multiplier": 0.8,
+            "cultivation_efficiency_multiplier": 0.9,
+        }
+        ghost.ghost_parade = {
+            "status": "active",
+            "world": "hell",
+            "location_id": ghost.player.location_id,
+            "start_age": ghost.player.age,
+            "end_age": ghost.player.age + 2,
+            "announced": True,
+            "participated": False,
+            "souls": [{
+                "id": "old-parade-soul",
+                "name": "夜行旧魂",
+                "realm_index": 1,
+                "layer": 2,
+                "combat_power": 90.0,
+                "soul_pressure": 0.7,
+            }],
+        }
         self.v1.store.save(ghost)
         ghost_result = self.v2.import_v1_save(
             self.v1_directory / f"{ghost.id}.json"
         )
         self.assertEqual(ghost_result.game["extensions"]["ghost"]["wangsheng"], 9)
         self.assertEqual(ghost_result.game["extensions"]["ghost"]["intrinsic_hp"], 73.0)
+        self.assertEqual(
+            ghost_result.game["extensions"]["ghost"]["intrinsic_hp_reference"],
+            120.0,
+        )
+        self.assertEqual(len(ghost_result.game["ghost_system"]["bound_souls"]), 1)
+        self.assertEqual(
+            next(
+                row for row in ghost_result.game["ghost_system"]["slots"]
+                if row["id"] == "胎光"
+            )["soul_id"],
+            ghost_result.game["ghost_system"]["bound_souls"][0]["id"],
+        )
+        self.assertEqual(
+            ghost_result.game["ghost_system"]["attachment"]["item_id"],
+            "spirit_sword",
+        )
+        self.assertEqual(ghost_result.game["ghost_system"]["parade"]["status"], "active")
+        self.assertEqual(len(ghost_result.game["ghost_system"]["parade"]["souls"]), 1)
 
         monster_created = self.v1.create_game(
             "旧妖", "supreme_wood", "monster", seed=72,
@@ -476,6 +529,74 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(bloodline["species_id"], "serpent")
         self.assertEqual(bloodline["adaptations"], ["water"])
         self.assertEqual(bloodline["adaptation_years"], {"water": 4})
+
+    def test_active_ghost_captor_is_imported_instead_of_blocked(self):
+        created = self.v1.create_game(
+            "受拘旧魂", "supreme_water", "ghost", seed=73, start_world="hell"
+        )
+        game = self.v1.store.load(created["id"])
+        game.player.ghost_captor = {
+            "id": "legacy-captor-1",
+            "npc_id": "legacy-captor-1",
+            "name": "旧档拘魂者",
+            "gender": "male",
+            "age": 80,
+            "lifespan": 180,
+            "alive": True,
+            "world": "hell",
+            "location_id": game.player.location_id,
+            "race": "human",
+            "path": "dao",
+            "spirit_root": "supreme_fire",
+            "realm_index": 2,
+            "layer": 3,
+            "combat_power": 1200.0,
+            "followed_years": 4,
+        }
+        self.v1.store.save(game)
+
+        imported = self.v2.import_v1_save(
+            self.v1_directory / f"{game.id}.json"
+        )
+        captor = imported.game["ghost_system"]["captor"]
+        self.assertEqual(captor["name"], "旧档拘魂者")
+        self.assertTrue(captor["entity_id"].startswith("character:"))
+        self.assertFalse(any(
+            issue["path"] == "player.ghost_captor"
+            for issue in imported.report["issues"]
+        ))
+
+    def test_active_ghost_possession_import_can_leave_host_in_v2(self):
+        created = self.v1.create_game(
+            "夺舍旧魂", "supreme_water", "ghost", seed=74, start_world="hell"
+        )
+        game = self.v1.store.load(created["id"])
+        enter_host_body(game.player, {
+            "id": "legacy-host-1",
+            "name": "旧档宿主",
+            "gender": "male",
+            "age": 30,
+            "lifespan": 120,
+            "race": "human",
+            "path": "dao",
+            "spirit_root": "supreme_fire",
+            "realm_index": 0,
+            "layer": 1,
+        })
+        self.v1.store.save(game)
+
+        imported = self.v2.import_v1_save(
+            self.v1_directory / f"{game.id}.json"
+        )
+        self.assertEqual(imported.game["ghost_system"]["state"], "possessed")
+        left = self.v2.leave_possessed_body(imported.game["id"]).game
+        self.assertEqual(left["ghost_system"]["state"], "free")
+        self.assertEqual(left["player"]["cultivation"]["path"], "ghost")
+        self.assertEqual(
+            left["player"]["divine_sense"]["technique_id"],
+            "TECH_SOUL_ECHO_SENSE",
+        )
+        self.assertEqual(left["ghost_system"]["possession_count"], 1)
 
 
 class V1V2ShadowTests(unittest.TestCase):

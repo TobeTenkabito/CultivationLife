@@ -280,6 +280,12 @@ def _cultivation_gain(
         * max(0.0, 1 + item_bonus + artifact_bonus)
         * environment
     )
+    if context.state.entities.get(actor_id, "dlc.ghost.soul") is not None:
+        from .ghost import ghost_progression_multiplier
+
+        multiplier *= ghost_progression_multiplier(
+            context.state, definitions, actor_id
+        )
     if context.state.relations.find(target_id=actor_id, kind="concubine"):
         multiplier *= 0.8
     if action == "cultivate" and cultivation["path"] == "demonic":
@@ -685,6 +691,13 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         devouring_bonus = max(
             0.0, float(demonic_state.get("devouring_breakthrough_bonus", 0.0))
         )
+        ghost_bonus = 0.0
+        if context.state.entities.get(command.actor_id, "dlc.ghost.soul") is not None:
+            from .ghost import ghost_breakthrough_bonus
+
+            ghost_bonus = ghost_breakthrough_bonus(
+                context.state, definitions, command.actor_id
+            )
         dependent_bonus = 0.0
         owner_edge = next(iter(context.state.relations.find(
             target_id=command.actor_id, kind="concubine"
@@ -710,7 +723,8 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
                 + companion_bonus
                 + cauldron_bonus
                 + dependent_bonus
-                + devouring_bonus,
+                + devouring_bonus
+                + ghost_bonus,
             ),
         )
         if concubine_state:

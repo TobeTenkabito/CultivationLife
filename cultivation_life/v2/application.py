@@ -63,6 +63,20 @@ from .domain.demonic import (
     reconcile_demonic_state,
     register_demonic_domain,
 )
+from .domain.ghost import (
+    GhostAttachmentAction,
+    GhostConstraintAction,
+    GhostParadeAction,
+    GhostSoulAction,
+    LeavePossessedBody,
+    PrepareGhostReincarnation,
+    ReincarnateGhost,
+    ghost_invariants,
+    ghost_view,
+    reconcile_ghost_state,
+    register_ghost_domain,
+    register_ghost_story_effects,
+)
 from .domain.war import (
     IssueBounty,
     WarAction,
@@ -304,6 +318,7 @@ class V2GameEngine:
         register_demonic_domain(self.commands, self.definitions)
         register_war_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
+        register_ghost_domain(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
@@ -311,6 +326,7 @@ class V2GameEngine:
         register_faction_story_effects(self.story_effects)
         register_concubine_story_effects(self.story_effects, self.definitions)
         register_war_story_effects(self.story_effects, self.definitions)
+        register_ghost_story_effects(self.story_effects, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
@@ -333,6 +349,7 @@ class V2GameEngine:
         self.invariants.register("demonic", demonic_invariants)
         self.invariants.register("war", war_invariants(self.definitions))
         self.invariants.register("extensions", extension_invariants(self.definitions))
+        self.invariants.register("ghost", ghost_invariants)
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
 
@@ -360,6 +377,7 @@ class V2GameEngine:
             start_world=start_world,
         ))
         reconcile_extension_state(state, self.definitions)
+        reconcile_ghost_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -406,6 +424,7 @@ class V2GameEngine:
         )
         state = result.state
         reconcile_extension_state(state, self.definitions)
+        reconcile_ghost_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -462,6 +481,7 @@ class V2GameEngine:
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
+        reconcile_ghost_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -867,6 +887,63 @@ class V2GameEngine:
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, PostBattlePossession(actor_id, target_id))
+
+    def prepare_ghost_reincarnation(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PrepareGhostReincarnation(actor_id))
+
+    def reincarnate_ghost(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ReincarnateGhost(actor_id))
+
+    def ghost_parade_action(
+        self, game_id: str, action: str, soul_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, GhostParadeAction(actor_id, action, soul_id))
+
+    def ghost_soul_action(
+        self, game_id: str, soul_id: str, action: str, slot: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, GhostSoulAction(actor_id, soul_id, action, slot))
+
+    def ghost_attachment_action(
+        self, game_id: str, action: str, item_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, GhostAttachmentAction(actor_id, action, item_id))
+
+    def ghost_constraint_action(
+        self, game_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, GhostConstraintAction(actor_id, action))
+
+    def leave_possessed_body(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, LeavePossessedBody(actor_id))
 
     def equip_special_technique(
         self, game_id: str, technique_id: str, slot: str,
@@ -1385,6 +1462,7 @@ class V2GameEngine:
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
+        reconcile_ghost_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1445,6 +1523,7 @@ class V2GameEngine:
             "combat": combat_view(state, self.definitions),
             "party": party_view(state, self.definitions),
             "demonic_system": demonic_view(state, self.definitions),
+            "ghost_system": ghost_view(state, self.definitions),
             "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],

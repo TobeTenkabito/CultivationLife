@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import copy
 import math
 from dataclasses import dataclass
 from typing import Any
 
 from .actions import ACTION_RUNTIME, begin_action, complete_action
-from .advanced_cultivation import DIVINE_SENSE
+from .advanced_cultivation import BODY, DIVINE_SENSE, TRANSFORMATIONS
 from .character import IDENTITY, LIFE, LIFESPAN_DUE, character_view
 from .combat import CONDITION, PRISONER, combat_snapshot
 from .cultivation import CULTIVATION, PRACTICE
@@ -655,6 +656,10 @@ def _possess(
         "life": actor_life,
         "cultivation": actor_cultivation,
         "practice": actor_practice,
+        "condition": context.state.entities.require(actor_id, CONDITION),
+        "body": context.state.entities.require(actor_id, BODY),
+        "divine_sense": context.state.entities.require(actor_id, DIVINE_SENSE),
+        "transformations": context.state.entities.require(actor_id, TRANSFORMATIONS),
     }
     target_life = context.state.entities.require(target_id, LIFE)
     target_practice = context.state.entities.require(target_id, PRACTICE)
@@ -683,6 +688,10 @@ def _possess(
     context.state.entities.put(actor_id, LIFE, actor_life)
     context.state.entities.put(actor_id, CULTIVATION, target_cultivation)
     context.state.entities.put(actor_id, PRACTICE, target_practice)
+    for component in (BODY, DIVINE_SENSE, TRANSFORMATIONS):
+        target_component = context.state.entities.get(target_id, component)
+        if target_component is not None:
+            context.state.entities.put(actor_id, component, target_component)
     context.state.entities.put(actor_id, POSSESSION, possession)
     context.state.entities.put(
         actor_id, CONDITION, {"hp_ratio": 0.7, "mp_ratio": 0.7}
@@ -713,6 +722,64 @@ def _possess(
     state["pending_post_battle_possession"] = None
     context.state.entities.put(actor_id, DEMONIC_STATE, state)
     return {"result": "possessed", "chance": chance, "host_id": target_id}
+
+
+def possess_character(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    target_id: str,
+    *,
+    post_battle: bool = False,
+) -> dict[str, Any]:
+    """Canonical cross-domain entry point for occupying a living body."""
+    return _possess(
+        context, definitions, actor_id, target_id, post_battle=post_battle
+    )
+
+
+def leave_possessed_body(
+    context: SimulationContext, actor_id: str,
+) -> dict[str, Any]:
+    """Restore the preserved ghost body while retaining possession usage."""
+    possession = context.state.entities.require(actor_id, POSSESSION)
+    host = copy.deepcopy(possession.get("host"))
+    core = copy.deepcopy(possession.get("core"))
+    if not isinstance(host, dict) or not isinstance(core, dict):
+        raise ValueError("当前并未夺舍寄身")
+    count = int(possession.get("count", 0))
+    component_map = {
+        "identity": IDENTITY,
+        "life": LIFE,
+        "cultivation": CULTIVATION,
+        "practice": PRACTICE,
+        "condition": CONDITION,
+        "body": BODY,
+        "divine_sense": DIVINE_SENSE,
+        "transformations": TRANSFORMATIONS,
+    }
+    for key, component in component_map.items():
+        value = core.get(key)
+        if isinstance(value, dict):
+            context.state.entities.put(actor_id, component, value)
+    life = context.state.entities.require(actor_id, LIFE)
+    life.update(alive=True, death_reason=None)
+    context.state.entities.put(actor_id, LIFE, life)
+    context.state.entities.put(
+        actor_id, POSSESSION, {"host": None, "count": count, "core": None}
+    )
+    context.state.scheduler.cancel(
+        lambda row: row.event_type == LIFESPAN_DUE
+        and str(row.payload.get("entity_id", "")) == actor_id
+    )
+    if life.get("lifespan") is not None:
+        context.emit(
+            "character.lifespan.changed",
+            source="demonic",
+            scope=EventScope.entity(actor_id),
+            payload={"entity_id": actor_id},
+        )
+    return host
 
 
 def _captive_action_handler(definitions: GameDefinitions):

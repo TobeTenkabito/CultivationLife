@@ -19,6 +19,11 @@ from ..domain.cultivation import CULTIVATION, PRACTICE, QI_SOURCES
 from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
 from ..domain.extensions import GHOST_SOUL, MONSTER_BLOODLINE
+from ..domain.ghost import (
+    BOUND_SOUL,
+    GHOST_ECOLOGY,
+    SOUL_CONTROL as GHOST_SOUL_CONTROL,
+)
 from ..domain.factions import (
     DIPLOMACY_STATE, FACTION_GOVERNANCE, FACTION_NPC, FACTION_PROFILE, MEMBERSHIP,
 )
@@ -31,6 +36,7 @@ from ..domain.demonic import (
     IMPRISONMENT,
     PUPPET,
     PUPPET_CONTROL,
+    POSSESSION,
     SOUL_CONTROL,
 )
 from ..domain.story import STORY_STATE
@@ -248,6 +254,7 @@ class LegacyV1Importer:
         "id", "seed", "player", "created_at", "updated_at", "rng_state",
         "version", "history", "story_trigger_attempts", "family", "sects",
         "race_relations", "sect_relations", "player_bounties", "wars",
+        "ghost_parade",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -268,7 +275,11 @@ class LegacyV1Importer:
         "ghost_intrinsic_mp_current", "ghost_soul_erosion_rate_pp",
         "ghost_soul_erosion_time_progress", "ghost_wangsheng_energy",
         "ghost_reincarnation_imprints", "ghost_intrinsic_highwater_realm",
-        "ghost_intrinsic_highwater_layer",
+        "ghost_intrinsic_highwater_layer", "ghost_intrinsic_hp_reference",
+        "ghost_intrinsic_mp_reference", "ghost_last_reincarnation_realm",
+        "ghost_last_reincarnation_layer", "ghost_erosion_thresholds_seen",
+        "ghost_bound_souls", "ghost_soul_slots", "ghost_attachment",
+        "ghost_captor", "ghost_core_state", "ghost_host_body", "possession_count",
         "story_flags", "milestones", "karma", "fame", "sha_qi",
         "body_training", "body_progress", "body_technique",
         "awaiting_body_breakthrough", "body_breakthrough_pity",
@@ -385,7 +396,9 @@ class LegacyV1Importer:
         self._import_demonic_state(
             state, actor_id, player, legacy_entities, report
         )
-        self._import_extensions(state, actor_id, player, report)
+        self._import_extensions(
+            state, actor_id, source, player, legacy_entities, report
+        )
         self._import_combat_condition(state, actor_id, player, report)
         self._import_story(state, actor_id, source, player, report)
         self._audit_deferred_fields(source, player, report)
@@ -422,7 +435,6 @@ class LegacyV1Importer:
             ("pending_event", source.get("pending_event"), "请先在V1结算当前事件"),
             ("active_trial", source.get("active_trial"), "请先在V1完成或退出突破试炼"),
             ("player.sealed_cultivation", player.get("sealed_cultivation"), "请先在V1解除修为封印"),
-            ("player.ghost_captor", player.get("ghost_captor"), "请先在V1解决拘魂控制状态"),
         )
         for path, value, message in candidates:
             if _meaningful(value):
@@ -1777,18 +1789,67 @@ class LegacyV1Importer:
         self,
         state: WorldState,
         actor_id: str,
+        source: dict[str, Any],
         player: dict[str, Any],
+        legacy_entities: dict[str, str],
         report: LegacyImportReport,
     ) -> None:
         ghost = state.entities.get(actor_id, GHOST_SOUL)
+        raw_host = player.get("ghost_host_body")
+        raw_core = player.get("ghost_core_state")
+        ghost_extension_loaded = any(
+            extension.id == "official.ghost-reincarnation"
+            and extension.status == "loaded"
+            for extension in self.definitions.extensions
+        )
+        if (
+            ghost is None
+            and ghost_extension_loaded
+            and isinstance(raw_host, dict)
+            and isinstance(raw_core, dict)
+        ):
+            core_realm_index = max(0, min(
+                len(self.definitions.realms) - 1,
+                int(raw_core.get("realm_index", 0)),
+            ))
+            ghost = {
+                "intrinsic_hp": max(0.0, float(player.get("ghost_intrinsic_hp_current") or 100.0)),
+                "intrinsic_mp": max(0.0, float(player.get("ghost_intrinsic_mp_current") or 100.0)),
+                "intrinsic_hp_reference": max(0.0, float(player.get("ghost_intrinsic_hp_reference") or 100.0)),
+                "intrinsic_mp_reference": max(0.0, float(player.get("ghost_intrinsic_mp_reference") or 100.0)),
+                "erosion_rate_pp": max(0.0, float(player.get("ghost_soul_erosion_rate_pp", 0.0))),
+                "erosion_time_progress": max(0.0, float(player.get("ghost_soul_erosion_time_progress", 0.0))),
+                "erosion_thresholds_seen": list(player.get("ghost_erosion_thresholds_seen", [])),
+                "wangsheng": max(0, int(player.get("ghost_wangsheng_energy", 0))),
+                "reincarnation_imprints": copy.deepcopy(player.get("ghost_reincarnation_imprints", {})),
+                "historical_peak": {
+                    "realm_id": self.definitions.realms[core_realm_index].id,
+                    "layer": max(1, int(raw_core.get("layer", 1))),
+                },
+                "last_reincarnation": None,
+            }
+            state.entities.put(actor_id, GHOST_SOUL, ghost)
         if ghost is not None:
             hp_current = player.get("ghost_intrinsic_hp_current")
             mp_current = player.get("ghost_intrinsic_mp_current")
+            hp_reference = player.get("ghost_intrinsic_hp_reference")
+            mp_reference = player.get("ghost_intrinsic_mp_reference")
             ghost.update(
                 intrinsic_hp=max(0.0, float(ghost["intrinsic_hp"] if hp_current is None else hp_current)),
                 intrinsic_mp=max(0.0, float(ghost["intrinsic_mp"] if mp_current is None else mp_current)),
+                intrinsic_hp_reference=max(0.0, float(
+                    ghost.get("intrinsic_hp_reference", 100.0)
+                    if hp_reference is None else hp_reference
+                )),
+                intrinsic_mp_reference=max(0.0, float(
+                    ghost.get("intrinsic_mp_reference", 100.0)
+                    if mp_reference is None else mp_reference
+                )),
                 erosion_rate_pp=max(0.0, float(player.get("ghost_soul_erosion_rate_pp", 0.0))),
                 erosion_time_progress=max(0.0, float(player.get("ghost_soul_erosion_time_progress", 0.0))),
+                erosion_thresholds_seen=list(dict.fromkeys(
+                    int(value) for value in player.get("ghost_erosion_thresholds_seen", [])
+                )),
                 wangsheng=max(0, int(player.get("ghost_wangsheng_energy", 0))),
                 reincarnation_imprints={
                     str(key): int(value)
@@ -1801,8 +1862,251 @@ class LegacyV1Importer:
                     "realm_id": self.definitions.realms[peak_index].id,
                     "layer": max(1, int(player.get("ghost_intrinsic_highwater_layer") or 1)),
                 }
+            last_index = player.get("ghost_last_reincarnation_realm")
+            if isinstance(last_index, int) and 0 <= last_index < len(self.definitions.realms):
+                ghost["last_reincarnation"] = {
+                    "realm_id": self.definitions.realms[last_index].id,
+                    "layer": max(1, int(player.get("ghost_last_reincarnation_layer") or 1)),
+                    "year": state.clock.year,
+                }
             state.entities.put(actor_id, GHOST_SOUL, ghost)
+            ecology = state.entities.get(actor_id, GHOST_ECOLOGY) or {
+                "slots": {}, "parade": None, "attachment": None,
+                "captor": None, "pending_capture_revive": False,
+            }
+            ecology["attachment"] = copy.deepcopy(player.get("ghost_attachment"))
+            ecology["captor"] = copy.deepcopy(player.get("ghost_captor"))
+            if isinstance(ecology.get("captor"), dict):
+                legacy_captor = dict(ecology["captor"])
+                legacy_id = str(
+                    legacy_captor.get("npc_id") or legacy_captor.get("id") or ""
+                )
+                # Captors imported through ordinary relations already have a
+                # canonical character. If absent, retain the controlling
+                # snapshot but do not manufacture a duplicate person.
+                canonical_captor_id = legacy_entities.get(legacy_id)
+                if legacy_id and canonical_captor_id is None:
+                    canonical_captor_id = self._create_related_character(
+                        state, legacy_captor, legacy_id, report
+                    )
+                    legacy_entities[legacy_id] = canonical_captor_id
+                legacy_captor["entity_id"] = canonical_captor_id
+                ecology["captor"] = legacy_captor
+                ecology["attachment"] = None
+            legacy_to_canonical: dict[str, str] = {}
+            for index, raw in enumerate(player.get("ghost_bound_souls", [])):
+                if not isinstance(raw, dict):
+                    continue
+                soul_id = state.entities.create("ghost_soul")
+                legacy_id = str(raw.get("id") or f"legacy_bound_{index}")
+                legacy_to_canonical[legacy_id] = soul_id
+                realm_index = max(0, min(
+                    len(self.definitions.realms) - 1,
+                    int(raw.get("realm_index", 0)),
+                ))
+                state.entities.put(soul_id, BOUND_SOUL, {
+                    "name": str(raw.get("name", "无名遗魂")),
+                    "origin": str(raw.get("source", "legacy_import")),
+                    "status": "bound",
+                    "combat_power": max(0.0, float(raw.get("combat_power", 0.0))),
+                    "soul_pressure": max(0.0, float(raw.get("soul_pressure", 0.0))),
+                    "affinity": float(raw.get("affinity", 0.0)),
+                    "defeated": bool(raw.get("defeated", True)),
+                    "befriended": bool(raw.get("befriended", False)),
+                    "trait": copy.deepcopy(raw.get("soul_trait") or {}),
+                    "original_identity": str(raw.get(
+                        "original_identity", self.definitions.realms[realm_index].name + "遗魂"
+                    )),
+                    "legacy_id": legacy_id,
+                    "legacy_realm_id": self.definitions.realms[realm_index].id,
+                    "legacy_layer": max(1, int(raw.get("layer", 1))),
+                })
+                state.relations.add(
+                    source_id=actor_id,
+                    target_id=soul_id,
+                    kind=GHOST_SOUL_CONTROL,
+                    created_year=state.clock.year,
+                    metadata={"status": "bound", "source": "legacy_import"},
+                )
+            ecology["slots"] = {
+                str(slot): legacy_to_canonical[str(legacy_id)]
+                for slot, legacy_id in dict(player.get("ghost_soul_slots", {})).items()
+                if str(legacy_id) in legacy_to_canonical
+            }
+            raw_parade = source.get("ghost_parade")
+            if isinstance(raw_parade, dict) and raw_parade:
+                parade_soul_ids: list[str] = []
+                for index, raw in enumerate(raw_parade.get("souls", [])):
+                    if not isinstance(raw, dict):
+                        continue
+                    parade_soul_id = state.entities.create("ghost_soul")
+                    realm_index = max(0, min(
+                        len(self.definitions.realms) - 1,
+                        int(raw.get("realm_index", 0)),
+                    ))
+                    state.entities.put(parade_soul_id, BOUND_SOUL, {
+                        "name": str(raw.get("name", "无名游魂")),
+                        "origin": "legacy_ghost_parade",
+                        "status": "roaming",
+                        "combat_power": max(0.0, float(raw.get("combat_power", 0.0))),
+                        "soul_pressure": max(0.0, float(raw.get("soul_pressure", 0.0))),
+                        "affinity": float(raw.get("affinity", 0.0)),
+                        "defeated": bool(raw.get("defeated", False)),
+                        "befriended": bool(raw.get("befriended", False)),
+                        "trait": copy.deepcopy(raw.get("soul_trait") or {}),
+                        "original_identity": str(raw.get(
+                            "original_identity", self.definitions.realms[realm_index].name + "遗魂"
+                        )),
+                        "legacy_id": str(raw.get("id", f"legacy_parade_{index}")),
+                        "realm_id": self.definitions.realms[realm_index].id,
+                        "layer": max(1, int(raw.get("layer", 1))),
+                        "world_id": str(raw_parade.get("world", player.get("world", "hell"))),
+                        "location_id": str(raw_parade.get("location_id", player.get("location_id", ""))),
+                    })
+                    parade_soul_ids.append(parade_soul_id)
+                current_age = int(player.get("age", 0))
+                ecology["parade"] = {
+                    "status": str(raw_parade.get("status", "scheduled")),
+                    "world_id": str(raw_parade.get("world", player.get("world", "hell"))),
+                    "location_id": str(raw_parade.get("location_id", player.get("location_id", ""))),
+                    "start_year": state.clock.year + int(raw_parade.get("start_age", current_age)) - current_age,
+                    "end_year": state.clock.year + int(raw_parade.get("end_age", current_age)) - current_age,
+                    "announced": bool(raw_parade.get("announced", False)),
+                    "participated": bool(raw_parade.get("participated", False)),
+                    "soul_ids": parade_soul_ids,
+                }
+            state.entities.put(actor_id, GHOST_ECOLOGY, ecology)
+            possession = state.entities.get(actor_id, POSSESSION) or {
+                "host": None, "count": 0, "core": None,
+            }
+            possession["count"] = max(0, int(player.get("possession_count", 0)))
+            if isinstance(raw_host, dict) and isinstance(raw_core, dict):
+                possession["host"] = {
+                    "entity_id": str(raw_host.get("id") or raw_host.get("npc_id") or "legacy_host"),
+                    "name": str(raw_host.get("name", "旧档宿主")),
+                    "entered_year": state.clock.year,
+                    "body_age": max(0, int(raw_host.get("age", player.get("age", 0)))),
+                    "lifespan": raw_host.get("lifespan"),
+                    "legacy": True,
+                }
+                core_realm_index = max(0, min(
+                    len(self.definitions.realms) - 1,
+                    int(raw_core.get("realm_index", 0)),
+                ))
+                core_technique = raw_core.get("technique")
+                core_technique_id = (
+                    str(core_technique.get("id", ""))
+                    if isinstance(core_technique, dict) else ""
+                )
+                known_ids = [
+                    str(row.get("id", "")) for row in raw_core.get("known_techniques", [])
+                    if isinstance(row, dict) and str(row.get("id", "")) in self.definitions.techniques
+                ]
+                if (
+                    core_technique_id in self.definitions.techniques
+                    and core_technique_id not in known_ids
+                ):
+                    known_ids.append(core_technique_id)
+                core_slot_ids: dict[str, str | None] = {}
+                for field, category in (
+                    ("body_technique", "body"),
+                    ("divine_sense_technique", "divine_sense"),
+                    ("transformation_technique", "transformation"),
+                ):
+                    raw_technique = raw_core.get(field)
+                    technique_id = (
+                        str(raw_technique.get("id", ""))
+                        if isinstance(raw_technique, dict) else ""
+                    )
+                    definition = self.definitions.techniques.get(technique_id)
+                    if definition is None or definition.category != category:
+                        technique_id = ""
+                    if technique_id and technique_id not in known_ids:
+                        known_ids.append(technique_id)
+                    core_slot_ids[field] = technique_id or None
+                core_mastery = {
+                    str(form_id): copy.deepcopy(value)
+                    for form_id, value in dict(
+                        raw_core.get("transformation_mastery", {})
+                    ).items()
+                    if str(form_id) in self.definitions.transformations
+                    and isinstance(value, dict)
+                }
+                core_loadouts = {
+                    str(technique_id): {
+                        "stored": [
+                            str(form_id) for form_id in raw.get("stored", raw.get("forms", []))
+                            if str(form_id) in self.definitions.transformations
+                        ],
+                        "active": [
+                            str(form_id) for form_id in raw.get("active", [])
+                            if str(form_id) in self.definitions.transformations
+                        ],
+                    }
+                    for technique_id, raw in dict(
+                        raw_core.get("transformation_loadouts", {})
+                    ).items()
+                    if str(technique_id) in self.definitions.techniques
+                    and isinstance(raw, dict)
+                }
+                possession["core"] = {
+                    "identity": {
+                        "name": str(raw_core.get("name", player.get("name", "旧档游魂"))),
+                        "gender": str(raw_core.get("gender", player.get("gender", "male"))),
+                        "race": str(raw_core.get("race", "human")),
+                    },
+                    "life": {
+                        "birth_year": state.clock.year - int(player.get("age", 0)),
+                        "lifespan": raw_core.get("lifespan"),
+                        "alive": True,
+                        "death_reason": None,
+                    },
+                    "cultivation": {
+                        "path": str(raw_core.get("path", "ghost")),
+                        "spirit_root": str(raw_core.get("spirit_root", "none")),
+                        "additional_roots": list(raw_core.get("additional_roots", [])),
+                        "realm_id": self.definitions.realms[core_realm_index].id,
+                        "layer": max(1, int(raw_core.get("layer", 1))),
+                        "opportunity": max(0.0, float(raw_core.get("opportunity", 0.0))),
+                        "heart_demon": 0.0,
+                        "bottleneck": None,
+                        "breakthrough_pity": copy.deepcopy(raw_core.get("breakthrough_pity", {})),
+                        "active_breakthrough_aids": [],
+                        "intrinsic_hp_bonus": 0.0,
+                        "intrinsic_mp_bonus": 0.0,
+                        "next_thunder_damage_reduction": 0.0,
+                        "qi_experience": copy.deepcopy(raw_core.get("qi_experience", {})),
+                    },
+                    "practice": {
+                        "known_techniques": list(dict.fromkeys(known_ids)),
+                        "main_technique_id": core_technique_id if core_technique_id in self.definitions.techniques else None,
+                    },
+                    "condition": {"hp_ratio": 1.0, "mp_ratio": 1.0},
+                    "body": {
+                        "technique_id": core_slot_ids["body_technique"],
+                        "layer": max(0, int(raw_core.get("body_training", 0))),
+                        "progress": max(0.0, float(raw_core.get("body_progress", 0.0))),
+                        "ready": bool(raw_core.get("awaiting_body_breakthrough", False)),
+                        "breakthrough_pity": copy.deepcopy(raw_core.get("body_breakthrough_pity", {})),
+                        "intrinsic_hp_bonus": 0.0,
+                    },
+                    "divine_sense": {
+                        "technique_id": core_slot_ids["divine_sense_technique"],
+                        "rank": max(0, int(raw_core.get("divine_sense_rank", 1))),
+                        "experience": max(0.0, float(raw_core.get("divine_sense_experience", 0.0))),
+                    },
+                    "transformations": {
+                        "technique_id": core_slot_ids["transformation_technique"],
+                        "mastery": core_mastery,
+                        "loadouts": core_loadouts,
+                    },
+                }
+            state.entities.put(actor_id, POSSESSION, possession)
             report.imported_counts["ghost_states"] = 1
+            report.imported_counts["ghost_bound_souls"] = len(legacy_to_canonical)
+            report.imported_counts["ghost_parade_souls"] = len(
+                list((ecology.get("parade") or {}).get("soul_ids", []))
+            )
         elif str(player.get("path", "")) == "ghost" and any(
             _meaningful(player.get(key)) for key in (
                 "ghost_intrinsic_hp_current", "ghost_intrinsic_mp_current",
