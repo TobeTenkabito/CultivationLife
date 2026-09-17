@@ -162,6 +162,15 @@ class ItemDefinition:
     transformation_form_id: str | None = None
     transformation_source: str = ""
     transformation_purity: float = 0.0
+    breakthrough_bonus: float = 0.0
+    breakthrough_scope: str = ""
+    trial_restore_hp: float = 0.0
+    trial_restore_mp: float = 0.0
+    root_grant: str = ""
+    conception_bonus: float = 0.0
+    permanent_intrinsic_hp_bonus: float = 0.0
+    permanent_intrinsic_mp_bonus: float = 0.0
+    tribulation_damage_reduction: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)

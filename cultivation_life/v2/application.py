@@ -46,10 +46,49 @@ from .domain.combat import (
 from .domain.economy import (
     BuyMarketOffer,
     RefreshMarket,
+    UseItem,
     economy_invariants,
     inventory_view,
     market_view,
     register_economy_domain,
+)
+from .domain.assets import (
+    asset_invariants,
+    asset_view,
+    reconcile_asset_ledger,
+    register_asset_domain,
+)
+from .domain.auction import (
+    AdvanceAuctionRound,
+    BargainPrivateTrade,
+    BuyBlackMarket,
+    BuyPrivateTrade,
+    ChooseAuctionIdentity,
+    ConsignAuctionAsset,
+    LeaveBlackMarket,
+    NegotiateAuction,
+    PlaceAuctionBid,
+    ScheduleAuction,
+    SearchBlackMarket,
+    SellBlackMarketAsset,
+    SellPrivateTrade,
+    auction_invariants,
+    auction_view,
+    reconcile_auction_state,
+    register_auction_domain,
+)
+from .domain.production import (
+    HarvestSpiritCrop,
+    IrrigateSpiritCrop,
+    PlantSpiritCrop,
+    ReclaimSpiritField,
+    RefinePill,
+    SellSpiritPlant,
+    UseHarvestedPlant,
+    production_invariants,
+    production_view,
+    reconcile_production_state,
+    register_production_domain,
 )
 from .domain.extensions import (
     extension_invariants,
@@ -158,6 +197,9 @@ class V2GameEngine:
         register_relationship_domain(self.commands)
         register_faction_domain(self.commands, self.definitions)
         register_economy_domain(self.commands, self.definitions)
+        register_asset_domain(self.commands)
+        register_production_domain(self.commands, self.definitions)
+        register_auction_domain(self.commands, self.definitions)
         register_combat_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
@@ -174,6 +216,9 @@ class V2GameEngine:
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
         self.invariants.register("economy", economy_invariants(self.definitions))
+        self.invariants.register("assets", asset_invariants)
+        self.invariants.register("production", production_invariants(self.definitions))
+        self.invariants.register("auction", auction_invariants)
         self.invariants.register("combat", combat_invariants)
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
@@ -209,6 +254,9 @@ class V2GameEngine:
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
         reconcile_trial_state(state)
+        reconcile_asset_ledger(state)
+        reconcile_production_state(state)
+        reconcile_auction_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -246,6 +294,9 @@ class V2GameEngine:
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
         reconcile_trial_state(state)
+        reconcile_asset_ledger(state)
+        reconcile_production_state(state)
+        reconcile_auction_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -293,6 +344,9 @@ class V2GameEngine:
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
         reconcile_trial_state(state)
+        reconcile_asset_ledger(state)
+        reconcile_production_state(state)
+        reconcile_auction_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -423,6 +477,201 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, RefreshMarket(actor_id=actor_id, force=force))
 
+    def use_item(self, game_id: str, item_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, UseItem(actor_id, item_id))
+
+    def reclaim_spirit_field(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ReclaimSpiritField(actor_id))
+
+    def plant_spirit_crop(
+        self, game_id: str, plant_id: str, slot: int | None = None,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PlantSpiritCrop(actor_id, plant_id, slot))
+
+    def irrigate_spirit_crop(
+        self, game_id: str, plot_id: str, mp_ratio: float = 0.0,
+        booster_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, IrrigateSpiritCrop(actor_id, plot_id, mp_ratio, booster_id)
+        )
+
+    def harvest_spirit_crop(self, game_id: str, plot_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, HarvestSpiritCrop(actor_id, plot_id))
+
+    def sell_spirit_plant(
+        self, game_id: str, asset_id: str, *, venue: str = "market",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, SellSpiritPlant(actor_id, asset_id, venue))
+
+    def use_harvested_plant(self, game_id: str, asset_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, UseHarvestedPlant(actor_id, asset_id))
+
+    def refine_pill(
+        self, game_id: str, target_item_id: str,
+        materials: tuple[tuple[str, int], ...],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RefinePill(actor_id, target_item_id, materials))
+
+    def schedule_auction(
+        self, game_id: str, location_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ScheduleAuction(actor_id, location_id))
+
+    def consign_auction_asset(
+        self, game_id: str, asset_ref: str, start_price: int = 0,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, ConsignAuctionAsset(actor_id, asset_ref, start_price)
+        )
+
+    def consign_auction_item(
+        self, game_id: str, item_id: str, start_price: int = 0,
+    ) -> CommandExecution:
+        return self.consign_auction_asset(game_id, item_id, start_price)
+
+    def place_auction_bid(self, game_id: str, lot_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PlaceAuctionBid(actor_id, lot_id))
+
+    def advance_auction_round(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, AdvanceAuctionRound(actor_id))
+
+    def negotiate_at_auction(
+        self, game_id: str, attendee_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, NegotiateAuction(actor_id, attendee_id))
+
+    def choose_auction_identity(self, game_id: str, alias: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ChooseAuctionIdentity(actor_id, alias))
+
+    def buy_private_trade_item(
+        self, game_id: str, attendee_id: str, offer_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, BuyPrivateTrade(actor_id, attendee_id, offer_id)
+        )
+
+    def sell_private_trade_asset(
+        self, game_id: str, attendee_id: str, asset_ref: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, SellPrivateTrade(actor_id, attendee_id, asset_ref)
+        )
+
+    def sell_private_trade_item(
+        self, game_id: str, attendee_id: str, item_id: str,
+    ) -> CommandExecution:
+        return self.sell_private_trade_asset(game_id, attendee_id, item_id)
+
+    def bargain_private_trade(
+        self, game_id: str, attendee_id: str, side: str, asset_ref: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, BargainPrivateTrade(actor_id, attendee_id, side, asset_ref)
+        )
+
+    def search_black_market(self, game_id: str, pattern: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, SearchBlackMarket(actor_id, pattern))
+
+    def buy_black_market_item(
+        self, game_id: str, result_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, BuyBlackMarket(actor_id, result_id))
+
+    def sell_black_market_asset(
+        self, game_id: str, kind: str, asset_ref: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, SellBlackMarketAsset(actor_id, kind, asset_ref)
+        )
+
+    def leave_black_market(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, LeaveBlackMarket(actor_id))
+
     def buy_market_offer(self, game_id: str, offer_id: str) -> CommandExecution:
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
@@ -533,6 +782,9 @@ class V2GameEngine:
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
         reconcile_trial_state(state)
+        reconcile_asset_ledger(state)
+        reconcile_production_state(state)
+        reconcile_auction_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -564,6 +816,9 @@ class V2GameEngine:
             "faction": faction_view(state, self.definitions),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),
             "inventory": inventory_view(state, self.definitions),
+            "assets": asset_view(state),
+            "production": production_view(state, self.definitions),
+            "auction": auction_view(state, self.definitions),
             "market": market_view(state, self.definitions),
             "combat": combat_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),

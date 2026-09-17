@@ -32,7 +32,8 @@ class V2ReadinessMatrixTests(unittest.TestCase):
         report = assess_default_matrix(SOURCE_ROOT)
         self.assertFalse(report.ready)
         blocker_ids = {row["id"] for row in report.blockers}
-        self.assertIn("economy.auction", blocker_ids)
+        self.assertNotIn("economy.auction", blocker_ids)
+        self.assertIn("economy.black_market", blocker_ids)
         self.assertIn("core.action_loop", blocker_ids)
         self.assertIn("interface.http_frontend", blocker_ids)
         with self.assertRaises(CutoverBlockedError):

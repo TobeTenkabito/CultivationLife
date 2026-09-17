@@ -56,6 +56,10 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
         "heart_demon": 0.0,
         "bottleneck": None,
         "breakthrough_pity": {},
+        "active_breakthrough_aids": [],
+        "intrinsic_hp_bonus": 0.0,
+        "intrinsic_mp_bonus": 0.0,
+        "next_thunder_damage_reduction": 0.0,
         "qi_experience": {source: 0.0 for source in QI_SOURCES},
     }
     starters = {
@@ -514,7 +518,12 @@ def _breakthrough_chance(definitions: GameDefinitions, cultivation: dict[str, An
             float(definitions.breakthrough["minor_pity"]["max_bonus"]),
             failures * float(definitions.breakthrough["minor_pity"]["bonus_per_failure"]),
         )
-    return max(0.005, min(0.98, base + pity - penalty))
+    aid_bonus = sum(
+        definitions.items[item_id].breakthrough_bonus
+        for item_id in cultivation.get("active_breakthrough_aids", [])
+        if item_id in definitions.items
+    )
+    return max(0.005, min(0.98, base + pity + aid_bonus - penalty))
 
 
 def _attempt_breakthrough_handler(definitions: GameDefinitions):
@@ -543,6 +552,7 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         if float(cultivation["opportunity"]) < required:
             raise ValueError("机缘尚未圆满")
         chance = _breakthrough_chance(definitions, cultivation, major)
+        cultivation["active_breakthrough_aids"] = []
         old_realm = str(cultivation["realm_id"])
         pity_key = f"minor:{realm_index}:{old_layer}"
         success = context.rng.random() < chance

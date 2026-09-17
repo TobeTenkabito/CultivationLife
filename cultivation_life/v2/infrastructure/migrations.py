@@ -210,6 +210,64 @@ def _schema_6_to_7(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_7_to_8(source: dict[str, Any]) -> dict[str, Any]:
+    """Add instance assets, durable reservations and spirit-field production."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault(
+            "economy.asset_ledger",
+            {"next_sequence": 1, "instances": {}, "reservations": {}},
+        )
+        components.setdefault(
+            "economy.spirit_field",
+            {
+                "reclaimed_qing": 0,
+                "next_plot_sequence": 1,
+                "plots": [],
+                "art_experience": {
+                    "alchemy": 0.0,
+                    "refining": 0.0,
+                    "formation": 0.0,
+                    "talisman": 0.0,
+                    "spirit_control": 0.0,
+                },
+            },
+        )
+        cultivation = dict(components.get("cultivation.state", {}))
+        cultivation.setdefault("active_breakthrough_aids", [])
+        cultivation.setdefault("intrinsic_hp_bonus", 0.0)
+        cultivation.setdefault("intrinsic_mp_bonus", 0.0)
+        cultivation.setdefault("next_thunder_damage_reduction", 0.0)
+        if cultivation:
+            components["cultivation.state"] = cultivation
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "assets": 1, "production": 1,
+    }
+    value["schema_version"] = 8
+    return value
+
+
+def _schema_8_to_9(source: dict[str, Any]) -> dict[str, Any]:
+    """Add the auction/black-market state machine over the shared asset ledger."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" in components:
+            components.setdefault(
+                "economy.auction", {"next_sequence": 1, "session": None}
+            )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "auction": 1,
+    }
+    value["schema_version"] = 9
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -217,6 +275,8 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     4: _schema_4_to_5,
     5: _schema_5_to_6,
     6: _schema_6_to_7,
+    7: _schema_7_to_8,
+    8: _schema_8_to_9,
 }
 
 

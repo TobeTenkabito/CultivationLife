@@ -101,11 +101,13 @@ def combat_snapshot(
         max(10.0, 100.0 + math.sqrt(power) * 18.0)
         * max(0.1, 1 + hp_bonus + item_hp)
         + faction_hp
+        + float(cultivation.get("intrinsic_hp_bonus", 0))
     )
     max_mp = (
         max(10.0, 80.0 + math.sqrt(power) * 15.0)
         * max(0.1, 1 + mp_bonus + item_mp)
         + faction_mp
+        + float(cultivation.get("intrinsic_mp_bonus", 0))
     )
     stats = {
         "might": power * 1.02,
