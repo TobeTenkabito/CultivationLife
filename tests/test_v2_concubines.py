@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,11 +13,22 @@ from cultivation_life.v2 import (
     ManageConcubine,
     ManageConcubineStatus,
     RegisterCharacter,
+    ResolveStoryChoice,
     V2GameEngine,
 )
 from cultivation_life.v2.domain.actions import ACTION_RUNTIME
 from cultivation_life.v2.domain.combat import CONDITION
 from cultivation_life.v2.domain.cultivation import CULTIVATION
+from cultivation_life.v2.kernel.bus import SimulationContext
+from cultivation_life.v2.kernel.model import EventScope
+
+
+class _AlwaysTrigger(random.Random):
+    def random(self) -> float:
+        return 0.0
+
+    def choice(self, seq):
+        return seq[0]
 
 
 class V2ConcubineTests(unittest.TestCase):
@@ -189,6 +201,64 @@ class V2ConcubineTests(unittest.TestCase):
         self.assertGreater(
             advanced["concubine_system"]["status"]["last_drain"], 0.0
         )
+
+    def test_automatic_proposal_refusal_and_two_unit_revenge_are_persisted(self):
+        game = self.engine.create_game("拒婚", seed=2204, gender="female")
+        actor_id = game["player"]["id"]
+        owner_id = self._register(
+            game["id"], "玄门府主", gender="male", realm_id="core", layer=3
+        )
+        state = self.engine.store.load(game["id"])
+        context = SimulationContext(state, self.engine.commands.event_bus)
+        context._rng = _AlwaysTrigger()
+        context.emit(
+            "core.action.completed",
+            source="test",
+            scope=EventScope.entity(actor_id),
+            payload={"actor_id": actor_id, "action": "rest"},
+        )
+        context.persist_rng()
+        self.engine.store.save(
+            state, context.emitted_events,
+            player_name="拒婚", expected_revision=state.revision,
+        )
+        proposed = self.engine.get_game(game["id"])
+        self.assertEqual(proposed["pending_event"]["id"], "SYS_CONCUBINE_PROPOSAL")
+        self.assertIn("玄门府主", proposed["pending_event"]["body"])
+
+        refused = self.engine.execute(
+            game["id"], ResolveStoryChoice(actor_id, "refuse")
+        ).game
+        aftermath = refused["concubine_system"]["rejection_aftermath"]
+        self.assertEqual(len(aftermath), 1)
+        self.assertEqual(aftermath[0]["owner_id"], owner_id)
+
+        state = self.engine.store.load(game["id"])
+        runtime = state.entities.require(actor_id, ACTION_RUNTIME)
+        runtime["next_sequence"] = 2
+        state.entities.put(actor_id, ACTION_RUNTIME, runtime)
+        context = SimulationContext(state, self.engine.commands.event_bus)
+        context._rng = _AlwaysTrigger()
+        context.emit(
+            "core.action.completed",
+            source="test",
+            scope=EventScope.entity(actor_id),
+            payload={"actor_id": actor_id, "action": "rest"},
+        )
+        context.persist_rng()
+        self.engine.store.save(
+            state, context.emitted_events,
+            player_name="拒婚", expected_revision=state.revision,
+        )
+        revenge = self.engine.get_game(game["id"])
+        self.assertEqual(revenge["pending_event"]["id"], "SYS_CONCUBINE_REVENGE")
+        self.assertEqual(revenge["concubine_system"]["rejection_aftermath"], [])
+
+        submitted = self.engine.execute(
+            game["id"], ResolveStoryChoice(actor_id, "submit")
+        ).game
+        self.assertEqual(submitted["concubine_system"]["status"]["owner"]["id"], owner_id)
+        self.assertTrue(submitted["concubine_system"]["status"]["forced"])
 
 
 if __name__ == "__main__":

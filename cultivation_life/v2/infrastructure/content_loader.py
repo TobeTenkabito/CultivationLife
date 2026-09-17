@@ -82,7 +82,7 @@ class V2ContentLoader:
         transformations = cls._transformations(transformation_doc, len(realms))
         items = cls._items(item_doc, transformations)
         market_goods = cls._market_goods(market_doc, items, techniques)
-        worlds = cls._worlds(world_doc, maps_doc)
+        worlds = cls._worlds(world_doc, maps_doc, len(realms))
         factions = cls._factions(faction_doc, worlds)
         story_events = cls._story_events(documents, items, techniques, factions)
         faction_rewards = {
@@ -95,6 +95,7 @@ class V2ContentLoader:
         ):
             raise V2ContentError("势力年度奖励定义无效")
         systems = dict(world_doc.get("systems", {}))
+        systems["factions"] = dict(faction_doc.get("systems", {}))
         systems["crafting"] = {
             "settings": dict(crafting_doc.get("settings", {})),
             "molds": [dict(row) for row in crafting_doc.get("molds", [])],
@@ -476,7 +477,9 @@ class V2ContentLoader:
         return tuple(result)
 
     @staticmethod
-    def _worlds(world_doc: dict[str, Any], maps_doc: dict[str, Any]) -> dict[str, WorldDefinition]:
+    def _worlds(
+        world_doc: dict[str, Any], maps_doc: dict[str, Any], realm_count: int,
+    ) -> dict[str, WorldDefinition]:
         systems = dict(world_doc["systems"])
         profiles = dict(systems["world_profiles"])
         names = dict(systems["world_names"])
@@ -487,6 +490,9 @@ class V2ContentLoader:
         for world_id, profile_source in profiles.items():
             profile = dict(profile_source)
             map_source = dict(map_worlds[world_id])
+            npc_realm_cap = int(profile.get("npc_realm_cap", realm_count - 1))
+            if not 0 <= npc_realm_cap < realm_count:
+                raise V2ContentError(f"世界NPC境界上限非法：{world_id}")
             locations = {
                 str(row["id"]): LocationDefinition(
                     id=str(row["id"]),
@@ -515,6 +521,7 @@ class V2ContentLoader:
                 id=world_id,
                 name=str(names[world_id]),
                 tier=int(profile["tier"]),
+                npc_realm_cap=npc_realm_cap,
                 enabled=bool(profile["enabled"]),
                 qi_concentrations={
                     source: float(dict(profile["qi_concentrations"])[source])
@@ -543,6 +550,7 @@ class V2ContentLoader:
                 allegiance_race=str(row.get("allegiance_race", "human")),
                 description=str(row.get("description", "")),
                 color=str(row.get("color", "")),
+                npcs=tuple(dict(npc) for npc in row.get("npcs", [])),
             )
         return result
 

@@ -21,13 +21,18 @@ from .domain.advanced_cultivation import (
     ManageTransformation,
 )
 from .domain.factions import (
+    ArrangeFactionSuccession,
     ChangeContribution,
+    DispatchFactionMember,
     FoundFaction,
+    InterceptFactionMember,
     JoinFaction,
     InviteRelationshipToFaction,
     SetFactionRewardPreference,
+    ProposeDiplomacy,
     LeaveFaction,
     TransferFactionControl,
+    TransferVassalPersonnel,
 )
 from .domain.family import CreateFamily
 from .domain.concubines import (
@@ -88,6 +93,7 @@ from .domain.extensions import (
     SpendWangsheng,
 )
 from .domain.relations import (
+    BeginRelationshipCapture,
     BefriendDaoist,
     ChangeAffinity,
     EndRelationship,
@@ -106,6 +112,7 @@ from .domain.story import QueueStoryEvent, ResolveStoryChoice
 from .domain.trials import BeginAscensionTrial
 
 __all__ = [
+    "ArrangeFactionSuccession",
     "AttemptBreakthrough",
     "AttemptBodyBreakthrough",
     "AttemptDivineSenseBreakthrough",
@@ -114,10 +121,12 @@ __all__ = [
     "AssignFactionPosition",
     "BuyMarketOffer",
     "BeginAscensionTrial",
+    "BeginRelationshipCapture",
     "ChangeContribution",
     "ConfigureMonsterBloodline",
     "CrossWorld",
     "CreateFamily",
+    "DispatchFactionMember",
     "ChangeAffinity",
     "EndRelationship",
     "EquipMainTechnique",
@@ -129,6 +138,7 @@ __all__ = [
     "InteractDaoFriend",
     "OfferDiscipleRequest",
     "ProposeDaoCompanion",
+    "ProposeDiplomacy",
     "RequestFromMaster",
     "RequestMentorship",
     "RespondDiscipleRequest",
@@ -138,9 +148,13 @@ __all__ = [
     "HarvestSpiritCrop",
     "IrrigateSpiritCrop",
     "JoinFaction",
+    "InterceptFactionMember",
     "ManageTransformation",
     "InviteRelationshipToFaction",
     "SetFactionRewardPreference",
+    "EnterConcubineStatus",
+    "ManageConcubine",
+    "ManageConcubineStatus",
     "LeaveFaction",
     "PerformActionUnits",
     "PerformTimedAction",
@@ -157,6 +171,7 @@ __all__ = [
     "SellSpiritPlant",
     "ToggleMarketOfferLock",
     "TransferFactionControl",
+    "TransferVassalPersonnel",
     "TravelWithinWorld",
     "UseHarvestedPlant",
     "UseItem",

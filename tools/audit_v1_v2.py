@@ -34,11 +34,6 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "relations_and_governance": (
         "relations.concubines",
-        "relations.capture",
-        "factions.succession",
-        "factions.family",
-        "factions.npc_operations",
-        "factions.diplomacy",
     ),
     "combat_and_demonic": (
         "party.management",
@@ -62,7 +57,7 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
 GROUP_CAUSES = {
     "shared_runtime": "通用行动与交互内核已经建立，但领域专属效果、完整行动适配器、全操作影子覆盖及正式HTTP入口尚未完成。",
     "asset_and_economy_model": "实例资产、统一预留账本、完整物品使用、拍卖、炼器、阵法和本命法宝已经建立；黑市仍缺傀儡交易。",
-    "relations_and_governance": "关系生命周期、好感、道侣/道友互动、师徒请求、侍妾与家族基础已迁移；侍妾自动事件、俘虏、家族自治、NPC自治及治理事务仍待完成。",
+    "relations_and_governance": "关系生擒、家族自治、宗门NPC、继承、外交及侍妾求娶/拒绝报复已经迁移；侍妾炼尸仍等待魔道傀儡与魂魄聚合。",
     "combat_and_demonic": "单场一对一结算存在，但队伍、战场、持续囚禁/魂魄/傀儡聚合尚未迁移。",
     "dlc_depth": "扩展加载和首层状态存在，DLC专属状态机及交互命令仍缺失。",
 }

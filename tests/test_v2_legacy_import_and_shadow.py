@@ -106,6 +106,9 @@ class V2LegacyImportTests(unittest.TestCase):
             result.game["faction"]["permanent_benefits"],
             {"hp": 6.0, "mp": 8.0, "combat": 9.0},
         )
+        self.assertEqual(len(result.game["faction"]["roster"]), 7)
+        self.assertEqual(result.report["imported_counts"]["faction_npcs"], 6)
+        self.assertTrue(result.game["governance"]["relations"])
         self.assertEqual(result.game["relationships"][0]["kind"], "friend")
         self.assertEqual(result.game["relationships"][0]["other"]["name"], "旧雨")
         self.assertEqual(
@@ -183,6 +186,16 @@ class V2LegacyImportTests(unittest.TestCase):
             "last_requests": {"stones": 2},
             "angered_until_unit": -1,
         }
+        document["player"]["concubine_rejection_aftermath"] = [{
+            "owner_id": "legacy-owner",
+            "owner_name": "玄明",
+            "owner_world": "human",
+            "owner_realm_index": 3,
+            "owner_layer": 2,
+            "declined_unit": 5,
+            "expires_unit": 7,
+            "last_checked_unit": 5,
+        }]
         document["family"] = {
             "id": "legacy-family",
             "name": "归氏仙族",
@@ -208,6 +221,11 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(concubines["escape_reputation"], 2)
         self.assertEqual(concubines["status"]["owner"]["name"], "玄明")
         self.assertTrue(concubines["status"]["dependent"])
+        self.assertEqual(len(concubines["rejection_aftermath"]), 1)
+        self.assertEqual(
+            concubines["rejection_aftermath"][0]["owner_id"],
+            concubines["status"]["owner"]["id"],
+        )
         self.assertEqual(result.report["imported_counts"]["offspring"], 1)
         self.assertEqual(result.report["imported_counts"]["families"], 1)
         self.assertEqual(result.report["imported_counts"]["concubine_status"], 1)

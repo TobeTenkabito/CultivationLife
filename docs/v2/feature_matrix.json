@@ -286,18 +286,19 @@
       "evidence": [
         "tests/test_v2_concubines.py::V2ConcubineTests::test_recruitment_creates_a_distinct_concubine_relationship",
         "tests/test_v2_concubines.py::V2ConcubineTests::test_cauldron_cooldown_live_view_and_breakthrough_bonus_consumption",
-        "tests/test_v2_concubines.py::V2ConcubineTests::test_player_concubine_status_drains_and_manages_owner_dependency"
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_player_concubine_status_drains_and_manages_owner_dependency",
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_automatic_proposal_refusal_and_two_unit_revenge_are_persisted"
       ],
-      "notes": "Recruitment, distinct relationship semantics, canonical live information, cauldron cooldown/restoration/affinity, breakthrough bonuses, dismissal, dependent efficiency and drain, owner requests and escape resolution are migrated. Random owner proposals, rejection revenge and demonic corpse conversion remain explicit dependencies."
+      "notes": "Recruitment, distinct relationship semantics, canonical live information, cauldron cooldown/restoration/affinity, breakthrough bonuses, dismissal, dependent efficiency and drain, owner requests, escape resolution, automatic stronger-owner proposals and the persisted two-action rejection/revenge chain are migrated. Demonic corpse conversion remains an explicit dependency on the puppet/soul aggregate."
     },
     {
       "id": "relations.capture",
       "domain": "relations",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["relationship-capture"],
-      "evidence": [],
-      "notes": "Relationship capture chains and consequences are not migrated."
+      "evidence": ["tests/test_v2_governance_batch5.py::V2GovernanceBatchFiveTests::test_relationship_capture_keeps_runtime_across_both_story_stages"],
+      "notes": "Demonic capture uses the typed story queue, persists runtime across both stages, records the annual attempt, ends the social edge on betrayal and creates one canonical combat-prisoner edge on success."
     },
     {
       "id": "factions.create_leave",
@@ -311,20 +312,23 @@
     {
       "id": "factions.succession",
       "domain": "factions",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["faction-succession"],
-      "evidence": ["tests/test_v2_core_domains.py"],
-      "notes": "Control transfer exists; ascension handover and founder-return event remain."
+      "evidence": ["tests/test_v2_governance_batch5.py::V2GovernanceBatchFiveTests::test_arranged_ascension_handover_and_founder_return"],
+      "notes": "A controlling player founder can designate a living same-world successor. Permanent ascent removes the player membership, transfers arranged control, and the persisted founder-return event can restore control after a later return."
     },
     {
       "id": "factions.family",
       "domain": "factions",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["create-family"],
-      "evidence": ["tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_conception_item_child_lifecycle_and_family_founding"],
-      "notes": "Canonical children, spirit-root inheritance, lifespan/age projection, cultivation start, family founding and cross-world roster isolation are implemented. Autonomous family recruitment, annual member progression and the complete founder/control lifecycle remain."
+      "evidence": [
+        "tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_conception_item_child_lifecycle_and_family_founding",
+        "tests/test_v2_governance_batch5.py::V2GovernanceBatchFiveTests::test_family_recruits_offline_and_cross_world_removes_player_voice"
+      ],
+      "notes": "Canonical children, inheritance, lifespan, cultivation start and family founding are joined by autonomous recruitment and member progression. The family continues off-world while its roster and player voice remain hidden until return."
     },
     {
       "id": "factions.rewards",
@@ -338,20 +342,23 @@
     {
       "id": "factions.npc_operations",
       "domain": "factions",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["faction-dispatch", "faction-intercept", "faction-relationship"],
-      "evidence": [],
-      "notes": "Roster, dispatch, interception and relationship recruitment remain."
+      "evidence": [
+        "tests/test_v2_governance_batch5.py::V2GovernanceBatchFiveTests::test_lazy_faction_roster_dispatch_and_interception_share_characters",
+        "tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_disciple_requests_master_requests_and_gifts_are_persistent"
+      ],
+      "notes": "Content rosters are lazily materialized as canonical characters. Dispatch spends membership-scoped contribution with a yearly cooldown, interception reuses combat, and same-faction mentorship uses the same live roster."
     },
     {
       "id": "factions.diplomacy",
       "domain": "factions",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["race-diplomacy", "faction-diplomacy", "vassal-transfer"],
-      "evidence": [],
-      "notes": "Race and faction diplomacy plus vassal transfer remain."
+      "evidence": ["tests/test_v2_governance_batch5.py::V2GovernanceBatchFiveTests::test_faction_and_race_diplomacy_and_vassal_transfer"],
+      "notes": "Race and faction proposals use persisted typed relations and eligible canonical voters. Vassal direction is explicit and personnel transfer atomically moves the canonical character membership with same-world and rank checks."
     },
     {
       "id": "party.management",

@@ -118,12 +118,22 @@ from .domain.extensions import (
     register_extension_domains,
 )
 from .domain.factions import (
+    ArrangeFactionSuccession,
+    DispatchFactionMember,
+    FoundFaction,
+    InterceptFactionMember,
     InviteRelationshipToFaction,
+    JoinFaction,
+    LeaveFaction,
+    ProposeDiplomacy,
     SetFactionRewardPreference,
+    TransferVassalPersonnel,
     faction_catalog_view,
     faction_invariants,
     faction_view,
+    governance_view,
     register_faction_domain,
+    register_faction_story_effects,
 )
 from .domain.family import (
     CreateFamily,
@@ -140,8 +150,10 @@ from .domain.concubines import (
     concubine_view,
     reconcile_concubine_state,
     register_concubine_domain,
+    register_concubine_story_effects,
 )
 from .domain.relations import (
+    BeginRelationshipCapture,
     BefriendDaoist,
     ChangeAffinity,
     GiftDisciple,
@@ -157,6 +169,7 @@ from .domain.relations import (
     relationship_invariants,
     relationship_view,
     register_relationship_domain,
+    register_relationship_story_effects,
 )
 from .domain.presentation import (
     RecordWorldNews,
@@ -261,6 +274,9 @@ class V2GameEngine:
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
+        register_relationship_story_effects(self.story_effects, self.definitions)
+        register_faction_story_effects(self.story_effects)
+        register_concubine_story_effects(self.story_effects, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
@@ -495,6 +511,11 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, RequestMentorship(actor_id, target_id, role))
 
+    def manage_faction_relationship(
+        self, game_id: str, target_id: str, role: str,
+    ) -> CommandExecution:
+        return self.request_mentorship(game_id, target_id, role)
+
     def offer_disciple_request(
         self, game_id: str, requester_id: str,
     ) -> CommandExecution:
@@ -535,6 +556,102 @@ class V2GameEngine:
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, CreateFamily(actor_id, name))
+
+    def create_faction(self, game_id: str, name: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, FoundFaction(actor_id, name))
+
+    def join_faction(self, game_id: str, faction_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, JoinFaction(actor_id, faction_id))
+
+    def leave_faction(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, LeaveFaction(actor_id))
+
+    def arrange_faction_succession(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ArrangeFactionSuccession(actor_id))
+
+    def dispatch_faction_member(self, game_id: str, target: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, DispatchFactionMember(actor_id, target))
+
+    def dispatch_disciple(self, game_id: str, target: str) -> CommandExecution:
+        return self.dispatch_faction_member(game_id, target)
+
+    def intercept_faction_member(
+        self, game_id: str, target_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, InterceptFactionMember(actor_id, target_id))
+
+    def intercept_faction_npc(
+        self, game_id: str, target_id: str,
+    ) -> CommandExecution:
+        return self.intercept_faction_member(game_id, target_id)
+
+    def begin_relationship_capture(
+        self, game_id: str, kind: str, target_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, BeginRelationshipCapture(actor_id, kind, target_id))
+
+    def propose_diplomacy(
+        self, game_id: str, kind: str, target_id: str, status: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        normalized = "faction" if kind in {"faction", "sect"} else kind
+        return self.execute(
+            game_id, ProposeDiplomacy(actor_id, normalized, target_id, status)
+        )
+
+    def propose_race_diplomacy(
+        self, game_id: str, target_id: str, status: str,
+    ) -> CommandExecution:
+        return self.propose_diplomacy(game_id, "race", target_id, status)
+
+    def propose_sect_diplomacy(
+        self, game_id: str, target_id: str, status: str,
+    ) -> CommandExecution:
+        return self.propose_diplomacy(game_id, "faction", target_id, status)
+
+    def transfer_vassal_personnel(
+        self, game_id: str, kind: str, target_id: str, character_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        normalized = "faction" if kind in {"faction", "sect"} else kind
+        return self.execute(
+            game_id,
+            TransferVassalPersonnel(actor_id, normalized, target_id, character_id),
+        )
 
     def manage_concubine(
         self, game_id: str, target_id: str, action: str,
@@ -1137,6 +1254,7 @@ class V2GameEngine:
             "relationships": relationship_view(state),
             "disciple_requests": disciple_request_view(state),
             "faction": faction_view(state, self.definitions),
+            "governance": governance_view(state),
             "family": family_view(state, self.definitions),
             "concubine_system": concubine_view(state, self.definitions),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),

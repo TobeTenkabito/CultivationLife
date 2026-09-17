@@ -19,7 +19,9 @@ from ..domain.cultivation import CULTIVATION, PRACTICE, QI_SOURCES
 from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
 from ..domain.extensions import GHOST_SOUL, MONSTER_BLOODLINE
-from ..domain.factions import FACTION_GOVERNANCE, FACTION_PROFILE, MEMBERSHIP
+from ..domain.factions import (
+    DIPLOMACY_STATE, FACTION_GOVERNANCE, FACTION_NPC, FACTION_PROFILE, MEMBERSHIP,
+)
 from ..domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE, PARENT_CHILD
 from ..domain.concubines import CONCUBINE_STATE
 from ..domain.story import STORY_STATE
@@ -248,6 +250,7 @@ class LegacyV1Importer:
         "dao_friends", "concubines", "dao_companion", "monster_species_id",
         "offspring", "next_companion_conception_bonus", "concubine_status",
         "concubine_breakthrough_bonus", "concubine_escape_reputation",
+        "concubine_rejection_aftermath",
         "monster_evolution_id", "monster_evolution_history", "monster_adaptations",
         "monster_adaptation_progress", "monster_bloodline_imprints",
         "monster_acquired_bloodline_traits", "ghost_intrinsic_hp_current",
@@ -359,7 +362,9 @@ class LegacyV1Importer:
         self._import_family_and_concubine_state(
             state, actor_id, source, player, legacy_entities, report
         )
-        self._import_faction(state, actor_id, source, player, report)
+        self._import_faction(
+            state, actor_id, source, player, legacy_entities, report
+        )
         self._import_extensions(state, actor_id, player, report)
         self._import_combat_condition(state, actor_id, player, report)
         self._import_story(state, actor_id, source, player, report)
@@ -534,20 +539,23 @@ class LegacyV1Importer:
             {"known_techniques": known, "main_technique_id": main_id or None},
         )
         slot_ids: dict[str, str | None] = {}
-        for field, category in (
+        for slot_field, category in (
             ("body_technique", "body"),
             ("divine_sense_technique", "divine_sense"),
             ("transformation_technique", "transformation"),
         ):
-            raw = player.get(field)
+            raw = player.get(slot_field)
             technique_id = str(raw.get("id", "")) if isinstance(raw, dict) else ""
             definition = self.definitions.techniques.get(technique_id)
             if technique_id and (definition is None or definition.category != category):
-                report.warn("unknown_technique", f"player.{field}", f"槽位功法 {technique_id} 无法映射")
+                report.warn(
+                    "unknown_technique", f"player.{slot_field}",
+                    f"槽位功法 {technique_id} 无法映射",
+                )
                 technique_id = ""
             if technique_id and technique_id not in known:
                 known.append(technique_id)
-            slot_ids[field] = technique_id or None
+            slot_ids[slot_field] = technique_id or None
         state.entities.put(
             actor_id, PRACTICE,
             {"known_techniques": known, "main_technique_id": main_id or None},
@@ -827,6 +835,7 @@ class LegacyV1Importer:
                 "controller_id": actor_id,
                 "active": True,
                 "founded_year": state.clock.year,
+                "last_recruitment_year": state.clock.year,
                 "legacy_id": str(legacy_family.get("id", "")),
             })
             state.relations.add(
@@ -858,6 +867,9 @@ class LegacyV1Importer:
                         created_year=state.clock.year,
                         metadata={
                             "role": str(raw.get("member_type", "member")),
+                            "cultivation_progress": max(
+                                0.0, float(raw.get("cultivation_progress", 0.0))
+                            ),
                             "imported": True,
                         },
                     )
@@ -882,6 +894,47 @@ class LegacyV1Importer:
         concubine_state["escape_reputation"] = max(
             0, int(player.get("concubine_escape_reputation", 0))
         )
+        imported_aftermath: list[dict[str, Any]] = []
+        for index, raw in enumerate(player.get("concubine_rejection_aftermath", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_concubine_aftermath",
+                    f"player.concubine_rejection_aftermath[{index}]",
+                    "拒绝求娶记录格式非法，已跳过",
+                )
+                continue
+            legacy_owner_id = str(raw.get("owner_id", "")).strip()
+            owner_id = legacy_entities.get(legacy_owner_id)
+            if owner_id is None:
+                owner_id = self._create_related_character(
+                    state,
+                    {
+                        "name": raw.get("owner_name", "旧档求娶者"),
+                        "gender": "male",
+                        "age": raw.get("owner_age", 30),
+                        "alive": True,
+                        "world": raw.get("owner_world", player.get("world", "human")),
+                        "race": raw.get("owner_race", "human"),
+                        "path": raw.get("owner_path", "dao"),
+                        "spirit_root": raw.get("owner_spirit_root", "supreme_wood"),
+                        "realm_index": raw.get("owner_realm_index", 1),
+                        "layer": raw.get("owner_layer", 1),
+                    },
+                    legacy_owner_id or f"concubine-aftermath-{index}",
+                    report,
+                )
+                if legacy_owner_id:
+                    legacy_entities[legacy_owner_id] = owner_id
+            imported_aftermath.append({
+                **dict(raw),
+                "owner_id": owner_id,
+                "declined_unit": max(0, int(raw.get("declined_unit", 0))),
+                "expires_unit": max(0, int(raw.get("expires_unit", 2))),
+                "last_checked_unit": max(
+                    0, int(raw.get("last_checked_unit", raw.get("declined_unit", 0)))
+                ),
+            })
+        concubine_state["rejection_aftermath"] = imported_aftermath
         state.entities.put(actor_id, CONCUBINE_STATE, concubine_state)
 
         status = player.get("concubine_status")
@@ -1040,6 +1093,7 @@ class LegacyV1Importer:
         actor_id: str,
         source: dict[str, Any],
         player: dict[str, Any],
+        legacy_entities: dict[str, str],
         report: LegacyImportReport,
     ) -> None:
         legacy_faction_id = str(player.get("faction_id") or "")
@@ -1068,11 +1122,13 @@ class LegacyV1Importer:
                 "description": str(legacy_profile.get("description", "")),
                 "color": "#888888",
                 "active": not bool(legacy_profile.get("extinct", False)),
+                "roster_seeded": True,
             })
             state.entities.put(target_id, FACTION_GOVERNANCE, {
                 "creator_id": actor_id if founded else None,
                 "controller_id": actor_id if founded else None,
                 "designated_successor_id": None,
+                "last_ascension_handover": None,
             })
         if target_id is None:
             report.warn(
@@ -1112,7 +1168,89 @@ class LegacyV1Importer:
             governance = state.entities.require(target_id, FACTION_GOVERNANCE)
             governance.update(creator_id=actor_id, controller_id=actor_id)
             state.entities.put(target_id, FACTION_GOVERNANCE, governance)
+        imported_members = 0
+        if isinstance(legacy_profile, dict):
+            profile["roster_seeded"] = True
+            state.entities.put(target_id, FACTION_PROFILE, profile)
+            for index, raw in enumerate(legacy_profile.get("npcs", [])):
+                if not isinstance(raw, dict):
+                    continue
+                legacy_id = str(raw.get("id", "")).strip() or f"faction-member:{index}"
+                member_id = legacy_entities.get(legacy_id)
+                if member_id is None:
+                    member_id = self._create_related_character(
+                        state, raw, legacy_id, report
+                    )
+                    legacy_entities[legacy_id] = member_id
+                state.entities.put(member_id, FACTION_NPC, {
+                    "external_id": legacy_id,
+                    "title": str(raw.get("title", "门人")),
+                    "cultivation_progress": max(
+                        0.0, float(raw.get("cultivation_progress", 0.0))
+                    ),
+                    "last_dispatch_year": None,
+                })
+                if bool(state.entities.require(member_id, LIFE).get("alive")) and not state.relations.find(
+                    source_id=member_id, kind=MEMBERSHIP
+                ):
+                    state.relations.add(
+                        source_id=member_id, target_id=target_id, kind=MEMBERSHIP,
+                        created_year=state.clock.year,
+                        metadata={"role": "member", "contribution": 0, "imported": True},
+                    )
+                    imported_members += 1
+            intrigue = source.get("intrigue_state", {})
+            plans = dict(intrigue.get("succession_plans", {})) if isinstance(intrigue, dict) else {}
+            plan = plans.get(legacy_faction_id)
+            if isinstance(plan, dict):
+                successor_id = legacy_entities.get(str(plan.get("successor_id", "")))
+                governance = state.entities.require(target_id, FACTION_GOVERNANCE)
+                governance["designated_successor_id"] = successor_id
+                governance["last_ascension_handover"] = {
+                    "founder_id": actor_id if founded else None,
+                    "successor_id": successor_id,
+                    "arranged": bool(plan.get("arranged")),
+                    "return_eligible": bool(plan.get("eligible_return")),
+                    "origin_world_id": str(plan.get("origin_world", profile["world_id"])),
+                    "year": state.clock.year,
+                }
+                state.entities.put(target_id, FACTION_GOVERNANCE, governance)
         report.imported_counts["faction_memberships"] = 1
+        report.imported_counts["faction_npcs"] = imported_members
+        diplomacy = state.entities.get(actor_id, DIPLOMACY_STATE) or {"relations": {}}
+        relations = dict(diplomacy.get("relations", {}))
+        faction_ids = {
+            str(state.entities.require(entity_id, FACTION_PROFILE).get("external_id")): entity_id
+            for entity_id in state.entities.with_component(FACTION_PROFILE)
+        }
+        for source_key, kind in (("race_relations", "race"), ("sect_relations", "faction")):
+            source_relations = source.get(source_key, {})
+            if not isinstance(source_relations, dict):
+                continue
+            for legacy_key, raw in source_relations.items():
+                if not isinstance(raw, dict):
+                    continue
+                parts = str(legacy_key).split("|", 1)
+                if len(parts) != 2:
+                    continue
+                first, second = parts
+                if kind == "faction":
+                    first, second = faction_ids.get(first, first), faction_ids.get(second, second)
+                key = f"{kind}:{min(first, second)}:{max(first, second)}"
+                relations[key] = {
+                    "kind": kind,
+                    "first_id": min(first, second),
+                    "second_id": max(first, second),
+                    "status": str(raw.get("status", "neutral")),
+                    "affinity": float(raw.get("affinity", 0.0)),
+                    "since_year": state.clock.year,
+                    "overlord": faction_ids.get(str(raw.get("overlord")), raw.get("overlord")),
+                    "subject": faction_ids.get(str(raw.get("subject")), raw.get("subject")),
+                    "last_vote": copy.deepcopy(raw.get("last_vote")),
+                    "imported": True,
+                }
+        diplomacy["relations"] = relations
+        state.entities.put(actor_id, DIPLOMACY_STATE, diplomacy)
 
     def _import_extensions(
         self,

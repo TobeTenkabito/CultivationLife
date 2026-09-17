@@ -262,6 +262,7 @@ def _create_family(context: SimulationContext, command: object) -> None:
             "controller_id": command.founder_id,
             "active": True,
             "founded_year": context.state.clock.year,
+            "last_recruitment_year": context.state.clock.year,
         },
     )
     context.state.relations.add(
@@ -276,7 +277,7 @@ def _create_family(context: SimulationContext, command: object) -> None:
             target_id=family_id,
             kind=FAMILY_MEMBERSHIP,
             created_year=context.state.clock.year,
-            metadata={"role": "lineal_heir"},
+            metadata={"role": "lineal_heir", "cultivation_progress": 0.0},
         )
     lineage["family_id"] = family_id
     context.state.entities.put(command.founder_id, LINEAGE, lineage)
@@ -293,30 +294,208 @@ def _create_family(context: SimulationContext, command: object) -> None:
     )
 
 
-def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None:
-    entity_id = str(event.payload["entity_id"])
-    memberships = context.state.relations.find(
-        source_id=entity_id, kind=FAMILY_MEMBERSHIP
-    )
-    for membership in memberships:
-        family_id = membership.target_id
-        living = [
-            edge for edge in context.state.relations.find(
-                target_id=family_id, kind=FAMILY_MEMBERSHIP
-            )
-            if bool(context.state.entities.require(edge.source_id, LIFE).get("alive"))
-        ]
-        if not living:
+def _on_character_died(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        entity_id = str(event.payload["entity_id"])
+        memberships = context.state.relations.find(
+            source_id=entity_id, kind=FAMILY_MEMBERSHIP
+        )
+        family_ids = {membership.target_id for membership in memberships}
+        family_ids.update(
+            family_id
+            for family_id in context.state.entities.with_component(FAMILY_PROFILE)
+            if context.state.entities.require(
+                family_id, FAMILY_PROFILE
+            ).get("controller_id") == entity_id
+        )
+        for family_id in family_ids:
             profile = context.state.entities.require(family_id, FAMILY_PROFILE)
-            profile["active"] = False
-            profile["extinct_year"] = context.state.clock.year
-            context.state.entities.put(family_id, FAMILY_PROFILE, profile)
-            context.emit(
-                "family.extinct",
-                source="family",
-                scope=EventScope("faction", family_id),
-                payload={"family_id": family_id},
+            if profile.get("controller_id") == entity_id:
+                candidates: list[tuple[int, int, str]] = []
+                for edge in context.state.relations.find(
+                    target_id=family_id, kind=FAMILY_MEMBERSHIP
+                ):
+                    if edge.source_id == entity_id:
+                        continue
+                    life = context.state.entities.require(edge.source_id, LIFE)
+                    if not bool(life.get("alive")):
+                        continue
+                    cultivation = context.state.entities.require(
+                        edge.source_id, CULTIVATION
+                    )
+                    candidates.append((
+                        definitions.realm_index(str(cultivation["realm_id"])),
+                        int(cultivation["layer"]), edge.source_id,
+                    ))
+                profile["controller_id"] = (
+                    max(candidates)[2] if candidates else None
+                )
+                context.state.entities.put(family_id, FAMILY_PROFILE, profile)
+            living = [
+                edge for edge in context.state.relations.find(
+                    target_id=family_id, kind=FAMILY_MEMBERSHIP
+                )
+                if bool(context.state.entities.require(
+                    edge.source_id, LIFE
+                ).get("alive"))
+            ]
+            if not living:
+                profile["active"] = False
+                profile["extinct_year"] = context.state.clock.year
+                context.state.entities.put(family_id, FAMILY_PROFILE, profile)
+                context.emit(
+                    "family.extinct", source="family",
+                    scope=EventScope("faction", family_id),
+                    payload={"family_id": family_id},
+                )
+
+    return handler
+
+
+def _family_recruit(
+    context: SimulationContext, definitions: GameDefinitions, family_id: str,
+) -> str:
+    profile = context.state.entities.require(family_id, FAMILY_PROFILE)
+    rules = dict(definitions.systems.get("factions", {}))
+    distributions = dict(rules.get("recruitment_distribution_by_world", {}))
+    distribution = list(
+        distributions.get(str(profile["world_id"]))
+        or rules.get("recruitment_distribution", [{"upper": 1.0, "realm_index": 1}])
+    )
+    roll = context.rng.random()
+    realm_index = int(distribution[-1]["realm_index"])
+    for row in distribution:
+        if roll <= float(row["upper"]):
+            realm_index = int(row["realm_index"])
+            break
+    realm_index = max(0, min(len(definitions.realms) - 1, realm_index))
+    realm = definitions.realms[realm_index]
+    age = max(16, context.rng.randint(18, 42) + realm_index * 24)
+    lifespan = None
+    if realm.lifespan is not None:
+        lifespan = max(age + 1, context.rng.randint(*realm.lifespan))
+    surname = str(profile["name"])[:1] or "林"
+    character_id = create_character(
+        context,
+        name=surname + context.rng.choice(["宁", "安", "澄", "昭", "遥", "真", "元", "清"]),
+        age=age, gender=context.rng.choice(["male", "female"]),
+        race=str(profile.get("allegiance_race", "human")),
+        spirit_root=context.rng.choice([
+            "supreme_wood", "supreme_water", "heavenly_metal_fire"
+        ]),
+        path=str(profile.get("path", "dao")), realm_id=realm.id,
+        layer=1 if realm_index == 0 else context.rng.randint(1, min(3, realm.layers)),
+        world_id=str(profile["world_id"]), lifespan=lifespan,
+    )
+    edge = context.state.relations.add(
+        source_id=character_id, target_id=family_id, kind=FAMILY_MEMBERSHIP,
+        created_year=context.state.clock.year,
+        metadata={"role": "external_member", "cultivation_progress": 0.0},
+    )
+    context.emit(
+        "family.member.recruited", source="family",
+        scope=EventScope("faction", family_id), payload=edge.to_dict(),
+    )
+    return character_id
+
+
+def _advance_family_members(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        elapsed = int(event.payload["to_year"]) - int(event.payload["from_year"])
+        if elapsed <= 0:
+            return
+        rules = dict(definitions.systems.get("factions", {}))
+        cultivation_rules = dict(rules.get("npc_cultivation", {}))
+        progress_rates = dict(cultivation_rules.get("progress_per_year", {}))
+        threshold = float(cultivation_rules.get("threshold", 100.0))
+        base_success = float(cultivation_rules.get("base_success", 0.64))
+        retention = float(cultivation_rules.get("failed_progress_retained", 0.55))
+        accident = float(cultivation_rules.get("accident_death_chance", 0.0005))
+        for family_id in list(context.state.entities.with_component(FAMILY_PROFILE)):
+            profile = context.state.entities.require(family_id, FAMILY_PROFILE)
+            if not bool(profile.get("active")):
+                continue
+            for edge in list(context.state.relations.find(
+                target_id=family_id, kind=FAMILY_MEMBERSHIP
+            )):
+                life = context.state.entities.require(edge.source_id, LIFE)
+                if not bool(life.get("alive")):
+                    continue
+                cultivation = context.state.entities.require(edge.source_id, CULTIVATION)
+                metadata = dict(edge.metadata)
+                for _ in range(elapsed):
+                    if context.rng.random() < accident:
+                        context.emit(
+                            "character.lethal_hazard", source="family",
+                            scope=EventScope.entity(edge.source_id),
+                            payload={"entity_id": edge.source_id, "reason": "家族修行意外陨落"},
+                        )
+                        break
+                    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+                    if realm_index == 0 or realm_index >= len(definitions.realms) - 1:
+                        continue
+                    progress = float(metadata.get("cultivation_progress", 0.0))
+                    progress += float(progress_rates.get(str(realm_index), 0.0))
+                    if progress < threshold:
+                        metadata["cultivation_progress"] = progress
+                        continue
+                    root = definitions.roots.get(str(cultivation.get("spirit_root", "none")))
+                    chance = base_success
+                    if root is not None:
+                        chance += (float(root.efficiency) - 1.0) * float(
+                            cultivation_rules.get("root_success_scale", 0.20)
+                        )
+                    chance = max(0.05, min(0.95, chance))
+                    if context.rng.random() >= chance:
+                        metadata["cultivation_progress"] = threshold * retention
+                        continue
+                    realm = definitions.realms[realm_index]
+                    old = (str(cultivation["realm_id"]), int(cultivation["layer"]))
+                    if int(cultivation["layer"]) < realm.layers:
+                        cultivation["layer"] = int(cultivation["layer"]) + 1
+                    else:
+                        cultivation["realm_id"] = definitions.realms[realm_index + 1].id
+                        cultivation["layer"] = 1
+                        next_span = definitions.realms[realm_index + 1].lifespan
+                        if next_span is not None:
+                            age = context.state.clock.year - int(life["birth_year"])
+                            life["lifespan"] = max(
+                                int(life.get("lifespan") or 0), age + 1,
+                                context.rng.randint(*next_span),
+                            )
+                            context.state.entities.put(edge.source_id, LIFE, life)
+                            context.emit(
+                                "character.lifespan.changed", source="family",
+                                scope=EventScope.entity(edge.source_id),
+                                payload={"entity_id": edge.source_id},
+                            )
+                    metadata["cultivation_progress"] = 0.0
+                    context.emit(
+                        "family.member.breakthrough", source="family",
+                        scope=EventScope("faction", family_id),
+                        payload={
+                            "family_id": family_id, "character_id": edge.source_id,
+                            "before": old,
+                            "after": (str(cultivation["realm_id"]), int(cultivation["layer"])),
+                        },
+                    )
+                context.state.entities.put(edge.source_id, CULTIVATION, cultivation)
+                context.state.relations.replace_metadata(edge.relation_id, metadata)
+            interval = max(1, int(rules.get("recruitment_interval_years", 5)))
+            last = int(profile.get("last_recruitment_year") or 0)
+            due = int(event.payload["to_year"]) // interval > last // interval
+            living_count = sum(
+                bool(context.state.entities.require(row.source_id, LIFE).get("alive"))
+                for row in context.state.relations.find(
+                    target_id=family_id, kind=FAMILY_MEMBERSHIP
+                )
             )
+            if due and living_count < int(rules.get("max_members", 36)):
+                _family_recruit(context, definitions, family_id)
+                profile["last_recruitment_year"] = int(event.payload["to_year"])
+                context.state.entities.put(family_id, FAMILY_PROFILE, profile)
+
+    return handler
 
 
 def family_invariants(state: WorldState) -> list[str]:
@@ -354,13 +533,13 @@ def register_family_domain(bus: CommandBus, definitions: GameDefinitions) -> Non
         "family.conception.requested", _on_conception_requested(definitions)
     )
     bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
-    bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register("core.time.advanced", _advance_family_members(definitions))
+    bus.event_bus.register("character.died", _on_character_died(definitions))
 
 
 def family_view(
     state: WorldState, definitions: GameDefinitions, entity_id: str | None = None,
 ) -> dict[str, Any]:
-    del definitions
     actor_id = entity_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
@@ -399,12 +578,24 @@ def family_view(
             target_id=str(family_id), kind=FAMILY_MEMBERSHIP
         ):
             member = character_view(state, edge.source_id)
-            roster.append({**member, "role": edge.metadata.get("role", "member")})
+            cultivation = state.entities.require(edge.source_id, CULTIVATION)
+            roster.append({
+                **member,
+                "role": edge.metadata.get("role", "member"),
+                "realm_id": cultivation["realm_id"],
+                "realm_index": definitions.realm_index(str(cultivation["realm_id"])),
+                "layer": cultivation["layer"],
+                "cultivation_progress": float(edge.metadata.get("cultivation_progress", 0.0)),
+            })
     return {
         "exists": True,
         "id": family_id,
         **profile,
         "same_world": profile["world_id"] == actor_world,
+        "has_voice": bool(
+            profile.get("controller_id") == actor_id
+            and profile["world_id"] == actor_world
+        ),
         "offspring": children,
         "roster": roster,
         "living_count": sum(row["alive"] for row in roster) if visible else None,
