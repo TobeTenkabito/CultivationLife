@@ -77,6 +77,27 @@ from .domain.auction import (
     reconcile_auction_state,
     register_auction_domain,
 )
+from .domain.artifacts import (
+    ActivateFormation,
+    DeactivateFormation,
+    DeleteFormation,
+    DeployGroundFormation,
+    ForgeArtifact,
+    ManageNatalArtifact,
+    PreviewCrafting,
+    PreviewFormation,
+    RepairGroundFormation,
+    SaveCraftingBlueprint,
+    SaveFormation,
+    SellCraftedArtifact,
+    WithdrawGroundFormation,
+    artifact_invariants,
+    crafting_view,
+    formation_view,
+    natal_view,
+    reconcile_artifact_state,
+    register_artifact_domains,
+)
 from .domain.production import (
     HarvestSpiritCrop,
     IrrigateSpiritCrop,
@@ -104,7 +125,23 @@ from .domain.factions import (
     faction_view,
     register_faction_domain,
 )
-from .domain.relations import relationship_invariants, relationship_view, register_relationship_domain
+from .domain.relations import (
+    BefriendDaoist,
+    ChangeAffinity,
+    GiftDisciple,
+    InteractDaoCompanion,
+    InteractDaoFriend,
+    OfferDiscipleRequest,
+    ProposeDaoCompanion,
+    RequestFromMaster,
+    RequestMentorship,
+    RespondDiscipleRequest,
+    disciple_request_view,
+    reconcile_relationship_state,
+    relationship_invariants,
+    relationship_view,
+    register_relationship_domain,
+)
 from .domain.presentation import (
     RecordWorldNews,
     SetWorldNewsDebug,
@@ -194,12 +231,13 @@ class V2GameEngine:
         register_advanced_cultivation_domain(self.commands, self.definitions)
         register_trial_domain(self.commands, self.definitions)
         register_world_domain(self.commands, self.definitions)
-        register_relationship_domain(self.commands)
+        register_relationship_domain(self.commands, self.definitions)
         register_faction_domain(self.commands, self.definitions)
         register_economy_domain(self.commands, self.definitions)
         register_asset_domain(self.commands)
         register_production_domain(self.commands, self.definitions)
         register_auction_domain(self.commands, self.definitions)
+        register_artifact_domains(self.commands, self.definitions)
         register_combat_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
@@ -219,6 +257,7 @@ class V2GameEngine:
         self.invariants.register("assets", asset_invariants)
         self.invariants.register("production", production_invariants(self.definitions))
         self.invariants.register("auction", auction_invariants)
+        self.invariants.register("artifacts", artifact_invariants(self.definitions))
         self.invariants.register("combat", combat_invariants)
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
@@ -257,6 +296,8 @@ class V2GameEngine:
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
+        reconcile_artifact_state(state)
+        reconcile_relationship_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -297,6 +338,8 @@ class V2GameEngine:
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
+        reconcile_artifact_state(state)
+        reconcile_relationship_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -347,6 +390,8 @@ class V2GameEngine:
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
+        reconcile_artifact_state(state)
+        reconcile_relationship_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -373,6 +418,90 @@ class V2GameEngine:
             game_id,
             PerformTimedAction(actor_id=actor_id, action=action, years=years),
         )
+
+    def change_affinity(
+        self, game_id: str, target_id: str, amount: float, *, reason: str = "interaction",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ChangeAffinity(actor_id, target_id, amount, reason))
+
+    def propose_dao_companion(self, game_id: str, target_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ProposeDaoCompanion(actor_id, target_id))
+
+    def interact_dao_companion(
+        self, game_id: str, action: str, *, content_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, InteractDaoCompanion(actor_id, action, content_id))
+
+    def befriend_daoist(self, game_id: str, target_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, BefriendDaoist(actor_id, target_id))
+
+    def interact_dao_friend(
+        self, game_id: str, friend_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, InteractDaoFriend(actor_id, friend_id, action))
+
+    def request_mentorship(
+        self, game_id: str, target_id: str, role: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RequestMentorship(actor_id, target_id, role))
+
+    def offer_disciple_request(
+        self, game_id: str, requester_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, OfferDiscipleRequest(requester_id, actor_id))
+
+    def respond_disciple_request(
+        self, game_id: str, request_id: str, accept: bool,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RespondDiscipleRequest(actor_id, request_id, accept))
+
+    def request_from_master(self, game_id: str, kind: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RequestFromMaster(actor_id, kind))
+
+    def gift_disciple(
+        self, game_id: str, disciple_id: str, kind: str, content_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, GiftDisciple(actor_id, disciple_id, kind, content_id))
 
     def perform_action(self, game_id: str, action: str, units: int = 1) -> CommandExecution:
         state = self.store.load(game_id)
@@ -672,6 +801,131 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, LeaveBlackMarket(actor_id))
 
+    def preview_crafting(
+        self, game_id: str, payload: dict[str, Any],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PreviewCrafting(actor_id, dict(payload)))
+
+    def forge_crafted_artifact(
+        self, game_id: str, payload: dict[str, Any],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ForgeArtifact(actor_id, dict(payload)))
+
+    def save_crafting_blueprint(
+        self, game_id: str, payload: dict[str, Any],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, SaveCraftingBlueprint(actor_id, dict(payload)))
+
+    def crafted_artifact_action(
+        self, game_id: str, artifact_id: str, action: str, start_price: int = 0,
+    ) -> CommandExecution:
+        if action == "sell":
+            state = self.store.load(game_id)
+            actor_id = state.controlled_entity_id
+            if actor_id is None:
+                raise ValueError("游戏尚未初始化")
+            return self.execute(game_id, SellCraftedArtifact(actor_id, artifact_id))
+        if action == "consign":
+            return self.consign_auction_asset(game_id, artifact_id, start_price)
+        if action in {"natal", "unbind_natal"}:
+            return self.natal_artifact_action(
+                game_id, "bind" if action == "natal" else "unbind", artifact_id
+            )
+        if action in {"equip", "unequip"}:
+            raise ValueError("炼器法宝留在资产仓库中即自动生效，无需另行装备")
+        raise ValueError("未知炼器法宝操作")
+
+    def preview_formation(
+        self, game_id: str, payload: dict[str, Any],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PreviewFormation(actor_id, dict(payload)))
+
+    def save_formation(
+        self, game_id: str, payload: dict[str, Any],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, SaveFormation(actor_id, dict(payload)))
+
+    def activate_formation(self, game_id: str, loadout_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ActivateFormation(actor_id, loadout_id))
+
+    def deactivate_formation(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, DeactivateFormation(actor_id))
+
+    def delete_formation(self, game_id: str, loadout_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, DeleteFormation(actor_id, loadout_id))
+
+    def deploy_ground_formation(
+        self, game_id: str, owner_kind: str = "player",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, DeployGroundFormation(actor_id, owner_kind))
+
+    def withdraw_ground_formation(
+        self, game_id: str, ground_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, WithdrawGroundFormation(actor_id, ground_id))
+
+    def repair_ground_formation(
+        self, game_id: str, ground_id: str, supply_id: str, quantity: int = 1,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, RepairGroundFormation(actor_id, ground_id, supply_id, quantity)
+        )
+
+    def natal_artifact_action(
+        self, game_id: str, action: str, item_id: str = "", slot_index: int = -1,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, ManageNatalArtifact(actor_id, action, item_id, slot_index)
+        )
+
     def buy_market_offer(self, game_id: str, offer_id: str) -> CommandExecution:
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
@@ -785,6 +1039,8 @@ class V2GameEngine:
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
+        reconcile_artifact_state(state)
+        reconcile_relationship_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -813,12 +1069,16 @@ class V2GameEngine:
             "player": {**player, "cultivation": cultivation, **advanced_cultivation},
             "world": current_world,
             "relationships": relationship_view(state),
+            "disciple_requests": disciple_request_view(state),
             "faction": faction_view(state, self.definitions),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),
             "inventory": inventory_view(state, self.definitions),
             "assets": asset_view(state),
             "production": production_view(state, self.definitions),
             "auction": auction_view(state, self.definitions),
+            "crafting": crafting_view(state, self.definitions),
+            "formation_system": formation_view(state, self.definitions),
+            "natal_artifact": natal_view(state, self.definitions),
             "market": market_view(state, self.definitions),
             "combat": combat_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),

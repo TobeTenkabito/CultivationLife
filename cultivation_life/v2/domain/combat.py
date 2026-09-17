@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .character import IDENTITY, LIFE
+from .artifacts import artifact_static_bonuses
 from .cultivation import CULTIVATION, PRACTICE
 from .definitions import GameDefinitions
 from .economy import INVENTORY
@@ -93,21 +94,25 @@ def combat_snapshot(
         mp_bonus += technique.mp_bonus
     item_combat, item_hp, item_mp = _item_bonuses(state, definitions, entity_id)
     faction_combat, faction_hp, faction_mp = _faction_benefits(state, entity_id)
+    artifact = artifact_static_bonuses(state, definitions, entity_id)
     power = max(
         1.0,
-        realm.base_power * progression + technique_bonus + item_combat + faction_combat,
+        realm.base_power * progression + technique_bonus + item_combat + faction_combat
+        + float(artifact["combat_power"]),
     )
     max_hp = (
         max(10.0, 100.0 + math.sqrt(power) * 18.0)
         * max(0.1, 1 + hp_bonus + item_hp)
         + faction_hp
         + float(cultivation.get("intrinsic_hp_bonus", 0))
+        + float(artifact["max_hp"])
     )
     max_mp = (
         max(10.0, 80.0 + math.sqrt(power) * 15.0)
         * max(0.1, 1 + mp_bonus + item_mp)
         + faction_mp
         + float(cultivation.get("intrinsic_mp_bonus", 0))
+        + float(artifact["max_mp"])
     )
     stats = {
         "might": power * 1.02,
@@ -119,6 +124,8 @@ def combat_snapshot(
     }
     for stat, factor in PATH_FACTORS.get(str(cultivation["path"]), {}).items():
         stats[stat] *= factor
+    for stat, factor in dict(artifact["player_multipliers"]).items():
+        stats[stat] *= float(factor)
     return {
         "entity_id": entity_id,
         "name": str(identity["name"]),
@@ -133,14 +140,21 @@ def combat_snapshot(
         "hp_ratio": float(condition["hp_ratio"]),
         "mp_ratio": float(condition["mp_ratio"]),
         "stats": {key: round(value, 4) for key, value in stats.items()},
+        "enemy_multipliers": dict(artifact["enemy_multipliers"]),
+        "artifact_traits": list(dict.fromkeys(artifact["traits"])),
+        "tribulation_reduction": float(artifact["tribulation_reduction"]),
     }
 
 
 def _damage(
     context: SimulationContext, attacker: dict[str, Any], defender: dict[str, Any],
-    attacker_mp_ratio: float,
+    attacker_mp_ratio: float, round_number: int,
 ) -> float:
     offense = float(attacker["stats"]["might"]) * 0.68 + float(attacker["stats"]["breach"]) * 0.32
+    if "even_round_might_40" in attacker.get("artifact_traits", []) and round_number % 2 == 0:
+        offense *= 1.4
+    if "odd_round_enemy_might_down_40" in defender.get("artifact_traits", []) and round_number % 2 == 1:
+        offense *= 0.6
     defense = float(defender["stats"]["guard"]) * 0.78 + float(defender["stats"]["sense"]) * 0.22
     ratio = max(0.05, offense / max(1.0, defense))
     mana_factor = 0.72 + 0.28 * max(0.0, min(1.0, attacker_mp_ratio))
@@ -170,6 +184,11 @@ def _resolve_handler(definitions: GameDefinitions):
 
         attacker = combat_snapshot(context.state, definitions, command.attacker_id)
         target = combat_snapshot(context.state, definitions, command.target_id)
+        for snapshot, opposing in ((attacker, target), (target, attacker)):
+            if "player_debuff_immunity" in snapshot.get("artifact_traits", []):
+                continue
+            for stat, multiplier in dict(opposing.get("enemy_multipliers", {})).items():
+                snapshot["stats"][stat] *= float(multiplier)
         hp = {
             command.attacker_id: attacker["max_hp"] * attacker["hp_ratio"],
             command.target_id: target["max_hp"] * target["hp_ratio"],
@@ -196,7 +215,7 @@ def _resolve_handler(definitions: GameDefinitions):
                 if hp[acting] <= 0 or hp[defending] <= 0:
                     continue
                 dealt = min(hp[defending], _damage(
-                    context, acting_snapshot, defending_snapshot, mp[acting]
+                    context, acting_snapshot, defending_snapshot, mp[acting], round_number
                 ))
                 hp[defending] -= dealt
                 mp[acting] = max(0.0, mp[acting] - 0.045)

@@ -267,6 +267,8 @@ def _asset_info(
     instance = dict(ledger.get("instances", {})).get(asset_ref)
     if isinstance(instance, dict):
         metadata = dict(instance.get("metadata", {}))
+        if metadata.get("is_natal"):
+            raise ValueError("本命法宝不能交易或寄拍")
         value = max(1, round(float(
             metadata.get("value", metadata.get("material_value", metadata.get("base_value", 1)))
         )))

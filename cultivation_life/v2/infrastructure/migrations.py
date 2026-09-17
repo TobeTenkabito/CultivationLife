@@ -268,6 +268,48 @@ def _schema_8_to_9(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_9_to_10(source: dict[str, Any]) -> dict[str, Any]:
+    """Add crafted artifacts, nine-palace formations and natal artifacts."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" not in components:
+            continue
+        components.setdefault(
+            "crafting.artifacts", {"next_blueprint_sequence": 1, "blueprints": []}
+        )
+        components.setdefault(
+            "formation.nine_palace", {
+                "next_sequence": 1, "next_ground_sequence": 1,
+                "loadouts": [], "active": None, "ground_arrays": [],
+            },
+        )
+        components.setdefault("artifact.natal", {"artifact": None})
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "artifacts": 1,
+    }
+    value["schema_version"] = 10
+    return value
+
+
+def _schema_10_to_11(source: dict[str, Any]) -> dict[str, Any]:
+    """Add canonical per-character affinity and relationship-attempt profiles."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" in components:
+            components.setdefault(
+                "relations.social_profile", {"affinities": {}, "attempts": []}
+            )
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})), "relations": 2,
+    }
+    value["schema_version"] = 11
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -277,6 +319,8 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     6: _schema_6_to_7,
     7: _schema_7_to_8,
     8: _schema_8_to_9,
+    9: _schema_9_to_10,
+    10: _schema_10_to_11,
 }
 
 
