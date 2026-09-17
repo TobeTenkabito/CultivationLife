@@ -29,6 +29,12 @@ from .domain.factions import (
     LeaveFaction,
     TransferFactionControl,
 )
+from .domain.family import CreateFamily
+from .domain.concubines import (
+    EnterConcubineStatus,
+    ManageConcubine,
+    ManageConcubineStatus,
+)
 from .domain.combat import ResolveCombat, RestoreCombatCondition
 from .domain.economy import (
     BuyMarketOffer,
@@ -111,6 +117,7 @@ __all__ = [
     "ChangeContribution",
     "ConfigureMonsterBloodline",
     "CrossWorld",
+    "CreateFamily",
     "ChangeAffinity",
     "EndRelationship",
     "EquipMainTechnique",

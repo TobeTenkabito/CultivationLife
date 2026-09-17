@@ -139,6 +139,38 @@ def _create_character(
     return entity_id
 
 
+def create_character(
+    context: SimulationContext,
+    *,
+    name: str,
+    age: int,
+    gender: str,
+    race: str,
+    spirit_root: str,
+    path: str,
+    realm_id: str,
+    layer: int,
+    world_id: str,
+    lifespan: int | None,
+    controlled: bool = False,
+) -> str:
+    """Create one canonical character while preserving domain subscriptions."""
+    return _create_character(
+        context,
+        name=name,
+        age=age,
+        gender=gender,
+        race=race,
+        spirit_root=spirit_root,
+        path=path,
+        realm_id=realm_id,
+        layer=layer,
+        world_id=world_id,
+        lifespan=lifespan,
+        controlled=controlled,
+    )
+
+
 def _bootstrap_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, BootstrapGame):

@@ -340,7 +340,21 @@ def _use_item_handler(definitions: GameDefinitions):
             context.state.entities.put(command.actor_id, CULTIVATION, cultivation)
             result = "intrinsic_growth"
         elif item.conception_bonus > 0:
-            raise ValueError("孕育药力将在家族生命周期迁移后开放")
+            change_inventory_item(
+                context, definitions, command.actor_id, command.item_id, -1,
+                "conception_aid",
+            )
+            context.emit(
+                "family.conception_bonus.granted",
+                source="economy",
+                scope=EventScope.entity(command.actor_id),
+                payload={
+                    "entity_id": command.actor_id,
+                    "item_id": command.item_id,
+                    "bonus": item.conception_bonus,
+                },
+            )
+            result = "conception_aid"
         else:
             raise ValueError("该物品当前不能使用")
         context.emit(

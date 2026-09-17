@@ -125,6 +125,22 @@ from .domain.factions import (
     faction_view,
     register_faction_domain,
 )
+from .domain.family import (
+    CreateFamily,
+    family_invariants,
+    family_view,
+    reconcile_family_state,
+    register_family_domain,
+)
+from .domain.concubines import (
+    EnterConcubineStatus,
+    ManageConcubine,
+    ManageConcubineStatus,
+    concubine_invariants,
+    concubine_view,
+    reconcile_concubine_state,
+    register_concubine_domain,
+)
 from .domain.relations import (
     BefriendDaoist,
     ChangeAffinity,
@@ -233,6 +249,8 @@ class V2GameEngine:
         register_world_domain(self.commands, self.definitions)
         register_relationship_domain(self.commands, self.definitions)
         register_faction_domain(self.commands, self.definitions)
+        register_family_domain(self.commands, self.definitions)
+        register_concubine_domain(self.commands, self.definitions)
         register_economy_domain(self.commands, self.definitions)
         register_asset_domain(self.commands)
         register_production_domain(self.commands, self.definitions)
@@ -253,6 +271,8 @@ class V2GameEngine:
         self.invariants.register("world", world_invariants(self.definitions))
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
+        self.invariants.register("family", family_invariants)
+        self.invariants.register("concubines", concubine_invariants)
         self.invariants.register("economy", economy_invariants(self.definitions))
         self.invariants.register("assets", asset_invariants)
         self.invariants.register("production", production_invariants(self.definitions))
@@ -298,6 +318,8 @@ class V2GameEngine:
         reconcile_auction_state(state)
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
+        reconcile_family_state(state)
+        reconcile_concubine_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
@@ -340,6 +362,8 @@ class V2GameEngine:
         reconcile_auction_state(state)
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
+        reconcile_family_state(state)
+        reconcile_concubine_state(state)
         self.invariants.validate(state)
         player = character_view(state)
         backup = backup_legacy_save(
@@ -392,6 +416,8 @@ class V2GameEngine:
         reconcile_auction_state(state)
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
+        reconcile_family_state(state)
+        reconcile_concubine_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
         events = self.commands.execute(state, command)
@@ -502,6 +528,44 @@ class V2GameEngine:
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, GiftDisciple(actor_id, disciple_id, kind, content_id))
+
+    def create_family(self, game_id: str, name: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, CreateFamily(actor_id, name))
+
+    def manage_concubine(
+        self, game_id: str, target_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ManageConcubine(actor_id, target_id, action))
+
+    def enter_concubine_status(
+        self, game_id: str, owner_id: str, *, forced: bool = False,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, EnterConcubineStatus(actor_id, owner_id, forced=forced)
+        )
+
+    def manage_concubine_status(
+        self, game_id: str, action: str, *, method: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, ManageConcubineStatus(actor_id, action, method=method)
+        )
 
     def perform_action(self, game_id: str, action: str, units: int = 1) -> CommandExecution:
         state = self.store.load(game_id)
@@ -1041,6 +1105,8 @@ class V2GameEngine:
         reconcile_auction_state(state)
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
+        reconcile_family_state(state)
+        reconcile_concubine_state(state)
         self.invariants.validate(state)
         return self._present(state)
 
@@ -1071,6 +1137,8 @@ class V2GameEngine:
             "relationships": relationship_view(state),
             "disciple_requests": disciple_request_view(state),
             "faction": faction_view(state, self.definitions),
+            "family": family_view(state, self.definitions),
+            "concubine_system": concubine_view(state, self.definitions),
             "available_factions": faction_catalog_view(state, current_world["world_id"]),
             "inventory": inventory_view(state, self.definitions),
             "assets": asset_view(state),

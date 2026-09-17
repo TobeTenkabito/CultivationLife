@@ -40,15 +40,16 @@
     {
       "id": "inventory.item_use",
       "domain": "economy",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["use-item", "spirit-plant-use"],
       "evidence": [
         "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_healing_and_breakthrough_items_are_consumed_atomically",
         "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_trial_recovery_item_can_be_used_without_resolving_pending_choice",
-        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_irrigation_harvest_and_alchemy_share_instance_assets"
+        "tests/test_v2_assets_production.py::V2AssetsAndProductionTests::test_irrigation_harvest_and_alchemy_share_instance_assets",
+        "tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_conception_item_child_lifecycle_and_family_founding"
       ],
-      "notes": "Healing, breakthrough aids, trial recovery, root manuals, permanent intrinsic pills and active harvested-plant effects are migrated. Conception pills remain blocked until the family lifecycle has a V2 authority state."
+      "notes": "Healing, breakthrough aids, trial recovery, root manuals, permanent intrinsic pills, active harvested-plant effects and one-shot conception aids all use canonical domain state and atomic inventory consumption."
     },
     {
       "id": "presentation.settings_debug",
@@ -238,11 +239,16 @@
     {
       "id": "relations.dao_companion",
       "domain": "relations",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["dao-companion"],
-      "evidence": ["tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_companion_interactions_use_canonical_entities_and_lifecycle_rules"],
-      "notes": "Proposal rules, affinity, yearly cooldowns, intimacy/dual-cultivation effects, item and technique exchange, requests and separation consequences operate over canonical character entities. Conception is emitted as a typed family-domain request; synchronized companion breakthrough remains to be connected to the cultivation trial state machine."
+      "evidence": [
+        "tests/test_v2_social_relationships.py::V2SocialRelationshipTests::test_companion_interactions_use_canonical_entities_and_lifecycle_rules",
+        "tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_same_realm_same_technique_companion_advances_with_player",
+        "tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_joint_companion_target_survives_persisted_trial",
+        "tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_conception_item_child_lifecycle_and_family_founding"
+      ],
+      "notes": "Proposal rules, affinity, yearly cooldowns, intimacy/dual-cultivation effects, exchange, requests, conception and separation consequences operate over canonical entities. Eligible same-realm, same-technique companions now contribute their bonus and advance through direct or persisted-trial breakthroughs with the player."
     },
     {
       "id": "relations.dao_friend",
@@ -274,11 +280,15 @@
     {
       "id": "relations.concubines",
       "domain": "relations",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["concubine-action", "concubine-status"],
-      "evidence": [],
-      "notes": "The relation type exists, but concubine lifecycle and information views remain."
+      "evidence": [
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_recruitment_creates_a_distinct_concubine_relationship",
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_cauldron_cooldown_live_view_and_breakthrough_bonus_consumption",
+        "tests/test_v2_concubines.py::V2ConcubineTests::test_player_concubine_status_drains_and_manages_owner_dependency"
+      ],
+      "notes": "Recruitment, distinct relationship semantics, canonical live information, cauldron cooldown/restoration/affinity, breakthrough bonuses, dismissal, dependent efficiency and drain, owner requests and escape resolution are migrated. Random owner proposals, rejection revenge and demonic corpse conversion remain explicit dependencies."
     },
     {
       "id": "relations.capture",
@@ -310,11 +320,11 @@
     {
       "id": "factions.family",
       "domain": "factions",
-      "status": "missing",
+      "status": "partial",
       "required_for_cutover": true,
       "v1_operations": ["create-family"],
-      "evidence": [],
-      "notes": "Family aggregate and lower-world control rules are not implemented."
+      "evidence": ["tests/test_v2_family_and_joint_breakthrough.py::V2FamilyAndJointBreakthroughTests::test_conception_item_child_lifecycle_and_family_founding"],
+      "notes": "Canonical children, spirit-root inheritance, lifespan/age projection, cultivation start, family founding and cross-world roster isolation are implemented. Autonomous family recruitment, annual member progression and the complete founder/control lifecycle remain."
     },
     {
       "id": "factions.rewards",

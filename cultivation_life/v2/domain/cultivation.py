@@ -280,6 +280,8 @@ def _cultivation_gain(
         * max(0.0, 1 + item_bonus + artifact_bonus)
         * environment
     )
+    if context.state.relations.find(target_id=actor_id, kind="concubine"):
+        multiplier *= 0.8
     if action == "cultivate" and cultivation["path"] == "demonic":
         multiplier *= 0.1
     return float(base) * multiplier
@@ -572,6 +574,30 @@ def _artifact_progression_bonuses(
     return opportunity, max(breakthroughs, default=0.0)
 
 
+def _joint_companion_id(state: WorldState, actor_id: str) -> str | None:
+    edge = next(iter(state.relations.involving(actor_id, kind="dao_companion")), None)
+    if edge is None:
+        return None
+    companion_id = edge.target_id if edge.source_id == actor_id else edge.source_id
+    life = state.entities.require(companion_id, LIFE)
+    if not bool(life.get("alive")):
+        return None
+    actor_location = state.entities.require(actor_id, LOCATION)
+    companion_location = state.entities.require(companion_id, LOCATION)
+    if actor_location.get("world_id") != companion_location.get("world_id"):
+        return None
+    actor_practice = state.entities.require(actor_id, PRACTICE)
+    companion_practice = state.entities.require(companion_id, PRACTICE)
+    main_id = actor_practice.get("main_technique_id")
+    if not main_id or main_id != companion_practice.get("main_technique_id"):
+        return None
+    actor_cultivation = state.entities.require(actor_id, CULTIVATION)
+    companion_cultivation = state.entities.require(companion_id, CULTIVATION)
+    if actor_cultivation.get("realm_id") != companion_cultivation.get("realm_id"):
+        return None
+    return companion_id
+
+
 def _breakthrough_chance(
     definitions: GameDefinitions, cultivation: dict[str, Any], major: bool,
     artifact_bonus: float = 0.0,
@@ -638,9 +664,50 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         _, artifact_breakthrough = _artifact_progression_bonuses(
             context.state, definitions, command.actor_id
         )
+        joint_companion_id = _joint_companion_id(context.state, command.actor_id)
+        companion_bonus = (
+            float(
+                dict(definitions.systems.get("relationship", {})).get(
+                    "companion_breakthrough_bonus", 0.05
+                )
+            )
+            if joint_companion_id else 0.0
+        )
+        concubine_state = context.state.entities.get(
+            command.actor_id, "relations.concubine_state"
+        ) or {}
+        cauldron_bonus = min(
+            0.02, max(0.0, float(concubine_state.get("cauldron_breakthrough_bonus", 0.0)))
+        )
+        dependent_bonus = 0.0
+        owner_edge = next(iter(context.state.relations.find(
+            target_id=command.actor_id, kind="concubine"
+        )), None)
+        if owner_edge is not None:
+            owner_cultivation = context.state.entities.require(
+                owner_edge.source_id, CULTIVATION
+            )
+            owner_rank = (
+                definitions.realm_index(str(owner_cultivation["realm_id"])),
+                int(owner_cultivation["layer"]),
+            )
+            if owner_rank > (realm_index, old_layer):
+                dependent_bonus = 0.02
         chance = _breakthrough_chance(
             definitions, cultivation, major, artifact_breakthrough
         )
+        chance = max(
+            0.005,
+            min(
+                0.98,
+                chance + companion_bonus + cauldron_bonus + dependent_bonus,
+            ),
+        )
+        if concubine_state:
+            concubine_state["cauldron_breakthrough_bonus"] = 0.0
+            context.state.entities.put(
+                command.actor_id, "relations.concubine_state", concubine_state
+            )
         cultivation["active_breakthrough_aids"] = []
         old_realm = str(cultivation["realm_id"])
         pity_key = f"minor:{realm_index}:{old_layer}"
@@ -697,6 +764,7 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
                     "major": major,
                     "lethal": realm_index == 3 or realm_index >= 6,
                     "chance": chance,
+                    "joint_companion_id": joint_companion_id,
                 },
             )
             return
@@ -756,6 +824,7 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
                 "to_layer": cultivation["layer"],
                 "lifespan_gain": lifespan_gain,
                 "automatic": False,
+                "joint_companion_id": joint_companion_id,
             },
         )
 
@@ -846,6 +915,83 @@ def _on_trial_completed(definitions: GameDefinitions):
                 "to_layer": cultivation["layer"],
                 "lifespan_gain": lifespan_gain, "trial": trial["kind"],
                 "automatic": False,
+                "joint_companion_id": trial.get("joint_companion_id"),
+            },
+        )
+
+    return handler
+
+
+def _on_joint_companion_breakthrough(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        companion_id = event.payload.get("joint_companion_id")
+        if not companion_id:
+            return
+        companion_id = str(companion_id)
+        edge = next(
+            (
+                edge for edge in context.state.relations.involving(
+                    actor_id, kind="dao_companion"
+                )
+                if companion_id in {edge.source_id, edge.target_id}
+            ),
+            None,
+        )
+        if edge is None:
+            return
+        life = context.state.entities.require(companion_id, LIFE)
+        if not bool(life.get("alive")):
+            return
+        actor_cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        companion_cultivation = context.state.entities.require(companion_id, CULTIVATION)
+        companion_cultivation["realm_id"] = str(actor_cultivation["realm_id"])
+        companion_cultivation["layer"] = int(actor_cultivation["layer"])
+        companion_cultivation["opportunity"] = 0.0
+        companion_cultivation["bottleneck"] = None
+        major = event.payload.get("kind") == "major"
+        lifespan_gain = 0
+        age = context.state.clock.year - int(life["birth_year"])
+        if major:
+            target = definitions.realm(str(companion_cultivation["realm_id"]))
+            if target.lifespan is None:
+                life["lifespan"] = None
+            elif life.get("lifespan") is not None:
+                rolled = context.rng.randint(*target.lifespan)
+                if companion_cultivation.get("path") == "monster":
+                    rolled *= 3
+                before = int(life["lifespan"])
+                life["lifespan"] = max(before, rolled, age + 1)
+                lifespan_gain = int(life["lifespan"]) - before
+        else:
+            layer = int(companion_cultivation["layer"])
+            stage = "middle" if layer == 4 else "late" if layer == 7 else None
+            span = definitions.stage_lifespan_bonus.get(
+                str(companion_cultivation["realm_id"]), {}
+            ).get(stage or "")
+            if span and life.get("lifespan") is not None:
+                lifespan_gain = context.rng.randint(*span)
+                if companion_cultivation.get("path") == "monster":
+                    lifespan_gain *= 3
+                life["lifespan"] = int(life["lifespan"]) + lifespan_gain
+        context.state.entities.put(companion_id, CULTIVATION, companion_cultivation)
+        context.state.entities.put(companion_id, LIFE, life)
+        context.emit(
+            "character.lifespan.changed",
+            source="cultivation",
+            scope=EventScope.entity(companion_id),
+            payload={"entity_id": companion_id, "lifespan": life.get("lifespan")},
+        )
+        context.emit(
+            "relationship.companion.joint_breakthrough.completed",
+            source="cultivation",
+            scope=EventScope.entity(actor_id),
+            payload={
+                "actor_id": actor_id,
+                "companion_id": companion_id,
+                "realm_id": companion_cultivation["realm_id"],
+                "layer": companion_cultivation["layer"],
+                "lifespan_gain": lifespan_gain,
             },
         )
 
@@ -963,6 +1109,10 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     bus.event_bus.register("character.died", _on_character_died)
     bus.event_bus.register("cultivation.trial.failed", _on_trial_failed(definitions))
     bus.event_bus.register("cultivation.trial.completed", _on_trial_completed(definitions))
+    bus.event_bus.register(
+        "cultivation.breakthrough.succeeded",
+        _on_joint_companion_breakthrough(definitions),
+    )
     bus.event_bus.register(
         "cultivation.ascension.completed", _on_ascension_completed(definitions)
     )

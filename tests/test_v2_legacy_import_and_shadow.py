@@ -148,6 +148,70 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(len(self.v2.list_games()), 1)
         self.assertEqual(self.v2.get_game(first.game["id"])["revision"], 1)
 
+    def test_import_preserves_family_and_concubine_lifecycle_state(self):
+        source = self._legacy_save()
+        document = json.loads(source.read_text(encoding="utf-8"))
+        child = {
+            "id": "legacy-heir",
+            "name": "归宁",
+            "gender": "female",
+            "age": 9,
+            "lifespan": 112,
+            "alive": True,
+            "world": "human",
+            "race": "human",
+            "path": "dao",
+            "spirit_root": "supreme_wood",
+            "realm_index": 1,
+            "layer": 1,
+            "cultivation_started": True,
+        }
+        document["player"]["offspring"] = [child]
+        document["player"]["next_companion_conception_bonus"] = 0.16
+        document["player"]["concubine_breakthrough_bonus"] = 0.01
+        document["player"]["concubine_escape_reputation"] = 2
+        document["player"]["concubine_status"] = {
+            "owner_id": "legacy-owner",
+            "owner_name": "玄明",
+            "owner_world": "human",
+            "owner_realm_index": 3,
+            "owner_layer": 2,
+            "turns": 4,
+            "last_drain": 2.5,
+            "dependent": True,
+            "failed_escape_count": 1,
+            "last_requests": {"stones": 2},
+            "angered_until_unit": -1,
+        }
+        document["family"] = {
+            "id": "legacy-family",
+            "name": "归氏仙族",
+            "world": "human",
+            "path": "dao",
+            "allegiance_race": "human",
+            "founded_by_player": True,
+            "extinct": False,
+            "members": [{**child, "member_type": "本家"}],
+        }
+        source.write_text(
+            json.dumps(document, ensure_ascii=False), encoding="utf-8"
+        )
+
+        result = self.v2.import_v1_save(source)
+
+        self.assertEqual(result.game["family"]["offspring"][0]["name"], "归宁")
+        self.assertEqual(result.game["family"]["pending_conception_bonus"], 0.16)
+        self.assertEqual(result.game["family"]["name"], "归氏仙族")
+        self.assertEqual(result.game["family"]["roster"][0]["name"], "归宁")
+        concubines = result.game["concubine_system"]
+        self.assertEqual(concubines["cauldron_breakthrough_bonus"], 0.01)
+        self.assertEqual(concubines["escape_reputation"], 2)
+        self.assertEqual(concubines["status"]["owner"]["name"], "玄明")
+        self.assertTrue(concubines["status"]["dependent"])
+        self.assertEqual(result.report["imported_counts"]["offspring"], 1)
+        self.assertEqual(result.report["imported_counts"]["families"], 1)
+        self.assertEqual(result.report["imported_counts"]["concubine_status"], 1)
+
     def test_live_workflows_and_frozen_auction_assets_block_import(self):
         source = self._legacy_save()
         document = json.loads(source.read_text(encoding="utf-8"))
