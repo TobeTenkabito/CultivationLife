@@ -35,7 +35,7 @@
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
       ],
-      "notes": "Schema 5 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 165 of 363 loaded events are currently executable through 20 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
+      "notes": "Schema 14 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 194 of 363 loaded events are currently executable through 26 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
     },
     {
       "id": "inventory.item_use",
@@ -363,29 +363,38 @@
     {
       "id": "party.management",
       "domain": "combat",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["party"],
-      "evidence": [],
-      "notes": "Party membership and combined battle snapshots are not implemented."
+      "evidence": [
+        "tests/test_v2_combat_war_batch6.py::V2CombatWarBatchSixTests::test_party_relations_drive_combined_combat_and_context_report",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_preserves_party_active_war_and_bounties"
+      ],
+      "notes": "Canonical party relations enforce the two-member cap, same-world/life checks, action-unit interactions and eligible crossing selection. Combat consumes the persisted party snapshot using the V1 50%/25% coefficients."
     },
     {
       "id": "combat.automatic_resolution",
       "domain": "combat",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_combat_uses_canonical_characters_and_records_lethal_result"],
-      "notes": "Deterministic duel/kill/capture works; terrain, formations, teams and full traits remain."
+      "evidence": [
+        "tests/test_v2_step5_domains.py::V2StepFiveDomainTests::test_combat_uses_canonical_characters_and_records_lethal_result",
+        "tests/test_v2_combat_war_batch6.py::V2CombatWarBatchSixTests::test_party_relations_drive_combined_combat_and_context_report"
+      ],
+      "notes": "Canonical duel, kill, capture and team resolution share combat snapshots. Party coefficients, terrain modifiers, active formations and persisted artifact traits are included in reports and deterministic outcomes."
     },
     {
       "id": "war.aggregate",
       "domain": "war",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["war-action", "war-peace", "issue-bounty"],
-      "evidence": [],
-      "notes": "War aggregate, peace process and bounties are not migrated."
+      "evidence": [
+        "tests/test_v2_combat_war_batch6.py::V2CombatWarBatchSixTests::test_declared_faction_war_round_peace_and_bounty_are_canonical",
+        "tests/test_v2_legacy_import_and_shadow.py::V2LegacyImportTests::test_import_preserves_party_active_war_and_bounties"
+      ],
+      "notes": "Diplomatic war votes create persisted faction/race war aggregates with canonical rosters, coalitions, morale, exhaustion, battlefield rounds and player participation. Vanguard events, ally calls, peace terms, annex/dissolution and authority-gated bounties share canonical entities and support legacy import."
     },
     {
       "id": "demonic.prison",

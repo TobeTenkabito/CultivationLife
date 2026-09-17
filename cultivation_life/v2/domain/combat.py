@@ -25,6 +25,7 @@ class ResolveCombat:
     attacker_id: str
     target_id: str
     objective: str = "duel"
+    terrain: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +44,50 @@ PATH_FACTORS: dict[str, dict[str, float]] = {
     "buddhist": {"might": 0.92, "guard": 1.18, "sense": 1.10, "sustain": 1.12},
     "confucian": {"might": 0.96, "sense": 1.14, "breach": 1.12},
 }
+
+
+def _terrain_profile(location_id: str, override: str = "") -> dict[str, Any]:
+    terrain = override.strip() or location_id
+    lowered = terrain.lower()
+    profile: dict[str, Any] = {
+        "id": terrain or "neutral",
+        "name": "寻常地势",
+        "attacker": {},
+        "defender": {},
+    }
+    rules = (
+        (("mountain", "peak", "ridge", "shan"), "山岭", {"mobility": 0.94}, {"guard": 1.08, "sense": 1.04}),
+        (("cave", "grotto", "crypt"), "洞窟", {"mobility": 0.91}, {"guard": 1.05, "sense": 1.08}),
+        (("forest", "wood", "grove"), "密林", {"sense": 0.95}, {"mobility": 1.05, "sense": 1.04}),
+        (("city", "sect", "palace", "court"), "城池禁制", {"breach": 0.95}, {"guard": 1.10, "sustain": 1.05}),
+        (("sea", "river", "lake", "water"), "水域", {"mobility": 0.96}, {"sustain": 1.04}),
+        (("desert", "waste", "ash"), "荒漠", {"sustain": 0.94}, {"sense": 1.03}),
+    )
+    for needles, name, attacker, defender in rules:
+        if any(needle in lowered for needle in needles):
+            profile.update(name=name, attacker=attacker, defender=defender)
+            break
+    return profile
+
+
+def _apply_context_multipliers(
+    snapshot: dict[str, Any], multipliers: dict[str, float],
+) -> None:
+    for stat, multiplier in multipliers.items():
+        if stat in snapshot["stats"]:
+            snapshot["stats"][stat] *= float(multiplier)
+
+
+def _formation_summary(state: WorldState, entity_id: str) -> dict[str, Any] | None:
+    formation = state.entities.get(entity_id, "formation.nine_palace") or {}
+    active = formation.get("active")
+    if not isinstance(active, dict):
+        return None
+    return {
+        "id": active.get("id"),
+        "name": active.get("name", "九宫阵"),
+        "integrity": active.get("integrity", active.get("durability", 1.0)),
+    }
 
 
 def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
@@ -182,8 +227,19 @@ def _resolve_handler(definitions: GameDefinitions):
         if attacker_location != target_location:
             raise ValueError("战斗参与者必须位于同一地点")
 
-        attacker = combat_snapshot(context.state, definitions, command.attacker_id)
-        target = combat_snapshot(context.state, definitions, command.target_id)
+        from .party import party_combat_snapshot
+
+        attacker = party_combat_snapshot(
+            context.state, definitions, command.attacker_id
+        )
+        target = party_combat_snapshot(
+            context.state, definitions, command.target_id
+        )
+        terrain = _terrain_profile(
+            str(attacker_location.get("location_id", "")), command.terrain
+        )
+        _apply_context_multipliers(attacker, dict(terrain["attacker"]))
+        _apply_context_multipliers(target, dict(terrain["defender"]))
         for snapshot, opposing in ((attacker, target), (target, attacker)):
             if "player_debuff_immunity" in snapshot.get("artifact_traits", []):
                 continue
@@ -289,6 +345,15 @@ def _resolve_handler(definitions: GameDefinitions):
             "ended_year": context.state.clock.year,
             "attacker": attacker,
             "target": target,
+            "terrain": terrain,
+            "formations": {
+                command.attacker_id: _formation_summary(
+                    context.state, command.attacker_id
+                ),
+                command.target_id: _formation_summary(
+                    context.state, command.target_id
+                ),
+            },
             "final_hp_ratios": {
                 command.attacker_id: context.state.entities.require(command.attacker_id, CONDITION)["hp_ratio"],
                 command.target_id: context.state.entities.require(command.target_id, CONDITION)["hp_ratio"],
@@ -319,13 +384,127 @@ def resolve_combat(
     attacker_id: str,
     target_id: str,
     objective: str = "duel",
+    terrain: str = "",
 ) -> None:
     """Resolve combat inside another domain's transaction.
 
     Governance and story commands use this entry point so combat remains the
     sole owner of conditions, reports, captures and lethal hazards.
     """
-    _resolve_handler(definitions)(context, ResolveCombat(attacker_id, target_id, objective))
+    _resolve_handler(definitions)(
+        context, ResolveCombat(attacker_id, target_id, objective, terrain)
+    )
+
+
+def _aggregate_team_snapshot(
+    state: WorldState,
+    definitions: GameDefinitions,
+    member_ids: list[str],
+) -> dict[str, Any]:
+    snapshots = [
+        combat_snapshot(state, definitions, entity_id)
+        for entity_id in member_ids
+        if state.entities.exists(entity_id)
+        and bool(state.entities.require(entity_id, LIFE).get("alive"))
+    ]
+    snapshots.sort(key=lambda row: float(row["power"]), reverse=True)
+    snapshots = snapshots[:3]
+    if not snapshots:
+        return {"power": 0.0, "members": []}
+    coefficient = 0.5 if len(snapshots) == 2 else 0.25 if len(snapshots) >= 3 else 0.0
+    power = float(snapshots[0]["power"]) + sum(
+        float(row["power"]) for row in snapshots[1:]
+    ) * coefficient
+    return {
+        "power": round(power, 4),
+        "members": snapshots,
+        "coefficient": coefficient,
+    }
+
+
+def resolve_team_combat(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    *,
+    attacker_id: str,
+    target_ids: list[str],
+    terrain: str = "",
+    source: str = "combat",
+) -> dict[str, Any]:
+    """Resolve a non-lethal player-party versus canonical NPC team engagement."""
+    if attacker_id != context.state.controlled_entity_id:
+        raise ValueError("只有当前角色可以率队参战")
+    from .party import party_combat_snapshot
+
+    attacker = party_combat_snapshot(context.state, definitions, attacker_id)
+    target = _aggregate_team_snapshot(context.state, definitions, target_ids)
+    if not target["members"]:
+        raise ValueError("敌方队伍已经无人可以出战")
+    location = context.state.entities.require(attacker_id, LOCATION)
+    profile = _terrain_profile(str(location.get("location_id", "")), terrain)
+    attacker_multiplier = sum(map(float, profile["attacker"].values()))
+    defender_multiplier = sum(map(float, profile["defender"].values()))
+    attacker_power = float(attacker["power"]) * (
+        attacker_multiplier / len(profile["attacker"])
+        if profile["attacker"] else 1.0
+    )
+    target_power = float(target["power"]) * (
+        defender_multiplier / len(profile["defender"])
+        if profile["defender"] else 1.0
+    )
+    chance = max(
+        0.05,
+        min(0.95, 0.5 + 0.34 * math.log2(max(0.125, attacker_power / max(1.0, target_power)))),
+    )
+    outcome = "victory" if context.rng.random() < chance else "defeat"
+    condition = context.state.entities.require(attacker_id, CONDITION)
+    hp_loss = context.rng.uniform(0.06, 0.18) if outcome == "victory" else context.rng.uniform(0.18, 0.42)
+    mp_loss = context.rng.uniform(0.05, 0.16) if outcome == "victory" else context.rng.uniform(0.12, 0.30)
+    condition["hp_ratio"] = max(0.10, float(condition["hp_ratio"]) - hp_loss)
+    condition["mp_ratio"] = max(0.0, float(condition["mp_ratio"]) - mp_loss)
+    context.state.entities.put(attacker_id, CONDITION, condition)
+    report_id = context.state.entities.create("combat")
+    report = {
+        "mode": "team",
+        "attacker_id": attacker_id,
+        "target_id": str(target["members"][0]["entity_id"]),
+        "target_ids": [str(row["entity_id"]) for row in target["members"]],
+        "objective": "repel",
+        "outcome": outcome,
+        "rounds": [],
+        "captured": False,
+        "started_year": context.state.clock.year,
+        "ended_year": context.state.clock.year,
+        "attacker": attacker,
+        "target": target,
+        "terrain": profile,
+        "formations": {
+            attacker_id: _formation_summary(context.state, attacker_id),
+            **{
+                str(row["entity_id"]): _formation_summary(
+                    context.state, str(row["entity_id"])
+                )
+                for row in target["members"]
+            },
+        },
+        "success_chance": round(chance, 6),
+        "final_hp_ratios": {attacker_id: condition["hp_ratio"]},
+    }
+    context.state.entities.put(report_id, REPORT, report)
+    context.emit(
+        "combat.resolved",
+        source=source,
+        scope=EventScope.entity(attacker_id),
+        payload={
+            "report_id": report_id,
+            "attacker_id": attacker_id,
+            "target_id": report["target_id"],
+            "objective": "repel",
+            "outcome": outcome,
+            "captured": False,
+        },
+    )
+    return {"report_id": report_id, **report}
 
 
 def _restore(context: SimulationContext, command: object) -> None:

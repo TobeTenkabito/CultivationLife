@@ -230,7 +230,10 @@ class V2AscensionTrialTests(unittest.TestCase):
         self.assertEqual(transaction["status"], "committed")
         self.assertEqual(
             set(transaction["acknowledgements"]),
-            {"relations", "factions", "economy", "assets", "auction", "artifacts", "combat"},
+            {
+                "relations", "factions", "economy", "assets", "auction",
+                "artifacts", "combat", "party",
+            },
         )
         state = engine.store.load(game_id)
         self.assertEqual(

@@ -8,7 +8,7 @@ from typing import Any
 
 
 V2_FORMAT_ID = "cultivation-life-v2"
-V2_SCHEMA_VERSION = 13
+V2_SCHEMA_VERSION = 14
 
 
 @dataclass(frozen=True, slots=True)
@@ -427,7 +427,8 @@ class WorldState:
         "family": 2,
         "factions": 2,
         "economy": 1,
-        "combat": 1,
+        "combat": 2,
+        "war": 1,
         "extensions": 1,
         "presentation": 1,
         "actions": 1,

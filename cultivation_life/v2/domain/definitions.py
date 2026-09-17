@@ -249,6 +249,7 @@ class GameDefinitions:
     paths: dict[str, str]
     techniques: dict[str, TechniqueDefinition]
     worlds: dict[str, WorldDefinition]
+    races: dict[str, dict[str, Any]]
     factions: dict[str, FactionDefinition]
     faction_rewards: dict[str, dict[str, Any]]
     items: dict[str, ItemDefinition]
