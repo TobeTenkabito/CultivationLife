@@ -333,7 +333,10 @@ def extension_invariants(definitions: GameDefinitions):
         for entity_id in state.entities.with_component(GHOST_SOUL):
             cultivation = state.entities.get(entity_id, CULTIVATION)
             soul = state.entities.require(entity_id, GHOST_SOUL)
-            if cultivation is None or cultivation.get("path") != "ghost":
+            possession = state.entities.get(entity_id, "demonic.possession") or {}
+            if cultivation is None or (
+                cultivation.get("path") != "ghost" and not possession.get("host")
+            ):
                 errors.append(f"鬼修DLC状态指向非鬼修角色：{entity_id}")
             if min(float(soul.get("intrinsic_hp", -1)), float(soul.get("intrinsic_mp", -1))) < 0:
                 errors.append(f"鬼修魂基非法：{entity_id}")

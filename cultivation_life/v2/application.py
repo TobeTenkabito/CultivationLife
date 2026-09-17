@@ -50,6 +50,19 @@ from .domain.party import (
     party_view,
     register_party_domain,
 )
+from .domain.demonic import (
+    CaptiveAction,
+    CraftMechanicalPuppet,
+    EnterImprisonment,
+    PostBattlePossession,
+    PrisonAction,
+    PuppetAction,
+    RefineForeignSoul,
+    demonic_invariants,
+    demonic_view,
+    reconcile_demonic_state,
+    register_demonic_domain,
+)
 from .domain.war import (
     IssueBounty,
     WarAction,
@@ -288,6 +301,7 @@ class V2GameEngine:
         register_artifact_domains(self.commands, self.definitions)
         register_combat_domain(self.commands, self.definitions)
         register_party_domain(self.commands, self.definitions)
+        register_demonic_domain(self.commands, self.definitions)
         register_war_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
@@ -316,6 +330,7 @@ class V2GameEngine:
         self.invariants.register("artifacts", artifact_invariants(self.definitions))
         self.invariants.register("combat", combat_invariants)
         self.invariants.register("party", party_invariants)
+        self.invariants.register("demonic", demonic_invariants)
         self.invariants.register("war", war_invariants(self.definitions))
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
@@ -358,6 +373,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
         player = character_view(state)
@@ -403,6 +419,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
         player = character_view(state)
@@ -458,6 +475,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
         expected_revision = state.revision
@@ -773,6 +791,82 @@ class V2GameEngine:
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, AttemptBreakthrough(actor_id=actor_id))
+
+    def imprison_character(
+        self,
+        game_id: str,
+        captor_id: str,
+        years: int,
+        *,
+        name: str = "势力大牢",
+        facility: str = "world_prison",
+        hostility: float = 0.0,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, EnterImprisonment(
+            actor_id, captor_id, years, name, facility, hostility
+        ))
+
+    def prison_action(self, game_id: str, action: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PrisonAction(actor_id, action))
+
+    def captive_action(
+        self, game_id: str, target_id: str, action: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, CaptiveAction(actor_id, target_id, action))
+
+    def craft_mechanical_puppet(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, CraftMechanicalPuppet(actor_id))
+
+    def puppet_action(
+        self, game_id: str, puppet_id: str, action: str,
+        content_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, PuppetAction(actor_id, puppet_id, action, content_id)
+        )
+
+    def refine_foreign_souls(
+        self, game_id: str, *, secluded: bool = False,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, RefineForeignSoul(actor_id, secluded))
+
+    def secluded_refine_foreign_souls(
+        self, game_id: str,
+    ) -> CommandExecution:
+        return self.refine_foreign_souls(game_id, secluded=True)
+
+    def post_battle_possess(
+        self, game_id: str, target_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PostBattlePossession(actor_id, target_id))
 
     def equip_special_technique(
         self, game_id: str, technique_id: str, slot: str,
@@ -1304,6 +1398,7 @@ class V2GameEngine:
         reconcile_relationship_state(state)
         reconcile_family_state(state)
         reconcile_concubine_state(state)
+        reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
         return self._present(state)
@@ -1349,6 +1444,7 @@ class V2GameEngine:
             "market": market_view(state, self.definitions),
             "combat": combat_view(state, self.definitions),
             "party": party_view(state, self.definitions),
+            "demonic_system": demonic_view(state, self.definitions),
             "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],

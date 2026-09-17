@@ -348,7 +348,21 @@ def _manage_concubine_handler(definitions: GameDefinitions):
                 payload={"actor_id": command.actor_id, "target_id": command.target_id},
             )
         elif command.action == "corpse":
-            raise ValueError("侍妾炼尸将在魔道傀儡聚合迁移后开放")
+            from .demonic import convert_relationship_to_corpse
+
+            result = convert_relationship_to_corpse(
+                context, definitions, command.actor_id, command.target_id
+            )
+            context.emit(
+                "relationship.concubine.corpse_conversion",
+                source="concubines",
+                scope=EventScope.entity(command.actor_id),
+                payload={
+                    "actor_id": command.actor_id,
+                    "target_id": command.target_id,
+                    **result,
+                },
+            )
         else:
             raise ValueError("未知侍妾操作")
 

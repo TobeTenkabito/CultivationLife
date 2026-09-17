@@ -256,10 +256,17 @@ def party_combat_snapshot(
     state: WorldState, definitions: GameDefinitions, leader_id: str,
 ) -> dict[str, Any]:
     leader = combat_snapshot(state, definitions, leader_id)
-    members = [
+    members: list[dict[str, Any]] = [
         combat_snapshot(state, definitions, member_id)
         for member_id in party_member_ids(state, leader_id)
-    ][:2]
+    ]
+    from .demonic import demonic_combat_contributions
+
+    members.extend(
+        demonic_combat_contributions(state, definitions, leader_id)["living"]
+    )
+    members.sort(key=lambda row: float(row["power"]), reverse=True)
+    members = members[:2]
     coefficient = 0.5 if len(members) == 1 else 0.25 if len(members) >= 2 else 0.0
     combined = float(leader["power"]) + sum(
         float(member["power"]) for member in members

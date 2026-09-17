@@ -16,7 +16,7 @@ from .assets import (
 from .character import IDENTITY, LIFE
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
-from .economy import CURRENCY_ID, change_inventory_item, inventory_quantity
+from .economy import CURRENCY_ID, change_inventory_item
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState

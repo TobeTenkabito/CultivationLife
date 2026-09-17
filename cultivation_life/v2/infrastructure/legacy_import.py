@@ -14,7 +14,7 @@ from typing import Any
 
 from ..domain.character import ACTIVITY, IDENTITY, LIFE, BootstrapGame, LIFESPAN_DUE
 from ..domain.advanced_cultivation import BODY, DIVINE_SENSE, TRANSFORMATIONS
-from ..domain.combat import CONDITION, combat_snapshot
+from ..domain.combat import CONDITION, PRISONER, combat_snapshot
 from ..domain.cultivation import CULTIVATION, PRACTICE, QI_SOURCES
 from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
@@ -25,6 +25,14 @@ from ..domain.factions import (
 from ..domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE, PARENT_CHILD
 from ..domain.concubines import CONCUBINE_STATE
 from ..domain.party import PARTY_MEMBER
+from ..domain.demonic import (
+    DEMONIC_STATE,
+    FOREIGN_SOUL,
+    IMPRISONMENT,
+    PUPPET,
+    PUPPET_CONTROL,
+    SOUL_CONTROL,
+)
 from ..domain.story import STORY_STATE
 from ..domain.war import BOUNTY_STATE, WAR_PROFILE
 from ..domain.world import LOCATION
@@ -268,6 +276,8 @@ class LegacyV1Importer:
         "transformation_technique", "known_transformations",
         "transformation_mastery", "transformation_loadouts",
         "party", "joint_spirit_crossing", "joint_friend_crossing",
+        "prisoners", "puppets", "foreign_souls",
+        "devouring_breakthrough_bonus", "imprisonment",
     }
 
     def __init__(self, definitions: GameDefinitions, commands: CommandBus):
@@ -372,6 +382,9 @@ class LegacyV1Importer:
         self._import_party_wars_and_bounties(
             state, actor_id, source, player, legacy_entities, report
         )
+        self._import_demonic_state(
+            state, actor_id, player, legacy_entities, report
+        )
         self._import_extensions(state, actor_id, player, report)
         self._import_combat_condition(state, actor_id, player, report)
         self._import_story(state, actor_id, source, player, report)
@@ -408,7 +421,6 @@ class LegacyV1Importer:
         candidates = (
             ("pending_event", source.get("pending_event"), "请先在V1结算当前事件"),
             ("active_trial", source.get("active_trial"), "请先在V1完成或退出突破试炼"),
-            ("player.imprisonment", player.get("imprisonment"), "请先在V1结束监禁状态"),
             ("player.sealed_cultivation", player.get("sealed_cultivation"), "请先在V1解除修为封印"),
             ("player.ghost_captor", player.get("ghost_captor"), "请先在V1解决拘魂控制状态"),
         )
@@ -1518,6 +1530,248 @@ class LegacyV1Importer:
         bounty_state["next_sequence"] = len(orders) + 1
         state.entities.put(actor_id, BOUNTY_STATE, bounty_state)
         report.imported_counts["bounties"] = len(orders)
+
+    def _import_demonic_state(
+        self,
+        state: WorldState,
+        actor_id: str,
+        player: dict[str, Any],
+        legacy_entities: dict[str, str],
+        report: LegacyImportReport,
+    ) -> None:
+        """Translate V1's embedded demonic lists into canonical entities."""
+
+        def canonical_character(
+            raw: dict[str, Any], legacy_id: str,
+        ) -> str:
+            existing = legacy_entities.get(legacy_id)
+            if existing is not None:
+                return existing
+            entity_id = self._create_related_character(
+                state, raw, legacy_id, report
+            )
+            legacy_entities[legacy_id] = entity_id
+            return entity_id
+
+        imported_prisoners = 0
+        for index, raw in enumerate(player.get("prisoners", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_prisoner", f"player.prisoners[{index}]",
+                    "非对象俘虏记录未导入",
+                )
+                continue
+            legacy_id = str(
+                raw.get("npc_id") or raw.get("id") or f"prisoner:{index}"
+            )
+            target_id = canonical_character(raw, legacy_id)
+            if not state.relations.find(
+                source_id=actor_id, target_id=target_id, kind=PRISONER
+            ):
+                state.relations.add(
+                    source_id=actor_id,
+                    target_id=target_id,
+                    kind=PRISONER,
+                    created_year=state.clock.year,
+                    metadata={
+                        "status": "confined",
+                        "source": str(raw.get("source", "legacy")),
+                        "legacy_id": legacy_id,
+                        "imported": True,
+                    },
+                )
+            imported_prisoners += 1
+
+        current_age = max(0, int(player.get("age", 16)))
+        imported_puppets = 0
+        for index, raw in enumerate(player.get("puppets", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_puppet", f"player.puppets[{index}]",
+                    "非对象傀儡记录未导入",
+                )
+                continue
+            kind = str(raw.get("type", ""))
+            if kind not in {"corpse", "living", "mechanical"}:
+                report.warn(
+                    "invalid_puppet", f"player.puppets[{index}].type",
+                    f"无法识别的傀儡类型 {kind or '<empty>'} 未导入",
+                )
+                continue
+            legacy_id = str(raw.get("id") or f"puppet:{index}")
+            if kind == "mechanical":
+                puppet_id = state.entities.create("puppet")
+            else:
+                puppet_id = canonical_character(raw, legacy_id)
+                if kind == "corpse":
+                    life = state.entities.require(puppet_id, LIFE)
+                    life.update(
+                        alive=False,
+                        death_reason=life.get("death_reason") or "已炼为炼尸",
+                    )
+                    state.entities.put(puppet_id, LIFE, life)
+                    state.scheduler.cancel(
+                        lambda event, entity_id=puppet_id:
+                        event.event_type == LIFESPAN_DUE
+                        and event.payload.get("entity_id") == entity_id
+                    )
+            created_age = int(raw.get("created_age", current_age))
+            puppet_realm_index = max(0, min(
+                len(self.definitions.realms) - 1,
+                int(raw.get("realm_index", 0)),
+            ))
+            state.entities.put(puppet_id, PUPPET, {
+                "name": str(raw.get("name", "旧档傀儡")),
+                "kind": kind,
+                "realm_index": puppet_realm_index,
+                "layer": max(1, min(
+                    self.definitions.realms[puppet_realm_index].layers,
+                    int(raw.get("layer", 1)),
+                )),
+                "combat_power": max(0.0, float(raw.get("combat_power", 0.0))),
+                "original_power": max(
+                    0.0,
+                    float(raw.get("original_power", raw.get("combat_power", 0.0))),
+                ),
+                "main_technique_id": raw.get("main_technique_id"),
+                "control": max(0.0, min(100.0, float(raw.get("control", 100.0)))),
+                "cultivation_progress": max(
+                    0.0, float(raw.get("cultivation_progress", 0.0))
+                ),
+                "breakthrough_bonus": max(
+                    0.0, float(raw.get("breakthrough_bonus", 0.0))
+                ),
+                "created_year": max(
+                    0, state.clock.year - max(0, current_age - created_age)
+                ),
+                "last_infusion_unit": -1,
+                "durability": max(
+                    0.0, min(100.0, float(raw.get("durability", 100.0)))
+                ),
+                "corpse_integrity": max(
+                    0.0,
+                    min(100.0, float(raw.get("corpse_integrity", 100.0))),
+                ),
+                "active": bool(raw.get("alive", True)),
+                "source_character_id": puppet_id if kind != "mechanical" else None,
+                "legacy_id": legacy_id,
+                "imported": True,
+            })
+            state.relations.add(
+                source_id=actor_id,
+                target_id=puppet_id,
+                kind=PUPPET_CONTROL,
+                created_year=state.clock.year,
+                metadata={"kind": kind, "legacy_id": legacy_id, "imported": True},
+            )
+            imported_puppets += 1
+
+        imported_souls = 0
+        for index, raw in enumerate(player.get("foreign_souls", [])):
+            if not isinstance(raw, dict):
+                report.warn(
+                    "invalid_foreign_soul", f"player.foreign_souls[{index}]",
+                    "非对象外来元神记录未导入",
+                )
+                continue
+            soul_id = state.entities.create("soul")
+            required = max(0.01, float(raw.get("required", 100.0)))
+            progress = max(0.0, min(required, float(raw.get("progress", 0.0))))
+            refined = bool(raw.get("refined", False)) or progress >= required
+            state.entities.put(soul_id, FOREIGN_SOUL, {
+                "name": str(raw.get("name", "无名元神")),
+                "realm_index": max(0, min(
+                    len(self.definitions.realms) - 1,
+                    int(raw.get("realm_index", 0)),
+                )),
+                "strength": max(0.0, float(raw.get("strength", 0.5))),
+                "combat_power": max(0.0, float(raw.get("combat_power", 0.0))),
+                "progress": required if refined else progress,
+                "required": required,
+                "remaining_bonus": max(
+                    0.0, float(raw.get("remaining_bonus", 0.0))
+                ),
+                "refined": refined,
+                "last_refine_unit": -1,
+                "legacy_id": str(raw.get("id", "")),
+                "imported": True,
+            })
+            state.relations.add(
+                source_id=actor_id,
+                target_id=soul_id,
+                kind=SOUL_CONTROL,
+                created_year=state.clock.year,
+                metadata={"imported": True},
+            )
+            imported_souls += 1
+
+        demonic = state.entities.require(actor_id, DEMONIC_STATE)
+        demonic["devouring_breakthrough_bonus"] = max(
+            0.0,
+            min(
+                float(self.definitions.systems["demonic_cultivation"]["max_devour_bonus"]),
+                float(player.get("devouring_breakthrough_bonus", 0.0)),
+            ),
+        )
+        state.entities.put(actor_id, DEMONIC_STATE, demonic)
+
+        raw_prison = player.get("imprisonment")
+        if isinstance(raw_prison, dict):
+            key = str(raw_prison.get("key", "legacy:prison"))
+            captor_id = canonical_character({
+                "name": str(raw_prison.get("name", "旧档狱卒")),
+                "gender": "male",
+                "age": current_age,
+                "alive": True,
+                "world": player.get("world", "human"),
+                "race": "human",
+                "path": "dao",
+                "spirit_root": "supreme_wood",
+                "realm_index": player.get("realm_index", 0),
+                "layer": player.get("layer", 1),
+            }, f"prison-captor:{key}")
+            edge = state.relations.add(
+                source_id=captor_id,
+                target_id=actor_id,
+                kind=PRISONER,
+                created_year=state.clock.year,
+                metadata={
+                    "status": "imprisoned",
+                    "facility": str(raw_prison.get("facility", "world_prison")),
+                    "legacy_key": key,
+                    "imported": True,
+                },
+            )
+            captured_age = int(raw_prison.get("captured_age", current_age))
+            remaining = max(1, int(raw_prison.get("remaining_years", 1)))
+            prison = state.entities.require(actor_id, IMPRISONMENT)
+            prison["active"] = {
+                "captor_id": captor_id,
+                "relation_id": edge.relation_id,
+                "name": str(raw_prison.get("name", "旧档大牢")),
+                "facility": str(raw_prison.get("facility", "world_prison")),
+                "remaining_years": remaining,
+                "sentence_years": max(
+                    remaining, int(raw_prison.get("sentence_years", remaining))
+                ),
+                "captured_year": max(
+                    0, state.clock.year - max(0, current_age - captured_age)
+                ),
+                "hostility": max(0.0, float(raw_prison.get("hostility", 0.0))),
+                "hostility_reduction_per_year": max(
+                    0.0,
+                    float(raw_prison.get("hostility_reduction_per_year", 4.0)),
+                ),
+                "legacy_key": key,
+            }
+            state.entities.put(actor_id, IMPRISONMENT, prison)
+            report.imported_counts["active_imprisonments"] = 1
+        else:
+            report.imported_counts["active_imprisonments"] = 0
+
+        report.imported_counts["prisoners"] = imported_prisoners
+        report.imported_counts["puppets"] = imported_puppets
+        report.imported_counts["foreign_souls"] = imported_souls
 
     def _import_extensions(
         self,

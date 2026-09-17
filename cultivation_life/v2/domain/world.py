@@ -155,7 +155,7 @@ def _begin_cleanup_transaction(
     transaction_id = f"crossing:{context.state.next_event_sequence:010d}"
     required = [
         "relations", "factions", "economy", "assets", "auction", "artifacts",
-        "combat", "party",
+        "combat", "party", "demonic",
     ]
     transition["last_transaction"] = {
         "id": transaction_id,

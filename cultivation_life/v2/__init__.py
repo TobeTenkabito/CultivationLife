@@ -42,6 +42,15 @@ from .domain.concubines import (
 )
 from .domain.combat import ResolveCombat, RestoreCombatCondition
 from .domain.party import ManageParty
+from .domain.demonic import (
+    CaptiveAction,
+    CraftMechanicalPuppet,
+    EnterImprisonment,
+    PostBattlePossession,
+    PrisonAction,
+    PuppetAction,
+    RefineForeignSoul,
+)
 from .domain.war import IssueBounty, WarAction, WarPeace
 from .domain.economy import (
     BuyMarketOffer,
@@ -158,6 +167,13 @@ __all__ = [
     "ManageConcubine",
     "ManageConcubineStatus",
     "ManageParty",
+    "CaptiveAction",
+    "CraftMechanicalPuppet",
+    "EnterImprisonment",
+    "PostBattlePossession",
+    "PrisonAction",
+    "PuppetAction",
+    "RefineForeignSoul",
     "LeaveFaction",
     "PerformActionUnits",
     "PerformTimedAction",

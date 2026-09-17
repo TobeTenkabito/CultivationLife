@@ -29,17 +29,6 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
         "verification.shadow_coverage",
         "interface.http_frontend",
     ),
-    "asset_and_economy_model": (
-        "economy.black_market",
-    ),
-    "relations_and_governance": (
-        "relations.concubines",
-    ),
-    "combat_and_demonic": (
-        "demonic.prison",
-        "demonic.captives",
-        "demonic.puppets_souls",
-    ),
     "dlc_depth": (
         "ghost.reincarnation",
         "ghost.soul_ecology",
@@ -53,9 +42,6 @@ BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
 
 GROUP_CAUSES = {
     "shared_runtime": "通用行动与交互内核已经建立，但领域专属效果、完整行动适配器、全操作影子覆盖及正式HTTP入口尚未完成。",
-    "asset_and_economy_model": "实例资产、统一预留账本、完整物品使用、拍卖、炼器、阵法和本命法宝已经建立；黑市仍缺傀儡交易。",
-    "relations_and_governance": "关系生擒、家族自治、宗门NPC、继承、外交及侍妾求娶/拒绝报复已经迁移；侍妾炼尸仍等待魔道傀儡与魂魄聚合。",
-    "combat_and_demonic": "队伍、地形/阵法战场和战争聚合已经迁移；持续囚禁、魂魄与傀儡聚合尚未迁移。",
     "dlc_depth": "扩展加载和首层状态存在，DLC专属状态机及交互命令仍缺失。",
 }
 

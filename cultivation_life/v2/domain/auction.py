@@ -1049,7 +1049,28 @@ def _sell_black_handler(definitions: GameDefinitions):
             raise TypeError("命令类型错误")
         _require_session(context, command.actor_id, {"black_market"})
         if command.kind == "puppet":
-            raise ValueError("傀儡销赃须等待魔道傀儡领域迁移")
+            from .demonic import consume_puppet_for_sale
+
+            puppet = consume_puppet_for_sale(
+                context, command.actor_id, command.asset_ref
+            )
+            price = max(5, round(float(puppet["combat_power"]) * 0.08))
+            change_inventory_item(
+                context, definitions, command.actor_id, CURRENCY_ID, price,
+                "black-market:sale:puppet",
+            )
+            context.emit(
+                "economy.black_market.sold", source="auction",
+                scope=EventScope.entity(command.actor_id),
+                payload={
+                    "entity_id": command.actor_id,
+                    "asset_ref": command.asset_ref,
+                    "kind": command.kind,
+                    "name": puppet["name"],
+                    "price": price,
+                },
+            )
+            return
         if command.asset_ref == CURRENCY_ID:
             raise ValueError("灵石不能在黑市出售")
         info = _asset_info(context.state, definitions, command.actor_id, command.asset_ref)
@@ -1289,10 +1310,30 @@ def auction_view(
         if asset.get("reservation_id"):
             continue
         consignable.append(_asset_info(state, definitions, actor_id, asset_id))
+    from .demonic import PUPPET, PUPPET_CONTROL
+
+    sellable_puppets = []
+    for edge in state.relations.find(
+        source_id=actor_id, kind=PUPPET_CONTROL
+    ):
+        puppet = state.entities.require(edge.target_id, PUPPET)
+        if bool(puppet.get("active", True)) and puppet.get("kind") in {
+            "mechanical", "corpse",
+        }:
+            sellable_puppets.append({
+                "id": edge.target_id,
+                "name": puppet["name"],
+                "type": puppet["kind"],
+                "combat_power": puppet["combat_power"],
+                "black_market_price": max(
+                    5, round(float(puppet["combat_power"]) * 0.08)
+                ),
+            })
     return {
         **dict(session), "available": status in {"scheduled", "open", "black_market"},
         "at_location": _location_matches(state, actor_id, session),
         "lots": lots, "consignable_assets": consignable,
+        "black_market_sellable_puppets": sellable_puppets,
         "spirit_stones": inventory_quantity(
             state, actor_id, CURRENCY_ID, spendable=True
         ),

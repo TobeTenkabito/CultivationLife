@@ -140,10 +140,16 @@ def combat_snapshot(
     item_combat, item_hp, item_mp = _item_bonuses(state, definitions, entity_id)
     faction_combat, faction_hp, faction_mp = _faction_benefits(state, entity_id)
     artifact = artifact_static_bonuses(state, definitions, entity_id)
+    from .demonic import demonic_combat_contributions
+
+    puppet_contribution = demonic_combat_contributions(
+        state, definitions, entity_id
+    )
     power = max(
         1.0,
         realm.base_power * progression + technique_bonus + item_combat + faction_combat
-        + float(artifact["combat_power"]),
+        + float(artifact["combat_power"])
+        + float(puppet_contribution["intrinsic"]),
     )
     max_hp = (
         max(10.0, 100.0 + math.sqrt(power) * 18.0)
@@ -187,6 +193,7 @@ def combat_snapshot(
         "stats": {key: round(value, 4) for key, value in stats.items()},
         "enemy_multipliers": dict(artifact["enemy_multipliers"]),
         "artifact_traits": list(dict.fromkeys(artifact["traits"])),
+        "puppet_contribution": puppet_contribution,
         "tribulation_reduction": float(artifact["tribulation_reduction"]),
     }
 
@@ -544,7 +551,14 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
     if condition is not None:
         condition["hp_ratio"] = 0.0
         context.state.entities.put(entity_id, CONDITION, condition)
+    demonic_state = context.state.entities.get(entity_id, "demonic.state") or {}
+    preserve_captives = bool(
+        entity_id == context.state.controlled_entity_id
+        and demonic_state.get("pending_post_battle_possession")
+    )
     for edge in context.state.relations.involving(entity_id, kind=PRISONER):
+        if preserve_captives and edge.source_id == entity_id:
+            continue
         ended = context.state.relations.end(
             edge.relation_id, ended_year=context.state.clock.year
         )

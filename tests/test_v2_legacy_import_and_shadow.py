@@ -151,6 +151,76 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(len(self.v2.list_games()), 1)
         self.assertEqual(self.v2.get_game(first.game["id"])["revision"], 1)
 
+    def test_import_translates_demonic_entities_and_active_imprisonment(self):
+        source = self._legacy_save()
+        document = json.loads(source.read_text(encoding="utf-8"))
+        document["player"]["prisoners"] = [{
+            "id": "legacy-prisoner",
+            "name": "旧档战俘",
+            "gender": "male",
+            "age": 28,
+            "lifespan": 100,
+            "alive": True,
+            "world": "human",
+            "race": "human",
+            "path": "dao",
+            "spirit_root": "supreme_wood",
+            "realm_index": 1,
+            "layer": 1,
+            "combat_power": 25,
+        }]
+        document["player"]["puppets"] = [{
+            "id": "legacy-puppet",
+            "name": "旧档机关傀儡",
+            "type": "mechanical",
+            "realm_index": 1,
+            "layer": 1,
+            "combat_power": 30,
+            "original_power": 30,
+            "control": 100,
+            "alive": True,
+        }]
+        document["player"]["foreign_souls"] = [{
+            "id": "legacy-soul",
+            "name": "旧档元神",
+            "realm_index": 1,
+            "strength": 1.5,
+            "combat_power": 20,
+            "progress": 40,
+            "required": 100,
+            "remaining_bonus": 0.08,
+            "refined": False,
+        }]
+        document["player"]["devouring_breakthrough_bonus"] = 0.12
+        document["player"]["imprisonment"] = {
+            "key": "sect:tianjian",
+            "name": "天剑宗",
+            "facility": "faction_prison",
+            "remaining_years": 2,
+            "sentence_years": 4,
+            "captured_age": 23,
+            "hostility": 20,
+            "hostility_reduction_per_year": 5,
+        }
+        source.write_text(
+            json.dumps(document, ensure_ascii=False), encoding="utf-8"
+        )
+
+        result = self.v2.import_v1_save(source)
+
+        demonic = result.game["demonic_system"]
+        self.assertEqual(len(demonic["prisoners"]), 1)
+        self.assertEqual(demonic["prisoners"][0]["name"], "旧档战俘")
+        self.assertEqual(len(demonic["puppets"]), 1)
+        self.assertEqual(demonic["puppets"][0]["type"], "mechanical")
+        self.assertEqual(len(demonic["foreign_souls"]), 1)
+        self.assertEqual(demonic["breakthrough_bonus"], 0.12)
+        self.assertEqual(demonic["imprisonment"]["remaining_years"], 2)
+        self.assertEqual(result.report["imported_counts"]["prisoners"], 1)
+        self.assertEqual(result.report["imported_counts"]["puppets"], 1)
+        self.assertEqual(result.report["imported_counts"]["foreign_souls"], 1)
+        self.assertEqual(result.report["imported_counts"]["active_imprisonments"], 1)
+
     def test_import_preserves_family_and_concubine_lifecycle_state(self):
         source = self._legacy_save()
         document = json.loads(source.read_text(encoding="utf-8"))
