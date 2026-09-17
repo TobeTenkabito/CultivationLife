@@ -337,6 +337,39 @@ def _schema_11_to_12(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_12_to_13(source: dict[str, Any]) -> dict[str, Any]:
+    """Add governance runtime state without duplicating canonical characters."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        if "core.identity" in components:
+            components.setdefault("governance.diplomacy", {"relations": {}})
+            concubine = components.get("relations.concubine_state")
+            if isinstance(concubine, dict):
+                concubine.setdefault("rejection_aftermath", [])
+                concubine.setdefault(
+                    "revenge_cooldown",
+                    {"global_count": 0, "next_unit": -1, "sources": {}},
+                )
+        profile = components.get("faction.profile")
+        if isinstance(profile, dict):
+            profile.setdefault("roster_seeded", False)
+        governance = components.get("faction.governance")
+        if isinstance(governance, dict):
+            governance.setdefault("designated_successor_id", None)
+            governance.setdefault("last_ascension_handover", None)
+        family = components.get("family.profile")
+        if isinstance(family, dict):
+            family.setdefault("last_recruitment_year", None)
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "relations": 4, "family": 2, "factions": 2,
+    }
+    value["schema_version"] = 13
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -349,6 +382,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     9: _schema_9_to_10,
     10: _schema_10_to_11,
     11: _schema_11_to_12,
+    12: _schema_12_to_13,
 }
 
 

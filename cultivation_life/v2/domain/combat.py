@@ -312,6 +312,22 @@ def _resolve_handler(definitions: GameDefinitions):
     return handler
 
 
+def resolve_combat(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    *,
+    attacker_id: str,
+    target_id: str,
+    objective: str = "duel",
+) -> None:
+    """Resolve combat inside another domain's transaction.
+
+    Governance and story commands use this entry point so combat remains the
+    sole owner of conditions, reports, captures and lethal hazards.
+    """
+    _resolve_handler(definitions)(context, ResolveCombat(attacker_id, target_id, objective))
+
+
 def _restore(context: SimulationContext, command: object) -> None:
     if not isinstance(command, RestoreCombatCondition):
         raise TypeError("命令类型错误")

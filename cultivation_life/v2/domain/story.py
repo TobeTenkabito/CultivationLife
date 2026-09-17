@@ -5,11 +5,11 @@ import operator
 from dataclasses import dataclass
 from typing import Any, Callable, ClassVar
 
-from .actions import ACTION_RUNTIME, resume_action
+from .actions import resume_action
 from .character import IDENTITY, LIFE
 from .combat import CONDITION
 from .cultivation import CULTIVATION, PRACTICE
-from .definitions import GameDefinitions, StoryChoiceDefinition, StoryEffectDefinition, StoryEventDefinition
+from .definitions import GameDefinitions, StoryEffectDefinition, StoryEventDefinition
 from .economy import INVENTORY
 from .factions import MEMBERSHIP
 from .world import LOCATION
@@ -478,7 +478,16 @@ def _promote_story_queue(
     queued = dict(queue.pop(0))
     event = definitions.story_events[str(queued["event_id"])]
     story["queue"] = queue
-    story["pending"] = _public_event(context.state, actor_id, definitions, event)
+    pending = _public_event(context.state, actor_id, definitions, event)
+    runtime = queued.get("runtime")
+    if isinstance(runtime, dict):
+        pending["runtime"] = copy.deepcopy(runtime)
+        body = str(pending["body"])
+        for key, value in runtime.items():
+            if isinstance(value, (str, int, float)):
+                body = body.replace("{" + str(key) + "}", str(value))
+        pending["body"] = body
+    story["pending"] = pending
     context.state.entities.put(actor_id, STORY_STATE, story)
     context.emit(
         "story.interaction.opened",
@@ -494,13 +503,16 @@ def _promote_story_queue(
 
 def queue_story_event(
     context: SimulationContext, definitions: GameDefinitions, actor_id: str,
-    event_id: str, *, reason: str,
+    event_id: str, *, reason: str, runtime: dict[str, Any] | None = None,
 ) -> None:
     if event_id not in definitions.story_events:
         raise ValueError(f"剧情事件不存在：{event_id}")
     story = context.state.entities.require(actor_id, STORY_STATE)
     queue = list(story.get("queue", []))
-    queue.append({"event_id": event_id, "reason": reason, "queued_year": context.state.clock.year})
+    queued = {"event_id": event_id, "reason": reason, "queued_year": context.state.clock.year}
+    if runtime is not None:
+        queued["runtime"] = copy.deepcopy(runtime)
+    queue.append(queued)
     story["queue"] = queue
     context.state.entities.put(actor_id, STORY_STATE, story)
     _promote_story_queue(context, definitions, actor_id)

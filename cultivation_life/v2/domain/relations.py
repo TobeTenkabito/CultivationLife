@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any
 
 from .character import IDENTITY, LIFE, character_view
+from .advanced_cultivation import DIVINE_SENSE
+from .combat import CONDITION, PRISONER, combat_snapshot
 from .cultivation import CULTIVATION, PRACTICE
 from .definitions import GameDefinitions, RootDefinition, TechniqueDefinition
 from .economy import inventory_quantity
@@ -99,6 +102,13 @@ class GiftDisciple:
     disciple_id: str
     kind: str
     content_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class BeginRelationshipCapture:
+    actor_id: str
+    kind: str
+    target_id: str = ""
 
 
 def _default_profile() -> dict[str, Any]:
@@ -230,6 +240,157 @@ def _active_edge(state: WorldState, actor_id: str, other_id: str, kind: str) -> 
 
 def _single_edge(state: WorldState, actor_id: str, kind: str) -> RelationEdge | None:
     return next(iter(state.relations.involving(actor_id, kind=kind)), None)
+
+
+def _capture_edge(
+    state: WorldState, actor_id: str, kind: str, target_id: str,
+) -> RelationEdge | None:
+    if kind == "master":
+        return next((
+            edge for edge in state.relations.find(target_id=actor_id, kind="master_disciple")
+        ), None)
+    if kind == "companion":
+        return _single_edge(state, actor_id, "dao_companion")
+    if kind == "friend":
+        return _active_edge(state, actor_id, target_id, "friend")
+    return None
+
+
+def _begin_capture_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, BeginRelationshipCapture):
+            raise TypeError("命令类型错误")
+        _ensure_controlled_alive(context, command.actor_id)
+        cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        if cultivation.get("path") != "demonic":
+            raise ValueError("只有魔修会对亲近之人施展生擒魔禁")
+        edge = _capture_edge(context.state, command.actor_id, command.kind, command.target_id)
+        if edge is None:
+            raise ValueError("目标关系人物当前不在身边")
+        target_id = edge.source_id if edge.target_id == command.actor_id else edge.target_id
+        _ensure_available_pair(context, command.actor_id, target_id)
+        metadata = dict(edge.metadata)
+        last = dict(metadata.get("last_interactions", {}))
+        if last.get("capture_attempt") == context.state.clock.year:
+            raise ValueError("本行动年份已经尝试生擒过此人")
+        target = context.state.entities.require(target_id, IDENTITY)
+        runtime = {
+            "kind": command.kind,
+            "target_id": target_id,
+            "target_name": str(target["name"]),
+            "relation_id": edge.relation_id,
+            "target_power": float(combat_snapshot(context.state, definitions, target_id)["power"]),
+        }
+        from .story import queue_story_event
+        queue_story_event(
+            context, definitions, command.actor_id, "EVT_RELATION_CAPTURE_001",
+            reason="relationship_capture", runtime=runtime,
+        )
+
+    return handler
+
+
+def _close_capture_relationship(
+    context: SimulationContext, edge: RelationEdge, *, captured: bool,
+) -> None:
+    closed = context.state.relations.end(edge.relation_id, ended_year=context.state.clock.year)
+    metadata = dict(closed.metadata)
+    metadata["end_reason"] = "captured" if captured else "capture_betrayal"
+    context.state.relations.replace_metadata(closed.relation_id, metadata)
+    for observer_id, subject_id in (
+        (edge.source_id, edge.target_id), (edge.target_id, edge.source_id)
+    ):
+        _set_affinity(context.state, observer_id, subject_id, -100.0 if captured else 0.0)
+    context.emit(
+        "relationship.ended", source="relations",
+        scope=EventScope.entity(edge.source_id),
+        payload={"relation_id": edge.relation_id, "reason": metadata["end_reason"]},
+    )
+
+
+def register_relationship_story_effects(
+    registry: Any, definitions: GameDefinitions,
+) -> None:
+    from .story import EffectOutcome, queue_story_event
+
+    def capture_step(
+        context: SimulationContext, actor_id: str, effect: Any, pending: dict[str, Any],
+    ) -> EffectOutcome:
+        runtime = dict(pending.get("runtime", {}))
+        relation_id = str(runtime.get("relation_id", ""))
+        edge = next((
+            row for row in context.state.relations.involving(actor_id)
+            if row.relation_id == relation_id and row.kind in SOCIAL_KINDS
+        ), None)
+        if edge is None:
+            return EffectOutcome("target_absent", "目标已经脱离了这段关系，生擒计划无从继续。")
+        target_id = str(runtime.get("target_id", ""))
+        if target_id not in {edge.source_id, edge.target_id}:
+            return EffectOutcome("target_absent", "目标已经脱离了这段关系，生擒计划无从继续。")
+        metadata = dict(edge.metadata)
+        last = dict(metadata.get("last_interactions", {}))
+        last["capture_attempt"] = context.state.clock.year
+        metadata["last_interactions"] = last
+        context.state.relations.replace_metadata(edge.relation_id, metadata)
+        name = str(runtime.get("target_name", "无名修士"))
+        stage = str(effect.payload.get("stage", ""))
+        method = str(effect.payload.get("method", ""))
+        if stage == "abandon":
+            return EffectOutcome("abandoned", f"你最终没有对{name}出手，这段关系暂时维持原状。")
+        own = combat_snapshot(context.state, definitions, actor_id)
+        target = combat_snapshot(context.state, definitions, target_id)
+        own_power = max(1.0, float(own["power"]))
+        target_power = max(1.0, float(runtime.get("target_power", target["power"])))
+        ratio_term = math.log2(max(0.25, own_power / target_power))
+        realm_gap = int(own["realm_index"]) - int(target["realm_index"])
+        affinity = _affinity(context.state, target_id, actor_id)
+        if stage == "opening":
+            bonus = 0.16 if method == "ambush" else 0.03
+            chance = max(0.06, min(0.94, 0.30 + bonus + ratio_term * 0.11 + realm_gap * 0.06 + max(0.0, affinity) / 500))
+            if context.rng.random() >= chance:
+                _close_capture_relationship(context, edge, captured=False)
+                return EffectOutcome("escaped", f"{name}识破杀机并断绝关系后遁走（第一重压制成功率 {chance:.0%}）。")
+            queue_story_event(
+                context, definitions, actor_id, "EVT_RELATION_CAPTURE_002",
+                reason="relationship_capture_final", runtime=runtime,
+            )
+            return EffectOutcome("body_suppressed", f"你成功制住{name}的肉身（第一重压制成功率 {chance:.0%}），接下来必须镇封其元神。")
+        if stage == "release":
+            _close_capture_relationship(context, edge, captured=False)
+            return EffectOutcome("released", f"你放开禁制；{name}惊怒离去，这段关系彻底断绝。")
+        if stage != "final":
+            raise ValueError("未知关系生擒阶段")
+        bonus = 0.15 if method == "blood_mark" else 0.04
+        if method == "blood_mark":
+            condition = context.state.entities.require(actor_id, CONDITION)
+            condition["hp_ratio"] = max(0.01, float(condition["hp_ratio"]) - 0.12)
+            context.state.entities.put(actor_id, CONDITION, condition)
+        sense = context.state.entities.get(actor_id, DIVINE_SENSE) or {}
+        sense_level = int(sense.get("level", 0))
+        chance = max(0.05, min(
+            0.93,
+            0.32 + bonus + ratio_term * 0.10 + realm_gap * 0.05
+            + max(0, sense_level - int(target["realm_index"])) * 0.025,
+        ))
+        if context.rng.random() >= chance:
+            _close_capture_relationship(context, edge, captured=False)
+            return EffectOutcome("escaped", f"{name}的元神撕开魔禁并远遁（封魂成功率 {chance:.0%}），从此与你恩断义绝。")
+        if context.state.relations.find(target_id=target_id, kind=PRISONER):
+            raise ValueError("目标已经被其他人拘押")
+        prisoner = context.state.relations.add(
+            source_id=actor_id, target_id=target_id, kind=PRISONER,
+            created_year=context.state.clock.year,
+            metadata={"status": "confined", "source": f"relationship:{runtime.get('kind', '')}"},
+        )
+        _close_capture_relationship(context, edge, captured=True)
+        context.emit(
+            "combat.prisoner.captured", source="relations",
+            scope=EventScope.entity(actor_id), payload=prisoner.to_dict(),
+        )
+        label = {"master": "师父", "companion": "道侣", "friend": "道友"}.get(str(runtime.get("kind")), "故人")
+        return EffectOutcome("captured", f"你彻底封住{name}的元神，将昔日{label}收入俘虏名册（封魂成功率 {chance:.0%}）。")
+
+    registry.register("relationship_capture_step", capture_step)
 
 
 def _add_relationship(context: SimulationContext, command: FormRelationship) -> RelationEdge:
@@ -1000,6 +1161,7 @@ def register_relationship_domain(bus: CommandBus, definitions: GameDefinitions) 
     bus.register(RespondDiscipleRequest, _respond_disciple_request_handler(definitions))
     bus.register(RequestFromMaster, _request_from_master_handler(definitions))
     bus.register(GiftDisciple, _gift_disciple_handler(definitions))
+    bus.register(BeginRelationshipCapture, _begin_capture_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("faction.relationship.invited", _on_faction_relationship_invited)
     bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)

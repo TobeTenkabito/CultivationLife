@@ -5,6 +5,7 @@ from typing import Any
 
 from .actions import ACTION_RUNTIME
 from .character import IDENTITY, LIFE, character_view
+from .combat import combat_snapshot
 from .cultivation import CULTIVATION, PRACTICE
 from .definitions import GameDefinitions, RootDefinition, TechniqueDefinition
 from .relations import (
@@ -42,7 +43,16 @@ class ManageConcubineStatus:
 
 
 def _default_state() -> dict[str, Any]:
-    return {"cauldron_breakthrough_bonus": 0.0, "escape_reputation": 0}
+    return {
+        "cauldron_breakthrough_bonus": 0.0,
+        "escape_reputation": 0,
+        "rejection_aftermath": [],
+        "revenge_cooldown": {
+            "global_count": 0,
+            "next_unit": -1,
+            "sources": {},
+        },
+    }
 
 
 def reconcile_concubine_state(state: WorldState) -> None:
@@ -54,6 +64,34 @@ def reconcile_concubine_state(state: WorldState) -> None:
         component["escape_reputation"] = max(
             0, int(component.get("escape_reputation", 0))
         )
+        aftermath = []
+        for raw in component.get("rejection_aftermath", []):
+            if not isinstance(raw, dict) or not str(raw.get("owner_id", "")):
+                continue
+            row = dict(raw)
+            declined = max(0, int(row.get("declined_unit", 0)))
+            row["declined_unit"] = declined
+            row["expires_unit"] = max(
+                declined, int(row.get("expires_unit", declined + 2))
+            )
+            row["last_checked_unit"] = min(
+                row["expires_unit"],
+                max(declined, int(row.get("last_checked_unit", declined))),
+            )
+            aftermath.append(row)
+        component["rejection_aftermath"] = aftermath
+        cooldown = dict(component.get("revenge_cooldown", {}))
+        cooldown["global_count"] = max(0, int(cooldown.get("global_count", 0)))
+        cooldown["next_unit"] = int(cooldown.get("next_unit", -1))
+        cooldown["sources"] = {
+            str(key): {
+                "count": max(0, int(dict(value).get("count", 0))),
+                "next_unit": int(dict(value).get("next_unit", -1)),
+            }
+            for key, value in dict(cooldown.get("sources", {})).items()
+            if isinstance(value, dict)
+        }
+        component["revenge_cooldown"] = cooldown
         state.entities.put(entity_id, CONCUBINE_STATE, component)
 
 
@@ -127,6 +165,36 @@ def _close_pair_relationships(
         metadata = dict(closed.metadata)
         metadata["end_reason"] = "converted_to_concubine"
         context.state.relations.replace_metadata(closed.relation_id, metadata)
+
+
+def _set_concubine_status(
+    context: SimulationContext,
+    actor_id: str,
+    owner_id: str,
+    *,
+    forced: bool,
+) -> RelationEdge:
+    _close_pair_relationships(context, actor_id, owner_id)
+    component = context.state.entities.get(actor_id, CONCUBINE_STATE)
+    if component is not None:
+        component["rejection_aftermath"] = []
+        context.state.entities.put(actor_id, CONCUBINE_STATE, component)
+    return context.state.relations.add(
+        source_id=owner_id,
+        target_id=actor_id,
+        kind="concubine",
+        created_year=context.state.clock.year,
+        metadata={
+            "joined_year": context.state.clock.year,
+            "turns": 0,
+            "last_drain": 0.0,
+            "dependent": False,
+            "forced": forced,
+            "failed_escape_count": 0,
+            "last_requests": {},
+            "angered_until_unit": -1,
+        },
+    )
 
 
 def _manage_concubine_handler(definitions: GameDefinitions):
@@ -301,22 +369,11 @@ def _enter_status_handler(definitions: GameDefinitions):
             context.state, definitions, command.actor_id
         ) and not command.forced:
             raise ValueError("修为不高于你的修士无法迫使你成为侍妾")
-        _close_pair_relationships(context, command.actor_id, command.owner_id)
-        edge = context.state.relations.add(
-            source_id=command.owner_id,
-            target_id=command.actor_id,
-            kind="concubine",
-            created_year=context.state.clock.year,
-            metadata={
-                "joined_year": context.state.clock.year,
-                "turns": 0,
-                "last_drain": 0.0,
-                "dependent": False,
-                "forced": bool(command.forced),
-                "failed_escape_count": 0,
-                "last_requests": {},
-                "angered_until_unit": -1,
-            },
+        edge = _set_concubine_status(
+            context,
+            command.actor_id,
+            command.owner_id,
+            forced=bool(command.forced),
         )
         context.emit(
             "relationship.concubine.status_entered",
@@ -529,6 +586,307 @@ def _manage_status_handler(definitions: GameDefinitions):
     return handler
 
 
+def _owner_runtime(
+    state: WorldState, definitions: GameDefinitions, owner_id: str,
+) -> dict[str, Any]:
+    identity = state.entities.require(owner_id, IDENTITY)
+    cultivation = state.entities.require(owner_id, CULTIVATION)
+    realm = definitions.realm(str(cultivation["realm_id"]))
+    return {
+        "owner_id": owner_id,
+        "owner_name": str(identity["name"]),
+        "owner_realm_index": definitions.realm_index(realm.id),
+        "owner_layer": int(cultivation["layer"]),
+        "owner_realm": realm.name,
+        "owner_realm_name": realm.name,
+        "owner_world": str(state.entities.require(owner_id, LOCATION)["world_id"]),
+    }
+
+
+def _revenge_ready(component: dict[str, Any], owner_id: str, unit: int) -> bool:
+    cooldown = dict(component.get("revenge_cooldown", {}))
+    source = dict(dict(cooldown.get("sources", {})).get(owner_id, {}))
+    return unit >= max(
+        int(cooldown.get("next_unit", -1)), int(source.get("next_unit", -1))
+    )
+
+
+def _record_revenge_trigger(
+    component: dict[str, Any], definitions: GameDefinitions, owner_id: str, unit: int,
+) -> int:
+    rules = dict(definitions.systems.get("relationship", {}))
+    base = max(1, int(rules.get("revenge_cooldown_base_units", 3)))
+    increment = max(0, int(rules.get("revenge_cooldown_increment_units", 2)))
+    maximum = max(base, int(rules.get("revenge_cooldown_max_units", 15)))
+    cooldown = dict(component.get("revenge_cooldown", {}))
+    global_count = max(0, int(cooldown.get("global_count", 0))) + 1
+    sources = dict(cooldown.get("sources", {}))
+    source = dict(sources.get(owner_id, {}))
+    source["count"] = max(0, int(source.get("count", 0))) + 1
+    interval = min(maximum, base + (global_count - 1) * increment)
+    next_unit = unit + interval
+    source["next_unit"] = next_unit
+    sources[owner_id] = source
+    cooldown.update(
+        global_count=global_count, next_unit=next_unit, sources=sources
+    )
+    component["revenge_cooldown"] = cooldown
+    return interval
+
+
+def _advance_rejection_aftermath(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    component: dict[str, Any],
+) -> bool:
+    from .story import queue_story_event
+
+    current_unit = _action_unit(context.state, actor_id)
+    kept: list[dict[str, Any]] = []
+    triggered: dict[str, Any] | None = None
+    for raw in component.get("rejection_aftermath", []):
+        record = dict(raw)
+        declined = int(record.get("declined_unit", current_unit))
+        expires = int(record.get("expires_unit", declined + 2))
+        if current_unit <= int(record.get("last_checked_unit", declined)):
+            kept.append(record)
+            continue
+        owner_id = str(record.get("owner_id", ""))
+        if (
+            not context.state.entities.exists(owner_id)
+            or not bool(context.state.entities.require(owner_id, LIFE).get("alive"))
+            or context.state.entities.require(owner_id, LOCATION).get("world_id")
+            != context.state.entities.require(actor_id, LOCATION).get("world_id")
+            or current_unit > expires
+        ):
+            continue
+        record["last_checked_unit"] = current_unit
+        if (
+            triggered is None
+            and _revenge_ready(component, owner_id, current_unit)
+            and context.rng.random() < 0.30
+        ):
+            record["revenge_cooldown_units"] = _record_revenge_trigger(
+                component, definitions, owner_id, current_unit
+            )
+            triggered = record
+            continue
+        if current_unit < expires:
+            kept.append(record)
+    component["rejection_aftermath"] = kept
+    context.state.entities.put(actor_id, CONCUBINE_STATE, component)
+    if triggered is None:
+        return False
+    queue_story_event(
+        context,
+        definitions,
+        actor_id,
+        "SYS_CONCUBINE_REVENGE",
+        reason="concubine_rejection_revenge",
+        runtime=triggered,
+    )
+    return True
+
+
+def _maybe_queue_proposal(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    component: dict[str, Any],
+) -> bool:
+    from .story import queue_story_event
+
+    identity = context.state.entities.require(actor_id, IDENTITY)
+    if (
+        identity.get("gender") != "female"
+        or _status_edge(context.state, actor_id) is not None
+        or component.get("rejection_aftermath")
+    ):
+        return False
+    actor_realm, actor_layer = _rank(context.state, definitions, actor_id)
+    world_id = str(context.state.entities.require(actor_id, LOCATION)["world_id"])
+    world = definitions.worlds[world_id]
+    realm_cap = min(len(definitions.realms) - 1, world.npc_realm_cap)
+    if actor_realm >= realm_cap - 1:
+        return False
+    candidates = [
+        entity_id
+        for entity_id in context.state.entities.with_component(IDENTITY)
+        if entity_id != actor_id
+        and context.state.entities.require(entity_id, IDENTITY).get("gender") == "male"
+        and bool(context.state.entities.require(entity_id, LIFE).get("alive"))
+        and context.state.entities.require(entity_id, LOCATION).get("world_id") == world_id
+        and _rank(context.state, definitions, entity_id) > (actor_realm, actor_layer)
+    ]
+    if not candidates:
+        return False
+    candidates.sort(
+        key=lambda entity_id: _rank(context.state, definitions, entity_id),
+        reverse=True,
+    )
+    owner_id = context.rng.choice(candidates[: min(8, len(candidates))])
+    gap = max(1, _rank(context.state, definitions, owner_id)[0] - actor_realm)
+    reputation_multiplier = max(
+        0.01, 0.20 ** int(component.get("escape_reputation", 0))
+    )
+    chance = min(0.32, 0.05 + gap * 0.035) * reputation_multiplier
+    if context.rng.random() >= chance:
+        return False
+    queue_story_event(
+        context,
+        definitions,
+        actor_id,
+        "SYS_CONCUBINE_PROPOSAL",
+        reason="concubine_proposal",
+        runtime=_owner_runtime(context.state, definitions, owner_id),
+    )
+    return True
+
+
+def _on_action_completed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        if actor_id != context.state.controlled_entity_id:
+            return
+        story = context.state.entities.require(actor_id, "story.state")
+        if story.get("pending") is not None or story.get("queue"):
+            return
+        component = context.state.entities.require(actor_id, CONCUBINE_STATE)
+        if _advance_rejection_aftermath(
+            context, definitions, actor_id, component
+        ):
+            return
+        _maybe_queue_proposal(context, definitions, actor_id, component)
+
+    return handler
+
+
+def register_concubine_story_effects(
+    registry: Any, definitions: GameDefinitions,
+) -> None:
+    from .story import EffectOutcome
+
+    def proposal(
+        context: SimulationContext, actor_id: str, effect: Any, pending: dict[str, Any],
+    ) -> EffectOutcome:
+        runtime = dict(pending.get("runtime", {}))
+        owner_id = str(runtime.get("owner_id", ""))
+        name = str(runtime.get("owner_name", "一位高阶修士"))
+        if (
+            not context.state.entities.exists(owner_id)
+            or not bool(context.state.entities.require(owner_id, LIFE).get("alive"))
+            or context.state.entities.require(owner_id, LOCATION).get("world_id")
+            != context.state.entities.require(actor_id, LOCATION).get("world_id")
+        ):
+            return EffectOutcome(
+                "owner_absent", "提议者已经离开当前界面，这桩拉拢自然作罢。"
+            )
+        component = context.state.entities.require(actor_id, CONCUBINE_STATE)
+        if bool(effect.payload.get("accept", False)):
+            if _status_edge(context.state, actor_id) is not None:
+                return EffectOutcome("already_bound", "你已有正主，这桩拉拢无法再继续。")
+            _set_concubine_status(context, actor_id, owner_id, forced=False)
+            component["rejection_aftermath"] = []
+            context.state.entities.put(actor_id, CONCUBINE_STATE, component)
+            return EffectOutcome(
+                "accepted",
+                f"你接受{name}的拉拢，成为其侍妾；此后机缘获取效率降至八成。",
+            )
+        set_relationship_affinity(
+            context.state,
+            owner_id,
+            actor_id,
+            relationship_affinity(context.state, owner_id, actor_id) - 8,
+        )
+        unit = _action_unit(context.state, actor_id)
+        aftermath = [
+            dict(row)
+            for row in component.get("rejection_aftermath", [])
+            if str(row.get("owner_id", "")) != owner_id
+        ]
+        aftermath.append({
+            **runtime,
+            "declined_unit": unit,
+            "expires_unit": unit + 2,
+            "last_checked_unit": unit,
+        })
+        component["rejection_aftermath"] = aftermath
+        context.state.entities.put(actor_id, CONCUBINE_STATE, component)
+        return EffectOutcome(
+            "refused",
+            f"你拒绝成为{name}的侍妾；若其意图报复，只会在接下来的两个行动单位内发作。",
+        )
+
+    def revenge(
+        context: SimulationContext, actor_id: str, effect: Any, pending: dict[str, Any],
+    ) -> EffectOutcome:
+        runtime = dict(pending.get("runtime", {}))
+        owner_id = str(runtime.get("owner_id", ""))
+        name = str(runtime.get("owner_name", "一位高阶修士"))
+        if (
+            not context.state.entities.exists(owner_id)
+            or not bool(context.state.entities.require(owner_id, LIFE).get("alive"))
+            or context.state.entities.require(owner_id, LOCATION).get("world_id")
+            != context.state.entities.require(actor_id, LOCATION).get("world_id")
+        ):
+            return EffectOutcome(
+                "owner_absent", "追来之人已经离开当前界面，这场逼迫不了了之。"
+            )
+        rules = dict(definitions.systems.get("relationship", {}))
+        relief = float(rules.get("sanction_affinity_relief", 8))
+        set_relationship_affinity(
+            context.state,
+            owner_id,
+            actor_id,
+            relationship_affinity(context.state, owner_id, actor_id) + relief,
+        )
+        method = str(effect.payload.get("method", ""))
+        if method == "submit":
+            _set_concubine_status(context, actor_id, owner_id, forced=True)
+            return EffectOutcome(
+                "submitted", f"你暂时向{name}低头，被强行带回府中。"
+            )
+        if method != "resist":
+            raise ValueError("未知的逼迫应对方式")
+        player_power = max(
+            1.0, float(combat_snapshot(context.state, definitions, actor_id)["power"])
+        )
+        owner_power = max(
+            1.0, float(combat_snapshot(context.state, definitions, owner_id)["power"])
+        )
+        chance = max(
+            0.08,
+            min(0.75, 0.16 + 0.42 * player_power / (player_power + owner_power)),
+        )
+        if context.rng.random() < chance:
+            component = context.state.entities.require(actor_id, CONCUBINE_STATE)
+            component["escape_reputation"] = int(
+                component.get("escape_reputation", 0)
+            ) + 1
+            context.state.entities.put(actor_id, CONCUBINE_STATE, component)
+            return EffectOutcome(
+                "escaped_revenge",
+                f"你拼死突破{name}的围堵，保住自由（成功率 {chance:.0%}）。",
+            )
+        context.emit(
+            "combat.condition.drain.requested",
+            source="concubines",
+            scope=EventScope.entity(actor_id),
+            payload={"entity_id": actor_id, "hp_ratio": 0.22, "mp_ratio": 0.0},
+        )
+        edge = _set_concubine_status(context, actor_id, owner_id, forced=True)
+        metadata = dict(edge.metadata)
+        metadata["angered_until_unit"] = _action_unit(context.state, actor_id) + 2
+        context.state.relations.replace_metadata(edge.relation_id, metadata)
+        return EffectOutcome(
+            "captured", f"反抗失败，你负伤后被{name}强行带走。"
+        )
+
+    registry.register("concubine_proposal", proposal)
+    registry.register("concubine_revenge", revenge)
+
+
 def _on_time_advanced(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
         actor_id = context.state.controlled_entity_id
@@ -590,6 +948,15 @@ def concubine_invariants(state: WorldState) -> list[str]:
         bonus = float(component.get("cauldron_breakthrough_bonus", -1))
         if not 0 <= bonus <= 0.02:
             errors.append(f"角色 {entity_id} 的炉鼎突破加成非法")
+        for row in component.get("rejection_aftermath", []):
+            owner_id = str(row.get("owner_id", ""))
+            if state.entities.get(owner_id, IDENTITY) is None:
+                errors.append(f"角色 {entity_id} 的拒婚后续引用未知人物")
+            declined = int(row.get("declined_unit", -1))
+            expires = int(row.get("expires_unit", -1))
+            checked = int(row.get("last_checked_unit", -1))
+            if declined < 0 or not declined <= checked <= expires:
+                errors.append(f"角色 {entity_id} 的拒婚后续行动单位非法")
     return errors
 
 
@@ -599,6 +966,7 @@ def register_concubine_domain(bus: CommandBus, definitions: GameDefinitions) -> 
     bus.register(ManageConcubineStatus, _manage_status_handler(definitions))
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
+    bus.event_bus.register("core.action.completed", _on_action_completed(definitions))
     bus.event_bus.register("character.died", _on_character_died)
 
 
@@ -688,5 +1056,7 @@ def concubine_view(
         "future_proposal_multiplier": round(
             max(0.01, 0.20 ** int(component["escape_reputation"])), 4
         ),
-        "rejection_aftermath": [],
+        "rejection_aftermath": [
+            dict(row) for row in component.get("rejection_aftermath", [])
+        ],
     }

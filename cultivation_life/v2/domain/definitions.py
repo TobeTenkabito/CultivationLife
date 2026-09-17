@@ -81,6 +81,7 @@ class WorldDefinition:
     id: str
     name: str
     tier: int
+    npc_realm_cap: int
     enabled: bool
     qi_concentrations: dict[str, float]
     default_location: str
@@ -147,6 +148,7 @@ class FactionDefinition:
     allegiance_race: str
     description: str
     color: str
+    npcs: tuple[dict[str, Any], ...]
 
 
 @dataclass(frozen=True, slots=True)
