@@ -2,59 +2,70 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/panels.css">
 </head>
 <body>
-<main>
-  <header class="masthead">
-    <div><small>CULTIVATION LIFE</small><h1>浮生问道</h1></div>
-    <div class="header-actions"><span id="save-state" aria-live="polite"></span><button id="new" type="button">另启一世</button></div>
-  </header>
+  <div class="mist mist-a"></div><div class="mist mist-b"></div>
+  <main class="shell">
+    <header class="brand">
+      <div class="seal">道</div>
+      <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p></div>
+      <div class="brand-actions"><span id="save-state" aria-live="polite"></span><button id="new" class="text-button hidden" type="button">另启一世</button></div>
+    </header>
 
-  <section id="start" class="card start-card">
-    <div><p class="eyebrow">新建角色</p><h2>命格初定</h2><p class="muted">每次抉择都会即时写入存档。</p></div>
-    <form id="create">
-      <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
-      <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
-      <label>灵根<select name="spirit_root" id="roots"></select></label>
-      <label>道路<select name="path" id="paths"></select></label>
-      <label>随机种子（可留空）<input name="seed" type="number"></label>
-      <button class="primary" type="submit">叩问长生</button>
-    </form>
-    <section><h3>已有命途</h3><div id="saves" class="button-row empty-note"></div></section>
-  </section>
-
-  <section id="game" class="hidden game-layout">
-    <aside class="sidebar">
-      <section class="card identity">
-        <p class="eyebrow">当前角色</p><h2 id="name"></h2><p id="realm"></p><dl id="stats"></dl>
-      </section>
-      <nav id="system-nav" class="card system-nav" aria-label="系统分类"></nav>
-      <section class="card compact"><h3>当前状态</h3><div id="status-flags"></div></section>
-    </aside>
-
-    <section class="play-area">
-      <article id="event" class="card event-card hidden">
-        <p class="eyebrow">命途事件</p><h2 id="event-title"></h2><p id="event-body"></p><div id="choices" class="button-row"></div>
-      </article>
-      <article class="card action-card">
-        <div class="section-heading"><div><p class="eyebrow">日常行动</p><h2>岁月流转</h2></div><label class="unit-input">行动单位<input id="action-units" type="number" min="1" max="100" value="1"></label></div>
-        <div id="actions" class="action-grid"></div>
-      </article>
-      <article class="card operation-shell">
-        <div class="section-heading"><div><p class="eyebrow">完整功能入口</p><h2 id="operation-title">修行</h2></div><input id="operation-search" type="search" placeholder="搜索功能……" aria-label="搜索功能"></div>
-        <p id="operation-summary" class="muted"></p>
-        <div id="operation-list" class="operation-list"></div>
-      </article>
-      <article class="card journal-card">
-        <details><summary>查看当前系统信息</summary><div id="view-tabs" class="button-row"></div><div id="panel" class="state-panel"></div></details>
-      </article>
+    <section id="start" class="paper start-card">
+      <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，道统决定因果如何回响。随机种子可以复现同一条时间线。</p></div>
+      <form id="create">
+        <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
+        <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
+        <label>灵根<select name="spirit_root" id="roots"></select></label>
+        <label>修行道统<select name="path" id="paths"></select></label>
+        <label>出生界面<select name="start_world" id="worlds"></select></label>
+        <label>天机数 <span>可留空</span><input name="seed" type="number" min="1" placeholder="随机"></label>
+        <button class="primary" type="submit">叩问长生</button>
+      </form>
+      <div class="save-section"><p class="eyebrow">已有命途</p><div id="saves" class="save-list"></div></div>
     </section>
-  </section>
-  <div id="toast" role="status" aria-live="polite"></div>
-</main>
-<script src="/app.js"></script>
+
+    <section id="game" class="game-grid hidden">
+      <aside class="paper character-card">
+        <div class="character-head"><div class="avatar" id="avatar">修</div><div><h2 id="name"></h2><p id="realm"></p></div></div>
+        <div class="realm"><span>当前道途</span><strong id="realm-display"></strong><small id="age-line"></small></div>
+        <div class="meter-block"><div><span>机缘</span><b id="opportunity-text"></b></div><div class="meter gold"><i id="opportunity-bar"></i></div></div>
+        <div class="meter-block"><div><span>HP</span><b id="hp-text"></b></div><div class="meter red"><i id="hp-bar"></i></div></div>
+        <div class="meter-block"><div><span>MP</span><b id="mp-text"></b></div><div class="meter blue"><i id="mp-bar"></i></div></div>
+        <dl id="stats" class="stats"></dl>
+        <section class="current-status"><h3>当前状态</h3><div id="status-flags"></div></section>
+        <button id="insight-open" class="wide-button" type="button">查看行囊与诸系统</button>
+      </aside>
+
+      <section class="main-column">
+        <article id="event" class="paper event-card hidden"><p class="eyebrow">命途有变</p><h2 id="event-title"></h2><p id="event-body"></p><div id="choices" class="choices"></div></article>
+        <article class="paper action-card">
+          <div class="section-title"><div><p class="eyebrow">岁月流转</p><h2>这一程，你将如何度过？</h2></div><label class="unit-input">行动单位<input id="action-units" type="number" min="1" max="100" value="1"></label></div>
+          <p class="muted">行动会推进统一世界时间，并自动保存人物、势力与诸界变化。</p><div id="actions" class="actions"></div>
+        </article>
+        <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>近况一览</h2></div><span>所有抉择均已入档</span></div><div id="chronicle" class="timeline"></div></article>
+      </section>
+
+      <article id="operation-shell" class="paper utility-panel left-panel operation-shell" role="dialog" aria-modal="false" aria-label="道途功能">
+        <div class="section-title"><div><p class="eyebrow">道途抉择</p><h2 id="operation-title">修行</h2></div><button id="operation-close" type="button">关闭</button></div>
+        <p id="operation-summary" class="muted"></p><input id="operation-search" class="operation-search" type="search" placeholder="搜索功能……" aria-label="搜索功能"><div id="operation-list" class="operation-list"></div>
+      </article>
+
+      <article id="insight-shell" class="paper utility-panel insight-shell" role="dialog" aria-modal="false" aria-label="诸系统状态">
+        <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>诸系统状态</h2></div><button id="insight-close" type="button">关闭</button></div><div id="view-tabs" class="view-tabs"></div><div id="panel" class="state-panel"></div>
+      </article>
+
+      <nav id="system-nav" class="strategy-dock left-dock" aria-label="道途功能"></nav>
+    </section>
+  </main>
+
+  <div id="game-confirm-backdrop" class="game-confirm-backdrop hidden"><section class="paper game-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="game-confirm-title" aria-describedby="game-confirm-body"><p class="eyebrow">命途抉择</p><h2 id="game-confirm-title">确认操作</h2><p id="game-confirm-body"></p><div class="game-confirm-actions"><button id="game-confirm-cancel" type="button">取消</button><button id="game-confirm-accept" type="button">确认</button></div></section></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
 </body>
 </html>

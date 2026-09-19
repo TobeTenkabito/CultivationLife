@@ -449,6 +449,10 @@ def build_handler(
                             for key, value in engine.definitions.races.items()
                         },
                         "worlds": {key: value.name for key, value in engine.definitions.worlds.items() if value.enabled},
+                        "start_worlds": {
+                            key: list(value)
+                            for key, value in engine.definitions.start_worlds.items()
+                        },
                         "operations": registry.operations,
                     })
                 elif path == "/api/games":
