@@ -91,7 +91,9 @@ def main() -> None:
             content_directory=paths.content_root,
             extension_root=paths.app_root,
         )
-        server = ThreadingHTTPServer((HOST, port), build_handler(engine, paths.web_root))
+        server = ThreadingHTTPServer(
+            (HOST, port), build_handler(engine, paths.web_root, paths.app_root)
+        )
         if not args.no_browser:
             threading.Timer(0.7, lambda: webbrowser.open(f"http://{HOST}:{port}")).start()
         server.serve_forever()

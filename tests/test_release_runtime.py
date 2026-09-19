@@ -69,6 +69,13 @@ class ReleaseRuntimeTests(unittest.TestCase):
         self.assertEqual(status, 200)
         config = json.loads(config_body)
         self.assertIn("advance", config["operations"])
+        self.assertIn("extensions", config)
+
+        status, achievements_body, _ = self.request("/api/achievements")
+        self.assertEqual(status, 200)
+        achievements = json.loads(achievements_body)
+        self.assertEqual(achievements["total"], 44)
+        self.assertFalse(achievements["progress_available"])
 
         status, created_body, _ = self.request(
             "/api/games", payload={"name": "发布烟测", "seed": 20260919}
