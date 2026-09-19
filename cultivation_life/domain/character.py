@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from .definitions import GameDefinitions
 from ..kernel.bus import CommandBus, SimulationContext
@@ -12,6 +12,7 @@ IDENTITY = "core.identity"
 LIFE = "character.life"
 ACTIVITY = "character.activity"
 LIFESPAN_DUE = "character.lifespan.due"
+WORLD_NPC_PROFILE = "world.npc_profile"
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +38,14 @@ class RegisterCharacter:
     layer: int
     world_id: str
     lifespan: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EnsureWorldCharacters:
+    """Idempotently materialize content-defined NPCs as canonical characters."""
+
+    allow_during_interaction: ClassVar[bool] = True
+    allow_during_court_election: ClassVar[bool] = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -169,6 +178,82 @@ def create_character(
         lifespan=lifespan,
         controlled=controlled,
     )
+
+
+def _ensure_world_characters(
+    context: SimulationContext, definitions: GameDefinitions,
+) -> list[str]:
+    existing = {
+        str(context.state.entities.require(entity_id, IDENTITY).get("external_id"))
+        for entity_id in context.state.entities.with_component(IDENTITY)
+        if context.state.entities.require(entity_id, IDENTITY).get("external_id")
+    }
+    created: list[str] = []
+    actor_id = context.state.controlled_entity_id
+    for row in definitions.world_npcs:
+        external_id = str(row["id"])
+        if external_id in existing:
+            continue
+        realm = definitions.realms[int(row["realm_index"])]
+        entity_id = create_character(
+            context,
+            name=str(row["name"]),
+            age=int(row.get("age", 18)),
+            gender=str(row.get("gender") or (
+                "female" if sum(external_id.encode("utf-8")) % 2 else "male"
+            )),
+            race=str(row.get("race", "human")),
+            spirit_root=str(row.get("spirit_root", "none")),
+            path=str(row.get("path", "dao")),
+            realm_id=realm.id,
+            layer=int(row.get("layer", 1)),
+            world_id=str(row.get("world", "human")),
+            lifespan=None if row.get("lifespan") is None else int(row["lifespan"]),
+        )
+        identity = context.state.entities.require(entity_id, IDENTITY)
+        identity["external_id"] = external_id
+        context.state.entities.put(entity_id, IDENTITY, identity)
+        context.state.entities.put(entity_id, WORLD_NPC_PROFILE, {
+            "external_id": external_id,
+            "title": str(row.get("title", "云游修士")),
+            "cultivation_progress": float(row.get("cultivation_progress", 0.0)),
+            "combat_factor": float(row.get("combat_factor", 1.0)),
+            "treasure_item_id": str(row.get("treasure_item_id", "")),
+            "notorious": bool(row.get("notorious", False)),
+            "notoriety": float(row.get("notoriety", 0.0)),
+        })
+        treasure_id = str(row.get("treasure_item_id", ""))
+        inventory = context.state.entities.get(entity_id, "economy.inventory")
+        if treasure_id in definitions.items and inventory is not None:
+            items = dict(inventory.get("items", {}))
+            items[treasure_id] = max(1, int(items.get(treasure_id, 0)))
+            inventory["items"] = items
+            context.state.entities.put(entity_id, "economy.inventory", inventory)
+        social = context.state.entities.get(entity_id, "relations.social_profile")
+        if actor_id is not None and social is not None and row.get("affinity") is not None:
+            affinities = dict(social.get("affinities", {}))
+            affinities[actor_id] = float(row["affinity"])
+            social["affinities"] = affinities
+            context.state.entities.put(entity_id, "relations.social_profile", social)
+        existing.add(external_id)
+        created.append(entity_id)
+    return created
+
+
+def _ensure_world_characters_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, EnsureWorldCharacters):
+            raise TypeError("命令类型错误")
+        _ensure_world_characters(context, definitions)
+
+    return handler
+
+
+def _on_game_created(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        _ensure_world_characters(context, definitions)
+
+    return handler
 
 
 def _bootstrap_handler(definitions: GameDefinitions):
@@ -368,6 +453,8 @@ def character_invariants(state: WorldState) -> list[str]:
 def register_character_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
     bus.register(BootstrapGame, _bootstrap_handler(definitions))
     bus.register(RegisterCharacter, _register_character_handler(definitions))
+    bus.register(EnsureWorldCharacters, _ensure_world_characters_handler(definitions))
+    bus.event_bus.register("core.game.created", _on_game_created(definitions))
     bus.event_bus.register(LIFESPAN_DUE, _on_lifespan_due)
     bus.event_bus.register("character.lifespan.changed", _on_lifespan_changed)
     bus.event_bus.register("character.lethal_hazard", _on_lethal_hazard)

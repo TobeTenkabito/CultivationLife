@@ -770,6 +770,24 @@ def market_view(state: Any, definitions: GameDefinitions, entity_id: str | None 
         market.get("world_id") == location.get("world_id")
         and market.get("location_id") == location.get("location_id")
     )
+    ledger = state.entities.get(actor_id, "economy.asset_ledger") or {}
+    sell_ratio = float(definitions.systems.get("spirit_field", {}).get(
+        "market_sell_ratio", 0.55
+    ))
+    sellable_plants = []
+    for asset in dict(ledger.get("instances", {})).values():
+        if asset.get("kind") != "harvested_spirit_plant" or asset.get("reservation_id"):
+            continue
+        metadata = dict(asset.get("metadata", {}))
+        sellable_plants.append({
+            "id": str(asset["id"]),
+            "name": str(asset["name"]),
+            "quantity": 1,
+            "price": max(1, round(float(metadata.get("value", 1)) * sell_ratio)),
+            "plant_id": metadata.get("plant_id"),
+            "plant_years": int(metadata.get("years", 0)),
+            "plant_quality": float(metadata.get("quality", 0.0)),
+        })
     return {
         "available": _market_tier(definitions, cultivation, str(location["world_id"])) > 0,
         "current": current,
@@ -778,4 +796,5 @@ def market_view(state: Any, definitions: GameDefinitions, entity_id: str | None 
         "generated_year": market.get("generated_year") if current else None,
         "spirit_stones": _quantity(_inventory(state, actor_id), CURRENCY_ID),
         "offers": [dict(row) for row in market.get("offers", [])] if current else [],
+        "sellable_plants": sellable_plants,
     }

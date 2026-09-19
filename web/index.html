@@ -4,83 +4,390 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/panels.css">
+  <link rel="stylesheet" href="/style.css?v=20260919-8364171-v2">
+  <link rel="stylesheet" href="/panels.css?v=20260919-8364171-v3">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
   <main class="shell">
     <header class="brand">
       <div class="seal">道</div>
-      <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p></div>
-      <div class="brand-actions"><span id="save-state" aria-live="polite"></span><button id="new" class="text-button hidden" type="button">另启一世</button></div>
+      <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p><small id="base-game-version" class="base-game-version">本体版本读取中……</small></div>
+      <button id="new-game-button" class="text-button hidden">另启一世</button>
     </header>
 
-    <section id="start" class="paper start-card">
+    <section id="start-screen" class="paper start-card">
       <details id="start-extension-manager" class="start-extension-manager">
-        <summary>DLC / MOD</summary><p>独立开关 · 下次启动生效</p><div id="start-extension-list"></div>
+        <summary>DLC / MOD</summary>
+        <p>独立开关 · 下次启动生效</p>
+        <div id="start-extension-list"></div>
       </details>
-      <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，道统决定因果如何回响。随机种子可以复现同一条时间线。</p><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取功业中……</small></button></div>
-      <form id="create">
-        <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
-        <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
-        <label>灵根<select name="spirit_root" id="roots"></select></label>
-        <label>修行道统<select name="path" id="paths"></select></label>
-        <label>出生界面<select name="start_world" id="worlds"></select></label>
+      <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，主修决定因果如何回响。随机种子可以复现同一条时间线。</p><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取成就中……</small></button></div>
+      <form id="new-game-form">
+        <label>道号<input name="name" maxlength="16" placeholder="无名散修"></label>
+        <label>性别<select name="gender" id="gender-select"><option value="male">男</option><option value="female">女</option></select></label>
+        <label>灵根<select name="spirit_root" id="root-select"></select></label>
+        <label>修行道统倾向<select name="path" id="path-select"></select></label>
+        <label id="monster-species-field" class="hidden">妖修本源种<select name="monster_species_id" id="monster-species-select"></select><span>政治身份仍为妖族；本源种只决定生命谱系。</span></label>
+        <label>出生界面<select name="start_world" id="start-world-select"></select></label>
         <label>天机数 <span>可留空</span><input name="seed" type="number" min="1" placeholder="随机"></label>
         <button class="primary" type="submit">叩问长生</button>
       </form>
-      <div class="save-section"><p class="eyebrow">已有命途</p><div id="saves" class="save-list"></div></div>
+      <div class="quick-start"><div><p class="eyebrow">快速开始</p><h3>承接一段既有道途</h3><p class="muted">使用预设修为、功法、属性与行囊；也可选择出生魔界的魔修预设。</p></div><div id="quick-start-list" class="quick-start-list"></div></div>
+      <div id="save-list" class="save-list"></div>
     </section>
 
     <section id="achievement-screen" class="paper achievement-screen hidden" aria-label="成就">
-      <div class="achievement-heading"><div><p class="eyebrow">ACHIEVEMENTS</p><h2>功业录</h2><p id="achievement-summary" class="muted"></p></div><button id="achievement-close" type="button">返回命格界面</button></div>
+      <div class="achievement-heading">
+        <div><p class="eyebrow">ACHIEVEMENTS</p><h2>功业录</h2><p id="achievement-summary" class="muted"></p></div>
+        <button id="achievement-close" type="button">返回命格界面</button>
+      </div>
       <div id="achievement-groups" class="achievement-groups"></div>
     </section>
 
-    <section id="game" class="game-grid hidden">
+    <section id="game-screen" class="game-grid hidden">
       <aside class="paper character-card">
-        <div class="character-head"><div class="avatar" id="avatar">修</div><div><h2 id="name"></h2><p id="realm"></p></div></div>
-        <div class="realm"><span>当前道途</span><strong id="realm-display"></strong><small id="age-line"></small></div>
+        <div class="character-head"><div class="avatar" id="avatar">修</div><div><h2 id="player-name"></h2><p id="player-subtitle"></p></div></div>
+        <div class="realm"><span>当前境界</span><strong id="realm-name"></strong><small id="age-line"></small><small id="tribulation-line" class="tribulation-line hidden"></small></div>
         <div class="meter-block"><div><span>机缘</span><b id="opportunity-text"></b></div><div class="meter gold"><i id="opportunity-bar"></i></div></div>
+        <div id="qi-mastery" class="qi-mastery" aria-label="四气经验等级"></div>
+        <details class="art-mastery compact-library"><summary>百艺经验</summary><div id="art-mastery" class="art-mastery-grid"></div></details>
         <div class="meter-block"><div><span>HP</span><b id="hp-text"></b></div><div class="meter red"><i id="hp-bar"></i></div></div>
-        <div class="meter-block"><div><span>MP</span><b id="mp-text"></b></div><div class="meter blue"><i id="mp-bar"></i></div></div>
-        <dl id="stats" class="stats"></dl>
-        <section class="current-status"><h3>当前状态</h3><div id="status-flags"></div></section>
-        <button class="wide-button" data-panel-target="cultivation" type="button">修行、突破与功法</button>
-        <button id="insight-open" class="wide-button" type="button">查看行囊与诸系统</button>
+        <div class="meter-block"><div><span id="mp-label">MP</span><b id="mp-text"></b></div><div id="mp-meter" class="meter blue"><i id="mp-bar"></i></div></div>
+        <dl class="stats">
+          <div><dt>战斗力</dt><dd id="combat-power" tabindex="0"></dd></div>
+          <div><dt>因果</dt><dd id="karma"></dd></div>
+          <div><dt>煞气</dt><dd id="sha-qi"></dd></div>
+          <div><dt>威名</dt><dd id="fame"></dd></div>
+          <div><dt>组队战力</dt><dd id="battle-power"></dd></div>
+          <div id="heart-demon-stat" class="hidden"><dt>心魔 Debug</dt><dd id="heart-demon"></dd></div>
+          <div><dt>有效因果</dt><dd id="effective-karma"></dd></div>
+          <div><dt>主修功法</dt><dd id="technique"></dd></div>
+          <div><dt>机缘效率</dt><dd id="root-efficiency"></dd></div>
+          <div><dt>气环境</dt><dd id="qi-environment"></dd></div>
+          <div><dt>炼体</dt><dd id="body-training"></dd></div>
+          <div><dt>神识</dt><dd id="divine-sense"></dd></div>
+          <div id="immortal-power-stat" class="hidden"><dt>仙灵力</dt><dd id="immortal-power-state"></dd></div>
+          <div id="ghost-erosion-stat" class="hidden"><dt>魂蚀率</dt><dd id="ghost-erosion"></dd></div>
+          <div id="ghost-wangsheng-stat" class="hidden"><dt>往生</dt><dd id="ghost-wangsheng"></dd></div>
+          <div><dt>种族</dt><dd id="player-race"></dd></div>
+          <div><dt>性别</dt><dd id="player-gender"></dd></div>
+        </dl>
+        <details class="techniques compact-library"><summary>功法配置 <span id="equipped-technique-count"></span></summary><div id="technique-list"></div></details>
+        <details class="technique-library compact-library"><summary>已悟功法 <span id="known-technique-count"></span></summary><div id="known-technique-list"></div></details>
+        <div class="wanted"><h3>势力敌对</h3><div id="wanted-list"></div></div>
       </aside>
 
       <section class="main-column">
-        <article id="event" class="paper event-card hidden"><p class="eyebrow">命途有变</p><h2 id="event-title"></h2><p id="event-body"></p><div id="choices" class="choices"></div></article>
-        <article class="paper action-card">
-          <div class="section-title"><div><p class="eyebrow">岁月流转</p><h2>这一程，你将如何度过？</h2></div><label class="unit-input">行动单位<input id="action-units" type="number" min="1" max="100" value="1"></label></div>
-          <p class="muted">行动会推进统一世界时间，并自动保存人物、势力与诸界变化。</p><div id="actions" class="actions"></div>
+        <article id="prison-card" class="paper prison-card hidden">
+          <p class="eyebrow">身陷囹圄</p><h2 id="prison-title">势力大牢</h2><p id="prison-description"></p>
+          <div class="choices"><button id="prison-endure">忍受一年刑狱</button><button id="prison-wait" class="hidden">静待一年</button><button id="prison-cultivate" class="hidden">受限修炼一年</button><button id="prison-escape">冒险越狱</button></div>
         </article>
-        <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>近况一览</h2></div><span>所有抉择均已入档</span></div><div id="chronicle" class="timeline"></div></article>
+        <article id="event-card" class="paper event-card hidden">
+          <p class="eyebrow">命途有变</p><h2 id="event-title"></h2><p id="event-body"></p><div id="event-choices" class="choices"></div>
+        </article>
+        <article id="battle-report-card" class="paper battle-report-card battle-report-popup hidden" aria-live="polite" role="dialog" aria-modal="false">
+          <div class="section-title"><div><p class="eyebrow">自动斗法</p><h2 id="battle-report-title">最近战报</h2></div><div class="battle-report-heading"><div id="battle-report-grade" class="battle-grade"></div><button id="battle-report-toggle" type="button">关闭</button></div></div>
+          <p id="battle-report-summary" class="muted"></p>
+          <div id="battle-rosters" class="battle-rosters"></div>
+          <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
+          <div id="battle-key-events" class="battle-key-events"></div>
+          <div id="battle-stat-grid" class="battle-stat-grid"></div>
+          <details class="battle-round-details"><summary>展开逐轮演算</summary><div id="battle-round-list"></div></details>
+        </article>
+        <article id="action-card" class="paper action-card">
+          <p class="eyebrow">岁月流转</p><h2 id="action-heading">这一年，你将如何度过？</h2><p id="time-unit-hint" class="muted"></p>
+          <div id="breakthrough-panel" class="breakthrough-panel hidden">
+            <div><b id="breakthrough-title">大境界瓶颈</b><span id="breakthrough-reason"></span></div>
+            <button id="breakthrough-action" type="button">突破瓶颈</button>
+          </div>
+          <div id="body-breakthrough-panel" class="breakthrough-panel body-breakthrough-panel hidden">
+            <div><b id="body-breakthrough-title">冲击炼体境界</b><span id="body-breakthrough-reason"></span></div>
+            <button id="body-breakthrough-action" type="button">冲击下一层</button>
+          </div>
+          <div id="ghost-system-panel" class="breakthrough-panel ghost-system-panel hidden">
+            <div class="ghost-system-copy">
+              <b id="ghost-system-title">百鬼夜行:轮回往生</b><span id="ghost-system-summary"></span>
+              <details class="ghost-ledger">
+                <summary>展开魂基明细与轮回册</summary>
+                <p id="ghost-integrity-detail"></p>
+                <p id="ghost-imprint-list"></p>
+                <p id="ghost-reincarnation-preview" class="hidden"></p>
+              </details>
+            </div>
+            <div class="ghost-system-actions">
+              <button id="ghost-wangsheng-action" type="button">消耗往生</button>
+              <button id="ghost-wangsheng-all-action" type="button">尽数往生</button>
+              <button id="ghost-reincarnate-action" type="button">舍此世修为，入轮回</button>
+            </div>
+          </div>
+          <div class="actions primary-actions">
+            <button data-action="cultivate" id="cultivate-action"><b>潜心修炼</b><span>稳定积累机缘</span></button>
+            <button data-action="body_train" id="body-train-action"><b>淬炼肉身</b><span>需要先配置一部炼体功法</span></button>
+            <button data-action="sense_train" id="sense-train-action"><b>锻炼神识</b><span>需要先配置一部神识功法</span></button>
+            <button id="sense-breakthrough-action" class="hidden"><b>突破神识</b><span>消耗神识经验，提升一级</span></button>
+            <button data-action="rest"><b>静养调息</b><span>恢复 HP 与 MP</span></button>
+            <button data-action="befriend_neighbors"><b>修好睦邻</b><span>收敛声势、赔礼往来，降低威名</span></button>
+            <button id="spirit-crossing-action" class="hidden"><b>偷渡灵界</b><span>一次机会，连续通过信物、HP 与战力三重死关</span></button>
+            <button id="cross-world-action" class="hidden"><b id="cross-world-title">跨界移动</b><span id="cross-world-hint">以大乘之身往返两界</span></button>
+            <button id="cross-world-secondary-action" class="hidden"><b id="cross-world-secondary-title">跨界移动</b><span id="cross-world-secondary-hint">选择另一处对应下界</span></button>
+          </div>
+          <div class="action-folds">
+            <details><summary>历练与生计</summary><div class="fold-actions actions">
+              <button data-action="treasure"><b>寻幽探宝</b><span>微量机缘，并随机获得法器、功法或丹药</span></button>
+              <button data-action="commission" id="commission-action"><b>坊市委托</b><span>承接同阶委托，稳定赚取灵石</span></button>
+              <button data-action="travel"><b>下山游历</b><span>遭遇更多故事</span></button>
+            </div></details>
+            <details><summary>斗法与狩猎</summary><div class="fold-actions actions">
+              <button data-action="hunt_beast"><b>猎杀妖兽</b><span>寻找弱于自己的妖兽，夺取战利品</span></button>
+              <button data-action="spar"><b>同道切磋</b><span>非致命斗法，印证功法与战力</span></button>
+              <button data-action="slay" id="slay-action"><b>灭杀修士</b><span>寻找弱者下手，夺宝但增加因果</span></button>
+              <button data-action="capture"><b>生擒修士</b><span>压制对手并收入俘虏名册</span></button>
+            </div></details>
+          </div>
+        </article>
+        <article id="race-card" class="paper race-card utility-panel hidden" role="dialog" aria-modal="false" aria-label="上界族群外交">
+          <div class="section-title"><div><p id="race-world-label" class="eyebrow">上界族群</p><h2>种族与盟约</h2></div><div class="panel-heading"><span>外交、战争与依附</span><button id="race-toggle" type="button">关闭</button></div></div><p id="race-description" class="muted"></p><div id="race-list" class="race-list"></div><div id="race-detail" class="race-detail"></div><div id="race-alliance-list"></div>
+        </article>
+        <article id="world-route-card" class="paper utility-panel" role="dialog" aria-modal="false" aria-label="修炼道路与界面">
+          <div class="section-title"><div><p class="eyebrow">诸界道途</p><h2 id="world-route-title">修炼道路</h2></div><div class="panel-heading"><span id="world-route-status"></span><button id="world-route-toggle" type="button">关闭</button></div></div>
+          <p id="world-route-description" class="muted"></p><div id="world-route-stages" class="world-route-stages"></div>
+        </article>
+        <article id="world-npc-card" class="paper world-npc-card utility-panel" role="dialog" aria-modal="false" aria-label="世界人物">
+          <div class="section-title"><div><p class="eyebrow">天下人物</p><h2>世界 NPC</h2></div><div class="panel-heading"><span>真实状态随界面分别记录</span><button id="world-npc-toggle" type="button">关闭</button></div></div>
+          <div id="world-npc-list" class="world-npc-list"></div>
+        </article>
+        <article id="ranking-card" class="paper ranking-card utility-panel" role="dialog" aria-modal="false" aria-label="上界天榜">
+          <div class="section-title"><div><p class="eyebrow">万族争锋</p><h2 id="ranking-title">上界天榜前二十</h2></div><div class="panel-heading"><span id="ranking-player-status"></span><button id="ranking-toggle" type="button">关闭</button></div></div>
+          <p class="muted">按大境界、小境界与个人战力综合排列；玩家与所有存活高手共同参与计算。</p>
+          <div id="ranking-list" class="ranking-list"></div>
+        </article>
+        <article id="map-card" class="paper utility-panel map-panel" role="dialog" aria-modal="false" aria-label="当前界面地图">
+          <div class="section-title"><div><p class="eyebrow">山河路远</p><h2 id="map-title">界面地图</h2></div><div class="panel-heading"><span id="map-current"></span><button id="map-toggle" type="button">关闭</button></div></div>
+          <p id="map-description" class="muted"></p><div id="map-locations" class="map-locations"></div>
+        </article>
+        <article id="market-card" class="paper market-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙坊市">
+          <div class="section-title"><div><p class="eyebrow">互通有无</p><h2 id="market-title">修仙坊市</h2></div><div class="market-heading-actions"><strong id="market-wallet"></strong><button id="market-toggle" type="button">关闭</button></div></div>
+          <div id="market-content">
+            <p id="market-description" class="muted"></p>
+            <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">丹器功法</p><h3>一般坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="market-offers" class="market-offers"></div></section>
+            <section class="market-stock-section material-market-section"><div class="market-stock-heading"><div><p class="eyebrow">阵材器料</p><h3>材料坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="material-market-offers" class="market-offers"></div></section>
+            <section id="market-plant-sell-section" class="market-plant-sell"><h3>出售灵植</h3><div id="market-plant-sellables" class="auction-sellables"></div></section>
+          </div>
+        </article>
+        <article id="auction-card" class="paper utility-panel auction-panel hidden" role="dialog" aria-modal="false" aria-label="拍卖会与黑市">
+          <div class="section-title"><div><p class="eyebrow">奇珍易主</p><h2 id="auction-title">拍卖会</h2></div><div class="panel-heading"><strong id="auction-wallet"></strong><button id="auction-toggle" type="button">关闭</button></div></div>
+          <p id="auction-description" class="muted"></p>
+          <div id="auction-travel-warning" class="auction-warning hidden"></div>
+          <section id="auction-identity-section" class="hidden"><h3>匿名入席</h3><div id="auction-identities" class="auction-identities"></div></section>
+          <section id="auction-consign-section" class="hidden"><h3>寄拍</h3><p class="muted">成交后收取最终拍定价的30%作为手续费。</p><form id="auction-consign-form" class="auction-inline-form"><select id="auction-consign-item"></select><input id="auction-start-price" type="number" min="1" placeholder="起拍价"><button type="submit">送去拍卖</button></form></section>
+          <section id="auction-lots-section" class="hidden"><h3>拍品</h3><div id="auction-lots" class="auction-lots"></div><button id="auction-advance-round" type="button">推进竞价</button></section>
+          <section id="auction-attendees-section" class="hidden"><h3>到场人物与私下交易</h3><div id="auction-attendees" class="auction-attendees"></div><div id="auction-private-trade" class="auction-private-trade"></div></section>
+          <section id="auction-log-section" class="hidden"><h3>场内竞价</h3><div id="auction-bid-logs" class="auction-bid-logs"></div></section>
+          <section id="black-market-section" class="hidden"><h3>散场黑市</h3><p class="muted">输入普通字符串或正则表达式检索本界商品；黑市售价严重溢价。</p><form id="black-market-search-form" class="auction-inline-form"><input id="black-market-pattern" maxlength="40" placeholder="例如：丹|剑|神识"><button type="submit">检索</button></form><div id="black-market-results" class="auction-lots"></div><h3>出手资产</h3><div id="black-market-sellables" class="auction-sellables"></div><button id="black-market-leave" type="button">离开黑市</button></section>
+        </article>
+        <article id="ghost-parade-card" class="paper utility-panel ghost-parade-panel hidden" role="dialog" aria-modal="false" aria-label="百鬼夜行">
+          <div class="section-title"><div><p class="eyebrow">NIGHT PARADE</p><h2>百鬼夜行</h2></div><div class="panel-heading"><span id="ghost-parade-summary"></span><button id="ghost-parade-toggle" type="button">关闭</button></div></div>
+          <p id="ghost-parade-description" class="muted"></p>
+          <div id="ghost-parade-list" class="ghost-parade-list"></div>
+        </article>
+        <article id="ghost-soul-card" class="paper utility-panel left-panel ghost-soul-panel hidden" role="dialog" aria-modal="false" aria-label="三魂七魄">
+          <div class="section-title"><div><p class="eyebrow">THREE SOULS · SEVEN SPIRITS</p><h2>三魂七魄</h2></div><div class="panel-heading"><span id="ghost-soul-summary"></span><button id="ghost-soul-toggle" type="button">关闭</button></div></div>
+          <p id="ghost-phase-state" class="muted"></p>
+          <div id="ghost-constraint-actions" class="ghost-system-actions hidden"></div>
+          <div id="ghost-host-actions" class="ghost-system-actions hidden"></div>
+          <section><h3>十魂位</h3><p class="section-note">三魂提供无硬上限的递减收益；七魄各自进入对应战斗规则。事件发生时仍可即时换魂。</p><div id="ghost-soul-slots" class="ghost-soul-slots"></div></section>
+          <section><h3>拘魂册</h3><div id="ghost-bound-souls" class="ghost-bound-souls"></div></section>
+        </article>
+        <article id="ghost-attachment-card" class="paper utility-panel left-panel ghost-attachment-panel hidden" role="dialog" aria-modal="false" aria-label="附灵">
+          <div class="section-title"><div><p class="eyebrow">SPIRIT ATTACHMENT</p><h2>附灵</h2></div><div class="panel-heading"><span id="ghost-attachment-summary"></span><button id="ghost-attachment-toggle" type="button">关闭</button></div></div>
+          <p class="muted">附入器物后仍可自由行动和离器，以修炼效率换取更慢的魂蚀增长。</p>
+          <section><h3>载体与器灵状态</h3><div id="ghost-attachment-list" class="ghost-attachment-list"></div></section>
+        </article>
+        <article id="faction-card" class="paper faction-card utility-panel" role="dialog" aria-modal="false" aria-label="宗门势力">
+          <div class="section-title"><div><p class="eyebrow">山门势力</p><h2 id="faction-title">人界宗门</h2></div><div class="faction-heading-actions"><span id="faction-role"></span><button id="faction-toggle" type="button">关闭</button></div></div>
+          <div id="faction-content">
+            <p id="faction-description" class="muted"></p>
+            <div id="faction-summary"></div>
+            <div id="faction-diplomacy-detail" class="faction-diplomacy-detail"></div>
+            <div id="faction-dispatch" class="faction-dispatch hidden"><h3>门下差遣</h3><p id="faction-dispatch-hint" class="muted"></p><div><button data-dispatch="item">搜寻同阶物品</button><button data-dispatch="technique">搜寻适配功法</button></div></div>
+            <div id="faction-rewards" class="faction-rewards hidden"><h3>年度分红</h3><p id="faction-reward-hint" class="muted"></p><div id="faction-reward-options" class="reward-options"></div></div>
+            <div id="faction-roster" class="faction-roster hidden"><div class="roster-head"><h3>宗门名单</h3><span id="faction-roster-note"></span></div><div id="faction-roster-list"></div></div>
+          </div>
+        </article>
+        <article id="inventory-card" class="paper utility-panel left-panel inventory-panel" role="dialog" aria-modal="false" aria-label="分类行囊">
+          <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>分类行囊</h2></div><div class="panel-heading"><span>同名常驻属性按数量叠加</span><button id="inventory-toggle" type="button">关闭</button></div></div>
+          <div id="inventory-list" class="inventory-groups"></div>
+        </article>
+        <article id="intrigue-card" class="paper utility-panel intrigue-panel hidden" role="dialog" aria-modal="false" aria-label="势力内政">
+          <div class="section-title"><div><p class="eyebrow">COALITIONS &amp; INTRIGUE</p><h2>明争暗斗：合纵连横</h2></div><div class="panel-heading"><span id="intrigue-heading">职位、决议与人事</span><button id="intrigue-toggle" type="button">关闭</button></div></div>
+          <p class="muted">职位、控制权与决策权彼此独立。重大公共事务一人一票；内部任免与赏罚由控制者直接执行，但会留下真实后果。</p>
+          <div id="intrigue-content"></div>
+        </article>
+        <article id="spirit-field-card" class="paper utility-panel left-panel spirit-field-panel" role="dialog" aria-modal="false" aria-label="灵田">
+          <div class="section-title"><div><p class="eyebrow">洞府沃土</p><h2>灵田</h2></div><div class="panel-heading"><span id="spirit-field-summary"></span><button id="spirit-field-toggle" type="button">关闭</button></div></div>
+          <p id="spirit-field-note" class="muted"></p>
+          <div id="spirit-field-plots" class="spirit-field-plots"></div>
+          <details class="alchemy-workbench"><summary>丹炉 · 任意药材配伍</summary><p class="muted">勾选任意品种与数量的药材，再选择目标丹药。成功率由丹药品阶、炼丹等级、投入数量与药材年份品质共同决定。</p><select id="alchemy-target"></select><div id="alchemy-materials" class="alchemy-materials"></div><button id="alchemy-refine" type="button">开炉炼丹</button></details>
+        </article>
+        <article id="relationship-card" class="paper utility-panel left-panel relationship-panel" role="dialog" aria-modal="false" aria-label="人际关系">
+          <div class="section-title"><div><p class="eyebrow">尘缘牵系</p><h2>人际关系</h2></div><div class="panel-heading"><span>师徒、道友、道侣、侍妾与同行</span><button id="relationship-toggle" type="button">关闭</button></div></div>
+          <section class="concubines"><h3>侍妾</h3><div id="concubine-status"></div><div id="concubine-list"></div></section>
+          <section class="dao-companion"><h3>道侣</h3><div id="dao-companion-list"></div></section>
+          <section class="dao-friends"><h3>道友</h3><div id="dao-friend-list"></div></section>
+          <section class="relationships"><h3>师徒</h3><div id="relationship-list"></div></section>
+          <section class="party"><h3>同行队伍</h3><div id="party-list"></div></section>
+          <details class="affinity-directory" open><summary>交好人物</summary><div id="high-affinity-list"></div></details>
+          <details class="affinity-directory"><summary>敌视人物</summary><div id="low-affinity-list"></div></details>
+        </article>
+        <article id="transformation-card" class="paper utility-panel left-panel transformation-panel" role="dialog" aria-modal="false" aria-label="变身管理">
+          <div class="section-title"><div><p class="eyebrow">真灵化形</p><h2>变身管理</h2></div><div class="panel-heading"><span id="transformation-summary"></span><button id="transformation-toggle" type="button">关闭</button></div></div>
+          <p id="transformation-note" class="muted"></p>
+          <div id="transformation-combined" class="transformation-combined"></div>
+          <section><h3>真灵素材</h3><p class="section-note">每次选择一项属性培养。直接炼化损耗较大；两份同类素材先合炼提纯，单位素材的本源利用率显著更高。</p><div id="transformation-materials"></div></section>
+          <section><h3>功法内变身</h3><div id="transformation-stored"></div></section>
+          <section><h3>已悟但未存放</h3><div id="transformation-known"></div></section>
+        </article>
+        <article id="bloodline-card" class="paper utility-panel left-panel bloodline-panel hidden" role="dialog" aria-modal="false" aria-label="妖修血脉">
+          <div class="section-title"><div><p class="eyebrow">BLOODLINE EVOLUTION</p><h2>血脉与进化</h2></div><div class="panel-heading"><span id="bloodline-summary"></span><button id="bloodline-toggle" type="button">关闭</button></div></div>
+          <p id="bloodline-note" class="muted"></p>
+          <div id="bloodline-current"></div>
+          <section><h3>生命印记</h3><div id="bloodline-marks" class="bloodline-marks"></div></section>
+          <section><h3>进化经历</h3><div id="bloodline-history" class="bloodline-history"></div></section>
+          <section id="custom-lineage-section" class="hidden"><h3>自创祖血</h3><div id="custom-lineage"></div></section>
+          <section id="bloodline-evolution-section"><h3>下一次蜕变</h3><p class="section-note">选择永久改变本体与未来支系，不能洗点或逆转。</p><div id="bloodline-candidates"></div></section>
+        </article>
+        <article id="extension-card" class="paper utility-panel extension-panel" role="dialog" aria-modal="false" aria-label="扩展内容">
+          <div class="section-title"><div><p class="eyebrow">CONTENT EXTENSIONS</p><h2>DLC 与 MOD</h2></div><div class="panel-heading"><span id="extension-summary"></span><button id="extension-toggle" type="button">关闭</button></div></div>
+          <p class="muted">扩展在启动时识别。本体先加载，随后依次加载 DLC 与 MOD；修改清单后需重启游戏。</p>
+          <div id="extension-list" class="extension-list"></div>
+        </article>
+        <article id="war-card" class="paper utility-panel war-panel" role="dialog" aria-modal="false" aria-label="势力战争">
+          <div class="section-title"><div><p class="eyebrow">兵凶战危</p><h2>征伐与和谈</h2></div><div class="panel-heading"><span id="war-status"></span><button id="war-toggle" type="button">关闭</button></div></div>
+          <p class="muted">战争按行动单位推进；只要属于参战阵营，你每场会战都可选择亲自出阵。离屏演算会同时考虑总战力、高阶修士与双方阵势条件。</p>
+          <div id="war-list" class="war-list"></div>
+        </article>
+        <article id="captive-card" class="paper utility-panel left-panel captive-panel" role="dialog" aria-modal="false" aria-label="俘虏与傀儡">
+          <div class="section-title"><div><p class="eyebrow">拘魂御傀</p><h2>俘虏与傀儡</h2></div><div class="panel-heading"><span id="puppet-capacity"></span><button id="captive-toggle" type="button">关闭</button></div></div>
+          <section><h3>俘虏</h3><p class="section-note">普通修士可释放或拷打；魔修还可炼尸或种下活傀标记。</p><div id="captive-list"></div></section>
+          <section><h3>傀儡</h3><p id="puppet-time-note" class="section-note"></p><div class="puppet-global-tools"><button id="craft-puppet">合成机关傀儡</button><small>下品灵石 ×25、青锋灵剑 ×1</small></div><div id="puppet-list"></div></section>
+          <section><h3>外来元神</h3><div class="puppet-global-tools"><button id="refine-souls">炼化一道元神</button><button id="secluded-refine-souls">闭关炼化</button><small id="devour-bonus"></small></div><div id="foreign-soul-list"></div></section>
+        </article>
+        <article id="family-card" class="paper faction-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙家族">
+          <div class="section-title"><div><p class="eyebrow">血脉传承</p><h2 id="family-title">修仙家族</h2></div><div class="panel-heading"><span id="family-status"></span><button id="family-toggle" type="button">关闭</button></div></div>
+          <p id="family-description" class="muted"></p>
+          <div id="family-content"></div>
+        </article>
+        <article id="heavenly-court-card" class="paper utility-panel court-panel hidden" role="dialog" aria-modal="false" aria-label="天庭政务">
+          <div class="section-title"><div><p class="eyebrow">HEAVENLY COURT</p><h2>天庭</h2></div><div class="panel-heading"><span id="court-heading"></span><button id="heavenly-court-toggle" type="button">关闭</button></div></div>
+          <p class="muted">四十九宗门共议仙域。七曜主持决议与天条，所有政治结算均按仙界时间单位进行。</p>
+          <div id="heavenly-court-content"></div>
+        </article>
+        <article id="natal-artifact-card" class="paper utility-panel left-panel natal-artifact-panel hidden" role="dialog" aria-modal="false" aria-label="本命法宝">
+          <div class="section-title"><div><p class="eyebrow">LIFEBOND ARTIFACT</p><h2>本命法宝</h2></div><div class="panel-heading"><span id="natal-artifact-heading"></span><button id="natal-artifact-toggle" type="button">关闭</button></div></div>
+          <div id="natal-artifact-content"></div>
+        </article>
+        <article id="crafting-card" class="paper utility-panel left-panel crafting-panel hidden" role="dialog" aria-modal="false" aria-label="组合炼器">
+          <div class="section-title"><div><p class="eyebrow">ARTIFACT FORGING</p><h2>组合炼器</h2></div><div class="panel-heading"><span id="crafting-heading"></span><button id="crafting-toggle" type="button">关闭</button></div></div>
+          <p class="muted">胎模定器类与固定规则，四份真实材料实例决定特性；属性由你分配，炼制不会彻底失败。</p>
+          <section class="crafting-workbench">
+            <h3>五位成器</h3>
+            <div class="crafting-five-slots">
+              <label>① 胎模<select id="crafting-mold"></select></label>
+              <label>② 主材<select id="crafting-primary"></select></label>
+              <label>③ 辅材甲<select id="crafting-secondary-a"></select></label>
+              <label>④ 辅材乙<select id="crafting-secondary-b"></select></label>
+              <label>⑤ 淬火<select id="crafting-quench"></select></label>
+            </div>
+            <div class="crafting-budget-head"><h3>属性预算</h3><strong id="crafting-budget"></strong></div>
+            <div id="crafting-allocations" class="crafting-allocations"></div>
+            <label class="crafting-name">成品名<input id="crafting-name" maxlength="20" placeholder="留空则依胎模命名"></label>
+            <div class="crafting-actions"><button id="crafting-preview" type="button">推演成器</button><button id="crafting-save-blueprint" type="button">保存图谱</button></div>
+            <div id="crafting-preview-result" class="crafting-preview-result"></div>
+          </section>
+          <section><h3>材料库</h3><div id="crafting-material-library" class="crafting-material-library"></div></section>
+          <section><h3>炼器图谱</h3><p class="section-note">图谱仅记录材料类型与属性设计，不记录材料品质及成品品质。</p><div id="crafting-blueprint-list" class="crafting-blueprint-list"></div></section>
+        </article>
+        <article id="formation-card" class="paper utility-panel left-panel formation-panel hidden" role="dialog" aria-modal="false" aria-label="九宫阵法">
+          <div class="section-title"><div><p class="eyebrow">NINE PALACE MATRIX V2</p><h2>九宫阵法</h2></div><div class="panel-heading"><span id="formation-heading"></span><button id="formation-toggle" type="button">关闭</button></div></div>
+          <p class="muted">阵材位置决定有向灵流。绿色为相生，红色为冲克，灰色为弱关系；阵法效果只向敌我两侧各广播一次。</p>
+          <div class="formation-layout">
+            <section class="formation-workbench">
+              <label class="formation-name">阵名<input id="formation-name" maxlength="20" placeholder="为亲手排出的阵命名"></label>
+              <div id="formation-grid-wrap" class="formation-grid-wrap">
+                <svg id="formation-flow-lines" class="formation-flow-lines" aria-hidden="true"></svg>
+                <div id="formation-grid" class="formation-grid" aria-label="九宫阵材位置"></div>
+              </div>
+              <div class="formation-actions"><button id="formation-preview" type="button">推演阵势</button><button id="formation-save" type="button">保存预设</button><button id="formation-save-activate" type="button">保存并启用</button><button id="formation-deactivate" type="button">收阵</button></div>
+            </section>
+            <section class="formation-reading">
+              <div id="formation-metrics" class="formation-metrics"></div>
+              <div id="formation-effects" class="formation-effects"></div>
+              <details class="formation-advanced"><summary>显示阵理</summary><pre id="formation-advanced"></pre></details>
+            </section>
+          </div>
+          <section><h3>阵材库</h3><p class="section-note">可拖入九宫，也可直接使用格内选择框；“占用中”的真实实例已从炼器、出售与其他阵法中移出。</p><div id="formation-material-library" class="formation-material-library"></div></section>
+          <section class="formation-ground-section"><h3>镇地阵域</h3><p class="section-note">把当前随身阵的真实阵基永久留在所在地域。私阵可在当地斗法时自动接管；护山阵进入宗门防守与离屏战争。完整度跨战斗保存，必须使用本界修阵资源恢复。</p><div class="formation-ground-actions"><button id="formation-ground-personal" type="button">镇为此地私阵</button><button id="formation-ground-sect" type="button">镇为宗门护山阵</button></div><div id="formation-repair-supplies" class="formation-repair-supplies"></div><div id="formation-ground-list" class="formation-ground-list"></div></section>
+          <section><h3>阵法预设</h3><p class="section-note">预设只保存位置、材料类型与名称；启阵时重新绑定你实际拥有的实例。</p><div id="formation-loadout-list" class="formation-loadout-list"></div></section>
+        </article>
+        <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
+          <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
+          <div class="settings-list">
+            <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
+            <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
+            <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
+            <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
+          </div>
+        </article>
+        <article id="ending-card" class="paper ending-card hidden"><p class="eyebrow">尘缘已了</p><h2>此生落幕</h2><p id="death-reason"></p><div id="post-battle-possession" class="hidden"><p class="post-battle-possession-lead">本魂尚可借俘虏肉身还魂。选择后将立即消耗一次夺舍次数，并改用该 NPC 的年龄与寿元。</p><div id="post-battle-possession-choices" class="choices"></div><p class="muted">若不夺舍，可直接再入轮回，结束此存档的人生。</p></div><button id="restart-button" class="primary">再入轮回</button></article>
+        <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
-
-      <article id="operation-shell" class="paper utility-panel left-panel operation-shell" role="dialog" aria-modal="false" aria-label="道途功能">
-        <div class="section-title"><div><p class="eyebrow">道途抉择</p><h2 id="operation-title">修行</h2></div><button id="operation-close" type="button">关闭</button></div>
-        <p id="operation-summary" class="muted"></p><div id="operation-state" class="panel-state"></div><input id="operation-search" class="operation-search" type="search" placeholder="搜索当前窗口功能……" aria-label="搜索当前窗口功能"><div id="operation-list" class="operation-list"></div>
-      </article>
-
-      <article id="insight-shell" class="paper utility-panel insight-shell" role="dialog" aria-modal="false" aria-label="诸系统状态">
-        <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>诸系统状态</h2></div><button id="insight-close" type="button">关闭</button></div><div id="view-tabs" class="view-tabs"></div><div id="panel" class="state-panel"></div>
-      </article>
-
-      <nav id="left-dock" class="strategy-dock left-dock" aria-label="个人窗口">
-        <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button><button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button><button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button><button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button><button type="button" data-panel-target="bloodline" title="妖修血脉"><span>脉</span><small>血脉</small></button><button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="ghost-dock-button"><span>魂</span><small>十魂</small></button><button type="button" data-panel-target="ghost-attachment" title="附灵" class="ghost-dock-button"><span>附</span><small>附灵</small></button><button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button><button type="button" data-panel-target="crafting" title="炼器"><span>器</span><small>炼器</small></button><button type="button" data-panel-target="formation" title="阵法"><span>阵</span><small>阵法</small></button><button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
+      <nav class="strategy-dock left-dock" aria-label="个人窗口">
+        <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
+        <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
+        <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
+        <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
+        <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden"><span>脉</span><small>血脉</small></button>
+        <button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
+        <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
+        <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
+        <button type="button" data-panel-target="crafting" title="组合炼器"><span>器</span><small>炼器</small></button>
+        <button type="button" data-panel-target="formation" title="九宫阵法"><span>阵</span><small>阵法</small></button>
+        <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
+        <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
-      <nav id="right-dock" class="strategy-dock" aria-label="功能窗口">
-        <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button><button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button><button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button><button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="ghost-dock-button"><span>夜</span><small>夜行</small></button><button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button><button type="button" data-panel-target="intrigue" title="势力内政" class="intrigue-dock-button"><span>谋</span><small>内政</small></button><button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button><button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button><button type="button" data-panel-target="world-npc" title="诸界人物"><span>人</span><small>人物</small></button><button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button><button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button><button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button><button type="button" data-panel-target="world-route" title="诸界道途"><span>界</span><small>道途</small></button><button type="button" data-panel-target="extension" title="DLC 与 MOD"><span>拓</span><small>扩展</small></button>
+      <nav id="strategy-dock" class="strategy-dock" aria-label="功能窗口">
+        <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
+        <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
+        <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
+        <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
+        <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
+        <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
+        <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
+        <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
+        <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
+        <button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button>
+        <button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button>
+        <button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button>
+        <button type="button" data-panel-target="world-route" title="诸界道途"><span>界</span><small>道途</small></button>
+        <button type="button" data-panel-target="extension" title="DLC 与 MOD"><span>拓</span><small>扩展</small></button>
       </nav>
-      <nav id="settings-dock" class="strategy-dock settings-dock" aria-label="设置窗口"><button type="button" data-panel-target="settings" title="游戏设置"><span>设</span><small>设置</small></button></nav>
+      <nav class="strategy-dock settings-dock" aria-label="设置窗口">
+        <button type="button" data-panel-target="settings" title="游戏设置"><span>设</span><small>设置</small></button>
+      </nav>
     </section>
   </main>
-
-  <div id="game-confirm-backdrop" class="game-confirm-backdrop hidden"><section class="paper game-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="game-confirm-title" aria-describedby="game-confirm-body"><p class="eyebrow">命途抉择</p><h2 id="game-confirm-title">确认操作</h2><p id="game-confirm-body"></p><div class="game-confirm-actions"><button id="game-confirm-cancel" type="button">取消</button><button id="game-confirm-accept" type="button">确认</button></div></section></div>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/app.js"></script>
+  <div id="game-confirm-backdrop" class="game-confirm-backdrop hidden">
+    <section id="game-confirm-dialog" class="paper game-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="game-confirm-title" aria-describedby="game-confirm-body">
+      <p class="eyebrow">命途抉择</p>
+      <h2 id="game-confirm-title">确认操作</h2>
+      <p id="game-confirm-body"></p>
+      <div class="game-confirm-actions"><button id="game-confirm-cancel" type="button">取消</button><button id="game-confirm-accept" type="button">确认</button></div>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+  <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
+  <script src="/ui-panels.js?v=20260919-8364171-v3"></script>
+  <script src="/app.js?v=20260919-8364171-v3"></script>
 </body>
 </html>

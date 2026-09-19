@@ -70,6 +70,11 @@ class ReleaseRuntimeTests(unittest.TestCase):
         config = json.loads(config_body)
         self.assertIn("advance", config["operations"])
         self.assertIn("extensions", config)
+        self.assertEqual(config["base_game"]["id"], "cultivation-life")
+        self.assertEqual(config["root_details"]["supreme_wood"]["tier"], "极品灵根")
+        self.assertEqual(config["root_details"]["supreme_wood"]["efficiency"], 1.3)
+        self.assertEqual(config["technique_elements"]["wood"], "木")
+        self.assertEqual(config["qi_sources"]["spirit"], "灵源")
 
         status, achievements_body, _ = self.request("/api/achievements")
         self.assertEqual(status, 200)

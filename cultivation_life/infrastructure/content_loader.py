@@ -33,7 +33,7 @@ class ContentLoader:
 
     REQUIRED_FILES = (
         "world.json", "races.json", "maps.json", "factions.json", "techniques.json",
-        "items.json", "market.json", "transformations.json", "crafting.json",
+        "items.json", "market.json", "transformations.json", "world_npcs.json", "crafting.json",
         "formations.json",
     )
 
@@ -67,6 +67,7 @@ class ContentLoader:
         technique_doc = documents["techniques.json"]
         item_doc = documents["items.json"]
         transformation_doc = documents["transformations.json"]
+        world_npc_doc = documents["world_npcs.json"]
         market_doc = documents["market.json"]
         crafting_doc = documents["crafting.json"]
         formation_doc = documents["formations.json"]
@@ -93,6 +94,22 @@ class ContentLoader:
         ):
             raise ContentError("种族定义为空或不完整")
         factions = cls._factions(faction_doc, worlds)
+        world_npcs = tuple(dict(row) for row in world_npc_doc.get("npcs", []))
+        npc_ids: set[str] = set()
+        for npc in world_npcs:
+            npc_id = str(npc.get("id", ""))
+            realm_index = int(npc.get("realm_index", -1))
+            if (
+                not npc_id or npc_id in npc_ids or not str(npc.get("name", ""))
+                or not 0 <= realm_index < len(realms)
+                or not 1 <= int(npc.get("layer", 0)) <= realms[realm_index].layers
+                or str(npc.get("spirit_root", "")) not in roots
+                or str(npc.get("path", "")) not in paths
+                or str(npc.get("race", "")) not in races
+                or str(npc.get("world", "")) not in worlds
+            ):
+                raise ContentError(f"固定世界人物定义无效：{npc_id or '<missing>'}")
+            npc_ids.add(npc_id)
         story_events = cls._story_events(documents, items, techniques, factions)
         faction_rewards = {
             str(reward_id): dict(reward)
@@ -104,6 +121,10 @@ class ContentLoader:
         ):
             raise ContentError("势力年度奖励定义无效")
         systems = dict(world_doc.get("systems", {}))
+        systems["karma_factors"] = {
+            str(path_id): float(definition.get("karma_factor", 1.0))
+            for path_id, definition in dict(world_doc.get("paths", {})).items()
+        }
         systems["factions"] = dict(faction_doc.get("systems", {}))
         systems["crafting"] = {
             "settings": dict(crafting_doc.get("settings", {})),
@@ -147,11 +168,16 @@ class ContentLoader:
         return GameDefinitions(
             realms=realms,
             roots=roots,
+            affinity_names={
+                str(key): str(value)
+                for key, value in dict(world_doc.get("affinities", {})).items()
+            },
             paths=paths,
             techniques=techniques,
             worlds=worlds,
             races=races,
             factions=factions,
+            world_npcs=world_npcs,
             faction_rewards=faction_rewards,
             items=items,
             transformations=transformations,
@@ -324,6 +350,12 @@ class ContentLoader:
     @staticmethod
     def _techniques(document: dict[str, Any], paths: dict[str, str]) -> dict[str, TechniqueDefinition]:
         defaults = dict(document.get("source_defaults_by_path", {}))
+        requirement_levels = {
+            int(grade): int(level)
+            for grade, level in dict(
+                document.get("combat_requirement_levels_by_grade", {})
+            ).items()
+        }
         result: dict[str, TechniqueDefinition] = {}
         for source in document.get("techniques", []):
             row = dict(source)
@@ -350,13 +382,19 @@ class ContentLoader:
                 hp_bonus=float(row.get("hp_bonus", 0)),
                 mp_bonus=float(row.get("mp_bonus", 0)),
                 combat_bonus=float(row.get("combat_bonus", 0)),
+                karma_multiplier=float(row.get("karma_multiplier", 1)),
                 category=str(row.get("category", "spiritual")),
                 sources=sources,
+                combat_requirement_level=requirement_levels.get(
+                    int(row.get("grade", 1)), 0
+                ),
                 body_breakthrough_bonus=float(row.get("body_breakthrough_bonus", 0)),
                 body_bonus_max_layer=int(row.get("body_bonus_max_layer", 0)),
                 divine_sense_bonus=float(row.get("divine_sense_bonus", 0)),
                 transformation_capacity=int(row.get("transformation_capacity", 0)),
                 transformation_space=int(row.get("transformation_space", 0)),
+                requires_immortal_power=bool(row.get("requires_immortal_power", False)),
+                immortal_power_cost=float(row.get("immortal_power_cost", 0)),
             )
         return result
 

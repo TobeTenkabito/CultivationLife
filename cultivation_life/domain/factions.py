@@ -804,6 +804,7 @@ def _propose_diplomacy_handler(definitions: GameDefinitions):
             voter_ids = [
                 entity_id for entity_id in context.state.entities.with_component(IDENTITY)
                 if entity_id != command.actor_id
+                and context.state.entities.get(entity_id, "world.npc_profile") is None
                 and context.state.entities.require(entity_id, IDENTITY).get("race") == own_id
                 and context.state.entities.require(entity_id, LOCATION).get("world_id") == world_id
                 and bool(context.state.entities.require(entity_id, LIFE).get("alive"))

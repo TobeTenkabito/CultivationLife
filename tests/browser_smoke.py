@@ -34,67 +34,92 @@ def main() -> None:
                 browser = playwright.chromium.launch(headless=True)
                 page = browser.new_page(viewport={"width": 1440, "height": 1000})
                 errors: list[str] = []
+                console_errors: list[str] = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
+                page.on(
+                    "console",
+                    lambda message: (
+                        console_errors.append(message.text)
+                        if message.type == "error"
+                        else None
+                    ),
+                )
                 response = page.goto(f"http://127.0.0.1:{server.server_port}/")
                 assert response is not None and response.ok
 
                 assert page.locator("#start-extension-manager").count() == 1
-                assert page.locator("#start-extension-list [data-extension-id]").count() > 0
+                assert page.locator("#start-extension-list input[type=checkbox]").count() > 0
+                assert page.locator("#quick-start-list button").count() == 9
                 page.locator("#achievement-open").click()
+                page.locator(".achievement-row").first.wait_for(state="visible")
                 assert page.locator(".achievement-row").count() == 44
                 page.locator("#achievement-close").click()
 
-                page.locator("#create input[name=name]").fill("界面烟测")
-                page.locator("#create button[type=submit]").click()
-                page.locator("#game").wait_for(state="visible")
-                assert page.locator("#left-dock button").count() == 11
-                assert page.locator("#right-dock button").count() == 14
-                assert page.locator("#settings-dock button").count() == 1
+                page.locator("#new-game-form input[name=name]").fill("界面烟测")
+                page.locator("#path-select").select_option("demonic")
+                page.locator("#new-game-form button[type=submit]").click()
+                page.locator("#game-screen").wait_for(state="visible")
+                assert page.locator("nav.left-dock button").count() == 12
+                assert page.locator("#strategy-dock button").count() == 14
+                assert page.locator("nav.settings-dock button").count() == 1
+                assert page.locator("#map-locations .map-location").count() >= 2
+                assert "NaN" not in page.locator("body").inner_text()
+                assert "undefined" not in page.locator("body").inner_text()
+                technique_text = page.locator("#known-technique-list").text_content()
+                assert "魔煞引气诀" in technique_text
+                assert "魔源" in technique_text
+                assert "机缘 +10%" in technique_text
+                assert page.locator("#player-race").text_content() == "人族"
 
-                mapped: set[str] = set()
-                dock_buttons = page.locator("[data-panel-target]")
-                for index in range(dock_buttons.count()):
-                    dock_buttons.nth(index).click()
-                    mapped.update(page.locator(".operation-card").evaluate_all(
-                        "rows => rows.map(row => row.dataset.operationCard)"
-                    ))
-                assert mapped == set(page.evaluate(
-                    "OPERATIONS.map(row => row.operation)"
-                ))
-                assert page.evaluate("OPERATIONS.map(row => row.operation)") == list(
-                    dict.fromkeys(page.evaluate("OPERATIONS.map(row => row.operation)"))
+                game_id = str(engine.list_games()[0]["game_id"])
+                state = engine.store.load(game_id)
+                actor_id = str(state.controlled_entity_id)
+                cultivation = state.entities.require(actor_id, "cultivation.state")
+                cultivation.update(
+                    realm_id="core", layer=1, opportunity=300.0, bottleneck="minor"
                 )
+                state.entities.put(actor_id, "cultivation.state", cultivation)
+                engine.store.save(
+                    state, [], player_name="界面烟测", expected_revision=state.revision
+                )
+                page.evaluate("id => loadGame(id)", game_id)
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert "初期·1层" in page.locator("#realm-name").text_content()
+                assert "53%" in page.locator("#breakthrough-reason").text_content()
+                assert "基础 48%" in page.locator("#breakthrough-reason").text_content()
 
-                def open_card(panel: str, query: str):
-                    page.locator(f'[data-panel-target="{panel}"]').first.click()
-                    page.locator("#operation-search").fill(query)
-                    card = page.locator(".operation-card")
-                    assert card.count() == 1
-                    card.locator("summary").click()
-                    return card
+                visible_targets = page.locator("[data-panel-target]:visible")
+                for index in range(visible_targets.count()):
+                    button = visible_targets.nth(index)
+                    target = button.get_attribute("data-panel-target")
+                    button.click(force=True)
+                    panel = page.locator(f"#{target}-card")
+                    assert panel.count() == 1
+                    assert panel.evaluate("node => node.classList.contains('panel-open')")
 
-                assert open_card("world-route", "选择飞升世界").locator("datalist option").count() > 5
-                assert open_card("spirit-field", "播种灵田").locator("datalist option").count() > 0
-                assert open_card("spirit-field", "开炉炼丹").locator("datalist").first.locator(
-                    "option"
-                ).count() > 0
-                assert open_card("formation", "预览阵法").locator(
-                    "[data-formation-slot]"
-                ).count() == 9
-                assert open_card("crafting", "预览炼器").locator(
-                    "[data-allocation]"
-                ).count() == 8
-
-                debug = open_card("settings", "调试世界消息")
-                debug.locator("input[type=checkbox]").check()
+                page.locator('[data-panel-target="settings"]').click(force=True)
                 with page.expect_response(
                     lambda item: item.url.endswith("/debug-world-news")
                 ) as pending:
-                    debug.locator("button[type=submit]").click()
+                    page.locator("#world-news-debug").click()
                 assert pending.value.status == 200
                 page.wait_for_function("!document.body.classList.contains('busy')")
-                assert page.locator("#save-state").text_content() == "已保存"
+                assert "开" in page.locator("#world-news-debug").text_content()
+
+                before = page.locator("#age-line").text_content()
+                with page.expect_response(
+                    lambda item: item.url.endswith("/advance")
+                ) as pending:
+                    page.locator('[data-action="cultivate"]').click()
+                assert pending.value.status == 200
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#age-line").text_content() != before
+
+                page.set_viewport_size({"width": 390, "height": 844})
+                page.locator('[data-panel-target="map"]').evaluate("node => node.click()")
+                assert page.evaluate("document.documentElement.scrollWidth === innerWidth")
                 assert not errors, errors
+                assert not console_errors, console_errors
                 browser.close()
         finally:
             server.shutdown()
