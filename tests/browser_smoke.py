@@ -38,40 +38,54 @@ def main() -> None:
                 response = page.goto(f"http://127.0.0.1:{server.server_port}/")
                 assert response is not None and response.ok
 
+                assert page.locator("#start-extension-manager").count() == 1
+                assert page.locator("#start-extension-list [data-extension-id]").count() > 0
+                page.locator("#achievement-open").click()
+                assert page.locator(".achievement-row").count() == 44
+                page.locator("#achievement-close").click()
+
                 page.locator("#create input[name=name]").fill("界面烟测")
                 page.locator("#create button[type=submit]").click()
                 page.locator("#game").wait_for(state="visible")
-                assert page.locator("#system-nav button").count() == 8
+                assert page.locator("#left-dock button").count() == 11
+                assert page.locator("#right-dock button").count() == 14
+                assert page.locator("#settings-dock button").count() == 1
 
-                counts = []
-                for index in range(8):
-                    page.locator("#system-nav button").nth(index).click()
-                    counts.append(page.locator(".operation-card").count())
-                assert sum(counts) == 102  # Plus the direct advance/choice entries.
+                mapped: set[str] = set()
+                dock_buttons = page.locator("[data-panel-target]")
+                for index in range(dock_buttons.count()):
+                    dock_buttons.nth(index).click()
+                    mapped.update(page.locator(".operation-card").evaluate_all(
+                        "rows => rows.map(row => row.dataset.operationCard)"
+                    ))
+                assert mapped == set(page.evaluate(
+                    "OPERATIONS.map(row => row.operation)"
+                ))
                 assert page.evaluate("OPERATIONS.map(row => row.operation)") == list(
                     dict.fromkeys(page.evaluate("OPERATIONS.map(row => row.operation)"))
                 )
 
-                def open_card(query: str):
+                def open_card(panel: str, query: str):
+                    page.locator(f'[data-panel-target="{panel}"]').first.click()
                     page.locator("#operation-search").fill(query)
                     card = page.locator(".operation-card")
                     assert card.count() == 1
                     card.locator("summary").click()
                     return card
 
-                assert open_card("选择飞升世界").locator("datalist option").count() > 5
-                assert open_card("播种灵田").locator("datalist option").count() > 0
-                assert open_card("开炉炼丹").locator("datalist").first.locator(
+                assert open_card("world-route", "选择飞升世界").locator("datalist option").count() > 5
+                assert open_card("spirit-field", "播种灵田").locator("datalist option").count() > 0
+                assert open_card("spirit-field", "开炉炼丹").locator("datalist").first.locator(
                     "option"
                 ).count() > 0
-                assert open_card("预览阵法").locator(
+                assert open_card("formation", "预览阵法").locator(
                     "[data-formation-slot]"
                 ).count() == 9
-                assert open_card("预览炼器").locator(
+                assert open_card("crafting", "预览炼器").locator(
                     "[data-allocation]"
                 ).count() == 8
 
-                debug = open_card("调试世界消息")
+                debug = open_card("settings", "调试世界消息")
                 debug.locator("input[type=checkbox]").check()
                 with page.expect_response(
                     lambda item: item.url.endswith("/debug-world-news")

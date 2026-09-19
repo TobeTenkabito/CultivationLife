@@ -429,8 +429,61 @@ class HTTPCommandRegistry:
 def build_handler(
     engine: GameEngine,
     web_root: Path = WEB_ROOT,
+    extension_root: Path | None = None,
 ) -> type[BaseHTTPRequestHandler]:
     registry = HTTPCommandRegistry(engine)
+    package_root = Path(extension_root or web_root.parent).resolve()
+
+    def extension_rows() -> list[dict[str, Any]]:
+        return [
+            {
+                "id": row.id,
+                "name": row.name,
+                "version": row.version,
+                "kind": row.kind,
+                "enabled": row.enabled,
+                "status": row.status,
+                "description": row.description,
+                "error": row.error,
+            }
+            for row in engine.definitions.extensions
+        ]
+
+    def achievement_rows() -> list[dict[str, Any]]:
+        path = web_root.resolve().parent / "content" / "achievements.json"
+        if not path.is_file():
+            return []
+        document = json.loads(path.read_text(encoding="utf-8"))
+        rows = document.get("achievements", [])
+        return [dict(row) for row in rows if isinstance(row, dict)]
+
+    def set_extension_preference(package_id: str, enabled: bool) -> dict[str, Any]:
+        known = {row.id: row for row in engine.definitions.extensions}
+        if package_id not in known:
+            raise KeyError(f"未知扩展：{package_id}")
+        path = package_root / "data" / "extension_preferences.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        document: dict[str, Any] = {"schema_version": 1, "enabled": {}}
+        if path.is_file():
+            try:
+                loaded = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict) and isinstance(loaded.get("enabled"), dict):
+                    document["enabled"] = dict(loaded["enabled"])
+            except (OSError, json.JSONDecodeError):
+                pass
+        document["enabled"][package_id] = enabled
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        temporary.replace(path)
+        row = known[package_id]
+        return {
+            "id": row.id,
+            "name": row.name,
+            "enabled": enabled,
+            "restart_required": enabled != row.enabled,
+        }
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "CultivationLife/2"
@@ -453,7 +506,16 @@ def build_handler(
                             key: list(value)
                             for key, value in engine.definitions.start_worlds.items()
                         },
+                        "extensions": extension_rows(),
                         "operations": registry.operations,
+                    })
+                elif path == "/api/achievements":
+                    rows = achievement_rows()
+                    self._json({
+                        "achievements": rows,
+                        "unlocked": 0,
+                        "total": len(rows),
+                        "progress_available": False,
                     })
                 elif path == "/api/games":
                     self._json({"games": engine.list_games()})
@@ -470,6 +532,12 @@ def build_handler(
                 self._validate_local_write()
                 path = urlparse(self.path).path
                 payload = self._body()
+                if path.startswith("/api/extensions/"):
+                    package_id = unquote(path.removeprefix("/api/extensions/").strip("/"))
+                    self._json(set_extension_preference(
+                        package_id, _boolean(payload, "enabled")
+                    ))
+                    return
                 if path == "/api/games":
                     result = engine.create_game(
                         str(payload.get("name", "无名散修")),
@@ -566,7 +634,7 @@ def main() -> None:
     )
     server = ThreadingHTTPServer(
         (args.host, args.port),
-        build_handler(engine, paths.web_root),
+        build_handler(engine, paths.web_root, paths.app_root),
     )
     print(f"Cultivation Life running at http://{args.host}:{args.port}/")
     server.serve_forever()

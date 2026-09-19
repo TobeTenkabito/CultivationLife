@@ -1,6 +1,6 @@
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-let config, game, busy = false, activeGroup = 'cultivation', activeView = 'cultivation';
+let config, achievements, game, busy = false, activeGroup = 'cultivation', activeView = 'cultivation', activePanel = 'map';
 async function api(path, options = {}) { const response=await fetch(path,{headers:{'Content-Type':'application/json'},...options}); const value=await response.json(); if(!response.ok)throw Error(value.error||'命令失败'); return value; }
 function toast(text,kind=''){const node=$('#toast');node.textContent=text;node.className=`show ${kind}`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.className='',2800);}
 
@@ -9,6 +9,36 @@ const GROUPS={
   relationships:['因果','道侣、道友、师徒、侍妾、家族与队伍','缘'],faction:['势力','宗门治理、外交、内政、战争与悬赏','宗'],
   economy:['营生','坊市、拍卖、黑市与物品交易','市'],production:['百艺','灵田、炼器、阵法与本命法宝','艺'],
   combat:['征伐','战斗、监狱、傀儡、炼魂与夺舍','斗'],dlc:['异道','鬼修、妖修与天庭扩展系统','异'],
+};
+
+const PANELS={
+  cultivation:{title:'修行与突破',summary:'境界、炼体、神识、功法与丹药。',views:['player.cultivation','player.body','player.divine_sense'],ops:['breakthrough','body-breakthrough','sense-breakthrough','equip-technique']},
+  'spirit-field':{title:'灵田',summary:'开垦、播种、灌溉与收获灵植。',views:['production'],ops:['spirit-field-*','spirit-plant-use','alchemy']},
+  inventory:{title:'行囊',summary:'查看随身资产并使用可消耗物品。',views:['inventory','assets'],ops:['use-item']},
+  relationship:{title:'人际关系',summary:'道侣、道友、师徒、侍妾与同行者。',views:['relationships','concubine_system','party'],ops:['dao-*','master-request','disciple-*','concubine-*','relationship-*','party']},
+  transformation:{title:'变身管理',summary:'管理变化形态与变化材料。',views:['player.cultivation.transformations'],ops:['transformation*']},
+  bloodline:{title:'妖修血脉',summary:'本源血脉、蜕变路线与自创祖血。',views:['monster_system'],ops:['monster-*','custom-lineage-*']},
+  'ghost-soul':{title:'三魂七魄',summary:'十魂、约束与往生轮回。',views:['ghost_system'],ops:['ghost-soul','ghost-constraint','ghost-wangsheng','ghost-reincarnate','ghost-reincarnation-prompt']},
+  'ghost-attachment':{title:'附灵',summary:'查看宿主并处理附灵关系。',views:['ghost_system'],ops:['ghost-attachment','ghost-leave-host']},
+  captive:{title:'俘虏与傀儡',summary:'俘虏、监狱、傀儡、炼魂与夺舍。',views:['demonic_system'],ops:['prison-action','captive-action','craft-puppet','puppet-action','refine-souls','secluded-refine-souls','post-battle-possession']},
+  crafting:{title:'炼器',summary:'配置材料、预览并锻造法器。',views:['crafting'],ops:['crafting-*','crafted-artifact']},
+  formation:{title:'阵法',summary:'九宫布阵、阵图与驻地阵法。',views:['formation_system'],ops:['formation-*']},
+  'natal-artifact':{title:'本命法宝',summary:'蕴养、炼化与管理本命法宝。',views:['natal_artifact'],ops:['natal-artifact']},
+  map:{title:'界面地图',summary:'查看当前界面与地点，并在界内移动。',views:['world'],ops:['map-travel']},
+  market:{title:'坊市',summary:'刷新、锁定、购买或出售坊市货物。',views:['market'],ops:['market-*','spirit-plant-use']},
+  auction:{title:'拍卖与黑市',summary:'参与拍卖、寄售、议价与黑市交易。',views:['auction'],ops:['auction-*','black-market-*']},
+  'ghost-parade':{title:'百鬼夜行',summary:'参加百鬼夜行并处理鬼道机缘。',views:['ghost_system'],ops:['ghost-parade']},
+  faction:{title:'宗门',summary:'宗门身份、贡献、成员、外交与传承。',views:['faction','available_factions'],ops:['create-faction','leave-faction','faction-*']},
+  intrigue:{title:'势力内政',summary:'客卿、人事、招募与议案表决。',views:['intrigue_system','governance'],ops:['intrigue-*']},
+  'heavenly-court':{title:'天庭',summary:'天庭官职、政务与选举。',views:['heavenly_court'],ops:['heavenly-*']},
+  war:{title:'征伐与和谈',summary:'推进战争、亲自出阵、议和与悬赏。',views:['war_system'],ops:['war-*','issue-bounty']},
+  'world-npc':{title:'诸界人物',summary:'查看当前可见人物并发起交互或战斗。',views:['characters'],ops:['fight','dao-friend','dao-companion','relationship-capture']},
+  ranking:{title:'天榜',summary:'按当前公开信息查阅诸界人物名录。',views:['characters'],ops:[]},
+  family:{title:'家族',summary:'家族状态、成员与家族事务。',views:['family'],ops:['create-family','intrigue-guest','intrigue-personnel','intrigue-resolution']},
+  race:{title:'族群外交',summary:'查看族群格局并调整外交关系。',views:['governance'],ops:['race-diplomacy','vassal-transfer']},
+  'world-route':{title:'诸界道途',summary:'跨界、偷渡与各条飞升路线。',views:['world','trial'],ops:['cross-world','spirit-crossing','celestial-ascension','asura-ascension','ascend-world']},
+  extension:{title:'DLC 与 MOD',summary:'查看已识别扩展；开关将在下次启动时生效。',views:['extensions'],ops:[],extensions:true},
+  settings:{title:'游戏设置',summary:'调整弹窗、自动推进与跨界调试消息。',views:['settings'],ops:['settings','debug-world-news']},
 };
 const choice=(value,label)=>({value,label});
 const textField=(name,label,source='',extra={})=>({name,label,type:'text',source,...extra});
@@ -188,9 +218,11 @@ function renderLineageRules(){
   return`<fieldset class="wide lineage"><legend>祖血规则（功业点：${esc(editor.deeds?.total??'未知')}）</legend>${Array.from({length:count},(_,index)=>`<div class="rule-row" data-rule="${index}"><strong>规则 ${index+1}${index<existing.length?' · 已铭刻':''}</strong>${keys.map(([key,label])=>`<label>${label}<select data-rule-field="${key}"><option value="">请选择</option>${opts(key).map(row=>`<option value="${esc(row.value)}"${String(existing[index]?.[key]??'')===row.value?' selected':''}>${esc(row.label)}</option>`).join('')}</select></label>`).join('')}<label>数值<select data-rule-field="value"><option value="">请选择</option>${values.map(row=>`<option value="${esc(row.value)}"${String(existing[index]?.value??'')===row.value?' selected':''}>${esc(row.label)}</option>`).join('')}</select></label></div>`).join('')}</fieldset>`;
 }
 function operationAvailable(spec){if(game?.player?.alive===false)return false;if(game?.pending_event&&!['settings','debug-world-news'].includes(spec.operation))return false;if(at('demonic_system.imprisonment')&&!['prison-action','spirit-crossing','settings','debug-world-news'].includes(spec.operation))return false;if(spec.group==='dlc'){if(spec.operation.startsWith('ghost-'))return at('ghost_system.available')===true;if(spec.operation.startsWith('monster-')||spec.operation.startsWith('custom-lineage'))return at('monster_system.visible')===true&&at('monster_system.available')===true;if(spec.operation.startsWith('heavenly-'))return at('heavenly_court.visible')===true;}return true;}
+function matchesOperation(operation,patterns=[]){return patterns.some(pattern=>pattern.endsWith('*')?operation.startsWith(pattern.slice(0,-1)):operation===pattern);}
+function panelRows(){const definition=PANELS[activePanel];return definition?OPERATIONS.filter(spec=>matchesOperation(spec.operation,definition.ops)):[];}
 function renderOperations(){
-  const query=$('#operation-search').value.trim().toLowerCase(),rows=OPERATIONS.filter(spec=>(!query&&spec.group===activeGroup)||(query&&`${spec.label}${spec.description}${spec.operation}`.toLowerCase().includes(query))),group=GROUPS[activeGroup];
-  $('#operation-title').textContent=query?'寻觅结果':group[0];$('#operation-summary').textContent=query?`找到 ${rows.length} 项可选事务`:`${group[1]} · 共 ${rows.length} 项`;
+  const query=$('#operation-search').value.trim().toLowerCase(),definition=PANELS[activePanel],base=panelRows(),rows=query?base.filter(spec=>`${spec.label}${spec.description}${spec.operation}`.toLowerCase().includes(query)):base;
+  $('#operation-title').textContent=query?'寻觅结果':definition.title;$('#operation-summary').textContent=query?`当前窗口找到 ${rows.length} 项可选事务`:`${definition.summary} · ${rows.length?`共 ${rows.length} 项操作`:'此窗口仅供查阅'}`;
   $('#operation-list').innerHTML=rows.length?rows.map(spec=>{const available=operationAvailable(spec);return`<details class="operation-card" data-operation-card="${esc(spec.operation)}"><summary><span><strong>${esc(spec.label)}</strong><small>${esc(spec.description)}</small></span><span class="route-badge">${available?'可行':'条件未足'}</span></summary><form data-operation="${esc(spec.operation)}" class="operation-form">${spec.fields.map(field=>renderField(field,spec.operation)).join('')}<div class="submit-row"><button type="submit" class="${spec.danger?'danger':'primary'}"${available?'':' disabled'}>${spec.danger?'郑重决定':'执行'}</button></div></form></details>`;}).join(''):'<p class="empty-note">没有找到相符事务。</p>';
   document.querySelectorAll('.operation-form').forEach(form=>form.onsubmit=submitOperation);
 }
@@ -216,12 +248,41 @@ async function command(operation,payload={}){
 function fill(selector,rows){$(selector).innerHTML=Object.entries(rows||{}).map(([id,name])=>`<option value="${esc(id)}">${esc(name)}</option>`).join('');}
 function renderSaves(){const node=$('#saves');node.innerHTML=(window.saves||[]).length?window.saves.map(row=>`<button data-id="${esc(row.game_id||row.id)}">续接 · ${esc(row.player_name||row.name)}</button>`).join(''):'<span class="muted">尚无存档</span>';node.querySelectorAll('button').forEach(button=>button.onclick=()=>load(button.dataset.id));}
 async function load(id){game=await api(`/api/games/${id}`);render();}
-function closePanels(){document.querySelectorAll('.utility-panel').forEach(panel=>panel.classList.remove('panel-open'));$('#system-nav').querySelectorAll('button').forEach(button=>button.classList.remove('active'));}
+function closePanels(){document.querySelectorAll('.utility-panel').forEach(panel=>panel.classList.remove('panel-open'));document.querySelectorAll('[data-panel-target]').forEach(button=>button.classList.remove('active'));}
 function openPanel(selector){closePanels();$(selector).classList.add('panel-open');}
-function renderNav(){$('#system-nav').innerHTML=Object.entries(GROUPS).map(([id,[label,,glyph]])=>`<button type="button" data-group="${id}" title="${esc(label)}"><span>${esc(glyph)}</span><small>${esc(label)}</small></button>`).join('');$('#system-nav').querySelectorAll('button').forEach(button=>button.onclick=()=>{activeGroup=button.dataset.group;$('#operation-search').value='';renderOperations();openPanel('#operation-shell');button.classList.add('active');});}
+function renderPanelState(){
+  const definition=PANELS[activePanel],node=$('#operation-state');
+  if(definition.extensions){node.innerHTML=renderExtensionList('game');bindExtensionSwitches(node);return;}
+  const unavailable={market:'当前地点没有开放坊市。你仍可刷新货架，或前往设有坊市的地点。',auction:'当前没有开放的拍卖会或黑市。',faction:'目前尚未加入宗门。',family:'目前尚未建立家族。','ghost-soul':'当前并非鬼修，十魂系统尚未开启。','ghost-attachment':'当前没有附灵宿主。','ghost-parade':'百鬼夜行尚未开启。',bloodline:'当前人物没有可展示的妖修血脉。','heavenly-court':'当前尚未接触天庭。'};
+  const blocked=(activePanel==='market'&&at('market.available')===false)||(activePanel==='auction'&&at('auction.available')===false)||(activePanel==='faction'&&!at('faction'))||(activePanel==='family'&&at('family.exists')===false)||(activePanel.startsWith('ghost-')&&at('ghost_system.available')===false)||(activePanel==='bloodline'&&at('monster_system.visible')===false)||(activePanel==='heavenly-court'&&at('heavenly_court.visible')===false);
+  const sections=blocked?[]:definition.views.filter(path=>at(path)!==undefined).map(path=>`<section class="panel-state-section"><h3>${esc(labelKey(path.split('.').at(-1)))}</h3>${renderValue(at(path))}</section>`);
+  if(blocked){node.innerHTML=`<p class="panel-empty">${esc(unavailable[activePanel]||'当前条件尚未满足，入口会一直保留。')}</p>`;return;}
+  node.innerHTML=sections.length?sections.join(''):'<p class="empty-note">此系统当前尚未开启，入口会保留以便条件满足后使用。</p>';
+}
+function openSystemPanel(target,button){const shell=$('#operation-shell');activePanel=target;shell.classList.toggle('left-panel',Boolean(button?.closest('#left-dock'))||target==='cultivation');shell.classList.toggle('settings-panel',target==='settings');$('#operation-search').value='';renderPanelState();renderOperations();openPanel('#operation-shell');button?.classList.add('active');}
+function renderNav(){document.querySelectorAll('[data-panel-target]').forEach(button=>{button.onclick=()=>openSystemPanel(button.dataset.panelTarget,button);});}
 const VIEWS={cultivation:['修行','player.cultivation'],world:['天地','world'],world_news:['世界消息','world_news'],relationships:['人物关系','relationships'],faction:['宗门','faction'],family:['家族','family'],intrigue_system:['内政','intrigue_system'],war_system:['战争','war_system'],inventory:['行囊','inventory'],production:['生产','production'],crafting:['炼器','crafting'],formation_system:['阵法','formation_system'],auction:['拍卖','auction'],market:['坊市','market'],combat:['战斗','combat'],party:['队伍','party'],demonic_system:['魔道','demonic_system'],ghost_system:['鬼修','ghost_system'],monster_system:['妖修','monster_system'],heavenly_court:['天庭','heavenly_court']};
-function labelKey(key){const labels={id:'编号',name:'名称',status:'状态',available:'可用',visible:'可见',quantity:'数量',price:'价格',kind:'类别',role:'身份',current:'当前',active:'启用',members:'成员',offers:'商品',plots:'田地',wars:'战争',relations:'关系',world_name:'世界',location_name:'地点'};return labels[key]||String(key).replaceAll('_',' ');}
-function renderValue(value,depth=0){if(value==null)return'<span class="muted">无</span>';if(typeof value==='boolean')return`<span class="pill ${value?'good':''}">${value?'是':'否'}</span>`;if(typeof value!=='object')return`<span>${esc(value)}</span>`;if(Array.isArray(value))return value.length?`<div class="state-list">${value.map(row=>`<article>${renderValue(row,depth+1)}</article>`).join('')}</div>`:'<span class="muted">暂无记录</span>';const entries=Object.entries(value).filter(([key])=>key!=='debug_world_news'||at('settings.debug_world_news')===true);return`<dl class="state-dl">${entries.map(([key,row])=>`<div><dt>${esc(labelKey(key))}</dt><dd>${depth>2&&typeof row==='object'?`<span class="muted">${Array.isArray(row)?`${row.length} 项`:'详情'}</span>`:renderValue(row,depth+1)}</dd></div>`).join('')}</dl>`;}
+function labelKey(key){const labels={name:'名称',status:'状态',quantity:'数量',price:'价格',role:'身份',current:'当前位置',active:'当前启用',members:'成员',offers:'在售货物',plots:'灵田',wars:'战争',relations:'关系',world_name:'所在界面',location_name:'所在地点',destinations:'可前往地点',travel_years:'所需年数',accessible:'可以前往',warning:'提示',spirit_stones:'灵石',reclaimed_qing:'已开垦',free_qing:'空闲灵田',reclaim_cost:'开垦费用',reclaim_years:'开垦耗时',art_skills:'百艺修为',level:'等级',experience:'经验',loadouts:'已存阵图',ground_arrays:'驻地阵法',materials:'可用材料',supplies:'修复物资',formation_level:'阵法造诣',prisoners:'俘虏',puppets:'傀儡',foreign_souls:'外来魂魄',capacity:'御傀上限',used:'已用名额',sections:'势力议事',resolutions:'议案',roster:'家族成员',offspring:'后代',bounties:'悬赏',active_count:'进行中的战争',packages:'扩展包',description:'说明',version:'版本',combat_popup:'战斗结算提示',achievement_popup:'成就解锁提示',auto_advance_player_wars:'自动推进玩家战争',realm_name:'境界',layer:'层次',age:'年龄',lifespan:'寿元',reserved:'冻结数量'};return labels[key]||String(key).replaceAll('_',' ');}
+function renderValue(value,depth=0){
+  if(value==null)return'<span class="muted">暂无</span>';if(typeof value==='boolean')return`<span class="pill ${value?'good':''}">${value?'是':'否'}</span>`;if(typeof value!=='object')return`<span>${esc(value)}</span>`;
+  if(Array.isArray(value))return value.length?`<div class="state-list">${value.map(row=>`<article>${renderValue(row,depth+1)}</article>`).join('')}</div>`:'<span class="muted">暂无记录</span>';
+  const hidden=new Set(['id','world_id','location_id','faction_id','race_id','item_id','npc_id','seed_id','generated_year','next_sequence','next_ground_sequence','visible','available','enabled','kind','error','transition','route','molds','plants','resolution_types','policy_types','mechanical_recipe','components','values','rules','options']);
+  const entries=Object.entries(value).filter(([key])=>!hidden.has(key)&&!key.endsWith('_id')&&(key!=='debug_world_news'||at('settings.debug_world_news')===true));
+  if(!entries.length)return'<span class="muted">暂无可公开记录</span>';
+  return`<dl class="state-dl">${entries.map(([key,row])=>`<div><dt>${esc(labelKey(key))}</dt><dd>${depth>2&&typeof row==='object'?`<span class="muted">${Array.isArray(row)?`${row.length} 项记录`:'已记录'}</span>`:renderValue(row,depth+1)}</dd></div>`).join('')}</dl>`;
+}
+function renderExtensionList(scope){
+  const rows=config.extensions||[];
+  return rows.length?`<div class="extension-list">${rows.map(row=>`<label class="${scope==='start'?'start-extension-switch':'extension-row'}"><span><b>${esc(row.name)}</b><small>${esc(row.kind.toUpperCase())} · ${esc(row.version)} · ${esc(row.status)}${row.error?` · ${esc(row.error)}`:''}</small></span><input type="checkbox" data-extension-id="${esc(row.id)}" ${row.enabled?'checked':''}></label>`).join('')}</div>`:'<p class="empty-note">未发现 DLC 或 MOD。</p>';
+}
+function bindExtensionSwitches(root=document){root.querySelectorAll('[data-extension-id]').forEach(input=>input.onchange=async()=>{input.disabled=true;try{const result=await api(`/api/extensions/${encodeURIComponent(input.dataset.extensionId)}`,{method:'POST',body:JSON.stringify({enabled:input.checked})});const row=(config.extensions||[]).find(item=>item.id===result.id);if(row)row.enabled=result.enabled;document.querySelectorAll(`[data-extension-id="${CSS.escape(result.id)}"]`).forEach(peer=>{peer.checked=result.enabled;});toast(result.restart_required?'扩展偏好已保存，重启游戏后生效':'扩展偏好已保存','success');}catch(error){input.checked=!input.checked;toast(error.message,'error');}finally{input.disabled=false;}});}
+function renderStartExtensions(){const node=$('#start-extension-list');node.innerHTML=renderExtensionList('start');bindExtensionSwitches(node);}
+function renderAchievements(){
+  const rows=achievements?.achievements||[],groups=Object.groupBy?Object.groupBy(rows,row=>row.source?.name||'游戏本体'):rows.reduce((all,row)=>{const key=row.source?.name||'游戏本体';(all[key]??=[]).push(row);return all;},{});
+  $('#achievement-entry-progress').textContent=achievements?.progress_available?`${achievements.unlocked} / ${achievements.total} 已达成`:`${rows.length} 项功业 · V2 记录尚未迁移`;
+  $('#achievement-summary').textContent=achievements?.progress_available?`已达成 ${achievements.unlocked} / ${achievements.total}`:`共 ${rows.length} 项功业。V2 后端尚未迁移全局解锁档，本页不伪造解锁状态。`;
+  $('#achievement-groups').innerHTML=Object.entries(groups).map(([source,items])=>`<section class="achievement-source"><div class="achievement-source-head"><h3>${esc(source)}</h3><span>${items.length} 项</span></div><div class="achievement-grid">${items.map(row=>`<article class="achievement-row"><span class="achievement-medal">未</span><div><b>${esc(row.name)}</b><small>${esc(row.description)}</small><small class="achievement-unlock-note">尚未记入 V2 功业档</small></div></article>`).join('')}</div></section>`).join('');
+}
 function showPanel(key){activeView=key;$('#view-tabs').querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.view===key));$('#panel').innerHTML=renderValue(at(VIEWS[key]?.[1]||key));}
 function renderViews(){$('#view-tabs').innerHTML=Object.entries(VIEWS).filter(([,row])=>at(row[1])!==undefined).map(([id,[label]])=>`<button type="button" data-view="${id}" class="${id===activeView?'active':''}">${esc(label)}</button>`).join('');$('#view-tabs').querySelectorAll('button').forEach(button=>button.onclick=()=>showPanel(button.dataset.view));if(!VIEWS[activeView]||at(VIEWS[activeView][1])===undefined)activeView='cultivation';showPanel(activeView);}
 function renderStatus(){const flags=[['存活',game.player.alive!==false],['事件待决',Boolean(game.pending_event)],['服刑',Boolean(at('demonic_system.imprisonment'))],['宗门',Boolean(game.faction?.exists||game.faction?.id)],['家族',Boolean(game.family?.exists)],['拍卖会',['scheduled','open','black_market'].includes(game.auction?.status)]];$('#status-flags').innerHTML=flags.map(([label,on])=>`<span class="pill ${on?'good':''}">${esc(label)} · ${on?'是':'否'}</span>`).join('');}
@@ -233,10 +294,10 @@ function render(){
   $('#stats').innerHTML=[['战斗力',Math.round(combat.power||0)],['心魔',Math.round(c.heart_demon)],['世界',game.world.world_name||game.world.name],['地点',game.world.location_name||game.world.location?.name||'未知'],['炼体',game.player.body?.layer??0],['神识',game.player.divine_sense?.rank??0]].map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join('');
   const units=Math.max(1,Number($('#action-units').value||1));$('#actions').innerHTML=Object.entries(config.actions||{}).map(([id,name])=>`<button data-action="${esc(id)}"><strong>${esc(name)}</strong><small>${units} 单位</small></button>`).join('');$('#actions').querySelectorAll('button').forEach(button=>button.onclick=()=>command('advance',{action:button.dataset.action,units:Math.max(1,Number($('#action-units').value||1))}));
   const event=game.pending_event;$('#event').classList.toggle('hidden',!event);if(event){$('#event-title').textContent=event.title;$('#event-body').textContent=event.body;$('#choices').innerHTML=(event.choices||[]).map(row=>`<button data-id="${esc(row.id)}" ${row.enabled?'':'disabled'}>${esc(row.text)}</button>`).join('');$('#choices').querySelectorAll('button').forEach(button=>button.onclick=()=>command('choice',{choice_id:button.dataset.id}));}
-  renderNav();renderStatus();renderOperations();renderViews();renderChronicle();$('#save-state').textContent='已入因果录';
+  renderNav();renderStatus();renderPanelState();renderOperations();renderViews();renderChronicle();$('#save-state').textContent='已入因果录';
 }
 function fillWorlds(){const path=$('#paths').value,allowed=config.start_worlds?.[path]||['human'];$('#worlds').innerHTML=allowed.map(id=>`<option value="${esc(id)}">${esc(config.worlds?.[id]||id)}</option>`).join('');}
-async function boot(){[config,{games:window.saves}]=await Promise.all([api('/api/config'),api('/api/games')]);fill('#roots',config.roots);fill('#paths',config.paths);fillWorlds();renderSaves();}
-$('#operation-search').oninput=renderOperations;$('#action-units').onchange=()=>game&&render();$('#paths').onchange=fillWorlds;$('#operation-close').onclick=closePanels;$('#insight-close').onclick=closePanels;$('#insight-open').onclick=()=>openPanel('#insight-shell');document.addEventListener('keydown',event=>{if(event.key==='Escape')closePanels();});$('#new').onclick=()=>{closePanels();$('#game').classList.add('hidden');$('#start').classList.remove('hidden');$('#new').classList.add('hidden');};
+async function boot(){[config,{games:window.saves},achievements]=await Promise.all([api('/api/config'),api('/api/games'),api('/api/achievements')]);fill('#roots',config.roots);fill('#paths',config.paths);fillWorlds();renderSaves();renderStartExtensions();renderAchievements();}
+$('#operation-search').oninput=renderOperations;$('#action-units').onchange=()=>game&&render();$('#paths').onchange=fillWorlds;$('#operation-close').onclick=closePanels;$('#insight-close').onclick=closePanels;$('#insight-open').onclick=()=>openPanel('#insight-shell');document.addEventListener('keydown',event=>{if(event.key==='Escape')closePanels();});$('#achievement-open').onclick=()=>{$('#start').classList.add('hidden');$('#achievement-screen').classList.remove('hidden');};$('#achievement-close').onclick=()=>{$('#achievement-screen').classList.add('hidden');$('#start').classList.remove('hidden');};$('#new').onclick=()=>{closePanels();$('#game').classList.add('hidden');$('#achievement-screen').classList.add('hidden');$('#start').classList.remove('hidden');$('#new').classList.add('hidden');};
 $('#create').onsubmit=async event=>{event.preventDefault();const payload=Object.fromEntries(new FormData(event.target));if(!payload.seed)delete payload.seed;else payload.seed=Number(payload.seed);try{game=await api('/api/games',{method:'POST',body:JSON.stringify(payload)});render();}catch(error){toast(error.message,'error');}};
 boot().catch(error=>toast(error.message,'error'));

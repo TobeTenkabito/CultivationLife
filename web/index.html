@@ -17,7 +17,10 @@
     </header>
 
     <section id="start" class="paper start-card">
-      <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，道统决定因果如何回响。随机种子可以复现同一条时间线。</p></div>
+      <details id="start-extension-manager" class="start-extension-manager">
+        <summary>DLC / MOD</summary><p>独立开关 · 下次启动生效</p><div id="start-extension-list"></div>
+      </details>
+      <div><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，道统决定因果如何回响。随机种子可以复现同一条时间线。</p><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取功业中……</small></button></div>
       <form id="create">
         <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
         <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
@@ -30,6 +33,11 @@
       <div class="save-section"><p class="eyebrow">已有命途</p><div id="saves" class="save-list"></div></div>
     </section>
 
+    <section id="achievement-screen" class="paper achievement-screen hidden" aria-label="成就">
+      <div class="achievement-heading"><div><p class="eyebrow">ACHIEVEMENTS</p><h2>功业录</h2><p id="achievement-summary" class="muted"></p></div><button id="achievement-close" type="button">返回命格界面</button></div>
+      <div id="achievement-groups" class="achievement-groups"></div>
+    </section>
+
     <section id="game" class="game-grid hidden">
       <aside class="paper character-card">
         <div class="character-head"><div class="avatar" id="avatar">修</div><div><h2 id="name"></h2><p id="realm"></p></div></div>
@@ -39,6 +47,7 @@
         <div class="meter-block"><div><span>MP</span><b id="mp-text"></b></div><div class="meter blue"><i id="mp-bar"></i></div></div>
         <dl id="stats" class="stats"></dl>
         <section class="current-status"><h3>当前状态</h3><div id="status-flags"></div></section>
+        <button class="wide-button" data-panel-target="cultivation" type="button">修行、突破与功法</button>
         <button id="insight-open" class="wide-button" type="button">查看行囊与诸系统</button>
       </aside>
 
@@ -53,14 +62,20 @@
 
       <article id="operation-shell" class="paper utility-panel left-panel operation-shell" role="dialog" aria-modal="false" aria-label="道途功能">
         <div class="section-title"><div><p class="eyebrow">道途抉择</p><h2 id="operation-title">修行</h2></div><button id="operation-close" type="button">关闭</button></div>
-        <p id="operation-summary" class="muted"></p><input id="operation-search" class="operation-search" type="search" placeholder="搜索功能……" aria-label="搜索功能"><div id="operation-list" class="operation-list"></div>
+        <p id="operation-summary" class="muted"></p><div id="operation-state" class="panel-state"></div><input id="operation-search" class="operation-search" type="search" placeholder="搜索当前窗口功能……" aria-label="搜索当前窗口功能"><div id="operation-list" class="operation-list"></div>
       </article>
 
       <article id="insight-shell" class="paper utility-panel insight-shell" role="dialog" aria-modal="false" aria-label="诸系统状态">
         <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>诸系统状态</h2></div><button id="insight-close" type="button">关闭</button></div><div id="view-tabs" class="view-tabs"></div><div id="panel" class="state-panel"></div>
       </article>
 
-      <nav id="system-nav" class="strategy-dock left-dock" aria-label="道途功能"></nav>
+      <nav id="left-dock" class="strategy-dock left-dock" aria-label="个人窗口">
+        <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button><button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button><button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button><button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button><button type="button" data-panel-target="bloodline" title="妖修血脉"><span>脉</span><small>血脉</small></button><button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="ghost-dock-button"><span>魂</span><small>十魂</small></button><button type="button" data-panel-target="ghost-attachment" title="附灵" class="ghost-dock-button"><span>附</span><small>附灵</small></button><button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button><button type="button" data-panel-target="crafting" title="炼器"><span>器</span><small>炼器</small></button><button type="button" data-panel-target="formation" title="阵法"><span>阵</span><small>阵法</small></button><button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
+      </nav>
+      <nav id="right-dock" class="strategy-dock" aria-label="功能窗口">
+        <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button><button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button><button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button><button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="ghost-dock-button"><span>夜</span><small>夜行</small></button><button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button><button type="button" data-panel-target="intrigue" title="势力内政" class="intrigue-dock-button"><span>谋</span><small>内政</small></button><button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button><button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button><button type="button" data-panel-target="world-npc" title="诸界人物"><span>人</span><small>人物</small></button><button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button><button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button><button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button><button type="button" data-panel-target="world-route" title="诸界道途"><span>界</span><small>道途</small></button><button type="button" data-panel-target="extension" title="DLC 与 MOD"><span>拓</span><small>扩展</small></button>
+      </nav>
+      <nav id="settings-dock" class="strategy-dock settings-dock" aria-label="设置窗口"><button type="button" data-panel-target="settings" title="游戏设置"><span>设</span><small>设置</small></button></nav>
     </section>
   </main>
 
