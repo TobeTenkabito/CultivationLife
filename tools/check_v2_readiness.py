@@ -9,7 +9,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from cultivation_life.migration import CutoverBlockedError, assess_default_matrix
+from cultivation_life.migration import (  # noqa: E402
+    CutoverBlockedError,
+    assess_default_matrix,
+)
 
 
 def main() -> int:
