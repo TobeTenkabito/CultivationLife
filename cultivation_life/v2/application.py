@@ -32,6 +32,7 @@ from .domain.advanced_cultivation import (
 )
 from .domain.cultivation import (
     AttemptBreakthrough,
+    EquipMainTechnique,
     PerformActionUnits,
     cultivation_invariants,
     cultivation_view,
@@ -78,6 +79,9 @@ from .domain.ghost import (
     register_ghost_story_effects,
 )
 from .domain.monster import (
+    ConfirmCustomLineage,
+    EvolveMonster,
+    PrepareCustomLineage,
     monster_invariants,
     monster_view,
     reconcile_monster_state,
@@ -182,6 +186,8 @@ from .domain.production import (
     register_production_domain,
 )
 from .domain.extensions import (
+    GHOST_SOUL,
+    SpendWangsheng,
     extension_invariants,
     extension_view,
     reconcile_extension_state,
@@ -226,6 +232,7 @@ from .domain.relations import (
     BeginRelationshipCapture,
     BefriendDaoist,
     ChangeAffinity,
+    EndRelationship,
     GiftDisciple,
     InteractDaoCompanion,
     InteractDaoFriend,
@@ -314,10 +321,15 @@ class V2GameEngine:
         database_path: Path,
         *,
         content_directory: Path | None = None,
+        extension_root: Path | None = None,
         legacy_backup_directory: Path | None = None,
     ):
         default_content = Path(__file__).resolve().parents[2] / "content"
-        self.definitions = V2ContentLoader.load(content_directory or default_content)
+        content_root = Path(content_directory or default_content)
+        self.definitions = V2ContentLoader.load(
+            content_root,
+            project_root=Path(extension_root) if extension_root is not None else content_root.parent,
+        )
         database_path = Path(database_path)
         self.store = SQLiteSaveStore(database_path)
         self.legacy_backup_directory = Path(
@@ -609,6 +621,44 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, InteractDaoFriend(actor_id, friend_id, action))
 
+    def end_relationship(
+        self, game_id: str, kind: str, target_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        normalized = {
+            "companion": "dao_companion",
+            "dao_companion": "dao_companion",
+            "friend": "friend",
+            "master": "master_disciple",
+            "disciple": "master_disciple",
+            "master_disciple": "master_disciple",
+            "concubine": "concubine",
+        }.get(kind, kind)
+        candidates = []
+        for edge in state.relations.involving(actor_id):
+            if not edge.active or edge.kind != normalized:
+                continue
+            other_id = edge.target_id if edge.source_id == actor_id else edge.source_id
+            if target_id and other_id != target_id:
+                continue
+            if kind == "master" and not (
+                edge.kind == "master_disciple" and edge.target_id == actor_id
+            ):
+                continue
+            if kind == "disciple" and not (
+                edge.kind == "master_disciple" and edge.source_id == actor_id
+            ):
+                continue
+            candidates.append(edge)
+        if len(candidates) != 1:
+            raise ValueError("无法唯一确定要结束的关系")
+        return self.execute(
+            game_id, EndRelationship(actor_id, candidates[0].relation_id)
+        )
+
     def request_mentorship(
         self, game_id: str, target_id: str, role: str,
     ) -> CommandExecution:
@@ -856,6 +906,19 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, AttemptBreakthrough(actor_id=actor_id))
 
+    def equip_known_technique(
+        self, game_id: str, technique_id: str, slot: str,
+    ) -> CommandExecution:
+        if slot in {"body", "divine_sense", "transformation"}:
+            return self.equip_special_technique(game_id, technique_id, slot)
+        if slot != "main":
+            raise ValueError("V2灵修功法只保留主修槽位")
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, EquipMainTechnique(actor_id, technique_id))
+
     def imprison_character(
         self,
         game_id: str,
@@ -1024,6 +1087,14 @@ class V2GameEngine:
             actor_id, item_id, mode, stat_id, batch,
         ))
 
+    def batch_absorb_transformation_material(
+        self, game_id: str, item_id: str, mode: str = "direct",
+        stat_id: str = "",
+    ) -> CommandExecution:
+        return self.absorb_transformation_material(
+            game_id, item_id, mode=mode, stat_id=stat_id, batch=True,
+        )
+
     def manage_transformation(
         self, game_id: str, form_id: str, action: str,
     ) -> CommandExecution:
@@ -1073,6 +1144,75 @@ class V2GameEngine:
             invited_ids = party_crossing_ids(state, actor_id)
         return self.execute(
             game_id, BeginAscensionTrial(actor_id, destination_world_id, invited_ids)
+        )
+
+    def begin_spirit_crossing(self, game_id: str) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        cultivation = state.entities.require(actor_id, "cultivation.state")
+        location = state.entities.require(actor_id, "world.location")
+        if cultivation.get("path") == "demonic":
+            destination = {
+                "human": "demon",
+                "demon": "true_demon",
+            }.get(str(location.get("world_id")))
+            if destination is None:
+                raise ValueError("当前魔界路线没有可用的飞升目标")
+        else:
+            destination = "spirit"
+        return self.ascend_world(game_id, destination)
+
+    def spend_wangsheng(
+        self, game_id: str, *, all_available: bool = False,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        uses = 1
+        if all_available:
+            soul = state.entities.get(actor_id, GHOST_SOUL) or {}
+            unit_cost = max(
+                1,
+                int(self.definitions.systems.get("ghost_cultivation", {}).get(
+                    "wangsheng_cost", 2
+                )),
+            )
+            uses = int(soul.get("wangsheng", 0)) // unit_cost
+            if uses <= 0:
+                raise ValueError("往生不足")
+        return self.execute(game_id, SpendWangsheng(actor_id, uses))
+
+    def evolve_monster(
+        self, game_id: str, evolution_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, EvolveMonster(actor_id, evolution_id))
+
+    def prepare_custom_lineage(
+        self, game_id: str, evolution_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, PrepareCustomLineage(actor_id, evolution_id))
+
+    def confirm_custom_lineage(
+        self, game_id: str, evolution_id: str, name: str,
+        rules: tuple[dict[str, Any], ...],
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id, ConfirmCustomLineage(actor_id, evolution_id, name, rules)
         )
 
     def refresh_market(self, game_id: str, *, force: bool = False) -> CommandExecution:

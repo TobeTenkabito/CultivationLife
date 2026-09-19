@@ -20,6 +20,7 @@ from cultivation_life.migration import (  # noqa: E402
     ShadowRunner,
     assess_default_matrix,
 )
+from cultivation_life.v2.release_audit import assess_release_surface  # noqa: E402
 
 
 BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {}
@@ -141,6 +142,7 @@ def main() -> int:
     root = args.root.resolve()
 
     readiness = assess_default_matrix(root).to_dict()
+    release_surface = assess_release_surface(root).to_dict()
     expected, actual = _frozen_operations(root)
     blockers = _blocker_audit(readiness)
     shadow = _shadow_matrix(root)
@@ -157,6 +159,7 @@ def main() -> int:
             "forbidden_imports": _v2_boundary_violations(root),
         },
         "readiness": readiness,
+        "release_surface": release_surface,
         "blocker_audit": {
             "count": len(blockers),
             "classified_count": len(classified_ids),
@@ -190,11 +193,15 @@ def main() -> int:
             bool(row["execution_errors"]) for row in shadow
         ),
         "shadow_diverged": sum(row["status"] == "diverged" for row in shadow),
+        "release_surface_ready": release_surface["ready"],
+        "release_http_missing": len(release_surface["missing_from_http"]),
+        "release_client_missing": len(release_surface["missing_from_client"]),
     }, ensure_ascii=False))
     failed = (
         not payload["v1_public_surface"]["matched"]
         or bool(payload["v2_architecture_boundary"]["forbidden_imports"])
         or bool(readiness["structural_errors"])
+        or not release_surface["ready"]
         or len(classified_ids) != len(blockers)
         or any(row["execution_errors"] for row in shadow)
     )

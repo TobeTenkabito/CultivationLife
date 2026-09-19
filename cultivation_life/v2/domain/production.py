@@ -647,4 +647,15 @@ def production_view(
         "art_skills": art_skills,
         "alchemy_experience": float(experience.get("alchemy", 0)),
         "alchemy_level": _art_level(field, definitions, "alchemy"),
+        # Formal clients must be able to construct planting and alchemy
+        # commands from the public view instead of knowing content IDs.
+        "plants": [
+            {"id": plant_id, **dict(plant)}
+            for plant_id, plant in rules["plants"].items()
+        ],
+        "alchemy_targets": [
+            {"id": item.id, "name": item.name, "description": item.description}
+            for item in definitions.items.values()
+            if "pill" in item.tags
+        ],
     }
