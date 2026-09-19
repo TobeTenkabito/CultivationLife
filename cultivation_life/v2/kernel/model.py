@@ -8,7 +8,7 @@ from typing import Any
 
 
 V2_FORMAT_ID = "cultivation-life-v2"
-V2_SCHEMA_VERSION = 17
+V2_SCHEMA_VERSION = 18
 
 
 @dataclass(frozen=True, slots=True)

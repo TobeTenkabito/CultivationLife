@@ -238,7 +238,12 @@ def _damage(
     mana_factor = 0.72 + 0.28 * max(0.0, min(1.0, attacker_mp_ratio))
     morale_factor = max(0.5, min(1.5, float(attacker.get("morale", 50.0)) / 50.0))
     fraction = max(0.035, min(0.34, 0.115 * math.sqrt(ratio) * mana_factor * morale_factor))
-    return float(defender["max_hp"]) * fraction * context.rng.uniform(0.88, 1.12)
+    return (
+        float(defender["max_hp"])
+        * fraction
+        * context.rng.uniform(0.88, 1.12)
+        * float(attacker.get("court_damage_multiplier", 1.0))
+    )
 
 
 def _resolve_handler(definitions: GameDefinitions):
@@ -269,6 +274,35 @@ def _resolve_handler(definitions: GameDefinitions):
         target = party_combat_snapshot(
             context.state, definitions, command.target_id
         )
+        if attacker_location.get("world_id") == "celestial":
+            from .celestial import CELESTIAL_COURT, court_law_active
+
+            court_ids = context.state.entities.with_component(CELESTIAL_COURT)
+            court = (
+                context.state.entities.require(court_ids[0], CELESTIAL_COURT)
+                if court_ids else {}
+            )
+            martial = 1.10 if court_law_active(context.state, "martial_gods") else 1.0
+            wanted = set(map(str, court.get("wanted_ids", [])))
+            attacker["court_damage_multiplier"] = martial * (
+                1.10 if command.target_id in wanted else 1.0
+            )
+            target["court_damage_multiplier"] = martial * (
+                1.10 if command.attacker_id in wanted else 1.0
+            )
+            if court_law_active(context.state, "universal_protection"):
+                if command.attacker_id not in wanted:
+                    court.setdefault("wanted_ids", []).append(command.attacker_id)
+                    context.state.entities.put(court_ids[0], CELESTIAL_COURT, court)
+            if court_law_active(context.state, "immortal_slaughter"):
+                from .story import STORY_STATE
+
+                story = context.state.entities.get(command.attacker_id, STORY_STATE)
+                if story is not None:
+                    attributes = dict(story.get("attributes", {}))
+                    attributes["karma"] = max(0.0, float(attributes.get("karma", 0)) - 10)
+                    story["attributes"] = attributes
+                    context.state.entities.put(command.attacker_id, STORY_STATE, story)
         terrain = _terrain_profile(
             str(attacker_location.get("location_id", "")), command.terrain
         )

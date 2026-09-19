@@ -132,7 +132,7 @@ class V2MonsterBatchNineTests(unittest.TestCase):
             bloodline.pop(key, None)
         migrated = migrate_snapshot(snapshot)
         migrated_bloodline = migrated["entities"]["entities"][actor_id][MONSTER_BLOODLINE]
-        self.assertEqual(migrated["schema_version"], 17)
+        self.assertEqual(migrated["schema_version"], 18)
         self.assertEqual(migrated["module_versions"]["monster"], 1)
         self.assertEqual(migrated_bloodline["lineage_deeds"], {})
         self.assertIsNone(migrated_bloodline["pending_lineage_editor"])

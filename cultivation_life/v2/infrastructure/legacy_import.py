@@ -40,6 +40,7 @@ from ..domain.demonic import (
     SOUL_CONTROL,
 )
 from ..domain.story import STORY_STATE
+from ..domain.celestial import CELESTIAL_COURT, reconcile_celestial_state
 from ..domain.war import BOUNTY_STATE, WAR_PROFILE
 from ..domain.world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -255,6 +256,7 @@ class LegacyV1Importer:
         "version", "history", "story_trigger_attempts", "family", "sects",
         "race_relations", "sect_relations", "player_bounties", "wars",
         "ghost_parade",
+        "heavenly_court",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -404,6 +406,9 @@ class LegacyV1Importer:
         )
         self._import_combat_condition(state, actor_id, player, report)
         self._import_story(state, actor_id, source, player, report)
+        self._import_celestial_court(
+            state, actor_id, source, legacy_entities, report
+        )
         self._audit_deferred_fields(source, player, report)
 
         report.imported_counts.setdefault("characters", 1)
@@ -2226,6 +2231,109 @@ class LegacyV1Importer:
         })
         report.imported_counts["story_history"] = len(history)
         report.imported_counts["story_flags"] = len(flags)
+
+    def _import_celestial_court(
+        self,
+        state: WorldState,
+        actor_id: str,
+        source: dict[str, Any],
+        legacy_entities: dict[str, str],
+        report: LegacyImportReport,
+    ) -> None:
+        raw = source.get("heavenly_court")
+        if not isinstance(raw, dict) or not raw:
+            return
+        reconcile_celestial_state(state, self.definitions, force=True)
+        entity_ids = state.entities.with_component(CELESTIAL_COURT)
+        if not entity_ids:
+            raise LegacyImportError("heavenly_court无法建立V2权威实体")
+        court = state.entities.require(entity_ids[0], CELESTIAL_COURT)
+
+        def canonical(value: Any) -> str:
+            legacy_id = str(value or "")
+            if legacy_id == "player":
+                return actor_id
+            return legacy_entities.get(legacy_id, legacy_id)
+
+        for key in (
+            "unit", "time_progress", "authority", "treasury", "equipment",
+            "player_grade", "player_merit", "player_support", "last_vote",
+        ):
+            if key in raw:
+                court[key] = copy.deepcopy(raw[key])
+        court["authority"] = max(0.0, float(court["authority"]))
+        court["treasury"] = max(0.0, float(court["treasury"]))
+        court["equipment"] = max(0.0, float(court["equipment"]))
+        court["player_grade"] = max(1, min(9, int(court["player_grade"])))
+        court["player_merit"] = max(0, int(court["player_merit"]))
+        court["player_support"] = max(0.0, min(100.0, float(court["player_support"])))
+        court["unit"] = max(0, int(court["unit"]))
+        court["time_progress"] = max(0, int(court.get("time_progress", 0)))
+
+        laws = dict(raw.get("laws", {}))
+        for law_id in court["laws"]:
+            if law_id in laws:
+                court["laws"][law_id] = bool(laws[law_id])
+        imported_officials: dict[str, dict[str, Any]] = {}
+        for legacy_id, row in dict(raw.get("officials", {})).items():
+            if not isinstance(row, dict):
+                continue
+            official_id = canonical(legacy_id)
+            imported_officials[official_id] = {
+                **copy.deepcopy(row),
+                "id": official_id,
+            }
+        court["officials"].update(imported_officials)
+        if "player" in dict(raw.get("officials", {})):
+            court["officials"].pop("player", None)
+
+        raw_seats = raw.get("seats", [])
+        if isinstance(raw_seats, list) and len(raw_seats) == len(court["seats"]):
+            court["seats"] = [
+                {
+                    **copy.deepcopy(row),
+                    "representative_id": canonical(row.get("representative_id")),
+                }
+                for row in raw_seats if isinstance(row, dict)
+            ]
+        for office_id, row in dict(raw.get("offices", {})).items():
+            if office_id not in court["offices"]:
+                continue
+            if row is None:
+                court["offices"][office_id] = None
+            elif isinstance(row, dict):
+                holder_id = canonical(row.get("holder_id"))
+                if holder_id in court["officials"]:
+                    court["offices"][office_id] = {
+                        **copy.deepcopy(row), "holder_id": holder_id,
+                    }
+        court["active_decrees"] = [
+            copy.deepcopy(row) for row in raw.get("active_decrees", [])
+            if isinstance(row, dict)
+        ]
+        court["wanted_ids"] = [
+            canonical(value) for value in raw.get("wanted_ids", [])
+            if canonical(value) == actor_id or state.entities.exists(canonical(value))
+        ]
+        court["pledges"] = [
+            copy.deepcopy(row) for row in raw.get("pledges", [])
+            if isinstance(row, dict)
+        ]
+        election = raw.get("open_election")
+        if isinstance(election, dict):
+            candidates = [canonical(value) for value in election.get("candidates", [])]
+            candidates = [value for value in candidates if value in court["officials"]]
+            if candidates and election.get("office_id") in court["offices"]:
+                court["open_election"] = {
+                    **copy.deepcopy(election), "candidates": candidates,
+                }
+        court["election_queue"] = [
+            str(value) for value in raw.get("election_queue", [])
+            if str(value) in court["offices"]
+        ]
+        state.entities.put(entity_ids[0], CELESTIAL_COURT, court)
+        report.imported_counts["celestial_court_seats"] = len(court["seats"])
+        report.imported_counts["celestial_court_officials"] = len(court["officials"])
 
     def _audit_deferred_fields(
         self,

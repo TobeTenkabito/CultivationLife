@@ -65,6 +65,7 @@ from .domain.monster import (
     EvolveMonster,
     PrepareCustomLineage,
 )
+from .domain.celestial import HeavenlyCourtAction, ResolveHeavenlyElection
 from .domain.war import IssueBounty, WarAction, WarPeace
 from .domain.economy import (
     BuyMarketOffer,
@@ -158,6 +159,7 @@ __all__ = [
     "EquipMainTechnique",
     "EquipSpecialTechnique",
     "EvolveMonster",
+    "HeavenlyCourtAction",
     "FormRelationship",
     "BefriendDaoist",
     "GiftDisciple",
@@ -209,6 +211,7 @@ __all__ = [
     "QueueStoryEvent",
     "RegisterCharacter",
     "ResolveCombat",
+    "ResolveHeavenlyElection",
     "RestoreCombatCondition",
     "IssueBounty",
     "WarAction",
