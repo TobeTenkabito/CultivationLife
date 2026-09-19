@@ -26,6 +26,7 @@ _OPS: dict[str, Callable[[Any, Any], bool]] = {
     "gte": operator.ge,
     "lt": operator.lt,
     "lte": operator.le,
+    "contains": lambda actual, expected: expected in actual,
 }
 
 
@@ -335,11 +336,16 @@ def _path_value(state: WorldState, actor_id: str, path: str) -> Any:
     life = state.entities.require(actor_id, LIFE)
     practice = state.entities.require(actor_id, PRACTICE)
     story = state.entities.require(actor_id, STORY_STATE)
+    legacy = dict(story.get("legacy_effect_state", {}))
+    mortal = dict(legacy.get("mortal", {}))
+    body = state.entities.get(actor_id, "cultivation.body") or {}
+    monster = state.entities.get(actor_id, "dlc.monster.bloodline") or {}
     membership = next(iter(state.relations.find(source_id=actor_id, kind=MEMBERSHIP)), None)
     values = {
         "player.world": location["world_id"],
         "player.path": cultivation["path"],
         "player.spirit_root": cultivation["spirit_root"],
+        "player.born_rootless": cultivation["spirit_root"] == "none",
         "player.layer": int(cultivation["layer"]),
         "player.age": state.clock.year - int(life["birth_year"]),
         "player.karma": float(story["attributes"].get("karma", 0)),
@@ -366,6 +372,15 @@ def _path_value(state: WorldState, actor_id: str, path: str) -> Any:
         "player.faction_contribution": (
             int(membership.metadata.get("contribution", 0)) if membership else 0
         ),
+        "player.body_training": int(body.get("layer", 0)),
+        "player.monster.imprints": list(monster.get("imprints", [])),
+        "player.monster_species_id": monster.get("species_id"),
+        "player.mortal_aspiration": mortal.get("aspiration"),
+        "player.spouse": bool(mortal.get("spouse", False)),
+        "player.children": int(mortal.get("children", 0)),
+        "player.official_rank": int(mortal.get("official_rank", 0)),
+        "player.military_merit": int(mortal.get("military_merit", 0)),
+        "player.jianghu_reputation": int(mortal.get("jianghu_reputation", 0)),
     }
     return values.get(path)
 
@@ -405,6 +420,20 @@ def _condition(
         }
         return str(condition["has_affinity"]) in affinities
     if "world_npc" in condition:
+        wanted = dict(condition["world_npc"])
+        for entity_id in state.entities.with_component(IDENTITY):
+            identity = state.entities.require(entity_id, IDENTITY)
+            if str(identity.get("external_id", "")) != str(wanted.get("id", "")):
+                continue
+            if "alive" in wanted and bool(
+                state.entities.require(entity_id, LIFE).get("alive")
+            ) != bool(wanted["alive"]):
+                continue
+            if "world" in wanted and state.entities.require(
+                entity_id, LOCATION
+            ).get("world_id") != wanted["world"]:
+                continue
+            return True
         return False
     path = str(condition.get("path", ""))
     op = _OPS.get(str(condition.get("op", "eq")))

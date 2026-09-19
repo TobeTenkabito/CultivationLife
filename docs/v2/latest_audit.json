@@ -1,0 +1,286 @@
+{
+  "v1_public_surface": {
+    "expected_count": 101,
+    "actual_count": 101,
+    "missing_from_server": [],
+    "unfrozen_in_server": [],
+    "matched": true
+  },
+  "v2_architecture_boundary": {
+    "forbidden_imports": []
+  },
+  "readiness": {
+    "ready": true,
+    "matrix_path": "F:\\CultivationLife\\docs\\v2\\feature_matrix.json",
+    "baseline_path": "F:\\CultivationLife\\docs\\v2\\v1_behavior_inventory.json",
+    "baseline_commit": "31b4fee4abd2024487ae92beddfac736e1f93e30",
+    "operation_count": 101,
+    "covered_operation_count": 101,
+    "feature_count": 53,
+    "status_counts": {
+      "pass": 53
+    },
+    "domain_counts": {
+      "artifact": {
+        "pass": 1
+      },
+      "celestial": {
+        "pass": 1
+      },
+      "combat": {
+        "pass": 2
+      },
+      "core": {
+        "pass": 2
+      },
+      "crafting": {
+        "pass": 2
+      },
+      "cultivation": {
+        "pass": 5
+      },
+      "demonic": {
+        "pass": 3
+      },
+      "economy": {
+        "pass": 6
+      },
+      "extensions": {
+        "pass": 1
+      },
+      "factions": {
+        "pass": 6
+      },
+      "formation": {
+        "pass": 1
+      },
+      "ghost_dlc": {
+        "pass": 3
+      },
+      "intrigue_dlc": {
+        "pass": 2
+      },
+      "migration": {
+        "pass": 2
+      },
+      "monster_dlc": {
+        "pass": 1
+      },
+      "persistence": {
+        "pass": 1
+      },
+      "presentation": {
+        "pass": 2
+      },
+      "relations": {
+        "pass": 7
+      },
+      "story": {
+        "pass": 1
+      },
+      "verification": {
+        "pass": 1
+      },
+      "war": {
+        "pass": 1
+      },
+      "world": {
+        "pass": 2
+      }
+    },
+    "structural_errors": [],
+    "blockers": []
+  },
+  "blocker_audit": {
+    "count": 0,
+    "classified_count": 0,
+    "groups": {
+      "unclassified": 0
+    },
+    "items": []
+  },
+  "shadow_validation": {
+    "shared_operations": [
+      "advance:befriend_neighbors",
+      "advance:body_train",
+      "advance:capture",
+      "advance:commission",
+      "advance:cultivate",
+      "advance:hunt_beast",
+      "advance:rest",
+      "advance:sense_train",
+      "advance:slay",
+      "advance:spar",
+      "advance:travel",
+      "advance:treasure"
+    ],
+    "adapter_coverage": {
+      "expected": 12,
+      "actual": 12,
+      "complete": true
+    },
+    "scenario_count": 10,
+    "scenarios": [
+      {
+        "name": "影子道修",
+        "seed": 1,
+        "path": "dao",
+        "start_world": "human",
+        "command": "rest:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子道修",
+        "seed": 1,
+        "path": "dao",
+        "start_world": "human",
+        "command": "cultivate:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子道修",
+        "seed": 123,
+        "path": "dao",
+        "start_world": "human",
+        "command": "rest:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子道修",
+        "seed": 123,
+        "path": "dao",
+        "start_world": "human",
+        "command": "cultivate:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子魔修",
+        "seed": 23,
+        "path": "demonic",
+        "start_world": "demon",
+        "command": "rest:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子魔修",
+        "seed": 23,
+        "path": "demonic",
+        "start_world": "demon",
+        "command": "cultivate:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子妖修",
+        "seed": 37,
+        "path": "monster",
+        "start_world": "monster_realm",
+        "command": "rest:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子妖修",
+        "seed": 37,
+        "path": "monster",
+        "start_world": "monster_realm",
+        "command": "cultivate:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子鬼修",
+        "seed": 51,
+        "path": "ghost",
+        "start_world": "hell",
+        "command": "rest:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      },
+      {
+        "name": "影子鬼修",
+        "seed": 51,
+        "path": "ghost",
+        "start_world": "hell",
+        "command": "cultivate:1",
+        "status": "matched",
+        "summary": {
+          "steps": 2,
+          "differences": 0,
+          "by_severity": {},
+          "by_category": {}
+        },
+        "difference_paths": [],
+        "execution_errors": []
+      }
+    ]
+  }
+}

@@ -18,7 +18,12 @@ from ..domain.combat import CONDITION, PRISONER, combat_snapshot
 from ..domain.cultivation import CULTIVATION, PRACTICE, QI_SOURCES
 from ..domain.definitions import GameDefinitions
 from ..domain.economy import INVENTORY, MARKET
-from ..domain.extensions import GHOST_SOUL, MONSTER_BLOODLINE
+from ..domain.extensions import GHOST_SOUL, INTRIGUE_GOVERNANCE, MONSTER_BLOODLINE
+from ..domain.intrigue import (
+    INTRIGUE_GUEST,
+    INTRIGUE_PRISONER,
+    reconcile_intrigue_state,
+)
 from ..domain.ghost import (
     BOUND_SOUL,
     GHOST_ECOLOGY,
@@ -257,6 +262,7 @@ class LegacyV1Importer:
         "race_relations", "sect_relations", "player_bounties", "wars",
         "ghost_parade",
         "heavenly_court",
+        "intrigue_state",
     }
     _MAPPED_PLAYER_FIELDS = {
         "name", "spirit_root", "gender", "age", "realm_index", "layer",
@@ -394,6 +400,9 @@ class LegacyV1Importer:
         )
         self._import_faction(
             state, actor_id, source, player, legacy_entities, report
+        )
+        self._import_intrigue_personnel(
+            state, actor_id, source, legacy_entities, report
         )
         self._import_party_wars_and_bounties(
             state, actor_id, source, player, legacy_entities, report
@@ -1290,6 +1299,191 @@ class LegacyV1Importer:
                 }
         diplomacy["relations"] = relations
         state.entities.put(actor_id, DIPLOMACY_STATE, diplomacy)
+
+    def _import_intrigue_personnel(
+        self,
+        state: WorldState,
+        actor_id: str,
+        source: dict[str, Any],
+        legacy_entities: dict[str, str],
+        report: LegacyImportReport,
+    ) -> None:
+        raw_state = source.get("intrigue_state")
+        if not isinstance(raw_state, dict) or not raw_state:
+            return
+        reconcile_intrigue_state(state, self.definitions)
+        faction_ids = {
+            str(state.entities.require(entity_id, FACTION_PROFILE).get("external_id")): entity_id
+            for entity_id in state.entities.with_component(FACTION_PROFILE)
+        }
+        family_ids = {
+            str(state.entities.require(entity_id, FAMILY_PROFILE).get("legacy_id")): entity_id
+            for entity_id in state.entities.with_component(FAMILY_PROFILE)
+            if state.entities.require(entity_id, FAMILY_PROFILE).get("legacy_id")
+        }
+        imported_positions = 0
+        imported_prisoners = 0
+        imported_guests = 0
+        imported_resolutions = 0
+        records = raw_state.get("factions", {})
+        if not isinstance(records, dict):
+            records = {}
+
+        def canonical(value: Any) -> str | None:
+            legacy_id = str(value or "")
+            if legacy_id == "player":
+                return actor_id
+            return legacy_entities.get(legacy_id)
+
+        for legacy_key, raw in records.items():
+            if not isinstance(raw, dict):
+                continue
+            kind, separator, legacy_power_id = str(legacy_key).partition(":")
+            if not separator or kind not in {"sect", "family"}:
+                continue
+            power_id = (
+                faction_ids.get(legacy_power_id)
+                if kind == "sect" else family_ids.get(legacy_power_id)
+            )
+            if power_id is None:
+                continue
+            intrigue = state.entities.require(power_id, INTRIGUE_GOVERNANCE)
+            allowed_positions = set(
+                dict(dict(self.definitions.systems.get("intrigue_dlc", {})).get(
+                    "positions", {}
+                )).get(kind, {})
+            )
+            positions: dict[str, str] = {}
+            for position_id, legacy_holder in dict(raw.get("positions", {})).items():
+                holder_id = canonical(legacy_holder)
+                if position_id not in allowed_positions or holder_id is None:
+                    continue
+                membership_kind = MEMBERSHIP if kind == "sect" else FAMILY_MEMBERSHIP
+                controller = (
+                    state.entities.require(power_id, FACTION_GOVERNANCE).get("controller_id")
+                    if kind == "sect"
+                    else state.entities.require(power_id, FAMILY_PROFILE).get("controller_id")
+                )
+                leader = "leader" if kind == "sect" else "family_head"
+                if not (
+                    position_id == leader and holder_id == controller
+                ) and not state.relations.find(
+                    source_id=holder_id, target_id=power_id, kind=membership_kind
+                ):
+                    continue
+                positions[str(position_id)] = holder_id
+                imported_positions += 1
+            intrigue["positions"] = positions
+            intrigue["unrest"] = max(0.0, min(100.0, float(raw.get("unrest", 0))))
+            intrigue["fear"] = max(0.0, min(100.0, float(raw.get("fear", 0))))
+            intrigue["member_contribution"] = {
+                member_id: int(value)
+                for legacy_member_id, value in dict(raw.get("member_contribution", {})).items()
+                if (member_id := canonical(legacy_member_id)) is not None
+            }
+            prisoner_ids: list[str] = []
+            for prison in raw.get("prison", []):
+                if not isinstance(prison, dict):
+                    continue
+                member_id = canonical(prison.get("prisoner_id"))
+                if member_id is None or member_id == actor_id:
+                    continue
+                membership_kind = MEMBERSHIP if kind == "sect" else FAMILY_MEMBERSHIP
+                if not state.relations.find(
+                    source_id=member_id, target_id=power_id, kind=membership_kind
+                ):
+                    continue
+                remaining = max(1, int(prison.get("sentence_remaining", 1)))
+                state.relations.add(
+                    source_id=power_id,
+                    target_id=member_id,
+                    kind=INTRIGUE_PRISONER,
+                    created_year=state.clock.year,
+                    metadata={
+                        "sentence_remaining": remaining,
+                        "sentence_units": max(
+                            remaining, int(prison.get("sentence_years", remaining))
+                        ),
+                        "reason": str(prison.get("reason", "旧档势力刑罚"))[:40],
+                        "imprisoned_by": actor_id,
+                        "imported": True,
+                    },
+                )
+                prisoner_ids.append(member_id)
+                imported_prisoners += 1
+            intrigue["prisoner_ids"] = list(dict.fromkeys(prisoner_ids))
+            for guest in raw.get("guests", []):
+                if not isinstance(guest, dict):
+                    continue
+                guest_id = canonical(guest.get("npc_id"))
+                if guest_id is None or not state.entities.exists(guest_id):
+                    continue
+                if not state.relations.find(
+                    source_id=power_id, target_id=guest_id, kind=INTRIGUE_GUEST
+                ):
+                    state.relations.add(
+                        source_id=power_id, target_id=guest_id,
+                        kind=INTRIGUE_GUEST, created_year=state.clock.year,
+                        metadata={
+                            "defense_required": bool(guest.get("defense_required", True)),
+                            "offense_opt_in": bool(guest.get("offense_opt_in", False)),
+                            "imported": True,
+                        },
+                    )
+                    imported_guests += 1
+            state.entities.put(power_id, INTRIGUE_GOVERNANCE, intrigue)
+
+        for raw_resolution in raw_state.get("resolutions", []):
+            if not isinstance(raw_resolution, dict):
+                continue
+            kind = str(raw_resolution.get("kind", "sect"))
+            legacy_power_id = str(
+                raw_resolution.get("faction_id") or raw_resolution.get("power_id") or ""
+            )
+            power_id = (
+                faction_ids.get(legacy_power_id)
+                if kind == "sect" else family_ids.get(legacy_power_id)
+            )
+            if power_id is None:
+                continue
+            intrigue = state.entities.require(power_id, INTRIGUE_GOVERNANCE)
+            row = copy.deepcopy(raw_resolution)
+            row["faction_id"] = power_id
+            row["imported"] = True
+            intrigue["resolutions"] = [*intrigue.get("resolutions", []), row][-80:]
+            state.entities.put(power_id, INTRIGUE_GOVERNANCE, intrigue)
+            imported_resolutions += 1
+
+        invitation = raw_state.get("pending_guest_invitation")
+        if isinstance(invitation, dict):
+            kind = str(invitation.get("kind", "sect"))
+            legacy_power_id = str(invitation.get("faction_id", ""))
+            power_id = (
+                faction_ids.get(legacy_power_id)
+                if kind == "sect" else family_ids.get(legacy_power_id)
+            )
+            if power_id is not None:
+                intrigue = state.entities.require(power_id, INTRIGUE_GOVERNANCE)
+                intrigue["pending_guest_invitation"] = {
+                    "target_id": actor_id,
+                    "invited_by": None,
+                    "title": str(invitation.get("title", "客卿")),
+                    "world_id": str(invitation.get("world", "")),
+                    "imported": True,
+                }
+                state.entities.put(power_id, INTRIGUE_GOVERNANCE, intrigue)
+
+        deferred_keys = {"npcs", "recruitment_sequence", "ai_cursor"}
+        if any(_meaningful(raw_state.get(key)) for key in deferred_keys):
+            report.warn(
+                "deferred_intrigue_decisions",
+                "intrigue_state",
+                "NPC执政性格与后台游标不属于可恢复的玩家决策状态",
+            )
+        report.imported_counts["intrigue_positions"] = imported_positions
+        report.imported_counts["intrigue_prisoners"] = imported_prisoners
+        report.imported_counts["intrigue_guests"] = imported_guests
+        report.imported_counts["intrigue_resolutions"] = imported_resolutions
 
     def _import_party_wars_and_bounties(
         self,

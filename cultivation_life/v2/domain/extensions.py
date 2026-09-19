@@ -327,44 +327,28 @@ def _assign_position_handler(definitions: GameDefinitions):
             raise TypeError("命令类型错误")
         if not _loaded(definitions, INTRIGUE_DLC):
             raise ValueError("势力内政DLC未启用")
-        governance = context.state.entities.require(command.faction_id, FACTION_GOVERNANCE)
+        profile = context.state.entities.require(command.faction_id, FACTION_PROFILE)
+        governance = context.state.entities.require(
+            command.faction_id, FACTION_GOVERNANCE
+        )
         if governance.get("controller_id") != command.actor_id:
             raise ValueError("只有势力控制者可以任免职位")
-        membership = context.state.relations.find(
-            source_id=command.member_id, target_id=command.faction_id, kind=MEMBERSHIP
+        actor_membership = context.state.relations.find(
+            source_id=command.actor_id,
+            target_id=command.faction_id,
+            kind=MEMBERSHIP,
         )
-        if not membership:
-            raise ValueError("任职者不是该势力成员")
-        profile = context.state.entities.require(command.faction_id, FACTION_PROFILE)
-        faction_kind = "sect" if profile.get("path") != "family" else "family"
-        config = dict(definitions.systems.get("intrigue_dlc", {}))
-        positions = dict(dict(config.get("positions", {})).get(faction_kind, {}))
-        position = dict(positions.get(command.position_id, {}))
-        if not position:
-            raise ValueError("未知势力职位")
-        cultivation = context.state.entities.require(command.member_id, CULTIVATION)
-        if definitions.realm_index(str(cultivation["realm_id"])) < int(position.get("minimum_realm", 0)):
-            raise ValueError("任职者境界不足")
-        state = context.state.entities.require(command.faction_id, INTRIGUE_GOVERNANCE)
-        assigned = dict(state.get("positions", {}))
-        assigned = {
-            position_id: member_id
-            for position_id, member_id in assigned.items()
-            if member_id != command.member_id and position_id != command.position_id
-        }
-        assigned[command.position_id] = command.member_id
-        state["positions"] = assigned
-        context.state.entities.put(command.faction_id, INTRIGUE_GOVERNANCE, state)
-        context.emit(
-            "dlc.intrigue.position.assigned",
-            source=INTRIGUE_DLC,
-            scope=EventScope("faction", command.faction_id),
-            payload={
-                "faction_id": command.faction_id,
-                "member_id": command.member_id,
-                "position_id": command.position_id,
-            },
-        )
+        if not actor_membership or profile.get("path") == "family":
+            raise ValueError("兼容任命命令只适用于当前宗门")
+        from .intrigue import IntriguePersonnelAction, _personnel_handler
+
+        _personnel_handler(definitions)(context, IntriguePersonnelAction(
+            command.actor_id,
+            "sect",
+            "appoint",
+            command.member_id,
+            command.position_id,
+        ))
 
     return handler
 
@@ -397,13 +381,6 @@ def extension_invariants(definitions: GameDefinitions):
                 and bloodline.get("species_id") not in species_ids
             ):
                 errors.append(f"妖修本源谱系非法：{entity_id}")
-        for faction_id in state.entities.with_component(INTRIGUE_GOVERNANCE):
-            governance = state.entities.require(faction_id, INTRIGUE_GOVERNANCE)
-            for member_id in dict(governance.get("positions", {})).values():
-                if not state.relations.find(
-                    source_id=str(member_id), target_id=faction_id, kind=MEMBERSHIP
-                ):
-                    errors.append(f"势力 {faction_id} 职位指向非成员")
         return errors
 
     return validate

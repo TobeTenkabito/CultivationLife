@@ -680,6 +680,10 @@ def _intercept_handler(definitions: GameDefinitions):
         target_life = context.state.entities.require(command.target_id, LIFE)
         if target_location.get("world_id") != profile.get("world_id") or not bool(target_life.get("alive")):
             raise ValueError("目标已不在当前宗门名册中")
+        from .intrigue import is_intrigue_imprisoned
+
+        if is_intrigue_imprisoned(context.state, command.target_id):
+            raise ValueError("目标正在势力监狱服刑")
         resolve_combat(
             context, definitions, attacker_id=command.actor_id,
             target_id=command.target_id, objective="kill",
@@ -742,6 +746,8 @@ def _vote_probability(affinity: float, status: str, voter_affinity: float = 0.0)
 
 def _propose_diplomacy_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
+        from .intrigue import is_intrigue_imprisoned
+
         if not isinstance(command, ProposeDiplomacy):
             raise TypeError("命令类型错误")
         if command.actor_id != context.state.controlled_entity_id:
@@ -768,6 +774,7 @@ def _propose_diplomacy_handler(definitions: GameDefinitions):
                 edge.source_id for edge in context.state.relations.find(target_id=own_id, kind=MEMBERSHIP)
                 if edge.source_id != command.actor_id
                 and bool(context.state.entities.require(edge.source_id, LIFE).get("alive"))
+                and not is_intrigue_imprisoned(context.state, edge.source_id)
                 and definitions.realm_index(str(context.state.entities.require(edge.source_id, CULTIVATION)["realm_id"]))
                 >= _governance_threshold(definitions, world_id)
             ]
@@ -800,6 +807,7 @@ def _propose_diplomacy_handler(definitions: GameDefinitions):
                 and context.state.entities.require(entity_id, IDENTITY).get("race") == own_id
                 and context.state.entities.require(entity_id, LOCATION).get("world_id") == world_id
                 and bool(context.state.entities.require(entity_id, LIFE).get("alive"))
+                and not is_intrigue_imprisoned(context.state, entity_id)
                 and definitions.realm_index(str(context.state.entities.require(entity_id, CULTIVATION)["realm_id"])) >= required
             ]
         state = context.state.entities.require(command.actor_id, DIPLOMACY_STATE)
@@ -885,9 +893,12 @@ def _transfer_vassal_handler(definitions: GameDefinitions):
         life = context.state.entities.require(command.character_id, LIFE)
         actor_cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
         target_cultivation = context.state.entities.require(command.character_id, CULTIVATION)
+        from .intrigue import is_intrigue_imprisoned
+
         if (
             location.get("world_id") != destination_world
             or not bool(life.get("alive"))
+            or is_intrigue_imprisoned(context.state, command.character_id)
             or (
                 definitions.realm_index(str(target_cultivation["realm_id"])), int(target_cultivation["layer"])
             ) > (
@@ -996,6 +1007,8 @@ def _on_time_advanced(definitions: GameDefinitions):
 
 def _advance_faction_npcs(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        from .intrigue import is_intrigue_imprisoned
+
         elapsed = int(event.payload["to_year"]) - int(event.payload["from_year"])
         if elapsed <= 0:
             return
@@ -1008,7 +1021,9 @@ def _advance_faction_npcs(definitions: GameDefinitions):
         accident = float(cultivation_rules.get("accident_death_chance", 0.0005))
         for character_id in list(context.state.entities.with_component(FACTION_NPC)):
             life = context.state.entities.require(character_id, LIFE)
-            if not bool(life.get("alive")):
+            if not bool(life.get("alive")) or is_intrigue_imprisoned(
+                context.state, character_id
+            ):
                 continue
             cultivation = context.state.entities.require(character_id, CULTIVATION)
             npc = context.state.entities.require(character_id, FACTION_NPC)

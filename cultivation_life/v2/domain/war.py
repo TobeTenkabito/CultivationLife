@@ -147,10 +147,13 @@ def _power_members(
             entity_id for entity_id in state.entities.with_component(IDENTITY)
             if str(state.entities.require(entity_id, IDENTITY).get("race")) == power_id
         ]
+    from .intrigue import is_intrigue_imprisoned
+
     available = [
         entity_id for entity_id in ids
         if bool(state.entities.require(entity_id, LIFE).get("alive"))
         and state.entities.require(entity_id, LOCATION).get("world_id") == world_id
+        and not is_intrigue_imprisoned(state, entity_id)
     ]
     available.sort(
         key=lambda entity_id: float(
@@ -231,6 +234,8 @@ def _formation_modifier(state: WorldState, member_ids: list[str]) -> tuple[float
 
 
 def _available_roster(state: WorldState, war: dict[str, Any], side: str) -> list[str]:
+    from .intrigue import is_intrigue_imprisoned
+
     escaped = set(map(str, war.get("escaped", {}).get(side, [])))
     world_id = str(war["world_id"])
     return [
@@ -239,6 +244,7 @@ def _available_roster(state: WorldState, war: dict[str, Any], side: str) -> list
         and state.entities.exists(str(entity_id))
         and bool(state.entities.require(str(entity_id), LIFE).get("alive"))
         and state.entities.require(str(entity_id), LOCATION).get("world_id") == world_id
+        and not is_intrigue_imprisoned(state, str(entity_id))
     ]
 
 
@@ -319,6 +325,17 @@ def _create_war(
     defender_roster = _power_members(
         context.state, definitions, kind, defender_id, world_id
     )
+    if kind == "faction":
+        from .intrigue import intrigue_guest_ids
+
+        cap = int(_rules(definitions).get("roster_cap", 24))
+        defensive_guests = [
+            guest_id for guest_id in intrigue_guest_ids(context.state, defender_id)
+            if context.state.entities.require(guest_id, LOCATION).get("world_id") == world_id
+        ]
+        defender_roster = list(dict.fromkeys([
+            *defender_roster, *defensive_guests,
+        ]))[:cap]
     unit = _action_unit(context.state, actor_id)
     war = {
         "kind": kind,

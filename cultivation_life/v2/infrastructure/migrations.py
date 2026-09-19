@@ -476,6 +476,28 @@ def _schema_17_to_18(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_18_to_19(source: dict[str, Any]) -> dict[str, Any]:
+    """Expand intrigue governance into personnel and prison authority state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        intrigue = components.get("dlc.intrigue.governance")
+        if not isinstance(intrigue, dict):
+            continue
+        intrigue.setdefault("member_contribution", {})
+        intrigue.setdefault("unrest", 0.0)
+        intrigue.setdefault("fear", 0.0)
+        intrigue.setdefault("time_progress", 0.0)
+        intrigue.setdefault("personnel_history", [])
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "intrigue": 2,
+    }
+    value["schema_version"] = 19
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -494,6 +516,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     15: _schema_15_to_16,
     16: _schema_16_to_17,
     17: _schema_17_to_18,
+    18: _schema_18_to_19,
 }
 
 

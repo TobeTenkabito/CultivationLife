@@ -66,6 +66,12 @@ from .domain.monster import (
     PrepareCustomLineage,
 )
 from .domain.celestial import HeavenlyCourtAction, ResolveHeavenlyElection
+from .domain.intrigue import (
+    IntrigueGuestAction,
+    IntriguePersonnelAction,
+    IntrigueRecruitmentAction,
+    IntrigueResolutionAction,
+)
 from .domain.war import IssueBounty, WarAction, WarPeace
 from .domain.economy import (
     BuyMarketOffer,
@@ -160,6 +166,10 @@ __all__ = [
     "EquipSpecialTechnique",
     "EvolveMonster",
     "HeavenlyCourtAction",
+    "IntriguePersonnelAction",
+    "IntrigueGuestAction",
+    "IntrigueResolutionAction",
+    "IntrigueRecruitmentAction",
     "FormRelationship",
     "BefriendDaoist",
     "GiftDisciple",

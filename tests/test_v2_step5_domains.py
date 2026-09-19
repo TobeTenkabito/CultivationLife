@@ -230,7 +230,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
         faction = self.engine.execute(
             game["id"], FoundFaction(founder_id=actor_id, name="清微宗")
         ).game["faction"]
-        npc_id = self._register_character(game["id"], "执事", realm_id="qi", layer=3)
+        npc_id = self._register_character(game["id"], "执事", realm_id="foundation", layer=3)
         self.engine.execute(
             game["id"], JoinFaction(character_id=npc_id, faction_id=faction["id"])
         )
@@ -240,12 +240,12 @@ class V2StepFiveDomainTests(unittest.TestCase):
                 actor_id=actor_id,
                 faction_id=faction["id"],
                 member_id=npc_id,
-                position_id="leader",
+                position_id="affairs_elder",
             ),
         )
         state = self.engine.store.load(game["id"])
         intrigue = state.entities.require(faction["id"], INTRIGUE_GOVERNANCE)
-        self.assertEqual(intrigue["positions"]["leader"], npc_id)
+        self.assertEqual(intrigue["positions"]["affairs_elder"], npc_id)
 
 
 if __name__ == "__main__":
