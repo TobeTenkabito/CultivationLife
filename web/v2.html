@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>浮生问道 · V2</title><link rel="stylesheet" href="/v2.css">
+</head>
+<body><main>
+  <header><div><small>CULTIVATION LIFE · V2</small><h1>浮生问道</h1></div><button id="new">另启一世</button></header>
+  <section id="start" class="card"><h2>命格初定</h2><form id="create">
+    <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
+    <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
+    <label>灵根<select name="spirit_root" id="roots"></select></label>
+    <label>道路<select name="path" id="paths"></select></label>
+    <label>随机种子<input name="seed" type="number"></label><button type="submit">叩问长生</button>
+  </form><div id="saves"></div></section>
+  <section id="game" class="hidden grid">
+    <aside class="card"><h2 id="name"></h2><p id="realm"></p><dl id="stats"></dl></aside>
+    <section><article id="event" class="card hidden"><h2 id="event-title"></h2><p id="event-body"></p><div id="choices"></div></article>
+    <article class="card"><h2>岁月流转</h2><div id="actions" class="actions"></div></article>
+    <article class="card"><h2>势力与因果</h2><nav><button data-panel="relationships">关系</button><button data-panel="faction">宗门</button><button data-panel="intrigue_system">内政</button><button data-panel="war_system">战争</button><button data-panel="inventory">行囊</button></nav><pre id="panel"></pre></article></section>
+  </section><div id="toast"></div>
+</main><script src="/v2.js"></script></body></html>

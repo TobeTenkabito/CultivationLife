@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .character import ACTIVITY, IDENTITY, LIFE, PerformTimedAction
+from .character import ACTIVITY, IDENTITY, LIFE, PerformTimedAction, create_character
 from .actions import begin_action, complete_action
 from .definitions import GameDefinitions, QI_SOURCES, RootDefinition, TechniqueDefinition
 from .world import LOCATION
@@ -15,6 +15,7 @@ from ..kernel.services import TimeService
 CULTIVATION = "cultivation.state"
 PRACTICE = "cultivation.practice"
 ACTION_TICK = "cultivation.action.tick"
+ACTION_COMBAT_REQUESTED = "cultivation.action.combat.requested"
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,12 +104,13 @@ def _ensure_controllable_alive(context: SimulationContext, actor_id: str) -> Non
 
 def _schedule_action(
     context: SimulationContext,
+    definitions: GameDefinitions,
     *,
     actor_id: str,
     action: str,
     years: int,
 ) -> None:
-    if action not in {"cultivate", "rest", "body_train", "sense_train"}:
+    if action not in definitions.actions:
         raise ValueError("未知的V2耗时行动")
     if not isinstance(years, int) or isinstance(years, bool) or not 1 <= years <= 1_000:
         raise ValueError("单次行动必须耗时1至1000年")
@@ -138,11 +140,17 @@ def _schedule_action(
     TimeService.advance(context, years, source=f"cultivation.action.{action}")
 
 
-def _perform_timed_action_handler(context: SimulationContext, command: object) -> None:
-    if not isinstance(command, PerformTimedAction):
-        raise TypeError("命令类型错误")
-    _ensure_controllable_alive(context, command.actor_id)
-    _schedule_action(context, actor_id=command.actor_id, action=command.action, years=command.years)
+def _perform_timed_action_handler(definitions: GameDefinitions):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, PerformTimedAction):
+            raise TypeError("命令类型错误")
+        _ensure_controllable_alive(context, command.actor_id)
+        _schedule_action(
+            context, definitions, actor_id=command.actor_id,
+            action=command.action, years=command.years,
+        )
+
+    return handler
 
 
 def _perform_units_handler(definitions: GameDefinitions):
@@ -164,7 +172,15 @@ def _perform_units_handler(definitions: GameDefinitions):
             if not sense.get("technique_id"):
                 raise ValueError("必须先配置一部神识功法")
         years = definitions.action_time(str(cultivation["realm_id"]), command.units)
-        _schedule_action(context, actor_id=command.actor_id, action=command.action, years=years)
+        if command.action not in definitions.actions:
+            raise ValueError("未知的V2耗时行动")
+        if command.action in {"commission", "hunt_beast", "spar", "slay", "capture"}:
+            if definitions.realm_index(str(cultivation["realm_id"])) < 1:
+                raise ValueError("凡人不能执行这项修士行动")
+        _schedule_action(
+            context, definitions, actor_id=command.actor_id,
+            action=command.action, years=years,
+        )
 
     return handler
 
@@ -341,6 +357,112 @@ def _on_action_tick(definitions: GameDefinitions):
         if action == "rest":
             activity["rest_years"] = int(activity["rest_years"]) + 1
         if final:
+            action_spec = dict(definitions.actions[action])
+            if action != "rest":
+                hp_delta = float(action_spec.get("hp", 0))
+                mp_delta = float(action_spec.get("mp", 0))
+                if hp_delta < 0 or mp_delta < 0:
+                    context.emit(
+                        "combat.condition.drain.requested",
+                        source="cultivation", scope=EventScope.entity(actor_id),
+                        payload={
+                            "entity_id": actor_id,
+                            "hp_ratio": max(0.0, -hp_delta),
+                            "mp_ratio": max(0.0, -mp_delta),
+                            "reason": f"action:{action}",
+                        },
+                    )
+                for kind, amount in (("restore_hp", hp_delta), ("restore_mp", mp_delta)):
+                    if amount > 0:
+                        context.emit(
+                            "story.effect.combat_condition.changed",
+                            source="cultivation", scope=EventScope.entity(actor_id),
+                            payload={
+                                "entity_id": actor_id, "kind": kind,
+                                "amount": amount, "reason": f"action:{action}",
+                            },
+                        )
+            if action == "rest":
+                cultivation["heart_demon"] = max(
+                    0.0, float(cultivation.get("heart_demon", 0)) - 0.5
+                )
+                context.state.entities.put(actor_id, CULTIVATION, cultivation)
+            if action == "befriend_neighbors":
+                story = context.state.entities.require(actor_id, "story.state")
+                attributes = dict(story.get("attributes", {}))
+                realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+                reduction = min(
+                    float(attributes.get("fame", 0)), 15.0 + realm_index * 5.0
+                )
+                attributes["fame"] = max(
+                    0.0, float(attributes.get("fame", 0)) - reduction
+                )
+                story["attributes"] = attributes
+                context.state.entities.put(actor_id, "story.state", story)
+            if action in {"treasure", "commission"}:
+                if action == "commission":
+                    realm_index = max(
+                        1, definitions.realm_index(str(cultivation["realm_id"]))
+                    )
+                    low, high = map(int, dict(
+                        definitions.market_settings.get("commission_stones", {})
+                    ).get(str(realm_index), [4, 12]))
+                else:
+                    low, high = 2, 8
+                context.emit(
+                    "story.effect.inventory.changed",
+                    source="cultivation",
+                    scope=EventScope.entity(actor_id),
+                    payload={
+                        "entity_id": actor_id,
+                        "item_id": "spirit_stone",
+                        "quantity": context.rng.randint(low, high),
+                        "reason": f"action:{action}",
+                    },
+                )
+                if action == "treasure":
+                    from .story import queue_story_event
+
+                    queue_story_event(
+                        context, definitions, actor_id,
+                        "EVT_TREASURE_REWARD_SELECT_001",
+                        reason="action:treasure",
+                    )
+            if action in {"hunt_beast", "spar", "slay", "capture"}:
+                cultivation_now = context.state.entities.require(actor_id, CULTIVATION)
+                identity = context.state.entities.require(actor_id, IDENTITY)
+                location = context.state.entities.require(actor_id, LOCATION)
+                target_id = create_character(
+                    context,
+                    name={
+                        "hunt_beast": "荒野妖兽", "spar": "同道修士",
+                        "slay": "邪道修士", "capture": "流窜修士",
+                    }[action],
+                    age=max(
+                        16,
+                        context.state.clock.year
+                        - int(context.state.entities.require(actor_id, LIFE)["birth_year"]),
+                    ),
+                    gender=context.rng.choice(["male", "female"]),
+                    race="monster" if action == "hunt_beast" else str(identity["race"]),
+                    spirit_root=str(cultivation_now["spirit_root"]),
+                    path="monster" if action == "hunt_beast" else str(cultivation_now["path"]),
+                    realm_id=str(cultivation_now["realm_id"]),
+                    layer=max(1, int(cultivation_now["layer"]) - (1 if action in {"slay", "capture"} else 0)),
+                    world_id=str(location["world_id"]),
+                    lifespan=None,
+                )
+                context.emit(
+                    ACTION_COMBAT_REQUESTED,
+                    source="cultivation",
+                    scope=EventScope.entity(actor_id),
+                    payload={
+                        "actor_id": actor_id, "target_id": target_id,
+                        "objective": "capture" if action == "capture" else (
+                            "duel" if action == "spar" else "kill"
+                        ),
+                    },
+                )
             activity["actions_completed"] = int(activity["actions_completed"]) + 1
             context.state.entities.put(actor_id, ACTIVITY, activity)
             context.emit(
@@ -362,6 +484,19 @@ def _on_action_tick(definitions: GameDefinitions):
             )
         else:
             context.state.entities.put(actor_id, ACTIVITY, activity)
+
+    return handler
+
+
+def _on_action_combat_requested(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        from .combat import ResolveCombat, _resolve_handler
+
+        _resolve_handler(definitions)(context, ResolveCombat(
+            str(event.payload["actor_id"]),
+            str(event.payload["target_id"]),
+            str(event.payload["objective"]),
+        ))
 
     return handler
 
@@ -1126,7 +1261,7 @@ def cultivation_invariants(definitions: GameDefinitions):
 
 
 def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
-    bus.register(PerformTimedAction, _perform_timed_action_handler)
+    bus.register(PerformTimedAction, _perform_timed_action_handler(definitions))
     bus.register(PerformActionUnits, _perform_units_handler(definitions))
     bus.register(GrantTechnique, _grant_technique_handler(definitions))
     bus.register(EquipMainTechnique, _equip_technique_handler(definitions))
@@ -1151,6 +1286,9 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
         _on_relationship_technique_granted(definitions),
     )
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
+    bus.event_bus.register(
+        ACTION_COMBAT_REQUESTED, _on_action_combat_requested(definitions)
+    )
     bus.event_bus.register("character.died", _on_character_died)
     bus.event_bus.register("cultivation.trial.failed", _on_trial_failed(definitions))
     bus.event_bus.register("cultivation.trial.completed", _on_trial_completed(definitions))

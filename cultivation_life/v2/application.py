@@ -92,6 +92,16 @@ from .domain.celestial import (
     register_celestial_domain,
     register_celestial_story_effects,
 )
+from .domain.intrigue import (
+    IntrigueGuestAction,
+    IntriguePersonnelAction,
+    IntrigueRecruitmentAction,
+    IntrigueResolutionAction,
+    intrigue_invariants,
+    intrigue_view,
+    reconcile_intrigue_state,
+    register_intrigue_domain,
+)
 from .domain.war import (
     IssueBounty,
     WarAction,
@@ -105,6 +115,7 @@ from .domain.war import (
 from .domain.economy import (
     BuyMarketOffer,
     RefreshMarket,
+    ToggleMarketOfferLock,
     UseItem,
     economy_invariants,
     inventory_view,
@@ -256,6 +267,7 @@ from .domain.story import (
     story_invariants,
     story_view,
 )
+from .domain.story_compat import register_story_compat_effects
 from .domain.trials import (
     BeginAscensionTrial,
     reconcile_trial_state,
@@ -336,6 +348,7 @@ class V2GameEngine:
         register_ghost_domain(self.commands, self.definitions)
         register_monster_domain(self.commands, self.definitions)
         register_celestial_domain(self.commands, self.definitions)
+        register_intrigue_domain(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
@@ -345,6 +358,7 @@ class V2GameEngine:
         register_war_story_effects(self.story_effects, self.definitions)
         register_ghost_story_effects(self.story_effects, self.definitions)
         register_celestial_story_effects(self.story_effects)
+        register_story_compat_effects(self.story_effects, self.definitions)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
@@ -370,6 +384,7 @@ class V2GameEngine:
         self.invariants.register("ghost", ghost_invariants)
         self.invariants.register("monster", monster_invariants(self.definitions))
         self.invariants.register("celestial", celestial_invariants(self.definitions))
+        self.invariants.register("intrigue", intrigue_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
 
@@ -400,6 +415,7 @@ class V2GameEngine:
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
         reconcile_celestial_state(state, self.definitions)
+        reconcile_intrigue_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -449,6 +465,7 @@ class V2GameEngine:
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
         reconcile_celestial_state(state, self.definitions)
+        reconcile_intrigue_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -508,6 +525,7 @@ class V2GameEngine:
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
         reconcile_celestial_state(state, self.definitions)
+        reconcile_intrigue_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1064,6 +1082,15 @@ class V2GameEngine:
             raise ValueError("游戏尚未初始化")
         return self.execute(game_id, RefreshMarket(actor_id=actor_id, force=force))
 
+    def toggle_market_offer_lock(
+        self, game_id: str, offer_id: str,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ToggleMarketOfferLock(actor_id, offer_id))
+
     def use_item(self, game_id: str, item_id: str) -> CommandExecution:
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
@@ -1507,12 +1534,75 @@ class V2GameEngine:
             HeavenlyCourtAction(actor_id, action, target_id, enact, influence_spend),
         )
 
+    def intrigue_personnel_action(
+        self,
+        game_id: str,
+        kind: str,
+        action: str,
+        member_id: str,
+        position_id: str = "",
+        years: int = 1,
+        reason: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            IntriguePersonnelAction(
+                actor_id, kind, action, member_id, position_id, years, reason,
+            ),
+        )
+
+    def intrigue_guest_action(
+        self, game_id: str, kind: str, action: str, target_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, IntrigueGuestAction(actor_id, kind, action, target_id))
+
+    def intrigue_propose_resolution(
+        self, game_id: str, kind: str, resolution_type: str,
+        target_id: str = "", *, player_vote: bool = True,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            IntrigueResolutionAction(
+                actor_id, kind, resolution_type, target_id, player_vote,
+            ),
+        )
+
+    def intrigue_recruitment_action(
+        self, game_id: str, action: str, *,
+        filters: dict[str, Any] | None = None,
+        candidate_ids: tuple[str, ...] = (),
+        player_vote: bool = True,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            IntrigueRecruitmentAction(
+                actor_id, action, filters, candidate_ids, player_vote,
+            ),
+        )
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
         reconcile_celestial_state(state, self.definitions)
+        reconcile_intrigue_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1576,6 +1666,7 @@ class V2GameEngine:
             "ghost_system": ghost_view(state, self.definitions),
             "monster_system": monster_view(state, self.definitions),
             "heavenly_court": celestial_view(state, self.definitions),
+            "intrigue_system": intrigue_view(state, self.definitions),
             "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],

@@ -4,7 +4,6 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.migration import (
-    CutoverBlockedError,
     FeatureMatrix,
     assess_default_matrix,
     assert_ready_for_cutover,
@@ -28,22 +27,16 @@ class V2ReadinessMatrixTests(unittest.TestCase):
             report.feature_count,
         )
 
-    def test_current_matrix_blocks_cutover_and_names_real_gaps(self):
+    def test_current_matrix_is_ready_after_every_required_feature_passes(self):
         report = assess_default_matrix(SOURCE_ROOT)
-        self.assertFalse(report.ready)
-        blocker_ids = {row["id"] for row in report.blockers}
-        self.assertNotIn("economy.auction", blocker_ids)
-        self.assertNotIn("economy.black_market", blocker_ids)
-        self.assertNotIn("demonic.puppets_souls", blocker_ids)
-        self.assertIn("core.action_loop", blocker_ids)
-        self.assertIn("interface.http_frontend", blocker_ids)
-        with self.assertRaises(CutoverBlockedError):
-            assert_ready_for_cutover(SOURCE_ROOT)
+        self.assertTrue(report.ready)
+        self.assertEqual(report.blockers, ())
+        assert_ready_for_cutover(SOURCE_ROOT)
 
-    def test_launcher_remains_on_v1_while_cutover_is_blocked(self):
+    def test_launcher_remains_on_v1_until_the_separate_cutover_step(self):
         report = assess_default_matrix(SOURCE_ROOT)
         launcher = (SOURCE_ROOT / "launcher.py").read_text(encoding="utf-8")
-        self.assertFalse(report.ready)
+        self.assertTrue(report.ready)
         self.assertIn("from cultivation_life.server import Handler", launcher)
         self.assertNotIn("cultivation_life.v2", launcher)
 

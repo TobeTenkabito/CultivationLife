@@ -401,6 +401,8 @@ def _family_recruit(
 
 def _advance_family_members(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        from .intrigue import is_intrigue_imprisoned
+
         elapsed = int(event.payload["to_year"]) - int(event.payload["from_year"])
         if elapsed <= 0:
             return
@@ -419,7 +421,9 @@ def _advance_family_members(definitions: GameDefinitions):
                 target_id=family_id, kind=FAMILY_MEMBERSHIP
             )):
                 life = context.state.entities.require(edge.source_id, LIFE)
-                if not bool(life.get("alive")):
+                if not bool(life.get("alive")) or is_intrigue_imprisoned(
+                    context.state, edge.source_id
+                ):
                     continue
                 cultivation = context.state.entities.require(edge.source_id, CULTIVATION)
                 metadata = dict(edge.metadata)

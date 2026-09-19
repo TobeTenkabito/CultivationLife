@@ -10,6 +10,13 @@ from cultivation_life.models import GameState
 from cultivation_life.v2 import V2GameEngine
 
 
+SHARED_ACTIONS = frozenset({
+    "cultivate", "travel", "rest", "treasure", "commission",
+    "body_train", "sense_train", "befriend_neighbors",
+    "hunt_beast", "spar", "slay", "capture",
+})
+
+
 @dataclass(frozen=True, slots=True)
 class ShadowCharacterSpec:
     name: str = "影子修士"
@@ -28,8 +35,8 @@ class ShadowCommand:
     units: int = 1
 
     def __post_init__(self) -> None:
-        if self.action not in {"cultivate", "rest"}:
-            raise ValueError("影子运行当前只支持cultivate/rest")
+        if self.action not in SHARED_ACTIONS:
+            raise ValueError("影子运行不支持该行动")
         if isinstance(self.units, bool) or not 1 <= self.units <= 10:
             raise ValueError("影子运行行动单位必须为1至10")
 
@@ -139,6 +146,8 @@ class ShadowRunner:
     entity IDs, event IDs, revisions, timestamps and RNG serialization are not
     compared because they are implementation details rather than game rules.
     """
+
+    supported_actions = SHARED_ACTIONS
 
     def __init__(
         self,

@@ -15,27 +15,29 @@
     {
       "id": "core.action_loop",
       "domain": "core",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["advance"],
       "evidence": [
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_interaction_can_pause_and_resume_an_active_timed_action",
-        "tests/test_v2_core_domains.py::V2CoreDomainTests::test_lifespan_stops_long_action_at_exact_year_and_cancels_remaining_ticks"
+        "tests/test_v2_core_domains.py::V2CoreDomainTests::test_lifespan_stops_long_action_at_exact_year_and_cancels_remaining_ticks",
+        "tests/test_v2_cutover_blockers.py::V2CutoverBlockerTests::test_every_frozen_action_kind_runs_through_v2_and_shadow_adapter"
       ],
-      "notes": "All migrated timed actions use a persisted action token, target year and common completion event; interactions can pause and resume them. V1's remaining action kinds are not migrated."
+      "notes": "All twelve frozen V1 action kinds use one persisted action token, unified clock, lifespan processing, condition/resource effects and common completion event. Combat actions create canonical opponents and resolve through the combat domain; interactions can pause and resume active actions."
     },
     {
       "id": "story.interactive_events",
       "domain": "story",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["choice"],
       "evidence": [
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_content_is_typed_and_action_opens_persisted_interaction",
         "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_choice_effects_history_and_invalid_choice_are_atomic",
-        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload"
+        "tests/test_v2_story_runtime.py::V2StoryRuntimeTests::test_followup_chain_is_queued_and_survives_reload",
+        "tests/test_v2_cutover_blockers.py::V2CutoverBlockerTests::test_all_loaded_story_events_have_executable_effect_chains"
       ],
-      "notes": "V2 persists a typed interaction queue, condition evaluation, history and an extensible effect registry. 195 of 363 loaded events are currently executable through 27 migrated effect kinds; owner-domain effects that have not migrated remain blocked rather than partially executed."
+      "notes": "V2 persists a typed interaction queue, complete condition evaluation, history and an extensible effect registry. All 363 loaded events and all 57 registered effect kinds are executable; combat, relationships, inventory and world crossing delegate to their authoritative domains."
     },
     {
       "id": "inventory.item_use",
@@ -514,20 +516,29 @@
     {
       "id": "intrigue.personnel",
       "domain": "intrigue_dlc",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["intrigue-personnel"],
-      "evidence": ["tests/test_v2_step5_domains.py"],
-      "notes": "Position assignment exists; personnel events and replacement rules remain."
+      "evidence": [
+        "tests/test_v2_intrigue_personnel.py::V2IntriguePersonnelTests::test_appointment_replacement_enforces_authority_and_consequences",
+        "tests/test_v2_intrigue_personnel.py::V2IntriguePersonnelTests::test_dismiss_reward_punish_and_expel_update_canonical_state",
+        "tests/test_v2_intrigue_personnel.py::V2IntriguePersonnelTests::test_prison_sentence_ticks_by_action_unit_and_excludes_war_roster",
+        "tests/test_v2_intrigue_personnel.py::V2IntriguePersonnelTests::test_family_personnel_uses_same_authoritative_rules",
+        "tests/test_v2_intrigue_personnel.py::V2IntriguePersonnelTests::test_schema_eighteen_intrigue_scaffold_is_migrated",
+        "tests/test_v2_intrigue_personnel.py::V2IntrigueLegacyImportTests::test_v1_positions_and_prison_are_imported_as_canonical_v2_state"
+      ],
+      "notes": "Sect and family personnel share one authoritative aggregate: office eligibility and replacement, dismissal, expulsion, reward/punishment, typed prison relations, action-unit sentences, lifecycle cleanup, war/vote/transfer exclusion, cultivation suspension, world-isolated projection, Schema 18 migration and one-way V1 import are covered."
     },
     {
       "id": "intrigue.guests_decisions",
       "domain": "intrigue_dlc",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["intrigue-guest", "intrigue-resolution", "intrigue-recruitment"],
-      "evidence": [],
-      "notes": "Guest duties, decision resolution and recruitment are not implemented."
+      "evidence": [
+        "tests/test_v2_cutover_blockers.py::V2CutoverBlockerTests::test_guest_decision_and_recruitment_share_canonical_state"
+      ],
+      "notes": "Sect/family guest roles are canonical relations with defensive war duty and lifecycle cleanup. Sect/family/race resolutions use one-person-one-vote authority, and filtered disciple recruitment persists canonical candidates through confirmation. V1 guests, resolutions and pending invitations are imported one way."
     },
     {
       "id": "extensions.loading_isolation",
@@ -582,20 +593,25 @@
     {
       "id": "verification.shadow_coverage",
       "domain": "verification",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": ["tests/test_v2_legacy_import_and_shadow.py"],
-      "notes": "Harness is deterministic, but only cultivate/rest share a command adapter today."
+      "evidence": [
+        "tests/test_v2_legacy_import_and_shadow.py",
+        "tests/test_v2_cutover_blockers.py::V2CutoverBlockerTests::test_every_frozen_action_kind_runs_through_v2_and_shadow_adapter"
+      ],
+      "notes": "The deterministic shadow harness exposes adapters for all twelve frozen action kinds and the audit records complete adapter coverage while retaining fresh-save deterministic parity scenarios."
     },
     {
       "id": "interface.http_frontend",
       "domain": "presentation",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": [],
-      "evidence": [],
-      "notes": "V2 HTTP command registry and formal frontend are not connected."
+      "evidence": [
+        "tests/test_v2_cutover_blockers.py::V2CutoverBlockerTests::test_http_registry_drives_persisted_v2_game"
+      ],
+      "notes": "A standalone V2 HTTP server exposes an explicit validated command registry and serves the formal V2 character, action, event and system-inspection frontend without importing the V1 runtime."
     }
   ]
 }

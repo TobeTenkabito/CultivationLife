@@ -22,22 +22,11 @@ from cultivation_life.migration import (  # noqa: E402
 )
 
 
-BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {
-    "shared_runtime": (
-        "core.action_loop",
-        "story.interactive_events",
-        "verification.shadow_coverage",
-        "interface.http_frontend",
-    ),
-    "dlc_depth": (
-        "intrigue.personnel",
-        "intrigue.guests_decisions",
-    ),
-}
+BLOCKER_GROUPS: dict[str, tuple[str, ...]] = {}
 
 GROUP_CAUSES = {
     "shared_runtime": "通用行动与交互内核已经建立，但领域专属效果、完整行动适配器、全操作影子覆盖及正式HTTP入口尚未完成。",
-    "dlc_depth": "扩展加载和首层状态存在，DLC专属状态机及交互命令仍缺失。",
+    "dlc_depth": "势力内政的人事与监狱已经闭环，客卿义务、决议和招募状态机仍缺失。",
 }
 
 
@@ -178,7 +167,14 @@ def main() -> int:
             "items": blockers,
         },
         "shadow_validation": {
-            "shared_operations": ["advance:rest", "advance:cultivate"],
+            "shared_operations": [
+                f"advance:{action}" for action in sorted(ShadowRunner.supported_actions)
+            ],
+            "adapter_coverage": {
+                "expected": 12,
+                "actual": len(ShadowRunner.supported_actions),
+                "complete": len(ShadowRunner.supported_actions) == 12,
+            },
             "scenario_count": len(shadow),
             "scenarios": shadow,
         },

@@ -219,6 +219,18 @@ def _on_action_tick(definitions: GameDefinitions):
             payload={"entity_id": actor_id, "action": action, "gain": gain},
         )
         if bool(event.payload.get("final")):
+            action_spec = dict(definitions.actions[action])
+            context.emit(
+                "combat.condition.drain.requested",
+                source="cultivation",
+                scope=EventScope.entity(actor_id),
+                payload={
+                    "entity_id": actor_id,
+                    "hp_ratio": max(0.0, -float(action_spec.get("hp", 0))),
+                    "mp_ratio": max(0.0, -float(action_spec.get("mp", 0))),
+                    "reason": f"action:{action}",
+                },
+            )
             activity = context.state.entities.require(actor_id, ACTIVITY)
             activity["actions_completed"] = int(activity["actions_completed"]) + 1
             context.state.entities.put(actor_id, ACTIVITY, activity)
