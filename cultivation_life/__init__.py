@@ -1,11 +1,6 @@
-"""Second-generation simulation runtime.
+"""Cultivation Life simulation runtime and public command API."""
 
-The V2 package is deliberately isolated from the legacy ``GameEngine``.  It
-does not import legacy models or save stores, which lets the new runtime be
-built and verified without changing existing saves.
-"""
-
-from .application import LegacyImportExecution, V2GameEngine
+from .application import GameEngine
 from .domain.character import PerformTimedAction, RegisterCharacter
 from .domain.cultivation import (
     AttemptBreakthrough,
@@ -234,8 +229,7 @@ __all__ = [
     "TravelWithinWorld",
     "UseHarvestedPlant",
     "UseItem",
-    "V2GameEngine",
-    "LegacyImportExecution",
+    "GameEngine",
     "AdvanceAuctionRound",
     "BargainPrivateTrade",
     "BuyBlackMarket",

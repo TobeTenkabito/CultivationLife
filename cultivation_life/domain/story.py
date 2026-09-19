@@ -83,7 +83,7 @@ def _on_character_created(context: SimulationContext, event: EventEnvelope) -> N
 
 
 class StoryEffectRegistry:
-    """Registry of effect kinds that are safe to execute inside V2.
+    """Registry of effect kinds that are safe to execute inside the simulation.
 
     Event files may contain effects owned by domains that have not migrated
     yet.  Such event chains remain loaded for diagnostics but cannot be

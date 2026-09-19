@@ -1,4 +1,4 @@
-"""Manual V2 browser smoke test; uses a temporary database only."""
+"""Manual browser smoke test; uses a temporary database only."""
 
 from __future__ import annotations
 
@@ -13,13 +13,13 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from cultivation_life.v2.application import V2GameEngine  # noqa: E402
-from cultivation_life.v2.server import build_handler  # noqa: E402
+from cultivation_life.application import GameEngine  # noqa: E402
+from cultivation_life.server import build_handler  # noqa: E402
 
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
-        engine = V2GameEngine(
+        engine = GameEngine(
             Path(temporary) / "games.db",
             content_directory=ROOT / "content",
             extension_root=ROOT,
@@ -35,10 +35,10 @@ def main() -> None:
                 page = browser.new_page(viewport={"width": 1440, "height": 1000})
                 errors: list[str] = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
-                response = page.goto(f"http://127.0.0.1:{server.server_port}/v2")
+                response = page.goto(f"http://127.0.0.1:{server.server_port}/")
                 assert response is not None and response.ok
 
-                page.locator("#create input[name=name]").fill("V2界面烟测")
+                page.locator("#create input[name=name]").fill("界面烟测")
                 page.locator("#create button[type=submit]").click()
                 page.locator("#game").wait_for(state="visible")
                 assert page.locator("#system-nav button").count() == 8

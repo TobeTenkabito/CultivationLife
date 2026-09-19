@@ -31,7 +31,7 @@ class InvariantRegistry:
 
 
 class TimeService:
-    """The only legal V2 entry point for advancing simulation time."""
+    """The only legal entry point for advancing simulation time."""
 
     @staticmethod
     def advance(context: SimulationContext, years: int, *, source: str) -> None:

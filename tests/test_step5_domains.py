@@ -4,7 +4,7 @@ import json
 import shutil
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     AssignFactionPosition,
     ConfigureMonsterBloodline,
     FoundFaction,
@@ -13,11 +13,11 @@ from cultivation_life.v2 import (
     JoinFaction,
     RegisterCharacter,
     ToggleMarketOfferLock,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.character import LIFE
-from cultivation_life.v2.domain.extensions import INTRIGUE_GOVERNANCE
-from cultivation_life.v2.infrastructure import V2ContentLoader
+from cultivation_life.domain.character import LIFE
+from cultivation_life.domain.extensions import INTRIGUE_GOVERNANCE
+from cultivation_life.infrastructure import ContentLoader
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -26,13 +26,13 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 class V2StepFiveDomainTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temp.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temp.name) / "v2.sqlite3")
 
     def tearDown(self):
         self.temp.cleanup()
 
     @staticmethod
-    def _resolve_pending(engine: V2GameEngine, game_id: str) -> dict:
+    def _resolve_pending(engine: GameEngine, game_id: str) -> dict:
         game = engine.get_game(game_id)
         while game["pending_event"] is not None:
             choice = next(row for row in game["pending_event"]["choices"] if row["enabled"])
@@ -102,7 +102,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
             project = Path(directory)
             content = project / "content"
             content.mkdir()
-            for name in V2ContentLoader.REQUIRED_FILES:
+            for name in ContentLoader.REQUIRED_FILES:
                 shutil.copy2(SOURCE_ROOT / "content" / name, content / name)
             package = project / "dlc" / "broken-market"
             (package / "content").mkdir(parents=True)
@@ -128,7 +128,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
                 }],
             }), encoding="utf-8")
 
-            definitions = V2ContentLoader.load(content, project_root=project)
+            definitions = ContentLoader.load(content, project_root=project)
             extension = next(row for row in definitions.extensions if row.id == "test.broken-market")
             self.assertEqual(extension.status, "error")
             self.assertIn("spirit_stone", definitions.items)
@@ -203,7 +203,7 @@ class V2StepFiveDomainTests(unittest.TestCase):
         self.assertGreater(advanced["extensions"]["ghost"]["erosion_rate_pp"], 0)
         self.assertIsNone(advanced["extensions"]["monster_bloodline"])
 
-        monster_engine = V2GameEngine(Path(self.temp.name) / "monster.sqlite3")
+        monster_engine = GameEngine(Path(self.temp.name) / "monster.sqlite3")
         monster = monster_engine.create_game(
             "青蛇", seed=805, path="monster", spirit_root="supreme_wood",
             start_world="monster_realm",

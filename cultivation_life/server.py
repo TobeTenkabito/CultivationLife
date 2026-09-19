@@ -13,11 +13,12 @@ from urllib.parse import unquote, urlparse
 
 from cultivation_life.runtime import persistence_root
 
-from .application import CommandExecution, V2GameEngine
+from .application import CommandExecution, GameEngine
 
 
-SOURCE_ROOT = Path(__file__).resolve().parents[2]
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = SOURCE_ROOT / "web"
+LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
 
 
 def _text(payload: dict[str, Any], key: str, default: str = "") -> str:
@@ -75,17 +76,16 @@ def _rule_rows(value: Any) -> tuple[dict[str, Any], ...]:
 
 
 @dataclass(frozen=True, slots=True)
-class V2RuntimePaths:
+class RuntimePaths:
     app_root: Path
     bundled_root: Path
     persistence_root: Path
     content_root: Path
     web_root: Path
     database_path: Path
-    legacy_save_root: Path
 
 
-def resolve_runtime_paths() -> V2RuntimePaths:
+def resolve_runtime_paths() -> RuntimePaths:
     """Resolve writable and bundled paths for source and frozen launches."""
     app_root = (
         Path(sys.executable).resolve().parent
@@ -100,59 +100,20 @@ def resolve_runtime_paths() -> V2RuntimePaths:
     web_root = app_root / "web"
     if not web_root.is_dir():
         web_root = bundled_root / "web"
-    return V2RuntimePaths(
+    return RuntimePaths(
         app_root=app_root,
         bundled_root=bundled_root,
         persistence_root=persistent,
         content_root=content_root,
         web_root=web_root,
-        database_path=persistent / "data" / "v2" / "games.db",
-        legacy_save_root=persistent / "data" / "saves",
+        database_path=persistent / "data" / "games.db",
     )
 
 
-def _legacy_saves(directory: Path | None) -> list[dict[str, Any]]:
-    if directory is None or not directory.is_dir():
-        return []
-    saves: list[dict[str, Any]] = []
-    for path in sorted(
-        directory.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True
-    ):
-        try:
-            if not 0 < path.stat().st_size <= 64 * 1024 * 1024:
-                continue
-            document = json.loads(path.read_text(encoding="utf-8"))
-            player = document["player"]
-            if document.get("version") not in {2, 3, 4, 5} or not isinstance(player, dict):
-                continue
-            saves.append({
-                "file_name": path.name,
-                "id": str(document.get("id", path.stem)),
-                "name": str(player.get("name", "无名修士")),
-                "updated_at": str(document.get("updated_at", "")),
-                "game_version": str(document.get("last_saved_with_game_version", "V1")),
-            })
-        except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
-            continue
-    return saves
-
-
-def _legacy_save_path(directory: Path | None, file_name: str) -> Path:
-    if directory is None:
-        raise KeyError("未配置V1存档目录")
-    if not file_name or Path(file_name).name != file_name or not file_name.endswith(".json"):
-        raise ValueError("V1存档文件名非法")
-    root = directory.resolve()
-    target = (root / file_name).resolve()
-    if target.parent != root or not target.is_file():
-        raise KeyError("V1存档不存在")
-    return target
-
-
-class V2HTTPCommandRegistry:
+class HTTPCommandRegistry:
     """Explicit HTTP boundary; browser input never constructs domain commands."""
 
-    def __init__(self, engine: V2GameEngine):
+    def __init__(self, engine: GameEngine):
         self.engine = engine
         self._operations: dict[str, Callable[[str, dict[str, Any]], Any]] = {
             "advance": lambda game, p: engine.perform_action(
@@ -456,44 +417,44 @@ class V2HTTPCommandRegistry:
     def dispatch(self, game_id: str, operation: str, payload: dict[str, Any]) -> dict[str, Any]:
         handler = self._operations.get(operation)
         if handler is None:
-            raise KeyError(f"未知V2命令：{operation}")
+            raise KeyError(f"未知命令：{operation}")
         result = handler(game_id, payload)
         if isinstance(result, CommandExecution):
             return {"game": result.game, "events": list(result.events)}
         if isinstance(result, dict):
             return result
-        raise TypeError("V2命令返回值无法公开")
+        raise TypeError("命令返回值无法公开")
 
 
 def build_handler(
-    engine: V2GameEngine,
+    engine: GameEngine,
     web_root: Path = WEB_ROOT,
-    *,
-    legacy_save_root: Path | None = None,
 ) -> type[BaseHTTPRequestHandler]:
-    registry = V2HTTPCommandRegistry(engine)
+    registry = HTTPCommandRegistry(engine)
 
     class Handler(BaseHTTPRequestHandler):
-        server_version = "CultivationLifeV2/2"
+        server_version = "CultivationLife/2"
 
         def do_GET(self) -> None:  # noqa: N802
             try:
                 path = urlparse(self.path).path
-                if path == "/api/v2/config":
+                if path == "/api/config":
                     self._json({
                         "format": "cultivation-life-v2",
                         "actions": {key: value.get("name", key) for key, value in engine.definitions.actions.items()},
                         "roots": {key: value.name for key, value in engine.definitions.roots.items() if value.creation},
                         "paths": dict(engine.definitions.paths),
+                        "races": {
+                            key: str(value.get("name", key))
+                            for key, value in engine.definitions.races.items()
+                        },
                         "worlds": {key: value.name for key, value in engine.definitions.worlds.items() if value.enabled},
                         "operations": registry.operations,
                     })
-                elif path == "/api/v2/games":
+                elif path == "/api/games":
                     self._json({"games": engine.list_games()})
-                elif path == "/api/v2/legacy-saves":
-                    self._json({"games": _legacy_saves(legacy_save_root)})
-                elif path.startswith("/api/v2/games/"):
-                    game_id = unquote(path.removeprefix("/api/v2/games/").strip("/"))
+                elif path.startswith("/api/games/"):
+                    game_id = unquote(path.removeprefix("/api/games/").strip("/"))
                     self._json(engine.get_game(game_id))
                 else:
                     self._static(path)
@@ -502,9 +463,10 @@ def build_handler(
 
         def do_POST(self) -> None:  # noqa: N802
             try:
+                self._validate_local_write()
                 path = urlparse(self.path).path
                 payload = self._body()
-                if path == "/api/v2/games":
+                if path == "/api/games":
                     result = engine.create_game(
                         str(payload.get("name", "无名散修")),
                         seed=payload.get("seed"),
@@ -517,46 +479,55 @@ def build_handler(
                     )
                     self._json(result, HTTPStatus.CREATED)
                     return
-                if path == "/api/v2/import":
-                    source = _legacy_save_path(
-                        legacy_save_root, str(payload.get("file_name", ""))
-                    )
-                    result = engine.import_v1_save(source)
-                    self._json(
-                        {"game": result.game, "report": result.report},
-                        HTTPStatus.CREATED,
-                    )
-                    return
                 parts = path.strip("/").split("/")
-                if len(parts) != 5 or parts[:3] != ["api", "v2", "games"]:
+                if len(parts) != 4 or parts[:2] != ["api", "games"]:
                     raise KeyError("接口不存在")
-                self._json(registry.dispatch(unquote(parts[3]), parts[4], payload))
+                self._json(registry.dispatch(unquote(parts[2]), parts[3], payload))
             except Exception as error:
                 self._error(error)
 
         def _body(self) -> dict[str, Any]:
             length = int(self.headers.get("Content-Length", "0"))
-            if length > 1_000_000:
-                raise ValueError("请求体过大")
+            if length < 0 or length > 1_000_000:
+                raise ValueError("请求体大小非法")
+            if self.headers.get_content_type() != "application/json":
+                raise TypeError("写入接口只接受 application/json")
             document = json.loads(self.rfile.read(length) or b"{}")
             if not isinstance(document, dict):
                 raise ValueError("请求体必须是JSON对象")
             return document
+
+        def _validate_local_write(self) -> None:
+            host = self.headers.get("Host", "")
+            if urlparse(f"//{host}").hostname not in LOOPBACK_HOSTS:
+                raise PermissionError("本地游戏接口拒绝非回环 Host")
+            origin = self.headers.get("Origin")
+            if origin:
+                parsed = urlparse(origin)
+                if parsed.scheme not in {"http", "https"} or parsed.hostname not in LOOPBACK_HOSTS:
+                    raise PermissionError("本地游戏接口拒绝跨站写入")
 
         def _json(self, value: Any, status: HTTPStatus = HTTPStatus.OK) -> None:
             body = json.dumps(value, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(body)
 
         def _error(self, error: Exception) -> None:
-            status = HTTPStatus.NOT_FOUND if isinstance(error, KeyError) else HTTPStatus.BAD_REQUEST
+            status = (
+                HTTPStatus.FORBIDDEN if isinstance(error, PermissionError)
+                else HTTPStatus.UNSUPPORTED_MEDIA_TYPE if isinstance(error, TypeError)
+                else HTTPStatus.NOT_FOUND if isinstance(error, KeyError)
+                else HTTPStatus.BAD_REQUEST
+            )
             self._json({"error": str(error).strip("'"), "type": type(error).__name__}, status)
 
         def _static(self, path: str) -> None:
-            relative = "v2.html" if path in {"/", "/v2", "/v2/"} else path.lstrip("/")
+            relative = "index.html" if path == "/" else path.lstrip("/")
             target = (web_root / relative).resolve()
             if web_root.resolve() not in target.parents or not target.is_file():
                 raise KeyError("页面不存在")
@@ -564,6 +535,9 @@ def build_handler(
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", mimetypes.guess_type(target.name)[0] or "application/octet-stream")
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(body)
 
@@ -575,22 +549,22 @@ def build_handler(
 
 def main() -> None:
     paths = resolve_runtime_paths()
-    parser = argparse.ArgumentParser(description="浮生问道 V2 本地服务器")
+    parser = argparse.ArgumentParser(description="浮生问道本地服务器")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8766)
     parser.add_argument("--database", type=Path, default=paths.database_path)
     args = parser.parse_args()
     args.database.parent.mkdir(parents=True, exist_ok=True)
-    engine = V2GameEngine(
+    engine = GameEngine(
         args.database,
         content_directory=paths.content_root,
         extension_root=paths.app_root,
     )
     server = ThreadingHTTPServer(
         (args.host, args.port),
-        build_handler(engine, paths.web_root, legacy_save_root=paths.legacy_save_root),
+        build_handler(engine, paths.web_root),
     )
-    print(f"V2 running at http://{args.host}:{args.port}/")
+    print(f"Cultivation Life running at http://{args.host}:{args.port}/")
     server.serve_forever()
 
 

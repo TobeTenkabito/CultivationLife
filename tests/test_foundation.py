@@ -1,62 +1,29 @@
-import json
-import ast
-import re
 import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import V2GameEngine
-from cultivation_life.v2.infrastructure import ConcurrentWriteError, V2ContentLoader
-from cultivation_life.v2.domain.character import BootstrapGame, register_character_domain
-from cultivation_life.v2.kernel.bus import CommandBus, SimulationContext
-from cultivation_life.v2.kernel.model import EntityStore, EventScope, WorldState
-from cultivation_life.v2.kernel.services import TimeService
+from cultivation_life import GameEngine
+from cultivation_life.infrastructure import ConcurrentWriteError, ContentLoader
+from cultivation_life.domain.character import BootstrapGame, register_character_domain
+from cultivation_life.kernel.bus import CommandBus, SimulationContext
+from cultivation_life.kernel.model import EntityStore, EventScope, WorldState
+from cultivation_life.kernel.services import TimeService
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 
-class V1BehaviorFreezeTests(unittest.TestCase):
-    def test_v1_public_operation_inventory_is_frozen(self):
-        inventory = json.loads(
-            (SOURCE_ROOT / "docs" / "v2" / "v1_behavior_inventory.json").read_text(encoding="utf-8")
-        )
-        server_source = (SOURCE_ROOT / "cultivation_life" / "server.py").read_text(encoding="utf-8")
-        implemented = sorted(set(re.findall(r'operation == "([^"]+)"', server_source)))
-        self.assertEqual(implemented, inventory["public_operations"])
-
-    def test_v2_does_not_import_legacy_runtime_or_models(self):
-        forbidden = {
-            "cultivation_life.engine",
-            "cultivation_life.models",
-            "cultivation_life.storage",
-        }
-        violations = []
-        for path in (SOURCE_ROOT / "cultivation_life" / "v2").rglob("*.py"):
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    modules = {alias.name for alias in node.names}
-                elif isinstance(node, ast.ImportFrom):
-                    modules = {node.module or ""}
-                else:
-                    continue
-                if modules & forbidden:
-                    violations.append(f"{path.name}:{node.lineno}")
-        self.assertEqual(violations, [])
-
-
-class V2FoundationTests(unittest.TestCase):
+class FoundationTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.database = Path(self.temp.name) / "v2" / "saves.sqlite3"
-        self.engine = V2GameEngine(self.database)
+        self.engine = GameEngine(self.database)
 
     def tearDown(self):
         self.temp.cleanup()
 
     @staticmethod
-    def _resolve_pending(engine: V2GameEngine, game_id: str) -> dict:
+    def _resolve_pending(engine: GameEngine, game_id: str) -> dict:
         game = engine.get_game(game_id)
         while game["pending_event"] is not None:
             choice = next(row for row in game["pending_event"]["choices"] if row["enabled"])
@@ -85,7 +52,7 @@ class V2FoundationTests(unittest.TestCase):
         self.assertEqual(event_types[-1], "story.interaction.opened")
         self.assertIsNotNone(execution.game["pending_event"])
 
-        reloaded_engine = V2GameEngine(self.database)
+        reloaded_engine = GameEngine(self.database)
         self.assertEqual(reloaded_engine.get_game(created["id"]), execution.game)
         journal_types = [event["event_type"] for event in reloaded_engine.event_journal(created["id"])]
         self.assertEqual(journal_types[0], "character.created")
@@ -103,13 +70,13 @@ class V2FoundationTests(unittest.TestCase):
 
     def test_rng_is_deterministic_across_reload_boundaries(self):
         other_database = Path(self.temp.name) / "other" / "saves.sqlite3"
-        other = V2GameEngine(other_database)
+        other = GameEngine(other_database)
         left = self.engine.create_game("甲", seed=99, path="demonic", spirit_root="supreme_fire")
         right = other.create_game("乙", seed=99, path="demonic", spirit_root="supreme_fire")
 
         self.engine.perform_timed_action(left["id"], "cultivate", 2)
         self._resolve_pending(self.engine, left["id"])
-        reloaded = V2GameEngine(self.database)
+        reloaded = GameEngine(self.database)
         left_result = reloaded.perform_timed_action(left["id"], "cultivate", 3).game
 
         other.perform_timed_action(right["id"], "cultivate", 2)
@@ -148,7 +115,7 @@ class V2FoundationTests(unittest.TestCase):
 
     def test_scheduler_processes_events_in_chronological_order(self):
         bus = CommandBus()
-        definitions = V2ContentLoader.load(SOURCE_ROOT / "content")
+        definitions = ContentLoader.load(SOURCE_ROOT / "content")
         register_character_domain(bus, definitions)
         state = WorldState.new(seed=10, created_at="2026-09-16T00:00:00+00:00")
         bus.execute(state, BootstrapGame(name="守时"))

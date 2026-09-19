@@ -4,22 +4,21 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.engine import GameEngine
-from cultivation_life.v2 import (
+from cultivation_life import (
     FoundFaction,
     IntriguePersonnelAction,
     JoinFaction,
     RegisterCharacter,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.extensions import INTRIGUE_GOVERNANCE
-from cultivation_life.v2.domain.character import IDENTITY
-from cultivation_life.v2.domain.factions import FACTION_NPC
-from cultivation_life.v2.domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE
-from cultivation_life.v2.domain.intrigue import INTRIGUE_PRISONER
-from cultivation_life.v2.domain.relations import relationship_affinity
-from cultivation_life.v2.domain.war import _power_members
-from cultivation_life.v2.infrastructure.migrations import migrate_snapshot
+from cultivation_life.domain.extensions import INTRIGUE_GOVERNANCE
+from cultivation_life.domain.character import IDENTITY
+from cultivation_life.domain.factions import FACTION_NPC
+from cultivation_life.domain.family import FAMILY_MEMBERSHIP, FAMILY_PROFILE, LINEAGE
+from cultivation_life.domain.intrigue import INTRIGUE_PRISONER
+from cultivation_life.domain.relations import relationship_affinity
+from cultivation_life.domain.war import _power_members
+from cultivation_life.infrastructure.migrations import migrate_snapshot
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -28,7 +27,7 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 class V2IntriguePersonnelTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temporary.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temporary.name) / "v2.sqlite3")
         self.game = self.engine.create_game("执掌山门", seed=2619)
         self.game_id = str(self.game["id"])
         self.actor_id = str(self.game["player"]["id"])
@@ -256,54 +255,6 @@ class V2IntriguePersonnelTests(unittest.TestCase):
         self.assertEqual(migrated_intrigue["member_contribution"], {})
         self.assertEqual(migrated_intrigue["personnel_history"], [])
         self.assertEqual(migrated_intrigue["time_progress"], 0.0)
-
-
-class V2IntrigueLegacyImportTests(unittest.TestCase):
-    def test_v1_positions_and_prison_are_imported_as_canonical_v2_state(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            v1_directory = root / "v1"
-            v1 = GameEngine(SOURCE_ROOT, v1_directory)
-            created = v1.create_game(
-                "旧宗执法", "supreme_metal", "dao", seed=2620
-            )
-            legacy = v1._load(created["id"])
-            legacy.player.realm_index = 4
-            legacy.player.layer = 3
-            v1.store.save(legacy)
-            v1.create_faction(created["id"], "旧衡议宗")
-            section = next(
-                row for row in v1.get_game(created["id"])["intrigue_system"]["sections"]
-                if row["kind"] == "sect"
-            )
-            member_id = str(section["members"][0]["id"])
-            v1.intrigue_personnel_action(
-                created["id"], "sect", "appoint", member_id, "affairs_elder"
-            )
-            v1.intrigue_personnel_action(
-                created["id"], "sect", "imprison", member_id,
-                years=5, reason="旧档违令",
-            )
-
-            v2 = V2GameEngine(root / "v2.sqlite3")
-            imported = v2.import_v1_save(v1_directory / f"{created['id']}.json")
-            section = next(
-                row for row in imported.game["intrigue_system"]["sections"]
-                if row["kind"] == "sect"
-            )
-            holder_id = next(
-                row for row in section["positions"]
-                if row["id"] == "affairs_elder"
-            )["holder_id"]
-            self.assertTrue(str(holder_id).startswith("character:"))
-            self.assertEqual(section["prison"][0]["prisoner_id"], holder_id)
-            self.assertEqual(section["prison"][0]["sentence_remaining"], 5)
-            self.assertGreaterEqual(
-                imported.report["imported_counts"]["intrigue_positions"], 1
-            )
-            self.assertEqual(
-                imported.report["imported_counts"]["intrigue_prisoners"], 1
-            )
 
 
 if __name__ == "__main__":

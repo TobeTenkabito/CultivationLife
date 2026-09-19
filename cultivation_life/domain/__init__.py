@@ -1,1 +1,1 @@
-"""V2 domain modules.  Domains may depend on kernel, never on infrastructure."""
+"""Domain modules may depend on the kernel, never on infrastructure."""

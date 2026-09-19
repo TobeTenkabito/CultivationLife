@@ -24,12 +24,12 @@ from ..domain.definitions import (
 from .extension_loader import load_extension_documents, read_json_document
 
 
-class V2ContentError(ValueError):
+class ContentError(ValueError):
     pass
 
 
-class V2ContentLoader:
-    """Strict adapter from immutable V1 content documents to V2 definitions."""
+class ContentLoader:
+    """Strict adapter from immutable content documents to domain definitions."""
 
     REQUIRED_FILES = (
         "world.json", "races.json", "maps.json", "factions.json", "techniques.json",
@@ -73,7 +73,7 @@ class V2ContentLoader:
 
         realms = tuple(cls._realm(row) for row in world_doc.get("realms", []))
         if not realms or len({realm.id for realm in realms}) != len(realms):
-            raise V2ContentError("境界表为空或包含重复ID")
+            raise ContentError("境界表为空或包含重复ID")
         paths = {
             str(path_id): str(definition["name"])
             for path_id, definition in dict(world_doc.get("paths", {})).items()
@@ -91,7 +91,7 @@ class V2ContentLoader:
             not str(row.get("name", "")) or not list(row.get("worlds", []))
             for row in races.values()
         ):
-            raise V2ContentError("种族定义为空或不完整")
+            raise ContentError("种族定义为空或不完整")
         factions = cls._factions(faction_doc, worlds)
         story_events = cls._story_events(documents, items, techniques, factions)
         faction_rewards = {
@@ -102,7 +102,7 @@ class V2ContentLoader:
             not str(reward.get("name", "")) or not dict(reward.get("effect", {}))
             for reward in faction_rewards.values()
         ):
-            raise V2ContentError("势力年度奖励定义无效")
+            raise ContentError("势力年度奖励定义无效")
         systems = dict(world_doc.get("systems", {}))
         systems["factions"] = dict(faction_doc.get("systems", {}))
         systems["crafting"] = {
@@ -129,14 +129,14 @@ class V2ContentLoader:
         }
         expected_indexes = set(range(len(realms)))
         if set(time_units) != expected_indexes or set(travel_speeds) != expected_indexes:
-            raise V2ContentError("行动时间与移动速度必须覆盖全部境界")
+            raise ContentError("行动时间与移动速度必须覆盖全部境界")
         start_worlds = {
             str(path): tuple(map(str, world_ids))
             for path, world_ids in dict(systems.get("start_worlds", {})).items()
         }
         for path, world_ids in start_worlds.items():
             if path not in paths or set(world_ids) - set(worlds):
-                raise V2ContentError(f"开局世界引用无效：{path}")
+                raise ContentError(f"开局世界引用无效：{path}")
         stage_bonus = {
             str(realm_id): {
                 str(stage): (int(span[0]), int(span[1]))
@@ -189,41 +189,41 @@ class V2ContentLoader:
             document = documents[filename]
             rows = document.get("events", [])
             if not isinstance(rows, list):
-                raise V2ContentError(f"事件文件 {filename} 缺少events数组")
+                raise ContentError(f"事件文件 {filename} 缺少events数组")
             document_world = str(document.get("world", ""))
             for raw in rows:
                 if not isinstance(raw, dict):
-                    raise V2ContentError(f"事件文件 {filename} 包含非对象事件")
+                    raise ContentError(f"事件文件 {filename} 包含非对象事件")
                 event_id = str(raw.get("id", ""))
                 if not event_id or event_id in result:
-                    raise V2ContentError(f"事件ID缺失或重复：{event_id}")
+                    raise ContentError(f"事件ID缺失或重复：{event_id}")
                 raw_choices = raw.get("choices", [])
                 if not raw.get("title") or not isinstance(raw_choices, list) or not raw_choices:
-                    raise V2ContentError(f"事件 {event_id} 缺少标题或选项")
+                    raise ContentError(f"事件 {event_id} 缺少标题或选项")
                 choices: list[StoryChoiceDefinition] = []
                 choice_ids: set[str] = set()
                 for raw_choice in raw_choices:
                     if not isinstance(raw_choice, dict):
-                        raise V2ContentError(f"事件 {event_id} 包含非对象选项")
+                        raise ContentError(f"事件 {event_id} 包含非对象选项")
                     choice_id = str(raw_choice.get("id", ""))
                     if not choice_id or choice_id in choice_ids:
-                        raise V2ContentError(f"事件 {event_id} 的选项ID缺失或重复")
+                        raise ContentError(f"事件 {event_id} 的选项ID缺失或重复")
                     choice_ids.add(choice_id)
                     effects: list[StoryEffectDefinition] = []
                     for raw_effect in raw_choice.get("effects", []):
                         if not isinstance(raw_effect, dict) or not raw_effect.get("type"):
-                            raise V2ContentError(f"事件 {event_id} 包含无类型效果")
+                            raise ContentError(f"事件 {event_id} 包含无类型效果")
                         payload = {
                             str(key): value for key, value in raw_effect.items()
                             if key != "type"
                         }
                         kind = str(raw_effect["type"])
                         if kind in {"add_item", "remove_item"} and str(payload.get("item_id")) not in items:
-                            raise V2ContentError(f"事件 {event_id} 引用未知物品")
+                            raise ContentError(f"事件 {event_id} 引用未知物品")
                         if kind in {"learn_technique", "equip_technique"} and str(payload.get("technique_id")) not in techniques:
-                            raise V2ContentError(f"事件 {event_id} 引用未知功法")
+                            raise ContentError(f"事件 {event_id} 引用未知功法")
                         if kind == "join_faction" and str(payload.get("faction_id")) not in factions:
-                            raise V2ContentError(f"事件 {event_id} 引用未知势力")
+                            raise ContentError(f"事件 {event_id} 引用未知势力")
                         if kind == "queue_event":
                             queue_references.append((event_id, str(payload.get("event_id", ""))))
                         effects.append(StoryEffectDefinition(kind=kind, payload=payload))
@@ -256,7 +256,7 @@ class V2ContentLoader:
                 )
         for source_id, target_id in queue_references:
             if target_id not in result:
-                raise V2ContentError(f"事件 {source_id} 排入未知后续事件：{target_id}")
+                raise ContentError(f"事件 {source_id} 排入未知后续事件：{target_id}")
         return result
 
     @staticmethod
@@ -318,7 +318,7 @@ class V2ContentLoader:
             for row in rows
         }
         if len(result) != len(rows):
-            raise V2ContentError("灵根表包含重复ID")
+            raise ContentError("灵根表包含重复ID")
         return result
 
     @staticmethod
@@ -338,7 +338,7 @@ class V2ContentLoader:
                 or not sources or set(sources) - set(QI_SOURCES)
                 or abs(sum(sources.values()) - 1.0) > 1e-9
             ):
-                raise V2ContentError(f"功法定义无效：{technique_id}")
+                raise ContentError(f"功法定义无效：{technique_id}")
             result[technique_id] = TechniqueDefinition(
                 id=technique_id,
                 name=str(row["name"]),
@@ -369,7 +369,7 @@ class V2ContentLoader:
             row = dict(source)
             item_id = str(row["id"])
             if item_id in result:
-                raise V2ContentError(f"物品ID重复：{item_id}")
+                raise ContentError(f"物品ID重复：{item_id}")
             result[item_id] = ItemDefinition(
                 id=item_id,
                 name=str(row["name"]),
@@ -406,9 +406,9 @@ class V2ContentLoader:
                 form_id not in transformations
                 or not 0 < result[item_id].transformation_purity <= 1
             ):
-                raise V2ContentError(f"真灵素材定义无效：{item_id}")
+                raise ContentError(f"真灵素材定义无效：{item_id}")
         if "spirit_stone" not in result or "currency" not in result["spirit_stone"].tags:
-            raise V2ContentError("物品表缺少灵石货币定义")
+            raise ContentError("物品表缺少灵石货币定义")
         return result
 
     @staticmethod
@@ -437,7 +437,7 @@ class V2ContentLoader:
                 or not 0 <= realm_index < realm_count
                 or any(not 0 <= value <= 1 for value in requirements)
             ):
-                raise V2ContentError(f"变化形态定义无效：{form_id}")
+                raise ContentError(f"变化形态定义无效：{form_id}")
             result[form_id] = TransformationDefinition(
                 id=form_id,
                 name=str(row["name"]),
@@ -451,10 +451,10 @@ class V2ContentLoader:
                 incompatible_with=tuple(map(str, row.get("incompatible_with", []))),
             )
         if not result:
-            raise V2ContentError("变化形态表为空")
+            raise ContentError("变化形态表为空")
         for form in result.values():
             if set(form.incompatible_with) - set(result):
-                raise V2ContentError(f"变化形态互斥引用无效：{form.id}")
+                raise ContentError(f"变化形态互斥引用无效：{form.id}")
         return result
 
     @staticmethod
@@ -475,7 +475,7 @@ class V2ContentLoader:
             key = (world_id, kind, content_id, tier)
             catalog = items if kind == "item" else techniques if kind == "technique" else None
             if key in seen or catalog is None or content_id not in catalog or tier < 1 or price <= 0:
-                raise V2ContentError(f"坊市货物定义无效：{key}")
+                raise ContentError(f"坊市货物定义无效：{key}")
             seen.add(key)
             result.append(MarketGoodDefinition(
                 world_id=world_id,
@@ -495,14 +495,14 @@ class V2ContentLoader:
         names = dict(systems["world_names"])
         map_worlds = dict(maps_doc["worlds"])
         if set(profiles) != set(map_worlds):
-            raise V2ContentError("世界规则与地图世界不一致")
+            raise ContentError("世界规则与地图世界不一致")
         result: dict[str, WorldDefinition] = {}
         for world_id, profile_source in profiles.items():
             profile = dict(profile_source)
             map_source = dict(map_worlds[world_id])
             npc_realm_cap = int(profile.get("npc_realm_cap", realm_count - 1))
             if not 0 <= npc_realm_cap < realm_count:
-                raise V2ContentError(f"世界NPC境界上限非法：{world_id}")
+                raise ContentError(f"世界NPC境界上限非法：{world_id}")
             locations = {
                 str(row["id"]): LocationDefinition(
                     id=str(row["id"]),
@@ -519,12 +519,12 @@ class V2ContentLoader:
             }
             default = str(map_source["default"])
             if default not in locations:
-                raise V2ContentError(f"世界缺少默认地点：{world_id}")
+                raise ContentError(f"世界缺少默认地点：{world_id}")
             graph: dict[str, list[tuple[str, int]]] = {location_id: [] for location_id in locations}
             for route in map_source.get("routes", []):
                 first, second, years = str(route["from"]), str(route["to"]), int(route["years"])
                 if first not in graph or second not in graph or first == second or years <= 0:
-                    raise V2ContentError(f"世界包含无效路线：{world_id}")
+                    raise ContentError(f"世界包含无效路线：{world_id}")
                 graph[first].append((second, years))
                 graph[second].append((first, years))
             result[world_id] = WorldDefinition(
@@ -551,7 +551,7 @@ class V2ContentLoader:
             faction_id = str(row["id"])
             world_id = str(row["world"])
             if faction_id in result or world_id not in worlds:
-                raise V2ContentError(f"势力定义无效：{faction_id}")
+                raise ContentError(f"势力定义无效：{faction_id}")
             result[faction_id] = FactionDefinition(
                 id=faction_id,
                 name=str(row["name"]),
@@ -567,9 +567,9 @@ class V2ContentLoader:
     @staticmethod
     def _read(path: Path) -> dict[str, Any]:
         if not path.is_file():
-            raise V2ContentError(f"缺少V2内容文件：{path.name}")
+            raise ContentError(f"缺少必需内容文件：{path.name}")
         try:
             return read_json_document(path)
         except ValueError as error:
-            raise V2ContentError(str(error)) from error
+            raise ContentError(str(error)) from error
     MarketGoodDefinition,

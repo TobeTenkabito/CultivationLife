@@ -4,14 +4,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import FormRelationship, RegisterCharacter, V2GameEngine
-from cultivation_life.v2.domain.family import LINEAGE, PARENT_CHILD
+from cultivation_life import FormRelationship, RegisterCharacter, GameEngine
+from cultivation_life.domain.family import LINEAGE, PARENT_CHILD
 
 
 class V2GovernanceBatchFiveTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temporary.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temporary.name) / "v2.sqlite3")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()

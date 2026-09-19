@@ -13,7 +13,7 @@ from ..domain.definitions import ExtensionDefinition
 PACKAGE_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,63}$")
 
 
-class V2ExtensionError(ValueError):
+class ExtensionError(ValueError):
     pass
 
 
@@ -38,13 +38,13 @@ def read_json_document(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
     except (OSError, json.JSONDecodeError) as error:
-        raise V2ExtensionError(f"{path.name} 无法读取：{error}") from error
+        raise ExtensionError(f"{path.name} 无法读取：{error}") from error
     if duplicates:
-        raise V2ExtensionError(f"{path.name} 包含重复键：{sorted(set(duplicates))}")
+        raise ExtensionError(f"{path.name} 包含重复键：{sorted(set(duplicates))}")
     if not isinstance(value, dict):
-        raise V2ExtensionError(f"{path.name} 顶层必须为对象")
+        raise ExtensionError(f"{path.name} 顶层必须为对象")
     if value.get("schema_version") != 1:
-        raise V2ExtensionError(f"{path.name} 必须声明 schema_version=1")
+        raise ExtensionError(f"{path.name} 必须声明 schema_version=1")
     return value
 
 
@@ -105,7 +105,7 @@ def _preferences(project_root: Path) -> dict[str, bool]:
         return {}
     try:
         document = read_json_document(path)
-    except V2ExtensionError:
+    except ExtensionError:
         return {}
     enabled = document.get("enabled", {})
     if not isinstance(enabled, dict):
@@ -131,15 +131,15 @@ def _discover(project_root: Path) -> tuple[list[_Package], list[ExtensionDefinit
                 manifest = read_json_document(manifest_path)
                 package_id = str(manifest.get("id", ""))
                 if int(manifest.get("api_version", 0)) != 1:
-                    raise V2ExtensionError("仅支持 api_version=1")
+                    raise ExtensionError("仅支持 api_version=1")
                 if not PACKAGE_ID.fullmatch(package_id) or package_id in seen:
-                    raise V2ExtensionError("扩展ID非法或重复")
+                    raise ExtensionError("扩展ID非法或重复")
                 if manifest.get("kind") != kind:
-                    raise V2ExtensionError(f"扩展 kind 必须为 {kind}")
+                    raise ExtensionError(f"扩展 kind 必须为 {kind}")
                 default_enabled = manifest.get("enabled")
                 requires = tuple(map(str, manifest.get("requires", [])))
                 if not isinstance(default_enabled, bool) or any(not PACKAGE_ID.fullmatch(dep) for dep in requires):
-                    raise V2ExtensionError("enabled 或 requires 非法")
+                    raise ExtensionError("enabled 或 requires 非法")
                 definition = ExtensionDefinition(
                     id=package_id,
                     name=str(manifest.get("name") or package_id),
@@ -152,7 +152,7 @@ def _discover(project_root: Path) -> tuple[list[_Package], list[ExtensionDefinit
                 )
                 packages.append(_Package(definition, manifest_path.parent, requires))
                 seen.add(package_id)
-            except (V2ExtensionError, TypeError, ValueError) as error:
+            except (ExtensionError, TypeError, ValueError) as error:
                 errors.append(ExtensionDefinition(
                     id=manifest_path.parent.name,
                     name=manifest_path.parent.name,
@@ -206,10 +206,10 @@ def load_extension_documents(
                 candidate = copy.deepcopy(documents)
                 content_root = package.root / "content"
                 if not content_root.is_dir():
-                    raise V2ExtensionError("扩展缺少 content 目录")
+                    raise ExtensionError("扩展缺少 content 目录")
                 content_files = sorted(content_root.glob("*.json"))
                 if not content_files:
-                    raise V2ExtensionError("扩展没有JSON内容")
+                    raise ExtensionError("扩展没有JSON内容")
                 for path in content_files:
                     overlay = read_json_document(path)
                     candidate[path.name] = merge_documents(

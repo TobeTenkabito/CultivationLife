@@ -1,6 +1,6 @@
 # 浮生问道
 
-**当前本体版本：v1.15.1。** 本体采用语义化版本号，唯一代码来源为 `cultivation_life/version.py`；存档 schema、内容 schema 以及各 DLC/MOD 的版本继续独立管理。
+**当前本体版本：v2.0.0。** 第二代模拟内核现已成为唯一正式运行时；旧 V1 JSON 存档不再兼容。存档 schema、内容 schema 以及各 DLC/MOD 的版本继续独立管理。
 
 各界现已拥有独立地域地图。跨域移动按最短路线、距离与角色境界消耗游戏时间，途中复用统一世界时钟；坊市货单与寻幽探宝奖励按当前地域分流，高危地图还具有阻挡或致死性的境界限制。
 
@@ -16,7 +16,7 @@
 
 ## 快速开始
 
-推荐直接双击项目根目录的 `launcher.exe`。启动器会自动运行本地游戏服务并打开浏览器；如果服务已经运行，再次双击只会打开现有游戏页面。存档仍写入项目下的 `data/saves/`。
+推荐直接双击项目根目录的 `launcher.exe`。启动器会自动运行本地游戏服务并打开浏览器；如果服务已经运行，再次双击只会打开现有游戏页面。正式存档写入项目下的 `data/games.db`。
 
 也可以使用 Python 命令启动：
 
@@ -24,12 +24,12 @@
 python -m cultivation_life.server
 ```
 
-然后浏览器打开 <http://127.0.0.1:8000>。
+然后浏览器打开 <http://127.0.0.1:8766>。
 
 ## 测试
 
 ```powershell
-python -m unittest discover -s tests -v
+python -m pytest -q
 ```
 
 可选的真实浏览器交互烟雾测试（使用临时存档）：
@@ -107,20 +107,14 @@ python tests/browser_smoke.py
 - `content/true_demon_world_events.json`：真魔界六个专属日常事件，以及黑日曜烬、坠星遗胎、渊极界柱三条剧情链
 - `content/hell_events.json`：地狱界通用、宗门、战斗事件与忘川失名舟剧情链
 - `content/encounter_events.json`：修士交易、结侣、贪念反转与多人战斗预览事件
-- `cultivation_life/content_registry.py`：内容加载、对象化与跨表引用校验
-- `cultivation_life/achievements.py`：跨存档成就判定、全局元数据和公开目录
-- `cultivation_life/event_repository.py`：事件加载及事件引用校验
-- `cultivation_life/simulation.py`：多年行动单位的成本/年度收益账本
-- `cultivation_life/map_system.py`：地图校验、最短路径、境界限制与地域内容池
-- `cultivation_life/map_runtime.py`：旅行流程与统一年度世界时钟
-- `cultivation_life/economy_system.py`：坊市、拍卖会、私下交易、散场黑市、灵田与探宝奖励
-- `cultivation_life/formation_system.py`：九宫矩阵、六项指标、阵图预设、实物占用与阵法战斗轮廓
+- `cultivation_life/application.py`：事务化游戏命令与公开应用服务
+- `cultivation_life/domain/`：人物、修炼、世界、关系、势力、经济、战斗及 DLC 领域规则
+- `cultivation_life/kernel/`：实体仓库、命令总线、统一时间与事件基础设施
+- `cultivation_life/infrastructure/`：内容加载、扩展加载、SQLite 存档与 schema 迁移
+- `cultivation_life/server.py`：正式 HTTP 接口与静态页面服务
 - `cultivation_life/runtime.py`：时间戳与可复现随机状态基础设施
-- `cultivation_life/world_state.py`：NPC 缓存队列、种族关系键与遭遇权重等世界状态基础设施
-- `web/`：零构建单页前端；`ui-panels.js` 与 `panels.css` 独立管理策略悬浮窗
+- `web/`：零构建正式单页前端
 - `tests/`：核心规则测试
-- `docs/v2/`：V1行为冻结基线、V2架构约束与迁移状态
-- `cultivation_life/v2/`：与V1隔离的第二代模拟内核实验区，尚未接入正式界面
 
 ## 当前范围
 

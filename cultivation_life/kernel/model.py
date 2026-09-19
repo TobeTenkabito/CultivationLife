@@ -7,15 +7,15 @@ from collections.abc import Callable
 from typing import Any
 
 
-V2_FORMAT_ID = "cultivation-life-v2"
-V2_SCHEMA_VERSION = 19
+SAVE_FORMAT_ID = "cultivation-life-v2"
+SAVE_SCHEMA_VERSION = 19
 
 
 @dataclass(frozen=True, slots=True)
 class GameClock:
     """Canonical simulation clock.
 
-    One tick is one in-game year for the first V2 milestone.  Finer-grained
+    One tick is one in-game year. Finer-grained
     units can be introduced behind this type without allowing domains to edit
     character ages directly.
     """
@@ -411,7 +411,7 @@ class WorldState:
     created_at: str
     updated_at: str
     revision: int = 0
-    schema_version: int = V2_SCHEMA_VERSION
+    schema_version: int = SAVE_SCHEMA_VERSION
     clock: GameClock = field(default_factory=GameClock)
     rng_state: str = ""
     controlled_entity_id: str | None = None
@@ -457,7 +457,7 @@ class WorldState:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "format": V2_FORMAT_ID,
+            "format": SAVE_FORMAT_ID,
             "schema_version": self.schema_version,
             "game_id": self.game_id,
             "seed": self.seed,
@@ -477,10 +477,10 @@ class WorldState:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> WorldState:
-        if value.get("format") != V2_FORMAT_ID:
-            raise ValueError("不是V2存档")
-        if int(value.get("schema_version", 0)) != V2_SCHEMA_VERSION:
-            raise ValueError("不支持的V2存档版本")
+        if value.get("format") != SAVE_FORMAT_ID:
+            raise ValueError("不是受支持的游戏存档")
+        if int(value.get("schema_version", 0)) != SAVE_SCHEMA_VERSION:
+            raise ValueError("不支持的存档版本")
         return cls(
             game_id=str(value["game_id"]),
             seed=int(value["seed"]),

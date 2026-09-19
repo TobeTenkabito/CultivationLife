@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from ..kernel.model import EventEnvelope, V2_FORMAT_ID, V2_SCHEMA_VERSION, WorldState
+from ..kernel.model import EventEnvelope, SAVE_FORMAT_ID, SAVE_SCHEMA_VERSION, WorldState
 from .migrations import migrate_snapshot
 
 
@@ -15,7 +15,7 @@ class ConcurrentWriteError(RuntimeError):
 
 
 class SQLiteSaveStore:
-    """Atomic V2 snapshot store with an append-only domain-event journal."""
+    """Atomic snapshot store with an append-only domain-event journal."""
 
     def __init__(self, database_path: Path):
         self.database_path = Path(database_path)
@@ -104,7 +104,7 @@ class SQLiteSaveStore:
                 ).fetchone()
                 if expected_revision is None:
                     if existing is not None:
-                        raise ConcurrentWriteError("V2存档已经存在")
+                        raise ConcurrentWriteError("存档已经存在")
                     connection.execute(
                         """
                         INSERT INTO games (
@@ -114,8 +114,8 @@ class SQLiteSaveStore:
                         """,
                         (
                             state.game_id,
-                            V2_FORMAT_ID,
-                            V2_SCHEMA_VERSION,
+                            SAVE_FORMAT_ID,
+                            SAVE_SCHEMA_VERSION,
                             new_revision,
                             player_name,
                             state.created_at,
@@ -127,7 +127,7 @@ class SQLiteSaveStore:
                     if existing is None or int(existing["revision"]) != expected_revision:
                         actual = None if existing is None else int(existing["revision"])
                         raise ConcurrentWriteError(
-                            f"V2存档已被其他操作修改：期望 {expected_revision}，实际 {actual}"
+                            f"存档已被其他操作修改：期望 {expected_revision}，实际 {actual}"
                         )
                     connection.execute(
                         """
@@ -137,8 +137,8 @@ class SQLiteSaveStore:
                         WHERE game_id = ? AND revision = ?
                         """,
                         (
-                            V2_FORMAT_ID,
-                            V2_SCHEMA_VERSION,
+                            SAVE_FORMAT_ID,
+                            SAVE_SCHEMA_VERSION,
                             new_revision,
                             player_name,
                             state.updated_at,
@@ -174,13 +174,13 @@ class SQLiteSaveStore:
                 (game_id,),
             ).fetchone()
         if row is None:
-            raise KeyError("V2存档不存在")
-        if row["format_id"] != V2_FORMAT_ID:
-            raise ValueError("V2存档格式不受支持")
+            raise KeyError("存档不存在")
+        if row["format_id"] != SAVE_FORMAT_ID:
+            raise ValueError("存档格式不受支持")
         snapshot = migrate_snapshot(json.loads(str(row["snapshot_json"])))
         state = WorldState.from_dict(snapshot)
         if state.game_id != game_id or state.revision != int(row["revision"]):
-            raise ValueError("V2存档索引与快照不一致")
+            raise ValueError("存档索引与快照不一致")
         return state
 
     def list_games(self) -> list[dict[str, Any]]:
