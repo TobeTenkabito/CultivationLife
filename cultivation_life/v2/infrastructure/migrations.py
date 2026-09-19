@@ -465,6 +465,17 @@ def _schema_16_to_17(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_17_to_18(source: dict[str, Any]) -> dict[str, Any]:
+    """Declare the persistent celestial-court aggregate module."""
+    value = copy.deepcopy(source)
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "celestial": 1,
+    }
+    value["schema_version"] = 18
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -482,6 +493,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     14: _schema_14_to_15,
     15: _schema_15_to_16,
     16: _schema_16_to_17,
+    17: _schema_17_to_18,
 }
 
 

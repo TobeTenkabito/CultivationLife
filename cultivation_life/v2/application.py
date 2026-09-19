@@ -83,6 +83,15 @@ from .domain.monster import (
     reconcile_monster_state,
     register_monster_domain,
 )
+from .domain.celestial import (
+    HeavenlyCourtAction,
+    ResolveHeavenlyElection,
+    celestial_invariants,
+    celestial_view,
+    reconcile_celestial_state,
+    register_celestial_domain,
+    register_celestial_story_effects,
+)
 from .domain.war import (
     IssueBounty,
     WarAction,
@@ -326,6 +335,7 @@ class V2GameEngine:
         register_extension_domains(self.commands, self.definitions)
         register_ghost_domain(self.commands, self.definitions)
         register_monster_domain(self.commands, self.definitions)
+        register_celestial_domain(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
@@ -334,6 +344,7 @@ class V2GameEngine:
         register_concubine_story_effects(self.story_effects, self.definitions)
         register_war_story_effects(self.story_effects, self.definitions)
         register_ghost_story_effects(self.story_effects, self.definitions)
+        register_celestial_story_effects(self.story_effects)
         self.invariants.register("character", character_invariants)
         self.invariants.register("actions", action_invariants)
         self.invariants.register("cultivation", cultivation_invariants(self.definitions))
@@ -358,6 +369,7 @@ class V2GameEngine:
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("ghost", ghost_invariants)
         self.invariants.register("monster", monster_invariants(self.definitions))
+        self.invariants.register("celestial", celestial_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
 
@@ -387,6 +399,7 @@ class V2GameEngine:
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
+        reconcile_celestial_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -435,6 +448,7 @@ class V2GameEngine:
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
+        reconcile_celestial_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -493,6 +507,7 @@ class V2GameEngine:
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
+        reconcile_celestial_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1470,11 +1485,34 @@ class V2GameEngine:
             QueueStoryEvent(actor_id=actor_id, event_id=event_id, reason=reason),
         )
 
+    def resolve_heavenly_election(
+        self, game_id: str, method: str = "none", pledge_id: str = "",
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(game_id, ResolveHeavenlyElection(actor_id, method, pledge_id))
+
+    def heavenly_court_action(
+        self, game_id: str, action: str, target_id: str = "",
+        enact: bool | None = None, influence_spend: int = 0,
+    ) -> CommandExecution:
+        state = self.store.load(game_id)
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            raise ValueError("游戏尚未初始化")
+        return self.execute(
+            game_id,
+            HeavenlyCourtAction(actor_id, action, target_id, enact, influence_spend),
+        )
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
+        reconcile_celestial_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1537,6 +1575,7 @@ class V2GameEngine:
             "demonic_system": demonic_view(state, self.definitions),
             "ghost_system": ghost_view(state, self.definitions),
             "monster_system": monster_view(state, self.definitions),
+            "heavenly_court": celestial_view(state, self.definitions),
             "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],

@@ -288,6 +288,11 @@ def _cultivation_gain(
         )
     if context.state.relations.find(target_id=actor_id, kind="concubine"):
         multiplier *= 0.8
+    if world_id == "celestial":
+        from .celestial import court_law_active
+
+        if court_law_active(context.state, "immortal_twofold"):
+            multiplier *= 1.10
     if action == "cultivate" and cultivation["path"] == "demonic":
         multiplier *= 0.1
     return float(base) * multiplier

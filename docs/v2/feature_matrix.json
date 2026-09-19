@@ -489,11 +489,18 @@
     {
       "id": "celestial.court",
       "domain": "celestial",
-      "status": "missing",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["heavenly-election", "heavenly-court"],
-      "evidence": [],
-      "notes": "Court offices, laws and election interaction queue are not migrated."
+      "evidence": [
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_court_is_world_isolated_and_initializes_with_49_seats",
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_interactive_election_halts_and_resumes_timed_action",
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_four_player_controlled_offices_guarantee_law_vote",
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_v1_court_is_imported_with_player_identity_remapped",
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_celestial_combat_laws_apply_wanted_and_karma_rules",
+        "tests/test_v2_celestial_court.py::V2CelestialCourtTests::test_story_court_merit_effect_uses_authoritative_court_state"
+      ],
+      "notes": "The celestial court is a persistent global aggregate with 49 seats, seven rotating offices, resumable interactive elections, merit examinations, decrees, laws, world-isolated projection, cross-domain cultivation/combat effects and one-way V1 import."
     },
     {
       "id": "artifact.natal",
