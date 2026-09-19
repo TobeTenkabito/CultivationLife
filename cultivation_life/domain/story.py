@@ -7,7 +7,7 @@ from typing import Any, Callable, ClassVar
 
 from .actions import resume_action
 from .character import IDENTITY, LIFE
-from .combat import CONDITION
+from .combat import CONDITION, combat_snapshot
 from .cultivation import CULTIVATION, PRACTICE
 from .definitions import GameDefinitions, StoryEffectDefinition, StoryEventDefinition
 from .economy import INVENTORY
@@ -159,10 +159,11 @@ class StoryEffectRegistry:
             "add_karma": "karma", "add_fame": "fame", "add_sha_qi": "sha_qi",
         }[effect.kind]
         value = self._value(context, effect)
-        attributes[key] = max(0.0, float(attributes.get(key, 0.0)) + value)
+        attributes[key] = float(attributes.get(key, 0.0)) + value
         state["attributes"] = attributes
         context.state.entities.put(actor_id, STORY_STATE, state)
-        return EffectOutcome(None, f"{key} {value:+g}")
+        label = {"karma": "因果", "fame": "声望", "sha_qi": "煞气"}[key]
+        return EffectOutcome(None, f"{label} {value:+g}")
 
     def _change_heart_demon(
         self, context: SimulationContext, actor_id: str,
@@ -277,6 +278,7 @@ class StoryEffectRegistry:
     ) -> EffectOutcome:
         value = self._value(context, effect)
         condition = context.state.entities.require(actor_id, CONDITION)
+        snapshot = combat_snapshot(context.state, self.definitions, actor_id)
         context.emit(
             "story.effect.combat_condition.changed",
             source="story",
@@ -287,11 +289,23 @@ class StoryEffectRegistry:
             },
         )
         if effect.kind == "damage":
+            points = round(float(snapshot["max_hp"]) * min(
+                max(0.0, value), float(condition["hp_ratio"])
+            ))
             if float(condition["hp_ratio"]) - value <= 0:
-                return EffectOutcome("dead", f"受到最大生命 {value:.0%} 的伤害并陨落")
-            return EffectOutcome("injured", f"受到最大生命 {value:.0%} 的伤害")
+                return EffectOutcome("dead", f"受到 {points} 点伤害并陨落")
+            return EffectOutcome("injured", f"受到 {points} 点伤害")
         key = "mp_ratio" if effect.kind == "restore_mp" else "hp_ratio"
-        return EffectOutcome(None, f"{key} {value:+.0%}")
+        maximum = float(snapshot["max_mp"] if key == "mp_ratio" else snapshot["max_hp"])
+        current_ratio = float(condition[key])
+        applied_ratio = (
+            min(value, 1.0 - current_ratio)
+            if value >= 0 else -min(-value, current_ratio)
+        )
+        points = round(maximum * abs(applied_ratio))
+        resource = "MP" if key == "mp_ratio" else "HP"
+        verb = "恢复" if applied_ratio >= 0 else "消耗"
+        return EffectOutcome(None, f"{resource} {verb} {points}")
 
     def _extend_lifespan(
         self, context: SimulationContext, actor_id: str,
@@ -330,7 +344,9 @@ class StoryEffectRegistry:
         return EffectOutcome(None, str(effect.payload.get("text", "新的因果接踵而至。")))
 
 
-def _path_value(state: WorldState, actor_id: str, path: str) -> Any:
+def _path_value(
+    state: WorldState, actor_id: str, path: str, definitions: GameDefinitions,
+) -> Any:
     cultivation = state.entities.require(actor_id, CULTIVATION)
     location = state.entities.require(actor_id, LOCATION)
     life = state.entities.require(actor_id, LIFE)
@@ -341,6 +357,15 @@ def _path_value(state: WorldState, actor_id: str, path: str) -> Any:
     body = state.entities.get(actor_id, "cultivation.body") or {}
     monster = state.entities.get(actor_id, "dlc.monster.bloodline") or {}
     membership = next(iter(state.relations.find(source_id=actor_id, kind=MEMBERSHIP)), None)
+    raw_karma = float(story["attributes"].get("karma", 0))
+    main_id = practice.get("main_technique_id")
+    technique = definitions.techniques.get(str(main_id)) if main_id else None
+    karma_factor = (
+        0.0 if cultivation.get("path") == "demonic" else
+        float(definitions.systems.get("karma_factors", {}).get(
+            technique.path if technique else cultivation.get("path"), 1.0
+        )) * (float(technique.karma_multiplier) if technique else 1.0)
+    )
     values = {
         "player.world": location["world_id"],
         "player.path": cultivation["path"],
@@ -348,8 +373,8 @@ def _path_value(state: WorldState, actor_id: str, path: str) -> Any:
         "player.born_rootless": cultivation["spirit_root"] == "none",
         "player.layer": int(cultivation["layer"]),
         "player.age": state.clock.year - int(life["birth_year"]),
-        "player.karma": float(story["attributes"].get("karma", 0)),
-        "player.effective_karma": float(story["attributes"].get("karma", 0)),
+        "player.karma": raw_karma,
+        "player.effective_karma": max(0.0, raw_karma) * karma_factor,
         "player.fame": float(story["attributes"].get("fame", 0)),
         "player.has_main_technique": bool(practice.get("main_technique_id")),
         "player.has_companion": bool(state.relations.involving(actor_id, kind="dao_companion")),
@@ -412,12 +437,13 @@ def _condition(
         return str(condition["knows_technique"]) in set(map(str, practice.get("known_techniques", [])))
     if "has_affinity" in condition:
         cultivation = state.entities.require(actor_id, CULTIVATION)
-        roots = [str(cultivation["spirit_root"]), *map(str, cultivation.get("additional_roots", []))]
+        roots = [str(cultivation["spirit_root"])]
         affinities = {
             affinity
             for root_id in roots if root_id in definitions.roots
             for affinity in definitions.roots[root_id].elements
         }
+        affinities.update(map(str, cultivation.get("additional_roots", [])))
         return str(condition["has_affinity"]) in affinities
     if "world_npc" in condition:
         wanted = dict(condition["world_npc"])
@@ -443,7 +469,7 @@ def _condition(
         cultivation = state.entities.require(actor_id, CULTIVATION)
         actual = definitions.realm_index(str(cultivation["realm_id"]))
     else:
-        actual = _path_value(state, actor_id, path)
+        actual = _path_value(state, actor_id, path, definitions)
     if actual is None and condition.get("value") is not None and path not in {
         "player.faction_id", "player.mortal_aspiration", "player.spouse",
     }:
@@ -666,7 +692,10 @@ def _resolve_choice_handler(
             "title": event.title,
             "choice_id": choice.id,
             "result": result,
-            "summary": " ".join(summaries) or choice.result_text,
+            "summary": (
+                "。".join(summary.rstrip("。") for summary in summaries) + "。"
+                if summaries else choice.result_text
+            ),
             "tags": list(event.tags),
         })
         story["history"] = history

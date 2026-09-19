@@ -35,7 +35,7 @@ def _runtime_target(context: SimulationContext, actor_id: str, pending: dict[str
     return create_character(
         context,
         name=str(runtime.get("target_name", runtime.get("npc_name", "因果中人"))),
-        age=max(16, int(life["age"])),
+        age=max(16, context.state.clock.year - int(life["birth_year"])),
         gender="female" if identity.get("gender") == "male" else "male",
         race=str(runtime.get("race", identity.get("race", "human"))),
         spirit_root=str(cultivation["spirit_root"]),
@@ -139,12 +139,16 @@ def register_story_compat_effects(
         story, extra = _story_extra(context, actor_id)
         if kind == "acquire_root":
             affinity = str(payload.get("affinity", "wood"))
-            root_id = f"acquired_{affinity}"
             cultivation = context.state.entities.require(actor_id, CULTIVATION)
-            roots = list(map(str, cultivation.get("additional_roots", [])))
-            if root_id in definitions.roots and root_id not in roots:
-                roots.append(root_id)
-            cultivation["additional_roots"] = roots
+            acquired_id = f"acquired_{affinity}"
+            if cultivation.get("spirit_root") == "none" and acquired_id in definitions.roots:
+                cultivation["spirit_root"] = acquired_id
+            else:
+                roots = list(map(str, cultivation.get("additional_roots", [])))
+                base_elements = definitions.roots[str(cultivation["spirit_root"])].elements
+                if affinity in definitions.affinity_names and affinity not in roots and affinity not in base_elements:
+                    roots.append(affinity)
+                cultivation["additional_roots"] = roots
             context.state.entities.put(actor_id, CULTIVATION, cultivation)
         elif kind in {"add_body_progress", "body_training"}:
             body = context.state.entities.require(actor_id, BODY)
@@ -190,7 +194,10 @@ def register_story_compat_effects(
             technique_id = str(practice.get("main_technique_id", ""))
             levels = dict(practice.get("technique_levels", {}))
             if technique_id:
-                levels[technique_id] = int(levels.get(technique_id, 0)) + int(payload.get("value", 1))
+                base_level = definitions.techniques[technique_id].level
+                levels[technique_id] = int(
+                    levels.get(technique_id, base_level)
+                ) + int(payload.get("value", 1))
             practice["technique_levels"] = levels
             context.state.entities.put(actor_id, PRACTICE, practice)
         elif kind == "add_hostility":

@@ -9,7 +9,10 @@ from typing import Any
 from .domain.character import (
     IDENTITY,
     LIFE,
+    LIFESPAN_DUE,
+    WORLD_NPC_PROFILE,
     BootstrapGame,
+    EnsureWorldCharacters,
     PerformTimedAction,
     character_invariants,
     character_view,
@@ -34,9 +37,11 @@ from .domain.advanced_cultivation import (
 )
 from .domain.cultivation import (
     CULTIVATION,
+    PRACTICE,
     AttemptBreakthrough,
     EquipMainTechnique,
     PerformActionUnits,
+    breakthrough_view,
     cultivation_invariants,
     cultivation_view,
     register_cultivation_domain,
@@ -44,11 +49,13 @@ from .domain.cultivation import (
 from .domain.combat import (
     ResolveCombat,
     combat_invariants,
+    combat_snapshot,
     combat_view,
     register_combat_domain,
 )
 from .domain.party import (
     ManageParty,
+    PARTY_MEMBER,
     party_crossing_ids,
     party_invariants,
     party_view,
@@ -120,6 +127,7 @@ from .domain.war import (
     war_view,
 )
 from .domain.economy import (
+    INVENTORY,
     BuyMarketOffer,
     RefreshMarket,
     ToggleMarketOfferLock,
@@ -197,6 +205,8 @@ from .domain.extensions import (
     register_extension_domains,
 )
 from .domain.factions import (
+    FACTION_NPC,
+    MEMBERSHIP,
     ArrangeFactionSuccession,
     DispatchFactionMember,
     FoundFaction,
@@ -244,9 +254,11 @@ from .domain.relations import (
     RequestFromMaster,
     RequestMentorship,
     RespondDiscipleRequest,
+    SOCIAL_PROFILE,
     disciple_request_view,
     reconcile_relationship_state,
     relationship_invariants,
+    relationship_affinity,
     relationship_view,
     register_relationship_domain,
     register_relationship_story_effects,
@@ -271,6 +283,7 @@ from .domain.world import (
     world_view,
 )
 from .domain.story import (
+    STORY_STATE,
     QueueStoryEvent,
     ResolveStoryChoice,
     reconcile_story_state,
@@ -290,7 +303,7 @@ from .domain.trials import (
 from .infrastructure.content_loader import ContentLoader
 from .infrastructure.sqlite_store import SQLiteSaveStore
 from .kernel.bus import CommandBus
-from .kernel.model import WorldState
+from .kernel.model import EventScope, WorldState
 from .kernel.services import InvariantRegistry
 
 
@@ -398,7 +411,23 @@ class GameEngine:
         spirit_root: str = "supreme_wood",
         path: str = "dao",
         start_world: str = "human",
+        preset_id: str | None = None,
     ) -> dict[str, Any]:
+        preset: dict[str, Any] | None = None
+        if preset_id:
+            preset = next((
+                dict(row)
+                for row in self.definitions.systems.get("quick_start_presets", [])
+                if str(row.get("id")) == preset_id and bool(row.get("enabled", True))
+            ), None)
+            if preset is None:
+                raise ValueError("未知或未开放的快速开始预设")
+            name = name.strip() or str(preset["name"])
+            starting_age = int(preset.get("age", starting_age))
+            race = str(preset.get("race", race))
+            spirit_root = str(preset.get("spirit_root", spirit_root))
+            path = str(preset.get("path", path))
+            start_world = str(preset.get("world", start_world))
         now = _now_iso()
         state = WorldState.new(seed=seed if seed is not None else secrets.randbits(63), created_at=now)
         events = self.commands.execute(state, BootstrapGame(
@@ -410,6 +439,81 @@ class GameEngine:
             path=path,
             start_world=start_world,
         ))
+        if preset is not None:
+            actor_id = str(state.controlled_entity_id)
+            realm = self.definitions.realms[int(preset["realm_index"])]
+            layer = int(preset.get("layer", 1))
+            cultivation = state.entities.require(actor_id, CULTIVATION)
+            cultivation.update({
+                "realm_id": realm.id,
+                "layer": layer,
+                "additional_roots": list(map(str, preset.get("additional_roots", []))),
+                "opportunity": round(
+                    realm.opportunity_base * (1 + 0.12 * (layer - 1))
+                    * float(preset.get("opportunity_fraction", 0.0)),
+                    4,
+                ),
+                "bottleneck": None,
+            })
+            state.entities.put(actor_id, CULTIVATION, cultivation)
+
+            practice = state.entities.require(actor_id, PRACTICE)
+            main_id = str(preset.get("main_technique", "")) or None
+            support_id = str(preset.get("support_technique", "")) or None
+            combat_ids = list(map(str, preset.get("combat_techniques", [])))
+            known = list(dict.fromkeys(filter(None, [
+                main_id, support_id, *combat_ids,
+            ])))
+            practice.update({
+                "known_techniques": known,
+                "main_technique_id": main_id,
+                "support_technique_id": support_id,
+                "combat_technique_ids": combat_ids,
+            })
+            state.entities.put(actor_id, PRACTICE, practice)
+
+            story = state.entities.require(actor_id, STORY_STATE)
+            story["flags"] = list(map(str, preset.get("story_flags", [])))
+            attributes = dict(story.get("attributes", {}))
+            for key in ("karma", "fame", "sha_qi"):
+                attributes[key] = float(preset.get(key, 0.0))
+            story["attributes"] = attributes
+            state.entities.put(actor_id, STORY_STATE, story)
+
+            inventory = state.entities.require(actor_id, INVENTORY)
+            inventory["items"] = {
+                str(row["id"]): int(row.get("quantity", 1))
+                for row in preset.get("inventory", [])
+                if str(row.get("id", "")) in self.definitions.items
+            }
+            inventory["reserved"] = {}
+            state.entities.put(actor_id, INVENTORY, inventory)
+
+            life = state.entities.require(actor_id, LIFE)
+            if path == "ghost" or realm.lifespan is None:
+                life["lifespan"] = None
+            else:
+                lifespan = int(realm.lifespan[1])
+                if path == "monster":
+                    lifespan *= 3
+                life["lifespan"] = max(starting_age + 1, lifespan)
+            state.entities.put(actor_id, LIFE, life)
+            state.scheduler.cancel(lambda scheduled: (
+                scheduled.event_type == LIFESPAN_DUE
+                and str(scheduled.payload.get("entity_id", "")) == actor_id
+            ))
+            if life["lifespan"] is not None:
+                state.scheduler.schedule(
+                    due_year=int(life["birth_year"]) + int(life["lifespan"]),
+                    event_type=LIFESPAN_DUE,
+                    source="character",
+                    scope=EventScope.entity(actor_id),
+                    payload={"entity_id": actor_id},
+                )
+            ghost_soul = state.entities.get(actor_id, "dlc.ghost.soul")
+            if ghost_soul is not None:
+                ghost_soul["historical_peak"] = {"realm_id": realm.id, "layer": layer}
+                state.entities.put(actor_id, "dlc.ghost.soul", ghost_soul)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
@@ -437,6 +541,8 @@ class GameEngine:
 
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
+        expected_revision = state.revision
+        content_events = self.commands.execute(state, EnsureWorldCharacters())
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
@@ -458,8 +564,7 @@ class GameEngine:
         reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
-        expected_revision = state.revision
-        events = self.commands.execute(state, command)
+        events = [*content_events, *self.commands.execute(state, command)]
         self.invariants.validate(state)
         state.updated_at = _now_iso()
         player = character_view(state)
@@ -1160,12 +1265,17 @@ class GameEngine:
 
     def irrigate_spirit_crop(
         self, game_id: str, plot_id: str, mp_ratio: float = 0.0,
-        booster_id: str = "",
+        booster_id: str = "", *, mp_amount: float | None = None,
     ) -> CommandExecution:
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
+        if mp_amount is not None:
+            maximum = float(combat_snapshot(
+                state, self.definitions, actor_id
+            )["max_mp"])
+            mp_ratio = float(mp_amount) / max(1.0, maximum)
         return self.execute(
             game_id, IrrigateSpiritCrop(actor_id, plot_id, mp_ratio, booster_id)
         )
@@ -1642,6 +1752,8 @@ class GameEngine:
 
     def get_game(self, game_id: str) -> dict[str, Any]:
         state = self.store.load(game_id)
+        expected_revision = state.revision
+        content_events = self.commands.execute(state, EnsureWorldCharacters())
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
@@ -1663,6 +1775,15 @@ class GameEngine:
         reconcile_demonic_state(state)
         reconcile_war_state(state)
         self.invariants.validate(state)
+        if content_events:
+            state.updated_at = _now_iso()
+            player = character_view(state)
+            self.store.save(
+                state,
+                content_events,
+                player_name=player["name"],
+                expected_revision=expected_revision,
+            )
         return self._present(state)
 
     def list_games(self) -> list[dict[str, Any]]:
@@ -1670,6 +1791,180 @@ class GameEngine:
 
     def event_journal(self, game_id: str, *, after_sequence: int = 0) -> list[dict[str, Any]]:
         return [event.to_dict() for event in self.store.load_events(game_id, after_sequence=after_sequence)]
+
+    def _character_projection(
+        self, state: WorldState, entity_id: str, *, observer_id: str,
+    ) -> dict[str, Any]:
+        character = character_view(state, entity_id)
+        cultivation = cultivation_view(state, self.definitions, entity_id)
+        practice = state.entities.require(entity_id, PRACTICE)
+        location = state.entities.require(entity_id, LOCATION)
+        snapshot = combat_snapshot(state, self.definitions, entity_id)
+        identity = state.entities.require(entity_id, IDENTITY)
+        world_profile = state.entities.get(entity_id, WORLD_NPC_PROFILE) or {}
+        faction_profile = state.entities.get(entity_id, FACTION_NPC) or {}
+        actor_cultivation = state.entities.require(observer_id, CULTIVATION)
+        actor_rank = (
+            self.definitions.realm_index(str(actor_cultivation["realm_id"])),
+            int(actor_cultivation["layer"]),
+        )
+        target_rank = (int(cultivation["realm_index"]), int(cultivation["layer"]))
+        involved = [
+            edge for edge in state.relations.involving(observer_id)
+            if entity_id in {edge.source_id, edge.target_id}
+        ]
+        social = [
+            edge for edge in involved
+            if edge.kind in {"friend", "dao_companion", "master_disciple", "concubine"}
+        ]
+        social_kinds = {edge.kind for edge in social}
+        party_edge = next((
+            edge for edge in state.relations.find(
+                source_id=observer_id, kind=PARTY_MEMBER
+            ) if edge.target_id == entity_id
+        ), None)
+        party_count = len(state.relations.find(
+            source_id=observer_id, kind=PARTY_MEMBER
+        ))
+        relationship_rules = dict(self.definitions.systems.get("relationship", {}))
+        party_rules = dict(self.definitions.systems.get("party", {}))
+        affinity = relationship_affinity(state, entity_id, observer_id)
+        if affinity >= float(relationship_rules.get("positive_affinity_threshold", 30)):
+            attitude = "亲近"
+        elif affinity >= float(relationship_rules.get("friend_affinity_required", 15)):
+            attitude = "友善"
+        elif affinity <= float(relationship_rules.get("hostile_affinity_threshold", -25)):
+            attitude = "敌视"
+        elif affinity < 0:
+            attitude = "冷淡"
+        else:
+            attitude = "平常"
+        actor_location = state.entities.require(observer_id, LOCATION)
+        same_world = location.get("world_id") == actor_location.get("world_id")
+        actor_profile = state.entities.get(observer_id, SOCIAL_PROFILE) or {}
+        attempts = set(map(str, actor_profile.get("attempts", [])))
+        actor_has_master = bool(state.relations.find(
+            target_id=observer_id, kind="master_disciple"
+        ))
+        actor_disciple_count = len(state.relations.find(
+            source_id=observer_id, kind="master_disciple"
+        ))
+        actor_has_companion = bool(state.relations.involving(
+            observer_id, kind="dao_companion"
+        ))
+        actor_membership = next(iter(state.relations.find(
+            source_id=observer_id, kind=MEMBERSHIP
+        )), None)
+        target_membership = next(iter(state.relations.find(
+            source_id=entity_id, kind=MEMBERSHIP
+        )), None)
+        same_faction = bool(
+            actor_membership and target_membership
+            and actor_membership.target_id == target_membership.target_id
+        )
+        main_id = practice.get("main_technique_id")
+        world_id = str(location["world_id"])
+        world = self.definitions.worlds[world_id]
+        location_id = str(location["location_id"])
+        title = str(
+            world_profile.get("title")
+            or faction_profile.get("title")
+            or "云游修士"
+        )
+        alive = bool(character["alive"])
+        unrelated = not social
+        can_interact = bool(alive and same_world and entity_id != observer_id)
+        max_disciples = int(relationship_rules.get("max_disciples", 8))
+        return {
+            **character,
+            **cultivation,
+            "external_id": identity.get("external_id"),
+            "title": title,
+            "gender_name": {"male": "男", "female": "女"}.get(
+                str(character["gender"]), "性别未明"
+            ),
+            "race_name": str(
+                self.definitions.races.get(str(character["race"]), {}).get(
+                    "name", character["race"]
+                )
+            ),
+            "world": world_id,
+            "world_name": world.name,
+            "location": location_id,
+            "location_name": world.locations[location_id].name,
+            "perceived_alive": alive and same_world,
+            "status": "存活" if alive and same_world else (
+                character.get("death_reason") or "不在当前界面，生死不明"
+            ),
+            "combat_power": round(float(snapshot["power"]), 1) if same_world else None,
+            "affinity": round(affinity, 1),
+            "attitude": attitude,
+            "main_technique_id": main_id,
+            "main_technique_name": (
+                self.definitions.techniques[str(main_id)].name
+                if main_id in self.definitions.techniques else "尚无主修功法"
+            ),
+            "techniques": list(map(str, practice.get("known_techniques", []))),
+            "source": "world" if world_profile else "faction" if target_membership else "event",
+            "treasure_name": (
+                self.definitions.items[str(world_profile.get("treasure_item_id"))].name
+                if str(world_profile.get("treasure_item_id", "")) in self.definitions.items
+                else None
+            ),
+            "formation": None,
+            "wounds": 0,
+            "in_party": party_edge is not None,
+            "can_invite_party": bool(
+                can_interact and party_edge is None
+                and party_count < int(party_rules.get("max_companions", 2))
+            ),
+            "can_propose_companion": bool(
+                can_interact and not actor_has_companion
+                and "master_disciple" not in social_kinds
+                and "concubine" not in social_kinds
+            ),
+            "can_befriend": bool(
+                can_interact and unrelated
+                and affinity >= float(relationship_rules.get(
+                    "friend_affinity_required", 15
+                ))
+            ),
+            "can_request_master": bool(
+                can_interact and same_faction and unrelated and not actor_has_master
+                and target_rank > actor_rank
+                and f"master:{entity_id}" not in attempts
+            ),
+            "can_accept_disciple": bool(
+                can_interact and same_faction and unrelated
+                and actor_disciple_count < max_disciples
+                and target_rank < actor_rank
+                and f"disciple:{entity_id}" not in attempts
+            ),
+            "can_recruit_concubine": bool(
+                can_interact and character["gender"] == "female"
+                and target_rank <= actor_rank and "concubine" not in social_kinds
+            ),
+            "can_invite_faction": bool(
+                can_interact and actor_membership and target_membership is None
+            ),
+            "can_invite_guest": False,
+            "is_master": any(
+                edge.kind == "master_disciple" and edge.source_id == entity_id
+                for edge in social
+            ),
+            "is_disciple": any(
+                edge.kind == "master_disciple" and edge.target_id == entity_id
+                for edge in social
+            ),
+            "is_friend": "friend" in social_kinds,
+            "same_cultivation": bool(
+                cultivation.get("realm_id") == actor_cultivation.get("realm_id")
+                and cultivation.get("path") == actor_cultivation.get("path")
+            ),
+            "breakthrough_bonus": float(
+                relationship_rules.get("companion_breakthrough_bonus", 0.05)
+            ),
+        }
 
     def _character_catalog(self, state: WorldState) -> list[dict[str, Any]]:
         actor_id = state.controlled_entity_id
@@ -1685,18 +1980,13 @@ class GameEngine:
             cultivation = state.entities.get(entity_id, CULTIVATION) or {}
             if not bool(life.get("alive")) or location.get("world_id") != world_id:
                 continue
-            identity = state.entities.require(entity_id, IDENTITY)
-            realm_id = str(cultivation.get("realm_id", "mortal"))
-            rows.append({
-                "id": entity_id,
-                "name": str(identity["name"]),
-                "gender": str(identity["gender"]),
-                "race": str(identity["race"]),
-                "realm_id": realm_id,
-                "realm_index": self.definitions.realm_index(realm_id),
-                "layer": int(cultivation.get("layer", 1)),
-            })
-        return sorted(rows, key=lambda row: (row["realm_index"], row["layer"], row["name"]))
+            rows.append(self._character_projection(
+                state, entity_id, observer_id=actor_id
+            ))
+        return sorted(
+            rows,
+            key=lambda row: (-row["realm_index"], -row["layer"], row["name"]),
+        )
 
     def _present(self, state: WorldState) -> dict[str, Any]:
         player = character_view(state)
@@ -1708,6 +1998,69 @@ class GameEngine:
         action = action_view(state)
         alive = bool(player["alive"])
         interaction_open = story["pending_event"] is not None
+        actor_id = str(state.controlled_entity_id)
+        characters = self._character_catalog(state)
+        projections = {str(row["id"]): row for row in characters}
+
+        def projected(entity_id: str) -> dict[str, Any]:
+            if entity_id not in projections:
+                projections[entity_id] = self._character_projection(
+                    state, entity_id, observer_id=actor_id
+                )
+            return projections[entity_id]
+
+        relationships = relationship_view(state, self.definitions)
+        for row in relationships:
+            other_id = str(dict(row.get("other", {})).get("id", ""))
+            if other_id:
+                row["other"] = projected(other_id)
+        disciple_requests = disciple_request_view(state)
+        for row in disciple_requests:
+            requester_id = str(dict(row.get("requester", {})).get("id", ""))
+            if requester_id:
+                row["requester"] = projected(requester_id)
+        faction = faction_view(state, self.definitions)
+        if faction is not None:
+            roster = []
+            for entry in faction.get("roster", []):
+                entity_id = str(entry["id"])
+                roster.append({**projected(entity_id), **entry, "is_player": False})
+            roster.sort(key=lambda row: (
+                -int(row["realm_index"]), -int(row["layer"]), str(row["name"])
+            ))
+            actor_realm = int(cultivation["realm_index"])
+            faction = {
+                **faction,
+                "member": True,
+                "world": current_world["world_id"],
+                "world_name": current_world["world_name"],
+                "description": next((
+                    definition.description
+                    for definition in self.definitions.factions.values()
+                    if definition.id == faction.get("external_id")
+                ), "修行势力"),
+                "join_age": next((
+                    edge.created_year for edge in state.relations.find(
+                        source_id=actor_id, kind=MEMBERSHIP
+                    ) if edge.target_id == faction.get("id")
+                ), state.clock.year),
+                "fixed_reward_unlocked": actor_realm >= 4,
+                "can_dispatch": actor_realm >= 4,
+                "dispatch_used": False,
+                "dispatch_cost": int(self.definitions.systems.get(
+                    "factions", {}
+                ).get("disciple_dispatch_cost", 0)),
+                "dispatch_success": float(self.definitions.systems.get(
+                    "factions", {}
+                ).get("disciple_dispatch_success", 0.0)),
+                "can_leave": True,
+                "can_arrange_succession": False,
+                "founded_by_player": False,
+                "pressure": 0,
+                "fallen_count": 0,
+                "has_diplomatic_voice": bool(faction.get("has_voice")),
+                "roster": roster,
+            }
         return {
             "format": "cultivation-life-v2",
             "id": state.game_id,
@@ -1716,10 +2069,10 @@ class GameEngine:
             "clock": {"year": state.clock.year},
             "player": {**player, "cultivation": cultivation, **advanced_cultivation},
             "world": current_world,
-            "relationships": relationship_view(state, self.definitions),
-            "characters": self._character_catalog(state),
-            "disciple_requests": disciple_request_view(state),
-            "faction": faction_view(state, self.definitions),
+            "relationships": relationships,
+            "characters": characters,
+            "disciple_requests": disciple_requests,
+            "faction": faction,
             "governance": governance_view(state),
             "family": family_view(state, self.definitions),
             "concubine_system": concubine_view(state, self.definitions),
@@ -1752,6 +2105,7 @@ class GameEngine:
                 "milestones": story["milestones"],
                 "attributes": story["attributes"],
             },
+            "breakthrough": breakthrough_view(state, self.definitions),
             "action": action,
             "trial": trial_view(state),
             "capabilities": {

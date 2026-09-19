@@ -14,6 +14,8 @@ from urllib.parse import unquote, urlparse
 from cultivation_life.runtime import persistence_root
 
 from .application import CommandExecution, GameEngine
+from .domain.definitions import QI_SOURCE_NAMES
+from .version import base_game_metadata
 
 
 SOURCE_ROOT = Path(__file__).resolve().parents[1]
@@ -346,8 +348,9 @@ class HTTPCommandRegistry:
             ),
             "spirit-field-irrigate": lambda game, p: engine.irrigate_spirit_crop(
                 game, _text(p, "plot_id"),
-                _number(p, "mp_ratio") if "mp_ratio" in p else _number(p, "mp_amount"),
+                _number(p, "mp_ratio") if "mp_ratio" in p else 0.0,
                 _text(p, "booster_id"),
+                mp_amount=None if "mp_ratio" in p else _number(p, "mp_amount"),
             ),
             "spirit-field-plant": lambda game, p: engine.plant_spirit_crop(
                 game, _text(p, "plant_id"),
@@ -494,9 +497,33 @@ def build_handler(
                 if path == "/api/config":
                     self._json({
                         "format": "cultivation-life-v2",
+                        "base_game": base_game_metadata(),
                         "actions": {key: value.get("name", key) for key, value in engine.definitions.actions.items()},
                         "roots": {key: value.name for key, value in engine.definitions.roots.items() if value.creation},
+                        "root_details": {
+                            key: {
+                                "name": value.name,
+                                "tier": value.tier,
+                                "efficiency": value.efficiency,
+                                "elements": list(value.elements),
+                            }
+                            for key, value in engine.definitions.roots.items()
+                            if value.creation
+                        },
                         "paths": dict(engine.definitions.paths),
+                        "karma_factors": dict(
+                            engine.definitions.systems.get("karma_factors", {})
+                        ),
+                        "technique_elements": {
+                            "neutral": "无属性",
+                            **dict(engine.definitions.affinity_names),
+                        },
+                        "qi_sources": dict(QI_SOURCE_NAMES),
+                        "qi_experience_base": float(
+                            engine.definitions.systems.get("qi_mastery", {}).get(
+                                "experience_base", 25
+                            )
+                        ),
                         "races": {
                             key: str(value.get("name", key))
                             for key, value in engine.definitions.races.items()
@@ -506,6 +533,21 @@ def build_handler(
                             key: list(value)
                             for key, value in engine.definitions.start_worlds.items()
                         },
+                        "quick_starts": [
+                            {
+                                "id": str(row["id"]),
+                                "name": str(row["name"]),
+                                "enabled": bool(row.get("enabled", True)),
+                                "status": str(row.get("status", "尚未开放")),
+                                "path": str(row.get("path", "dao")),
+                                "realm_index": int(row.get("realm_index", 0)),
+                                "layer": int(row.get("layer", 1)),
+                                "world": str(row.get("world", "human")),
+                            }
+                            for row in engine.definitions.systems.get(
+                                "quick_start_presets", []
+                            )
+                        ],
                         "extensions": extension_rows(),
                         "operations": registry.operations,
                     })
@@ -548,6 +590,10 @@ def build_handler(
                         spirit_root=str(payload.get("spirit_root", "supreme_wood")),
                         path=str(payload.get("path", "dao")),
                         start_world=str(payload.get("start_world", "human")),
+                        preset_id=(
+                            str(payload["preset_id"])
+                            if payload.get("preset_id") else None
+                        ),
                     )
                     self._json(result, HTTPStatus.CREATED)
                     return

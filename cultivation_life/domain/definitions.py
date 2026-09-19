@@ -6,7 +6,13 @@ from dataclasses import dataclass
 from typing import Any
 
 
-QI_SOURCES = ("spirit", "demon", "monster", "yin")
+QI_SOURCE_NAMES = {
+    "spirit": "灵源",
+    "demon": "魔源",
+    "monster": "妖源",
+    "yin": "阴源",
+}
+QI_SOURCES = tuple(QI_SOURCE_NAMES)
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,13 +48,17 @@ class TechniqueDefinition:
     hp_bonus: float
     mp_bonus: float
     combat_bonus: float
+    karma_multiplier: float
     category: str
     sources: dict[str, float]
+    combat_requirement_level: int = 0
     body_breakthrough_bonus: float = 0.0
     body_bonus_max_layer: int = 0
     divine_sense_bonus: float = 0.0
     transformation_capacity: int = 0
     transformation_space: int = 0
+    requires_immortal_power: bool = False
+    immortal_power_cost: float = 0.0
 
     @property
     def scale(self) -> float:
@@ -246,11 +256,13 @@ class StoryEventDefinition:
 class GameDefinitions:
     realms: tuple[RealmDefinition, ...]
     roots: dict[str, RootDefinition]
+    affinity_names: dict[str, str]
     paths: dict[str, str]
     techniques: dict[str, TechniqueDefinition]
     worlds: dict[str, WorldDefinition]
     races: dict[str, dict[str, Any]]
     factions: dict[str, FactionDefinition]
+    world_npcs: tuple[dict[str, Any], ...]
     faction_rewards: dict[str, dict[str, Any]]
     items: dict[str, ItemDefinition]
     transformations: dict[str, TransformationDefinition]

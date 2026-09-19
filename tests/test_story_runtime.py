@@ -3,8 +3,9 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
-from cultivation_life import GameEngine
+from cultivation_life import GameEngine, GrantItem
 from cultivation_life.domain.actions import begin_action, complete_action
+from cultivation_life.domain.cultivation import GrantTechnique
 from cultivation_life.domain.story import queue_story_event
 from cultivation_life.kernel.bus import SimulationContext
 from cultivation_life.kernel.model import EventEnvelope, EventScope
@@ -70,6 +71,51 @@ class V2StoryRuntimeTests(unittest.TestCase):
         self.assertEqual(history[-1]["event_id"], "EVT_TRAVEL_HERB_001")
         self.assertEqual(history[-1]["choice_id"], "wait")
         self.assertEqual(resolved.events[-1]["event_type"], "story.interaction.resolved")
+
+    def test_legacy_event_text_and_technique_level_are_projected_and_consumed(self):
+        created = self.engine.create_game("悟法", seed=18)
+        actor_id = created["player"]["id"]
+        learned = self.engine.execute(
+            created["id"],
+            GrantTechnique(actor_id, "TECH_BASIC_QI", equip_main=True),
+        ).game
+        before = learned["player"]["cultivation"]["cultivation_efficiency"]
+        self.engine.queue_story_event(created["id"], "EVT_CULTIVATE_INSIGHT_001")
+        resolved = self.engine.choose(created["id"], "record").game
+        technique = resolved["player"]["cultivation"]["main_technique"]
+        self.assertEqual(technique["level"], 2)
+        self.assertGreater(
+            resolved["player"]["cultivation"]["cultivation_efficiency"], before
+        )
+        self.assertNotIn("undefined", resolved["story"]["history"][-1]["summary"])
+
+        self.engine.queue_story_event(created["id"], "EVT_TRAVEL_HERB_001")
+        picked = self.engine.choose(created["id"], "pick").game
+        summary = picked["story"]["history"][-1]["summary"]
+        self.assertIn("点伤害", summary)
+        self.assertNotIn("hp_ratio", summary)
+        self.assertIn("获得回春丹", summary)
+
+    def test_acquired_affinity_unlocks_legacy_event_conditions_and_techniques(self):
+        created = self.engine.create_game("补根", seed=19, spirit_root="none")
+        actor_id = created["player"]["id"]
+        self.engine.execute(created["id"], GrantItem(actor_id, "jinque_fire", 1))
+        self.engine.queue_story_event(created["id"], "EVT_MORTAL_ROOT_COMPLETE_001")
+        repaired = self.engine.choose(created["id"], "fire").game
+        self.assertEqual(
+            repaired["player"]["cultivation"]["spirit_root"], "acquired_fire"
+        )
+        self.assertEqual(
+            repaired["player"]["cultivation"]["spirit_root_name"], "后天补灵根（火）"
+        )
+        learned = self.engine.execute(
+            created["id"],
+            GrantTechnique(actor_id, "TECH_FIRE_SCRIPTURE", equip_main=True),
+        ).game
+        self.assertEqual(
+            learned["player"]["cultivation"]["main_technique"]["id"],
+            "TECH_FIRE_SCRIPTURE",
+        )
 
     def test_followup_chain_is_queued_and_survives_reload(self):
         created = self.engine.create_game(

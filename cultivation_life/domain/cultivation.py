@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
 from .character import ACTIVITY, IDENTITY, LIFE, PerformTimedAction, create_character
 from .actions import begin_action, complete_action
-from .definitions import GameDefinitions, QI_SOURCES, RootDefinition, TechniqueDefinition
+from .definitions import (
+    GameDefinitions,
+    QI_SOURCE_NAMES,
+    QI_SOURCES,
+    RootDefinition,
+    TechniqueDefinition,
+)
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState
@@ -189,13 +196,164 @@ def _qi_environment_multiplier(concentration: float) -> float:
     return 0.25 + 1.5 * concentration / (concentration + 1)
 
 
-def _can_practice(root: RootDefinition, technique: TechniqueDefinition) -> bool:
+def _can_practice(
+    root: RootDefinition,
+    technique: TechniqueDefinition,
+    additional_affinities: list[str] | tuple[str, ...] = (),
+) -> bool:
     if technique.element in {"neutral", "sex"}:
         return True
-    elements = set(root.elements)
+    elements = set(root.elements) | set(map(str, additional_affinities))
     if technique.element == "five_elements":
         return {"metal", "wood", "water", "fire", "earth"} <= elements
     return technique.element in elements
+
+
+def _technique_level(
+    practice: dict[str, Any], technique: TechniqueDefinition,
+) -> int:
+    return max(
+        technique.level,
+        int(dict(practice.get("technique_levels", {})).get(
+            technique.id, technique.level
+        )),
+    )
+
+
+def _technique_scale(technique: TechniqueDefinition, level: int) -> float:
+    return (1 + 0.12 * (technique.grade - 1)) * (1 + 0.025 * (level - 1))
+
+
+def _stage_name(
+    definitions: GameDefinitions, cultivation: dict[str, Any],
+    *,
+    layer: int | None = None,
+) -> str:
+    realm = definitions.realm(str(cultivation["realm_id"]))
+    current_layer = int(cultivation["layer"] if layer is None else layer)
+    if realm.id == "mortal" or realm.layers == 1:
+        return realm.name
+    name = realm.name
+    if cultivation.get("path") == "demonic":
+        name = str(
+            definitions.systems.get("demonic_cultivation", {})
+            .get("realm_names", {})
+            .get(str(definitions.realm_index(realm.id)), realm.name)
+        )
+    if realm.id == "qi" or (
+        cultivation.get("path") == "demonic"
+        and definitions.realm_index(realm.id) == 1
+    ):
+        return f"{name}{current_layer}层"
+    stage = "初期" if current_layer <= 3 else "中期" if current_layer <= 6 else "后期"
+    return f"{name}{stage}·{current_layer}层"
+
+
+def _qi_level(definitions: GameDefinitions, experience: float) -> int:
+    base = max(
+        1.0,
+        float(definitions.systems.get("qi_mastery", {}).get("experience_base", 25)),
+    )
+    return max(0, int(math.sqrt(max(0.0, float(experience)) / base)))
+
+
+def _qi_threshold(definitions: GameDefinitions, level: int) -> float:
+    base = max(
+        1.0,
+        float(definitions.systems.get("qi_mastery", {}).get("experience_base", 25)),
+    )
+    return base * max(0, int(level)) ** 2
+
+
+def _technique_view(
+    state: WorldState,
+    definitions: GameDefinitions,
+    actor_id: str,
+    technique_id: str,
+    *,
+    environment_active: bool,
+) -> dict[str, Any]:
+    technique = definitions.techniques[technique_id]
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    practice = state.entities.require(actor_id, PRACTICE)
+    root = definitions.roots[str(cultivation["spirit_root"])]
+    compatible = _can_practice(
+        root, technique, list(map(str, cultivation.get("additional_roots", [])))
+    )
+    world_id = str(state.entities.require(actor_id, LOCATION)["world_id"])
+    world = definitions.worlds[world_id]
+    environment_multiplier = sum(
+        weight * _qi_environment_multiplier(world.qi_concentrations[source])
+        for source, weight in technique.sources.items()
+    )
+    qi_experience = dict(cultivation.get("qi_experience", {}))
+    qi_levels = {
+        source: _qi_level(definitions, qi_experience.get(source, 0.0))
+        for source in QI_SOURCES
+    }
+    requirement_level = int(technique.combat_requirement_level)
+    requirement_met = any(
+        qi_levels.get(source, 0) >= requirement_level for source in technique.sources
+    )
+    source_display = "、".join(
+        QI_SOURCE_NAMES[source]
+        + (f" {weight:.0%}" if len(technique.sources) > 1 else "")
+        for source, weight in technique.sources.items()
+    )
+    combat_requirement_display = "（" + " 或 ".join(
+        f"{QI_SOURCE_NAMES[source].removesuffix('源')}气 >= {requirement_level}级"
+        for source in technique.sources
+    ) + "）"
+    body = state.entities.get(actor_id, "cultivation.body") or {}
+    immortal_power_met = not technique.requires_immortal_power or world_id == "celestial"
+    body_requirement_met = int(body.get("layer", 0)) >= 0
+    category_names = {
+        "body": "炼体",
+        "divine_sense": "神识",
+        "transformation": "变身",
+        "spiritual": "修仙",
+    }
+    return {
+        "id": technique.id,
+        "name": technique.name,
+        "path": technique.path,
+        "path_name": definitions.paths[technique.path],
+        "element": technique.element,
+        "element_name": (
+            "无属性" if technique.element == "neutral"
+            else definitions.affinity_names.get(technique.element, technique.element)
+        ),
+        "grade": technique.grade,
+        "level": _technique_level(practice, technique),
+        "opportunity_bonus": technique.opportunity_bonus,
+        "hp_bonus": technique.hp_bonus,
+        "mp_bonus": technique.mp_bonus,
+        "combat_bonus": technique.combat_bonus,
+        "karma_multiplier": technique.karma_multiplier,
+        "category": technique.category,
+        "category_name": category_names.get(technique.category, "修仙"),
+        "sources": dict(technique.sources),
+        "source_names": [QI_SOURCE_NAMES[source] for source in technique.sources],
+        "source_display": source_display,
+        "environment_active": environment_active,
+        "environment_multiplier": (
+            round(environment_multiplier, 4) if environment_active else None
+        ),
+        "combat_requirement_level": requirement_level,
+        "combat_requirement_display": combat_requirement_display,
+        "combat_requirement_met": requirement_met,
+        "body_breakthrough_bonus": technique.body_breakthrough_bonus,
+        "body_bonus_max_layer": technique.body_bonus_max_layer,
+        "divine_sense_bonus": technique.divine_sense_bonus,
+        "transformation_capacity": technique.transformation_capacity,
+        "transformation_space": technique.transformation_space,
+        "requires_immortal_power": technique.requires_immortal_power,
+        "immortal_power_cost": technique.immortal_power_cost,
+        "immortal_power_met": immortal_power_met,
+        "required_body_training": 0,
+        "body_requirement_met": body_requirement_met,
+        "compatible": compatible and immortal_power_met and body_requirement_met,
+    }
 
 
 def _opportunity_required(definitions: GameDefinitions, cultivation: dict[str, Any]) -> int:
@@ -273,6 +431,7 @@ def _cultivation_gain(
     if root.id == "none" or not main_id:
         return 0.0
     technique = definitions.techniques[str(main_id)]
+    technique_level = _technique_level(practice, technique)
     low, high = map(int, definitions.actions[action]["opportunity"])
     base = context.rng.randint(low, high)
     world_id = str(context.state.entities.require(actor_id, LOCATION)["world_id"])
@@ -292,7 +451,7 @@ def _cultivation_gain(
     )
     multiplier = (
         root.efficiency
-        * (1 + technique.opportunity_bonus * technique.scale)
+        * (1 + technique.opportunity_bonus * _technique_scale(technique, technique_level))
         * max(0.0, 1 + item_bonus + artifact_bonus)
         * environment
     )
@@ -526,6 +685,11 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
                 "reason": event.payload.get("reason"),
             },
         )
+    if actor_id == context.state.controlled_entity_id:
+        # No scheduled work can run after the controlled character's terminal
+        # death.  Clear NPC timers only after action interruption events have
+        # been derived from the remaining action ticks.
+        context.state.scheduler.cancel(lambda _scheduled: True)
 
 
 def _grant_technique_handler(definitions: GameDefinitions):
@@ -539,7 +703,7 @@ def _grant_technique_handler(definitions: GameDefinitions):
             raise ValueError("未知功法")
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
         root = definitions.roots[str(cultivation["spirit_root"])]
-        if not _can_practice(root, technique):
+        if not _can_practice(root, technique, cultivation.get("additional_roots", [])):
             raise ValueError("灵根属性与功法不合")
         practice = context.state.entities.require(command.actor_id, PRACTICE)
         known = list(practice["known_techniques"])
@@ -572,7 +736,11 @@ def _equip_technique_handler(definitions: GameDefinitions):
         if technique.category != "spiritual":
             raise ValueError("只有灵修功法可以配置为主修")
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
-        if not _can_practice(definitions.roots[str(cultivation["spirit_root"])], technique):
+        if not _can_practice(
+            definitions.roots[str(cultivation["spirit_root"])],
+            technique,
+            cultivation.get("additional_roots", []),
+        ):
             raise ValueError("灵根属性与功法不合")
         practice["main_technique_id"] = command.technique_id
         context.state.entities.put(command.actor_id, PRACTICE, practice)
@@ -746,8 +914,14 @@ def _joint_companion_id(state: WorldState, actor_id: str) -> str | None:
 
 def _breakthrough_chance(
     definitions: GameDefinitions, cultivation: dict[str, Any], major: bool,
-    artifact_bonus: float = 0.0,
-) -> float:
+    artifact_bonus: float = 0.0, *,
+    companion_bonus: float = 0.0,
+    concubine_base_bonus: float = 0.0,
+    devouring_bonus: float = 0.0,
+    reincarnation_bonus: float = 0.0,
+    body_training_bonus: float = 0.0,
+    optimal_state_bonus: float = 0.0,
+) -> dict[str, float]:
     realm_index = definitions.realm_index(str(cultivation["realm_id"]))
     if major and realm_index == 0:
         base = 1.0
@@ -772,14 +946,189 @@ def _breakthrough_chance(
             float(definitions.breakthrough["minor_pity"]["max_bonus"]),
             failures * float(definitions.breakthrough["minor_pity"]["bonus_per_failure"]),
         )
+    scope = f"{'major' if major else 'minor'}:{realm_index}"
     aid_bonus = sum(
         definitions.items[item_id].breakthrough_bonus
         for item_id in cultivation.get("active_breakthrough_aids", [])
         if item_id in definitions.items
+        and definitions.items[item_id].breakthrough_scope == scope
     )
-    return max(
-        0.005, min(0.98, base + pity + aid_bonus + artifact_bonus - penalty)
+    final = max(0.005, min(
+        0.98,
+        base + pity + aid_bonus + artifact_bonus + companion_bonus
+        + concubine_base_bonus + devouring_bonus + reincarnation_bonus
+        + body_training_bonus + optimal_state_bonus - penalty,
+    ))
+    return {
+        "base": base,
+        "aid_bonus": aid_bonus,
+        "companion_bonus": companion_bonus,
+        "concubine_base_bonus": concubine_base_bonus,
+        "artifact_bonus": artifact_bonus,
+        "pity_bonus": pity,
+        "devouring_bonus": devouring_bonus,
+        "reincarnation_bonus": reincarnation_bonus,
+        "body_training_bonus": body_training_bonus,
+        "optimal_state_bonus": optimal_state_bonus,
+        "heart_demon_penalty": penalty,
+        "final": final,
+    }
+
+
+def _major_breakthrough_requirement(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+    cultivation: dict[str, Any],
+) -> dict[str, Any]:
+    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+    world_id = str(state.entities.require(actor_id, LOCATION)["world_id"])
+    if cultivation.get("path") == "demonic" and world_id == "demon" and realm_index == 5:
+        return {
+            "met": False,
+            "reason": "炼魔境必须先飞升真魔界。",
+            "missing_affinities": [],
+        }
+    if realm_index == 5:
+        root = definitions.roots[str(cultivation["spirit_root"])]
+        owned = set(root.elements) | set(map(str, cultivation.get("additional_roots", [])))
+        missing = [
+            definitions.affinity_names.get(element, element)
+            for element in ("metal", "wood", "water", "fire", "earth")
+            if element not in owned
+        ]
+        return {
+            "met": not missing,
+            "reason": (
+                "五行灵根齐备。" if not missing
+                else "突破炼虚必须具备完整五行灵根；当前尚缺"
+                + "、".join(missing) + "灵根。"
+            ),
+            "missing_affinities": missing,
+        }
+    return {"met": True, "reason": "机缘圆满后可主动突破。", "missing_affinities": []}
+
+
+def _breakthrough_projection(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> dict[str, Any]:
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    kind = cultivation.get("bottleneck")
+    major = kind == "major"
+    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+    required = _opportunity_required(definitions, cultivation)
+    at_bottleneck = kind in {"minor", "major"}
+    _, artifact_bonus = _artifact_progression_bonuses(state, definitions, actor_id)
+    companion_bonus = (
+        float(dict(definitions.systems.get("relationship", {})).get(
+            "companion_breakthrough_bonus", 0.05
+        ))
+        if _joint_companion_id(state, actor_id) else 0.0
     )
+    concubine_state = state.entities.get(actor_id, "relations.concubine_state") or {}
+    concubine_bonus = min(
+        0.02, max(0.0, float(concubine_state.get("cauldron_breakthrough_bonus", 0.0)))
+    )
+    owner_edge = next(iter(state.relations.find(
+        target_id=actor_id, kind="concubine"
+    )), None)
+    if owner_edge is not None:
+        owner_cultivation = state.entities.require(owner_edge.source_id, CULTIVATION)
+        owner_rank = (
+            definitions.realm_index(str(owner_cultivation["realm_id"])),
+            int(owner_cultivation["layer"]),
+        )
+        if owner_rank > (realm_index, int(cultivation["layer"])):
+            concubine_bonus += 0.02
+    demonic_state = state.entities.get(actor_id, "demonic.state") or {}
+    devouring_bonus = (
+        max(0.0, float(demonic_state.get("devouring_breakthrough_bonus", 0.0)))
+        if cultivation.get("path") == "demonic" else 0.0
+    )
+    reincarnation_bonus = 0.0
+    if state.entities.get(actor_id, "dlc.ghost.soul") is not None:
+        from .ghost import ghost_breakthrough_bonus
+
+        reincarnation_bonus = ghost_breakthrough_bonus(state, definitions, actor_id)
+    body = state.entities.get(actor_id, "cultivation.body") or {}
+    body_training_bonus = (
+        int(body.get("layer", 0)) // 20
+        * float(dict(definitions.systems.get("body_cultivation", {})).get(
+            "cultivation_breakthrough_bonus_per_20_layers", 0.01
+        ))
+    )
+    condition = state.entities.get(actor_id, "combat.condition") or {}
+    optimal = dict(definitions.breakthrough.get("optimal_state", {}))
+    optimal_state_bonus = (
+        float(optimal.get("bonus", 0.0))
+        if float(condition.get("hp_ratio", 0.0)) >= float(optimal.get("hp_ratio", 0.8))
+        and float(condition.get("mp_ratio", 0.0)) >= float(optimal.get("mp_ratio", 0.8))
+        else 0.0
+    )
+    chance_supported = not (
+        major and realm_index != 0
+        and definitions.breakthrough["major_base"].get(str(realm_index)) is None
+    )
+    chance = (
+        _breakthrough_chance(
+            definitions, cultivation, major, artifact_bonus,
+            companion_bonus=companion_bonus,
+            concubine_base_bonus=concubine_bonus,
+            devouring_bonus=devouring_bonus,
+            reincarnation_bonus=reincarnation_bonus,
+            body_training_bonus=body_training_bonus,
+            optimal_state_bonus=optimal_state_bonus,
+        )
+        if at_bottleneck and chance_supported else None
+    )
+    requirement = (
+        _major_breakthrough_requirement(state, definitions, actor_id, cultivation)
+        if major else {
+            "met": True,
+            "reason": (
+                "阶段关隘已经圆满，可以服丹整备后手动冲关。"
+                if int(cultivation["layer"]) in {3, 6}
+                else "层级瓶颈已经圆满；本层冲击失败会为下一次累积专属成功率。"
+            ),
+            "missing_affinities": [],
+        }
+    )
+    if major:
+        target_index = realm_index + 1
+        if target_index < len(definitions.realms):
+            target = definitions.realms[target_index]
+            target_name = str(
+                definitions.systems.get("demonic_cultivation", {})
+                .get("realm_names", {}).get(str(target_index), target.name)
+            ) if cultivation.get("path") == "demonic" else target.name
+        else:
+            target_name = None
+        action_label = "选择血脉进化" if cultivation.get("path") == "monster" else "突破大境界"
+    elif at_bottleneck:
+        target_name = _stage_name(
+            definitions, cultivation, layer=int(cultivation["layer"]) + 1
+        )
+        action_label = "突破小境界"
+    else:
+        target_name = None
+        action_label = "突破瓶颈"
+    ready = bool(at_bottleneck and float(cultivation["opportunity"]) >= required)
+    return {
+        "kind": kind,
+        "ready": ready,
+        "enabled": bool(ready and requirement["met"] and chance is not None),
+        "target_realm": target_name,
+        "action_label": action_label,
+        "chance": chance,
+        "active_aids": [
+            {
+                "id": item_id,
+                "name": definitions.items[item_id].name,
+                "bonus": definitions.items[item_id].breakthrough_bonus,
+            }
+            for item_id in cultivation.get("active_breakthrough_aids", [])
+            if item_id in definitions.items
+        ],
+        **requirement,
+    }
 
 
 def _attempt_breakthrough_handler(definitions: GameDefinitions):
@@ -818,66 +1167,21 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         required = _opportunity_required(definitions, cultivation)
         if float(cultivation["opportunity"]) < required:
             raise ValueError("机缘尚未圆满")
-        _, artifact_breakthrough = _artifact_progression_bonuses(
+        projection = _breakthrough_projection(
             context.state, definitions, command.actor_id
         )
+        if not bool(projection["met"]):
+            raise ValueError(str(projection["reason"]))
+        if projection["chance"] is None:
+            raise ValueError("当前大境界突破需要完成专属飞升或血脉试炼")
         joint_companion_id = _joint_companion_id(context.state, command.actor_id)
-        companion_bonus = (
-            float(
-                dict(definitions.systems.get("relationship", {})).get(
-                    "companion_breakthrough_bonus", 0.05
-                )
-            )
-            if joint_companion_id else 0.0
-        )
         concubine_state = context.state.entities.get(
             command.actor_id, "relations.concubine_state"
         ) or {}
-        cauldron_bonus = min(
-            0.02, max(0.0, float(concubine_state.get("cauldron_breakthrough_bonus", 0.0)))
-        )
         demonic_state = context.state.entities.get(
             command.actor_id, "demonic.state"
         ) or {}
-        devouring_bonus = max(
-            0.0, float(demonic_state.get("devouring_breakthrough_bonus", 0.0))
-        )
-        ghost_bonus = 0.0
-        if context.state.entities.get(command.actor_id, "dlc.ghost.soul") is not None:
-            from .ghost import ghost_breakthrough_bonus
-
-            ghost_bonus = ghost_breakthrough_bonus(
-                context.state, definitions, command.actor_id
-            )
-        dependent_bonus = 0.0
-        owner_edge = next(iter(context.state.relations.find(
-            target_id=command.actor_id, kind="concubine"
-        )), None)
-        if owner_edge is not None:
-            owner_cultivation = context.state.entities.require(
-                owner_edge.source_id, CULTIVATION
-            )
-            owner_rank = (
-                definitions.realm_index(str(owner_cultivation["realm_id"])),
-                int(owner_cultivation["layer"]),
-            )
-            if owner_rank > (realm_index, old_layer):
-                dependent_bonus = 0.02
-        chance = _breakthrough_chance(
-            definitions, cultivation, major, artifact_breakthrough
-        )
-        chance = max(
-            0.005,
-            min(
-                0.98,
-                chance
-                + companion_bonus
-                + cauldron_bonus
-                + dependent_bonus
-                + devouring_bonus
-                + ghost_bonus,
-            ),
-        )
+        chance = float(dict(projection["chance"])["final"])
         if concubine_state:
             concubine_state["cauldron_breakthrough_bonus"] = 0.0
             context.state.entities.put(
@@ -1301,6 +1605,62 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
     )
 
 
+def _cultivation_efficiency(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> float:
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    practice = state.entities.require(actor_id, PRACTICE)
+    root = definitions.roots[str(cultivation["spirit_root"])]
+    main_id = practice.get("main_technique_id")
+    if root.id == "none" or not main_id:
+        return 0.0
+    technique = definitions.techniques[str(main_id)]
+    world_id = str(state.entities.require(actor_id, LOCATION)["world_id"])
+    world = definitions.worlds[world_id]
+    environment = sum(
+        weight * _qi_environment_multiplier(world.qi_concentrations[source])
+        for source, weight in technique.sources.items()
+    )
+    inventory = state.entities.get(actor_id, "economy.inventory") or {"items": {}}
+    item_bonus = sum(
+        definitions.items[item_id].opportunity_bonus * int(quantity)
+        for item_id, quantity in dict(inventory.get("items", {})).items()
+        if item_id in definitions.items
+    )
+    artifact_bonus, _ = _artifact_progression_bonuses(
+        state, definitions, actor_id
+    )
+    multiplier = (
+        root.efficiency
+        * (1 + technique.opportunity_bonus * _technique_scale(
+            technique, _technique_level(practice, technique)
+        ))
+        * max(0.0, 1 + item_bonus + artifact_bonus)
+        * environment
+    )
+    if state.entities.get(actor_id, "dlc.ghost.soul") is not None:
+        from .ghost import ghost_progression_multiplier
+
+        multiplier *= ghost_progression_multiplier(state, definitions, actor_id)
+    if state.relations.find(target_id=actor_id, kind="concubine"):
+        multiplier *= 0.8
+    if world_id == "celestial":
+        from .celestial import court_law_active
+
+        if court_law_active(state, "immortal_twofold"):
+            multiplier *= 1.10
+    return float(multiplier)
+
+
+def breakthrough_view(
+    state: WorldState, definitions: GameDefinitions, entity_id: str | None = None,
+) -> dict[str, Any]:
+    actor_id = entity_id or state.controlled_entity_id
+    if actor_id is None:
+        raise ValueError("游戏尚未初始化")
+    return _breakthrough_projection(state, definitions, actor_id)
+
+
 def cultivation_view(state: Any, definitions: GameDefinitions, entity_id: str | None = None) -> dict[str, Any]:
     actor_id = entity_id or state.controlled_entity_id
     if actor_id is None:
@@ -1308,20 +1668,114 @@ def cultivation_view(state: Any, definitions: GameDefinitions, entity_id: str | 
     cultivation = state.entities.require(actor_id, CULTIVATION)
     practice = state.entities.require(actor_id, PRACTICE)
     realm = definitions.realm(str(cultivation["realm_id"]))
+    root = definitions.roots[str(cultivation["spirit_root"])]
     main_id = practice.get("main_technique_id")
+    support_id = practice.get("support_technique_id")
+    combat_ids = [
+        str(value) for value in practice.get("combat_technique_ids", [])
+        if str(value) in definitions.techniques
+    ]
+    karma_factor = (
+        0.0 if cultivation.get("path") == "demonic" else
+        float(definitions.systems.get("karma_factors", {}).get(
+            definitions.techniques[str(main_id)].path if main_id else cultivation["path"],
+            1.0,
+        )) * (
+            float(definitions.techniques[str(main_id)].karma_multiplier)
+            if main_id else 1.0
+        )
+    )
+    location = state.entities.require(actor_id, LOCATION)
+    world = definitions.worlds[str(location["world_id"])]
+    local = world.locations[str(location["location_id"])]
+    qi_experience = dict(cultivation.get("qi_experience", {}))
+    qi_mastery = []
+    for source in QI_SOURCES:
+        experience = float(qi_experience.get(source, 0.0))
+        level = _qi_level(definitions, experience)
+        threshold = _qi_threshold(definitions, level)
+        qi_mastery.append({
+            "source": source,
+            "name": QI_SOURCE_NAMES[source].removesuffix("源") + "气",
+            "level": level,
+            "experience": round(experience, 2),
+            "level_experience": round(experience - threshold, 2),
+            "next_level_experience": round(
+                _qi_threshold(definitions, level + 1) - threshold, 2
+            ),
+        })
     return {
         **cultivation,
-        "realm_name": realm.name,
+        "realm_name": _stage_name(definitions, cultivation),
         "realm_index": definitions.realm_index(realm.id),
         "opportunity_required": _opportunity_required(definitions, cultivation),
-        "spirit_root_name": definitions.roots[str(cultivation["spirit_root"])].name,
+        "spirit_root_name": root.name,
+        "spirit_root_tier": root.tier,
+        "spirit_root_efficiency": root.efficiency,
+        "spirit_root_elements": [
+            definitions.affinity_names.get(element, element)
+            for element in root.elements
+        ],
+        "additional_root_names": [
+            definitions.affinity_names.get(str(element), str(element))
+            for element in cultivation.get("additional_roots", [])
+        ],
         "path_name": definitions.paths[str(cultivation["path"])],
+        "karma_factor": round(karma_factor, 4),
+        "cultivation_efficiency": round(
+            _cultivation_efficiency(state, definitions, actor_id), 4
+        ),
+        "time_unit_years": definitions.time_units[definitions.realm_index(realm.id)],
+        "qi_gain_efficiencies": dict(local.qi_gain_efficiencies),
+        "qi_environment": {
+            "display": [
+                {
+                    "source": source,
+                    "name": QI_SOURCE_NAMES[source],
+                    "concentration": round(float(world.qi_concentrations[source]), 4),
+                    "multiplier": round(_qi_environment_multiplier(
+                        float(world.qi_concentrations[source])
+                    ), 4),
+                }
+                for source in QI_SOURCES
+            ],
+            "main_multiplier": (
+                round(sum(
+                    weight * _qi_environment_multiplier(
+                        float(world.qi_concentrations[source])
+                    )
+                    for source, weight in definitions.techniques[str(main_id)].sources.items()
+                ), 4)
+                if main_id else None
+            ),
+        },
+        "qi_mastery": qi_mastery,
         "known_techniques": [
-            {"id": technique_id, "name": definitions.techniques[technique_id].name}
+            _technique_view(
+                state, definitions, actor_id, technique_id,
+                environment_active=False,
+            )
             for technique_id in practice["known_techniques"]
         ],
         "main_technique": (
-            {"id": main_id, "name": definitions.techniques[str(main_id)].name}
+            _technique_view(
+                state, definitions, actor_id, str(main_id),
+                environment_active=True,
+            )
             if main_id else None
         ),
+        "support_technique": (
+            _technique_view(
+                state, definitions, actor_id, str(support_id),
+                environment_active=False,
+            )
+            if support_id and str(support_id) in definitions.techniques else None
+        ),
+        "combat_techniques": [
+            _technique_view(
+                state, definitions, actor_id, technique_id,
+                environment_active=False,
+            )
+            for technique_id in combat_ids
+        ],
     }

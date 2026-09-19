@@ -6,7 +6,7 @@ from typing import Any
 
 from .assets import ASSET_LEDGER, consume_asset, create_asset, require_asset
 from .character import IDENTITY, LIFE
-from .combat import CONDITION
+from .combat import CONDITION, combat_snapshot
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
 from .economy import CURRENCY_ID, change_inventory_item, inventory_quantity
@@ -605,11 +605,15 @@ def production_view(
         plots.append({
             **plot,
             "name": plant["name"],
+            "kind": plant.get("kind", "medicinal"),
             "display_years": years,
             "quality": quality,
             "value": _plant_value(plant, max(1, years), quality),
             "optimal_years": int(plant["optimal_years"]),
+            "best": years == int(plant["optimal_years"]),
             "can_harvest": float(plot["growth_years"]) > 0,
+            "requires_booster": bool(plant.get("requires_booster")),
+            "booster_unlocked": bool(plot.get("booster_unlocked")),
         })
     reclaimed = int(field["reclaimed_qing"])
     next_cost = max(
@@ -637,13 +641,108 @@ def production_view(
             "level_experience": round(amount - current, 1),
             "next_level_experience": round(following - current, 1),
         })
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    condition = state.entities.require(actor_id, CONDITION)
+    snapshot = combat_snapshot(state, definitions, actor_id)
+    max_mp = float(snapshot["max_mp"])
+    inventory = state.entities.require(actor_id, "economy.inventory")
+    quantities = {
+        str(item_id): max(
+            0,
+            int(quantity) - int(dict(inventory.get("reserved", {})).get(item_id, 0)),
+        )
+        for item_id, quantity in dict(inventory.get("items", {})).items()
+    }
+    seeds = []
+    for plant_id, plant in rules["plants"].items():
+        seed_id = str(plant["seed_id"])
+        if quantities.get(seed_id, 0) > 0:
+            seeds.append({
+                "plant_id": plant_id,
+                "seed_id": seed_id,
+                "name": plant["name"],
+                "quantity": quantities[seed_id],
+            })
+    materials = []
+    for item_id, quantity in quantities.items():
+        definition = definitions.items.get(item_id)
+        if (
+            definition is not None and quantity > 0
+            and "herb" in definition.tags and "seed" not in definition.tags
+        ):
+            materials.append({
+                "id": item_id, "name": definition.name, "quantity": quantity,
+                "years": 0, "quality": 0.55,
+            })
+    ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    for asset in dict(ledger.get("instances", {})).values():
+        metadata = dict(asset.get("metadata", {}))
+        if (
+            asset.get("kind") == "harvested_spirit_plant"
+            and not asset.get("reservation_id")
+            and metadata.get("plant_kind", "medicinal") == "medicinal"
+        ):
+            materials.append({
+                "id": str(asset["id"]), "name": str(asset["name"]),
+                "quantity": 1, "years": int(metadata.get("years", 0)),
+                "quality": float(metadata.get("quality", 0.55)),
+            })
+    target_tiers: dict[str, int] = {}
+    for good in definitions.market_goods:
+        definition = definitions.items.get(good.content_id)
+        if definition is not None and "pill" in definition.tags:
+            target_tiers[good.content_id] = min(
+                int(good.tier), target_tiers.get(good.content_id, int(good.tier))
+            )
+    alchemy_targets = [
+        {
+            "id": item.id, "name": item.name,
+            "tier": target_tiers.get(item.id, 1),
+            "description": item.description,
+        }
+        for item in definitions.items.values()
+        if "pill" in item.tags
+    ]
+    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+    spirit_stones = inventory_quantity(
+        state, actor_id, CURRENCY_ID, spendable=True
+    )
+    alive = bool(state.entities.require(actor_id, LIFE).get("alive"))
+    imprisoned = bool(state.relations.find(target_id=actor_id, kind="combat_prisoner"))
     return {
         "max_qing": int(rules["max_qing"]),
         "reclaimed_qing": reclaimed,
         "free_qing": max(0, reclaimed - len(plots)),
+        "can_reclaim": bool(
+            alive and not imprisoned and realm_index > 0
+            and reclaimed < int(rules["max_qing"])
+        ),
         "reclaim_cost": next_cost,
         "reclaim_years": 0,
         "plots": plots,
+        "seeds": seeds,
+        "spirit_stones": spirit_stones,
+        "mp": round(max_mp * float(condition.get("mp_ratio", 0.0)), 1),
+        "max_mp": round(max_mp, 1),
+        "irrigation_min_mp": round(max(
+            1.0, max_mp * float(rules["irrigation_min_mp_ratio"])
+        ), 1),
+        "irrigation_max_mp": round(max(
+            1.0, max_mp * float(rules["irrigation_max_mp_ratio"])
+        ), 1),
+        "irrigation_years_at_full_mp": float(
+            rules["irrigation_years_by_realm"][str(realm_index)]
+        ),
+        "boosters": [
+            {"id": item_id, "name": definitions.items[item_id].name, "quantity": quantity}
+            for item_id, quantity in quantities.items()
+            if quantity > 0 and item_id in definitions.items
+            and "spirit_plant_booster" in definitions.items[item_id].tags
+        ],
+        "alchemy": {
+            "materials": sorted(materials, key=lambda row: (row["name"], row["id"])),
+            "targets": sorted(alchemy_targets, key=lambda row: (row["tier"], row["name"])),
+        },
         "art_skills": art_skills,
         "alchemy_experience": float(experience.get("alchemy", 0)),
         "alchemy_level": _art_level(field, definitions, "alchemy"),
@@ -653,9 +752,5 @@ def production_view(
             {"id": plant_id, **dict(plant)}
             for plant_id, plant in rules["plants"].items()
         ],
-        "alchemy_targets": [
-            {"id": item.id, "name": item.name, "description": item.description}
-            for item in definitions.items.values()
-            if "pill" in item.tags
-        ],
+        "alchemy_targets": alchemy_targets,
     }

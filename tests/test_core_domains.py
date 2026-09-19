@@ -78,6 +78,11 @@ class V2CoreDomainTests(unittest.TestCase):
         self.assertEqual(definitions.realms[0].id, "mortal")
         self.assertEqual(definitions.realms[-1].id, "daluo")
         self.assertEqual(definitions.roots["supreme_wood"].elements, ("wood",))
+        self.assertEqual(definitions.affinity_names["wood"], "木")
+        self.assertEqual(definitions.techniques["TECH_DEMON_BREATHING"].karma_multiplier, 1.05)
+        self.assertEqual(definitions.techniques["TECH_DEMON_BREATHING"].combat_requirement_level, 0)
+        self.assertTrue(definitions.techniques["TECH_CELESTIAL_BREATHING"].requires_immortal_power)
+        self.assertEqual(definitions.techniques["TECH_CELESTIAL_BREATHING"].immortal_power_cost, 0.08)
         self.assertEqual(definitions.worlds["human"].default_location, "wudi_plain")
         self.assertEqual(definitions.factions["tianjian"].world_id, "human")
 
@@ -97,6 +102,22 @@ class V2CoreDomainTests(unittest.TestCase):
             game["player"]["cultivation"]["main_technique"]["id"],
             "TECH_DEMON_BREATHING",
         )
+        technique = game["player"]["cultivation"]["main_technique"]
+        self.assertEqual(technique["category_name"], "修仙")
+        self.assertEqual(technique["element_name"], "无属性")
+        self.assertEqual(technique["source_display"], "魔源")
+        self.assertEqual(technique["opportunity_bonus"], 0.10)
+        self.assertEqual(technique["hp_bonus"], 0.08)
+        self.assertEqual(technique["mp_bonus"], 0.11)
+        self.assertEqual(technique["combat_bonus"], 18)
+        self.assertIsInstance(technique["environment_multiplier"], float)
+        self.assertNotIn(None, (
+            technique["combat_requirement_display"],
+            technique["combat_requirement_met"],
+            technique["compatible"],
+        ))
+        self.assertEqual(game["player"]["cultivation"]["spirit_root_efficiency"], 1.3)
+        self.assertEqual(game["player"]["cultivation"]["qi_mastery"][0]["next_level_experience"], 25)
         self.assertEqual(game["world"]["world_id"], "demon")
         self.assertEqual(game["world"]["location_id"], "gathering_baleful_plain")
         self.assertEqual(
@@ -120,8 +141,51 @@ class V2CoreDomainTests(unittest.TestCase):
         broken = self.engine.attempt_breakthrough(game["id"])
         self.assertEqual(broken.game["player"]["cultivation"]["realm_id"], "qi")
         self.assertEqual(broken.game["player"]["cultivation"]["layer"], 1)
+        self.assertEqual(
+            broken.game["player"]["cultivation"]["realm_name"], "练气1层"
+        )
         self.assertTrue(
             any(event["event_type"] == "cultivation.breakthrough.succeeded" for event in broken.events)
+        )
+
+    def test_realm_stage_and_breakthrough_details_match_authoritative_state(self):
+        game = self.engine.create_game("照鉴", seed=211)
+        actor_id = game["player"]["id"]
+        state = self.engine.store.load(game["id"])
+        cultivation = state.entities.require(actor_id, "cultivation.state")
+        cultivation.update(
+            realm_id="core", layer=1, opportunity=300.0, bottleneck="minor"
+        )
+        state.entities.put(actor_id, "cultivation.state", cultivation)
+        self.engine.store.save(
+            state, [], player_name="照鉴", expected_revision=state.revision
+        )
+
+        projected = self.engine.get_game(game["id"])
+        self.assertEqual(
+            projected["player"]["cultivation"]["realm_name"], "结丹初期·1层"
+        )
+        self.assertEqual(projected["breakthrough"]["target_realm"], "结丹初期·2层")
+        self.assertEqual(projected["breakthrough"]["chance"]["base"], 0.48)
+        self.assertEqual(
+            projected["breakthrough"]["chance"]["optimal_state_bonus"], 0.05
+        )
+        self.assertEqual(projected["breakthrough"]["chance"]["final"], 0.53)
+
+    def test_quick_start_restores_preset_progression_and_loadout(self):
+        game = self.engine.create_game("", seed=212, preset_id="core")
+        cultivation = game["player"]["cultivation"]
+        self.assertEqual(cultivation["realm_name"], "结丹初期·1层")
+        self.assertEqual(cultivation["opportunity"], 75.0)
+        self.assertEqual(cultivation["main_technique"]["id"], "TECH_COMMON_CORE")
+        self.assertEqual(
+            cultivation["support_technique"]["id"], "TECH_COMMON_FOUNDATION"
+        )
+        self.assertEqual(len(cultivation["combat_techniques"]), 3)
+        self.assertEqual(game["story"]["attributes"]["karma"], 8.0)
+        self.assertEqual(
+            next(row for row in game["inventory"] if row["id"] == "spirit_stone")["quantity"],
+            120,
         )
 
     def test_technique_affinity_is_checked_on_learning_and_equipping(self):
