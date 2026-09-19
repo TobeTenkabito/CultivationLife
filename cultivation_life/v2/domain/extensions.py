@@ -72,6 +72,11 @@ def _new_monster_state() -> dict[str, Any]:
         "adaptations": [],
         "imprints": [],
         "traits": [],
+        "generated_traits": [],
+        "lineage_deeds": {},
+        "custom_lineage_id": None,
+        "custom_lineage": None,
+        "pending_lineage_editor": None,
         "frozen": False,
     }
 
@@ -302,7 +307,9 @@ def _configure_bloodline_handler(definitions: GameDefinitions):
         if command.species_id not in species:
             raise ValueError("未知妖修本源谱系")
         bloodline["species_id"] = command.species_id
-        bloodline["evolution_id"] = species[command.species_id].get("base_evolution_id")
+        base_id = species[command.species_id].get("base_evolution_id")
+        bloodline["evolution_id"] = base_id
+        bloodline["evolution_history"] = [str(base_id)] if base_id else []
         context.state.entities.put(command.actor_id, MONSTER_BLOODLINE, bloodline)
         context.emit(
             "dlc.monster.bloodline.configured",

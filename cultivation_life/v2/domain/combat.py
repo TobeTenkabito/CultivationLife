@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import math
 from dataclasses import dataclass
 from typing import Any
@@ -192,6 +193,14 @@ def combat_snapshot(
         ) * float(ghost_details["mp_multiplier"])
         for stat, factor in dict(ghost_details["stats"]).items():
             stats[stat] *= float(factor)
+    monster_details: dict[str, Any] | None = None
+    if state.entities.get(entity_id, "dlc.monster.bloodline") is not None:
+        from .monster import monster_combat_profile
+
+        monster_details = monster_combat_profile(state, definitions, entity_id)
+        if monster_details is not None:
+            for stat, factor in dict(monster_details["stat_multipliers"]).items():
+                stats[stat] *= float(factor)
     return {
         "entity_id": entity_id,
         "name": str(identity["name"]),
@@ -210,6 +219,7 @@ def combat_snapshot(
         "artifact_traits": list(dict.fromkeys(artifact["traits"])),
         "puppet_contribution": puppet_contribution,
         "ghost_contribution": ghost_details,
+        "monster_contribution": monster_details,
         "tribulation_reduction": float(artifact["tribulation_reduction"]),
     }
 
@@ -226,7 +236,8 @@ def _damage(
     defense = float(defender["stats"]["guard"]) * 0.78 + float(defender["stats"]["sense"]) * 0.22
     ratio = max(0.05, offense / max(1.0, defense))
     mana_factor = 0.72 + 0.28 * max(0.0, min(1.0, attacker_mp_ratio))
-    fraction = max(0.035, min(0.34, 0.115 * math.sqrt(ratio) * mana_factor))
+    morale_factor = max(0.5, min(1.5, float(attacker.get("morale", 50.0)) / 50.0))
+    fraction = max(0.035, min(0.34, 0.115 * math.sqrt(ratio) * mana_factor * morale_factor))
     return float(defender["max_hp"]) * fraction * context.rng.uniform(0.88, 1.12)
 
 
@@ -276,6 +287,11 @@ def _resolve_handler(definitions: GameDefinitions):
             command.attacker_id: float(attacker["mp_ratio"]),
             command.target_id: float(target["mp_ratio"]),
         }
+        morale = {command.attacker_id: 50.0, command.target_id: 50.0}
+        base_snapshots = {
+            command.attacker_id: attacker,
+            command.target_id: target,
+        }
         first_attacker = (
             attacker["stats"]["mobility"] + attacker["stats"]["sense"]
             >= target["stats"]["mobility"] + target["stats"]["sense"]
@@ -287,10 +303,61 @@ def _resolve_handler(definitions: GameDefinitions):
         )
         rounds: list[dict[str, Any]] = []
         for round_number in range(1, 13):
+            from .monster import evaluate_custom_lineage
+
+            round_snapshots = {
+                entity_id: copy.deepcopy(snapshot)
+                for entity_id, snapshot in base_snapshots.items()
+            }
+            lineage_events: list[dict[str, Any]] = []
+            participants = (
+                (command.attacker_id, command.target_id),
+                (command.target_id, command.attacker_id),
+            )
+            terrain_id = str(command.terrain or terrain["id"])
+            for owner_id, enemy_id in participants:
+                owner_snapshot = base_snapshots[owner_id]
+                enemy_snapshot = base_snapshots[enemy_id]
+                result = evaluate_custom_lineage(
+                    context.state, definitions, owner_id,
+                    phase="round_start", round_no=round_number,
+                    terrain=terrain_id,
+                    owner_state=max(0.0, hp[owner_id] / float(owner_snapshot["max_hp"])),
+                    enemy_state=max(0.0, hp[enemy_id] / float(enemy_snapshot["max_hp"])),
+                    owner_morale=morale[owner_id], enemy_morale=morale[enemy_id],
+                )
+                _apply_context_multipliers(
+                    round_snapshots[owner_id],
+                    dict(result["owner_stat_multipliers"]),
+                )
+                _apply_context_multipliers(
+                    round_snapshots[enemy_id],
+                    dict(result["enemy_stat_multipliers"]),
+                )
+                hp[owner_id] = min(
+                    float(owner_snapshot["max_hp"]),
+                    hp[owner_id] + float(result["owner_state_delta"]) * float(owner_snapshot["max_hp"]),
+                )
+                hp[enemy_id] = min(
+                    float(enemy_snapshot["max_hp"]),
+                    hp[enemy_id] + float(result["enemy_state_delta"]) * float(enemy_snapshot["max_hp"]),
+                )
+                morale[owner_id] = max(
+                    0.0, min(100.0, morale[owner_id] + float(result["owner_morale_delta"]))
+                )
+                morale[enemy_id] = max(
+                    0.0, min(100.0, morale[enemy_id] + float(result["enemy_morale_delta"]))
+                )
+                lineage_events.extend(result["events"])
+            for entity_id, snapshot in round_snapshots.items():
+                snapshot["morale"] = morale[entity_id]
             exchanges: list[dict[str, Any]] = []
-            for acting, acting_snapshot in order:
+            round_order = tuple(
+                (entity_id, round_snapshots[entity_id]) for entity_id, _ in order
+            )
+            for acting, acting_snapshot in round_order:
                 defending = command.target_id if acting == command.attacker_id else command.attacker_id
-                defending_snapshot = target if defending == command.target_id else attacker
+                defending_snapshot = round_snapshots[defending]
                 if hp[acting] <= 0 or hp[defending] <= 0:
                     continue
                 dealt = min(hp[defending], _damage(
@@ -306,7 +373,37 @@ def _resolve_handler(definitions: GameDefinitions):
                         hp[defending] / float(defending_snapshot["max_hp"]), 6
                     ),
                 })
-            rounds.append({"round": round_number, "exchanges": exchanges})
+            for owner_id, enemy_id in participants:
+                owner_snapshot = base_snapshots[owner_id]
+                enemy_snapshot = base_snapshots[enemy_id]
+                result = evaluate_custom_lineage(
+                    context.state, definitions, owner_id,
+                    phase="round_end", round_no=round_number,
+                    terrain=terrain_id,
+                    owner_state=max(0.0, hp[owner_id] / float(owner_snapshot["max_hp"])),
+                    enemy_state=max(0.0, hp[enemy_id] / float(enemy_snapshot["max_hp"])),
+                    owner_morale=morale[owner_id], enemy_morale=morale[enemy_id],
+                )
+                hp[owner_id] = min(
+                    float(owner_snapshot["max_hp"]),
+                    hp[owner_id] + float(result["owner_state_delta"]) * float(owner_snapshot["max_hp"]),
+                )
+                hp[enemy_id] = min(
+                    float(enemy_snapshot["max_hp"]),
+                    hp[enemy_id] + float(result["enemy_state_delta"]) * float(enemy_snapshot["max_hp"]),
+                )
+                morale[owner_id] = max(
+                    0.0, min(100.0, morale[owner_id] + float(result["owner_morale_delta"]))
+                )
+                morale[enemy_id] = max(
+                    0.0, min(100.0, morale[enemy_id] + float(result["enemy_morale_delta"]))
+                )
+                lineage_events.extend(result["events"])
+            rounds.append({
+                "round": round_number, "exchanges": exchanges,
+                "lineage_events": lineage_events,
+                "morale": dict(morale),
+            })
             if hp[command.attacker_id] <= 0 or hp[command.target_id] <= 0:
                 break
 
@@ -381,6 +478,7 @@ def _resolve_handler(definitions: GameDefinitions):
                 command.attacker_id: context.state.entities.require(command.attacker_id, CONDITION)["hp_ratio"],
                 command.target_id: context.state.entities.require(command.target_id, CONDITION)["hp_ratio"],
             },
+            "final_morale": dict(morale),
         }
         context.state.entities.put(report_id, REPORT, report)
         context.emit(

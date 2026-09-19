@@ -320,6 +320,33 @@ def _on_ascension_commit_requested(definitions: GameDefinitions):
     return handler
 
 
+def _on_monster_ascension_requested(definitions: GameDefinitions):
+    """Commit the realm-eight bloodline ascension through normal cleanup."""
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        destination = str(event.payload.get("destination_world_id", "nether"))
+        location = context.state.entities.require(actor_id, LOCATION)
+        origin = str(location["world_id"])
+        cultivation = context.state.entities.require(actor_id, "cultivation.state")
+        if cultivation.get("path") != "monster" or definitions.realm_index(
+            str(cultivation["realm_id"])
+        ) != 9:
+            raise ValueError("妖修血脉飞升请求与角色境界不一致")
+        if destination != "nether" or destination not in definitions.worlds:
+            raise ValueError("妖修血脉飞升目标无效")
+        _begin_cleanup_transaction(
+            context,
+            actor_id=actor_id,
+            origin=origin,
+            destination=destination,
+            keep_ids=[],
+            fallen_ids=[],
+            commit_after_ack=True,
+        )
+
+    return handler
+
+
 def _cross_world_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, CrossWorld):
@@ -544,6 +571,10 @@ def register_world_domain(bus: CommandBus, definitions: GameDefinitions) -> None
     )
     bus.event_bus.register(
         "world.ascension.commit.requested", _on_ascension_commit_requested(definitions)
+    )
+    bus.event_bus.register(
+        "world.monster_ascension.requested",
+        _on_monster_ascension_requested(definitions),
     )
 
 

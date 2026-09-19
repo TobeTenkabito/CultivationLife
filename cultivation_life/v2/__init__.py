@@ -60,6 +60,11 @@ from .domain.ghost import (
     PrepareGhostReincarnation,
     ReincarnateGhost,
 )
+from .domain.monster import (
+    ConfirmCustomLineage,
+    EvolveMonster,
+    PrepareCustomLineage,
+)
 from .domain.war import IssueBounty, WarAction, WarPeace
 from .domain.economy import (
     BuyMarketOffer,
@@ -144,6 +149,7 @@ __all__ = [
     "BeginRelationshipCapture",
     "ChangeContribution",
     "ConfigureMonsterBloodline",
+    "ConfirmCustomLineage",
     "CrossWorld",
     "CreateFamily",
     "DispatchFactionMember",
@@ -151,6 +157,7 @@ __all__ = [
     "EndRelationship",
     "EquipMainTechnique",
     "EquipSpecialTechnique",
+    "EvolveMonster",
     "FormRelationship",
     "BefriendDaoist",
     "GiftDisciple",
@@ -180,6 +187,7 @@ __all__ = [
     "CraftMechanicalPuppet",
     "EnterImprisonment",
     "PostBattlePossession",
+    "PrepareCustomLineage",
     "PrisonAction",
     "PuppetAction",
     "RefineForeignSoul",

@@ -443,6 +443,28 @@ def _schema_15_to_16(source: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def _schema_16_to_17(source: dict[str, Any]) -> dict[str, Any]:
+    """Add resumable monster evolution and custom-lineage state."""
+    value = copy.deepcopy(source)
+    entities = dict(value.setdefault("entities", {}).setdefault("entities", {}))
+    value["entities"]["entities"] = entities
+    for components in entities.values():
+        bloodline = components.get("dlc.monster.bloodline")
+        if not isinstance(bloodline, dict):
+            continue
+        bloodline.setdefault("generated_traits", [])
+        bloodline.setdefault("lineage_deeds", {})
+        bloodline.setdefault("custom_lineage_id", None)
+        bloodline.setdefault("custom_lineage", None)
+        bloodline.setdefault("pending_lineage_editor", None)
+    value["module_versions"] = {
+        **dict(value.get("module_versions", {})),
+        "monster": 1,
+    }
+    value["schema_version"] = 17
+    return value
+
+
 MIGRATIONS: dict[int, SnapshotMigration] = {
     1: _schema_1_to_2,
     2: _schema_2_to_3,
@@ -459,6 +481,7 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
     13: _schema_13_to_14,
     14: _schema_14_to_15,
     15: _schema_15_to_16,
+    16: _schema_16_to_17,
 }
 
 

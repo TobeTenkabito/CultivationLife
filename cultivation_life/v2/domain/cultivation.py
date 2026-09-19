@@ -657,6 +657,17 @@ def _attempt_breakthrough_handler(definitions: GameDefinitions):
         if kind not in {"minor", "major"}:
             raise ValueError("尚未抵达需要手动突破的瓶颈")
         major = kind == "major"
+        monster_bloodline = context.state.entities.get(
+            command.actor_id, "dlc.monster.bloodline"
+        )
+        if (
+            major
+            and cultivation.get("path") == "monster"
+            and isinstance(monster_bloodline, dict)
+            and monster_bloodline.get("species_id") is not None
+            and not bool(monster_bloodline.get("frozen"))
+        ):
+            raise ValueError("妖修大境界必须从血脉进化候选中选择形态")
         realm_index = definitions.realm_index(str(cultivation["realm_id"]))
         old_layer = int(cultivation["layer"])
         requires_trial = (major and realm_index >= 3) or (

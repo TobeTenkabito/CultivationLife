@@ -77,6 +77,12 @@ from .domain.ghost import (
     register_ghost_domain,
     register_ghost_story_effects,
 )
+from .domain.monster import (
+    monster_invariants,
+    monster_view,
+    reconcile_monster_state,
+    register_monster_domain,
+)
 from .domain.war import (
     IssueBounty,
     WarAction,
@@ -319,6 +325,7 @@ class V2GameEngine:
         register_war_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_ghost_domain(self.commands, self.definitions)
+        register_monster_domain(self.commands, self.definitions)
         register_presentation_domain(self.commands, self.definitions)
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
@@ -350,6 +357,7 @@ class V2GameEngine:
         self.invariants.register("war", war_invariants(self.definitions))
         self.invariants.register("extensions", extension_invariants(self.definitions))
         self.invariants.register("ghost", ghost_invariants)
+        self.invariants.register("monster", monster_invariants(self.definitions))
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
 
@@ -378,6 +386,7 @@ class V2GameEngine:
         ))
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
+        reconcile_monster_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -425,6 +434,7 @@ class V2GameEngine:
         state = result.state
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
+        reconcile_monster_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -482,6 +492,7 @@ class V2GameEngine:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
+        reconcile_monster_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1463,6 +1474,7 @@ class V2GameEngine:
         state = self.store.load(game_id)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
+        reconcile_monster_state(state, self.definitions)
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
@@ -1524,6 +1536,7 @@ class V2GameEngine:
             "party": party_view(state, self.definitions),
             "demonic_system": demonic_view(state, self.definitions),
             "ghost_system": ghost_view(state, self.definitions),
+            "monster_system": monster_view(state, self.definitions),
             "war_system": war_view(state, self.definitions),
             "extensions": extension_view(state, self.definitions),
             "settings": presentation["settings"],
