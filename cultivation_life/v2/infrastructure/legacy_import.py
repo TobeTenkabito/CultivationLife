@@ -271,7 +271,10 @@ class LegacyV1Importer:
         "concubine_rejection_aftermath",
         "monster_evolution_id", "monster_evolution_history", "monster_adaptations",
         "monster_adaptation_progress", "monster_bloodline_imprints",
-        "monster_acquired_bloodline_traits", "ghost_intrinsic_hp_current",
+        "monster_acquired_bloodline_traits", "monster_generated_bloodline_traits",
+        "monster_lineage_deeds", "monster_custom_lineage_id",
+        "monster_custom_lineage", "monster_lineage_origin",
+        "ghost_intrinsic_hp_current",
         "ghost_intrinsic_mp_current", "ghost_soul_erosion_rate_pp",
         "ghost_soul_erosion_time_progress", "ghost_wangsheng_energy",
         "ghost_reincarnation_imprints", "ghost_intrinsic_highwater_realm",
@@ -2139,6 +2142,16 @@ class LegacyV1Importer:
                 adaptations=list(player.get("monster_adaptations", [])),
                 imprints=list(player.get("monster_bloodline_imprints", [])),
                 traits=list(player.get("monster_acquired_bloodline_traits", [])),
+                generated_traits=copy.deepcopy(
+                    list(player.get("monster_generated_bloodline_traits", []))
+                ),
+                lineage_deeds={
+                    str(key): max(0, int(value))
+                    for key, value in dict(player.get("monster_lineage_deeds", {})).items()
+                },
+                custom_lineage_id=player.get("monster_custom_lineage_id"),
+                custom_lineage=copy.deepcopy(player.get("monster_custom_lineage")),
+                pending_lineage_editor=None,
             )
             state.entities.put(actor_id, MONSTER_BLOODLINE, monster)
             report.imported_counts["monster_states"] = 1

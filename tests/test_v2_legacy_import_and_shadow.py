@@ -521,6 +521,19 @@ class V2LegacyImportTests(unittest.TestCase):
         monster = self.v1.store.load(monster_created["id"])
         monster.player.monster_adaptations = ["water"]
         monster.player.monster_adaptation_progress = {"water": 4}
+        monster.player.monster_lineage_deeds = {"victory": 2}
+        monster.player.monster_custom_lineage_id = "custom-lineage-legacy"
+        monster.player.monster_custom_lineage = {
+            "id": "custom-lineage-legacy",
+            "name": "旧谱祖血",
+            "finalized_stage": 1,
+            "spent_points": 9,
+            "rules": [{
+                "phase": "round_start", "schedule": "every",
+                "condition": "always", "target": "player",
+                "effect": "might", "value": 0.03, "cost": 9,
+            }],
+        }
         self.v1.store.save(monster)
         monster_result = self.v2.import_v1_save(
             self.v1_directory / f"{monster.id}.json"
@@ -529,6 +542,11 @@ class V2LegacyImportTests(unittest.TestCase):
         self.assertEqual(bloodline["species_id"], "serpent")
         self.assertEqual(bloodline["adaptations"], ["water"])
         self.assertEqual(bloodline["adaptation_years"], {"water": 4})
+        self.assertEqual(bloodline["lineage_deeds"], {"victory": 2})
+        self.assertEqual(
+            monster_result.game["monster_system"]["custom_lineage"]["name"],
+            "旧谱祖血",
+        )
 
     def test_active_ghost_captor_is_imported_instead_of_blocked(self):
         created = self.v1.create_game(

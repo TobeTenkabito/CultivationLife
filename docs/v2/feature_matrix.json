@@ -476,11 +476,15 @@
     {
       "id": "monster.evolution_lineage",
       "domain": "monster_dlc",
-      "status": "partial",
+      "status": "pass",
       "required_for_cutover": true,
       "v1_operations": ["monster-evolve", "custom-lineage-prepare", "custom-lineage-confirm"],
-      "evidence": ["tests/test_v2_step5_domains.py"],
-      "notes": "Species and adaptation state exist; evolution and custom lineage commands remain."
+      "evidence": [
+        "tests/test_v2_monster_batch9.py::V2MonsterBatchNineTests::test_major_breakthrough_requires_irreversible_evolution_choice",
+        "tests/test_v2_monster_batch9.py::V2MonsterBatchNineTests::test_locked_branch_is_visible_but_cannot_be_selected",
+        "tests/test_v2_monster_batch9.py::V2MonsterBatchNineTests::test_custom_lineage_is_resumable_and_affects_combat"
+      ],
+      "notes": "Typed irreversible evolution, branch requirements, resumable custom-lineage editing, combat execution and nether ascension are complete."
     },
     {
       "id": "celestial.court",
