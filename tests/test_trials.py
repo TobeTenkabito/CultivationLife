@@ -4,17 +4,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import FormRelationship, GrantItem, RegisterCharacter, V2GameEngine
-from cultivation_life.v2.domain.combat import CONDITION
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.domain.story import STORY_STATE
-from cultivation_life.v2.domain.world import LOCATION
+from cultivation_life import FormRelationship, GrantItem, RegisterCharacter, GameEngine
+from cultivation_life.domain.combat import CONDITION
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.story import STORY_STATE
+from cultivation_life.domain.world import LOCATION
 
 
 class V2TrialRuntimeTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         game = self.engine.create_game("渡劫者", seed=880055)
         self.game_id = game["id"]
         self.actor_id = game["player"]["id"]
@@ -148,7 +148,7 @@ class V2AscensionTrialTests(unittest.TestCase):
         self.directory.cleanup()
 
     def _engine(self, *, path: str, start_world: str):
-        engine = V2GameEngine(Path(self.directory.name) / f"{path}.sqlite3")
+        engine = GameEngine(Path(self.directory.name) / f"{path}.sqlite3")
         game = engine.create_game(
             f"{path}飞升者", seed=99117, path=path, start_world=start_world
         )

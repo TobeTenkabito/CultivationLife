@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>浮生问道 · V2</title>
-  <link rel="stylesheet" href="/v2.css">
+  <title>浮生问道</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <main>
   <header class="masthead">
-    <div><small>CULTIVATION LIFE · V2</small><h1>浮生问道</h1></div>
+    <div><small>CULTIVATION LIFE</small><h1>浮生问道</h1></div>
     <div class="header-actions"><span id="save-state" aria-live="polite"></span><button id="new" type="button">另启一世</button></div>
   </header>
 
   <section id="start" class="card start-card">
-    <div><p class="eyebrow">新建角色</p><h2>命格初定</h2><p class="muted">每次抉择都会即时写入 V2 存档。</p></div>
+    <div><p class="eyebrow">新建角色</p><h2>命格初定</h2><p class="muted">每次抉择都会即时写入存档。</p></div>
     <form id="create">
       <label>道号<input name="name" required maxlength="16" value="无名散修"></label>
       <label>性别<select name="gender"><option value="male">男</option><option value="female">女</option></select></label>
@@ -24,7 +24,6 @@
       <button class="primary" type="submit">叩问长生</button>
     </form>
     <section><h3>已有命途</h3><div id="saves" class="button-row empty-note"></div></section>
-    <details id="legacy-box" class="hidden"><summary>导入旧版存档</summary><p>导入前会自动生成不可变备份；旧文件不会被修改。</p><div id="legacy-saves" class="button-row"></div></details>
   </section>
 
   <section id="game" class="hidden game-layout">
@@ -56,6 +55,6 @@
   </section>
   <div id="toast" role="status" aria-live="polite"></div>
 </main>
-<script src="/v2.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>

@@ -4,17 +4,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import GrantItem, V2GameEngine
-from cultivation_life.v2.domain.artifacts import FORMATION
-from cultivation_life.v2.domain.assets import ASSET_LEDGER
-from cultivation_life.v2.domain.combat import combat_snapshot
-from cultivation_life.v2.domain.cultivation import CULTIVATION
+from cultivation_life import GrantItem, GameEngine
+from cultivation_life.domain.artifacts import FORMATION
+from cultivation_life.domain.assets import ASSET_LEDGER
+from cultivation_life.domain.combat import combat_snapshot
+from cultivation_life.domain.cultivation import CULTIVATION
 
 
 class V2ArtifactsFormationsNatalTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         game = self.engine.create_game("百艺修士", seed=881177)
         self.game_id = game["id"]
         self.actor_id = game["player"]["id"]

@@ -5,26 +5,26 @@ import unittest
 from contextlib import closing
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     EndRelationship,
     FormRelationship,
     FoundFaction,
     JoinFaction,
     LeaveFaction,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.character import LIFE, RegisterCharacter
-from cultivation_life.v2.domain.cultivation import (
+from cultivation_life.domain.character import LIFE, RegisterCharacter
+from cultivation_life.domain.cultivation import (
     EquipMainTechnique,
     GrantTechnique,
 )
-from cultivation_life.v2.domain.factions import (
+from cultivation_life.domain.factions import (
     ChangeContribution,
     TransferFactionControl,
 )
-from cultivation_life.v2.domain.world import LOCATION
-from cultivation_life.v2.infrastructure import V2ContentLoader
-from cultivation_life.v2.kernel.model import EventScope
+from cultivation_life.domain.world import LOCATION
+from cultivation_life.infrastructure import ContentLoader
+from cultivation_life.kernel.model import EventScope
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -34,7 +34,7 @@ class V2CoreDomainTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.database = Path(self.temp.name) / "v2.sqlite3"
-        self.engine = V2GameEngine(self.database)
+        self.engine = GameEngine(self.database)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -74,7 +74,7 @@ class V2CoreDomainTests(unittest.TestCase):
         return str(created["payload"]["entity_id"])
 
     def test_content_loader_builds_independent_domain_definitions(self):
-        definitions = V2ContentLoader.load(SOURCE_ROOT / "content")
+        definitions = ContentLoader.load(SOURCE_ROOT / "content")
         self.assertEqual(definitions.realms[0].id, "mortal")
         self.assertEqual(definitions.realms[-1].id, "daluo")
         self.assertEqual(definitions.roots["supreme_wood"].elements, ("wood",))
@@ -370,7 +370,7 @@ class V2SchemaMigrationTests(unittest.TestCase):
     def test_schema_one_snapshot_is_migrated_and_rewritten_as_current_schema(self):
         with tempfile.TemporaryDirectory() as directory:
             database = Path(directory) / "old.sqlite3"
-            engine = V2GameEngine(database)
+            engine = GameEngine(database)
             game_id = "legacy-v2-step3"
             snapshot = {
                 "format": "cultivation-life-v2",

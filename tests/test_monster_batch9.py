@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     AttemptBreakthrough,
     ConfigureMonsterBloodline,
     ConfirmCustomLineage,
@@ -12,17 +12,17 @@ from cultivation_life.v2 import (
     PrepareCustomLineage,
     RegisterCharacter,
     ResolveCombat,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.domain.extensions import MONSTER_BLOODLINE
-from cultivation_life.v2.infrastructure.migrations import migrate_snapshot
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.extensions import MONSTER_BLOODLINE
+from cultivation_life.infrastructure.migrations import migrate_snapshot
 
 
 class V2MonsterBatchNineTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temporary.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temporary.name) / "v2.sqlite3")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()

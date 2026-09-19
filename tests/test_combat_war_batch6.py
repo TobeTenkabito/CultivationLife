@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     FormRelationship,
     FoundFaction,
     IssueBounty,
@@ -13,7 +13,7 @@ from cultivation_life.v2 import (
     RegisterCharacter,
     ResolveCombat,
     ResolveStoryChoice,
-    V2GameEngine,
+    GameEngine,
     WarAction,
     WarPeace,
 )
@@ -22,7 +22,7 @@ from cultivation_life.v2 import (
 class V2CombatWarBatchSixTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temporary.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temporary.name) / "v2.sqlite3")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()

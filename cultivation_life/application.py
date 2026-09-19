@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from .domain.character import (
+    IDENTITY,
+    LIFE,
     BootstrapGame,
     PerformTimedAction,
     character_invariants,
@@ -31,6 +33,7 @@ from .domain.advanced_cultivation import (
     register_advanced_cultivation_domain,
 )
 from .domain.cultivation import (
+    CULTIVATION,
     AttemptBreakthrough,
     EquipMainTechnique,
     PerformActionUnits,
@@ -258,6 +261,7 @@ from .domain.presentation import (
     register_presentation_domain,
 )
 from .domain.world import (
+    LOCATION,
     AscendWorld,
     CrossWorld,
     TravelWithinWorld,
@@ -283,17 +287,10 @@ from .domain.trials import (
     trial_invariants,
     trial_view,
 )
-from .infrastructure.content_loader import V2ContentLoader
-from .infrastructure.legacy_import import (
-    LEGACY_AUDIT,
-    LegacyImportError,
-    LegacyV1Importer,
-    backup_legacy_save,
-    load_legacy_save,
-)
+from .infrastructure.content_loader import ContentLoader
 from .infrastructure.sqlite_store import SQLiteSaveStore
-from .kernel.bus import CommandBus, SimulationContext
-from .kernel.model import EventScope, WorldState
+from .kernel.bus import CommandBus
+from .kernel.model import WorldState
 from .kernel.services import InvariantRegistry
 
 
@@ -307,14 +304,8 @@ class CommandExecution:
     events: tuple[dict[str, Any], ...]
 
 
-@dataclass(frozen=True, slots=True)
-class LegacyImportExecution:
-    game: dict[str, Any]
-    report: dict[str, Any]
-
-
-class V2GameEngine:
-    """Transactional application boundary for the V2 simulation."""
+class GameEngine:
+    """Transactional application boundary for the simulation."""
 
     def __init__(
         self,
@@ -322,19 +313,15 @@ class V2GameEngine:
         *,
         content_directory: Path | None = None,
         extension_root: Path | None = None,
-        legacy_backup_directory: Path | None = None,
     ):
-        default_content = Path(__file__).resolve().parents[2] / "content"
+        default_content = Path(__file__).resolve().parents[1] / "content"
         content_root = Path(content_directory or default_content)
-        self.definitions = V2ContentLoader.load(
+        self.definitions = ContentLoader.load(
             content_root,
             project_root=Path(extension_root) if extension_root is not None else content_root.parent,
         )
         database_path = Path(database_path)
         self.store = SQLiteSaveStore(database_path)
-        self.legacy_backup_directory = Path(
-            legacy_backup_directory or database_path.parent / "legacy-v1-backups"
-        )
         self.commands = CommandBus()
         self.invariants = InvariantRegistry()
         register_character_domain(self.commands, self.definitions)
@@ -447,89 +434,6 @@ class V2GameEngine:
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
         return self._present(state)
-
-    def import_v1_save(
-        self,
-        source_path: Path,
-        *,
-        target_game_id: str | None = None,
-    ) -> LegacyImportExecution:
-        """Import one legacy JSON save without changing the source file."""
-        source = Path(source_path)
-        document, source_sha256 = load_legacy_save(source)
-        for saved in self.store.list_games():
-            existing = self.store.load(str(saved["game_id"]))
-            actor_id = existing.controlled_entity_id
-            audit = existing.entities.get(actor_id, LEGACY_AUDIT) if actor_id else None
-            if audit and audit.get("source_sha256") == source_sha256:
-                raise LegacyImportError(
-                    f"该V1存档已经导入为V2存档：{existing.game_id}"
-                )
-        importer = LegacyV1Importer(self.definitions, self.commands)
-        result = importer.import_document(
-            document,
-            source_name=source.name,
-            source_sha256=source_sha256,
-            target_game_id=target_game_id,
-        )
-        state = result.state
-        reconcile_extension_state(state, self.definitions)
-        reconcile_ghost_state(state, self.definitions)
-        reconcile_monster_state(state, self.definitions)
-        reconcile_celestial_state(state, self.definitions)
-        reconcile_intrigue_state(state, self.definitions)
-        reconcile_presentation_state(state)
-        reconcile_action_runtime(state)
-        reconcile_story_state(state)
-        reconcile_advanced_cultivation(state, self.definitions)
-        reconcile_world_state(state)
-        reconcile_trial_state(state)
-        reconcile_asset_ledger(state)
-        reconcile_production_state(state)
-        reconcile_auction_state(state)
-        reconcile_artifact_state(state)
-        reconcile_relationship_state(state)
-        reconcile_family_state(state)
-        reconcile_concubine_state(state)
-        reconcile_demonic_state(state)
-        reconcile_war_state(state)
-        self.invariants.validate(state)
-        player = character_view(state)
-        backup = backup_legacy_save(
-            source,
-            self.legacy_backup_directory,
-            expected_sha256=source_sha256,
-        )
-        result.report.backup_path = str(backup.path)
-        result.report.backup_sha256 = backup.sha256
-        result.report.backup_created = backup.created
-        state.entities.put(str(state.controlled_entity_id), LEGACY_AUDIT, result.report.to_dict())
-        backup_context = SimulationContext(state=state, event_bus=self.commands.event_bus)
-        backup_context.emit(
-            "migration.v1.backup.verified",
-            source="legacy_import",
-            scope=EventScope.entity(str(state.controlled_entity_id)),
-            payload={
-                "backup_path": str(backup.path),
-                "backup_sha256": backup.sha256,
-                "backup_created": backup.created,
-            },
-        )
-        backup_context.persist_rng()
-        self.store.create(
-            state,
-            [*result.events, *backup_context.emitted_events],
-            player_name=player["name"],
-        )
-        return LegacyImportExecution(game=self._present(state), report=result.report.to_dict())
-
-    def legacy_import_report(self, game_id: str) -> dict[str, Any]:
-        state = self.store.load(game_id)
-        actor_id = state.controlled_entity_id
-        report = state.entities.get(actor_id, LEGACY_AUDIT) if actor_id else None
-        if report is None:
-            raise KeyError("该V2存档不是由V1导入的")
-        return report
 
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
@@ -912,7 +816,7 @@ class V2GameEngine:
         if slot in {"body", "divine_sense", "transformation"}:
             return self.equip_special_technique(game_id, technique_id, slot)
         if slot != "main":
-            raise ValueError("V2灵修功法只保留主修槽位")
+            raise ValueError("灵修功法只保留主修槽位")
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
         if actor_id is None:
@@ -1767,6 +1671,33 @@ class V2GameEngine:
     def event_journal(self, game_id: str, *, after_sequence: int = 0) -> list[dict[str, Any]]:
         return [event.to_dict() for event in self.store.load_events(game_id, after_sequence=after_sequence)]
 
+    def _character_catalog(self, state: WorldState) -> list[dict[str, Any]]:
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            return []
+        world_id = state.entities.require(actor_id, LOCATION)["world_id"]
+        rows: list[dict[str, Any]] = []
+        for entity_id in state.entities.with_component(IDENTITY):
+            if entity_id == actor_id:
+                continue
+            life = state.entities.get(entity_id, LIFE) or {}
+            location = state.entities.get(entity_id, LOCATION) or {}
+            cultivation = state.entities.get(entity_id, CULTIVATION) or {}
+            if not bool(life.get("alive")) or location.get("world_id") != world_id:
+                continue
+            identity = state.entities.require(entity_id, IDENTITY)
+            realm_id = str(cultivation.get("realm_id", "mortal"))
+            rows.append({
+                "id": entity_id,
+                "name": str(identity["name"]),
+                "gender": str(identity["gender"]),
+                "race": str(identity["race"]),
+                "realm_id": realm_id,
+                "realm_index": self.definitions.realm_index(realm_id),
+                "layer": int(cultivation.get("layer", 1)),
+            })
+        return sorted(rows, key=lambda row: (row["realm_index"], row["layer"], row["name"]))
+
     def _present(self, state: WorldState) -> dict[str, Any]:
         player = character_view(state)
         cultivation = cultivation_view(state, self.definitions)
@@ -1785,7 +1716,8 @@ class V2GameEngine:
             "clock": {"year": state.clock.year},
             "player": {**player, "cultivation": cultivation, **advanced_cultivation},
             "world": current_world,
-            "relationships": relationship_view(state),
+            "relationships": relationship_view(state, self.definitions),
+            "characters": self._character_catalog(state),
             "disciple_requests": disciple_request_view(state),
             "faction": faction_view(state, self.definitions),
             "governance": governance_view(state),

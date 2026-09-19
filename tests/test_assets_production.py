@@ -4,25 +4,25 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     GrantItem,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.assets import (
+from cultivation_life.domain.assets import (
     ASSET_LEDGER,
     create_asset,
     release_reservation,
     reserve_asset,
     settle_reservation,
 )
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.kernel.bus import SimulationContext
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.kernel.bus import SimulationContext
 
 
 class V2AssetsAndProductionTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         game = self.engine.create_game("百工修士", seed=330077)
         self.game_id = game["id"]
         self.actor_id = game["player"]["id"]

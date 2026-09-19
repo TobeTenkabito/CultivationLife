@@ -4,15 +4,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import GrantItem, V2GameEngine
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.domain.world import LOCATION
+from cultivation_life import GrantItem, GameEngine
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.world import LOCATION
 
 
 class V2AuctionAndBlackMarketTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         game = self.engine.create_game("匿名竞拍者", seed=771122)
         self.game_id = game["id"]
         self.actor_id = game["player"]["id"]

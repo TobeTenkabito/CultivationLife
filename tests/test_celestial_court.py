@@ -1,26 +1,24 @@
 import tempfile
 import unittest
-import random
 from pathlib import Path
 
-from cultivation_life.engine import GameEngine
-from cultivation_life.v2 import RegisterCharacter, ResolveCombat, V2GameEngine
-from cultivation_life.v2.domain.celestial import (
+from cultivation_life import RegisterCharacter, ResolveCombat, GameEngine
+from cultivation_life.domain.celestial import (
     CELESTIAL_COURT,
     reconcile_celestial_state,
 )
-from cultivation_life.v2.domain.character import LIFE
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.domain.definitions import StoryEffectDefinition
-from cultivation_life.v2.domain.world import LOCATION
-from cultivation_life.v2.domain.story import STORY_STATE
-from cultivation_life.v2.kernel.bus import SimulationContext
+from cultivation_life.domain.character import LIFE
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.definitions import StoryEffectDefinition
+from cultivation_life.domain.world import LOCATION
+from cultivation_life.domain.story import STORY_STATE
+from cultivation_life.kernel.bus import SimulationContext
 
 
 class V2CelestialCourtTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temp.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.temp.name) / "v2.sqlite3")
         self.game = self.engine.create_game("巡天者", seed=20260919)
         self.game_id = self.game["id"]
         self.actor_id = self.game["player"]["id"]
@@ -113,40 +111,6 @@ class V2CelestialCourtTests(unittest.TestCase):
         law = next(row for row in shown["laws"] if row["id"] == "martial_gods")
         self.assertTrue(law["active"])
         self.assertTrue(shown["last_vote"]["passed"])
-
-    def test_v1_court_is_imported_with_player_identity_remapped(self):
-        source_root = Path(__file__).resolve().parent.parent
-        legacy_dir = Path(self.temp.name) / "legacy"
-        legacy = GameEngine(source_root, legacy_dir)
-        created = legacy.create_game(
-            "旧廷仙官", "supreme_wood", "dao", seed=9191
-        )
-        old = legacy.store.load(created["id"])
-        old.player.world = "celestial"
-        old.player.location_id = "celestial_gate"
-        old.player.realm_index = 9
-        old.player.layer = 1
-        legacy._ensure_heavenly_court(old, random.Random(3))
-        old.heavenly_court["player_grade"] = 4
-        old.heavenly_court["player_merit"] = 271
-        old.heavenly_court["laws"]["immortal_twofold"] = True
-        legacy._sync_player_court_identity(old)
-        legacy.store.save(old)
-
-        imported = self.engine.import_v1_save(
-            legacy_dir / f"{old.id}.json", target_game_id="imported-court"
-        )
-        court = imported.game["heavenly_court"]
-
-        self.assertEqual(court["seat_count"], 49)
-        self.assertEqual(court["player_grade"], 4)
-        self.assertEqual(court["player_merit"], 271)
-        self.assertTrue(next(
-            law for law in court["laws"] if law["id"] == "immortal_twofold"
-        )["active"])
-        self.assertEqual(
-            imported.report["imported_counts"]["celestial_court_seats"], 49
-        )
 
     def test_celestial_combat_laws_apply_wanted_and_karma_rules(self):
         self._enter_celestial()

@@ -111,7 +111,7 @@ class CommandBus:
     def execute(self, state: WorldState, command: object) -> list[EventEnvelope]:
         handler = self._handlers.get(type(command))
         if handler is None:
-            raise ValueError(f"未注册的V2命令：{type(command).__name__}")
+            raise ValueError(f"未注册的游戏命令：{type(command).__name__}")
         for guard in self._guards:
             guard(state, command)
         context = SimulationContext(state=state, event_bus=self.event_bus)

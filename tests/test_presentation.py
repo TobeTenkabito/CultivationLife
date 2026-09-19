@@ -2,13 +2,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import V2GameEngine
+from cultivation_life import GameEngine
 
 
 class V2PresentationTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.temporary.name) / "games.sqlite3")
+        self.engine = GameEngine(Path(self.temporary.name) / "games.sqlite3")
         self.created = self.engine.create_game("观世者", seed=20260916)
         self.game_id = self.created["id"]
 

@@ -1167,7 +1167,11 @@ def register_relationship_domain(bus: CommandBus, definitions: GameDefinitions) 
     bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
 
 
-def relationship_view(state: Any, entity_id: str | None = None) -> list[dict[str, Any]]:
+def relationship_view(
+    state: Any,
+    definitions: GameDefinitions | None = None,
+    entity_id: str | None = None,
+) -> list[dict[str, Any]]:
     actor_id = entity_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
@@ -1178,6 +1182,18 @@ def relationship_view(state: Any, entity_id: str | None = None) -> list[dict[str
     ):
         other_id = edge.target_id if edge.source_id == actor_id else edge.source_id
         other = character_view(state, other_id)
+        actor_location = state.entities.require(actor_id, LOCATION)
+        other_location = state.entities.require(other_id, LOCATION)
+        actor_cultivation = state.entities.require(actor_id, CULTIVATION)
+        other_cultivation = state.entities.require(other_id, CULTIVATION)
+        ascension_eligible = False
+        if definitions is not None and edge.kind in {"friend", "dao_companion"}:
+            ascension_eligible = bool(
+                other["alive"]
+                and other_location.get("world_id") == actor_location.get("world_id")
+                and definitions.realm_index(str(other_cultivation["realm_id"]))
+                >= definitions.realm_index(str(actor_cultivation["realm_id"]))
+            )
         metadata = dict(edge.metadata)
         metadata["affinity"] = _affinity(state, other_id, actor_id)
         rows.append({
@@ -1189,6 +1205,7 @@ def relationship_view(state: Any, entity_id: str | None = None) -> list[dict[str
                 else "disciple" if edge.kind == "master_disciple"
                 else edge.kind
             ),
+            "ascension_eligible": ascension_eligible,
             "other": {
                 "id": other["id"], "name": other["name"], "gender": other["gender"],
                 "age": other["age"], "lifespan": other["lifespan"],

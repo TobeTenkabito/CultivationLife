@@ -4,7 +4,7 @@ import copy
 from collections.abc import Callable
 from typing import Any
 
-from ..kernel.model import V2_FORMAT_ID, V2_SCHEMA_VERSION
+from ..kernel.model import SAVE_FORMAT_ID, SAVE_SCHEMA_VERSION
 
 
 SnapshotMigration = Callable[[dict[str, Any]], dict[str, Any]]
@@ -522,18 +522,18 @@ MIGRATIONS: dict[int, SnapshotMigration] = {
 
 def migrate_snapshot(source: dict[str, Any]) -> dict[str, Any]:
     value = copy.deepcopy(source)
-    if value.get("format") != V2_FORMAT_ID:
-        raise ValueError("不是V2存档")
+    if value.get("format") != SAVE_FORMAT_ID:
+        raise ValueError("不是受支持的游戏存档")
     version = int(value.get("schema_version", 0))
-    if version < 1 or version > V2_SCHEMA_VERSION:
-        raise ValueError("不支持的V2存档版本")
-    while version < V2_SCHEMA_VERSION:
+    if version < 1 or version > SAVE_SCHEMA_VERSION:
+        raise ValueError("不支持的存档版本")
+    while version < SAVE_SCHEMA_VERSION:
         migration = MIGRATIONS.get(version)
         if migration is None:
-            raise ValueError(f"缺少V2存档迁移：{version} → {version + 1}")
+            raise ValueError(f"缺少存档迁移：{version} → {version + 1}")
         value = migration(value)
         next_version = int(value.get("schema_version", 0))
         if next_version != version + 1:
-            raise ValueError(f"V2存档迁移未正确推进版本：{version}")
+            raise ValueError(f"存档迁移未正确推进版本：{version}")
         version = next_version
     return value

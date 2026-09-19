@@ -12,7 +12,8 @@ import webbrowser
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from cultivation_life.server import Handler
+from cultivation_life.application import GameEngine
+from cultivation_life.server import build_handler, resolve_runtime_paths
 
 
 HOST = "127.0.0.1"
@@ -22,7 +23,7 @@ def is_game_server(port: int) -> bool:
     try:
         with urllib.request.urlopen(f"http://{HOST}:{port}/api/config", timeout=0.5) as response:
             data = json.loads(response.read().decode("utf-8"))
-            return response.status == 200 and "spirit_roots" in data
+            return response.status == 200 and data.get("format") == "cultivation-life-v2"
     except Exception:
         return False
 
@@ -83,7 +84,14 @@ def main() -> None:
         if port is None:
             show_error("端口 8000–8010 均被占用，无法启动游戏。")
             return
-        server = ThreadingHTTPServer((HOST, port), Handler)
+        paths = resolve_runtime_paths()
+        paths.database_path.parent.mkdir(parents=True, exist_ok=True)
+        engine = GameEngine(
+            paths.database_path,
+            content_directory=paths.content_root,
+            extension_root=paths.app_root,
+        )
+        server = ThreadingHTTPServer((HOST, port), build_handler(engine, paths.web_root))
         if not args.no_browser:
             threading.Timer(0.7, lambda: webbrowser.open(f"http://{HOST}:{port}")).start()
         server.serve_forever()

@@ -4,23 +4,23 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.v2 import (
+from cultivation_life import (
     FormRelationship,
     GrantItem,
     GrantTechnique,
     JoinFaction,
     RegisterCharacter,
-    V2GameEngine,
+    GameEngine,
 )
-from cultivation_life.v2.domain.advanced_cultivation import BODY, DIVINE_SENSE
-from cultivation_life.v2.domain.cultivation import CULTIVATION
-from cultivation_life.v2.domain.factions import FACTION_PROFILE
+from cultivation_life.domain.advanced_cultivation import BODY, DIVINE_SENSE
+from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.factions import FACTION_PROFILE
 
 
 class V2AdvancedCultivationTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         self.game = self.engine.create_game("进阶修士", seed=112233)
         self.game_id = self.game["id"]
         self.actor_id = self.game["player"]["id"]
@@ -152,7 +152,7 @@ class V2AdvancedCultivationTests(unittest.TestCase):
 class V2WorldCrossingTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
-        self.engine = V2GameEngine(Path(self.directory.name) / "v2.sqlite3")
+        self.engine = GameEngine(Path(self.directory.name) / "v2.sqlite3")
         self.game = self.engine.create_game("破界者", seed=9988)
         self.game_id = self.game["id"]
         self.actor_id = self.game["player"]["id"]

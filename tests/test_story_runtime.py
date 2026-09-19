@@ -3,19 +3,19 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
-from cultivation_life.v2 import V2GameEngine
-from cultivation_life.v2.domain.actions import begin_action, complete_action
-from cultivation_life.v2.domain.story import queue_story_event
-from cultivation_life.v2.kernel.bus import SimulationContext
-from cultivation_life.v2.kernel.model import EventEnvelope, EventScope
-from cultivation_life.v2.kernel.services import TimeService
+from cultivation_life import GameEngine
+from cultivation_life.domain.actions import begin_action, complete_action
+from cultivation_life.domain.story import queue_story_event
+from cultivation_life.kernel.bus import SimulationContext
+from cultivation_life.kernel.model import EventEnvelope, EventScope
+from cultivation_life.kernel.services import TimeService
 
 
 class V2StoryRuntimeTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.database = Path(self.temp.name) / "v2.sqlite3"
-        self.engine = V2GameEngine(self.database)
+        self.engine = GameEngine(self.database)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -31,7 +31,7 @@ class V2StoryRuntimeTests(unittest.TestCase):
         ))
         self.assertEqual(acted.events[-1]["event_type"], "story.interaction.opened")
 
-        reloaded = V2GameEngine(self.database).get_game(created["id"])
+        reloaded = GameEngine(self.database).get_game(created["id"])
         self.assertEqual(reloaded["pending_event"], acted.game["pending_event"])
         self.assertFalse(reloaded["capabilities"]["character.rest"]["enabled"])
         self.assertEqual(
@@ -78,7 +78,7 @@ class V2StoryRuntimeTests(unittest.TestCase):
         self.engine.queue_story_event(created["id"], "EVT_HELL_MEMORY_001")
         followed = self.engine.choose(created["id"], "board").game
         self.assertEqual(followed["pending_event"]["id"], "EVT_HELL_MEMORY_002")
-        persisted = V2GameEngine(self.database).get_game(created["id"])
+        persisted = GameEngine(self.database).get_game(created["id"])
         self.assertEqual(persisted["pending_event"]["id"], "EVT_HELL_MEMORY_002")
         finished = self.engine.choose(created["id"], "burn").game
         self.assertIsNone(finished["pending_event"])

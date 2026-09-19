@@ -1,4 +1,4 @@
-"""Stable primitives shared by V2 domain modules."""
+"""Stable primitives shared by all domain modules."""
 
 from .bus import CommandBus, SimulationContext
 from .model import EventEnvelope, EventScope, WorldState
