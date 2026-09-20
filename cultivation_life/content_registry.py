@@ -923,7 +923,7 @@ class ContentRegistry:
         realms: tuple[RealmDef, ...], roots: dict[str, dict[str, Any]], paths: dict[str, str],
         races: dict[str, dict[str, Any]],
     ) -> None:
-        required_ids = {"core", "demonic_core", "ghost_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
+        required_ids = {"core", "demonic_core", "ghost_core", "monster_core", "confucian_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
         if not required_ids <= {str(entry.get("id", "")) for entry in presets}:
             raise ContentError("快速开局必须至少覆盖正统修仙七档、魔界魔丹与地狱界鬼修预设")
         if not all(bool(entry.get("enabled")) for entry in presets):
@@ -937,9 +937,16 @@ class ContentRegistry:
                 raise ContentError(f"快速开局 {entry['id']} 的种族或世界不存在")
             if not 1 <= int(entry.get("layer", 0)) <= realms[int(entry["realm_index"])].layers:
                 raise ContentError(f"快速开局 {entry['id']} 的层数不合法")
-            technique_ids = [entry.get("main_technique"), entry.get("support_technique"), *entry.get("combat_techniques", [])]
+            technique_ids = [
+                entry.get("main_technique"), entry.get("support_technique"),
+                *entry.get("combat_techniques", []),
+                *([entry.get("body_technique")] if entry.get("body_technique") else []),
+                *([entry.get("divine_sense_technique")] if entry.get("divine_sense_technique") else []),
+            ]
             if any(technique_id not in techniques for technique_id in technique_ids):
                 raise ContentError(f"快速开局 {entry['id']} 引用了不存在的功法")
+            if int(entry.get("body_training", 0)) < 0 or int(entry.get("divine_sense_rank", 0)) < 0:
+                raise ContentError(f"快速开局 {entry['id']} 的炼体或神识等级不合法")
             if any(item.get("id") not in items or int(item.get("quantity", 0)) <= 0 for item in entry.get("inventory", [])):
                 raise ContentError(f"快速开局 {entry['id']} 引用了不存在或数量错误的物品")
             if not isinstance(entry.get("story_flags", []), list) or any(

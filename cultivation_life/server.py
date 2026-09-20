@@ -227,6 +227,10 @@ class Handler(BaseHTTPRequestHandler):
                 )
             elif operation == "sage-worship":
                 result = ENGINE.sage_choose_sage(game_id, payload.get("sage_id", ""))
+            elif operation == "sage-debate":
+                result = ENGINE.sage_debate(
+                    game_id, payload.get("doctrine_id", ""), payload.get("member_id", ""),
+                )
             elif operation == "spirit-plant-use":
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":

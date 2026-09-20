@@ -34,6 +34,11 @@ class ExtensionSystemTests(unittest.TestCase):
             self.assertEqual(ContentRegistry.extension_report, [])
             self.assertEqual(registry.monster_species, {})
             self.assertEqual(registry.monster_evolutions, {})
+            monster_start = next(
+                row for row in registry.world_systems["quick_start_presets"] if row["id"] == "monster_core"
+            )
+            self.assertEqual(monster_start["variant_label"], "本体兼容")
+            self.assertEqual(monster_start["main_technique"], "TECH_COMMON_CORE")
 
     def test_dlc_loads_before_mod_and_mod_can_override_it(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -7,6 +7,7 @@ from typing import Any
 
 from .content_registry import CONTENT_DOCUMENTS
 from .models import GameState, HistoryRecord
+from .rules import REALMS, expected_combat_power
 from .runtime import decode_rng, encode_rng
 
 
@@ -108,28 +109,56 @@ def apply_external_influence(doctrines: list[dict[str, Any]], doctrine_id: str, 
 
 
 class SageSystemMixin:
+    @staticmethod
+    def _normalize_sage_member(member: dict[str, Any]) -> None:
+        member.setdefault("path", "confucian")
+        member.setdefault("layer", 1)
+        if "combat_factor" not in member:
+            seed = sum(ord(char) for char in str(member.get("id", "儒生")))
+            member["combat_factor"] = round(0.78 + (seed % 25) / 100.0, 2)
+
+    def _normalize_sage_doctrine(self, doctrine: dict[str, Any], age: int, cfg: dict[str, Any]) -> None:
+        doctrine.setdefault("protection_until", age + int(cfg.get("protection_years", 10)))
+        doctrine.setdefault("sage_id", "confucius")
+        doctrine.setdefault("sage_cooldown_until", 0)
+        doctrine.setdefault("extinct_years", 0)
+        doctrine.setdefault("active_disciples", [])
+        doctrine.setdefault("graduates", 0)
+        members = []
+        for member in doctrine.setdefault("members", []):
+            self._normalize_sage_member(member)
+            if member.get("is_player") or member.get("path") == "confucian":
+                members.append(member)
+        doctrine["members"] = members
+        if members and not any(row.get("id") == doctrine.get("controller_id") for row in members):
+            doctrine["controller_id"] = max(members, key=lambda row: float(row.get("inner", 0.0)))["id"]
+
     def _ensure_sage_state(self, game: GameState) -> bool:
         if not sage_content_available():
             game.player.sage_effects = {}
             return False
-        if game.sage_state.get("version") == 1:
-            return False
         cfg = sage_config()
+        version = int(game.sage_state.get("version", 0) or 0)
+        if version in {1, 2}:
+            for world_state in game.sage_state.get("worlds", {}).values():
+                for doctrine in world_state.get("doctrines", []):
+                    self._normalize_sage_doctrine(doctrine, game.player.age, cfg)
+            game.sage_state.setdefault("debate_cooldowns", {})
+            game.sage_state["version"] = 2
+            if version == 1:
+                self._refresh_sage_effects(game)
+            return False
         worlds: dict[str, Any] = {}
         for world in cfg.get("worlds", ["human", "spirit"]):
             presets = copy.deepcopy(cfg.get("initial_doctrines", {}).get(world, []))
             for row in presets:
-                row.setdefault("protection_until", game.player.age + int(cfg.get("protection_years", 10)))
-                row.setdefault("sage_id", "confucius")
-                row.setdefault("sage_cooldown_until", 0)
-                row.setdefault("extinct_years", 0)
-                row.setdefault("active_disciples", [])
-                row.setdefault("graduates", 0)
+                self._normalize_sage_doctrine(row, game.player.age, cfg)
             worlds[str(world)] = {"doctrines": presets, "ai_found_cooldown_until": 0}
         game.sage_state = {
-            "version": 1, "worlds": worlds, "memberships": {}, "quit_cooldown_until": {},
+            "version": 2, "worlds": worlds, "memberships": {}, "quit_cooldown_until": {},
             "recruit_enabled": True, "active_action": None, "action_result": {},
             "total_graduated": 0, "unlocked_sages": ["confucius"],
+            "debate_cooldowns": {},
             "future_hooks": {"faction_ref": None, "tags": []},
         }
         self._refresh_sage_effects(game)
@@ -147,14 +176,18 @@ class SageSystemMixin:
 
     @staticmethod
     def _rank_members(doctrine: dict[str, Any]) -> list[dict[str, Any]]:
-        return sorted(doctrine.get("members", []), key=lambda row: float(row.get("inner", 0.0)), reverse=True)
+        controller_id = doctrine.get("controller_id")
+        return sorted(
+            doctrine.get("members", []),
+            key=lambda row: (row.get("id") != controller_id, -float(row.get("inner", 0.0))),
+        )
 
     def _refresh_sage_effects(self, game: GameState) -> None:
         player = game.player
         if not sage_content_available() or player.world not in sage_config().get("worlds", []):
             player.sage_effects = {}
             return
-        doctrine = self._player_doctrine(game, player.world) if game.sage_state.get("version") == 1 else None
+        doctrine = self._player_doctrine(game, player.world) if game.sage_state.get("version") == 2 else None
         if not doctrine:
             player.sage_effects = {}
             return
@@ -185,7 +218,7 @@ class SageSystemMixin:
         game.sage_state["action_result"] = {"years": 0, "external": 0.0, "inner": 0.0, "graduated": 0}
 
     def _finish_sage_action(self, game: GameState) -> None:
-        if not sage_content_available() or game.sage_state.get("version") != 1:
+        if not sage_content_available() or game.sage_state.get("version") != 2:
             return
         game.sage_state["active_action"] = None
         self._refresh_sage_effects(game)
@@ -241,7 +274,7 @@ class SageSystemMixin:
                         "founded_year": game.player.age, "protection_until": game.player.age + int(cfg.get("protection_years", 10)),
                         "extinct_years": 0, "sage_id": "confucius", "sage_cooldown_until": 0,
                         "controller_id": f"sage-ai-{world}-{seq}-master",
-                        "members": [{"id":f"sage-ai-{world}-{seq}-master","name":f"游儒{seq}","inner":10.0,"realm_index":3}],
+                        "members": [{"id":f"sage-ai-{world}-{seq}-master","name":f"游儒{seq}","inner":10.0,"realm_index":3,"layer":1,"path":"confucian","combat_factor":0.9}],
                         "active_disciples": [], "graduates": 0,
                     }
                     doctrines.append(new_doctrine)
@@ -257,7 +290,9 @@ class SageSystemMixin:
             result = game.sage_state.setdefault("action_result", {})
             values = cfg.get("actions", {}).get(action, {})
             external = float(values.get("external", 0.0))
-            inner = float(values.get("inner", 0.0))
+            inner = float(values.get("inner", 0.0)) * (
+                1.0 + game.player.realm_index * float(cfg.get("inner_realm_scale_per_realm", 0.08))
+            )
             if action == "sage_preach":
                 external *= 1.0 + float(game.player.sage_effects.get("preach_multiplier", 0.0))
             gained = apply_external_influence(self._sage_world(game)["doctrines"], doctrine["id"], external, cfg)
@@ -278,12 +313,26 @@ class SageSystemMixin:
             result["inner"] = round(float(result.get("inner", 0.0)) + inner, 3)
             if action == "sage_teach":
                 for pupil in list(doctrine.get("active_disciples", [])):
-                    pupil["progress"] = min(100.0, float(pupil.get("progress", 0.0)) + rng.uniform(8.0, 15.0))
+                    progress = rng.uniform(
+                        float(cfg.get("teaching_progress_min", 8.0)),
+                        float(cfg.get("teaching_progress_max", 15.0)),
+                    ) + game.player.divine_sense_rank * float(cfg.get("teaching_progress_per_sense", 0.6)) \
+                        + game.player.realm_index * float(cfg.get("teaching_progress_per_realm", 0.35))
+                    pupil["progress"] = min(100.0, float(pupil.get("progress", 0.0)) + progress)
                     if pupil["progress"] >= 100.0:
                         doctrine["active_disciples"].remove(pupil)
                         doctrine["graduates"] = int(doctrine.get("graduates", 0)) + 1
                         game.sage_state["total_graduated"] += 1
                         result["graduated"] = int(result.get("graduated", 0)) + 1
+                        graduation_inner = float(cfg.get("graduation_inner_gain", 1.5))
+                        graduation_external = apply_external_influence(
+                            self._sage_world(game)["doctrines"], doctrine["id"],
+                            float(cfg.get("graduation_external_gain", 0.5)), cfg,
+                        )
+                        if member:
+                            member["inner"] = round(float(member.get("inner", 0.0)) + graduation_inner, 4)
+                        result["inner"] = round(float(result.get("inner", 0.0)) + graduation_inner, 3)
+                        result["external"] = round(float(result.get("external", 0.0)) + graduation_external, 3)
                         game.history.append(HistoryRecord(
                             "SYS_SAGE_DISCIPLE_GRADUATED", 1, game.player.age, "桃李初成", None,
                             "graduated", f"{pupil['name']}学成出师，仍尊你为师。", {"doctrine_id": doctrine["id"]},
@@ -293,22 +342,38 @@ class SageSystemMixin:
                     game.player.milestones["sage_ten_graduates"] = 1
             elif action == "sage_preach" and game.player.realm_index >= 3 and game.sage_state.get("recruit_enabled", True):
                 curve = disciple_curve(len(doctrine.get("active_disciples", [])), game.player.divine_sense_rank, cfg)
-                if len(doctrine.get("active_disciples", [])) < int(curve["hard_cap"]) and rng.random() < float(cfg.get("recruit_chance_per_year", 0.04)):
+                influence_ratio = float(doctrine.get("external", 0.0)) / max(
+                    1.0, float(cfg.get("doctrine_influence_cap", 60.0)),
+                )
+                recruit_scale = float(cfg.get("recruit_external_scale_min", 0.5)) + (
+                    float(cfg.get("recruit_external_scale_max", 2.0))
+                    - float(cfg.get("recruit_external_scale_min", 0.5))
+                ) * influence_ratio
+                recruit_chance = float(cfg.get("recruit_chance_per_year", 0.04)) * recruit_scale
+                if len(doctrine.get("active_disciples", [])) < int(curve["hard_cap"]) and rng.random() < recruit_chance:
                     seq = int(doctrine.get("disciple_sequence", 0)) + 1
                     doctrine["disciple_sequence"] = seq
                     doctrine.setdefault("active_disciples", []).append({"id": f"sage-disciple-{seq}", "name": f"游学弟子{seq}", "progress": 0.0})
                     news.append(f"{game.player.age}岁：一名散修受教，拜入你的门墙。")
             elif action == "sage_answer":
-                reward = rng.uniform(0.5, 1.5) * (1.0 + float(game.player.sage_effects.get("answer_multiplier", 0.0)))
+                reward = rng.uniform(
+                    float(cfg.get("answer_opportunity_min", 0.5)),
+                    float(cfg.get("answer_opportunity_max", 1.5)),
+                ) * (1.0 + float(game.player.sage_effects.get("answer_multiplier", 0.0)))
                 game.player.opportunity += reward
-                game.player.divine_sense_experience += reward * 0.5 * (
+                game.player.divine_sense_experience += reward * float(cfg.get("answer_sense_ratio", 0.5)) * (
                     1.0 + float(game.player.sage_effects.get("sense_multiplier", 0.0))
                 )
 
-            ranks = self._rank_members(doctrine)
-            if ranks:
-                current = next((row for row in ranks if row.get("id") == doctrine.get("controller_id")), ranks[0])
-                challenger = ranks[0]
+            influence_order = sorted(
+                doctrine.get("members", []), key=lambda row: float(row.get("inner", 0.0)), reverse=True,
+            )
+            if influence_order:
+                current = next(
+                    (row for row in influence_order if row.get("id") == doctrine.get("controller_id")),
+                    influence_order[0],
+                )
+                challenger = influence_order[0]
                 if challenger["id"] != current["id"] and float(challenger.get("inner", 0.0)) >= float(current.get("inner", 0.0)) * float(cfg.get("control_hysteresis", 1.10)):
                     doctrine["controller_id"] = challenger["id"]
                     if challenger.get("is_player"):
@@ -337,7 +402,11 @@ class SageSystemMixin:
                 raise ValueError("学说不存在")
             if player.age < int(game.sage_state.get("quit_cooldown_until", {}).get(player.world, 0)):
                 raise ValueError("退出学说后的十年冷静期尚未结束")
-            doctrine.setdefault("members", []).append({"id": "player", "name": player.name, "inner": 5.0, "realm_index": player.realm_index, "is_player": True})
+            doctrine.setdefault("members", []).append({
+                "id": "player", "name": player.name, "inner": 5.0,
+                "realm_index": player.realm_index, "layer": player.layer,
+                "path": "confucian", "combat_factor": 1.0, "is_player": True,
+            })
             game.sage_state["memberships"][player.world] = doctrine["id"]
             summary = f"你加入了{doctrine['name']}。"
         elif action == "leave":
@@ -374,7 +443,11 @@ class SageSystemMixin:
                 "external": float(cfg.get("influence_floor", 0.1)), "founded_year": player.age,
                 "protection_until": player.age + int(cfg.get("protection_years", 10)), "extinct_years": 0,
                 "sage_id": "confucius", "sage_cooldown_until": 0, "controller_id": "player",
-                "members": [{"id": "player", "name": player.name, "inner": 10.0, "realm_index": player.realm_index, "is_player": True}],
+                "members": [{
+                    "id": "player", "name": player.name, "inner": 10.0,
+                    "realm_index": player.realm_index, "layer": player.layer,
+                    "path": "confucian", "combat_factor": 1.0, "is_player": True,
+                }],
                 "active_disciples": [], "graduates": 0, "faction_ref": None, "tags": [],
             }
             state["doctrines"].append(doctrine)
@@ -445,6 +518,88 @@ class SageSystemMixin:
         self.store.save(game)
         return self.present(game)
 
+    def sage_debate(self, game_id: str, doctrine_id: str, member_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        self._ensure_sage_state(game)
+        player = game.player
+        if (
+            not sage_content_available() or player.path != "confucian"
+            or player.world not in sage_config().get("worlds", [])
+        ):
+            raise ValueError("只有当前界面的儒修可以论道")
+        own_doctrine = self._player_doctrine(game)
+        if not own_doctrine:
+            raise ValueError("请先加入或创立一个学说")
+        state = self._sage_world(game)
+        target_doctrine = next(
+            (row for row in state.get("doctrines", []) if row.get("id") == doctrine_id), None,
+        )
+        if not target_doctrine:
+            raise ValueError("目标学说不存在")
+        member = next(
+            (row for row in target_doctrine.get("members", []) if row.get("id") == member_id), None,
+        )
+        if not member or member.get("is_player"):
+            raise ValueError("请选择一名学说中的儒修论道")
+        if member.get("path") != "confucian":
+            raise ValueError("非儒修不能参与学说论道")
+        cfg = sage_config()
+        debate_cfg = cfg.get("debate", {})
+        cooldowns = game.sage_state.setdefault("debate_cooldowns", {})
+        cooldown_key = f"{player.world}:{doctrine_id}:{member_id}"
+        next_age = int(cooldowns.get(cooldown_key, 0))
+        if player.age < next_age:
+            raise ValueError(f"与此人的论道需到 {next_age} 岁后方可再次进行")
+        target_realm = max(0, min(len(REALMS) - 1, int(member.get("realm_index", 0))))
+        target_layer = max(1, min(REALMS[target_realm].layers, int(member.get("layer", 1))))
+        target_power = expected_combat_power(target_realm, target_layer) * max(
+            0.25, float(member.get("combat_factor", 1.0)),
+        )
+        rng = decode_rng(game.seed, game.rng_state)
+        result, combat_summary = self._combat(game, {
+            "target_name": member["name"],
+            "target_power": target_power,
+            "target_realm_index": target_realm,
+            "combat_type": "cultivator",
+            "npc_id": str(member["id"]),
+            "action": "sage_debate",
+            "loss_scale": float(debate_cfg.get("loss_scale", 0.45)),
+        }, False, rng)
+        cooldowns[cooldown_key] = player.age + max(1, int(debate_cfg.get("cooldown_years", 1)))
+        same_doctrine = target_doctrine.get("id") == own_doctrine.get("id")
+        gain = 0.0
+        if result == "victory":
+            if same_doctrine:
+                gain = float(debate_cfg.get("same_doctrine_inner_gain", 1.2))
+                player_member = next(
+                    (row for row in own_doctrine.get("members", []) if row.get("is_player")), None,
+                )
+                if player_member:
+                    player_member["inner"] = round(float(player_member.get("inner", 0.0)) + gain, 4)
+                reward_text = f"内在影响力 +{gain:g}"
+            else:
+                gain = apply_external_influence(
+                    state["doctrines"], own_doctrine["id"],
+                    float(debate_cfg.get("other_doctrine_external_gain", 0.8)), cfg,
+                )
+                reward_text = f"{own_doctrine['name']}外在影响力 +{gain:.2f}"
+        else:
+            reward_text = "本次未获得影响力"
+        game.history.append(HistoryRecord(
+            "SYS_SAGE_DEBATE", 1, player.age, "论道争锋", str(member["id"]), result,
+            f"你与{target_doctrine['name']}的{member['name']}论道，{reward_text}。",
+            {
+                "doctrine_id": target_doctrine["id"], "member_id": member["id"],
+                "same_doctrine": same_doctrine, "gain": round(gain, 4),
+            }, ["sage", "debate", "combat"],
+        ))
+        game.rng_state = encode_rng(rng)
+        self._refresh_sage_effects(game)
+        self.store.save(game)
+        shown = self.present(game)
+        shown["action_summary"] = f"{combat_summary} {reward_text}。"
+        return shown
+
     def _public_sage_system(self, game: GameState) -> dict[str, Any]:
         enabled = sage_content_available()
         if enabled:
@@ -471,10 +626,36 @@ class SageSystemMixin:
             )
         doctrines = []
         for row in (state or {}).get("doctrines", []):
+            for member in row.get("members", []):
+                if member.get("is_player"):
+                    member.update({
+                        "name": game.player.name, "realm_index": game.player.realm_index,
+                        "layer": game.player.layer, "path": "confucian", "combat_factor": 1.0,
+                    })
             ranks = self._rank_members(row)
+            public_members = []
+            for rank, member in enumerate(ranks, 1):
+                realm_index = max(0, min(len(REALMS) - 1, int(member.get("realm_index", 0))))
+                layer = max(1, min(REALMS[realm_index].layers, int(member.get("layer", 1))))
+                cooldown_key = f"{game.player.world}:{row.get('id')}:{member.get('id')}"
+                public_members.append({
+                    **copy.deepcopy(member), "rank": rank,
+                    "realm_name": f"{REALMS[realm_index].name}{'' if REALMS[realm_index].layers == 1 else f'·{layer}层'}",
+                    "combat_power": round(
+                        expected_combat_power(realm_index, layer) * max(0.25, float(member.get("combat_factor", 1.0))), 1,
+                    ),
+                    "role_name": "执掌者" if member.get("id") == row.get("controller_id") else (
+                        "议事席" if rank <= int(cfg.get("decision_rank", 3)) else "门人"
+                    ),
+                    "can_debate": bool(
+                        current and not member.get("is_player") and member.get("path") == "confucian"
+                        and game.player.age >= int(game.sage_state.get("debate_cooldowns", {}).get(cooldown_key, 0))
+                    ),
+                    "debate_available_age": int(game.sage_state.get("debate_cooldowns", {}).get(cooldown_key, 0)),
+                })
             combo_details = [choice_details.get(str(choice), {"name": str(choice), "effect_text": []}) for choice in row.get("combo", {}).values()]
             doctrines.append({
-                **copy.deepcopy(row), "members": ranks,
+                **copy.deepcopy(row), "members": public_members,
                 "player_rank": next((i + 1 for i, member in enumerate(ranks) if member.get("is_player")), None),
                 "combo_details": copy.deepcopy(combo_details),
                 "passive_effect_text": [text for detail in combo_details for text in detail.get("effect_text", [])],
@@ -490,4 +671,18 @@ class SageSystemMixin:
             "effects": dict(game.player.sage_effects),
             "effect_text": sage_effect_text(game.player.sage_effects),
             "last_action": copy.deepcopy(game.sage_state.get("action_result", {})) if enabled else {},
+            "action_values": copy.deepcopy(cfg.get("actions", {})),
+            "debate_values": copy.deepcopy(cfg.get("debate", {})),
+            "numeric_rules": {
+                "world_pool": float(cfg.get("world_influence_pool", 100.0)),
+                "doctrine_cap": float(cfg.get("doctrine_influence_cap", 60.0)),
+                "inner_decay_percent": float(cfg.get("inner_decay", 0.03)) * 100.0,
+                "inner_realm_scale_percent": float(cfg.get("inner_realm_scale_per_realm", 0.08)) * 100.0,
+                "control_lead_percent": (float(cfg.get("control_hysteresis", 1.10)) - 1.0) * 100.0,
+                "recruit_base_percent": float(cfg.get("recruit_chance_per_year", 0.04)) * 100.0,
+                "teaching_progress": [
+                    float(cfg.get("teaching_progress_min", 8.0)),
+                    float(cfg.get("teaching_progress_max", 15.0)),
+                ],
+            },
         }

@@ -4,6 +4,7 @@
     {"id":"spirit_stone","name":"下品灵石","description":"修仙界通行货币，可用于交易与事件。","tags":["currency"]},
     {"id":"healing_pill","name":"回春丹","description":"服用后恢复 35% 最大 HP。","tags":["consumable","healing","pill"]},
     {"id":"spirit_sword","name":"青锋灵剑","combat_bonus":22,"description":"装备在身，战斗力 +22。","tags":["equipment"]},
+    {"id":"mortal_beast_core_charm","name":"镇妖骨符","combat_bonus":760,"description":"人界散修以寻常兽骨和灵墨制成的护身骨符，供未得祖血传承的妖修稳固妖丹；战斗力 +760。","tags":["equipment","monster","core","quick_start"]},
     {"id":"ancient_jade","name":"残缺古玉","mp_bonus":15,"opportunity_bonus":0.05,"description":"最大 MP +15，机缘获取效率 +5%。","tags":["treasure"]},
     {"id":"blood_banner","name":"血魂幡","combat_bonus":55,"description":"战斗力 +55。","tags":["equipment","karmic"]},
     {"id":"blood_ginseng","name":"百年血参","hp_bonus":28,"description":"最大 HP +28。","tags":["treasure","vitality"]},

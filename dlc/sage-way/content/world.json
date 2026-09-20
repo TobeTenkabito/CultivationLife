@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "actions": {
-    "sage_preach": {"name":"传道","opportunity":[0,0],"hp":-0.01,"mp":-0.08,"sage_action":true},
-    "sage_teach": {"name":"授业","opportunity":[0,0],"hp":-0.01,"mp":-0.08,"sage_action":true},
+    "sage_preach": {"name":"传道","opportunity":[0,0],"hp":-0.01,"mp":-0.10,"sage_action":true},
+    "sage_teach": {"name":"授业","opportunity":[0,0],"hp":-0.02,"mp":-0.12,"sage_action":true},
     "sage_answer": {"name":"解惑","opportunity":[0,0],"hp":-0.01,"mp":-0.08,"sage_action":true}
   },
   "systems": {
     "quick_start_presets": [
-      {"id":"confucian_core","name":"结丹鸿儒","description":"从人界结丹期开始，携基础儒修传承体验圣人教化。","enabled":true,"path":"confucian","spirit_root":"supreme_wood","realm_index":3,"layer":1,"age":260,"world":"human","race":"human","main_technique":"TECH_CONFUCIAN_RECTIFY_HEART","support_technique":"TECH_CONFUCIAN_SPRING_AUTUMN","combat_techniques":[],"inventory":[],"opportunity_fraction":0.25,"karma":8,"sha_qi":0,"fame":20,"story_flags":[],"additional_roots":[],"immortal_power_converted":false}
+      {"id":"confucian_core","name":"儒修·结丹鸿儒","description":"圣人之道开局：正心养气、浩然应敌，携文衡与游学资粮进入学说竞争。","category":"异道结丹","variant_label":"圣人之道 DLC","enabled":true,"path":"confucian","spirit_root":"supreme_wood","realm_index":3,"layer":1,"age":260,"world":"human","race":"human","main_technique":"TECH_CONFUCIAN_RECTIFY_HEART","support_technique":"TECH_CONFUCIAN_SPRING_AUTUMN","combat_techniques":["TECH_CONFUCIAN_RECTIFY_HEART","TECH_CONFUCIAN_HEART_MIND"],"inventory":{"$replace":[{"id":"spirit_stone","quantity":160},{"id":"confucian_jade_ruler","quantity":1},{"id":"marrow_cleansing_pill","quantity":2},{"id":"ancient_jade","quantity":1}]},"opportunity_fraction":0.25,"karma":8,"sha_qi":0,"fame":20,"story_flags":[],"additional_roots":[],"immortal_power_converted":false}
     ]
   }
 }

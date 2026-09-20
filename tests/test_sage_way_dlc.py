@@ -79,8 +79,37 @@ class SageWayDlcTests(unittest.TestCase):
         shown = self.engine.sage_doctrine_action(self.game_id, "found", {"action":"found","name":"新民学","combo":combo})
         self.assertIsNotNone(shown["sage_system"]["membership_id"])
         restored = self.engine.store.load(self.game_id)
-        self.assertEqual(restored.sage_state["version"], 1)
+        self.assertEqual(restored.sage_state["version"], 2)
         self.assertTrue(restored.player.sage_effects)
+
+    def test_only_confucians_rank_and_debate_changes_the_correct_influence(self):
+        game = self.engine.store.load(self.game_id)
+        doctrine = game.sage_state["worlds"]["human"]["doctrines"][0]
+        doctrine["members"].append({
+            "id": "outsider", "name": "外道客", "path": "dao", "inner": 99,
+            "realm_index": 3, "layer": 1,
+        })
+        self.engine.store.save(game)
+        self.engine.sage_doctrine_action(
+            self.game_id, "join", {"doctrine_id": "sage-human-righteous"},
+        )
+        before = self.engine.get_game(self.game_id)["sage_system"]
+        own = next(row for row in before["doctrines"] if row["id"] == "sage-human-righteous")
+        self.assertNotIn("outsider", {row["id"] for row in own["members"]})
+        self.assertEqual([row["rank"] for row in own["members"]], list(range(1, len(own["members"]) + 1)))
+        player_before = next(row for row in own["members"] if row.get("is_player"))["inner"]
+        result = self.engine.sage_debate(self.game_id, "sage-human-righteous", "sage-h-r-4")
+        own_after = next(row for row in result["sage_system"]["doctrines"] if row["id"] == "sage-human-righteous")
+        player_after = next(row for row in own_after["members"] if row.get("is_player"))["inner"]
+        self.assertGreater(player_after, player_before)
+        with self.assertRaisesRegex(ValueError, "论道需到"):
+            self.engine.sage_debate(self.game_id, "sage-human-righteous", "sage-h-r-4")
+        external_before = own_after["external"]
+        result = self.engine.sage_debate(self.game_id, "sage-human-evidence", "sage-h-e-3")
+        own_after = next(
+            row for row in result["sage_system"]["doctrines"] if row["id"] == "sage-human-righteous"
+        )
+        self.assertGreater(own_after["external"], external_before)
 
     def test_two_thousand_year_simulation_keeps_all_bounds(self):
         game = self.engine.store.load(self.game_id)

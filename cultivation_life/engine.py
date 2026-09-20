@@ -183,8 +183,6 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             raise ValueError("未知主修类型")
         if gender not in {"male", "female"}:
             raise ValueError("未知性别")
-        if path == "monster" and not bloodline_content_available():
-            raise ValueError("妖修开局需要安装并启用【妖修道途：血脉与进化】DLC")
         allowed_start_worlds = WORLD_SYSTEMS.get("start_worlds", {}).get(path, ["human"])
         selected_start_world = str(start_world or "human")
         if not preset and selected_start_world not in allowed_start_worlds:
@@ -232,6 +230,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             player.karma = float(preset.get("karma", 0))
             player.sha_qi = int(preset.get("sha_qi", 0))
             player.fame = float(preset.get("fame", 0))
+            player.body_training = max(0, int(preset.get("body_training", player.body_training)))
+            player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
+            player.divine_sense_rank = max(0, int(preset.get("divine_sense_rank", player.divine_sense_rank)))
+            player.divine_sense_experience = max(
+                0.0, float(preset.get("divine_sense_experience", player.divine_sense_experience)),
+            )
             player.story_flags = list(dict.fromkeys(str(flag) for flag in preset.get("story_flags", [])))
             player.additional_roots = list(dict.fromkeys(preset.get("additional_roots", [])))
             player.immortal_power_converted = bool(preset.get("immortal_power_converted", False))
@@ -246,6 +250,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                         player.additional_roots.append(affinity)
             assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["main_technique"]]), "main")
             assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["support_technique"]]), "support")
+            if preset.get("body_technique"):
+                assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["body_technique"]]), "body")
+            if preset.get("divine_sense_technique"):
+                assign_technique(
+                    player, copy.deepcopy(TECHNIQUE_CATALOG[preset["divine_sense_technique"]]), "divine_sense",
+                )
             for technique_id in preset.get("combat_techniques", []):
                 assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[technique_id]), "combat")
             for item in preset.get("inventory", []):

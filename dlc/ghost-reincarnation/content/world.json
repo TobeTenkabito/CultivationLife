@@ -1,6 +1,25 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id":"ghost_core",
+        "name":"鬼修·魂丹初期",
+        "description":"鬼修 DLC 开局：以夜行炼魂录稳固魂体，并携养魂容器进入魂蚀、拘魂与轮回体系。",
+        "category":"异道结丹",
+        "variant_label":"鬼修 DLC",
+        "main_technique":"TECH_GHOST_NIGHT_PROCESSION_CORE",
+        "support_technique":"TECH_YIN_ADVANCED",
+        "combat_techniques":["TECH_GHOST_NIGHT_PROCESSION_CORE","TECH_GHOSTFIRE_BLADE"],
+        "inventory":{"$replace":[
+          {"id":"spirit_stone","quantity":150},
+          {"id":"soul_lamp","quantity":1},
+          {"id":"ghost_gate_ward","quantity":1},
+          {"id":"ghost_core_pill","quantity":2},
+          {"id":"ghost_nurturing_casket","quantity":1}
+        ]}
+      }
+    ],
     "ghost_cultivation": {
       "enabled": true,
       "infinite_lifespan": true,

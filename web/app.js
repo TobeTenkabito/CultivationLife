@@ -225,13 +225,30 @@ function renderStartExtensionManager(extensions) {
 
 function renderQuickStarts(presets) {
   const list = $('#quick-start-list'); list.innerHTML = '';
+  const groupFor = preset => preset.category || (preset.realm_index >= 9 ? '飞升开局' : preset.path === 'dao' ? '正统进阶' : '异道结丹');
+  const groups = new Map();
   presets.forEach(preset => {
+    const group = groupFor(preset);
+    if (!groups.has(group)) groups.set(group, []);
+    groups.get(group).push(preset);
+  });
+  groups.forEach((entries, groupName) => {
+    const section = document.createElement('section'); section.className = 'quick-start-group';
+    const heading = document.createElement('div'); heading.className = 'quick-start-group-heading';
+    heading.innerHTML = `<b>${groupName}</b><small>${entries.length} 项</small>`; section.appendChild(heading);
+    const grid = document.createElement('div'); grid.className = 'quick-start-group-grid';
+    entries.forEach(preset => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'quick-start-button';
     button.dataset.presetId = preset.id; button.disabled = !preset.enabled;
-    const detail = preset.path === 'demonic' ? '出生魔界 · 使用魔修功法与行囊' : '使用默认属性与功法开局';
-    button.innerHTML = `<b>${preset.name}</b><span>${preset.enabled ? detail : preset.status}</span>`;
+    const pathName = configData?.paths?.[preset.path] || preset.path;
+    const worldName = configData?.worlds?.[preset.world] || preset.world;
+    const badge = preset.variant_label || (preset.path === 'dao' ? '本体' : '道途配置');
+    const detail = preset.description || `${worldName} · ${pathName} · 使用对应境界的默认功法与行囊`;
+    button.innerHTML = `<span class="quick-start-title"><b>${preset.name}</b><i>${badge}</i></span><span class="quick-start-meta">${worldName} · ${pathName} · ${preset.layer || 1}层</span><span>${preset.enabled ? detail : preset.status}</span>`;
     if (preset.enabled) button.onclick = () => startQuickGame(preset.id);
-    list.appendChild(button);
+    grid.appendChild(button);
+    });
+    section.appendChild(grid); list.appendChild(section);
   });
 }
 
@@ -1160,7 +1177,8 @@ function renderSageSystem(system) {
   const doctrines = system.doctrines || [];
   const current = doctrines.find(row => row.id === system.membership_id);
   $('#sage-heading').textContent = current ? current.name : '尚未入说';
-  $('#sage-note').textContent = '外在影响力在每界共享一百点，单说上限六十；内在影响力每年衰减 3%，领先现任一成方可接掌道统。跨界期间你的席位冻结。';
+  const numeric = system.numeric_rules || {};
+  $('#sage-note').textContent = `外在影响力在每界共享 ${numeric.world_pool || 100} 点，单说上限 ${numeric.doctrine_cap || 60}；内在影响力每年衰减 ${numeric.inner_decay_percent || 3}%，领先现任 ${numeric.control_lead_percent || 10}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
 
   const membership = $('#sage-membership'); membership.innerHTML = '';
   if (current) {
@@ -1175,8 +1193,11 @@ function renderSageSystem(system) {
     if (!effectChips.childElementCount) effectChips.innerHTML = '<small>当前没有额外数值效果。</small>';
     finalEffects.appendChild(effectChips);
     const actions = document.createElement('div'); actions.className = 'sage-actions';
-    [['sage_preach','传道'],['sage_teach','授业'],['sage_answer','解惑']].forEach(([action, label]) => {
-      const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+    ['sage_preach','sage_teach','sage_answer'].forEach(action => {
+      const values = system.action_values?.[action] || {};
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'sage-action-card';
+      const realmScale = Number(numeric.inner_realm_scale_percent || 8) / 100;
+      button.innerHTML = `<b>${values.name || action}</b><span>外在 +${Number(values.external || 0).toFixed(1)} · 内在 +${Number(values.inner || 0).toFixed(1)}（再按境界 ×${(1 + Number(game.player.realm_index || 0) * realmScale).toFixed(2)}）</span><small>HP -${values.hp_cost_percent || 0}% · MP -${values.mp_cost_percent || 0}%｜${values.description || ''}</small>`;
       button.onclick = () => mutate(`/api/games/${game.id}/advance`, {action, years:1}); actions.appendChild(button);
     });
     const recruit = document.createElement('button'); recruit.type = 'button'; recruit.textContent = system.recruit_enabled ? '停止收徒' : '开启收徒';
@@ -1198,6 +1219,26 @@ function renderSageSystem(system) {
     (doctrine.passive_effect_text || []).forEach(text => { const chip = document.createElement('span'); chip.textContent = text; effects.appendChild(chip); });
     row.append(title, details, tenets, effects);
     if (!system.membership_id) { const join = document.createElement('button'); join.textContent = '加入'; join.onclick = () => mutate(`/api/games/${game.id}/sage-doctrine`, {action:'join', doctrine_id:doctrine.id}); row.appendChild(join); }
+    const ranking = document.createElement('div'); ranking.className = 'sage-ranking';
+    const rankingTitle = document.createElement('div'); rankingTitle.className = 'sage-ranking-title'; rankingTitle.innerHTML = '<b>学说席次</b><small>执掌者固定列首，其余按内在影响排序</small>'; ranking.appendChild(rankingTitle);
+    (doctrine.members || []).forEach(member => {
+      const memberRow = document.createElement('div'); memberRow.className = `sage-member-row${member.is_player ? ' player' : ''}`;
+      const identity = document.createElement('span'); identity.className = 'sage-member-identity';
+      identity.innerHTML = `<i>${member.rank}</i><span><b>${member.name}${member.is_player ? '（你）' : ''}</b><small>${member.role_name} · ${member.realm_name}</small></span>`;
+      const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = `<b>内在 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
+      memberRow.append(identity, values);
+      if (!member.is_player && system.membership_id) {
+        const debate = document.createElement('button'); debate.type = 'button'; debate.className = 'sage-debate-button';
+        const same = doctrine.id === system.membership_id;
+        debate.textContent = same ? `同门论道 · 胜则内在 +${Number(system.debate_values?.same_doctrine_inner_gain || 1.2).toFixed(1)}` : `学派论道 · 胜则外在 +${Number(system.debate_values?.other_doctrine_external_gain || .8).toFixed(1)}`;
+        debate.disabled = !member.can_debate;
+        if (!member.can_debate && member.debate_available_age > Number(game.player.age || 0)) debate.title = `${member.debate_available_age} 岁后可再论道`;
+        debate.onclick = () => mutate(`/api/games/${game.id}/sage-debate`, {doctrine_id:doctrine.id, member_id:member.id});
+        memberRow.appendChild(debate);
+      }
+      ranking.appendChild(memberRow);
+    });
+    row.appendChild(ranking);
     list.appendChild(row);
   });
 

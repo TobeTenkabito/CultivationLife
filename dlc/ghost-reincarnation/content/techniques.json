@@ -2,6 +2,20 @@
   "schema_version": 1,
   "techniques": [
     {
+      "id": "TECH_GHOST_NIGHT_PROCESSION_CORE",
+      "name": "夜行炼魂录",
+      "path": "ghost",
+      "element": "yin",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.26,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.34,
+      "combat_bonus": 310,
+      "karma_multiplier": 1.0,
+      "sources": {"yin": 1.0}
+    },
+    {
       "id": "TECH_GHOST_BODY_THIEF",
       "name": "无相夺舍经",
       "path": "ghost",
