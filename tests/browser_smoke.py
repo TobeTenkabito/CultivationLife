@@ -97,9 +97,25 @@ def main() -> None:
                 assert "解锁条件：取得沧海玄鼎" in page.locator(".achievement-row").first.text_content()
                 page.locator("#achievement-close").click()
                 page.locator("#new-game-form").wait_for(state="visible")
-                assert page.locator(".quick-start-button").count() == 9
-                assert page.locator(".quick-start-button:not([disabled])").count() == 9
+                assert page.locator(".quick-start-button").count() >= 9
+                assert page.locator(".quick-start-button:not([disabled])").count() >= 9
                 assert page.locator(".quick-start-button[disabled]").count() == 0
+                page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                sage_dock = page.locator("[data-panel-target='sage']")
+                assert sage_dock.is_visible()
+                assert "sage-dock-button" in (sage_dock.get_attribute("class") or "")
+                sage_dock.click()
+                page.locator("#sage-card").wait_for(state="visible")
+                assert page.locator("#sage-founding .sage-combo-grid label").count() == 4
+                assert page.locator("#sage-founding-preview .sage-effect-chips span").count() == 4
+                assert page.locator("#sage-worship-list .sage-worship-card").count() == 8
+                assert "战斗力" in page.locator("#sage-classic-detail").text_content()
+                assert page.locator("#sage-worship-list .sage-worship-card").first.evaluate(
+                    "node => getComputedStyle(node).backgroundColor !== 'rgb(255, 255, 255)'"
+                )
+                page.locator("#sage-toggle").click()
+                page.locator("#new-game-button").click()
                 page.locator("#path-select").select_option("monster")
                 assert page.locator("#monster-species-field").is_visible()
                 assert page.locator("#monster-species-select option").count() == 8
@@ -109,6 +125,7 @@ def main() -> None:
                 page.locator("#new-game-form button[type='submit']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("[data-panel-target='bloodline']").is_visible()
+                assert page.locator("[data-panel-target='bloodline']").evaluate("node => node.classList.contains('dlc-active')")
                 page.locator("[data-panel-target='bloodline']").click()
                 page.locator("#bloodline-card").wait_for(state="visible")
                 page.locator("#bloodline-current").get_by_text("山雀妖", exact=True).wait_for()
@@ -122,6 +139,7 @@ def main() -> None:
                     reason:'血脉冻结测试', general_trait_pool_size:16,
                     general_traits:[{id:'monster_common_stout_hide',name:'坚韧皮膜',description:'防护提高 3%。'}]
                 })""")
+                assert not page.locator("[data-panel-target='bloodline']").evaluate("node => node.classList.contains('dlc-active')")
                 assert "1 / 16" in page.locator("#bloodline-summary").text_content()
                 assert "坚韧皮膜" in page.locator("#bloodline-current").text_content()
                 assert "血脉冻结测试" in page.locator("#bloodline-note").text_content()
@@ -303,7 +321,7 @@ def main() -> None:
 
                 page.locator("[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
-                assert "已识别 3" in page.locator("#extension-summary").text_content()
+                assert "已识别 4" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
                 assert "妖修道途：血脉与进化" in extension_text
                 assert "百鬼夜行:轮回往生" in extension_text

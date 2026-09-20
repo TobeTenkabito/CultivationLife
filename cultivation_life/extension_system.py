@@ -14,7 +14,10 @@ REGISTRY_DOCUMENTS = (
     "story_combat_scenarios.json",
 )
 CORE_DOCUMENTS = (*REGISTRY_DOCUMENTS, "maps.json")
-OPTIONAL_DOCUMENTS = ("monster_bloodlines.json", "achievements.json", "crafting.json", "formations.json")
+OPTIONAL_DOCUMENTS = (
+    "monster_bloodlines.json", "achievements.json", "crafting.json", "formations.json",
+    "sage_way.json",
+)
 PACKAGE_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,63}$")
 PREFERENCES_FILE = "extension_preferences.json"
 

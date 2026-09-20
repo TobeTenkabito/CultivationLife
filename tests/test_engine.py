@@ -340,7 +340,7 @@ class EngineTests(unittest.TestCase):
         created = self.engine.create_game("观山", "supreme_metal", "dao", 109)
         game = self.engine.store.load(created["id"])
         self.assertEqual(set(game.sects), set(FACTION_DEFINITIONS))
-        self.assertEqual(sum(sect.world == "human" for sect in game.sects.values()), 3)
+        self.assertEqual(sum(sect.world == "human" for sect in game.sects.values()), 4)
         self.assertEqual(sum(sect.world == "spirit" for sect in game.sects.values()), 3)
         spirit_npcs = [
             npc for npc in [*(npc for sect in game.sects.values() for npc in sect.npcs), *game.world_npcs.values()]

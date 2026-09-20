@@ -368,3 +368,56 @@
   .intrigue-resolution-form { grid-template-columns:1fr; }
   .intrigue-recruitment-form { grid-template-columns:1fr; }
 }
+.strategy-dock button.sage-dock-button { color:#315d68; border-color:rgba(49,93,104,.34); background:linear-gradient(145deg,rgba(49,93,104,.16),rgba(181,149,82,.1)); box-shadow:inset 0 0 0 2px rgba(255,255,255,.32); }
+.strategy-dock button.sage-dock-button:hover,.strategy-dock button.sage-dock-button.active { color:#fff; border-color:#315d68; background:linear-gradient(145deg,#315d68,#82683e); }
+.strategy-dock button.bloodline-dock-button.dlc-active { color:#9a4436; border-color:rgba(154,68,54,.38); background:linear-gradient(145deg,rgba(154,68,54,.16),rgba(182,139,61,.12)); box-shadow:inset 0 0 0 2px rgba(255,255,255,.3); }
+.strategy-dock button.bloodline-dock-button.dlc-active:hover,.strategy-dock button.bloodline-dock-button.dlc-active.active { color:#fff; border-color:#9a4436; background:linear-gradient(145deg,#9a4436,#7a4a38); }
+
+.sage-panel { width:min(980px,calc(100vw - 140px)); max-width:980px; padding:34px 38px; background:linear-gradient(155deg,rgba(246,244,231,.98),rgba(235,241,235,.97)); }
+.sage-panel>section { margin-top:18px; }
+.sage-panel #sage-membership { padding:15px 17px; border:1px solid rgba(49,93,104,.2); border-left:4px solid #315d68; background:linear-gradient(120deg,rgba(49,93,104,.085),rgba(181,149,82,.075)); }
+.sage-panel #sage-membership h3,.sage-panel #sage-membership p { margin:0 0 7px; }
+.sage-subheading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:10px; border-bottom:1px solid rgba(49,93,104,.16); padding-bottom:8px; }
+.sage-subheading h3,.sage-subheading p { margin:0; }
+.sage-subheading>small { max-width:560px; color:var(--muted); text-align:right; line-height:1.5; }
+.sage-doctrine-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+.sage-doctrine { position:relative; display:grid; gap:.3rem; align-content:start; min-height:130px; padding:13px 14px; border:1px solid rgba(49,93,104,.18); border-left:4px solid rgba(49,93,104,.38); background:rgba(255,252,239,.58); }
+.sage-doctrine.active { border-left-color:#b58e42; background:linear-gradient(130deg,rgba(181,142,66,.13),rgba(255,252,239,.62)); }
+.sage-doctrine>b { color:#294f58; font-size:14px; }
+.sage-doctrine small { color:#716b5e; line-height:1.45; }
+.sage-doctrine-tenets { color:#4c625f!important; }
+.sage-doctrine>button { position:absolute; right:12px; top:12px; padding:6px 11px; color:#fff; border-color:#315d68; background:#315d68; }
+.sage-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:12px; }
+.sage-actions button { padding:7px 11px; color:#fff; border-color:#315d68; background:#315d68; }
+.sage-actions button:nth-last-child(-n+2) { color:#664e2e; border-color:rgba(181,142,66,.45); background:rgba(181,142,66,.16); }
+.sage-effect-summary { display:grid; gap:8px; margin:11px 0; padding:12px 13px; border:1px solid rgba(181,142,66,.24); border-left:4px solid #b58e42; background:rgba(181,142,66,.075); }
+.sage-effect-summary.current { border-left-color:#315d68; background:rgba(49,93,104,.065); }
+.sage-effect-chips { display:flex; flex-wrap:wrap; gap:5px; }
+.sage-effect-chips span { padding:4px 8px; border-radius:999px; color:#315d68; border:1px solid rgba(49,93,104,.16); background:rgba(49,93,104,.075); font-size:10px; }
+.sage-doctrine>.sage-effect-chips { margin-top:auto; }
+.sage-founding { padding:15px; border:1px solid rgba(181,142,66,.24); background:rgba(255,252,239,.47); }
+.sage-combo-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; margin-bottom:.65rem; }
+.sage-combo-grid label { display:grid; grid-template-columns:auto minmax(120px,.7fr); gap:5px 10px; align-items:center; padding:11px 12px; border-left:3px solid rgba(49,93,104,.38); background:rgba(49,93,104,.055); }
+.sage-combo-grid label>span { color:#315d68; font-weight:700; }
+.sage-combo-grid select { min-width:0; width:100%; padding:7px 8px; color:#294f58; border:1px solid rgba(49,93,104,.24); background:rgba(250,249,241,.88); }
+.sage-combo-grid label>small { grid-column:1/-1; min-height:34px; color:var(--muted); line-height:1.5; }
+.sage-founding-submit { display:flex; align-items:end; justify-content:space-between; gap:12px; }
+.sage-founding-submit label { display:grid; flex:1; gap:5px; color:var(--muted); }
+.sage-founding-submit input { width:100%; padding:8px 10px; border:1px solid rgba(49,93,104,.24); background:rgba(255,255,255,.68); }
+.sage-founding-submit button { padding:9px 16px; color:#fff; border-color:#315d68; background:linear-gradient(135deg,#315d68,#6f6844); }
+.sage-worship-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.sage-worship-card { display:grid; gap:5px; min-height:142px; padding:13px 14px; text-align:left; color:var(--ink); border:1px solid rgba(49,93,104,.22); border-left:4px solid rgba(49,93,104,.36); background:linear-gradient(145deg,rgba(49,93,104,.075),rgba(244,239,220,.66)); }
+.sage-worship-card:hover:not(:disabled) { color:var(--ink); border-color:#315d68; background:linear-gradient(145deg,rgba(49,93,104,.14),rgba(181,142,66,.13)); transform:translateY(-1px); }
+.sage-worship-card.compatible { border-left-color:#b58e42; }
+.sage-worship-card.active { color:#fff; border-color:#315d68; background:linear-gradient(145deg,#315d68,#696743); }
+.sage-worship-card:disabled { cursor:default; opacity:.72; }
+.sage-worship-card.active:disabled { opacity:1; }
+.sage-worship-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.sage-worship-head b { font-size:15px; }
+.sage-worship-head i { padding:3px 7px; border-radius:999px; color:#765b2f; background:rgba(181,142,66,.18); font-size:9px; font-style:normal; }
+.sage-worship-card.active .sage-worship-head i { color:#fff; background:rgba(255,255,255,.16); }
+.sage-worship-card small { color:var(--muted); line-height:1.45; }
+.sage-worship-card.active small { color:rgba(255,255,255,.76); }
+.sage-worship-card strong { margin-top:auto; color:#315d68; font-size:10px; line-height:1.45; }
+.sage-worship-card.active strong { color:#f3dfad; }
+@media(max-width:800px){.sage-panel{width:calc(100vw - 20px);padding:28px 18px}.sage-doctrine-list,.sage-combo-grid,.sage-worship-list{grid-template-columns:1fr}.sage-subheading,.sage-founding-submit{align-items:stretch;flex-direction:column}.sage-subheading>small{text-align:left}.sage-founding-submit{display:grid}}

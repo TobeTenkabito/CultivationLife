@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.sage-way",
+  "name": "圣人之道：内圣外王",
+  "version": "0.2.1",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 130,
+  "requires": [],
+  "description": "圣人教化一期：四层学说、双重影响力、门人教化、道统执掌与先贤祭祀；补全主张、最终效果与先贤相性的可视化说明。"
+}

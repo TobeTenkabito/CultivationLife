@@ -384,7 +384,7 @@ class ContentRegistry:
             and 0 <= float(settings["enemy_stat_reduction_cap"]) <= 0.08
             and 0 <= float(settings["change_round_cap"]) <= 0.10
             and 0 < float(settings["ground_power_ratio_min"]) <= float(settings["ground_power_ratio_max"])
-            <= float(settings["ground_power_hard_cap_ratio"]) <= 0.60
+            <= float(settings["ground_power_hard_cap_ratio"]) <= 2.20
             and 0 <= float(settings["npc_formation_bonus_cap"]) <= 0.10
             and 0 < float(settings["ground_battle_min_wear"]) <= float(settings["ground_battle_max_wear"]) <= 30
             and 0 < float(settings["sect_defense_success_wear"]) < float(settings["sect_defense_failure_wear"]) <= 25
@@ -924,8 +924,8 @@ class ContentRegistry:
         races: dict[str, dict[str, Any]],
     ) -> None:
         required_ids = {"core", "demonic_core", "ghost_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
-        if {str(entry.get("id", "")) for entry in presets} != required_ids:
-            raise ContentError("快速开局必须覆盖正统修仙七档、魔界魔丹与地狱界鬼修预设")
+        if not required_ids <= {str(entry.get("id", "")) for entry in presets}:
+            raise ContentError("快速开局必须至少覆盖正统修仙七档、魔界魔丹与地狱界鬼修预设")
         if not all(bool(entry.get("enabled")) for entry in presets):
             raise ContentError("九项快速开局预设均应处于开放状态")
         for entry in presets:

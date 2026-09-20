@@ -242,7 +242,10 @@ def raw_external_hp_bonus(player: Player) -> float:
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
-        support_bonus = player.support_technique.hp_bonus * technique_scale(player.support_technique)
+        support_bonus = (
+            player.support_technique.hp_bonus * technique_scale(player.support_technique)
+            * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
+        )
     return (
         reference * support_bonus
         + sum(i.hp_bonus * i.quantity for i in player.inventory)
@@ -262,7 +265,10 @@ def raw_external_mp_bonus(player: Player) -> float:
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
-        support_bonus = player.support_technique.mp_bonus * technique_scale(player.support_technique)
+        support_bonus = (
+            player.support_technique.mp_bonus * technique_scale(player.support_technique)
+            * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
+        )
     return (
         reference * support_bonus
         + sum(i.mp_bonus * i.quantity for i in player.inventory)
@@ -289,6 +295,7 @@ def combat_power(player: Player) -> float:
     current_qi_levels = qi_levels(player)
     technique_power = sum(
         entry.combat_bonus * technique_scale(entry)
+        * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         for entry in player.combat_techniques
         if combat_requirement_met(entry.combat_requirements, current_qi_levels)
         and (not entry.requires_immortal_power or player.immortal_power_converted)
@@ -300,6 +307,7 @@ def combat_power(player: Player) -> float:
     )
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
+    total *= 1.0 + max(0.0, float(player.sage_effects.get("combat_multiplier", 0.0)))
     return round(total, 1)
 
 
@@ -486,7 +494,10 @@ def opportunity_multiplier(player: Player) -> float:
     root_efficiency = root_definition(player.spirit_root)["efficiency"]
     if player.technique is None:
         return 0.0
-    main_bonus = player.technique.opportunity_bonus * technique_scale(player.technique)
+    main_bonus = (
+        player.technique.opportunity_bonus * technique_scale(player.technique)
+        * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
+    )
     from .crafting_system import crafted_artifact_bonuses
     item_bonus = (
         sum(item.opportunity_bonus * item.quantity for item in player.inventory)
@@ -498,6 +509,7 @@ def opportunity_multiplier(player: Player) -> float:
         root_efficiency * inner_multiplier
         * technique_environment_multiplier(player.technique, player.world)
         * ghost_opportunity_multiplier(player)
+        * (1 + max(0.0, float(player.sage_effects.get("opportunity_multiplier", 0.0))))
         * (0.8 if player.concubine_status else 1.0)
     )
 

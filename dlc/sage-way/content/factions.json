@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "systems": {"npc_path_distribution":{"jixia":{"confucian":0.82,"dao":0.12,"buddhist":0.06}}},
+  "factions": [
+    {"id":"jixia","name":"稷下学宫","world":"human","allegiance_race":"human","path":"人界儒门学宫","description":"百家讲席并立，以教化、策论与经世之学立身。","color":"#876b42","npcs":[
+      {"id":"jx_ji","name":"姬明德","title":"大祭酒","realm_index":4,"layer":8,"age":980,"lifespan":1390,"spirit_root":"supreme_wood","path":"confucian"},
+      {"id":"jx_gongyang","name":"公羊守义","title":"春秋博士","realm_index":4,"layer":5,"age":820,"lifespan":1310,"spirit_root":"heavenly_wood_fire","path":"confucian"},
+      {"id":"jx_wang","name":"王知行","title":"讲席","realm_index":3,"layer":8,"age":360,"lifespan":485,"spirit_root":"mutated_yang","path":"confucian"},
+      {"id":"jx_gu","name":"顾实甫","title":"典籍使","realm_index":3,"layer":5,"age":310,"lifespan":470,"spirit_root":"heavenly_metal_water","path":"confucian"},
+      {"id":"jx_lu","name":"陆问礼","title":"游学弟子","realm_index":2,"layer":6,"age":138,"lifespan":235,"spirit_root":"heavenly_wood_earth","path":"confucian"}
+    ]}
+  ]
+}
