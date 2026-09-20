@@ -1100,6 +1100,7 @@ class EconomySystemMixin:
         rng = self._auction_rng(game, "negotiate")
         affinity_range = self._auction_rules()["negotiation_affinity_gain"]
         change = rng.randint(int(affinity_range[0]), int(affinity_range[1]))
+        change = self._sage_affinity_gain(game.player, change)
         npc.affinity = float(npc.affinity or 0) + change
         attendee.update({
             "interacted":True, "affinity":round(npc.affinity, 1), "private_trade_unlocked":True,
@@ -1151,6 +1152,7 @@ class EconomySystemMixin:
         rng = self._auction_rng(game, f"private-buy:{npc_id}:{offer_id}")
         affinity_gain = rng.randint(int(affinity_range[0]), int(affinity_range[1]))
         if npc:
+            affinity_gain = self._sage_affinity_gain(game.player, affinity_gain)
             npc.affinity = float(npc.affinity or 0) + affinity_gain
             attendee["affinity"] = round(npc.affinity, 1)
         else:

@@ -733,7 +733,9 @@ class IntrigueSystemMixin:
                     old.affinity = float(old.affinity or 0) - 8
                 record["unrest"] = min(100.0, float(record.get("unrest", 0)) + 3)
             record["positions"][position_id] = npc.id
-            npc.affinity = min(100.0, float(npc.affinity or 0) + 5)
+            npc.affinity = min(
+                100.0, float(npc.affinity or 0) + self._sage_affinity_gain(game.player, 5),
+            )
             summary = f"你任命{npc.name}为{specs[position_id]['name']}。"
         elif action == "dismiss":
             held = next((pid for pid, holder in record["positions"].items() if holder == npc.id), None)
@@ -857,7 +859,9 @@ class IntrigueSystemMixin:
                     summary = f"{npc.name}权衡职责与旧有关系后，婉拒了客卿邀请（接受率 {chance:.0%}）。"
                 else:
                     guests.append({"npc_id": npc.id, "name": npc.name, "defense_required": True, "offense_opt_in": False, "joined_age": game.player.age})
-                    npc.affinity = min(100.0, float(npc.affinity or 0) + 4)
+                    npc.affinity = min(
+                        100.0, float(npc.affinity or 0) + self._sage_affinity_gain(game.player, 4),
+                    )
                     for war in game.wars:
                         if (war.get("status") in {"active", "peace_ready"} and war.get("kind") == kind
                                 and faction_id in self._coalition_ids(war, "defender")):

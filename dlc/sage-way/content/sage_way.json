@@ -2,7 +2,7 @@
   "schema_version": 1,
   "settings": {
     "enabled": true,
-    "phase": "doctrine_debate",
+    "phase": "inner_sage_outer_king",
     "worlds": ["human", "spirit"],
     "world_influence_pool": 100.0,
     "doctrine_influence_cap": 60.0,
@@ -40,6 +40,40 @@
       "other_doctrine_external_gain": 0.8,
       "loss_scale": 0.45,
       "cooldown_years": 1
+    },
+    "inner_outer": {
+      "haoran": {
+        "exp_per_level_unit": 10.0,
+        "threshold_base": 60.0,
+        "max_level": 30,
+        "realm_weights": {"1":1,"2":2,"3":4,"4":8,"5":16,"6":32,"7":64,"8":128},
+        "passive_half_level": 10.0,
+        "passive_caps": {
+          "affinity_multiplier": 0.30,
+          "opportunity_multiplier": 0.25,
+          "heavenly_tribulation_reduction": 0.12,
+          "thunder_tribulation_reduction": 0.12,
+          "karma_effect_reduction": 0.35,
+          "heart_demon_gain_reduction": 0.35,
+          "sha_qi_gain_reduction": 0.35,
+          "breakthrough_bonus": 0.03
+        }
+      },
+      "outer_king": {
+        "advancement": {
+          "base_cost_by_target_realm": {"1":300,"2":600,"3":1200,"4":2400,"5":4800,"6":8000,"7":12000,"8":18000},
+          "cost_multiplier": 2.0
+        },
+        "combat_power": {"standard_power_ratio":0.05,"base_cost":600,"cost_growth":1.0},
+        "spirit_stone": {
+          "cost":200,
+          "gain_by_realm":{"0":20,"1":50,"2":100,"3":220,"4":500,"5":1100,"6":2400,"7":5200,"8":11000,"9":24000,"10":52000,"11":110000,"12":240000}
+        },
+        "opportunity": {
+          "cost":150,
+          "gain_by_realm":{"0":3,"1":6,"2":15,"3":40,"4":100,"5":250,"6":600,"7":1400,"8":3000,"9":7000,"10":16000,"11":36000,"12":80000}
+        }
+      }
     },
     "sage_change_cooldown_years": 10,
     "combination_choices": {
@@ -95,6 +129,6 @@
         {"id":"sage-spirit-heart","name":"万族心学","combo":{"classic":"gongyang","philosophy":"mind","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|mind|statecraft|new_text","external":28.0,"controller_id":"sage-s-h-1","members":[{"id":"sage-s-h-1","name":"王照心","inner":27.0,"realm_index":6},{"id":"sage-s-h-2","name":"云无迹","inner":20.0,"realm_index":5},{"id":"sage-s-h-3","name":"木年","inner":13.0,"realm_index":5}]}
       ]
     },
-    "future_interfaces": {"faction_ref": true, "tags": true, "inner_sage": true, "outer_kingship": false}
+    "future_interfaces": {"faction_ref": true, "tags": true, "inner_sage": true, "outer_kingship": true}
   }
 }

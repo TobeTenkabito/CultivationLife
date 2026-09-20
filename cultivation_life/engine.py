@@ -1276,7 +1276,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             player.joint_companion_breakthrough = None
             failure_type = "major" if major else "minor"
             player.opportunity = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])
-            gain = float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_heart_demon"])
+            gain = self._sage_scaled_gain(
+                player, float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_heart_demon"]),
+                "heart_demon_gain_reduction",
+            )
             player.heart_demon += gain
             target_index = player.realm_index + 1
             target_name = (
@@ -2530,7 +2533,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 npc.affinity = (npc.affinity or 0) - 3
                 result, summary = "proposal_refused", f"{npc.name}认为缘分未至，婉拒了结为道侣的请求（同意率 {chance:.0%}）。"
             else:
-                npc.affinity = (npc.affinity or 0) + 12
+                npc.affinity = (npc.affinity or 0) + self._sage_affinity_gain(player, 12)
                 source = self._npc_faction_id(game, npc.id) or "world"
                 player.dao_companion = self._relationship_snapshot(
                     npc.id, npc.name, npc.realm_index, npc.layer, source, npc.age, npc.lifespan,
@@ -2553,7 +2556,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 low, high = WORLD_SYSTEMS["relationship"]["companion_heart_demon_intimacy"]
                 reduction = min(player.heart_demon, rng.randint(int(low), int(high)))
                 player.heart_demon -= reduction
-                companion["affinity"] = float(companion.get("affinity", 20)) + 1
+                companion["affinity"] = float(companion.get("affinity", 20)) + self._sage_affinity_gain(player, 1)
                 dialogue = rng.choice([
                     "对方与你谈起初次相遇时的窘事，洞府中久违地有了笑声。",
                     "你们互相复盘近年的得失，许多执念在言语间自然散去。",
@@ -2566,7 +2569,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 low, high = WORLD_SYSTEMS["relationship"]["companion_heart_demon_entwine"]
                 reduction = min(player.heart_demon, rng.randint(int(low), int(high)))
                 player.heart_demon -= reduction
-                companion["affinity"] = float(companion.get("affinity", 20)) + 2
+                companion["affinity"] = float(companion.get("affinity", 20)) + self._sage_affinity_gain(player, 2)
                 sex_ids = {technique.id for technique in [player.technique] if technique and technique.element == "sex"}
                 if companion.get("main_technique_id") in TECHNIQUE_CATALOG and TECHNIQUE_CATALOG[companion["main_technique_id"]].element == "sex":
                     sex_ids.add(str(companion["main_technique_id"]))
@@ -2610,7 +2613,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                     raise ValueError("物品栏中没有这件物品")
                 items = companion.setdefault("items", {})
                 items[content_id] = int(items.get(content_id, 0)) + 1
-                companion["affinity"] = float(companion.get("affinity", 20)) + 3
+                companion["affinity"] = float(companion.get("affinity", 20)) + self._sage_affinity_gain(player, 3)
                 result, summary = "companion_gifted", f"你将{ITEM_CATALOG[content_id].name}赠予{companion['name']}，情意更深。"
             elif action == "teach_technique":
                 technique = next((entry for entry in player.known_techniques if entry.id == content_id), None)
@@ -2622,7 +2625,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 taught = companion.setdefault("techniques", [])
                 if technique.id not in taught:
                     taught.append(technique.id)
-                companion["affinity"] = float(companion.get("affinity", 20)) + 2
+                companion["affinity"] = float(companion.get("affinity", 20)) + self._sage_affinity_gain(player, 2)
                 result, summary = "companion_technique_replaced", f"{companion['name']}废去旧法，将《{technique.name}》改作主修功法。"
             else:
                 raise ValueError("未知道侣互动")
@@ -2721,7 +2724,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         npc = self._persist_relationship_npc(game, relation, "受邀加入宗门")
         npc.faction_id = sect.id
         relation["source"] = "world"
-        npc.affinity = max(float(npc.affinity or 0), float(relation.get("affinity", 0))) + 4
+        npc.affinity = max(
+            float(npc.affinity or 0), float(relation.get("affinity", 0)),
+        ) + self._sage_affinity_gain(player, 4)
         relation["affinity"] = npc.affinity
         game.history.append(HistoryRecord(
             "SYS_RELATION_JOIN_FACTION",1,player.age,"引荐入宗",npc_id,"joined",
@@ -2743,7 +2748,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             if not relation:
                 raise ValueError("你当前没有道侣")
             npc = self._persist_relationship_npc(game, relation, "道侣决裂")
-            player.heart_demon += float(rules["companion_separation_heart_demon"])
+            player.heart_demon += self._sage_scaled_gain(
+                player, float(rules["companion_separation_heart_demon"]), "heart_demon_gain_reduction",
+            )
             npc.affinity = float(rules.get("relationship_release_affinity", 0))
             player.dao_companion = None
             summary = f"你与{relation['name']}斩断道侣誓约，双方好感重置为中立；心魔骤增 {rules['companion_separation_heart_demon']:g}。"
@@ -2965,7 +2972,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 npc.affinity = (npc.affinity or 0) - 2
                 result, summary = "rejected", f"{npc.name}婉拒了同行邀请（同意率 {chance:.0%}）。"
             else:
-                npc.affinity = (npc.affinity or 0) + 4
+                npc.affinity = (npc.affinity or 0) + self._sage_affinity_gain(player, 4)
                 player.party.append({"id": npc.id, "name": npc.name})
                 result, summary = "joined", f"{npc.name}同意加入队伍（同意率 {chance:.0%}）。"
             game.rng_state = encode_rng(rng)
@@ -3509,7 +3516,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         npc = self._find_npc(game, npc_id)
         relation = next((entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
         base = float(relation.get("affinity", 0)) if relation else float(npc.affinity or 0) if npc else 0.0
-        value = base + float(delta)
+        value = base + self._sage_affinity_gain(game.player, delta)
         if npc:
             npc.affinity = value
         for relation in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples]:
@@ -6093,13 +6100,15 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             sign = "+" if value >= 0 else ""
             return None, f"威名 {sign}{value}。"
         if kind == "add_sha_qi":
-            player.sha_qi = max(0.0, player.sha_qi + float(value))
-            sign = "+" if value >= 0 else ""
-            return None, f"煞气 {sign}{value}。"
+            actual = self._sage_scaled_gain(player, float(value), "sha_qi_gain_reduction")
+            player.sha_qi = max(0.0, player.sha_qi + actual)
+            sign = "+" if actual >= 0 else ""
+            return None, f"煞气 {sign}{actual:g}。"
         if kind == "add_heart_demon":
-            player.heart_demon = max(0.0, player.heart_demon + float(value))
-            sign = "+" if value >= 0 else ""
-            return None, f"心魔 {sign}{value}。"
+            actual = self._sage_scaled_gain(player, float(value), "heart_demon_gain_reduction")
+            player.heart_demon = max(0.0, player.heart_demon + actual)
+            sign = "+" if actual >= 0 else ""
+            return None, f"心魔 {sign}{actual:g}。"
         if kind == "relationship_affinity":
             role = str(effect.get("role", "companion"))
             if role == "master":
@@ -6113,11 +6122,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 raise ValueError("未知关系角色")
             if not relation:
                 return "relationship_absent", "对应之人当前不在身边。"
-            relation["affinity"] = float(relation.get("affinity", 20)) + float(value)
+            actual = self._sage_affinity_gain(player, float(value))
+            relation["affinity"] = float(relation.get("affinity", 20)) + actual
             source_npc = self._find_npc(game, str(relation.get("id", "")))
             if source_npc:
                 source_npc.affinity = float(relation["affinity"])
-            return "relationship_changed", f"{relation.get('name', '对方')}好感 {float(value):+g}。"
+            return "relationship_changed", f"{relation.get('name', '对方')}好感 {actual:+g}。"
         if kind == "add_hostility":
             entity = player.world if effect.get("entity") == "current" else str(effect.get("entity"))
             key = self._hostility_key(str(effect.get("kind", "world")), entity)
@@ -7006,6 +7016,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                         float(fame_rules["monster_dao_kill_sha_base"])
                         + int(victim["realm_index"]) * float(fame_rules["monster_dao_kill_sha_realm_scale"])
                     )
+                    sha_gain = self._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
                     player.sha_qi += sha_gain
                     sha_text = f" 煞气 +{sha_gain}。"
                 result = "killed"
@@ -7285,7 +7296,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             chance = self._breakthrough_chance(player, major=False, allow_aids=False)
             if rng.random() >= chance["final"]:
                 player.opportunity = required * float(WORLD_SYSTEMS["breakthrough"]["minor_failure_retention"])
-                gain = float(WORLD_SYSTEMS["breakthrough"]["minor_failure_heart_demon"])
+                gain = self._sage_scaled_gain(
+                    player, float(WORLD_SYSTEMS["breakthrough"]["minor_failure_heart_demon"]),
+                    "heart_demon_gain_reduction",
+                )
                 player.heart_demon += gain
                 game.history.append(HistoryRecord(
                     "SYS_MINOR_BREAKTHROUGH_FAILED", 1, player.age, "小境界冲关失利", None, "failed",
@@ -7811,7 +7825,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             drain_hp, drain_mp = config["drain_hp"], config["drain_mp"]
 
         if not passed:
-            gain = float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"])
+            gain = self._sage_scaled_gain(
+                player, float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"]),
+                "heart_demon_gain_reduction",
+            )
             player.heart_demon += gain
             player.joint_companion_breakthrough = None
             lethal = bool(trial.get("lethal"))
@@ -7910,7 +7927,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         else:
             raise ValueError("未知的飞升劫关隘")
         if not passed:
-            player.heart_demon += float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"])
+            player.heart_demon += self._sage_scaled_gain(
+                player, float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"]),
+                "heart_demon_gain_reduction",
+            )
             player.next_thunder_damage_reduction = 0.0
             game.active_trial = None
             self._die(game, f"九重飞升劫的{step}判定失败，肉身与元神一同崩解", "SYS_CELESTIAL_ASCENSION_FAILED")
@@ -8019,7 +8039,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         else:
             raise ValueError("未知的修罗飞升劫关隘")
         if not passed:
-            player.heart_demon += float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"])
+            player.heart_demon += self._sage_scaled_gain(
+                player, float(WORLD_SYSTEMS["breakthrough"]["trial_failure_heart_demon"]),
+                "heart_demon_gain_reduction",
+            )
             player.next_thunder_damage_reduction = 0.0
             game.active_trial = None
             self._die(game, f"九重修罗天魔劫的{step}判定失败，魔躯与元神一同崩解", "SYS_ASURA_ASCENSION_FAILED")
@@ -8156,7 +8179,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             + crafted_artifact_bonuses(player)["tribulation_reduction"]
         )
         one_time = player.next_thunder_damage_reduction if kind in {"periodic_thunder", "celestial_ascension", "asura_ascension"} else 0.0
-        return min(0.75, item_reduction + self._body_tribulation_damage_reduction(player) + one_time)
+        sage_key = "thunder_tribulation_reduction" if kind == "periodic_thunder" else "heavenly_tribulation_reduction"
+        sage_reduction = max(0.0, float(player.sage_effects.get(sage_key, 0.0)))
+        return min(
+            0.75,
+            item_reduction + self._body_tribulation_damage_reduction(player) + one_time + sage_reduction,
+        )
 
     @staticmethod
     def _tribulation_base_power_cap(world: str) -> float | None:
@@ -9508,7 +9536,15 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 offer.setdefault("location_id", normalized_location)
             location_changed = True
         before_known = tuple(technique.id for technique in game.player.known_techniques)
+        before_manuals = tuple(
+            (item.id, item.technique_level, item.technique_origin_realm_index, item.quantity)
+            for item in game.player.inventory if item.technique_id
+        )
         ensure_technique_set(game.player)
+        after_manuals = tuple(
+            (item.id, item.technique_level, item.technique_origin_realm_index, item.quantity)
+            for item in game.player.inventory if item.technique_id
+        )
         bloodline_changed = ensure_monster_bloodline_state(game.player)
         if game.player.path == "monster" and bloodline_content_available() and game.player.technique is None:
             starter_id = str(MONSTER_BLOODLINE_SETTINGS.get("starter_technique_id", ""))
@@ -9539,7 +9575,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             learn_technique(game.player, starter)
             assign_technique(game.player, starter, "main")
             version_changed = True
-        changed = ghost_migrated or conversion_migrated or monster_lifespan_migrated or possession_timeline_migrated or version_changed or location_changed or bloodline_changed or before_known != tuple(technique.id for technique in game.player.known_techniques)
+        changed = (
+            ghost_migrated or conversion_migrated or monster_lifespan_migrated
+            or possession_timeline_migrated or version_changed or location_changed
+            or bloodline_changed or before_manuals != after_manuals
+            or before_known != tuple(technique.id for technique in game.player.known_techniques)
+        )
         if (
             game.player.body_technique and game.player.body_training < int(WORLD_SYSTEMS["body_cultivation"]["max_layer"])
             and game.player.body_progress >= self._body_progress_required(game.player)
@@ -9704,6 +9745,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         settings = ACTIONS[action]["combat"]
         if action == "hunt_beast" and result == "killed":
             sha_gain = rng.randint(*settings["sha_qi_gain"])
+            sha_gain = self._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
             player.sha_qi += sha_gain
             summary += f" 妖血淬身，煞气 +{sha_gain}。"
         if result in {"victory", "killed"} and settings.get("reward_stones"):

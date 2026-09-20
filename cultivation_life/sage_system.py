@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import copy
+import math
 import random
 import uuid
 from typing import Any
 
-from .content_registry import CONTENT_DOCUMENTS
+from .content_registry import CONTENT_DOCUMENTS, TECHNIQUE_CATALOG
 from .models import GameState, HistoryRecord
-from .rules import REALMS, expected_combat_power
-from .runtime import decode_rng, encode_rng
+from .rules import REALMS, add_item, expected_combat_power, remove_item, stage_name
+from .runtime import decode_rng, encode_rng, now_iso
 
 
 def sage_config() -> dict[str, Any]:
@@ -18,6 +19,38 @@ def sage_config() -> dict[str, Any]:
 
 def sage_content_available() -> bool:
     return bool(sage_config().get("enabled", False))
+
+
+def inner_outer_config() -> dict[str, Any]:
+    return sage_config().get("inner_outer", {})
+
+
+def haoran_level(experience: float, config: dict[str, Any] | None = None) -> int:
+    rules = (config or inner_outer_config()).get("haoran", {})
+    base = max(1.0, float(rules.get("threshold_base", 60.0)))
+    maximum = max(0, int(rules.get("max_level", 30)))
+    return min(maximum, max(0, int(math.sqrt(max(0.0, float(experience)) / base))))
+
+
+def haoran_threshold(level: int, config: dict[str, Any] | None = None) -> float:
+    rules = (config or inner_outer_config()).get("haoran", {})
+    base = max(1.0, float(rules.get("threshold_base", 60.0)))
+    target = max(0, int(level))
+    return base * target * target
+
+
+def haoran_passive_effects(experience: float, config: dict[str, Any] | None = None) -> dict[str, float]:
+    rules = (config or inner_outer_config()).get("haoran", {})
+    level = haoran_level(experience, config)
+    half = max(1.0, float(rules.get("passive_half_level", 10.0)))
+    maximum = max(1, int(rules.get("max_level", 30)))
+    raw = level / (level + half) if level else 0.0
+    maximum_raw = maximum / (maximum + half)
+    saturation = min(1.0, raw / maximum_raw)
+    return {
+        str(key): round(max(0.0, float(cap)) * saturation, 8)
+        for key, cap in rules.get("passive_caps", {}).items()
+    }
 
 
 SAGE_EFFECT_LABELS = {
@@ -31,6 +64,12 @@ SAGE_EFFECT_LABELS = {
     "field_alchemy_multiplier": "灵田生长与炼丹经验",
     "crafting_formation_multiplier": "炼器与阵法收益",
     "technique_learning_multiplier": "功法效果",
+    "affinity_multiplier": "NPC好感获取",
+    "heavenly_tribulation_reduction": "天劫伤害",
+    "thunder_tribulation_reduction": "雷劫伤害",
+    "karma_effect_reduction": "因果效果",
+    "heart_demon_gain_reduction": "心魔获得效率",
+    "sha_qi_gain_reduction": "煞气获得效率",
 }
 
 
@@ -40,6 +79,9 @@ def sage_effect_text(effects: dict[str, float], scale: float = 1.0) -> list[str]
         value = float(raw_value) * scale
         label = SAGE_EFFECT_LABELS.get(key, key)
         amount = value * 100.0
+        if key.endswith("_reduction"):
+            result.append(f"{label} -{amount:g}%")
+            continue
         unit = "个百分点" if key == "breakthrough_bonus" else "%"
         result.append(f"{label} {amount:+g}{unit}")
     return result
@@ -109,6 +151,19 @@ def apply_external_influence(doctrines: list[dict[str, Any]], doctrine_id: str, 
 
 
 class SageSystemMixin:
+    @staticmethod
+    def _sage_scaled_gain(player, amount: float, reduction_key: str) -> float:
+        value = float(amount)
+        if value <= 0:
+            return value
+        reduction = max(0.0, min(0.95, float(player.sage_effects.get(reduction_key, 0.0))))
+        return value * (1.0 - reduction)
+
+    @staticmethod
+    def _sage_affinity_gain(player, amount: float) -> float:
+        value = float(amount)
+        return value * (1.0 + max(0.0, float(player.sage_effects.get("affinity_multiplier", 0.0)))) if value > 0 else value
+
     @staticmethod
     def _normalize_sage_member(member: dict[str, Any]) -> None:
         member.setdefault("path", "confucian")
@@ -184,26 +239,29 @@ class SageSystemMixin:
 
     def _refresh_sage_effects(self, game: GameState) -> None:
         player = game.player
-        if not sage_content_available() or player.world not in sage_config().get("worlds", []):
+        if not sage_content_available() or player.path != "confucian":
             player.sage_effects = {}
             return
-        doctrine = self._player_doctrine(game, player.world) if game.sage_state.get("version") == 2 else None
-        if not doctrine:
-            player.sage_effects = {}
-            return
-        active = len(doctrine.get("active_disciples", []))
-        curve = disciple_curve(active, player.divine_sense_rank)
-        effects: dict[str, float] = {"breakthrough_bonus": curve["breakthrough_pp"] / 100.0}
-        combo = doctrine.get("combo", {})
-        passives = sage_config().get("doctrine_passives", {})
-        for choice in combo.values():
-            for key, value in passives.get(choice, {}).items():
-                effects[key] = effects.get(key, 0.0) + float(value)
-        sage = sage_config().get("sages", {}).get(doctrine.get("sage_id"), {})
-        compatible = sage.get("compatible", [])
-        sage_scale = 1.0 if "*" in compatible or any(choice in compatible for choice in combo.values()) else 0.5
-        for key, value in sage.get("effects", {}).items():
-            effects[key] = effects.get(key, 0.0) + float(value) * sage_scale
+        effects = haoran_passive_effects(player.haoran_exp)
+        doctrine = (
+            self._player_doctrine(game, player.world)
+            if game.sage_state.get("version") == 2 and player.world in sage_config().get("worlds", [])
+            else None
+        )
+        if doctrine:
+            active = len(doctrine.get("active_disciples", []))
+            curve = disciple_curve(active, player.divine_sense_rank)
+            effects["breakthrough_bonus"] = effects.get("breakthrough_bonus", 0.0) + curve["breakthrough_pp"] / 100.0
+            combo = doctrine.get("combo", {})
+            passives = sage_config().get("doctrine_passives", {})
+            for choice in combo.values():
+                for key, value in passives.get(choice, {}).items():
+                    effects[key] = effects.get(key, 0.0) + float(value)
+            sage = sage_config().get("sages", {}).get(doctrine.get("sage_id"), {})
+            compatible = sage.get("compatible", [])
+            sage_scale = 1.0 if "*" in compatible or any(choice in compatible for choice in combo.values()) else 0.5
+            for key, value in sage.get("effects", {}).items():
+                effects[key] = effects.get(key, 0.0) + float(value) * sage_scale
         effects["breakthrough_bonus"] = max(-0.08, min(0.05, effects.get("breakthrough_bonus", 0.0)))
         player.sage_effects = effects
 
@@ -600,13 +658,280 @@ class SageSystemMixin:
         shown["action_summary"] = f"{combat_summary} {reward_text}。"
         return shown
 
+    @staticmethod
+    def _haoran_manual_gain(origin_realm: int, previous: int, level: int) -> float:
+        cfg = inner_outer_config().get("haoran", {})
+        weight = float(cfg.get("realm_weights", {}).get(str(origin_realm), 1.0))
+        unit = float(cfg.get("exp_per_level_unit", 10.0))
+        return max(0.0, weight * unit * max(0, int(level) - int(previous)))
+
+    def sage_refine_manual(self, game_id: str, item_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        if not sage_content_available() or player.path != "confucian":
+            raise ValueError("只有启用《圣人之道》的儒修可以炼化经典")
+        if game.pending_event or not player.alive or player.imprisonment:
+            raise ValueError("当前状态无法炼化传承玉简")
+        item = next((row for row in player.inventory if row.id == item_id and row.quantity > 0), None)
+        if not item or not item.technique_id or item.technique_level is None:
+            raise ValueError("包裹中没有这枚传承玉简")
+        technique_id = str(item.technique_id)
+        level = max(1, min(9, int(item.technique_level)))
+        previous = max(0, int(player.refined_inheritances.get(technique_id, 0)))
+        if level <= previous:
+            raise ValueError(f"这部经典已参至 Lv.{previous}，相同或更低等级不能重复产生浩然之气")
+        template = TECHNIQUE_CATALOG.get(technique_id)
+        origin_realm = max(1, min(8, int(
+            item.technique_origin_realm_index or (template.grade if template else 1)
+        )))
+        gain = self._haoran_manual_gain(origin_realm, previous, level)
+        if gain <= 0 or not remove_item(player, item.id):
+            raise ValueError("这枚玉简当前无法炼化")
+        before_exp = player.haoran_exp
+        before_level = haoran_level(before_exp)
+        player.haoran_exp += gain
+        player.refined_inheritances[technique_id] = level
+        after_level = haoran_level(player.haoran_exp)
+        technique_name = template.name if template else item.name.removeprefix("《").split("》", 1)[0]
+        self._refresh_sage_effects(game)
+        game.history.append(HistoryRecord(
+            "SYS_SAGE_CLASSIC_REFINED", 1, player.age, "博采百家", technique_id, "refined",
+            f"你炼化《{technique_name}》Lv.{level}，补全 Lv.{previous + 1}—Lv.{level} 的理解，"
+            f"浩然之气 +{gain:g}（Lv.{before_level} → Lv.{after_level}）。",
+            {
+                "technique_id":technique_id, "origin_realm_index":origin_realm,
+                "refined_level":[previous, level], "haoran_exp":[before_exp, player.haoran_exp],
+            }, ["sage", "inner_sage", "classic", "milestone"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        result = self.present(game)
+        result["action_summary"] = f"炼化完成：浩然之气 +{gain:g}，当前 Lv.{after_level}。"
+        return result
+
+    @staticmethod
+    def _outer_target(player) -> tuple[int, int] | None:
+        current = REALMS[player.realm_index]
+        if player.realm_index >= 9 or (player.realm_index == 8 and player.layer >= current.layers):
+            return None
+        return (
+            (player.realm_index + 1, 1)
+            if player.layer >= current.layers else (player.realm_index, player.layer + 1)
+        )
+
+    def _outer_advance_block_reason(self, game: GameState) -> str:
+        player = game.player
+        target = self._outer_target(player)
+        if target is None:
+            return "大乘圆满后的飞升必须另渡九重天劫"
+        if player.sealed_cultivation:
+            return "下界法则正封印真实修为"
+        if player.spirit_root == "none":
+            return "尚无灵根，不能承载强行升境"
+        if player.world == "human" and player.realm_index == 5 and player.layer >= 3:
+            return "人界法则不足，须先前往灵界"
+        major = target[0] != player.realm_index
+        if major:
+            requirement = self._major_breakthrough_requirement(player)
+            if not requirement.get("met", True):
+                return str(requirement.get("reason", "尚不满足大境界条件"))
+        return ""
+
+    @staticmethod
+    def _outer_cost(action: str, player) -> int:
+        cfg = inner_outer_config().get("outer_king", {})
+        if action == "advance":
+            target = SageSystemMixin._outer_target(player)
+            if target is None:
+                return 0
+            rules = cfg.get("advancement", {})
+            base = float(rules.get("base_cost_by_target_realm", {}).get(str(target[0]), 0))
+            return round(base * float(rules.get("cost_multiplier", 2.0)) ** player.outer_king_advance_uses)
+        if action == "combat":
+            rules = cfg.get("combat_power", {})
+            return round(float(rules.get("base_cost", 600)) * (
+                1 + float(rules.get("cost_growth", 1.0)) * player.outer_king_combat_uses
+            ))
+        return round(float(cfg.get(action, {}).get("cost", 0)))
+
+    def sage_outer_king(self, game_id: str, action: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        if not sage_content_available() or player.path != "confucian":
+            raise ValueError("只有启用《圣人之道》的儒修可以行外王之策")
+        if game.pending_event or game.active_trial or not player.alive or player.imprisonment:
+            raise ValueError("当前状态无法施行外王之策")
+        if action not in {"advance", "combat", "spirit_stone", "opportunity"}:
+            raise ValueError("未知的外王之策")
+        if action == "advance":
+            reason = self._outer_advance_block_reason(game)
+            if reason:
+                raise ValueError(reason)
+        cost = self._outer_cost(action, player)
+        if cost <= 0 or player.haoran_exp < cost:
+            raise ValueError(f"浩然之气不足，需要 {cost:g} 经验")
+        before_exp = player.haoran_exp
+        before_level = haoran_level(before_exp)
+        player.haoran_exp = max(0.0, player.haoran_exp - cost)
+        self._refresh_sage_effects(game)
+        rng = decode_rng(game.seed, game.rng_state)
+        reward_text = ""
+        if action == "advance":
+            target = self._outer_target(player)
+            if target is None:
+                raise ValueError("当前已经无法继续提升修为层级")
+            old_label = stage_name(player)
+            source = player.realm_index
+            major = target[0] != source
+            player.outer_king_advance_uses += 1
+            player.joint_companion_breakthrough = None
+            player.awaiting_major_breakthrough = False
+            player.awaiting_minor_breakthrough = False
+            if major and source >= 3:
+                kind = "heavenly" if source >= 6 else "traditional"
+                self._start_breakthrough_trial(game, kind, source, target[0], old_label, major=True, rng=rng)
+                if game.active_trial:
+                    game.active_trial["outer_king"] = True
+                reward_text = f"强行越过突破概率，{REALMS[target[0]].name}劫数已经开始"
+            elif not major and source >= 6 and player.layer in {3, 6}:
+                self._start_breakthrough_trial(game, "traditional", source, source, old_label, major=False, rng=rng)
+                if game.active_trial:
+                    game.active_trial["outer_king"] = True
+                reward_text = f"强行越过突破概率，通往{REALMS[source].name}{target[1]}层的劫数已经开始"
+            elif major:
+                self._complete_major_breakthrough(game, rng, old_label)
+                reward_text = f"修为由{old_label}提升至{stage_name(player)}"
+            else:
+                self._complete_minor_breakthrough(game, rng, old_label)
+                reward_text = f"修为由{old_label}提升至{stage_name(player)}"
+        elif action == "combat":
+            rules = inner_outer_config().get("outer_king", {}).get("combat_power", {})
+            gain = expected_combat_power(player.realm_index, player.layer) * float(
+                rules.get("standard_power_ratio", 0.05)
+            )
+            player.outer_king_combat_uses += 1
+            player.outer_king_fixed_combat_power += gain
+            reward_text = f"永久固定战斗力 +{gain:.1f}"
+        elif action == "spirit_stone":
+            rules = inner_outer_config().get("outer_king", {}).get("spirit_stone", {})
+            gain = int(rules.get("gain_by_realm", {}).get(str(player.realm_index), 0))
+            add_item(player, "spirit_stone", gain)
+            reward_text = f"下品灵石 +{gain}"
+        else:
+            rules = inner_outer_config().get("outer_king", {}).get("opportunity", {})
+            gain = float(rules.get("gain_by_realm", {}).get(str(player.realm_index), 0))
+            actual = self._add_opportunity(player, gain)
+            reward_text = f"机缘 +{actual:g}"
+        after_level = haoran_level(player.haoran_exp)
+        game.history.append(HistoryRecord(
+            "SYS_SAGE_OUTER_KING", 1, player.age, "外王经世", action, "spent",
+            f"你消耗 {cost:g} 浩然经验施行外王之策：{reward_text}；"
+            f"浩然等级 Lv.{before_level} → Lv.{after_level}。",
+            {"action":action, "cost":cost, "haoran_exp":[before_exp, player.haoran_exp]},
+            ["sage", "outer_king", action, "milestone"],
+        ))
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        self.store.save(game)
+        result = self.present(game)
+        result["action_summary"] = f"{reward_text}；浩然之气剩余 {player.haoran_exp:g}。"
+        return result
+
+    def _public_inner_outer(self, game: GameState) -> dict[str, Any]:
+        player = game.player
+        cfg = inner_outer_config()
+        level = haoran_level(player.haoran_exp, cfg)
+        maximum = int(cfg.get("haoran", {}).get("max_level", 30))
+        current_floor = haoran_threshold(level, cfg)
+        next_threshold = haoran_threshold(min(maximum, level + 1), cfg)
+        manuals = []
+        classic_rows: dict[str, dict[str, Any]] = {}
+        for item in player.inventory:
+            if not item.technique_id or item.technique_level is None:
+                continue
+            technique_id = str(item.technique_id)
+            template = TECHNIQUE_CATALOG.get(technique_id)
+            origin = max(1, min(8, int(item.technique_origin_realm_index or (template.grade if template else 1))))
+            refined = max(0, int(player.refined_inheritances.get(technique_id, 0)))
+            manual_level = max(1, min(9, int(item.technique_level)))
+            gain = self._haoran_manual_gain(origin, refined, manual_level)
+            name = template.name if template else item.name.removeprefix("《").split("》", 1)[0]
+            row = {
+                "item_id":item.id, "technique_id":technique_id, "name":name,
+                "manual_level":manual_level, "quantity":item.quantity,
+                "origin_realm_index":origin, "origin_realm_name":REALMS[origin].name,
+                "refined_level":refined, "new_levels":max(0, manual_level - refined),
+                "gain":gain, "can_refine":gain > 0,
+            }
+            manuals.append(row)
+            classic_rows[technique_id] = max(
+                classic_rows.get(technique_id, row), row, key=lambda entry: entry["manual_level"],
+            )
+        for technique_id, refined in player.refined_inheritances.items():
+            if technique_id in classic_rows:
+                continue
+            template = TECHNIQUE_CATALOG.get(technique_id)
+            origin = max(1, min(8, int(template.grade if template else 1)))
+            classic_rows[technique_id] = {
+                "item_id":None, "technique_id":technique_id,
+                "name":template.name if template else technique_id,
+                "manual_level":0, "quantity":0, "origin_realm_index":origin,
+                "origin_realm_name":REALMS[origin].name, "refined_level":int(refined),
+                "new_levels":0, "gain":0, "can_refine":False,
+            }
+        before_effects = haoran_passive_effects(player.haoran_exp, cfg)
+        action_specs = {
+            "advance": ("强行提升修为层级", self._outer_advance_block_reason(game)),
+            "combat": ("固化当前标准战力的 5%", ""),
+            "spirit_stone": ("经世济用·灵石", ""),
+            "opportunity": ("经世济用·机缘", ""),
+        }
+        outer_actions = []
+        for action, (name, reason) in action_specs.items():
+            cost = self._outer_cost(action, player)
+            after_exp = max(0.0, player.haoran_exp - cost)
+            after_effects = haoran_passive_effects(after_exp, cfg)
+            if action == "advance":
+                target = self._outer_target(player)
+                reward = "飞升另循天劫" if target is None else f"直达{REALMS[target[0]].name}·{target[1]}层（劫数不免）"
+            elif action == "combat":
+                ratio = float(cfg.get("outer_king", {}).get("combat_power", {}).get("standard_power_ratio", 0.05))
+                reward = f"永久固定战斗力 +{expected_combat_power(player.realm_index, player.layer) * ratio:.1f}"
+            else:
+                gain = cfg.get("outer_king", {}).get(action, {}).get("gain_by_realm", {}).get(str(player.realm_index), 0)
+                reward = f"{'下品灵石' if action == 'spirit_stone' else '机缘'} +{gain}"
+            outer_actions.append({
+                "id":action, "name":name, "cost":cost, "reward":reward,
+                "before_exp":player.haoran_exp, "after_exp":after_exp,
+                "before_level":level, "after_level":haoran_level(after_exp, cfg),
+                "can_use":not reason and cost > 0 and player.haoran_exp >= cost,
+                "reason":reason or (f"浩然经验不足，还差 {max(0, cost - player.haoran_exp):g}" if player.haoran_exp < cost else ""),
+                "effect_changes":[
+                    f"{SAGE_EFFECT_LABELS.get(key, key)}：{value * 100:.2f}% → {after_effects.get(key, 0.0) * 100:.2f}%"
+                    for key, value in before_effects.items() if abs(value - after_effects.get(key, 0.0)) > 1e-9
+                ],
+            })
+        return {
+            "available":sage_content_available() and player.path == "confucian",
+            "exp":player.haoran_exp, "level":level, "max_level":maximum,
+            "level_floor":current_floor, "next_threshold":next_threshold,
+            "passives":before_effects, "passive_text":sage_effect_text(before_effects),
+            "manuals":sorted(manuals, key=lambda row: (-row["gain"], row["name"], row["manual_level"])),
+            "classics":sorted(classic_rows.values(), key=lambda row: (row["origin_realm_index"], row["name"])),
+            "outer_actions":outer_actions,
+            "advance_uses":player.outer_king_advance_uses,
+            "combat_uses":player.outer_king_combat_uses,
+            "fixed_combat_power":player.outer_king_fixed_combat_power,
+        }
+
     def _public_sage_system(self, game: GameState) -> dict[str, Any]:
         enabled = sage_content_available()
         if enabled:
             self._ensure_sage_state(game)
-        available = enabled and game.player.path == "confucian" and game.player.world in sage_config().get("worlds", [])
-        state = self._sage_world(game) if available else None
-        current = self._player_doctrine(game) if available else None
+        available = enabled and game.player.path == "confucian"
+        teaching_available = available and game.player.world in sage_config().get("worlds", [])
+        state = self._sage_world(game) if teaching_available else None
+        current = self._player_doctrine(game) if teaching_available else None
         cfg = sage_config()
         choice_details = public_sage_choice_details(cfg)
         sages = copy.deepcopy(cfg.get("sages", {}))
@@ -661,7 +986,8 @@ class SageSystemMixin:
                 "passive_effect_text": [text for detail in combo_details for text in detail.get("effect_text", [])],
             })
         return {
-            "installed": enabled, "available": available, "world": game.player.world,
+            "installed": enabled, "available": available, "teaching_available":teaching_available,
+            "world": game.player.world,
             "doctrines": doctrines, "membership_id": current.get("id") if current else None,
             "recruit_enabled": bool(game.sage_state.get("recruit_enabled", True)) if enabled else False,
             "combination_choices": copy.deepcopy(cfg.get("combination_choices", {})),
@@ -673,6 +999,7 @@ class SageSystemMixin:
             "last_action": copy.deepcopy(game.sage_state.get("action_result", {})) if enabled else {},
             "action_values": copy.deepcopy(cfg.get("actions", {})),
             "debate_values": copy.deepcopy(cfg.get("debate", {})),
+            "inner_outer": self._public_inner_outer(game),
             "numeric_rules": {
                 "world_pool": float(cfg.get("world_influence_pool", 100.0)),
                 "doctrine_cap": float(cfg.get("doctrine_influence_cap", 60.0)),

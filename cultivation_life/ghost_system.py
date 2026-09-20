@@ -15,7 +15,7 @@ from .possession_system import (
 )
 
 
-GHOST_DLC_NAME = "百鬼夜行:轮回往生"
+GHOST_DLC_NAME = "百鬼夜行：往生轮回"
 
 SOUL_SLOTS = {
     "胎光": ("opportunity", "机缘效率"), "爽灵": ("external_mp", "外源 MP"),

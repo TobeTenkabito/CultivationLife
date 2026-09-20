@@ -56,6 +56,9 @@ class Item:
     # first copy remains the single canonical entry in known_techniques.
     technique_id: str | None = None
     technique_level: int | None = None
+    # Stable source tier of the original classic (练气=1 … 大乘=8).
+    # This is independent from the manual's synthesised Lv.1–9 quality.
+    technique_origin_realm_index: int | None = None
     description: str = ""
     tags: list[str] = field(default_factory=list)
 
@@ -428,6 +431,12 @@ class Player:
     # simulation lives on GameState; this compact cache lets base combat and
     # breakthrough rules consume the currently active effects.
     sage_effects: dict[str, float] = field(default_factory=dict)
+    # 《圣人之道》内圣外王。等级实时由 haoran_exp 推导，不重复持久化。
+    haoran_exp: float = 0.0
+    refined_inheritances: dict[str, int] = field(default_factory=dict)
+    outer_king_advance_uses: int = 0
+    outer_king_combat_uses: int = 0
+    outer_king_fixed_combat_power: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -537,6 +546,16 @@ class Player:
             str(key): float(value) for key, value in data.get("sage_effects", {}).items()
             if isinstance(value, (int, float))
         } if isinstance(data.get("sage_effects", {}), dict) else {}
+        data["haoran_exp"] = max(0.0, float(data.get("haoran_exp", 0.0)))
+        data["refined_inheritances"] = {
+            str(technique_id): max(0, min(9, int(level)))
+            for technique_id, level in data.get("refined_inheritances", {}).items()
+        } if isinstance(data.get("refined_inheritances", {}), dict) else {}
+        data["outer_king_advance_uses"] = max(0, int(data.get("outer_king_advance_uses", 0)))
+        data["outer_king_combat_uses"] = max(0, int(data.get("outer_king_combat_uses", 0)))
+        data["outer_king_fixed_combat_power"] = max(
+            0.0, float(data.get("outer_king_fixed_combat_power", 0.0)),
+        )
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
             source: max(0.0, float(saved_qi.get(source, 0.0)))
