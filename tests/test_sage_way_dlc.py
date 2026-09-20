@@ -43,6 +43,12 @@ class SageWayDlcTests(unittest.TestCase):
         self.assertTrue(joined["effect_text"])
         self.assertIn("神识修炼收益", joined["sages"]["confucius"]["applied_effect_text"][0])
 
+    def test_breakthrough_ui_shows_sage_bonus_and_formats_control_threshold(self):
+        script = (Path(__file__).resolve().parents[1] / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("breakthrough.chance.sage_bonus", script)
+        self.assertIn("，学说 ", script)
+        self.assertIn("Number(numeric.control_lead_percent ?? 10).toFixed(1)", script)
+
     def test_shared_pool_and_individual_cap(self):
         rows = [{"id":"a", "external":60.0}, {"id":"b", "external":40.0}]
         apply_external_influence(rows, "a", 10.0, {"influence_floor":.1, "doctrine_influence_cap":60, "world_influence_pool":100})
