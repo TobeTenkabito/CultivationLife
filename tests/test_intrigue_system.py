@@ -44,6 +44,27 @@ def test_personality_authorities_and_roundtrip(intrigue_game: tuple[GameEngine, 
     assert engine._ensure_intrigue_personality(clone, clone.sects[clone.player.faction_id].npcs[0]) == personality
 
 
+def test_race_voter_list_includes_player_name_when_player_has_a_vote(
+    intrigue_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = intrigue_game
+    game = engine._load(game_id)
+    game.player.world = "spirit"
+    game.player.realm_index, game.player.layer = 8, 2
+    game.player.race = "human"
+    game.player.allegiance_race = "human"
+    engine.store.save(game)
+
+    shown = engine.get_game(game_id)
+    race = next(row for row in shown["intrigue_system"]["sections"] if row["kind"] == "race")
+    assert race["decision_authority"] is True
+    player_row = next(row for row in race["members"] if row["id"] == "player")
+    assert player_row["name"] == shown["player"]["name"]
+    assert player_row["is_player"] is True
+    assert player_row["decision_authority"] is True
+    assert player_row["position"] == "种族议事成员"
+
+
 def test_control_actions_have_consequences_and_prison_excludes_npc(intrigue_game: tuple[GameEngine, str]) -> None:
     engine, game_id = intrigue_game
     section = _sect_section(engine.get_game(game_id))

@@ -6,6 +6,7 @@
       "monster_realm": {
         "tier": 2,
         "npc_realm_cap": 8,
+        "tribulation_base_power_cap": 32000,
         "enabled": true,
         "kind": "world",
         "supports": ["events", "market", "factions", "races"],

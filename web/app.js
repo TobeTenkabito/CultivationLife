@@ -343,7 +343,8 @@ function render(data) {
   $('#age-line').textContent = (p.lifespan == null ? `${p.age} 岁 · 寿元无尽` : `${p.age} 岁 · 寿元 ${p.lifespan}`) + worldAge;
   const tribulationLine = $('#tribulation-line');
   tribulationLine.classList.toggle('hidden', data.tribulation?.next_age == null);
-  tribulationLine.textContent = data.tribulation?.next_age == null ? '' : `雷劫：${data.tribulation.years_remaining} 年后 · 已历 ${data.tribulation.count} 次 · 雷威 ${number(data.tribulation.power || 0)}`;
+  const tribulationCap = data.tribulation?.world_base_power_cap;
+  tribulationLine.textContent = data.tribulation?.next_age == null ? '' : `雷劫：${data.tribulation.years_remaining} 年后 · 已历 ${data.tribulation.count} 次 · 累积雷威 ${number(data.tribulation.power || 0)}${tribulationCap == null ? '' : ` · 本界基础上限 ${number(tribulationCap)}`}`;
   meter('opportunity', p.opportunity, p.opportunity_required);
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
   meter('hp', p.hp, p.max_hp); meter('mp', p.mp, p.max_mp);
@@ -1053,8 +1054,10 @@ function renderIntrigue(system) {
     (section.members || []).forEach(member => {
       const row = document.createElement('div'); row.className = `intrigue-member${member.imprisoned ? ' imprisoned' : ''}`;
       const info = document.createElement('span'); const name = document.createElement('b'); const detail = document.createElement('small');
-      name.textContent = `${member.name} · ${member.position}`;
-      detail.textContent = `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
+      name.textContent = `${member.name}${member.is_player ? '（你）' : ''} · ${member.position}`;
+      detail.textContent = member.is_player
+        ? `${member.realm_name} · 玩家本人 · 有票`
+        : `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
       info.append(name, detail); row.appendChild(info);
       if (section.control_authority) {
         const tools = document.createElement('div'); tools.className = 'intrigue-member-tools';

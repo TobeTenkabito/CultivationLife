@@ -1360,6 +1360,17 @@ class ContentRegistry:
             or any(profile.get("kind") != "world" for profile in profiles.values())
         ):
             raise ContentError("所有真实界面都必须具有独立的界面配置")
+        if any(
+            (
+                int(profile.get("tier", 1)) < 3
+                and float(profile.get("tribulation_base_power_cap", 0)) <= 0
+            ) or (
+                int(profile.get("tier", 1)) >= 3
+                and profile.get("tribulation_base_power_cap") is not None
+            )
+            for profile in profiles.values()
+        ):
+            raise ContentError("仙界同级以下界面必须配置正数雷劫基础威力上限，仙界同级界面不得封顶")
         qi_sources = {"spirit", "demon", "monster", "yin"}
         if any(
             set(profile.get("qi_concentrations", {})) != qi_sources
