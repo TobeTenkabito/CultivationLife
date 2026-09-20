@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from .character import IDENTITY
+from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -157,6 +158,332 @@ def _record_world_news(definitions: GameDefinitions):
     return handler
 
 
+def _append_news(
+    context: SimulationContext,
+    *,
+    world_id: str,
+    title: str,
+    summary: str,
+    tags: tuple[str, ...] = (),
+) -> None:
+    """Project a simulation fact into the controlled character's chronology."""
+    actor_id = context.state.controlled_entity_id
+    if actor_id is None or not title.strip() or not summary.strip():
+        return
+    row = {
+        "year": context.state.clock.year,
+        "world_id": world_id,
+        "title": title.strip(),
+        "summary": summary.strip(),
+        "tags": list(dict.fromkeys(map(str, tags))),
+    }
+    runtime = context.state.entities.get(actor_id, "core.action_runtime") or {}
+    if isinstance(runtime.get("active"), dict):
+        context.transient.setdefault("presentation.news", []).append(row)
+        return
+    _commit_news_rows(context, actor_id, [row])
+
+
+def _commit_news_rows(
+    context: SimulationContext, actor_id: str, rows: list[dict[str, Any]]
+) -> None:
+    if not rows:
+        return
+    feed = context.state.entities.get(actor_id, NEWS_FEED)
+    if feed is None:
+        return
+    sequence = int(feed.get("next_sequence", 1))
+    entries = list(feed.get("entries", []))
+    for raw in rows:
+        entries.append({"id": f"news:{sequence}", **dict(raw)})
+        sequence += 1
+    feed["next_sequence"] = sequence
+    feed["entries"] = entries[-200:]
+    context.state.entities.put(actor_id, NEWS_FEED, feed)
+
+
+def _flush_news_buffer(context: SimulationContext, event: EventEnvelope) -> None:
+    del event
+    actor_id = context.state.controlled_entity_id
+    if actor_id is None:
+        return
+    rows = list(context.transient.pop("presentation.news", []))
+    _commit_news_rows(context, actor_id, rows)
+
+
+def _entity_name(context: SimulationContext, entity_id: str) -> str:
+    identity = context.state.entities.get(entity_id, IDENTITY) or {}
+    return str(identity.get("name") or "无名修士")
+
+
+def _entity_world(context: SimulationContext, entity_id: str) -> str:
+    location = context.state.entities.get(entity_id, LOCATION) or {}
+    return str(location.get("world_id") or "global")
+
+
+def _scope_world(context: SimulationContext, event: EventEnvelope) -> str:
+    if event.scope.kind == "world" and event.scope.value:
+        return str(event.scope.value)
+    if event.scope.kind == "entity" and event.scope.value:
+        return _entity_world(context, str(event.scope.value))
+    if event.scope.kind == "faction" and event.scope.value:
+        profile = (
+            context.state.entities.get(str(event.scope.value), "faction.profile")
+            or context.state.entities.get(str(event.scope.value), "family.profile")
+            or {}
+        )
+        return str(profile.get("world_id") or "global")
+    return "global"
+
+
+def _realm_name(
+    context: SimulationContext, definitions: GameDefinitions, entity_id: str
+) -> str:
+    cultivation = context.state.entities.get(entity_id, CULTIVATION) or {}
+    realm_id = str(cultivation.get("realm_id", "mortal"))
+    realm = definitions.realm(realm_id)
+    layer = int(cultivation.get("layer", 1))
+    if realm.layers == 1 or realm.id == "mortal":
+        return realm.name
+    if realm.id == "qi":
+        return f"{realm.name}{layer}层"
+    return f"{realm.name}{'初期' if layer <= 3 else '中期' if layer <= 6 else '后期'}"
+
+
+def _realm_tuple_name(
+    definitions: GameDefinitions, realm_and_layer: object
+) -> str:
+    """Format the realm at the instant a batched breakthrough happened.
+
+    A long action may contain several breakthroughs for the same cultivator.
+    Reading the entity's final cultivation component would label every row as
+    the last realm reached, losing the chronology that V1 exposed.
+    """
+    if not isinstance(realm_and_layer, (list, tuple)) or len(realm_and_layer) != 2:
+        return "未知境界"
+    realm_id, raw_layer = realm_and_layer
+    realm = definitions.realm(str(realm_id))
+    layer = int(raw_layer)
+    if realm.layers == 1 or realm.id == "mortal":
+        return realm.name
+    if realm.id == "qi":
+        return f"{realm.name}{layer}层"
+    return f"{realm.name}{'初期' if layer <= 3 else '中期' if layer <= 6 else '后期'}"
+
+
+def _project_character_died(context: SimulationContext, event: EventEnvelope) -> None:
+    entity_id = str(event.payload.get("entity_id", ""))
+    if not entity_id or entity_id == context.state.controlled_entity_id:
+        return
+    name = _entity_name(context, entity_id)
+    reason = str(event.payload.get("reason") or "不幸陨落")
+    title = "天下讣闻"
+    tags = ["system", "npc", "death"]
+    faction = context.state.relations.find(
+        source_id=entity_id, kind="faction_membership", active_only=False
+    )
+    family = context.state.relations.find(
+        source_id=entity_id, kind="family_membership", active_only=False
+    )
+    social = [
+        edge for edge in context.state.relations.involving(
+            str(context.state.controlled_entity_id), active_only=False
+        )
+        if entity_id in {edge.source_id, edge.target_id}
+    ]
+    if family:
+        title = "家族讣告"
+        tags.append("family")
+    elif faction:
+        title = "宗门讣告"
+        tags.append("faction")
+    elif social:
+        title = "故人陨落"
+        tags.append("relationship")
+    _append_news(
+        context,
+        world_id=_entity_world(context, entity_id),
+        title=title,
+        summary=f"{name}{reason if reason.startswith(('因', '于', '遭')) else '因' + reason}。",
+        tags=tuple(tags),
+    )
+
+
+def _project_simulation_event(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        payload = event.payload
+        event_type = event.event_type
+        if event_type == "npc.breakthrough.batch":
+            for raw in payload.get("entries", []):
+                row = dict(raw)
+                character_id = str(row.get("character_id", ""))
+                _append_news(
+                    context,
+                    world_id=str(row.get("world_id") or _entity_world(
+                        context, character_id
+                    )),
+                    title="修士破境",
+                    summary=(
+                        f"{_entity_name(context, character_id)}突破至"
+                        f"{_realm_tuple_name(definitions, row.get('after'))}。"
+                    ),
+                    tags=("system", "npc", "breakthrough"),
+                )
+            return
+        world_id = str(payload.get("world_id") or _scope_world(context, event))
+        character_id = str(payload.get("character_id", ""))
+        name = _entity_name(context, character_id) if character_id else ""
+        title = ""
+        summary = ""
+        tags: tuple[str, ...] = ("system",)
+        if event_type in {
+            "npc.breakthrough", "faction.member.breakthrough",
+            "family.member.breakthrough",
+        }:
+            # The canonical lifecycle also emits compatibility events for the
+            # faction and family domains.  Project only its generic fact.
+            if event_type != "npc.breakthrough" and event.source == "npc_lifecycle":
+                return
+            title = "修士破境"
+            summary = f"{name}突破至{_realm_name(context, definitions, character_id)}。"
+            tags = ("system", "npc", "breakthrough")
+        elif event_type == "npc.departed":
+            destination = str(payload.get("destination_world_id", ""))
+            destination_name = definitions.worlds[destination].name
+            world_id = str(payload.get("origin_world_id") or world_id)
+            title = "飞升离界"
+            summary = f"{name}飞升{destination_name}；自此在本界再无踪迹。"
+            tags = ("system", "npc", "ascension")
+        elif event_type == "npc.tribulation.resolved":
+            survived = bool(payload.get("survived"))
+            title = "天劫异动"
+            summary = (
+                f"{name}渡过第{int(payload.get('count', 1))}次大天劫。"
+                if survived else
+                f"{name}渡第{int(payload.get('count', 1))}次大天劫失败，灰飞烟灭。"
+            )
+            tags = ("system", "npc", "tribulation")
+        elif event_type == "family.child.cultivation_started":
+            child_id = str(payload.get("child_id", ""))
+            title = "血脉问道"
+            summary = f"后代{_entity_name(context, child_id)}正式引气入体，踏入仙途。"
+            world_id = _entity_world(context, child_id)
+            tags = ("system", "family", "offspring")
+        elif event_type in {"family.member.recruited", "faction.member.recruited"}:
+            title = "新秀入门"
+            summary = f"{name or _entity_name(context, str(payload.get('source_id', '')))}加入了新的传承。"
+            tags = ("system", "recruitment")
+        elif event_type == "family.extinct":
+            family = context.state.entities.get(
+                str(payload.get("family_id", "")), "family.profile"
+            ) or {}
+            title = "家族断绝"
+            summary = f"{family.get('name', '一支修仙家族')}最后一名在册修士陨落，传承断绝。"
+            tags = ("system", "family", "extinction")
+        elif event_type == "faction.dissolved":
+            profile = context.state.entities.get(
+                str(payload.get("faction_id", "")), "faction.profile"
+            ) or {}
+            title = "山门解散"
+            summary = f"{profile.get('name', '一方宗门')}因{payload.get('reason', '变故')}而解散。"
+            tags = ("system", "faction", "extinction")
+        elif event_type == "faction.npc_founded":
+            profile = context.state.entities.get(
+                str(payload.get("faction_id", "")), "faction.profile"
+            ) or {}
+            founder = _entity_name(
+                context, str(payload.get("founder_id", ""))
+            )
+            title = "新势力崛起"
+            summary = (
+                f"{founder}建立了{profile.get('name', '新势力')}，"
+                f"一座新的"
+                f"{'修仙家族' if payload.get('kind') == 'family' else '宗门'}"
+                "进入天下势力谱。"
+            )
+            tags = ("system", "faction", "founding", "npc")
+        elif event_type == "npc.notorious.killing":
+            villain = _entity_name(
+                context, str(payload.get("villain_id", ""))
+            )
+            victim = _entity_name(
+                context, str(payload.get("victim_id", ""))
+            )
+            title = "凶名远播"
+            summary = f"臭名昭著的{villain}又造血案，{victim}遭其截杀。"
+            tags = ("system", "npc", "notorious", "death")
+        elif event_type == "war.declared":
+            title = "战端开启"
+            summary = "两方势力正式宣战，烽火已经燃起。"
+            tags = ("system", "war", "diplomacy")
+        elif event_type == "war.peace.concluded":
+            title = "战争落幕"
+            summary = f"持续的战争以“{payload.get('term', '议和')}”告终。"
+            tags = ("system", "war", "peace")
+        elif event_type == "governance.diplomacy.voted" and bool(payload.get("passed")):
+            relation = dict(payload.get("relation", {}))
+            title = "外交异动"
+            summary = f"两方势力关系转为{relation.get('status', '中立')}。"
+            tags = ("system", "diplomacy")
+        elif event_type == "governance.diplomacy.changed":
+            relation = dict(payload.get("relation", {}))
+            title = "外交异动"
+            summary = f"两方势力关系转为{relation.get('status', '中立')}。"
+            tags = ("system", "diplomacy")
+        elif event_type == "npc.duel.resolved":
+            winner = _entity_name(context, str(payload.get("winner_id", "")))
+            loser = _entity_name(context, str(payload.get("loser_id", "")))
+            title = "修士斗法"
+            summary = (
+                f"{winner}在斗法中击杀{loser}。"
+                if bool(payload.get("lethal")) else
+                f"{winner}在斗法中击败{loser}，双方各自退去。"
+            )
+            tags = ("system", "npc", "duel")
+        elif event_type == "dlc.monster.adaptation.unlocked":
+            title = "生命适应"
+            summary = f"{name or '一名妖修'}在漫长栖居中获得了新的环境适应。"
+            tags = ("system", "monster", "adaptation")
+        else:
+            return
+        _append_news(
+            context, world_id=world_id, title=title, summary=summary, tags=tags
+        )
+
+    return handler
+
+
+def _project_era_summary(context: SimulationContext, event: EventEnvelope) -> None:
+    years = int(event.payload.get("years", 0))
+    if years < 5:
+        return
+    actor_id = str(event.payload.get("actor_id", ""))
+    feed = context.state.entities.get(actor_id, NEWS_FEED)
+    if feed is None:
+        return
+    started = int(event.payload.get("started_year", context.state.clock.year - years))
+    rows = [
+        row for row in feed.get("entries", [])
+        if started < int(row.get("year", -1)) <= context.state.clock.year
+        and "era_summary" not in row.get("tags", [])
+    ]
+    distinct = list(dict.fromkeys(str(row.get("summary", "")) for row in rows if row.get("summary")))
+    if distinct:
+        shown = distinct[:12]
+        summary = "；".join(shown)
+        if len(distinct) > len(shown):
+            summary += f"；另有 {len(distinct) - len(shown)} 项人事变动记入各年档案"
+    else:
+        summary = "本期未发生足以传遍各地的突破、陨落或大事件。"
+    _append_news(
+        context,
+        world_id=_entity_world(context, actor_id),
+        title=f"{years}年纪要",
+        summary=summary,
+        tags=("system", "era_summary", "world_news"),
+    )
+
+
 def presentation_invariants(definitions: GameDefinitions):
     def validate(state: WorldState) -> list[str]:
         errors: list[str] = []
@@ -189,6 +516,40 @@ def register_presentation_domain(bus: CommandBus, definitions: GameDefinitions) 
     bus.register(SetWorldNewsDebug, _set_world_news_debug)
     bus.register(RecordWorldNews, _record_world_news(definitions))
     bus.event_bus.register("character.created", _on_character_created)
+    bus.event_bus.register("character.died", _project_character_died)
+    projector = _project_simulation_event(definitions)
+    for event_type in (
+        "npc.breakthrough",
+        "npc.breakthrough.batch",
+        "npc.departed",
+        "npc.tribulation.resolved",
+        "faction.member.breakthrough",
+        "family.member.breakthrough",
+        "family.child.cultivation_started",
+        "family.member.recruited",
+        "faction.member.recruited",
+        "family.extinct",
+        "faction.dissolved",
+        "faction.npc_founded",
+        "npc.notorious.killing",
+        "war.declared",
+        "war.peace.concluded",
+        "governance.diplomacy.voted",
+        "governance.diplomacy.changed",
+        "npc.duel.resolved",
+        "dlc.monster.adaptation.unlocked",
+    ):
+        bus.event_bus.register(event_type, projector)
+    # Scheduler events at the target year run after the final time slice.
+    # Flush once more after the action runtime closes so deaths or other facts
+    # due exactly that year are not stranded in the transient buffer.
+    bus.event_bus.register("core.action.completed", _flush_news_buffer)
+    bus.event_bus.register("core.action.completed", _project_era_summary)
+    # TimeService may emit thousands of facts during one immortal action.
+    # Commit each time slice as one component update instead of copying the
+    # bounded news feed once per fact.
+    bus.event_bus.register("core.time.advanced", _flush_news_buffer)
+    bus.event_bus.register("core.action.interrupted", _flush_news_buffer)
 
 
 def presentation_view(state: Any, entity_id: str | None = None) -> dict[str, Any]:

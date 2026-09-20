@@ -755,6 +755,11 @@ def _maybe_queue_proposal(
         for entity_id in context.state.entities.with_component(IDENTITY)
         if entity_id != actor_id
         and context.state.entities.get(entity_id, "world.npc_profile") is None
+        # Definition rosters are background population.  They became eagerly
+        # materialized during the V1 world-simulation migration and must not
+        # suddenly replace authored/relationship candidates in personal
+        # proposal events merely because their entities now exist at startup.
+        and context.state.entities.get(entity_id, "faction.npc_profile") is None
         and context.state.entities.require(entity_id, IDENTITY).get("gender") == "male"
         and bool(context.state.entities.require(entity_id, LIFE).get("alive"))
         and context.state.entities.require(entity_id, LOCATION).get("world_id") == world_id

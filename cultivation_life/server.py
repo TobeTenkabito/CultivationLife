@@ -523,6 +523,9 @@ def build_handler(
                 }
                 for key, value in engine.definitions.factions.items()
             },
+            "race_faction_presets": dict(
+                engine.definitions.systems.get("race_faction_presets", {})
+            ),
             "world_travel_rules": dict(
                 engine.definitions.systems.get("world_travel", {})
             ),
