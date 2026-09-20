@@ -130,20 +130,15 @@ def combat_snapshot(
     condition = state.entities.require(entity_id, CONDITION)
     realm = definitions.realm(str(cultivation["realm_id"]))
     layer = int(cultivation["layer"])
-    progression = 1.0 + 0.12 * (layer - 1)
+    progression = 1.0 + 0.08 * (layer - 1)
     technique_bonus = hp_bonus = mp_bonus = 0.0
-    main_id = practice.get("main_technique_id")
-    if main_id:
-        technique = definitions.techniques[str(main_id)]
-        technique_bonus += technique.combat_bonus
-        hp_bonus += technique.hp_bonus
-        mp_bonus += technique.mp_bonus
     support_id = practice.get("support_technique_id")
     if support_id and str(support_id) in definitions.techniques:
         support = definitions.techniques[str(support_id)]
         hp_bonus += support.hp_bonus * support.scale
         mp_bonus += support.mp_bonus * support.scale
     qi_experience = dict(cultivation.get("qi_experience", {}))
+    body = state.entities.get(entity_id, "cultivation.body") or {}
     from .cultivation import _qi_level
 
     for combat_id in map(str, practice.get("combat_technique_ids", [])):
@@ -161,7 +156,6 @@ def combat_snapshot(
             and not bool(cultivation.get("immortal_power_converted"))
         ):
             continue
-        body = state.entities.get(entity_id, "cultivation.body") or {}
         if int(body.get("layer", 0)) < int(technique.required_body_training):
             continue
         technique_bonus += technique.combat_bonus * technique.scale
@@ -173,26 +167,66 @@ def combat_snapshot(
     puppet_contribution = demonic_combat_contributions(
         state, definitions, entity_id
     )
+    hp_ratio = max(0.0, min(1.0, float(condition["hp_ratio"])))
+    mp_ratio = max(0.0, min(1.0, float(condition["mp_ratio"])))
+    status = 0.35 + 0.40 * hp_ratio + 0.25 * mp_ratio
+    opportunity_required = round(
+        realm.opportunity_base * (1 + 0.12 * (layer - 1))
+    )
+    opportunity_progress = min(
+        1.5,
+        float(cultivation.get("opportunity", 0))
+        / max(1.0, float(opportunity_required)),
+    )
     power = max(
         1.0,
-        realm.base_power * progression + technique_bonus + item_combat + faction_combat
+        realm.base_power * progression * status
+        + realm.base_power * opportunity_progress * 0.15
+        + technique_bonus + item_combat + faction_combat
+        + int(body.get("layer", 0)) * 8
         + float(artifact["combat_power"])
         + float(puppet_contribution["intrinsic"]),
     )
-    max_hp = (
-        max(10.0, 100.0 + math.sqrt(power) * 18.0)
-        * max(0.1, 1 + hp_bonus + item_hp)
-        + faction_hp
+    hp_reference = float(
+        100 + int(math.sqrt(realm.base_power) * 16) + layer * 8
+        + int(body.get("layer", 0)) * 12
         + float(cultivation.get("intrinsic_hp_bonus", 0))
-        + float(artifact["max_hp"])
     )
-    max_mp = (
-        max(10.0, 80.0 + math.sqrt(power) * 15.0)
-        * max(0.1, 1 + mp_bonus + item_mp)
-        + faction_mp
+    mp_reference = float(
+        40 + int(math.sqrt(realm.base_power) * 20) + layer * 11
         + float(cultivation.get("intrinsic_mp_bonus", 0))
-        + float(artifact["max_mp"])
     )
+    intrinsic_hp = hp_reference
+    intrinsic_mp = mp_reference
+    hp_carry = mp_carry = 1.0
+    ghost_details: dict[str, Any] | None = None
+    if state.entities.get(entity_id, "dlc.ghost.soul") is not None:
+        from .ghost import ghost_combat_modifiers
+
+        ghost_details = ghost_combat_modifiers(
+            state, definitions, entity_id
+        )
+        soul = state.entities.require(entity_id, "dlc.ghost.soul")
+        hp_reference = max(1.0, float(soul.get(
+            "intrinsic_hp_reference", hp_reference
+        )))
+        mp_reference = max(1.0, float(soul.get(
+            "intrinsic_mp_reference", mp_reference
+        )))
+        intrinsic_hp = max(0.0, float(soul.get("intrinsic_hp", hp_reference)))
+        intrinsic_mp = max(0.0, float(soul.get("intrinsic_mp", mp_reference)))
+        hp_carry = float(ghost_details["hp_multiplier"])
+        mp_carry = float(ghost_details["mp_multiplier"])
+    max_hp = intrinsic_hp + (
+        hp_reference * hp_bonus + item_hp + faction_hp
+        + float(artifact["max_hp"])
+        + float((ghost_details or {}).get("external_hp", 0))
+    ) * hp_carry
+    max_mp = intrinsic_mp + (
+        mp_reference * mp_bonus + item_mp + faction_mp
+        + float(artifact["max_mp"])
+        + float((ghost_details or {}).get("external_mp", 0))
+    ) * mp_carry
     stats = {
         "might": power * 1.02,
         "guard": power * 0.98,
@@ -215,19 +249,7 @@ def combat_snapshot(
             stats[stat] *= float(factor)
     for stat, factor in dict(artifact["player_multipliers"]).items():
         stats[stat] *= float(factor)
-    ghost_details: dict[str, Any] | None = None
-    if state.entities.get(entity_id, "dlc.ghost.soul") is not None:
-        from .ghost import ghost_combat_modifiers
-
-        ghost_details = ghost_combat_modifiers(
-            state, definitions, entity_id
-        )
-        max_hp = (
-            max_hp + float(ghost_details["external_hp"])
-        ) * float(ghost_details["hp_multiplier"])
-        max_mp = (
-            max_mp + float(ghost_details["external_mp"])
-        ) * float(ghost_details["mp_multiplier"])
+    if ghost_details is not None:
         for stat, factor in dict(ghost_details["stats"]).items():
             stats[stat] *= float(factor)
     monster_details: dict[str, Any] | None = None
@@ -246,9 +268,9 @@ def combat_snapshot(
         "realm_index": definitions.realm_index(realm.id),
         "layer": layer,
         "path": cultivation["path"],
-        "power": round(power, 4),
-        "max_hp": round(max_hp, 4),
-        "max_mp": round(max_mp, 4),
+        "power": round(power, 1),
+        "max_hp": round(max_hp),
+        "max_mp": round(max_mp),
         "hp_ratio": float(condition["hp_ratio"]),
         "mp_ratio": float(condition["mp_ratio"]),
         "stats": {key: round(value, 4) for key, value in stats.items()},

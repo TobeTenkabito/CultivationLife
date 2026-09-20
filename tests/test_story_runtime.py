@@ -172,7 +172,7 @@ class V2StoryRuntimeTests(unittest.TestCase):
         inventory["items"] = {
             **dict(inventory.get("items", {})),
             "spirit_node_info": 1,
-            "broken_god": 1,
+            "broken_god": 5,
         }
         state.entities.put(actor_id, "economy.inventory", inventory)
         captor_id = next(
@@ -250,7 +250,7 @@ class V2StoryRuntimeTests(unittest.TestCase):
         inventory["items"] = {
             **dict(inventory.get("items", {})),
             "spirit_node_info": 1,
-            "broken_god": 1,
+            "broken_god": 5,
         }
         state.entities.put(actor_id, "economy.inventory", inventory)
         self.engine.store.save(

@@ -721,18 +721,41 @@ def game_view(data: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
         return str(value.get("name", race_id) if isinstance(value, dict) else value)
 
     story_attributes = dict(dict(data.get("story", {})).get("attributes", {}))
+    story_flags = list(dict(data.get("story", {})).get("flags", []))
     spirit_crossing = dict(dict(data.get("story", {})).get("spirit_crossing", {}))
     karma_factor = float(cultivation.get("karma_factor", 1))
     hp_max = float(combat.get("max_hp", 1))
     mp_max = float(combat.get("max_mp", 1))
     transformations = dict(raw_player.get("transformations", {}))
     clock_year = dict(data.get("clock", {})).get("year", raw_player.get("age", 0))
+    fame = float(story_attributes.get("fame", 0))
+    fame_rules = dict(config.get("fame_rules", {}))
+    conflict_rules = dict(config.get("faction_conflict_rules", {}))
+    coalition_threshold = float(conflict_rules.get(
+        "demonic_coalition_fame_threshold"
+        if cultivation.get("path") == "demonic"
+        else "coalition_fame_threshold",
+        1000 if cultivation.get("path") == "demonic" else 400,
+    ))
+    world_id = str(world.get("world_id", "human"))
+    fame_assessment = (
+        "威压全界，本界围杀势力已经低头"
+        if f"world_coalition_subdued:{world_id}" in story_flags else
+        "凶名震世，各方势力正在酝酿包围网"
+        if fame > coalition_threshold else
+        "威名过盛，修仙界已经明显警觉"
+        if fame >= float(fame_rules.get("alarmed_threshold", 100)) else
+        "声名足以使同道敬重"
+        if fame >= float(fame_rules.get("respected_threshold", 35)) else
+        "尚未在修仙界留下显赫名声"
+    )
     player = {
         **raw_player,
         **cultivation,
         "world": world.get("world_id"), "world_name": world.get("world_name"),
-        "location": world.get("location_id"), "location_name": world.get("location_name"),
-        "world_age": clock_year,
+        "location": world.get("location_id"), "location_id": world.get("location_id"),
+        "location_name": world.get("location_name"),
+        "world_age": int(raw_player.get("age", clock_year)),
         "opportunity": float(cultivation.get("opportunity", 0)),
         "opportunity_required": float(cultivation.get("opportunity_required", 1)),
         "spirit_root_display": cultivation.get("spirit_root_name"),
@@ -758,7 +781,11 @@ def game_view(data: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
         )),
         "karma_factor": karma_factor,
         "heart_demon": float(cultivation.get("heart_demon", 0)),
-        "fame": float(story_attributes.get("fame", 0)),
+        "fame": fame,
+        "fame_assessment": fame_assessment,
+        "sha_qi": float(story_attributes.get("sha_qi", 0)),
+        "story_flags": story_flags,
+        "gender_name": "女" if raw_player.get("gender") == "female" else "男",
         "spirit_stones": float(dict(data.get("market", {})).get("spirit_stones", 0)),
         "technique": cultivation.get("main_technique"),
         "technique_slots": {
@@ -784,6 +811,9 @@ def game_view(data: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
         "qi_gain_efficiencies": dict(cultivation.get("qi_gain_efficiencies", {})),
         "qi_environment": cultivation.get("qi_environment") or {"display": [], "main_multiplier": None},
         "body_training": int(body.get("layer", 0)),
+        "divine_sense_rank": int(sense.get("rank", 0)),
+        "divine_sense_experience": float(sense.get("experience", 0)),
+        "divine_sense_technique": technique(sense.get("technique_id")),
         "divine_sense": {
             "level": int(sense.get("rank", 0)),
             "level_experience": float(sense.get("experience", 0)),
@@ -806,11 +836,16 @@ def game_view(data: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             or raw_player.get("race", "human")
         )),
         "master": master, "disciples": disciples,
+        "next_companion_conception_bonus": float(
+            dict(data.get("family", {})).get("pending_conception_bonus", 0)
+        ),
         "disciple_requests": [
             {**_relation(row), "id": row.get("request_id")}
             for row in data.get("disciple_requests", [])
         ],
     }
+    if not bool(data.get("debug_world_news")):
+        player.pop("heart_demon", None)
     destination_names = {
         str(row.get("id")): row.get("name") for row in world.get("destinations", [])
     }
@@ -1140,7 +1175,15 @@ def game_view(data: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
             str(raw_player.get("id", "")),
         ),
         "history": [
-            {**record, "age": record.get("age", record.get("year", clock_year))}
+            {
+                **record,
+                "age": record.get(
+                    "age",
+                    int(raw_player.get("age", clock_year))
+                    - int(clock_year)
+                    + int(record.get("year", clock_year)),
+                ),
+            }
             for record in history
         ],
         "world_npcs": characters,

@@ -188,6 +188,141 @@ class V2CoreDomainTests(unittest.TestCase):
             120,
         )
 
+    def test_every_enabled_quick_start_matches_the_v1_preset_contract(self):
+        qi_levels = {3: 5, 4: 8, 5: 12, 6: 17, 7: 23, 8: 30, 9: 30}
+        v1_combat_totals = {
+            "core": (664, 733, 2713.4),
+            "ghost_core": (892, 956, 2300.2),
+            "demonic_core": (400703, 500691, 3865.1),
+            "nascent": (2005, 2360, 19732.8),
+            "spirit": (4790, 5868, 129532.0),
+            "void": (24890, 29548, 731282.0),
+            "integration": (115557, 137282, 4887347.0),
+            "mahayana": (577761, 701874, 32565422.0),
+            "true_immortal": (1250683, 2778942, 420400022.0),
+        }
+        qi_sources = {
+            "dao": "spirit", "demonic": "demon",
+            "monster": "monster", "ghost": "yin",
+        }
+        presets = [
+            dict(row)
+            for row in self.engine.definitions.systems["quick_start_presets"]
+            if bool(row.get("enabled", True))
+        ]
+        self.assertEqual(len(presets), 9)
+
+        for index, preset in enumerate(presets):
+            with self.subTest(preset=preset["id"]):
+                game = self.engine.create_game(
+                    "", seed=10_000 + index, preset_id=str(preset["id"])
+                )
+                player = game["player"]
+                cultivation = player["cultivation"]
+                realm = self.engine.definitions.realms[int(preset["realm_index"])]
+
+                self.assertEqual(player["name"], "无名散修")
+                self.assertEqual(player["age"], int(preset["age"]))
+                self.assertEqual(player["race"], preset["race"])
+                self.assertEqual(game["world"]["world_id"], preset["world"])
+                self.assertEqual(cultivation["realm_id"], realm.id)
+                self.assertEqual(cultivation["layer"], int(preset["layer"]))
+                self.assertEqual(cultivation["path"], preset["path"])
+                self.assertEqual(cultivation["spirit_root"], preset["spirit_root"])
+                self.assertEqual(
+                    cultivation["opportunity"],
+                    round(
+                        round(
+                            realm.opportunity_base
+                            * (1 + 0.12 * (int(preset["layer"]) - 1))
+                        ) * float(preset.get("opportunity_fraction", 0.0)),
+                        1,
+                    ),
+                )
+                self.assertEqual(
+                    cultivation["main_technique"]["id"],
+                    preset["main_technique"],
+                )
+                self.assertEqual(
+                    cultivation["support_technique"]["id"],
+                    preset["support_technique"],
+                )
+                self.assertEqual(
+                    [row["id"] for row in cultivation["combat_techniques"]],
+                    list(preset.get("combat_techniques", [])),
+                )
+                known_ids = {
+                    row["id"] for row in cultivation["known_techniques"]
+                }
+                self.assertTrue({
+                    preset["main_technique"], preset["support_technique"],
+                    *preset.get("combat_techniques", []),
+                }.issubset(known_ids))
+                if preset["path"] == "demonic":
+                    self.assertTrue({
+                        "TECH_DEMON_BREATHING", "TECH_BLOOD_SOUL_SENSE",
+                    }.issubset(known_ids))
+                if preset["path"] == "ghost":
+                    self.assertTrue({
+                        "TECH_GHOST_BREATHING", "TECH_SOUL_ECHO_SENSE",
+                    }.issubset(known_ids))
+                mastery = {
+                    row["source"]: row for row in cultivation["qi_mastery"]
+                }
+                source = qi_sources[str(preset["path"])]
+                self.assertEqual(
+                    mastery[source]["level"], qi_levels[int(preset["realm_index"])]
+                )
+                self.assertEqual(
+                    cultivation["immortal_power_converted"],
+                    bool(preset.get("immortal_power_converted", False)),
+                )
+                self.assertEqual(
+                    cultivation["immortal_conversion_stage"],
+                    5 if preset.get("immortal_power_converted", False) else 0,
+                )
+                snapshot = game["combat"]["snapshot"]
+                expected_hp, expected_mp, expected_power = v1_combat_totals[
+                    str(preset["id"])
+                ]
+                self.assertEqual(snapshot["max_hp"], expected_hp)
+                self.assertEqual(snapshot["max_mp"], expected_mp)
+                self.assertEqual(snapshot["power"], expected_power)
+
+                attributes = game["story"]["attributes"]
+                self.assertEqual(attributes["karma"], float(preset.get("karma", 0)))
+                self.assertEqual(attributes["fame"], float(preset.get("fame", 0)))
+                self.assertEqual(attributes["sha_qi"], float(preset.get("sha_qi", 0)))
+                self.assertEqual(
+                    game["story"]["flags"], list(preset.get("story_flags", []))
+                )
+                inventory = {row["id"]: row["quantity"] for row in game["inventory"]}
+                expected_items = {
+                    str(row["id"]): int(row.get("quantity", 1))
+                    for row in preset.get("inventory", [])
+                }
+                expected_items.setdefault("spirit_sword", 1)
+                self.assertEqual(inventory, expected_items)
+
+                birth = next(
+                    row for row in game["story"]["history"]
+                    if row["event_id"] == "SYS_BIRTH"
+                )
+                self.assertEqual(birth["age"], int(preset["age"]))
+                if int(preset["realm_index"]) in {6, 7, 8}:
+                    self.assertEqual(
+                        game["tribulation"]["next_age"], int(preset["age"]) + 3000
+                    )
+                if preset["world"] == "celestial":
+                    self.assertTrue(game["heavenly_court"]["visible"])
+                    self.assertTrue(game["heavenly_court"]["initialized"])
+
+    def test_blank_standard_name_and_long_names_follow_v1_creation_rules(self):
+        unnamed = self.engine.create_game("", seed=20_001)
+        self.assertEqual(unnamed["player"]["name"], "无名散修")
+        long_name = self.engine.create_game("甲" * 30, seed=20_002)
+        self.assertEqual(long_name["player"]["name"], "甲" * 16)
+
     def test_technique_affinity_is_checked_on_learning_and_equipping(self):
         game = self.engine.create_game("木心", seed=303, spirit_root="supreme_wood")
         actor_id = game["player"]["id"]
@@ -421,12 +556,13 @@ class V2CoreDomainTests(unittest.TestCase):
             rewarded["combat"]["snapshot"]["power"], before_power + 3 * elapsed
         )
         self._resolve_pending(game["id"])
+        before_leave = self.engine.get_game(game["id"])["combat"]["snapshot"]["power"]
         left = self.engine.execute(
             game["id"], LeaveFaction(character_id=actor_id)
         ).game
         self.assertIsNone(left["faction"])
         self.assertEqual(
-            left["combat"]["snapshot"]["power"], before_power + 3 * elapsed
+            left["combat"]["snapshot"]["power"], before_leave
         )
 
 

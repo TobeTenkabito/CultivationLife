@@ -95,6 +95,43 @@ class V1FacadeContractTests(unittest.TestCase):
                 self.assertEqual(view["seed"], 1000 + index)
                 self._assert_no_non_finite(view)
 
+    def test_quick_start_attributes_and_debug_only_fields_reach_v1_ui(self) -> None:
+        canonical = self.engine.create_game(
+            "", seed=1010, preset_id="true_immortal"
+        )
+        config = {
+            "fame_rules": {"respected_threshold": 35, "alarmed_threshold": 100},
+            "faction_conflict_rules": {
+                "coalition_fame_threshold": 400,
+                "demonic_coalition_fame_threshold": 1000,
+            },
+        }
+        view = game_view(canonical, config)
+        player = view["player"]
+        self.assertEqual(player["name"], "无名散修")
+        self.assertEqual(player["sha_qi"], 120.0)
+        self.assertEqual(player["fame"], 0.0)
+        self.assertEqual(player["gender_name"], "男")
+        self.assertEqual(player["location_id"], canonical["world"]["location_id"])
+        self.assertEqual(player["divine_sense_rank"], 0)
+        self.assertNotIn("heart_demon", player)
+        self.assertEqual(player["world_age"], 68000)
+        self.assertEqual(view["history"][0]["age"], 68000)
+        self.assertEqual(
+            player["next_companion_conception_bonus"],
+            canonical["family"]["pending_conception_bonus"],
+        )
+
+        debug = self.engine.set_world_news_debug(canonical["id"], True).game
+        self.assertEqual(game_view(debug, config)["player"]["heart_demon"], 0.0)
+
+        advanced = self.engine.perform_action(canonical["id"], "rest", 1).game
+        advanced_view = game_view(advanced, config)
+        self.assertEqual(advanced_view["player"]["world_age"], 68500)
+        self.assertTrue(all(
+            row["age"] >= 68000 for row in advanced_view["history"]
+        ))
+
     def test_party_crossing_and_intrigue_controls_use_v1_field_contracts(self) -> None:
         created = self.engine.create_game("门面联调", seed=1009)
         game_id = str(created["id"])

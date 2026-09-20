@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -47,12 +48,17 @@ def _loaded(definitions: GameDefinitions, package_id: str) -> bool:
     )
 
 
-def _new_ghost_state(realm_id: str, layer: int) -> dict[str, Any]:
+def _new_ghost_state(
+    definitions: GameDefinitions, realm_id: str, layer: int,
+) -> dict[str, Any]:
+    realm = definitions.realm(realm_id)
+    intrinsic_hp = float(100 + int(math.sqrt(realm.base_power) * 16) + layer * 8)
+    intrinsic_mp = float(40 + int(math.sqrt(realm.base_power) * 20) + layer * 11)
     return {
-        "intrinsic_hp": 100.0,
-        "intrinsic_mp": 100.0,
-        "intrinsic_hp_reference": 100.0,
-        "intrinsic_mp_reference": 100.0,
+        "intrinsic_hp": intrinsic_hp,
+        "intrinsic_mp": intrinsic_mp,
+        "intrinsic_hp_reference": intrinsic_hp,
+        "intrinsic_mp_reference": intrinsic_mp,
         "erosion_rate_pp": 0.0,
         "erosion_time_progress": 0.0,
         "erosion_thresholds_seen": [],
@@ -109,7 +115,8 @@ def reconcile_extension_state(state: WorldState, definitions: GameDefinitions) -
         path = str(cultivation.get("path", ""))
         if path == "ghost" and _loaded(definitions, GHOST_DLC):
             defaults = _new_ghost_state(
-                str(cultivation["realm_id"]), int(cultivation["layer"])
+                definitions, str(cultivation["realm_id"]),
+                int(cultivation["layer"])
             )
             ghost = state.entities.get(entity_id, GHOST_SOUL)
             if ghost is None:
@@ -139,7 +146,8 @@ def _on_character_created(definitions: GameDefinitions):
         path = str(event.payload["path"])
         if path == "ghost" and _loaded(definitions, GHOST_DLC):
             context.state.entities.put(entity_id, GHOST_SOUL, _new_ghost_state(
-                str(event.payload["realm_id"]), int(event.payload["layer"])
+                definitions, str(event.payload["realm_id"]),
+                int(event.payload["layer"])
             ))
         if path == "monster" and _loaded(definitions, MONSTER_DLC):
             context.state.entities.put(entity_id, MONSTER_BLOODLINE, _new_monster_state())

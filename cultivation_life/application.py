@@ -9,7 +9,6 @@ from typing import Any
 from .domain.character import (
     IDENTITY,
     LIFE,
-    LIFESPAN_DUE,
     WORLD_NPC_PROFILE,
     BootstrapGame,
     EnsureWorldCharacters,
@@ -44,6 +43,7 @@ from .domain.cultivation import (
     breakthrough_view,
     cultivation_invariants,
     cultivation_view,
+    _qi_threshold,
     register_cultivation_domain,
 )
 from .domain.combat import (
@@ -532,14 +532,16 @@ class GameEngine:
             ), None)
             if preset is None:
                 raise ValueError("未知或未开放的快速开始预设")
-            name = name.strip() or str(preset["name"])
+            name = name.strip()[:16] or "无名散修"
             starting_age = int(preset.get("age", starting_age))
             race = str(preset.get("race", race))
             spirit_root = str(preset.get("spirit_root", spirit_root))
             path = str(preset.get("path", path))
             start_world = str(preset.get("world", start_world))
-        elif start_world not in self.definitions.start_worlds.get(path, ()):
-            raise ValueError("该修行道统无法从所选界面开局")
+        else:
+            name = name.strip()[:16] or "无名散修"
+            if start_world not in self.definitions.start_worlds.get(path, ()):
+                raise ValueError("该修行道统无法从所选界面开局")
         if path == "monster" and preset is None:
             race = "monster"
         now = _now_iso()
@@ -552,6 +554,7 @@ class GameEngine:
             spirit_root=spirit_root,
             path=path,
             start_world=start_world,
+            preset_id=preset_id,
         ))
         if path == "monster" and monster_species_id is not None:
             species_id = str(monster_species_id)
@@ -573,12 +576,46 @@ class GameEngine:
                 "layer": layer,
                 "additional_roots": list(map(str, preset.get("additional_roots", []))),
                 "opportunity": round(
-                    realm.opportunity_base * (1 + 0.12 * (layer - 1))
+                    round(realm.opportunity_base * (1 + 0.12 * (layer - 1)))
                     * float(preset.get("opportunity_fraction", 0.0)),
-                    4,
+                    1,
                 ),
                 "bottleneck": None,
             })
+            conversion_complete = bool(
+                preset.get("immortal_power_converted", False)
+            )
+            cultivation.update({
+                "immortal_power_converted": conversion_complete,
+                "immortal_conversion_stage": 5 if conversion_complete else 0,
+                "immortal_conversion_last_year": (
+                    state.clock.year
+                    if start_world == "celestial" else None
+                ),
+                "immortal_conversion_checked_units": 0,
+            })
+            starting_qi_level = {
+                3: 5, 4: 8, 5: 12, 6: 17, 7: 23, 8: 30, 9: 30,
+            }.get(int(preset["realm_index"]), 0)
+            starting_source = {
+                "demonic": "demon", "monster": "monster", "ghost": "yin",
+            }.get(path, "spirit")
+            qi_experience = dict(cultivation.get("qi_experience", {}))
+            qi_experience[starting_source] = _qi_threshold(
+                self.definitions, starting_qi_level
+            )
+            cultivation["qi_experience"] = qi_experience
+            if int(preset["realm_index"]) >= 6:
+                base_elements = set(
+                    self.definitions.roots[spirit_root].elements
+                )
+                additional = list(map(
+                    str, cultivation.get("additional_roots", [])
+                ))
+                for affinity in ("metal", "wood", "water", "fire", "earth"):
+                    if affinity not in base_elements and affinity not in additional:
+                        additional.append(affinity)
+                cultivation["additional_roots"] = additional
             state.entities.put(actor_id, CULTIVATION, cultivation)
 
             practice = state.entities.require(actor_id, PRACTICE)
@@ -586,6 +623,7 @@ class GameEngine:
             support_id = str(preset.get("support_technique", "")) or None
             combat_ids = list(map(str, preset.get("combat_techniques", [])))
             known = list(dict.fromkeys(filter(None, [
+                *map(str, practice.get("known_techniques", [])),
                 main_id, support_id, *combat_ids,
             ])))
             practice.update({
@@ -610,34 +648,47 @@ class GameEngine:
                 for row in preset.get("inventory", [])
                 if str(row.get("id", "")) in self.definitions.items
             }
+            inventory["items"].setdefault("spirit_sword", 1)
             inventory["reserved"] = {}
             state.entities.put(actor_id, INVENTORY, inventory)
 
-            life = state.entities.require(actor_id, LIFE)
-            if path == "ghost" or realm.lifespan is None:
-                life["lifespan"] = None
-            else:
-                lifespan = int(realm.lifespan[1])
-                if path == "monster":
-                    lifespan *= 3
-                life["lifespan"] = max(starting_age + 1, lifespan)
-            state.entities.put(actor_id, LIFE, life)
-            state.scheduler.cancel(lambda scheduled: (
-                scheduled.event_type == LIFESPAN_DUE
-                and str(scheduled.payload.get("entity_id", "")) == actor_id
-            ))
-            if life["lifespan"] is not None:
-                state.scheduler.schedule(
-                    due_year=int(life["birth_year"]) + int(life["lifespan"]),
-                    event_type=LIFESPAN_DUE,
-                    source="character",
-                    scope=EventScope.entity(actor_id),
-                    payload={"entity_id": actor_id},
-                )
             ghost_soul = state.entities.get(actor_id, "dlc.ghost.soul")
             if ghost_soul is not None:
                 ghost_soul["historical_peak"] = {"realm_id": realm.id, "layer": layer}
                 state.entities.put(actor_id, "dlc.ghost.soul", ghost_soul)
+        actor_id = str(state.controlled_entity_id)
+        story = state.entities.require(actor_id, STORY_STATE)
+        history = list(story.get("history", []))
+        cultivation = state.entities.require(actor_id, CULTIVATION)
+        realm_display = cultivation_view(
+            state, self.definitions, actor_id
+        )["realm_name"]
+        root = self.definitions.roots[str(cultivation["spirit_root"])]
+        world_name = self.definitions.worlds[
+            str(state.entities.require(actor_id, LOCATION)["world_id"])
+        ].name
+        history.append({
+            "event_id": "SYS_BIRTH",
+            "version": 1,
+            "year": state.clock.year,
+            "age": starting_age,
+            "title": "问道之始",
+            "choice_id": None,
+            "result": "created",
+            "summary": (
+                f"{state.entities.require(actor_id, IDENTITY)['name']}"
+                f"以快速开局承接既有因果，当前为{realm_display}，"
+                f"身具{root.name}，已配置默认功法、属性与行囊。"
+                if preset is not None else
+                f"{state.entities.require(actor_id, IDENTITY)['name']}"
+                f"以{'女' if gender == 'female' else '男'}身生于{world_name}，"
+                f"身具{root.name}，心向{self.definitions.paths[path]}，"
+                "但尚未获得任何功法。"
+            ),
+            "tags": ["system", "milestone"],
+        })
+        story["history"] = history
+        state.entities.put(actor_id, STORY_STATE, story)
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)

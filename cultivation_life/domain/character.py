@@ -24,6 +24,7 @@ class BootstrapGame:
     spirit_root: str = "supreme_wood"
     path: str = "dao"
     start_world: str = "human"
+    preset_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -263,6 +264,21 @@ def _bootstrap_handler(definitions: GameDefinitions):
             raise TypeError("命令类型错误")
         if context.state.controlled_entity_id is not None:
             raise ValueError("游戏已经初始化")
+        preset: dict[str, Any] | None = None
+        creation_realm_id = "mortal"
+        creation_layer = 1
+        if command.preset_id:
+            preset = next((
+                dict(row)
+                for row in definitions.systems.get("quick_start_presets", [])
+                if str(row.get("id")) == command.preset_id
+                and bool(row.get("enabled", True))
+            ), None)
+            if preset is not None:
+                creation_realm_id = definitions.realms[
+                    int(preset["realm_index"])
+                ].id
+                creation_layer = int(preset.get("layer", 1))
         clean_name = _validate_character_spec(
             definitions,
             name=command.name,
@@ -270,13 +286,22 @@ def _bootstrap_handler(definitions: GameDefinitions):
             gender=command.gender,
             spirit_root=command.spirit_root,
             path=command.path,
-            realm_id="mortal",
-            layer=1,
+            realm_id=creation_realm_id,
+            layer=creation_layer,
             world_id=command.start_world,
         )
-        if command.start_world not in definitions.start_worlds.get(command.path, ("human",)):
+        if command.preset_id:
+            if (
+                preset is None
+                or str(preset.get("path")) != command.path
+                or str(preset.get("world")) != command.start_world
+            ):
+                raise ValueError("快速开局预设与出生世界不匹配")
+        elif command.start_world not in definitions.start_worlds.get(
+            command.path, ("human",)
+        ):
             raise ValueError("该修行道路不能从所选世界开局")
-        span = definitions.realms[0].lifespan
+        span = definitions.realm(creation_realm_id).lifespan
         lifespan = None if command.path == "ghost" or span is None else context.rng.randint(*span)
         if command.path == "monster" and lifespan is not None:
             lifespan *= 3
@@ -289,8 +314,8 @@ def _bootstrap_handler(definitions: GameDefinitions):
             race=command.race,
             spirit_root=command.spirit_root,
             path=command.path,
-            realm_id="mortal",
-            layer=1,
+            realm_id=creation_realm_id,
+            layer=creation_layer,
             world_id=command.start_world,
             lifespan=lifespan,
             controlled=True,

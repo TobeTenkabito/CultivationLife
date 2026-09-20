@@ -249,6 +249,16 @@ class V2AscensionTrialTests(unittest.TestCase):
     def _complete(self, engine, game_id: str, choices: tuple[str, ...]):
         result = None
         for choice in choices:
+            # V1 permits recovery supplies between trial stages.  The legacy
+            # test fixture restored both resources before each choice; retain
+            # that setup instead of relying on an accidentally inflated V2
+            # HP/MP formula to survive the full chain without recovery.
+            state = engine.store.load(game_id)
+            actor_id = str(state.controlled_entity_id)
+            condition = state.entities.require(actor_id, CONDITION)
+            condition.update(hp_ratio=1.0, mp_ratio=1.0)
+            state.entities.put(actor_id, CONDITION, condition)
+            self._save(engine, game_id, state)
             result = engine.choose(game_id, choice)
         return result
 
