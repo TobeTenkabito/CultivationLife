@@ -97,9 +97,11 @@ def main() -> None:
                 assert "解锁条件：取得沧海玄鼎" in page.locator(".achievement-row").first.text_content()
                 page.locator("#achievement-close").click()
                 page.locator("#new-game-form").wait_for(state="visible")
-                assert page.locator(".quick-start-button").count() >= 9
-                assert page.locator(".quick-start-button:not([disabled])").count() >= 9
+                assert page.locator(".quick-start-button").count() >= 11
+                assert page.locator(".quick-start-button:not([disabled])").count() >= 11
                 assert page.locator(".quick-start-button[disabled]").count() == 0
+                assert page.locator(".quick-start-group").count() >= 3
+                assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_core']").text_content()
                 page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 sage_dock = page.locator("[data-panel-target='sage']")
@@ -114,6 +116,15 @@ def main() -> None:
                 assert page.locator("#sage-worship-list .sage-worship-card").first.evaluate(
                     "node => getComputedStyle(node).backgroundColor !== 'rgb(255, 255, 255)'"
                 )
+                assert page.locator("#sage-doctrine-list .sage-member-row").count() >= 7
+                page.locator("#sage-doctrine-list .sage-doctrine").first.locator(":scope > button").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#sage-doctrine-list .sage-member-row.player").count() == 1
+                weak_debate = page.locator("#sage-doctrine-list .sage-member-row", has_text="许问经").locator(".sage-debate-button")
+                assert weak_debate.is_enabled()
+                weak_debate.click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#sage-doctrine-list .sage-member-row", has_text="许问经").locator(".sage-debate-button").is_disabled()
                 page.locator("#sage-toggle").click()
                 page.locator("#new-game-button").click()
                 page.locator("#path-select").select_option("monster")

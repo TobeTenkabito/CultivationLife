@@ -1,6 +1,26 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id": "monster_core",
+        "name": "妖修·血丹初期",
+        "description": "妖修 DLC 开局：生成本源血脉，配置妖丹烘炉法、搬山妖身与结丹期妖族资粮。",
+        "category": "异道结丹",
+        "variant_label": "妖修 DLC",
+        "body_training": 12,
+        "main_technique": "TECH_MONSTER_DEMON_CORE",
+        "support_technique": "TECH_MONSTER_BREATHING",
+        "body_technique": "TECH_MONSTER_GREAT_STRENGTH_BODY",
+        "combat_techniques": ["TECH_MONSTER_DEMON_CORE", "TECH_MONSTER_IRON_BONE"],
+        "inventory": {"$replace": [
+          {"id":"spirit_stone","quantity":150},
+          {"id":"beast_pattern_bone","quantity":14},
+          {"id":"blood_core_pill","quantity":2},
+          {"id":"monster_tempering_blood","quantity":2}
+        ]}
+      }
+    ],
     "world_names": {"monster_realm": "妖界"},
     "world_profiles": {
       "monster_realm": {

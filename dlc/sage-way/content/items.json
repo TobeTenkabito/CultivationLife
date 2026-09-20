@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "confucian_jade_ruler",
+      "name": "明德玉衡",
+      "combat_bonus": 1210,
+      "mp_bonus": 90,
+      "description": "鸿儒讲学、正衣冠与驭浩然气所用的玉衡；战斗力 +1,210，最大 MP +90。",
+      "tags": ["confucian", "equipment", "core", "sage"]
+    }
+  ]
+}

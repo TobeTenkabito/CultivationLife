@@ -2,7 +2,7 @@
   "schema_version": 1,
   "settings": {
     "enabled": true,
-    "phase": "sage_teaching",
+    "phase": "doctrine_debate",
     "worlds": ["human", "spirit"],
     "world_influence_pool": 100.0,
     "doctrine_influence_cap": 60.0,
@@ -23,6 +23,24 @@
     "disciple_n0_per_sense": 2,
     "disciple_penalty_floor_pp": -8.0,
     "recruit_chance_per_year": 0.04,
+    "recruit_external_scale_min": 0.50,
+    "recruit_external_scale_max": 2.00,
+    "inner_realm_scale_per_realm": 0.08,
+    "teaching_progress_min": 8.0,
+    "teaching_progress_max": 15.0,
+    "teaching_progress_per_sense": 0.6,
+    "teaching_progress_per_realm": 0.35,
+    "graduation_inner_gain": 1.5,
+    "graduation_external_gain": 0.5,
+    "answer_opportunity_min": 0.5,
+    "answer_opportunity_max": 1.5,
+    "answer_sense_ratio": 0.5,
+    "debate": {
+      "same_doctrine_inner_gain": 1.2,
+      "other_doctrine_external_gain": 0.8,
+      "loss_scale": 0.45,
+      "cooldown_years": 1
+    },
     "sage_change_cooldown_years": 10,
     "combination_choices": {
       "classic": ["gongyang", "guliang", "zuoshi"],
@@ -42,9 +60,9 @@
       "new_text": {"name": "今文经", "description": "通经致治、阐发当世，提高传道影响力。"}
     },
     "actions": {
-      "sage_preach": {"external": 0.6, "inner": 0.2},
-      "sage_teach": {"external": 0.2, "inner": 0.6},
-      "sage_answer": {"external": 0.1, "inner": 0.1}
+      "sage_preach": {"name":"传道","external":0.6,"inner":0.2,"hp_cost_percent":1,"mp_cost_percent":10,"description":"扩大本说声势；传道类被动会进一步放大外在影响。"},
+      "sage_teach": {"name":"授业","external":0.2,"inner":0.6,"hp_cost_percent":2,"mp_cost_percent":12,"description":"以内在影响为主，并推进所有在教门人的出师进度。"},
+      "sage_answer": {"name":"解惑","external":0.1,"inner":0.1,"hp_cost_percent":1,"mp_cost_percent":8,"description":"获得 0.5–1.5 机缘，并得到相当于机缘 50% 的神识经验。"}
     },
     "doctrine_passives": {
       "gongyang": {"combat_multiplier": 0.03},
@@ -77,6 +95,6 @@
         {"id":"sage-spirit-heart","name":"万族心学","combo":{"classic":"gongyang","philosophy":"mind","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|mind|statecraft|new_text","external":28.0,"controller_id":"sage-s-h-1","members":[{"id":"sage-s-h-1","name":"王照心","inner":27.0,"realm_index":6},{"id":"sage-s-h-2","name":"云无迹","inner":20.0,"realm_index":5},{"id":"sage-s-h-3","name":"木年","inner":13.0,"realm_index":5}]}
       ]
     },
-    "future_interfaces": {"faction_ref": true, "tags": true, "inner_sage": false, "outer_kingship": false}
+    "future_interfaces": {"faction_ref": true, "tags": true, "inner_sage": true, "outer_kingship": false}
   }
 }

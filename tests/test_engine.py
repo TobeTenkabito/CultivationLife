@@ -1311,6 +1311,20 @@ class EngineTests(unittest.TestCase):
                 "spirit_sword", {row["id"] for row in result["player"]["inventory"]}, preset["id"],
             )
 
+    def test_special_core_quick_starts_use_balanced_dlc_loadouts(self):
+        for index, preset_id in enumerate(("monster_core", "ghost_core", "confucian_core")):
+            result = self.engine.create_game(
+                f"异道速启{index}", "none", "dao", 460 + index, preset_id=preset_id,
+            )
+            player = result["player"]
+            self.assertEqual(player["realm_index"], 3)
+            self.assertGreaterEqual(player["combat_power"] / player["expected_combat_power"], 0.9)
+            self.assertLessEqual(player["combat_power"] / player["expected_combat_power"], 1.1)
+        monster = self.engine.create_game("妖丹", "none", "dao", 470, preset_id="monster_core")["player"]
+        self.assertIsNotNone(monster["technique_slots"]["body"])
+        confucian = self.engine.create_game("鸿儒", "none", "dao", 471, preset_id="confucian_core")["player"]
+        self.assertIn("confucian_jade_ruler", {row["id"] for row in confucian["inventory"]})
+
     def test_spirit_world_exposes_three_joinable_sects_with_raced_rosters(self):
         created = self.engine.create_game("灵界门人", "supreme_metal", "dao", 310)
         game = self.engine.store.load(created["id"])
