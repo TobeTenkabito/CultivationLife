@@ -303,7 +303,7 @@ class SageSystemMixin:
                 doctrine["cap_recorded"] = True
                 game.history.append(HistoryRecord(
                     "SYS_SAGE_INFLUENCE_CAP", 1, game.player.age, "独树一帜", None, "capped",
-                    f"{doctrine['name']}的外在影响力达到本界上限。", {"doctrine_id": doctrine["id"]}, ["sage", "milestone"],
+                    f"{doctrine['name']}的学说声望达到本界上限。", {"doctrine_id": doctrine["id"]}, ["sage", "milestone"],
                 ))
             member = next((row for row in doctrine.get("members", []) if row.get("is_player")), None)
             if member:
@@ -379,7 +379,7 @@ class SageSystemMixin:
                     if challenger.get("is_player"):
                         game.history.append(HistoryRecord(
                             "SYS_SAGE_CONTROL_TAKEN", 1, game.player.age, "道统更替", None,
-                            "controlled", f"你以内在影响力执掌了{doctrine['name']}。", {"doctrine_id": doctrine["id"]},
+                            "controlled", f"你凭门内威望执掌了{doctrine['name']}。", {"doctrine_id": doctrine["id"]},
                             ["sage", "milestone"],
                         ))
         self._refresh_sage_effects(game)
@@ -417,7 +417,7 @@ class SageSystemMixin:
                 current["controller_id"] = self._rank_members(current)[0]["id"]
             game.sage_state["memberships"].pop(player.world, None)
             game.sage_state["quit_cooldown_until"][player.world] = player.age + int(cfg.get("quit_cooldown_years", 10))
-            summary = f"你退出了{current['name']}，内在影响力归零。"
+            summary = f"你退出了{current['name']}，门内威望归零。"
         elif action == "found":
             if current:
                 raise ValueError("请先退出当前学说")
@@ -460,7 +460,7 @@ class SageSystemMixin:
                 "SYS_SAGE_DOCTRINE_FOUNDED", 1, player.age, "开宗立说", None, "founded",
                 f"你在人间立下{name}，四层宗旨自成一家。", {"doctrine_id": doctrine["id"]}, ["sage", "milestone"],
             ))
-            summary = f"{name}立说成功，获得 {cfg.get('founding_influence', 5)} 点外在影响力。"
+            summary = f"{name}立说成功，获得 {cfg.get('founding_influence', 5)} 点学说声望。"
         else:
             raise ValueError("未知学说操作")
         self._refresh_sage_effects(game)
@@ -485,7 +485,7 @@ class SageSystemMixin:
         ranks = self._rank_members(doctrine)
         rank = next((i + 1 for i, row in enumerate(ranks) if row.get("is_player")), 999)
         if rank > int(sage_config().get("decision_rank", 3)):
-            raise ValueError("只有内在影响力前三名可以提议改祀")
+            raise ValueError("只有门内威望前三名可以提议改祀")
         if game.player.age < int(doctrine.get("sage_cooldown_until", 0)):
             raise ValueError("改祀冷却尚未结束")
         if sage_id not in sage_config().get("sages", {}):
@@ -576,13 +576,13 @@ class SageSystemMixin:
                 )
                 if player_member:
                     player_member["inner"] = round(float(player_member.get("inner", 0.0)) + gain, 4)
-                reward_text = f"内在影响力 +{gain:g}"
+                reward_text = f"门内威望 +{gain:g}"
             else:
                 gain = apply_external_influence(
                     state["doctrines"], own_doctrine["id"],
                     float(debate_cfg.get("other_doctrine_external_gain", 0.8)), cfg,
                 )
-                reward_text = f"{own_doctrine['name']}外在影响力 +{gain:.2f}"
+                reward_text = f"{own_doctrine['name']}学说声望 +{gain:.2f}"
         else:
             reward_text = "本次未获得影响力"
         game.history.append(HistoryRecord(

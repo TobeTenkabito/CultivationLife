@@ -1178,11 +1178,11 @@ function renderSageSystem(system) {
   const current = doctrines.find(row => row.id === system.membership_id);
   $('#sage-heading').textContent = current ? current.name : '尚未入说';
   const numeric = system.numeric_rules || {};
-  $('#sage-note').textContent = `外在影响力在每界共享 ${numeric.world_pool || 100} 点，单说上限 ${numeric.doctrine_cap || 60}；内在影响力每年衰减 ${numeric.inner_decay_percent || 3}%，领先现任 ${Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '')}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
+  $('#sage-note').textContent = `本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；个人门内威望每年衰减 ${numeric.inner_decay_percent || 3}%，高出现任执掌者 ${Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '')}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
 
   const membership = $('#sage-membership'); membership.innerHTML = '';
   if (current) {
-    const title = document.createElement('h3'); title.textContent = `${current.name} · 外在 ${Number(current.external || 0).toFixed(1)}/60`;
+    const title = document.createElement('h3'); title.textContent = `${current.name} · 学说声望 ${Number(current.external || 0).toFixed(1)}/${numeric.doctrine_cap || 60}`;
     const details = document.createElement('p'); details.textContent = `你的席次 ${current.player_rank || '未入榜'} · 门人 ${(current.active_disciples || []).length} · 已出师 ${current.graduates || 0} · 奉祀 ${(system.sages || {})[current.sage_id]?.name || '孔子'}`;
     const curve = system.disciple_curve || {};
     const curveText = document.createElement('p'); curveText.className = 'muted'; curveText.textContent = `门人规模基准 N₀=${curve.n0 || 0}，硬上限 ${curve.hard_cap || 0}；当前突破修正 ${(Number(curve.breakthrough_pp || 0) >= 0 ? '+' : '')}${Number(curve.breakthrough_pp || 0).toFixed(2)} 个百分点。`;
@@ -1197,13 +1197,13 @@ function renderSageSystem(system) {
       const values = system.action_values?.[action] || {};
       const button = document.createElement('button'); button.type = 'button'; button.className = 'sage-action-card';
       const realmScale = Number(numeric.inner_realm_scale_percent || 8) / 100;
-      button.innerHTML = `<b>${values.name || action}</b><span>外在 +${Number(values.external || 0).toFixed(1)} · 内在 +${Number(values.inner || 0).toFixed(1)}（再按境界 ×${(1 + Number(game.player.realm_index || 0) * realmScale).toFixed(2)}）</span><small>HP -${values.hp_cost_percent || 0}% · MP -${values.mp_cost_percent || 0}%｜${values.description || ''}</small>`;
+      button.innerHTML = `<b>${values.name || action}</b><span>学说声望 +${Number(values.external || 0).toFixed(1)} · 门内威望 +${Number(values.inner || 0).toFixed(1)}（境界修正 ×${(1 + Number(game.player.realm_index || 0) * realmScale).toFixed(2)}）</span><small>HP -${values.hp_cost_percent || 0}% · MP -${values.mp_cost_percent || 0}%｜${values.description || ''}</small>`;
       button.onclick = () => mutate(`/api/games/${game.id}/advance`, {action, years:1}); actions.appendChild(button);
     });
     const recruit = document.createElement('button'); recruit.type = 'button'; recruit.textContent = system.recruit_enabled ? '停止收徒' : '开启收徒';
     recruit.onclick = () => mutate(`/api/games/${game.id}/sage-recruitment`, {enabled:!system.recruit_enabled});
     const leave = document.createElement('button'); leave.type = 'button'; leave.textContent = '退出学说';
-    leave.onclick = () => openGameConfirm({title:'退出学说', body:'你的内在影响力将归零，十年内不能重新加入本界学说。', confirmText:'确认退出', onConfirm:()=>mutate(`/api/games/${game.id}/sage-doctrine`, {action:'leave'})});
+    leave.onclick = () => openGameConfirm({title:'退出学说', body:'你的门内威望将归零，十年内不能重新加入本界学说。', confirmText:'确认退出', onConfirm:()=>mutate(`/api/games/${game.id}/sage-doctrine`, {action:'leave'})});
     actions.append(recruit, leave); membership.append(title, details, curveText, finalEffects, actions);
   } else {
     membership.innerHTML = '<h3>游学之身</h3><p class="muted">可加入本界已有学说；结丹后也可选择四层主张开宗立说。</p>';
@@ -1212,7 +1212,7 @@ function renderSageSystem(system) {
   const list = $('#sage-doctrine-list'); list.innerHTML = '';
   doctrines.forEach(doctrine => {
     const row = document.createElement('div'); row.className = `sage-doctrine${doctrine.id === system.membership_id ? ' active' : ''}`;
-    const title = document.createElement('b'); title.textContent = `${doctrine.name} · ${Number(doctrine.external || 0).toFixed(1)}`;
+    const title = document.createElement('b'); title.textContent = `${doctrine.name} · 学说声望 ${Number(doctrine.external || 0).toFixed(1)}`;
     const details = document.createElement('small'); details.textContent = `成员 ${(doctrine.members || []).length} · 执掌者 ${(doctrine.members || []).find(member => member.id === doctrine.controller_id)?.name || '无'} · 先贤 ${(system.sages || {})[doctrine.sage_id]?.name || '孔子'}`;
     const tenets = document.createElement('small'); tenets.className = 'sage-doctrine-tenets'; tenets.textContent = `宗旨：${(doctrine.combo_details || []).map(item => item.name).join(' · ') || '未载'}`;
     const effects = document.createElement('div'); effects.className = 'sage-effect-chips';
@@ -1220,17 +1220,17 @@ function renderSageSystem(system) {
     row.append(title, details, tenets, effects);
     if (!system.membership_id) { const join = document.createElement('button'); join.textContent = '加入'; join.onclick = () => mutate(`/api/games/${game.id}/sage-doctrine`, {action:'join', doctrine_id:doctrine.id}); row.appendChild(join); }
     const ranking = document.createElement('div'); ranking.className = 'sage-ranking';
-    const rankingTitle = document.createElement('div'); rankingTitle.className = 'sage-ranking-title'; rankingTitle.innerHTML = '<b>学说席次</b><small>执掌者固定列首，其余按内在影响排序</small>'; ranking.appendChild(rankingTitle);
+    const rankingTitle = document.createElement('div'); rankingTitle.className = 'sage-ranking-title'; rankingTitle.innerHTML = '<b>学说席次</b><small>执掌者固定列首，其余按门内威望排序</small>'; ranking.appendChild(rankingTitle);
     (doctrine.members || []).forEach(member => {
       const memberRow = document.createElement('div'); memberRow.className = `sage-member-row${member.is_player ? ' player' : ''}`;
       const identity = document.createElement('span'); identity.className = 'sage-member-identity';
       identity.innerHTML = `<i>${member.rank}</i><span><b>${member.name}${member.is_player ? '（你）' : ''}</b><small>${member.role_name} · ${member.realm_name}</small></span>`;
-      const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = `<b>内在 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
+      const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = `<b>门内威望 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
       memberRow.append(identity, values);
       if (!member.is_player && system.membership_id) {
         const debate = document.createElement('button'); debate.type = 'button'; debate.className = 'sage-debate-button';
         const same = doctrine.id === system.membership_id;
-        debate.textContent = same ? `同门论道 · 胜则内在 +${Number(system.debate_values?.same_doctrine_inner_gain || 1.2).toFixed(1)}` : `学派论道 · 胜则外在 +${Number(system.debate_values?.other_doctrine_external_gain || .8).toFixed(1)}`;
+        debate.textContent = same ? `同门论道 · 胜则门内威望 +${Number(system.debate_values?.same_doctrine_inner_gain || 1.2).toFixed(1)}` : `学派论道 · 胜则学说声望 +${Number(system.debate_values?.other_doctrine_external_gain || .8).toFixed(1)}`;
         debate.disabled = !member.can_debate;
         if (!member.can_debate && member.debate_available_age > Number(game.player.age || 0)) debate.title = `${member.debate_available_age} 岁后可再论道`;
         debate.onclick = () => mutate(`/api/games/${game.id}/sage-debate`, {doctrine_id:doctrine.id, member_id:member.id});

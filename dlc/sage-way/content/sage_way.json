@@ -60,8 +60,8 @@
       "new_text": {"name": "今文经", "description": "通经致治、阐发当世，提高传道影响力。"}
     },
     "actions": {
-      "sage_preach": {"name":"传道","external":0.6,"inner":0.2,"hp_cost_percent":1,"mp_cost_percent":10,"description":"扩大本说声势；传道类被动会进一步放大外在影响。"},
-      "sage_teach": {"name":"授业","external":0.2,"inner":0.6,"hp_cost_percent":2,"mp_cost_percent":12,"description":"以内在影响为主，并推进所有在教门人的出师进度。"},
+      "sage_preach": {"name":"传道","external":0.6,"inner":0.2,"hp_cost_percent":1,"mp_cost_percent":10,"description":"扩大学说声望；传道类被动会进一步放大收益。"},
+      "sage_teach": {"name":"授业","external":0.2,"inner":0.6,"hp_cost_percent":2,"mp_cost_percent":12,"description":"以积累门内威望为主，并推进所有在教门人的出师进度。"},
       "sage_answer": {"name":"解惑","external":0.1,"inner":0.1,"hp_cost_percent":1,"mp_cost_percent":8,"description":"获得 0.5–1.5 机缘，并得到相当于机缘 50% 的神识经验。"}
     },
     "doctrine_passives": {
@@ -78,7 +78,7 @@
     "sages": {
       "confucius": {"name": "孔子", "description": "有教无类，诸家皆可奉祀且始终获得完整加成。", "compatible": ["*"], "effects": {"sense_multiplier": 0.05}},
       "mencius": {"name": "孟子", "description": "养浩然之气，心学或公羊义统可尽得其力。", "compatible": ["mind", "gongyang"], "effects": {"combat_multiplier": 0.05}},
-      "dong_zhongshu": {"name": "董仲舒", "description": "融通春秋与今文，擅长扩大学说的外在声势。", "compatible": ["gongyang", "new_text"], "effects": {"preach_multiplier": 0.10}},
+      "dong_zhongshu": {"name": "董仲舒", "description": "融通春秋与今文，擅长扩大学说声望。", "compatible": ["gongyang", "new_text"], "effects": {"preach_multiplier": 0.10}},
       "zhu_xi": {"name": "朱熹", "description": "会通义理与古经，为破境提供最直接的根基增益。", "compatible": ["principle", "old_text"], "effects": {"breakthrough_bonus": 0.01}},
       "wang_yangming": {"name": "王阳明", "description": "致良知而重践履，最适合心学门人答疑解惑。", "compatible": ["mind"], "effects": {"answer_multiplier": 0.15}},
       "gu_yanwu": {"name": "顾炎武", "description": "经世致用，强化灵田经营与炼丹所得。", "compatible": ["statecraft"], "effects": {"field_alchemy_multiplier": 0.10}},
