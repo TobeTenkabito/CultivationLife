@@ -19,7 +19,9 @@ from .ghost_system import (
     ghost_opportunity_multiplier,
 )
 from .possession_system import current_body_age
-from .transformation_system import ensure_transformation_state, equip_transformation_technique
+from .transformation_system import (
+    ensure_transformation_state, equip_transformation_technique, transformation_technique_limits,
+)
 
 
 LEGACY_ROOTS = {
@@ -43,6 +45,8 @@ COMBAT_REQUIREMENT_OPERATORS = {
     "==": lambda left, right: left == right,
     "!=": lambda left, right: left != right,
 }
+TECHNIQUE_MAX_LEVEL = 9
+TECHNIQUE_MANUAL_PREFIX = "technique_manual::"
 
 def create_technique(
     technique_id: str, name: str, path: str, element: str,
@@ -127,7 +131,150 @@ def validate_technique(technique: Technique) -> None:
 
 
 def technique_scale(technique: Technique) -> float:
-    return (1 + 0.12 * (technique.grade - 1)) * (1 + 0.025 * (technique.level - 1))
+    """Keep the established grade balance and apply the explicit Lv.1–9 multiplier."""
+    grade_multiplier = 1.0 + 0.12 * (max(1, int(technique.grade)) - 1)
+    return grade_multiplier * technique.level_multiplier
+
+
+def effective_technique_karma_multiplier(technique: Technique) -> float:
+    """Amplify a karma modifier around the neutral value instead of multiplying 1.0."""
+    return 1.0 + (float(technique.karma_multiplier) - 1.0) * technique.level_multiplier
+
+
+def technique_manual_item_id(technique_id: str, level: int = 1) -> str:
+    manual_level = max(1, min(TECHNIQUE_MAX_LEVEL, int(level)))
+    return f"{TECHNIQUE_MANUAL_PREFIX}{technique_id}::lv{manual_level}"
+
+
+def technique_manual_description(technique_name: str, level: int) -> str:
+    if level >= TECHNIQUE_MAX_LEVEL:
+        return f"可用于同名 Lv.{level} 功法的最终合参；此玉简已达最高等级，不能继续合成。"
+    return (
+        f"升级同名 Lv.{level} 功法时消耗一份；也可用两份同名同级玉简"
+        f"合成一份 Lv.{level + 1} 玉简。"
+    )
+
+
+def _normalize_technique_manuals(player: Player) -> None:
+    """Migrate legacy unlevelled manuals and merge equal ID/level stacks."""
+    ordinary_items: list[Item] = []
+    manuals: dict[tuple[str, int], Item] = {}
+    known_names = {technique.id: technique.name for technique in player.known_techniques}
+    for item in player.inventory:
+        if not item.technique_id and not item.id.startswith(TECHNIQUE_MANUAL_PREFIX):
+            ordinary_items.append(item)
+            continue
+        technique_id = str(item.technique_id or item.id.removeprefix(TECHNIQUE_MANUAL_PREFIX))
+        parsed_level = 1
+        if "::lv" in technique_id:
+            technique_id, raw_level = technique_id.rsplit("::lv", 1)
+            try:
+                parsed_level = int(raw_level)
+            except ValueError:
+                parsed_level = 1
+        manual_level = max(1, min(
+            TECHNIQUE_MAX_LEVEL,
+            int(item.technique_level if item.technique_level is not None else parsed_level),
+        ))
+        key = (technique_id, manual_level)
+        if key in manuals:
+            manuals[key].quantity += max(0, int(item.quantity))
+            continue
+        template = TECHNIQUE_CATALOG.get(technique_id)
+        technique_name = known_names.get(technique_id) or (template.name if template else item.name)
+        technique_name = technique_name.removeprefix("《").split("》", 1)[0]
+        manuals[key] = Item(
+            id=technique_manual_item_id(technique_id, manual_level),
+            name=f"《{technique_name}》Lv.{manual_level} 传承玉简",
+            quantity=max(0, int(item.quantity)),
+            technique_id=technique_id,
+            technique_level=manual_level,
+            description=technique_manual_description(technique_name, manual_level),
+            tags=list(dict.fromkeys([*item.tags, "technique_manual"])),
+        )
+    player.inventory = ordinary_items + [item for item in manuals.values() if item.quantity > 0]
+
+
+def technique_copy_count(player: Player, technique_id: str, level: int | None = None) -> int:
+    _normalize_technique_manuals(player)
+    return sum(
+        max(0, int(item.quantity)) for item in player.inventory
+        if item.technique_id == technique_id
+        and (level is None or item.technique_level == int(level))
+    )
+
+
+def add_technique_copy(
+    player: Player, technique: Technique, quantity: int = 1, *, level: int | None = None,
+) -> None:
+    quantity = max(0, int(quantity))
+    if quantity <= 0:
+        return
+    _normalize_technique_manuals(player)
+    manual_level = max(1, min(TECHNIQUE_MAX_LEVEL, int(level if level is not None else technique.level)))
+    item_id = technique_manual_item_id(technique.id, manual_level)
+    for item in player.inventory:
+        if item.id == item_id:
+            item.quantity += quantity
+            item.technique_id = technique.id
+            item.technique_level = manual_level
+            return
+    player.inventory.append(Item(
+        id=item_id,
+        name=f"《{technique.name}》Lv.{manual_level} 传承玉简",
+        quantity=quantity,
+        technique_id=technique.id,
+        technique_level=manual_level,
+        description=technique_manual_description(technique.name, manual_level),
+        tags=["technique_manual"],
+    ))
+
+
+def acquire_technique(player: Player, technique: Technique) -> bool:
+    """Learn the first copy and put every later copy in the ordinary inventory."""
+    if any(known.id == technique.id for known in player.known_techniques):
+        add_technique_copy(player, technique)
+        return False
+    player.known_techniques.append(copy.deepcopy(technique))
+    return True
+
+
+def upgrade_known_technique(player: Player, technique_id: str) -> int:
+    known = next((entry for entry in player.known_techniques if entry.id == technique_id), None)
+    if known is None:
+        raise ValueError("你尚未掌握这部功法")
+    if known.level >= TECHNIQUE_MAX_LEVEL:
+        raise ValueError(f"《{known.name}》已经达到 Lv.{TECHNIQUE_MAX_LEVEL}")
+    if not remove_item(player, technique_manual_item_id(technique_id, known.level)):
+        raise ValueError(f"升级《{known.name}》需要一份同名 Lv.{known.level} 传承玉简")
+    new_level = known.level + 1
+    equipped = [
+        player.technique, player.support_technique, player.body_technique,
+        player.divine_sense_technique, player.transformation_technique,
+        *player.combat_techniques,
+    ]
+    for entry in [*player.known_techniques, *equipped]:
+        if entry and entry.id == technique_id:
+            entry.level = new_level
+    return new_level
+
+
+def merge_technique_copies(player: Player, technique_id: str, level: int) -> int:
+    """Combine two same-name, same-level manuals into one manual of the next level."""
+    manual_level = int(level)
+    if not 1 <= manual_level < TECHNIQUE_MAX_LEVEL:
+        raise ValueError(f"只有 Lv.1–{TECHNIQUE_MAX_LEVEL - 1} 玉简可以继续合成")
+    known = next((entry for entry in player.known_techniques if entry.id == technique_id), None)
+    template = known or TECHNIQUE_CATALOG.get(technique_id)
+    if template is None:
+        raise ValueError("未找到这部功法")
+    item_id = technique_manual_item_id(technique_id, manual_level)
+    if technique_copy_count(player, technique_id, manual_level) < 2:
+        raise ValueError(f"合成需要两份《{template.name}》Lv.{manual_level} 传承玉简")
+    remove_item(player, item_id)
+    remove_item(player, item_id)
+    add_technique_copy(player, template, level=manual_level + 1)
+    return manual_level + 1
 
 
 def ensure_technique_set(player: Player) -> None:
@@ -141,18 +288,27 @@ def ensure_technique_set(player: Player) -> None:
         if item.id in ITEM_CATALOG:
             quantity = item.quantity
             player.inventory[index] = Item(**(ITEM_CATALOG[item.id].to_dict() | {"quantity": quantity}))
+    _normalize_technique_manuals(player)
     equipped = [
         player.technique, player.support_technique, player.body_technique,
         player.divine_sense_technique, player.transformation_technique,
         *player.combat_techniques,
     ]
-    for technique in [*equipped, *player.known_techniques]:
+    all_techniques = [*equipped, *player.known_techniques]
+    levels_by_id: dict[str, int] = {}
+    for technique in all_techniques:
+        if technique:
+            technique.level = max(1, min(TECHNIQUE_MAX_LEVEL, int(technique.level)))
+            levels_by_id[technique.id] = max(levels_by_id.get(technique.id, 1), technique.level)
+    for technique in all_techniques:
         if technique and not technique.combat_requirements and technique.id in TECHNIQUE_CATALOG:
             technique.combat_requirements = copy.deepcopy(TECHNIQUE_CATALOG[technique.id].combat_requirements)
         if technique and technique.id in TECHNIQUE_CATALOG:
             technique.required_body_training = int(TECHNIQUE_CATALOG[technique.id].required_body_training)
             technique.possession_limit_bonus = int(TECHNIQUE_CATALOG[technique.id].possession_limit_bonus)
             technique.ignore_possession_limit = bool(TECHNIQUE_CATALOG[technique.id].ignore_possession_limit)
+        if technique:
+            technique.level = levels_by_id[technique.id]
     for technique in equipped:
         if technique and all(known.id != technique.id for known in player.known_techniques):
             player.known_techniques.append(copy.deepcopy(technique))
@@ -167,6 +323,9 @@ def learn_technique(player: Player, technique: Technique) -> bool:
 
 
 def assign_technique(player: Player, technique: Technique, slot: str) -> None:
+    known = next((entry for entry in player.known_techniques if entry.id == technique.id), None)
+    if known is not None:
+        technique.level = max(technique.level, known.level)
     validate_technique(technique)
     if player.path == "monster" and (slot == "transformation" or technique.category == "transformation"):
         raise ValueError("妖修以血脉本体进化，不能修炼或配置变化术")
@@ -356,7 +515,10 @@ def effective_karma(player: Player) -> float:
     if player.path == "demonic":
         return 0.0
     if player.technique:
-        return max(0.0, player.karma) * KARMA_FACTORS[player.technique.path] * player.technique.karma_multiplier
+        return (
+            max(0.0, player.karma) * KARMA_FACTORS[player.technique.path]
+            * effective_technique_karma_multiplier(player.technique)
+        )
     return max(0.0, player.karma)
 
 
@@ -616,7 +778,36 @@ def public_player(player: Player) -> dict[str, Any]:
         if technique is None:
             return None
         result = dict(technique.__dict__)
+        level_multiplier = technique.level_multiplier
+        effect_multiplier = technique_scale(technique)
+        for field_name in (
+            "opportunity_bonus", "hp_bonus", "mp_bonus", "combat_bonus", "divine_sense_bonus",
+        ):
+            base_value = float(getattr(technique, field_name))
+            result[f"base_{field_name}"] = base_value
+            result[field_name] = base_value * effect_multiplier
+        result["base_body_breakthrough_bonus"] = float(technique.body_breakthrough_bonus)
+        result["body_breakthrough_bonus"] = float(technique.body_breakthrough_bonus) * level_multiplier
+        capacity, space = transformation_technique_limits(technique)
+        result["base_transformation_capacity"] = technique.transformation_capacity
+        result["base_transformation_space"] = technique.transformation_space
+        result["transformation_capacity"] = capacity
+        result["transformation_space"] = space
         result.update(
+            level_multiplier=level_multiplier,
+            effect_multiplier=effect_multiplier,
+            max_level=TECHNIQUE_MAX_LEVEL,
+            upgrade_copies=technique_copy_count(player, technique.id, technique.level),
+            manuals_by_level=[
+                {"level": level, "quantity": quantity}
+                for level in range(1, TECHNIQUE_MAX_LEVEL + 1)
+                if (quantity := technique_copy_count(player, technique.id, level)) > 0
+            ],
+            can_upgrade=(
+                technique.level < TECHNIQUE_MAX_LEVEL
+                and technique_copy_count(player, technique.id, technique.level) > 0
+            ),
+            effective_karma_multiplier=effective_technique_karma_multiplier(technique),
             source_names=[QI_SOURCE_NAMES[source] for source in technique.sources],
             source_display="、".join(
                 QI_SOURCE_NAMES[source] + (f" {weight:.0%}" if len(technique.sources) > 1 else "")
@@ -648,7 +839,8 @@ def public_player(player: Player) -> dict[str, Any]:
         effective_karma=round(effective_karma(player), 1),
         karma_factor=(
             0.0 if player.path == "demonic" else
-            (KARMA_FACTORS[player.technique.path] * player.technique.karma_multiplier) if player.technique else 1.0
+            (KARMA_FACTORS[player.technique.path] * effective_technique_karma_multiplier(player.technique))
+            if player.technique else 1.0
         ),
         path_name=PATH_NAMES[player.path],
         spirit_root_name=root_definition(player.spirit_root)["name"],

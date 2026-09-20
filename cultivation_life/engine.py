@@ -32,6 +32,7 @@ from .rules import (
     expected_combat_power,
     effective_karma,
     has_item,
+    acquire_technique,
     learn_technique,
     max_hp,
     max_mp,
@@ -54,10 +55,14 @@ from .rules import (
     divine_sense_level,
     divine_sense_level_threshold,
     technique_scale,
+    add_technique_copy,
+    merge_technique_copies,
+    upgrade_known_technique,
 )
 from .transformation_system import (
     absorption_gain, active_transformation_profile, ensure_transformation_state,
     form_purity, form_stat_progress, forms_are_incompatible, public_transformation_system,
+    transformation_technique_limits,
 )
 
 
@@ -401,6 +406,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 training_gain = (
                     rng.randint(*body_rules["progress_per_year"])
                     * (1 + 0.04 * max(0, player.body_technique.grade - 1))
+                    * player.body_technique.level_multiplier
                     * technique_environment_multiplier(player.body_technique, player.world)
                     * (
                         float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))
@@ -1336,7 +1342,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         )
         technique_bonus = 0.0
         if player.body_technique and target <= int(player.body_technique.body_bonus_max_layer or 0):
-            technique_bonus = float(player.body_technique.body_breakthrough_bonus)
+            technique_bonus = (
+                float(player.body_technique.body_breakthrough_bonus)
+                * player.body_technique.level_multiplier
+            )
         failures = int(player.body_breakthrough_pity.get(self._body_pity_key(player), 0))
         pity_bonus = 0.0
         if target >= int(config["pity_start_target"]):
@@ -1925,10 +1934,6 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             raise ValueError("该货物已经售出或不在本期坊市")
         if offer.get("world", "human") != game.player.world:
             raise ValueError("此物不属于当前世界的坊市货池")
-        if offer["kind"] == "technique" and any(
-            known.id == offer["content_id"] for known in game.player.known_techniques
-        ):
-            raise ValueError("你已经掌握这部功法")
         price = int(offer["price"])
         if not remove_item(game.player, "spirit_stone", price):
             raise ValueError(f"需要 {price} 枚下品灵石")
@@ -1942,8 +1947,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             add_item(game.player, offer["content_id"])
             summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得{offer['name']}。"
         else:
-            learn_technique(game.player, TECHNIQUE_CATALOG[offer["content_id"]])
-            summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得《{offer['name']}》传承玉简。"
+            learned = acquire_technique(game.player, TECHNIQUE_CATALOG[offer["content_id"]])
+            destination = "已悟功法" if learned else "包裹，可用于升级"
+            summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得《{offer['name']}》传承玉简，收入{destination}。"
         offer["sold"] = True
         offer["locked"] = False
         game.history.append(HistoryRecord(
@@ -1972,6 +1978,50 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             "SYS_EQUIP_KNOWN_TECHNIQUE", 1, game.player.age, "重整功法", technique_id, "equipped",
             f"你将《{known.name}》配置为{slot_name}功法。", {"slot": slot, "technique_id": technique_id},
             ["system", "technique"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def upgrade_technique(self, game_id: str, technique_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        if game.pending_event or not game.player.alive or game.player.imprisonment:
+            raise ValueError("当前状态无法升级功法")
+        known = next(
+            (entry for entry in game.player.known_techniques if entry.id == technique_id), None,
+        )
+        if known is None:
+            raise ValueError("你尚未掌握这部功法")
+        technique_name = known.name
+        old_level = known.level
+        new_level = upgrade_known_technique(game.player, technique_id)
+        game.history.append(HistoryRecord(
+            "SYS_TECHNIQUE_UPGRADE", 1, game.player.age, "合参功法", technique_id, "upgraded",
+            f"你消耗一份《{technique_name}》Lv.{old_level} 传承玉简，将功法提升至 Lv.{new_level}。",
+            {"technique_id":technique_id, "level":[old_level, new_level]},
+            ["system", "technique", "upgrade"],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def merge_technique_manuals(
+        self, game_id: str, technique_id: str, level: int,
+    ) -> dict[str, Any]:
+        game = self._load(game_id)
+        if game.pending_event or not game.player.alive or game.player.imprisonment:
+            raise ValueError("当前状态无法合成传承玉简")
+        known = next(
+            (entry for entry in game.player.known_techniques if entry.id == technique_id), None,
+        )
+        template = TECHNIQUE_CATALOG.get(technique_id)
+        technique_name = known.name if known else (template.name if template else "无名功法")
+        new_level = merge_technique_copies(game.player, technique_id, int(level))
+        game.history.append(HistoryRecord(
+            "SYS_TECHNIQUE_MANUAL_MERGE", 1, game.player.age, "合炼玉简", technique_id, "merged",
+            f"你将两份《{technique_name}》Lv.{level} 传承玉简合为一份 Lv.{new_level} 玉简。",
+            {"technique_id":technique_id, "level":[int(level), new_level]},
+            ["system", "technique", "manual", "merge"],
         ))
         game.updated_at = now_iso()
         self.store.save(game)
@@ -2143,11 +2193,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         technique = player.transformation_technique
         loadout = player.transformation_loadouts[technique.id]
         stored, active = loadout["stored"], loadout["active"]
+        capacity, space = transformation_technique_limits(technique)
         form = TRANSFORMATION_CATALOG[form_id]
         if action == "store":
             if form_id in stored:
                 raise ValueError("该变身已经存入本功法")
-            if len(stored) >= technique.transformation_capacity:
+            if len(stored) >= capacity:
                 raise ValueError("该功法的变身容量已满")
             stored.append(form_id)
             summary = f"你将{form.name}存入《{technique.name}》。"
@@ -2163,7 +2214,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 raise ValueError("需要先将该变身存入功法")
             if form_id in active:
                 raise ValueError("该变身已经列入战斗预案")
-            if len(active) >= technique.transformation_space:
+            if len(active) >= space:
                 raise ValueError("该功法的变身空间已满")
             conflict = next((other for other in active if forms_are_incompatible(form_id, other)), None)
             if conflict:
@@ -6383,8 +6434,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         if kind == "technique_level":
             if player.technique is None:
                 return "no_technique", "你尚无主修功法，无法参悟。"
-            player.technique.level = max(1, player.technique.level + int(value))
-            return None, f"功法等级提升至 {player.technique.level}。"
+            quantity = max(1, int(value))
+            add_technique_copy(player, player.technique, quantity)
+            return None, f"你将感悟凝成《{player.technique.name}》同源传承玉简 ×{quantity}，已收入包裹。"
         if kind == "equip_technique":
             template = copy.deepcopy(TECHNIQUE_CATALOG[effect["technique_id"]])
             template.path = player.technique.path if player.technique else player.path
@@ -6396,10 +6448,12 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             return "technique_equipped", f"你将《{template.name}》设为{slot_name}功法。"
         if kind == "learn_technique":
             template = copy.deepcopy(TECHNIQUE_CATALOG[effect["technique_id"]])
-            learned = learn_technique(player, template)
+            learned = acquire_technique(player, template)
+            # Keep the legacy result tag because story chains use it to gate
+            # later rewards; only the duplicate's storage semantics changed.
             return ("technique_learned" if learned else "already_known"), (
                 f"你悟得《{template.name}》，功法已收入已悟列表，并未改变当前配置。"
-                if learned else f"你已经掌握《{template.name}》，此次重温又有所得。"
+                if learned else f"你已经掌握《{template.name}》，同源传承玉简已收入包裹，可用于升级。"
             )
         if kind == "gain_generated_master":
             if player.master:

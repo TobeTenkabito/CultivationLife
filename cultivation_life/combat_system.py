@@ -1157,7 +1157,7 @@ class PlayerCombatSystem:
 
     @classmethod
     def _apply_technique(cls, stats: dict[str, float], technique: Technique, total_power: float) -> None:
-        weight = min(0.12, 0.008 + technique.grade * 0.006 + technique.level * 0.002)
+        weight = min(0.18, (0.010 + technique.grade * 0.006) * technique.level_multiplier)
         factors = cls.ELEMENT_FACTORS.get(technique.element, {})
         for key, factor in factors.items():
             stats[key] += total_power * weight * max(0.0, factor - 1.0)
@@ -1165,7 +1165,9 @@ class PlayerCombatSystem:
             stats["guard"] += total_power * weight
             stats["sustain"] += total_power * weight * 0.75
         elif technique.category == "divine_sense":
-            stats["sense"] += total_power * weight * (1.0 + max(0.0, technique.divine_sense_bonus))
+            stats["sense"] += total_power * weight * (
+                1.0 + max(0.0, technique.divine_sense_bonus) * technique.level_multiplier
+            )
         elif technique.category == "transformation":
             stats["might"] += total_power * weight * 0.65
             stats["sustain"] += total_power * weight * 0.65

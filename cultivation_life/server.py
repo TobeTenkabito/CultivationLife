@@ -241,6 +241,12 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.equip_known_technique(
                     game_id, payload.get("technique_id", ""), payload.get("slot", "")
                 )
+            elif operation == "technique-upgrade":
+                result = ENGINE.upgrade_technique(game_id, payload.get("technique_id", ""))
+            elif operation == "technique-manual-merge":
+                result = ENGINE.merge_technique_manuals(
+                    game_id, payload.get("technique_id", ""), int(payload.get("level", 1)),
+                )
             elif operation == "transformation":
                 result = ENGINE.manage_transformation(
                     game_id, payload.get("form_id", ""), payload.get("action", "")

@@ -52,6 +52,10 @@ class Item:
     # Their full immutable recipe/result remains in crafted_artifacts; this ID
     # links the bag entry without flattening generated rules into Item fields.
     crafted_artifact_id: str | None = None
+    # Duplicate technique inheritances are ordinary stackable bag items.  The
+    # first copy remains the single canonical entry in known_techniques.
+    technique_id: str | None = None
+    technique_level: int | None = None
     description: str = ""
     tags: list[str] = field(default_factory=list)
 
@@ -92,6 +96,7 @@ class Technique:
     ignore_possession_limit: bool = False
 
     def __post_init__(self) -> None:
+        self.level = max(1, min(9, int(self.level)))
         # 旧存档与未显式标注的内容按道统补齐先天“源”；一旦写入存档，
         # sources 就成为功法自身的固定数据，不随角色所在界面改变。
         if not self.sources:
@@ -110,6 +115,13 @@ class Technique:
                 for source in self.sources
             ]
             self.combat_requirements = leaves[0] if len(leaves) == 1 else {"any": leaves}
+
+    @property
+    def level_multiplier(self) -> float:
+        return {
+            1: 1.0, 2: 1.1, 3: 1.2, 4: 1.3, 5: 1.4, 6: 1.5,
+            7: 1.8, 8: 2.4, 9: 3.0,
+        }[self.level]
 
 
 @dataclass(frozen=True)
