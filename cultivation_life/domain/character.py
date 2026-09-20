@@ -446,7 +446,16 @@ def character_invariants(state: WorldState) -> list[str]:
             if age < 0:
                 errors.append(f"角色 {entity_id} 尚未出生")
             lifespan = life.get("lifespan")
-            if bool(life.get("alive")) and lifespan is not None and age >= int(lifespan):
+            due_now = any(
+                scheduled.event_type == LIFESPAN_DUE
+                and scheduled.due_year == state.clock.year
+                and str(scheduled.payload.get("entity_id", "")) == entity_id
+                for scheduled in state.scheduler.events
+            )
+            if (
+                bool(life.get("alive")) and lifespan is not None
+                and age >= int(lifespan) and not due_now
+            ):
                 errors.append(f"角色 {entity_id} 已达寿限但仍标记为存活")
     return errors
 

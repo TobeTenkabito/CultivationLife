@@ -420,6 +420,12 @@ def _advance_family_members(definitions: GameDefinitions):
             for edge in list(context.state.relations.find(
                 target_id=family_id, kind=FAMILY_MEMBERSHIP
             )):
+                # NPC cultivation is owned by the canonical lifecycle domain.
+                # This handler still owns family recruitment below.
+                if context.state.entities.get(
+                    edge.source_id, "simulation.npc_lifecycle"
+                ) is not None:
+                    continue
                 life = context.state.entities.require(edge.source_id, LIFE)
                 if not bool(life.get("alive")) or is_intrigue_imprisoned(
                     context.state, edge.source_id

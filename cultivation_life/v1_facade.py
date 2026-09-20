@@ -551,28 +551,49 @@ def _race_system_view(
                 ),
             })
         faction_details = dict(config.get("faction_details") or {})
+        faction_presets = [
+            dict(row)
+            for row in dict(config.get("race_faction_presets") or {}).get(
+                race_id, []
+            )
+            if str(dict(row).get("world", "")) == world_id
+        ]
+        active_factions = [
+            {
+                "id": faction_id, "name": faction.get("name", faction_id),
+                "active": any(
+                    row.get("faction_id") == faction_id
+                    or row.get("faction_external_id") == faction_id
+                    for row in characters
+                ),
+                "elders": [
+                    str(row.get("name", "无名修士"))
+                    for row in characters
+                    if row.get("faction_external_id") == faction_id
+                    and int(row.get("realm_index", 0)) >= 4
+                ][:6],
+            }
+            for faction_id, faction in faction_details.items()
+            if faction.get("world") == world_id
+            and faction.get("allegiance_race") == race_id
+        ]
+        active_ids = {str(row["id"]) for row in active_factions}
         races[race_id] = {
             "id": race_id, "name": definition.get("name", race_id),
             "description": definition.get("description", ""),
             "relations": relations, "recent_events": recent_events[-10:],
             "supported_factions": [
-                {
-                    "id": faction_id, "name": faction.get("name", faction_id),
-                    "active": any(
-                        row.get("faction_id") == faction_id
-                        or row.get("faction_external_id") == faction_id
-                        for row in characters
-                    ),
-                    "elders": [
-                        str(row.get("name", "无名修士"))
-                        for row in characters
-                        if row.get("faction_external_id") == faction_id
-                        and int(row.get("realm_index", 0)) >= 4
-                    ][:6],
-                }
-                for faction_id, faction in faction_details.items()
-                if faction.get("world") == world_id
-                and faction.get("allegiance_race") == race_id
+                *active_factions,
+                *[
+                    {
+                        "id": str(row.get("id", "")),
+                        "name": str(row.get("name", row.get("id", ""))),
+                        "active": False,
+                        "elders": list(map(str, row.get("elders", []))),
+                    }
+                    for row in faction_presets
+                    if str(row.get("id", "")) not in active_ids
+                ],
             ],
         }
     alliances = []

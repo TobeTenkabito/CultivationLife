@@ -37,6 +37,7 @@ class SimulationContext:
     _dispatching: bool = False
     time_halted: bool = False
     time_halt_reason: str | None = None
+    transient: dict[str, Any] = field(default_factory=dict)
     _rng: random.Random = field(init=False, repr=False)
 
     def __post_init__(self) -> None:

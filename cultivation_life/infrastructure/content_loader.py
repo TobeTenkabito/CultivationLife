@@ -126,6 +126,16 @@ class ContentLoader:
             for path_id, definition in dict(world_doc.get("paths", {})).items()
         }
         systems["factions"] = dict(faction_doc.get("systems", {}))
+        race_systems = dict(races_doc.get("systems", {}))
+        # V1's autonomous diplomacy consumed these tables directly.  Dropping
+        # them while loading V2 left races and NPC powers as static scenery.
+        systems["race_diplomacy"] = dict(race_systems.get("diplomacy", {}))
+        systems["race_alliances"] = [
+            dict(row) for row in race_systems.get("alliances", [])
+        ]
+        systems["race_faction_presets"] = dict(
+            race_systems.get("faction_presets", {})
+        )
         systems["crafting"] = {
             "settings": dict(crafting_doc.get("settings", {})),
             "molds": [dict(row) for row in crafting_doc.get("molds", [])],

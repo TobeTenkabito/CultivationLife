@@ -457,6 +457,14 @@ class V2StoryRuntimeTests(unittest.TestCase):
         ))
         state = self.engine.store.load(game_id)
         hostage_id = (set(state.entities.with_component("core.identity")) - before_ids).pop()
+        # Definition factions now have their V1 roster from game start.  This
+        # scenario is specifically the one-member weak-faction negotiation
+        # branch, so retire the normal roster explicitly instead of relying on
+        # the old lazy-roster bug that left the faction empty.
+        for edge in state.relations.find(
+            target_id=faction_id, kind="faction_membership"
+        ):
+            state.relations.end(edge.relation_id, ended_year=state.clock.year)
         state.relations.add(
             source_id=hostage_id, target_id=faction_id,
             kind="faction_membership", created_year=state.clock.year,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from .character import IDENTITY, LIFE, character_view, create_character
 from .combat import combat_snapshot, resolve_combat
@@ -99,6 +99,14 @@ class TransferVassalPersonnel:
     character_id: str
 
 
+@dataclass(frozen=True, slots=True)
+class EnsureFactionRosters:
+    """Idempotently materialize definition rosters in migrated V2 saves."""
+
+    allow_during_interaction: ClassVar[bool] = True
+    allow_during_court_election: ClassVar[bool] = True
+
+
 def _create_faction_entity(
     context: SimulationContext,
     *,
@@ -125,6 +133,7 @@ def _create_faction_entity(
             "color": color,
             "active": True,
             "roster_seeded": False,
+            "last_recruitment_year": context.state.clock.year,
         },
     )
     context.state.entities.put(
@@ -161,6 +170,10 @@ def _on_game_created(definitions: GameDefinitions):
                 scope=EventScope("world", definition.world_id),
                 payload={"faction_id": faction_id, "external_id": definition.id},
             )
+            # V1 factions existed as living powers from the first year.  A
+            # lazy roster made every faction the player had not joined an
+            # empty shell, so there was nobody to cultivate, die or fight.
+            _seed_definition_roster(context, definitions, faction_id)
 
     return handler
 
@@ -198,7 +211,14 @@ def _seed_definition_roster(
             context,
             name=str(row["name"]),
             age=int(row.get("age", 16)),
-            gender=str(row.get("gender") or context.rng.choice(("male", "female"))),
+            # Definition rosters are world state, not a player roll.  Keep
+            # their missing gender deterministic without consuming the
+            # gameplay RNG merely because eager world simulation is enabled.
+            gender=str(row.get("gender") or (
+                "female"
+                if sum(str(row.get("id", row["name"])).encode("utf-8")) % 2
+                else "male"
+            )),
             race=str(row.get("race", definition.allegiance_race)),
             spirit_root=str(row.get("spirit_root", "none")),
             path=str(row.get("path", "dao")),
@@ -255,6 +275,20 @@ def _seed_player_followers(
         _add_membership(
             context, character_id=character_id, faction_id=faction_id, role="member"
         )
+
+
+def _ensure_faction_rosters_handler(
+    definitions: GameDefinitions,
+):
+    def handler(context: SimulationContext, command: object) -> None:
+        if not isinstance(command, EnsureFactionRosters):
+            raise TypeError("命令类型错误")
+        for faction_id in context.state.entities.with_component(FACTION_PROFILE):
+            profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+            if bool(profile.get("active")) and profile.get("external_id"):
+                _seed_definition_roster(context, definitions, faction_id)
+
+    return handler
 
 
 def _active_membership(state: WorldState, character_id: str):
@@ -1150,6 +1184,13 @@ def _advance_faction_npcs(definitions: GameDefinitions):
         retention = float(cultivation_rules.get("failed_progress_retained", 0.55))
         accident = float(cultivation_rules.get("accident_death_chance", 0.0005))
         for character_id in list(context.state.entities.with_component(FACTION_NPC)):
+            # Schema 3 gives every NPC one canonical lifecycle.  Keep this
+            # legacy loop only as a fallback for snapshots not yet reconciled;
+            # otherwise family/faction overlap would advance a person twice.
+            if context.state.entities.get(
+                character_id, "simulation.npc_lifecycle"
+            ) is not None:
+                continue
             life = context.state.entities.require(character_id, LIFE)
             if not bool(life.get("alive")) or is_intrigue_imprisoned(
                 context.state, character_id
@@ -1222,6 +1263,134 @@ def _advance_faction_npcs(definitions: GameDefinitions):
     return handler
 
 
+def _recruit_faction_npc(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    faction_id: str,
+) -> str:
+    profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+    rules = dict(definitions.systems.get("factions", {}))
+    distributions = dict(rules.get("recruitment_distribution_by_world", {}))
+    distribution = list(
+        distributions.get(str(profile["world_id"]))
+        or rules.get("recruitment_distribution", [{"upper": 1.0, "realm_index": 1}])
+    )
+    roll = context.rng.random()
+    realm_index = int(distribution[-1]["realm_index"])
+    for row in distribution:
+        if roll <= float(row["upper"]):
+            realm_index = int(row["realm_index"])
+            break
+    realm_index = max(0, min(len(definitions.realms) - 1, realm_index))
+    realm = definitions.realms[realm_index]
+    age_ranges = {
+        0: (16, 36), 1: (18, 72), 2: (45, 150), 3: (120, 330),
+        4: (280, 850), 5: (750, 2300), 6: (2200, 5800),
+        7: (6000, 21000), 8: (14000, 80000),
+    }
+    low, high = age_ranges.get(realm_index, (18, 80))
+    lifespan = None
+    if realm.lifespan is not None:
+        lifespan = context.rng.randint(*realm.lifespan)
+        high = max(low, min(high, lifespan - max(12, int(lifespan * 0.25))))
+    age = context.rng.randint(low, high)
+    existing = [
+        edge.source_id for edge in context.state.relations.find(
+            target_id=faction_id, kind=MEMBERSHIP
+        )
+    ]
+    paths = [
+        str(context.state.entities.require(entity_id, CULTIVATION)["path"])
+        for entity_id in existing
+        if context.state.entities.get(entity_id, CULTIVATION) is not None
+    ]
+    path = context.rng.choice(paths) if paths else "dao"
+    if path == "monster" and lifespan is not None:
+        lifespan *= 3
+    roots = [
+        root_id for root_id, root in definitions.roots.items()
+        if root_id != "none" and root.creation
+    ]
+    surname = context.rng.choice(["顾", "叶", "陆", "楚", "白", "谢", "云", "林", "江", "闻"])
+    given = context.rng.choice(["玄", "宁", "川", "微", "岳", "霜", "澄", "昭", "离", "砚"])
+    character_id = create_character(
+        context,
+        name=surname + given,
+        age=age,
+        gender=context.rng.choice(("male", "female")),
+        race=str(profile.get("allegiance_race", "human")),
+        spirit_root=context.rng.choice(roots),
+        path=path,
+        realm_id=realm.id,
+        layer=1 if realm_index == 0 else context.rng.randint(1, realm.layers),
+        world_id=str(profile["world_id"]),
+        lifespan=lifespan,
+    )
+    context.state.entities.put(character_id, FACTION_NPC, {
+        "external_id": "",
+        "title": (
+            "跨域客卿" if realm_index >= 5 else
+            "加盟客卿" if realm_index >= 3 else
+            "新晋内门" if realm_index == 2 else "新入门弟子"
+        ),
+        "cultivation_progress": 0.0,
+        "last_dispatch_year": None,
+    })
+    _add_membership(
+        context, character_id=character_id, faction_id=faction_id, role="member"
+    )
+    context.emit(
+        "faction.member.recruited", source="factions",
+        scope=EventScope("faction", faction_id),
+        payload={"faction_id": faction_id, "character_id": character_id},
+    )
+    return character_id
+
+
+def _maintain_faction_rosters(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        start = int(event.payload["from_year"])
+        end = int(event.payload["to_year"])
+        if end <= start:
+            return
+        player_rng_state = context.rng.getstate()
+        rules = dict(definitions.systems.get("factions", {}))
+        interval = max(1, int(rules.get("recruitment_interval_years", 5)))
+        maximum = max(1, int(rules.get("max_members", 36)))
+        actor_id = context.state.controlled_entity_id
+        active_world = (
+            str(context.state.entities.require(actor_id, LOCATION)["world_id"])
+            if actor_id else ""
+        )
+        for faction_id in list(context.state.entities.with_component(FACTION_PROFILE)):
+            profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+            if (
+                not bool(profile.get("active"))
+                or not bool(profile.get("roster_seeded"))
+                or str(profile.get("world_id")) != active_world
+            ):
+                continue
+            last = int(profile.get("last_recruitment_year", start))
+            due = max(0, end // interval - max(last, start) // interval)
+            for _ in range(due):
+                living = sum(
+                    bool(context.state.entities.require(edge.source_id, LIFE).get("alive"))
+                    for edge in context.state.relations.find(
+                        target_id=faction_id, kind=MEMBERSHIP
+                    )
+                )
+                if living >= maximum:
+                    break
+                _recruit_faction_npc(context, definitions, faction_id)
+            if due:
+                profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+                profile["last_recruitment_year"] = end
+                context.state.entities.put(faction_id, FACTION_PROFILE, profile)
+        context.rng.setstate(player_rng_state)
+
+    return handler
+
+
 def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None:
     character_id = str(event.payload["entity_id"])
     membership = _active_membership(context.state, character_id)
@@ -1243,6 +1412,17 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
     metadata = dict(ended.metadata)
     metadata["end_reason"] = "member_died"
     context.state.relations.replace_metadata(ended.relation_id, metadata)
+    living = [
+        edge for edge in context.state.relations.find(
+            target_id=membership.target_id, kind=MEMBERSHIP
+        )
+        if bool(context.state.entities.require(edge.source_id, LIFE).get("alive"))
+    ]
+    profile = context.state.entities.require(membership.target_id, FACTION_PROFILE)
+    if not living and bool(profile.get("active")):
+        _dissolve_faction(
+            context, membership.target_id, reason="last_member_fallen"
+        )
 
 
 def _on_same_faction_combat(definitions: GameDefinitions):
@@ -1728,12 +1908,15 @@ def register_faction_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.register(InterceptFactionMember, _intercept_handler(definitions))
     bus.register(ProposeDiplomacy, _propose_diplomacy_handler(definitions))
     bus.register(TransferVassalPersonnel, _transfer_vassal_handler(definitions))
+    bus.register(EnsureFactionRosters, _ensure_faction_rosters_handler(definitions))
     bus.event_bus.register("core.game.created", _on_game_created(definitions))
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("character.died", _on_character_died)
     bus.event_bus.register("combat.resolved", _on_same_faction_combat(definitions))
     bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
-    bus.event_bus.register("core.time.advanced", _advance_faction_npcs(definitions))
+    bus.event_bus.register(
+        "core.time.advanced", _maintain_faction_rosters(definitions)
+    )
     bus.event_bus.register(
         "core.time.advanced", _maybe_player_faction_pressure(definitions)
     )
@@ -1938,6 +2121,12 @@ def governance_view(
         raise ValueError("游戏尚未初始化")
     component = state.entities.get(actor_id, DIPLOMACY_STATE) or {"relations": {}}
     world_id = str(state.entities.require(actor_id, LOCATION)["world_id"])
+    preferences = state.entities.get(actor_id, "presentation.preferences") or {}
+    debug = bool(preferences.get("debug_world_news", False))
+    visible_relations = [
+        dict(row) for row in dict(component.get("relations", {})).values()
+        if debug or not row.get("world_id") or row.get("world_id") == world_id
+    ]
     support = []
     for edge in state.relations.find(source_id=actor_id, kind=RACE_SUPPORT):
         location = state.entities.require(edge.target_id, LOCATION)
@@ -1949,7 +2138,7 @@ def governance_view(
             "source_race_id": edge.metadata.get("source_race_id"),
         })
     return {
-        "relations": list(dict(component.get("relations", {})).values()),
+        "relations": visible_relations,
         "race_support": support,
         "diplomacy_statuses": {
             "neutral": "中立",

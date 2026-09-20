@@ -127,6 +127,7 @@ from .domain.war import (
     war_invariants,
     war_view,
 )
+from .domain.world_simulation import register_world_simulation_domain
 from .domain.economy import (
     INVENTORY,
     MARKET,
@@ -213,6 +214,7 @@ from .domain.factions import (
     MEMBERSHIP,
     ArrangeFactionSuccession,
     DispatchFactionMember,
+    EnsureFactionRosters,
     FoundFaction,
     InterceptFactionMember,
     InviteRelationshipToFaction,
@@ -234,6 +236,11 @@ from .domain.family import (
     family_view,
     reconcile_family_state,
     register_family_domain,
+)
+from .domain.npc_lifecycle import (
+    npc_lifecycle_invariants,
+    reconcile_npc_lifecycle,
+    register_npc_lifecycle_domain,
 )
 from .domain.concubines import (
     EnterConcubineStatus,
@@ -366,6 +373,7 @@ class GameEngine:
         register_relationship_domain(self.commands, self.definitions)
         register_faction_domain(self.commands, self.definitions)
         register_family_domain(self.commands, self.definitions)
+        register_npc_lifecycle_domain(self.commands, self.definitions)
         register_concubine_domain(self.commands, self.definitions)
         register_economy_domain(self.commands, self.definitions)
         register_asset_domain(self.commands)
@@ -376,6 +384,7 @@ class GameEngine:
         register_party_domain(self.commands, self.definitions)
         register_demonic_domain(self.commands, self.definitions)
         register_war_domain(self.commands, self.definitions)
+        register_world_simulation_domain(self.commands, self.definitions)
         register_extension_domains(self.commands, self.definitions)
         register_ghost_domain(self.commands, self.definitions)
         register_monster_domain(self.commands, self.definitions)
@@ -402,6 +411,7 @@ class GameEngine:
         self.invariants.register("relations", relationship_invariants)
         self.invariants.register("factions", faction_invariants(self.definitions))
         self.invariants.register("family", family_invariants)
+        self.invariants.register("npc_lifecycle", npc_lifecycle_invariants)
         self.invariants.register("concubines", concubine_invariants)
         self.invariants.register("economy", economy_invariants(self.definitions))
         self.invariants.register("assets", asset_invariants)
@@ -645,6 +655,7 @@ class GameEngine:
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
         reconcile_family_state(state)
+        reconcile_npc_lifecycle(state)
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
@@ -658,6 +669,7 @@ class GameEngine:
         state = self.store.load(game_id)
         expected_revision = state.revision
         content_events = self.commands.execute(state, EnsureWorldCharacters())
+        roster_events = self.commands.execute(state, EnsureFactionRosters())
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
@@ -681,6 +693,7 @@ class GameEngine:
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
         reconcile_family_state(state)
+        reconcile_npc_lifecycle(state)
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
@@ -688,6 +701,7 @@ class GameEngine:
         self.invariants.validate(state)
         events = [
             *content_events,
+            *roster_events,
             *story_repair_events,
             *market_events,
             *self.commands.execute(state, command),
@@ -1883,6 +1897,7 @@ class GameEngine:
         state = self.store.load(game_id)
         expected_revision = state.revision
         content_events = self.commands.execute(state, EnsureWorldCharacters())
+        roster_events = self.commands.execute(state, EnsureFactionRosters())
         reconcile_extension_state(state, self.definitions)
         reconcile_ghost_state(state, self.definitions)
         reconcile_monster_state(state, self.definitions)
@@ -1906,12 +1921,15 @@ class GameEngine:
         reconcile_artifact_state(state)
         reconcile_relationship_state(state)
         reconcile_family_state(state)
+        reconcile_npc_lifecycle(state)
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
         market_events = self._ensure_current_market(state)
         self.invariants.validate(state)
-        events = [*content_events, *story_repair_events, *market_events]
+        events = [
+            *content_events, *roster_events, *story_repair_events, *market_events
+        ]
         if events:
             state.updated_at = _now_iso()
             player = character_view(state)
