@@ -8,6 +8,22 @@
       "mp_bonus": 90,
       "description": "鸿儒讲学、正衣冠与驭浩然气所用的玉衡；战斗力 +1,210，最大 MP +90。",
       "tags": ["confucian", "equipment", "core", "sage"]
+    },
+    {
+      "id": "people_annals_bamboo",
+      "name": "万民青简",
+      "combat_bonus": 3600,
+      "opportunity_bonus": 0.02,
+      "description": "《石渠民志》重修后留下的第一枚青简，正面刻着三百个失而复得的姓名，背面永远留给后来人的申诉；战斗力 +3,600，机缘获取 +2%。",
+      "tags": ["confucian", "sage", "story", "core", "treasure"]
+    },
+    {
+      "id": "myriad_voices_blank_seal",
+      "name": "万籁无字印",
+      "combat_bonus": 420000,
+      "mp_bonus": 12000,
+      "description": "十二族共同重订天河译约后留下的无字法印，不替任何一种声音预刻正文；战斗力 +420,000，最大 MP +12,000。",
+      "tags": ["confucian", "sage", "story", "void", "treasure"]
     }
   ]
 }

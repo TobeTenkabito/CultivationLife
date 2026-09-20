@@ -1,4 +1,5 @@
 import json
+import random
 import tempfile
 import unittest
 from pathlib import Path
@@ -76,6 +77,53 @@ class AchievementSystemTests(unittest.TestCase):
         self.assertEqual(catalog["百族立碑"]["source"]["id"], "official.monster-bloodlines")
         self.assertEqual(catalog["今夜百鬼行"]["source"]["id"], "official.ghost-reincarnation")
         self.assertEqual(catalog["胯下之辱"]["source"]["id"], "official.ghost-reincarnation")
+
+    def test_new_path_and_upper_world_achievements(self):
+        catalog = self.engine.list_achievements()["achievements"]
+        names = [row["name"] for row in catalog if row["source"]["kind"] == "base"]
+        monster_index = names.index("真灵之身")
+        self.assertEqual(names[monster_index + 1:monster_index + 3], ["阴魂不散", "修齐治平"])
+
+        ghost = self.engine.create_game("幽客", "mutated_yin", "ghost", 996)
+        ghost_game = self.engine.store.load(ghost["id"])
+        ghost_game.player.realm_index = 8
+        unlocked = {row["name"] for row in self.engine.present(ghost_game)["new_achievements"]}
+        self.assertIn("阴魂不散", unlocked)
+
+        confucian = self.engine.create_game("治平", "supreme_wood", "confucian", 997)
+        confucian_game = self.engine.store.load(confucian["id"])
+        confucian_game.player.realm_index = 8
+        confucian_game.history.append(HistoryRecord(
+            "SYS_CELESTIAL_ASCENSION_COMPLETE", 1, confucian_game.player.age,
+            "飞升仙界", None, "ascended", "渡劫飞升。", {}, ["ascension"],
+        ))
+        unlocked = {row["name"] for row in self.engine.present(confucian_game)["new_achievements"]}
+        self.assertTrue({"修齐治平", "羽化登仙"} <= unlocked)
+
+    def test_monte_cristo_requires_releasing_then_dissolving_same_power(self):
+        created = self.engine.create_game("复仇者", "supreme_fire", "dao", 998)
+        game = self.engine.store.load(created["id"])
+        sect = next(sect for sect in game.sects.values() if not sect.extinct)
+        key = f"sect:{sect.id}"
+        game.player.imprisonment = {
+            "key": key, "name": sect.name, "remaining_years": 1,
+            "captured_age": game.player.age, "hostility": 30,
+            "sentence_years": 1, "hostility_reduction_per_year": 30,
+            "faction_id": sect.id, "faction_kind": "sect", "facility": "faction_prison",
+        }
+        self.engine.store.save(game)
+        released = self.engine.prison_action(created["id"], "wait")
+        self.assertIsNone(released["player"]["imprisonment"])
+
+        game = self.engine.store.load(created["id"])
+        pending = {"runtime": {
+            "hostility_key": key, "kind": "sect", "entity_id": sect.id,
+            "entity_name": sect.name, "power": 1,
+        }}
+        result, _ = self.engine._resolve_wanted_settlement(game, pending, "dissolve", random.Random(998))
+        self.assertEqual(result, "dissolved")
+        unlocked = {row["name"] for row in self.engine.present(game)["new_achievements"]}
+        self.assertIn("基督山伯爵", unlocked)
 
 
 if __name__ == "__main__":

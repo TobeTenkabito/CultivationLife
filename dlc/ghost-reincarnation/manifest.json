@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.ghost-reincarnation",
   "name": "百鬼夜行：往生轮回",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 110,
   "requires": [],
-  "description": "百鬼夜行、随机组合魂性、拘魂十槽、附灵、受制与夺舍完整生态，并保留魂蚀、轮回印记及往生系统。"
+  "description": "百鬼夜行、随机组合魂性、拘魂十槽、附灵、受制与夺舍完整生态；元婴起可用同境小境界丹药，炼虚起开放同境大境界突破丹药。"
 }

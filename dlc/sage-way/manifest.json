@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.sage-way",
   "name": "圣人之道：内圣外王",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 130,
   "requires": [],
-  "description": "完整儒修循环：圣人教化、学说论道、传承炼化、浩然之气动态被动，以及消耗浩然经验的外王四策。"
+  "description": "完整儒修循环：圣人教化、内圣外王，以及人界结丹与灵界炼虚两条六幕专属剧情链。"
 }

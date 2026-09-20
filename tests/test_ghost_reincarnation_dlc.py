@@ -575,7 +575,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         finally:
             config["enabled"] = True
 
-    def test_ghost_breakthrough_medicine_is_blocked_in_use_and_probability_layers(self):
+    def test_ghost_breakthrough_medicine_is_blocked_before_nascent_soul(self):
         shown = self.engine.create_game("无丹", "mutated_yin", "ghost", 902, preset_id="ghost_core")
         game = self.engine.store.load(shown["id"])
         aid = next(
@@ -588,8 +588,48 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         chance = self.engine._breakthrough_chance(game.player, major=False)
         self.assertEqual(chance["aid_bonus"], 0.0)
         self.engine.store.save(game)
-        with self.assertRaisesRegex(ValueError, "鬼修唯有自渡轮回"):
+        with self.assertRaisesRegex(ValueError, "达到元婴期后"):
             self.engine.use_item(game.id, aid.id)
+
+    def test_ghost_can_use_matching_breakthrough_medicine_from_nascent_soul(self):
+        shown = self.engine.create_game("凝婴服丹", "mutated_yin", "ghost", 914, preset_id="ghost_core")
+        game = self.engine.store.load(shown["id"])
+        game.player.realm_index = 4
+        game.player.layer = 3
+        game.player.awaiting_minor_breakthrough = True
+        game.player.opportunity = opportunity_required(game.player)
+        aid = copy.deepcopy(ITEM_CATALOG["infant_soul_dew"])
+        game.player.inventory.append(aid)
+        self.engine.store.save(game)
+
+        used = self.engine.use_item(game.id, aid.id)
+        self.assertIn(aid.id, used["player"]["active_breakthrough_aids"])
+        saved = self.engine.store.load(game.id).player
+        chance = self.engine._breakthrough_chance(saved, major=False)
+        self.assertAlmostEqual(chance["aid_bonus"], aid.breakthrough_bonus)
+
+    def test_ghost_major_breakthrough_medicine_unlocks_from_void_refinement(self):
+        shown = self.engine.create_game("虚魂服丹", "mutated_yin", "ghost", 915, preset_id="ghost_core")
+        game = self.engine.store.load(shown["id"])
+        game.player.realm_index = 5
+        game.player.layer = REALMS[5].layers
+        blocked_aid = copy.deepcopy(ITEM_CATALOG["void_soul_elixir"])
+        game.player.inventory.append(blocked_aid)
+        self.engine.store.save(game)
+        with self.assertRaisesRegex(ValueError, "达到炼虚期后"):
+            self.engine.use_item(game.id, blocked_aid.id)
+
+        game = self.engine.store.load(game.id)
+        game.player.realm_index = 6
+        game.player.layer = REALMS[6].layers
+        allowed_aid = copy.deepcopy(ITEM_CATALOG["soul_covenant_pill"])
+        game.player.inventory.append(allowed_aid)
+        self.engine.store.save(game)
+        used = self.engine.use_item(game.id, allowed_aid.id)
+        self.assertIn(allowed_aid.id, used["player"]["active_breakthrough_aids"])
+        saved = self.engine.store.load(game.id).player
+        chance = self.engine._breakthrough_chance(saved, major=True)
+        self.assertAlmostEqual(chance["aid_bonus"], allowed_aid.breakthrough_bonus)
 
     def test_ghost_cannot_bypass_pill_ban_with_a_hybrid_permanent_item(self):
         item_id = "test_hybrid_breakthrough_pill"
@@ -607,7 +647,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             game.player.inventory.append(copy.deepcopy(ITEM_CATALOG[item_id]))
             old_reference = game.player.ghost_intrinsic_hp_reference
             self.engine.store.save(game)
-            with self.assertRaisesRegex(ValueError, "鬼修唯有自渡轮回"):
+            with self.assertRaisesRegex(ValueError, "达到元婴期后"):
                 self.engine.use_item(game.id, item_id)
             saved = self.engine.store.load(game.id).player
             self.assertEqual(saved.ghost_intrinsic_hp_reference, old_reference)
