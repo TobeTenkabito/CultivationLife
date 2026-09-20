@@ -61,8 +61,53 @@ class SQLiteSaveStore:
                     PRIMARY KEY (game_id, sequence),
                     FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE CASCADE
                 );
+                CREATE TABLE IF NOT EXISTS achievement_unlocks (
+                    achievement_id TEXT PRIMARY KEY,
+                    unlocked_at TEXT NOT NULL,
+                    game_id TEXT NOT NULL,
+                    player_name TEXT NOT NULL
+                );
                 """
             )
+
+    def achievement_unlocks(self) -> dict[str, dict[str, Any]]:
+        with self._connection() as connection:
+            rows = connection.execute(
+                """
+                SELECT achievement_id, unlocked_at, game_id, player_name
+                FROM achievement_unlocks ORDER BY unlocked_at, achievement_id
+                """
+            ).fetchall()
+        return {
+            str(row["achievement_id"]): dict(row)
+            for row in rows
+        }
+
+    def unlock_achievements(
+        self,
+        achievement_ids: list[str],
+        *,
+        unlocked_at: str,
+        game_id: str,
+        player_name: str,
+    ) -> set[str]:
+        fresh: set[str] = set()
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            for achievement_id in achievement_ids:
+                cursor = connection.execute(
+                    """
+                    INSERT OR IGNORE INTO achievement_unlocks (
+                        achievement_id, unlocked_at, game_id, player_name
+                    ) VALUES (?, ?, ?, ?)
+                    """,
+                    (
+                        achievement_id, unlocked_at, game_id, player_name,
+                    ),
+                )
+                if cursor.rowcount:
+                    fresh.add(achievement_id)
+        return fresh
 
     def create(self, state: WorldState, events: list[EventEnvelope], *, player_name: str) -> int:
         if state.revision != 0:

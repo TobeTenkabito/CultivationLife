@@ -62,6 +62,7 @@ class SimulationContext:
         source: str,
         scope: EventScope,
         payload: dict[str, Any] | None = None,
+        immediate: bool = False,
     ) -> EventEnvelope:
         sequence = self.state.next_event_sequence
         self.state.next_event_sequence += 1
@@ -75,8 +76,16 @@ class SimulationContext:
             payload=copy.deepcopy(payload or {}),
         )
         self.emitted_events.append(event)
-        self._pending_events.append(event)
-        self._drain_events()
+        if immediate and self._dispatching:
+            # Aggregate creation is occasionally requested by an event handler
+            # and the caller must be able to use the fully initialized entity
+            # before that handler returns.  Dispatch only that lifecycle event
+            # synchronously; secondary events remain queued in normal order.
+            for handler in self.event_bus.handlers_for(event.event_type):
+                handler(self, event)
+        else:
+            self._pending_events.append(event)
+            self._drain_events()
         return event
 
     def _drain_events(self) -> None:

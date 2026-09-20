@@ -15,6 +15,7 @@ from cultivation_life.runtime import persistence_root
 
 from .application import CommandExecution, GameEngine
 from .domain.definitions import QI_SOURCE_NAMES
+from .v1_facade import config_view, game_view, save_list_view
 from .version import base_game_metadata
 
 
@@ -179,7 +180,7 @@ class HTTPCommandRegistry:
             ),
             "crafting-blueprint": lambda game, p: engine.save_crafting_blueprint(game, p),
             "crafting-forge": lambda game, p: engine.forge_crafted_artifact(game, p),
-            "crafting-preview": lambda game, p: engine.preview_crafting(game, p),
+            "crafting-preview": self._crafting_preview,
             "create-faction": lambda game, p: engine.create_faction(game, _text(p, "name")),
             "create-family": lambda game, p: engine.create_family(game, _text(p, "name")),
             "cross-world": lambda game, p: engine.cross_world(
@@ -239,7 +240,7 @@ class HTTPCommandRegistry:
             "formation-ground-withdraw": lambda game, p: engine.withdraw_ground_formation(
                 game, _text(p, "ground_formation_id")
             ),
-            "formation-preview": lambda game, p: engine.preview_formation(game, p),
+            "formation-preview": self._formation_preview,
             "formation-save": lambda game, p: engine.save_formation(game, p),
             "ghost-attachment": lambda game, p: engine.ghost_attachment_action(
                 game, _text(p, "action"), _text(p, "item_id")
@@ -413,6 +414,22 @@ class HTTPCommandRegistry:
             return self.engine.befriend_daoist(game_id, target_id)
         return self.engine.interact_dao_friend(game_id, target_id, action)
 
+    def _crafting_preview(
+        self, game_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        result = self.engine.preview_crafting(game_id, payload)
+        if isinstance(result, CommandExecution):
+            return dict(result.game["crafting"]["last_preview"])
+        return dict(result)
+
+    def _formation_preview(
+        self, game_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        result = self.engine.preview_formation(game_id, payload)
+        if isinstance(result, CommandExecution):
+            return dict(result.game["formation_system"]["last_preview"])
+        return dict(result)
+
     @property
     def operations(self) -> tuple[str, ...]:
         return tuple(sorted(self._operations))
@@ -436,6 +453,104 @@ def build_handler(
 ) -> type[BaseHTTPRequestHandler]:
     registry = HTTPCommandRegistry(engine)
     package_root = Path(extension_root or web_root.parent).resolve()
+
+    def raw_config() -> dict[str, Any]:
+        monster_document = dict(
+            engine.definitions.extension_documents.get(
+                "monster_bloodlines.json", {}
+            )
+        )
+        monster_species = {
+            str(row["id"]): dict(row)
+            for row in monster_document.get("species", [])
+            if isinstance(row, dict) and row.get("id")
+        }
+        return {
+            "format": "cultivation-life-v2",
+            "base_game": base_game_metadata(),
+            "actions": {
+                key: value.get("name", key)
+                for key, value in engine.definitions.actions.items()
+            },
+            "roots": {
+                key: value.name
+                for key, value in engine.definitions.roots.items()
+                if value.creation
+            },
+            "root_details": {
+                key: {
+                    "name": value.name,
+                    "tier": value.tier,
+                    "efficiency": value.efficiency,
+                    "elements": list(value.elements),
+                }
+                for key, value in engine.definitions.roots.items()
+                if value.creation
+            },
+            "paths": {
+                key: value
+                for key, value in engine.definitions.paths.items()
+                if key != "monster" or monster_species
+            },
+            "monster_species": monster_species,
+            "karma_factors": dict(
+                engine.definitions.systems.get("karma_factors", {})
+            ),
+            "technique_elements": {
+                "neutral": "无属性",
+                **dict(engine.definitions.affinity_names),
+            },
+            "qi_sources": dict(QI_SOURCE_NAMES),
+            "qi_experience_base": float(
+                engine.definitions.systems.get("qi_mastery", {}).get(
+                    "experience_base", 25
+                )
+            ),
+            "races": {
+                key: str(value.get("name", key))
+                for key, value in engine.definitions.races.items()
+            },
+            "race_details": {
+                key: dict(value)
+                for key, value in engine.definitions.races.items()
+            },
+            "faction_details": {
+                key: {
+                    "id": value.id,
+                    "name": value.name,
+                    "world": value.world_id,
+                    "allegiance_race": value.allegiance_race,
+                }
+                for key, value in engine.definitions.factions.items()
+            },
+            "world_travel_rules": dict(
+                engine.definitions.systems.get("world_travel", {})
+            ),
+            "worlds": {
+                key: value.name
+                for key, value in engine.definitions.worlds.items()
+                if value.enabled
+            },
+            "start_worlds": {
+                key: list(value)
+                for key, value in engine.definitions.start_worlds.items()
+            },
+            "quick_starts": [
+                {
+                    "id": str(row["id"]),
+                    "name": str(row["name"]),
+                    "enabled": bool(row.get("enabled", True)),
+                    "status": str(row.get("status", "尚未开放")),
+                    "path": str(row.get("path", "dao")),
+                    "realm_index": int(row.get("realm_index", 0)),
+                    "layer": int(row.get("layer", 1)),
+                    "world": str(row.get("world", "human")),
+                }
+                for row in engine.definitions.systems.get("quick_start_presets", [])
+            ],
+            "extensions": extension_rows(),
+            "operations": registry.operations,
+        }
 
     def extension_rows() -> list[dict[str, Any]]:
         return [
@@ -486,7 +601,21 @@ def build_handler(
             "name": row.name,
             "enabled": enabled,
             "restart_required": enabled != row.enabled,
+            "message": "扩展偏好已保存，重启游戏后生效",
         }
+
+    public_config = config_view(raw_config())
+
+    def public_game(value: dict[str, Any]) -> dict[str, Any]:
+        return game_view(value, public_config)
+
+    def public_result(value: dict[str, Any]) -> dict[str, Any]:
+        game = value.get("game")
+        if isinstance(game, dict) and "player" in game:
+            return public_game(game)
+        if "player" in value:
+            return public_game(value)
+        return value
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "CultivationLife/2"
@@ -495,75 +624,14 @@ def build_handler(
             try:
                 path = urlparse(self.path).path
                 if path == "/api/config":
-                    self._json({
-                        "format": "cultivation-life-v2",
-                        "base_game": base_game_metadata(),
-                        "actions": {key: value.get("name", key) for key, value in engine.definitions.actions.items()},
-                        "roots": {key: value.name for key, value in engine.definitions.roots.items() if value.creation},
-                        "root_details": {
-                            key: {
-                                "name": value.name,
-                                "tier": value.tier,
-                                "efficiency": value.efficiency,
-                                "elements": list(value.elements),
-                            }
-                            for key, value in engine.definitions.roots.items()
-                            if value.creation
-                        },
-                        "paths": dict(engine.definitions.paths),
-                        "karma_factors": dict(
-                            engine.definitions.systems.get("karma_factors", {})
-                        ),
-                        "technique_elements": {
-                            "neutral": "无属性",
-                            **dict(engine.definitions.affinity_names),
-                        },
-                        "qi_sources": dict(QI_SOURCE_NAMES),
-                        "qi_experience_base": float(
-                            engine.definitions.systems.get("qi_mastery", {}).get(
-                                "experience_base", 25
-                            )
-                        ),
-                        "races": {
-                            key: str(value.get("name", key))
-                            for key, value in engine.definitions.races.items()
-                        },
-                        "worlds": {key: value.name for key, value in engine.definitions.worlds.items() if value.enabled},
-                        "start_worlds": {
-                            key: list(value)
-                            for key, value in engine.definitions.start_worlds.items()
-                        },
-                        "quick_starts": [
-                            {
-                                "id": str(row["id"]),
-                                "name": str(row["name"]),
-                                "enabled": bool(row.get("enabled", True)),
-                                "status": str(row.get("status", "尚未开放")),
-                                "path": str(row.get("path", "dao")),
-                                "realm_index": int(row.get("realm_index", 0)),
-                                "layer": int(row.get("layer", 1)),
-                                "world": str(row.get("world", "human")),
-                            }
-                            for row in engine.definitions.systems.get(
-                                "quick_start_presets", []
-                            )
-                        ],
-                        "extensions": extension_rows(),
-                        "operations": registry.operations,
-                    })
+                    self._json(public_config)
                 elif path == "/api/achievements":
-                    rows = achievement_rows()
-                    self._json({
-                        "achievements": rows,
-                        "unlocked": 0,
-                        "total": len(rows),
-                        "progress_available": False,
-                    })
+                    self._json(engine.list_achievements())
                 elif path == "/api/games":
-                    self._json({"games": engine.list_games()})
+                    self._json(save_list_view(engine.list_games()))
                 elif path.startswith("/api/games/"):
                     game_id = unquote(path.removeprefix("/api/games/").strip("/"))
-                    self._json(engine.get_game(game_id))
+                    self._json(public_game(engine.get_game(game_id)))
                 else:
                     self._static(path)
             except Exception as error:
@@ -594,13 +662,19 @@ def build_handler(
                             str(payload["preset_id"])
                             if payload.get("preset_id") else None
                         ),
+                        monster_species_id=(
+                            str(payload["monster_species_id"])
+                            if payload.get("monster_species_id") else None
+                        ),
                     )
-                    self._json(result, HTTPStatus.CREATED)
+                    self._json(public_game(result), HTTPStatus.CREATED)
                     return
                 parts = path.strip("/").split("/")
                 if len(parts) != 4 or parts[:2] != ["api", "games"]:
                     raise KeyError("接口不存在")
-                self._json(registry.dispatch(unquote(parts[2]), parts[3], payload))
+                self._json(public_result(
+                    registry.dispatch(unquote(parts[2]), parts[3], payload)
+                ))
             except Exception as error:
                 self._error(error)
 
@@ -655,7 +729,12 @@ def build_handler(
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'")
+            self.send_header(
+                "Content-Security-Policy",
+                "default-src 'self'; script-src 'self'; "
+                "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+                "connect-src 'self'; base-uri 'none'; frame-ancestors 'none'",
+            )
             self.end_headers()
             self.wfile.write(body)
 

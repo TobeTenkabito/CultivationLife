@@ -16,7 +16,7 @@ from .assets import (
 from .character import IDENTITY, LIFE
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
-from .economy import CURRENCY_ID, change_inventory_item
+from .economy import CURRENCY_ID, change_inventory_item, inventory_quantity
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, WorldState
@@ -32,6 +32,19 @@ CRAFT_STATS = (
     "body_training_efficiency", "divine_sense_efficiency",
     "tribulation_reduction", "breakthrough_bonus",
 )
+CRAFT_STAT_NAMES = {
+    "combat_power": "战斗力", "max_hp": "最大HP", "max_mp": "最大MP",
+    "opportunity_efficiency": "机缘效率",
+    "body_training_efficiency": "炼体效率",
+    "divine_sense_efficiency": "神识效率",
+    "tribulation_reduction": "渡劫减伤", "breakthrough_bonus": "突破加成",
+}
+FORMATION_NATURE_NAMES = {
+    "metal": "金", "wood": "木", "water": "水", "fire": "火",
+    "earth": "土", "yin": "阴", "yang": "阳", "wind": "风",
+    "thunder": "雷", "soul": "魂", "space": "空", "star": "星",
+    "law": "律", "neutral": "中",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,13 +160,17 @@ def _on_character_created(context: SimulationContext, event: EventEnvelope) -> N
     context.state.entities.put(actor_id, NATAL, _new_natal())
 
 
-def _ensure_available(context: SimulationContext, actor_id: str) -> None:
-    if actor_id != context.state.controlled_entity_id:
+def _ensure_state_available(state: WorldState, actor_id: str) -> None:
+    if actor_id != state.controlled_entity_id:
         raise ValueError("只能管理当前角色的法宝与阵法")
-    if not bool(context.state.entities.require(actor_id, LIFE).get("alive")):
+    if not bool(state.entities.require(actor_id, LIFE).get("alive")):
         raise ValueError("死亡角色不能进行炼器或布阵")
-    if context.state.relations.find(target_id=actor_id, kind="combat_prisoner"):
+    if state.relations.find(target_id=actor_id, kind="combat_prisoner"):
         raise ValueError("服刑期间不能进行炼器或布阵")
+
+
+def _ensure_available(context: SimulationContext, actor_id: str) -> None:
+    _ensure_state_available(context.state, actor_id)
 
 
 def _crafting_rules(definitions: GameDefinitions) -> dict[str, Any]:
@@ -198,6 +215,12 @@ def _material_candidate(
         raise ValueError("所选实例不能作为炼器材料")
     quality = float(metadata.get("quality_multiplier", metadata.get("quality", 1.0)))
     value = int(metadata.get("material_value", metadata.get("value", 1)))
+    state_name = str(metadata.get("state", "")).strip()
+    if not state_name:
+        state_name = (
+            "灵韵天成" if quality >= 1.15 else "品相上佳" if quality >= 1.05
+            else "保存完好" if quality >= 0.9 else "略有损耗"
+        )
     return {
         **asset, "roles": list(definition.get("roles", [])),
         "tags": list(definition.get("tags", [])),
@@ -205,6 +228,8 @@ def _material_candidate(
         "role_effects": copy.deepcopy(definition.get("role_effects", {})),
         "quality": max(0.01, quality), "material_value": max(1, value),
         "acquired_tier": int(metadata.get("tier", definition.get("tier", 1))),
+        "state": state_name,
+        "source": str(metadata.get("source", "行囊")),
     }
 
 
@@ -340,6 +365,20 @@ def _crafting_preview(
     }
 
 
+def preview_crafting_view(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a preview without advancing the save revision.
+
+    The frozen client previews on input changes.  Treating that read as a
+    persisted command makes two nearby previews race each other and can reject
+    a later real save with a stale revision.
+    """
+    _ensure_state_available(state, actor_id)
+    return _crafting_preview(state, definitions, actor_id, payload)
+
+
 def _preview_crafting_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, PreviewCrafting):
@@ -441,7 +480,63 @@ def _formation_config(definitions: GameDefinitions) -> dict[str, Any]:
 
 
 def _formation_defs(definitions: GameDefinitions) -> dict[str, dict[str, Any]]:
-    return {str(row["id"]): dict(row) for row in _formation_config(definitions)["materials"]}
+    config = _formation_config(definitions)
+    result = {
+        str(row["id"]): {**dict(row), "source_kind": "formation_material"}
+        for row in config["materials"]
+    }
+    for group, source_kind in (
+        ("crafting_materials", "crafting_material"),
+        ("inventory_items", "inventory"),
+        ("spirit_plants", "harvested_spirit_plant"),
+    ):
+        for row in config.get(group, []):
+            result[str(row["id"])] = {
+                **dict(row), "source_kind": source_kind,
+            }
+    return result
+
+
+def _formation_definition_for_asset(
+    definitions: GameDefinitions, asset: dict[str, Any]
+) -> dict[str, Any] | None:
+    all_definitions = _formation_defs(definitions)
+    kind = str(asset.get("kind", ""))
+    content_id = str(asset.get("definition_id", ""))
+    if kind == "formation_material":
+        return all_definitions.get(content_id)
+    source_key = {
+        "crafting_material": "crafting_material_id",
+        "harvested_spirit_plant": "plant_id",
+    }.get(kind)
+    if source_key:
+        return next((
+            row for row in all_definitions.values()
+            if row.get("source_kind") == kind
+            and str(row.get(source_key, "")) == content_id
+        ), None)
+    return None
+
+
+def _formation_candidate_from_definition(
+    definition: dict[str, Any], *, candidate_id: str,
+    source_kind: str, source: str, acquired_tier: int,
+    asset_id: str | None = None, item_id: str | None = None,
+) -> dict[str, Any]:
+    nature = str(definition.get("nature", "neutral"))
+    return {
+        "id": candidate_id, "asset_id": asset_id,
+        "item_id": item_id,
+        "definition_id": str(definition["id"]),
+        "name": str(definition.get("name", "阵材")),
+        "nature": nature,
+        "nature_name": FORMATION_NATURE_NAMES.get(nature, nature),
+        "formation_value": float(definition.get("formation_value", 0)),
+        "relation_overrides": dict(definition.get("relation_overrides", {})),
+        "field_hook": definition.get("field_hook"),
+        "source_kind": source_kind, "source": source,
+        "acquired_tier": acquired_tier,
+    }
 
 
 def _formation_candidate(
@@ -449,26 +544,123 @@ def _formation_candidate(
     *, allow_reserved: bool = False,
 ) -> dict[str, Any]:
     asset = require_asset(state, actor_id, asset_id)
-    if asset["kind"] != "formation_material":
-        raise ValueError("所选实例不是阵材")
     if asset.get("reservation_id") and not allow_reserved:
         raise ValueError("阵材已经被其他阵法占用")
-    definition = _formation_defs(definitions).get(str(asset["definition_id"]))
+    definition = _formation_definition_for_asset(definitions, asset)
     if not definition:
         raise ValueError("阵材定义已经失效")
-    return {
-        "asset_id": asset_id, "definition_id": str(definition["id"]),
-        "name": str(definition["name"]), "nature": str(definition.get("nature", "neutral")),
-        "formation_value": float(definition.get("formation_value", 0)),
-        "relation_overrides": dict(definition.get("relation_overrides", {})),
-        "field_hook": definition.get("field_hook"),
-    }
+    metadata = dict(asset.get("metadata", {}))
+    return _formation_candidate_from_definition(
+        definition, candidate_id=asset_id,
+        asset_id=asset_id, item_id=None,
+        source_kind=str(asset.get("kind")),
+        source=str(metadata.get("source", "行囊")),
+        acquired_tier=int(metadata.get("tier", definition.get("tier", 1))),
+    )
+
+
+def _formation_candidates(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> list[dict[str, Any]]:
+    ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    instances = dict(ledger.get("instances", {}))
+    reservations = dict(ledger.get("reservations", {}))
+    candidates: list[dict[str, Any]] = []
+    by_id: dict[str, dict[str, Any]] = {}
+    for asset_id, asset in sorted(instances.items()):
+        if _formation_definition_for_asset(definitions, asset) is None:
+            continue
+        row = _formation_candidate(
+            state, definitions, actor_id, asset_id, allow_reserved=True
+        )
+        reservation = reservations.get(str(asset.get("reservation_id") or ""), {})
+        purpose = str(reservation.get("purpose", ""))
+        row.update(
+            occupied=bool(asset.get("reservation_id")),
+            locked=bool(asset.get("reservation_id"))
+            and not purpose.startswith("formation:active:"),
+            occupied_scope=(
+                "ground" if purpose.startswith("formation:ground:")
+                else "active" if purpose.startswith("formation:active:") else None
+            ),
+        )
+        candidates.append(row)
+        by_id[str(row["id"])] = row
+
+    inventory_definitions = [
+        row for row in _formation_defs(definitions).values()
+        if row.get("source_kind") == "inventory"
+    ]
+    for definition in inventory_definitions:
+        item_id = str(definition.get("item_id", ""))
+        quantity = inventory_quantity(
+            state, actor_id, item_id, spendable=True
+        )
+        for index in range(quantity):
+            candidate_id = f"inventory:{item_id}:{index}"
+            row = _formation_candidate_from_definition(
+                definition, candidate_id=candidate_id,
+                source_kind="inventory", source="行囊",
+                acquired_tier=int(definition.get("tier", 1)),
+                item_id=item_id,
+            )
+            row.update(occupied=False, locked=False, occupied_scope=None)
+            candidates.append(row)
+            by_id[candidate_id] = row
+
+    component = state.entities.require(actor_id, FORMATION)
+    active = component.get("active")
+    if isinstance(active, dict):
+        for slot, binding in enumerate(active.get("bindings", [])):
+            if not binding:
+                continue
+            row = dict(binding)
+            candidate_id = str(
+                row.get("asset_id") or row.get("reservation_id") or row.get("id")
+            )
+            row.update(
+                id=candidate_id, slot=slot, occupied=True,
+                locked=False, occupied_scope="active",
+            )
+            if candidate_id in by_id:
+                by_id[candidate_id].update(row)
+            else:
+                candidates.append(row)
+                by_id[candidate_id] = row
+    for ground in component.get("ground_arrays", []):
+        for binding in ground.get("bindings", []):
+            if not binding:
+                continue
+            row = dict(binding)
+            candidate_id = str(
+                row.get("asset_id") or row.get("reservation_id") or row.get("id")
+            )
+            row.update(
+                id=candidate_id, occupied=True, locked=True,
+                occupied_scope="ground", ground_array_id=ground.get("id"),
+                source=f"镇于{ground.get('owner_name', '阵域')}",
+            )
+            if candidate_id in by_id:
+                by_id[candidate_id].update(row)
+            else:
+                candidates.append(row)
+                by_id[candidate_id] = row
+    return sorted(
+        candidates,
+        key=lambda row: (
+            bool(row.get("occupied")), str(row.get("name")), str(row.get("id"))
+        ),
+    )
 
 
 def _formation_nodes(
     state: WorldState, definitions: GameDefinitions, actor_id: str, slots: list[Any],
 ) -> list[dict[str, Any] | None]:
     values = list(slots[:9]) + [None] * max(0, 9 - len(slots))
+    candidates = {
+        str(row["id"]): row
+        for row in _formation_candidates(state, definitions, actor_id)
+    }
     used: set[str] = set()
     nodes = []
     for raw in values[:9]:
@@ -479,7 +671,10 @@ def _formation_nodes(
         if asset_id in used:
             raise ValueError("同一阵材实例不能重复放入九宫")
         used.add(asset_id)
-        nodes.append(_formation_candidate(state, definitions, actor_id, asset_id))
+        candidate = candidates.get(asset_id)
+        if candidate is None or candidate.get("locked"):
+            raise ValueError("九宫中的阵材实例不存在，或正在被镇地阵占用")
+        nodes.append(dict(candidate))
     return nodes
 
 
@@ -488,6 +683,18 @@ def _formation_level(state: WorldState, definitions: GameDefinitions, actor_id: 
     experience = float(dict(field.get("art_experience", {})).get("formation", 0))
     base = float(_formation_config(definitions)["settings"].get("experience_base", 100))
     return int(math.sqrt(max(0.0, experience) / base))
+
+
+def _formation_alpha(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> float:
+    settings = dict(_formation_config(definitions).get("settings", {}))
+    low = float(settings.get("alpha_min", 0.5))
+    high = float(settings.get("alpha_max", 0.9))
+    scale = max(1.0, float(settings.get("alpha_level_scale", 12)))
+    return low + (high - low) * (
+        1 - math.exp(-_formation_level(state, definitions, actor_id) / scale)
+    )
 
 
 def _formation_profile(
@@ -506,7 +713,7 @@ def _formation_profile(
         return empty
     config = _formation_config(definitions)
     relations = dict(config.get("relations", {}))
-    alpha = min(0.9, max(0.5, 0.5 + _formation_level(state, definitions, actor_id) / 12 * 0.4))
+    alpha = _formation_alpha(state, definitions, actor_id)
     positive = negative = 0.0
     incoming = {index: 0.0 for index, _ in occupied}
     edges = 0
@@ -570,9 +777,28 @@ def _formation_profile(
         "metrics": {key: round(value * 100, 2) for key, value in ratios.items()},
         "static_player_multipliers": player, "static_enemy_multipliers": enemy,
         "artificial_conditions": conditions, "effects": effects,
-        "core_node": {"index": core_index, "position": core_index + 1, "name": core.get("name"), "nature": core.get("nature")},
+        "core_node": {
+            "index": core_index, "position": core_index + 1,
+            "name": core.get("name"), "nature": core.get("nature"),
+            "nature_name": FORMATION_NATURE_NAMES.get(
+                str(core.get("nature", "neutral")),
+                str(core.get("nature", "neutral")),
+            ),
+        },
         "stability": "高" if ratios["balance"] >= 0.45 else "中" if ratios["balance"] >= 0.05 else "低",
     }
+
+
+def preview_formation_view(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    _ensure_state_available(state, actor_id)
+    nodes = _formation_nodes(
+        state, definitions, actor_id, list(payload.get("slots", []))
+    )
+    name = str(payload.get("name", "无名阵")).strip()[:20] or "无名阵"
+    return _formation_profile(state, definitions, actor_id, nodes, name)
 
 
 def _release_bindings(context: SimulationContext, actor_id: str, bindings: list[dict[str, Any]]) -> None:
@@ -588,28 +814,39 @@ def _bind_definitions(
     context: SimulationContext, definitions: GameDefinitions, actor_id: str,
     definition_ids: list[str | None], purpose: str,
 ) -> list[dict[str, Any] | None]:
-    ledger = context.state.entities.require(actor_id, ASSET_LEDGER)
-    instances = dict(ledger.get("instances", {}))
-    used: set[str] = set()
     bindings: list[dict[str, Any] | None] = []
     for definition_id in definition_ids:
         if not definition_id:
             bindings.append(None)
             continue
-        asset_id = next((
-            key for key, asset in sorted(instances.items())
-            if key not in used and asset.get("kind") == "formation_material"
-            and asset.get("definition_id") == definition_id and not asset.get("reservation_id")
+        candidate = next((
+            row for row in _formation_candidates(
+                context.state, definitions, actor_id
+            )
+            if row.get("definition_id") == definition_id
+            and not row.get("occupied")
         ), None)
-        if asset_id is None:
+        if candidate is None:
             raise ValueError(f"缺少可用阵材实例：{definition_id}")
-        reservation_id = reserve_asset(context, actor_id, purpose=purpose, asset_id=asset_id)
-        used.add(asset_id)
+        asset_id = candidate.get("asset_id")
+        item_id = candidate.get("item_id")
+        if asset_id:
+            reservation_id = reserve_asset(
+                context, actor_id, purpose=purpose, asset_id=str(asset_id)
+            )
+            binding_id = str(asset_id)
+        elif item_id:
+            reservation_id = reserve_asset(
+                context, actor_id, purpose=purpose,
+                item_id=str(item_id), quantity=1,
+            )
+            binding_id = reservation_id
+        else:
+            raise ValueError(f"阵材来源已经失效：{definition_id}")
         bindings.append({
-            **_formation_candidate(context.state, definitions, actor_id, asset_id, allow_reserved=True),
+            **dict(candidate), "id": binding_id,
             "reservation_id": reservation_id,
         })
-        instances[asset_id] = require_asset(context.state, actor_id, asset_id)
     return bindings
 
 
@@ -714,6 +951,37 @@ def _delete_handler(context: SimulationContext, command: object) -> None:
     context.state.entities.put(command.actor_id, FORMATION, component)
 
 
+def _sect_formation_authority(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> tuple[bool, str | None, str | None]:
+    # Keep the formation domain's authorization identical to the faction
+    # command path.  The import is local to avoid coupling domain startup.
+    from .factions import (
+        FACTION_GOVERNANCE,
+        FACTION_PROFILE,
+        _active_membership,
+        _has_faction_voice,
+    )
+
+    membership = _active_membership(state, actor_id)
+    if membership is None:
+        return False, None, None
+    profile = state.entities.get(membership.target_id, FACTION_PROFILE)
+    governance = state.entities.get(membership.target_id, FACTION_GOVERNANCE)
+    location = state.entities.require(actor_id, LOCATION)
+    if (
+        not isinstance(profile, dict)
+        or not isinstance(governance, dict)
+        or not bool(profile.get("active"))
+        or profile.get("world_id") != location.get("world_id")
+    ):
+        return False, None, None
+    permitted = _has_faction_voice(
+        state, definitions, actor_id, membership.target_id
+    )
+    return permitted, membership.target_id, str(profile.get("name", "宗门"))
+
+
 def _deploy_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, DeployGroundFormation):
@@ -726,10 +994,21 @@ def _deploy_handler(definitions: GameDefinitions):
         if command.owner_kind not in {"player", "sect"}:
             raise ValueError("未知镇地阵归属")
         location = context.state.entities.require(command.actor_id, LOCATION)
+        if command.owner_kind == "sect":
+            permitted, owner_id, owner_name = _sect_formation_authority(
+                context.state, definitions, command.actor_id
+            )
+            if not permitted or not owner_id:
+                raise ValueError("只有拥有宗门话语权者才能更换护山阵")
+        else:
+            identity = context.state.entities.require(command.actor_id, IDENTITY)
+            owner_id = command.actor_id
+            owner_name = str(identity.get("name", "自身"))
         if any(
             row.get("world_id") == location["world_id"]
             and row.get("location_id") == location["location_id"]
             and row.get("owner_kind") == command.owner_kind
+            and row.get("owner_id", owner_id) == owner_id
             for row in component.get("ground_arrays", [])
         ):
             raise ValueError("此地已经存在同归属的镇地阵")
@@ -737,10 +1016,19 @@ def _deploy_handler(definitions: GameDefinitions):
         ground = {
             "id": f"ground-formation:{command.actor_id}:{sequence}",
             "name": active["name"], "loadout_id": active["loadout_id"],
-            "owner_kind": command.owner_kind, "world_id": location["world_id"],
+            "owner_kind": command.owner_kind,
+            "owner_id": owner_id, "owner_name": owner_name,
+            "creator_id": command.actor_id,
+            "creator_name": str(
+                context.state.entities.require(command.actor_id, IDENTITY).get(
+                    "name", "无名修士"
+                )
+            ),
+            "world_id": location["world_id"],
             "location_id": location["location_id"], "bindings": active["bindings"],
             "profile": active["profile"], "durability": 100.0,
-            "created_year": context.state.clock.year, "last_repaired_year": context.state.clock.year,
+            "created_year": context.state.clock.year,
+            "last_repaired_year": context.state.clock.year, "battles": 0,
         }
         component.update(next_ground_sequence=sequence + 1, active=None)
         component["ground_arrays"] = [*component.get("ground_arrays", []), ground]
@@ -974,11 +1262,24 @@ def _on_world_transition(context: SimulationContext, event: EventEnvelope) -> No
                 bindings.append(None)
                 continue
             binding = dict(raw_binding)
-            asset_id = str(binding["asset_id"])
-            binding["reservation_id"] = reserve_asset(
-                context, actor_id,
-                purpose=f"formation:ground:{ground['id']}", asset_id=asset_id,
-            )
+            asset_id = binding.get("asset_id")
+            item_id = binding.get("item_id")
+            if asset_id:
+                binding["reservation_id"] = reserve_asset(
+                    context, actor_id,
+                    purpose=f"formation:ground:{ground['id']}",
+                    asset_id=str(asset_id),
+                )
+                binding["id"] = str(asset_id)
+            elif item_id:
+                binding["reservation_id"] = reserve_asset(
+                    context, actor_id,
+                    purpose=f"formation:ground:{ground['id']}",
+                    item_id=str(item_id), quantity=1,
+                )
+                binding["id"] = binding["reservation_id"]
+            else:
+                raise ValueError("镇地阵的阵材来源已经失效")
             bindings.append(binding)
         ground["bindings"] = bindings
         arrays.append(ground)
@@ -1009,6 +1310,7 @@ def artifact_static_bonuses(
     active_artifacts = [
         asset for asset in dict(ledger.get("instances", {})).values()
         if asset.get("kind") == "crafted_artifact"
+        and not asset.get("reservation_id")
     ]
     breakthrough_values = []
     for asset in active_artifacts:
@@ -1159,49 +1461,326 @@ def register_artifact_domains(bus: CommandBus, definitions: GameDefinitions) -> 
     bus.event_bus.register("world.temporary_transition.committed", _on_world_transition)
 
 
-def crafting_view(state: WorldState, definitions: GameDefinitions, actor_id: str | None = None) -> dict[str, Any]:
+def _crafted_artifact_description(asset: dict[str, Any]) -> str:
+    metadata = dict(asset.get("metadata", {}))
+    stats = dict(metadata.get("actual_stats", {}))
+    pieces = []
+    for key, value in stats.items():
+        number = float(value)
+        if not number:
+            continue
+        shown = (
+            f"{number:.1%}"
+            if key.endswith("efficiency")
+            or key.endswith("reduction")
+            or key == "breakthrough_bonus"
+            else f"{number:,.0f}"
+        )
+        pieces.append(f"{CRAFT_STAT_NAMES.get(key, key)} +{shown}")
+    summary = "、".join(pieces) or "无常驻数值"
+    effect_lines = [
+        str(row.get("description", "")).strip()
+        for row in metadata.get("material_effects", [])
+        if str(row.get("description", "")).strip()
+    ]
+    description = (
+        f"{metadata.get('quality_name', '')}{metadata.get('mold_name', '组合式法宝')}。"
+        f"常驻属性：{summary}。"
+    )
+    if effect_lines:
+        description += "材料器纹：" + "；".join(effect_lines) + "。"
+    description += (
+        f"炼于纪年 {asset.get('created_year', '?')}，锚定价值 "
+        f"{int(metadata.get('anchor_value', 1)):,} 灵石。"
+    )
+    return description
+
+
+def _crafted_artifact_public(asset: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(asset.get("metadata", {}))
+    return {
+        **dict(asset), **metadata,
+        "id": str(asset["id"]), "name": str(asset["name"]),
+        "description": _crafted_artifact_description(asset),
+        "is_natal": bool(metadata.get("is_natal")),
+        "equipped": not bool(asset.get("reservation_id")),
+    }
+
+
+def _crafted_only_bonuses(artifacts: list[dict[str, Any]]) -> dict[str, float]:
+    result = {key: 0.0 for key in CRAFT_STATS}
+    breakthroughs = []
+    for artifact in artifacts:
+        stats = dict(artifact.get("actual_stats", {}))
+        for key in CRAFT_STATS:
+            value = max(0.0, float(stats.get(key, 0)))
+            if key == "breakthrough_bonus":
+                breakthroughs.append(min(0.05, value))
+            else:
+                result[key] += value
+    result["breakthrough_bonus"] = max(breakthroughs, default=0.0)
+    return result
+
+
+def crafting_view(
+    state: WorldState, definitions: GameDefinitions,
+    actor_id: str | None = None,
+) -> dict[str, Any]:
     actor_id = actor_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
     component = state.entities.require(actor_id, CRAFTING)
     ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+    rules = _crafting_rules(definitions)
+    crafting_material_ids = set(_crafting_materials(definitions))
+    crafting_plant_ids = set(_crafting_plants(definitions))
+    materials = [
+        _material_candidate(state, definitions, actor_id, asset_id)
+        for asset_id, asset in sorted(dict(ledger.get("instances", {})).items())
+        if not asset.get("reservation_id") and (
+            (
+                asset.get("kind") == "crafting_material"
+                and str(asset.get("definition_id")) in crafting_material_ids
+            )
+            or (
+                asset.get("kind") == "harvested_spirit_plant"
+                and str(asset.get("definition_id")) in crafting_plant_ids
+            )
+        )
+    ]
+    artifacts = [
+        _crafted_artifact_public(asset)
+        for _, asset in sorted(dict(ledger.get("instances", {})).items())
+        if asset.get("kind") == "crafted_artifact"
+        and not asset.get("reservation_id")
+    ]
+    auction = state.entities.get(actor_id, "economy.auction") or {}
+    session = auction.get("session")
+    location = state.entities.require(actor_id, LOCATION)
+    auction_available = bool(
+        isinstance(session, dict)
+        and session.get("status") in {"scheduled", "open"}
+        and session.get("world_id") == location.get("world_id")
+        and session.get("location_id") == location.get("location_id")
+    )
+    budgets = list(rules.get("budget_by_realm", [40]))
     return {
+        "visible": bool(definitions.systems.get("crafting"))
+        and realm_index >= int(rules.get("minimum_realm", 1)),
         "molds": list(_crafting_molds(definitions).values()),
-        "materials": [
-            dict(asset) for asset in dict(ledger.get("instances", {})).values()
-            if asset.get("kind") in {"crafting_material", "harvested_spirit_plant"}
-            and not asset.get("reservation_id")
-        ],
-        "artifacts": [
-            dict(asset) for asset in dict(ledger.get("instances", {})).values()
-            if asset.get("kind") == "crafted_artifact"
-        ],
+        "materials": materials,
+        "artifacts": artifacts,
         "blueprints": list(component.get("blueprints", [])),
         "last_preview": component.get("last_preview"),
+        "active_count": len(artifacts),
+        "budget": int(budgets[min(realm_index, len(budgets) - 1)]),
+        "stat_costs": dict(rules.get("stat_costs", {})),
+        "stat_names": dict(CRAFT_STAT_NAMES),
+        "quality_names": dict(rules.get("quality_names", {})),
+        "bonuses": _crafted_only_bonuses(artifacts),
+        "auction_available": auction_available,
     }
 
 
-def formation_view(state: WorldState, definitions: GameDefinitions, actor_id: str | None = None) -> dict[str, Any]:
+def _ground_defense_power(
+    definitions: GameDefinitions, ground: dict[str, Any]
+) -> float:
+    if float(ground.get("durability", 0)) <= 0:
+        return 0.0
+    bindings = [
+        dict(row) for row in ground.get("bindings", []) if isinstance(row, dict)
+    ]
+    if not bindings:
+        return 0.0
+    tiers = sorted(max(0, min(
+        len(definitions.realms) - 1, int(row.get("acquired_tier", 1))
+    )) for row in bindings)
+    realm = definitions.realms[tiers[len(tiers) // 2]]
+    profile = dict(ground.get("profile", {}))
+    metrics = dict(profile.get("metrics", {}))
+    structure = min(1.0, sum(
+        float(metrics.get(key, 0)) for key in ("focus", "balance", "cycle")
+    ) / 300)
+    settings = dict(_formation_config(definitions).get("settings", {}))
+    low = float(settings.get("ground_power_ratio_min", 0.18))
+    high = float(settings.get("ground_power_ratio_max", 0.52))
+    ratio = min(
+        float(settings.get("ground_power_hard_cap_ratio", 0.58)),
+        low + (high - low) * structure,
+    )
+    return round(
+        float(realm.base_power) * ratio
+        * math.sqrt(float(ground.get("durability", 0)) / 100),
+        2,
+    )
+
+
+def formation_view(
+    state: WorldState, definitions: GameDefinitions,
+    actor_id: str | None = None,
+) -> dict[str, Any]:
     actor_id = actor_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
     component = state.entities.require(actor_id, FORMATION)
     ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    instances = dict(ledger.get("instances", {}))
+    materials = _formation_candidates(state, definitions, actor_id)
+    active = component.get("active")
+    active_data = dict(active) if isinstance(active, dict) else {}
+    active_bindings = []
+    for slot, binding in enumerate(active_data.get("bindings", [])):
+        if not binding:
+            active_bindings.append(None)
+            continue
+        row = dict(binding)
+        row.update(
+            id=row.get("asset_id") or row.get("reservation_id") or row.get("id"),
+            slot=slot,
+        )
+        active_bindings.append(row)
+    location = state.entities.require(actor_id, LOCATION)
+    world_id = str(location["world_id"])
+    location_id = str(location["location_id"])
+    world = definitions.worlds[world_id]
+    ground_arrays = []
+    for raw in component.get("ground_arrays", []):
+        ground = dict(raw)
+        ground_world_id = str(ground.get("world_id", ""))
+        ground_location_id = str(ground.get("location_id", ""))
+        ground_world = definitions.worlds.get(ground_world_id)
+        location_name = ground_location_id
+        if ground_world and ground_location_id in ground_world.locations:
+            location_name = ground_world.locations[ground_location_id].name
+        ground_arrays.append({
+            **ground,
+            "world": ground_world_id,
+            "world_name": ground_world.name if ground_world else ground_world_id,
+            "location_name": location_name,
+            "owner_name": ground.get("owner_name", "自身"),
+            "defense_power": _ground_defense_power(definitions, ground),
+            "local": ground_world_id == world_id
+            and ground_location_id == location_id,
+        })
+    supply_definitions = {
+        str(row["id"]): dict(row)
+        for row in _formation_config(definitions).get(
+            "maintenance_resources", []
+        )
+    }
+    supply_counts: dict[str, int] = {}
+    for asset in instances.values():
+        if asset.get("kind") == "formation_supply" and not asset.get(
+            "reservation_id"
+        ):
+            definition_id = str(asset.get("definition_id", ""))
+            supply_counts[definition_id] = supply_counts.get(definition_id, 0) + 1
+    repair_supplies = [
+        {
+            **definition, "id": definition_id, "quantity": quantity,
+            "world_name": definitions.worlds[definition["world"]].name
+            if definition.get("world") in definitions.worlds
+            else definition.get("world"),
+        }
+        for definition_id, quantity in sorted(supply_counts.items())
+        if (definition := supply_definitions.get(definition_id))
+    ]
+    profile = dict(active_data.get("profile", {}))
+    permitted, _, _ = _sect_formation_authority(
+        state, definitions, actor_id
+    )
+    level = _formation_level(state, definitions, actor_id)
+    field = state.entities.require(actor_id, SPIRIT_FIELD)
     return {
         **dict(component),
-        "materials": [
-            dict(asset) for asset in dict(ledger.get("instances", {})).values()
-            if asset.get("kind") == "formation_material"
-        ],
-        "supplies": [
-            dict(asset) for asset in dict(ledger.get("instances", {})).values()
-            if asset.get("kind") == "formation_supply" and not asset.get("reservation_id")
-        ],
-        "formation_level": _formation_level(state, definitions, actor_id),
+        "visible": bool(definitions.systems.get("formations")),
+        "system_version": int(
+            _formation_config(definitions).get("system_version", 1)
+        ),
+        "grid_size": 9,
+        "level": level,
+        "formation_level": level,
+        "experience": round(float(
+            dict(field.get("art_experience", {})).get("formation", 0)
+        ), 2),
+        "alpha": round(_formation_alpha(state, definitions, actor_id), 6),
+        "materials": materials,
+        "loadouts": list(component.get("loadouts", [])),
+        "active_formation_id": active_data.get("loadout_id"),
+        "active_bindings": active_bindings,
+        "profile": profile,
+        "ground_arrays": ground_arrays,
+        "repair_supplies": repair_supplies,
+        "supplies": repair_supplies,
+        "current_location": {
+            "world": world_id, "world_name": world.name,
+            "location_id": location_id,
+            "location_name": world.locations[location_id].name,
+        },
+        "can_deploy_personal": bool(profile.get("active")),
+        "can_deploy_sect": bool(profile.get("active") and permitted),
     }
 
 
-def natal_view(state: WorldState, definitions: GameDefinitions, actor_id: str | None = None) -> dict[str, Any]:
+def _natal_display_bonuses(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+    artifact: dict[str, Any],
+) -> dict[str, float]:
+    level = max(1, int(artifact.get("level", 1)))
+    scale = 1 + float(_natal_config(definitions)["level_scale_per_level"]) * (
+        level - 1
+    )
+    result = {
+        "combat_bonus": 0.0, "hp_bonus": 0.0, "mp_bonus": 0.0,
+        "opportunity_bonus": 0.0, "tribulation_reduction": 0.0,
+    }
+    ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    asset = dict(ledger.get("instances", {})).get(str(artifact.get("asset_id", "")))
+    if isinstance(asset, dict):
+        stats = dict(dict(asset.get("metadata", {})).get("actual_stats", {}))
+        result.update({
+            "combat_bonus": float(stats.get("combat_power", 0)) * scale,
+            "hp_bonus": float(stats.get("max_hp", 0)) * scale,
+            "mp_bonus": float(stats.get("max_mp", 0)) * scale,
+            "opportunity_bonus": float(
+                stats.get("opportunity_efficiency", 0)
+            ) * scale,
+            "tribulation_reduction": float(
+                stats.get("tribulation_reduction", 0)
+            ) * scale,
+        })
+    else:
+        item = definitions.items.get(str(artifact.get("item_id", "")))
+        if item:
+            result.update({
+                "combat_bonus": float(item.combat_bonus) * scale,
+                "hp_bonus": float(item.hp_bonus) * scale,
+                "mp_bonus": float(item.mp_bonus) * scale,
+                "opportunity_bonus": float(item.opportunity_bonus) * scale,
+                "tribulation_reduction": float(
+                    item.tribulation_damage_reduction
+                ) * scale,
+            })
+    material_defs = _natal_materials(definitions)
+    for material_id in artifact.get("slots", []):
+        definition = material_defs.get(str(material_id))
+        if not definition:
+            continue
+        for key, value in dict(definition.get("effect", {})).items():
+            if key in result:
+                result[key] += float(value)
+    result["tribulation_reduction"] = min(
+        0.5, result["tribulation_reduction"]
+    )
+    return result
+
+
+def natal_view(
+    state: WorldState, definitions: GameDefinitions,
+    actor_id: str | None = None,
+) -> dict[str, Any]:
     actor_id = actor_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
@@ -1213,29 +1792,92 @@ def natal_view(state: WorldState, definitions: GameDefinitions, actor_id: str | 
     if not isinstance(artifact, dict):
         ledger = state.entities.require(actor_id, ASSET_LEDGER)
         candidates = [
-            {"id": asset["id"], "name": asset["name"], "kind": "crafted_artifact"}
+            {
+                "id": asset["id"], "name": asset["name"],
+                "kind": "crafted_artifact",
+                "quantity": 1,
+                "combat_bonus": float(dict(asset.get("metadata", {})).get(
+                    "actual_stats", {}
+                ).get("combat_power", 0)),
+                "description": _crafted_artifact_description(asset),
+            }
             for asset in dict(ledger.get("instances", {})).values()
             if asset.get("kind") == "crafted_artifact" and not asset.get("reservation_id")
         ]
         inventory = state.entities.require(actor_id, "economy.inventory")
         candidates.extend(
-            {"id": item_id, "name": definitions.items[item_id].name, "kind": "item"}
+            {
+                "id": item_id, "name": definitions.items[item_id].name,
+                "kind": "item", "quantity": int(quantity),
+                "combat_bonus": float(definitions.items[item_id].combat_bonus),
+                "description": definitions.items[item_id].description,
+            }
             for item_id, quantity in dict(inventory.get("items", {})).items()
             if quantity > 0 and item_id in set(_natal_config(definitions).get("eligible_item_ids", []))
         )
         return {"visible": True, "bound": False, "candidates": candidates}
     level = int(artifact["level"])
     config = _natal_config(definitions)
-    bonuses = artifact_static_bonuses(state, definitions, actor_id)
+    ledger = state.entities.require(actor_id, ASSET_LEDGER)
+    source_asset = dict(ledger.get("instances", {})).get(
+        str(artifact.get("asset_id", ""))
+    )
+    source_item = definitions.items.get(str(artifact.get("item_id", "")))
+    description = (
+        _crafted_artifact_description(source_asset)
+        if isinstance(source_asset, dict)
+        else source_item.description if source_item else "本命法宝"
+    )
+    raw_slots = list(artifact.get("slots", []))[:7]
+    raw_slots.extend([None] * (7 - len(raw_slots)))
+    material_definitions = _natal_materials(definitions)
+    materials = []
+    for material_id, definition in material_definitions.items():
+        quantity = inventory_quantity(state, actor_id, material_id, spendable=True)
+        materials.append({
+            **definition, "item_id": material_id, "quantity": quantity,
+            "available": quantity > 0
+            and realm_index >= int(definition["minimum_realm"])
+            and material_id not in raw_slots,
+        })
+    slots = []
+    unlocked = _natal_slots(definitions, level)
+    for index, material_id in enumerate(raw_slots):
+        definition = material_definitions.get(str(material_id))
+        slots.append({
+            "index": index, "unlocked": index < unlocked,
+            "material_id": material_id,
+            "name": definition.get("name") if definition else None,
+            "description": definition.get("description") if definition else None,
+        })
+    bonuses = _natal_display_bonuses(
+        state, definitions, actor_id, artifact
+    )
+    maximum = int(config["max_level"])
+    refine_cost = int(config["manual_refine_stone_base"]) * level
     return {
         "visible": True, "bound": True, **dict(artifact),
-        "max_level": int(config["max_level"]),
-        "unlocked_slots": _natal_slots(definitions, level),
+        "description": description,
+        "crafted_artifact_id": artifact.get("asset_id"),
+        "max_level": maximum,
+        "unlocked_slots": unlocked,
         "experience_required": int(config["experience_base"]) * level
-        if level < int(config["max_level"]) else 0,
-        "refine_cost": int(config["manual_refine_stone_base"]) * level,
-        "materials": list(_natal_materials(definitions).values()),
-        "bonuses": {key: bonuses[key] for key in (
-            "combat_power", "max_hp", "max_mp", "opportunity_efficiency", "tribulation_reduction"
-        )},
+        if level < maximum else 0,
+        "refine_cost": refine_cost,
+        "can_refine": level < maximum and inventory_quantity(
+            state, actor_id, CURRENCY_ID, spendable=True
+        ) >= refine_cost,
+        # Keep the canonical slot IDs stable for V2 callers and expose the
+        # richer V1 rendering contract separately.  The frozen facade maps
+        # slot_details back to `slots` for the legacy UI.
+        "slots": raw_slots,
+        "slot_details": slots,
+        "materials": materials,
+        "bonuses": {
+            **bonuses,
+            "combat_power": bonuses["combat_bonus"],
+            "max_hp": bonuses["hp_bonus"],
+            "max_mp": bonuses["mp_bonus"],
+            "opportunity_efficiency": bonuses["opportunity_bonus"],
+        },
     }

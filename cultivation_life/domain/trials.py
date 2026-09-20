@@ -14,6 +14,7 @@ from ..kernel.model import EventEnvelope, EventScope, WorldState
 
 
 TRIAL = "cultivation.trial"
+PERIODIC_THUNDER_DUE = "cultivation.periodic_thunder.due"
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,13 +25,105 @@ class BeginAscensionTrial:
 
 
 def _new_trial_state() -> dict[str, Any]:
-    return {"active": None, "history": []}
+    return {
+        "active": None,
+        "history": [],
+        "periodic": {
+            "count": 0,
+            "power": None,
+            "next_year": None,
+            "schedule_sequence": None,
+        },
+    }
 
 
-def reconcile_trial_state(state: WorldState) -> None:
+def _periodic_config(definitions: GameDefinitions) -> dict[str, Any]:
+    return dict(definitions.breakthrough["periodic_thunder"])
+
+
+def _cancel_periodic_schedule(state: WorldState, entity_id: str) -> None:
+    state.scheduler.cancel(lambda scheduled: (
+        scheduled.event_type == PERIODIC_THUNDER_DUE
+        and str(scheduled.payload.get("entity_id", "")) == entity_id
+    ))
+
+
+def _schedule_periodic_thunder(
+    state: WorldState, entity_id: str, periodic: dict[str, Any], due_year: int,
+) -> None:
+    _cancel_periodic_schedule(state, entity_id)
+    scheduled = state.scheduler.schedule(
+        due_year=due_year,
+        event_type=PERIODIC_THUNDER_DUE,
+        source="trials",
+        scope=EventScope.entity(entity_id),
+        payload={"entity_id": entity_id},
+    )
+    periodic["next_year"] = due_year
+    periodic["schedule_sequence"] = scheduled.sequence
+
+
+def reconcile_trial_state(
+    state: WorldState, definitions: GameDefinitions | None = None,
+) -> None:
     for entity_id in state.entities.with_component(IDENTITY):
-        if state.entities.get(entity_id, TRIAL) is None:
-            state.entities.put(entity_id, TRIAL, _new_trial_state())
+        component = state.entities.get(entity_id, TRIAL)
+        if component is None:
+            component = _new_trial_state()
+        periodic = dict(component.get("periodic", {}))
+        periodic.setdefault("count", 0)
+        periodic.setdefault("power", None)
+        periodic.setdefault("next_year", None)
+        periodic.setdefault("schedule_sequence", None)
+        component["periodic"] = periodic
+        state.entities.put(entity_id, TRIAL, component)
+    if definitions is None or state.controlled_entity_id is None:
+        return
+    actor_id = state.controlled_entity_id
+    component = state.entities.require(actor_id, TRIAL)
+    periodic = dict(component["periodic"])
+    cultivation = state.entities.get(actor_id, CULTIVATION) or {}
+    life = state.entities.get(actor_id, LIFE) or {}
+    transition = state.entities.get(actor_id, WORLD_TRANSITION) or {}
+    realm_index = definitions.realm_index(str(cultivation.get("realm_id", "mortal")))
+    sealed = dict(transition.get("sealed_cultivation") or {})
+    upper_world = str(sealed.get("upper_world", ""))
+    eligible_to_initialize = (
+        bool(life.get("alive"))
+        and
+        6 <= realm_index <= 8
+        and upper_world not in {"celestial", "asura", "nether"}
+    )
+    if periodic.get("next_year") is None and eligible_to_initialize:
+        config = _periodic_config(definitions)
+        periodic["power"] = float(config["base_power"]) * (
+            float(config["power_multiplier"]) ** int(periodic["count"])
+        )
+        _schedule_periodic_thunder(
+            state, actor_id, periodic,
+            state.clock.year + int(config["interval_years"]),
+        )
+    active = component.get("active")
+    periodic_active = (
+        isinstance(active, dict) and active.get("kind") == "periodic_thunder"
+    )
+    scheduled = any(
+        event.event_type == PERIODIC_THUNDER_DUE
+        and str(event.payload.get("entity_id", "")) == actor_id
+        for event in state.scheduler.events
+    )
+    if (
+        bool(life.get("alive"))
+        and periodic.get("next_year") is not None
+        and not periodic_active
+        and not scheduled
+    ):
+        _schedule_periodic_thunder(
+            state, actor_id, periodic,
+            max(state.clock.year, int(periodic["next_year"])),
+        )
+    component["periodic"] = periodic
+    state.entities.put(actor_id, TRIAL, component)
 
 
 def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
@@ -40,7 +133,14 @@ def _on_character_created(context: SimulationContext, event: EventEnvelope) -> N
 def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None:
     entity_id = str(event.payload["entity_id"])
     state = context.state.entities.get(entity_id, TRIAL)
-    if state is None or state.get("active") is None:
+    if state is None:
+        return
+    _cancel_periodic_schedule(context.state, entity_id)
+    periodic = dict(state.get("periodic", {}))
+    periodic.update(next_year=None, schedule_sequence=None)
+    state["periodic"] = periodic
+    if state.get("active") is None:
+        context.state.entities.put(entity_id, TRIAL, state)
         return
     active = dict(state["active"])
     history = list(state.get("history", []))
@@ -82,6 +182,11 @@ def _event_ids(kind: str) -> list[str]:
         "asura_ascension": [
             f"EVT_ASURA_ASCENSION_{index:03d}" for index in range(1, 10)
         ],
+        "periodic_thunder": [
+            "EVT_PERIODIC_THUNDER_001",
+            "EVT_PERIODIC_THUNDER_002",
+            "EVT_PERIODIC_THUNDER_003",
+        ],
     }[kind]
 
 
@@ -100,13 +205,14 @@ def _start_trial(
     invited_ids: tuple[str, ...] = (),
     destination_world_id: str | None = None,
     joint_companion_id: str | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     state = context.state.entities.require(actor_id, TRIAL)
     if state.get("active") is not None:
         raise ValueError("已有试炼正在进行")
     event_ids = _event_ids(kind)
     trial_id = f"trial:{context.state.next_event_sequence:010d}"
-    state["active"] = {
+    active = {
         "id": trial_id,
         "kind": kind,
         "status": "active",
@@ -123,6 +229,9 @@ def _start_trial(
         "joint_companion_id": joint_companion_id,
         "started_year": context.state.clock.year,
     }
+    if metadata:
+        active.update(metadata)
+    state["active"] = active
     context.state.entities.put(actor_id, TRIAL, state)
     queue_story_event(
         context, definitions, actor_id, event_ids[0], reason=f"trial:{trial_id}"
@@ -257,7 +366,36 @@ def _evaluate_step(
     heart = float(cultivation.get("heart_demon", 0))
     target = int(trial["target_realm_index"])
     thunder = "thunder" in step
-    if step == "vitality":
+    if step.startswith("thunder_"):
+        config = _periodic_config(definitions)
+        strike_index = int(step.rsplit("_", 1)[1]) - 1
+        multipliers = list(config["strike_multipliers"])
+        if not 0 <= strike_index < len(multipliers):
+            raise ValueError(f"未知雷劫关隘：{step}")
+        thunder_power = float(trial["power"]) * float(multipliers[strike_index])
+        current_hp = float(snapshot["max_hp"]) * hp_ratio
+        current_mp = float(snapshot["max_mp"]) * mp_ratio
+        hp_need = max(
+            float(snapshot["max_hp"]) * float(config["hp_ratio"]),
+            thunder_power * float(config["power_hp_scale"]),
+        )
+        mp_need = max(
+            float(snapshot["max_mp"]) * float(config["mp_ratio"]),
+            thunder_power * float(config["power_mp_scale"]),
+        )
+        passed = current_hp >= hp_need and current_mp >= mp_need
+        detail = (
+            f"HP {current_hp:.0f}/{hp_need:.0f}，MP {current_mp:.0f}/{mp_need:.0f}，"
+            f"雷威 {thunder_power:.0f}"
+        )
+        drain = tuple(map(float, config["drain_hp"])), tuple(map(float, config["drain_mp"]))
+        # Periodic thunder uses a random value inside each configured range.
+        drain = (
+            context.rng.uniform(*drain[0]),
+            context.rng.uniform(*drain[1]),
+        )
+        thunder = True
+    elif step == "vitality":
         passed, detail, drain = hp_ratio >= 0.62 and mp_ratio >= 0.62, f"HP {hp_ratio:.0%}、MP {mp_ratio:.0%}", (0.08, 0.10)
     elif step == "karma":
         limit = float(definitions.breakthrough["traditional"]["karma_limits"].get(str(target), 60))
@@ -364,6 +502,10 @@ def _trial_step_handler(definitions: GameDefinitions):
             })
             state["history"] = history[-50:]
             context.state.entities.put(actor_id, TRIAL, state)
+            if active["kind"] == "periodic_thunder":
+                cultivation = context.state.entities.require(actor_id, CULTIVATION)
+                cultivation["next_thunder_damage_reduction"] = 0.0
+                context.state.entities.put(actor_id, CULTIVATION, cultivation)
             context.emit(
                 "cultivation.trial.failed",
                 source="trials",
@@ -385,15 +527,26 @@ def _trial_step_handler(definitions: GameDefinitions):
 
         hp_drain, mp_drain = drain
         if thunder:
+            cultivation = context.state.entities.require(actor_id, CULTIVATION)
             reduction = min(
-                0.90,
+                0.75,
                 _body_thunder_reduction(context, definitions, actor_id)
                 + float(combat_snapshot(
                     context.state, definitions, actor_id
-                ).get("tribulation_reduction", 0)),
+                ).get("tribulation_reduction", 0))
+                + float(cultivation.get("next_thunder_damage_reduction", 0)),
             )
             hp_drain *= 1 - reduction
             mp_drain *= 1 - reduction
+            if (
+                active["kind"] == "periodic_thunder"
+                and cultivation.get("path") == "demonic"
+            ):
+                damage_multiplier = float(definitions.systems[
+                    "demonic_cultivation"
+                ].get("periodic_thunder_damage_multiplier", 1.0))
+                hp_drain *= damage_multiplier
+                mp_drain *= damage_multiplier
         context.emit(
             "combat.condition.drain.requested",
             source="trials",
@@ -417,7 +570,37 @@ def _trial_step_handler(definitions: GameDefinitions):
                 f"第 {active['step_index']}/{len(active['event_ids'])} 关通过（{detail}）。",
             )
 
-        if active["kind"] in {"celestial_ascension", "asura_ascension"}:
+        if active["kind"] == "periodic_thunder":
+            config = _periodic_config(definitions)
+            periodic = dict(state["periodic"])
+            periodic["count"] = int(periodic["count"]) + 1
+            periodic["power"] = float(active.get("base_power", active["power"])) * float(
+                config["power_multiplier"]
+            )
+            _schedule_periodic_thunder(
+                context.state, actor_id, periodic,
+                context.state.clock.year + int(config["interval_years"]),
+            )
+            state["periodic"] = periodic
+            cultivation = context.state.entities.require(actor_id, CULTIVATION)
+            cultivation["next_thunder_damage_reduction"] = 0.0
+            context.state.entities.put(actor_id, CULTIVATION, cultivation)
+            context.emit(
+                "cultivation.periodic_thunder.completed",
+                source="trials",
+                scope=EventScope.entity(actor_id),
+                payload={
+                    "entity_id": actor_id,
+                    "count": periodic["count"],
+                    "next_year": periodic["next_year"],
+                    "next_power": periodic["power"],
+                },
+            )
+        elif active["kind"] in {"celestial_ascension", "asura_ascension"}:
+            periodic = dict(state["periodic"])
+            periodic.update(power=None, next_year=None, schedule_sequence=None)
+            state["periodic"] = periodic
+            _cancel_periodic_schedule(context.state, actor_id)
             context.emit(
                 "world.ascension.commit.requested",
                 source="trials",
@@ -459,6 +642,95 @@ def _trial_step_handler(definitions: GameDefinitions):
     return handler
 
 
+def _on_breakthrough_succeeded(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        if actor_id != context.state.controlled_entity_id:
+            return
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+        if realm_index != 6:
+            return
+        state = context.state.entities.require(actor_id, TRIAL)
+        periodic = dict(state["periodic"])
+        if periodic.get("next_year") is not None:
+            return
+        config = _periodic_config(definitions)
+        periodic["power"] = float(config["base_power"])
+        _schedule_periodic_thunder(
+            context.state, actor_id, periodic,
+            context.state.clock.year + int(config["interval_years"]),
+        )
+        state["periodic"] = periodic
+        context.state.entities.put(actor_id, TRIAL, state)
+
+    return handler
+
+
+def _on_periodic_thunder_due(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["entity_id"])
+        if actor_id != context.state.controlled_entity_id:
+            return
+        life = context.state.entities.require(actor_id, LIFE)
+        if not bool(life.get("alive")):
+            return
+        state = context.state.entities.require(actor_id, TRIAL)
+        periodic = dict(state["periodic"])
+        if periodic.get("next_year") is None:
+            return
+        transition = context.state.entities.get(actor_id, WORLD_TRANSITION) or {}
+        sealed = dict(transition.get("sealed_cultivation") or {})
+        location = context.state.entities.require(actor_id, LOCATION)
+        current_tier = int(definitions.worlds[str(location["world_id"])].tier)
+        upper_world = str(sealed.get("upper_world", location["world_id"]))
+        upper_tier = int(definitions.worlds[upper_world].tier)
+        world_multiplier = (
+            float(definitions.systems["world_travel"].get(
+                "lower_world_tribulation_multiplier", 1.0,
+            ))
+            if upper_tier > current_tier else 1.0
+        )
+        base_power = float(periodic.get("power") or _periodic_config(definitions)["base_power"])
+        _start_trial(
+            context,
+            definitions,
+            actor_id=actor_id,
+            kind="periodic_thunder",
+            source_realm_index=definitions.realm_index(str(
+                context.state.entities.require(actor_id, CULTIVATION)["realm_id"]
+            )),
+            source_layer=int(context.state.entities.require(actor_id, CULTIVATION)["layer"]),
+            target_realm_index=definitions.realm_index(str(
+                context.state.entities.require(actor_id, CULTIVATION)["realm_id"]
+            )),
+            target_layer=int(context.state.entities.require(actor_id, CULTIVATION)["layer"]),
+            major=False,
+            lethal=True,
+            metadata={
+                "power": base_power * world_multiplier,
+                "base_power": base_power,
+                "world_power_multiplier": world_multiplier,
+            },
+        )
+        periodic["schedule_sequence"] = None
+        state = context.state.entities.require(actor_id, TRIAL)
+        state["periodic"] = periodic
+        context.state.entities.put(actor_id, TRIAL, state)
+
+    return handler
+
+
+def _on_ascension_completed(context: SimulationContext, event: EventEnvelope) -> None:
+    actor_id = str(event.payload["entity_id"])
+    state = context.state.entities.require(actor_id, TRIAL)
+    periodic = dict(state["periodic"])
+    periodic.update(power=None, next_year=None, schedule_sequence=None)
+    state["periodic"] = periodic
+    context.state.entities.put(actor_id, TRIAL, state)
+    _cancel_periodic_schedule(context.state, actor_id)
+
+
 def trial_invariants(definitions: GameDefinitions):
     def validate(state: WorldState) -> list[str]:
         errors: list[str] = []
@@ -468,6 +740,14 @@ def trial_invariants(definitions: GameDefinitions):
                 errors.append(f"角色 {entity_id} 缺少试炼组件")
                 continue
             active = component.get("active")
+            periodic = dict(component.get("periodic", {}))
+            try:
+                if int(periodic.get("count", 0)) < 0:
+                    errors.append(f"角色 {entity_id} 的雷劫次数无效")
+                if periodic.get("next_year") is not None and int(periodic["next_year"]) < state.clock.year:
+                    errors.append(f"角色 {entity_id} 的雷劫调度已经过期")
+            except (TypeError, ValueError):
+                errors.append(f"角色 {entity_id} 的周期雷劫结构无效")
             if active is None:
                 continue
             try:
@@ -496,6 +776,13 @@ def register_trial_domain(bus: CommandBus, definitions: GameDefinitions) -> None
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("character.died", _on_character_died)
     bus.event_bus.register(
+        "cultivation.breakthrough.succeeded", _on_breakthrough_succeeded(definitions)
+    )
+    bus.event_bus.register(
+        PERIODIC_THUNDER_DUE, _on_periodic_thunder_due(definitions)
+    )
+    bus.event_bus.register("cultivation.ascension.completed", _on_ascension_completed)
+    bus.event_bus.register(
         "cultivation.trial.start.requested", _on_breakthrough_trial_requested(definitions)
     )
 
@@ -510,4 +797,35 @@ def trial_view(state: WorldState, entity_id: str | None = None) -> dict[str, Any
     actor_id = entity_id or state.controlled_entity_id
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
-    return state.entities.require(actor_id, TRIAL)
+    component = state.entities.require(actor_id, TRIAL)
+    return {
+        "active": component.get("active"),
+        "history": list(component.get("history", [])),
+    }
+
+
+def tribulation_view(state: WorldState, entity_id: str | None = None) -> dict[str, Any]:
+    actor_id = entity_id or state.controlled_entity_id
+    if actor_id is None:
+        raise ValueError("游戏尚未初始化")
+    trial = state.entities.require(actor_id, TRIAL)
+    periodic = dict(trial.get("periodic", {}))
+    life = state.entities.require(actor_id, LIFE)
+    next_year = periodic.get("next_year")
+    next_age = (
+        int(next_year) - int(life["birth_year"])
+        if next_year is not None else None
+    )
+    return {
+        "active": bool(
+            isinstance(trial.get("active"), dict)
+            and trial["active"].get("kind") == "periodic_thunder"
+        ),
+        "count": int(periodic.get("count", 0)),
+        "power": periodic.get("power"),
+        "next_age": next_age,
+        "years_remaining": (
+            max(0, int(next_year) - state.clock.year)
+            if next_year is not None else None
+        ),
+    }

@@ -11,7 +11,7 @@ from .character import IDENTITY, LIFE, LIFESPAN_DUE
 from .combat import CONDITION, combat_snapshot
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions, StoryEffectDefinition
-from .demonic import DEMONIC_STATE, POSSESSION, possess_character
+from .demonic import DEMONIC_STATE, POSSESSION, possess_character, possession_limit
 from .economy import INVENTORY
 from .extensions import GHOST_DLC, GHOST_SOUL
 from .story import (
@@ -107,6 +107,23 @@ def _loaded(definitions: GameDefinitions) -> bool:
 
 def _phase_two(definitions: GameDefinitions) -> dict[str, Any]:
     return dict(dict(definitions.systems.get("ghost_cultivation", {})).get("phase_two", {}))
+
+
+def _attachment_quality(item: Any) -> float:
+    return max(
+        0.0,
+        float(item.combat_bonus) + float(item.hp_bonus) + float(item.mp_bonus)
+        + float(item.opportunity_bonus) * 100,
+    )
+
+
+def _is_attachable_item(item: Any) -> bool:
+    vessel_words = ("器", "剑", "刀", "鼎", "炉", "珠", "灯", "匣", "舟")
+    return (
+        _attachment_quality(item) > 0
+        or "ghost_vessel" in item.tags
+        or any(word in item.name for word in vessel_words)
+    )
 
 
 def _default_ecology() -> dict[str, Any]:
@@ -831,19 +848,16 @@ def _attachment_handler(definitions: GameDefinitions):
             item = definitions.items.get(command.item_id)
             if item is None:
                 raise ValueError("未知器物")
-            quality = max(
-                0.0,
-                item.combat_bonus + item.hp_bonus + item.mp_bonus
-                + item.opportunity_bonus * 100,
-            )
-            vessel_words = ("器", "剑", "刀", "鼎", "炉", "珠", "灯", "匣", "舟")
-            if quality <= 0 and "ghost_vessel" not in item.tags and not any(
-                word in item.name for word in vessel_words
-            ):
+            quality = _attachment_quality(item)
+            if not _is_attachable_item(item):
                 raise ValueError("只能附着兵器、法器或魂器")
             ecology["attachment"] = {
                 "item_id": item.id,
                 "name": item.name,
+                "spirit_name": (
+                    f"{item.name}器灵·"
+                    f"{context.state.entities.require(command.actor_id, IDENTITY)['name']}"
+                ),
                 "erosion_growth_multiplier": max(0.45, 0.92 - min(0.47, quality / 5000)),
                 "cultivation_efficiency_multiplier": max(0.68, 0.94 - min(0.26, quality / 10000)),
             }
@@ -1076,7 +1090,8 @@ def _controlled_guard(state: WorldState, command: object) -> None:
         return
     allowed = {
         "GhostConstraintAction", "GhostSoulAction", "ResolveStoryChoice",
-        "UseItem", "UpdateSetting", "SetWorldNewsDebug",
+        "RepairPendingStoryEvent", "UseItem", "UpdateSetting",
+        "SetWorldNewsDebug",
     }
     if type(command).__name__ not in allowed:
         raise ValueError("魂印受制于拘魂者，当前功能要求自由行动主体，因而不可使用")
@@ -1106,17 +1121,28 @@ def ghost_invariants(state: WorldState) -> list[str]:
     return errors
 
 
-def _public_soul(state: WorldState, soul_id: str) -> dict[str, Any]:
+def _public_soul(
+    state: WorldState, definitions: GameDefinitions, soul_id: str,
+) -> dict[str, Any]:
     soul = state.entities.require(soul_id, BOUND_SOUL)
     identity = state.entities.get(soul_id, IDENTITY) or {"name": soul.get("name", "无名游魂")}
     cultivation = state.entities.get(soul_id, CULTIVATION) or {}
-    return {
+    realm_id = str(cultivation.get("realm_id", "mortal"))
+    layer = int(cultivation.get("layer", 1))
+    realm = definitions.realm(realm_id)
+    result = {
         "id": soul_id,
         "name": identity.get("name", soul.get("name", "无名游魂")),
-        "realm_id": cultivation.get("realm_id"),
-        "layer": cultivation.get("layer"),
+        "realm_id": realm_id,
+        "realm_index": definitions.realm_index(realm_id),
+        "realm_name": realm.name if realm.id == "mortal" else f"{realm.name}·{layer}层",
+        "layer": layer,
         **copy.deepcopy(soul),
     }
+    result["soul_trait"] = copy.deepcopy(
+        soul.get("soul_trait") or soul.get("trait") or {}
+    )
+    return result
 
 
 def ghost_view(
@@ -1139,6 +1165,10 @@ def ghost_view(
             "stat_name": label,
             "soul_id": dict(ecology.get("slots", {})).get(slot),
             "effect": round(effects[stat], 6),
+            "curve": (
+                "unbounded_diminishing" if stat in THREE_SOUL_STATS
+                else "bounded"
+            ),
         }
         for slot, (stat, label) in SOUL_SLOTS.items()
     ]
@@ -1147,7 +1177,7 @@ def ghost_view(
         parade = {"status": "dormant", "announced": False}
     elif parade:
         parade["souls"] = [
-            _public_soul(state, soul_id)
+            _public_soul(state, definitions, soul_id)
             for soul_id in parade.get("soul_ids", [])
             if state.entities.get(soul_id, BOUND_SOUL) is not None
         ]
@@ -1165,11 +1195,38 @@ def ghost_view(
         else "attached" if ecology.get("attachment")
         else "free"
     )
+    state_labels = {
+        "free": "自由魂体",
+        "attached": "附灵器魂",
+        "controlled": "受制拘魂",
+        "possessed": "夺舍寄身",
+    }
+    inventory = state.entities.require(actor_id, INVENTORY)
+    attachable_items = []
+    for item_id, quantity in dict(inventory.get("items", {})).items():
+        item = definitions.items.get(str(item_id))
+        if int(quantity) <= 0 or item is None or not _is_attachable_item(item):
+            continue
+        attachable_items.append({
+            "id": item.id,
+            "name": item.name,
+            "description": item.description,
+            "quantity": int(quantity),
+        })
+    attachment = copy.deepcopy(ecology.get("attachment"))
+    if isinstance(attachment, dict):
+        attachment.setdefault(
+            "spirit_name",
+            f"{attachment.get('name', '无名器物')}器灵·"
+            f"{state.entities.require(actor_id, IDENTITY)['name']}",
+        )
     return {
         "available": True,
         "name": "百鬼夜行:轮回往生",
         "state": state_name,
+        "state_name": state_labels[state_name],
         "suspended": bool(possession.get("host")),
+        "souls_suspended": bool(possession.get("host")),
         "soul": copy.deepcopy(soul),
         "can_reincarnate": can_reincarnate,
         "reincarnation_preview": {
@@ -1182,15 +1239,21 @@ def ghost_view(
         } if can_reincarnate else None,
         "breakthrough_bonus": ghost_breakthrough_bonus(state, definitions, actor_id),
         "slots": slots,
-        "bound_souls": [_public_soul(state, soul_id) for soul_id in bound_ids],
+        "bound_souls": [
+            _public_soul(state, definitions, soul_id) for soul_id in bound_ids
+        ],
         "effects": {key: round(value, 6) for key, value in effects.items()},
         "pressure": round(pressure, 4),
         "pressure_modifier": round(pressure_modifier, 6),
         "parade": parade,
-        "attachment": copy.deepcopy(ecology.get("attachment")),
+        "attachment": attachment,
+        "attachable_items": attachable_items,
         "captor": copy.deepcopy(ecology.get("captor")),
         "host": copy.deepcopy(possession.get("host")),
         "possession_count": int(possession.get("count", 0)),
+        "possession_limit": possession_limit(
+            state, definitions, actor_id
+        ),
     }
 
 

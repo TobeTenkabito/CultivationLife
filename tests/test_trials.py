@@ -8,7 +8,9 @@ from cultivation_life import FormRelationship, GrantItem, RegisterCharacter, Gam
 from cultivation_life.domain.combat import CONDITION
 from cultivation_life.domain.cultivation import CULTIVATION
 from cultivation_life.domain.story import STORY_STATE
+from cultivation_life.domain.trials import PERIODIC_THUNDER_DUE, TRIAL
 from cultivation_life.domain.world import LOCATION
+from cultivation_life.kernel.model import EventScope
 
 
 class V2TrialRuntimeTests(unittest.TestCase):
@@ -130,6 +132,51 @@ class V2TrialRuntimeTests(unittest.TestCase):
         self.assertIsNone(failed.game["trial"]["active"])
         self.assertEqual(failed.game["trial"]["history"][-1]["result"], "failed")
 
+    def test_periodic_thunder_is_scheduled_resolved_and_persisted(self):
+        state = self.engine.store.load(self.game_id)
+        cultivation = state.entities.require(self.actor_id, CULTIVATION)
+        cultivation.update(realm_id="void", layer=1)
+        state.entities.put(self.actor_id, CULTIVATION, cultivation)
+        trial = state.entities.require(self.actor_id, TRIAL)
+        trial["periodic"].update(
+            count=0, power=1000.0, next_year=1,
+        )
+        state.scheduler.cancel(
+            lambda event: event.event_type == PERIODIC_THUNDER_DUE
+        )
+        scheduled = state.scheduler.schedule(
+            due_year=1,
+            event_type=PERIODIC_THUNDER_DUE,
+            source="test",
+            scope=EventScope.entity(self.actor_id),
+            payload={"entity_id": self.actor_id},
+        )
+        trial["periodic"]["schedule_sequence"] = scheduled.sequence
+        state.entities.put(self.actor_id, TRIAL, trial)
+        self._save(state)
+
+        started = self.engine.perform_timed_action(self.game_id, "rest", 1)
+        self.assertEqual(started.game["clock"]["year"], 1)
+        self.assertEqual(
+            started.game["pending_event"]["id"], "EVT_PERIODIC_THUNDER_001"
+        )
+        self.assertTrue(started.game["tribulation"]["active"])
+
+        for event_id in (
+            "EVT_PERIODIC_THUNDER_002", "EVT_PERIODIC_THUNDER_003",
+        ):
+            advanced = self.engine.choose(self.game_id, "strike")
+            self.assertEqual(advanced.game["pending_event"]["id"], event_id)
+        completed = self.engine.choose(self.game_id, "strike")
+        self.assertTrue(completed.game["player"]["alive"])
+        self.assertFalse(completed.game["tribulation"]["active"])
+        self.assertEqual(completed.game["tribulation"]["count"], 1)
+        self.assertEqual(completed.game["tribulation"]["power"], 2000.0)
+        self.assertEqual(completed.game["tribulation"]["years_remaining"], 3000)
+
+        restored = self.engine.get_game(self.game_id)
+        self.assertEqual(restored["tribulation"], completed.game["tribulation"])
+
 
 class V2AscensionTrialTests(unittest.TestCase):
     CELESTIAL_CHOICES = (
@@ -224,6 +271,7 @@ class V2AscensionTrialTests(unittest.TestCase):
         self.assertEqual(completed.game["world"]["world_id"], "celestial")
         self.assertEqual(completed.game["player"]["cultivation"]["realm_id"], "true_immortal")
         self.assertEqual(completed.game["combat"]["snapshot"]["mp_ratio"], 0.0)
+        self.assertIsNone(completed.game["tribulation"]["next_age"])
         transaction = completed.game["world"]["transition"]["last_transaction"]
         self.assertEqual(transaction["status"], "committed")
         self.assertEqual(

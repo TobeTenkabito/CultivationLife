@@ -7,6 +7,8 @@ from pathlib import Path
 from cultivation_life import GrantItem, GameEngine
 from cultivation_life.domain.cultivation import CULTIVATION
 from cultivation_life.domain.world import LOCATION
+from cultivation_life.server import HTTPCommandRegistry
+from cultivation_life.v1_facade import game_view
 
 
 class V2AuctionAndBlackMarketTests(unittest.TestCase):
@@ -285,6 +287,79 @@ class V2AuctionAndBlackMarketTests(unittest.TestCase):
             self.engine.sell_black_market_asset(self.game_id, "puppet", "not-migrated")
         left = self.engine.leave_black_market(self.game_id)
         self.assertEqual(left.game["auction"]["status"], "cooldown")
+
+    def test_v1_auction_asset_lists_drive_real_http_transactions(self):
+        self.engine.execute(
+            self.game_id, GrantItem(self.actor_id, "spirit_stone", 10_000)
+        )
+        self.engine.execute(
+            self.game_id, GrantItem(self.actor_id, "foundation_pill", 1)
+        )
+        self.engine.execute(
+            self.game_id, GrantItem(self.actor_id, "healing_pill", 1)
+        )
+        state = self.engine.store.load(self.game_id)
+        location_id = state.entities.require(self.actor_id, LOCATION)["location_id"]
+        scheduled = self.engine.schedule_auction(
+            self.game_id, location_id
+        ).game
+        public = game_view(scheduled, {})["auction_system"]
+        for key in (
+            "consignable_items",
+            "private_sellable_items",
+            "black_market_sellable_items",
+        ):
+            self.assertTrue(public[key], key)
+        consignment = next(
+            row for row in public["consignable_items"]
+            if row["id"] == "foundation_pill"
+        )
+        self.assertLessEqual(
+            consignment["minimum_start_price"],
+            consignment["suggested_start_price"],
+        )
+        self.assertLessEqual(
+            consignment["suggested_start_price"],
+            consignment["maximum_start_price"],
+        )
+        consigned = HTTPCommandRegistry(self.engine).dispatch(
+            self.game_id,
+            "auction-consign",
+            {
+                "item_id": consignment["id"],
+                "start_price": consignment["suggested_start_price"],
+            },
+        )["game"]
+        reserved = next(
+            row for row in consigned["inventory"]
+            if row["id"] == "foundation_pill"
+        )
+        self.assertEqual(reserved["reserved"], 1)
+
+        for _ in range(2):
+            self.engine.perform_action(self.game_id, "rest", 1)
+            self._resolve_pending()
+        rules = self.engine.definitions.systems["auction_system"]
+        previous = rules["auction_rounds"]
+        try:
+            rules["auction_rounds"] = 1
+            black = HTTPCommandRegistry(self.engine).dispatch(
+                self.game_id, "auction-advance", {}
+            )["game"]
+        finally:
+            rules["auction_rounds"] = previous
+        black_public = game_view(black, {})["auction_system"]
+        sellable = next(
+            row for row in black_public["black_market_sellable_items"]
+            if row["id"] == "healing_pill"
+        )
+        before = black_public["spirit_stones"]
+        sold = HTTPCommandRegistry(self.engine).dispatch(
+            self.game_id,
+            "black-market-sell",
+            {"kind": "item", "asset_id": sellable["id"]},
+        )["game"]
+        self.assertGreater(sold["market"]["spirit_stones"], before)
 
 
 if __name__ == "__main__":

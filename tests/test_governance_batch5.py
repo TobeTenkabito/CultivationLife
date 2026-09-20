@@ -6,6 +6,7 @@ from pathlib import Path
 
 from cultivation_life import FormRelationship, RegisterCharacter, GameEngine
 from cultivation_life.domain.family import LINEAGE, PARENT_CHILD
+from cultivation_life.v1_facade import game_view
 
 
 class V2GovernanceBatchFiveTests(unittest.TestCase):
@@ -41,6 +42,15 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
             (row for row in joined["faction"]["roster"] if row["id"] != actor_id),
             key=lambda row: (row["realm_index"], row["layer"]),
         )["id"]
+        target = next(
+            row for row in joined["faction"]["roster"]
+            if row["id"] == target_id
+        )
+        self.assertTrue(target["can_intercept"])
+        self.assertFalse(next(
+            row for row in joined["faction"]["roster"]
+            if row["id"] == actor_id
+        )["can_intercept"])
         self._set_realm(game["id"], actor_id, "nascent", 9)
         self._set_realm(game["id"], target_id, "qi", 1)
         state = self.engine.store.load(game["id"])
@@ -54,6 +64,9 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
 
         dispatched = self.engine.dispatch_faction_member(game["id"], "item")
         self.assertEqual(dispatched.game["faction"]["contribution"], 2)
+        self.assertTrue(dispatched.game["faction"]["dispatch_used"])
+        reloaded = self.engine.get_game(game["id"])
+        self.assertTrue(reloaded["faction"]["dispatch_used"])
         self.assertTrue(any(
             row["event_type"] == "faction.member.dispatched"
             for row in dispatched.events
@@ -70,6 +83,57 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
         self.assertFalse(state.relations.find(
             source_id=target_id, kind="faction_membership"
         ))
+
+    def test_low_rank_same_faction_kill_expels_and_marks_real_hostility(self):
+        game = self.engine.create_game("同门血案", seed=53)
+        actor_id = game["player"]["id"]
+        faction_id = next(
+            row["id"] for row in game["available_factions"]
+            if row["external_id"] == "tianjian"
+        )
+        joined = self.engine.join_faction(game["id"], faction_id).game
+        target_id = min(
+            (row for row in joined["faction"]["roster"] if row["id"] != actor_id),
+            key=lambda row: (row["realm_index"], row["layer"]),
+        )["id"]
+        self._set_realm(game["id"], actor_id, "foundation", 9)
+        self._set_realm(game["id"], target_id, "qi", 1)
+
+        result = self.engine.intercept_faction_member(
+            game["id"], target_id
+        ).game
+        self.assertIsNone(result["faction"])
+        state = self.engine.store.load(game["id"])
+        self.assertFalse(state.relations.find(
+            source_id=actor_id, kind="faction_membership"
+        ))
+        hostility = state.entities.require(actor_id, "war.wanted_state")[
+            "hostility"
+        ]
+        self.assertGreaterEqual(hostility[f"sect:{faction_id}"], 60)
+        history = state.entities.require(actor_id, "story.state")[
+            "system_history"
+        ]
+        self.assertEqual(history[-1]["result"], "expelled")
+
+    def test_faction_war_story_choice_runs_combat_and_grants_contribution(self):
+        game = self.engine.create_game("应召门人", seed=51)
+        faction_id = next(
+            row["id"] for row in game["available_factions"]
+            if row["external_id"] == "tianjian"
+        )
+        joined = self.engine.join_faction(game["id"], faction_id).game
+        before = joined["faction"]["contribution"]
+        self.engine.queue_story_event(
+            game["id"], "EVT_FACTION_COMMON_WAR_001"
+        )
+        resolved = self.engine.choose(game["id"], "front").game
+        self.assertIsNotNone(resolved["combat"]["last_report"])
+        self.assertGreater(resolved["faction"]["contribution"], before)
+        self.assertIn(
+            resolved["story"]["history"][-1]["result"],
+            {"victory", "survived"},
+        )
 
     def test_relationship_capture_keeps_runtime_across_both_story_stages(self):
         game = self.engine.create_game(
@@ -116,9 +180,25 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
         actor_id = game["player"]["id"]
         founded = self.engine.create_faction(game["id"], "归真宗").game
         faction_id = founded["faction"]["id"]
+        self.assertTrue(founded["faction"]["founded_by_player"])
+        self.assertTrue(founded["faction"]["can_arrange_succession"])
+        self.assertEqual(founded["faction"]["role"], "开山祖师")
+        self.assertEqual(sum(
+            row["is_player"] for row in founded["faction"]["roster"]
+        ), 1)
         arranged = self.engine.arrange_faction_succession(game["id"]).game
         successor_id = arranged["faction"]["designated_successor_id"]
         self.assertIsNotNone(successor_id)
+        self.assertEqual(
+            arranged["faction"]["succession_plan"]["successor_id"],
+            successor_id,
+        )
+        self.assertTrue(arranged["faction"]["succession_plan"]["arranged"])
+        self.assertTrue(
+            self.engine.get_game(game["id"])["faction"]["succession_plan"][
+                "arranged"
+            ]
+        )
         self._set_realm(game["id"], actor_id, "spirit", 3)
         ascended = self.engine.ascend_world(game["id"], "spirit").game
         self.assertIsNone(ascended["faction"])
@@ -151,6 +231,55 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
         self.assertFalse(
             governance["last_ascension_handover"]["return_eligible"]
         )
+
+    def test_player_faction_defense_pressure_and_dissolution_are_real(self):
+        game = self.engine.create_game("守山者", seed=12)
+        founded = self.engine.create_faction(game["id"], "孤峰宗").game
+        faction_id = founded["faction"]["id"]
+        for expected_pressure in (1, 2):
+            queued = self.engine.queue_story_event(
+                game["id"], "EVT_PLAYER_SECT_DEFENSE_001"
+            ).game
+            self.assertEqual(
+                queued["pending_event"]["id"],
+                "EVT_PLAYER_SECT_DEFENSE_001",
+            )
+            failed = self.engine.choose(game["id"], "appease").game
+            self.assertEqual(failed["faction"]["pressure"], expected_pressure)
+            self.assertIsNotNone(self.engine.get_game(game["id"])["faction"])
+        self.engine.queue_story_event(
+            game["id"], "EVT_PLAYER_SECT_DEFENSE_001"
+        )
+        dissolved = self.engine.choose(game["id"], "appease").game
+        self.assertIsNone(dissolved["faction"])
+        state = self.engine.store.load(game["id"])
+        self.assertFalse(
+            state.entities.require(faction_id, "faction.profile")["active"]
+        )
+        self.assertFalse(state.relations.find(
+            target_id=faction_id, kind="faction_membership"
+        ))
+
+        abandoned = self.engine.create_game("退隐者", seed=14)
+        abandoned = self.engine.create_faction(
+            abandoned["id"], "归林宗"
+        ).game
+        self.engine.queue_story_event(
+            abandoned["id"], "EVT_PLAYER_SECT_DEFENSE_001"
+        )
+        left = self.engine.choose(abandoned["id"], "abandon").game
+        self.assertIsNone(left["faction"])
+
+        fighter = self.engine.create_game("迎战者", seed=15)
+        fighter = self.engine.create_faction(fighter["id"], "战庐").game
+        self.engine.queue_story_event(
+            fighter["id"], "EVT_PLAYER_SECT_DEFENSE_001"
+        )
+        fought = self.engine.choose(fighter["id"], "fight")
+        self.assertIsNotNone(fought.game["combat"]["last_report"])
+        self.assertTrue(any(
+            row["event_type"] == "combat.resolved" for row in fought.events
+        ))
 
     def test_faction_and_race_diplomacy_and_vassal_transfer(self):
         game = self.engine.create_game("盟主", seed=5)
@@ -209,6 +338,27 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
         ))
         state = self.engine.store.load(upper["id"])
         candidate_id = (set(state.entities.with_component("core.identity")) - before).pop()
+        legacy = game_view(self.engine.get_game(upper["id"]), {
+            "race_details": {
+                key: dict(value)
+                for key, value in self.engine.definitions.races.items()
+            },
+            "faction_details": {
+                key: {
+                    "id": value.id, "name": value.name,
+                    "world": value.world_id,
+                    "allegiance_race": value.allegiance_race,
+                }
+                for key, value in self.engine.definitions.factions.items()
+            },
+        })
+        transfer = next(
+            row for row in legacy["race_system"]["vassal_transfers"]
+            if row["target_id"] == "monster"
+        )
+        self.assertIn(candidate_id, {
+            row["id"] for row in transfer["candidates"]
+        })
         supported = self.engine.transfer_vassal_personnel(
             upper["id"], "race", "monster", candidate_id
         ).game
@@ -216,6 +366,46 @@ class V2GovernanceBatchFiveTests(unittest.TestCase):
             supported["governance"]["race_support"][0]["character"]["id"],
             candidate_id,
         )
+
+    def test_lineage_and_faction_allegiance_remain_distinct_in_v1_ui(self):
+        game = self.engine.create_game(
+            "异族客卿", seed=31, start_world="spirit"
+        )
+        faction_id = next(
+            row["id"] for row in game["available_factions"]
+            if row["external_id"] == "wanlingshan"
+        )
+        joined = self.engine.join_faction(game["id"], faction_id).game
+        self.assertEqual(joined["player"]["lineage_race"], "human")
+        self.assertEqual(joined["player"]["allegiance_race"], "monster")
+        legacy = game_view(joined, {
+            "races": {
+                key: value.get("name", key)
+                for key, value in self.engine.definitions.races.items()
+            },
+            "race_details": self.engine.definitions.races,
+            "faction_details": {
+                key: {
+                    "id": value.id, "name": value.name,
+                    "world": value.world_id,
+                    "allegiance_race": value.allegiance_race,
+                }
+                for key, value in self.engine.definitions.factions.items()
+            },
+            "worlds": {
+                key: value.name
+                for key, value in self.engine.definitions.worlds.items()
+            },
+        })
+        self.assertEqual(legacy["player"]["lineage_race_name"], "人族")
+        self.assertEqual(legacy["player"]["allegiance_race_name"], "妖族")
+        self.assertEqual(legacy["race_system"]["player_race"], "monster")
+        supported = legacy["race_system"]["races"]["monster"][
+            "supported_factions"
+        ]
+        wanling = next(row for row in supported if row["id"] == "wanlingshan")
+        self.assertTrue(wanling["active"])
+        self.assertTrue(wanling["elders"])
 
     def test_family_recruits_offline_and_cross_world_removes_player_voice(self):
         game = self.engine.create_game("林祖", seed=3)

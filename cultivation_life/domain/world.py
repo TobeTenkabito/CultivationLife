@@ -260,6 +260,8 @@ def _ascend_handler(definitions: GameDefinitions):
         routes = {
             ("human", "spirit"): (path in {"dao", "buddhist", "confucian"}, 5, 3),
             ("human", "demon"): (path == "demonic", 5, 3),
+            ("human", "monster_realm"): (path == "monster", 5, 3),
+            ("human", "hell"): (path == "ghost", 5, 3),
             ("demon", "true_demon"): (path == "demonic", 5, 1),
         }
         allowed, required_realm, max_start_layer = routes.get(
@@ -268,8 +270,11 @@ def _ascend_handler(definitions: GameDefinitions):
         imprisoned = bool(context.state.relations.find(
             target_id=command.actor_id, kind="combat_prisoner"
         ))
-        if imprisoned and (origin, destination) != ("human", "spirit"):
-            raise ValueError("服刑期间只能尝试人界偷渡灵界")
+        prison_crossing_routes = {
+            ("human", "spirit"), ("human", "monster_realm"), ("human", "hell"),
+        }
+        if imprisoned and (origin, destination) not in prison_crossing_routes:
+            raise ValueError("服刑期间只能尝试人界偷渡")
         if not allowed or realm_index != required_realm or layer > max_start_layer:
             if (origin, destination) in {("spirit", "celestial"), ("true_demon", "asura")}:
                 raise ValueError("该飞升路线必须通过九重飞升试炼，请使用飞升试炼入口")
@@ -359,19 +364,27 @@ def _cross_world_handler(definitions: GameDefinitions):
             raise ValueError("服刑期间不能正常跨界")
         location = context.state.entities.require(command.actor_id, LOCATION)
         origin, destination = str(location["world_id"]), command.destination_world_id
-        pairs = {
-            "spirit": "human", "true_demon": "demon", "celestial": "spirit",
-            "asura": "true_demon", "hell": "human",
+        lower_worlds = {
+            "spirit": {"human"}, "true_demon": {"demon"},
+            "celestial": {"spirit"}, "asura": {"true_demon"},
+            "nether": {"monster_realm", "phantom_underworld"},
+            "hell": {"human"},
         }
-        reverse = {lower: upper for upper, lower in pairs.items()}
+        reverse = {
+            lower: upper
+            for upper, lowers in lower_worlds.items()
+            for lower in lowers
+        }
         transition = context.state.entities.require(command.actor_id, WORLD_TRANSITION)
         cultivation = context.state.entities.require(command.actor_id, "cultivation.state")
         sealed = transition.get("sealed_cultivation")
-        if origin in pairs and destination == pairs[origin]:
+        if destination in lower_worlds.get(origin, set()):
             if sealed is not None:
                 raise ValueError("当前已经处于下界封印状态")
             required = int(definitions.systems["world_travel"][
-                "celestial_required_realm" if origin in {"celestial", "asura"} else "required_realm"
+                "celestial_required_realm"
+                if origin in {"celestial", "asura", "nether"}
+                else "required_realm"
             ])
             if definitions.realm_index(str(cultivation["realm_id"])) < required:
                 raise ValueError("境界不足，无法逆穿界壁")
@@ -380,11 +393,15 @@ def _cross_world_handler(definitions: GameDefinitions):
                 "upper_world": origin, "lower_world": destination,
             }
             suppressed_index = int(definitions.systems["world_travel"][
-                "spirit_suppression_realm" if origin in {"celestial", "asura"} else "human_suppression_realm"
+                "spirit_suppression_realm"
+                if origin in {"celestial", "asura", "nether"}
+                else "human_suppression_realm"
             ])
             cultivation["realm_id"] = definitions.realms[suppressed_index].id
             cultivation["layer"] = int(definitions.systems["world_travel"][
-                "spirit_suppression_layer" if origin in {"celestial", "asura"} else "human_suppression_layer"
+                "spirit_suppression_layer"
+                if origin in {"celestial", "asura", "nether"}
+                else "human_suppression_layer"
             ])
             cultivation["bottleneck"] = None
         elif sealed and origin == sealed.get("lower_world") and destination == sealed.get("upper_world"):
@@ -590,8 +607,19 @@ def world_view(state: Any, definitions: GameDefinitions, entity_id: str | None =
     world = definitions.worlds[world_id]
     destinations = []
     for target_id, target in world.locations.items():
+        public_location = {
+            "id": target_id, "name": target.name,
+            "description": target.description,
+            "themes": list(target.themes),
+            "combat_terrain": target.combat_terrain,
+            "combat_conditions": list(target.combat_conditions),
+            "qi_gain_efficiencies": dict(target.qi_gain_efficiencies),
+        }
         if target_id == location_id:
-            destinations.append({"id": target_id, "name": target.name, "current": True, "travel_years": 0})
+            destinations.append({
+                **public_location, "current": True, "travel_years": 0,
+                "accessible": True, "warning": "", "route": [target_id],
+            })
             continue
         plan = world.travel_plan(
             location_id,
@@ -600,8 +628,7 @@ def world_view(state: Any, definitions: GameDefinitions, entity_id: str | None =
             definitions.travel_speeds[realm_index],
         )
         destinations.append({
-            "id": target_id,
-            "name": target.name,
+            **public_location,
             "current": False,
             "travel_years": plan.years,
             "accessible": plan.accessible,

@@ -138,6 +138,33 @@ def combat_snapshot(
         technique_bonus += technique.combat_bonus
         hp_bonus += technique.hp_bonus
         mp_bonus += technique.mp_bonus
+    support_id = practice.get("support_technique_id")
+    if support_id and str(support_id) in definitions.techniques:
+        support = definitions.techniques[str(support_id)]
+        hp_bonus += support.hp_bonus * support.scale
+        mp_bonus += support.mp_bonus * support.scale
+    qi_experience = dict(cultivation.get("qi_experience", {}))
+    from .cultivation import _qi_level
+
+    for combat_id in map(str, practice.get("combat_technique_ids", [])):
+        technique = definitions.techniques.get(combat_id)
+        if technique is None:
+            continue
+        required = int(technique.combat_requirement_level)
+        if required > 0 and not any(
+            _qi_level(definitions, qi_experience.get(source, 0.0)) >= required
+            for source in technique.sources
+        ):
+            continue
+        if (
+            technique.requires_immortal_power
+            and not bool(cultivation.get("immortal_power_converted"))
+        ):
+            continue
+        body = state.entities.get(entity_id, "cultivation.body") or {}
+        if int(body.get("layer", 0)) < int(technique.required_body_training):
+            continue
+        technique_bonus += technique.combat_bonus * technique.scale
     item_combat, item_hp, item_mp = _item_bonuses(state, definitions, entity_id)
     faction_combat, faction_hp, faction_mp = _faction_benefits(state, entity_id)
     artifact = artifact_static_bonuses(state, definitions, entity_id)
@@ -176,6 +203,16 @@ def combat_snapshot(
     }
     for stat, factor in PATH_FACTORS.get(str(cultivation["path"]), {}).items():
         stats[stat] *= factor
+    from .advanced_cultivation import active_transformation_profile
+
+    transformation = active_transformation_profile(
+        state, definitions, entity_id
+    )
+    for stat, factor in dict(
+        transformation["stat_multipliers"]
+    ).items():
+        if stat in stats:
+            stats[stat] *= float(factor)
     for stat, factor in dict(artifact["player_multipliers"]).items():
         stats[stat] *= float(factor)
     ghost_details: dict[str, Any] | None = None
@@ -217,6 +254,10 @@ def combat_snapshot(
         "stats": {key: round(value, 4) for key, value in stats.items()},
         "enemy_multipliers": dict(artifact["enemy_multipliers"]),
         "artifact_traits": list(dict.fromkeys(artifact["traits"])),
+        "transformation_traits": list(
+            dict.fromkeys(transformation["traits"])
+        ),
+        "transformation_contribution": transformation,
         "puppet_contribution": puppet_contribution,
         "ghost_contribution": ghost_details,
         "monster_contribution": monster_details,
@@ -233,6 +274,15 @@ def _damage(
         offense *= 1.4
     if "odd_round_enemy_might_down_40" in defender.get("artifact_traits", []) and round_number % 2 == 1:
         offense *= 0.6
+    transformation_traits = set(attacker.get("transformation_traits", []))
+    if "damage_bonus_5" in transformation_traits:
+        offense *= 1.05
+    if (
+        "higher_realm_damage_10" in transformation_traits
+        and int(attacker.get("realm_index", 0))
+        < int(defender.get("realm_index", 0))
+    ):
+        offense *= 1.10
     defense = float(defender["stats"]["guard"]) * 0.78 + float(defender["stats"]["sense"]) * 0.22
     ratio = max(0.05, offense / max(1.0, defense))
     mana_factor = 0.72 + 0.28 * max(0.0, min(1.0, attacker_mp_ratio))
@@ -322,19 +372,33 @@ def _resolve_handler(definitions: GameDefinitions):
             command.target_id: float(target["mp_ratio"]),
         }
         morale = {command.attacker_id: 50.0, command.target_id: 50.0}
+        participants = (
+            (command.attacker_id, command.target_id),
+            (command.target_id, command.attacker_id),
+        )
+        for owner_id, enemy_id in participants:
+            owner_snapshot = (
+                attacker if owner_id == command.attacker_id else target
+            )
+            enemy_snapshot = (
+                target if enemy_id == command.target_id else attacker
+            )
+            owner_traits = set(
+                owner_snapshot.get("transformation_traits", [])
+            )
+            if (
+                "dragon_pressure" in owner_traits
+                and int(owner_snapshot["realm_index"])
+                >= int(enemy_snapshot["realm_index"])
+            ):
+                morale[enemy_id] = min(morale[enemy_id], 42.5)
+            if "first_round_full_state" in owner_traits:
+                hp[owner_id] = float(owner_snapshot["max_hp"])
         base_snapshots = {
             command.attacker_id: attacker,
             command.target_id: target,
         }
-        first_attacker = (
-            attacker["stats"]["mobility"] + attacker["stats"]["sense"]
-            >= target["stats"]["mobility"] + target["stats"]["sense"]
-        )
-        order = (
-            ((command.attacker_id, attacker), (command.target_id, target))
-            if first_attacker else
-            ((command.target_id, target), (command.attacker_id, attacker))
-        )
+        defeat_prevented: set[str] = set()
         rounds: list[dict[str, Any]] = []
         for round_number in range(1, 13):
             from .monster import evaluate_custom_lineage
@@ -344,10 +408,6 @@ def _resolve_handler(definitions: GameDefinitions):
                 for entity_id, snapshot in base_snapshots.items()
             }
             lineage_events: list[dict[str, Any]] = []
-            participants = (
-                (command.attacker_id, command.target_id),
-                (command.target_id, command.attacker_id),
-            )
             terrain_id = str(command.terrain or terrain["id"])
             for owner_id, enemy_id in participants:
                 owner_snapshot = base_snapshots[owner_id]
@@ -383,11 +443,66 @@ def _resolve_handler(definitions: GameDefinitions):
                     0.0, min(100.0, morale[enemy_id] + float(result["enemy_morale_delta"]))
                 )
                 lineage_events.extend(result["events"])
+            for owner_id, enemy_id in participants:
+                owner_traits = set(
+                    base_snapshots[owner_id].get(
+                        "transformation_traits", []
+                    )
+                )
+                if "morale_drain_5" in owner_traits:
+                    morale[enemy_id] = max(0.0, morale[enemy_id] - 5.0)
+                if "steadfast" in owner_traits:
+                    morale[owner_id] = max(25.0, morale[owner_id])
+                if round_number >= 4 and "round4_regen_10" in owner_traits:
+                    hp[owner_id] = min(
+                        float(base_snapshots[owner_id]["max_hp"]),
+                        hp[owner_id]
+                        + float(base_snapshots[owner_id]["max_hp"]) * 0.10,
+                    )
             for entity_id, snapshot in round_snapshots.items():
                 snapshot["morale"] = morale[entity_id]
             exchanges: list[dict[str, Any]] = []
-            round_order = tuple(
-                (entity_id, round_snapshots[entity_id]) for entity_id, _ in order
+            attacker_initiative = (
+                float(round_snapshots[command.attacker_id]["stats"]["mobility"])
+                + float(round_snapshots[command.attacker_id]["stats"]["sense"])
+            )
+            target_initiative = (
+                float(round_snapshots[command.target_id]["stats"]["mobility"])
+                + float(round_snapshots[command.target_id]["stats"]["sense"])
+            )
+            if round_number == 1 and terrain["name"] in {
+                "寻常地势", "水域", "荒漠",
+            }:
+                if "airborne" in attacker.get("transformation_traits", []):
+                    attacker_initiative *= 1.08
+                if "airborne" in target.get("transformation_traits", []):
+                    target_initiative *= 1.08
+            attacker_pressure = (
+                "dragon_pressure" in attacker.get("transformation_traits", [])
+                and int(attacker["realm_index"]) >= int(target["realm_index"])
+                and round_number <= 2
+            )
+            target_pressure = (
+                "dragon_pressure" in target.get("transformation_traits", [])
+                and int(target["realm_index"]) >= int(attacker["realm_index"])
+                and round_number <= 2
+            )
+            first_id = (
+                command.attacker_id
+                if attacker_pressure or (
+                    not target_pressure
+                    and attacker_initiative >= target_initiative
+                )
+                else command.target_id
+            )
+            second_id = (
+                command.target_id
+                if first_id == command.attacker_id
+                else command.attacker_id
+            )
+            round_order = (
+                (first_id, round_snapshots[first_id]),
+                (second_id, round_snapshots[second_id]),
             )
             for acting, acting_snapshot in round_order:
                 defending = command.target_id if acting == command.attacker_id else command.attacker_id
@@ -398,6 +513,18 @@ def _resolve_handler(definitions: GameDefinitions):
                     context, acting_snapshot, defending_snapshot, mp[acting], round_number
                 ))
                 hp[defending] -= dealt
+                defending_traits = set(
+                    defending_snapshot.get("transformation_traits", [])
+                )
+                if (
+                    hp[defending] <= 0
+                    and "prevent_defeat_once" in defending_traits
+                    and defending not in defeat_prevented
+                ):
+                    hp[defending] = max(
+                        1.0, float(defending_snapshot["max_hp"]) * 0.15
+                    )
+                    defeat_prevented.add(defending)
                 mp[acting] = max(0.0, mp[acting] - 0.045)
                 exchanges.append({
                     "attacker_id": acting,
@@ -434,9 +561,34 @@ def _resolve_handler(definitions: GameDefinitions):
                 )
                 lineage_events.extend(result["events"])
             rounds.append({
-                "round": round_number, "exchanges": exchanges,
+                "round": round_number,
+                "initiative": (
+                    "attacker" if round_order[0][0] == command.attacker_id
+                    else "target"
+                ),
+                "exchanges": exchanges,
                 "lineage_events": lineage_events,
                 "morale": dict(morale),
+                # A combat report is persisted gameplay data, not merely a log of
+                # attacks.  Keep the complete post-round state so every client can
+                # render the historical battle without trying to reconstruct it
+                # from the current character condition (which may have changed).
+                "hp": {
+                    entity_id: round(max(0.0, value), 4)
+                    for entity_id, value in hp.items()
+                },
+                "hp_ratios": {
+                    entity_id: round(
+                        max(0.0, value)
+                        / max(1.0, float(base_snapshots[entity_id]["max_hp"])),
+                        6,
+                    )
+                    for entity_id, value in hp.items()
+                },
+                "mp_ratios": {
+                    entity_id: round(max(0.0, min(1.0, value)), 6)
+                    for entity_id, value in mp.items()
+                },
             })
             if hp[command.attacker_id] <= 0 or hp[command.target_id] <= 0:
                 break

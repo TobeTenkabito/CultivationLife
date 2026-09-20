@@ -16,6 +16,10 @@ BODY = "cultivation.body"
 DIVINE_SENSE = "cultivation.divine_sense"
 TRANSFORMATIONS = "cultivation.transformations"
 TRANSFORMATION_STATS = ("might", "guard", "mobility", "sense", "sustain", "breach")
+TRANSFORMATION_STAT_NAMES = {
+    "might": "威能", "guard": "防护", "mobility": "身法",
+    "sense": "神识", "sustain": "续航", "breach": "破法",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -578,6 +582,113 @@ def _form_view(
     }
 
 
+def _transformation_weights(count: int) -> list[float]:
+    if count <= 0:
+        return []
+    raw = [0.5 ** index for index in range(count)]
+    total = sum(raw)
+    return [value / total for value in raw]
+
+
+def active_transformation_profile(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> dict[str, Any]:
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    transformations = state.entities.require(actor_id, TRANSFORMATIONS)
+    technique_id = str(transformations.get("technique_id") or "")
+    if cultivation.get("path") == "monster" or not technique_id:
+        return {
+            "form_ids": [], "weights": [], "stat_multipliers": {},
+            "traits": [],
+        }
+    loadout = dict(transformations.get("loadouts", {})).get(
+        technique_id, {}
+    )
+    mastery = dict(transformations.get("mastery", {}))
+    form_ids = [
+        form_id for form_id in map(str, loadout.get("active", []))
+        if form_id in definitions.transformations and form_id in mastery
+    ]
+    weights = _transformation_weights(len(form_ids))
+    effective = []
+    traits = []
+    for form_id in form_ids:
+        definition = definitions.transformations[form_id]
+        progress = _form_progress(transformations, form_id)
+        effective.append({
+            stat: 1 + (
+                float(definition.stat_multipliers.get(stat, 1)) - 1
+            ) * progress[stat]
+            for stat in TRANSFORMATION_STATS
+        })
+        purity = sum(progress.values()) / len(progress)
+        for trait, required in zip(
+            definition.traits, definition.trait_purity_requirements
+        ):
+            if purity >= required and trait not in traits:
+                traits.append(trait)
+    multipliers = {
+        stat: sum(
+            row[stat] * weight for row, weight in zip(effective, weights)
+        )
+        for stat in TRANSFORMATION_STATS
+    } if effective else {}
+    return {
+        "form_ids": form_ids, "weights": weights,
+        "stat_multipliers": multipliers, "traits": traits,
+    }
+
+
+def _public_transformation_form(
+    definitions: GameDefinitions, transformations: dict[str, Any],
+    form_id: str,
+) -> dict[str, Any]:
+    definition = definitions.transformations[form_id]
+    progress = _form_progress(transformations, form_id)
+    purity = sum(progress.values()) / len(progress)
+    realm = definitions.realms[max(
+        0, min(len(definitions.realms) - 1, definition.realm_index)
+    )]
+    return {
+        "id": form_id, "name": definition.name,
+        "description": definition.description,
+        "realm_index": definition.realm_index,
+        "realm_name": (
+            realm.name if definition.realm_index >= 9
+            else f"{realm.name}{definition.layer}层"
+        ),
+        "purity": round(purity, 6),
+        "completion": round(purity, 6),
+        "remaining": round(1 - purity, 6),
+        "stats": [
+            {
+                "id": stat, "name": TRANSFORMATION_STAT_NAMES[stat],
+                "multiplier": round(
+                    1 + (float(definition.stat_multipliers[stat]) - 1)
+                    * progress[stat],
+                    4,
+                ),
+                "cap": round(float(definition.stat_multipliers[stat]), 4),
+                "progress": round(progress[stat], 6),
+                "remaining": round(1 - progress[stat], 6),
+            }
+            for stat in TRANSFORMATION_STATS
+        ],
+        "traits": [
+            {
+                "id": trait, "name": description,
+                "required_purity": required,
+                "unlocked": purity >= required,
+            }
+            for trait, description, required in zip(
+                definition.traits, definition.trait_descriptions,
+                definition.trait_purity_requirements,
+            )
+        ],
+        "incompatible_with": list(definition.incompatible_with),
+    }
+
+
 def advanced_cultivation_view(
     state: WorldState, definitions: GameDefinitions, entity_id: str | None = None,
 ) -> dict[str, Any]:
@@ -585,8 +696,37 @@ def advanced_cultivation_view(
     if actor_id is None:
         raise ValueError("游戏尚未初始化")
     body = dict(state.entities.require(actor_id, BODY))
-    body["required"] = _body_required(definitions, int(body["layer"]))
-    body["chance"] = _body_chance(definitions, body) if body.get("technique_id") and int(body["layer"]) < 100 else None
+    body_config = dict(definitions.systems["body_cultivation"])
+    body_layer = int(body["layer"])
+    body_maximum = int(body_config["max_layer"])
+    body["required"] = _body_required(definitions, body_layer)
+    body["max_layer"] = body_maximum
+    body["target_layer"] = body_layer + 1 if body_layer < body_maximum else None
+    body["chance"] = (
+        _body_chance(definitions, body)
+        if body.get("technique_id") and body_layer < body_maximum else None
+    )
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    body["training_speed_multiplier"] = (
+        float(dict(definitions.systems.get("monster_cultivation", {})).get(
+            "body_training_multiplier", 1.5
+        ))
+        if cultivation.get("path") == "monster" else 1.0
+    )
+    reduction_start = int(body_config["tribulation_reduction_start"])
+    if body_layer < reduction_start:
+        body["tribulation_damage_reduction"] = 0.0
+    else:
+        reduction_steps = 1 + (
+            body_layer - reduction_start
+        ) // int(body_config["tribulation_reduction_step_layers"])
+        body["tribulation_damage_reduction"] = reduction_steps * float(
+            body_config["tribulation_reduction_per_step"]
+        )
+    body["cultivation_breakthrough_bonus"] = (
+        body_layer // 20
+        * float(body_config["cultivation_breakthrough_bonus_per_20_layers"])
+    )
     sense = dict(state.entities.require(actor_id, DIVINE_SENSE))
     sense["breakthrough_cost"] = _sense_cost(definitions, int(sense["rank"]))
     transformations = state.entities.require(actor_id, TRANSFORMATIONS)
@@ -594,18 +734,131 @@ def advanced_cultivation_view(
     loadout = dict(transformations.get("loadouts", {})).get(str(technique_id), {}) if technique_id else {}
     active = list(loadout.get("active", []))
     mastery = dict(transformations.get("mastery", {}))
+    raw_forms = [
+        _form_view(definitions.transformations[form_id], value, active=form_id in active)
+        for form_id, value in mastery.items() if form_id in definitions.transformations
+    ]
+    profile = active_transformation_profile(
+        state, definitions, actor_id
+    )
+    public_forms = {
+        form_id: _public_transformation_form(
+            definitions, transformations, form_id
+        )
+        for form_id in mastery if form_id in definitions.transformations
+    }
+    weights = dict(zip(profile["form_ids"], profile["weights"]))
+    stored_ids = [
+        form_id for form_id in map(str, loadout.get("stored", []))
+        if form_id in public_forms
+    ]
+    stored = [
+        {
+            **public_forms[form_id],
+            "active": form_id in weights,
+            "weight": round(weights.get(form_id, 0), 6),
+            "active_order": (
+                profile["form_ids"].index(form_id) + 1
+                if form_id in profile["form_ids"] else None
+            ),
+        }
+        for form_id in stored_ids
+    ]
+    inventory = state.entities.require(actor_id, "economy.inventory")
+    inventory_items = dict(inventory.get("items", {}))
+    inventory_reserved = dict(inventory.get("reserved", {}))
+    materials = []
+    for item_id, total in sorted(inventory_items.items()):
+        item = definitions.items.get(str(item_id))
+        if (
+            item is None or not item.transformation_form_id
+            or item.transformation_form_id not in definitions.transformations
+            or item.transformation_purity <= 0
+        ):
+            continue
+        quantity = int(total) - int(inventory_reserved.get(item_id, 0))
+        if quantity <= 0:
+            continue
+        progress = _form_progress(
+            transformations, item.transformation_form_id
+        )
+        can_improve = any(value < 1 - 1e-9 for value in progress.values())
+        direct_gain = _absorption_gain(item.transformation_purity, False)
+        purified_gain = _absorption_gain(item.transformation_purity, True)
+        materials.append({
+            "id": item_id, "name": item.name, "quantity": quantity,
+            "form_id": item.transformation_form_id,
+            "form_name": definitions.transformations[
+                item.transformation_form_id
+            ].name,
+            "source_type": item.transformation_source,
+            "purity": round(item.transformation_purity, 8),
+            "purified_purity": round(
+                _purified_purity(item.transformation_purity), 8
+            ),
+            "direct_gain": round(direct_gain, 8),
+            "purified_gain": round(purified_gain, 8),
+            "batch_pair_gain": round(purified_gain * 1.3, 8),
+            "batch_pair_bonus_active": quantity > 2,
+            "stat_progress": {
+                key: round(value, 8) for key, value in progress.items()
+            },
+            "can_improve": can_improve,
+            "can_purify": quantity >= 2 and can_improve,
+            "can_batch_absorb": can_improve,
+            "can_batch_purify": quantity >= 2 and can_improve,
+        })
+    practice = state.entities.require(actor_id, PRACTICE)
+    known_transformation_techniques = [
+        definitions.techniques[known_id]
+        for known_id in map(str, practice.get("known_techniques", []))
+        if known_id in definitions.techniques
+        and definitions.techniques[known_id].category == "transformation"
+    ]
+    technique = definitions.techniques.get(str(technique_id)) if technique_id else None
+    available = cultivation.get("path") != "monster"
     return {
         "body": body,
         "divine_sense": sense,
         "transformations": {
+            "available": available,
+            "disabled_reason": (
+                "" if available else "妖修依靠自身血脉进化，不能使用变化术。"
+            ),
             "technique_id": technique_id,
-            "capacity": definitions.techniques[str(technique_id)].transformation_capacity if technique_id else 0,
-            "space": definitions.techniques[str(technique_id)].transformation_space if technique_id else 0,
-            "stored": list(loadout.get("stored", [])),
-            "active": active,
-            "forms": [
-                _form_view(definitions.transformations[form_id], value, active=form_id in active)
-                for form_id, value in mastery.items() if form_id in definitions.transformations
+            "technique": ({
+                "id": technique.id, "name": technique.name,
+                "grade": technique.grade, "level": technique.level,
+            } if technique else None),
+            "capacity": technique.transformation_capacity if technique else 0,
+            "space": technique.transformation_space if technique else 0,
+            "stored": stored,
+            "stored_ids": stored_ids,
+            "known": [
+                form for form_id, form in public_forms.items()
+                if form_id not in stored_ids
             ],
+            "active": active,
+            "forms": raw_forms,
+            "materials": materials,
+            "combined_stats": [
+                {
+                    "id": stat, "name": TRANSFORMATION_STAT_NAMES[stat],
+                    "multiplier": round(
+                        profile["stat_multipliers"].get(stat, 1), 4
+                    ),
+                }
+                for stat in TRANSFORMATION_STATS
+            ] if technique else [],
+            "traits": [
+                {"id": trait, "name": trait}
+                for trait in profile["traits"]
+            ],
+            "acquisition_hint": (
+                f"你已掌握《{known_transformation_techniques[-1].name}》，"
+                "请在功法栏将变身功法配置到“变”槽。"
+                if known_transformation_techniques else
+                "变身功法自元婴起随机流通于各界一般坊市。"
+            ),
         },
     }

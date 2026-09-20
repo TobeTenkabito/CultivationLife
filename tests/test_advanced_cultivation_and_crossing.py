@@ -13,8 +13,10 @@ from cultivation_life import (
     GameEngine,
 )
 from cultivation_life.domain.advanced_cultivation import BODY, DIVINE_SENSE
+from cultivation_life.domain.combat import combat_snapshot
 from cultivation_life.domain.cultivation import CULTIVATION
 from cultivation_life.domain.factions import FACTION_PROFILE
+from cultivation_life.v1_facade import game_view
 
 
 class V2AdvancedCultivationTests(unittest.TestCase):
@@ -48,6 +50,8 @@ class V2AdvancedCultivationTests(unittest.TestCase):
         self.engine.store.save(
             state, [], player_name="进阶修士", expected_revision=state.revision
         )
+        public = game_view(self.engine.get_game(self.game_id), {})
+        self.assertTrue(public["player"]["divine_sense"]["breakthrough_ready"])
         broken = self.engine.attempt_divine_sense_breakthrough(self.game_id)
         self.assertEqual(broken.game["player"]["divine_sense"]["rank"], 1)
         self.assertEqual(broken.game["player"]["divine_sense"]["experience"], 80)
@@ -107,6 +111,71 @@ class V2AdvancedCultivationTests(unittest.TestCase):
         )
         self.assertEqual(
             activated.game["player"]["transformations"]["active"],
+            ["FORM_PHOENIX"],
+        )
+
+    def test_v1_transformation_buttons_feed_real_combat_profile(self):
+        technique_id = "TECH_MYRIAD_FORM_SPECTRUM"
+        self.engine.execute(
+            self.game_id, GrantTechnique(self.actor_id, technique_id)
+        )
+        self.engine.equip_special_technique(
+            self.game_id, technique_id, "transformation"
+        )
+        self.engine.execute(
+            self.game_id,
+            GrantItem(self.actor_id, "phoenix_soul_flame", 3),
+        )
+        public = game_view(self.engine.get_game(self.game_id), {})[
+            "transformation_system"
+        ]
+        self.assertEqual(public["technique"]["id"], technique_id)
+        self.assertEqual(public["materials"][0]["quantity"], 3)
+        self.assertTrue(public["materials"][0]["can_batch_purify"])
+
+        self.engine.batch_absorb_transformation_material(
+            self.game_id, "phoenix_soul_flame", "purified", "sustain"
+        )
+        unlocked = game_view(self.engine.get_game(self.game_id), {})[
+            "transformation_system"
+        ]
+        phoenix = next(
+            row for row in unlocked["known"]
+            if row["id"] == "FORM_PHOENIX"
+        )
+        self.assertEqual(len(phoenix["stats"]), 6)
+        self.assertGreater(
+            next(
+                row["progress"] for row in phoenix["stats"]
+                if row["id"] == "sustain"
+            ),
+            0,
+        )
+        before = combat_snapshot(
+            self.engine.store.load(self.game_id),
+            self.engine.definitions,
+            self.actor_id,
+        )["stats"]["sustain"]
+        self.engine.manage_transformation(
+            self.game_id, "FORM_PHOENIX", "store"
+        )
+        self.engine.manage_transformation(
+            self.game_id, "FORM_PHOENIX", "activate"
+        )
+        active = game_view(self.engine.get_game(self.game_id), {})[
+            "transformation_system"
+        ]
+        self.assertEqual(active["active"], ["FORM_PHOENIX"])
+        self.assertTrue(active["stored"][0]["active"])
+        self.assertEqual(len(active["combined_stats"]), 6)
+        after_snapshot = combat_snapshot(
+            self.engine.store.load(self.game_id),
+            self.engine.definitions,
+            self.actor_id,
+        )
+        self.assertGreater(after_snapshot["stats"]["sustain"], before)
+        self.assertEqual(
+            after_snapshot["transformation_contribution"]["form_ids"],
             ["FORM_PHOENIX"],
         )
 

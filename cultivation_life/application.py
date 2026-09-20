@@ -107,6 +107,7 @@ from .domain.celestial import (
     register_celestial_story_effects,
 )
 from .domain.intrigue import (
+    INTRIGUE_GUEST,
     IntrigueGuestAction,
     IntriguePersonnelAction,
     IntrigueRecruitmentAction,
@@ -128,6 +129,7 @@ from .domain.war import (
 )
 from .domain.economy import (
     INVENTORY,
+    MARKET,
     BuyMarketOffer,
     RefreshMarket,
     ToggleMarketOfferLock,
@@ -169,8 +171,6 @@ from .domain.artifacts import (
     DeployGroundFormation,
     ForgeArtifact,
     ManageNatalArtifact,
-    PreviewCrafting,
-    PreviewFormation,
     RepairGroundFormation,
     SaveCraftingBlueprint,
     SaveFormation,
@@ -180,6 +180,8 @@ from .domain.artifacts import (
     crafting_view,
     formation_view,
     natal_view,
+    preview_crafting_view,
+    preview_formation_view,
     reconcile_artifact_state,
     register_artifact_domains,
 )
@@ -197,6 +199,7 @@ from .domain.production import (
     register_production_domain,
 )
 from .domain.extensions import (
+    ConfigureMonsterBloodline,
     GHOST_SOUL,
     SpendWangsheng,
     extension_invariants,
@@ -206,6 +209,7 @@ from .domain.extensions import (
 )
 from .domain.factions import (
     FACTION_NPC,
+    FACTION_GOVERNANCE,
     MEMBERSHIP,
     ArrangeFactionSuccession,
     DispatchFactionMember,
@@ -283,10 +287,13 @@ from .domain.world import (
     world_view,
 )
 from .domain.story import (
+    BeginSpiritCrossing,
+    RepairPendingStoryEvent,
     STORY_STATE,
     QueueStoryEvent,
     ResolveStoryChoice,
     reconcile_story_state,
+    pending_story_needs_repair,
     register_story_domain,
     story_invariants,
     story_view,
@@ -297,11 +304,17 @@ from .domain.trials import (
     reconcile_trial_state,
     register_trial_domain,
     register_trial_story_effects,
+    tribulation_view,
     trial_invariants,
     trial_view,
 )
 from .infrastructure.content_loader import ContentLoader
 from .infrastructure.sqlite_store import SQLiteSaveStore
+from .achievement_system import (
+    load_achievement_definitions,
+    matching_achievement_ids,
+    public_definition as public_achievement_definition,
+)
 from .kernel.bus import CommandBus
 from .kernel.model import EventScope, WorldState
 from .kernel.services import InvariantRegistry
@@ -329,12 +342,19 @@ class GameEngine:
     ):
         default_content = Path(__file__).resolve().parents[1] / "content"
         content_root = Path(content_directory or default_content)
+        project_root = (
+            Path(extension_root) if extension_root is not None
+            else content_root.parent
+        )
         self.definitions = ContentLoader.load(
             content_root,
-            project_root=Path(extension_root) if extension_root is not None else content_root.parent,
+            project_root=project_root,
         )
         database_path = Path(database_path)
         self.store = SQLiteSaveStore(database_path)
+        self.achievement_definitions = load_achievement_definitions(
+            content_root, project_root, self.definitions
+        )
         self.commands = CommandBus()
         self.invariants = InvariantRegistry()
         register_character_domain(self.commands, self.definitions)
@@ -365,7 +385,7 @@ class GameEngine:
         self.story_effects = register_story_domain(self.commands, self.definitions)
         register_trial_story_effects(self.story_effects, self.definitions)
         register_relationship_story_effects(self.story_effects, self.definitions)
-        register_faction_story_effects(self.story_effects)
+        register_faction_story_effects(self.story_effects, self.definitions)
         register_concubine_story_effects(self.story_effects, self.definitions)
         register_war_story_effects(self.story_effects, self.definitions)
         register_ghost_story_effects(self.story_effects, self.definitions)
@@ -400,6 +420,85 @@ class GameEngine:
         self.invariants.register("presentation", presentation_invariants(self.definitions))
         self.invariants.register("story", story_invariants(self.definitions))
 
+    def _ensure_current_market(self, state: WorldState):
+        """Populate markets missing from migrated or newly promoted saves."""
+        actor_id = state.controlled_entity_id
+        if actor_id is None:
+            return []
+        cultivation = state.entities.get(actor_id, CULTIVATION)
+        location = state.entities.get(actor_id, LOCATION)
+        market = state.entities.get(actor_id, MARKET)
+        life = state.entities.get(actor_id, LIFE)
+        if not all(isinstance(row, dict) for row in (
+            cultivation, location, market, life,
+        )):
+            return []
+        if not bool(life.get("alive")):
+            return []
+        if self.definitions.realm_index(str(cultivation["realm_id"])) == 0:
+            return []
+        story = state.entities.get(actor_id, STORY_STATE) or {}
+        if story.get("pending") is not None:
+            return []
+        world_id = str(location["world_id"])
+        if not any(
+            good.world_id == world_id for good in self.definitions.market_goods
+        ):
+            return []
+        stale = (
+            market.get("world_id") != location.get("world_id")
+            or market.get("location_id") != location.get("location_id")
+            or not market.get("offers")
+        )
+        if not stale:
+            return []
+        return self.commands.execute(
+            state, RefreshMarket(actor_id=str(actor_id), force=True)
+        )
+
+    def list_achievements(self) -> dict[str, Any]:
+        records = self.store.achievement_unlocks()
+        rows = []
+        for definition in self.achievement_definitions:
+            record = records.get(str(definition["id"]))
+            rows.append({
+                **public_achievement_definition(definition),
+                "unlocked": record is not None,
+                "unlocked_at": record.get("unlocked_at") if record else None,
+                "player_name": record.get("player_name") if record else None,
+            })
+        return {
+            "achievements": rows,
+            "unlocked": sum(bool(row["unlocked"]) for row in rows),
+            "total": len(rows),
+            "progress_available": True,
+        }
+
+    def _present_with_achievements(self, state: WorldState) -> dict[str, Any]:
+        matched = matching_achievement_ids(
+            state, self.definitions, self.achievement_definitions
+        )
+        actor_id = str(state.controlled_entity_id)
+        identity = state.entities.require(actor_id, IDENTITY)
+        fresh_ids = self.store.unlock_achievements(
+            matched,
+            unlocked_at=_now_iso(),
+            game_id=state.game_id,
+            player_name=str(identity["name"]),
+        )
+        game = self._present(state)
+        records = self.store.achievement_unlocks()
+        game["new_achievements"] = [
+            {
+                **public_achievement_definition(definition),
+                **records[str(definition["id"])],
+                "unlocked": True,
+            }
+            for definition in self.achievement_definitions
+            if str(definition["id"]) in fresh_ids
+        ]
+        return game
+
     def create_game(
         self,
         name: str,
@@ -412,6 +511,7 @@ class GameEngine:
         path: str = "dao",
         start_world: str = "human",
         preset_id: str | None = None,
+        monster_species_id: str | None = None,
     ) -> dict[str, Any]:
         preset: dict[str, Any] | None = None
         if preset_id:
@@ -428,6 +528,10 @@ class GameEngine:
             spirit_root = str(preset.get("spirit_root", spirit_root))
             path = str(preset.get("path", path))
             start_world = str(preset.get("world", start_world))
+        elif start_world not in self.definitions.start_worlds.get(path, ()):
+            raise ValueError("该修行道统无法从所选界面开局")
+        if path == "monster" and preset is None:
+            race = "monster"
         now = _now_iso()
         state = WorldState.new(seed=seed if seed is not None else secrets.randbits(63), created_at=now)
         events = self.commands.execute(state, BootstrapGame(
@@ -439,6 +543,16 @@ class GameEngine:
             path=path,
             start_world=start_world,
         ))
+        if path == "monster" and monster_species_id is not None:
+            species_id = str(monster_species_id)
+            events = [
+                *events,
+                *self.commands.execute(
+                    state, ConfigureMonsterBloodline(
+                        str(state.controlled_entity_id), species_id
+                    )
+                ),
+            ]
         if preset is not None:
             actor_id = str(state.controlled_entity_id)
             realm = self.definitions.realms[int(preset["realm_index"])]
@@ -524,7 +638,7 @@ class GameEngine:
         reconcile_story_state(state)
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
-        reconcile_trial_state(state)
+        reconcile_trial_state(state, self.definitions)
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
@@ -534,10 +648,11 @@ class GameEngine:
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
+        events = [*events, *self._ensure_current_market(state)]
         self.invariants.validate(state)
         player = character_view(state)
         self.store.create(state, events, player_name=player["name"])
-        return self._present(state)
+        return self._present_with_achievements(state)
 
     def execute(self, game_id: str, command: object) -> CommandExecution:
         state = self.store.load(game_id)
@@ -551,9 +666,15 @@ class GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        story_repair_events = (
+            self.commands.execute(
+                state, RepairPendingStoryEvent(str(state.controlled_entity_id))
+            )
+            if pending_story_needs_repair(state, self.definitions) else []
+        )
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
-        reconcile_trial_state(state)
+        reconcile_trial_state(state, self.definitions)
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
@@ -563,8 +684,14 @@ class GameEngine:
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
+        market_events = self._ensure_current_market(state)
         self.invariants.validate(state)
-        events = [*content_events, *self.commands.execute(state, command)]
+        events = [
+            *content_events,
+            *story_repair_events,
+            *market_events,
+            *self.commands.execute(state, command),
+        ]
         self.invariants.validate(state)
         state.updated_at = _now_iso()
         player = character_view(state)
@@ -575,7 +702,7 @@ class GameEngine:
             expected_revision=expected_revision,
         )
         return CommandExecution(
-            game=self._present(state),
+            game=self._present_with_achievements(state),
             events=tuple(event.to_dict() for event in events),
         )
 
@@ -920,13 +1047,13 @@ class GameEngine:
     ) -> CommandExecution:
         if slot in {"body", "divine_sense", "transformation"}:
             return self.equip_special_technique(game_id, technique_id, slot)
-        if slot != "main":
-            raise ValueError("灵修功法只保留主修槽位")
+        if slot not in {"main", "support", "combat"}:
+            raise ValueError("未知功法槽位")
         state = self.store.load(game_id)
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
-        return self.execute(game_id, EquipMainTechnique(actor_id, technique_id))
+        return self.execute(game_id, EquipMainTechnique(actor_id, technique_id, slot))
 
     def imprison_character(
         self,
@@ -1160,18 +1287,10 @@ class GameEngine:
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
-        cultivation = state.entities.require(actor_id, "cultivation.state")
-        location = state.entities.require(actor_id, "world.location")
-        if cultivation.get("path") == "demonic":
-            destination = {
-                "human": "demon",
-                "demon": "true_demon",
-            }.get(str(location.get("world_id")))
-            if destination is None:
-                raise ValueError("当前魔界路线没有可用的飞升目标")
-        else:
-            destination = "spirit"
-        return self.ascend_world(game_id, destination)
+        return self.execute(
+            game_id,
+            BeginSpiritCrossing(actor_id, party_crossing_ids(state, actor_id)),
+        )
 
     def spend_wangsheng(
         self, game_id: str, *, all_available: bool = False,
@@ -1447,7 +1566,12 @@ class GameEngine:
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
-        return self.execute(game_id, PreviewCrafting(actor_id, dict(payload)))
+        preview = preview_crafting_view(
+            state, self.definitions, actor_id, dict(payload)
+        )
+        game = self._present(state)
+        game["crafting"]["last_preview"] = preview
+        return CommandExecution(game=game, events=())
 
     def forge_crafted_artifact(
         self, game_id: str, payload: dict[str, Any],
@@ -1493,7 +1617,12 @@ class GameEngine:
         actor_id = state.controlled_entity_id
         if actor_id is None:
             raise ValueError("游戏尚未初始化")
-        return self.execute(game_id, PreviewFormation(actor_id, dict(payload)))
+        preview = preview_formation_view(
+            state, self.definitions, actor_id, dict(payload)
+        )
+        game = self._present(state)
+        game["formation_system"]["last_preview"] = preview
+        return CommandExecution(game=game, events=())
 
     def save_formation(
         self, game_id: str, payload: dict[str, Any],
@@ -1762,9 +1891,15 @@ class GameEngine:
         reconcile_presentation_state(state)
         reconcile_action_runtime(state)
         reconcile_story_state(state)
+        story_repair_events = (
+            self.commands.execute(
+                state, RepairPendingStoryEvent(str(state.controlled_entity_id))
+            )
+            if pending_story_needs_repair(state, self.definitions) else []
+        )
         reconcile_advanced_cultivation(state, self.definitions)
         reconcile_world_state(state)
-        reconcile_trial_state(state)
+        reconcile_trial_state(state, self.definitions)
         reconcile_asset_ledger(state)
         reconcile_production_state(state)
         reconcile_auction_state(state)
@@ -1774,17 +1909,19 @@ class GameEngine:
         reconcile_concubine_state(state)
         reconcile_demonic_state(state)
         reconcile_war_state(state)
+        market_events = self._ensure_current_market(state)
         self.invariants.validate(state)
-        if content_events:
+        events = [*content_events, *story_repair_events, *market_events]
+        if events:
             state.updated_at = _now_iso()
             player = character_view(state)
             self.store.save(
                 state,
-                content_events,
+                events,
                 player_name=player["name"],
                 expected_revision=expected_revision,
             )
-        return self._present(state)
+        return self._present_with_achievements(state)
 
     def list_games(self) -> list[dict[str, Any]]:
         return self.store.list_games()
@@ -1858,9 +1995,29 @@ class GameEngine:
         target_membership = next(iter(state.relations.find(
             source_id=entity_id, kind=MEMBERSHIP
         )), None)
+        target_faction = (
+            state.entities.get(target_membership.target_id, "faction.profile")
+            if target_membership else None
+        )
         same_faction = bool(
             actor_membership and target_membership
             and actor_membership.target_id == target_membership.target_id
+        )
+        controlled_faction_id = (
+            actor_membership.target_id
+            if actor_membership
+            and (state.entities.get(
+                actor_membership.target_id, FACTION_GOVERNANCE
+            ) or {}).get("controller_id") == observer_id
+            else None
+        )
+        target_is_controlled_guest = bool(
+            controlled_faction_id
+            and state.relations.find(
+                source_id=controlled_faction_id,
+                target_id=entity_id,
+                kind=INTRIGUE_GUEST,
+            )
         )
         main_id = practice.get("main_technique_id")
         world_id = str(location["world_id"])
@@ -1906,6 +2063,11 @@ class GameEngine:
             ),
             "techniques": list(map(str, practice.get("known_techniques", []))),
             "source": "world" if world_profile else "faction" if target_membership else "event",
+            "faction_id": target_membership.target_id if target_membership else None,
+            "faction_external_id": (
+                target_faction.get("external_id") if target_faction else None
+            ),
+            "faction_name": target_faction.get("name") if target_faction else None,
             "treasure_name": (
                 self.definitions.items[str(world_profile.get("treasure_item_id"))].name
                 if str(world_profile.get("treasure_item_id", "")) in self.definitions.items
@@ -1929,6 +2091,7 @@ class GameEngine:
                     "friend_affinity_required", 15
                 ))
             ),
+            "can_intercept": bool(can_interact and same_faction),
             "can_request_master": bool(
                 can_interact and same_faction and unrelated and not actor_has_master
                 and target_rank > actor_rank
@@ -1947,7 +2110,15 @@ class GameEngine:
             "can_invite_faction": bool(
                 can_interact and actor_membership and target_membership is None
             ),
-            "can_invite_guest": False,
+            "can_invite_guest": bool(
+                can_interact and controlled_faction_id
+                and not target_is_controlled_guest
+                and not (
+                    target_membership
+                    and target_membership.target_id == controlled_faction_id
+                )
+                and (affinity >= 30 or "friend" in social_kinds)
+            ),
             "is_master": any(
                 edge.kind == "master_disciple" and edge.source_id == entity_id
                 for edge in social
@@ -1977,7 +2148,6 @@ class GameEngine:
                 continue
             life = state.entities.get(entity_id, LIFE) or {}
             location = state.entities.get(entity_id, LOCATION) or {}
-            cultivation = state.entities.get(entity_id, CULTIVATION) or {}
             if not bool(life.get("alive")) or location.get("world_id") != world_id:
                 continue
             rows.append(self._character_projection(
@@ -2021,14 +2191,54 @@ class GameEngine:
                 row["requester"] = projected(requester_id)
         faction = faction_view(state, self.definitions)
         if faction is not None:
+            faction_id = str(faction["id"])
+            governance = state.entities.require(faction_id, FACTION_GOVERNANCE)
+            actor_membership = next(
+                edge for edge in state.relations.find(
+                    source_id=actor_id, target_id=faction_id, kind=MEMBERSHIP
+                )
+            )
             roster = []
             for entry in faction.get("roster", []):
                 entity_id = str(entry["id"])
-                roster.append({**projected(entity_id), **entry, "is_player": False})
+                roster.append({
+                    **projected(entity_id), **entry,
+                    "is_player": entity_id == actor_id,
+                })
             roster.sort(key=lambda row: (
                 -int(row["realm_index"]), -int(row["layer"]), str(row["name"])
             ))
             actor_realm = int(cultivation["realm_index"])
+            creator_id = governance.get("creator_id")
+            controller_id = governance.get("controller_id")
+            successor_id = governance.get("designated_successor_id")
+            successor_name = None
+            if successor_id and state.entities.exists(str(successor_id)):
+                successor_name = str(
+                    state.entities.require(str(successor_id), IDENTITY)["name"]
+                )
+            eligible_successors = [
+                row for row in roster
+                if not row["is_player"] and bool(row.get("alive", True))
+            ]
+            historical_members = {
+                edge.source_id
+                for edge in state.relations.find(
+                    target_id=faction_id, kind=MEMBERSHIP, active_only=False
+                )
+                if edge.source_id != actor_id
+            }
+            fallen_count = sum(
+                not bool((state.entities.get(entity_id, LIFE) or {}).get("alive"))
+                or (state.entities.get(entity_id, LOCATION) or {}).get("world_id")
+                != current_world["world_id"]
+                for entity_id in historical_members
+            )
+            founded_by_player = creator_id == actor_id
+            succession_arranged = bool(successor_id)
+            faction_rules = dict(
+                self.definitions.systems.get("player_faction", {})
+            )
             faction = {
                 **faction,
                 "member": True,
@@ -2044,9 +2254,18 @@ class GameEngine:
                         source_id=actor_id, kind=MEMBERSHIP
                     ) if edge.target_id == faction.get("id")
                 ), state.clock.year),
+                "role": (
+                    "开山祖师" if founded_by_player
+                    else "宗门执掌" if controller_id == actor_id
+                    else "议事长老" if actor_realm >= 4
+                    else "宗门弟子"
+                ),
                 "fixed_reward_unlocked": actor_realm >= 4,
                 "can_dispatch": actor_realm >= 4,
-                "dispatch_used": False,
+                "dispatch_used": (
+                    actor_membership.metadata.get("last_dispatch_year")
+                    == state.clock.year
+                ),
                 "dispatch_cost": int(self.definitions.systems.get(
                     "factions", {}
                 ).get("disciple_dispatch_cost", 0)),
@@ -2054,20 +2273,39 @@ class GameEngine:
                     "factions", {}
                 ).get("disciple_dispatch_success", 0.0)),
                 "can_leave": True,
-                "can_arrange_succession": False,
-                "founded_by_player": False,
-                "pressure": 0,
-                "fallen_count": 0,
+                "can_arrange_succession": bool(
+                    founded_by_player and controller_id == actor_id
+                    and eligible_successors
+                ),
+                "founded_by_player": founded_by_player,
+                "succession_plan": {
+                    "arranged": succession_arranged,
+                    "successor_id": successor_id,
+                    "successor_name": successor_name,
+                },
+                "pressure": int(governance.get("pressure", 0)),
+                "pressure_limit": int(faction_rules.get("pressure_limit", 3)),
+                "fallen_count": fallen_count,
                 "has_diplomatic_voice": bool(faction.get("has_voice")),
                 "roster": roster,
             }
+        lineage_race = str(player["race"])
+        allegiance_race = str(
+            (faction.get("allegiance_race") or lineage_race)
+            if faction is not None else lineage_race
+        )
         return {
             "format": "cultivation-life-v2",
             "id": state.game_id,
+            "seed": state.seed,
             "revision": state.revision,
             "schema_version": state.schema_version,
             "clock": {"year": state.clock.year},
-            "player": {**player, "cultivation": cultivation, **advanced_cultivation},
+            "player": {
+                **player, "cultivation": cultivation, **advanced_cultivation,
+                "lineage_race": lineage_race,
+                "allegiance_race": allegiance_race,
+            },
             "world": current_world,
             "relationships": relationships,
             "characters": characters,
@@ -2104,10 +2342,12 @@ class GameEngine:
                 "flags": story["flags"],
                 "milestones": story["milestones"],
                 "attributes": story["attributes"],
+                "spirit_crossing": story["spirit_crossing"],
             },
             "breakthrough": breakthrough_view(state, self.definitions),
             "action": action,
             "trial": trial_view(state),
+            "tribulation": tribulation_view(state),
             "capabilities": {
                 "character.cultivate": {
                     "enabled": alive and not interaction_open,

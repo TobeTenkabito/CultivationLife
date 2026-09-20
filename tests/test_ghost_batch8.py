@@ -17,7 +17,7 @@ from cultivation_life import (
     GameEngine,
 )
 from cultivation_life.domain.character import LIFE
-from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.cultivation import CULTIVATION, GrantTechnique
 from cultivation_life.domain.demonic import DEMONIC_STATE
 from cultivation_life.domain.extensions import GHOST_SOUL
 from cultivation_life.domain.ghost import (
@@ -26,6 +26,7 @@ from cultivation_life.domain.ghost import (
     SOUL_CONTROL,
 )
 from cultivation_life.domain.world import LOCATION
+from cultivation_life.v1_facade import game_view
 
 
 class V2GhostBatchEightTests(unittest.TestCase):
@@ -77,6 +78,24 @@ class V2GhostBatchEightTests(unittest.TestCase):
                 row for row in game["pending_event"]["choices"] if row["enabled"]
             )
             game = self.engine.choose(game_id, choice["id"]).game
+
+    def test_possession_limit_uses_learned_ghost_techniques(self):
+        game = self.engine.create_game(
+            "夺舍上限", seed=805, path="ghost",
+            spirit_root="mutated_yin", start_world="hell",
+        )
+        actor_id = game["player"]["id"]
+        self.assertEqual(game["ghost_system"]["possession_limit"], 1)
+        limited = self.engine.execute(
+            game["id"], GrantTechnique(actor_id, "TECH_GHOST_BODY_THIEF")
+        ).game
+        self.assertEqual(limited["ghost_system"]["possession_limit"], 2)
+        unlimited = self.engine.execute(
+            game["id"], GrantTechnique(
+                actor_id, "TECH_GHOST_TEN_THOUSAND_HOSTS"
+            )
+        ).game
+        self.assertIsNone(unlimited["ghost_system"]["possession_limit"])
 
     def test_reincarnation_prompt_resets_progress_but_preserves_soul_damage(self):
         game = self.engine.create_game(
@@ -145,6 +164,11 @@ class V2GhostBatchEightTests(unittest.TestCase):
         parade_view = active["ghost_system"]["parade"]
         self.assertEqual(parade_view["status"], "active")
         self.assertEqual(len(parade_view["souls"]), 6)
+        self.assertTrue(all(
+            row["realm_name"] and row["realm_index"] >= 0
+            and row["soul_trait"]["name"]
+            for row in parade_view["souls"]
+        ))
         soul_id = parade_view["souls"][0]["id"]
         persisted = self.engine.store.load(game["id"])
         self.assertIsNotNone(persisted.entities.get(soul_id, BOUND_SOUL))
@@ -201,10 +225,20 @@ class V2GhostBatchEightTests(unittest.TestCase):
         )
         actor_id = game["player"]["id"]
         self.engine.execute(game["id"], GrantItem(actor_id, "spirit_sword", 1))
+        attachable = self.engine.get_game(game["id"])["ghost_system"]
+        self.assertEqual(attachable["state_name"], "自由魂体")
+        self.assertFalse(attachable["souls_suspended"])
+        self.assertIn("spirit_sword", {
+            row["id"] for row in attachable["attachable_items"]
+        })
         attached = self.engine.execute(
             game["id"], GhostAttachmentAction(actor_id, "attach", "spirit_sword")
         ).game
         self.assertEqual(attached["ghost_system"]["state"], "attached")
+        self.assertEqual(
+            attached["ghost_system"]["attachment"]["spirit_name"],
+            "青锋灵剑器灵·寄魂",
+        )
         detached = self.engine.execute(
             game["id"], GhostAttachmentAction(actor_id, "leave")
         ).game
@@ -222,10 +256,27 @@ class V2GhostBatchEightTests(unittest.TestCase):
         }
         state.entities.put(actor_id, DEMONIC_STATE, demonic)
         self._save(game["id"], state)
+        legacy = game_view(self.engine.get_game(game["id"]), {})
+        self.assertEqual(
+            legacy["pending_event"]["id"],
+            "SYS_POST_BATTLE_POSSESSION",
+        )
+        self.assertEqual(
+            legacy["pending_event"]["choices"][0]["id"], target_id
+        )
         possessed = self.engine.execute(
             game["id"], PostBattlePossession(actor_id, target_id)
         ).game
         self.assertEqual(possessed["ghost_system"]["state"], "possessed")
+        legacy_possessed = game_view(possessed, {})
+        self.assertEqual(
+            legacy_possessed["ghost_system"]["phase_two"]["state"],
+            "possessed",
+        )
+        self.assertEqual(
+            legacy_possessed["ghost_system"]["phase_two"]["host"]["name"],
+            "备用肉身",
+        )
         left = self.engine.execute(
             game["id"], LeavePossessedBody(actor_id)
         ).game
