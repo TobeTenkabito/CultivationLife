@@ -566,6 +566,29 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             floor = 1 if action == "commission" and resource == "hp" else 0
             setattr(player, resource, min(maximum, max(floor, value)))
 
+    @staticmethod
+    def _remember_faction_prison_release(player: Player, prison: dict[str, Any]) -> None:
+        """Persist the exact former jailer so a later dissolution can match it."""
+        key = str(prison.get("key", ""))
+        if ":" not in key:
+            return
+        kind, faction_id = key.split(":", 1)
+        if kind not in {"sect", "family"} or not faction_id:
+            return
+        flag = f"released_faction_prison:{kind}:{faction_id}"
+        if flag not in player.story_flags:
+            player.story_flags.append(flag)
+
+    @staticmethod
+    def _record_former_jailer_dissolved(player: Player, kind: str, faction_id: str) -> bool:
+        flag = f"released_faction_prison:{kind}:{faction_id}"
+        if flag not in player.story_flags:
+            return False
+        player.milestones["dissolved_former_jailer"] = max(
+            1, int(player.milestones.get("dissolved_former_jailer", 0)),
+        )
+        return True
+
     def prison_action(self, game_id: str, action: str) -> dict[str, Any]:
         game = self._load(game_id)
         player = game.player
@@ -611,6 +634,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 player.hostility[key] = 0.0
                 if key.startswith("world:"):
                     self._record_world_coalition_amnesty(player, key.split(":", 1)[1])
+                self._remember_faction_prison_release(player, prison)
                 player.imprisonment = None
                 self._intrigue_sync_player_prison(game)
                 result = "released"
@@ -637,6 +661,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 result, summary = "dead", "你未能熬到刑满，在大牢中寿尽坐化。"
             elif prison["remaining_years"] <= 0:
                 player.hostility[key] = 0.0
+                self._remember_faction_prison_release(player, prison)
                 player.imprisonment = None
                 self._intrigue_sync_player_prison(game)
                 result, summary = "released", "刑期已满，你获准离开势力监狱。"
@@ -1811,7 +1836,11 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         if not item or not has_item(game.player, item_id):
             raise ValueError("物品不存在")
         if ghost_cultivation_active(game.player) and item.breakthrough_bonus > 0:
-            raise ValueError("阴魂不受血肉丹火重塑，此物无法助你破境。鬼修唯有自渡轮回，方能熟悉来路。")
+            scope_type = str(item.breakthrough_scope or "").split(":", 1)[0]
+            if game.player.realm_index < 4:
+                raise ValueError("凝婴入体前，阴魂无法承受突破丹药；达到元婴期后方可服用当前境界适用的小境界丹药。")
+            if scope_type == "major" and game.player.realm_index < 6:
+                raise ValueError("炼虚以前魂婴尚不能借丹药跨越大境界；达到炼虚期后方可服用当前境界适用的大境界丹药。")
         if game.pending_event:
             if not game.active_trial or (item.trial_restore_hp <= 0 and item.trial_restore_mp <= 0):
                 raise ValueError("当前事件中只能使用渡劫恢复道具")
@@ -3953,6 +3982,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             entity.extinct = True
             game.player.milestones["became_wanted_target"] = 1
             game.player.milestones["dissolved_wanted_power"] = 1
+            self._record_former_jailer_dissolved(game.player, kind, entity_id)
             for npc in members:
                 npc.faction_id = None
                 game.notable_npcs.setdefault(npc.id, npc)
@@ -7431,7 +7461,17 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             float(ITEM_CATALOG[item_id].breakthrough_bonus)
             for item_id in player.active_breakthrough_aids
             if item_id in ITEM_CATALOG and ITEM_CATALOG[item_id].breakthrough_scope == scope
-        ) if allow_aids and player.path != "demonic" and not ghost_cultivation_active(player) else 0.0
+        ) if (
+            allow_aids
+            and player.path != "demonic"
+            and (
+                not ghost_cultivation_active(player)
+                or (
+                    player.realm_index >= 4
+                    and (not major or player.realm_index >= 6)
+                )
+            )
+        ) else 0.0
         devouring_bonus = player.devouring_breakthrough_bonus if player.path == "demonic" else 0.0
         companion_bonus = (
             float(WORLD_SYSTEMS["relationship"]["companion_breakthrough_bonus"])
@@ -9478,8 +9518,18 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             self._die(game, "本体魂基已经低于存在界限，魂魄彻底消散", "SYS_GHOST_SOUL_DISPERSAL")
             ghost_migrated = True
         if ghost_cultivation_active(game.player) and game.player.active_breakthrough_aids:
-            game.player.active_breakthrough_aids = []
-            ghost_migrated = True
+            valid_ghost_aids = [
+                item_id for item_id in game.player.active_breakthrough_aids
+                if item_id in ITEM_CATALOG
+                and game.player.realm_index >= 4
+                and (
+                    not str(ITEM_CATALOG[item_id].breakthrough_scope or "").startswith("major:")
+                    or game.player.realm_index >= 6
+                )
+            ]
+            if valid_ghost_aids != game.player.active_breakthrough_aids:
+                game.player.active_breakthrough_aids = valid_ghost_aids
+                ghost_migrated = True
         if (
             game.player.path == "ghost" and not ghost_cultivation_active(game.player)
             and game.player.ghost_intrinsic_hp_reference is not None

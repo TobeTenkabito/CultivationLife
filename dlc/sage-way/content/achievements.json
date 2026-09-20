@@ -6,6 +6,8 @@
     {"id":"sage_influence_cap","name":"独树一帜","description":"令所奉学说的声望达到本界六十点上限","category":"cultivation","condition":{"history":{"event_id":"SYS_SAGE_INFLUENCE_CAP","result":"capped"}}},
     {"id":"sage_take_control","name":"道统更替","description":"以门内威望超过原执掌者一成并接掌学说","category":"cultivation","condition":{"history":{"event_id":"SYS_SAGE_CONTROL_TAKEN","result":"controlled"}}},
     {"id":"sage_change_worship","name":"受祀有灵","description":"以学说前三席身份完成一次先贤改祀","category":"cultivation","condition":{"history":{"event_id":"SYS_SAGE_CHANGED","result":"changed"}}},
-    {"id":"sage_ten_graduates","name":"门墙如林","description":"累计教出十名进度圆满的门人","category":"cultivation","condition":{"milestone_at_least":{"id":"sage_ten_graduates","value":1}}}
+    {"id":"sage_ten_graduates","name":"门墙如林","description":"累计教出十名进度圆满的门人","category":"cultivation","condition":{"milestone_at_least":{"id":"sage_ten_graduates","value":1}}},
+    {"id":"sage_story_human_annals","name":"青史有名","description":"查清石渠县志删名案，让三百户灾民的姓名重回人间","category":"story","condition":{"all":[{"path":"confucian"},{"flag":"sage_human_annals_completed"}]}},
+    {"id":"sage_story_spirit_covenant","name":"万籁成章","description":"终止同文灵律的抹名之祸，为灵界十二族订立可容异声的新约","category":"story","condition":{"all":[{"path":"confucian"},{"flag":"sage_spirit_covenant_completed"}]}}
   ]
 }

@@ -210,6 +210,34 @@
       "condition": {"all": [{"path": "monster"}, {"realm_at_least": 8}]}
     },
     {
+      "id": "cultivation_ghost_mahayana",
+      "name": "阴魂不散",
+      "description": "以鬼修身份修炼至大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "ghost"}, {"realm_at_least": 8}]}
+    },
+    {
+      "id": "cultivation_confucian_mahayana",
+      "name": "修齐治平",
+      "description": "以儒修身份修炼至大乘",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"all": [{"path": "confucian"}, {"realm_at_least": 8}]}
+    },
+    {
+      "id": "cultivation_ascend_upper_world",
+      "name": "羽化登仙",
+      "description": "以大乘修为渡过飞升之关，登临任一上位界面",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"any": [
+        {"history": {"event_id": "SYS_CELESTIAL_ASCENSION_COMPLETE", "result": "ascended"}},
+        {"history": {"event_id": "SYS_ASURA_ASCENSION_COMPLETE", "result": "ascended"}},
+        {"history": {"event_id": "SYS_MONSTER_NETHER_ASCENSION", "result": "ascended"}}
+      ]}
+    },
+    {
       "id": "politics_wanted_target",
       "name": "无妄之灾",
       "description": "成为任一界面通缉令的目标",
@@ -224,6 +252,14 @@
       "category": "cultivation",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},
       "condition": {"milestone_at_least": {"id": "dissolved_wanted_power", "value": 1}}
+    },
+    {
+      "id": "politics_dissolve_former_jailer",
+      "name": "基督山伯爵",
+      "description": "从任一势力牢狱刑满出狱，并在此后亲手解散该势力",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "dissolved_former_jailer", "value": 1}}
     },
     {
       "id": "combat_enemy_initiative_five",

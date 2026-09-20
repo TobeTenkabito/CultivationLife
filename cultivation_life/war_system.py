@@ -1084,6 +1084,8 @@ class WarSystemMixin:
             ):
                 game.player.milestones["became_wanted_target"] = 1
                 game.player.milestones["dissolved_wanted_power"] = 1
+            if own_id == winner_id and term == "dissolve":
+                self._record_former_jailer_dissolved(game.player, "sect", loser_id)
             if game.player.faction_id == loser_id:
                 game.player.faction_id = winner_id if term == "annex" else None
         elif term != "white_peace":
