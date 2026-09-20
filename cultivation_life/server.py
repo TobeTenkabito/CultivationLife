@@ -496,6 +496,12 @@ def build_handler(
             "karma_factors": dict(
                 engine.definitions.systems.get("karma_factors", {})
             ),
+            "fame_rules": dict(
+                engine.definitions.systems.get("fame", {})
+            ),
+            "faction_conflict_rules": dict(
+                engine.definitions.systems.get("faction_conflict", {})
+            ),
             "technique_elements": {
                 "neutral": "无属性",
                 **dict(engine.definitions.affinity_names),

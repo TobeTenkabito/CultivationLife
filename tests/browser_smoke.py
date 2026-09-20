@@ -100,6 +100,25 @@ def main() -> None:
                 ).text_content()
                 page.locator("#new-game-button").click()
                 page.locator("#start-screen").wait_for(state="visible")
+                page.locator("#new-game-form input[name=name]").fill("")
+                with page.expect_response(
+                    lambda item: item.url.endswith("/api/games")
+                    and item.request.method == "POST"
+                ) as pending:
+                    page.locator(
+                        '.quick-start-button[data-preset-id="true_immortal"]'
+                    ).click()
+                assert pending.value.status == 201, pending.value.text()
+                page.locator("#game-screen").wait_for(state="visible")
+                assert page.locator("#player-name").text_content() == "无名散修"
+                assert "真仙" in page.locator("#realm-name").text_content()
+                assert "真仙引灵经" in page.locator(
+                    "#known-technique-list"
+                ).text_content()
+                assert "NaN" not in page.locator("body").inner_text()
+                assert "undefined" not in page.locator("body").inner_text()
+                page.locator("#new-game-button").click()
+                page.locator("#start-screen").wait_for(state="visible")
                 page.locator("#path-select").select_option("monster")
                 assert page.locator("#monster-species-field").is_visible()
                 assert page.locator("#monster-species-select option").count() == 8
@@ -921,6 +940,20 @@ def main() -> None:
                     assert pending.value.status == 200, pending.value.text()
                     page.locator("body:not(.busy)").wait_for()
 
+                def restore_trial_resources(game_id: str, actor_id: str) -> None:
+                    state = engine.store.load(game_id)
+                    condition = state.entities.require(
+                        actor_id, "combat.condition"
+                    )
+                    condition.update(hp_ratio=1.0, mp_ratio=1.0)
+                    state.entities.put(
+                        actor_id, "combat.condition", condition
+                    )
+                    engine.store.save(
+                        state, [], player_name="飞升烟测",
+                        expected_revision=state.revision,
+                    )
+
                 monster_flow = engine.create_game(
                     "妖族进化烟测", seed=7101, path="monster",
                     start_world="human", monster_species_id="serpent",
@@ -999,11 +1032,11 @@ def main() -> None:
                     crossing_state, [], player_name="偷渡灵界烟测",
                     expected_revision=crossing_state.revision,
                 )
-                for item_id in ("spirit_node_info", "broken_god"):
+                for item_id, quantity in (("spirit_node_info", 1), ("broken_god", 5)):
                     engine.execute(
                         crossing_id,
                         GrantItem(
-                            crossing_actor, item_id, 1, "browser-smoke"
+                            crossing_actor, item_id, quantity, "browser-smoke"
                         ),
                     )
                 page.evaluate("id => loadGame(id)", crossing_id)
@@ -1060,6 +1093,9 @@ def main() -> None:
                     "endure", "cross", "receive", "sever", "destroy",
                     "receive", "anchor", "answer", "ascend",
                 ):
+                    restore_trial_resources(
+                        celestial_flow_id, celestial_flow_actor
+                    )
                     choose_story(choice_id)
                 assert page.evaluate("game.player.world") == "celestial"
 
@@ -1124,6 +1160,7 @@ def main() -> None:
                     "endure", "cross", "receive", "master", "devour",
                     "receive", "command", "answer", "ascend",
                 ):
+                    restore_trial_resources(asura_flow_id, asura_flow_actor)
                     choose_story(choice_id)
                 assert page.evaluate("game.player.world") == "asura"
 
