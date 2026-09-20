@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.content_registry import REALMS, TECHNIQUE_CATALOG, TRANSFORMATION_CATALOG
+from cultivation_life.content_registry import REALMS, TECHNIQUE_CATALOG, TRANSFORMATION_CATALOG, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import assign_technique, max_hp, max_mp, opportunity_required, public_player, stage_name
 
@@ -129,6 +129,50 @@ class CelestialSystemTests(unittest.TestCase):
         self.assertEqual(game.active_trial["base_power"], 1000)
         self.assertEqual(game.active_trial["power"], 1500)
         self.assertEqual(game.active_trial["world_power_multiplier"], 1.5)
+
+    def test_lower_world_caps_local_thunder_without_erasing_accumulated_power(self):
+        shown = self.engine.create_game("携劫下界", "law_space", "dao", 1914)
+        game = self.engine.store.load(shown["id"])
+        player = game.player
+        player.realm_index, player.layer = 7, 3
+        player.world = "human"
+        player.sealed_cultivation = {
+            "realm_index": 7, "layer": 3, "upper_world": "spirit", "lower_world": "human",
+        }
+        player.next_tribulation_age = player.age
+        player.tribulation_power = 1_000_000
+        player.hp, player.mp = max_hp(player), max_mp(player)
+
+        self.engine._check_tribulation(game, random.Random(1))
+        self.assertEqual(game.active_trial["uncapped_base_power"], 1_000_000)
+        self.assertEqual(game.active_trial["world_base_power_cap"], 4000)
+        self.assertEqual(game.active_trial["base_power"], 4000)
+        self.assertEqual(game.active_trial["power"], 6000)
+        for step in ("thunder_1", "thunder_2", "thunder_3"):
+            result, _ = self.engine._resolve_trial_step(game, step, random.Random(2))
+        self.assertEqual(result, "trial_completed")
+        self.assertEqual(player.tribulation_power, 2_000_000)
+
+    def test_celestial_level_worlds_do_not_cap_thunder_base_power(self):
+        shown = self.engine.create_game("仙界承劫", "otherworld", "dao", 1915)
+        game = self.engine.store.load(shown["id"])
+        player = game.player
+        player.realm_index, player.layer = 9, 1
+        player.world = "celestial"
+        player.next_tribulation_age = player.age
+        player.tribulation_power = 1_000_000
+        self.engine._check_tribulation(game, random.Random(1))
+        self.assertIsNone(game.active_trial["world_base_power_cap"])
+        self.assertEqual(game.active_trial["base_power"], 1_000_000)
+        self.assertEqual(game.active_trial["power"], 1_000_000)
+
+    def test_only_worlds_below_celestial_tier_define_thunder_caps(self):
+        profiles = WORLD_SYSTEMS["world_profiles"]
+        for profile in profiles.values():
+            if int(profile["tier"]) < 3:
+                self.assertGreater(float(profile["tribulation_base_power_cap"]), 0)
+            else:
+                self.assertNotIn("tribulation_base_power_cap", profile)
 
     def test_immortal_technique_requires_completed_conversion(self):
         shown = self.engine.create_game("求仙者", "otherworld", "dao", 915)

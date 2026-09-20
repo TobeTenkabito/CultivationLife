@@ -5213,7 +5213,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             return None
         expected = expected_combat_power(npc.realm_index, npc.layer)
         own_power = self._npc_power(npc)
-        pressure = max(1.0, float(npc.tribulation_power or config["base_power"]))
+        uncapped_pressure = max(1.0, float(npc.tribulation_power or config["base_power"]))
+        world_cap = self._tribulation_base_power_cap(npc.world)
+        pressure = min(uncapped_pressure, world_cap) if world_cap is not None else uncapped_pressure
         preparedness = own_power / max(1.0, expected * 0.72 + pressure * 16)
         success_chance = max(0.48, min(0.985, 0.62 + preparedness * 0.24))
         old_count = npc.tribulation_count
@@ -5228,11 +5230,17 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             result = "npc_tribulation_fallen"
         else:
             summary = f"{prefix}扛过第{old_count + 1}次大天劫（渡过概率 {success_chance:.0%}），下一劫威力再增一倍。"
+            if world_cap is not None and uncapped_pressure > world_cap:
+                summary += f" 本界将实际基础雷威压制在 {world_cap:.0f}。"
             result = "npc_tribulation_survived"
         game.history.append(HistoryRecord(
             "SYS_NPC_TRIBULATION", 1, game.player.age,
             f"{WORLD_SYSTEMS['world_names'].get(npc.world, npc.world)}天劫", None, result, summary,
-            {"npc_id": npc.id, "tribulation_count": npc.tribulation_count, "chance": round(success_chance, 3)},
+            {
+                "npc_id": npc.id, "tribulation_count": npc.tribulation_count,
+                "chance": round(success_chance, 3), "base_power": pressure,
+                "uncapped_base_power": uncapped_pressure, "world_base_power_cap": world_cap,
+            },
             ["system", "npc", "tribulation", "world_news", f"world:{npc.world}"],
         ))
         return summary
@@ -7765,7 +7773,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             thunder = WORLD_SYSTEMS["breakthrough"]["periodic_thunder"]
             player.tribulation_count += 1
             player.next_tribulation_age = player.age + int(thunder["interval_years"])
-            player.tribulation_power = float(trial.get("base_power", trial["power"])) * float(thunder["power_multiplier"])
+            player.tribulation_power = float(
+                trial.get("uncapped_base_power", trial.get("base_power", trial["power"]))
+            ) * float(thunder["power_multiplier"])
             player.next_thunder_damage_reduction = 0.0
             game.history.append(HistoryRecord(
                 "SYS_PERIODIC_TRIBULATION", 1, player.age, "三千年雷劫", None, "success",
@@ -8074,6 +8084,14 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         one_time = player.next_thunder_damage_reduction if kind in {"periodic_thunder", "celestial_ascension", "asura_ascension"} else 0.0
         return min(0.75, item_reduction + self._body_tribulation_damage_reduction(player) + one_time)
 
+    @staticmethod
+    def _tribulation_base_power_cap(world: str) -> float | None:
+        raw = WORLD_SYSTEMS["world_profiles"].get(world, {}).get("tribulation_base_power_cap")
+        if raw is None:
+            return None
+        cap = float(raw)
+        return cap if cap > 0 else None
+
     def _check_tribulation(self, game: GameState, rng: random.Random) -> None:
         player = game.player
         if (
@@ -8082,7 +8100,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         ):
             return
         thunder = WORLD_SYSTEMS["breakthrough"]["periodic_thunder"]
-        base_power = float(player.tribulation_power or thunder["base_power"])
+        uncapped_base_power = float(player.tribulation_power or thunder["base_power"])
+        world_cap = self._tribulation_base_power_cap(player.world)
+        base_power = min(uncapped_base_power, world_cap) if world_cap is not None else uncapped_base_power
         sealed = player.sealed_cultivation or {}
         current_tier = int(WORLD_SYSTEMS["world_profiles"].get(player.world, {}).get("tier", 1))
         upper_tier = int(WORLD_SYSTEMS["world_profiles"].get(str(sealed.get("upper_world", player.world)), {}).get("tier", current_tier))
@@ -8097,14 +8117,22 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             "target_realm": player.realm_index, "target_layer": player.layer,
             "major": False, "old_label": public_player(player)["realm_name"],
             "step_index": 0, "event_ids": event_ids, "lethal": True, "power": power,
-            "base_power":base_power, "world_power_multiplier":world_multiplier,
+            "base_power":base_power, "uncapped_base_power":uncapped_base_power,
+            "world_base_power_cap":world_cap, "world_power_multiplier":world_multiplier,
         }
         game.pending_event = self._instantiate_event(self.events_by_id[event_ids[0]], game, rng)
         game.history.append(HistoryRecord(
             "SYS_TRIBULATION_BEGINS", 1, player.age, "雷劫倒计时归零", None, "started",
             f"第 {player.tribulation_count + 1} 次三千年雷劫降临，当前雷威 {power:.0f}，共需承受三道判定。"
+            + (f" 本界法则将基础雷威限制在 {world_cap:.0f}。" if world_cap is not None and uncapped_base_power > world_cap else "")
             + (" 真实道果所在界面高于当前界面，雷劫威力额外增加 50%。" if world_multiplier > 1 else ""),
-            {"power": power, "base_power":base_power, "world_power_multiplier":world_multiplier, "tribulation_count": player.tribulation_count}, ["system", "tribulation"],
+            {
+                "power": power, "base_power":base_power,
+                "uncapped_base_power":uncapped_base_power,
+                "world_base_power_cap":world_cap,
+                "world_power_multiplier":world_multiplier,
+                "tribulation_count": player.tribulation_count,
+            }, ["system", "tribulation"],
         ))
 
     def _die(
@@ -8396,6 +8424,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                 "active": bool(game.active_trial and game.active_trial.get("kind") == "periodic_thunder"),
                 "count": game.player.tribulation_count,
                 "power": game.player.tribulation_power,
+                "world_base_power_cap": self._tribulation_base_power_cap(game.player.world),
                 "next_age": game.player.next_tribulation_age,
                 "years_remaining": years_to_tribulation,
             },

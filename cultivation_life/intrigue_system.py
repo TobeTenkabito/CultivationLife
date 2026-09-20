@@ -498,6 +498,19 @@ class IntrigueSystemMixin:
                 continue
             record = self._ensure_intrigue_faction(game, kind, faction_id)
             members = [self._intrigue_public_member(game, npc, record) for npc in self._intrigue_members(game, kind, faction_id) if npc.alive]
+            if kind == "race" and self._intrigue_has_decision_authority(game, kind, faction_id):
+                player_realm, player_layer = self._actual_player_realm(game.player)
+                members.append({
+                    "id": PLAYER_ID, "name": game.player.name, "realm_index": player_realm,
+                    "realm_name": (
+                        f"{REALMS[player_realm].name}{player_layer}层"
+                        if player_realm else REALMS[0].name
+                    ),
+                    "affinity": None, "attitude": "本人", "primary": "玩家本人",
+                    "secondary": "", "governance_style": "", "position_id": None,
+                    "position": "种族议事成员", "decision_authority": True,
+                    "imprisoned": False, "contribution": 0, "is_player": True,
+                })
             members.sort(key=lambda row: (-row["realm_index"], row["name"]))
             positions = []
             for position_id, spec in self._intrigue_position_specs(kind).items():
