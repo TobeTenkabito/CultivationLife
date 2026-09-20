@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from .content_registry import TRANSFORMATION_CATALOG
@@ -16,6 +17,20 @@ REALM_POTENCY = (0.03, 0.06, 0.11, 0.18, 0.28, 0.40, 0.54, 0.72, 1.0, 1.0, 1.0, 
 DIRECT_ABSORPTION_EFFICIENCY = 0.45
 PURIFIED_ABSORPTION_EFFICIENCY = 0.92
 BATCH_PAIR_BONUS = 0.30
+
+
+def transformation_technique_limits(technique: Technique) -> tuple[int, int]:
+    """Scale structural transformation slots to the nearest whole slot by level."""
+    multiplier = technique.level_multiplier
+    capacity = max(
+        int(technique.transformation_capacity),
+        math.floor(float(technique.transformation_capacity) * multiplier + 0.5),
+    )
+    space = max(
+        int(technique.transformation_space),
+        math.floor(float(technique.transformation_space) * multiplier + 0.5),
+    )
+    return capacity, min(capacity, space)
 
 
 def normalized_transformation_weights(count: int) -> list[float]:
@@ -56,11 +71,12 @@ def ensure_transformation_state(player: Player) -> None:
     if not technique:
         return
     loadout = player.transformation_loadouts.setdefault(technique.id, {"stored": [], "active": []})
+    capacity, space = transformation_technique_limits(technique)
     known = set(player.known_transformations)
     stored = [form_id for form_id in loadout.get("stored", []) if form_id in known and form_id in TRANSFORMATION_CATALOG]
     active = [form_id for form_id in loadout.get("active", []) if form_id in stored]
-    loadout["stored"] = stored[:technique.transformation_capacity]
-    loadout["active"] = compatible_active_forms(active, technique.transformation_space)
+    loadout["stored"] = stored[:capacity]
+    loadout["active"] = compatible_active_forms(active, space)
 
 
 def compatible_active_forms(form_ids: list[str], space: int) -> list[str]:
@@ -220,9 +236,10 @@ def public_transformation_system(player: Player) -> dict[str, Any]:
         }
         for form_id in loadout["stored"] if form_id in TRANSFORMATION_CATALOG
     ]
+    capacity, space = transformation_technique_limits(technique)
     return base | {
         "technique": {"id": technique.id, "name": technique.name, "grade": technique.grade, "level": technique.level},
-        "capacity": technique.transformation_capacity, "space": technique.transformation_space,
+        "capacity": capacity, "space": space,
         "stored": stored,
         "known": [form for form in known if form["id"] not in loadout["stored"]],
         "active": [form.id for form in profile["forms"]],

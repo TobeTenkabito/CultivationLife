@@ -14,8 +14,8 @@ from .models import GameState, HistoryRecord, Item, Player
 from .runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age
 from .rules import (
-    QI_SOURCE_NAMES, add_item, can_player_practice_technique, combat_requirement_display,
-    learn_technique, max_hp, max_mp, remove_item,
+    QI_SOURCE_NAMES, acquire_technique, add_item, can_player_practice_technique,
+    combat_requirement_display, max_hp, max_mp, remove_item,
 )
 
 
@@ -218,10 +218,13 @@ class EconomySystemMixin:
             shown = dict(offer)
             shown["locked"] = bool(offer.get("locked", False))
             shown["market_group"] = self._market_offer_group(offer)
-            shown["owned"] = bool(
+            shown["known"] = bool(
                 offer["kind"] == "technique"
                 and any(entry.id == offer["content_id"] for entry in player.known_techniques)
             )
+            # Known techniques remain purchasable: every later copy becomes a
+            # stackable inheritance manual used by the explicit upgrade action.
+            shown["owned"] = False
             shown["compatible"] = (
                 offer["kind"] != "technique"
                 or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]].element)
@@ -1044,11 +1047,7 @@ class EconomySystemMixin:
         if kind == "item":
             add_item(player, content_id)
             return
-        known = next((entry for entry in player.known_techniques if entry.id == content_id), None)
-        if known is None:
-            learn_technique(player, TECHNIQUE_CATALOG[content_id])
-        else:
-            known.level += 1
+        acquire_technique(player, TECHNIQUE_CATALOG[content_id])
 
     def _finish_auction(self, game: GameState, rng: Any, reason: str = "") -> None:
         state = game.auction_state
@@ -1143,8 +1142,6 @@ class EconomySystemMixin:
             game.player.world, str(offer.get("kind", "")), str(offer.get("content_id", "")),
         ):
             raise ValueError("这件货物不属于当前世界的流通范围")
-        if offer["kind"] == "technique" and any(row.id == offer["content_id"] for row in game.player.known_techniques):
-            raise ValueError("你已经掌握这部功法")
         if not remove_item(game.player, "spirit_stone", int(offer["price"])):
             raise ValueError(f"私下交易需要 {offer['price']} 枚下品灵石")
         self._grant_auction_content(game.player, str(offer["kind"]), str(offer["content_id"]))
@@ -1325,10 +1322,6 @@ class EconomySystemMixin:
             game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
         ):
             raise ValueError("这件货物不属于当前世界的流通范围")
-        if result["kind"] == "technique" and any(
-            row.id == result["content_id"] for row in game.player.known_techniques
-        ):
-            raise ValueError("你已经掌握这部功法")
         if not remove_item(game.player, "spirit_stone", int(result["price"])):
             raise ValueError(f"需要 {result['price']} 枚下品灵石")
         kind = str(result["kind"])
@@ -1516,17 +1509,7 @@ class EconomySystemMixin:
             category_name = "法器" if category == "artifact" else "丹药"
             return "treasure_claimed", f"你取走{category_name}“{ITEM_CATALOG[content_id].name}” ×1。"
         technique = TECHNIQUE_CATALOG[content_id]
-        known = next((entry for entry in player.known_techniques if entry.id == content_id), None)
-        if known is None:
-            learn_technique(player, technique)
+        learned = acquire_technique(player, technique)
+        if learned:
             return "technique_learned", f"你取走功法《{technique.name}》，已收入已悟功法。"
-        new_level = known.level + 1
-        seen_objects: set[int] = set()
-        for entry in [
-            *player.known_techniques, player.technique, player.support_technique,
-            player.body_technique, *player.combat_techniques,
-        ]:
-            if entry and entry.id == content_id and id(entry) not in seen_objects:
-                entry.level = max(entry.level, new_level)
-                seen_objects.add(id(entry))
-        return "technique_improved", f"你取走《{technique.name}》残篇，功法精进至 {new_level} 级。"
+        return "technique_copy_gained", f"你取走《{technique.name}》传承玉简，已收入包裹，可用于升级。"

@@ -2299,7 +2299,7 @@ function renderMarket(market) {
     const info = document.createElement('div'); const title = document.createElement('b');
     title.textContent = `${offer.kind === 'technique' ? '《' : ''}${offer.name}${offer.kind === 'technique' ? '》' : ''}`;
     const detail = document.createElement('small');
-    detail.textContent = `${offer.tier_name} · ${offer.description}${offer.kind === 'technique' && !offer.compatible ? ' · 灵根不符，购得后暂不可修炼' : ''}`;
+    detail.textContent = `${offer.tier_name} · ${offer.description}${offer.kind === 'technique' && offer.known ? ' · 已掌握；再次购得会收入包裹，用于升级' : ''}${offer.kind === 'technique' && !offer.compatible ? ' · 灵根不符，购得后暂不可修炼' : ''}`;
     info.append(title, detail);
     const controls = document.createElement('div'); controls.className = 'market-offer-actions';
     const lock = document.createElement('button'); lock.className = `market-lock${offer.locked ? ' active' : ''}`;
@@ -2307,9 +2307,9 @@ function renderMarket(market) {
     lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
     lock.disabled = busy || offer.sold || !!game.pending_event || !game.player.alive;
     lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
-    const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : offer.owned ? '已掌握' : `${offer.price} 灵石`;
+    const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : `${offer.price} 灵石`;
     buy.className = 'market-buy'; buy.dataset.offerId = offer.id;
-    buy.disabled = busy || offer.sold || offer.owned || market.spirit_stones < offer.price || !!game.pending_event || !game.player.alive;
+    buy.disabled = busy || offer.sold || market.spirit_stones < offer.price || !!game.pending_event || !game.player.alive;
     buy.onclick = () => mutate(`/api/games/${game.id}/market-buy`, {offer_id:offer.id});
     controls.append(lock, buy); row.append(info, controls); list.appendChild(row);
     });
@@ -2599,6 +2599,7 @@ function renderInventory(items) {
   const list = $('#inventory-list'); list.innerHTML = '';
   if (!items.length) { list.innerHTML = '<p class="empty">袖中空空，唯有清风。</p>'; return; }
   const definitions = [
+    ['功法传承玉简', item => item.tags?.includes('technique_manual') || !!item.technique_id],
     ['丹药与突破材料', item => item.breakthrough_bonus > 0 || item.tags?.includes('pill') || item.tags?.includes('breakthrough')],
     ['灵植与种子', item => item.tags?.includes('spirit_plant') || item.tags?.includes('seed')],
     ['灵根法门', item => item.tags?.includes('root_manual')],
@@ -2622,6 +2623,25 @@ function renderInventory(items) {
     const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact || artifact?.is_natal ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
     const effect = document.createElement('small'); effect.textContent = item.description || '可用于特定事件。';
     text.append(name, effect); row.appendChild(text);
+    if (item.technique_id) {
+      const known = (game?.player?.known_techniques || []).find(art => art.id === item.technique_id);
+      const manualLevel = Number(item.technique_level || 1);
+      const levelMatches = Boolean(known && known.level === manualLevel);
+      const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
+      upgrade.textContent = known?.level >= known?.max_level ? '功法已满级' : levelMatches ? `升级至 Lv.${manualLevel + 1}` : '等级不符';
+      upgrade.disabled = busy || !known || !levelMatches || known.level >= known.max_level || !!game.pending_event || !game.player.alive;
+      upgrade.title = !known ? '尚未掌握这部功法' : levelMatches ? `消耗一份同名 Lv.${manualLevel} 玉简` : `当前功法为 Lv.${known.level}，需要同名 Lv.${known.level} 玉简`;
+      upgrade.onclick = () => mutate(`/api/games/${game.id}/technique-upgrade`, {technique_id:item.technique_id});
+      row.appendChild(upgrade);
+      if (manualLevel < 9) {
+        const merge = document.createElement('button'); merge.className = 'technique-merge';
+        merge.textContent = `二合一 → Lv.${manualLevel + 1}`;
+        merge.disabled = busy || item.quantity < 2 || !!game.pending_event || !game.player.alive;
+        merge.title = item.quantity < 2 ? `还需 ${2 - item.quantity} 份同名同级玉简` : `消耗两份 Lv.${manualLevel} 玉简`;
+        merge.onclick = () => mutate(`/api/games/${game.id}/technique-manual-merge`, {technique_id:item.technique_id, level:manualLevel});
+        row.appendChild(merge);
+      }
+    }
     if (artifact) {
       const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
       const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
@@ -2755,12 +2775,12 @@ function renderTechniques(slots) {
   const add = (role, technique, activeText) => {
     if (!technique) return;
     const row = document.createElement('div'); row.className = 'technique-row';
-    const name = document.createElement('b'); name.textContent = `${role} · ${technique.name}`;
+    const name = document.createElement('b'); name.textContent = `${role} · ${technique.name} Lv.${technique.level} · 等级倍率 ×${Number(technique.level_multiplier || 1).toFixed(1)}`;
     const effect = document.createElement('small'); effect.textContent = activeText(technique);
     row.append(name, effect); list.appendChild(row);
   };
   const source = art => `${art.source_display || '灵源'}${art.environment_multiplier == null ? '' : ` · 环境 ×${Number(art.environment_multiplier).toFixed(3)}`}`;
-  add('主修', slots.main, art => `${source(art)} · 启用机缘 +${percent(art.opportunity_bonus)}${art.karma_multiplier !== 1 ? `，因果倍率 ×${art.karma_multiplier}` : ''}`);
+  add('主修', slots.main, art => `${source(art)} · 启用机缘 +${percent(art.opportunity_bonus)}${art.effective_karma_multiplier !== 1 ? `，因果倍率 ×${Number(art.effective_karma_multiplier).toFixed(3)}` : ''}`);
   add('辅修', slots.support, art => `${source(art)} · 启用 HP +${percent(art.hp_bonus)}，MP +${percent(art.mp_bonus)}`);
   add('炼体', slots.body, art => `${source(art)} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（适用至 ${art.body_bonus_max_layer} 层）`);
   add('神识', slots.divine_sense, art => `${source(art)} · 神识修炼 +${percent(art.divine_sense_bonus)}`);
@@ -2785,7 +2805,7 @@ function renderKnownTechniques(techniques) {
   if (!techniques.length) { list.innerHTML = '<p class="empty">尚无可配置功法。</p>'; return; }
   techniques.forEach(art => {
     const row = document.createElement('div'); row.className = 'known-technique';
-    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} · ${art.category_name || '修仙'} · ${art.element_name}`;
+    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.category_name || '修仙'} · ${art.element_name}`;
     const sourceText = art.source_display || '灵源';
     const detail = document.createElement('small'); detail.textContent = art.category === 'body'
       ? `${sourceText} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（至 ${art.body_bonus_max_layer} 层） · 通用四维：机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`
@@ -2809,6 +2829,14 @@ function renderKnownTechniques(techniques) {
       button.onclick = () => mutate(`/api/games/${game.id}/equip-technique`, {technique_id:art.id, slot});
       buttons.appendChild(button);
     });
+    const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
+    upgrade.textContent = art.level >= art.max_level ? '已满级' : `升级 · 玉简 ×${art.upgrade_copies || 0}`;
+    upgrade.disabled = busy || !art.can_upgrade || !!game.pending_event || !game.player.alive;
+    upgrade.title = art.level >= art.max_level
+      ? `最高等级 Lv.${art.max_level}`
+      : art.upgrade_copies ? `消耗一份《${art.name}》Lv.${art.level} 传承玉简，提升至 Lv.${art.level + 1}` : `包裹中缺少同名 Lv.${art.level} 传承玉简`;
+    upgrade.onclick = () => mutate(`/api/games/${game.id}/technique-upgrade`, {technique_id:art.id});
+    buttons.appendChild(upgrade);
     row.appendChild(buttons); list.appendChild(row);
   });
 }
@@ -3369,7 +3397,7 @@ function renderButtons() {
   });
   document.querySelectorAll('.market-buy').forEach(button => {
     const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
-    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.owned || game.market.spirit_stones < offer.price;
+    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('.market-lock').forEach(button => {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
