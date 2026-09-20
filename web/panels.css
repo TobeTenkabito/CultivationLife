@@ -374,6 +374,7 @@
 .strategy-dock button.bloodline-dock-button.dlc-active:hover,.strategy-dock button.bloodline-dock-button.dlc-active.active { color:#fff; border-color:#9a4436; background:linear-gradient(145deg,#9a4436,#7a4a38); }
 
 .sage-panel { width:min(980px,calc(100vw - 140px)); max-width:980px; padding:34px 38px; background:linear-gradient(155deg,rgba(246,244,231,.98),rgba(235,241,235,.97)); }
+.sage-inner-outer-panel { width:min(880px,calc(100vw - 140px)); max-width:880px; }
 .sage-panel>section { margin-top:18px; }
 .sage-panel #sage-membership { padding:15px 17px; border:1px solid rgba(49,93,104,.2); border-left:4px solid #315d68; background:linear-gradient(120deg,rgba(49,93,104,.085),rgba(181,149,82,.075)); }
 .sage-panel #sage-membership h3,.sage-panel #sage-membership p { margin:0 0 7px; }

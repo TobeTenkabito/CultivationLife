@@ -104,14 +104,21 @@ def main() -> None:
                 assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_core']").text_content()
                 page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
+                inner_outer_dock = page.locator("[data-panel-target='sage-inner-outer']")
+                assert inner_outer_dock.is_visible()
+                assert "sage-dock-button" in (inner_outer_dock.get_attribute("class") or "")
+                assert inner_outer_dock.evaluate("node => node.closest('.left-dock') !== null")
+                inner_outer_dock.click()
+                page.locator("#sage-inner-outer-card").wait_for(state="visible")
+                assert "浩然" in page.locator("#sage-haoran-summary").text_content()
+                assert page.locator("#sage-haoran-passives > *").count() >= 1
+                assert page.locator("#sage-outer-list .sage-outer-card").count() == 4
+                page.locator("#sage-inner-outer-toggle").click()
                 sage_dock = page.locator("[data-panel-target='sage']")
                 assert sage_dock.is_visible()
                 assert "sage-dock-button" in (sage_dock.get_attribute("class") or "")
                 sage_dock.click()
                 page.locator("#sage-card").wait_for(state="visible")
-                assert "浩然" in page.locator("#sage-haoran-summary").text_content()
-                assert page.locator("#sage-haoran-passives > *").count() >= 1
-                assert page.locator("#sage-outer-list .sage-outer-card").count() == 4
                 assert page.locator("#sage-founding .sage-combo-grid label").count() == 4
                 assert page.locator("#sage-founding-preview .sage-effect-chips span").count() == 4
                 assert page.locator("#sage-worship-list .sage-worship-card").count() == 8

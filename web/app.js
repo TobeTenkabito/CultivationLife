@@ -1170,21 +1170,30 @@ function renderIntrigue(system) {
 function renderSageSystem(system) {
   const panel = $('#sage-card');
   const dock = document.querySelector('[data-panel-target="sage"]');
+  const innerOuterPanel = $('#sage-inner-outer-card');
+  const innerOuterDock = document.querySelector('[data-panel-target="sage-inner-outer"]');
   const visible = !!system.available;
-  panel?.classList.toggle('hidden', !visible);
-  dock?.classList.toggle('hidden', !visible);
-  if (!visible) { window.UtilityPanels?.close('sage'); return; }
+  const teachingVisible = visible && !!system.teaching_available;
+  panel?.classList.toggle('hidden', !teachingVisible);
+  dock?.classList.toggle('hidden', !teachingVisible);
+  innerOuterPanel?.classList.toggle('hidden', !visible);
+  innerOuterDock?.classList.toggle('hidden', !visible);
+  if (!visible) {
+    window.UtilityPanels?.close('sage');
+    window.UtilityPanels?.close('sage-inner-outer');
+    return;
+  }
+  if (!teachingVisible) window.UtilityPanels?.close('sage');
   const doctrines = system.doctrines || [];
   const current = doctrines.find(row => row.id === system.membership_id);
   $('#sage-heading').textContent = current ? current.name : system.teaching_available ? '尚未入说' : '游学诸界';
   const numeric = system.numeric_rules || {};
   const controlLead = Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '');
-  $('#sage-note').textContent = system.teaching_available
-    ? `内圣外王在诸界均可运转；本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；门内威望高出现任执掌者 ${controlLead}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`
-    : '当前界面没有圣人教化学说，但传承炼化、浩然被动与外王经世仍可正常使用。';
+  $('#sage-note').textContent = `本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；门内威望高出现任执掌者 ${controlLead}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
   $('#sage-teaching-sections')?.classList.toggle('hidden', !system.teaching_available);
 
   const inner = system.inner_outer || {};
+  $('#sage-inner-outer-heading').textContent = `浩然 Lv.${inner.level || 0}`;
   const haoranSummary = $('#sage-haoran-summary'); haoranSummary.innerHTML = '';
   const level = document.createElement('strong'); level.textContent = `浩然之气 Lv.${inner.level || 0}`;
   const exp = document.createElement('span'); exp.textContent = Number(inner.level || 0) >= Number(inner.max_level || 30)
