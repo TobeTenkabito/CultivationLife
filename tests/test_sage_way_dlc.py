@@ -48,6 +48,10 @@ class SageWayDlcTests(unittest.TestCase):
         self.assertIn("breakthrough.chance.sage_bonus", script)
         self.assertIn("，学说 ", script)
         self.assertIn("Number(numeric.control_lead_percent ?? 10).toFixed(1)", script)
+        self.assertIn("学说声望", script)
+        self.assertIn("门内威望", script)
+        self.assertNotIn("胜则内在", script)
+        self.assertNotIn("胜则外在", script)
 
     def test_shared_pool_and_individual_cap(self):
         rows = [{"id":"a", "external":60.0}, {"id":"b", "external":40.0}]
