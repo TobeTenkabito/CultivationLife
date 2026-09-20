@@ -144,6 +144,7 @@ def _create_character(
             "world_id": world_id,
             "controlled": controlled,
         },
+        immediate=True,
     )
     return entity_id
 

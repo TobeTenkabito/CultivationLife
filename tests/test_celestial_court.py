@@ -13,6 +13,7 @@ from cultivation_life.domain.definitions import StoryEffectDefinition
 from cultivation_life.domain.world import LOCATION
 from cultivation_life.domain.story import STORY_STATE
 from cultivation_life.kernel.bus import SimulationContext
+from cultivation_life.v1_facade import game_view
 
 
 class V2CelestialCourtTests(unittest.TestCase):
@@ -65,6 +66,8 @@ class V2CelestialCourtTests(unittest.TestCase):
         self.assertTrue(shown["initialized"])
         self.assertEqual(shown["seat_count"], 49)
         self.assertEqual(len(shown["offices"]), 7)
+        self.assertTrue(shown["target_npcs"])
+        self.assertTrue(all(row["realm_name"] for row in shown["target_npcs"]))
 
     def test_interactive_election_halts_and_resumes_timed_action(self):
         self._enter_celestial()
@@ -76,6 +79,11 @@ class V2CelestialCourtTests(unittest.TestCase):
         paused = self.engine.perform_timed_action(self.game_id, "rest", years).game
 
         self.assertIsNotNone(paused["heavenly_court"]["election"])
+        public = game_view(paused, {})["heavenly_court"]["election"]
+        if paused["heavenly_court"]["election"]["player_candidate"]:
+            self.assertIn("player", {
+                candidate["id"] for candidate in public["candidates"]
+            })
         self.assertIsNotNone(paused["action"]["active"])
         for _ in range(50):
             paused = self.engine.resolve_heavenly_election(
@@ -111,6 +119,19 @@ class V2CelestialCourtTests(unittest.TestCase):
         law = next(row for row in shown["laws"] if row["id"] == "martial_gods")
         self.assertTrue(law["active"])
         self.assertTrue(shown["last_vote"]["passed"])
+        controlled = [
+            office for office in shown["offices"]
+            if office["holder"] and office["holder"]["holder_id"] == self.actor_id
+        ]
+        self.assertEqual(len(controlled), 4)
+        self.assertTrue(all(row["holder"]["holder_name"] for row in controlled))
+        public = game_view(self.engine.get_game(self.game_id), {})[
+            "heavenly_court"
+        ]
+        self.assertEqual(sum(
+            office["holder"]["holder_id"] == "player"
+            for office in public["offices"] if office["holder"]
+        ), 4)
 
     def test_celestial_combat_laws_apply_wanted_and_karma_rules(self):
         self._enter_celestial()

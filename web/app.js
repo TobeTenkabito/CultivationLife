@@ -19,274 +19,6 @@ const timelineText = value => (
     ? `纪年 ${value}` : `${value} 岁`
 );
 
-// The interface in this file comes from the 8364171 release.  The V2 backend
-// deliberately exposes normalized domain projections instead of the former
-// monolithic view model, so keep the visual implementation intact and adapt
-// only at this boundary.
-function adaptConfig(config) {
-  if (config.format !== 'cultivation-life-v2') return config;
-  const roots = config.roots || {};
-  return {
-    ...config,
-    base_game: config.base_game || {id:'cultivation-life', name:'浮生问道', version:'2.0.0', version_label:'本体 v2.0.0'},
-    spirit_roots: roots,
-    spirit_root_details: config.root_details || Object.fromEntries(Object.keys(roots).map(id => [id, {tier:'灵根', efficiency:1}])),
-    technique_elements: config.technique_elements || {},
-    factions: config.factions || {},
-    qi_sources: config.qi_sources || {},
-    quick_starts: config.quick_starts || [],
-    monster_species: config.monster_species || {},
-    extensions: (config.extensions || []).map(row => ({
-      ...row,
-      kind_name: row.kind === 'dlc' ? 'DLC' : 'MOD',
-      next_enabled: null,
-      requires: row.requires || [],
-    })),
-  };
-}
-
-function adaptRelation(row) {
-  const other = row.other || row.character || row.requester || {};
-  return {...other, ...row.metadata, relation_id:row.relation_id, kind:row.kind, role:row.role, direction:row.direction, ascension_eligible:row.ascension_eligible};
-}
-
-function adaptGhost(system, player, timeUnitYears = 1) {
-  if (!system?.available) return system || {available:false};
-  const soul = system.soul || {};
-  const hpCurrent = Number(soul.intrinsic_hp ?? 100);
-  const hpReference = Math.max(1, Number(soul.intrinsic_hp_reference ?? hpCurrent));
-  const mpCurrent = Number(soul.intrinsic_mp ?? 100);
-  const mpReference = Math.max(1, Number(soul.intrinsic_mp_reference ?? mpCurrent));
-  const integrity = Math.max(0, Math.min(1, (hpCurrent / hpReference + mpCurrent / mpReference) / 2));
-  const boundById = Object.fromEntries((system.bound_souls || []).map(row => [row.id, row]));
-  const imprints = Object.entries(soul.reincarnation_imprints || {}).map(([realmId, count]) => ({realm_name:realmId, layer:1, count}));
-  const wangsheng = Number(soul.wangsheng || 0);
-  const wangshengCost = 2;
-  const phaseTwo = {
-    enabled:true,
-    ...system,
-    slots:(system.slots || []).map(slot => ({...slot, soul:boundById[slot.soul_id] || null})),
-    attachable_items:system.attachable_items || [],
-    bound_souls:system.bound_souls || [],
-  };
-  return {
-    ...system,
-    erosion_rate_pp:Number(soul.erosion_rate_pp || 0),
-    erosion_time:{
-      elapsed_equivalent_years:Number(soul.erosion_time_progress || 0) * timeUnitYears,
-      time_unit_years:timeUnitYears,
-      progress_ratio:Number(soul.erosion_time_progress || 0),
-    },
-    wangsheng,
-    wangsheng_cost:wangshengCost,
-    wangsheng_reduction_pp:0.02,
-    wangsheng_available_uses:Math.floor(wangsheng / wangshengCost),
-    can_spend_wangsheng:wangsheng >= wangshengCost,
-    intrinsic_hp:{current:hpCurrent, reference:hpReference, carry_ratio:hpCurrent / hpReference, external_raw:0, external_effective:0},
-    intrinsic_mp:{current:mpCurrent, reference:mpReference, carry_ratio:mpCurrent / mpReference, external_raw:0, external_effective:0},
-    soul_integrity:{ratio:integrity, label:integrity >= .8 ? '魂基稳固' : integrity >= .5 ? '魂基有损' : '魂基危殆'},
-    imprints,
-    total_imprints:imprints.reduce((total, row) => total + Number(row.count || 0), 0),
-    effective_marks:imprints.reduce((total, row) => total + Number(row.count || 0), 0),
-    breakthrough_probability_cap:.98,
-    highwater:{name:soul.historical_peak?.realm_id || player?.cultivation?.realm_name || '未记录'},
-    last_anchor:soul.last_reincarnation,
-    phase_two:phaseTwo,
-  };
-}
-
-function adaptGame(data) {
-  if (!data || data.format !== 'cultivation-life-v2') return data;
-  const cultivation = data.player?.cultivation || {};
-  const body = data.player?.body || {};
-  const sense = data.player?.divine_sense || {};
-  const combat = data.combat?.snapshot || {};
-  const world = data.world || {};
-  const relationships = (data.relationships || []).map(adaptRelation);
-  const companion = relationships.find(row => row.kind === 'dao_companion') || null;
-  const friends = relationships.filter(row => row.kind === 'friend');
-  const master = relationships.find(row => row.kind === 'master_disciple' && row.direction === 'target') || null;
-  const disciples = relationships.filter(row => row.kind === 'master_disciple' && row.direction === 'source');
-  const harvestedPlants = (data.assets?.instances || [])
-    .filter(asset => asset.kind === 'harvested_spirit_plant' && !asset.reservation_id)
-    .map(asset => ({
-      id:asset.id, name:asset.name, description:'灵田采收所得，可炼丹、出售或在满足年份后直接使用。',
-      tags:['spirit_plant','herb'], quantity:1, available:1,
-      plant_id:asset.metadata?.plant_id, plant_years:Number(asset.metadata?.years || 0),
-      plant_quality:Number(asset.metadata?.quality || 0),
-    }));
-  const inventory = [...(data.inventory || []), ...harvestedPlants];
-  const hpMax = Number(combat.max_hp || 1);
-  const mpMax = Number(combat.max_mp || 1);
-  const knownTechniques = cultivation.known_techniques || [];
-  const storyAttributes = data.story?.attributes || {};
-  const karmaFactor = Number(cultivation.karma_factor ?? 1);
-  const techniqueById = Object.fromEntries(knownTechniques.map(row => [row.id, row]));
-  const techniqueFor = id => id ? (techniqueById[id] || {id, name:id}) : null;
-  const raceName = id => {
-    const value = configData?.races?.[id];
-    return typeof value === 'object' ? (value.name || id) : (value || id);
-  };
-  const ghost = adaptGhost(data.ghost_system, data.player, 1);
-  const intrigue = {
-    ...(data.intrigue_system || {}),
-    player_guest_roles: data.intrigue_system?.player_guest_roles || [],
-    sections: (data.intrigue_system?.sections || []).map(section => ({
-      kind_name: section.kind_name || ({race:'族群', sect:'宗门', family:'家族'}[section.kind] || '势力'),
-      controller_name: section.controller_name || '暂无',
-      policy: section.policy || '守成',
-      unrest: Number(section.unrest || 0),
-      fear: Number(section.fear || 0),
-      control_authority: Boolean(section.control_authority),
-      positionless_race: section.positionless_race ?? section.kind === 'race',
-      positions: section.positions || [],
-      members: section.members || [],
-      guests: section.guests || [],
-      guest_candidates: section.guest_candidates || [],
-      resolutions: section.resolutions || [],
-      ...section,
-    })),
-  };
-  const player = {
-    ...data.player,
-    ...cultivation,
-    world: world.world_id,
-    world_name: world.world_name,
-    location: world.location_id,
-    location_name: world.location_name,
-    world_age: data.clock?.year ?? data.player.age,
-    opportunity: Number(cultivation.opportunity || 0),
-    opportunity_required: Number(cultivation.opportunity_required || 1),
-    spirit_root_display: cultivation.spirit_root_name,
-    spirit_root_efficiency: Number(cultivation.spirit_root_efficiency || 0),
-    cultivation_efficiency: Number(cultivation.cultivation_efficiency || 0),
-    time_unit_years: Number(cultivation.time_unit_years || 1),
-    hp: hpMax * Number(combat.hp_ratio ?? 1),
-    max_hp: hpMax,
-    mp: mpMax * Number(combat.mp_ratio ?? 1),
-    max_mp: mpMax,
-    combat_power: Number(combat.power || 0),
-    battle_power: Number(combat.power || 0),
-    expected_combat_power: Number(combat.power || 0),
-    combat_power_assessment: '由当前 V2 战斗投影实时计算。',
-    karma: Number(storyAttributes.karma || 0),
-    effective_karma: Number(
-      storyAttributes.effective_karma
-      ?? Math.max(0, Number(storyAttributes.karma || 0)) * karmaFactor
-    ),
-    karma_factor: karmaFactor,
-    heart_demon: Number(cultivation.heart_demon || 0),
-    fame: Number(storyAttributes.fame || 0),
-    spirit_stones: Number(data.market?.spirit_stones || 0),
-    technique: cultivation.main_technique,
-    technique_slots: {
-      main:cultivation.main_technique || null,
-      support:cultivation.support_technique || null,
-      body:techniqueFor(body.technique_id),
-      divine_sense:techniqueFor(sense.technique_id),
-      transformation:techniqueFor(data.player?.transformations?.technique_id),
-      combat:cultivation.combat_techniques || [],
-    },
-    known_techniques: knownTechniques,
-    inventory,
-    qi_mastery: cultivation.qi_mastery || Object.entries(cultivation.qi_experience || {}).map(([id, experience]) => ({
-      id, source:id, name:({spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'}[id] || id),
-      level:Math.floor(Math.sqrt(Number(experience || 0) / Number(configData?.qi_experience_base || 25))), experience:Number(experience || 0),
-      level_experience:Number(experience || 0), next_level_experience:Number(configData?.qi_experience_base || 25),
-    })),
-    qi_gain_efficiencies: cultivation.qi_gain_efficiencies || {},
-    qi_environment: cultivation.qi_environment || {display:[], main_multiplier:null},
-    body_training: Number(body.layer || 0),
-    divine_sense: {level:Number(sense.rank || 0), level_experience:Number(sense.experience || 0), next_level_experience:Number(sense.breakthrough_cost || 0), capacity:Number(data.demonic_system?.capacity || 0), used:Number(data.demonic_system?.used || 0), technique:techniqueFor(sense.technique_id)},
-    lineage_race_name: raceName(data.player.race),
-    allegiance_race_name: raceName(data.player.race),
-    master,
-    disciples,
-    disciple_requests: (data.disciple_requests || []).map(row => ({...adaptRelation(row), id:row.request_id})),
-  };
-  const destinationNames = Object.fromEntries((world.destinations || []).map(row => [row.id, row.name]));
-  const map = {
-    world: world.world_id,
-    world_name: world.world_name,
-    current_location: world.location_id,
-    current_name: world.location_name,
-    current_location_name: world.location_name,
-    locations: (world.destinations || []).map(location => ({
-      ...location,
-      description: location.warning || (location.current ? '你当前驻足之地。' : '沿界内道路可抵达此地。'),
-      themes: location.themes || [],
-      qi_gain_efficiencies: location.qi_gain_efficiencies || {},
-      route_names: (location.route || []).map(id => destinationNames[id] || id),
-      travel_status: location.current ? 'current' : location.accessible === false ? 'lethal' : 'safe',
-      ground_formations: location.ground_formations || [],
-    })),
-  };
-  return {
-    ...data,
-    player,
-    seed: null,
-    actions: configData?.actions || {},
-    rules: {karma_factors:configData?.karma_factors || {}},
-    new_achievements: [],
-    transformation_system: {available:true, ...(data.player.transformations || {})},
-    monster_bloodline: data.monster_system?.visible && (!data.monster_system.species || !data.monster_system.current)
-      ? {...data.monster_system, available:false, reason:'当前角色尚未形成可展示的本源血脉。', general_traits:data.monster_system.general_traits || []}
-      : (data.monster_system || {}),
-    dao_companion: companion,
-    dao_friends: friends,
-    personal_relations: {high:[], low:[]},
-    party: data.party?.members || [],
-    wanted: data.war_system?.bounties || [],
-    imprisonment: data.demonic_system?.imprisonment || null,
-    body_cultivation: {
-      layer:Number(body.layer || 0), max_layer:100, progress:Number(body.progress || 0), required:Number(body.required || 0),
-      ready:Boolean(body.ready), chance:body.chance, target_layer:Number(body.layer || 0) + 1,
-      technique:techniqueFor(body.technique_id), training_speed_multiplier:1,
-    },
-    breakthrough: data.breakthrough ? {
-      ...data.breakthrough,
-      enabled:Boolean(data.breakthrough.enabled && data.capabilities?.['cultivation.breakthrough']?.enabled),
-    } : {
-      ready:['minor','major'].includes(cultivation.bottleneck), enabled:Boolean(data.capabilities?.['cultivation.breakthrough']?.enabled),
-      target_realm:null, action_label:'突破瓶颈', chance:null, active_aids:cultivation.active_breakthrough_aids || [], met:true,
-      reason:data.capabilities?.['cultivation.breakthrough']?.reason || '',
-    },
-    map,
-    world_travel: {},
-    spirit_field: data.production || {},
-    art_skills: data.production?.art_skills || [],
-    auction_system: data.auction || {},
-    crafting_system: data.crafting || {},
-    last_combat_report: data.combat?.last_report || null,
-    history: [...(data.world_news || []), ...(data.story?.history || [])].map(record => ({
-      ...record,
-      age:record.age ?? record.year ?? data.clock?.year ?? data.player.age,
-    })),
-    world_npcs: data.characters || [],
-    spirit_ranking: {available:false, entries:[]},
-    race_system: {available:false, races:{}, alliances:[]},
-    world_route: {
-      route_id:cultivation.path,
-      name:cultivation.path_name,
-      path:cultivation.path,
-      path_name:cultivation.path_name,
-      current_world:world.world_id,
-      current_world_name:world.world_name,
-      lineage_race_name:raceName(data.player.race),
-      allegiance_race_name:raceName(data.player.race),
-      stages:Object.entries(configData?.worlds || {}).map(([id, name]) => ({
-        id, label:name, current:id === world.world_id, enabled:true, kind:'world', description:'V2 领域世界',
-      })),
-    },
-    faction: data.faction || {member:false, available:data.available_factions || [], can_found:true, system_available:true},
-    governance: {...(data.governance || {}), bounty_candidates:data.characters || [], bounty_authorities:data.war_system?.bounty_authorities || []},
-    heavenly_court: data.heavenly_court || {},
-    intrigue_system: intrigue,
-    ghost_system: ghost,
-    tribulation: {},
-  };
-}
-
 async function api(path, options = {}) {
   const response = await fetch(path, {headers: {'Content-Type': 'application/json'}, ...options});
   const data = await response.json();
@@ -325,34 +57,33 @@ $('#game-confirm-backdrop').addEventListener('click', event => {
 
 async function boot() {
   const [config, saves, achievements] = await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
-  configData = adaptConfig(config);
-  const normalizedConfig = configData;
-  const baseGame = normalizedConfig.base_game || {};
+  configData = config;
+  const baseGame = config.base_game || {};
   const versionLabel = baseGame.version_label || `本体 v${baseGame.version || '?'}`;
   $('#base-game-version').textContent = versionLabel;
   $('#settings-base-version').textContent = `${baseGame.name || '浮生问道'} · ${versionLabel}`;
   document.title = `${baseGame.name || '浮生问道'} · v${baseGame.version || '?'}`;
   achievementCatalog = achievements;
   updateAchievementEntry();
-  fillRootSelect(normalizedConfig);
-  fillSelect('#path-select', normalizedConfig.paths);
-  fillSelect('#monster-species-select', Object.fromEntries(Object.entries(normalizedConfig.monster_species || {}).map(([id, row]) => [id, row.name])));
-  fillStartWorldSelect(normalizedConfig);
+  fillRootSelect(config);
+  fillSelect('#path-select', config.paths);
+  fillSelect('#monster-species-select', Object.fromEntries(Object.entries(config.monster_species || {}).map(([id, row]) => [id, row.name])));
+  fillStartWorldSelect(config);
   const updateCreationFields = () => {
-    fillStartWorldSelect(normalizedConfig);
-    $('#monster-species-field').classList.toggle('hidden', $('#path-select').value !== 'monster' || !Object.keys(normalizedConfig.monster_species || {}).length);
+    fillStartWorldSelect(config);
+    $('#monster-species-field').classList.toggle('hidden', $('#path-select').value !== 'monster' || !Object.keys(config.monster_species || {}).length);
   };
   $('#path-select').addEventListener('change', updateCreationFields);
   updateCreationFields();
-  renderQuickStarts(normalizedConfig.quick_starts || []);
-  renderExtensions(normalizedConfig.extensions || []);
-  renderStartExtensionManager(normalizedConfig.extensions || []);
+  renderQuickStarts(config.quick_starts || []);
+  renderExtensions(config.extensions || []);
+  renderStartExtensionManager(config.extensions || []);
   const list = $('#save-list');
   saves.games.slice(0, 5).forEach(save => {
     const button = document.createElement('button');
     const saveVersion = save.game_version && save.game_version !== 'pre-1.0.0' ? ` · v${save.game_version}` : '';
-    button.textContent = `续接 · ${save.name || save.player_name || '无名散修'}${saveVersion}`;
-    button.onclick = () => loadGame(save.id || save.game_id);
+    button.textContent = `续接 · ${save.name}${saveVersion}`;
+    button.onclick = () => loadGame(save.id);
     list.appendChild(button);
   });
 }
@@ -578,11 +309,8 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 async function mutate(path, payload) {
   if (busy) return;
   busy = true; document.body.classList.add('busy'); renderButtons();
-  try {
-    const result = await api(path, {method:'POST', body:JSON.stringify(payload)});
-    render(result.game || result);
-  }
-  catch (error) { console.error(error); toast(error.message); }
+  try { render(await api(path, {method:'POST', body:JSON.stringify(payload)})); }
+  catch (error) { toast(error.message); }
   finally { busy = false; document.body.classList.remove('busy'); renderButtons(); }
 }
 
@@ -597,7 +325,6 @@ function showStart() {
 }
 
 function render(data) {
-  data = adaptGame(data);
   game = data;
   $('#start-screen').classList.add('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.remove('hidden'); $('#new-game-button').classList.remove('hidden');
   queueAchievementToasts(data.new_achievements || []);
@@ -808,7 +535,7 @@ function render(data) {
       : ['human', 'demon'].includes(crossDestination)
         ? `修为将受界面压制至${crossDestination === 'demon' ? '化魔' : '化神'}初期三层`
         : `解除界面压制，完整复原${crossDestination === 'true_demon' ? '魔尊' : '大乘'}道果`;
-  $('#seed-label').textContent = data.seed == null ? 'V2 天机已入档' : `天机数 ${data.seed}`;
+  $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
@@ -2422,7 +2149,6 @@ function renderMap(map, auction) {
 
 function renderMarket(market) {
   const card = $('#market-card'); card.classList.toggle('hidden', !market?.available);
-  document.querySelector("[data-panel-target='market']")?.classList.toggle('hidden', !market?.available);
   if (!market?.available) return;
   $('#market-title').textContent = market.name;
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
@@ -2932,7 +2658,7 @@ function renderKnownTechniques(techniques) {
       : `${sourceText} · 战斗门槛 ${art.combat_requirement_display}${art.required_body_training ? ` · 炼体门槛 ${art.required_body_training} 层${art.body_requirement_met ? '' : '（未满足）'}` : ''}${art.requires_immortal_power ? ` · 仙灵力消耗 ${percent(art.immortal_power_cost)}` : ''} · 机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`;
     info.append(name, detail); row.appendChild(info);
     const buttons = document.createElement('div'); buttons.className = 'technique-equip-buttons';
-    const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主']];
+    const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主'],['support','辅'],['combat','战']];
     slotChoices.forEach(([slot,label]) => {
       const button = document.createElement('button'); button.className = 'technique-equip'; button.textContent = label;
       const eligible = art.compatible && (slot !== 'combat' || art.combat_requirement_met);

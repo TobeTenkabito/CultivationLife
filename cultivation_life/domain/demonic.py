@@ -16,7 +16,7 @@ from .extensions import GHOST_SOUL
 from .party import PARTY_MEMBER
 from .production import SPIRIT_FIELD
 from .relations import relationship_affinity, set_relationship_affinity
-from .story import STORY_STATE, ResolveStoryChoice
+from .story import STORY_STATE, RepairPendingStoryEvent, ResolveStoryChoice
 from .world import LOCATION, AscendWorld
 from ..kernel.bus import CommandBus, SimulationContext
 from ..kernel.model import EventEnvelope, EventScope, RelationEdge, WorldState
@@ -118,7 +118,9 @@ def _imprisonment_guard(state: WorldState, command: object) -> None:
     prison = state.entities.get(actor_id, IMPRISONMENT) or {}
     if not prison.get("active"):
         return
-    if isinstance(command, (PrisonAction, ResolveStoryChoice, AscendWorld)):
+    if isinstance(command, (
+        PrisonAction, RepairPendingStoryEvent, ResolveStoryChoice, AscendWorld,
+    )):
         return
     raise ValueError("身陷大牢时只能服刑、处理当前事件或尝试飞升偷渡")
 
@@ -626,8 +628,9 @@ def _possess(
     identity = context.state.entities.require(target_id, IDENTITY)
     if str(identity.get("race", "human")) not in {"human", "demon", "immortal"}:
         raise ValueError("目标并非可夺舍的人形生灵")
-    if int(possession.get("count", 0)) >= 1:
-        raise ValueError("本魂最多成功夺舍一次")
+    limit = possession_limit(context.state, definitions, actor_id)
+    if limit is not None and int(possession.get("count", 0)) >= limit:
+        raise ValueError(f"本魂最多成功夺舍 {limit} 次")
     target_power = float(combat_snapshot(
         context.state, definitions, target_id
     )["power"])
@@ -722,6 +725,36 @@ def _possess(
     state["pending_post_battle_possession"] = None
     context.state.entities.put(actor_id, DEMONIC_STATE, state)
     return {"result": "possessed", "chance": chance, "host_id": target_id}
+
+
+def possession_limit(
+    state: WorldState, definitions: GameDefinitions, actor_id: str,
+) -> int | None:
+    possession = state.entities.require(actor_id, POSSESSION)
+    practice: dict[str, Any]
+    core = possession.get("core")
+    if possession.get("host") and isinstance(core, dict) and isinstance(
+        core.get("practice"), dict
+    ):
+        practice = dict(core["practice"])
+    else:
+        practice = state.entities.require(actor_id, PRACTICE)
+    technique_ids = set(map(str, practice.get("known_techniques", [])))
+    technique_ids.update(map(str, practice.get("combat_technique_ids", [])))
+    for key in ("main_technique_id", "support_technique_id"):
+        if practice.get(key):
+            technique_ids.add(str(practice[key]))
+    techniques = [
+        definitions.techniques[technique_id]
+        for technique_id in technique_ids
+        if technique_id in definitions.techniques
+    ]
+    if any(technique.ignore_possession_limit for technique in techniques):
+        return None
+    return 1 + max(
+        (technique.possession_limit_bonus for technique in techniques),
+        default=0,
+    )
 
 
 def possess_character(
@@ -1627,6 +1660,8 @@ def demonic_view(
             continue
         kind = str(puppet["kind"])
         ratio = float(_rules(definitions)["puppet_combat_contribution"][kind])
+        technique_id = str(puppet.get("main_technique_id") or "")
+        technique = definitions.techniques.get(technique_id)
         puppets.append({
             "id": edge.target_id,
             **dict(puppet),
@@ -1636,6 +1671,21 @@ def demonic_view(
             "battle_contribution": round(
                 float(puppet["combat_power"]) * ratio, 4
             ),
+            "battle_contribution_ratio": ratio,
+            "battle_contribution_mode": (
+                "队伍战力" if kind == "living" else "本体战力"
+            ),
+            "main_technique_name": (
+                technique.name if technique is not None else "无"
+            ),
+            "annual_opportunity": (
+                max(
+                    0.1,
+                    int(puppet["realm_index"])
+                    * (0.16 if kind == "corpse" else 0.34),
+                )
+                if kind in {"corpse", "living"} else 0.0
+            ),
             "black_market_sellable": kind in {"mechanical", "corpse"},
         })
     prisoners = []
@@ -1643,15 +1693,25 @@ def demonic_view(
         if state.entities.get(edge.target_id, IDENTITY) is None:
             continue
         cultivation = state.entities.require(edge.target_id, CULTIVATION)
+        identity = state.entities.require(edge.target_id, IDENTITY)
+        realm = definitions.realm(str(cultivation["realm_id"]))
         prisoners.append({
             **character_view(state, edge.target_id),
             "realm_id": cultivation["realm_id"],
-            "realm_name": definitions.realm(str(cultivation["realm_id"])).name,
+            "realm_name": realm.name,
             "layer": cultivation["layer"],
+            "gender_name": {
+                "male": "男", "female": "女",
+            }.get(str(identity.get("gender")), "性别未明"),
+            "path": cultivation["path"],
+            "path_name": definitions.paths.get(
+                str(cultivation["path"]), str(cultivation["path"])
+            ),
             "combat_power": combat_snapshot(
                 state, definitions, edge.target_id
             )["power"],
             "can_possess": state.entities.get(actor_id, GHOST_SOUL) is not None,
+            "can_recruit_concubine": identity.get("gender") == "female",
         })
     souls = []
     for edge in _soul_edges(state, actor_id):
@@ -1660,6 +1720,57 @@ def demonic_view(
         )})
     demonic = state.entities.require(actor_id, DEMONIC_STATE)
     prison = state.entities.require(actor_id, IMPRISONMENT)
+    rules = _rules(definitions)
+    inventory = state.entities.require(actor_id, "economy.inventory")
+    pill_options = [
+        {"id": item_id, "name": definitions.items[item_id].name}
+        for item_id in sorted(dict(inventory.get("items", {})))
+        if item_id in definitions.items
+        and "pill" in definitions.items[item_id].tags
+        and inventory_quantity(state, actor_id, item_id, spendable=True) > 0
+    ]
+    practice = state.entities.require(actor_id, PRACTICE)
+    technique_options = [
+        {"id": technique_id, "name": definitions.techniques[technique_id].name}
+        for technique_id in map(str, practice.get("known_techniques", []))
+        if technique_id in definitions.techniques
+        and definitions.techniques[technique_id].category == "spiritual"
+    ]
+    remaining = sum(
+        max(0.0, float(soul["required"]) - float(soul["progress"]))
+        for _, soul in _unrefined_souls(state, actor_id)
+    )
+    refine_gain = _soul_refine_gain(state, definitions, actor_id)
+    seclusion_multiplier = float(
+        rules.get("soul_seclusion_time_multiplier", 1.2)
+    )
+    seclusion_years = (
+        max(1, math.ceil(remaining * seclusion_multiplier / max(0.01, refine_gain)))
+        if remaining > 0 else 0
+    )
+    cultivation = state.entities.require(actor_id, CULTIVATION)
+    location = state.entities.require(actor_id, LOCATION)
+    from .cultivation import _qi_level
+
+    required_demon_qi = int(
+        rules["true_demon_ascension_demon_qi_level"]
+    )
+    current_demon_qi = _qi_level(
+        definitions,
+        float(dict(cultivation.get("qi_experience", {})).get("demon", 0)),
+    )
+    realm_index = definitions.realm_index(str(cultivation["realm_id"]))
+    world_id = str(location["world_id"])
+    ascension_available = bool(
+        state.entities.require(actor_id, LIFE).get("alive")
+        and cultivation.get("path") == "demonic"
+        and realm_index == 5
+        and (
+            (world_id == "human" and int(cultivation["layer"]) >= 3)
+            or (world_id == "demon" and int(cultivation["layer"]) >= 1)
+        )
+    )
+    snapshot = combat_snapshot(state, definitions, actor_id)
     return {
         "is_demonic": _is_demonic(state, actor_id),
         "capacity": puppet_capacity(state, actor_id),
@@ -1676,7 +1787,26 @@ def demonic_view(
             "pending_post_battle_possession"
         ),
         "possession": state.entities.require(actor_id, POSSESSION),
-        "mechanical_recipe": dict(_rules(definitions)["mechanical_recipe"]),
+        "mechanical_recipe": dict(rules["mechanical_recipe"]),
+        "secluded_refine_years": seclusion_years,
+        "secluded_refine_multiplier": seclusion_multiplier,
+        "pill_options": pill_options,
+        "technique_options": technique_options,
+        "control_mp_cost": round(
+            float(snapshot["max_mp"])
+            * float(rules["control_reinforce_mp_ratio"]),
+            1,
+        ),
+        "true_demon_ascension": {
+            "required_demon_qi_level": required_demon_qi,
+            "current_demon_qi_level": current_demon_qi,
+            "satisfied": current_demon_qi >= required_demon_qi,
+            "available": ascension_available,
+        },
+        "time_behavior": (
+            "年度机缘、控制衰减与反噬按行动年数逐年结算；"
+            "普通炼魂为即时操作，闭关炼化则会实际推进所示年月。"
+        ),
     }
 
 

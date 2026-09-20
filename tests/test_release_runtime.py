@@ -64,6 +64,10 @@ class ReleaseRuntimeTests(unittest.TestCase):
         self.assertIn(b'/app.js', page)
         self.assertNotIn(b'/v2.js', page)
         self.assertIn("Content-Security-Policy", headers)
+        policy = headers["Content-Security-Policy"]
+        self.assertIn("style-src 'self' 'unsafe-inline'", policy)
+        self.assertIn("script-src 'self'", policy)
+        self.assertNotIn("script-src 'self' 'unsafe-inline'", policy)
 
         status, config_body, _ = self.request("/api/config")
         self.assertEqual(status, 200)
@@ -79,8 +83,8 @@ class ReleaseRuntimeTests(unittest.TestCase):
         status, achievements_body, _ = self.request("/api/achievements")
         self.assertEqual(status, 200)
         achievements = json.loads(achievements_body)
-        self.assertEqual(achievements["total"], 44)
-        self.assertFalse(achievements["progress_available"])
+        self.assertEqual(achievements["total"], 58)
+        self.assertTrue(achievements["progress_available"])
 
         status, created_body, _ = self.request(
             "/api/games", payload={"name": "发布烟测", "seed": 20260919}
@@ -93,7 +97,10 @@ class ReleaseRuntimeTests(unittest.TestCase):
             payload={"action": "rest", "units": 1},
         )
         self.assertEqual(status, 200)
-        self.assertEqual(json.loads(advanced_body)["game"]["clock"]["year"], 1)
+        advanced = json.loads(advanced_body)
+        self.assertEqual(advanced["clock"]["year"], 1)
+        self.assertIn("spirit_field", advanced)
+        self.assertIn("world_route", advanced)
 
         reloaded = GameEngine(
             self.database,

@@ -135,6 +135,7 @@ class ContentLoader:
             ],
         }
         systems["formations"] = {
+            "system_version": int(formation_doc.get("system_version", 1)),
             "settings": dict(formation_doc.get("settings", {})),
             "materials": [dict(row) for row in formation_doc.get("materials", [])],
             "maintenance_resources": [
@@ -142,6 +143,24 @@ class ContentLoader:
             ],
             "nature_channels": dict(formation_doc.get("nature_channels", {})),
             "relations": dict(formation_doc.get("relations", {})),
+            "material_progression": dict(
+                formation_doc.get("material_progression", {})
+            ),
+            "crafting_materials": [
+                dict(row) for row in formation_doc.get("crafting_materials", [])
+            ],
+            "inventory_items": [
+                dict(row) for row in formation_doc.get("inventory_items", [])
+            ],
+            "spirit_plants": [
+                dict(row) for row in formation_doc.get("spirit_plants", [])
+            ],
+        }
+        # Regional market/treasure partitioning is a simulation rule, not a
+        # presentation concern. Keep the immutable map setting available to
+        # the economy and story domains instead of dropping it during load.
+        systems["maps"] = {
+            "settings": dict(maps_doc.get("settings", {})),
         }
         time_units = {int(index): int(years) for index, years in dict(systems["time_units"]).items()}
         travel_speeds = {
@@ -278,6 +297,8 @@ class ContentLoader:
                     },
                     repeat=str(raw.get("repeat", "repeatable")),
                     conditions=dict(raw.get("conditions", {})),
+                    trigger=dict(raw.get("trigger", {})),
+                    combat=dict(raw.get("combat", {})),
                     choices=tuple(choices),
                 )
         for source_id, target_id in queue_references:
@@ -369,6 +390,8 @@ class ContentLoader:
                 technique_id in result or path not in paths
                 or not sources or set(sources) - set(QI_SOURCES)
                 or abs(sum(sources.values()) - 1.0) > 1e-9
+                or not 0 <= int(row.get("required_body_training", 0)) <= 100
+                or int(row.get("possession_limit_bonus", 0)) < 0
             ):
                 raise ContentError(f"功法定义无效：{technique_id}")
             result[technique_id] = TechniqueDefinition(
@@ -395,6 +418,9 @@ class ContentLoader:
                 transformation_space=int(row.get("transformation_space", 0)),
                 requires_immortal_power=bool(row.get("requires_immortal_power", False)),
                 immortal_power_cost=float(row.get("immortal_power_cost", 0)),
+                required_body_training=int(row.get("required_body_training", 0)),
+                possession_limit_bonus=int(row.get("possession_limit_bonus", 0)),
+                ignore_possession_limit=bool(row.get("ignore_possession_limit", False)),
             )
         return result
 
@@ -545,6 +571,12 @@ class ContentLoader:
                 str(row["id"]): LocationDefinition(
                     id=str(row["id"]),
                     name=str(row["name"]),
+                    description=str(row.get("description", "")),
+                    themes=tuple(map(str, row.get("themes", []))),
+                    combat_terrain=str(row.get("combat_terrain", "")),
+                    combat_conditions=tuple(map(
+                        str, row.get("combat_conditions", [])
+                    )),
                     min_realm_index=int(row.get("min_realm_index", 0)),
                     failure=str(row.get("failure", "blocked")),
                     failure_reason=str(row.get("failure_reason", "")),

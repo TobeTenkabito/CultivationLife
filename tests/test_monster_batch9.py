@@ -30,7 +30,7 @@ class V2MonsterBatchNineTests(unittest.TestCase):
     def _create_monster(self) -> tuple[dict, str]:
         game = self.engine.create_game(
             "青鳞", seed=901, path="monster",
-            spirit_root="supreme_wood", start_world="monster_realm",
+            spirit_root="supreme_wood", start_world="phantom_underworld",
         )
         actor_id = game["player"]["id"]
         game = self.engine.execute(
@@ -43,6 +43,20 @@ class V2MonsterBatchNineTests(unittest.TestCase):
         self.engine.store.save(
             state, [], player_name="青鳞", expected_revision=state.revision
         )
+
+    def test_v1_creation_species_is_applied_in_the_bootstrap_transaction(self):
+        game = self.engine.create_game(
+            "青羽", seed=900, path="monster",
+            spirit_root="supreme_wood", start_world="monster_realm",
+            monster_species_id="avian",
+        )
+        bloodline = game["monster_system"]
+        self.assertTrue(bloodline["available"])
+        self.assertEqual(bloodline["species"]["id"], "avian")
+        self.assertEqual(bloodline["current"]["id"], "AVIAN_BASE")
+        self.assertEqual(game["player"]["race"], "monster")
+        restored = self.engine.get_game(game["id"])
+        self.assertEqual(restored["monster_system"]["species"]["id"], "avian")
 
     def _set_major_bottleneck(
         self, game_id: str, actor_id: str, *,

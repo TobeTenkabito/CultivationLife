@@ -654,19 +654,28 @@ def celestial_view(state: WorldState, definitions: GameDefinitions) -> dict[str,
         if row.get("forbidden_law") and court["laws"].get(row["forbidden_law"]):
             enabled, reason = False, "被当前天条禁止"
         decrees.append(dict(row, enabled=enabled, disabled_reason=reason))
+    def target_row(entity_id: str, *, self_target: bool = False) -> dict[str, Any]:
+        cultivation = state.entities.require(entity_id, CULTIVATION)
+        realm = definitions.realm(str(cultivation["realm_id"]))
+        layer = int(cultivation["layer"])
+        return {
+            "id": entity_id,
+            "name": state.entities.require(entity_id, IDENTITY)["name"],
+            "realm_name": (
+                realm.name if realm.id == "mortal" else f"{realm.name}·{layer}层"
+            ),
+            "wanted": entity_id in court["wanted_ids"],
+            "self": self_target,
+        }
+
     targets = []
     if actor_id in court["wanted_ids"]:
-        targets.append({
-            "id": actor_id,
-            "name": state.entities.require(actor_id, IDENTITY)["name"],
-            "wanted": True,
-            "self": True,
-        })
+        targets.append(target_row(actor_id, self_target=True))
     for entity_id in state.entities.with_component(IDENTITY):
         if entity_id == actor_id:
             continue
         if (state.entities.get(entity_id, LOCATION) or {}).get("world_id") == "celestial" and bool((state.entities.get(entity_id, LIFE) or {}).get("alive")):
-            targets.append({"id": entity_id, "name": state.entities.require(entity_id, IDENTITY)["name"], "wanted": entity_id in court["wanted_ids"]})
+            targets.append(target_row(entity_id))
     faction_id = _player_faction(state, actor_id)
     seat = next((row for row in court["seats"] if row["sect_id"] == faction_id), None)
     seat_sizes = {

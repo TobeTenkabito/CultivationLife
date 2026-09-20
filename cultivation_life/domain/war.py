@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .actions import ACTION_RUNTIME
-from .character import IDENTITY, LIFE, character_view
+from .character import IDENTITY, LIFE, character_view, create_character
 from .combat import combat_snapshot, resolve_team_combat
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
@@ -30,6 +30,7 @@ from ..kernel.model import EventEnvelope, EventScope, WorldState
 
 WAR_PROFILE = "war.profile"
 BOUNTY_STATE = "governance.bounties"
+WANTED_STATE = "war.wanted_state"
 WAR_TERMS = {
     "execute": 30,
     "alliance": 18,
@@ -74,6 +75,10 @@ def _default_bounties() -> dict[str, Any]:
     return {"next_sequence": 1, "orders": []}
 
 
+def _default_wanted_state() -> dict[str, Any]:
+    return {"hostility": {}, "last_trigger_units": {}, "subdued": []}
+
+
 def reconcile_war_state(state: WorldState) -> None:
     for entity_id in state.entities.with_component(IDENTITY):
         component = state.entities.get(entity_id, BOUNTY_STATE) or _default_bounties()
@@ -83,6 +88,24 @@ def reconcile_war_state(state: WorldState) -> None:
             if isinstance(row, dict) and str(row.get("target_id", ""))
         ]
         state.entities.put(entity_id, BOUNTY_STATE, component)
+        wanted = state.entities.get(entity_id, WANTED_STATE) or _default_wanted_state()
+        wanted["hostility"] = {
+            str(key): max(0.0, float(value))
+            for key, value in dict(wanted.get("hostility", {})).items()
+            if ":" in str(key)
+        }
+        wanted["last_trigger_units"] = {
+            str(key): int(value)
+            for key, value in dict(wanted.get("last_trigger_units", {})).items()
+        }
+        wanted["subdued"] = list(dict.fromkeys(map(str, wanted.get("subdued", []))))
+        story = state.entities.get(entity_id, "story.state") or {}
+        legacy = dict(story.get("legacy_effect_state", {}))
+        for key, value in dict(legacy.get("hostility", {})).items():
+            wanted["hostility"][str(key)] = max(
+                float(wanted["hostility"].get(str(key), 0.0)), float(value)
+            )
+        state.entities.put(entity_id, WANTED_STATE, wanted)
     for war_id in list(state.entities.with_component(WAR_PROFILE)):
         war = state.entities.require(war_id, WAR_PROFILE)
         war.setdefault("coalitions", {
@@ -97,8 +120,400 @@ def reconcile_war_state(state: WorldState) -> None:
 
 
 def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
-    context.state.entities.put(
-        str(event.payload["entity_id"]), BOUNTY_STATE, _default_bounties()
+    entity_id = str(event.payload["entity_id"])
+    context.state.entities.put(entity_id, BOUNTY_STATE, _default_bounties())
+    context.state.entities.put(entity_id, WANTED_STATE, _default_wanted_state())
+
+
+def _hostility_name(
+    state: WorldState, definitions: GameDefinitions, key: str,
+) -> str:
+    kind, entity_id = key.split(":", 1)
+    if kind == "world":
+        world = definitions.worlds.get(entity_id)
+        return f"{world.name if world else entity_id}包围网"
+    if kind == "race":
+        return str(definitions.races.get(entity_id, {}).get("name", entity_id))
+    profile = (
+        state.entities.get(entity_id, FACTION_PROFILE)
+        or state.entities.get(entity_id, FAMILY_PROFILE)
+    )
+    return str(profile.get("name", entity_id)) if profile else entity_id
+
+
+def _protected_from_hostility(state: WorldState, actor_id: str) -> set[str]:
+    protected = {actor_id, *party_member_ids(state, actor_id)}
+    for edge in state.relations.involving(actor_id):
+        if edge.kind in {
+            "friend", "dao_companion", "master_disciple", "concubine",
+            "parent_child",
+        }:
+            protected.add(
+                edge.target_id if edge.source_id == actor_id else edge.source_id
+            )
+    membership = _active_membership(state, actor_id)
+    if membership is not None:
+        protected.update(
+            edge.source_id for edge in state.relations.find(
+                target_id=membership.target_id, kind=MEMBERSHIP
+            )
+        )
+    lineage = state.entities.get(actor_id, LINEAGE) or {}
+    family_id = str(lineage.get("family_id") or "")
+    if family_id:
+        from .family import FAMILY_MEMBERSHIP
+
+        protected.update(
+            edge.source_id for edge in state.relations.find(
+                target_id=family_id, kind=FAMILY_MEMBERSHIP
+            )
+        )
+    return protected
+
+
+def _hostility_entity_state(
+    state: WorldState, definitions: GameDefinitions, actor_id: str, key: str,
+) -> dict[str, Any]:
+    kind, entity_id = key.split(":", 1)
+    world_id = str(state.entities.require(actor_id, LOCATION)["world_id"])
+    if kind == "world" and entity_id != world_id:
+        return {"status": "inactive"}
+    protected = _protected_from_hostility(state, actor_id)
+    if kind in {"sect", "faction"}:
+        profile = state.entities.get(entity_id, FACTION_PROFILE)
+        own = _active_membership(state, actor_id)
+        if own is not None and own.target_id == entity_id:
+            return {"status": "friendly"}
+        if profile is None or profile.get("world_id") != world_id:
+            return {"status": "inactive"}
+        if not bool(profile.get("active")):
+            return {
+                "status": "fallen", "kind": "sect", "entity_id": entity_id,
+                "members": [],
+            }
+        member_ids = [
+            edge.source_id for edge in state.relations.find(
+                target_id=entity_id, kind=MEMBERSHIP
+            )
+        ]
+        public_kind = "sect"
+    elif kind == "family":
+        profile = state.entities.get(entity_id, FAMILY_PROFILE)
+        lineage = state.entities.get(actor_id, LINEAGE) or {}
+        if str(lineage.get("family_id") or "") == entity_id:
+            return {"status": "friendly"}
+        if profile is None or profile.get("world_id") != world_id:
+            return {"status": "inactive"}
+        if not bool(profile.get("active")):
+            return {
+                "status": "fallen", "kind": kind, "entity_id": entity_id,
+                "members": [],
+            }
+        from .family import FAMILY_MEMBERSHIP
+
+        member_ids = [
+            edge.source_id for edge in state.relations.find(
+                target_id=entity_id, kind=FAMILY_MEMBERSHIP
+            )
+        ]
+        public_kind = kind
+    else:
+        member_ids = [
+            candidate_id
+            for candidate_id in state.entities.with_component(IDENTITY)
+            if state.entities.require(candidate_id, LOCATION).get("world_id")
+            == world_id
+            and (
+                kind == "world"
+                or (
+                    kind == "race"
+                    and str(state.entities.require(
+                        candidate_id, IDENTITY
+                    ).get("race")) == entity_id
+                )
+            )
+        ]
+        if kind not in {"world", "race"}:
+            return {"status": "inactive"}
+        if kind == "race" and str(
+            state.entities.require(actor_id, IDENTITY).get("race")
+        ) == entity_id:
+            return {"status": "friendly"}
+        public_kind = kind
+    members = [
+        candidate_id for candidate_id in member_ids
+        if candidate_id not in protected
+        and state.entities.exists(candidate_id)
+        and bool(state.entities.require(candidate_id, LIFE).get("alive"))
+        and state.entities.require(candidate_id, LOCATION).get("world_id")
+        == world_id
+    ]
+    if not members:
+        return {
+            "status": "fallen", "kind": public_kind, "entity_id": entity_id,
+            "members": [],
+        }
+    ranked = sorted(
+        members,
+        key=lambda candidate_id: float(combat_snapshot(
+            state, definitions, candidate_id
+        )["power"]),
+        reverse=True,
+    )
+    powers = [
+        float(combat_snapshot(state, definitions, candidate_id)["power"])
+        for candidate_id in ranked[:5]
+    ]
+    return {
+        "status": "active", "kind": public_kind, "entity_id": entity_id,
+        "members": ranked, "power": sum(powers),
+        "max_realm": max(
+            definitions.realm_index(str(state.entities.require(
+                candidate_id, CULTIVATION
+            )["realm_id"]))
+            for candidate_id in members
+        ),
+    }
+
+
+def _queue_wanted_settlement(
+    context: SimulationContext,
+    definitions: GameDefinitions,
+    actor_id: str,
+    key: str,
+    entity_state: dict[str, Any],
+    *,
+    fallen: bool,
+) -> None:
+    from .story import STORY_STATE, queue_story_event
+
+    event_id = "EVT_POWER_FALL_001" if fallen else "EVT_WANTED_NEGOTIATION_001"
+    name = _hostility_name(context.state, definitions, key)
+    kind, entity_id = key.split(":", 1)
+    runtime = {
+        "hostility_key": key,
+        "kind": str(entity_state.get("kind", kind)),
+        "entity_id": str(entity_state.get("entity_id", entity_id)),
+        "entity_name": name,
+        "pursuer": name,
+        "member_ids": list(map(str, entity_state.get("members", []))),
+        "power": round(float(entity_state.get("power", 0.0)), 1),
+    }
+    queue_story_event(
+        context, definitions, actor_id, event_id,
+        reason="wanted_power_fallen" if fallen else "wanted_negotiation",
+        runtime=runtime,
+    )
+    story = context.state.entities.require(actor_id, STORY_STATE)
+    pending = dict(story.get("pending") or {})
+    pending["body"] = str(pending.get("body", "")).replace("{pursuer}", name)
+    if fallen:
+        pending["title"] = {
+            "sect": "宗门的陨落", "family": "家族的陨落",
+            "race": "种族势力的陨落", "world": "围杀令的陨落",
+        }.get(runtime["kind"], "势力的陨落")
+    else:
+        own = _active_membership(context.state, actor_id)
+        choices = []
+        for raw in pending.get("choices", []):
+            choice = dict(raw)
+            if choice.get("id") == "dissolve" and runtime["kind"] not in {
+                "sect", "family",
+            }:
+                choice.update(
+                    enabled=False,
+                    disabled_reason="种族与全界势力不能以解散宗门的方式处置",
+                )
+            elif choice.get("id") == "sect_vassal" and (
+                own is None or runtime["kind"] not in {"sect", "family"}
+            ):
+                choice.update(
+                    enabled=False,
+                    disabled_reason="需要拥有当前宗门，且谈判对象必须是宗门或家族",
+                )
+            choices.append(choice)
+        pending["choices"] = choices
+    story["pending"] = pending
+    context.state.entities.put(actor_id, STORY_STATE, story)
+
+
+def _change_hostility(
+    context: SimulationContext, actor_id: str, key: str, amount: float,
+) -> float:
+    wanted = context.state.entities.require(actor_id, WANTED_STATE)
+    hostility = dict(wanted.get("hostility", {}))
+    hostility[key] = max(0.0, float(hostility.get(key, 0.0)) + float(amount))
+    wanted["hostility"] = hostility
+    context.state.entities.put(actor_id, WANTED_STATE, wanted)
+    threshold = 100.0
+    if hostility[key] > threshold:
+        story = context.state.entities.get(actor_id, "story.state")
+        if story is not None:
+            milestones = dict(story.get("milestones", {}))
+            milestones["became_wanted_target"] = max(
+                1, int(milestones.get("became_wanted_target", 0))
+            )
+            story["milestones"] = milestones
+            context.state.entities.put(actor_id, "story.state", story)
+    return hostility[key]
+
+
+def _on_hostility_changed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        kind = str(event.payload.get("kind", "world"))
+        entity_id = str(event.payload.get("entity_id", "current"))
+        if entity_id == "current":
+            if kind != "world":
+                raise ValueError("只有全界敌意可以使用 current")
+            entity_id = str(context.state.entities.require(actor_id, LOCATION)["world_id"])
+        _change_hostility(
+            context, actor_id, f"{kind}:{entity_id}",
+            float(event.payload.get("amount", 0.0)),
+        )
+
+    return handler
+
+
+def _maybe_queue_wanted_encounter(
+    context: SimulationContext, definitions: GameDefinitions, actor_id: str,
+) -> None:
+    if actor_id != context.state.controlled_entity_id:
+        return
+    life = context.state.entities.require(actor_id, LIFE)
+    story = context.state.entities.get(actor_id, "story.state") or {}
+    if not bool(life.get("alive")) or story.get("pending") is not None or story.get("queue"):
+        return
+    from .demonic import IMPRISONMENT
+
+    if (context.state.entities.get(actor_id, IMPRISONMENT) or {}).get("active"):
+        return
+    rules = dict(definitions.systems.get("faction_conflict", {}))
+    threshold = float(rules.get("wanted_threshold", 100))
+    wanted = context.state.entities.require(actor_id, WANTED_STATE)
+    hostility = dict(wanted.get("hostility", {}))
+    world_id = str(context.state.entities.require(actor_id, LOCATION)["world_id"])
+    fame = float(dict(story.get("attributes", {})).get("fame", 0.0))
+    coalition = float(rules.get(
+        "demonic_coalition_fame_threshold"
+        if context.state.entities.require(actor_id, CULTIVATION).get("path") == "demonic"
+        else "coalition_fame_threshold",
+        400,
+    ))
+    world_key = f"world:{world_id}"
+    if fame > coalition and world_key not in set(map(str, wanted.get("subdued", []))):
+        hostility[world_key] = max(
+            float(hostility.get(world_key, 0.0)), threshold + fame - coalition
+        )
+    unit = _action_unit(context.state, actor_id)
+    cooldown = int(definitions.systems.get("relationship", {}).get(
+        "revenge_cooldown_base_units", 3
+    ))
+    last = dict(wanted.get("last_trigger_units", {}))
+    candidates = [
+        (key, float(value)) for key, value in hostility.items()
+        if float(value) > threshold
+        and unit - int(last.get(key, -cooldown)) >= cooldown
+        and not (key.startswith("world:") and key != world_key)
+    ]
+    wanted["hostility"] = hostility
+    context.state.entities.put(actor_id, WANTED_STATE, wanted)
+    if not candidates:
+        return
+    story = context.state.entities.require(actor_id, "story.state")
+    milestones = dict(story.get("milestones", {}))
+    milestones["became_wanted_target"] = max(
+        1, int(milestones.get("became_wanted_target", 0))
+    )
+    story["milestones"] = milestones
+    context.state.entities.put(actor_id, "story.state", story)
+    actor_realm = definitions.realm_index(str(
+        context.state.entities.require(actor_id, CULTIVATION)["realm_id"]
+    ))
+    actor_power = float(party_combat_snapshot(
+        context.state, definitions, actor_id
+    )["power"])
+    pursuit_candidates: list[tuple[str, float]] = []
+    for key, _ in sorted(candidates, key=lambda row: row[1], reverse=True):
+        entity_state = _hostility_entity_state(
+            context.state, definitions, actor_id, key
+        )
+        if entity_state["status"] == "inactive":
+            continue
+        if entity_state["status"] == "friendly":
+            hostility[key] = 0.0
+            continue
+        if entity_state["status"] == "fallen":
+            _queue_wanted_settlement(
+                context, definitions, actor_id, key, entity_state, fallen=True
+            )
+            return
+        if (
+            actor_power >= float(entity_state["power"])
+            or actor_realm >= int(entity_state["max_realm"])
+        ):
+            _queue_wanted_settlement(
+                context, definitions, actor_id, key, entity_state, fallen=False
+            )
+            return
+        pursuit_candidates.append((key, float(hostility[key])))
+    wanted = context.state.entities.require(actor_id, WANTED_STATE)
+    wanted["hostility"] = hostility
+    context.state.entities.put(actor_id, WANTED_STATE, wanted)
+    if not pursuit_candidates:
+        return
+    candidates = pursuit_candidates
+    chance = min(
+        0.92,
+        float(rules.get("encounter_base_chance", 0.18))
+        + max(value for _, value in candidates)
+        * float(rules.get("encounter_hostility_scale", 0.003)),
+    )
+    if context.rng.random() >= chance:
+        return
+    keys = [row[0] for row in candidates]
+    weights = [row[1] for row in candidates]
+    key = context.rng.choices(keys, weights=weights, k=1)[0]
+    cultivation = context.state.entities.require(actor_id, CULTIVATION)
+    target_realm_index = min(
+        8, actor_realm + max(0, int(float(hostility[key]) // 45))
+    )
+    target_realm = definitions.realms[target_realm_index]
+    identity = context.state.entities.require(actor_id, IDENTITY)
+    target_id = create_character(
+        context,
+        name=f"{_hostility_name(context.state, definitions, key)}追缉使",
+        age=max(18, context.state.clock.year - int(life["birth_year"])),
+        gender="female" if identity.get("gender") == "male" else "male",
+        race=str(identity.get("race", "human")),
+        spirit_root="supreme_fire" if target_realm_index else "none",
+        path=str(cultivation["path"]),
+        realm_id=target_realm.id,
+        layer=(1 if target_realm_index > actor_realm else int(cultivation["layer"])),
+        world_id=world_id,
+        lifespan=None,
+    )
+    actor_location = context.state.entities.require(actor_id, LOCATION)
+    context.state.entities.put(target_id, LOCATION, dict(actor_location))
+    snapshot = combat_snapshot(context.state, definitions, target_id)
+    last[key] = unit
+    wanted = context.state.entities.require(actor_id, WANTED_STATE)
+    wanted["last_trigger_units"] = last
+    context.state.entities.put(actor_id, WANTED_STATE, wanted)
+    from .story import queue_story_event
+
+    queue_story_event(
+        context, definitions, actor_id, "EVT_WANTED_ENCOUNTER_001",
+        reason="wanted_pursuit",
+        runtime={
+            "hostility_key": key,
+            "hostility": float(hostility[key]),
+            "pursuer": _hostility_name(context.state, definitions, key),
+            "target_id": target_id,
+            "target_name": str(context.state.entities.require(target_id, IDENTITY)["name"]),
+            "target_power": float(snapshot["power"]),
+            "generated_encounter": False,
+        },
     )
 
 
@@ -1263,6 +1678,7 @@ def _on_action_completed(definitions: GameDefinitions):
                 _resolve_round(context, definitions, war)
                 war["abstract_rounds"] = int(war.get("abstract_rounds", 0)) + 1
             context.state.entities.put(war_id, WAR_PROFILE, war)
+        _maybe_queue_wanted_encounter(context, definitions, actor_id)
 
     return handler
 
@@ -1270,6 +1686,14 @@ def _on_action_completed(definitions: GameDefinitions):
 def war_invariants(definitions: GameDefinitions):
     def validate(state: WorldState) -> list[str]:
         errors: list[str] = []
+        for entity_id in state.entities.with_component(IDENTITY):
+            wanted = state.entities.get(entity_id, WANTED_STATE)
+            if wanted is None:
+                errors.append(f"角色 {entity_id} 缺少通缉敌意状态")
+                continue
+            for key, value in dict(wanted.get("hostility", {})).items():
+                if ":" not in str(key) or float(value) < 0:
+                    errors.append(f"角色 {entity_id} 的通缉敌意记录非法")
         for war_id in state.entities.with_component(WAR_PROFILE):
             war = state.entities.require(war_id, WAR_PROFILE)
             if war.get("kind") not in {"faction", "race"}:
@@ -1301,6 +1725,8 @@ def war_view(
     preferences = state.entities.require(actor_id, PREFERENCES)
     debug = bool(preferences.get("debug_world_news"))
     wars = []
+    diplomacy = state.entities.require(actor_id, DIPLOMACY_STATE)
+    diplomacy_relations = list(dict(diplomacy.get("relations", {})).values())
     for war_id in state.entities.with_component(WAR_PROFILE):
         war = state.entities.require(war_id, WAR_PROFILE)
         if not debug and war.get("world_id") != world_id:
@@ -1329,10 +1755,32 @@ def war_view(
             public["player_controls"]
             and (int(war.get("battles", 0)) >= 2 or war.get("status") == "peace_ready")
         )
-        public["power_summary"] = {
+        side_summaries = {
             side: _side_power(state, definitions, war, side)
             for side in ("attacker", "defender")
         }
+        public["power_summary"] = {}
+        public["formation_summary"] = {}
+        for side, summary in side_summaries.items():
+            roster_ids = _available_roster(state, war, side)
+            powers = [
+                float(combat_snapshot(
+                    state, definitions, member_id
+                )["power"])
+                for member_id in roster_ids
+            ]
+            public["power_summary"][side] = {
+                **summary,
+                "total": round(sum(powers), 4),
+                "elite": round(max(powers, default=0.0), 4),
+                "composite": summary["raw_power"],
+                "effective_composite": summary["power"],
+            }
+            formation = dict(summary.get("formation") or {})
+            public["formation_summary"][side] = (
+                {"active": True, "conditions": [], **formation}
+                if formation else {"active": False, "conditions": []}
+            )
         public["coalitions"] = {
             side: [
                 {
@@ -1340,29 +1788,142 @@ def war_view(
                     "name": _power_name(
                         state, definitions, str(war["kind"]), str(power_id)
                     ),
+                    "role": (
+                        "leader"
+                        if str(power_id) == str(war[f"{side}_id"])
+                        else "ally"
+                    ),
                 }
                 for power_id in war.get("coalitions", {}).get(side, [])
             ]
             for side in ("attacker", "defender")
         }
-        public["roster"] = {
-            side: [
-                {
+        public["roster"] = {}
+        for side in ("attacker", "defender"):
+            escaped = set(map(str, war.get("escaped", {}).get(side, [])))
+            rows = []
+            for member_id in map(str, war.get("roster", {}).get(side, [])):
+                if not state.entities.exists(member_id):
+                    continue
+                cultivation = state.entities.require(member_id, CULTIVATION)
+                realm = definitions.realm(str(cultivation["realm_id"]))
+                owner_id = str(
+                    war.get("roster_owner", {}).get(
+                        member_id, war[f"{side}_id"]
+                    )
+                )
+                rows.append({
                     **character_view(state, member_id),
+                    "realm_name": (
+                        realm.name if realm.id == "mortal"
+                        else f"{realm.name}·{int(cultivation['layer'])}层"
+                    ),
                     "combat_power": combat_snapshot(
                         state, definitions, member_id
                     )["power"],
-                    "owner_id": war.get("roster_owner", {}).get(member_id),
-                    "escaped": member_id in set(war.get("escaped", {}).get(side, [])),
-                }
-                for member_id in war.get("roster", {}).get(side, [])
-                if state.entities.exists(member_id)
-            ]
+                    "owner_id": owner_id,
+                    "owner_name": _power_name(
+                        state, definitions, str(war["kind"]), owner_id
+                    ),
+                    "escaped": member_id in escaped,
+                })
+            public["roster"][side] = rows
+        own_power_id = _actor_power_id(state, actor_id, str(war["kind"]))
+        coalition_ids = {
+            str(power_id)
             for side in ("attacker", "defender")
+            for power_id in war.get("coalitions", {}).get(side, [])
         }
+        callable_allies = []
+        if own_power_id and public["player_controls"]:
+            for relation in diplomacy_relations:
+                if relation.get("kind") != war.get("kind") or relation.get(
+                    "status"
+                ) not in {"alliance", "vassal"}:
+                    continue
+                sides = {
+                    str(relation.get("first_id")),
+                    str(relation.get("second_id")),
+                }
+                if str(own_power_id) not in sides:
+                    continue
+                ally_id = next(
+                    (value for value in sides if value != str(own_power_id)),
+                    "",
+                )
+                if not ally_id or ally_id in coalition_ids:
+                    continue
+                chance = max(0.10, min(
+                    0.98,
+                    float(_rules(definitions).get(
+                        "ally_call_base_chance", 0.68
+                    )) + float(relation.get("affinity", 0.0)) / 400,
+                ))
+                callable_allies.append({
+                    "id": ally_id,
+                    "name": _power_name(
+                        state, definitions, str(war["kind"]), ally_id
+                    ),
+                    "chance_percent": round(chance * 100, 1),
+                })
+        public["callable_allies"] = callable_allies
+        public["can_call_allies"] = bool(callable_allies)
+        if war["kind"] == "faction":
+            third_ids = [
+                power_id
+                for power_id in state.entities.with_component(FACTION_PROFILE)
+                if power_id not in coalition_ids
+                and _power_world(state, definitions, "faction", power_id)
+                == world_id
+            ]
+        else:
+            third_ids = [
+                race_id for race_id in definitions.races
+                if race_id not in coalition_ids
+                and _power_world(state, definitions, "race", race_id)
+                == world_id
+            ]
+        public["third_parties"] = [
+            {
+                "id": power_id,
+                "name": _power_name(
+                    state, definitions, str(war["kind"]), power_id
+                ),
+            }
+            for power_id in third_ids
+        ]
+        public["controller"] = (
+            "player" if public["player_controls"] else "ai"
+        )
+        public["logs"] = [
+            {**log, "age": log.get("age", log.get("year", 0))}
+            for log in war.get("logs", [])
+        ]
         wars.append(public)
     wars.sort(key=lambda row: (row.get("start_unit", 0), row["id"]), reverse=True)
     bounties = state.entities.require(actor_id, BOUNTY_STATE)
+    wanted_state = state.entities.require(actor_id, WANTED_STATE)
+    wanted_threshold = float(definitions.systems.get(
+        "faction_conflict", {}
+    ).get("wanted_threshold", 100))
+    wanted_by = []
+    for key, value in sorted(dict(wanted_state.get("hostility", {})).items()):
+        if float(value) <= wanted_threshold or ":" not in str(key):
+            continue
+        kind, power_id = str(key).split(":", 1)
+        if kind == "world" and power_id != world_id and not debug:
+            continue
+        wanted_by.append({
+            "key": key,
+            "kind": kind,
+            "id": power_id,
+            "name": {
+                "world": "修仙界包围网", "race": "种族",
+                "sect": "宗门", "family": "家族",
+            }.get(kind, "势力"),
+            "display_name": _hostility_name(state, definitions, str(key)),
+            "hostility": round(float(value), 1),
+        })
     authorities = _bounty_authorities(state, definitions, actor_id)
     return {
         "wars": wars[:20],
@@ -1370,8 +1931,32 @@ def war_view(
             row.get("status") in {"active", "peace_ready"} for row in wars
         ),
         "bounties": [dict(row) for row in bounties.get("orders", [])],
+        "wanted_by": wanted_by,
         "bounty_authorities": authorities,
         "can_issue_bounty": bool(authorities),
+        "terms": {
+            term: {
+                "name": {
+                    "execute": "处决敌方修士",
+                    "alliance": "强制结盟",
+                    "vassal": "收为附庸",
+                    "change_relation": "改变第三方关系",
+                    "stones": "索取灵石",
+                    "supplies": "索取物资",
+                    "dissolve": "解散势力",
+                    "annex": "吞并势力",
+                    "white_peace": "无条件停战",
+                }[term],
+                "cost": cost,
+                **({
+                    "power_ratio": float(_rules(definitions)[
+                        "annex_power_ratio"
+                        if term == "annex" else "dissolve_power_ratio"
+                    ])
+                } if term in {"annex", "dissolve"} else {}),
+            }
+            for term, cost in WAR_TERMS.items()
+        },
     }
 
 
@@ -1384,4 +1969,7 @@ def register_war_domain(bus: CommandBus, definitions: GameDefinitions) -> None:
         "governance.diplomacy.voted", _on_diplomacy_voted(definitions)
     )
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register(
+        "war.hostility.changed", _on_hostility_changed(definitions)
+    )
     bus.event_bus.register("core.action.completed", _on_action_completed(definitions))

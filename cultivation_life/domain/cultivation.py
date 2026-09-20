@@ -43,6 +43,7 @@ class GrantTechnique:
 class EquipMainTechnique:
     actor_id: str
     technique_id: str
+    slot: str = "main"
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +58,7 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
     cultivation = {
         "path": path,
         "spirit_root": root_id,
+        "born_spirit_root": root_id,
         "additional_roots": [],
         "realm_id": realm_id,
         "layer": int(event.payload["layer"]),
@@ -69,6 +71,10 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
         "intrinsic_mp_bonus": 0.0,
         "next_thunder_damage_reduction": 0.0,
         "qi_experience": {source: 0.0 for source in QI_SOURCES},
+        "immortal_conversion_stage": 0,
+        "immortal_conversion_last_year": None,
+        "immortal_conversion_checked_units": 0,
+        "immortal_power_converted": False,
     }
     starters = {
         "demonic": "TECH_DEMON_BREATHING",
@@ -88,6 +94,8 @@ def _initial_cultivation(event: EventEnvelope, definitions: GameDefinitions) -> 
     practice = {
         "known_techniques": [starter_id] if starter_id else [],
         "main_technique_id": starter_id,
+        "support_technique_id": None,
+        "combat_technique_ids": [],
     }
     return cultivation, practice
 
@@ -168,6 +176,13 @@ def _perform_units_handler(definitions: GameDefinitions):
         if not isinstance(command.units, int) or isinstance(command.units, bool) or not 1 <= command.units <= 10:
             raise ValueError("行动单位必须为1至10")
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
+        location = context.state.entities.require(command.actor_id, LOCATION)
+        if (
+            location.get("world_id") == "celestial"
+            and not bool(cultivation.get("immortal_power_converted"))
+            and command.action not in {"cultivate", "rest", "commission"}
+        ):
+            raise ValueError("仙灵力尚未完成转化，目前只能修炼、休养或执行委托")
         if command.action == "body_train":
             body = context.state.entities.require(command.actor_id, "cultivation.body")
             if not body.get("technique_id"):
@@ -305,8 +320,13 @@ def _technique_view(
         for source in technique.sources
     ) + "）"
     body = state.entities.get(actor_id, "cultivation.body") or {}
-    immortal_power_met = not technique.requires_immortal_power or world_id == "celestial"
-    body_requirement_met = int(body.get("layer", 0)) >= 0
+    immortal_power_met = (
+        not technique.requires_immortal_power
+        or bool(cultivation.get("immortal_power_converted"))
+    )
+    body_requirement_met = int(body.get("layer", 0)) >= int(
+        technique.required_body_training
+    )
     category_names = {
         "body": "炼体",
         "divine_sense": "神识",
@@ -350,7 +370,7 @@ def _technique_view(
         "requires_immortal_power": technique.requires_immortal_power,
         "immortal_power_cost": technique.immortal_power_cost,
         "immortal_power_met": immortal_power_met,
-        "required_body_training": 0,
+        "required_body_training": technique.required_body_training,
         "body_requirement_met": body_requirement_met,
         "compatible": compatible and immortal_power_met and body_requirement_met,
     }
@@ -558,16 +578,13 @@ def _on_action_tick(definitions: GameDefinitions):
                 )
                 story["attributes"] = attributes
                 context.state.entities.put(actor_id, "story.state", story)
-            if action in {"treasure", "commission"}:
-                if action == "commission":
-                    realm_index = max(
-                        1, definitions.realm_index(str(cultivation["realm_id"]))
-                    )
-                    low, high = map(int, dict(
-                        definitions.market_settings.get("commission_stones", {})
-                    ).get(str(realm_index), [4, 12]))
-                else:
-                    low, high = 2, 8
+            if action == "commission":
+                realm_index = max(
+                    1, definitions.realm_index(str(cultivation["realm_id"]))
+                )
+                low, high = map(int, dict(
+                    definitions.market_settings.get("commission_stones", {})
+                ).get(str(realm_index), [4, 12]))
                 context.emit(
                     "story.effect.inventory.changed",
                     source="cultivation",
@@ -579,7 +596,39 @@ def _on_action_tick(definitions: GameDefinitions):
                         "reason": f"action:{action}",
                     },
                 )
-                if action == "treasure":
+            if action == "treasure":
+                condition = context.state.entities.require(
+                    actor_id, "combat.condition"
+                )
+                if (
+                    float(condition.get("mp_ratio", 0)) > 0
+                    and context.rng.random() < 0.5
+                ):
+                    condition["mp_ratio"] = max(
+                        0.0,
+                        float(condition["mp_ratio"])
+                        - context.rng.uniform(0.10, 0.22),
+                    )
+                else:
+                    condition["hp_ratio"] = max(
+                        0.0,
+                        float(condition["hp_ratio"])
+                        - context.rng.uniform(0.07, 0.15),
+                    )
+                context.state.entities.put(
+                    actor_id, "combat.condition", condition
+                )
+                if float(condition["hp_ratio"]) <= 0:
+                    context.emit(
+                        "character.lethal_hazard",
+                        source="cultivation",
+                        scope=EventScope.entity(actor_id),
+                        payload={
+                            "entity_id": actor_id,
+                            "reason": "探宝时气血耗尽，埋骨荒野",
+                        },
+                    )
+                else:
                     from .story import queue_story_event
 
                     queue_story_event(
@@ -591,9 +640,39 @@ def _on_action_tick(definitions: GameDefinitions):
                 cultivation_now = context.state.entities.require(actor_id, CULTIVATION)
                 identity = context.state.entities.require(actor_id, IDENTITY)
                 location = context.state.entities.require(actor_id, LOCATION)
+                combat_spec = dict(action_spec.get("combat", {}))
+                actor_realm_index = definitions.realm_index(
+                    str(cultivation_now["realm_id"])
+                )
+                if action == "hunt_beast":
+                    target_realm_index = max(1, actor_realm_index - 1)
+                else:
+                    offset_rows = list(combat_spec.get("realm_offsets", []))
+                    if offset_rows:
+                        offsets = [int(row[0]) for row in offset_rows]
+                        weights = [float(row[1]) for row in offset_rows]
+                        offset = context.rng.choices(
+                            offsets, weights=weights, k=1
+                        )[0]
+                    else:
+                        offset = 0
+                    target_realm_index = max(
+                        1, min(len(definitions.realms) - 1, actor_realm_index + offset)
+                    )
+                target_realm = definitions.realms[target_realm_index]
+                target_layer = (
+                    max(
+                        1,
+                        int(cultivation_now["layer"])
+                        - (1 if action in {"slay", "capture", "hunt_beast"} else 0),
+                    )
+                    if target_realm_index == actor_realm_index
+                    else context.rng.randint(1, target_realm.layers)
+                )
+                target_names = list(combat_spec.get("target_names", []))
                 target_id = create_character(
                     context,
-                    name={
+                    name=context.rng.choice(target_names) if target_names else {
                         "hunt_beast": "荒野妖兽", "spar": "同道修士",
                         "slay": "邪道修士", "capture": "流窜修士",
                     }[action],
@@ -606,17 +685,22 @@ def _on_action_tick(definitions: GameDefinitions):
                     race="monster" if action == "hunt_beast" else str(identity["race"]),
                     spirit_root=str(cultivation_now["spirit_root"]),
                     path="monster" if action == "hunt_beast" else str(cultivation_now["path"]),
-                    realm_id=str(cultivation_now["realm_id"]),
-                    layer=max(1, int(cultivation_now["layer"]) - (1 if action in {"slay", "capture"} else 0)),
+                    realm_id=target_realm.id,
+                    layer=target_layer,
                     world_id=str(location["world_id"]),
                     lifespan=None,
                 )
+                # Generated encounters happen where the action was performed,
+                # not at the world's default spawn.  Without this replacement
+                # every combat action failed after the player travelled once.
+                context.state.entities.put(target_id, LOCATION, dict(location))
                 context.emit(
                     ACTION_COMBAT_REQUESTED,
                     source="cultivation",
                     scope=EventScope.entity(actor_id),
                     payload={
                         "actor_id": actor_id, "target_id": target_id,
+                        "action": action,
                         "objective": "capture" if action == "capture" else (
                             "duel" if action == "spar" else "kill"
                         ),
@@ -651,11 +735,53 @@ def _on_action_combat_requested(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
         from .combat import ResolveCombat, _resolve_handler
 
+        before = set(context.state.entities.with_component("combat.report"))
         _resolve_handler(definitions)(context, ResolveCombat(
             str(event.payload["actor_id"]),
             str(event.payload["target_id"]),
             str(event.payload["objective"]),
         ))
+        created = set(
+            context.state.entities.with_component("combat.report")
+        ) - before
+        if len(created) != 1:
+            raise ValueError("行动战斗没有生成唯一战报")
+        report = context.state.entities.require(created.pop(), "combat.report")
+        if report.get("outcome") != "victory":
+            return
+        actor_id = str(event.payload["actor_id"])
+        action = str(event.payload.get("action", ""))
+        combat_spec = dict(definitions.actions.get(action, {}).get("combat", {}))
+        reward_range = combat_spec.get("reward_stones")
+        if isinstance(reward_range, list) and len(reward_range) == 2:
+            context.emit(
+                "story.effect.inventory.changed",
+                source="cultivation",
+                scope=EventScope.entity(actor_id),
+                payload={
+                    "entity_id": actor_id,
+                    "item_id": "spirit_stone",
+                    "quantity": context.rng.randint(
+                        int(reward_range[0]), int(reward_range[1])
+                    ),
+                    "reason": f"action:{action}:loot",
+                },
+            )
+        if action == "hunt_beast":
+            sha_range = list(combat_spec.get("sha_qi_gain", [2, 5]))
+            story = context.state.entities.require(actor_id, "story.state")
+            attributes = dict(story.get("attributes", {}))
+            attributes["sha_qi"] = float(attributes.get("sha_qi", 0)) + (
+                context.rng.randint(int(sha_range[0]), int(sha_range[1]))
+            )
+            story["attributes"] = attributes
+            context.state.entities.put(actor_id, "story.state", story)
+        elif action == "spar":
+            cultivation = context.state.entities.require(actor_id, CULTIVATION)
+            cultivation["opportunity"] = float(
+                cultivation.get("opportunity", 0)
+            ) + 2.0
+            context.state.entities.put(actor_id, CULTIVATION, cultivation)
 
     return handler
 
@@ -729,12 +855,15 @@ def _equip_technique_handler(definitions: GameDefinitions):
     def handler(context: SimulationContext, command: object) -> None:
         if not isinstance(command, EquipMainTechnique):
             raise TypeError("命令类型错误")
+        _ensure_controllable_alive(context, command.actor_id)
+        if command.slot not in {"main", "support", "combat"}:
+            raise ValueError("未知功法槽位")
         practice = context.state.entities.require(command.actor_id, PRACTICE)
         if command.technique_id not in practice["known_techniques"]:
             raise ValueError("尚未学会该功法")
         technique = definitions.techniques[command.technique_id]
         if technique.category != "spiritual":
-            raise ValueError("只有灵修功法可以配置为主修")
+            raise ValueError("专属功法只能配置在对应专属槽位")
         cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
         if not _can_practice(
             definitions.roots[str(cultivation["spirit_root"])],
@@ -742,27 +871,80 @@ def _equip_technique_handler(definitions: GameDefinitions):
             cultivation.get("additional_roots", []),
         ):
             raise ValueError("灵根属性与功法不合")
-        practice["main_technique_id"] = command.technique_id
+        if (
+            technique.requires_immortal_power
+            and not bool(cultivation.get("immortal_power_converted"))
+        ):
+            raise ValueError("尚未完成仙灵力转化，无法配置仙家功法")
+        body = context.state.entities.get(
+            command.actor_id, "cultivation.body"
+        ) or {}
+        if int(body.get("layer", 0)) < int(technique.required_body_training):
+            raise ValueError(
+                f"肉身不足：配置《{technique.name}》需要炼体"
+                f"{technique.required_body_training}层"
+            )
+        if command.slot == "main":
+            practice["main_technique_id"] = command.technique_id
+        elif command.slot == "support":
+            practice["support_technique_id"] = command.technique_id
+        else:
+            qi_experience = dict(cultivation.get("qi_experience", {}))
+            required = int(technique.combat_requirement_level)
+            if required > 0 and not any(
+                _qi_level(definitions, qi_experience.get(source, 0.0)) >= required
+                for source in technique.sources
+            ):
+                raise ValueError("气等级不足，无法配置这部战斗功法")
+            combat_ids = list(map(str, practice.get("combat_technique_ids", [])))
+            if command.technique_id not in combat_ids:
+                combat_ids.append(command.technique_id)
+            practice["combat_technique_ids"] = combat_ids
         context.state.entities.put(command.actor_id, PRACTICE, practice)
         context.emit(
             "cultivation.technique.equipped",
             source="cultivation",
             scope=EventScope.entity(command.actor_id),
-            payload={"entity_id": command.actor_id, "technique_id": command.technique_id},
+            payload={
+                "entity_id": command.actor_id,
+                "technique_id": command.technique_id,
+                "slot": command.slot,
+            },
         )
 
     return handler
 
 
-def _on_technique_purchased(definitions: GameDefinitions):
-    grant = _grant_technique_handler(definitions)
+def _learn_known_technique(
+    context: SimulationContext, definitions: GameDefinitions,
+    actor_id: str, technique_id: str,
+) -> None:
+    if technique_id not in definitions.techniques:
+        raise ValueError("未知功法")
+    practice = context.state.entities.require(actor_id, PRACTICE)
+    known = list(map(str, practice.get("known_techniques", [])))
+    if technique_id not in known:
+        known.append(technique_id)
+    practice["known_techniques"] = known
+    context.state.entities.put(actor_id, PRACTICE, practice)
+    context.emit(
+        "cultivation.technique.learned",
+        source="cultivation",
+        scope=EventScope.entity(actor_id),
+        payload={"entity_id": actor_id, "technique_id": technique_id},
+    )
 
+
+def _on_technique_purchased(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
-        grant(context, GrantTechnique(
-            actor_id=str(event.payload["entity_id"]),
-            technique_id=str(event.payload["technique_id"]),
-            equip_main=False,
-        ))
+        # Owning or receiving a manual does not imply that the current spirit
+        # root can equip it.  V1 deliberately allowed incompatible manuals in
+        # the learned list and enforced compatibility only at equipment time.
+        _learn_known_technique(
+            context, definitions,
+            str(event.payload["entity_id"]),
+            str(event.payload["technique_id"]),
+        )
 
     return handler
 
@@ -807,42 +989,43 @@ def _on_relationship_cultivation_changed(definitions: GameDefinitions):
 
 
 def _on_relationship_technique_granted(definitions: GameDefinitions):
-    grant = _grant_technique_handler(definitions)
-
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
-        grant(context, GrantTechnique(
-            actor_id=str(event.payload["entity_id"]),
-            technique_id=str(event.payload["technique_id"]),
-            equip_main=bool(event.payload.get("equip_main", False)),
-        ))
+        actor_id = str(event.payload["entity_id"])
+        technique_id = str(event.payload["technique_id"])
+        _learn_known_technique(
+            context, definitions, actor_id, technique_id
+        )
+        if bool(event.payload.get("equip_main", False)):
+            _equip_technique_handler(definitions)(
+                context, EquipMainTechnique(actor_id, technique_id, "main")
+            )
 
     return handler
 
 
 def _on_story_technique_learned(definitions: GameDefinitions):
-    grant = _grant_technique_handler(definitions)
-
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
-        grant(context, GrantTechnique(
-            actor_id=str(event.payload["entity_id"]),
-            technique_id=str(event.payload["technique_id"]),
-            equip_main=False,
-        ))
+        _learn_known_technique(
+            context, definitions,
+            str(event.payload["entity_id"]),
+            str(event.payload["technique_id"]),
+        )
 
     return handler
 
 
 def _on_story_technique_equipped(definitions: GameDefinitions):
-    grant = _grant_technique_handler(definitions)
     equip = _equip_technique_handler(definitions)
 
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
         actor_id = str(event.payload["entity_id"])
         technique_id = str(event.payload["technique_id"])
-        grant(context, GrantTechnique(
-            actor_id=actor_id, technique_id=technique_id, equip_main=False,
+        _learn_known_technique(context, definitions, actor_id, technique_id)
+        equip(context, EquipMainTechnique(
+            actor_id=actor_id,
+            technique_id=technique_id,
+            slot=str(event.payload.get("slot", "main")),
         ))
-        equip(context, EquipMainTechnique(actor_id=actor_id, technique_id=technique_id))
 
     return handler
 
@@ -1507,6 +1690,14 @@ def _on_ascension_completed(definitions: GameDefinitions):
                 payload={"entity_id": actor_id, "lifespan": None},
             )
         destination = str(trial["destination_world_id"])
+        if destination == "celestial":
+            cultivation.update(
+                immortal_conversion_stage=0,
+                immortal_conversion_last_year=context.state.clock.year,
+                immortal_conversion_checked_units=0,
+                immortal_power_converted=False,
+            )
+            context.state.entities.put(actor_id, CULTIVATION, cultivation)
         context.emit(
             "combat.condition.reset.requested",
             source="cultivation",
@@ -1526,6 +1717,82 @@ def _on_ascension_completed(definitions: GameDefinitions):
                 "to_realm_id": target.id, "trial": trial["kind"],
             },
         )
+
+    return handler
+
+
+def _on_immortal_conversion_tick(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        if actor_id != context.state.controlled_entity_id:
+            return
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        location = context.state.entities.require(actor_id, LOCATION)
+        stage = int(cultivation.get("immortal_conversion_stage", 0))
+        if (
+            location.get("world_id") != "celestial"
+            or definitions.realm_index(str(cultivation["realm_id"])) < 9
+            or bool(cultivation.get("immortal_power_converted"))
+            or stage >= 5
+        ):
+            return
+        from .story import STORY_STATE, queue_story_event
+
+        story = context.state.entities.require(actor_id, STORY_STATE)
+        trial = context.state.entities.get(actor_id, "cultivation.trial") or {}
+        if story.get("pending") is not None or trial.get("active") is not None:
+            return
+        config = dict(definitions.systems["immortal_power_conversion"])
+        unit_years = max(1, int(config["time_unit_years"]))
+        min_gap = max(1, int(config["min_gap_units"]))
+        last_year = cultivation.get("immortal_conversion_last_year")
+        if last_year is None:
+            cultivation["immortal_conversion_last_year"] = context.state.clock.year
+            cultivation["immortal_conversion_checked_units"] = 0
+            context.state.entities.put(actor_id, CULTIVATION, cultivation)
+            return
+        elapsed_units = max(
+            0, (context.state.clock.year - int(last_year)) // unit_years
+        )
+        checked_units = min(
+            elapsed_units,
+            max(0, int(cultivation.get("immortal_conversion_checked_units", 0))),
+        )
+        for unit in range(checked_units + 1, elapsed_units + 1):
+            cultivation["immortal_conversion_checked_units"] = unit
+            if unit < min_gap:
+                continue
+            chance = min(
+                0.98,
+                float(config["base_chance"])
+                + float(config["chance_per_unit"]) * (unit - min_gap),
+            )
+            if context.rng.random() >= chance:
+                continue
+            next_stage = stage + 1
+            context.state.entities.put(actor_id, CULTIVATION, cultivation)
+            queue_story_event(
+                context,
+                definitions,
+                actor_id,
+                f"EVT_IMMORTAL_CONVERSION_{next_stage:03d}",
+                reason="immortal_power_conversion",
+                runtime={
+                    "conversion_stage": next_stage,
+                    "waited_units": unit,
+                    "trigger_chance": round(chance, 4),
+                },
+            )
+            pending_story = context.state.entities.require(actor_id, STORY_STATE)
+            pending = dict(pending_story.get("pending") or {})
+            pending["body"] = (
+                str(pending.get("body", ""))
+                + f"\n\n你已等待 {unit} 个仙界时间单位，本次触发概率为 {chance:.0%}。"
+            )
+            pending_story["pending"] = pending
+            context.state.entities.put(actor_id, STORY_STATE, pending_story)
+            return
+        context.state.entities.put(actor_id, CULTIVATION, cultivation)
 
     return handler
 
@@ -1553,6 +1820,11 @@ def cultivation_invariants(definitions: GameDefinitions):
                 errors.append(f"角色 {entity_id} 修行道路无效")
             if float(cultivation.get("opportunity", -1)) < 0:
                 errors.append(f"角色 {entity_id} 机缘为负")
+            conversion_stage = int(cultivation.get("immortal_conversion_stage", 0))
+            if not 0 <= conversion_stage <= 5:
+                errors.append(f"角色 {entity_id} 仙灵力转化阶段无效")
+            if bool(cultivation.get("immortal_power_converted")) and conversion_stage != 5:
+                errors.append(f"角色 {entity_id} 仙灵力转化完成状态不一致")
             known = list(practice.get("known_techniques", []))
             if len(known) != len(set(known)) or set(known) - set(definitions.techniques):
                 errors.append(f"角色 {entity_id} 功法列表无效")
@@ -1590,6 +1862,7 @@ def register_cultivation_domain(bus: CommandBus, definitions: GameDefinitions) -
         _on_relationship_technique_granted(definitions),
     )
     bus.event_bus.register(ACTION_TICK, _on_action_tick(definitions))
+    bus.event_bus.register(ACTION_TICK, _on_immortal_conversion_tick(definitions))
     bus.event_bus.register(
         ACTION_COMBAT_REQUESTED, _on_action_combat_requested(definitions)
     )
@@ -1704,10 +1977,51 @@ def cultivation_view(state: Any, definitions: GameDefinitions, entity_id: str | 
                 _qi_threshold(definitions, level + 1) - threshold, 2
             ),
         })
+    conversion_config = dict(definitions.systems["immortal_power_conversion"])
+    conversion_total = max(1, int(conversion_config.get("stages", 5)))
+    converted = bool(cultivation.get("immortal_power_converted"))
+    conversion_stage = (
+        conversion_total if converted else min(
+            conversion_total,
+            max(0, int(cultivation.get("immortal_conversion_stage", 0))),
+        )
+    )
+    conversion_unit_years = max(
+        1, int(conversion_config.get("time_unit_years", 500))
+    )
+    conversion_min_gap = max(
+        1, int(conversion_config.get("min_gap_units", 10))
+    )
+    last_conversion_year = cultivation.get("immortal_conversion_last_year")
+    elapsed_conversion_units = (
+        max(
+            0,
+            (state.clock.year - int(last_conversion_year))
+            // conversion_unit_years,
+        )
+        if last_conversion_year is not None else 0
+    )
+    current_conversion_chance = (
+        min(
+            0.98,
+            float(conversion_config.get("base_chance", 0.1))
+            + float(conversion_config.get("chance_per_unit", 0.02))
+            * (elapsed_conversion_units - conversion_min_gap),
+        )
+        if elapsed_conversion_units >= conversion_min_gap and not converted
+        else 0.0
+    )
+    uses_immortal_resource = str(location["world_id"]) == "celestial" or converted
     return {
         **cultivation,
         "realm_name": _stage_name(definitions, cultivation),
         "realm_index": definitions.realm_index(realm.id),
+        "expected_combat_power": round(
+            float(realm.base_power) * (
+                1 + 0.12 * (int(cultivation["layer"]) - 1)
+            ),
+            4,
+        ),
         "opportunity_required": _opportunity_required(definitions, cultivation),
         "spirit_root_name": root.name,
         "spirit_root_tier": root.tier,
@@ -1726,6 +2040,21 @@ def cultivation_view(state: Any, definitions: GameDefinitions, entity_id: str | 
             _cultivation_efficiency(state, definitions, actor_id), 4
         ),
         "time_unit_years": definitions.time_units[definitions.realm_index(realm.id)],
+        "resource_name": "仙灵力" if uses_immortal_resource else "MP",
+        "resource_kind": "immortal" if uses_immortal_resource else "mana",
+        "immortal_power": {
+            "visible": str(location["world_id"]) == "celestial",
+            "converted": converted,
+            "conversion_stage": conversion_stage,
+            "conversion_total": conversion_total,
+            "usable_ratio": round(conversion_stage / conversion_total, 4),
+            "elapsed_units": elapsed_conversion_units,
+            "minimum_gap_units": conversion_min_gap,
+            "wait_units_remaining": max(
+                0, conversion_min_gap - elapsed_conversion_units
+            ),
+            "current_trigger_chance": round(current_conversion_chance, 4),
+        },
         "qi_gain_efficiencies": dict(local.qi_gain_efficiencies),
         "qi_environment": {
             "display": [

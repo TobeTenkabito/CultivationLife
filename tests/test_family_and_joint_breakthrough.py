@@ -14,6 +14,7 @@ from cultivation_life import (
     GameEngine,
 )
 from cultivation_life.domain.cultivation import CULTIVATION, PRACTICE
+from cultivation_life.v1_facade import game_view
 
 
 class V2FamilyAndJointBreakthroughTests(unittest.TestCase):
@@ -180,6 +181,13 @@ class V2FamilyAndJointBreakthroughTests(unittest.TestCase):
         founded = self.engine.create_family(game["id"], "青林世家").game
         self.assertTrue(founded["family"]["exists"])
         self.assertEqual(founded["family"]["roster"][0]["id"], child_id)
+        legacy_family = game_view(founded, {})["family"]
+        self.assertEqual(legacy_family["name"], "青林世家")
+        self.assertTrue(legacy_family["description"])
+        self.assertFalse(legacy_family["extinct"])
+        self.assertEqual(
+            legacy_family["roster"][0]["member_type"], "嫡系后裔"
+        )
 
 
 if __name__ == "__main__":

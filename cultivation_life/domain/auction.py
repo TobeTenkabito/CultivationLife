@@ -1307,9 +1307,62 @@ def auction_view(
         consignable.append(info)
     ledger = state.entities.require(actor_id, ASSET_LEDGER)
     for asset_id, asset in sorted(dict(ledger.get("instances", {})).items()):
-        if asset.get("reservation_id"):
+        if (
+            asset.get("reservation_id")
+            or bool(dict(asset.get("metadata", {})).get("is_natal"))
+        ):
             continue
         consignable.append(_asset_info(state, definitions, actor_id, asset_id))
+    rules = _rules(definitions)
+    public_assets: list[dict[str, Any]] = []
+    for info in consignable:
+        rated = int(info["rated_price"])
+        minimum = max(
+            1,
+            math.ceil(rated * float(rules["consignment_min_price_ratio"])),
+        )
+        maximum = max(
+            minimum,
+            math.floor(rated * float(rules["consignment_max_price_ratio"])),
+        )
+        suggested = max(minimum, min(maximum, round(rated * 0.8)))
+        asset_ref = str(info["asset_ref"])
+        quantity = (
+            inventory_quantity(state, actor_id, asset_ref, spendable=True)
+            if info["asset_kind"] == "stack" else 1
+        )
+        black_market_ratio = float(rules["black_market_sell_ratio"])
+        if (
+            info["asset_kind"] == "instance"
+            and info["instance_kind"] == "harvested_spirit_plant"
+        ):
+            black_market_ratio = float(
+                definitions.systems["spirit_field"]["black_market_sell_ratio"]
+            )
+        public_assets.append({
+            **info,
+            # Frozen V1 controls submit `item.id`; use the canonical stack ID
+            # or unique instance ID directly so the same reference reaches
+            # reservation and settlement without a translation table.
+            "id": asset_ref,
+            "quantity": quantity,
+            "minimum_start_price": minimum,
+            "maximum_start_price": maximum,
+            "suggested_start_price": suggested,
+            "listing_fee": max(
+                1,
+                math.ceil(
+                    rated * float(rules["consignment_listing_fee_ratio"])
+                ),
+            ),
+            "private_base_price": max(
+                1,
+                round(rated * float(rules["private_trade_sell_multiplier"])),
+            ),
+            "black_market_price": max(
+                1, round(rated * black_market_ratio)
+            ),
+        })
     from .demonic import PUPPET, PUPPET_CONTROL
 
     sellable_puppets = []
@@ -1332,7 +1385,11 @@ def auction_view(
     return {
         **dict(session), "available": status in {"scheduled", "open", "black_market"},
         "at_location": _location_matches(state, actor_id, session),
-        "lots": lots, "consignable_assets": consignable,
+        "lots": lots,
+        "consignable_assets": consignable,
+        "consignable_items": public_assets,
+        "private_sellable_items": public_assets,
+        "black_market_sellable_items": public_assets,
         "black_market_sellable_puppets": sellable_puppets,
         "spirit_stones": inventory_quantity(
             state, actor_id, CURRENCY_ID, spendable=True

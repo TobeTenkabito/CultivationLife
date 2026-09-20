@@ -155,6 +155,15 @@ class V2DemonicBatchSevenTests(unittest.TestCase):
             game["id"], CaptiveAction(actor_id, target_id, "living")
         ).game
         self.assertEqual(converted["demonic_system"]["puppets"][0]["type"], "living")
+        puppet_view = converted["demonic_system"]["puppets"][0]
+        for field in (
+            "main_technique_name", "battle_contribution_ratio",
+            "battle_contribution_mode", "annual_opportunity",
+        ):
+            self.assertNotIn(puppet_view.get(field), (None, "", "undefined"))
+        self.assertGreater(converted["demonic_system"]["control_mp_cost"], 0)
+        self.assertTrue(converted["demonic_system"]["time_behavior"])
+        self.assertIn("secluded_refine_years", converted["demonic_system"])
         reinforced = self.engine.execute(
             game["id"], PuppetAction(actor_id, target_id, "reinforce_control")
         ).game
@@ -295,6 +304,43 @@ class V2DemonicBatchSevenTests(unittest.TestCase):
             self.engine.execute(
                 game["id"], PostBattlePossession(actor_id, captive_id)
             )
+
+    def test_frozen_demonic_crossing_gate_and_qi_death_are_authoritative(self):
+        doomed = self.engine.create_game(
+            "破界魔修", seed=708, path="demonic", start_world="demon"
+        )
+        actor_id = doomed["player"]["id"]
+        self._set_realm(doomed["id"], actor_id, "spirit", 1)
+        gate = self.engine.get_game(doomed["id"])["demonic_system"][
+            "true_demon_ascension"
+        ]
+        self.assertTrue(gate["available"])
+        self.assertFalse(gate["satisfied"])
+        failed = self.engine.begin_spirit_crossing(doomed["id"]).game
+        self.assertFalse(failed["player"]["alive"])
+        self.assertEqual(failed["world"]["world_id"], "demon")
+        self.assertIn("魔气等级", failed["player"]["death_reason"])
+
+        successful = self.engine.create_game(
+            "炼魔破界", seed=709, path="demonic", start_world="demon"
+        )
+        successful_id = successful["player"]["id"]
+        self._set_realm(successful["id"], successful_id, "spirit", 1)
+        state = self.engine.store.load(successful["id"])
+        cultivation = state.entities.require(successful_id, CULTIVATION)
+        cultivation["qi_experience"]["demon"] = 25 * 8**2
+        state.entities.put(successful_id, CULTIVATION, cultivation)
+        self.engine.store.save(
+            state, [], player_name="炼魔破界",
+            expected_revision=state.revision,
+        )
+        gate = self.engine.get_game(successful["id"])["demonic_system"][
+            "true_demon_ascension"
+        ]
+        self.assertTrue(gate["satisfied"])
+        crossed = self.engine.begin_spirit_crossing(successful["id"]).game
+        self.assertEqual(crossed["world"]["world_id"], "true_demon")
+        self.assertTrue(crossed["player"]["alive"])
 
 
 if __name__ == "__main__":

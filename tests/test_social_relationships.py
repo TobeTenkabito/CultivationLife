@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from dataclasses import dataclass
 from pathlib import Path
 
 from cultivation_life import (
@@ -19,6 +20,12 @@ from cultivation_life import (
     GameEngine,
 )
 from cultivation_life.domain.cultivation import CULTIVATION
+from cultivation_life.domain.relations import (
+    _queue_relationship_sanction,
+    relationship_affinity,
+    set_relationship_affinity,
+)
+from cultivation_life.kernel.bus import SimulationContext
 
 
 class V2SocialRelationshipTests(unittest.TestCase):
@@ -173,6 +180,58 @@ class V2SocialRelationshipTests(unittest.TestCase):
         self.assertEqual(event["payload"]["kind"], "item")
         with self.assertRaisesRegex(ValueError, "本年度"):
             self.engine.execute(game["id"], RequestFromMaster(actor_id, "item"))
+
+    def test_hostile_master_sanction_is_triggered_and_really_ends_relation(self):
+        @dataclass(frozen=True, slots=True)
+        class TriggerSanction:
+            actor_id: str
+
+        def trigger(context: SimulationContext, command: object) -> None:
+            self.assertIsInstance(command, TriggerSanction)
+            for _ in range(100):
+                _queue_relationship_sanction(
+                    context, self.engine.definitions, command.actor_id
+                )
+                story = context.state.entities.require(
+                    command.actor_id, "story.state"
+                )
+                if story.get("pending") is not None:
+                    return
+            self.fail("敌对师父没有触发师门问罪")
+
+        self.engine.commands.register(TriggerSanction, trigger)
+        game = self.engine.create_game("问罪", seed=1204)
+        actor_id = game["player"]["id"]
+        master_id = self._register(game["id"], "怒师", realm_id="core")
+        self.engine.execute(
+            game["id"],
+            FormRelationship(master_id, actor_id, "master_disciple"),
+        )
+        state = self.engine.store.load(game["id"])
+        set_relationship_affinity(state, master_id, actor_id, -100)
+        self.engine.store.save(
+            state, [], player_name="问罪", expected_revision=state.revision
+        )
+
+        pending = self.engine.execute(
+            game["id"], TriggerSanction(actor_id)
+        ).game["pending_event"]
+        self.assertEqual(pending["id"], "EVT_MASTER_SANCTION_001")
+        self.assertEqual(pending["runtime"]["id"], master_id)
+        resolved = self.engine.choose(game["id"], "leave").game
+        self.assertFalse(any(
+            row["kind"] == "master_disciple"
+            for row in resolved["relationships"]
+        ))
+        self.assertEqual(
+            relationship_affinity(
+                self.engine.store.load(game["id"]), master_id, actor_id
+            ),
+            0,
+        )
+        self.assertEqual(
+            resolved["story"]["history"][-1]["result"], "expelled"
+        )
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ from cultivation_life.domain.combat import CONDITION
 from cultivation_life.domain.cultivation import CULTIVATION
 from cultivation_life.kernel.bus import SimulationContext
 from cultivation_life.kernel.model import EventScope
+from cultivation_life.v1_facade import game_view
 
 
 class _AlwaysTrigger(random.Random):
@@ -89,6 +90,14 @@ class V2ConcubineTests(unittest.TestCase):
         self.assertEqual(public["spirit_root"], "supreme_wood")
         self.assertIn("lifespan", public)
         self.assertIn("main_technique_id", public)
+        legacy = game_view(recruited.game, {})["concubine_system"][
+            "concubines"
+        ][0]
+        for field in (
+            "gender_name", "realm_name", "path_name", "race_name",
+            "spirit_root_name", "combat_power", "cauldron_uses",
+        ):
+            self.assertNotIn(legacy.get(field), (None, "", "undefined"), field)
         self.assertFalse(any(
             row["kind"] == "dao_companion"
             for row in recruited.game["relationships"]
@@ -173,6 +182,9 @@ class V2ConcubineTests(unittest.TestCase):
         self.assertEqual(
             entered["concubine_system"]["opportunity_efficiency_multiplier"], 0.8
         )
+        legacy_status = game_view(entered, {})["concubine_system"]["status"]
+        self.assertEqual(legacy_status["owner_name"], "玄君")
+        self.assertTrue(legacy_status["owner_realm_name"])
 
         dependent = self.engine.execute(
             game["id"], ManageConcubineStatus(actor_id, "depend")
@@ -200,6 +212,34 @@ class V2ConcubineTests(unittest.TestCase):
         advanced = self.engine.perform_timed_action(game["id"], "rest", 1).game
         self.assertGreater(
             advanced["concubine_system"]["status"]["last_drain"], 0.0
+        )
+
+    def test_escape_button_opens_v1_choice_event_before_resolution(self):
+        game = self.engine.create_game("金笼", seed=2205, gender="female")
+        actor_id = game["player"]["id"]
+        owner_id = self._register(
+            game["id"], "禁府之主", gender="male", realm_id="core", layer=2
+        )
+        self.engine.execute(
+            game["id"], EnterConcubineStatus(actor_id, owner_id)
+        )
+
+        opened = self.engine.execute(
+            game["id"], ManageConcubineStatus(actor_id, "escape")
+        ).game
+        self.assertEqual(opened["pending_event"]["id"], "SYS_CONCUBINE_ESCAPE")
+        self.assertIn("禁府之主", opened["pending_event"]["body"])
+        self.assertIsNotNone(opened["concubine_system"]["status"])
+
+        deferred = self.engine.execute(
+            game["id"], ResolveStoryChoice(actor_id, "abandon")
+        ).game
+        self.assertIsNone(deferred["pending_event"])
+        self.assertEqual(
+            deferred["story"]["history"][-1]["result"], "abandoned"
+        )
+        self.assertEqual(
+            deferred["concubine_system"]["status"]["owner"]["id"], owner_id
         )
 
     def test_automatic_proposal_refusal_and_two_unit_revenge_are_persisted(self):

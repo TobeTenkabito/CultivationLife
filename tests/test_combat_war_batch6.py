@@ -100,6 +100,15 @@ class V2CombatWarBatchSixTests(unittest.TestCase):
             game["id"], FoundFaction(actor_id, "归锋盟")
         ).game
         own_id = founded["faction"]["id"]
+        self.assertTrue(founded["faction"]["has_diplomatic_voice"])
+        self.assertTrue(founded["faction"]["diplomacy"])
+        self.assertTrue(all(
+            row["target_name"] and row["status_name"]
+            for row in founded["faction"]["diplomacy"]
+        ))
+        self.assertEqual(
+            founded["governance"]["diplomacy_statuses"]["war"], "战争"
+        )
         target_id = next(
             row["id"] for row in founded["available_factions"]
             if row["external_id"] == "tianjian"
@@ -113,6 +122,17 @@ class V2CombatWarBatchSixTests(unittest.TestCase):
         self.assertEqual(war["attacker_id"], own_id)
         self.assertTrue(war["roster"]["attacker"])
         self.assertTrue(war["roster"]["defender"])
+        self.assertEqual(war["controller"], "player")
+        self.assertEqual(war["coalitions"]["attacker"][0]["role"], "leader")
+        self.assertIn("effective_composite", war["power_summary"]["attacker"])
+        self.assertIn("active", war["formation_summary"]["defender"])
+        self.assertTrue(war["roster"]["attacker"][0]["realm_name"])
+        self.assertTrue(war["roster"]["attacker"][0]["owner_name"])
+        self.assertTrue(war["third_parties"])
+        self.assertEqual(
+            declared["war_system"]["terms"]["white_peace"]["name"],
+            "无条件停战",
+        )
 
         opened = self.engine.execute(
             game["id"], WarAction(actor_id, war["id"], "conquest")

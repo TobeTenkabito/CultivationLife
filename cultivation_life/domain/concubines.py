@@ -456,7 +456,33 @@ def _manage_status_handler(definitions: GameDefinitions):
             context.state.relations.replace_metadata(edge.relation_id, metadata)
             payload = {"result": "dependent", "affinity": affinity}
         elif command.action == "escape":
-            method = command.method or "covert"
+            method = command.method
+            if not method:
+                from .story import queue_story_event
+
+                queue_story_event(
+                    context,
+                    definitions,
+                    command.actor_id,
+                    "SYS_CONCUBINE_ESCAPE",
+                    reason="concubine_escape",
+                    runtime=_owner_runtime(
+                        context.state, definitions, owner_id
+                    ),
+                )
+                payload = {"result": "escape_planned", "chance": None}
+                context.emit(
+                    "relationship.concubine.status_managed",
+                    source="concubines",
+                    scope=EventScope.entity(command.actor_id),
+                    payload={
+                        "actor_id": command.actor_id,
+                        "owner_id": owner_id,
+                        "action": command.action,
+                        **payload,
+                    },
+                )
+                return
             if method == "abandon":
                 payload = {"result": "abandoned", "chance": None}
             elif method in {"covert", "plead"}:

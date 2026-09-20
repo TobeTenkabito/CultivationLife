@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import random
 from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from .character import IDENTITY, LIFE
 from .assets import create_asset
-from .cultivation import CULTIVATION, PRACTICE
+from .cultivation import CULTIVATION, PRACTICE, _can_practice
 from .definitions import GameDefinitions, MarketGoodDefinition
 from .world import LOCATION
 from ..kernel.bus import CommandBus, SimulationContext
@@ -119,18 +120,37 @@ def change_inventory_item(
     _change_item(context, definitions, actor_id, item_id, quantity, reason)
 
 
-def _on_character_created(context: SimulationContext, event: EventEnvelope) -> None:
-    entity_id = str(event.payload["entity_id"])
-    # V1 gives the controlled character one starter spirit sword.  Keeping the
-    # grant in the economy subscriber (rather than BootstrapGame) preserves a
-    # single owner for inventory state while NPC creation remains unaffected.
-    starting_items = {"spirit_sword": 1} if bool(event.payload.get("controlled")) else {}
-    context.state.entities.put(
-        entity_id,
-        INVENTORY,
-        {"items": starting_items, "reserved": {}},
-    )
-    context.state.entities.put(entity_id, MARKET, {"revision": 0, "offers": []})
+def _on_character_created(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        entity_id = str(event.payload["entity_id"])
+        # V1 gives the controlled character one starter spirit sword.  Keeping
+        # the grant here preserves a single owner for inventory state.
+        controlled = bool(event.payload.get("controlled"))
+        starting_items = {"spirit_sword": 1} if controlled else {}
+        context.state.entities.put(
+            entity_id,
+            INVENTORY,
+            {"items": starting_items, "reserved": {}},
+        )
+        context.state.entities.put(
+            entity_id, MARKET, {"revision": 0, "offers": []}
+        )
+        # The V1 screen opens directly onto a populated market.  Initialising
+        # it in the economy transaction also ensures every displayed offer is
+        # immediately actionable by its persisted ID.
+        if controlled:
+            cultivation = context.state.entities.require(entity_id, CULTIVATION)
+            location = context.state.entities.require(entity_id, LOCATION)
+            world_id = str(location["world_id"])
+            if (
+                _market_tier(definitions, cultivation, world_id) > 0
+                and any(good.world_id == world_id for good in definitions.market_goods)
+            ):
+                _refresh_market_handler(definitions)(
+                    context, RefreshMarket(entity_id, force=True)
+                )
+
+    return handler
 
 
 def _on_story_inventory_changed(definitions: GameDefinitions):
@@ -374,7 +394,7 @@ def _market_tier(definitions: GameDefinitions, cultivation: dict[str, Any], worl
     realm_index = definitions.realm_index(str(cultivation["realm_id"]))
     if realm_index == 0:
         return 0
-    if world_id == "celestial":
+    if world_id in {"celestial", "asura", "nether"}:
         return max(9, min(12, realm_index))
     if world_id in {"spirit", "true_demon", "monster_realm", "phantom_underworld", "hell"}:
         return max(5, min(8, realm_index))
@@ -382,27 +402,107 @@ def _market_tier(definitions: GameDefinitions, cultivation: dict[str, Any], worl
 
 
 def _offer_group(offer: dict[str, Any]) -> str:
-    return str(offer.get("group", "general"))
+    return "general" if offer.get("group", "general") == "general" else "material"
+
+
+def regional_market_goods(
+    definitions: GameDefinitions,
+    goods: list[MarketGoodDefinition],
+    world_id: str,
+    location_id: str,
+    purpose: str,
+) -> list[MarketGoodDefinition]:
+    """Apply the stable V1 region/purpose partition without changing content."""
+    coverage = float(
+        definitions.systems.get("maps", {})
+        .get("settings", {})
+        .get("regional_coverage", 0.46)
+    )
+    groups: dict[tuple[int, str], list[MarketGoodDefinition]] = {}
+    for good in goods:
+        if good.world_id == world_id:
+            groups.setdefault((good.tier, good.kind), []).append(good)
+    result: list[MarketGoodDefinition] = []
+    for rows in groups.values():
+        ranked = sorted(
+            rows,
+            key=lambda good: _regional_score(
+                world_id, location_id, purpose, good.content_id
+            ),
+        )
+        selected = [
+            good for good in ranked
+            if _regional_score(
+                world_id, location_id, purpose, good.content_id
+            ) < coverage
+        ]
+        result.extend(selected or ranked[:1])
+    return result
+
+
+def _regional_score(
+    world_id: str, location_id: str, purpose: str, content_id: str,
+) -> float:
+    digest = hashlib.blake2b(
+        f"{world_id}:{location_id}:{purpose}:{content_id}".encode("utf-8"),
+        digest_size=8,
+    ).digest()
+    return int.from_bytes(digest, "big") / float(2**64 - 1)
+
+
+def _on_action_completed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload.get("actor_id", ""))
+        if actor_id != context.state.controlled_entity_id:
+            return
+        if not context.state.entities.exists(actor_id):
+            return
+        if not bool(context.state.entities.require(actor_id, LIFE).get("alive")):
+            return
+        cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        location = context.state.entities.require(actor_id, LOCATION)
+        world_id = str(location["world_id"])
+        if (
+            _market_tier(definitions, cultivation, world_id) == 0
+            or not any(
+                good.world_id == world_id for good in definitions.market_goods
+            )
+        ):
+            return
+        # A V1 market period is an action unit, not a calendar year.  Every
+        # completed timed action therefore rerolls both shelves while the one
+        # lock allowed on each shelf survives with its original instance data.
+        _refresh_market_handler(definitions)(
+            context, RefreshMarket(actor_id=actor_id, force=True)
+        )
+
+    return handler
 
 
 def _eligible_goods(
     definitions: GameDefinitions, world_id: str, tier: int,
 ) -> list[MarketGoodDefinition]:
+    return _eligible_goods_from(list(definitions.market_goods), world_id, tier)
+
+
+def _eligible_goods_from(
+    goods: list[MarketGoodDefinition], world_id: str, tier: int,
+) -> list[MarketGoodDefinition]:
     exact = [
-        good for good in definitions.market_goods
+        good for good in goods
         if good.world_id == world_id and good.tier == tier
     ]
     if exact:
         return exact
     available_tiers = [
-        good.tier for good in definitions.market_goods
+        good.tier for good in goods
         if good.world_id == world_id and good.tier <= tier
     ]
     if not available_tiers:
         return []
     fallback = max(available_tiers)
     return [
-        good for good in definitions.market_goods
+        good for good in goods
         if good.world_id == world_id and good.tier == fallback
     ]
 
@@ -430,6 +530,11 @@ def _refresh_market_handler(definitions: GameDefinitions):
         )
         if same_period and market.get("offers") and not command.force:
             return
+        revision = int(market.get("revision", 0)) + 1
+        market_rng = random.Random(
+            f"{context.state.seed}:general-market:{command.actor_id}:{world_id}:"
+            f"{location_id}:{context.state.clock.year}:{revision}"
+        )
         retained: list[dict[str, Any]] = []
         if market.get("world_id") == world_id and market.get("location_id") == location_id:
             groups: set[str] = set()
@@ -438,26 +543,86 @@ def _refresh_market_handler(definitions: GameDefinitions):
                 if bool(old.get("locked")) and not bool(old.get("sold")) and group not in groups:
                     retained.append(dict(old))
                     groups.add(group)
-        pool = _eligible_goods(definitions, world_id, tier)
+        regional_goods = regional_market_goods(
+            definitions,
+            list(definitions.market_goods),
+            world_id,
+            location_id,
+            "market",
+        )
+        pool = _eligible_goods_from(regional_goods, world_id, tier)
         if not pool and retained:
             pool = []
         elif not pool:
             raise ValueError("当前世界没有可用坊市货物")
         offer_limit = max(1, int(definitions.market_settings.get("offer_count", 6)))
-        fresh_count = max(0, offer_limit - len(retained))
-        candidates = list(pool)
-        context.rng.shuffle(candidates)
-        if fresh_count > len(candidates):
-            candidates = [context.rng.choice(pool) for _ in range(fresh_count)] if pool else []
-        else:
-            candidates = candidates[:fresh_count]
+        retained_general = [
+            row for row in retained if _offer_group(row) == "general"
+        ]
+        retained_material = [
+            row for row in retained if _offer_group(row) == "material"
+        ]
+        fresh_count = max(0, offer_limit - len(retained_general))
+        retained_keys = {
+            (str(row.get("kind")), str(row.get("content_id")))
+            for row in retained_general
+        }
+        candidates = [
+            good for good in pool
+            if (good.kind, good.content_id) not in retained_keys
+        ]
+        market_rng.shuffle(candidates)
+        next_tier_pool = [
+            good for good in regional_goods
+            if good.world_id == world_id and good.tier == tier + 1
+        ]
+        market_rng.shuffle(next_tier_pool)
+        next_tier_chance = float(
+            definitions.market_settings.get("next_tier_chance", 0.0)
+        )
+        selected: list[tuple[MarketGoodDefinition, int]] = []
+        # V1 reserves the first newly generated general slot for a locally
+        # available spirit-plant seed.  Without this guarantee the spirit
+        # field UI can be fully implemented yet become unreachable in normal
+        # play because no seed ever enters the economy.
+        seed_pool = [
+            good for good in regional_goods
+            if good.kind == "item"
+            and good.content_id in definitions.items
+            and "seed" in definitions.items[good.content_id].tags
+            and (good.kind, good.content_id) not in retained_keys
+        ]
+        if fresh_count and seed_pool:
+            seed_good = market_rng.choice(seed_pool)
+            selected.append((seed_good, tier))
+            candidates = [
+                good for good in candidates
+                if (good.kind, good.content_id)
+                != (seed_good.kind, seed_good.content_id)
+            ]
+            next_tier_pool = [
+                good for good in next_tier_pool
+                if (good.kind, good.content_id)
+                != (seed_good.kind, seed_good.content_id)
+            ]
+        for _index in range(len(selected), fresh_count):
+            use_next = bool(
+                next_tier_pool and market_rng.random() < next_tier_chance
+            )
+            source = next_tier_pool if use_next else candidates
+            fallback = candidates if use_next else next_tier_pool
+            if source:
+                good = source.pop(0)
+                selected.append((good, good.tier))
+            elif fallback:
+                good = fallback.pop(0)
+                selected.append((good, good.tier))
+            elif pool:
+                good = market_rng.choice(pool)
+                selected.append((good, good.tier))
         low, high = map(float, definitions.market_settings.get("price_multiplier", (0.9, 1.1)))
-        revision = int(market.get("revision", 0)) + 1
-        offers = list(retained)
-        retained_keys = {(row["kind"], row["content_id"]) for row in retained}
-        for index, good in enumerate(candidates):
-            if (good.kind, good.content_id) in retained_keys:
-                continue
+        offers = list(retained_general)
+        for index, (good, offer_tier) in enumerate(selected):
             content = (
                 definitions.items[good.content_id]
                 if good.kind == "item" else definitions.techniques[good.content_id]
@@ -467,8 +632,8 @@ def _refresh_market_handler(definitions: GameDefinitions):
                 "kind": good.kind,
                 "content_id": good.content_id,
                 "name": content.name,
-                "price": max(1, round(good.price * context.rng.uniform(low, high))),
-                "tier": good.tier,
+                "price": max(1, round(good.price * market_rng.uniform(low, high))),
+                "tier": offer_tier,
                 "group": "general",
                 "locked": False,
                 "sold": False,
@@ -489,7 +654,8 @@ def _refresh_market_handler(definitions: GameDefinitions):
             offers.append({
                 "id": f"market:{command.actor_id}:{revision}:crafting:{index + 1}",
                 "kind": "crafting_material", "content_id": definition["id"],
-                "name": definition["name"], "group": "crafting", "tier": definition["tier"],
+                "name": definition["name"], "group": "crafting",
+                "tier": min(len(definitions.realms) - 1, max(tier, int(definition["tier"]))),
                 "price": max(1, round(value * specialty_rng.uniform(0.9, 1.1))),
                 "asset_blueprint": {
                     "kind": "crafting_material", "definition_id": definition["id"],
@@ -513,7 +679,8 @@ def _refresh_market_handler(definitions: GameDefinitions):
             offers.append({
                 "id": f"market:{command.actor_id}:{revision}:formation:{index + 1}",
                 "kind": "formation_material", "content_id": definition["id"],
-                "name": definition["name"], "group": "formation", "tier": definition["tier"],
+                "name": definition["name"], "group": "formation",
+                "tier": min(len(definitions.realms) - 1, max(tier, int(definition["tier"]))),
                 "price": max(1, round(int(definition["base_value"]) * specialty_rng.uniform(0.9, 1.1))),
                 "asset_blueprint": {
                     "kind": "formation_material", "definition_id": definition["id"],
@@ -536,7 +703,8 @@ def _refresh_market_handler(definitions: GameDefinitions):
             offers.append({
                 "id": f"market:{command.actor_id}:{revision}:formation-supply:{index + 1}",
                 "kind": "formation_supply", "content_id": definition["id"],
-                "name": definition["name"], "group": "formation_supply", "tier": definition["tier"],
+                "name": definition["name"], "group": "formation_supply",
+                "tier": min(len(definitions.realms) - 1, max(tier, int(definition["tier"]))),
                 "price": int(definition["base_value"]),
                 "asset_blueprint": {
                     "kind": "formation_supply", "definition_id": definition["id"],
@@ -549,6 +717,50 @@ def _refresh_market_handler(definitions: GameDefinitions):
                 },
                 "locked": False, "sold": False,
             })
+        material_limit = max(
+            1, int(definitions.market_settings.get("material_offer_count", 6))
+        )
+        general_offers = [row for row in offers if _offer_group(row) == "general"]
+        material_offers = [row for row in offers if _offer_group(row) == "material"]
+        fresh_material_count = max(0, material_limit - len(retained_material))
+        crafting_target = max(
+            0,
+            int(crafting["settings"].get("market_material_offers", 3))
+            - int(bool(
+                retained_material
+                and retained_material[0].get("kind") == "crafting_material"
+            )),
+        )
+        formation_target = max(0, fresh_material_count - crafting_target)
+        crafting_offers = [
+            row for row in material_offers
+            if row.get("kind") == "crafting_material"
+        ]
+        formation_offers = [
+            row for row in material_offers
+            if row.get("kind") == "formation_material"
+        ]
+        supply_offers = [
+            row for row in material_offers
+            if row.get("kind") == "formation_supply"
+        ]
+        supply_count = min(1, formation_target, len(supply_offers))
+        selected_materials = [
+            *crafting_offers[:crafting_target],
+            *formation_offers[:max(0, formation_target - supply_count)],
+            *supply_offers[:supply_count],
+        ]
+        if len(selected_materials) < fresh_material_count:
+            selected_ids = {str(row["id"]) for row in selected_materials}
+            selected_materials.extend(
+                row for row in material_offers
+                if str(row["id"]) not in selected_ids
+            )
+        offers = [
+            *general_offers,
+            *retained_material,
+            *selected_materials[:fresh_material_count],
+        ]
         market = {
             "revision": revision,
             "world_id": world_id,
@@ -727,7 +939,8 @@ def register_economy_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.register(RefreshMarket, _refresh_market_handler(definitions))
     bus.register(ToggleMarketOfferLock, _toggle_lock)
     bus.register(BuyMarketOffer, _buy_handler(definitions))
-    bus.event_bus.register("character.created", _on_character_created)
+    bus.event_bus.register("character.created", _on_character_created(definitions))
+    bus.event_bus.register("core.action.completed", _on_action_completed(definitions))
     bus.event_bus.register(
         "story.effect.inventory.changed", _on_story_inventory_changed(definitions)
     )
@@ -788,13 +1001,131 @@ def market_view(state: Any, definitions: GameDefinitions, entity_id: str | None 
             "plant_years": int(metadata.get("years", 0)),
             "plant_quality": float(metadata.get("quality", 0.0)),
         })
+    world_id = str(location["world_id"])
+    location_id = str(location["location_id"])
+    tier = _market_tier(definitions, cultivation, world_id)
+    world = definitions.worlds[world_id]
+    location_definition = world.locations[location_id]
+    practice = state.entities.require(actor_id, PRACTICE)
+    known = set(map(str, practice.get("known_techniques", [])))
+    root = definitions.roots[str(cultivation["spirit_root"])]
+    additional_roots = list(map(str, cultivation.get("additional_roots", [])))
+    crafting_definitions = {
+        str(row["id"]): row
+        for row in definitions.systems["crafting"]["materials"]
+    }
+    formation_definitions = {
+        str(row["id"]): row
+        for row in definitions.systems["formations"]["materials"]
+    }
+    supply_definitions = {
+        str(row["id"]): row
+        for row in definitions.systems["formations"]["maintenance_resources"]
+    }
+
+    def public_offer(raw: dict[str, Any]) -> dict[str, Any]:
+        offer = dict(raw)
+        kind = str(offer.get("kind", ""))
+        content_id = str(offer.get("content_id", ""))
+        offer_tier = max(
+            0, min(len(definitions.realms) - 1, int(offer.get("tier", tier)))
+        )
+        description = ""
+        compatible = True
+        owned = False
+        if kind == "item":
+            definition = definitions.items.get(content_id)
+            description = definition.description if definition else "普通坊市货物"
+        elif kind == "technique":
+            definition = definitions.techniques.get(content_id)
+            if definition is not None:
+                path_name = definitions.paths.get(definition.path, definition.path)
+                element_name = definitions.affinity_names.get(
+                    definition.element, definition.element
+                )
+                description = f"{path_name}功法 · {element_name}属性"
+                compatible = _can_practice(root, definition, additional_roots)
+                owned = content_id in known
+            else:
+                description = "未知功法"
+                compatible = False
+        elif kind == "crafting_material":
+            definition = crafting_definitions.get(content_id, {})
+            metadata = dict(dict(offer.get("asset_blueprint", {})).get("metadata", {}))
+            roles = {
+                "primary": "主材", "secondary": "辅材", "quench": "淬火",
+            }
+            role_text = "、".join(
+                roles.get(str(role), str(role)) for role in definition.get("roles", [])
+            )
+            value = int(metadata.get("material_value", definition.get("base_material_value", 0)))
+            description = f"炼器材料 · 材料价值 {value:,}"
+            if role_text:
+                description += f" · 可用位置：{role_text}"
+        elif kind == "formation_material":
+            definition = formation_definitions.get(content_id, {})
+            nature = str(definition.get("nature", "neutral"))
+            nature_names = dict(
+                definitions.systems["formations"].get("nature_channels", {})
+            )
+            nature_label = definitions.affinity_names.get(nature, nature)
+            if nature in nature_names and nature_label == nature:
+                nature_label = nature
+            description = (
+                f"阵材 · {nature_label}性 · 固有阵值 "
+                f"{float(definition.get('formation_value', 0)):g}"
+            )
+        elif kind == "formation_supply":
+            definition = supply_definitions.get(content_id, {})
+            description = (
+                "镇地阵修复资源 · 恢复 "
+                f"{float(definition.get('repair_value', 0)):g}% 永久完整度"
+            )
+        else:
+            description = "坊市货物"
+        offer.update({
+            "description": description,
+            "tier_name": definitions.realms[offer_tier].name,
+            "market_name": f"{location_definition.name}·{definitions.realms[tier].name}坊市",
+            "market_group": _offer_group(offer),
+            "owned": owned,
+            "compatible": compatible,
+            "rare_next_tier": offer_tier > tier,
+        })
+        return offer
+
+    visible_offers = (
+        [public_offer(dict(row)) for row in market.get("offers", [])]
+        if current else []
+    )
+    crafting_offers = [
+        row for row in visible_offers if row["kind"] == "crafting_material"
+    ]
+    formation_offers = [
+        row for row in visible_offers
+        if row["kind"] in {"formation_material", "formation_supply"}
+    ]
     return {
-        "available": _market_tier(definitions, cultivation, str(location["world_id"])) > 0,
+        "available": tier > 0,
         "current": current,
-        "world_id": location["world_id"],
-        "location_id": location["location_id"],
+        "name": f"{location_definition.name}·{definitions.realms[tier].name}坊市",
+        "realm_index": tier,
+        "world": world_id,
+        "world_id": world_id,
+        "location_id": location_id,
+        "location_name": location_definition.name,
         "generated_year": market.get("generated_year") if current else None,
         "spirit_stones": _quantity(_inventory(state, actor_id), CURRENCY_ID),
-        "offers": [dict(row) for row in market.get("offers", [])] if current else [],
+        "offers": visible_offers,
+        "crafting_material_offers": crafting_offers,
+        "formation_material_offers": formation_offers,
+        "material_offers": [*crafting_offers, *formation_offers],
+        "general_offer_limit": int(definitions.market_settings.get("offer_count", 6)),
+        "material_offer_limit": int(
+            definitions.market_settings.get("material_offer_count", 6)
+        ),
+        "next_tier_chance": float(
+            definitions.market_settings.get("next_tier_chance", 0.0)
+        ),
         "sellable_plants": sellable_plants,
     }

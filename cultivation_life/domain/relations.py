@@ -4,6 +4,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any
 
+from .actions import ACTION_RUNTIME
 from .character import IDENTITY, LIFE, character_view
 from .advanced_cultivation import DIVINE_SENSE
 from .combat import CONDITION, PRISONER, combat_snapshot
@@ -112,7 +113,10 @@ class BeginRelationshipCapture:
 
 
 def _default_profile() -> dict[str, Any]:
-    return {"affinities": {}, "attempts": []}
+    return {
+        "affinities": {}, "attempts": [],
+        "revenge_last_units": {}, "revenge_counts": {},
+    }
 
 
 def reconcile_relationship_state(state: WorldState) -> None:
@@ -124,6 +128,14 @@ def reconcile_relationship_state(state: WorldState) -> None:
             if state.entities.exists(str(other_id))
         }
         profile["attempts"] = list(dict.fromkeys(map(str, profile.get("attempts", []))))
+        profile["revenge_last_units"] = {
+            str(key): int(value)
+            for key, value in dict(profile.get("revenge_last_units", {})).items()
+        }
+        profile["revenge_counts"] = {
+            str(key): int(value)
+            for key, value in dict(profile.get("revenge_counts", {})).items()
+        }
         state.entities.put(entity_id, SOCIAL_PROFILE, profile)
     actor_id = state.controlled_entity_id
     if actor_id is not None:
@@ -1096,6 +1108,329 @@ def _on_faction_relationship_invited(
     context.state.relations.replace_metadata(relation_id, metadata)
 
 
+def _same_world_people(
+    state: WorldState, actor_id: str,
+) -> list[str]:
+    actor_world = state.entities.require(actor_id, LOCATION)["world_id"]
+    return [
+        entity_id for entity_id in state.entities.with_component(IDENTITY)
+        if entity_id != actor_id
+        and bool(state.entities.require(entity_id, LIFE).get("alive"))
+        and state.entities.require(entity_id, LOCATION).get("world_id") == actor_world
+    ]
+
+
+def _queue_personal_relationship_event(
+    context: SimulationContext, definitions: GameDefinitions, actor_id: str,
+) -> None:
+    story = context.state.entities.get(actor_id, "story.state") or {}
+    if story.get("pending") is not None or story.get("queue"):
+        return
+    rules = dict(definitions.systems.get("relationship", {}))
+    people = _same_world_people(context.state, actor_id)
+    high_threshold = float(rules.get("positive_affinity_threshold", 30))
+    hostile_threshold = float(rules.get("hostile_affinity_threshold", -25))
+    allies = [
+        entity_id for entity_id in people
+        if relationship_affinity(context.state, entity_id, actor_id)
+        >= high_threshold
+    ]
+    protected = {
+        edge.target_id if edge.source_id == actor_id else edge.source_id
+        for edge in context.state.relations.involving(actor_id)
+        if edge.kind in SOCIAL_KINDS
+    }
+    profile = context.state.entities.require(actor_id, SOCIAL_PROFILE)
+    runtime = context.state.entities.require(actor_id, ACTION_RUNTIME)
+    unit = max(0, int(runtime.get("next_sequence", 1)) - 1)
+    last_units = dict(profile.get("revenge_last_units", {}))
+    counts = dict(profile.get("revenge_counts", {}))
+    enemies = []
+    for entity_id in people:
+        if entity_id in protected:
+            continue
+        affinity = relationship_affinity(context.state, entity_id, actor_id)
+        if affinity > hostile_threshold:
+            continue
+        count = int(counts.get(entity_id, 0))
+        cooldown = min(
+            int(rules.get("revenge_cooldown_max_units", 15)),
+            int(rules.get("revenge_cooldown_base_units", 3))
+            + count * int(rules.get("revenge_cooldown_increment_units", 2)),
+        )
+        if unit - int(last_units.get(entity_id, -cooldown)) >= cooldown:
+            enemies.append(entity_id)
+    if enemies:
+        protection = min(
+            float(rules.get("ally_protection_cap", 0.55)),
+            len(allies) * float(rules.get("ally_protection_per_person", 0.12)),
+        )
+        severity = max(
+            abs(relationship_affinity(context.state, entity_id, actor_id)
+                - hostile_threshold)
+            for entity_id in enemies
+        )
+        chance = min(
+            0.75,
+            float(rules.get("revenge_base_chance", 0.1))
+            + severity * float(rules.get("revenge_affinity_scale", 0.004)),
+        ) * (1 - protection)
+        if context.rng.random() < chance:
+            enemy_id = context.rng.choices(
+                enemies,
+                weights=[
+                    max(1.0, abs(relationship_affinity(
+                        context.state, entity_id, actor_id
+                    )))
+                    for entity_id in enemies
+                ],
+                k=1,
+            )[0]
+            actor_location = context.state.entities.require(actor_id, LOCATION)
+            context.state.entities.put(enemy_id, LOCATION, dict(actor_location))
+            enemy = context.state.entities.require(enemy_id, IDENTITY)
+            target_power = float(combat_snapshot(
+                context.state, definitions, enemy_id
+            )["power"])
+            best_ally = max(
+                (entity_id for entity_id in allies if entity_id != enemy_id),
+                key=lambda entity_id: float(combat_snapshot(
+                    context.state, definitions, entity_id
+                )["power"]),
+                default=None,
+            )
+            support_id = None
+            from .factions import MEMBERSHIP
+
+            membership = next(iter(context.state.relations.find(
+                source_id=actor_id, kind=MEMBERSHIP
+            )), None)
+            if membership is not None:
+                candidates = [
+                    edge.source_id
+                    for edge in context.state.relations.find(
+                        target_id=membership.target_id, kind=MEMBERSHIP
+                    )
+                    if edge.source_id not in {actor_id, enemy_id}
+                    and edge.source_id in people
+                ]
+                support_id = max(
+                    candidates,
+                    key=lambda entity_id: float(combat_snapshot(
+                        context.state, definitions, entity_id
+                    )["power"]),
+                    default=None,
+                )
+            from .story import STORY_STATE, queue_story_event
+
+            queue_story_event(
+                context, definitions, actor_id, "EVT_PERSONAL_REVENGE_001",
+                reason="personal_revenge",
+                runtime={
+                    "target_id": enemy_id,
+                    "npc_id": enemy_id,
+                    "npc_name": str(enemy["name"]),
+                    "target_power": round(target_power, 1),
+                    "ally_id": best_ally,
+                    "sect_support_id": support_id,
+                    "chance": round(chance, 4),
+                    "protection": round(protection, 4),
+                },
+            )
+            story = context.state.entities.require(actor_id, STORY_STATE)
+            pending = dict(story.get("pending") or {})
+            pending["body"] = str(pending.get("body", "")).replace(
+                "{npc_name}", str(enemy["name"])
+            ).replace("{target_power}", f"{target_power:.0f}")
+            choices = []
+            for raw in pending.get("choices", []):
+                choice = dict(raw)
+                if choice.get("id") == "ally" and best_ally is None:
+                    choice.update(
+                        enabled=False,
+                        disabled_reason="当前没有愿意驰援的高好感修士",
+                    )
+                elif choice.get("id") == "sect" and support_id is None:
+                    choice.update(
+                        enabled=False,
+                        disabled_reason="当前没有可接应你的宗门同道",
+                    )
+                choices.append(choice)
+            pending["choices"] = choices
+            story["pending"] = pending
+            context.state.entities.put(actor_id, STORY_STATE, story)
+            count = int(counts.get(enemy_id, 0)) + 1
+            counts[enemy_id] = count
+            last_units[enemy_id] = unit
+            profile["revenge_counts"] = counts
+            profile["revenge_last_units"] = last_units
+            context.state.entities.put(actor_id, SOCIAL_PROFILE, profile)
+            return
+
+    if not allies:
+        return
+    gift_chance = min(
+        0.32,
+        float(rules.get("positive_event_base_chance", 0.04))
+        + len(allies) * float(rules.get("positive_event_per_person", 0.025)),
+    )
+    if context.rng.random() >= gift_chance:
+        return
+    visitor_id = context.rng.choices(
+        allies,
+        weights=[max(1.0, relationship_affinity(
+            context.state, entity_id, actor_id
+        )) for entity_id in allies],
+        k=1,
+    )[0]
+    visitor = context.state.entities.require(visitor_id, IDENTITY)
+    visitor_cultivation = context.state.entities.require(visitor_id, CULTIVATION)
+    from .story import queue_story_event
+
+    queue_story_event(
+        context, definitions, actor_id, "EVT_PERSONAL_AFFINITY_GIFT_001",
+        reason="personal_affinity_gift",
+        runtime={
+            "target_id": visitor_id, "npc_id": visitor_id,
+            "npc_name": str(visitor["name"]),
+            "npc_realm_index": definitions.realm_index(
+                str(visitor_cultivation["realm_id"])
+            ),
+        },
+    )
+
+
+def _queue_relationship_sanction(
+    context: SimulationContext, definitions: GameDefinitions, actor_id: str,
+) -> None:
+    story = context.state.entities.get(actor_id, "story.state") or {}
+    if story.get("pending") is not None or story.get("queue"):
+        return
+    rules = dict(definitions.systems.get("relationship", {}))
+    threshold = float(rules.get("hostile_affinity_threshold", -25))
+    actor_world = context.state.entities.require(actor_id, LOCATION)["world_id"]
+    candidates: list[dict[str, Any]] = []
+
+    def add(role: str, target_id: str) -> None:
+        if (
+            not target_id
+            or not context.state.entities.exists(target_id)
+            or not bool(context.state.entities.require(target_id, LIFE).get("alive"))
+            or context.state.entities.require(target_id, LOCATION).get("world_id")
+            != actor_world
+        ):
+            return
+        affinity = relationship_affinity(context.state, target_id, actor_id)
+        if affinity > threshold:
+            return
+        cultivation = context.state.entities.require(target_id, CULTIVATION)
+        candidates.append({
+            "role": role, "id": target_id,
+            "name": str(context.state.entities.require(target_id, IDENTITY)["name"]),
+            "affinity": affinity,
+            "realm_index": definitions.realm_index(str(cultivation["realm_id"])),
+        })
+
+    master = next(iter(context.state.relations.find(
+        target_id=actor_id, kind="master_disciple"
+    )), None)
+    if master is not None:
+        add("master", master.source_id)
+    companion = next(iter(context.state.relations.involving(
+        actor_id, kind="dao_companion"
+    )), None)
+    if companion is not None:
+        add(
+            "companion",
+            companion.target_id if companion.source_id == actor_id
+            else companion.source_id,
+        )
+    owner = next(iter(context.state.relations.find(
+        target_id=actor_id, kind="concubine"
+    )), None)
+    if owner is not None:
+        add("concubine_owner", owner.source_id)
+    ecology = context.state.entities.get(actor_id, "dlc.ghost.ecology") or {}
+    captor = dict(ecology.get("captor") or {})
+    if captor:
+        add("ghost_captor", str(captor.get("entity_id") or ""))
+    if not candidates:
+        return
+    profile = context.state.entities.require(actor_id, SOCIAL_PROFILE)
+    runtime = context.state.entities.require(actor_id, ACTION_RUNTIME)
+    unit = max(0, int(runtime.get("next_sequence", 1)) - 1)
+    last_units = dict(profile.get("revenge_last_units", {}))
+    counts = dict(profile.get("revenge_counts", {}))
+    ready = []
+    for row in candidates:
+        key = f"sanction:{row['role']}:{row['id']}"
+        count = int(counts.get(key, 0))
+        cooldown = min(
+            int(rules.get("revenge_cooldown_max_units", 15)),
+            int(rules.get("revenge_cooldown_base_units", 3))
+            + count * int(rules.get("revenge_cooldown_increment_units", 2)),
+        )
+        if unit - int(last_units.get(key, -cooldown)) >= cooldown:
+            ready.append((row, key))
+    if not ready:
+        return
+    severity = max(threshold - float(row["affinity"]) for row, _ in ready)
+    chance = min(0.68, 0.18 + max(0.0, severity) * 0.006)
+    if context.rng.random() >= chance:
+        return
+    selected, cooldown_key = context.rng.choices(
+        ready,
+        weights=[max(1.0, abs(float(row["affinity"]))) for row, _ in ready],
+        k=1,
+    )[0]
+    event_id = {
+        "master": "EVT_MASTER_SANCTION_001",
+        "companion": "EVT_COMPANION_SANCTION_001",
+        "concubine_owner": "EVT_OWNER_SANCTION_001",
+        "ghost_captor": "EVT_OWNER_SANCTION_001",
+    }[str(selected["role"])]
+    demand = max(5, (int(selected["realm_index"]) + 1) ** 2 * 4)
+    from .story import STORY_STATE, queue_story_event
+
+    queue_story_event(
+        context, definitions, actor_id, event_id,
+        reason="relationship_sanction",
+        runtime={
+            **selected,
+            "npc_name": str(selected["name"]),
+            "demand": demand,
+            "chance": chance,
+        },
+    )
+    story = context.state.entities.require(actor_id, STORY_STATE)
+    pending = dict(story.get("pending") or {})
+    if selected["role"] in {"concubine_owner", "ghost_captor"}:
+        pending["body"] += (
+            f" 对方开出的价码是下品灵石 ×{demand}；不足部分会以机缘抵偿。"
+        )
+    story["pending"] = pending
+    context.state.entities.put(actor_id, STORY_STATE, story)
+    counts[cooldown_key] = int(counts.get(cooldown_key, 0)) + 1
+    last_units[cooldown_key] = unit
+    profile["revenge_counts"] = counts
+    profile["revenge_last_units"] = last_units
+    context.state.entities.put(actor_id, SOCIAL_PROFILE, profile)
+
+
+def _on_action_completed(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload["actor_id"])
+        if actor_id == context.state.controlled_entity_id:
+            _queue_relationship_sanction(
+                context, definitions, actor_id
+            )
+            _queue_personal_relationship_event(
+                context, definitions, actor_id
+            )
+
+    return handler
+
+
 def relationship_invariants(state: WorldState) -> list[str]:
     errors: list[str] = []
     active = [edge for edge in state.relations.find() if edge.kind in SOCIAL_KINDS]
@@ -1165,6 +1500,7 @@ def register_relationship_domain(bus: CommandBus, definitions: GameDefinitions) 
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("faction.relationship.invited", _on_faction_relationship_invited)
     bus.event_bus.register("world.permanent_transition.requested", _on_permanent_world_transition)
+    bus.event_bus.register("core.action.completed", _on_action_completed(definitions))
 
 
 def relationship_view(

@@ -59,6 +59,9 @@ class TechniqueDefinition:
     transformation_space: int = 0
     requires_immortal_power: bool = False
     immortal_power_cost: float = 0.0
+    required_body_training: int = 0
+    possession_limit_bonus: int = 0
+    ignore_possession_limit: bool = False
 
     @property
     def scale(self) -> float:
@@ -69,6 +72,10 @@ class TechniqueDefinition:
 class LocationDefinition:
     id: str
     name: str
+    description: str
+    themes: tuple[str, ...]
+    combat_terrain: str
+    combat_conditions: tuple[str, ...]
     min_realm_index: int
     failure: str
     failure_reason: str
@@ -249,6 +256,8 @@ class StoryEventDefinition:
     intent_weights: dict[str, float]
     repeat: str
     conditions: dict[str, Any]
+    trigger: dict[str, Any]
+    combat: dict[str, Any]
     choices: tuple[StoryChoiceDefinition, ...]
 
 

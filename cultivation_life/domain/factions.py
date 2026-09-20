@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .character import IDENTITY, LIFE, character_view, create_character
-from .combat import resolve_combat
+from .combat import combat_snapshot, resolve_combat
 from .cultivation import CULTIVATION
 from .definitions import GameDefinitions
 from .world import LOCATION
@@ -135,6 +135,7 @@ def _create_faction_entity(
             "controller_id": creator_id,
             "designated_successor_id": None,
             "last_ascension_handover": None,
+            "pressure": 0,
         },
     )
     return faction_id
@@ -261,6 +262,15 @@ def _active_membership(state: WorldState, character_id: str):
     if len(memberships) > 1:
         raise ValueError("角色同时拥有多个有效势力身份")
     return memberships[0] if memberships else None
+
+
+def _allegiance_race(state: WorldState, character_id: str) -> str:
+    membership = _active_membership(state, character_id)
+    if membership is not None:
+        profile = state.entities.get(membership.target_id, FACTION_PROFILE)
+        if profile and profile.get("allegiance_race"):
+            return str(profile["allegiance_race"])
+    return str(state.entities.require(character_id, IDENTITY)["race"])
 
 
 def _add_membership(
@@ -684,6 +694,11 @@ def _intercept_handler(definitions: GameDefinitions):
 
         if is_intrigue_imprisoned(context.state, command.target_id):
             raise ValueError("目标正在势力监狱服刑")
+        context.state.entities.put(
+            command.target_id,
+            LOCATION,
+            dict(context.state.entities.require(command.actor_id, LOCATION)),
+        )
         resolve_combat(
             context, definitions, attacker_id=command.actor_id,
             target_id=command.target_id, objective="kill",
@@ -782,8 +797,7 @@ def _propose_diplomacy_handler(definitions: GameDefinitions):
             world_id = str(context.state.entities.require(
                 command.actor_id, LOCATION
             )["world_id"])
-            identity = context.state.entities.require(command.actor_id, IDENTITY)
-            own_id = str(identity["race"])
+            own_id = _allegiance_race(context.state, command.actor_id)
             target_id = command.target_id
             cultivation = context.state.entities.require(command.actor_id, CULTIVATION)
             required = int(definitions.systems["world_travel"]["required_realm"])
@@ -867,7 +881,7 @@ def _transfer_vassal_handler(definitions: GameDefinitions):
             destination_world = str(own_profile["world_id"])
         else:
             membership = None
-            own_id = str(context.state.entities.require(command.actor_id, IDENTITY)["race"])
+            own_id = _allegiance_race(context.state, command.actor_id)
             destination_world = str(context.state.entities.require(
                 command.actor_id, LOCATION
             )["world_id"])
@@ -1006,6 +1020,121 @@ def _on_time_advanced(definitions: GameDefinitions):
     return handler
 
 
+def _dissolve_faction(
+    context: SimulationContext, faction_id: str, *, reason: str,
+) -> None:
+    profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+    profile["active"] = False
+    context.state.entities.put(faction_id, FACTION_PROFILE, profile)
+    governance = context.state.entities.require(faction_id, FACTION_GOVERNANCE)
+    governance["controller_id"] = None
+    governance["positions"] = {}
+    governance["prisoner_ids"] = []
+    context.state.entities.put(faction_id, FACTION_GOVERNANCE, governance)
+    intrigue = context.state.entities.get(
+        faction_id, "dlc.intrigue.governance"
+    )
+    if intrigue is not None:
+        intrigue["positions"] = {}
+        intrigue["prisoner_ids"] = []
+        context.state.entities.put(
+            faction_id, "dlc.intrigue.governance", intrigue
+        )
+    for edge in list(context.state.relations.find(
+        source_id=faction_id, kind="dlc.intrigue.prisoner"
+    )):
+        context.state.relations.end(
+            edge.relation_id, ended_year=context.state.clock.year
+        )
+    for edge in list(context.state.relations.find(
+        target_id=faction_id, kind=MEMBERSHIP
+    )):
+        ended = context.state.relations.end(
+            edge.relation_id, ended_year=context.state.clock.year
+        )
+        metadata = dict(ended.metadata)
+        metadata["end_reason"] = "faction_dissolved"
+        context.state.relations.replace_metadata(ended.relation_id, metadata)
+    context.emit(
+        "faction.dissolved", source="factions",
+        scope=EventScope("faction", faction_id),
+        payload={"faction_id": faction_id, "reason": reason},
+    )
+
+
+def _maybe_player_faction_pressure(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = context.state.controlled_entity_id
+        if actor_id is None or int(event.payload["to_year"]) <= int(
+            event.payload["from_year"]
+        ):
+            return
+        membership = _active_membership(context.state, actor_id)
+        if membership is None:
+            return
+        faction_id = membership.target_id
+        profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+        governance = context.state.entities.require(faction_id, FACTION_GOVERNANCE)
+        if (
+            not bool(profile.get("active"))
+            or governance.get("creator_id") != actor_id
+            or profile.get("world_id")
+            != context.state.entities.require(actor_id, LOCATION).get("world_id")
+        ):
+            return
+        rules = dict(definitions.systems.get("player_faction", {}))
+        threshold = _governance_threshold(definitions, str(profile["world_id"]))
+        actor_cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        qualified = definitions.realm_index(
+            str(actor_cultivation["realm_id"])
+        ) >= threshold
+        if not qualified:
+            qualified = any(
+                edge.source_id != actor_id
+                and bool(context.state.entities.require(
+                    edge.source_id, LIFE
+                ).get("alive"))
+                and context.state.entities.require(
+                    edge.source_id, LOCATION
+                ).get("world_id") == profile.get("world_id")
+                and definitions.realm_index(str(context.state.entities.require(
+                    edge.source_id, CULTIVATION
+                )["realm_id"])) >= threshold
+                for edge in context.state.relations.find(
+                    target_id=faction_id, kind=MEMBERSHIP
+                )
+            )
+        if qualified:
+            if int(governance.get("pressure", 0)):
+                governance["pressure"] = 0
+                context.state.entities.put(
+                    faction_id, FACTION_GOVERNANCE, governance
+                )
+            return
+        from .story import STORY_STATE, queue_story_event
+
+        story = context.state.entities.require(actor_id, STORY_STATE)
+        if story.get("pending") is not None or story.get("queue"):
+            return
+        if context.rng.random() >= float(
+            rules.get("pressure_chance_per_unit", 0.35)
+        ):
+            return
+        pressure = int(governance.get("pressure", 0))
+        event_id = f"EVT_PLAYER_SECT_DEFENSE_{min(3, pressure + 1):03d}"
+        queue_story_event(
+            context, definitions, actor_id, event_id,
+            reason="player_faction_pressure",
+            runtime={
+                "faction_id": faction_id,
+                "failure_number": pressure + 1,
+                "threshold_realm": threshold,
+            },
+        )
+
+    return handler
+
+
 def _advance_faction_npcs(definitions: GameDefinitions):
     def handler(context: SimulationContext, event: EventEnvelope) -> None:
         from .intrigue import is_intrigue_imprisoned
@@ -1116,6 +1245,120 @@ def _on_character_died(context: SimulationContext, event: EventEnvelope) -> None
     context.state.relations.replace_metadata(ended.relation_id, metadata)
 
 
+def _on_same_faction_combat(definitions: GameDefinitions):
+    def handler(context: SimulationContext, event: EventEnvelope) -> None:
+        actor_id = str(event.payload.get("attacker_id", ""))
+        target_id = str(event.payload.get("target_id", ""))
+        if (
+            actor_id != context.state.controlled_entity_id
+            or event.payload.get("objective") != "kill"
+            or event.payload.get("outcome") != "victory"
+        ):
+            return
+        actor_membership = _active_membership(context.state, actor_id)
+        target_membership = _active_membership(context.state, target_id)
+        if (
+            actor_membership is None
+            or target_membership is None
+            or actor_membership.target_id != target_membership.target_id
+        ):
+            return
+        faction_id = actor_membership.target_id
+        profile = context.state.entities.require(faction_id, FACTION_PROFILE)
+        world_id = str(profile["world_id"])
+        conflict = dict(definitions.systems.get("faction_conflict", {}))
+        thresholds = dict(conflict.get("control_realm", {}))
+        control_realm = int(thresholds.get(
+            world_id,
+            max(1, definitions.worlds[world_id].npc_realm_cap),
+        ))
+        actor_cultivation = context.state.entities.require(actor_id, CULTIVATION)
+        actor_rank = (
+            definitions.realm_index(str(actor_cultivation["realm_id"])),
+            int(actor_cultivation["layer"]),
+        )
+        living_ranks = []
+        for membership in context.state.relations.find(
+            target_id=faction_id, kind=MEMBERSHIP
+        ):
+            if not bool(context.state.entities.require(
+                membership.source_id, LIFE
+            ).get("alive")):
+                continue
+            cultivation = context.state.entities.require(
+                membership.source_id, CULTIVATION
+            )
+            living_ranks.append((
+                definitions.realm_index(str(cultivation["realm_id"])),
+                int(cultivation["layer"]),
+            ))
+        is_first = not living_ranks or actor_rank >= max(living_ranks)
+        governance = context.state.entities.require(
+            faction_id, FACTION_GOVERNANCE
+        )
+        warnings = list(map(str, governance.get("same_sect_kill_warnings", [])))
+        warning_key = f"same_sect_kill:{actor_id}"
+        result = "suppressed"
+        summary = "你位列宗门顺位第一，无人敢当面追究这次同门血案。"
+
+        def expel(reason: str, minimum: float, gain: float) -> None:
+            closed = context.state.relations.end(
+                actor_membership.relation_id,
+                ended_year=context.state.clock.year,
+            )
+            metadata = dict(closed.metadata)
+            metadata["end_reason"] = reason
+            context.state.relations.replace_metadata(
+                closed.relation_id, metadata
+            )
+            from .war import WANTED_STATE, _change_hostility
+
+            key = f"sect:{faction_id}"
+            wanted = context.state.entities.require(actor_id, WANTED_STATE)
+            current = float(dict(wanted.get("hostility", {})).get(key, 0.0))
+            _change_hostility(
+                context, actor_id, key, max(gain, minimum - current)
+            )
+
+        if actor_rank[0] < control_realm:
+            expel("same_faction_kill", 60.0, 45.0)
+            result = "expelled"
+            summary = "你残杀同门，被当场逐出宗门并列入全宗通缉。"
+        elif not is_first and warning_key not in warnings:
+            warnings.append(warning_key)
+            governance["same_sect_kill_warnings"] = warnings
+            context.state.entities.put(
+                faction_id, FACTION_GOVERNANCE, governance
+            )
+            story = context.state.entities.require(actor_id, "story.state")
+            if story.get("pending") is None and not story.get("queue"):
+                from .story import queue_story_event
+
+                queue_story_event(
+                    context, definitions, actor_id,
+                    "EVT_SECT_FIRST_WARNING_001",
+                    reason="same_faction_kill_warning",
+                    runtime={"faction_id": faction_id},
+                )
+            result = "warned"
+            summary = "宗门顺位第一的强者降下法旨，警告你下不为例。"
+        elif not is_first:
+            expel("repeated_same_faction_kill", 90.0, 55.0)
+            result = "hunted"
+            summary = "你无视警告再杀同门，宗门上下奉诛杀令追索你的性命。"
+        story = context.state.entities.require(actor_id, "story.state")
+        history = list(story.get("system_history", []))
+        history.append({
+            "kind": "same_faction_kill", "faction_id": faction_id,
+            "target_id": target_id, "result": result,
+            "summary": summary, "year": context.state.clock.year,
+        })
+        story["system_history"] = history[-80:]
+        context.state.entities.put(actor_id, "story.state", story)
+
+    return handler
+
+
 def _on_permanent_world_transition(context: SimulationContext, event: EventEnvelope) -> None:
     actor_id = str(event.payload["actor_id"])
     membership = _active_membership(context.state, actor_id)
@@ -1183,24 +1426,28 @@ def _on_temporary_world_transition(definitions: GameDefinitions):
             return
         faction_id, _ = candidate
         from .story import STORY_STATE, queue_story_event
+        profile = context.state.entities.require(faction_id, FACTION_PROFILE)
         queue_story_event(
             context, definitions, actor_id, "EVT_FOUNDER_RETURN_001",
             reason="founder_return",
+            runtime={
+                "faction_id": faction_id,
+                "sect_name": str(profile["name"]),
+            },
         )
         story = context.state.entities.require(actor_id, STORY_STATE)
         pending = story.get("pending")
         if isinstance(pending, dict) and pending.get("id") == "EVT_FOUNDER_RETURN_001":
             pending = dict(pending)
-            profile = context.state.entities.require(faction_id, FACTION_PROFILE)
-            pending["body"] = str(pending["body"]).replace("{sect_name}", str(profile["name"]))
-            pending["runtime"] = {"faction_id": faction_id}
             story["pending"] = pending
             context.state.entities.put(actor_id, STORY_STATE, story)
 
     return handler
 
 
-def register_faction_story_effects(registry: Any) -> None:
+def register_faction_story_effects(
+    registry: Any, definitions: GameDefinitions,
+) -> None:
     from .story import EffectOutcome
 
     def join(
@@ -1244,8 +1491,178 @@ def register_faction_story_effects(registry: Any) -> None:
         )
         return EffectOutcome("faction_control_restored", f"你重返{profile['name']}祖庭，门人奉还印玺，你重新执掌宗门大权。")
 
+    def defend_sect(
+        context: SimulationContext, actor_id: str, effect: Any,
+        pending: dict[str, Any],
+    ) -> EffectOutcome:
+        runtime = dict(pending.get("runtime", {}))
+        membership = _active_membership(context.state, actor_id)
+        faction_id = str(runtime.get(
+            "faction_id", membership.target_id if membership else ""
+        ))
+        profile = context.state.entities.get(faction_id, FACTION_PROFILE)
+        governance = context.state.entities.get(faction_id, FACTION_GOVERNANCE)
+        if (
+            membership is None or membership.target_id != faction_id
+            or profile is None or governance is None
+            or not bool(profile.get("active"))
+        ):
+            return EffectOutcome("sect_absent", "山门已经不复存在。")
+        mode = str(effect.payload.get("mode", "fight"))
+        success = False
+        detail = ""
+        if mode == "fight":
+            threshold = int(runtime.get(
+                "threshold_realm",
+                _governance_threshold(definitions, str(profile["world_id"])),
+            ))
+            enemy_realm_index = max(0, threshold - 1)
+            enemy_realm = definitions.realms[enemy_realm_index]
+            enemy_id = create_character(
+                context, name="来犯山门的敌修", age=max(18, threshold * 60),
+                gender="male", race=str(profile.get(
+                    "allegiance_race", "human"
+                )), spirit_root=(
+                    "none" if enemy_realm_index == 0 else "supreme_fire"
+                ), path="dao", realm_id=enemy_realm.id,
+                layer=enemy_realm.layers, world_id=str(profile["world_id"]),
+                lifespan=None,
+            )
+            context.state.entities.put(
+                enemy_id,
+                LOCATION,
+                dict(context.state.entities.require(actor_id, LOCATION)),
+            )
+            before = set(context.state.entities.with_component("combat.report"))
+            resolve_combat(
+                context, definitions, attacker_id=actor_id,
+                target_id=enemy_id, objective="duel",
+            )
+            report_id = next(iter(
+                set(context.state.entities.with_component("combat.report")) - before
+            ))
+            report = context.state.entities.require(report_id, "combat.report")
+            success = report["outcome"] == "victory"
+            detail = "你在山门前击退来犯修士" if success else "你未能正面压退来犯修士"
+            enemy_life = context.state.entities.require(enemy_id, LIFE)
+            enemy_life["alive"] = False
+            enemy_life["death_year"] = context.state.clock.year
+            enemy_life["death_reason"] = "护山战后离场"
+            context.state.entities.put(enemy_id, LIFE, enemy_life)
+        elif mode == "formation":
+            from .artifacts import FORMATION
+            from .combat import combat_snapshot
+
+            formation = context.state.entities.require(actor_id, FORMATION)
+            location = context.state.entities.require(actor_id, LOCATION)
+            arrays = [dict(row) for row in formation.get("ground_arrays", [])]
+            index = next((
+                index for index, row in enumerate(arrays)
+                if row.get("owner_kind") == "sect"
+                and row.get("world_id") == location.get("world_id")
+                and row.get("location_id") == location.get("location_id")
+                and float(row.get("durability", 0)) > 0
+            ), None)
+            if index is not None:
+                ground = arrays[index]
+                metrics = dict(dict(ground.get("profile", {})).get("metrics", {}))
+                formation_factor = 0.65 + sum(
+                    float(metrics.get(key, 0))
+                    for key in ("growth", "kill", "focus", "balance", "cycle", "change")
+                ) / 3
+                defense_power = float(combat_snapshot(
+                    context.state, definitions, actor_id
+                )["power"]) * formation_factor * float(
+                    ground.get("durability", 0)
+                ) / 100
+                threshold = int(runtime.get(
+                    "threshold_realm",
+                    _governance_threshold(definitions, str(profile["world_id"])),
+                ))
+                target_realm = definitions.realms[max(0, threshold - 1)]
+                target_id = create_character(
+                    context, name="阵外试压傀儡", age=18, gender="male",
+                    race="human", spirit_root=(
+                        "none" if threshold <= 1 else "supreme_fire"
+                    ), path="dao", realm_id=target_realm.id,
+                    layer=target_realm.layers,
+                    world_id=str(profile["world_id"]),
+                    lifespan=None,
+                )
+                required_power = float(combat_snapshot(
+                    context.state, definitions, target_id
+                )["power"]) * (0.72 + int(governance.get("pressure", 0)) * 0.12)
+                success = defense_power >= required_power
+                wear = min(25.0, 7.0 if success else 15.0)
+                ground["durability"] = round(max(
+                    0.0, float(ground.get("durability", 0)) - wear
+                ), 4)
+                arrays[index] = ground
+                formation["ground_arrays"] = arrays
+                context.state.entities.put(actor_id, FORMATION, formation)
+                target_life = context.state.entities.require(target_id, LIFE)
+                target_life["alive"] = False
+                context.state.entities.put(target_id, LIFE, target_life)
+                detail = (
+                    f"镇宗大阵以 {defense_power:.0f} 阵力抵御"
+                    f" {required_power:.0f} 来犯战力，完整度降至"
+                    f" {ground['durability']:.1f}%"
+                )
+            else:
+                detail = "此地没有以真实阵材布下的镇宗大阵"
+        elif mode == "appease":
+            from .economy import change_inventory_item, inventory_quantity
+
+            cost = 80 if str(profile["world_id"]) == "human" else 800
+            if inventory_quantity(
+                context.state, actor_id, "spirit_stone", spendable=True
+            ) >= cost:
+                change_inventory_item(
+                    context, definitions, actor_id, "spirit_stone", -cost,
+                    "faction_defense_appeasement",
+                )
+                success = True
+                detail = f"你支付了 {cost} 灵石请人调停"
+            else:
+                detail = f"可用灵石不足 {cost}"
+        elif mode == "abandon":
+            _dissolve_faction(context, faction_id, reason="founder_abandoned")
+            return EffectOutcome(
+                "sect_dissolved", "你撤下山门匾额，幸存门人各寻出路。"
+            )
+        else:
+            raise ValueError("未知护山方式")
+        if success:
+            metadata = dict(membership.metadata)
+            metadata["contribution"] = int(metadata.get("contribution", 0)) + 5
+            context.state.relations.replace_metadata(
+                membership.relation_id, metadata
+            )
+            return EffectOutcome(
+                "defended", f"{detail}；山门守住，宗门贡献 +5"
+            )
+        pressure = int(governance.get("pressure", 0)) + 1
+        governance["pressure"] = pressure
+        context.state.entities.put(faction_id, FACTION_GOVERNANCE, governance)
+        limit = int(dict(definitions.systems.get(
+            "player_faction", {}
+        )).get("pressure_limit", 3))
+        if pressure >= limit:
+            _dissolve_faction(
+                context, faction_id, reason="three_failed_defenses"
+            )
+            return EffectOutcome(
+                "sect_dissolved",
+                f"{detail}；这是第 {pressure} 次护山失败，宗门就此解散",
+            )
+        return EffectOutcome(
+            "defense_failed",
+            f"{detail}；护山失败累计 {pressure}/{limit}",
+        )
+
     registry.register("join_faction", join)
     registry.register("restore_faction_control", restore)
+    registry.register("sect_defense", defend_sect)
 
 
 def faction_invariants(definitions: GameDefinitions):
@@ -1314,8 +1731,12 @@ def register_faction_domain(bus: CommandBus, definitions: GameDefinitions) -> No
     bus.event_bus.register("core.game.created", _on_game_created(definitions))
     bus.event_bus.register("character.created", _on_character_created)
     bus.event_bus.register("character.died", _on_character_died)
+    bus.event_bus.register("combat.resolved", _on_same_faction_combat(definitions))
     bus.event_bus.register("core.time.advanced", _on_time_advanced(definitions))
     bus.event_bus.register("core.time.advanced", _advance_faction_npcs(definitions))
+    bus.event_bus.register(
+        "core.time.advanced", _maybe_player_faction_pressure(definitions)
+    )
     bus.event_bus.register(
         "story.effect.faction_contribution.changed", _on_story_contribution_changed
     )
@@ -1364,11 +1785,111 @@ def faction_view(
             "path": cultivation["path"],
         })
     diplomacy = state.entities.get(actor_id, DIPLOMACY_STATE) or {"relations": {}}
+    relations = dict(diplomacy.get("relations", {}))
+    actor_cultivation = state.entities.require(actor_id, CULTIVATION)
+    actor_rank = (
+        definitions.realm_index(str(actor_cultivation["realm_id"])),
+        int(actor_cultivation["layer"]),
+    )
+    runtime = state.entities.get(actor_id, "core.action_runtime") or {}
+    current_unit = max(0, int(runtime.get("next_sequence", 1)) - 1)
+    status_names = {
+        "neutral": "中立", "war": "战争", "alliance": "同盟",
+        "truce": "停战", "vassal": "依附",
+    }
+    diplomacy_rows = []
+    for other_id in state.entities.with_component(FACTION_PROFILE):
+        if other_id == membership.target_id:
+            continue
+        other_profile = state.entities.require(other_id, FACTION_PROFILE)
+        if (
+            not bool(other_profile.get("active"))
+            or other_profile.get("world_id") != profile.get("world_id")
+        ):
+            continue
+        relation = dict(relations.get(
+            _diplomacy_key("faction", membership.target_id, other_id),
+            {},
+        ))
+        status = str(relation.get("status", "neutral"))
+        members = []
+        for other_edge in state.relations.find(
+            target_id=other_id, kind=MEMBERSHIP
+        ):
+            member_id = other_edge.source_id
+            member_life = state.entities.require(member_id, LIFE)
+            member_location = state.entities.require(member_id, LOCATION)
+            if (
+                not bool(member_life.get("alive"))
+                or member_location.get("world_id") != profile.get("world_id")
+            ):
+                continue
+            member_cultivation = state.entities.require(member_id, CULTIVATION)
+            member_realm = definitions.realm(
+                str(member_cultivation["realm_id"])
+            )
+            snapshot = combat_snapshot(state, definitions, member_id)
+            members.append({
+                "id": member_id,
+                "name": state.entities.require(member_id, IDENTITY)["name"],
+                "realm_name": (
+                    member_realm.name
+                    if member_realm.id == "mortal"
+                    else f"{member_realm.name}·{int(member_cultivation['layer'])}层"
+                ),
+                "rank": (
+                    definitions.realm_index(member_realm.id),
+                    int(member_cultivation["layer"]),
+                ),
+                "combat_power": float(snapshot["power"]),
+            })
+        members.sort(
+            key=lambda row: (-row["combat_power"], -row["rank"][0], row["name"])
+        )
+        transferable = bool(
+            status == "vassal"
+            and relation.get("overlord") == membership.target_id
+            and relation.get("subject") == other_id
+        )
+        diplomacy_rows.append({
+            "target_id": other_id,
+            "target_name": other_profile["name"],
+            "status": status,
+            "status_name": status_names.get(status, status),
+            "affinity": round(float(relation.get("affinity", 0.0)), 1),
+            "overlord": relation.get("overlord"),
+            "subject": relation.get("subject"),
+            "since_age": relation.get("since_year"),
+            "last_vote": relation.get("last_vote"),
+            "truce_units_remaining": max(
+                0,
+                max(
+                    int(relation.get("truce_until_unit", 0)),
+                    int(relation.get("war_truce_until_unit", 0)),
+                ) - current_unit,
+            ),
+            "living_count": len(members),
+            "combined_power": round(sum(
+                row["combat_power"] for row in members
+            ), 1),
+            "leaders": [
+                f"{row['name']}（{row['realm_name']}）" for row in members[:3]
+            ],
+            "recent_events": [],
+            "transfer_candidates": [
+                {
+                    "id": row["id"], "name": row["name"],
+                    "realm_name": row["realm_name"],
+                }
+                for row in members if transferable and row["rank"] <= actor_rank
+            ],
+        })
     return {
         "id": membership.target_id,
         "external_id": profile.get("external_id"),
         "name": profile["name"],
         "world_id": profile["world_id"],
+        "allegiance_race": profile.get("allegiance_race"),
         "role": membership.metadata["role"],
         "contribution": int(membership.metadata["contribution"]),
         "controller_id": governance.get("controller_id"),
@@ -1379,7 +1900,7 @@ def faction_view(
         "designated_successor_id": governance.get("designated_successor_id"),
         "last_ascension_handover": governance.get("last_ascension_handover"),
         "roster": roster,
-        "diplomacy": list(dict(diplomacy.get("relations", {})).values()),
+        "diplomacy": diplomacy_rows,
         "reward_preference": membership.metadata.get("reward_preference"),
         "reward_options": {
             reward_id: {
@@ -1430,4 +1951,11 @@ def governance_view(
     return {
         "relations": list(dict(component.get("relations", {})).values()),
         "race_support": support,
+        "diplomacy_statuses": {
+            "neutral": "中立",
+            "alliance": "同盟",
+            "war": "战争",
+            "truce": "停战",
+            "vassal": "依附",
+        },
     }

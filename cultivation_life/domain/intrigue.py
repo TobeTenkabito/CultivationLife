@@ -1007,7 +1007,7 @@ def _recruitment_handler(definitions: GameDefinitions):
                     context,
                     character_id=candidate_id,
                     faction_id=power_id,
-                    role="disciple_recruitment",
+                    role="member",
                 )
             governance["pending_recruitment"] = None
             context.state.entities.put(power_id, INTRIGUE_GOVERNANCE, governance)
@@ -1522,6 +1522,7 @@ def intrigue_view(
     preferences = state.entities.get(actor_id, PREFERENCES) or {}
     debug = bool(preferences.get("debug_world_news"))
     sections: list[dict[str, Any]] = []
+    recent_resolutions: list[dict[str, Any]] = []
     pending_invitation = None
     for power_id in state.entities.with_component(INTRIGUE_GOVERNANCE):
         invitation = state.entities.require(
@@ -1538,6 +1539,7 @@ def intrigue_view(
         pending_invitation = {
             **invitation, "power_id": power_id, "kind": kind,
             "power_name": profile.get("name", power_id),
+            "faction_name": profile.get("name", power_id),
         }
         break
     for kind in ("sect", "family"):
@@ -1550,6 +1552,9 @@ def intrigue_view(
             continue
         governance = state.entities.require(power_id, INTRIGUE_GOVERNANCE)
         positions = dict(governance.get("positions", {}))
+        control_authority = bool(
+            same_world and _controller_id(state, kind, power_id) == actor_id
+        )
         member_rows = state.relations.find(
             target_id=power_id, kind=_membership_kind(kind)
         )
@@ -1558,17 +1563,32 @@ def intrigue_view(
             if not state.entities.exists(edge.source_id):
                 continue
             cultivation = state.entities.require(edge.source_id, CULTIVATION)
+            realm = definitions.realm(str(cultivation["realm_id"]))
             held = next((key for key, value in positions.items() if value == edge.source_id), None)
             members.append({
                 **character_view(state, edge.source_id),
                 "realm_id": cultivation["realm_id"],
                 "realm_index": definitions.realm_index(str(cultivation["realm_id"])),
                 "layer": int(cultivation["layer"]),
+                "realm_name": (
+                    realm.name if realm.id == "mortal"
+                    else f"{realm.name}·{int(cultivation['layer'])}层"
+                ),
                 "position_id": held,
-                "position": _positions(definitions, kind).get(held or "", {}).get("name"),
+                "position": _positions(definitions, kind).get(
+                    held or "", {}
+                ).get("name", "普通成员"),
                 "imprisoned": is_intrigue_imprisoned(state, edge.source_id),
                 "contribution": int(dict(governance.get("member_contribution", {})).get(edge.source_id, 0)),
                 "affinity": relationship_affinity(state, edge.source_id, actor_id),
+                "primary": "沉稳",
+                "secondary": "",
+                "governance_style": STYLE_LABELS.get(
+                    str(governance.get("policy", "balance")), "平衡型"
+                ),
+                "decision_authority": _decision_authority(
+                    state, definitions, kind, power_id, edge.source_id
+                ),
             })
         prison = []
         for edge in state.relations.find(source_id=power_id, kind=INTRIGUE_PRISONER):
@@ -1586,6 +1606,7 @@ def intrigue_view(
             guests.append({
                 **character_view(state, edge.target_id),
                 "guest_id": edge.target_id,
+                "npc_id": edge.target_id,
                 "defense_required": bool(edge.metadata.get("defense_required", True)),
                 "offense_opt_in": bool(edge.metadata.get("offense_opt_in", False)),
                 "affinity": relationship_affinity(state, edge.target_id, actor_id),
@@ -1593,31 +1614,204 @@ def intrigue_view(
         pending = governance.get("pending_recruitment")
         pending_public = None
         if isinstance(pending, dict):
+            candidate_rows = []
+            for candidate_id in map(str, pending.get("candidate_ids", [])):
+                if not state.entities.exists(candidate_id):
+                    continue
+                candidate = character_view(state, candidate_id)
+                candidate_cultivation = state.entities.require(
+                    candidate_id, CULTIVATION
+                )
+                realm = definitions.realm(str(candidate_cultivation["realm_id"]))
+                root = definitions.roots[str(candidate_cultivation["spirit_root"])]
+                candidate_rows.append({
+                    **candidate,
+                    "realm_index": definitions.realm_index(realm.id),
+                    "realm_name": (
+                        realm.name if realm.id == "mortal"
+                        else f"{realm.name}·{int(candidate_cultivation['layer'])}层"
+                    ),
+                    "spirit_root": root.id,
+                    "spirit_root_name": root.name,
+                    "path": candidate_cultivation["path"],
+                    "path_name": definitions.paths.get(
+                        str(candidate_cultivation["path"]),
+                        str(candidate_cultivation["path"]),
+                    ),
+                    "gender_name": "男" if candidate["gender"] == "male" else "女",
+                    "combat_power": float(combat_snapshot(
+                        state, definitions, candidate_id
+                    )["power"]),
+                    "combat_ratio": float(dict(pending.get(
+                        "combat_ratios", {}
+                    )).get(candidate_id, 1.0)),
+                })
+            filters = dict(pending.get("filters", {}))
             pending_public = {
                 **pending,
-                "candidates": [
-                    {
-                        **character_view(state, candidate_id),
-                        "cultivation": dict(state.entities.require(candidate_id, CULTIVATION)),
-                        "combat_ratio": float(dict(pending.get(
-                            "combat_ratios", {}
-                        )).get(candidate_id, 1.0)),
-                    }
-                    for candidate_id in map(str, pending.get("candidate_ids", []))
-                    if state.entities.exists(candidate_id)
+                "filter_summary": " · ".join((
+                    "天灵根" if filters.get("spirit_root") == "heavenly" else "灵根不限",
+                    (
+                        definitions.realm(str(filters["realm_id"])).name
+                        if filters.get("realm_id") else "修为不限"
+                    ),
+                    definitions.paths.get(str(filters.get("path")), "功法不限"),
+                    str(dict(dict(definitions.systems.get(
+                        "intrigue_dlc", {}
+                    )).get("disciple_recruitment", {})).get(
+                        "combat_filters", {}
+                    ).get(str(filters.get("combat", "any")), {}).get(
+                        "name", "战力不限"
+                    )),
+                    {"male": "男修", "female": "女修"}.get(
+                        str(filters.get("gender")), "性别不限"
+                    ),
+                )),
+                "message": "请选择本轮正式录取的弟子。",
+                "candidates": candidate_rows,
+            }
+        guest_candidates = []
+        if control_authority:
+            member_ids = {
+                edge.source_id for edge in state.relations.find(
+                    target_id=power_id, kind=_membership_kind(kind)
+                )
+            }
+            guest_ids = {
+                edge.target_id for edge in state.relations.find(
+                    source_id=power_id, kind=INTRIGUE_GUEST
+                )
+            }
+            friend_ids = {
+                edge.target_id if edge.source_id == actor_id else edge.source_id
+                for edge in state.relations.involving(actor_id, kind="friend")
+            }
+            for candidate_id in state.entities.with_component(IDENTITY):
+                if candidate_id == actor_id or candidate_id in member_ids | guest_ids:
+                    continue
+                life = state.entities.require(candidate_id, LIFE)
+                location = state.entities.require(candidate_id, LOCATION)
+                if not bool(life.get("alive")) or location.get("world_id") != profile.get("world_id"):
+                    continue
+                affinity = relationship_affinity(state, candidate_id, actor_id)
+                if affinity < 30 and candidate_id not in friend_ids:
+                    continue
+                candidate_cultivation = state.entities.require(
+                    candidate_id, CULTIVATION
+                )
+                guest_candidates.append({
+                    **character_view(state, candidate_id),
+                    "affinity": round(affinity, 1),
+                    "realm_index": definitions.realm_index(str(
+                        candidate_cultivation["realm_id"]
+                    )),
+                    "relationship": (
+                        "道友" if candidate_id in friend_ids else "故交"
+                    ),
+                })
+            guest_candidates.sort(key=lambda row: (
+                -float(row["affinity"]), -int(row["realm_index"]), str(row["name"])
+            ))
+        specs = _positions(definitions, kind)
+        resolution_targets = [
+            {
+                "id": target_id,
+                "name": state.entities.require(target_id, (
+                    FACTION_PROFILE if kind == "sect" else FAMILY_PROFILE
+                )).get("name", target_id),
+            }
+            for target_id in state.entities.with_component(
+                FACTION_PROFILE if kind == "sect" else FAMILY_PROFILE
+            )
+            if target_id != power_id
+            and bool(state.entities.require(target_id, (
+                FACTION_PROFILE if kind == "sect" else FAMILY_PROFILE
+            )).get("active", True))
+            and state.entities.require(target_id, (
+                FACTION_PROFILE if kind == "sect" else FAMILY_PROFILE
+            )).get("world_id") == actor_world
+        ]
+        from .war import WAR_PROFILE
+
+        war_targets = [
+            {
+                "id": war_id,
+                "name": (
+                    f"{war.get('attacker_id', '未知')} 对 "
+                    f"{war.get('defender_id', '未知')}"
+                ),
+            }
+            for war_id in state.entities.with_component(WAR_PROFILE)
+            for war in [state.entities.require(war_id, WAR_PROFILE)]
+            if war.get("status") in {"active", "peace_ready"}
+        ]
+        recruitment_config = dict(dict(definitions.systems.get(
+            "intrigue_dlc", {}
+        )).get("disciple_recruitment", {}))
+        disciple_recruitment = None
+        if kind == "sect":
+            disciple_recruitment = {
+                "available": same_world and _decision_authority(
+                    state, definitions, kind, power_id, actor_id
+                ),
+                "max_candidates": min(5, int(
+                    recruitment_config.get("max_candidates", 5)
+                )),
+                "pending": pending_public,
+                "spirit_root_options": [
+                    {"id": "any", "name": "不筛选"},
+                    {"id": "heavenly", "name": "天灵根"},
+                ],
+                "realm_options": [
+                    {"id": "any", "name": "不筛选"},
+                    *[
+                        {"id": str(index), "name": realm.name}
+                        for index, realm in enumerate(definitions.realms)
+                        if index < _decision_threshold(definitions, "sect")
+                    ],
+                ],
+                "path_options": [
+                    {"id": "any", "name": "不筛选"},
+                    *[
+                        {"id": path_id, "name": path_name}
+                        for path_id, path_name in definitions.paths.items()
+                    ],
+                ],
+                "combat_options": [
+                    {"id": key, "name": str(value.get("name", key))}
+                    for key, value in dict(recruitment_config.get(
+                        "combat_filters", {}
+                    )).items()
+                ],
+                "gender_options": [
+                    {"id": "any", "name": "不筛选"},
+                    {"id": "male", "name": "男"},
+                    {"id": "female", "name": "女"},
                 ],
             }
-        specs = _positions(definitions, kind)
+        section_resolutions = list(governance.get("resolutions", []))[-20:]
+        recent_resolutions.extend(section_resolutions)
         sections.append({
             "kind": kind,
             "id": power_id,
             "name": profile["name"],
             "same_world": same_world,
-            "control_authority": same_world and _controller_id(state, kind, power_id) == actor_id,
+            "control_authority": control_authority,
+            "controller_name": (
+                state.entities.require(
+                    str(_controller_id(state, kind, power_id)), IDENTITY
+                ).get("name", "无")
+                if _controller_id(state, kind, power_id)
+                and state.entities.exists(str(_controller_id(state, kind, power_id)))
+                else "无"
+            ),
             "unrest": round(float(governance.get("unrest", 0)), 2),
             "fear": round(float(governance.get("fear", 0)), 2),
             "resources": int(governance.get("resources", 0)),
-            "policy": str(governance.get("policy", "balance")),
+            "policy_id": str(governance.get("policy", "balance")),
+            "policy": STYLE_LABELS.get(
+                str(governance.get("policy", "balance")), "平衡型"
+            ),
             "decision_threshold": _decision_threshold(definitions, kind),
             "decision_authority": same_world and _decision_authority(
                 state, definitions, kind, power_id, actor_id
@@ -1632,13 +1826,25 @@ def intrigue_view(
                         if positions.get(position_id) and state.entities.exists(str(positions[position_id]))
                         else None
                     ),
+                    "holder_name": (
+                        character_view(
+                            state, str(positions[position_id])
+                        )["name"]
+                        if positions.get(position_id)
+                        and state.entities.exists(str(positions[position_id]))
+                        else "空缺"
+                    ),
                 }
                 for position_id, spec in specs.items()
             ],
             "members": members,
             "prison": prison,
             "guests": guests,
-            "resolutions": list(governance.get("resolutions", []))[-20:],
+            "guest_candidates": guest_candidates[:16],
+            "resolutions": section_resolutions,
+            "resolution_targets": resolution_targets,
+            "war_targets": war_targets,
+            "disciple_recruitment": disciple_recruitment,
             "pending_recruitment": pending_public,
             "personnel_history": list(governance.get("personnel_history", []))[-20:],
         })
@@ -1654,14 +1860,60 @@ def intrigue_view(
         "decision_authority": _decision_authority(
             state, definitions, "race", race_id, actor_id
         ),
+        "control_authority": False,
+        "controller_name": "无",
+        "policy": "平衡型",
+        "policy_id": "balance",
+        "positionless_race": True,
+        "positions": [],
+        "members": [],
+        "guests": [],
+        "guest_candidates": [],
+        "resolution_targets": [
+            {
+                "id": other_id,
+                "name": dict(other).get("name", other_id),
+            }
+            for other_id, other in definitions.races.items()
+            if other_id != race_id and actor_world in list(dict(other).get("worlds", []))
+        ],
+        "war_targets": [],
         "resolutions": list(race_diplomacy.get("intrigue_resolutions", []))[-20:],
     })
+    player_guest_roles = []
+    for power_id in state.entities.with_component(INTRIGUE_GOVERNANCE):
+        edge = next(iter(state.relations.find(
+            source_id=power_id, target_id=actor_id, kind=INTRIGUE_GUEST
+        )), None)
+        if edge is None:
+            continue
+        kind = _power_kind(state, power_id)
+        if kind is None:
+            continue
+        profile = _profile(state, kind, power_id)
+        if profile.get("world_id") != actor_world and not debug:
+            continue
+        player_guest_roles.append({
+            "kind": kind,
+            "faction_id": power_id,
+            "faction_name": profile.get("name", power_id),
+            "title": "供奉" if kind == "family" else "客卿长老",
+        })
     return {
         "enabled": True,
         "name": "明争暗斗：合纵连横",
         "sections": sections,
         "resolution_types": dict(RESOLUTION_LABELS),
+        "styles": dict(STYLE_LABELS),
         "policy_types": dict(STYLE_LABELS),
+        "available_worlds": [
+            {"id": world.id, "name": world.name}
+            for world in definitions.worlds.values() if world.enabled
+        ],
+        "resolutions": sorted(
+            recent_resolutions, key=lambda row: int(row.get("year", 0)), reverse=True
+        )[:16],
+        "player_guest_roles": player_guest_roles,
         "pending_guest_invitation": pending_invitation,
     }
 
