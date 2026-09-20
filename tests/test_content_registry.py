@@ -36,7 +36,8 @@ class ContentRegistryTests(unittest.TestCase):
             } <= set(registry.faction_definitions),
         )
         self.assertIn("myriad_beast_court", registry.faction_definitions)
-        self.assertEqual([entry["enabled"] for entry in registry.world_systems["quick_start_presets"]], [True] * 9)
+        self.assertGreaterEqual(len(registry.world_systems["quick_start_presets"]), 9)
+        self.assertTrue(all(entry["enabled"] for entry in registry.world_systems["quick_start_presets"]))
         self.assertEqual(registry.root_definitions["pseudo_all"]["efficiency"], 0.7)
         self.assertNotIn("qi", registry.world_systems["stage_lifespan_bonus"])
         self.assertEqual(registry.world_systems["stage_lifespan_bonus"]["foundation"]["middle"], [12, 20])

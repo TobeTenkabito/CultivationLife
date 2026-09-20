@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "techniques": [
+    {"id":"TECH_CONFUCIAN_PRIMER","name":"蒙学养气篇","path":"confucian","element":"neutral","grade":1,"level":1,"opportunity_bonus":0.09,"hp_bonus":0.06,"mp_bonus":0.10,"combat_bonus":16,"karma_multiplier":0.96},
+    {"id":"TECH_CONFUCIAN_RITES","name":"礼乐正气诀","path":"confucian","element":"neutral","grade":1,"level":1,"opportunity_bonus":0.08,"hp_bonus":0.08,"mp_bonus":0.09,"combat_bonus":18,"karma_multiplier":0.94},
+    {"id":"TECH_CONFUCIAN_SPRING_AUTUMN","name":"春秋微言章","path":"confucian","element":"neutral","grade":2,"level":1,"opportunity_bonus":0.16,"hp_bonus":0.12,"mp_bonus":0.18,"combat_bonus":52,"karma_multiplier":0.94},
+    {"id":"TECH_CONFUCIAN_CLASSICS","name":"五经通义","path":"confucian","element":"neutral","grade":2,"level":1,"opportunity_bonus":0.17,"hp_bonus":0.14,"mp_bonus":0.16,"combat_bonus":48,"karma_multiplier":0.93},
+    {"id":"TECH_CONFUCIAN_RECTIFY_HEART","name":"正心诚意经","path":"confucian","element":"neutral","grade":3,"level":1,"opportunity_bonus":0.23,"hp_bonus":0.20,"mp_bonus":0.26,"combat_bonus":150,"karma_multiplier":0.92},
+    {"id":"TECH_CONFUCIAN_VAST_QI","name":"浩然正气歌","path":"confucian","element":"yang","grade":3,"level":1,"opportunity_bonus":0.22,"hp_bonus":0.24,"mp_bonus":0.20,"combat_bonus":185,"karma_multiplier":0.92},
+    {"id":"TECH_CONFUCIAN_HEART_MIND","name":"知行合一录","path":"confucian","element":"neutral","grade":3,"level":1,"opportunity_bonus":0.25,"hp_bonus":0.18,"mp_bonus":0.28,"combat_bonus":165,"karma_multiplier":0.91},
+    {"id":"TECH_CONFUCIAN_HEAVEN_MAN","name":"天人策论","path":"confucian","element":"neutral","grade":4,"level":1,"opportunity_bonus":0.32,"hp_bonus":0.27,"mp_bonus":0.36,"combat_bonus":3500,"karma_multiplier":0.90},
+    {"id":"TECH_CONFUCIAN_GREAT_LEARNING","name":"大学明德篇","path":"confucian","element":"neutral","grade":4,"level":1,"opportunity_bonus":0.35,"hp_bonus":0.31,"mp_bonus":0.34,"combat_bonus":3900,"karma_multiplier":0.90},
+    {"id":"TECH_CONFUCIAN_PEOPLE_ROOT","name":"民本王道经","path":"confucian","element":"earth","grade":4,"level":1,"opportunity_bonus":0.30,"hp_bonus":0.38,"mp_bonus":0.29,"combat_bonus":4200,"karma_multiplier":0.89},
+    {"id":"TECH_CONFUCIAN_EVIDENTIAL","name":"乾嘉证义书","path":"confucian","element":"neutral","grade":4,"level":1,"opportunity_bonus":0.37,"hp_bonus":0.25,"mp_bonus":0.39,"combat_bonus":3200,"karma_multiplier":0.90}
+  ]
+}

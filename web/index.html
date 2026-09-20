@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260916-4">
-  <link rel="stylesheet" href="/panels.css?v=20260916-6">
+  <link rel="stylesheet" href="/panels.css?v=20260920-4">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -327,8 +327,16 @@
             </section>
           </div>
           <section><h3>阵材库</h3><p class="section-note">可拖入九宫，也可直接使用格内选择框；“占用中”的真实实例已从炼器、出售与其他阵法中移出。</p><div id="formation-material-library" class="formation-material-library"></div></section>
-          <section class="formation-ground-section"><h3>镇地阵域</h3><p class="section-note">把当前随身阵的真实阵基永久留在所在地域。私阵可在当地斗法时自动接管；护山阵进入宗门防守与离屏战争。完整度跨战斗保存，必须使用本界修阵资源恢复。</p><div class="formation-ground-actions"><button id="formation-ground-personal" type="button">镇为此地私阵</button><button id="formation-ground-sect" type="button">镇为宗门护山阵</button></div><div id="formation-repair-supplies" class="formation-repair-supplies"></div><div id="formation-ground-list" class="formation-ground-list"></div></section>
+          <section class="formation-ground-section"><h3>镇地阵域</h3><p class="section-note">把当前随身阵的真实阵基永久留在所在地域。满耐久阵地阵至少提供同阶标准战力的 150%，最高按阵势达到 210%（硬上限 220%）；受损后随耐久衰减。私阵可在当地斗法时自动接管，护山阵进入宗门防守与离屏战争。</p><div class="formation-ground-actions"><button id="formation-ground-personal" type="button">镇为此地私阵</button><button id="formation-ground-sect" type="button">镇为宗门护山阵</button></div><div id="formation-repair-supplies" class="formation-repair-supplies"></div><div id="formation-ground-list" class="formation-ground-list"></div></section>
           <section><h3>阵法预设</h3><p class="section-note">预设只保存位置、材料类型与名称；启阵时重新绑定你实际拥有的实例。</p><div id="formation-loadout-list" class="formation-loadout-list"></div></section>
+        </article>
+        <article id="sage-card" class="paper utility-panel sage-panel hidden" role="dialog" aria-modal="false" aria-label="圣人教化">
+          <div class="section-title"><div><p class="eyebrow">THE WAY OF THE SAGE</p><h2>圣人教化</h2></div><div class="panel-heading"><span id="sage-heading"></span><button id="sage-toggle" type="button">关闭</button></div></div>
+          <p id="sage-note" class="muted"></p>
+          <section id="sage-membership"></section>
+          <section><h3>本界学说</h3><div id="sage-doctrine-list" class="sage-doctrine-list"></div></section>
+          <section id="sage-founding" class="sage-founding"><div class="sage-subheading"><div><p class="eyebrow">FOURFOLD DOCTRINE</p><h3>开宗立说</h3></div><small>四层主张的效果直接相加，所选先贤再按相性提供完整或折半加成。</small></div><div class="sage-combo-grid"><label><span>经学取向</span><select id="sage-classic"></select><small id="sage-classic-detail"></small></label><label><span>义理根基</span><select id="sage-philosophy"></select><small id="sage-philosophy-detail"></small></label><label><span>实践路径</span><select id="sage-practice"></select><small id="sage-practice-detail"></small></label><label><span>经文传统</span><select id="sage-script"></select><small id="sage-script-detail"></small></label></div><div id="sage-founding-preview" class="sage-effect-summary" aria-live="polite"></div><div class="sage-founding-submit"><label>学说名<input id="sage-doctrine-name" maxlength="12" placeholder="自定学说名"></label><button id="sage-found" type="button">立此一家之言</button></div></section>
+          <section><div class="sage-subheading"><div><p class="eyebrow">SAGE PATRONAGE</p><h3>先贤祭祀</h3></div><small>相性命中时获得完整效果，否则只生效一半；当前奉祀与实际生效值会明确标出。</small></div><div id="sage-worship-list" class="sage-worship-list"></div></section>
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
@@ -347,7 +355,7 @@
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
-        <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden"><span>脉</span><small>血脉</small></button>
+        <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
         <button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
         <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
         <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
@@ -363,6 +371,7 @@
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
         <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
+        <button type="button" data-panel-target="sage" title="圣人教化" class="hidden sage-dock-button"><span>教</span><small>教化</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
         <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
@@ -387,7 +396,7 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260916-2"></script>
-  <script src="/app.js?v=20260920-1"></script>
+  <script src="/ui-panels.js?v=20260920-3"></script>
+  <script src="/app.js?v=20260920-4"></script>
 </body>
 </html>

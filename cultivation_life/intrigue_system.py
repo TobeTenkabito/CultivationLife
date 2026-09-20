@@ -198,11 +198,81 @@ class IntrigueSystemMixin:
                         record["positions"][position_id] = candidate.id
                         claimed.add(candidate.id)
             record["positions_initialized"] = True
+        self._intrigue_auto_appoint_player(game, kind, faction_id, record, members)
         if controller and controller != PLAYER_ID:
             ruler = next((npc for npc in members if npc.id == controller), None)
             if ruler:
                 record["policy"] = self._intrigue_governance_style(game, ruler)
         return record
+
+    def _intrigue_auto_appoint_player(
+        self, game: GameState, kind: str, faction_id: str,
+        record: dict[str, Any], members: list[SectNpc],
+    ) -> None:
+        """Let cultivation order, rather than voting rights, drive ordinary offices.
+
+        The controller still occupies the first (leader) office.  Remaining
+        offices follow the faction's cultivation order, while guest offices
+        remain reserved for external retainers.  This makes a powerful member
+        eligible for office even when their realm is below the independent
+        decision-authority threshold.
+        """
+        if kind not in {"sect", "family"}:
+            return
+        positions = record.setdefault("positions", {})
+        specs = self._intrigue_position_specs(kind)
+        office_ids = [
+            position_id for position_id in specs
+            if position_id not in {"leader", "family_head", "guest_elder", "guest_retainer"}
+        ]
+        existing = next((position_id for position_id in office_ids if positions.get(position_id) == PLAYER_ID), None)
+        player_is_member = self._intrigue_player_faction_id(game, kind) == faction_id and game.player.alive
+        entity = self._intrigue_entity(game, kind, faction_id)
+        player_is_local = not entity or entity.world == game.player.world
+        if not player_is_member or not player_is_local or record.get("controller_id") == PLAYER_ID:
+            if existing:
+                positions[existing] = None
+            record["player_auto_office"] = None
+            return
+
+        player_realm, player_layer = self._actual_player_realm(game.player)
+        order = [
+            (PLAYER_ID, player_realm, player_layer, self._player_intrinsic_combat_power(game.player)),
+            *[
+                (npc.id, npc.realm_index, npc.layer, expected_combat_power(npc.realm_index, npc.layer) * npc.combat_factor)
+                for npc in members if npc.alive and not self._intrigue_is_imprisoned(game, npc.id)
+            ],
+        ]
+        order.sort(key=lambda row: (-row[1], -row[2], -row[3], row[0]))
+        player_rank = next((index + 1 for index, row in enumerate(order) if row[0] == PLAYER_ID), len(order) + 1)
+        rank_limit = max(1, int(intrigue_rules().get("player_office_rank_limit", 7)))
+        desired: str | None = None
+        if player_rank <= rank_limit and office_ids:
+            start = max(0, player_rank - 2)
+            candidates = office_ids[start:] + office_ids[:start]
+            rank_by_id = {row[0]: index + 1 for index, row in enumerate(order)}
+            for position_id in candidates:
+                if player_realm < int(specs[position_id].get("minimum_realm", 0)):
+                    continue
+                holder_id = positions.get(position_id)
+                if not holder_id or holder_id == PLAYER_ID or rank_by_id.get(str(holder_id), 10**6) > player_rank:
+                    desired = position_id
+                    break
+
+        previous = str(record.get("player_auto_office") or "") or None
+        if existing and existing != desired:
+            positions[existing] = None
+        if desired:
+            positions[desired] = PLAYER_ID
+        record["player_auto_office"] = desired
+        record["player_power_rank"] = player_rank
+        if desired and desired != previous:
+            game.history.append(HistoryRecord(
+                "SYS_INTRIGUE_OFFICE_GRANTED", 1, game.player.age, "位列前席", desired, "appointed",
+                f"你在{self._intrigue_faction_name(game, kind, faction_id)}修为顺位第{player_rank}，获授{specs[desired].get('name', desired)}。",
+                {"kind": kind, "faction_id": faction_id, "position_id": desired, "power_rank": player_rank},
+                ["intrigue", "faction", "office"],
+            ))
 
     def _intrigue_is_imprisoned(self, game: GameState, npc_id: str) -> bool:
         if not self._intrigue_enabled():
@@ -500,6 +570,14 @@ class IntrigueSystemMixin:
             members = [self._intrigue_public_member(game, npc, record) for npc in self._intrigue_members(game, kind, faction_id) if npc.alive]
             if kind == "race" and self._intrigue_has_decision_authority(game, kind, faction_id):
                 player_realm, player_layer = self._actual_player_realm(game.player)
+                player_position = next(
+                    (position_id for position_id, holder_id in record.get("positions", {}).items() if holder_id == PLAYER_ID),
+                    None,
+                )
+                player_position_name = (
+                    self._intrigue_position_specs(kind).get(player_position, {}).get("name")
+                    if player_position else None
+                )
                 members.append({
                     "id": PLAYER_ID, "name": game.player.name, "realm_index": player_realm,
                     "realm_name": (
@@ -507,11 +585,12 @@ class IntrigueSystemMixin:
                         if player_realm else REALMS[0].name
                     ),
                     "affinity": None, "attitude": "本人", "primary": "玩家本人",
-                    "secondary": "", "governance_style": "", "position_id": None,
-                    "position": "种族议事成员", "decision_authority": True,
+                    "secondary": "", "governance_style": "", "position_id": player_position,
+                    "position": player_position_name or ("种族议事成员" if kind == "race" else "普通成员"),
+                    "decision_authority": True,
                     "imprisoned": False, "contribution": 0, "is_player": True,
                 })
-            members.sort(key=lambda row: (-row["realm_index"], row["name"]))
+            members.sort(key=lambda row: (-row["realm_index"], -int(row.get("layer", 0)), row["name"]))
             positions = []
             for position_id, spec in self._intrigue_position_specs(kind).items():
                 holder_id = record.get("positions", {}).get(position_id)
@@ -564,6 +643,8 @@ class IntrigueSystemMixin:
                 "policy": STYLE_LABELS.get(record.get("policy"), "平衡型"), "policy_id": record.get("policy", "balance"),
                 "unrest": round(float(record.get("unrest", 0)), 1), "fear": round(float(record.get("fear", 0)), 1),
                 "positions": positions, "members": members, "guests": guests,
+                "player_power_rank": record.get("player_power_rank"),
+                "player_office_id": record.get("player_auto_office"),
                 "guest_candidates": candidates[:16], "prison": copy.deepcopy(record.get("prison", [])),
                 "positionless_race": kind == "race",
                 "resolution_targets": (
@@ -1161,6 +1242,13 @@ class IntrigueSystemMixin:
         if not self._intrigue_enabled():
             return []
         state = self._intrigue_state(game)
+        # Re-evaluate the player's cultivation-order office every action unit,
+        # so appointments and later promotions survive even if the panel was
+        # never opened before advancing time.
+        for kind in ("sect", "family"):
+            faction_id = self._intrigue_player_faction_id(game, kind)
+            if faction_id:
+                self._ensure_intrigue_faction(game, kind, faction_id)
         # Sentences share the existing action-unit clock and do not scan NPC pairs.
         for record in state.get("factions", {}).values():
             remaining = []

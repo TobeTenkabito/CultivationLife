@@ -3,6 +3,7 @@
   "systems": {
     "intrigue_dlc": {
       "enabled": true,
+      "player_office_rank_limit": 7,
       "decision_thresholds": {
         "sect": 4,
         "family": 3,

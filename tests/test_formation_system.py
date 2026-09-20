@@ -278,7 +278,8 @@ class FormationIntegrationTests(unittest.TestCase):
         basics = [row for row in definitions if row["id"] in basic_ids]
         self.assertEqual(len(basics), len(worlds))
         self.assertTrue(all(row["field_hook"] is None and not row["relation_overrides"] for row in basics))
-        self.assertLessEqual(config["settings"]["ground_power_hard_cap_ratio"], .60)
+        self.assertGreaterEqual(config["settings"]["ground_power_ratio_min"], 1.50)
+        self.assertLessEqual(config["settings"]["ground_power_hard_cap_ratio"], 2.20)
         self.assertLessEqual(config["settings"]["npc_formation_bonus_cap"], .10)
 
     def test_every_target_world_stage_has_all_fourteen_basic_natures(self):
@@ -396,6 +397,8 @@ class FormationIntegrationTests(unittest.TestCase):
         profile = self.engine._ground_profile(game.player, array)
         median_tier = sorted(binding["acquired_tier"] for binding in array["bindings"] if binding)[1]
         hard_cap = expected_combat_power(median_tier, 1) * formation_config()["settings"]["ground_power_hard_cap_ratio"]
+        standard = expected_combat_power(median_tier, 1)
+        self.assertGreaterEqual(ground_formation_power(array, profile), standard * 1.50 - .01)
         self.assertLessEqual(ground_formation_power(array, profile), hard_cap + .01)
         before = array["durability"]
         self.engine._combat(game, {

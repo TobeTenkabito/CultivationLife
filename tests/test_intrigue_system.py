@@ -164,6 +164,28 @@ def test_founder_control_does_not_bypass_decision_realm(tmp_path: Path) -> None:
         engine.intrigue_propose_resolution(created["id"], "sect", "investment", "", True)
 
 
+def test_top_seven_member_receives_office_without_decision_authority(
+    intrigue_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = intrigue_game
+    game = engine._load(game_id)
+    sect = game.sects[game.player.faction_id]
+    sect.founded_by_player = False
+    sect.founder_player_id = None
+    game.player.realm_index, game.player.layer = 3, 9
+    for index, npc in enumerate(sect.npcs):
+        npc.realm_index = 4 if index == 0 else 3 if index < 3 else 2
+        npc.layer = 1 if index == 0 else max(1, 8 - index)
+    game.intrigue_state = {}
+    engine.store.save(game)
+
+    section = _sect_section(engine.get_game(game_id))
+    assert section["decision_authority"] is False
+    assert section["player_power_rank"] <= 7
+    assert section["player_office_id"] in {"enforcement_elder", "teaching_elder", "foreign_elder", "war_elder", "affairs_elder"}
+    assert next(row for row in section["positions"] if row["id"] == section["player_office_id"])["holder_id"] == "player"
+
+
 def test_filtered_disciple_recruitment_votes_then_lets_player_choose(
     intrigue_game: tuple[GameEngine, str],
 ) -> None:

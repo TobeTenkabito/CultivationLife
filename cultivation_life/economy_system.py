@@ -303,6 +303,11 @@ class EconomySystemMixin:
 
     def _grant_art_experience(self, player: Player, art_id: str, amount: float) -> None:
         if art_id in self._art_names() and amount > 0:
+            if art_id in {"alchemy"}:
+                amount *= 1 + max(0.0, float(player.sage_effects.get("field_alchemy_multiplier", 0.0)))
+            if art_id in {"refining", "formation"}:
+                amount *= 1 + max(0.0, float(player.sage_effects.get("crafting_formation_multiplier", 0.0)))
+            amount *= 1 + max(0.0, float(player.sage_effects.get("art_experience_multiplier", 0.0)))
             player.art_experience[art_id] = float(player.art_experience.get(art_id, 0.0)) + float(amount)
 
     def _public_art_skills(self, player: Player) -> list[dict[str, Any]]:
@@ -382,8 +387,9 @@ class EconomySystemMixin:
 
     def _annual_spirit_field_update(self, player: Player) -> None:
         # Bounded by max_qing, so multi-century actions stay O(years * 8) with no logs.
+        growth = 1.0 + max(0.0, float(player.sage_effects.get("field_alchemy_multiplier", 0.0)))
         for plot in player.spirit_field.get("plots", []):
-            plot["growth_years"] = float(plot.get("growth_years", 0.0)) + 1.0
+            plot["growth_years"] = float(plot.get("growth_years", 0.0)) + growth
 
     def _public_spirit_field(self, player: Player) -> dict[str, Any]:
         rules = self._spirit_field_rules()
@@ -538,7 +544,11 @@ class EconomySystemMixin:
             raise ValueError("这株灵植须先吸收岁华灵露或太虚灵泉，才能承受 MP 催熟")
         spirit_level = next((row["level"] for row in self._public_art_skills(game.player) if row["id"] == "spirit_control"), 0)
         realm_yield = float(rules["irrigation_years_by_realm"][str(game.player.realm_index)])
-        gain = max(0.1, realm_yield * (cost / maximum_mp) * (1 + spirit_level * 0.04) * booster_multiplier)
+        gain = max(
+            0.1,
+            realm_yield * (cost / maximum_mp) * (1 + spirit_level * 0.04) * booster_multiplier
+            * (1 + max(0.0, float(game.player.sage_effects.get("field_alchemy_multiplier", 0.0)))),
+        )
         game.player.mp -= cost
         plot["growth_years"] = float(plot.get("growth_years", 0)) + gain
         art_gain = max(2.0, min(40.0, 4 + math.sqrt(gain)))

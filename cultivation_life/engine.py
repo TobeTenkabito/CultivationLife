@@ -89,6 +89,7 @@ from .ghost_system import (
     grant_wangsheng, reincarnation_breakthrough_bonus,
 )
 from .intrigue_system import IntrigueSystemMixin
+from .sage_system import SageSystemMixin
 from .concubine_system import ConcubineSystemMixin, gender_name
 from .possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
@@ -128,7 +129,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -276,6 +277,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         self._ensure_sects(game)
         self._ensure_world_npcs(game)
         self._ensure_npc_formations(game)
+        self._ensure_sage_state(game)
         if player.world == "celestial":
             self._ensure_heavenly_court(game, rng)
         self._ensure_race_relations(game)
@@ -337,6 +339,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             raise ValueError("必须先获得并配置一部神识功法")
         if ACTIONS[action].get("combat") and player.realm_index == 0:
             raise ValueError("凡人尚无力参与修士层面的猎杀与斗法")
+        self._prepare_sage_action(game, action)
         if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique.element):
             raise ValueError("灵根属性与五行功法不合，无法修炼")
         units = max(1, min(10, int(years)))
@@ -378,6 +381,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
                     * technique_environment_multiplier(sense, player.world)
                     * regional_multiplier
                     * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
+                    * (1 + max(0.0, float(player.sage_effects.get("sense_multiplier", 0.0))))
                 )
                 player.divine_sense_experience += sense_gain
                 total_sense_gain += sense_gain
@@ -436,6 +440,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         if player.alive:
             action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
             action_summary = (
+                f"完成一个教化行动单位：外在影响 {game.sage_state.get('action_result', {}).get('external', 0):+.2f}，内在影响 +{game.sage_state.get('action_result', {}).get('inner', 0):.2f}，门人出师 {game.sage_state.get('action_result', {}).get('graduated', 0)} 人。"
+                if ACTIONS[action].get("sage_action")
+                else
                 f"从 {start_age} 岁炼体至 {current_body_age(player)} 岁；无灵根无法由吐纳获得机缘。"
                 if action == "cultivate" and player.spirit_root == "none"
                 else f"从 {start_age} 岁摸索至 {current_body_age(player)} 岁；尚无主修功法，无法炼化机缘。"
@@ -508,6 +515,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
 
             self._advance_auction_clock(game, rng)
 
+        self._finish_sage_action(game)
         # 坊市只在一次玩家操作结束时刷新。旧逻辑在大乘一次行动的 1000 个
         # 年度中重建 1000 次相同规模的随机货架，最终只有最后一次可见。
         self._ensure_market(game, rng)
@@ -7375,6 +7383,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             else 0.0
         )
         reincarnation_bonus = reincarnation_breakthrough_bonus(player, source)
+        sage_bonus = max(-0.08, min(0.05, float(player.sage_effects.get("breakthrough_bonus", 0.0))))
         # 轮回经验本身不封顶，但所有流派的最终有效突破率都必须保留
         # 至少 2% 的失败风险；扩展配置也不能绕过这一全局硬上限。
         configured_cap = float(
@@ -7383,7 +7392,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         final_cap = min(0.98, max(0.005, configured_cap))
         final = max(0.005, min(
             final_cap, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
-            + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus - penalty,
+            + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus + sage_bonus - penalty,
         ))
         return {
             "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
@@ -7391,6 +7400,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             "artifact_bonus": artifact_bonus, "pity_bonus": pity_bonus,
             "devouring_bonus": devouring_bonus,
             "reincarnation_bonus": reincarnation_bonus,
+            "sage_bonus": sage_bonus,
             "body_training_bonus": body_training_bonus, "optimal_state_bonus": optimal_state_bonus,
             "heart_demon_penalty": penalty, "final": final,
         }
@@ -8336,6 +8346,7 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
             "crafting_system": self._public_crafting_system(game),
             "formation_system": self._public_formation_system(game),
             "intrigue_system": self._public_intrigue_system(game),
+            "sage_system": self._public_sage_system(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),
@@ -9495,6 +9506,9 @@ class GameEngine(ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin
         changed = self._ensure_world_npcs(game) or changed
         changed = self._enforce_world_realm_caps(game) or changed
         changed = self._ensure_npc_formations(game) or changed
+        if self._ensure_sage_state(game):
+            changed = True
+        self._refresh_sage_effects(game)
         changed = self._migrate_true_demon_races(game) or changed
         if game.player.faction_id in game.sects:
             sect_allegiance = game.sects[game.player.faction_id].allegiance_race

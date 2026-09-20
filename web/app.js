@@ -318,7 +318,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -539,7 +539,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -1150,6 +1150,99 @@ function renderIntrigue(system) {
   }
 }
 
+function renderSageSystem(system) {
+  const panel = $('#sage-card');
+  const dock = document.querySelector('[data-panel-target="sage"]');
+  const visible = !!system.available;
+  panel?.classList.toggle('hidden', !visible);
+  dock?.classList.toggle('hidden', !visible);
+  if (!visible) { window.UtilityPanels?.close('sage'); return; }
+  const doctrines = system.doctrines || [];
+  const current = doctrines.find(row => row.id === system.membership_id);
+  $('#sage-heading').textContent = current ? current.name : '尚未入说';
+  $('#sage-note').textContent = '外在影响力在每界共享一百点，单说上限六十；内在影响力每年衰减 3%，领先现任一成方可接掌道统。跨界期间你的席位冻结。';
+
+  const membership = $('#sage-membership'); membership.innerHTML = '';
+  if (current) {
+    const title = document.createElement('h3'); title.textContent = `${current.name} · 外在 ${Number(current.external || 0).toFixed(1)}/60`;
+    const details = document.createElement('p'); details.textContent = `你的席次 ${current.player_rank || '未入榜'} · 门人 ${(current.active_disciples || []).length} · 已出师 ${current.graduates || 0} · 奉祀 ${(system.sages || {})[current.sage_id]?.name || '孔子'}`;
+    const curve = system.disciple_curve || {};
+    const curveText = document.createElement('p'); curveText.className = 'muted'; curveText.textContent = `门人规模基准 N₀=${curve.n0 || 0}，硬上限 ${curve.hard_cap || 0}；当前突破修正 ${(Number(curve.breakthrough_pp || 0) >= 0 ? '+' : '')}${Number(curve.breakthrough_pp || 0).toFixed(2)} 个百分点。`;
+    const finalEffects = document.createElement('div'); finalEffects.className = 'sage-effect-summary current';
+    const finalTitle = document.createElement('b'); finalTitle.textContent = '当前最终生效'; finalEffects.appendChild(finalTitle);
+    const effectChips = document.createElement('div'); effectChips.className = 'sage-effect-chips';
+    (system.effect_text || []).forEach(text => { const chip = document.createElement('span'); chip.textContent = text; effectChips.appendChild(chip); });
+    if (!effectChips.childElementCount) effectChips.innerHTML = '<small>当前没有额外数值效果。</small>';
+    finalEffects.appendChild(effectChips);
+    const actions = document.createElement('div'); actions.className = 'sage-actions';
+    [['sage_preach','传道'],['sage_teach','授业'],['sage_answer','解惑']].forEach(([action, label]) => {
+      const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+      button.onclick = () => mutate(`/api/games/${game.id}/advance`, {action, years:1}); actions.appendChild(button);
+    });
+    const recruit = document.createElement('button'); recruit.type = 'button'; recruit.textContent = system.recruit_enabled ? '停止收徒' : '开启收徒';
+    recruit.onclick = () => mutate(`/api/games/${game.id}/sage-recruitment`, {enabled:!system.recruit_enabled});
+    const leave = document.createElement('button'); leave.type = 'button'; leave.textContent = '退出学说';
+    leave.onclick = () => openGameConfirm({title:'退出学说', body:'你的内在影响力将归零，十年内不能重新加入本界学说。', confirmText:'确认退出', onConfirm:()=>mutate(`/api/games/${game.id}/sage-doctrine`, {action:'leave'})});
+    actions.append(recruit, leave); membership.append(title, details, curveText, finalEffects, actions);
+  } else {
+    membership.innerHTML = '<h3>游学之身</h3><p class="muted">可加入本界已有学说；结丹后也可选择四层主张开宗立说。</p>';
+  }
+
+  const list = $('#sage-doctrine-list'); list.innerHTML = '';
+  doctrines.forEach(doctrine => {
+    const row = document.createElement('div'); row.className = `sage-doctrine${doctrine.id === system.membership_id ? ' active' : ''}`;
+    const title = document.createElement('b'); title.textContent = `${doctrine.name} · ${Number(doctrine.external || 0).toFixed(1)}`;
+    const details = document.createElement('small'); details.textContent = `成员 ${(doctrine.members || []).length} · 执掌者 ${(doctrine.members || []).find(member => member.id === doctrine.controller_id)?.name || '无'} · 先贤 ${(system.sages || {})[doctrine.sage_id]?.name || '孔子'}`;
+    const tenets = document.createElement('small'); tenets.className = 'sage-doctrine-tenets'; tenets.textContent = `宗旨：${(doctrine.combo_details || []).map(item => item.name).join(' · ') || '未载'}`;
+    const effects = document.createElement('div'); effects.className = 'sage-effect-chips';
+    (doctrine.passive_effect_text || []).forEach(text => { const chip = document.createElement('span'); chip.textContent = text; effects.appendChild(chip); });
+    row.append(title, details, tenets, effects);
+    if (!system.membership_id) { const join = document.createElement('button'); join.textContent = '加入'; join.onclick = () => mutate(`/api/games/${game.id}/sage-doctrine`, {action:'join', doctrine_id:doctrine.id}); row.appendChild(join); }
+    list.appendChild(row);
+  });
+
+  const fields = {classic:'sage-classic',philosophy:'sage-philosophy',practice:'sage-practice',script:'sage-script'};
+  const updateFoundingPreview = () => {
+    const preview = $('#sage-founding-preview'); preview.innerHTML = '';
+    const heading = document.createElement('b'); heading.textContent = '立说后固定效果'; preview.appendChild(heading);
+    const chips = document.createElement('div'); chips.className = 'sage-effect-chips';
+    Object.values(fields).forEach(id => {
+      const select = $(`#${id}`); const detail = system.choice_details?.[select.value] || {};
+      const detailNode = $(`#${id}-detail`);
+      if (detailNode) detailNode.textContent = `${detail.description || ''}${detail.effect_text?.length ? `｜${detail.effect_text.join('、')}` : ''}`;
+      (detail.effect_text || []).forEach(text => { const chip = document.createElement('span'); chip.textContent = `${detail.name} · ${text}`; chips.appendChild(chip); });
+    });
+    preview.appendChild(chips);
+  };
+  Object.entries(fields).forEach(([key, id]) => {
+    const select = $(`#${id}`); select.innerHTML = '';
+    (system.combination_choices?.[key] || []).forEach(value => {
+      const option = document.createElement('option'); option.value = value;
+      option.textContent = system.choice_details?.[value]?.name || value; select.appendChild(option);
+    });
+    select.onchange = updateFoundingPreview;
+  });
+  updateFoundingPreview();
+  $('#sage-founding').classList.toggle('hidden', !!system.membership_id || Number(game.player.realm_index) < 3);
+  $('#sage-found').onclick = () => mutate(`/api/games/${game.id}/sage-doctrine`, {action:'found', name:$('#sage-doctrine-name').value, combo:{classic:$('#sage-classic').value, philosophy:$('#sage-philosophy').value, practice:$('#sage-practice').value, script:$('#sage-script').value}});
+
+  const worship = $('#sage-worship-list'); worship.innerHTML = '';
+  Object.entries(system.sages || {}).forEach(([sageId, sage]) => {
+    const button = document.createElement('button'); button.type = 'button';
+    button.className = `sage-worship-card${current?.sage_id === sageId ? ' active' : ''}${sage.compatible_current ? ' compatible' : ''}`;
+    const header = document.createElement('span'); header.className = 'sage-worship-head';
+    const name = document.createElement('b'); name.textContent = sage.name;
+    const state = document.createElement('i'); state.textContent = current?.sage_id === sageId ? '当前奉祀' : sage.compatible_current ? '相性契合' : '折半生效';
+    header.append(name, state);
+    const description = document.createElement('small'); description.textContent = sage.description || '';
+    const affinity = document.createElement('small'); affinity.className = 'sage-affinity'; affinity.textContent = `相性：${(sage.compatible_names || []).join('、') || '无'}`;
+    const effect = document.createElement('strong'); effect.textContent = `当前组合：${(sage.applied_effect_text || []).join('、') || '无数值效果'}`;
+    button.append(header, description, affinity, effect);
+    button.disabled = !current || current.player_rank > 3 || current.sage_id === sageId;
+    button.onclick = () => mutate(`/api/games/${game.id}/sage-worship`, {sage_id:sageId}); worship.appendChild(button);
+  });
+}
+
 function renderFaction(faction) {
   const summary = $('#faction-summary'); summary.innerHTML = '';
   const diplomacyDetail = $('#faction-diplomacy-detail'); diplomacyDetail.innerHTML = '';
@@ -1740,6 +1833,7 @@ function renderMonsterBloodline(system) {
   const visible = !!system.visible;
   panel.classList.toggle('hidden', !visible);
   dock?.classList.toggle('hidden', !visible);
+  dock?.classList.toggle('dlc-active', !!system.available);
   if (!visible) { window.UtilityPanels?.close('bloodline'); return; }
   const current = $('#bloodline-current');
   const marks = $('#bloodline-marks');

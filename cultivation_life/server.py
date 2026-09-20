@@ -217,6 +217,16 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("ground_formation_id", ""), payload.get("supply_id", ""),
                     int(payload.get("quantity", 1) or 1),
                 )
+            elif operation == "sage-doctrine":
+                result = ENGINE.sage_doctrine_action(
+                    game_id, payload.get("action", ""), payload,
+                )
+            elif operation == "sage-recruitment":
+                result = ENGINE.sage_toggle_recruitment(
+                    game_id, bool(payload.get("enabled", True)),
+                )
+            elif operation == "sage-worship":
+                result = ENGINE.sage_choose_sage(game_id, payload.get("sage_id", ""))
             elif operation == "spirit-plant-use":
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":

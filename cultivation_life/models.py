@@ -412,6 +412,10 @@ class Player:
     formation_ground_arrays: list[dict[str, Any]] = field(default_factory=list)
     formation_repair_supplies: dict[str, int] = field(default_factory=dict)
     formation_ground_sequence: int = 0
+    # Optional Confucian-teaching DLC bonuses.  The authoritative doctrine
+    # simulation lives on GameState; this compact cache lets base combat and
+    # breakthrough rules consume the currently active effects.
+    sage_effects: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -517,6 +521,10 @@ class Player:
         data["formation_ground_sequence"] = max(
             int(data.get("formation_ground_sequence", 0)), len(data["formation_ground_arrays"]), 0,
         )
+        data["sage_effects"] = {
+            str(key): float(value) for key, value in data.get("sage_effects", {}).items()
+            if isinstance(value, (int, float))
+        } if isinstance(data.get("sage_effects", {}), dict) else {}
         saved_qi = data.get("qi_experience", {})
         data["qi_experience"] = {
             source: max(0.0, float(saved_qi.get(source, 0.0)))
@@ -710,6 +718,9 @@ class GameState:
     # one additive key means disabling the DLC freezes it without rewriting
     # sect, family, race or legacy save structures.
     intrigue_state: dict[str, Any] = field(default_factory=dict)
+    # Additive DLC container: old saves default to an empty state and disabling
+    # the package freezes it byte-for-byte.
+    sage_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -758,6 +769,7 @@ class GameState:
             "ghost_parade": self.ghost_parade,
             "npc_formations": self.npc_formations,
             "intrigue_state": self.intrigue_state,
+            "sage_state": self.sage_state,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -809,6 +821,8 @@ class GameState:
             } if isinstance(value.get("npc_formations", {}), dict) else {},
             intrigue_state=copy.deepcopy(value.get("intrigue_state", {}))
             if isinstance(value.get("intrigue_state", {}), dict) else {},
+            sage_state=copy.deepcopy(value.get("sage_state", {}))
+            if isinstance(value.get("sage_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),
