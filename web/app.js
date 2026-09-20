@@ -1176,9 +1176,61 @@ function renderSageSystem(system) {
   if (!visible) { window.UtilityPanels?.close('sage'); return; }
   const doctrines = system.doctrines || [];
   const current = doctrines.find(row => row.id === system.membership_id);
-  $('#sage-heading').textContent = current ? current.name : '尚未入说';
+  $('#sage-heading').textContent = current ? current.name : system.teaching_available ? '尚未入说' : '游学诸界';
   const numeric = system.numeric_rules || {};
-  $('#sage-note').textContent = `本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；个人门内威望每年衰减 ${numeric.inner_decay_percent || 3}%，高出现任执掌者 ${Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '')}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
+  const controlLead = Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '');
+  $('#sage-note').textContent = system.teaching_available
+    ? `内圣外王在诸界均可运转；本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；门内威望高出现任执掌者 ${controlLead}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`
+    : '当前界面没有圣人教化学说，但传承炼化、浩然被动与外王经世仍可正常使用。';
+  $('#sage-teaching-sections')?.classList.toggle('hidden', !system.teaching_available);
+
+  const inner = system.inner_outer || {};
+  const haoranSummary = $('#sage-haoran-summary'); haoranSummary.innerHTML = '';
+  const level = document.createElement('strong'); level.textContent = `浩然之气 Lv.${inner.level || 0}`;
+  const exp = document.createElement('span'); exp.textContent = Number(inner.level || 0) >= Number(inner.max_level || 30)
+    ? `${number(inner.exp || 0)} · 已达当前上限`
+    : `${number(inner.exp || 0)} / ${number(inner.next_threshold || 0)}`;
+  const progress = document.createElement('div'); progress.className = 'sage-haoran-progress';
+  const floor = Number(inner.level_floor || 0), next = Number(inner.next_threshold || 1);
+  const ratio = Number(inner.level || 0) >= Number(inner.max_level || 30) ? 1 : Math.max(0, Math.min(1, (Number(inner.exp || 0) - floor) / Math.max(1, next - floor)));
+  const fill = document.createElement('i'); fill.style.width = `${ratio * 100}%`; progress.appendChild(fill);
+  haoranSummary.append(level, exp, progress);
+  const passives = $('#sage-haoran-passives'); passives.innerHTML = '';
+  (inner.passive_text || []).forEach(text => { const chip=document.createElement('span'); chip.textContent=text; passives.appendChild(chip); });
+  if (!passives.childElementCount) passives.innerHTML = '<small>炼化第一部经典后开始形成浩然被动。</small>';
+
+  const manualList = $('#sage-manual-list'); manualList.innerHTML = '';
+  (inner.manuals || []).forEach(manual => {
+    const row=document.createElement('div'); row.className=`sage-manual${manual.can_refine ? ' refinable' : ''}`;
+    const info=document.createElement('span');
+    const title=document.createElement('b'); title.textContent=`《${manual.name}》Lv.${manual.manual_level} ×${manual.quantity}`;
+    const detail=document.createElement('small'); detail.textContent=`原初 ${manual.origin_realm_name}（${manual.origin_realm_index}阶） · 已参 Lv.${manual.refined_level} · ${manual.can_refine ? `新增 Lv.${manual.refined_level + 1}—Lv.${manual.manual_level}，浩然 +${number(manual.gain)}` : '没有新的经典内容'}`;
+    info.append(title,detail);
+    const button=document.createElement('button'); button.textContent=manual.can_refine?'炼化':'已参透'; button.disabled=busy||!manual.can_refine||!!game.pending_event||!game.player.alive;
+    button.onclick=()=>openGameConfirm({title:'炼化传承玉简',body:`确认消耗《${manual.name}》Lv.${manual.manual_level}？本次获得 ${number(manual.gain)} 浩然经验；相同或更低等级以后不能再次产生收益。`,confirmText:'炼化',onConfirm:()=>mutate(`/api/games/${game.id}/sage-refine-manual`,{item_id:manual.item_id})});
+    row.append(info,button); manualList.appendChild(row);
+  });
+  if (!manualList.childElementCount) manualList.innerHTML='<p class="empty">包裹中没有传承玉简。</p>';
+
+  const classicList = $('#sage-classic-list'); classicList.innerHTML='';
+  (inner.classics || []).forEach(classic => {
+    const row=document.createElement('div'); row.className='sage-classic';
+    row.innerHTML=`<b>${classic.name}</b><span>原初 ${classic.origin_realm_name}</span><strong>已参 Lv.${classic.refined_level} / 9</strong><small>${classic.manual_level > classic.refined_level ? `包裹有 Lv.${classic.manual_level} 玉简，可再得 ${number(classic.gain)}` : '暂无更高等级玉简'}</small>`;
+    classicList.appendChild(row);
+  });
+  if (!classicList.childElementCount) classicList.innerHTML='<p class="empty">尚未炼化任何经典。</p>';
+
+  const outerList=$('#sage-outer-list'); outerList.innerHTML='';
+  (inner.outer_actions || []).forEach(action=>{
+    const card=document.createElement('div'); card.className='sage-outer-card';
+    const title=document.createElement('b'); title.textContent=action.name;
+    const reward=document.createElement('strong'); reward.textContent=action.reward;
+    const cost=document.createElement('span'); cost.textContent=`消耗 ${number(action.cost)} 浩然经验 · Lv.${action.before_level} → Lv.${action.after_level}`;
+    const changes=document.createElement('small'); changes.textContent=(action.effect_changes||[]).join('；')||'本次消费不跨越浩然被动档位';
+    const button=document.createElement('button'); button.textContent=action.can_use?'预览并施行':action.reason||'不可施行'; button.disabled=busy||!action.can_use||!!game.pending_event||!game.player.alive;
+    button.onclick=()=>openGameConfirm({title:`外王 · ${action.name}`,body:`${action.reward}\n浩然经验：${number(action.before_exp)} → ${number(action.after_exp)}\n浩然等级：Lv.${action.before_level} → Lv.${action.after_level}\n${(action.effect_changes||[]).join('\n')||'长期被动数值不跨档'}\n此消费不可逆。`,confirmText:'确认施行',onConfirm:()=>mutate(`/api/games/${game.id}/sage-outer-king`,{action:action.id})});
+    card.append(title,reward,cost,changes,button); outerList.appendChild(card);
+  });
 
   const membership = $('#sage-membership'); membership.innerHTML = '';
   if (current) {

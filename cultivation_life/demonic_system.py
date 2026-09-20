@@ -678,7 +678,9 @@ class DemonicSystemMixin:
         if rng.random() < chance:
             damage = max_hp(player) * min(0.6, 0.06 + burden * 0.018)
             player.hp = max(0.0, player.hp - damage)
-            player.heart_demon += burden * 0.5
+            player.heart_demon += self._sage_scaled_gain(
+                player, burden * 0.5, "heart_demon_gain_reduction",
+            )
             game.history.append(HistoryRecord(
                 "SYS_SOUL_BACKLASH", 1, player.age, "元神反噬", None, "backlash",
                 f"{len(unrefined)}道未炼化元神同时反扑，HP -{damage:.0f}，心魔 +{burden * 0.5:.1f}。",

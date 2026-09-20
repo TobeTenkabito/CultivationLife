@@ -36,7 +36,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         self.assertEqual(config["reincarnation_final_probability_cap"], 0.98)
         self.assertEqual(
             next(row for row in self.engine.achievements.definitions if row["id"] == "ghost_first_reincarnation")["source"]["name"],
-            "百鬼夜行:轮回往生",
+            "百鬼夜行：往生轮回",
         )
 
     def test_intrinsic_external_refactor_preserves_non_ghost_totals(self):

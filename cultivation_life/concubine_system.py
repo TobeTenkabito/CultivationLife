@@ -161,7 +161,10 @@ class ConcubineSystemMixin:
                 float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
             )
         player.dao_companion = None
-        player.heart_demon += float(WORLD_SYSTEMS["relationship"]["companion_separation_heart_demon"])
+        player.heart_demon += self._sage_scaled_gain(
+            player, float(WORLD_SYSTEMS["relationship"]["companion_separation_heart_demon"]),
+            "heart_demon_gain_reduction",
+        )
         return "separated", f"{name}收回道侣信物、解散誓约；双方好感重置为中立，心魔随之增长。"
 
     def _resolve_relationship_sanction(

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=20260921-2">
-  <link rel="stylesheet" href="/panels.css?v=20260920-5">
+  <link rel="stylesheet" href="/style.css?v=20260921-3">
+  <link rel="stylesheet" href="/panels.css?v=20260921-2">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -107,7 +107,7 @@
           </div>
           <div id="ghost-system-panel" class="breakthrough-panel ghost-system-panel hidden">
             <div class="ghost-system-copy">
-              <b id="ghost-system-title">百鬼夜行:轮回往生</b><span id="ghost-system-summary"></span>
+              <b id="ghost-system-title">百鬼夜行：往生轮回</b><span id="ghost-system-summary"></span>
               <details class="ghost-ledger">
                 <summary>展开魂基明细与轮回册</summary>
                 <p id="ghost-integrity-detail"></p>
@@ -330,13 +330,19 @@
           <section class="formation-ground-section"><h3>镇地阵域</h3><p class="section-note">把当前随身阵的真实阵基永久留在所在地域。满耐久阵地阵至少提供同阶标准战力的 150%，最高按阵势达到 210%（硬上限 220%）；受损后随耐久衰减。私阵可在当地斗法时自动接管，护山阵进入宗门防守与离屏战争。</p><div class="formation-ground-actions"><button id="formation-ground-personal" type="button">镇为此地私阵</button><button id="formation-ground-sect" type="button">镇为宗门护山阵</button></div><div id="formation-repair-supplies" class="formation-repair-supplies"></div><div id="formation-ground-list" class="formation-ground-list"></div></section>
           <section><h3>阵法预设</h3><p class="section-note">预设只保存位置、材料类型与名称；启阵时重新绑定你实际拥有的实例。</p><div id="formation-loadout-list" class="formation-loadout-list"></div></section>
         </article>
-        <article id="sage-card" class="paper utility-panel sage-panel hidden" role="dialog" aria-modal="false" aria-label="圣人教化">
-          <div class="section-title"><div><p class="eyebrow">THE WAY OF THE SAGE</p><h2>圣人教化</h2></div><div class="panel-heading"><span id="sage-heading"></span><button id="sage-toggle" type="button">关闭</button></div></div>
+        <article id="sage-card" class="paper utility-panel sage-panel hidden" role="dialog" aria-modal="false" aria-label="圣人之道：内圣外王">
+          <div class="section-title"><div><p class="eyebrow">THE WAY OF THE SAGE</p><h2>圣人之道 · 内圣外王</h2></div><div class="panel-heading"><span id="sage-heading"></span><button id="sage-toggle" type="button">关闭</button></div></div>
           <p id="sage-note" class="muted"></p>
+          <section class="sage-haoran-section"><div class="sage-subheading"><div><p class="eyebrow">INNER SAGE</p><h3>浩然之气</h3></div><small>炼化不同经典积累浩然经验；已经兑现的理解不可通过重复经典恢复。</small></div><div id="sage-haoran-summary" class="sage-haoran-summary"></div><div id="sage-haoran-passives" class="sage-effect-chips"></div></section>
+          <section><div class="sage-subheading"><div><p class="eyebrow">CLASSIC REFINEMENT</p><h3>可炼化玉简</h3></div><small>玉简合成等级与功法原初境界分别记录；只结算高于既有理解的新增等级。</small></div><div id="sage-manual-list" class="sage-manual-list"></div></section>
+          <section><h3>已参经典</h3><div id="sage-classic-list" class="sage-classic-list"></div></section>
+          <section><div class="sage-subheading"><div><p class="eyebrow">OUTER KING</p><h3>外王经世</h3></div><small>先扣除浩然经验再结算收益；等级与所有长期被动可能立即下降。</small></div><div id="sage-outer-list" class="sage-outer-list"></div></section>
+          <div id="sage-teaching-sections">
           <section id="sage-membership"></section>
           <section><h3>本界学说</h3><div id="sage-doctrine-list" class="sage-doctrine-list"></div></section>
           <section id="sage-founding" class="sage-founding"><div class="sage-subheading"><div><p class="eyebrow">FOURFOLD DOCTRINE</p><h3>开宗立说</h3></div><small>四层主张的效果直接相加，所选先贤再按相性提供完整或折半加成。</small></div><div class="sage-combo-grid"><label><span>经学取向</span><select id="sage-classic"></select><small id="sage-classic-detail"></small></label><label><span>义理根基</span><select id="sage-philosophy"></select><small id="sage-philosophy-detail"></small></label><label><span>实践路径</span><select id="sage-practice"></select><small id="sage-practice-detail"></small></label><label><span>经文传统</span><select id="sage-script"></select><small id="sage-script-detail"></small></label></div><div id="sage-founding-preview" class="sage-effect-summary" aria-live="polite"></div><div class="sage-founding-submit"><label>学说名<input id="sage-doctrine-name" maxlength="12" placeholder="自定学说名"></label><button id="sage-found" type="button">立此一家之言</button></div></section>
           <section><div class="sage-subheading"><div><p class="eyebrow">SAGE PATRONAGE</p><h3>先贤祭祀</h3></div><small>相性命中时获得完整效果，否则只生效一半；当前奉祀与实际生效值会明确标出。</small></div><div id="sage-worship-list" class="sage-worship-list"></div></section>
+          </div>
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
@@ -397,6 +403,6 @@
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260920-3"></script>
-  <script src="/app.js?v=20260921-2"></script>
+  <script src="/app.js?v=20260921-3"></script>
 </body>
 </html>

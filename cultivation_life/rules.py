@@ -183,13 +183,21 @@ def _normalize_technique_manuals(player: Player) -> None:
         template = TECHNIQUE_CATALOG.get(technique_id)
         technique_name = known_names.get(technique_id) or (template.name if template else item.name)
         technique_name = technique_name.removeprefix("《").split("》", 1)[0]
+        origin_realm_index = max(1, min(
+            8,
+            int(item.technique_origin_realm_index or (template.grade if template else 1)),
+        ))
         manuals[key] = Item(
             id=technique_manual_item_id(technique_id, manual_level),
             name=f"《{technique_name}》Lv.{manual_level} 传承玉简",
             quantity=max(0, int(item.quantity)),
             technique_id=technique_id,
             technique_level=manual_level,
-            description=technique_manual_description(technique_name, manual_level),
+            technique_origin_realm_index=origin_realm_index,
+            description=(
+                f"原初境界：{REALMS[origin_realm_index].name}（{origin_realm_index}阶）。"
+                + technique_manual_description(technique_name, manual_level)
+            ),
             tags=list(dict.fromkeys([*item.tags, "technique_manual"])),
         )
     player.inventory = ordinary_items + [item for item in manuals.values() if item.quantity > 0]
@@ -225,7 +233,12 @@ def add_technique_copy(
         quantity=quantity,
         technique_id=technique.id,
         technique_level=manual_level,
-        description=technique_manual_description(technique.name, manual_level),
+        technique_origin_realm_index=max(1, min(8, int(technique.grade))),
+        description=(
+            f"原初境界：{REALMS[max(1, min(8, int(technique.grade)))].name}"
+            f"（{max(1, min(8, int(technique.grade)))}阶）。"
+            + technique_manual_description(technique.name, manual_level)
+        ),
         tags=["technique_manual"],
     ))
 
@@ -462,6 +475,7 @@ def combat_power(player: Player) -> float:
     comprehensive = current.base_power * layer_factor * status + current.base_power * progress * 0.15 + item_power + player.body_training * 8
     total = (
         comprehensive + technique_power + player.faction_combat_bonus
+        + player.outer_king_fixed_combat_power
         + player.natal_artifact_combat_bonus + crafted_artifact_bonuses(player)["combat_power"]
     )
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
@@ -515,11 +529,13 @@ def effective_karma(player: Player) -> float:
     if player.path == "demonic":
         return 0.0
     if player.technique:
-        return (
+        value = (
             max(0.0, player.karma) * KARMA_FACTORS[player.technique.path]
             * effective_technique_karma_multiplier(player.technique)
         )
-    return max(0.0, player.karma)
+    else:
+        value = max(0.0, player.karma)
+    return value * max(0.0, 1.0 - float(player.sage_effects.get("karma_effect_reduction", 0.0)))
 
 
 def negative_event_multiplier(player: Player) -> float:
@@ -840,6 +856,7 @@ def public_player(player: Player) -> dict[str, Any]:
         karma_factor=(
             0.0 if player.path == "demonic" else
             (KARMA_FACTORS[player.technique.path] * effective_technique_karma_multiplier(player.technique))
+            * max(0.0, 1.0 - float(player.sage_effects.get("karma_effect_reduction", 0.0)))
             if player.technique else 1.0
         ),
         path_name=PATH_NAMES[player.path],
