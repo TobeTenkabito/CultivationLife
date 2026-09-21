@@ -38,6 +38,8 @@ class MapTravelMixin:
         self._resolve_breakthroughs(game, rng)
         if not player.alive or game.pending_event:
             return False
+        if self._advance_guixu_calendar(game, rng, era_news):
+            return False
         if not encounters:
             return True
         return not (

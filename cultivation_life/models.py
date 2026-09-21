@@ -774,6 +774,10 @@ class GameState:
     # Additive DLC container: old saves default to an empty state and disabling
     # the package freezes it byte-for-byte.
     sage_state: dict[str, Any] = field(default_factory=dict)
+    # Optional Guixu Tide DLC state. All cycle, roster, treasure ownership and
+    # active-session data lives under this one additive container so disabling
+    # the package can freeze it without leaking state into unrelated systems.
+    guixu_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -823,6 +827,7 @@ class GameState:
             "npc_formations": self.npc_formations,
             "intrigue_state": self.intrigue_state,
             "sage_state": self.sage_state,
+            "guixu_state": self.guixu_state,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -876,6 +881,8 @@ class GameState:
             if isinstance(value.get("intrigue_state", {}), dict) else {},
             sage_state=copy.deepcopy(value.get("sage_state", {}))
             if isinstance(value.get("sage_state", {}), dict) else {},
+            guixu_state=copy.deepcopy(value.get("guixu_state", {}))
+            if isinstance(value.get("guixu_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

@@ -1,0 +1,2002 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "draw_per_cycle": 6,
+    "action_days": {
+      "search": 2,
+      "combat": 1,
+      "negotiate": 1,
+      "event": 1
+    },
+    "recruit_cap": 2,
+    "secret_clue_threshold": 3,
+    "secret_unlock_probability_per_year": 0.05,
+    "enmity_kappa": 0.5
+  },
+  "dungeons": [
+    {
+      "id": "guixu_human_canghai",
+      "name": "沧海归墟",
+      "world": "human",
+      "entry_location_id": "lancang_sea",
+      "max_entry_rank": [
+        4,
+        9
+      ],
+      "eject_rank": [
+        5,
+        1
+      ],
+      "period_years": 100,
+      "first_open_year": 100,
+      "announce_lead_years": 10,
+      "window_days": 90,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "破碎泊港",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_gain_efficiencies": {
+            "spirit": 1.35,
+            "demon": 0.55,
+            "monster": 0.75,
+            "yin": 0.9
+          }
+        },
+        {
+          "id": "middle",
+          "name": "倒悬水府",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_gain_efficiencies": {
+            "spirit": 1.55,
+            "demon": 0.6,
+            "monster": 0.82,
+            "yin": 1.05
+          }
+        },
+        {
+          "id": "inner",
+          "name": "无光海眼",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_gain_efficiencies": {
+            "spirit": 1.75,
+            "demon": 0.7,
+            "monster": 0.95,
+            "yin": 1.2
+          }
+        },
+        {
+          "id": "final",
+          "name": "沉没祖庭",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_gain_efficiencies": {
+            "spirit": 2.0,
+            "demon": 0.75,
+            "monster": 1.05,
+            "yin": 1.3
+          }
+        },
+        {
+          "id": "secret",
+          "name": "月下潮库",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_gain_efficiencies": {
+            "spirit": 2.15,
+            "demon": 0.8,
+            "monster": 1.1,
+            "yin": 1.45
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "canghai_technique_01",
+          "name": "潮生归元经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_01",
+          "tier": "major",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_technique_02",
+          "name": "沧溟剑典",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_02",
+          "tier": "major",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_technique_03",
+          "name": "九曲玄河经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_03",
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_technique_04",
+          "name": "叠浪护心法",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_04",
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_technique_05",
+          "name": "归潮炼体篇",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_05",
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_technique_06",
+          "name": "照海观神术",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_06",
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_technique_07",
+          "name": "五岳镇流诀",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_07",
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_technique_08",
+          "name": "镜月遁法",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_08",
+          "tier": "normal",
+          "value": 14000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_technique_09",
+          "name": "水火济鼎经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_09",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_technique_10",
+          "name": "观澜阵解",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_CANGHAI_10",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_equipment_01",
+          "name": "定海玄珠",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_01",
+          "tier": "major",
+          "value": 800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_equipment_02",
+          "name": "归流古鼎",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_02",
+          "tier": "major",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_equipment_03",
+          "name": "潮音剑",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_03",
+          "tier": "normal",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_equipment_04",
+          "name": "伏流甲",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_04",
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_equipment_05",
+          "name": "断浪尺",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_05",
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_equipment_06",
+          "name": "蜃光镜",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_06",
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_equipment_07",
+          "name": "玄龟盾",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_07",
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_equipment_08",
+          "name": "听潮铃",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_08",
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_equipment_09",
+          "name": "泊舟靴",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_09",
+          "tier": "normal",
+          "value": 14000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_equipment_10",
+          "name": "量海斗",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_10",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_equipment_11",
+          "name": "沧波旗",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_11",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_equipment_12",
+          "name": "雨师环",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_canghai_equipment_12",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_consumable_01",
+          "name": "海眼定神丹",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_01",
+          "tier": "normal",
+          "value": 800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_consumable_02",
+          "name": "九转回潮丹",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_02",
+          "tier": "normal",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_consumable_03",
+          "name": "避水天符",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_03",
+          "tier": "normal",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_consumable_04",
+          "name": "蜃景遁符",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_04",
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_consumable_05",
+          "name": "覆海阵盘",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_05",
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_consumable_06",
+          "name": "锁潮阵旗",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_06",
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_consumable_07",
+          "name": "月汐护脉散",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_07",
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_consumable_08",
+          "name": "玄浪破禁梭",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_canghai_consumable_08",
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_plant_01",
+          "name": "月汐莲",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_01",
+          "tier": "major",
+          "value": 800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_plant_02",
+          "name": "沧海芝",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_02",
+          "tier": "normal",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_plant_03",
+          "name": "玄潮参",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_03",
+          "tier": "normal",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_plant_04",
+          "name": "龙涎藻",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_04",
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_plant_05",
+          "name": "七星水玉花",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_05",
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_plant_06",
+          "name": "寒髓珊瑚",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_06",
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_plant_07",
+          "name": "蜃气果",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_07",
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_plant_08",
+          "name": "还阳海棠",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_08",
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_plant_09",
+          "name": "碧浪藤",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_09",
+          "tier": "normal",
+          "value": 14000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_plant_10",
+          "name": "凝露贝母",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_canghai_plant_10",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_material_01",
+          "name": "海心玄铁",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_01",
+          "tier": "major",
+          "value": 800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_material_02",
+          "name": "太阴潮晶",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_02",
+          "tier": "normal",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_material_03",
+          "name": "沉渊铜母",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_03",
+          "tier": "normal",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "canghai_material_04",
+          "name": "玄龟背甲",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_04",
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_material_05",
+          "name": "蜃楼砂",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_05",
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_material_06",
+          "name": "寒泉玉髓",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_06",
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_material_07",
+          "name": "风蚀星铜",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_07",
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_material_08",
+          "name": "水府梁木",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_08",
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_material_09",
+          "name": "归墟磁石",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_09",
+          "tier": "normal",
+          "value": 14000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_material_10",
+          "name": "万年蚌珠",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_canghai_material_10",
+          "tier": "normal",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_currency_01",
+          "name": "潮纹石匣·甲",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 800,
+          "tier": "normal",
+          "value": 800,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "canghai_currency_02",
+          "name": "潮纹石匣·乙",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1200,
+          "tier": "normal",
+          "value": 1200,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "canghai_currency_03",
+          "name": "潮纹石匣·丙",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1800,
+          "tier": "normal",
+          "value": 1800,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "canghai_currency_04",
+          "name": "水府遗藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 2500,
+          "tier": "normal",
+          "value": 2500,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_currency_05",
+          "name": "水府遗藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 3600,
+          "tier": "normal",
+          "value": 3600,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_currency_06",
+          "name": "海眼灵藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 5000,
+          "tier": "normal",
+          "value": 5000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_currency_07",
+          "name": "海眼灵藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 7200,
+          "tier": "normal",
+          "value": 7200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "canghai_currency_08",
+          "name": "祖庭库藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 10000,
+          "tier": "normal",
+          "value": 10000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_currency_09",
+          "name": "祖庭库藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 14000,
+          "tier": "normal",
+          "value": 14000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "canghai_currency_10",
+          "name": "月库总匣",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 20000,
+          "tier": "major",
+          "value": 20000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_spirit_weir",
+      "name": "虚天尾闾",
+      "world": "spirit",
+      "entry_location_id": "mist_sea_isles",
+      "max_entry_rank": [
+        6,
+        9
+      ],
+      "eject_rank": [
+        7,
+        1
+      ],
+      "period_years": 200,
+      "first_open_year": 200,
+      "announce_lead_years": 20,
+      "window_days": 120,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "雾海残港",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_gain_efficiencies": {
+            "spirit": 1.85,
+            "demon": 0.75,
+            "monster": 1.1,
+            "yin": 1.1
+          }
+        },
+        {
+          "id": "middle",
+          "name": "界骸回廊",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_gain_efficiencies": {
+            "spirit": 2.1,
+            "demon": 0.85,
+            "monster": 1.2,
+            "yin": 1.25
+          }
+        },
+        {
+          "id": "inner",
+          "name": "星潮断层",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_gain_efficiencies": {
+            "spirit": 2.4,
+            "demon": 0.95,
+            "monster": 1.35,
+            "yin": 1.4
+          }
+        },
+        {
+          "id": "final",
+          "name": "万流归孔",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_gain_efficiencies": {
+            "spirit": 2.75,
+            "demon": 1.05,
+            "monster": 1.5,
+            "yin": 1.6
+          }
+        },
+        {
+          "id": "secret",
+          "name": "无岸法藏",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_gain_efficiencies": {
+            "spirit": 3.0,
+            "demon": 1.15,
+            "monster": 1.65,
+            "yin": 1.8
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "weir_technique_01",
+          "name": "万流归虚经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_01",
+          "tier": "major",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_technique_02",
+          "name": "星潮界剑录",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_02",
+          "tier": "major",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_technique_03",
+          "name": "太虚鲸息法",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_03",
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_technique_04",
+          "name": "无岸法身篇",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_04",
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_technique_05",
+          "name": "照界观神术",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_05",
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_technique_06",
+          "name": "天河折空遁",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_06",
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_technique_07",
+          "name": "五行界轮经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_07",
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_technique_08",
+          "name": "雾海藏形书",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_08",
+          "tier": "normal",
+          "value": 900000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_technique_09",
+          "name": "星槎阵枢解",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_09",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_technique_10",
+          "name": "虚实两仪丹经",
+          "category": "technique",
+          "kind": "technique",
+          "content_id": "TECH_GUIXU_WEIR_10",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_equipment_01",
+          "name": "尾闾界轮",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_01",
+          "tier": "major",
+          "value": 50000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_equipment_02",
+          "name": "万流星槎",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_02",
+          "tier": "major",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_equipment_03",
+          "name": "断界天戈",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_03",
+          "tier": "normal",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_equipment_04",
+          "name": "虚鲸法衣",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_04",
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_equipment_05",
+          "name": "无岸神镜",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_05",
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_equipment_06",
+          "name": "星潮镇尺",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_06",
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_equipment_07",
+          "name": "雾海天幕",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_07",
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_equipment_08",
+          "name": "界骸骨盾",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_08",
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_equipment_09",
+          "name": "折空履",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_09",
+          "tier": "normal",
+          "value": 900000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_equipment_10",
+          "name": "归孔法环",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_10",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_equipment_11",
+          "name": "天河定盘",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_11",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_equipment_12",
+          "name": "太虚鸣钟",
+          "category": "equipment",
+          "kind": "item",
+          "content_id": "guixu_weir_equipment_12",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_consumable_01",
+          "name": "两仪化虚丹",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_01",
+          "tier": "normal",
+          "value": 50000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_consumable_02",
+          "name": "星潮养神露",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_02",
+          "tier": "normal",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_consumable_03",
+          "name": "断界遁符",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_03",
+          "tier": "normal",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_consumable_04",
+          "name": "无岸定身符",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_04",
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_consumable_05",
+          "name": "万流归孔阵盘",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_05",
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_consumable_06",
+          "name": "界骸锁空旗",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_06",
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_consumable_07",
+          "name": "虚实护劫散",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_07",
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_consumable_08",
+          "name": "星槎破界梭",
+          "category": "consumable",
+          "kind": "item",
+          "content_id": "guixu_weir_consumable_08",
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_plant_01",
+          "name": "无岸道莲",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_01",
+          "tier": "major",
+          "value": 50000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_plant_02",
+          "name": "虚鲸髓芝",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_02",
+          "tier": "normal",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_plant_03",
+          "name": "星潮神参",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_03",
+          "tier": "normal",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_plant_04",
+          "name": "界隙空灵花",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_04",
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_plant_05",
+          "name": "天河九叶草",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_05",
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_plant_06",
+          "name": "雾海魂藻",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_06",
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_plant_07",
+          "name": "两仪合生果",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_07",
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_plant_08",
+          "name": "太虚银竹",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_08",
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_plant_09",
+          "name": "归孔法则藤",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_09",
+          "tier": "normal",
+          "value": 900000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_plant_10",
+          "name": "界骸还元苔",
+          "category": "plant",
+          "kind": "item",
+          "content_id": "guixu_weir_plant_10",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_material_01",
+          "name": "尾闾界心",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_01",
+          "tier": "major",
+          "value": 50000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_material_02",
+          "name": "虚空母银",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_02",
+          "tier": "normal",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_material_03",
+          "name": "星髓神晶",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_03",
+          "tier": "normal",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "weir_material_04",
+          "name": "界鲸脊骨",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_04",
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_material_05",
+          "name": "法则琉璃",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_05",
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_material_06",
+          "name": "天河重水",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_06",
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_material_07",
+          "name": "无岸神木",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_07",
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_material_08",
+          "name": "雾海幻砂",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_08",
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_material_09",
+          "name": "断界罡髓",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_09",
+          "tier": "normal",
+          "value": 900000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_material_10",
+          "name": "星槎古铜",
+          "category": "material",
+          "kind": "item",
+          "content_id": "guixu_weir_material_10",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_currency_01",
+          "name": "星纹石匣·甲",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 50000,
+          "tier": "normal",
+          "value": 50000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "weir_currency_02",
+          "name": "星纹石匣·乙",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 80000,
+          "tier": "normal",
+          "value": 80000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "weir_currency_03",
+          "name": "星纹石匣·丙",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 120000,
+          "tier": "normal",
+          "value": 120000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "weir_currency_04",
+          "name": "残港遗藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 180000,
+          "tier": "normal",
+          "value": 180000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_currency_05",
+          "name": "残港遗藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 260000,
+          "tier": "normal",
+          "value": 260000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_currency_06",
+          "name": "界骸灵藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 360000,
+          "tier": "normal",
+          "value": 360000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_currency_07",
+          "name": "界骸灵藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 500000,
+          "tier": "normal",
+          "value": 500000,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "weir_currency_08",
+          "name": "归孔库藏·一",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 700000,
+          "tier": "normal",
+          "value": 700000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_currency_09",
+          "name": "归孔库藏·二",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 900000,
+          "tier": "normal",
+          "value": 900000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "weir_currency_10",
+          "name": "无岸总匣",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1200000,
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.guixu-tide",
+  "name": "归墟之潮：九死一生",
+  "version": "0.1.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 140,
+  "requires": [],
+  "description": "人界与灵界各一座周期归墟，含限时夺宝、修士争夺、被困与苦修破关。"
+}

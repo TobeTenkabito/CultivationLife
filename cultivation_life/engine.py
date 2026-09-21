@@ -96,6 +96,7 @@ from .ghost_system import (
 from .intrigue_system import IntrigueSystemMixin
 from .sage_system import SageSystemMixin
 from .concubine_system import ConcubineSystemMixin, gender_name
+from .guixu_system import GuixuSystemMixin
 from .possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
@@ -134,7 +135,7 @@ LEGACY_TRUE_DEMON_RACE_MAP = {
     "insectkin": "insect_demon",
 }
 
-class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -297,6 +298,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         self._ensure_world_npcs(game)
         self._ensure_npc_formations(game)
         self._ensure_sage_state(game)
+        self._ensure_guixu_state(game)
         if player.world == "celestial":
             self._ensure_heavenly_court(game, rng)
         self._ensure_race_relations(game)
@@ -2065,6 +2067,22 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 f"你服下{item.name}，永久获得本体 HP +{hp_gain:g}、MP +{mp_gain:g}；既有魂蚀损失没有恢复。",
                 {"intrinsic_hp_gain": hp_gain, "intrinsic_mp_gain": mp_gain},
                 ["system", "item", "pill", "intrinsic", "permanent"],
+            ))
+        elif "guixu_consumable" in item.tags:
+            remove_item(game.player, item_id)
+            potency = max(1, int(item_id.rsplit("_", 1)[-1]))
+            hp_gain = max_hp(game.player) * min(.55, .18 + potency * .035)
+            mp_gain = max_mp(game.player) * min(.55, .18 + potency * .035)
+            opportunity_gain = REALMS[game.player.realm_index].opportunity_base * (.20 + potency * .04)
+            game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
+            game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
+            self._add_opportunity(game.player, opportunity_gain)
+            game.history.append(HistoryRecord(
+                "SYS_USE_GUIXU_CONSUMABLE", 1, game.player.age, "服用归墟奇物", item_id, "consumed",
+                f"你使用{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}，并获得机缘 {opportunity_gain:.1f}。",
+                {"hp_gain": round(hp_gain, 1), "mp_gain": round(mp_gain, 1),
+                 "opportunity_gain": round(opportunity_gain, 1)},
+                ["system", "item", "guixu", "consumable"],
             ))
         elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
             if game.player.path == "demonic":
@@ -4039,7 +4057,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         player = game.player
         protected = {
             str(row.get("id")) for row in [
-                player.master, player.dao_companion, *player.dao_friends, *player.disciples,
+                player.master, player.dao_companion, *player.dao_friends,
+                *player.concubines, *player.disciples,
             ] if row and row.get("id")
         }
         own_sect = game.sects.get(player.faction_id or "")
@@ -8821,6 +8840,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             "formation_system": self._public_formation_system(game),
             "intrigue_system": self._public_intrigue_system(game),
             "sage_system": self._public_sage_system(game),
+            "guixu_tide": self._public_guixu(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),
@@ -10071,6 +10091,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         changed = self._enforce_world_realm_caps(game) or changed
         changed = self._ensure_npc_formations(game) or changed
         if self._ensure_sage_state(game):
+            changed = True
+        if self._ensure_guixu_state(game):
             changed = True
         self._refresh_sage_effects(game)
         changed = self._migrate_true_demon_races(game) or changed

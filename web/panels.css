@@ -27,6 +27,29 @@
 .map-location button { justify-self: end; padding: 7px 10px; background: var(--pine); color: #fff; font-size: 11px; }
 .map-location.lethal button { background: var(--cinnabar); }
 .map-location button:disabled { opacity: .4; cursor: not-allowed; }
+.guixu-panel { padding:34px 38px; }
+.guixu-content { display:grid; gap:14px; }
+.guixu-dungeon-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.guixu-dungeon { display:grid; gap:10px; padding:16px; border:1px solid var(--line); border-top:3px solid rgba(47,82,69,.32); background:rgba(255,255,255,.36); }
+.guixu-dungeon.open { border-top-color:var(--cinnabar); box-shadow:inset 0 0 26px rgba(137,49,38,.055); }
+.guixu-dungeon header,.guixu-session-head,.guixu-actor,.guixu-treasure { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.guixu-dungeon h3,.guixu-session h3,.guixu-session h4 { margin:3px 0; }
+.guixu-dungeon p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
+.guixu-dungeon header small,.guixu-actor small,.guixu-treasure small { display:block; color:var(--muted); font-size:10px; margin-top:3px; }
+.guixu-dungeon header strong,.guixu-session-head strong { color:var(--cinnabar); font-size:12px; }
+.guixu-dungeon button,.guixu-session button { padding:7px 10px; color:var(--pine); background:rgba(47,82,69,.1); border:1px solid rgba(47,82,69,.18); font-size:11px; }
+.guixu-dungeon button.guixu-primary,.guixu-session button.guixu-primary { color:#fff; background:var(--pine); }
+.guixu-session button.danger { color:#fff; background:var(--cinnabar); }
+.guixu-dungeon button:disabled,.guixu-session button:disabled { opacity:.38; cursor:not-allowed; }
+.guixu-treasure-list { display:grid; gap:5px; margin:8px 0 0; padding:0; list-style:none; }
+.guixu-treasure-list li { display:flex; justify-content:space-between; gap:8px; padding:6px 8px; background:rgba(47,82,69,.05); }
+.guixu-treasure-list small { color:var(--muted); }
+.guixu-session { display:grid; gap:17px; }
+.guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
+.guixu-layers button.active { color:#fff; background:var(--gold); border-color:var(--gold); }
+.guixu-actor,.guixu-treasure { padding:10px 11px; margin-top:6px; border-left:3px solid rgba(47,82,69,.25); background:rgba(255,255,255,.38); }
+.guixu-actor>div:last-child { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+@media (max-width:720px) { .guixu-dungeon-grid { grid-template-columns:1fr; } .guixu-panel { padding:26px 22px; } }
 .panel-heading { display: flex; align-items: center; gap: 12px; }
 .panel-heading button, .history-tools button {
   position: relative; z-index: 2; padding: 6px 10px; color: var(--pine);

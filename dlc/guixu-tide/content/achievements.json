@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "guixu_first_entry",
+      "name": "初入归墟",
+      "description": "首次进入任一归墟副本",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_ENTER",
+          "result": "entered"
+        }
+      }
+    },
+    {
+      "id": "guixu_full_return",
+      "name": "满载而归",
+      "description": "携至少三条本届宝物成功返程",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_RETURN",
+          "result": "full_return"
+        }
+      }
+    },
+    {
+      "id": "guixu_narrow_escape",
+      "name": "九死一生",
+      "description": "剩余不足三天时成功返程",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_RETURN",
+          "result": "narrow_escape"
+        }
+      }
+    },
+    {
+      "id": "guixu_break_free",
+      "name": "破关而出",
+      "description": "被困后突破归墟修为边界",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_EJECT",
+          "result": "breakthrough"
+        }
+      }
+    },
+    {
+      "id": "guixu_secret",
+      "name": "别有洞天",
+      "description": "首次进入归墟秘层",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_MOVE",
+          "result": "secret"
+        }
+      }
+    },
+    {
+      "id": "guixu_negotiate",
+      "name": "虎口夺食",
+      "description": "首次通过宝物交涉取得宝物",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_NEGOTIATE",
+          "result": "traded"
+        }
+      }
+    },
+    {
+      "id": "guixu_recruit",
+      "name": "同舟共济",
+      "description": "首次拉拢归墟修士",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_RECRUIT",
+          "result": "joined"
+        }
+      }
+    },
+    {
+      "id": "guixu_last_treasure",
+      "name": "掘地三尺",
+      "description": "亲手取得一座归墟主池最后的宝物",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_TREASURE",
+          "result": "last_treasure"
+        }
+      }
+    },
+    {
+      "id": "guixu_die_trapped",
+      "name": "坐化归墟",
+      "description": "被困期间寿尽坐化",
+      "category": "cultivation",
+      "condition": {
+        "history": {
+          "event_id": "SYS_GUIXU_TRAPPED_DEATH",
+          "result": "dead"
+        }
+      }
+    }
+  ]
+}
