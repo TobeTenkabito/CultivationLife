@@ -1,5 +1,6 @@
 import random
 import copy
+import json
 import tempfile
 import unittest
 from collections import Counter
@@ -41,6 +42,10 @@ class GuixuTideTests(unittest.TestCase):
         return created["id"], dungeon
 
     def test_content_has_two_rich_non_repeating_pools(self):
+        manifest = json.loads(
+            (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(manifest["version"], "1.0.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual({row["world"] for row in dungeons}, {"human", "spirit"})
         self.assertEqual({row["name"] for row in dungeons}, {"葬海天渊", "诸界尾闾"})
@@ -58,6 +63,26 @@ class GuixuTideTests(unittest.TestCase):
             for row in pool:
                 catalog = TECHNIQUE_CATALOG if row["kind"] == "technique" else ITEM_CATALOG
                 self.assertIn(row["content_id"], catalog)
+
+    def test_public_panel_only_exposes_the_current_world_dungeon(self):
+        created = self.engine.create_game("观潮", "supreme_water", "dao", 19, "water")
+        game_id = created["id"]
+        human = self.engine.get_game(game_id)["guixu_tide"]
+        self.assertTrue(human["available"])
+        self.assertEqual([row["world"] for row in human["dungeons"]], ["human"])
+
+        game = self.engine.store.load(game_id)
+        game.player.world = "spirit"
+        self.engine.store.save(game)
+        spirit = self.engine.get_game(game_id)["guixu_tide"]
+        self.assertEqual([row["world"] for row in spirit["dungeons"]], ["spirit"])
+
+        game = self.engine.store.load(game_id)
+        game.player.world = "celestial"
+        self.engine.store.save(game)
+        celestial = self.engine.get_game(game_id)["guixu_tide"]
+        self.assertFalse(celestial["available"])
+        self.assertEqual(celestial["dungeons"], [])
 
     def test_guixu_treasures_are_excluded_from_every_generic_acquisition_pool(self):
         market_ids = {str(row["content_id"]) for row in MARKET_GOODS}

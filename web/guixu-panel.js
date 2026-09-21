@@ -44,18 +44,18 @@
       if (actor.status === 'recruited') return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>临时同行 · 战力 ${esc(actor.power)}</small></div></div>`;
       return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>${esc(actor.protected ? '与你关系深厚 · ' : '')}战力 ${esc(actor.power)}</small></div><div>
         ${button('夺宝战', 'fight', {actor_id:actor.actor_id, protected:!!actor.protected, actor_name:actor.name}, false, 'danger')}
-        ${button('遁走', 'flee', {actor_id:actor.actor_id})}
-        ${button('邀为队友', 'recruit', {actor_id:actor.actor_id})}
+        ${button('遁走', 'flee', {actor_id:actor.actor_id}, false, 'guixu-flee')}
+        ${button('邀为队友', 'recruit', {actor_id:actor.actor_id}, false, 'guixu-recruit')}
       </div></div>`;
     }).join('') || '<p class="muted">此层眼下不见其他修士。</p>';
     const treasures = (session.treasures || []).map(entry => `<div class="guixu-treasure">
       <div><b>${esc(entry.name)}</b><small>${esc(entry.resolution === 'held' ? `${entry.holder_name || '某修士'}持有` : '尚未被发现')}</small></div>
-      ${entry.resolution === 'held' ? button('报价交换', 'negotiate', {actor_id:entry.holder_id, pool_entry_id:entry.pool_entry_id, treasure_name:entry.name}, false, 'trade') : ''}
+      ${entry.resolution === 'held' ? button('报价交换', 'negotiate', {actor_id:entry.holder_id, pool_entry_id:entry.pool_entry_id, treasure_name:entry.name}, false, 'guixu-trade') : ''}
     </div>`).join('') || '<p class="muted">这一层暂时没有显露的本届宝物。</p>';
     return `<section class="guixu-session">
       <div class="guixu-session-head"><div><p class="eyebrow">${esc(session.trapped ? 'TRAPPED' : 'EXPEDITION')}</p><h3>${esc(session.dungeon_name)}</h3></div><strong>${session.trapped ? '已被困' : `余 ${esc(session.remaining_days)} 天`}</strong></div>
       <div class="guixu-layers">${layers}</div>
-      <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, false, 'guixu-primary')}${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped)}</div>
+      <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, false, 'guixu-rest')}${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped, 'guixu-return')}</div>
       ${session.trapped ? '<p class="muted">潮门闭合后，可回主界面使用修炼、炼体、神识训练及对应突破；外界行动仍被封锁。</p>' : ''}
       <section><h4>本层宝物</h4>${treasures}</section>
       <section><h4>本层修士</h4>${actors}</section>

@@ -27,7 +27,16 @@
 .map-location button { justify-self: end; padding: 7px 10px; background: var(--pine); color: #fff; font-size: 11px; }
 .map-location.lethal button { background: var(--cinnabar); }
 .map-location button:disabled { opacity: .4; cursor: not-allowed; }
-.guixu-panel { padding:34px 38px; }
+.guixu-panel {
+  --guixu-abyss:#173947;
+  --guixu-deep:#23586a;
+  --guixu-tide:#39859a;
+  --guixu-foam:#dff5f2;
+  --guixu-violet:#655476;
+  --guixu-coral:#ad4d65;
+  --guixu-amber:#b78339;
+  padding:34px 38px;
+}
 .guixu-content { display:grid; gap:14px; }
 .guixu-dungeon-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .guixu-dungeon { display:grid; gap:10px; padding:16px; border:1px solid var(--line); border-top:3px solid rgba(47,82,69,.32); background:rgba(255,255,255,.36); }
@@ -37,9 +46,58 @@
 .guixu-dungeon p { margin:0; color:var(--muted); font-size:11px; line-height:1.7; }
 .guixu-dungeon header small,.guixu-actor small,.guixu-treasure small { display:block; color:var(--muted); font-size:10px; margin-top:3px; }
 .guixu-dungeon header strong,.guixu-session-head strong { color:var(--cinnabar); font-size:12px; }
-.guixu-dungeon button,.guixu-session button { padding:7px 10px; color:var(--pine); background:rgba(47,82,69,.1); border:1px solid rgba(47,82,69,.18); font-size:11px; }
-.guixu-dungeon button.guixu-primary,.guixu-session button.guixu-primary { color:#fff; background:var(--pine); }
-.guixu-session button.danger { color:#fff; background:var(--cinnabar); }
+.guixu-dungeon button,.guixu-session button {
+  padding:8px 12px;
+  color:var(--guixu-deep);
+  background:linear-gradient(145deg,rgba(223,245,242,.96),rgba(194,225,230,.82));
+  border:1px solid rgba(48,119,137,.34);
+  border-radius:999px;
+  box-shadow:0 3px 9px rgba(17,57,70,.11),inset 0 1px rgba(255,255,255,.74);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.04em;
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+.guixu-dungeon button:not(:disabled):hover,.guixu-session button:not(:disabled):hover {
+  transform:translateY(-1px);
+  box-shadow:0 6px 14px rgba(17,57,70,.17),inset 0 1px rgba(255,255,255,.4);
+  filter:saturate(1.08);
+}
+.guixu-dungeon button.guixu-primary,.guixu-session button.guixu-primary {
+  color:#f5ffff;
+  background:linear-gradient(135deg,var(--guixu-abyss),var(--guixu-tide));
+  border-color:rgba(29,91,108,.72);
+}
+.guixu-session button.guixu-rest {
+  color:#244b58;
+  background:linear-gradient(135deg,#d9f4eb,#9fd8d3);
+  border-color:rgba(61,137,132,.48);
+}
+.guixu-session button.guixu-return {
+  color:#fff8e9;
+  background:linear-gradient(135deg,#76592f,var(--guixu-amber));
+  border-color:rgba(133,92,35,.58);
+}
+.guixu-session button.danger {
+  color:#fff7fa;
+  background:linear-gradient(135deg,#762f48,var(--guixu-coral));
+  border-color:rgba(112,38,65,.62);
+}
+.guixu-session button.guixu-flee {
+  color:#f9f6ff;
+  background:linear-gradient(135deg,#4d455d,var(--guixu-violet));
+  border-color:rgba(74,59,91,.58);
+}
+.guixu-session button.guixu-recruit {
+  color:#244752;
+  background:linear-gradient(135deg,#d9eff0,#afd5dd);
+  border-color:rgba(65,125,139,.42);
+}
+.guixu-session button.guixu-trade {
+  color:#fff9eb;
+  background:linear-gradient(135deg,#71542d,#c39142);
+  border-color:rgba(124,86,31,.58);
+}
 .guixu-dungeon button:disabled,.guixu-session button:disabled { opacity:.38; cursor:not-allowed; }
 .guixu-treasure-list { display:grid; gap:5px; margin:8px 0 0; padding:0; list-style:none; }
 .guixu-treasure-list li { display:flex; justify-content:space-between; gap:8px; padding:6px 8px; background:rgba(47,82,69,.05); }
@@ -54,7 +112,12 @@
 .guixu-entry-box li.fail b { color:var(--cinnabar); }
 .guixu-session { display:grid; gap:17px; }
 .guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
-.guixu-layers button.active { color:#fff; background:var(--gold); border-color:var(--gold); }
+.guixu-layers button.active {
+  color:#fffaff;
+  background:linear-gradient(135deg,#443950,var(--guixu-violet));
+  border-color:#594967;
+  box-shadow:0 4px 12px rgba(64,45,78,.22);
+}
 .guixu-actor,.guixu-treasure { padding:10px 11px; margin-top:6px; border-left:3px solid rgba(47,82,69,.25); background:rgba(255,255,255,.38); }
 .guixu-actor>div:last-child { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
 @media (max-width:720px) { .guixu-dungeon-grid { grid-template-columns:1fr; } .guixu-panel { padding:26px 22px; } }

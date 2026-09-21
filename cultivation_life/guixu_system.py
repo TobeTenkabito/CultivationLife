@@ -831,6 +831,8 @@ class GuixuSystemMixin:
         definitions = self._guixu_definitions()
         rows = []
         for dungeon_id, dungeon in definitions.items():
+            if dungeon["world"] != game.player.world:
+                continue
             cycle = game.guixu_state["cycles"][dungeon_id]
             entry_key = f"{dungeon_id}:{cycle['cycle_index']}"
             location_matches = bool(
@@ -902,4 +904,4 @@ class GuixuSystemMixin:
                 row for row in next(item for item in rows if item["id"] == dungeon["id"])["round_entries"]
                 if row["layer_id"] == session["layer_id"] and row["resolution"] in {"unclaimed", "held"}
             ] if expedition_open else [])
-        return {"available": True, "dungeons": rows, "session": session}
+        return {"available": bool(rows or session), "dungeons": rows, "session": session}
