@@ -117,6 +117,32 @@ class SecretArtsTests(unittest.TestCase):
             (suppressed["player"]["realm_index"], suppressed["player"]["layer"]), (4, 4),
         )
 
+    def test_suppression_does_not_pause_or_hide_periodic_tribulation(self):
+        game_id, game = self._core_game()
+        game.player.realm_index = 6
+        game.player.layer = 3
+        game.player.next_tribulation_age = game.player.age + 500
+        game.player.tribulation_power = 9000
+        original_due_age = game.player.next_tribulation_age
+        self.engine.store.save(game)
+
+        suppressed = self.engine.manage_secret_art(game_id, "suppress", "activate", 4, 1)
+        self.assertEqual(suppressed["tribulation"]["next_age"], original_due_age)
+        self.assertEqual(suppressed["tribulation"]["years_remaining"], 500)
+
+        active = self.engine.store.load(game_id)
+        active.player.age += 25
+        self.engine.store.save(active)
+        shown = self.engine.get_game(game_id)
+        self.assertEqual(shown["tribulation"]["next_age"], original_due_age)
+        self.assertEqual(shown["tribulation"]["years_remaining"], 475)
+
+        active = self.engine.store.load(game_id)
+        active.player.age = original_due_age
+        self.engine._check_tribulation(active, random.Random(2302))
+        self.assertEqual(active.active_trial["kind"], "periodic_thunder")
+        self.assertEqual(active.active_trial["source_realm"], 6)
+
     def test_npc_concealment_has_detect_and_reveal_thresholds(self):
         _, game = self._core_game()
         npc = SectNpc(

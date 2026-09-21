@@ -330,13 +330,18 @@ def main() -> None:
                 page.locator("#settings-card").wait_for(state="visible")
                 assert not page.locator("#setting-combat-popup").is_checked()
                 assert not page.locator("#setting-auto-war").is_checked()
+                assert page.locator("#setting-guixu-popup-row").is_visible()
+                assert not page.locator("#setting-guixu-popup").is_checked()
                 with page.expect_response(lambda response: response.url.endswith("/settings")):
                     page.locator("#setting-combat-popup").check()
+                with page.expect_response(lambda response: response.url.endswith("/settings")):
+                    page.locator("#setting-guixu-popup").check()
                 with page.expect_response(lambda response: response.url.endswith("/settings")):
                     page.locator("#setting-auto-war").check()
                 assert engine.store.load(created["id"]).settings == {
                     "combat_popup": False, "achievement_popup": True,
                     "auto_advance_player_wars": True,
+                    "guixu_event_popup": False,
                 }
                 page.locator("#settings-toggle").click()
 

@@ -1128,6 +1128,2262 @@
         "crafting_material",
         "treasure"
       ]
+    },
+    {
+      "id": "guixu_bloodriver_equipment_01",
+      "name": "血河魔珠",
+      "description": "血河魔珠出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 990,
+      "hp_bonus": 66,
+      "mp_bonus": 78
+    },
+    {
+      "id": "guixu_bloodriver_equipment_02",
+      "name": "沉骨战旗",
+      "description": "沉骨战旗出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1386,
+      "hp_bonus": 132,
+      "mp_bonus": 156
+    },
+    {
+      "id": "guixu_bloodriver_equipment_03",
+      "name": "九阴噬魂剑",
+      "description": "九阴噬魂剑出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1782,
+      "hp_bonus": 198,
+      "mp_bonus": 234
+    },
+    {
+      "id": "guixu_bloodriver_equipment_04",
+      "name": "万骸魔甲",
+      "description": "万骸魔甲出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2178,
+      "hp_bonus": 264,
+      "mp_bonus": 312
+    },
+    {
+      "id": "guixu_bloodriver_equipment_05",
+      "name": "赤潮炼魂鼎",
+      "description": "赤潮炼魂鼎出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2574,
+      "hp_bonus": 330,
+      "mp_bonus": 390
+    },
+    {
+      "id": "guixu_bloodriver_equipment_06",
+      "name": "无间血轮",
+      "description": "无间血轮出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2969,
+      "hp_bonus": 396,
+      "mp_bonus": 468
+    },
+    {
+      "id": "guixu_bloodriver_equipment_07",
+      "name": "葬魂幡",
+      "description": "葬魂幡出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 3366,
+      "hp_bonus": 462,
+      "mp_bonus": 546
+    },
+    {
+      "id": "guixu_bloodriver_equipment_08",
+      "name": "魔胎心镜",
+      "description": "魔胎心镜出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 3762,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_bloodriver_equipment_09",
+      "name": "逆流骨舟",
+      "description": "逆流骨舟出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 4158,
+      "hp_bonus": 594,
+      "mp_bonus": 702
+    },
+    {
+      "id": "guixu_bloodriver_equipment_10",
+      "name": "黑莲界尺",
+      "description": "黑莲界尺出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 4554,
+      "hp_bonus": 660,
+      "mp_bonus": 780
+    },
+    {
+      "id": "guixu_bloodriver_equipment_11",
+      "name": "血狱镇河碑",
+      "description": "血狱镇河碑出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 4950,
+      "hp_bonus": 726,
+      "mp_bonus": 858
+    },
+    {
+      "id": "guixu_bloodriver_equipment_12",
+      "name": "沉渊万煞钟",
+      "description": "沉渊万煞钟出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 5346,
+      "hp_bonus": 792,
+      "mp_bonus": 936
+    },
+    {
+      "id": "guixu_bloodriver_consumable_01",
+      "name": "血髓还元丹",
+      "description": "血髓还元丹出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_02",
+      "name": "九阴定魂露",
+      "description": "九阴定魂露出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_03",
+      "name": "魔胎续命丸",
+      "description": "魔胎续命丸出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_04",
+      "name": "万煞洗脉丹",
+      "description": "万煞洗脉丹出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_05",
+      "name": "逆血回天散",
+      "description": "逆血回天散出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_06",
+      "name": "沉河养神液",
+      "description": "沉河养神液出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_07",
+      "name": "白骨生肌膏",
+      "description": "白骨生肌膏出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_consumable_08",
+      "name": "黑莲渡厄丹",
+      "description": "黑莲渡厄丹出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "bloodriver",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_bloodriver_plant_01",
+      "name": "血潮莲",
+      "description": "血潮莲出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 72,
+      "mp_bonus": 84,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_bloodriver_plant_01",
+      "plant_years": 900,
+      "plant_kind": "guixu",
+      "plant_value": 2200
+    },
+    {
+      "id": "guixu_bloodriver_plant_02",
+      "name": "九阴骨芝",
+      "description": "九阴骨芝出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 144,
+      "mp_bonus": 168,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_bloodriver_plant_02",
+      "plant_years": 1400,
+      "plant_kind": "guixu",
+      "plant_value": 3260
+    },
+    {
+      "id": "guixu_bloodriver_plant_03",
+      "name": "魔胎参",
+      "description": "魔胎参出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 216,
+      "mp_bonus": 252,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_bloodriver_plant_03",
+      "plant_years": 1900,
+      "plant_kind": "guixu",
+      "plant_value": 4820
+    },
+    {
+      "id": "guixu_bloodriver_plant_04",
+      "name": "噬魂藤",
+      "description": "噬魂藤出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 288,
+      "mp_bonus": 336,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_bloodriver_plant_04",
+      "plant_years": 2400,
+      "plant_kind": "guixu",
+      "plant_value": 7130
+    },
+    {
+      "id": "guixu_bloodriver_plant_05",
+      "name": "黑莲魔藕",
+      "description": "黑莲魔藕出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 360,
+      "mp_bonus": 420,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_bloodriver_plant_05",
+      "plant_years": 2900,
+      "plant_kind": "guixu",
+      "plant_value": 10560
+    },
+    {
+      "id": "guixu_bloodriver_plant_06",
+      "name": "万煞苔",
+      "description": "万煞苔出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 432,
+      "mp_bonus": 504,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_bloodriver_plant_06",
+      "plant_years": 3400,
+      "plant_kind": "guixu",
+      "plant_value": 15620
+    },
+    {
+      "id": "guixu_bloodriver_plant_07",
+      "name": "沉河鬼兰",
+      "description": "沉河鬼兰出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 504,
+      "mp_bonus": 588,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_bloodriver_plant_07",
+      "plant_years": 3900,
+      "plant_kind": "guixu",
+      "plant_value": 23120
+    },
+    {
+      "id": "guixu_bloodriver_plant_08",
+      "name": "赤髓果",
+      "description": "赤髓果出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_bloodriver_plant_08",
+      "plant_years": 4400,
+      "plant_kind": "guixu",
+      "plant_value": 34220
+    },
+    {
+      "id": "guixu_bloodriver_plant_09",
+      "name": "逆脉草",
+      "description": "逆脉草出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 648,
+      "mp_bonus": 756,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_bloodriver_plant_09",
+      "plant_years": 4900,
+      "plant_kind": "guixu",
+      "plant_value": 50640
+    },
+    {
+      "id": "guixu_bloodriver_plant_10",
+      "name": "无间血桑",
+      "description": "无间血桑出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_bloodriver_plant_10",
+      "plant_years": 5400,
+      "plant_kind": "guixu",
+      "plant_value": 74950
+    },
+    {
+      "id": "guixu_bloodriver_material_01",
+      "name": "血河玄铁",
+      "description": "血河玄铁出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 132
+    },
+    {
+      "id": "guixu_bloodriver_material_02",
+      "name": "九阴潮晶",
+      "description": "九阴潮晶出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 264
+    },
+    {
+      "id": "guixu_bloodriver_material_03",
+      "name": "万魂砂",
+      "description": "万魂砂出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 396
+    },
+    {
+      "id": "guixu_bloodriver_material_04",
+      "name": "沉骨魔钢",
+      "description": "沉骨魔钢出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 528
+    },
+    {
+      "id": "guixu_bloodriver_material_05",
+      "name": "魔胎石",
+      "description": "魔胎石出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 660
+    },
+    {
+      "id": "guixu_bloodriver_material_06",
+      "name": "黑莲髓",
+      "description": "黑莲髓出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 792
+    },
+    {
+      "id": "guixu_bloodriver_material_07",
+      "name": "噬魂铜",
+      "description": "噬魂铜出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 924
+    },
+    {
+      "id": "guixu_bloodriver_material_08",
+      "name": "逆流血玉",
+      "description": "逆流血玉出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 1056
+    },
+    {
+      "id": "guixu_bloodriver_material_09",
+      "name": "无间骨金",
+      "description": "无间骨金出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 1188
+    },
+    {
+      "id": "guixu_bloodriver_material_10",
+      "name": "煞海母晶",
+      "description": "煞海母晶出自血河沉渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "bloodriver",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 1320
+    },
+    {
+      "id": "guixu_demon_grave_equipment_01",
+      "name": "黑日魔轮",
+      "description": "黑日魔轮出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 27000,
+      "hp_bonus": 110,
+      "mp_bonus": 130
+    },
+    {
+      "id": "guixu_demon_grave_equipment_02",
+      "name": "太古神骸甲",
+      "description": "太古神骸甲出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 37800,
+      "hp_bonus": 220,
+      "mp_bonus": 260
+    },
+    {
+      "id": "guixu_demon_grave_equipment_03",
+      "name": "葬天魔剑",
+      "description": "葬天魔剑出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 48600,
+      "hp_bonus": 330,
+      "mp_bonus": 390
+    },
+    {
+      "id": "guixu_demon_grave_equipment_04",
+      "name": "无相心镜",
+      "description": "无相心镜出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 59400,
+      "hp_bonus": 440,
+      "mp_bonus": 520
+    },
+    {
+      "id": "guixu_demon_grave_equipment_05",
+      "name": "万劫镇魂钟",
+      "description": "万劫镇魂钟出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 70200,
+      "hp_bonus": 550,
+      "mp_bonus": 650
+    },
+    {
+      "id": "guixu_demon_grave_equipment_06",
+      "name": "堕星血旗",
+      "description": "堕星血旗出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 80999,
+      "hp_bonus": 660,
+      "mp_bonus": 780
+    },
+    {
+      "id": "guixu_demon_grave_equipment_07",
+      "name": "九渊魔鼎",
+      "description": "九渊魔鼎出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 91800,
+      "hp_bonus": 770,
+      "mp_bonus": 910
+    },
+    {
+      "id": "guixu_demon_grave_equipment_08",
+      "name": "神骨界舟",
+      "description": "神骨界舟出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 102600,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_demon_grave_equipment_09",
+      "name": "血焰天戈",
+      "description": "血焰天戈出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 113400,
+      "hp_bonus": 990,
+      "mp_bonus": 1170
+    },
+    {
+      "id": "guixu_demon_grave_equipment_10",
+      "name": "魔皇印",
+      "description": "魔皇印出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 124199,
+      "hp_bonus": 1100,
+      "mp_bonus": 1300
+    },
+    {
+      "id": "guixu_demon_grave_equipment_11",
+      "name": "葬神碑",
+      "description": "葬神碑出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 135000,
+      "hp_bonus": 1210,
+      "mp_bonus": 1430
+    },
+    {
+      "id": "guixu_demon_grave_equipment_12",
+      "name": "混沌魔胎珠",
+      "description": "混沌魔胎珠出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 145800,
+      "hp_bonus": 1320,
+      "mp_bonus": 1560
+    },
+    {
+      "id": "guixu_demon_grave_consumable_01",
+      "name": "黑日还魂丹",
+      "description": "黑日还魂丹出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_02",
+      "name": "神骸补天露",
+      "description": "神骸补天露出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_03",
+      "name": "太古魔髓丸",
+      "description": "太古魔髓丸出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_04",
+      "name": "万劫养神液",
+      "description": "万劫养神液出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_05",
+      "name": "无相定心丹",
+      "description": "无相定心丹出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_06",
+      "name": "堕星续命散",
+      "description": "堕星续命散出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_07",
+      "name": "九渊洗魂水",
+      "description": "九渊洗魂水出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_consumable_08",
+      "name": "混沌魔胎膏",
+      "description": "混沌魔胎膏出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "demon_grave",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_demon_grave_plant_01",
+      "name": "黑日魔莲",
+      "description": "黑日魔莲出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 120,
+      "mp_bonus": 140,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_demon_grave_plant_01",
+      "plant_years": 1500,
+      "plant_kind": "guixu",
+      "plant_value": 60000
+    },
+    {
+      "id": "guixu_demon_grave_plant_02",
+      "name": "神骸血芝",
+      "description": "神骸血芝出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 240,
+      "mp_bonus": 280,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_demon_grave_plant_02",
+      "plant_years": 2000,
+      "plant_kind": "guixu",
+      "plant_value": 88800
+    },
+    {
+      "id": "guixu_demon_grave_plant_03",
+      "name": "太古魔参",
+      "description": "太古魔参出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 360,
+      "mp_bonus": 420,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_demon_grave_plant_03",
+      "plant_years": 2500,
+      "plant_kind": "guixu",
+      "plant_value": 131420
+    },
+    {
+      "id": "guixu_demon_grave_plant_04",
+      "name": "万劫魂藤",
+      "description": "万劫魂藤出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 480,
+      "mp_bonus": 560,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_demon_grave_plant_04",
+      "plant_years": 3000,
+      "plant_kind": "guixu",
+      "plant_value": 194510
+    },
+    {
+      "id": "guixu_demon_grave_plant_05",
+      "name": "无相心花",
+      "description": "无相心花出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 600,
+      "mp_bonus": 700,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_demon_grave_plant_05",
+      "plant_years": 3500,
+      "plant_kind": "guixu",
+      "plant_value": 287870
+    },
+    {
+      "id": "guixu_demon_grave_plant_06",
+      "name": "堕星骨木",
+      "description": "堕星骨木出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_demon_grave_plant_06",
+      "plant_years": 4000,
+      "plant_kind": "guixu",
+      "plant_value": 426050
+    },
+    {
+      "id": "guixu_demon_grave_plant_07",
+      "name": "九渊冥果",
+      "description": "九渊冥果出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 840,
+      "mp_bonus": 980,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_demon_grave_plant_07",
+      "plant_years": 4500,
+      "plant_kind": "guixu",
+      "plant_value": 630550
+    },
+    {
+      "id": "guixu_demon_grave_plant_08",
+      "name": "葬神苔",
+      "description": "葬神苔出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_demon_grave_plant_08",
+      "plant_years": 5000,
+      "plant_kind": "guixu",
+      "plant_value": 933220
+    },
+    {
+      "id": "guixu_demon_grave_plant_09",
+      "name": "血焰天葵",
+      "description": "血焰天葵出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1080,
+      "mp_bonus": 1260,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_demon_grave_plant_09",
+      "plant_years": 5500,
+      "plant_kind": "guixu",
+      "plant_value": 1381160
+    },
+    {
+      "id": "guixu_demon_grave_plant_10",
+      "name": "混沌魔桑",
+      "description": "混沌魔桑出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1200,
+      "mp_bonus": 1400,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_demon_grave_plant_10",
+      "plant_years": 6000,
+      "plant_kind": "guixu",
+      "plant_value": 2044120
+    },
+    {
+      "id": "guixu_demon_grave_material_01",
+      "name": "黑日母金",
+      "description": "黑日母金出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 3600
+    },
+    {
+      "id": "guixu_demon_grave_material_02",
+      "name": "太古神骨",
+      "description": "太古神骨出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 7200
+    },
+    {
+      "id": "guixu_demon_grave_material_03",
+      "name": "葬天魔晶",
+      "description": "葬天魔晶出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 10800
+    },
+    {
+      "id": "guixu_demon_grave_material_04",
+      "name": "无相魂银",
+      "description": "无相魂银出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 14400
+    },
+    {
+      "id": "guixu_demon_grave_material_05",
+      "name": "万劫血髓",
+      "description": "万劫血髓出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 18000
+    },
+    {
+      "id": "guixu_demon_grave_material_06",
+      "name": "堕星玄铁",
+      "description": "堕星玄铁出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 21600
+    },
+    {
+      "id": "guixu_demon_grave_material_07",
+      "name": "九渊魔铜",
+      "description": "九渊魔铜出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 25200
+    },
+    {
+      "id": "guixu_demon_grave_material_08",
+      "name": "神骸界石",
+      "description": "神骸界石出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 28800
+    },
+    {
+      "id": "guixu_demon_grave_material_09",
+      "name": "血焰法砂",
+      "description": "血焰法砂出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 32400
+    },
+    {
+      "id": "guixu_demon_grave_material_10",
+      "name": "混沌魔源核",
+      "description": "混沌魔源核出自太古葬魔墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "demon_grave",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 36000
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_01",
+      "name": "祖血妖珠",
+      "description": "祖血妖珠出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 23400,
+      "hp_bonus": 110,
+      "mp_bonus": 130
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_02",
+      "name": "万兽战旗",
+      "description": "万兽战旗出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 32760,
+      "hp_bonus": 220,
+      "mp_bonus": 260
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_03",
+      "name": "苍鳞裂海戟",
+      "description": "苍鳞裂海戟出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 42120,
+      "hp_bonus": 330,
+      "mp_bonus": 390
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_04",
+      "name": "百骸祖甲",
+      "description": "百骸祖甲出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 51480,
+      "hp_bonus": 440,
+      "mp_bonus": 520
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_05",
+      "name": "雷羽天冠",
+      "description": "雷羽天冠出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 60839,
+      "hp_bonus": 550,
+      "mp_bonus": 650
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_06",
+      "name": "青丘幻镜",
+      "description": "青丘幻镜出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 70200,
+      "hp_bonus": 660,
+      "mp_bonus": 780
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_07",
+      "name": "吞天妖鼎",
+      "description": "吞天妖鼎出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 79560,
+      "hp_bonus": 770,
+      "mp_bonus": 910
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_08",
+      "name": "始祖骨轮",
+      "description": "始祖骨轮出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 88920,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_09",
+      "name": "混沌卵舟",
+      "description": "混沌卵舟出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 98280,
+      "hp_bonus": 990,
+      "mp_bonus": 1170
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_10",
+      "name": "星落妖钟",
+      "description": "星落妖钟出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 107639,
+      "hp_bonus": 1100,
+      "mp_bonus": 1300
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_11",
+      "name": "万灵镇脉碑",
+      "description": "万灵镇脉碑出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 117000,
+      "hp_bonus": 1210,
+      "mp_bonus": 1430
+    },
+    {
+      "id": "guixu_beast_vortex_equipment_12",
+      "name": "祖涡源印",
+      "description": "祖涡源印出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 126360,
+      "hp_bonus": 1320,
+      "mp_bonus": 1560
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_01",
+      "name": "祖血回元丹",
+      "description": "祖血回元丹出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_02",
+      "name": "万兽养神露",
+      "description": "万兽养神露出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_03",
+      "name": "百骸生肌膏",
+      "description": "百骸生肌膏出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_04",
+      "name": "妖胎续命丸",
+      "description": "妖胎续命丸出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_05",
+      "name": "雷羽淬骨液",
+      "description": "雷羽淬骨液出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_06",
+      "name": "青丘定魂香",
+      "description": "青丘定魂香出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_07",
+      "name": "苍鳞补海散",
+      "description": "苍鳞补海散出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_consumable_08",
+      "name": "混沌返祖丹",
+      "description": "混沌返祖丹出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "beast_vortex",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_beast_vortex_plant_01",
+      "name": "祖血莲",
+      "description": "祖血莲出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 120,
+      "mp_bonus": 140,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_beast_vortex_plant_01",
+      "plant_years": 1500,
+      "plant_kind": "guixu",
+      "plant_value": 52000
+    },
+    {
+      "id": "guixu_beast_vortex_plant_02",
+      "name": "万兽髓芝",
+      "description": "万兽髓芝出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 240,
+      "mp_bonus": 280,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_beast_vortex_plant_02",
+      "plant_years": 2000,
+      "plant_kind": "guixu",
+      "plant_value": 76960
+    },
+    {
+      "id": "guixu_beast_vortex_plant_03",
+      "name": "百骸妖参",
+      "description": "百骸妖参出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 360,
+      "mp_bonus": 420,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_beast_vortex_plant_03",
+      "plant_years": 2500,
+      "plant_kind": "guixu",
+      "plant_value": 113900
+    },
+    {
+      "id": "guixu_beast_vortex_plant_04",
+      "name": "吞天胎藤",
+      "description": "吞天胎藤出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 480,
+      "mp_bonus": 560,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_beast_vortex_plant_04",
+      "plant_years": 3000,
+      "plant_kind": "guixu",
+      "plant_value": 168570
+    },
+    {
+      "id": "guixu_beast_vortex_plant_05",
+      "name": "雷羽天草",
+      "description": "雷羽天草出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 600,
+      "mp_bonus": 700,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_beast_vortex_plant_05",
+      "plant_years": 3500,
+      "plant_kind": "guixu",
+      "plant_value": 249490
+    },
+    {
+      "id": "guixu_beast_vortex_plant_06",
+      "name": "青丘梦花",
+      "description": "青丘梦花出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_beast_vortex_plant_06",
+      "plant_years": 4000,
+      "plant_kind": "guixu",
+      "plant_value": 369240
+    },
+    {
+      "id": "guixu_beast_vortex_plant_07",
+      "name": "苍鳞海藻",
+      "description": "苍鳞海藻出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 840,
+      "mp_bonus": 980,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_beast_vortex_plant_07",
+      "plant_years": 4500,
+      "plant_kind": "guixu",
+      "plant_value": 546480
+    },
+    {
+      "id": "guixu_beast_vortex_plant_08",
+      "name": "始祖蜕皮木",
+      "description": "始祖蜕皮木出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_beast_vortex_plant_08",
+      "plant_years": 5000,
+      "plant_kind": "guixu",
+      "plant_value": 808790
+    },
+    {
+      "id": "guixu_beast_vortex_plant_09",
+      "name": "星落妖果",
+      "description": "星落妖果出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1080,
+      "mp_bonus": 1260,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_beast_vortex_plant_09",
+      "plant_years": 5500,
+      "plant_kind": "guixu",
+      "plant_value": 1197010
+    },
+    {
+      "id": "guixu_beast_vortex_plant_10",
+      "name": "混沌卵苔",
+      "description": "混沌卵苔出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1200,
+      "mp_bonus": 1400,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_beast_vortex_plant_10",
+      "plant_years": 6000,
+      "plant_kind": "guixu",
+      "plant_value": 1771570
+    },
+    {
+      "id": "guixu_beast_vortex_material_01",
+      "name": "祖血源晶",
+      "description": "祖血源晶出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 3120
+    },
+    {
+      "id": "guixu_beast_vortex_material_02",
+      "name": "万兽骨金",
+      "description": "万兽骨金出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 6240
+    },
+    {
+      "id": "guixu_beast_vortex_material_03",
+      "name": "百骸玄铁",
+      "description": "百骸玄铁出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 9360
+    },
+    {
+      "id": "guixu_beast_vortex_material_04",
+      "name": "吞天妖髓",
+      "description": "吞天妖髓出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 12480
+    },
+    {
+      "id": "guixu_beast_vortex_material_05",
+      "name": "雷羽神铜",
+      "description": "雷羽神铜出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 15600
+    },
+    {
+      "id": "guixu_beast_vortex_material_06",
+      "name": "青丘幻砂",
+      "description": "青丘幻砂出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 18720
+    },
+    {
+      "id": "guixu_beast_vortex_material_07",
+      "name": "苍鳞海玉",
+      "description": "苍鳞海玉出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 21840
+    },
+    {
+      "id": "guixu_beast_vortex_material_08",
+      "name": "始祖蜕石",
+      "description": "始祖蜕石出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 24960
+    },
+    {
+      "id": "guixu_beast_vortex_material_09",
+      "name": "星落天银",
+      "description": "星落天银出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 28080
+    },
+    {
+      "id": "guixu_beast_vortex_material_10",
+      "name": "混沌卵核",
+      "description": "混沌卵核出自万兽祖涡，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "beast_vortex",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 31200
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_01",
+      "name": "黄泉魂灯",
+      "description": "黄泉魂灯出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 25200,
+      "hp_bonus": 110,
+      "mp_bonus": 130
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_02",
+      "name": "忘川渡舟",
+      "description": "忘川渡舟出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 35280,
+      "hp_bonus": 220,
+      "mp_bonus": 260
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_03",
+      "name": "无底狱甲",
+      "description": "无底狱甲出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 45360,
+      "hp_bonus": 330,
+      "mp_bonus": 390
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_04",
+      "name": "十殿判官笔",
+      "description": "十殿判官笔出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 55440,
+      "hp_bonus": 440,
+      "mp_bonus": 520
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_05",
+      "name": "罪业轮",
+      "description": "罪业轮出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 65519,
+      "hp_bonus": 550,
+      "mp_bonus": 650
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_06",
+      "name": "鬼柏心镜",
+      "description": "鬼柏心镜出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 75599,
+      "hp_bonus": 660,
+      "mp_bonus": 780
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_07",
+      "name": "生死簿残页",
+      "description": "生死簿残页出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 85680,
+      "hp_bonus": 770,
+      "mp_bonus": 910
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_08",
+      "name": "六道魂幡",
+      "description": "六道魂幡出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 95760,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_09",
+      "name": "幽关镇魄印",
+      "description": "幽关镇魄印出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 105840,
+      "hp_bonus": 990,
+      "mp_bonus": 1170
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_10",
+      "name": "引魂天索",
+      "description": "引魂天索出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 115919,
+      "hp_bonus": 1100,
+      "mp_bonus": 1300
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_11",
+      "name": "轮回石碑",
+      "description": "轮回石碑出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 126000,
+      "hp_bonus": 1210,
+      "mp_bonus": 1430
+    },
+    {
+      "id": "guixu_yellow_spring_equipment_12",
+      "name": "无岸冥钟",
+      "description": "无岸冥钟出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 136080,
+      "hp_bonus": 1320,
+      "mp_bonus": 1560
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_01",
+      "name": "黄泉还魂丹",
+      "description": "黄泉还魂丹出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_02",
+      "name": "忘川养神露",
+      "description": "忘川养神露出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_03",
+      "name": "无底固魄丸",
+      "description": "无底固魄丸出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_04",
+      "name": "十殿续命散",
+      "description": "十殿续命散出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_05",
+      "name": "罪业洗魂水",
+      "description": "罪业洗魂水出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_06",
+      "name": "鬼柏生阴膏",
+      "description": "鬼柏生阴膏出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_07",
+      "name": "六道定心香",
+      "description": "六道定心香出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_consumable_08",
+      "name": "轮回返照丹",
+      "description": "轮回返照丹出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "yellow_spring",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_yellow_spring_plant_01",
+      "name": "黄泉彼岸花",
+      "description": "黄泉彼岸花出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 120,
+      "mp_bonus": 140,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_yellow_spring_plant_01",
+      "plant_years": 1500,
+      "plant_kind": "guixu",
+      "plant_value": 56000
+    },
+    {
+      "id": "guixu_yellow_spring_plant_02",
+      "name": "忘川魂藻",
+      "description": "忘川魂藻出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 240,
+      "mp_bonus": 280,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_yellow_spring_plant_02",
+      "plant_years": 2000,
+      "plant_kind": "guixu",
+      "plant_value": 82880
+    },
+    {
+      "id": "guixu_yellow_spring_plant_03",
+      "name": "无底阴芝",
+      "description": "无底阴芝出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 360,
+      "mp_bonus": 420,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_yellow_spring_plant_03",
+      "plant_years": 2500,
+      "plant_kind": "guixu",
+      "plant_value": 122660
+    },
+    {
+      "id": "guixu_yellow_spring_plant_04",
+      "name": "十殿判木",
+      "description": "十殿判木出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 480,
+      "mp_bonus": 560,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_yellow_spring_plant_04",
+      "plant_years": 3000,
+      "plant_kind": "guixu",
+      "plant_value": 181540
+    },
+    {
+      "id": "guixu_yellow_spring_plant_05",
+      "name": "罪业心莲",
+      "description": "罪业心莲出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 600,
+      "mp_bonus": 700,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_yellow_spring_plant_05",
+      "plant_years": 3500,
+      "plant_kind": "guixu",
+      "plant_value": 268680
+    },
+    {
+      "id": "guixu_yellow_spring_plant_06",
+      "name": "鬼柏灵果",
+      "description": "鬼柏灵果出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_yellow_spring_plant_06",
+      "plant_years": 4000,
+      "plant_kind": "guixu",
+      "plant_value": 397650
+    },
+    {
+      "id": "guixu_yellow_spring_plant_07",
+      "name": "生死簿藤",
+      "description": "生死簿藤出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 840,
+      "mp_bonus": 980,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_yellow_spring_plant_07",
+      "plant_years": 4500,
+      "plant_kind": "guixu",
+      "plant_value": 588520
+    },
+    {
+      "id": "guixu_yellow_spring_plant_08",
+      "name": "六道轮回草",
+      "description": "六道轮回草出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_yellow_spring_plant_08",
+      "plant_years": 5000,
+      "plant_kind": "guixu",
+      "plant_value": 871000
+    },
+    {
+      "id": "guixu_yellow_spring_plant_09",
+      "name": "幽关冥参",
+      "description": "幽关冥参出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1080,
+      "mp_bonus": 1260,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_yellow_spring_plant_09",
+      "plant_years": 5500,
+      "plant_kind": "guixu",
+      "plant_value": 1289090
+    },
+    {
+      "id": "guixu_yellow_spring_plant_10",
+      "name": "无岸魂苔",
+      "description": "无岸魂苔出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1200,
+      "mp_bonus": 1400,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_yellow_spring_plant_10",
+      "plant_years": 6000,
+      "plant_kind": "guixu",
+      "plant_value": 1907850
+    },
+    {
+      "id": "guixu_yellow_spring_material_01",
+      "name": "黄泉阴铁",
+      "description": "黄泉阴铁出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 3360
+    },
+    {
+      "id": "guixu_yellow_spring_material_02",
+      "name": "忘川魂晶",
+      "description": "忘川魂晶出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 6720
+    },
+    {
+      "id": "guixu_yellow_spring_material_03",
+      "name": "无底冥金",
+      "description": "无底冥金出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 10080
+    },
+    {
+      "id": "guixu_yellow_spring_material_04",
+      "name": "十殿判玉",
+      "description": "十殿判玉出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 13440
+    },
+    {
+      "id": "guixu_yellow_spring_material_05",
+      "name": "罪业火砂",
+      "description": "罪业火砂出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 16800
+    },
+    {
+      "id": "guixu_yellow_spring_material_06",
+      "name": "鬼柏心木",
+      "description": "鬼柏心木出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 20160
+    },
+    {
+      "id": "guixu_yellow_spring_material_07",
+      "name": "生死簿银",
+      "description": "生死簿银出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 23520
+    },
+    {
+      "id": "guixu_yellow_spring_material_08",
+      "name": "六道轮回石",
+      "description": "六道轮回石出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 26880
+    },
+    {
+      "id": "guixu_yellow_spring_material_09",
+      "name": "幽关镇魂铜",
+      "description": "幽关镇魂铜出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 30240
+    },
+    {
+      "id": "guixu_yellow_spring_material_10",
+      "name": "无岸阴源核",
+      "description": "无岸阴源核出自黄泉无底狱，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "yellow_spring",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 33600
     }
   ]
 }

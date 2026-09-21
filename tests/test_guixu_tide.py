@@ -1,6 +1,7 @@
 import random
 import copy
 import json
+import shutil
 import tempfile
 import unittest
 from collections import Counter
@@ -10,7 +11,8 @@ from unittest.mock import patch
 from cultivation_life.content_registry import (
     CONTENT, CONTENT_DOCUMENTS, GUIXU_EXCLUSIVE_ITEM_IDS,
     GUIXU_EXCLUSIVE_TECHNIQUE_IDS, GUIXU_TIDE_CONTENT, ITEM_CATALOG,
-    MARKET_GOODS, TECHNIQUE_CATALOG, WORLD_SYSTEMS, ContentError, validate_guixu_catalog,
+    MARKET_GOODS, TECHNIQUE_CATALOG, WORLD_SYSTEMS, ContentError, ContentRegistry,
+    validate_guixu_catalog,
 )
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import SectNpc
@@ -41,14 +43,20 @@ class GuixuTideTests(unittest.TestCase):
         self.engine.store.save(game)
         return created["id"], dungeon
 
-    def test_content_has_two_rich_non_repeating_pools(self):
+    def test_content_has_six_rich_non_repeating_pools(self):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual(manifest["version"], "2.0.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
-        self.assertEqual({row["world"] for row in dungeons}, {"human", "spirit"})
-        self.assertEqual({row["name"] for row in dungeons}, {"葬海天渊", "诸界尾闾"})
+        self.assertEqual(
+            {row["world"] for row in dungeons},
+            {"human", "spirit", "demon", "true_demon", "phantom_underworld", "hell"},
+        )
+        self.assertEqual(
+            {row["name"] for row in dungeons},
+            {"葬海天渊", "诸界尾闾", "血河沉渊", "太古葬魔墟", "万兽祖涡", "黄泉无底狱"},
+        )
         seen = set()
         expected = {
             "technique": 10, "equipment": 12, "consumable": 8,
@@ -87,12 +95,57 @@ class GuixuTideTests(unittest.TestCase):
         spirit = self.engine.get_game(game_id)["guixu_tide"]
         self.assertEqual([row["world"] for row in spirit["dungeons"]], ["spirit"])
 
+        for world in ("demon", "true_demon", "phantom_underworld", "hell"):
+            game = self.engine.store.load(game_id)
+            game.player.world = world
+            game.player.location_id = self.engine.maps.default_location(world)
+            self.engine.store.save(game)
+            shown = self.engine.get_game(game_id)["guixu_tide"]
+            self.assertEqual([row["world"] for row in shown["dungeons"]], [world])
+
         game = self.engine.store.load(game_id)
         game.player.world = "celestial"
         self.engine.store.save(game)
         celestial = self.engine.get_game(game_id)["guixu_tide"]
         self.assertFalse(celestial["available"])
         self.assertEqual(celestial["dungeons"], [])
+
+    def test_dlc_loads_with_only_base_content_and_uses_base_map_entries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            extension_root = Path(directory)
+            package_root = extension_root / "dlc" / "guixu-tide"
+            shutil.copytree(SOURCE_ROOT / "dlc" / "guixu-tide", package_root)
+            registry = ContentRegistry.load(SOURCE_ROOT / "content", extension_root)
+
+        report = {row["id"]: row for row in ContentRegistry.extension_report}
+        self.assertEqual(report["official.guixu-tide"]["status"], "loaded")
+        dungeons = ContentRegistry.loaded_documents["guixu_tide.json"]["dungeons"]
+        entry_pairs = {(row["world"], row["entry_location_id"]) for row in dungeons}
+        self.assertIn(("phantom_underworld", "phantom_tide"), entry_pairs)
+        self.assertIn(("hell", "ninefold_prison"), entry_pairs)
+
+    def test_popup_setting_keeps_cycles_running_without_blocking_event(self):
+        created = self.engine.create_game("静潮", "supreme_water", "dao", 20, "water")
+        game_id = created["id"]
+        game = self.engine.store.load(game_id)
+        dungeon = next(row for row in GUIXU_TIDE_CONTENT["dungeons"] if row["world"] == "human")
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        cycle["next_announce_age"] = game.player.age
+        cycle["next_open_age"] = game.player.age + dungeon["announce_lead_years"]
+        game.settings["guixu_event_popup"] = False
+        requires_input = self.engine._advance_guixu_calendar(game, random.Random(20), [])
+        self.assertFalse(requires_input)
+        self.assertIsNone(game.pending_event)
+        self.assertEqual(cycle["phase"], "announced")
+        self.assertTrue(any(row.event_id == "SYS_GUIXU_ANNOUNCE" for row in game.history))
+
+        game.settings["guixu_event_popup"] = True
+        cycle["phase"] = "closed"
+        self.engine._announce_guixu_cycle(game, dungeon, cycle, random.Random(21))
+        self.assertEqual(game.pending_event["id"], "EVT_GUIXU_ANNOUNCE")
+        self.engine.store.save(game)
+        changed = self.engine.update_setting(game_id, "guixu_event_popup", False)
+        self.assertIsNone(changed["pending_event"])
 
     def test_guixu_treasures_are_excluded_from_every_generic_acquisition_pool(self):
         market_ids = {str(row["content_id"]) for row in MARKET_GOODS}

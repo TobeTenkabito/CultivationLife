@@ -48,10 +48,13 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(created["settings"]["combat_popup"])
         self.assertTrue(created["settings"]["achievement_popup"])
         self.assertFalse(created["settings"]["auto_advance_player_wars"])
+        self.assertTrue(created["settings"]["guixu_event_popup"])
         changed = self.engine.update_setting(created["id"], "combat_popup", False)
         self.assertFalse(changed["settings"]["combat_popup"])
         changed = self.engine.update_setting(created["id"], "auto_advance_player_wars", True)
         self.assertTrue(changed["settings"]["auto_advance_player_wars"])
+        changed = self.engine.update_setting(created["id"], "guixu_event_popup", False)
+        self.assertFalse(changed["settings"]["guixu_event_popup"])
         self.assertEqual(self.engine.get_game(created["id"])["settings"], changed["settings"])
 
     def test_choice_requirement_is_exposed_without_leaking_effects(self):

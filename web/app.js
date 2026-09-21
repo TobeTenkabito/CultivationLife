@@ -3035,9 +3035,13 @@ function transformationFormCard(form, system, isStored) {
 function renderSettings(settings) {
   const popup = $('#setting-combat-popup');
   const achievementPopup = $('#setting-achievement-popup');
+  const guixuPopup = $('#setting-guixu-popup');
+  const guixuPopupRow = $('#setting-guixu-popup-row');
   const autoWar = $('#setting-auto-war');
   if (popup) popup.checked = settings.combat_popup === false;
   if (achievementPopup) achievementPopup.checked = settings.achievement_popup === false;
+  if (guixuPopup) guixuPopup.checked = settings.guixu_event_popup === false;
+  if (guixuPopupRow) guixuPopupRow.classList.toggle('hidden', !game?.guixu_tide?.available);
   if (autoWar) autoWar.checked = !!settings.auto_advance_player_wars;
 }
 
@@ -3625,6 +3629,9 @@ $('#setting-combat-popup').onchange = event => mutate(`/api/games/${game.id}/set
 });
 $('#setting-achievement-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'achievement_popup', enabled:!event.target.checked,
+});
+$('#setting-guixu-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
+  setting:'guixu_event_popup', enabled:!event.target.checked,
 });
 $('#setting-auto-war').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'auto_advance_player_wars', enabled:event.target.checked,

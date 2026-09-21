@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260921-3">
-  <link rel="stylesheet" href="/panels.css?v=20260921-8">
+  <link rel="stylesheet" href="/panels.css?v=20260921-9">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -366,6 +366,7 @@
             <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
+            <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
           </div>
         </article>
@@ -423,6 +424,6 @@
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260921-3"></script>
   <script src="/guixu-panel.js?v=20260921-5"></script>
-  <script src="/app.js?v=20260921-9"></script>
+  <script src="/app.js?v=20260921-10"></script>
 </body>
 </html>
