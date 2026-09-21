@@ -16,7 +16,7 @@ from cultivation_life.content_registry import (
 )
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import SectNpc
-from cultivation_life.rules import has_item
+from cultivation_life.rules import add_item, has_item
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -48,7 +48,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.1.0")
+        self.assertEqual(manifest["version"], "2.2.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
@@ -82,6 +82,66 @@ class GuixuTideTests(unittest.TestCase):
             for row in pool:
                 catalog = TECHNIQUE_CATALOG if row["kind"] == "technique" else ITEM_CATALOG
                 self.assertIn(row["content_id"], catalog)
+        true_demon = next(row for row in dungeons if row["world"] == "true_demon")
+        self.assertEqual(true_demon["entry_location_id"], "fallen_god_ridge")
+        location = next(
+            row for row in CONTENT_DOCUMENTS["maps.json"]["worlds"]["true_demon"]["locations"]
+            if row["id"] == true_demon["entry_location_id"]
+        )
+        self.assertLessEqual(int(location.get("min_realm_index", 0)), true_demon["max_entry_rank"][0])
+
+    def test_every_guixu_item_category_has_a_real_consumption_or_equipment_path(self):
+        created = self.engine.create_game("百宝实装", "supreme_water", "dao", 19021, preset_id="core")
+        game = self.engine.store.load(created["id"])
+        game.pending_event = None
+        game.player.realm_index = 6
+        material_id = "guixu_weir_material_01"
+        plant_id = "guixu_weir_plant_01"
+        consumable_id = "guixu_weir_consumable_01"
+        add_item(game.player, material_id, 4)
+        add_item(game.player, plant_id, 4)
+        add_item(game.player, consumable_id)
+        self.engine.store.save(game)
+        self.engine.natal_artifact_action(created["id"], "bind", "starfall_blade")
+
+        shown = self.engine.get_game(created["id"])
+        crafting_ids = {row["definition_id"] for row in shown["crafting_system"]["materials"]}
+        formation_ids = {row["storage_id"] for row in shown["formation_system"]["materials"]}
+        natal_ids = {row["item_id"] for row in shown["natal_artifact"]["materials"]}
+        self.assertTrue({material_id, plant_id} <= crafting_ids)
+        self.assertTrue({material_id, plant_id} <= formation_ids)
+        self.assertIn(material_id, natal_ids)
+
+        before_socket_power = shown["natal_artifact"]["bonuses"]["combat_bonus"]
+        socketed = self.engine.natal_artifact_action(created["id"], "socket", material_id, 0)
+        self.assertEqual(socketed["natal_artifact"]["slots"][0]["name"], ITEM_CATALOG[material_id].name)
+        self.assertGreater(socketed["natal_artifact"]["bonuses"]["combat_bonus"], before_socket_power)
+        self.engine.natal_artifact_action(created["id"], "unsocket", slot_index=0)
+
+        material_candidates = [
+            row for row in self.engine.get_game(created["id"])["crafting_system"]["materials"]
+            if row["definition_id"] == material_id
+        ]
+        payload = {
+            "mold_id":"umbrella", "primary_id":material_candidates[0]["id"],
+            "secondary_a_id":material_candidates[1]["id"],
+            "secondary_b_id":material_candidates[2]["id"],
+            "quench_id":material_candidates[3]["id"], "name":"尾闾界伞",
+            "allocations":{"combat_power":20,"max_hp":10,"max_mp":10,"breakthrough_bonus":5},
+        }
+        forged = self.engine.forge_crafted_artifact(created["id"], payload)
+        artifact = next(row for row in forged["crafting_system"]["artifacts"] if row["name"] == "尾闾界伞")
+        self.assertEqual({row["definition_id"] for row in artifact["materials"]}, {material_id})
+        self.assertFalse(any(row["id"] == material_id for row in forged["player"]["inventory"]))
+
+        before_quantity = next(row["quantity"] for row in forged["player"]["inventory"] if row["id"] == consumable_id)
+        consumed = self.engine.use_item(created["id"], consumable_id)
+        self.assertEqual(
+            next((row["quantity"] for row in consumed["player"]["inventory"] if row["id"] == consumable_id), 0),
+            before_quantity - 1,
+        )
+        refined = self.engine.use_item(created["id"], plant_id)
+        self.assertEqual(refined["history"][0]["event_id"], "SYS_REFINE_GUIXU_PLANT")
 
     def test_public_panel_only_exposes_the_current_world_dungeon(self):
         created = self.engine.create_game("观潮", "supreme_water", "dao", 19, "water")

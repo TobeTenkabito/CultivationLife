@@ -15,6 +15,33 @@ class NatalArtifactSystemMixin:
     def _natal_artifact_config() -> dict[str, Any]:
         return WORLD_SYSTEMS["natal_artifact"]
 
+    def _natal_artifact_material_definitions(self) -> dict[str, dict[str, Any]]:
+        """Merge base socket gems with Guixu materials without duplicating inventory state."""
+        definitions = {
+            str(row["item_id"]): dict(row)
+            for row in self._natal_artifact_config()["materials"]
+        }
+        realm_by_source = {
+            "canghai": 3, "bloodriver": 3, "weir": 6,
+            "demon_grave": 6, "beast_vortex": 6, "yellow_spring": 6,
+        }
+        for item in ITEM_CATALOG.values():
+            tags = set(item.tags)
+            if not {"guixu_tide", "crafting_material"} <= tags:
+                continue
+            source = next((key for key in realm_by_source if key in tags), "canghai")
+            socket_power = max(1.0, float(item.combat_bonus) * 2.0)
+            definitions[item.id] = {
+                "item_id": item.id, "name": item.name,
+                "minimum_realm": realm_by_source[source],
+                "effect": {"combat_bonus": socket_power},
+                "description": (
+                    f"归墟专属镶材；嵌入本命法宝后战斗力 +{socket_power:,.0f}，"
+                    "取下时完整返还。"
+                ),
+            }
+        return definitions
+
     def _natal_artifact_candidate(self, item: Any) -> bool:
         tags = set(item.tags)
         return bool(getattr(item, "crafted_artifact_id", None)) or item.combat_bonus > 0 and (
@@ -150,7 +177,7 @@ class NatalArtifactSystemMixin:
             }
         else:
             return
-        definitions = {row["item_id"]: row for row in self._natal_artifact_config()["materials"]}
+        definitions = self._natal_artifact_material_definitions()
         for material_id in artifact.get("slots", []):
             definition = definitions.get(material_id)
             if not definition:
@@ -168,7 +195,7 @@ class NatalArtifactSystemMixin:
         artifact = game.natal_artifact
         if not artifact:
             return []
-        definitions = {row["item_id"]: row for row in self._natal_artifact_config()["materials"]}
+        definitions = self._natal_artifact_material_definitions()
         effects = []
         for material_id in artifact.get("slots", []):
             definition = definitions.get(material_id)
@@ -198,6 +225,31 @@ class NatalArtifactSystemMixin:
             artifact["experience"] = 0
         self._sync_natal_artifact_bonuses(game)
         return old_level, int(artifact["level"])
+
+    def _natal_refine_all_plan(self, game: GameState) -> tuple[int, int]:
+        artifact = game.natal_artifact
+        if not artifact:
+            return 0, 0
+        stone_item = next((row for row in game.player.inventory if row.id == "spirit_stone"), None)
+        stones = max(0, int(stone_item.quantity)) if stone_item else 0
+        level = max(1, int(artifact.get("level", 1)))
+        experience = max(0, int(artifact.get("experience", 0)))
+        maximum = int(self._natal_artifact_config()["max_level"])
+        base_cost = int(self._natal_artifact_config()["manual_refine_stone_base"])
+        refine_xp = int(self._natal_artifact_config()["manual_refine_xp"])
+        count = total_cost = 0
+        while level < maximum:
+            cost = base_cost * level
+            if stones < cost:
+                break
+            stones -= cost
+            total_cost += cost
+            count += 1
+            experience += refine_xp
+            while level < maximum and experience >= self._natal_level_required(level):
+                experience -= self._natal_level_required(level)
+                level += 1
+        return count, total_cost
 
     def _advance_natal_artifact(self, game: GameState, action: str, units: int) -> str | None:
         if action != "cultivate" or not game.natal_artifact:
@@ -248,22 +300,32 @@ class NatalArtifactSystemMixin:
                 }
             summary = f"你将{item.name}收入丹田，以精血和金丹真火炼为本命法宝。"
             result = "bound"
-        elif action == "refine":
+        elif action in {"refine", "refine_all"}:
             if not game.natal_artifact:
                 raise ValueError("尚未选择本命法宝")
             level = int(game.natal_artifact["level"])
             if level >= int(self._natal_artifact_config()["max_level"]):
                 raise ValueError("本命法宝已祭炼至当前上限")
-            cost = int(self._natal_artifact_config()["manual_refine_stone_base"]) * level
+            if action == "refine_all":
+                refine_count, cost = self._natal_refine_all_plan(game)
+                if refine_count <= 0:
+                    raise ValueError("灵石不足以继续温养本命法宝")
+            else:
+                refine_count = 1
+                cost = int(self._natal_artifact_config()["manual_refine_stone_base"]) * level
             if not remove_item(player, "spirit_stone", cost):
                 raise ValueError(f"本次温养需要 {cost} 枚灵石")
             old_level, new_level = self._add_natal_artifact_experience(
-                game, int(self._natal_artifact_config()["manual_refine_xp"]),
+                game, int(self._natal_artifact_config()["manual_refine_xp"]) * refine_count,
             )
-            summary = f"你耗费 {cost} 枚灵石温养{game.natal_artifact['name']}，祭炼经验增加。"
+            summary = (
+                f"你耗费 {cost} 枚灵石"
+                + (f"连续温养 {refine_count} 次" if action == "refine_all" else "温养")
+                + f"{game.natal_artifact['name']}，祭炼经验增加。"
+            )
             if new_level > old_level:
                 summary += f" 法宝升至 {new_level} 级。"
-            result = "refined"
+            result = "refined_all" if action == "refine_all" else "refined"
         elif action in {"socket", "unsocket"}:
             if not game.natal_artifact:
                 raise ValueError("尚未选择本命法宝")
@@ -279,7 +341,7 @@ class NatalArtifactSystemMixin:
                 slots[slot_index] = None
                 summary, result = f"你取回了{ITEM_CATALOG[old_material].name}。", "unsocketed"
             else:
-                definitions = {row["item_id"]: row for row in self._natal_artifact_config()["materials"]}
+                definitions = self._natal_artifact_material_definitions()
                 definition = definitions.get(item_id)
                 if not definition or player.realm_index < int(definition["minimum_realm"]):
                     raise ValueError("当前境界无法驾驭这种镶嵌材料")
@@ -325,9 +387,9 @@ class NatalArtifactSystemMixin:
             return {"visible": True, "bound": False, "candidates": candidates}
         level = int(artifact["level"])
         unlocked = self._natal_slots_for_level(level)
-        definitions = {row["item_id"]: row for row in self._natal_artifact_config()["materials"]}
+        definitions = self._natal_artifact_material_definitions()
         materials = []
-        for definition in self._natal_artifact_config()["materials"]:
+        for definition in definitions.values():
             item = next((row for row in player.inventory if row.id == definition["item_id"]), None)
             materials.append({
                 **definition, "quantity": int(item.quantity) if item else 0,
@@ -360,6 +422,7 @@ class NatalArtifactSystemMixin:
                 "combat_bonus", "hp_bonus", "mp_bonus", "opportunity_bonus", "tribulation_reduction",
             )}
         maximum = int(self._natal_artifact_config()["max_level"])
+        refine_all_count, refine_all_cost = self._natal_refine_all_plan(game)
         return {
             "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
             "crafted_artifact_id":artifact.get("crafted_artifact_id"),
@@ -368,6 +431,8 @@ class NatalArtifactSystemMixin:
             "experience_required": self._natal_level_required(level) if level < maximum else 0,
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
             "refine_cost": int(self._natal_artifact_config()["manual_refine_stone_base"]) * level,
+            "refine_all_count": refine_all_count, "refine_all_cost": refine_all_cost,
+            "can_refine_all": refine_all_count > 0,
             "can_refine": level < maximum and has_item(
                 player, "spirit_stone", int(self._natal_artifact_config()["manual_refine_stone_base"]) * level,
             ),

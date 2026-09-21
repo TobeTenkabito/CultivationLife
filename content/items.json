@@ -303,6 +303,14 @@
     {"id":"iron_tree_heartwood","name":"阴铁树心","combat_bonus":12000,"hp_bonus":6500,"description":"铁树荒原百年才生一寸的阴铁木心。战斗力 +12,000，最大 HP +6,500。","tags":["market","hell","ghost","treasure"]},
     {"id":"nine_prison_seal","name":"九狱镇魂印","combat_bonus":86000,"hp_bonus":19000,"mp_bonus":22000,"description":"仿照九重狱境地脉炼成的镇魂法印。战斗力 +86,000，最大 HP +19,000，最大 MP +22,000。","tags":["market","hell","ghost","treasure"]},
     {"id":"nether_tide_banner","name":"冥潮引魂幡","combat_bonus":620000,"mp_bonus":85000,"description":"只引无主残念、不拘生魂的冥潮法幡。战斗力 +620,000，最大 MP +85,000。","tags":["market","hell","ghost","treasure"]},
-    {"id":"karma_mirror_disc","name":"照业轮镜","combat_bonus":3900000,"hp_bonus":260000,"mp_bonus":340000,"opportunity_bonus":0.14,"description":"可照见施术者自身因果缺口的古镜轮。战斗力 +3,900,000，最大 HP +260,000，最大 MP +340,000，机缘效率 +14%。","tags":["market","hell","ghost","rare"]}
+    {"id":"karma_mirror_disc","name":"照业轮镜","combat_bonus":3900000,"hp_bonus":260000,"mp_bonus":340000,"opportunity_bonus":0.14,"description":"可照见施术者自身因果缺口的古镜轮。战斗力 +3,900,000，最大 HP +260,000，最大 MP +340,000，机缘效率 +14%。","tags":["market","hell","ghost","rare"]},
+    {"id":"demon_bloodsteel_core","name":"血炼魔钢心","description":"以魔界血火反复锻炼的器心，镶入本命法宝可显著提高威能。","tags":["market","demon","natal_artifact_material"]},
+    {"id":"demon_soulflame_crystal","name":"煞魂焰晶","description":"凝聚万缕煞气与魂焰的玄晶，适合高阶魔修温养本命法宝。","tags":["market","demon","natal_artifact_material"]},
+    {"id":"true_demon_voidbone_jade","name":"虚魔骨玉","description":"真魔遗骨在界隙中玉化而成，可扩张本命法宝的魔纹回路。","tags":["market","true_demon","natal_artifact_material"]},
+    {"id":"true_demon_primordial_heart_iron","name":"太古魔心铁","description":"太古魔心附近孕生的重铁，能令大乘本命法宝威能暴涨。","tags":["market","true_demon","natal_artifact_material"]},
+    {"id":"hell_forgetful_soul_jade","name":"忘川魂玉","description":"忘川完整魂光沉积成玉，可稳固鬼修本命法宝的器灵。","tags":["market","hell","ghost","natal_artifact_material"]},
+    {"id":"hell_yellow_spring_dark_iron","name":"黄泉冥铁","description":"黄泉河床深处的阴沉玄铁，可承载炼虚层次的幽冥威能。","tags":["market","hell","ghost","natal_artifact_material"]},
+    {"id":"asura_warsoul_crystal","name":"修罗战魂晶","description":"万战残魂凝成的兵煞晶核，可令仙阶本命法宝锋芒更盛。","tags":["market","asura","natal_artifact_material"]},
+    {"id":"asura_annihilation_bone_gold","name":"寂灭骨金","description":"修罗古战场中神骨与寂灭法则熔成的道金，足以温养太乙层次本命法宝。","tags":["market","asura","natal_artifact_material"]}
   ]
 }

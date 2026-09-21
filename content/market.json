@@ -362,5 +362,13 @@
 {"world":"hell","kind":"technique","content_id":"TECH_UNDYING_GHOST_BODY","tier":7,"price":760000},
 {"world":"hell","kind":"item","content_id":"mahayana_soul_marrow","tier":8,"price":2500000},
 {"world":"hell","kind":"item","content_id":"karma_mirror_disc","tier":8,"price":4100000},
-{"world":"hell","kind":"technique","content_id":"TECH_REINCARNATION_GATE_CANON","tier":8,"price":5200000}
+{"world":"hell","kind":"technique","content_id":"TECH_REINCARNATION_GATE_CANON","tier":8,"price":5200000},
+{"world":"demon","kind":"item","content_id":"demon_bloodsteel_core","tier":3,"price":320},
+{"world":"demon","kind":"item","content_id":"demon_soulflame_crystal","tier":5,"price":9200},
+{"world":"true_demon","kind":"item","content_id":"true_demon_voidbone_jade","tier":6,"price":78000},
+{"world":"true_demon","kind":"item","content_id":"true_demon_primordial_heart_iron","tier":8,"price":2400000},
+{"world":"hell","kind":"item","content_id":"hell_forgetful_soul_jade","tier":3,"price":300},
+{"world":"hell","kind":"item","content_id":"hell_yellow_spring_dark_iron","tier":6,"price":68000},
+{"world":"asura","kind":"item","content_id":"asura_warsoul_crystal","tier":9,"price":130000000},
+{"world":"asura","kind":"item","content_id":"asura_annihilation_bone_gold","tier":11,"price":9800000000}
 ]}

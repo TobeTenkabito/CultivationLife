@@ -28,6 +28,7 @@ def main() -> None:
         game = engine.store.load(created["id"])
         game.player.realm_index = 1
         add_item(game.player, "spirit_stone", 10_000)
+        add_item(game.player, "guixu_canghai_consumable_01")
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_BASIC_QI"])
         add_technique_copy(game.player, TECHNIQUE_CATALOG["TECH_BASIC_QI"], 3, level=1)
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"])
@@ -217,6 +218,10 @@ def main() -> None:
                 assert page.locator("#natal-artifact-card .natal-sword").count() == 1
                 assert page.locator("#natal-artifact-card .natal-slot").count() == 7
                 assert page.locator("#natal-artifact-card .natal-slot:not(.locked)").count() == 2
+                assert page.locator("#natal-artifact-card .natal-refine-all").is_enabled()
+                page.locator("#natal-artifact-card .natal-refine-all").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.evaluate("game.natal_artifact.level") > 1
                 page.locator("[data-panel-target='inventory']").click()
                 assert page.locator("#inventory-list .natal-artifact-item").count() == 1
                 page.locator("#new-game-button").click()
@@ -269,6 +274,11 @@ def main() -> None:
                 page.locator("#relationship-toggle").click()
 
                 page.locator("[data-panel-target='inventory']").click()
+                guixu_consumable = page.locator("#inventory-list .item", has_text="海眼定神丹")
+                assert guixu_consumable.locator(".item-use").is_enabled()
+                guixu_consumable.locator(".item-use").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#inventory-list .item", has_text="海眼定神丹").count() == 0
                 manual_row = page.locator("#inventory-list .item", has_text="Lv.1 传承玉简").filter(has=page.locator(".technique-merge")).first
                 assert manual_row.locator(".technique-upgrade").is_enabled()
                 assert manual_row.locator(".technique-merge").is_enabled()

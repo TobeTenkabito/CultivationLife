@@ -52,6 +52,24 @@ class NatalArtifactSystemTests(unittest.TestCase):
         self.assertEqual((old_level, new_level), (2, 3))
         self.assertEqual(self.engine._natal_slots_for_level(new_level), 3)
 
+    def test_one_click_refine_spends_exact_plan_and_uses_stronger_growth(self):
+        bound = self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
+        level_one_power = bound["natal_artifact"]["bonuses"]["combat_bonus"]
+        game = self.engine.store.load(self.game_id)
+        add_item(game.player, "spirit_stone", 100_000)
+        self.engine.store.save(game)
+        before_stones = next(row.quantity for row in game.player.inventory if row.id == "spirit_stone")
+        preview = self.engine.get_game(self.game_id)["natal_artifact"]
+        self.assertGreater(preview["refine_all_count"], 1)
+        self.assertGreater(preview["refine_all_cost"], preview["refine_cost"])
+
+        shown = self.engine.natal_artifact_action(self.game_id, "refine_all")
+        after = self.engine.store.load(self.game_id)
+        after_stones = next((row.quantity for row in after.player.inventory if row.id == "spirit_stone"), 0)
+        self.assertEqual(before_stones - after_stones, preview["refine_all_cost"])
+        self.assertEqual(shown["natal_artifact"]["level"], shown["natal_artifact"]["max_level"])
+        self.assertGreater(shown["natal_artifact"]["bonuses"]["combat_bonus"], level_one_power * 2)
+
     def test_geng_essence_socket_adds_power_and_can_be_recovered(self):
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         game = self.engine.store.load(self.game_id)
@@ -91,6 +109,19 @@ class NatalArtifactSystemTests(unittest.TestCase):
             if row.get("world") == "celestial" and row["kind"] == "item"
         }
         self.assertTrue(expected_gods <= celestial_market)
+        market_worlds_by_item = {
+            str(row["content_id"]): str(row["world"])
+            for row in MARKET_GOODS if row.get("kind") == "item"
+        }
+        expected_world_materials = {
+            "demon_bloodsteel_core":"demon", "true_demon_voidbone_jade":"true_demon",
+            "hell_forgetful_soul_jade":"hell", "asura_warsoul_crystal":"asura",
+        }
+        self.assertTrue(expected_world_materials.keys() <= by_id.keys())
+        self.assertEqual(
+            expected_world_materials,
+            {item_id:market_worlds_by_item[item_id] for item_id in expected_world_materials},
+        )
 
     def test_socketed_materials_export_data_driven_combat_effects(self):
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
