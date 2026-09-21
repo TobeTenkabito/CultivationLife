@@ -2721,15 +2721,18 @@ function renderInventory(items) {
       const manualLevel = Number(item.technique_level || 1);
       const levelMatches = Boolean(known && known.level === manualLevel);
       const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
+      const upgradeAvailable = Boolean(known && levelMatches && known.level < known.max_level);
       upgrade.textContent = known?.level >= known?.max_level ? '功法已满级' : levelMatches ? `升级至 Lv.${manualLevel + 1}` : '等级不符';
-      upgrade.disabled = busy || !known || !levelMatches || known.level >= known.max_level || !!game.pending_event || !game.player.alive;
+      upgrade.dataset.available = upgradeAvailable ? '1' : '0';
+      upgrade.disabled = busy || !upgradeAvailable || !!game.pending_event || !game.player.alive;
       upgrade.title = !known ? '尚未掌握这部功法' : levelMatches ? `消耗一份同名 Lv.${manualLevel} 玉简` : `当前功法为 Lv.${known.level}，需要同名 Lv.${known.level} 玉简`;
       upgrade.onclick = () => mutate(`/api/games/${game.id}/technique-upgrade`, {technique_id:item.technique_id});
       row.appendChild(upgrade);
       if (manualLevel < 9) {
         const merge = document.createElement('button'); merge.className = 'technique-merge';
         merge.textContent = `二合一 → Lv.${manualLevel + 1}`;
-        merge.disabled = busy || item.quantity < 2 || !!game.pending_event || !game.player.alive;
+        merge.dataset.available = item.quantity >= 2 ? '1' : '0';
+        merge.disabled = busy || merge.dataset.available !== '1' || !!game.pending_event || !game.player.alive;
         merge.title = item.quantity < 2 ? `还需 ${2 - item.quantity} 份同名同级玉简` : `消耗两份 Lv.${manualLevel} 玉简`;
         merge.onclick = () => mutate(`/api/games/${game.id}/technique-manual-merge`, {technique_id:item.technique_id, level:manualLevel});
         row.appendChild(merge);
@@ -2924,6 +2927,7 @@ function renderKnownTechniques(techniques) {
     });
     const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
     upgrade.textContent = art.level >= art.max_level ? '已满级' : `升级 · 玉简 ×${art.upgrade_copies || 0}`;
+    upgrade.dataset.available = art.can_upgrade ? '1' : '0';
     upgrade.disabled = busy || !art.can_upgrade || !!game.pending_event || !game.player.alive;
     upgrade.title = art.level >= art.max_level
       ? `最高等级 Lv.${art.max_level}`
@@ -3512,6 +3516,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.technique-equip').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.compatible !== '1';
+  });
+  document.querySelectorAll('.technique-upgrade, .technique-merge').forEach(button => {
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || button.dataset.available !== '1';
   });
   document.querySelectorAll('.transformation-form-tools button').forEach(button => {
     button.disabled = button.dataset.available === '0' || busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;

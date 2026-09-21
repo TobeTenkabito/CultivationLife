@@ -18,7 +18,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import REALMS
 from cultivation_life.ghost_system import grant_intrinsic_progression_if_new_highwater
 from cultivation_life.formation_system import formation_material_definitions, make_formation_material_instance
-from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
+from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, add_technique_copy, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
 
 
 def main() -> None:
@@ -29,6 +29,7 @@ def main() -> None:
         game.player.realm_index = 1
         add_item(game.player, "spirit_stone", 10_000)
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_BASIC_QI"])
+        add_technique_copy(game.player, TECHNIQUE_CATALOG["TECH_BASIC_QI"], 3, level=1)
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"])
         learn_technique(game.player, TECHNIQUE_CATALOG["TECH_BEAST_TRANSFORMATION"])
         assign_technique(game.player, TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"], "divine_sense")
@@ -266,6 +267,25 @@ def main() -> None:
                 assert page.get_by_role("button", name="赠物").is_enabled()
                 assert page.get_by_role("button", name="传功").is_enabled()
                 page.locator("#relationship-toggle").click()
+
+                page.locator("[data-panel-target='inventory']").click()
+                manual_row = page.locator("#inventory-list .item", has_text="Lv.1 传承玉简").filter(has=page.locator(".technique-merge")).first
+                assert manual_row.locator(".technique-upgrade").is_enabled()
+                assert manual_row.locator(".technique-merge").is_enabled()
+                manual_row.locator(".technique-upgrade").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                manual_row = page.locator("#inventory-list .item", has_text="Lv.1 传承玉简").filter(has=page.locator(".technique-merge")).first
+                assert manual_row.locator(".technique-merge").is_enabled()
+                manual_row.locator(".technique-merge").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                page.locator("#inventory-toggle").click()
+                page.locator("details.technique-library > summary").click()
+                known_basic = page.locator("#known-technique-list .known-technique", has_text=TECHNIQUE_CATALOG["TECH_BASIC_QI"].name)
+                assert "Lv.2" in known_basic.text_content()
+                assert known_basic.locator(".technique-upgrade").is_enabled()
+                known_basic.locator(".technique-upgrade").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert "Lv.3" in page.locator("#known-technique-list .known-technique", has_text=TECHNIQUE_CATALOG["TECH_BASIC_QI"].name).text_content()
 
                 page.locator("[data-panel-target='formation']").click()
                 page.locator("#formation-card").wait_for(state="visible")
