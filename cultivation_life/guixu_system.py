@@ -350,6 +350,24 @@ class GuixuSystemMixin:
             raise ValueError("未知归墟副本")
         return dungeon, game.guixu_state["cycles"][dungeon_id]
 
+    def _enforce_guixu_rank_boundary(self, game: GameState, reason: str) -> str:
+        """Eject an explorer whose effective cultivation reaches the dungeon boundary."""
+        session = game.guixu_state.get("player_session") if isinstance(game.guixu_state, dict) else None
+        if not session:
+            return ""
+        dungeon = self._guixu_definitions().get(str(session.get("dungeon_id", "")))
+        if not dungeon or (game.player.realm_index, game.player.layer) < tuple(dungeon["eject_rank"]):
+            return ""
+        game.player.location_id = str(dungeon["entry_location_id"])
+        game.guixu_state["player_session"] = None
+        game.history.append(HistoryRecord(
+            "SYS_GUIXU_EJECT", 1, game.player.age, "归墟界限传出", dungeon["id"], reason,
+            f"你的当前修为达到{dungeon['name']}承载界限，被潮眼送回入口。",
+            {"dungeon_id": dungeon["id"], "reason": reason},
+            ["system", "guixu", "eject", f"world:{dungeon['world']}"],
+        ))
+        return f" 复原后的修为超过{dungeon['name']}承载界限，你随即被潮眼送回入口。"
+
     def _guixu_grant_entry(
         self, game: GameState, dungeon: dict[str, Any], row: dict[str, Any], source: str,
     ) -> str:

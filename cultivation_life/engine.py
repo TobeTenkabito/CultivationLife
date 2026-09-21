@@ -346,6 +346,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
 
     def manage_secret_art(
         self, game_id: str, art: str, action: str, realm_index: int | None = None,
+        layer: int | None = None,
     ) -> dict[str, Any]:
         game = self._load(game_id)
         player = game.player
@@ -390,15 +391,22 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             true_name = self._secret_art_realm_name(player, player.realm_index, player.layer)
             title, result = "解开修为", "cancelled"
             summary = f"你解除秘法，将真正修为从{suppressed_name}完整复原至{true_name}；神识等级始终未变。"
+            guixu_ejection = self._enforce_guixu_rank_boundary(game, "suppression_released")
+            if guixu_ejection:
+                summary += guixu_ejection
         else:
             if game.pending_event or game.active_trial or player.imprisonment:
                 raise ValueError("事件、劫数或服刑期间不能改换修为秘法")
             if realm_index is None:
                 raise ValueError("请选择目标境界")
             target_realm = int(realm_index)
-            if not 0 <= target_realm < player.realm_index:
-                raise ValueError("秘法目标必须低于当前真实境界")
-            target_layer = 1
+            if not 0 <= target_realm < len(REALMS):
+                raise ValueError("秘法目标境界不存在")
+            target_layer = int(layer if layer is not None else 1)
+            if not 1 <= target_layer <= REALMS[target_realm].layers:
+                raise ValueError("秘法目标层数不存在")
+            if (target_realm, target_layer) >= (player.realm_index, player.layer):
+                raise ValueError("秘法目标必须低于当前生效修为")
             target_name = self._secret_art_realm_name(player, target_realm, target_layer)
             if art == "conceal":
                 player.cultivation_concealment = {
@@ -441,7 +449,10 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 player.next_tribulation_age = None
                 if (
                     player.cultivation_concealment
-                    and player.cultivation_concealment["realm_index"] >= target_realm
+                    and (
+                        int(player.cultivation_concealment["realm_index"]),
+                        int(player.cultivation_concealment.get("layer", 1)),
+                    ) >= (target_realm, target_layer)
                 ):
                     player.cultivation_concealment = None
                 player.hp = max(1.0, max_hp(player) * max(0.0, min(1.0, hp_ratio)))
@@ -454,7 +465,8 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
 
         game.history.append(HistoryRecord(
             "SYS_SECRET_ART", 1, player.age, title, art, result, summary,
-            {"art": art, "action": action, "target_realm_index": realm_index},
+            {"art": art, "action": action, "target_realm_index": realm_index,
+             "target_layer": layer},
             ["system", "secret_art", art],
         ))
         game.updated_at = now_iso()
@@ -470,14 +482,16 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 player, int(suppression["realm_index"]), int(suppression["layer"]),
             ) if suppression else current_name
         )
-        targets = [
-            {
-                "realm_index": index,
-                "name": self._secret_art_realm_name(player, index, 1),
-                "sense_requirement": self._cultivation_sense_requirement(index, 1),
-            }
-            for index in range(player.realm_index)
-        ]
+        targets = []
+        for index, definition in enumerate(REALMS):
+            for target_layer in range(1, definition.layers + 1):
+                if (index, target_layer) >= (player.realm_index, player.layer):
+                    continue
+                targets.append({
+                    "realm_index": index, "layer": target_layer,
+                    "name": self._secret_art_realm_name(player, index, target_layer),
+                    "sense_requirement": self._cultivation_sense_requirement(index, target_layer),
+                })
         return {
             "divine_sense_level": divine_sense_level(player),
             "natural_sense_level": self._cultivation_sense_requirement(
@@ -490,6 +504,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             "concealment": {
                 "active": bool(concealment),
                 "realm_index": concealment.get("realm_index") if concealment else None,
+                "layer": concealment.get("layer") if concealment else None,
                 "realm_name": (
                     self._secret_art_realm_name(
                         player, concealment["realm_index"], concealment.get("layer", 1),

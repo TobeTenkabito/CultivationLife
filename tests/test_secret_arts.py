@@ -93,6 +93,30 @@ class SecretArtsTests(unittest.TestCase):
         self.assertAlmostEqual(restored["player"]["hp"] / restored["player"]["max_hp"], 0.62, places=3)
         self.assertAlmostEqual(restored["player"]["mp"] / restored["player"]["max_mp"], 0.41, places=3)
 
+    def test_every_lower_cultivation_layer_is_a_secret_art_target(self):
+        game_id, game = self._core_game()
+        game.player.realm_index = 4
+        game.player.layer = 5
+        self.engine.store.save(game)
+
+        shown = self.engine.get_game(game_id)
+        targets = {
+            (row["realm_index"], row["layer"]) for row in shown["secret_arts"]["targets"]
+        }
+        self.assertIn((4, 4), targets)
+        self.assertIn((3, REALMS[3].layers), targets)
+        self.assertNotIn((4, 5), targets)
+
+        concealed = self.engine.manage_secret_art(game_id, "conceal", "activate", 4, 4)
+        self.assertEqual(concealed["secret_arts"]["concealment"]["realm_index"], 4)
+        self.assertEqual(concealed["secret_arts"]["concealment"]["layer"], 4)
+        self.engine.manage_secret_art(game_id, "conceal", "cancel")
+
+        suppressed = self.engine.manage_secret_art(game_id, "suppress", "activate", 4, 4)
+        self.assertEqual(
+            (suppressed["player"]["realm_index"], suppressed["player"]["layer"]), (4, 4),
+        )
+
     def test_npc_concealment_has_detect_and_reveal_thresholds(self):
         _, game = self._core_game()
         npc = SectNpc(

@@ -135,6 +135,44 @@ class GuixuTideTests(unittest.TestCase):
         self.assertEqual(loaded.player.location_id, dungeon["entry_location_id"])
         self.assertTrue(any(row.event_id == "SYS_GUIXU_DISABLED_EJECT" for row in loaded.history))
 
+    def test_suppression_grants_entry_but_concealment_does_not_and_release_ejects(self):
+        created = self.engine.create_game("藏境入墟", "supreme_water", "dao", 47, "water")
+        game_id = created["id"]
+        game = self.engine.store.load(game_id)
+        dungeon = next(row for row in GUIXU_TIDE_CONTENT["dungeons"] if row["world"] == "spirit")
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        self.engine._open_guixu_cycle(game, dungeon, cycle, random.Random(47))
+        game.pending_event = None
+        game.player.world = dungeon["world"]
+        game.player.location_id = dungeon["entry_location_id"]
+        game.player.realm_index, game.player.layer = dungeon["eject_rank"]
+        self.engine.store.save(game)
+
+        concealed = self.engine.manage_secret_art(
+            game_id, "conceal", "activate", *dungeon["max_entry_rank"],
+        )
+        public_dungeon = next(
+            row for row in concealed["guixu_tide"]["dungeons"] if row["id"] == dungeon["id"]
+        )
+        self.assertFalse(public_dungeon["can_enter"])
+        self.engine.manage_secret_art(game_id, "conceal", "cancel")
+
+        suppressed = self.engine.manage_secret_art(
+            game_id, "suppress", "activate", *dungeon["max_entry_rank"],
+        )
+        public_dungeon = next(
+            row for row in suppressed["guixu_tide"]["dungeons"] if row["id"] == dungeon["id"]
+        )
+        self.assertTrue(public_dungeon["can_enter"])
+        entered = self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        self.assertIsNotNone(entered["guixu_tide"]["session"])
+
+        released = self.engine.manage_secret_art(game_id, "suppress", "cancel")
+        self.assertIsNone(released["guixu_tide"]["session"])
+        self.assertEqual(released["player"]["location_id"], dungeon["entry_location_id"])
+        self.assertEqual(released["history"][0]["event_id"], "SYS_SECRET_ART")
+        self.assertEqual(released["history"][1]["event_id"], "SYS_GUIXU_EJECT")
+
 
 if __name__ == "__main__":
     unittest.main()

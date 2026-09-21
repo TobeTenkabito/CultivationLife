@@ -1186,14 +1186,14 @@ function renderSecretArts(system) {
     select.innerHTML = '';
     targets.forEach(target => {
       const option = document.createElement('option');
-      option.value = target.realm_index;
+      option.value = `${target.realm_index}:${target.layer || 1}`;
       option.textContent = `${target.name} · 识别基准 Lv.${target.sense_requirement}`;
       select.appendChild(option);
     });
-    if (targets.some(target => String(target.realm_index) === previous)) select.value = previous;
-    else if (targets.length) select.value = String(targets[targets.length - 1].realm_index);
+    if (targets.some(target => `${target.realm_index}:${target.layer || 1}` === previous)) select.value = previous;
+    else if (targets.length) select.value = `${targets[targets.length - 1].realm_index}:${targets[targets.length - 1].layer || 1}`;
   }
-  $('#secret-conceal-activate').dataset.available = targets.length && !concealment.active ? '1' : '0';
+  $('#secret-conceal-activate').dataset.available = targets.length ? '1' : '0';
   $('#secret-conceal-cancel').dataset.available = concealment.active ? '1' : '0';
   $('#secret-suppress-activate').dataset.available = targets.length && !suppression.active ? '1' : '0';
   $('#secret-suppress-cancel').dataset.available = suppression.active ? '1' : '0';
@@ -3624,14 +3624,19 @@ $('#setting-auto-war').onchange = event => mutate(`/api/games/${game.id}/setting
   setting:'auto_advance_player_wars', enabled:event.target.checked,
 });
 
+function selectedSecretArtTarget(selector) {
+  const [realmIndex, layer] = $(selector).value.split(':').map(Number);
+  return {realm_index:realmIndex, layer};
+}
+
 $('#secret-conceal-activate').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
-  art:'conceal', action:'activate', realm_index:Number($('#secret-conceal-realm').value),
+  art:'conceal', action:'activate', ...selectedSecretArtTarget('#secret-conceal-realm'),
 });
 $('#secret-conceal-cancel').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
   art:'conceal', action:'cancel',
 });
 $('#secret-suppress-activate').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
-  art:'suppress', action:'activate', realm_index:Number($('#secret-suppress-realm').value),
+  art:'suppress', action:'activate', ...selectedSecretArtTarget('#secret-suppress-realm'),
 });
 $('#secret-suppress-cancel').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
   art:'suppress', action:'cancel',

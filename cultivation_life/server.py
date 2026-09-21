@@ -264,9 +264,11 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.divine_sense_breakthrough(game_id)
             elif operation == "secret-art":
                 target_realm = payload.get("realm_index")
+                target_layer = payload.get("layer")
                 result = ENGINE.manage_secret_art(
                     game_id, payload.get("art", ""), payload.get("action", ""),
                     int(target_realm) if target_realm is not None else None,
+                    int(target_layer) if target_layer is not None else None,
                 )
             elif operation == "ghost-reincarnate":
                 result = ENGINE.reincarnate_ghost(game_id)
