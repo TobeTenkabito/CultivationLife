@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.sage-way",
   "name": "圣人之道：内圣外王",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 130,

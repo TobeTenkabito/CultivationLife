@@ -15,6 +15,11 @@
     "capture":{"name":"生擒修士","opportunity":[0,1],"hp":0.0,"mp":0.0,"combat":{"combat_type":"cultivator","target_names":["落单修士","负伤散修","宗门弃徒","游历客卿"],"realm_offsets":[[-2,0.42],[-1,0.40],[0,0.17],[1,0.01]],"expectation_multiplier":0.82,"power_sigma":0.14,"power_bounds":[0.45,1.2],"lethal":false,"capture":true,"kill_karma":false}}
   },
   "systems": {
+    "secret_arts": {
+      "npc_concealment_chance": 0.18,
+      "npc_max_realm_drop": 3,
+      "concealed_enemy_bias": 0.82
+    },
     "combat_expectations": {
       "mortal":{"value":20},
       "qi":{"base":100,"layer_step":15},

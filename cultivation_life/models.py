@@ -172,6 +172,11 @@ class SectNpc:
     encountered_player: bool = False
     wounds: int = 0
     gender: str = ""
+    # Some cultivators deliberately present a lower realm.  The real realm
+    # remains authoritative for combat and simulation; these two fields only
+    # describe the disguise seen by insufficient divine sense.
+    concealed_realm_index: int | None = None
+    concealed_layer: int | None = None
 
     def __post_init__(self) -> None:
         if self.gender not in {"male", "female"}:
@@ -353,6 +358,11 @@ class Player:
     breakthrough_pity: dict[str, int] = field(default_factory=dict)
     joint_spirit_crossing: dict[str, Any] | None = None
     joint_friend_crossing: list[dict[str, Any]] = field(default_factory=list)
+    # Base-game secret arts. Concealment changes only outward perception;
+    # suppression temporarily moves the live cultivation fields and keeps the
+    # true realm snapshot here until the art is released.
+    cultivation_concealment: dict[str, int] | None = None
+    cultivation_suppression: dict[str, Any] | None = None
     lineage_race: str | None = None
     allegiance_race: str | None = None
     # Political race remains ``race``. These fields describe a monster
@@ -601,6 +611,18 @@ class Player:
         data["monster_custom_lineage_id"] = str(saved_lineage_id) if saved_lineage_id else None
         data["next_companion_conception_bonus"] = max(
             0.0, min(0.95, float(data.get("next_companion_conception_bonus", 0.0)))
+        )
+        saved_concealment = data.get("cultivation_concealment")
+        data["cultivation_concealment"] = (
+            {
+                "realm_index": max(0, int(saved_concealment.get("realm_index", 0))),
+                "layer": max(1, int(saved_concealment.get("layer", 1))),
+            }
+            if isinstance(saved_concealment, dict) else None
+        )
+        saved_suppression = data.get("cultivation_suppression")
+        data["cultivation_suppression"] = (
+            copy.deepcopy(saved_suppression) if isinstance(saved_suppression, dict) else None
         )
         technique = data.get("technique")
         data["technique"] = Technique(**technique) if technique else None

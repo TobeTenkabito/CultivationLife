@@ -46,9 +46,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.22.0")
+        self.assertEqual(BASE_GAME_VERSION, "1.23.0")
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
-        self.assertIn('"version": "3.4.0"', manifest)
+        self.assertIn('"version": "3.5.0"', manifest)
 
     def test_ten_fixed_slots_saturate_and_pressure_only_changes_future_growth(self):
         player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)

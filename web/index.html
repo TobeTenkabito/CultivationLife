@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260921-3">
-  <link rel="stylesheet" href="/panels.css?v=20260921-3">
+  <link rel="stylesheet" href="/panels.css?v=20260921-4">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -219,6 +219,13 @@
           <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>分类行囊</h2></div><div class="panel-heading"><span>同名常驻属性按数量叠加</span><button id="inventory-toggle" type="button">关闭</button></div></div>
           <div id="inventory-list" class="inventory-groups"></div>
         </article>
+        <article id="secret-art-card" class="paper utility-panel left-panel secret-art-panel" role="dialog" aria-modal="false" aria-label="修为秘法">
+          <div class="section-title"><div><p class="eyebrow">HIDDEN CULTIVATION ARTS</p><h2>修为秘法</h2></div><div class="panel-heading"><span id="secret-art-heading"></span><button id="secret-art-toggle" type="button">关闭</button></div></div>
+          <p class="muted">收敛只改变外界认知与主动遭遇倾向；压制会暂时改变自身境界属性与条件。两者都不会降低神识等级。</p>
+          <div id="secret-art-sense" class="secret-art-sense"></div>
+          <section class="secret-art-row"><div><h3>收敛修为</h3><p id="secret-conceal-status" class="section-note"></p></div><div class="secret-art-controls"><select id="secret-conceal-realm"></select><button id="secret-conceal-activate" type="button">运转收敛</button><button id="secret-conceal-cancel" type="button">取消收敛</button></div></section>
+          <section class="secret-art-row"><div><h3>压制修为</h3><p id="secret-suppress-status" class="section-note"></p></div><div class="secret-art-controls"><select id="secret-suppress-realm"></select><button id="secret-suppress-activate" type="button">运转压制</button><button id="secret-suppress-cancel" type="button">解除压制</button></div></section>
+        </article>
         <article id="intrigue-card" class="paper utility-panel intrigue-panel hidden" role="dialog" aria-modal="false" aria-label="势力内政">
           <div class="section-title"><div><p class="eyebrow">COALITIONS &amp; INTRIGUE</p><h2>明争暗斗：合纵连横</h2></div><div class="panel-heading"><span id="intrigue-heading">职位、决议与人事</span><button id="intrigue-toggle" type="button">关闭</button></div></div>
           <p class="muted">职位、控制权与决策权彼此独立。重大公共事务一人一票；内部任免与赏罚由控制者直接执行，但会留下真实后果。</p>
@@ -363,6 +370,7 @@
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
+        <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
         <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
@@ -407,7 +415,7 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260921-1"></script>
-  <script src="/app.js?v=20260921-4"></script>
+  <script src="/ui-panels.js?v=20260921-2"></script>
+  <script src="/app.js?v=20260921-5"></script>
 </body>
 </html>
