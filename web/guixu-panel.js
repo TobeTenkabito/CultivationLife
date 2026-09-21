@@ -55,7 +55,8 @@
     return `<section class="guixu-session">
       <div class="guixu-session-head"><div><p class="eyebrow">${esc(session.trapped ? 'TRAPPED' : 'EXPEDITION')}</p><h3>${esc(session.dungeon_name)}</h3></div><strong>${session.trapped ? '已被困' : `余 ${esc(session.remaining_days)} 天`}</strong></div>
       <div class="guixu-layers">${layers}</div>
-      <div class="guixu-actions">${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped)}${session.trapped ? button('静修一年', 'trapped_cultivate', {}, false, 'guixu-primary') : ''}</div>
+      <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, false, 'guixu-primary')}${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped)}</div>
+      ${session.trapped ? '<p class="muted">潮门闭合后，可回主界面使用修炼、炼体、神识训练及对应突破；外界行动仍被封锁。</p>' : ''}
       <section><h4>本层宝物</h4>${treasures}</section>
       <section><h4>本层修士</h4>${actors}</section>
     </section>`;

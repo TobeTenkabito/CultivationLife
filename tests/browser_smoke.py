@@ -342,7 +342,7 @@ def main() -> None:
 
                 page.locator("[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
-                assert "已识别 4" in page.locator("#extension-summary").text_content()
+                assert "已识别 5" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
                 assert "万妖归宗：血脉进化" in extension_text
                 assert "百鬼夜行：往生轮回" in extension_text

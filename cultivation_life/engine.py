@@ -549,6 +549,14 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 raise ValueError("炼体积累已经圆满，请先手动冲击下一层")
         if action == "sense_train" and player.divine_sense_technique is None:
             raise ValueError("必须先获得并配置一部神识功法")
+        guixu_session = (
+            game.guixu_state.get("player_session")
+            if isinstance(game.guixu_state, dict) else None
+        )
+        if guixu_session and guixu_session.get("trapped"):
+            if action not in {"cultivate", "body_train", "sense_train"}:
+                raise ValueError("被困归墟期间只能修炼、炼体或锻炼神识")
+            return self._guixu_trapped_training(game_id, action, years)
         if ACTIONS[action].get("combat") and player.realm_index == 0:
             raise ValueError("凡人尚无力参与修士层面的猎杀与斗法")
         self._prepare_sage_action(game, action)
@@ -581,36 +589,12 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             self._add_opportunity(player, gain)
             total_gain += gain
             if action == "sense_train":
-                sense = player.divine_sense_technique
-                regional = self.maps.qi_gain_efficiencies(player.world, player.location_id)
-                regional_multiplier = sum(
-                    float(weight) * float(regional.get(source, 0))
-                    for source, weight in sense.sources.items()
-                )
-                sense_gain = (
-                    float(WORLD_SYSTEMS["demonic_cultivation"]["divine_sense_training_base"])
-                    * (1 + sense.divine_sense_bonus * technique_scale(sense))
-                    * technique_environment_multiplier(sense, player.world)
-                    * regional_multiplier
-                    * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
-                    * (1 + max(0.0, float(player.sage_effects.get("sense_multiplier", 0.0))))
-                )
+                sense_gain = self._sense_training_step(player)
                 player.divine_sense_experience += sense_gain
                 total_sense_gain += sense_gain
                 self._apply_action_resources(player, action, ledger.claim_resource_cost())
             elif action == "body_train":
-                body_rules = WORLD_SYSTEMS["body_cultivation"]
-                training_gain = (
-                    rng.randint(*body_rules["progress_per_year"])
-                    * (1 + 0.04 * max(0, player.body_technique.grade - 1))
-                    * player.body_technique.level_multiplier
-                    * technique_environment_multiplier(player.body_technique, player.world)
-                    * (
-                        float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))
-                        if player.path == "monster" else 1.0
-                    )
-                    * (1 + crafted_artifact_bonuses(player)["body_training_efficiency"])
-                )
+                training_gain = self._body_training_step(player, rng)
                 player.body_progress = min(self._body_progress_required(player), player.body_progress + training_gain)
                 total_body_gain += training_gain
                 self._apply_action_resources(player, action, ledger.claim_resource_cost())
@@ -749,6 +733,44 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 self.maps.qi_gain_efficiencies(player.world, player.location_id),
             )
         return actual_gain
+
+    def _sense_training_step(
+        self, player: Player, regional: dict[str, float] | None = None,
+    ) -> float:
+        """Calculate one year of sense training for every training context."""
+        sense = player.divine_sense_technique
+        if sense is None:
+            return 0.0
+        regional = regional or self.maps.qi_gain_efficiencies(player.world, player.location_id)
+        regional_multiplier = sum(
+            float(weight) * float(regional.get(source, 0))
+            for source, weight in sense.sources.items()
+        )
+        return (
+            float(WORLD_SYSTEMS["demonic_cultivation"]["divine_sense_training_base"])
+            * (1 + sense.divine_sense_bonus * technique_scale(sense))
+            * technique_environment_multiplier(sense, player.world)
+            * regional_multiplier
+            * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
+            * (1 + max(0.0, float(player.sage_effects.get("sense_multiplier", 0.0))))
+        )
+
+    def _body_training_step(self, player: Player, rng: random.Random) -> float:
+        """Calculate one year of body training for every training context."""
+        if player.body_technique is None:
+            return 0.0
+        body_rules = WORLD_SYSTEMS["body_cultivation"]
+        return (
+            rng.randint(*body_rules["progress_per_year"])
+            * (1 + 0.04 * max(0, player.body_technique.grade - 1))
+            * player.body_technique.level_multiplier
+            * technique_environment_multiplier(player.body_technique, player.world)
+            * (
+                float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))
+                if player.path == "monster" else 1.0
+            )
+            * (1 + crafted_artifact_bonuses(player)["body_training_efficiency"])
+        )
 
     @staticmethod
     def _apply_action_resources(player: Player, action: str, pay_cost: bool) -> None:
@@ -982,6 +1004,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             self._diff(before, after), history_tags,
         ))
         self._resolve_breakthroughs(game, rng)
+        self._enforce_guixu_rank_boundary(game, "breakthrough")
         self._ensure_market(game, rng)
         if game.pending_event is None:
             self._maybe_artifact_synthesis(game, rng)
@@ -1545,6 +1568,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             else:
                 self._complete_minor_breakthrough(game, rng, old_label)
         game.updated_at = now_iso()
+        self._enforce_guixu_rank_boundary(game, "breakthrough")
         self._ensure_market(game, rng)
         game.rng_state = encode_rng(rng)
         self.store.save(game)
@@ -7396,7 +7420,11 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         }]
         victim = min(members, key=lambda member: float(member["power"]))
         victim_ratio = own_power / max(1.0, float(victim["power"]))
-        pursuit_chance = min(0.94, 0.52 + max(0.0, victim_ratio - 1.0) * 0.11)
+        pursuit_chance = min(
+            0.99,
+            0.52 + max(0.0, victim_ratio - 1.0) * 0.11
+            + max(0.0, float(target.get("pursuit_chance_bonus", 0.0))),
+        )
         if resolution.kill_ready and rng.uniform(0.0, 1.0) < pursuit_chance:
             target["killed_member"] = victim
             fame_before = player.fame

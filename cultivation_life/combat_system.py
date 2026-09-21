@@ -960,9 +960,12 @@ class PlayerCombatSystem:
         decisive = ratio > 1.12 and (enemy_hp <= 0.46 or enemy_morale <= 22)
         pursuit = speed_edge * 0.55 + sense_edge * 0.30 + max(0, player.realm_index - enemy_realm) * 0.08
         escape_locked = "enemy_escape_lock" in artifact_traits
+        kill_pursuit_threshold = cls._clamp(
+            0.0, 2.0, float(target.get("kill_pursuit_threshold", 0.82)),
+        )
         kill_ready = bool(
             outcome == "victory" and lethal
-            and (escape_locked or (decisive and pursuit >= 0.82))
+            and (escape_locked or (decisive and pursuit >= kill_pursuit_threshold))
         )
         capture_ready = bool(
             outcome == "victory" and objective == "capture" and (enemy_hp <= 0.58 or enemy_morale <= 25)
