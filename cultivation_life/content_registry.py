@@ -93,6 +93,12 @@ def validate_guixu_catalog(
         if len(layer_ids) != 5 or len(set(layer_ids)) != 5 or "secret" not in layer_ids:
             raise ContentError(f"归墟副本 {dungeon_id} 必须配置四个常规层和 secret 秘层")
         for layer in layers:
+            concentrations = layer.get("qi_concentrations", {})
+            if set(concentrations) != {"spirit", "demon", "monster", "yin"} or any(
+                not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0
+                for value in concentrations.values()
+            ):
+                raise ContentError(f"归墟副本 {dungeon_id}/{layer.get('id')} 的四气浓度不完整")
             efficiencies = layer.get("qi_gain_efficiencies", {})
             if set(efficiencies) != {"spirit", "demon", "monster", "yin"} or any(
                 not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0

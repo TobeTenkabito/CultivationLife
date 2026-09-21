@@ -44,6 +44,12 @@
           "name": "破碎泊港",
           "travel_days": 1,
           "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 1.35,
+            "demon": 0.4,
+            "monster": 0.45,
+            "yin": 0.6
+          },
           "qi_gain_efficiencies": {
             "spirit": 1.35,
             "demon": 0.55,
@@ -56,6 +62,12 @@
           "name": "倒悬水府",
           "travel_days": 3,
           "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 1.55,
+            "demon": 0.45,
+            "monster": 0.5,
+            "yin": 0.75
+          },
           "qi_gain_efficiencies": {
             "spirit": 1.55,
             "demon": 0.6,
@@ -68,6 +80,12 @@
           "name": "无光海眼",
           "travel_days": 4,
           "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 1.8,
+            "demon": 0.55,
+            "monster": 0.65,
+            "yin": 0.95
+          },
           "qi_gain_efficiencies": {
             "spirit": 1.75,
             "demon": 0.7,
@@ -80,6 +98,12 @@
           "name": "沉没祖庭",
           "travel_days": 5,
           "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 2.1,
+            "demon": 0.65,
+            "monster": 0.8,
+            "yin": 1.15
+          },
           "qi_gain_efficiencies": {
             "spirit": 2.0,
             "demon": 0.75,
@@ -92,6 +116,12 @@
           "name": "月下潮库",
           "travel_days": 2,
           "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 2.4,
+            "demon": 0.75,
+            "monster": 0.95,
+            "yin": 1.35
+          },
           "qi_gain_efficiencies": {
             "spirit": 2.15,
             "demon": 0.8,
@@ -1086,6 +1116,12 @@
           "name": "雾海残港",
           "travel_days": 1,
           "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 2.35,
+            "demon": 0.65,
+            "monster": 0.95,
+            "yin": 0.8
+          },
           "qi_gain_efficiencies": {
             "spirit": 1.85,
             "demon": 0.75,
@@ -1098,6 +1134,12 @@
           "name": "界骸回廊",
           "travel_days": 3,
           "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 2.6,
+            "demon": 0.75,
+            "monster": 1.05,
+            "yin": 0.95
+          },
           "qi_gain_efficiencies": {
             "spirit": 2.1,
             "demon": 0.85,
@@ -1110,6 +1152,12 @@
           "name": "星潮断层",
           "travel_days": 4,
           "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 2.95,
+            "demon": 0.9,
+            "monster": 1.25,
+            "yin": 1.15
+          },
           "qi_gain_efficiencies": {
             "spirit": 2.4,
             "demon": 0.95,
@@ -1122,6 +1170,12 @@
           "name": "万流归孔",
           "travel_days": 5,
           "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 3.35,
+            "demon": 1.05,
+            "monster": 1.45,
+            "yin": 1.4
+          },
           "qi_gain_efficiencies": {
             "spirit": 2.75,
             "demon": 1.05,
@@ -1134,6 +1188,12 @@
           "name": "无岸法藏",
           "travel_days": 2,
           "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 3.8,
+            "demon": 1.25,
+            "monster": 1.7,
+            "yin": 1.65
+          },
           "qi_gain_efficiencies": {
             "spirit": 3.0,
             "demon": 1.15,

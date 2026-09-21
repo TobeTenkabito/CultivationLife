@@ -3471,14 +3471,14 @@ function renderButtons() {
   document.querySelectorAll('[data-action]').forEach(button => {
     const guixuSession = game?.guixu_tide?.session;
     const trappedInGuixu = !!guixuSession?.trapped;
-    const trappedTraining = ['cultivate', 'body_train', 'sense_train'].includes(button.dataset.action);
+    const trappedTraining = ['cultivate', 'body_train', 'sense_train', 'rest'].includes(button.dataset.action);
     const blockedByGuixu = !!guixuSession && !(trappedInGuixu && trappedTraining);
     const mortalCommission = button.dataset.action === 'commission' && game?.player?.realm_index === 0;
     const mortalCombat = ['hunt_beast', 'spar', 'slay', 'capture'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
     const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
-    const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate';
+    const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate' && !trappedInGuixu;
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
@@ -3586,9 +3586,9 @@ function renderButtons() {
     button.disabled = busy || button.dataset.unavailable === '1' || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   const bodyTrain = $('#body-train-action');
-  if (bodyTrain) bodyTrain.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || !game?.body_cultivation?.technique || game?.body_cultivation?.ready || game?.body_cultivation?.layer >= game?.body_cultivation?.max_layer;
+  if (bodyTrain) bodyTrain.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || (!trappedInGuixu && (!game?.body_cultivation?.technique || game?.body_cultivation?.ready || game?.body_cultivation?.layer >= game?.body_cultivation?.max_layer));
   const senseTrain = $('#sense-train-action');
-  if (senseTrain) senseTrain.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || !game?.player?.divine_sense?.technique;
+  if (senseTrain) senseTrain.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || (!trappedInGuixu && !game?.player?.divine_sense?.technique);
   const senseBreakthrough = $('#sense-breakthrough-action');
   if (senseBreakthrough) senseBreakthrough.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || !game?.player?.divine_sense?.breakthrough_ready;
   document.querySelectorAll('.captive-tools button, .puppet-tools button').forEach(button => {

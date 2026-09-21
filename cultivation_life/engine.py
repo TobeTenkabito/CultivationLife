@@ -48,6 +48,7 @@ from .rules import (
     roll_lifespan,
     ensure_technique_set,
     technique_environment_multiplier,
+    QI_NAMES,
     grant_qi_experience,
     qi_level,
     qi_level_threshold,
@@ -536,26 +537,27 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             raise ValueError("魂印受制时只能等待、有限修炼、反抗或夺舍拘魂者")
         if action not in ACTIONS:
             raise ValueError("未知行动")
-        if player.cultivation_suppression and action == "cultivate":
+        guixu_session = (
+            game.guixu_state.get("player_session")
+            if isinstance(game.guixu_state, dict) else None
+        )
+        trapped_in_guixu = bool(guixu_session and guixu_session.get("trapped"))
+        if player.cultivation_suppression and action == "cultivate" and not trapped_in_guixu:
             raise ValueError("压制修为期间不能运转主修功法；可修炼神识、炼体或进行其他行动")
         if action == "commission" and player.realm_index == 0:
             raise ValueError("凡人尚无法承接修仙坊市委托")
-        if action == "body_train":
+        if action == "body_train" and not trapped_in_guixu:
             if player.body_technique is None:
                 raise ValueError("必须先获得并配置一部炼体功法")
             if player.body_training >= int(WORLD_SYSTEMS["body_cultivation"]["max_layer"]):
                 raise ValueError("炼体已经达到一百层极限")
             if player.awaiting_body_breakthrough or player.body_progress >= self._body_progress_required(player):
                 raise ValueError("炼体积累已经圆满，请先手动冲击下一层")
-        if action == "sense_train" and player.divine_sense_technique is None:
+        if action == "sense_train" and player.divine_sense_technique is None and not trapped_in_guixu:
             raise ValueError("必须先获得并配置一部神识功法")
-        guixu_session = (
-            game.guixu_state.get("player_session")
-            if isinstance(game.guixu_state, dict) else None
-        )
-        if guixu_session and guixu_session.get("trapped"):
-            if action not in {"cultivate", "body_train", "sense_train"}:
-                raise ValueError("被困归墟期间只能修炼、炼体或锻炼神识")
+        if trapped_in_guixu:
+            if action not in {"cultivate", "body_train", "sense_train", "rest"}:
+                raise ValueError("被困归墟期间只能修炼、炼体、锻炼神识或调息")
             return self._guixu_trapped_training(game_id, action, years)
         if ACTIONS[action].get("combat") and player.realm_index == 0:
             raise ValueError("凡人尚无力参与修士层面的猎杀与斗法")
@@ -723,25 +725,34 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         self.store.save(game)
         return self.present(game)
 
-    def _add_opportunity(self, player: Player, amount: float) -> float:
+    def _add_opportunity(
+        self, player: Player, amount: float,
+        regional_efficiencies: dict[str, float] | None = None,
+    ) -> float:
         before = player.opportunity
         player.opportunity = max(0.0, before + float(amount))
         actual_gain = player.opportunity - before
         if actual_gain > 0:
             grant_qi_experience(
                 player, actual_gain,
-                self.maps.qi_gain_efficiencies(player.world, player.location_id),
+                regional_efficiencies
+                if regional_efficiencies is not None
+                else self.maps.qi_gain_efficiencies(player.world, player.location_id),
             )
         return actual_gain
 
     def _sense_training_step(
         self, player: Player, regional: dict[str, float] | None = None,
+        concentrations: dict[str, float] | None = None,
     ) -> float:
         """Calculate one year of sense training for every training context."""
         sense = player.divine_sense_technique
         if sense is None:
             return 0.0
-        regional = regional or self.maps.qi_gain_efficiencies(player.world, player.location_id)
+        regional = (
+            regional if regional is not None
+            else self.maps.qi_gain_efficiencies(player.world, player.location_id)
+        )
         regional_multiplier = sum(
             float(weight) * float(regional.get(source, 0))
             for source, weight in sense.sources.items()
@@ -749,13 +760,16 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         return (
             float(WORLD_SYSTEMS["demonic_cultivation"]["divine_sense_training_base"])
             * (1 + sense.divine_sense_bonus * technique_scale(sense))
-            * technique_environment_multiplier(sense, player.world)
+            * technique_environment_multiplier(sense, player.world, concentrations)
             * regional_multiplier
             * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
             * (1 + max(0.0, float(player.sage_effects.get("sense_multiplier", 0.0))))
         )
 
-    def _body_training_step(self, player: Player, rng: random.Random) -> float:
+    def _body_training_step(
+        self, player: Player, rng: random.Random,
+        concentrations: dict[str, float] | None = None,
+    ) -> float:
         """Calculate one year of body training for every training context."""
         if player.body_technique is None:
             return 0.0
@@ -764,7 +778,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             rng.randint(*body_rules["progress_per_year"])
             * (1 + 0.04 * max(0, player.body_technique.grade - 1))
             * player.body_technique.level_multiplier
-            * technique_environment_multiplier(player.body_technique, player.world)
+            * technique_environment_multiplier(player.body_technique, player.world, concentrations)
             * (
                 float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))
                 if player.path == "monster" else 1.0
@@ -8770,6 +8784,57 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         player_data["location_id"] = location_id
         player_data["location_name"] = self.maps.location(game.player.world, location_id)["name"]
         player_data["qi_gain_efficiencies"] = self.maps.qi_gain_efficiencies(game.player.world, location_id)
+        guixu_session = (
+            game.guixu_state.get("player_session")
+            if isinstance(game.guixu_state, dict) else None
+        )
+        if guixu_session:
+            dungeon = self._guixu_definitions().get(str(guixu_session.get("dungeon_id", "")))
+            layer = next(
+                (
+                    row for row in (dungeon or {}).get("layers", [])
+                    if row.get("id") == guixu_session.get("layer_id")
+                ),
+                None,
+            )
+            if layer:
+                concentrations = {
+                    source: float(value)
+                    for source, value in layer["qi_concentrations"].items()
+                }
+                player_data["qi_gain_efficiencies"] = {
+                    source: float(value)
+                    for source, value in layer["qi_gain_efficiencies"].items()
+                }
+                player_data["qi_environment"] = {
+                    "concentrations": concentrations,
+                    "display": [
+                        {
+                            "source": source,
+                            "name": QI_NAMES[source],
+                            "concentration": concentration,
+                        }
+                        for source, concentration in concentrations.items()
+                    ],
+                    "main_multiplier": (
+                        round(technique_environment_multiplier(
+                            game.player.technique, game.player.world, concentrations,
+                        ), 4)
+                        if game.player.technique else None
+                    ),
+                    "body_multiplier": (
+                        round(technique_environment_multiplier(
+                            game.player.body_technique, game.player.world, concentrations,
+                        ), 4)
+                        if game.player.body_technique else None
+                    ),
+                    "divine_sense_multiplier": (
+                        round(technique_environment_multiplier(
+                            game.player.divine_sense_technique, game.player.world, concentrations,
+                        ), 4)
+                        if game.player.divine_sense_technique else None
+                    ),
+                }
         for relation in [player_data.get("master"), *player_data.get("disciples", [])]:
             if relation:
                 relation["can_invite_faction"] = self._relationship_can_join_faction(game, relation)

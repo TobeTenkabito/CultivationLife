@@ -556,7 +556,9 @@ def world_qi_concentrations(world: str) -> dict[str, float]:
     return {source: max(0.0, float(configured.get(source, 0.0))) for source in QI_SOURCE_NAMES}
 
 
-def technique_environment_multiplier(technique: Technique, world: str) -> float:
+def technique_environment_multiplier(
+    technique: Technique, world: str, concentrations: dict[str, float] | None = None,
+) -> float:
     """按功法内部源权重求环境倍率；多源收益不会直接相加。"""
     if (
         not technique.sources
@@ -565,7 +567,8 @@ def technique_environment_multiplier(technique: Technique, world: str) -> float:
         or not math.isclose(sum(technique.sources.values()), 1.0, abs_tol=1e-9)
     ):
         raise ValueError("功法的先天源配置不合法")
-    concentrations = world_qi_concentrations(world)
+    if concentrations is None:
+        concentrations = world_qi_concentrations(world)
     return sum(
         weight * qi_environment_multiplier(concentrations[source])
         for source, weight in technique.sources.items()
@@ -667,7 +670,9 @@ def combat_requirement_display(requirement: dict[str, Any]) -> str:
     return f"{QI_NAMES[leaf['id']]} {leaf['op']} {leaf['level']}级"
 
 
-def opportunity_multiplier(player: Player) -> float:
+def opportunity_multiplier(
+    player: Player, concentrations: dict[str, float] | None = None,
+) -> float:
     """原有效率保持独立，最后仅为当前主修乘上所在界面的气环境倍率。"""
     root_efficiency = root_definition(player.spirit_root)["efficiency"]
     if player.technique is None:
@@ -685,7 +690,7 @@ def opportunity_multiplier(player: Player) -> float:
     inner_multiplier = (1 + main_bonus) * (1 + item_bonus)
     return (
         root_efficiency * inner_multiplier
-        * technique_environment_multiplier(player.technique, player.world)
+        * technique_environment_multiplier(player.technique, player.world, concentrations)
         * ghost_opportunity_multiplier(player)
         * (1 + max(0.0, float(player.sage_effects.get("opportunity_multiplier", 0.0))))
         * (0.8 if player.concubine_status else 1.0)

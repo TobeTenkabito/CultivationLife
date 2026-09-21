@@ -10,7 +10,7 @@ from unittest.mock import patch
 from cultivation_life.content_registry import (
     CONTENT, CONTENT_DOCUMENTS, GUIXU_EXCLUSIVE_ITEM_IDS,
     GUIXU_EXCLUSIVE_TECHNIQUE_IDS, GUIXU_TIDE_CONTENT, ITEM_CATALOG,
-    MARKET_GOODS, TECHNIQUE_CATALOG, ContentError, validate_guixu_catalog,
+    MARKET_GOODS, TECHNIQUE_CATALOG, WORLD_SYSTEMS, ContentError, validate_guixu_catalog,
 )
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import SectNpc
@@ -45,7 +45,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "1.0.0")
+        self.assertEqual(manifest["version"], "1.1.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual({row["world"] for row in dungeons}, {"human", "spirit"})
         self.assertEqual({row["name"] for row in dungeons}, {"葬海天渊", "诸界尾闾"})
@@ -56,6 +56,16 @@ class GuixuTideTests(unittest.TestCase):
         }
         for dungeon in dungeons:
             pool = dungeon["treasure_pool"]
+            outside = WORLD_SYSTEMS["world_profiles"][dungeon["world"]]["qi_concentrations"]
+            for layer in dungeon["layers"]:
+                self.assertEqual(
+                    set(layer["qi_concentrations"]),
+                    {"spirit", "demon", "monster", "yin"},
+                )
+                self.assertTrue(all(
+                    layer["qi_concentrations"][source] > outside[source]
+                    for source in outside
+                ))
             self.assertEqual(len(pool), 60)
             self.assertEqual(Counter(row["category"] for row in pool), expected)
             self.assertFalse(seen.intersection(row["id"] for row in pool))
@@ -207,8 +217,63 @@ class GuixuTideTests(unittest.TestCase):
         sense = self.engine.advance(game_id, "sense_train")
         self.assertGreater(sense["player"]["divine_sense"]["experience"], 0)
         self.assertTrue(sense["guixu_tide"]["session"]["trapped"])
+
+        game = self.engine.store.load(game_id)
+        game.player.hp = 1
+        game.player.mp = 1
+        game.player.cultivation_suppression = {
+            "realm_index": game.player.realm_index,
+            "layer": game.player.layer,
+            "opportunity": game.player.opportunity,
+            "awaiting_ascension": False,
+            "awaiting_major_breakthrough": False,
+            "awaiting_minor_breakthrough": False,
+            "awaiting_spirit_realm_crossing": False,
+            "active_breakthrough_aids": [],
+            "tribulation_remaining": None,
+        }
+        age = game.player.age
+        self.engine.store.save(game)
+
+        cultivated = self.engine.advance(game_id, "cultivate")
+        self.assertGreater(cultivated["player"]["age"], age)
+        rested = self.engine.advance(game_id, "rest")
+        self.assertGreater(rested["player"]["hp"], 1)
+        self.assertGreater(rested["player"]["mp"], 1)
+        self.assertTrue(rested["guixu_tide"]["session"]["trapped"])
         with self.assertRaisesRegex(ValueError, "只能修炼"):
             self.engine.advance(game_id, "befriend_neighbors")
+
+    def test_active_layer_replaces_sidebar_qi_environment(self):
+        game_id, dungeon = self._open_human_dungeon(seed=30)
+        shown = self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        outer = next(layer for layer in dungeon["layers"] if layer["id"] == "outer")
+        self.assertEqual(
+            shown["player"]["qi_environment"]["concentrations"],
+            outer["qi_concentrations"],
+        )
+        self.assertEqual(
+            shown["player"]["qi_gain_efficiencies"],
+            outer["qi_gain_efficiencies"],
+        )
+
+    def test_trapped_training_buttons_advance_time_without_specialized_techniques(self):
+        game_id, dungeon = self._open_human_dungeon(seed=32)
+        self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        game = self.engine.store.load(game_id)
+        game.guixu_state["player_session"]["remaining_days"] = 0
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        self.engine._close_guixu_cycle(game, dungeon, cycle, random.Random(32))
+        game.player.body_technique = None
+        game.player.divine_sense_technique = None
+        age = game.player.age
+        self.engine.store.save(game)
+
+        body = self.engine.advance(game_id, "body_train")
+        self.assertGreater(body["player"]["age"], age)
+        sense = self.engine.advance(game_id, "sense_train")
+        self.assertGreater(sense["player"]["age"], body["player"]["age"])
+        self.assertTrue(sense["guixu_tide"]["session"]["trapped"])
 
     def test_guixu_combat_uses_cramped_pursuit_rules(self):
         game_id, dungeon = self._open_human_dungeon(seed=33)

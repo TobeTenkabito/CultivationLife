@@ -36,6 +36,11 @@
 
   function renderSession(session) {
     const current = session.layer_id;
+    const currentLayer = (session.layers || []).find(layer => layer.current) || {};
+    const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
+    const qiLine = (values, marker) => Object.entries(values || {}).map(([source, value]) => (
+      `<span><b>${esc(qiNames[source] || source)}</b>${esc(marker)}${Number(value).toFixed(2)}</span>`
+    )).join('');
     const layers = (session.layers || []).map(layer => {
       const canMove = !layer.current && !layer.locked && layerEdges.has(`${current}:${layer.id}`);
       return button(layer.current ? `${layer.name}（当前）` : layer.name, 'move', {target_layer_id:layer.id}, !canMove, layer.current ? 'active' : '');
@@ -55,6 +60,7 @@
     return `<section class="guixu-session">
       <div class="guixu-session-head"><div><p class="eyebrow">${esc(session.trapped ? 'TRAPPED' : 'EXPEDITION')}</p><h3>${esc(session.dungeon_name)}</h3></div><strong>${session.trapped ? '已被困' : `余 ${esc(session.remaining_days)} 天`}</strong></div>
       <div class="guixu-layers">${layers}</div>
+      <div class="guixu-qi-profile"><div><small>当前层位气源</small><b>${esc(currentLayer.name || '')}</b></div><div class="guixu-qi-values">${qiLine(currentLayer.qi_concentrations, '浓度 ')}</div><div class="guixu-qi-values efficiency">${qiLine(currentLayer.qi_gain_efficiencies, '吸收 ×')}</div></div>
       <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, false, 'guixu-rest')}${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped, 'guixu-return')}</div>
       ${session.trapped ? '<p class="muted">潮门闭合后，可回主界面使用修炼、炼体、神识训练及对应突破；外界行动仍被封锁。</p>' : ''}
       <section><h4>本层宝物</h4>${treasures}</section>
