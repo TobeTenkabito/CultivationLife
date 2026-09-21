@@ -15,7 +15,8 @@ dlc/
 ```
 
 系统型 DLC 还可以提供本体已声明为可选扩展点的内容表，例如
-`monster_bloodlines.json`。具体物种与进化节点仍属于 DLC；本体只保留
+`monster_bloodlines.json`、`sage_way.json` 与 `guixu_tide.json`。具体物种、
+圣道条目与归墟副本/宝池仍属于 DLC；本体只保留
 通用的读取、存档兼容与运行时接口。
 
 `manifest.json`：

@@ -219,6 +219,11 @@
           <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>分类行囊</h2></div><div class="panel-heading"><span>同名常驻属性按数量叠加</span><button id="inventory-toggle" type="button">关闭</button></div></div>
           <div id="inventory-list" class="inventory-groups"></div>
         </article>
+        <article id="guixu-card" class="paper utility-panel guixu-panel hidden" role="dialog" aria-modal="false" aria-label="归墟之潮">
+          <div class="section-title"><div><p class="eyebrow">RETURNING TIDE</p><h2>归墟之潮</h2></div><div class="panel-heading"><span id="guixu-summary"></span><button id="guixu-toggle" type="button">关闭</button></div></div>
+          <p id="guixu-description" class="muted">大潮有期，入墟无悔。每届宝物一旦离池，便不会自然补回。</p>
+          <div id="guixu-content" class="guixu-content"></div>
+        </article>
         <article id="secret-art-card" class="paper utility-panel left-panel secret-art-panel" role="dialog" aria-modal="false" aria-label="修为秘法">
           <div class="section-title"><div><p class="eyebrow">HIDDEN CULTIVATION ARTS</p><h2>修为秘法</h2></div><div class="panel-heading"><span id="secret-art-heading"></span><button id="secret-art-toggle" type="button">关闭</button></div></div>
           <p class="muted">收敛只改变外界认知与主动遭遇倾向；压制会暂时改变自身境界属性与条件。两者都不会降低神识等级。</p>
@@ -385,6 +390,7 @@
       </nav>
       <nav id="strategy-dock" class="strategy-dock" aria-label="功能窗口">
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
+        <button type="button" data-panel-target="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
@@ -415,7 +421,8 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260921-2"></script>
-  <script src="/app.js?v=20260921-5"></script>
+  <script src="/ui-panels.js?v=20260921-3"></script>
+  <script src="/guixu-panel.js?v=20260921-1"></script>
+  <script src="/app.js?v=20260921-6"></script>
 </body>
 </html>

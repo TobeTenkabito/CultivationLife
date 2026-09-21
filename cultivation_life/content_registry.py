@@ -20,6 +20,110 @@ class ContentError(ValueError):
     """内容包格式或跨表引用不合法。"""
 
 
+def validate_guixu_catalog(
+    document: dict[str, Any], registry: "ContentRegistry", maps_document: dict[str, Any],
+) -> None:
+    """Validate the finite Guixu dungeon catalog and all cross-table rewards."""
+    if document.get("schema_version") != 1 or not isinstance(document.get("dungeons"), list):
+        raise ContentError("guixu_tide.json 须声明 schema_version=1 与 dungeons 数组")
+    dungeons = document["dungeons"]
+    if len(dungeons) != 2 or {row.get("world") for row in dungeons} != {"human", "spirit"}:
+        raise ContentError("归墟首版必须且只能配置人界、灵界各一座副本")
+    settings = document.get("settings", {})
+    if int(settings.get("draw_per_cycle", 0)) <= 0:
+        raise ContentError("归墟每届抽取数量必须为正数")
+    action_days = settings.get("action_days", {})
+    if set(action_days) != {"search", "combat", "negotiate", "event"} or any(
+        not isinstance(value, int) or isinstance(value, bool) or value <= 0
+        for value in action_days.values()
+    ):
+        raise ContentError("归墟行动天数必须完整配置 search/combat/negotiate/event")
+    map_worlds = maps_document.get("worlds", {})
+    seen_dungeons: set[str] = set()
+    seen_entries: set[str] = set()
+    expected_categories = {
+        "technique": 10, "equipment": 12, "consumable": 8,
+        "plant": 10, "material": 10, "currency": 10,
+    }
+    for dungeon in dungeons:
+        dungeon_id = str(dungeon.get("id", ""))
+        if not dungeon_id or dungeon_id in seen_dungeons:
+            raise ContentError("归墟副本 ID 缺失或重复")
+        seen_dungeons.add(dungeon_id)
+        world = str(dungeon.get("world", ""))
+        locations = {
+            str(row.get("id")) for row in map_worlds.get(world, {}).get("locations", [])
+            if isinstance(row, dict)
+        }
+        if dungeon.get("entry_location_id") not in locations:
+            raise ContentError(f"归墟副本 {dungeon_id} 的入口地域不存在")
+        for field in ("max_entry_rank", "eject_rank"):
+            rank = dungeon.get(field)
+            if (
+                not isinstance(rank, list) or len(rank) != 2
+                or not all(isinstance(value, int) and not isinstance(value, bool) for value in rank)
+                or not 0 <= rank[0] < len(registry.realms)
+                or not 1 <= rank[1] <= registry.realms[rank[0]].layers
+            ):
+                raise ContentError(f"归墟副本 {dungeon_id} 的 {field} 不合法")
+        if tuple(dungeon["max_entry_rank"]) >= tuple(dungeon["eject_rank"]):
+            raise ContentError(f"归墟副本 {dungeon_id} 的传出修为必须高于最高入场修为")
+        if any(int(dungeon.get(field, 0)) <= 0 for field in (
+            "period_years", "announce_lead_years", "window_days",
+        )):
+            raise ContentError(f"归墟副本 {dungeon_id} 的周期参数必须为正数")
+        if int(dungeon["announce_lead_years"]) >= int(dungeon["period_years"]):
+            raise ContentError(f"归墟副本 {dungeon_id} 的预告时间必须短于周期")
+        layers = dungeon.get("layers", [])
+        layer_ids = [str(row.get("id", "")) for row in layers if isinstance(row, dict)]
+        if len(layer_ids) != 5 or len(set(layer_ids)) != 5 or "secret" not in layer_ids:
+            raise ContentError(f"归墟副本 {dungeon_id} 必须配置四个常规层和 secret 秘层")
+        for layer in layers:
+            efficiencies = layer.get("qi_gain_efficiencies", {})
+            if set(efficiencies) != {"spirit", "demon", "monster", "yin"} or any(
+                not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0
+                for value in efficiencies.values()
+            ):
+                raise ContentError(f"归墟副本 {dungeon_id}/{layer.get('id')} 的四气效率不完整")
+            if int(layer.get("travel_days", 0)) <= 0:
+                raise ContentError(f"归墟副本 {dungeon_id}/{layer.get('id')} 的移动天数不合法")
+        pool = dungeon.get("treasure_pool", [])
+        if len(pool) != 60:
+            raise ContentError(f"归墟副本 {dungeon_id} 的主宝物池必须恰好 60 条")
+        category_counts = {key: 0 for key in expected_categories}
+        for entry in pool:
+            entry_id = str(entry.get("id", ""))
+            if not entry_id or entry_id in seen_entries:
+                raise ContentError(f"归墟宝物条目 ID 缺失或重复：{entry_id}")
+            seen_entries.add(entry_id)
+            category = str(entry.get("category", ""))
+            if category not in category_counts:
+                raise ContentError(f"归墟宝物 {entry_id} 的分类不合法")
+            category_counts[category] += 1
+            kind, content_id = str(entry.get("kind", "")), str(entry.get("content_id", ""))
+            if kind == "technique":
+                if content_id not in registry.techniques or category != "technique":
+                    raise ContentError(f"归墟功法条目 {entry_id} 引用了不存在或分类错误的功法")
+            elif kind in {"item", "item_bundle"}:
+                if content_id not in registry.items:
+                    raise ContentError(f"归墟宝物 {entry_id} 引用了不存在的物品：{content_id}")
+                quantity = entry.get("quantity", 1)
+                if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
+                    raise ContentError(f"归墟宝物 {entry_id} 的数量必须为正整数")
+            else:
+                raise ContentError(f"归墟宝物 {entry_id} 的 kind 不合法")
+            weights = entry.get("layer_weights", {})
+            regular_layers = set(layer_ids) - {"secret"}
+            if set(weights) != regular_layers or any(
+                not isinstance(value, (int, float)) or value < 0 for value in weights.values()
+            ) or sum(float(value) for value in weights.values()) <= 0:
+                raise ContentError(f"归墟宝物 {entry_id} 的层权重不合法")
+        if category_counts != expected_categories:
+            raise ContentError(
+                f"归墟副本 {dungeon_id} 的分类数量须为功法10/装备12/丹符8/灵植10/材料10/灵石10"
+            )
+
+
 @dataclass(frozen=True)
 class ContentRegistry:
     items: dict[str, Item]
@@ -70,6 +174,11 @@ class ContentRegistry:
                         "factions":registry.faction_definitions, "world_npcs":registry.world_npc_templates,
                         "monster_imprints":registry.monster_bloodline_settings.get("imprints", {}),
                     },
+                )
+            if "guixu_tide.json" in documents:
+                validate_guixu_catalog(
+                    documents["guixu_tide.json"], registry,
+                    documents.get("maps.json", {"worlds": {}}),
                 )
             return registry
 
@@ -1451,6 +1560,9 @@ def default_extension_root() -> Path:
 CONTENT = ContentRegistry.load(default_content_root(), default_extension_root())
 CONTENT_DOCUMENTS = ContentRegistry.loaded_documents
 EXTENSION_REPORT = ContentRegistry.extension_report
+GUIXU_TIDE_CONTENT = copy.deepcopy(CONTENT_DOCUMENTS.get(
+    "guixu_tide.json", {"schema_version": 1, "settings": {}, "dungeons": []},
+))
 ITEM_CATALOG = CONTENT.items
 TECHNIQUE_CATALOG = CONTENT.techniques
 TRANSFORMATION_CATALOG = CONTENT.transformations
