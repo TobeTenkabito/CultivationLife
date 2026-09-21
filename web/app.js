@@ -335,7 +335,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -346,6 +346,7 @@ function render(data) {
   $('#start-screen').classList.add('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.remove('hidden'); $('#new-game-button').classList.remove('hidden');
   queueAchievementToasts(data.new_achievements || []);
   const p = data.player;
+  renderSecretArts(data.secret_arts || {});
   const transformationAvailable = data.transformation_system?.available !== false;
   const transformationDock = document.querySelector('[data-panel-target="transformation"]');
   transformationDock?.classList.toggle('hidden', !transformationAvailable);
@@ -1165,6 +1166,37 @@ function renderIntrigue(system) {
     const log=document.createElement('section');log.className='intrigue-resolution-log';const h3=document.createElement('h3');h3.textContent='近期议决';log.appendChild(h3);
     system.resolutions.forEach(resolution=>{const row=document.createElement('div');const title=document.createElement('b');const detail=document.createElement('small');title.textContent=`${resolution.faction_name} · ${resolution.type_name} · ${resolution.result==='passed'?'通过':'否决'}`;detail.textContent=`${resolution.yes}/${resolution.total} 票赞成 · ${resolution.age} 岁`;row.append(title,detail);log.appendChild(row);});content.appendChild(log);
   }
+}
+
+function renderSecretArts(system) {
+  const targets = system.targets || [];
+  const concealment = system.concealment || {};
+  const suppression = system.suppression || {};
+  $('#secret-art-heading').textContent = `神识 Lv.${number(system.divine_sense_level || 0)}`;
+  $('#secret-art-sense').textContent = `当前神识 Lv.${number(system.divine_sense_level || 0)}；真实修为自然增长基准 Lv.${number(system.natural_sense_level || 0)}。达到伪装修为基准可察觉收敛，达到原修为基准才能看穿真实境界。`;
+  $('#secret-conceal-status').textContent = concealment.active
+    ? `正在收敛为${concealment.realm_name}；你的真实属性不变，外界与主动遭遇按伪装气机判断。`
+    : `当前未收敛；对外显示为${system.current_realm_name || '当前境界'}。`;
+  $('#secret-suppress-status').textContent = suppression.active
+    ? `实际压制为${suppression.realm_name}；原修为${suppression.true_realm_name}已封存，解除时按当前气血比例恢复。`
+    : `当前未压制；修为按${system.current_realm_name || '当前境界'}完整生效。`;
+  for (const selector of ['#secret-conceal-realm', '#secret-suppress-realm']) {
+    const select = $(selector);
+    const previous = select.value;
+    select.innerHTML = '';
+    targets.forEach(target => {
+      const option = document.createElement('option');
+      option.value = target.realm_index;
+      option.textContent = `${target.name} · 识别基准 Lv.${target.sense_requirement}`;
+      select.appendChild(option);
+    });
+    if (targets.some(target => String(target.realm_index) === previous)) select.value = previous;
+    else if (targets.length) select.value = String(targets[targets.length - 1].realm_index);
+  }
+  $('#secret-conceal-activate').dataset.available = targets.length && !concealment.active ? '1' : '0';
+  $('#secret-conceal-cancel').dataset.available = concealment.active ? '1' : '0';
+  $('#secret-suppress-activate').dataset.available = targets.length && !suppression.active ? '1' : '0';
+  $('#secret-suppress-cancel').dataset.available = suppression.active ? '1' : '0';
 }
 
 function renderSageSystem(system) {
@@ -3442,7 +3474,8 @@ function renderButtons() {
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
     const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
-    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost;
+    const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate';
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);
@@ -3529,6 +3562,12 @@ function renderButtons() {
   document.querySelectorAll('#formation-card button, #formation-card input, #formation-card select').forEach(control => {
     if (control.id !== 'formation-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.formationUnavailable === '1';
   });
+  document.querySelectorAll('#secret-art-card button, #secret-art-card select').forEach(control => {
+    if (control.id === 'secret-art-toggle') return;
+    const cancelling = control.id.endsWith('-cancel');
+    control.disabled = busy || !game?.player?.alive || control.dataset.available === '0'
+      || (!cancelling && (!!game?.pending_event || !!game?.imprisonment || !!game?.trial?.active));
+  });
   $('#spirit-crossing-action').disabled = busy || !game?.player.alive || !!game?.pending_event;
   $('#cross-world-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   $('#cross-world-secondary-action').disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
@@ -3583,6 +3622,19 @@ $('#setting-achievement-popup').onchange = event => mutate(`/api/games/${game.id
 });
 $('#setting-auto-war').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'auto_advance_player_wars', enabled:event.target.checked,
+});
+
+$('#secret-conceal-activate').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
+  art:'conceal', action:'activate', realm_index:Number($('#secret-conceal-realm').value),
+});
+$('#secret-conceal-cancel').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
+  art:'conceal', action:'cancel',
+});
+$('#secret-suppress-activate').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
+  art:'suppress', action:'activate', realm_index:Number($('#secret-suppress-realm').value),
+});
+$('#secret-suppress-cancel').onclick = () => mutate(`/api/games/${game.id}/secret-art`, {
+  art:'suppress', action:'cancel',
 });
 
 $('#battle-report-toggle').onclick = () => {

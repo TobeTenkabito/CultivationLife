@@ -344,7 +344,7 @@ def main() -> None:
                 page.locator("#extension-card").wait_for(state="visible")
                 assert "已识别 4" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
-                assert "妖修道途：血脉与进化" in extension_text
+                assert "万妖归宗：血脉进化" in extension_text
                 assert "百鬼夜行：往生轮回" in extension_text
                 assert "明争暗斗：合纵连横" in extension_text
                 page.locator("#extension-toggle").click()

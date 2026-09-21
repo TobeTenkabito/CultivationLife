@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.ghost-reincarnation",
   "name": "百鬼夜行：往生轮回",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 110,

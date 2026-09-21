@@ -99,13 +99,12 @@ class SageInnerOuterTests(unittest.TestCase):
         game.player.realm_index = 2
         game.player.layer = 9
         game.player.haoran_exp = 5000
-        old_sense = game.player.divine_sense_rank
         self.engine.store.save(game)
         shown = self.engine.sage_outer_king(game_id, "advance")
         self.assertEqual(shown["player"]["realm_index"], 3)
         self.assertEqual(shown["player"]["layer"], 1)
         saved = self.engine.store.load(game_id)
-        self.assertEqual(saved.player.divine_sense_rank, old_sense + 1)
+        self.assertEqual(saved.player.divine_sense_rank, self.engine._cultivation_sense_requirement(3, 1))
 
     def test_haoran_passives_grow_and_remain_capped(self):
         low = haoran_passive_effects(60)

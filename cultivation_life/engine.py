@@ -266,6 +266,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             for item in preset.get("inventory", []):
                 add_item(player, item["id"], int(item["quantity"]))
             player.opportunity = round(opportunity_required(player) * float(preset.get("opportunity_fraction", 0)), 1)
+        player.divine_sense_rank = max(
+            player.divine_sense_rank,
+            self._cultivation_sense_requirement(player.realm_index, player.layer),
+        )
         # Every life begins with one ordinary weapon already in the equipment
         # section, including mortal creation and every quick-start preset.
         if not has_item(player, "spirit_sword"):
@@ -324,6 +328,179 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
     def list_achievements(self) -> dict[str, Any]:
         return self.achievements.public_catalog()
 
+    @staticmethod
+    def _cultivation_sense_requirement(realm_index: int, layer: int) -> int:
+        """Natural divine-sense rank earned by reaching one cultivation layer."""
+        bounded_realm = max(0, min(int(realm_index), len(REALMS) - 1))
+        bounded_layer = max(1, min(int(layer), REALMS[bounded_realm].layers))
+        return sum(definition.layers for definition in REALMS[:bounded_realm]) + bounded_layer - 1
+
+    def _secret_art_realm_name(self, player: Player, realm_index: int, layer: int = 1) -> str:
+        shell = SectNpc(
+            "secret-art", player.name, "", int(realm_index), int(layer),
+            player.age, player.lifespan, path=player.path, world=player.world,
+        )
+        return self._npc_realm_name(shell)
+
+    def manage_secret_art(
+        self, game_id: str, art: str, action: str, realm_index: int | None = None,
+    ) -> dict[str, Any]:
+        game = self._load(game_id)
+        player = game.player
+        if not player.alive:
+            raise ValueError("此生已经结束")
+        if art not in {"conceal", "suppress"} or action not in {"activate", "cancel"}:
+            raise ValueError("未知秘法操作")
+
+        if art == "conceal" and action == "cancel":
+            if not player.cultivation_concealment:
+                raise ValueError("当前没有运转收敛修为")
+            old_name = self._secret_art_realm_name(
+                player, player.cultivation_concealment["realm_index"],
+                player.cultivation_concealment.get("layer", 1),
+            )
+            player.cultivation_concealment = None
+            title, result = "散去敛息", "cancelled"
+            summary = f"你散去收敛修为，对外气机不再停留于{old_name}。"
+        elif art == "suppress" and action == "cancel":
+            suppression = player.cultivation_suppression
+            if not suppression:
+                raise ValueError("当前没有运转压制修为")
+            hp_ratio = player.hp / max(1.0, max_hp(player))
+            mp_ratio = player.mp / max(1.0, max_mp(player))
+            suppressed_name = self._secret_art_realm_name(player, player.realm_index, player.layer)
+            accrued_opportunity = max(0.0, float(player.opportunity))
+            player.realm_index = int(suppression["realm_index"])
+            player.layer = int(suppression["layer"])
+            player.opportunity = float(suppression.get("opportunity", 0.0)) + accrued_opportunity
+            player.awaiting_ascension = bool(suppression.get("awaiting_ascension", False))
+            player.awaiting_major_breakthrough = bool(suppression.get("awaiting_major_breakthrough", False))
+            player.awaiting_minor_breakthrough = bool(suppression.get("awaiting_minor_breakthrough", False))
+            player.awaiting_spirit_realm_crossing = bool(
+                suppression.get("awaiting_spirit_realm_crossing", False)
+            )
+            player.active_breakthrough_aids = list(suppression.get("active_breakthrough_aids", []))
+            remaining = suppression.get("tribulation_remaining")
+            player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
+            player.cultivation_suppression = None
+            player.hp = max(1.0, max_hp(player) * max(0.0, min(1.0, hp_ratio)))
+            player.mp = max(0.0, max_mp(player) * max(0.0, min(1.0, mp_ratio)))
+            true_name = self._secret_art_realm_name(player, player.realm_index, player.layer)
+            title, result = "解开修为", "cancelled"
+            summary = f"你解除秘法，将真正修为从{suppressed_name}完整复原至{true_name}；神识等级始终未变。"
+        else:
+            if game.pending_event or game.active_trial or player.imprisonment:
+                raise ValueError("事件、劫数或服刑期间不能改换修为秘法")
+            if realm_index is None:
+                raise ValueError("请选择目标境界")
+            target_realm = int(realm_index)
+            if not 0 <= target_realm < player.realm_index:
+                raise ValueError("秘法目标必须低于当前真实境界")
+            target_layer = 1
+            target_name = self._secret_art_realm_name(player, target_realm, target_layer)
+            if art == "conceal":
+                player.cultivation_concealment = {
+                    "realm_index": target_realm, "layer": target_layer,
+                }
+                title, result = "收敛修为", "activated"
+                summary = (
+                    f"你将对外气机收敛为{target_name}。自身属性与突破状态不变，"
+                    "主动遭遇会更偏向这一层次的推荐战力。"
+                )
+            else:
+                if player.sealed_cultivation:
+                    raise ValueError("下界法则正在封印真实道果，不能再叠加压制修为")
+                if player.cultivation_suppression:
+                    raise ValueError("当前已经处于压制修为状态")
+                hp_ratio = player.hp / max(1.0, max_hp(player))
+                mp_ratio = player.mp / max(1.0, max_mp(player))
+                player.cultivation_suppression = {
+                    "realm_index": player.realm_index,
+                    "layer": player.layer,
+                    "opportunity": player.opportunity,
+                    "awaiting_ascension": player.awaiting_ascension,
+                    "awaiting_major_breakthrough": player.awaiting_major_breakthrough,
+                    "awaiting_minor_breakthrough": player.awaiting_minor_breakthrough,
+                    "awaiting_spirit_realm_crossing": player.awaiting_spirit_realm_crossing,
+                    "active_breakthrough_aids": list(player.active_breakthrough_aids),
+                    "tribulation_remaining": (
+                        max(0, player.next_tribulation_age - player.age)
+                        if player.next_tribulation_age is not None else None
+                    ),
+                }
+                player.realm_index = target_realm
+                player.layer = target_layer
+                player.opportunity = 0.0
+                player.awaiting_ascension = False
+                player.awaiting_major_breakthrough = False
+                player.awaiting_minor_breakthrough = False
+                player.awaiting_spirit_realm_crossing = False
+                player.active_breakthrough_aids = []
+                player.next_tribulation_age = None
+                if (
+                    player.cultivation_concealment
+                    and player.cultivation_concealment["realm_index"] >= target_realm
+                ):
+                    player.cultivation_concealment = None
+                player.hp = max(1.0, max_hp(player) * max(0.0, min(1.0, hp_ratio)))
+                player.mp = max(0.0, max_mp(player) * max(0.0, min(1.0, mp_ratio)))
+                title, result = "压制修为", "activated"
+                summary = (
+                    f"你将自身修为真正压制至{target_name}；境界属性与条件均按压制后结算，"
+                    "但神识等级和神识经验完整保留。"
+                )
+
+        game.history.append(HistoryRecord(
+            "SYS_SECRET_ART", 1, player.age, title, art, result, summary,
+            {"art": art, "action": action, "target_realm_index": realm_index},
+            ["system", "secret_art", art],
+        ))
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def _public_secret_arts(self, player: Player) -> dict[str, Any]:
+        concealment = player.cultivation_concealment
+        suppression = player.cultivation_suppression
+        current_name = self._secret_art_realm_name(player, player.realm_index, player.layer)
+        true_name = (
+            self._secret_art_realm_name(
+                player, int(suppression["realm_index"]), int(suppression["layer"]),
+            ) if suppression else current_name
+        )
+        targets = [
+            {
+                "realm_index": index,
+                "name": self._secret_art_realm_name(player, index, 1),
+                "sense_requirement": self._cultivation_sense_requirement(index, 1),
+            }
+            for index in range(player.realm_index)
+        ]
+        return {
+            "divine_sense_level": divine_sense_level(player),
+            "natural_sense_level": self._cultivation_sense_requirement(
+                int(suppression["realm_index"]) if suppression else player.realm_index,
+                int(suppression["layer"]) if suppression else player.layer,
+            ),
+            "current_realm_name": current_name,
+            "true_realm_name": true_name,
+            "targets": targets,
+            "concealment": {
+                "active": bool(concealment),
+                "realm_index": concealment.get("realm_index") if concealment else None,
+                "realm_name": (
+                    self._secret_art_realm_name(
+                        player, concealment["realm_index"], concealment.get("layer", 1),
+                    ) if concealment else None
+                ),
+            },
+            "suppression": {
+                "active": bool(suppression),
+                "realm_name": current_name if suppression else None,
+                "true_realm_name": true_name if suppression else None,
+            },
+        }
+
     def advance(self, game_id: str, action: str, years: int = 1) -> dict[str, Any]:
         game = self._load(game_id)
         player = game.player
@@ -341,6 +518,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             raise ValueError("魂印受制时只能等待、有限修炼、反抗或夺舍拘魂者")
         if action not in ACTIONS:
             raise ValueError("未知行动")
+        if player.cultivation_suppression and action == "cultivate":
+            raise ValueError("压制修为期间不能运转主修功法；可修炼神识、炼体或进行其他行动")
         if action == "commission" and player.realm_index == 0:
             raise ValueError("凡人尚无法承接修仙坊市委托")
         if action == "body_train":
@@ -1272,6 +1451,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             raise ValueError("身陷牢狱时无法正常突破")
         if player.sealed_cultivation:
             raise ValueError("当前修为受下界法则压制，不能在封印状态下突破")
+        if player.cultivation_suppression:
+            raise ValueError("当前修为受秘法压制，解除压制后方可突破")
         current = realm(player)
         required = opportunity_required(player)
         breakthrough_kind = self._manual_breakthrough_kind(player)
@@ -1835,6 +2016,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         item = ITEM_CATALOG.get(item_id)
         if not item or not has_item(game.player, item_id):
             raise ValueError("物品不存在")
+        if game.player.cultivation_suppression and item.breakthrough_bonus > 0:
+            raise ValueError("压制修为期间不能服用突破丹药")
         if ghost_cultivation_active(game.player) and item.breakthrough_bonus > 0:
             scope_type = str(item.breakthrough_scope or "").split(":", 1)[0]
             if game.player.realm_index < 4:
@@ -5386,6 +5569,120 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         return f"{definition.name}{stage}"
 
     @staticmethod
+    def _stable_secret_art_roll(identity: str) -> int:
+        return sum((index + 1) * ord(character) for index, character in enumerate(identity))
+
+    def _ensure_npc_concealment(self, npc: SectNpc) -> tuple[int, int] | None:
+        if (
+            npc.concealed_realm_index is not None
+            and 0 <= int(npc.concealed_realm_index) < npc.realm_index
+        ):
+            realm_index = int(npc.concealed_realm_index)
+            layer = max(1, min(int(npc.concealed_layer or 1), REALMS[realm_index].layers))
+            npc.concealed_layer = layer
+            return realm_index, layer
+        npc.concealed_realm_index = None
+        npc.concealed_layer = None
+        if npc.realm_index < 2:
+            return None
+        rules = WORLD_SYSTEMS.get("secret_arts", {})
+        roll = self._stable_secret_art_roll(f"{npc.id}|{npc.name}|收敛修为")
+        chance = max(0.0, min(1.0, float(rules.get("npc_concealment_chance", 0.18))))
+        if roll % 10_000 >= round(chance * 10_000):
+            return None
+        maximum_drop = min(
+            npc.realm_index,
+            max(1, int(rules.get("npc_max_realm_drop", 3))),
+        )
+        drop = 1 + (roll // 10_000) % maximum_drop
+        realm_index = max(0, npc.realm_index - drop)
+        layer = 1 + (roll // 100_000) % REALMS[realm_index].layers
+        npc.concealed_realm_index = realm_index
+        npc.concealed_layer = layer
+        return realm_index, layer
+
+    def _npc_cultivation_perception(
+        self, game: GameState, npc: SectNpc, require_realm_visibility: bool = False,
+    ) -> dict[str, Any]:
+        concealed = self._ensure_npc_concealment(npc)
+        actual_name = self._npc_realm_name(npc)
+        if not concealed:
+            visible = not require_realm_visibility or npc.realm_index <= game.player.realm_index + 1
+            return {
+                "realm_index": npc.realm_index,
+                "layer": npc.layer,
+                "realm_name": actual_name if visible else "无法看清",
+                "concealed": False,
+                "detected": False,
+                "revealed": visible,
+                "actual_realm_name": actual_name if visible else None,
+                "display_power": self._npc_power(npc) if visible else None,
+            }
+        concealed_realm, concealed_layer = concealed
+        shell = SectNpc(
+            npc.id, npc.name, npc.title, concealed_realm, concealed_layer,
+            npc.age, npc.lifespan, path=npc.path, world=npc.world,
+        )
+        concealed_name = self._npc_realm_name(shell)
+        sense = divine_sense_level(game.player)
+        detect_requirement = self._cultivation_sense_requirement(concealed_realm, concealed_layer)
+        reveal_requirement = self._cultivation_sense_requirement(npc.realm_index, npc.layer)
+        detected = sense >= detect_requirement
+        revealed = sense >= reveal_requirement
+        if revealed:
+            realm_name = f"{concealed_name}（已识破：真实{actual_name}）"
+            shown_realm, shown_layer = npc.realm_index, npc.layer
+            display_power = self._npc_power(npc)
+        else:
+            realm_name = f"{concealed_name}（气机有异）" if detected else concealed_name
+            shown_realm, shown_layer = concealed_realm, concealed_layer
+            actual_expected = max(1.0, expected_combat_power(npc.realm_index, npc.layer))
+            display_power = self._npc_power(npc) * (
+                expected_combat_power(concealed_realm, concealed_layer) / actual_expected
+            )
+        return {
+            "realm_index": shown_realm,
+            "layer": shown_layer,
+            "realm_name": realm_name,
+            "concealed": True,
+            "detected": detected,
+            "revealed": revealed,
+            "actual_realm_name": actual_name if revealed else None,
+            "concealed_realm_name": concealed_name,
+            "detect_requirement": detect_requirement,
+            "reveal_requirement": reveal_requirement if revealed else None,
+            "display_power": round(max(1.0, display_power), 1),
+        }
+
+    def _relationship_cultivation_perception(
+        self, game: GameState, person: dict[str, Any], title: str = "故交",
+    ) -> dict[str, Any]:
+        """Apply the same secret-art visibility rules to compact relationship snapshots."""
+        realm_index = int(person.get("realm_index", 0))
+        layer = int(person.get("layer", 1))
+        shell = SectNpc(
+            str(person.get("id", person.get("name", "relationship"))),
+            str(person.get("name", "无名修士")), title, realm_index, layer,
+            int(person.get("age", 1)), person.get("lifespan"),
+            path=str(person.get("path", "dao")), race=str(person.get("race", "human")),
+            world=str(person.get("world", game.player.world)),
+            combat_factor=float(person.get("combat_factor", 1.0)),
+            concealed_realm_index=person.get("concealed_realm_index"),
+            concealed_layer=person.get("concealed_layer"),
+        )
+        perception = self._npc_cultivation_perception(game, shell)
+        # Persist a deterministic disguise into the relationship snapshot so
+        # leaving and re-entering the panel cannot reroll the NPC's public face.
+        person["concealed_realm_index"] = shell.concealed_realm_index
+        person["concealed_layer"] = shell.concealed_layer
+        if perception["display_power"] is not None and person.get("combat_power") is not None:
+            actual = max(1.0, self._npc_power(shell))
+            perception["display_power"] = round(
+                float(person["combat_power"]) * float(perception["display_power"]) / actual, 1,
+            )
+        return perception
+
+    @staticmethod
     def _dynamic_sect_title(npc: SectNpc, sect: SectState) -> str:
         """随修为投影宗门职位，同时保留掌门等唯一职衔。"""
         if any(marker in npc.title for marker in ("宗主","掌门","台主","住持","方丈","太上","宫主","山主","族长","祭酒","老祖","尊者")):
@@ -5779,10 +6076,17 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
     def _generate_cultivator_target(
         self, player: Player, target_name: str, settings: dict[str, Any], rng: random.Random,
         game: GameState | None = None, forced_race: str | None = None,
+        use_player_concealment: bool = False,
     ) -> dict[str, Any]:
         offsets = settings.get("realm_offsets", [[0, 1.0]])
         offset = int(rng.choices([entry[0] for entry in offsets], weights=[entry[1] for entry in offsets], k=1)[0])
-        target_realm_index = max(1, min(self._world_realm_cap(player.world), player.realm_index + offset))
+        anchor_realm = player.realm_index
+        concealment = player.cultivation_concealment if use_player_concealment else None
+        if concealment:
+            bias = float(WORLD_SYSTEMS.get("secret_arts", {}).get("concealed_enemy_bias", 0.82))
+            if rng.random() < max(0.0, min(1.0, bias)):
+                anchor_realm = int(concealment["realm_index"])
+        target_realm_index = max(1, min(self._world_realm_cap(player.world), anchor_realm + offset))
         target_layer = rng.randint(1, REALMS[target_realm_index].layers)
         expected = expected_combat_power(target_realm_index, target_layer)
         mean = expected * float(settings.get("expectation_multiplier", 1.0))
@@ -5791,7 +6095,16 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         sampled = rng.gauss(mean, sigma)
         target_power = max(expected * float(lower), min(expected * float(upper), sampled))
         shell = SectNpc("encounter", target_name, "", target_realm_index, target_layer, 0, 1)
-        visible = target_realm_index <= player.realm_index + 1
+        npc_rules = WORLD_SYSTEMS.get("secret_arts", {})
+        if target_realm_index >= 2 and rng.random() < float(npc_rules.get("npc_concealment_chance", 0.18)):
+            maximum_drop = min(target_realm_index, max(1, int(npc_rules.get("npc_max_realm_drop", 3))))
+            shell.concealed_realm_index = max(0, target_realm_index - rng.randint(1, maximum_drop))
+            shell.concealed_layer = rng.randint(1, REALMS[shell.concealed_realm_index].layers)
+        perception = self._npc_cultivation_perception(game, shell, True) if game else None
+        visible = (
+            perception["realm_name"] != "无法看清" if perception
+            else target_realm_index <= player.realm_index + 1
+        )
         target_race = forced_race or "human"
         if self._world_supports(player.world, "races"):
             race_pool = [race_id for race_id, definition in RACE_DEFINITIONS.items() if player.world in definition.get("worlds", [])]
@@ -5807,7 +6120,16 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             "target_realm_index": target_realm_index,
             "target_layer": target_layer,
             "target_realm_visible": visible,
-            "target_realm_display": self._npc_realm_name(shell) if visible else "无法看清",
+            "target_realm_display": (
+                perception["realm_name"] if perception
+                else self._npc_realm_name(shell) if visible else "无法看清"
+            ),
+            "target_power_display": (
+                perception["display_power"] if perception and perception["display_power"] is not None
+                else round(max(1.0, target_power), 1)
+            ),
+            "npc_concealed_realm_index": shell.concealed_realm_index,
+            "npc_concealed_layer": shell.concealed_layer,
             "combat_type": "cultivator",
             "race": target_race,
             "race_name": RACE_DEFINITIONS[target_race]["name"],
@@ -5849,6 +6171,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 spirit_root=self._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
                 race=race_id, world=game.player.world, affinity=rng.uniform(-18, 12),
             )
+            if index == 0 and target.get("npc_concealed_realm_index") is not None:
+                npc.concealed_realm_index = int(target["npc_concealed_realm_index"])
+                npc.concealed_layer = int(target.get("npc_concealed_layer") or 1)
             npc.lifespan = self._scale_npc_lifespan(npc.lifespan, npc.path, npc.age)
             npc.treasure_item_id = self._select_npc_treasure(npc, rng)
             base_power = max(1.0, self._npc_power(npc))
@@ -5909,6 +6234,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
     ) -> dict[str, Any]:
         members = [{
             "name": target["target_name"], "power": float(target.get("primary_power", target["target_power"])),
+            "display_power": float(target.get(
+                "target_power_display", target.get("primary_power", target["target_power"]),
+            )),
             "realm_index": int(target["target_realm_index"]), "layer": int(target["target_layer"]),
             "npc_id": target.get("npc_id"), "faction_id": target.get("faction_id"), "path": target.get("path", "dao"),
             "race": target.get("race", "human"), "treasure_item_id": target.get("treasure_item_id"),
@@ -5930,6 +6258,9 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 })
         target["members"] = members
         target["target_power"] = npc_team_combat_power(member["power"] for member in members)
+        target["target_power_display"] = npc_team_combat_power(
+            member.get("display_power", member["power"]) for member in members
+        )
         return target
 
     def _condition(self, condition: dict[str, Any], game: GameState) -> bool:
@@ -7217,6 +7548,8 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
 
     def _resolve_breakthroughs(self, game: GameState, rng: random.Random) -> None:
         player = game.player
+        if player.cultivation_suppression:
+            return
         if player.sealed_cultivation:
             player.opportunity = min(player.opportunity, opportunity_required(player))
             return
@@ -8393,6 +8726,14 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             player_data["true_realm_name"] = self._npc_realm_name(true_shell)
             lower_name = WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world)
             player_data["realm_name"] += f"（{lower_name}压制；真实{player_data['true_realm_name']}）"
+        secret_arts = self._public_secret_arts(game.player)
+        if game.player.cultivation_suppression:
+            player_data["true_realm_name"] = secret_arts["true_realm_name"]
+            player_data["realm_name"] += f"（秘法压制；原修为{secret_arts['true_realm_name']}）"
+        player_data["external_realm_name"] = (
+            secret_arts["concealment"]["realm_name"]
+            if secret_arts["concealment"]["active"] else secret_arts["current_realm_name"]
+        )
         fame_config = WORLD_SYSTEMS["fame"]
         coalition_threshold = float(
             WORLD_SYSTEMS["faction_conflict"]["demonic_coalition_fame_threshold"]
@@ -8456,6 +8797,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             "last_combat_report": copy.deepcopy(game.last_combat_report),
             "settings": dict(game.settings),
             "new_achievements": new_achievements,
+            "secret_arts": secret_arts,
             "transformation_system": public_transformation_system(game.player),
             "monster_bloodline": public_monster_bloodline(game.player),
             "history": [entry.to_dict() for entry in reversed(history[-80:])],
@@ -8596,6 +8938,13 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         return "world:global" in world_tags or f"world:{game.player.world}" in world_tags
 
     def _public_major_breakthrough(self, player: Player) -> dict[str, Any]:
+        if player.cultivation_suppression:
+            return {
+                "kind": None, "ready": False, "enabled": False, "target_realm": None,
+                "action_label": "突破瓶颈", "chance": None, "active_aids": [],
+                "met": False, "reason": "当前修为受秘法压制，解除压制后方可继续修行与突破。",
+                "missing_affinities": [],
+            }
         if player.sealed_cultivation:
             upper_world = str(player.sealed_cultivation.get("upper_world", "spirit"))
             return {
@@ -8695,10 +9044,23 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             else:
                 status = "不在当前界面，生死不明"
             public_npc = npc.to_dict()
+            perception = self._npc_cultivation_perception(game, npc) if same_world and npc.alive else None
             if not same_world:
                 public_npc["departure_reason"] = None
+            public_npc.pop("concealed_realm_index", None)
+            public_npc.pop("concealed_layer", None)
+            if perception:
+                public_npc["realm_index"] = perception["realm_index"]
+                public_npc["layer"] = perception["layer"]
             result.append({
-                **public_npc, "realm_name": self._npc_realm_name(npc),
+                **public_npc,
+                "realm_name": perception["realm_name"] if perception else self._npc_realm_name(npc),
+                "cultivation_concealment": (
+                    {
+                        key: value for key, value in perception.items()
+                        if key not in {"realm_index", "layer", "realm_name", "display_power"}
+                    } if perception and perception["concealed"] else None
+                ),
                 "gender_name": gender_name(npc.gender),
                 "spirit_root_name": self._npc_root_name(npc.spirit_root),
                 "path_name": PATH_NAMES.get(npc.path, npc.path),
@@ -8707,8 +9069,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 "world_name": WORLD_SYSTEMS["world_names"].get(npc.world, npc.world) if same_world else "去向不明",
                 "perceived_alive": perceived_alive, "status": status,
                 "combat_power": (
-                    self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
-                    if same_world and npc.alive else None
+                    float(perception["display_power"])
+                    * self._npc_formation_power_multiplier(game, npc.id)
+                    if same_world and npc.alive and perception and perception["display_power"] is not None
+                    else None
                 ),
                 "formation": (
                     {
@@ -8953,11 +9317,16 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             companion = game.player.dao_companion
             if companion and companion.get("id") == reference.get("id"):
                 if companion.get("alive", True) and companion.get("world") == game.player.world:
+                    perception = self._relationship_cultivation_perception(game, companion, "道侣")
                     result.append({
                         "id": companion["id"], "name": companion["name"],
-                        "realm_index":int(companion.get("realm_index",0)), "layer":int(companion.get("layer",1)),
-                        "realm_name": companion.get("realm_name", "修为未明"),
-                        "combat_power": self._relationship_combat_power(companion),
+                        "realm_index": perception["realm_index"], "layer": perception["layer"],
+                        "realm_name": perception["realm_name"],
+                        "combat_power": perception["display_power"] or self._relationship_combat_power(companion),
+                        "cultivation_concealment": {
+                            key: value for key, value in perception.items()
+                            if key not in {"realm_index", "layer", "realm_name", "display_power"}
+                        } if perception["concealed"] else None,
                         "affinity": round(float(companion.get("affinity", 0)), 1), "attitude": "道侣",
                         "can_interact":game.governance_actions.get(f"party_interaction:{companion['id']}") != game.player.age,
                         "can_cross_spirit":bool(self._party_crossing_candidate(game, str(companion["id"]))),
@@ -8971,17 +9340,29 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             npc = self._find_npc(game, str(reference.get("id", "")))
             relation = next((entry for entry in [game.player.master, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == str(reference.get("id"))), None)
             if npc and npc.alive and npc.world == game.player.world:
+                perception = self._npc_cultivation_perception(game, npc)
                 row = {
-                    "id": npc.id, "name": npc.name, "realm_index":npc.realm_index, "layer":npc.layer,
-                    "realm_name": self._npc_realm_name(npc), "combat_power": self._npc_power(npc),
+                    "id": npc.id, "name": npc.name,
+                    "realm_index": perception["realm_index"], "layer": perception["layer"],
+                    "realm_name": perception["realm_name"],
+                    "combat_power": perception["display_power"] or self._npc_power(npc),
+                    "cultivation_concealment": {
+                        key: value for key, value in perception.items()
+                        if key not in {"realm_index", "layer", "realm_name", "display_power"}
+                    } if perception["concealed"] else None,
                     "affinity": round(npc.affinity or 0, 1), "attitude": attitude_label(npc.affinity or 0, 0),
                 }
             elif relation and relation.get("alive", True) and relation.get("world") == game.player.world:
+                perception = self._relationship_cultivation_perception(game, relation)
                 row = {
                     "id":str(relation["id"]), "name":str(relation["name"]),
-                    "realm_index":int(relation.get("realm_index",0)), "layer":int(relation.get("layer",1)),
-                    "realm_name":str(relation.get("realm_name","修为未明")),
-                    "combat_power":self._relationship_combat_power(relation),
+                    "realm_index": perception["realm_index"], "layer": perception["layer"],
+                    "realm_name": perception["realm_name"],
+                    "combat_power": perception["display_power"] or self._relationship_combat_power(relation),
+                    "cultivation_concealment": {
+                        key: value for key, value in perception.items()
+                        if key not in {"realm_index", "layer", "realm_name", "display_power"}
+                    } if perception["concealed"] else None,
                     "affinity":round(float(relation.get("affinity",0)),1),
                     "attitude":attitude_label(float(relation.get("affinity",0)),0),
                 }
@@ -9285,17 +9666,28 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         definition = self._faction_meta(game, sect.id)
         unlocked = player.realm_index >= 4
         sect_members = self._sect_members(game, sect)
-        roster = [
-            {
-                **npc.to_dict(),
+        roster = []
+        for npc in sect_members:
+            if not npc.alive or npc.world != sect.world:
+                continue
+            perception = self._npc_cultivation_perception(game, npc)
+            public_npc = npc.to_dict()
+            public_npc.pop("concealed_realm_index", None)
+            public_npc.pop("concealed_layer", None)
+            roster.append({
+                **public_npc,
                 "title": self._dynamic_sect_title(npc, sect),
-                "realm_name": self._npc_realm_name(npc),
+                "realm_index": perception["realm_index"],
+                "layer": perception["layer"],
+                "realm_name": perception["realm_name"],
+                "cultivation_concealment": {
+                    key: value for key, value in perception.items()
+                    if key not in {"realm_index", "layer", "realm_name", "display_power"}
+                } if perception["concealed"] else None,
                 "spirit_root_name": self._npc_root_name(npc.spirit_root),
                 "race_name": RACE_DEFINITIONS.get(npc.race, {"name": npc.race})["name"],
                 "is_player": False,
-            }
-            for npc in sect_members if npc.alive and npc.world == sect.world
-        ]
+            })
         sect_hostility = player.hostility.get(self._hostility_key("sect", sect.id), 0)
         npc_by_id = {npc.id: npc for npc in sect_members}
         player_rank = (player.realm_index, player.layer)
@@ -9305,14 +9697,17 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         concubine_ids = {str(entry.get("id")) for entry in player.concubines}
         for entry in roster:
             npc = npc_by_id[entry["id"]]
-            npc_rank = (entry["realm_index"], entry["layer"])
+            # Relationship permissions always use the NPC's true cultivation;
+            # secret arts only affect what the player can see.
+            npc_rank = (npc.realm_index, npc.layer)
             entry["is_master"] = entry["id"] == master_id
             entry["is_disciple"] = entry["id"] in disciple_ids
             entry["is_friend"] = entry["id"] in friend_ids
             entry["path_name"] = PATH_NAMES.get(entry.get("path", "dao"), entry.get("path", "dao"))
             entry["affinity"] = round(npc.affinity or 0, 1)
             entry["attitude"] = attitude_label(npc.affinity or 0, sect_hostility)
-            entry["combat_power"] = self._npc_power(npc)
+            perception = self._npc_cultivation_perception(game, npc)
+            entry["combat_power"] = perception["display_power"] or self._npc_power(npc)
             entry["breakthrough_chance"] = self._npc_breakthrough_probability(npc)
             entry["treasure_name"] = ITEM_CATALOG[npc.treasure_item_id].name if npc.treasure_item_id in ITEM_CATALOG else None
             entry["in_party"] = any(member.get("id") == npc.id for member in player.party)
@@ -9487,6 +9882,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         game = self.store.load(game_id)
         conversion_migrated = False
         monster_lifespan_migrated = False
+        sense_baseline_migrated = False
         possession_timeline_migrated = migrate_possession_timeline(game.player)
         ghost_migrated = ensure_ghost_cultivation_state(game.player)
         if ghost_cultivation_active(game.player):
@@ -9625,9 +10021,22 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             learn_technique(game.player, starter)
             assign_technique(game.player, starter, "main")
             version_changed = True
+        true_cultivation = (
+            game.player.cultivation_suppression
+            or game.player.sealed_cultivation
+            or {"realm_index": game.player.realm_index, "layer": game.player.layer}
+        )
+        natural_sense = self._cultivation_sense_requirement(
+            int(true_cultivation.get("realm_index", game.player.realm_index)),
+            int(true_cultivation.get("layer", game.player.layer)),
+        )
+        if game.player.divine_sense_rank < natural_sense:
+            game.player.divine_sense_rank = natural_sense
+            sense_baseline_migrated = True
         changed = (
             ghost_migrated or conversion_migrated or monster_lifespan_migrated
             or possession_timeline_migrated or version_changed or location_changed
+            or sense_baseline_migrated
             or bloodline_changed or before_manuals != after_manuals
             or before_known != tuple(technique.id for technique in game.player.known_techniques)
         )
@@ -9739,9 +10148,15 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         settings = ACTIONS[action]["combat"]
         target_name = rng.choice(settings["target_names"])
         if settings.get("combat_type") == "beast":
+            encounter_power = self._player_intrinsic_combat_power(player)
+            if player.cultivation_concealment:
+                concealment = player.cultivation_concealment
+                encounter_power = recommended_combat_power(
+                    int(concealment["realm_index"]), int(concealment.get("layer", 1)),
+                )
             target = {
                 "target_name": target_name,
-                "target_power": max(1.0, self._player_intrinsic_combat_power(player) * rng.uniform(*settings["power_multiplier"])),
+                "target_power": max(1.0, encounter_power * rng.uniform(*settings["power_multiplier"])),
                 "target_realm_index": max(1, player.realm_index - 1),
                 "combat_type": "beast",
                 "success_threshold": settings.get("success_threshold"),
@@ -9749,7 +10164,10 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
         else:
             target = self._known_npc_encounter_target(game, settings, rng)
             if target is None:
-                target = self._generate_cultivator_target(player, target_name, settings, rng, game=game)
+                target = self._generate_cultivator_target(
+                    player, target_name, settings, rng, game=game,
+                    use_player_concealment=True,
+                )
                 self._cache_encounter_target(game, target, rng)
         target["kill_karma"] = bool(settings.get("kill_karma", True))
         target["capture"] = bool(settings.get("capture", False))
@@ -9765,7 +10183,7 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             replacements = {
                 "{team_size}": str(len(target["members"])),
                 "{target_realm}": str(target["target_realm_display"]),
-                "{target_power}": f"{target['target_power']:.0f}",
+                "{target_power}": f"{target.get('target_power_display', target['target_power']):.0f}",
                 "{player_power}": f"{player_power:.0f}",
             }
             for marker, value in replacements.items():
@@ -9785,7 +10203,11 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
                 f" 传闻中这个人携带了{ITEM_CATALOG[target['treasure_item_id']].name}。"
                 if target.get("treasure_rumored") and target.get("treasure_item_id") in ITEM_CATALOG else ""
             )
-            summary = f"{race_text}你判断对方修为为{target['target_realm_display']}{team_text}，队伍战斗力约 {target['target_power']:.0f}。{rumor}" + summary
+            summary = (
+                f"{race_text}你判断对方修为为{target['target_realm_display']}{team_text}，"
+                f"表面战斗力约 {target.get('target_power_display', target['target_power']):.0f}。"
+                f"{rumor}" + summary
+            )
         return self._apply_combat_action_rewards(game, action, result, summary, rng)
 
     def _apply_combat_action_rewards(
@@ -9848,14 +10270,16 @@ class GameEngine(SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, For
             cached["last_seen_age"] = player.age
             npc = self._promote_cached_npc(game, npc.id, "再度相逢") or npc
         npc.encountered_player = True
-        visible = npc.realm_index <= player.realm_index + 1
+        perception = self._npc_cultivation_perception(game, npc, True)
+        visible = perception["realm_name"] != "无法看清"
         race_definition = RACE_DEFINITIONS.get(npc.race, RACE_DEFINITIONS["human"])
         target = {
             "target_name": npc.name, "target_power": self._npc_power(npc), "primary_power": self._npc_power(npc),
+            "target_power_display": perception["display_power"] or self._npc_power(npc),
             "target_expected_power": expected_combat_power(npc.realm_index, npc.layer),
             "target_realm_index": npc.realm_index, "target_layer": npc.layer,
             "target_realm_visible": visible,
-            "target_realm_display": self._npc_realm_name(npc) if visible else "无法看清",
+            "target_realm_display": perception["realm_name"],
             "combat_type": "cultivator", "race": npc.race,
             "race_name": race_definition["name"], "race_description": race_definition["description"],
             "world": npc.world, "npc_id": npc.id, "faction_id": faction_id, "path": npc.path,

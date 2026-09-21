@@ -80,13 +80,21 @@ class DemonicSystemTests(unittest.TestCase):
             "id": "second", "name": "第二人", "realm_index": 1, "layer": 1,
             "combat_power": 50, "affinity": 0, "path": "dao",
         })
+        capacity = puppet_capacity(reloaded.player)
+        while len(reloaded.player.puppets) < capacity:
+            index = len(reloaded.player.puppets)
+            reloaded.player.puppets.append({
+                "id": f"capacity-{index}", "name": f"傀儡{index}", "type": "corpse",
+                "combat_power": 1, "alive": True,
+            })
         self.engine.store.save(reloaded)
         with self.assertRaisesRegex(ValueError, "神识"):
             self.engine.captive_action(game_id, "second", "corpse")
 
         puppet_id = shown["demonic_system"]["puppets"][0]["id"]
         devoured = self.engine.puppet_action(game_id, puppet_id, "devour")
-        self.assertFalse(devoured["demonic_system"]["puppets"])
+        self.assertNotIn(puppet_id, {entry["id"] for entry in devoured["demonic_system"]["puppets"]})
+        self.assertEqual(len(devoured["demonic_system"]["puppets"]), capacity - 1)
         self.assertEqual(len(devoured["demonic_system"]["foreign_souls"]), 1)
         self.assertGreater(devoured["demonic_system"]["breakthrough_bonus"], 0)
 
@@ -249,11 +257,13 @@ class DemonicSystemTests(unittest.TestCase):
 
     def test_manual_divine_sense_breakthrough_consumes_only_required_experience(self):
         game_id, game = self.demonic_game()
+        game = self.engine._load(game_id)
         cost = divine_sense_breakthrough_cost(game.player)
+        old_level = game.player.divine_sense_rank
         game.player.divine_sense_experience = cost + 7
         self.engine.store.save(game)
         shown = self.engine.divine_sense_breakthrough(game_id)
-        self.assertEqual(shown["player"]["divine_sense"]["level"], 2)
+        self.assertEqual(shown["player"]["divine_sense"]["level"], old_level + 1)
         self.assertEqual(shown["player"]["divine_sense"]["experience"], 7)
 
     def test_legacy_cumulative_sense_experience_migrates_to_rank_and_remainder(self):
@@ -266,7 +276,7 @@ class DemonicSystemTests(unittest.TestCase):
         raw["player"]["divine_sense_experience"] = 87
         save_path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
         shown = self.engine.get_game(game_id)
-        self.assertEqual(shown["player"]["divine_sense"]["level"], 2)
+        self.assertEqual(shown["player"]["divine_sense"]["level"], 32)
         self.assertEqual(shown["player"]["divine_sense"]["experience"], 7)
 
     def test_demonic_ascension_to_true_demon_clears_puppets(self):

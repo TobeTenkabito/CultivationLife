@@ -978,8 +978,12 @@ class EngineTests(unittest.TestCase):
         lower = [entry for entry in faction["roster"] if entry.get("can_accept_disciple")]
         self.assertTrue(higher)
         self.assertTrue(lower)
-        self.assertTrue(all((entry["realm_index"], entry["layer"]) > (3, 1) for entry in higher))
-        self.assertTrue(all((entry["realm_index"], entry["layer"]) < (3, 1) for entry in lower))
+        true_ranks = {
+            npc.id: (npc.realm_index, npc.layer)
+            for npc in game.sects["tianjian"].npcs
+        }
+        self.assertTrue(all(true_ranks[entry["id"]] > (3, 1) for entry in higher))
+        self.assertTrue(all(true_ranks[entry["id"]] < (3, 1) for entry in lower))
 
     def test_direct_sect_relationship_request_is_persisted(self):
         created = self.engine.create_game("当面请益", "supreme_water", "dao", 230)
