@@ -7,7 +7,8 @@ import re
 from typing import Any
 
 from .content_registry import (
-    ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS, REALMS, TECHNIQUE_CATALOG,
+    GUIXU_EXCLUSIVE_ITEM_IDS, ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS,
+    REALMS, TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES, WORLD_SYSTEMS,
 )
 from .models import GameState, HistoryRecord, Item, Player
@@ -437,7 +438,10 @@ class EconomySystemMixin:
             if current is None or int(row["tier"]) < current["tier"]:
                 alchemy_targets[item.id] = {"id":item.id, "name":item.name, "tier":int(row["tier"]), "description":item.description}
         for item in ITEM_CATALOG.values():
-            if "pill" in item.tags and item.id not in alchemy_targets:
+            if (
+                "pill" in item.tags and item.id not in alchemy_targets
+                and item.id not in GUIXU_EXCLUSIVE_ITEM_IDS
+            ):
                 alchemy_targets[item.id] = {"id":item.id, "name":item.name, "tier":1, "description":item.description}
         materials = [
             {"id":item.id, "name":item.name, "quantity":item.quantity,

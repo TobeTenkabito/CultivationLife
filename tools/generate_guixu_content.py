@@ -154,6 +154,7 @@ def pool_rows(spec: dict) -> list[dict]:
         rows.append({
             "id": f"{spec['prefix']}_technique_{index:02d}", "name": name,
             "category": "technique", "kind": "technique",
+            "exclusive_source": "guixu_tide",
             "content_id": f"TECH_GUIXU_{spec['prefix'].upper()}_{index:02d}",
             "tier": "major" if index <= 2 else "normal", "value": spec["currency"][min(index, 9)],
             "layer_weights": layer_weights("technique", index),
@@ -163,6 +164,7 @@ def pool_rows(spec: dict) -> list[dict]:
             rows.append({
                 "id": f"{spec['prefix']}_{category}_{index:02d}", "name": name,
                 "category": category, "kind": "item",
+                "exclusive_source": "guixu_tide",
                 "content_id": f"guixu_{spec['prefix']}_{category}_{index:02d}",
                 "tier": "major" if (category in {"equipment", "plant", "material"} and index <= (2 if category == "equipment" else 1)) else "normal",
                 "value": spec["currency"][min(index - 1, 9)],
@@ -212,7 +214,7 @@ def main() -> None:
         },
         "dungeons": [
             {
-                "id": "guixu_human_canghai", "name": "沧海归墟", "world": "human",
+                "id": "guixu_human_canghai", "name": "葬海天渊", "world": "human",
                 "entry_location_id": "lancang_sea", "max_entry_rank": [4, 9], "eject_rank": [5, 1],
                 "period_years": 100, "first_open_year": 100, "announce_lead_years": 10, "window_days": 90,
                 "layers": layers(
@@ -222,7 +224,7 @@ def main() -> None:
                 "treasure_pool": pool_rows(HUMAN),
             },
             {
-                "id": "guixu_spirit_weir", "name": "虚天尾闾", "world": "spirit",
+                "id": "guixu_spirit_weir", "name": "诸界尾闾", "world": "spirit",
                 "entry_location_id": "mist_sea_isles", "max_entry_rank": [6, 9], "eject_rank": [7, 1],
                 "period_years": 200, "first_open_year": 200, "announce_lead_years": 20, "window_days": 120,
                 "layers": layers(

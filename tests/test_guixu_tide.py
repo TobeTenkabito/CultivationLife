@@ -1,12 +1,18 @@
 import random
+import copy
 import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
 from unittest.mock import patch
 
-from cultivation_life.content_registry import GUIXU_TIDE_CONTENT, ITEM_CATALOG, TECHNIQUE_CATALOG
+from cultivation_life.content_registry import (
+    CONTENT, CONTENT_DOCUMENTS, GUIXU_EXCLUSIVE_ITEM_IDS,
+    GUIXU_EXCLUSIVE_TECHNIQUE_IDS, GUIXU_TIDE_CONTENT, ITEM_CATALOG,
+    MARKET_GOODS, TECHNIQUE_CATALOG, ContentError, validate_guixu_catalog,
+)
 from cultivation_life.engine import GameEngine
+from cultivation_life.models import SectNpc
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +43,7 @@ class GuixuTideTests(unittest.TestCase):
     def test_content_has_two_rich_non_repeating_pools(self):
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual({row["world"] for row in dungeons}, {"human", "spirit"})
+        self.assertEqual({row["name"] for row in dungeons}, {"葬海天渊", "诸界尾闾"})
         seen = set()
         expected = {
             "technique": 10, "equipment": 12, "consumable": 8,
@@ -51,6 +58,38 @@ class GuixuTideTests(unittest.TestCase):
             for row in pool:
                 catalog = TECHNIQUE_CATALOG if row["kind"] == "technique" else ITEM_CATALOG
                 self.assertIn(row["content_id"], catalog)
+
+    def test_guixu_treasures_are_excluded_from_every_generic_acquisition_pool(self):
+        market_ids = {str(row["content_id"]) for row in MARKET_GOODS}
+        self.assertFalse(market_ids & GUIXU_EXCLUSIVE_ITEM_IDS)
+        self.assertFalse(market_ids & GUIXU_EXCLUSIVE_TECHNIQUE_IDS)
+
+        created = self.engine.create_game("守池", "supreme_metal", "dao", 13, "metal")
+        game = self.engine.store.load(created["id"])
+        npc = SectNpc(
+            "pool-audit", "守池人", "", 8, 9, 1000, None,
+            spirit_root="supreme_metal", path="dao", world="spirit",
+        )
+        npc_technique = self.engine._default_npc_main_technique(npc)
+        self.assertNotIn(npc_technique, GUIXU_EXCLUSIVE_TECHNIQUE_IDS)
+        self.assertFalse(
+            set(self.engine._owner_technique_candidates(game.player, npc))
+            & GUIXU_EXCLUSIVE_TECHNIQUE_IDS
+        )
+        alchemy_ids = {
+            row["id"] for row in self.engine._public_spirit_field(game.player)["alchemy"]["targets"]
+        }
+        self.assertFalse(alchemy_ids & GUIXU_EXCLUSIVE_ITEM_IDS)
+
+    def test_guixu_validator_rejects_any_declarative_side_channel(self):
+        documents = copy.deepcopy(CONTENT_DOCUMENTS)
+        leaked_id = next(iter(GUIXU_EXCLUSIVE_ITEM_IDS))
+        documents["illegal_events.json"] = {
+            "schema_version": 1,
+            "events": [{"id": "LEAK", "choices": [{"effects": [{"item_id": leaked_id}]}]}],
+        }
+        with self.assertRaisesRegex(ContentError, "不得被其他内容表引用"):
+            validate_guixu_catalog(GUIXU_TIDE_CONTENT, CONTENT, documents)
 
     def test_enter_search_and_close_permanently_depletes_pool(self):
         game_id, dungeon = self._open_human_dungeon()
@@ -155,6 +194,9 @@ class GuixuTideTests(unittest.TestCase):
             row for row in concealed["guixu_tide"]["dungeons"] if row["id"] == dungeon["id"]
         )
         self.assertFalse(public_dungeon["can_enter"])
+        self.assertFalse(public_dungeon["entry_requirements"]["rank_matches"])
+        self.assertFalse(public_dungeon["entry_requirements"]["suppression_active"])
+        self.assertTrue(public_dungeon["entry_requirements"]["max_rank_name"])
         self.engine.manage_secret_art(game_id, "conceal", "cancel")
 
         suppressed = self.engine.manage_secret_art(
@@ -164,6 +206,8 @@ class GuixuTideTests(unittest.TestCase):
             row for row in suppressed["guixu_tide"]["dungeons"] if row["id"] == dungeon["id"]
         )
         self.assertTrue(public_dungeon["can_enter"])
+        self.assertTrue(public_dungeon["entry_requirements"]["rank_matches"])
+        self.assertTrue(public_dungeon["entry_requirements"]["suppression_active"])
         entered = self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
         self.assertIsNotNone(entered["guixu_tide"]["session"])
 

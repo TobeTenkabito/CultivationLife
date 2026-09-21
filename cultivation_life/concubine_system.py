@@ -5,8 +5,8 @@ import random
 from typing import Any
 
 from .content_registry import (
-    ITEM_CATALOG, MARKET_GOODS, PATH_NAMES, RACE_DEFINITIONS, REALMS,
-    TECHNIQUE_CATALOG, WORLD_SYSTEMS,
+    GUIXU_EXCLUSIVE_TECHNIQUE_IDS, ITEM_CATALOG, MARKET_GOODS, PATH_NAMES,
+    RACE_DEFINITIONS, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS,
 )
 from .models import GameState, HistoryRecord, Player, SectNpc
 from .possession_system import current_body_age
@@ -814,6 +814,7 @@ class ConcubineSystemMixin:
             if technique.grade <= max(1, owner.realm_index + 1)
             and can_player_practice_technique(player, technique.element)
             and all(known.id != technique_id for known in player.known_techniques)
+            and technique_id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
         ]
 
     @staticmethod
