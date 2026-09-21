@@ -111,6 +111,14 @@
 .guixu-entry-box li.pass b { color:var(--pine); }
 .guixu-entry-box li.fail b { color:var(--cinnabar); }
 .guixu-session { display:grid; gap:17px; }
+.guixu-threat { padding:14px 16px; border:1px solid rgba(124,38,55,.52); border-left:4px solid #7c2637; background:rgba(124,38,55,.055); box-shadow:0 5px 16px rgba(68,25,35,.08); }
+.guixu-threat small { color:#8f3446; letter-spacing:.12em; }
+.guixu-threat h4 { margin:4px 0 6px; color:#57212c; }
+.guixu-threat p { margin:0 0 10px; line-height:1.7; }
+.guixu-threat>div { display:flex; flex-wrap:wrap; gap:8px; }
+.guixu-incidents ul { display:grid; gap:6px; margin:10px 0 0; padding:0; list-style:none; }
+.guixu-incidents li { display:flex; justify-content:space-between; gap:12px; padding:7px 9px; background:rgba(110,44,56,.045); border-left:2px solid rgba(110,44,56,.28); }
+.guixu-incidents li small { color:var(--muted); }
 .guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
 .guixu-qi-profile { display:grid; grid-template-columns:auto 1fr; gap:8px 16px; padding:12px 14px; border:1px solid rgba(48,119,137,.24); border-left:3px solid var(--guixu-tide); background:rgba(255,255,255,.18); }
 .guixu-qi-profile>div:first-child { grid-row:1/3; display:grid; align-content:center; min-width:92px; }

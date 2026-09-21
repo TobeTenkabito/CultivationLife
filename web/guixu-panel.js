@@ -17,7 +17,7 @@
     );
     const conditions = [
       condition(!!requirements.phase_open, '开放状态', requirements.phase_open ? `潮门已开启，可探索 ${row.window_days} 天` : `当前${phaseNames[row.phase] || row.phase}`),
-      condition(!!requirements.location_matches, '入口地点', requirements.location_matches ? `已抵达${row.entry_location_name}` : `需前往${row.world === 'human' ? '人界' : '灵界'}·${row.entry_location_name}`),
+      condition(!!requirements.location_matches, '入口地点', requirements.location_matches ? `已抵达${row.entry_location_name}` : `需前往${row.world_name || row.world}·${row.entry_location_name}`),
       condition(!!requirements.rank_matches, '修为上限', `当前${requirements.current_rank_name || '未知'}${requirements.suppression_active ? '（压制生效；入内解除并越界将被传出）' : ''}；最高${requirements.max_rank_name || '未知'}`),
       condition(!!requirements.not_entered, '进入次数', requirements.not_entered ? '本届尚未进入' : '本届已经进入过一次'),
       condition(!!requirements.player_available, '当前状态', requirements.player_available ? '可执行入场行动' : '需先处理事件或恢复可行动状态'),
@@ -26,7 +26,7 @@
       `<li><b>${esc(entry.name)}</b><small>${esc(entry.category)} · ${esc(entry.layer_id || '层位未定')} · ${esc(entry.resolution)}</small></li>`
     )).join('');
     return `<section class="guixu-dungeon ${row.phase === 'open' ? 'open' : ''}">
-      <header><div><small>${esc(row.world === 'human' ? '人界' : '灵界')} · ${esc(row.entry_location_name)}</small><h3>${esc(row.name)}</h3></div><strong>${esc(phaseNames[row.phase] || row.phase)}</strong></header>
+      <header><div><small>${esc(row.world_name || row.world)} · ${esc(row.entry_location_name)}</small><h3>${esc(row.name)}</h3></div><strong>${esc(phaseNames[row.phase] || row.phase)}</strong></header>
       <p>第 ${esc(row.cycle_index)} 届 · 下次预告 ${esc(row.next_announce_age)} 岁 · 开启 ${esc(row.next_open_age)} 岁 · 主池余 ${esc(row.pool_remaining)}/60</p>
       <div class="guixu-entry-box"><h4>进入条件</h4><ul>${conditions}</ul></div>
       ${entries ? `<details><summary>本届六件宝物</summary><ul class="guixu-treasure-list">${entries}</ul></details>` : '<p class="muted">本届宝物尚未显潮。</p>'}
@@ -36,6 +36,8 @@
 
   function renderSession(session) {
     const current = session.layer_id;
+    const pendingThreat = session.pending_threat;
+    const interactionLocked = !!pendingThreat;
     const currentLayer = (session.layers || []).find(layer => layer.current) || {};
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
     const qiLine = (values, marker) => Object.entries(values || {}).map(([source, value]) => (
@@ -43,28 +45,40 @@
     )).join('');
     const layers = (session.layers || []).map(layer => {
       const canMove = !layer.current && !layer.locked && layerEdges.has(`${current}:${layer.id}`);
-      return button(layer.current ? `${layer.name}（当前）` : layer.name, 'move', {target_layer_id:layer.id}, !canMove, layer.current ? 'active' : '');
+      return button(layer.current ? `${layer.name}（当前）` : layer.name, 'move', {target_layer_id:layer.id}, !canMove || interactionLocked, layer.current ? 'active' : '');
     }).join('');
     const actors = (session.actors || []).map(actor => {
-      if (actor.status === 'recruited') return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>临时同行 · 战力 ${esc(actor.power)}</small></div></div>`;
-      return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>${esc(actor.protected ? '与你关系深厚 · ' : '')}战力 ${esc(actor.power)}</small></div><div>
-        ${button('夺宝战', 'fight', {actor_id:actor.actor_id, protected:!!actor.protected, actor_name:actor.name}, false, 'danger')}
-        ${button('遁走', 'flee', {actor_id:actor.actor_id}, false, 'guixu-flee')}
-        ${button('邀为队友', 'recruit', {actor_id:actor.actor_id}, false, 'guixu-recruit')}
+      const team = actor.team_name ? ` · ${actor.team_name}` : '';
+      if (actor.status === 'recruited') return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>${esc(actor.realm_name)} · 与你临时同行 · 战力 ${esc(actor.power)}</small></div></div>`;
+      return `<div class="guixu-actor"><div><b>${esc(actor.name)}</b><small>${esc(actor.protected ? '与你关系深厚 · ' : '')}${esc(actor.realm_name)}${esc(team)} · 战力 ${esc(actor.power)}</small></div><div>
+        ${button('夺宝战', 'fight', {actor_id:actor.actor_id, protected:!!actor.protected, actor_name:actor.name}, interactionLocked, 'danger')}
+        ${button('遁走', 'flee', {actor_id:actor.actor_id}, interactionLocked, 'guixu-flee')}
+        ${button('邀为队友', 'recruit', {actor_id:actor.actor_id}, interactionLocked, 'guixu-recruit')}
       </div></div>`;
     }).join('') || '<p class="muted">此层眼下不见其他修士。</p>';
     const treasures = (session.treasures || []).map(entry => `<div class="guixu-treasure">
       <div><b>${esc(entry.name)}</b><small>${esc(entry.resolution === 'held' ? `${entry.holder_name || '某修士'}持有` : '尚未被发现')}</small></div>
-      ${entry.resolution === 'held' ? button('报价交换', 'negotiate', {actor_id:entry.holder_id, pool_entry_id:entry.pool_entry_id, treasure_name:entry.name}, false, 'guixu-trade') : ''}
+      ${entry.resolution === 'held' ? button('报价交换', 'negotiate', {actor_id:entry.holder_id, pool_entry_id:entry.pool_entry_id, treasure_name:entry.name}, interactionLocked, 'guixu-trade') : ''}
     </div>`).join('') || '<p class="muted">这一层暂时没有显露的本届宝物。</p>';
+    const threat = pendingThreat ? `<aside class="guixu-threat">
+      <small>恃强索宝 · 必须回应</small>
+      <h4>${esc(pendingThreat.actor_name)}拦住了你</h4>
+      <p>对方只按你显露的“${esc(pendingThreat.player_visible_realm_name)}”判断强弱，自恃“${esc(pendingThreat.actor_realm_name)}”，逼你交出<strong>${esc(pendingThreat.treasure_name)}</strong>保命。</p>
+      <div>${button(`交出${pendingThreat.treasure_name}`, 'threat_surrender', {}, false, 'guixu-return')}${button('拒绝，迎战', 'threat_resist', {}, false, 'danger')}</div>
+    </aside>` : '';
+    const incidents = (session.npc_incidents || []).slice().reverse().map(row => (
+      `<li><b>${esc(row.killer_name)}击杀${esc(row.victim_name)}</b><small>${row.transferred?.length ? `夺得${esc(row.transferred.join('、'))}` : '未夺得宝物'}</small></li>`
+    )).join('');
     return `<section class="guixu-session">
       <div class="guixu-session-head"><div><p class="eyebrow">${esc(session.trapped ? 'TRAPPED' : 'EXPEDITION')}</p><h3>${esc(session.dungeon_name)}</h3></div><strong>${session.trapped ? '已被困' : `余 ${esc(session.remaining_days)} 天`}</strong></div>
+      ${threat}
       <div class="guixu-layers">${layers}</div>
       <div class="guixu-qi-profile"><div><small>当前层位气源</small><b>${esc(currentLayer.name || '')}</b></div><div class="guixu-qi-values">${qiLine(currentLayer.qi_concentrations, '浓度 ')}</div><div class="guixu-qi-values efficiency">${qiLine(currentLayer.qi_gain_efficiencies, '吸收 ×')}</div></div>
-      <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, false, 'guixu-rest')}${button('搜寻此层', 'search', {}, !!session.trapped, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped, 'guixu-return')}</div>
+      <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, interactionLocked, 'guixu-rest')}${button('搜寻此层', 'search', {}, !!session.trapped || interactionLocked, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped || interactionLocked, 'guixu-return')}</div>
       ${session.trapped ? '<p class="muted">潮门闭合后，可回主界面使用修炼、炼体、神识训练及对应突破；外界行动仍被封锁。</p>' : ''}
       <section><h4>本层宝物</h4>${treasures}</section>
       <section><h4>本层修士</h4>${actors}</section>
+      ${incidents ? `<details class="guixu-incidents"><summary>副本内修士相残记录</summary><ul>${incidents}</ul></details>` : ''}
     </section>`;
   }
 
