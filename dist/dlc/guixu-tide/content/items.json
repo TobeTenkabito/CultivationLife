@@ -1,0 +1,1133 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "guixu_canghai_equipment_01",
+      "name": "定海玄珠",
+      "combat_bonus": 1750,
+      "hp_bonus": 18,
+      "mp_bonus": 20,
+      "description": "归墟潮汐中保存下来的定海玄珠；战斗力 +1,750。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_02",
+      "name": "归流古鼎",
+      "combat_bonus": 2900,
+      "hp_bonus": 36,
+      "mp_bonus": 40,
+      "description": "归墟潮汐中保存下来的归流古鼎；战斗力 +2,900。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_03",
+      "name": "潮音剑",
+      "combat_bonus": 4050,
+      "hp_bonus": 54,
+      "mp_bonus": 60,
+      "description": "归墟潮汐中保存下来的潮音剑；战斗力 +4,050。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_04",
+      "name": "伏流甲",
+      "combat_bonus": 5200,
+      "hp_bonus": 72,
+      "mp_bonus": 80,
+      "description": "归墟潮汐中保存下来的伏流甲；战斗力 +5,200。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_05",
+      "name": "断浪尺",
+      "combat_bonus": 6350,
+      "hp_bonus": 90,
+      "mp_bonus": 100,
+      "description": "归墟潮汐中保存下来的断浪尺；战斗力 +6,350。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_06",
+      "name": "蜃光镜",
+      "combat_bonus": 7500,
+      "hp_bonus": 108,
+      "mp_bonus": 120,
+      "description": "归墟潮汐中保存下来的蜃光镜；战斗力 +7,500。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_07",
+      "name": "玄龟盾",
+      "combat_bonus": 8650,
+      "hp_bonus": 126,
+      "mp_bonus": 140,
+      "description": "归墟潮汐中保存下来的玄龟盾；战斗力 +8,650。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_08",
+      "name": "听潮铃",
+      "combat_bonus": 9800,
+      "hp_bonus": 144,
+      "mp_bonus": 160,
+      "description": "归墟潮汐中保存下来的听潮铃；战斗力 +9,800。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_09",
+      "name": "泊舟靴",
+      "combat_bonus": 10950,
+      "hp_bonus": 162,
+      "mp_bonus": 180,
+      "description": "归墟潮汐中保存下来的泊舟靴；战斗力 +10,950。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_10",
+      "name": "量海斗",
+      "combat_bonus": 12100,
+      "hp_bonus": 180,
+      "mp_bonus": 200,
+      "description": "归墟潮汐中保存下来的量海斗；战斗力 +12,100。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_11",
+      "name": "沧波旗",
+      "combat_bonus": 13250,
+      "hp_bonus": 198,
+      "mp_bonus": 220,
+      "description": "归墟潮汐中保存下来的沧波旗；战斗力 +13,250。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_equipment_12",
+      "name": "雨师环",
+      "combat_bonus": 14400,
+      "hp_bonus": 216,
+      "mp_bonus": 240,
+      "description": "归墟潮汐中保存下来的雨师环；战斗力 +14,400。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_01",
+      "name": "海眼定神丹",
+      "description": "封存在归墟中的海眼定神丹，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_02",
+      "name": "九转回潮丹",
+      "description": "封存在归墟中的九转回潮丹，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_03",
+      "name": "避水天符",
+      "description": "封存在归墟中的避水天符，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_04",
+      "name": "蜃景遁符",
+      "description": "封存在归墟中的蜃景遁符，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_05",
+      "name": "覆海阵盘",
+      "description": "封存在归墟中的覆海阵盘，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_06",
+      "name": "锁潮阵旗",
+      "description": "封存在归墟中的锁潮阵旗，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_07",
+      "name": "月汐护脉散",
+      "description": "封存在归墟中的月汐护脉散，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_consumable_08",
+      "name": "玄浪破禁梭",
+      "description": "封存在归墟中的玄浪破禁梭，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "canghai",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_01",
+      "name": "月汐莲",
+      "hp_bonus": 12,
+      "mp_bonus": 14,
+      "opportunity_bonus": 0.014,
+      "plant_id": "guixu_canghai_plant_01",
+      "plant_years": 140,
+      "plant_kind": "guixu",
+      "plant_value": 800,
+      "description": "月汐莲随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_02",
+      "name": "沧海芝",
+      "hp_bonus": 24,
+      "mp_bonus": 28,
+      "opportunity_bonus": 0.018,
+      "plant_id": "guixu_canghai_plant_02",
+      "plant_years": 180,
+      "plant_kind": "guixu",
+      "plant_value": 1200,
+      "description": "沧海芝随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_03",
+      "name": "玄潮参",
+      "hp_bonus": 36,
+      "mp_bonus": 42,
+      "opportunity_bonus": 0.022,
+      "plant_id": "guixu_canghai_plant_03",
+      "plant_years": 220,
+      "plant_kind": "guixu",
+      "plant_value": 1800,
+      "description": "玄潮参随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_04",
+      "name": "龙涎藻",
+      "hp_bonus": 48,
+      "mp_bonus": 56,
+      "opportunity_bonus": 0.026,
+      "plant_id": "guixu_canghai_plant_04",
+      "plant_years": 260,
+      "plant_kind": "guixu",
+      "plant_value": 2500,
+      "description": "龙涎藻随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_05",
+      "name": "七星水玉花",
+      "hp_bonus": 60,
+      "mp_bonus": 70,
+      "opportunity_bonus": 0.03,
+      "plant_id": "guixu_canghai_plant_05",
+      "plant_years": 300,
+      "plant_kind": "guixu",
+      "plant_value": 3600,
+      "description": "七星水玉花随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_06",
+      "name": "寒髓珊瑚",
+      "hp_bonus": 72,
+      "mp_bonus": 84,
+      "opportunity_bonus": 0.034,
+      "plant_id": "guixu_canghai_plant_06",
+      "plant_years": 340,
+      "plant_kind": "guixu",
+      "plant_value": 5000,
+      "description": "寒髓珊瑚随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_07",
+      "name": "蜃气果",
+      "hp_bonus": 84,
+      "mp_bonus": 98,
+      "opportunity_bonus": 0.038,
+      "plant_id": "guixu_canghai_plant_07",
+      "plant_years": 380,
+      "plant_kind": "guixu",
+      "plant_value": 7200,
+      "description": "蜃气果随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_08",
+      "name": "还阳海棠",
+      "hp_bonus": 96,
+      "mp_bonus": 112,
+      "opportunity_bonus": 0.042,
+      "plant_id": "guixu_canghai_plant_08",
+      "plant_years": 420,
+      "plant_kind": "guixu",
+      "plant_value": 10000,
+      "description": "还阳海棠随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_09",
+      "name": "碧浪藤",
+      "hp_bonus": 108,
+      "mp_bonus": 126,
+      "opportunity_bonus": 0.046,
+      "plant_id": "guixu_canghai_plant_09",
+      "plant_years": 460,
+      "plant_kind": "guixu",
+      "plant_value": 14000,
+      "description": "碧浪藤随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_plant_10",
+      "name": "凝露贝母",
+      "hp_bonus": 120,
+      "mp_bonus": 140,
+      "opportunity_bonus": 0.05,
+      "plant_id": "guixu_canghai_plant_10",
+      "plant_years": 500,
+      "plant_kind": "guixu",
+      "plant_value": 20000,
+      "description": "凝露贝母随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_01",
+      "name": "海心玄铁",
+      "combat_bonus": 120,
+      "description": "海心玄铁是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_02",
+      "name": "太阴潮晶",
+      "combat_bonus": 240,
+      "description": "太阴潮晶是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_03",
+      "name": "沉渊铜母",
+      "combat_bonus": 360,
+      "description": "沉渊铜母是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_04",
+      "name": "玄龟背甲",
+      "combat_bonus": 480,
+      "description": "玄龟背甲是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_05",
+      "name": "蜃楼砂",
+      "combat_bonus": 600,
+      "description": "蜃楼砂是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_06",
+      "name": "寒泉玉髓",
+      "combat_bonus": 720,
+      "description": "寒泉玉髓是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_07",
+      "name": "风蚀星铜",
+      "combat_bonus": 840,
+      "description": "风蚀星铜是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_08",
+      "name": "水府梁木",
+      "combat_bonus": 960,
+      "description": "水府梁木是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_09",
+      "name": "归墟磁石",
+      "combat_bonus": 1080,
+      "description": "归墟磁石是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_canghai_material_10",
+      "name": "万年蚌珠",
+      "combat_bonus": 1200,
+      "description": "万年蚌珠是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "canghai",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_01",
+      "name": "尾闾界轮",
+      "combat_bonus": 37000,
+      "hp_bonus": 360,
+      "mp_bonus": 400,
+      "description": "归墟潮汐中保存下来的尾闾界轮；战斗力 +37,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_02",
+      "name": "万流星槎",
+      "combat_bonus": 56000,
+      "hp_bonus": 720,
+      "mp_bonus": 800,
+      "description": "归墟潮汐中保存下来的万流星槎；战斗力 +56,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_03",
+      "name": "断界天戈",
+      "combat_bonus": 75000,
+      "hp_bonus": 1080,
+      "mp_bonus": 1200,
+      "description": "归墟潮汐中保存下来的断界天戈；战斗力 +75,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_04",
+      "name": "虚鲸法衣",
+      "combat_bonus": 94000,
+      "hp_bonus": 1440,
+      "mp_bonus": 1600,
+      "description": "归墟潮汐中保存下来的虚鲸法衣；战斗力 +94,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_05",
+      "name": "无岸神镜",
+      "combat_bonus": 113000,
+      "hp_bonus": 1800,
+      "mp_bonus": 2000,
+      "description": "归墟潮汐中保存下来的无岸神镜；战斗力 +113,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_06",
+      "name": "星潮镇尺",
+      "combat_bonus": 132000,
+      "hp_bonus": 2160,
+      "mp_bonus": 2400,
+      "description": "归墟潮汐中保存下来的星潮镇尺；战斗力 +132,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_07",
+      "name": "雾海天幕",
+      "combat_bonus": 151000,
+      "hp_bonus": 2520,
+      "mp_bonus": 2800,
+      "description": "归墟潮汐中保存下来的雾海天幕；战斗力 +151,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_08",
+      "name": "界骸骨盾",
+      "combat_bonus": 170000,
+      "hp_bonus": 2880,
+      "mp_bonus": 3200,
+      "description": "归墟潮汐中保存下来的界骸骨盾；战斗力 +170,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_09",
+      "name": "折空履",
+      "combat_bonus": 189000,
+      "hp_bonus": 3240,
+      "mp_bonus": 3600,
+      "description": "归墟潮汐中保存下来的折空履；战斗力 +189,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_10",
+      "name": "归孔法环",
+      "combat_bonus": 208000,
+      "hp_bonus": 3600,
+      "mp_bonus": 4000,
+      "description": "归墟潮汐中保存下来的归孔法环；战斗力 +208,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_11",
+      "name": "天河定盘",
+      "combat_bonus": 227000,
+      "hp_bonus": 3960,
+      "mp_bonus": 4400,
+      "description": "归墟潮汐中保存下来的天河定盘；战斗力 +227,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_equipment_12",
+      "name": "太虚鸣钟",
+      "combat_bonus": 246000,
+      "hp_bonus": 4320,
+      "mp_bonus": 4800,
+      "description": "归墟潮汐中保存下来的太虚鸣钟；战斗力 +246,000。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "equipment",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_01",
+      "name": "两仪化虚丹",
+      "description": "封存在归墟中的两仪化虚丹，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_02",
+      "name": "星潮养神露",
+      "description": "封存在归墟中的星潮养神露，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_03",
+      "name": "断界遁符",
+      "description": "封存在归墟中的断界遁符，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_04",
+      "name": "无岸定身符",
+      "description": "封存在归墟中的无岸定身符，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_05",
+      "name": "万流归孔阵盘",
+      "description": "封存在归墟中的万流归孔阵盘，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_06",
+      "name": "界骸锁空旗",
+      "description": "封存在归墟中的界骸锁空旗，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_07",
+      "name": "虚实护劫散",
+      "description": "封存在归墟中的虚实护劫散，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_consumable_08",
+      "name": "星槎破界梭",
+      "description": "封存在归墟中的星槎破界梭，服用后恢复状态并补益当前境界机缘。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "weir",
+        "consumable",
+        "talisman"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_01",
+      "name": "无岸道莲",
+      "hp_bonus": 240,
+      "mp_bonus": 280,
+      "opportunity_bonus": 0.014,
+      "plant_id": "guixu_weir_plant_01",
+      "plant_years": 2500,
+      "plant_kind": "guixu",
+      "plant_value": 50000,
+      "description": "无岸道莲随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_02",
+      "name": "虚鲸髓芝",
+      "hp_bonus": 480,
+      "mp_bonus": 560,
+      "opportunity_bonus": 0.018,
+      "plant_id": "guixu_weir_plant_02",
+      "plant_years": 3000,
+      "plant_kind": "guixu",
+      "plant_value": 80000,
+      "description": "虚鲸髓芝随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_03",
+      "name": "星潮神参",
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.022,
+      "plant_id": "guixu_weir_plant_03",
+      "plant_years": 3500,
+      "plant_kind": "guixu",
+      "plant_value": 120000,
+      "description": "星潮神参随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_04",
+      "name": "界隙空灵花",
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.026,
+      "plant_id": "guixu_weir_plant_04",
+      "plant_years": 4000,
+      "plant_kind": "guixu",
+      "plant_value": 180000,
+      "description": "界隙空灵花随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_05",
+      "name": "天河九叶草",
+      "hp_bonus": 1200,
+      "mp_bonus": 1400,
+      "opportunity_bonus": 0.03,
+      "plant_id": "guixu_weir_plant_05",
+      "plant_years": 4500,
+      "plant_kind": "guixu",
+      "plant_value": 260000,
+      "description": "天河九叶草随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_06",
+      "name": "雾海魂藻",
+      "hp_bonus": 1440,
+      "mp_bonus": 1680,
+      "opportunity_bonus": 0.034,
+      "plant_id": "guixu_weir_plant_06",
+      "plant_years": 5000,
+      "plant_kind": "guixu",
+      "plant_value": 360000,
+      "description": "雾海魂藻随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_07",
+      "name": "两仪合生果",
+      "hp_bonus": 1680,
+      "mp_bonus": 1960,
+      "opportunity_bonus": 0.038,
+      "plant_id": "guixu_weir_plant_07",
+      "plant_years": 5500,
+      "plant_kind": "guixu",
+      "plant_value": 500000,
+      "description": "两仪合生果随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_08",
+      "name": "太虚银竹",
+      "hp_bonus": 1920,
+      "mp_bonus": 2240,
+      "opportunity_bonus": 0.042,
+      "plant_id": "guixu_weir_plant_08",
+      "plant_years": 6000,
+      "plant_kind": "guixu",
+      "plant_value": 700000,
+      "description": "太虚银竹随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_09",
+      "name": "归孔法则藤",
+      "hp_bonus": 2160,
+      "mp_bonus": 2520,
+      "opportunity_bonus": 0.046,
+      "plant_id": "guixu_weir_plant_09",
+      "plant_years": 6500,
+      "plant_kind": "guixu",
+      "plant_value": 900000,
+      "description": "归孔法则藤随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_plant_10",
+      "name": "界骸还元苔",
+      "hp_bonus": 2400,
+      "mp_bonus": 2800,
+      "opportunity_bonus": 0.05,
+      "plant_id": "guixu_weir_plant_10",
+      "plant_years": 7000,
+      "plant_kind": "guixu",
+      "plant_value": 1200000,
+      "description": "界骸还元苔随归墟潮汐沉浮，可入药、炼器或直接温养肉身元神。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "spirit_plant",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_01",
+      "name": "尾闾界心",
+      "combat_bonus": 2500,
+      "description": "尾闾界心是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_02",
+      "name": "虚空母银",
+      "combat_bonus": 5000,
+      "description": "虚空母银是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_03",
+      "name": "星髓神晶",
+      "combat_bonus": 7500,
+      "description": "星髓神晶是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_04",
+      "name": "界鲸脊骨",
+      "combat_bonus": 10000,
+      "description": "界鲸脊骨是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_05",
+      "name": "法则琉璃",
+      "combat_bonus": 12500,
+      "description": "法则琉璃是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_06",
+      "name": "天河重水",
+      "combat_bonus": 15000,
+      "description": "天河重水是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_07",
+      "name": "无岸神木",
+      "combat_bonus": 17500,
+      "description": "无岸神木是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_08",
+      "name": "雾海幻砂",
+      "combat_bonus": 20000,
+      "description": "雾海幻砂是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_09",
+      "name": "断界罡髓",
+      "combat_bonus": 22500,
+      "description": "断界罡髓是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    },
+    {
+      "id": "guixu_weir_material_10",
+      "name": "星槎古铜",
+      "combat_bonus": 25000,
+      "description": "星槎古铜是归墟中罕见的炼器、阵法与本命法宝材料。",
+      "tags": [
+        "guixu_tide",
+        "weir",
+        "crafting_material",
+        "treasure"
+      ]
+    }
+  ]
+}

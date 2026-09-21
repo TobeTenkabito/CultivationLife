@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_GUIXU_ANNOUNCE",
+      "version": 1,
+      "title": "归墟潮讯",
+      "body": "{dungeon_name}将在{lead_years}年后开启。本届潮眼显露的重宝为：{major_treasures}。",
+      "category": "guixu",
+      "tags": [
+        "manual_only",
+        "guixu",
+        "announcement"
+      ],
+      "weight": 0,
+      "conditions": {},
+      "choices": [
+        {
+          "id": "acknowledge",
+          "text": "记下潮讯",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_GUIXU_OPEN",
+      "version": 1,
+      "title": "归墟门开",
+      "body": "{dungeon_name}已经开启，潮门只会稳定{window_days}天。入口位于{entry_name}。",
+      "category": "guixu",
+      "tags": [
+        "manual_only",
+        "guixu",
+        "open"
+      ],
+      "weight": 0,
+      "conditions": {},
+      "choices": [
+        {
+          "id": "acknowledge",
+          "text": "查看归墟面板",
+          "effects": []
+        }
+      ]
+    }
+  ]
+}
