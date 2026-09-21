@@ -28,8 +28,11 @@ def validate_guixu_catalog(
     if document.get("schema_version") != 1 or not isinstance(document.get("dungeons"), list):
         raise ContentError("guixu_tide.json 须声明 schema_version=1 与 dungeons 数组")
     dungeons = document["dungeons"]
-    if len(dungeons) != 2 or {row.get("world") for row in dungeons} != {"human", "spirit"}:
-        raise ContentError("归墟首版必须且只能配置人界、灵界各一座副本")
+    expected_worlds = {
+        "human", "spirit", "demon", "true_demon", "phantom_underworld", "hell",
+    }
+    if len(dungeons) != len(expected_worlds) or {row.get("world") for row in dungeons} != expected_worlds:
+        raise ContentError("归墟必须在人、灵、魔、真魔、幻冥、地狱六界各配置一座副本")
     settings = document.get("settings", {})
     if int(settings.get("draw_per_cycle", 0)) <= 0:
         raise ContentError("归墟每届抽取数量必须为正数")

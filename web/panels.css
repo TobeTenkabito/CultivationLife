@@ -49,7 +49,7 @@
 .guixu-dungeon button,.guixu-session button {
   padding:8px 12px;
   color:var(--guixu-deep);
-  background:linear-gradient(145deg,rgba(223,245,242,.96),rgba(194,225,230,.82));
+  background:rgba(248,248,242,.58);
   border:1px solid rgba(48,119,137,.34);
   border-radius:999px;
   box-shadow:0 3px 9px rgba(17,57,70,.11),inset 0 1px rgba(255,255,255,.74);
@@ -64,38 +64,38 @@
   filter:saturate(1.08);
 }
 .guixu-dungeon button.guixu-primary,.guixu-session button.guixu-primary {
-  color:#f5ffff;
-  background:linear-gradient(135deg,var(--guixu-abyss),var(--guixu-tide));
+  color:var(--guixu-abyss);
+  background:rgba(57,133,154,.08);
   border-color:rgba(29,91,108,.72);
 }
 .guixu-session button.guixu-rest {
   color:#244b58;
-  background:linear-gradient(135deg,#d9f4eb,#9fd8d3);
+  background:rgba(78,151,142,.08);
   border-color:rgba(61,137,132,.48);
 }
 .guixu-session button.guixu-return {
-  color:#fff8e9;
-  background:linear-gradient(135deg,#76592f,var(--guixu-amber));
+  color:#76592f;
+  background:rgba(183,131,57,.08);
   border-color:rgba(133,92,35,.58);
 }
 .guixu-session button.danger {
-  color:#fff7fa;
-  background:linear-gradient(135deg,#762f48,var(--guixu-coral));
+  color:#762f48;
+  background:rgba(173,77,101,.08);
   border-color:rgba(112,38,65,.62);
 }
 .guixu-session button.guixu-flee {
-  color:#f9f6ff;
-  background:linear-gradient(135deg,#4d455d,var(--guixu-violet));
+  color:#4d455d;
+  background:rgba(101,84,118,.08);
   border-color:rgba(74,59,91,.58);
 }
 .guixu-session button.guixu-recruit {
   color:#244752;
-  background:linear-gradient(135deg,#d9eff0,#afd5dd);
+  background:rgba(65,125,139,.07);
   border-color:rgba(65,125,139,.42);
 }
 .guixu-session button.guixu-trade {
-  color:#fff9eb;
-  background:linear-gradient(135deg,#71542d,#c39142);
+  color:#71542d;
+  background:rgba(195,145,66,.08);
   border-color:rgba(124,86,31,.58);
 }
 .guixu-dungeon button:disabled,.guixu-session button:disabled { opacity:.38; cursor:not-allowed; }
@@ -112,7 +112,7 @@
 .guixu-entry-box li.fail b { color:var(--cinnabar); }
 .guixu-session { display:grid; gap:17px; }
 .guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
-.guixu-qi-profile { display:grid; grid-template-columns:auto 1fr; gap:8px 16px; padding:12px 14px; border:1px solid rgba(48,119,137,.24); border-left:3px solid var(--guixu-tide); background:linear-gradient(135deg,rgba(223,245,242,.58),rgba(202,222,235,.34)); }
+.guixu-qi-profile { display:grid; grid-template-columns:auto 1fr; gap:8px 16px; padding:12px 14px; border:1px solid rgba(48,119,137,.24); border-left:3px solid var(--guixu-tide); background:rgba(255,255,255,.18); }
 .guixu-qi-profile>div:first-child { grid-row:1/3; display:grid; align-content:center; min-width:92px; }
 .guixu-qi-profile>div:first-child small { color:var(--muted); font-size:9px; }
 .guixu-qi-profile>div:first-child b { margin-top:3px; color:var(--guixu-abyss); font-size:13px; }
@@ -121,8 +121,8 @@
 .guixu-qi-values span b { margin-right:4px; color:var(--guixu-abyss); }
 .guixu-qi-values.efficiency span { color:#6d5a35; background:rgba(190,150,74,.09); }
 .guixu-layers button.active {
-  color:#fffaff;
-  background:linear-gradient(135deg,#443950,var(--guixu-violet));
+  color:#443950;
+  background:rgba(101,84,118,.11);
   border-color:#594967;
   box-shadow:0 4px 12px rgba(64,45,78,.22);
 }

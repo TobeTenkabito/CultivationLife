@@ -145,7 +145,10 @@ class GuixuSystemMixin:
             {"cycle_index": cycle["cycle_index"], "entries": selected},
             ["system", "guixu", "announcement", f"world:{dungeon['world']}"],
         ))
-        if game.player.world == dungeon["world"] and not game.pending_event:
+        if (
+            game.settings.get("guixu_event_popup", True)
+            and game.player.world == dungeon["world"] and not game.pending_event
+        ):
             event = self._instantiate_event(self.events_by_id["EVT_GUIXU_ANNOUNCE"], game, rng)
             event["body"] = (
                 event["body"].replace("{dungeon_name}", str(dungeon["name"]))
@@ -244,7 +247,8 @@ class GuixuSystemMixin:
             ["system", "guixu", "open", f"world:{dungeon['world']}"],
         ))
         if (
-            game.player.world == dungeon["world"] and not game.pending_event
+            game.settings.get("guixu_event_popup", True)
+            and game.player.world == dungeon["world"] and not game.pending_event
             and not (session and session.get("dungeon_id") == dungeon["id"])
         ):
             event = self._instantiate_event(self.events_by_id["EVT_GUIXU_OPEN"], game, rng)

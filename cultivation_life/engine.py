@@ -385,8 +385,13 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 suppression.get("awaiting_spirit_realm_crossing", False)
             )
             player.active_breakthrough_aids = list(suppression.get("active_breakthrough_aids", []))
-            remaining = suppression.get("tribulation_remaining")
-            player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
+            if player.next_tribulation_age is None:
+                due_age = suppression.get("next_tribulation_age")
+                remaining = suppression.get("tribulation_remaining")
+                player.next_tribulation_age = (
+                    int(due_age) if due_age is not None else
+                    player.age + int(remaining) if remaining is not None else None
+                )
             player.cultivation_suppression = None
             player.hp = max(1.0, max_hp(player) * max(0.0, min(1.0, hp_ratio)))
             player.mp = max(0.0, max_mp(player) * max(0.0, min(1.0, mp_ratio)))
@@ -435,6 +440,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                     "awaiting_minor_breakthrough": player.awaiting_minor_breakthrough,
                     "awaiting_spirit_realm_crossing": player.awaiting_spirit_realm_crossing,
                     "active_breakthrough_aids": list(player.active_breakthrough_aids),
+                    "next_tribulation_age": player.next_tribulation_age,
                     "tribulation_remaining": (
                         max(0, player.next_tribulation_age - player.age)
                         if player.next_tribulation_age is not None else None
@@ -448,7 +454,6 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 player.awaiting_minor_breakthrough = False
                 player.awaiting_spirit_realm_crossing = False
                 player.active_breakthrough_aids = []
-                player.next_tribulation_age = None
                 if (
                     player.cultivation_concealment
                     and (
@@ -2458,9 +2463,17 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
 
     def update_setting(self, game_id: str, setting: str, enabled: bool) -> dict[str, Any]:
         game = self._load(game_id)
-        if setting not in {"combat_popup", "achievement_popup", "auto_advance_player_wars"}:
+        if setting not in {
+            "combat_popup", "achievement_popup", "auto_advance_player_wars",
+            "guixu_event_popup",
+        }:
             raise ValueError("未知设置项")
         game.settings[setting] = bool(enabled)
+        if (
+            setting == "guixu_event_popup" and not enabled and game.pending_event
+            and str(game.pending_event.get("id", "")) in {"EVT_GUIXU_ANNOUNCE", "EVT_GUIXU_OPEN"}
+        ):
+            game.pending_event = None
         game.updated_at = now_iso()
         self.store.save(game)
         return self.present(game)
@@ -8651,8 +8664,14 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
 
     def _check_tribulation(self, game: GameState, rng: random.Random) -> None:
         player = game.player
+        true_realm_index = int(
+            (player.cultivation_suppression or {}).get("realm_index", player.realm_index)
+        )
+        true_layer = int(
+            (player.cultivation_suppression or {}).get("layer", player.layer)
+        )
         if (
-            player.realm_index < 6 or game.pending_event or game.active_trial
+            true_realm_index < 6 or game.pending_event or game.active_trial
             or player.next_tribulation_age is None or player.age < player.next_tribulation_age
         ):
             return
@@ -8670,8 +8689,8 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         power = base_power * world_multiplier
         event_ids = ["EVT_PERIODIC_THUNDER_001", "EVT_PERIODIC_THUNDER_002", "EVT_PERIODIC_THUNDER_003"]
         game.active_trial = {
-            "kind": "periodic_thunder", "source_realm": player.realm_index,
-            "target_realm": player.realm_index, "target_layer": player.layer,
+            "kind": "periodic_thunder", "source_realm": true_realm_index,
+            "target_realm": true_realm_index, "target_layer": true_layer,
             "major": False, "old_label": public_player(player)["realm_name"],
             "step_index": 0, "event_ids": event_ids, "lethal": True, "power": power,
             "base_power":base_power, "uncapped_base_power":uncapped_base_power,
