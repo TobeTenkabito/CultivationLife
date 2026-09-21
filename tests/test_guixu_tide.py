@@ -16,6 +16,7 @@ from cultivation_life.content_registry import (
 )
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import SectNpc
+from cultivation_life.rules import has_item
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -47,7 +48,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.0.0")
+        self.assertEqual(manifest["version"], "2.1.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
@@ -115,7 +116,7 @@ class GuixuTideTests(unittest.TestCase):
             extension_root = Path(directory)
             package_root = extension_root / "dlc" / "guixu-tide"
             shutil.copytree(SOURCE_ROOT / "dlc" / "guixu-tide", package_root)
-            registry = ContentRegistry.load(SOURCE_ROOT / "content", extension_root)
+            ContentRegistry.load(SOURCE_ROOT / "content", extension_root)
 
         report = {row["id"]: row for row in ContentRegistry.extension_report}
         self.assertEqual(report["official.guixu-tide"]["status"], "loaded")
@@ -345,6 +346,112 @@ class GuixuTideTests(unittest.TestCase):
         self.assertEqual(target["kill_pursuit_threshold"], settings["combat_kill_pursuit_threshold"])
         self.assertEqual(target["pursuit_chance_bonus"], settings["combat_pursuit_chance_bonus"])
         self.assertLess(settings["flee_base_chance"], .48)
+
+    def test_npc_team_breaks_immediately_when_a_member_claims_treasure(self):
+        game_id, dungeon = self._open_human_dungeon(seed=34)
+        game = self.engine.store.load(game_id)
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        team = next(row for row in cycle["npc_teams"] if row["status"] == "active")
+        member = next(
+            actor for actor in cycle["roster"] if actor["actor_id"] in team["member_ids"]
+        )
+        treasure = cycle["round_entries"][0]
+
+        self.engine._guixu_npc_claim_entry(
+            game, dungeon, cycle, treasure, member, "test",
+        )
+
+        self.assertEqual(treasure["holder_id"], member["actor_id"])
+        self.assertEqual(treasure["resolution"], "held")
+        self.assertEqual(team["status"], "dissolved")
+        self.assertFalse(any(
+            actor.get("team_id") == team["id"] for actor in cycle["roster"]
+        ))
+        self.assertTrue(any(
+            row.event_id == "SYS_GUIXU_NPC_TEAM_BREAK" for row in game.history
+        ))
+
+    def test_npc_kill_transfers_treasure_and_persists_fixed_npc_death(self):
+        game_id, dungeon = self._open_human_dungeon(seed=35)
+        game = self.engine.store.load(game_id)
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        victim = next(actor for actor in cycle["roster"] if actor["actor_kind"] == "fixed")
+        killer = next(
+            actor for actor in cycle["roster"]
+            if actor["actor_id"] != victim["actor_id"] and actor["status"] == "active"
+        )
+        treasure = cycle["round_entries"][0]
+        treasure["holder_id"] = victim["actor_id"]
+        treasure["resolution"] = "held"
+
+        self.engine._resolve_guixu_npc_kill(
+            game, dungeon, cycle, killer, victim, 7,
+        )
+
+        self.assertEqual(victim["status"], "dead")
+        self.assertEqual(treasure["holder_id"], killer["actor_id"])
+        self.assertEqual(treasure["npc_claim_source"], "npc_kill")
+        fixed_npc = self.engine._find_npc(game, victim["npc_id"])
+        self.assertFalse(fixed_npc.alive)
+        self.assertIn(dungeon["name"], fixed_npc.death_reason)
+        self.assertEqual(cycle["npc_incidents"][-1]["transferred"], [
+            self.engine._guixu_entry_definition(dungeon, treasure["pool_entry_id"])["name"],
+        ])
+
+    def test_npc_threat_uses_visible_suppressed_rank_and_can_take_treasure(self):
+        game_id, dungeon = self._open_human_dungeon(seed=36)
+        self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        game = self.engine.store.load(game_id)
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        session = game.guixu_state["player_session"]
+        actor = next(row for row in cycle["roster"] if row["layer_id"] == "outer")
+        for other in cycle["roster"]:
+            if other is not actor:
+                other["status"] = "dead"
+        actor["realm_index"], actor["layer"] = 3, 5
+        physical = next(
+            row for row in cycle["round_entries"]
+            if self.engine._guixu_entry_definition(dungeon, row["pool_entry_id"])["kind"] == "item"
+        )
+        self.engine._guixu_grant_entry(game, dungeon, physical, "test")
+        definition = self.engine._guixu_entry_definition(dungeon, physical["pool_entry_id"])
+        game.player.cultivation_suppression = {"realm_index": 8, "layer": 9}
+        settings = {**GUIXU_TIDE_CONTENT["settings"], "npc_threat_chance_per_action": 1.0}
+
+        game.player.realm_index, game.player.layer = 4, 1
+        with patch.object(self.engine, "_guixu_settings", return_value=settings):
+            self.engine._maybe_guixu_npc_threat(
+                game, dungeon, cycle, session, random.Random(36),
+            )
+        self.assertIsNone(session["pending_threat"])
+
+        game.player.realm_index, game.player.layer = 2, 1
+        with patch.object(self.engine, "_guixu_settings", return_value=settings):
+            self.engine._maybe_guixu_npc_threat(
+                game, dungeon, cycle, session, random.Random(37),
+            )
+        self.assertEqual(session["pending_threat"]["actor_id"], actor["actor_id"])
+        self.assertEqual(session["pending_threat"]["player_visible_realm_index"], 2)
+        self.assertEqual(game.player.cultivation_suppression["realm_index"], 8)
+        self.engine.store.save(game)
+        shown_threat = self.engine.get_game(game_id)["guixu_tide"]["session"]["pending_threat"]
+        self.assertTrue(shown_threat["actor_realm_name"])
+        self.assertTrue(shown_threat["player_visible_realm_name"])
+        with self.assertRaisesRegex(ValueError, "必须先回应"):
+            self.engine.guixu_action(game_id, "rest", {})
+
+        surrendered = self.engine.guixu_action(game_id, "threat_surrender", {})
+        self.assertIsNone(surrendered["guixu_tide"]["session"]["pending_threat"])
+        game = self.engine.store.load(game_id)
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        physical = next(
+            row for row in cycle["round_entries"]
+            if row["pool_entry_id"] == physical["pool_entry_id"]
+        )
+        self.assertEqual(physical["holder_id"], actor["actor_id"])
+        self.assertEqual(physical["resolution"], "held")
+        self.assertNotIn(physical["pool_entry_id"], game.guixu_state["player_session"]["carried_entry_ids"])
+        self.assertFalse(has_item(game.player, definition["content_id"], int(definition.get("quantity", 1))))
 
     def test_state_round_trips_in_save_file(self):
         game_id, dungeon = self._open_human_dungeon(seed=31)

@@ -45,7 +45,9 @@ def validate_guixu_catalog(
     probability_keys = {
         "flee_base_chance", "flee_realm_gap_bonus", "flee_min_chance",
         "flee_max_chance", "combat_kill_pursuit_threshold",
-        "combat_pursuit_chance_bonus",
+        "combat_pursuit_chance_bonus", "npc_team_form_chance",
+        "npc_conflict_chance_per_day", "npc_combat_kill_chance",
+        "npc_threat_chance_per_action",
     }
     if any(
         isinstance(settings.get(key), bool)
@@ -53,7 +55,10 @@ def validate_guixu_catalog(
         or not 0 <= float(settings[key]) <= 1
         for key in probability_keys
     ) or float(settings["flee_min_chance"]) > float(settings["flee_max_chance"]):
-        raise ContentError("归墟遁逃与追击参数必须是 0 到 1 之间的有效概率")
+        raise ContentError("归墟遁逃、追击与 NPC 行为参数必须是 0 到 1 之间的有效概率")
+    team_max_size = settings.get("npc_team_max_size")
+    if not isinstance(team_max_size, int) or isinstance(team_max_size, bool) or team_max_size < 2:
+        raise ContentError("归墟 NPC 临时队伍人数上限不得小于 2")
     map_worlds = documents.get("maps.json", {"worlds": {}}).get("worlds", {})
     seen_dungeons: set[str] = set()
     seen_entries: set[str] = set()
