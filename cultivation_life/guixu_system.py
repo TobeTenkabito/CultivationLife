@@ -5,10 +5,14 @@ import math
 import random
 from typing import Any
 
-from .content_registry import GUIXU_TIDE_CONTENT, ITEM_CATALOG, REALMS, TECHNIQUE_CATALOG
+from .content_registry import (
+    ACTIONS, GUIXU_TIDE_CONTENT, ITEM_CATALOG, REALMS, TECHNIQUE_CATALOG,
+    WORLD_SYSTEMS,
+)
 from .models import GameState, HistoryRecord, SectNpc
 from .rules import (
-    acquire_technique, add_item, expected_combat_power, has_item, remove_item,
+    acquire_technique, add_item, divine_sense_level, expected_combat_power, has_item,
+    max_hp, max_mp, opportunity_multiplier, remove_item,
 )
 from .runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age
@@ -306,6 +310,10 @@ class GuixuSystemMixin:
             session["trapped"] = True
             session["remaining_days"] = 0
         cycle["phase"] = "closed"
+        # The closing tide ejects every other explorer.  Keep only the outcome
+        # report and external treasure records; a trapped player must not keep
+        # seeing stale actors from the finished expedition.
+        cycle["roster"] = []
         cycle["last_report"] = report
         cycle["next_open_age"] = int(cycle["next_open_age"]) + int(dungeon["period_years"])
         cycle["next_announce_age"] = int(cycle["next_open_age"]) - int(dungeon["announce_lead_years"])
@@ -459,7 +467,13 @@ class GuixuSystemMixin:
             "target_layer": int(actor["layer"]), "combat_type": "cultivator", "action": "slay",
             "npc_id": actor.get("npc_id") or actor["actor_id"], "kill_karma": True,
             "non_story_combat": True, "player_allies": allies,
-            "natural_terrain": "险要", "artificial_conditions": [],
+            "natural_terrain": "狭窄", "artificial_conditions": [],
+            "kill_pursuit_threshold": float(
+                self._guixu_settings().get("combat_kill_pursuit_threshold", .58)
+            ),
+            "pursuit_chance_bonus": float(
+                self._guixu_settings().get("combat_pursuit_chance_bonus", .22)
+            ),
         }
         result, summary = self._combat(game, target, True, rng)
         if result == "killed":
@@ -578,6 +592,22 @@ class GuixuSystemMixin:
                     session["exited"] = True
                     game.guixu_state["player_session"] = None
                 history_event = "SYS_GUIXU_RETURN"
+            elif action == "rest":
+                hp_before, mp_before = game.player.hp, game.player.mp
+                hp_max, mp_max = max_hp(game.player), max_mp(game.player)
+                game.player.hp = min(hp_max, game.player.hp + hp_max * .35)
+                game.player.mp = min(mp_max, game.player.mp + mp_max * .45)
+                if not session.get("trapped"):
+                    self._consume_guixu_days(
+                        game, dungeon, cycle, session,
+                        int(self._guixu_settings()["action_days"]["rest"]), rng,
+                    )
+                result = "rested"
+                summary = (
+                    f"你在归墟内就地调息，气血恢复{game.player.hp - hp_before:.0f}，"
+                    f"法力恢复{game.player.mp - mp_before:.0f}。"
+                )
+                history_event = "SYS_GUIXU_REST"
             elif action in {"fight", "flee", "recruit", "negotiate"}:
                 actor = self._guixu_actor(cycle, str(payload.get("actor_id", "")))
                 if actor["layer_id"] != session["layer_id"]:
@@ -597,7 +627,15 @@ class GuixuSystemMixin:
                     history_event = "SYS_GUIXU_COMBAT"
                 elif action == "flee":
                     gap = game.player.realm_index - int(actor["realm_index"])
-                    chance = max(.08, min(.92, .48 + gap * .10))
+                    settings = self._guixu_settings()
+                    chance = max(
+                        float(settings.get("flee_min_chance", .04)),
+                        min(
+                            float(settings.get("flee_max_chance", .68)),
+                            float(settings.get("flee_base_chance", .28))
+                            + gap * float(settings.get("flee_realm_gap_bonus", .07)),
+                        ),
+                    )
                     if rng.random() < chance:
                         result, summary = "escaped", f"你摆脱了{actor['name']}（遁走率{chance:.0%}）。"
                         self._consume_guixu_days(game, dungeon, cycle, session, 1, rng)
@@ -684,6 +722,89 @@ class GuixuSystemMixin:
         self.store.save(game)
         return self.present(game)
 
+    def _guixu_trapped_training(
+        self, game_id: str, action: str, units: int = 1,
+    ) -> dict[str, Any]:
+        """Run only inward-facing training while the player is trapped."""
+        game = self._load(game_id)
+        session = (
+            game.guixu_state.get("player_session")
+            if isinstance(game.guixu_state, dict) else None
+        )
+        if not session or not session.get("trapped"):
+            raise ValueError("你当前并未被困归墟")
+        if action not in {"cultivate", "body_train", "sense_train"}:
+            raise ValueError("被困归墟期间只能修炼、炼体或锻炼神识")
+        dungeon, _ = self._guixu_cycle_and_definition(game, str(session["dungeon_id"]))
+        layer = next(row for row in dungeon["layers"] if row["id"] == session["layer_id"])
+        rng = decode_rng(game.seed, game.rng_state)
+        action_units = max(1, min(10, int(units)))
+        requested_years = action_units * int(WORLD_SYSTEMS["time_units"][str(game.player.realm_index)])
+        start_age = game.player.age
+        total_opportunity = 0.0
+        total_body = 0.0
+        total_sense = 0.0
+        for elapsed in range(requested_years):
+            advance_player_age(game.player)
+            if action == "cultivate":
+                efficiency = max(float(value) for value in layer["qi_gain_efficiencies"].values())
+                gain = REALMS[game.player.realm_index].opportunity_base * efficiency
+                total_opportunity += self._add_opportunity(game.player, gain)
+            else:
+                low, high = ACTIONS[action]["opportunity"]
+                gain = rng.randint(low, high) * opportunity_multiplier(game.player)
+                total_opportunity += self._add_opportunity(game.player, gain)
+                if action == "body_train":
+                    body_gain = self._body_training_step(game.player, rng)
+                    required = self._body_progress_required(game.player)
+                    before = game.player.body_progress
+                    game.player.body_progress = min(required, before + body_gain)
+                    total_body += game.player.body_progress - before
+                    if game.player.body_progress >= required:
+                        game.player.awaiting_body_breakthrough = True
+                else:
+                    sense_gain = self._sense_training_step(
+                        game.player, dict(layer["qi_gain_efficiencies"]),
+                    )
+                    game.player.divine_sense_experience += sense_gain
+                    total_sense += sense_gain
+            self._apply_action_resources(game.player, action, elapsed == 0)
+            self._advance_world_year(game, rng, [], encounters=False)
+            if game.player.alive:
+                self._advance_soul_erosion_time(game, 1)
+            if (
+                not game.player.alive or game.pending_event
+                or not (game.guixu_state.get("player_session") or {}).get("trapped")
+            ):
+                break
+
+        if not game.player.alive and any(
+            record.event_id == "SYS_LIFESPAN" and record.age == game.player.age
+            for record in game.history[-3:]
+        ):
+            game.history.append(HistoryRecord(
+                "SYS_GUIXU_TRAPPED_DEATH", 1, game.player.age, "坐化归墟", dungeon["id"],
+                "dead", f"你被困于{dungeon['name']}期间寿尽坐化。", {},
+                ["system", "guixu", "death"],
+            ))
+        elapsed_years = max(1, game.player.age - start_age)
+        if action == "body_train":
+            detail = f"炼体积累 +{total_body:.1f}，当前炼体{game.player.body_training}层"
+        elif action == "sense_train":
+            detail = f"神识经验 +{total_sense:.1f}，当前神识{divine_sense_level(game.player)}级"
+        else:
+            detail = f"机缘 +{total_opportunity:.1f}"
+        game.history.append(HistoryRecord(
+            "SYS_GUIXU_TRAPPED_TRAIN", 1, game.player.age, "困守修行", action, "completed",
+            f"你在{layer['name']}闭关{elapsed_years}年，{detail}。",
+            {"action": action, "years": elapsed_years, "opportunity": round(total_opportunity, 1)},
+            ["action", "guixu", "trapped", action],
+        ))
+        game.updated_at = now_iso()
+        game.rng_state = encode_rng(rng)
+        self.store.save(game)
+        return self.present(game)
+
     def assert_guixu_operation_allowed(self, game_id: str, operation: str) -> None:
         # When the DLC is disabled, let the requested operation reach ``_load``;
         # its compatibility migration safely returns an active explorer first.
@@ -698,6 +819,8 @@ class GuixuSystemMixin:
             "technique-manual-merge", "settings", "formation-save", "formation-activate",
             "formation-deactivate", "formation-delete", "secret-art",
         }
+        if session.get("trapped"):
+            allowed.update({"advance", "breakthrough", "body-breakthrough", "sense-breakthrough"})
         if operation not in allowed:
             raise ValueError("身在归墟时无法进行外界操作")
 
@@ -770,12 +893,13 @@ class GuixuSystemMixin:
                 "current": layer["id"] == session["layer_id"],
                 "locked": layer["id"] == "secret" and not session.get("secret_unlocked"),
             } for layer in dungeon["layers"]]
-            session["actors"] = [
+            expedition_open = cycle.get("phase") == "open"
+            session["actors"] = ([
                 copy.deepcopy(actor) for actor in cycle.get("roster", [])
-                if actor.get("layer_id") == session["layer_id"] and actor.get("status") in {"active", "trapped", "recruited"}
-            ]
-            session["treasures"] = [
+                if actor.get("layer_id") == session["layer_id"] and actor.get("status") in {"active", "recruited"}
+            ] if expedition_open else [])
+            session["treasures"] = ([
                 row for row in next(item for item in rows if item["id"] == dungeon["id"])["round_entries"]
                 if row["layer_id"] == session["layer_id"] and row["resolution"] in {"unclaimed", "held"}
-            ]
+            ] if expedition_open else [])
         return {"available": True, "dungeons": rows, "session": session}

@@ -133,16 +133,75 @@ class GuixuTideTests(unittest.TestCase):
 
         trapped = self.engine.guixu_action(game_id, "return", {})
         self.assertTrue(trapped["guixu_tide"]["session"]["trapped"])
+        self.assertEqual(trapped["guixu_tide"]["session"]["actors"], [])
+        self.assertEqual(trapped["guixu_tide"]["session"]["treasures"], [])
+        self.engine.assert_guixu_operation_allowed(game_id, "advance")
         with self.assertRaisesRegex(ValueError, "外界操作"):
-            self.engine.assert_guixu_operation_allowed(game_id, "advance")
+            self.engine.assert_guixu_operation_allowed(game_id, "map-travel")
 
         game = self.engine.store.load(game_id)
         cycle = game.guixu_state["cycles"][dungeon["id"]]
+        self.assertEqual(cycle["roster"], [])
         self.engine._announce_guixu_cycle(game, dungeon, cycle, random.Random(24))
         game.pending_event = None
         self.engine._open_guixu_cycle(game, dungeon, cycle, random.Random(25))
         self.assertFalse(game.guixu_state["player_session"]["trapped"])
         self.assertEqual(game.guixu_state["player_session"]["remaining_days"], dungeon["window_days"])
+
+    def test_guixu_rest_restores_resources_and_costs_expedition_time(self):
+        game_id, dungeon = self._open_human_dungeon(seed=27)
+        self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        game = self.engine.store.load(game_id)
+        game.player.hp = 1
+        game.player.mp = 1
+        before_days = game.guixu_state["player_session"]["remaining_days"]
+        self.engine.store.save(game)
+
+        rested = self.engine.guixu_action(game_id, "rest", {})
+        self.assertGreater(rested["player"]["hp"], 1)
+        self.assertGreater(rested["player"]["mp"], 1)
+        self.assertEqual(
+            rested["guixu_tide"]["session"]["remaining_days"],
+            before_days - GUIXU_TIDE_CONTENT["settings"]["action_days"]["rest"],
+        )
+        self.assertEqual(rested["history"][0]["event_id"], "SYS_GUIXU_REST")
+
+    def test_trapped_main_training_reuses_body_and_sense_progression(self):
+        game_id, dungeon = self._open_human_dungeon(seed=29)
+        self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        game = self.engine.store.load(game_id)
+        game.guixu_state["player_session"]["remaining_days"] = 0
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        self.engine._close_guixu_cycle(game, dungeon, cycle, random.Random(29))
+        game.player.body_technique = copy.deepcopy(TECHNIQUE_CATALOG["TECH_BODY_MORTAL"])
+        game.player.divine_sense_technique = copy.deepcopy(TECHNIQUE_CATALOG["TECH_SPIRIT_SENSE"])
+        self.engine.store.save(game)
+
+        body = self.engine.advance(game_id, "body_train")
+        self.assertGreater(body["body_cultivation"]["progress"], 0)
+        sense = self.engine.advance(game_id, "sense_train")
+        self.assertGreater(sense["player"]["divine_sense"]["experience"], 0)
+        self.assertTrue(sense["guixu_tide"]["session"]["trapped"])
+        with self.assertRaisesRegex(ValueError, "只能修炼"):
+            self.engine.advance(game_id, "befriend_neighbors")
+
+    def test_guixu_combat_uses_cramped_pursuit_rules(self):
+        game_id, dungeon = self._open_human_dungeon(seed=33)
+        self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})
+        game = self.engine.store.load(game_id)
+        cycle = game.guixu_state["cycles"][dungeon["id"]]
+        actor = next(row for row in cycle["roster"] if row["layer_id"] == "outer")
+        with patch.object(self.engine, "_combat", return_value=("victory_escape", "test")) as combat:
+            self.engine._guixu_fight(
+                game, dungeon, cycle, game.guixu_state["player_session"], actor,
+                random.Random(33),
+            )
+        target = combat.call_args.args[1]
+        settings = GUIXU_TIDE_CONTENT["settings"]
+        self.assertEqual(target["natural_terrain"], "狭窄")
+        self.assertEqual(target["kill_pursuit_threshold"], settings["combat_kill_pursuit_threshold"])
+        self.assertEqual(target["pursuit_chance_bonus"], settings["combat_pursuit_chance_bonus"])
+        self.assertLess(settings["flee_base_chance"], .48)
 
     def test_state_round_trips_in_save_file(self):
         game_id, dungeon = self._open_human_dungeon(seed=31)

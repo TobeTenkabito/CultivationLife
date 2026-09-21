@@ -6,8 +6,15 @@
       "search": 2,
       "combat": 1,
       "negotiate": 1,
-      "event": 1
+      "event": 1,
+      "rest": 1
     },
+    "flee_base_chance": 0.28,
+    "flee_realm_gap_bonus": 0.07,
+    "flee_min_chance": 0.04,
+    "flee_max_chance": 0.68,
+    "combat_kill_pursuit_threshold": 0.58,
+    "combat_pursuit_chance_bonus": 0.22,
     "recruit_cap": 2,
     "secret_clue_threshold": 3,
     "secret_unlock_probability_per_year": 0.05,

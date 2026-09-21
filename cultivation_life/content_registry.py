@@ -34,11 +34,23 @@ def validate_guixu_catalog(
     if int(settings.get("draw_per_cycle", 0)) <= 0:
         raise ContentError("归墟每届抽取数量必须为正数")
     action_days = settings.get("action_days", {})
-    if set(action_days) != {"search", "combat", "negotiate", "event"} or any(
+    if set(action_days) != {"search", "combat", "negotiate", "event", "rest"} or any(
         not isinstance(value, int) or isinstance(value, bool) or value <= 0
         for value in action_days.values()
     ):
-        raise ContentError("归墟行动天数必须完整配置 search/combat/negotiate/event")
+        raise ContentError("归墟行动天数必须完整配置 search/combat/negotiate/event/rest")
+    probability_keys = {
+        "flee_base_chance", "flee_realm_gap_bonus", "flee_min_chance",
+        "flee_max_chance", "combat_kill_pursuit_threshold",
+        "combat_pursuit_chance_bonus",
+    }
+    if any(
+        isinstance(settings.get(key), bool)
+        or not isinstance(settings.get(key), (int, float))
+        or not 0 <= float(settings[key]) <= 1
+        for key in probability_keys
+    ) or float(settings["flee_min_chance"]) > float(settings["flee_max_chance"]):
+        raise ContentError("归墟遁逃与追击参数必须是 0 到 1 之间的有效概率")
     map_worlds = documents.get("maps.json", {"worlds": {}}).get("worlds", {})
     seen_dungeons: set[str] = set()
     seen_entries: set[str] = set()
