@@ -139,6 +139,44 @@
 .strategy-dock button small { font-size: 9px; }
 .strategy-dock button:hover, .strategy-dock button.active { color: #fff; background: var(--pine); transform: translateY(-2px); }
 .strategy-dock button:disabled { opacity: .38; cursor: wait; }
+.strategy-dock button.guixu-dock-button {
+  position:relative;
+  overflow:hidden;
+  color:#194f61;
+  border-color:rgba(39,113,135,.48);
+  background:linear-gradient(145deg,#e0f6f3 4%,#9dd4dc 54%,#79b5c6 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.42),0 5px 14px rgba(32,103,123,.18);
+}
+.strategy-dock button.guixu-dock-button::before {
+  content:"";
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:7px;
+  height:10px;
+  border-top:2px solid rgba(255,255,255,.72);
+  border-radius:50%;
+  transform:rotate(-7deg);
+}
+.strategy-dock button.guixu-dock-button span,
+.strategy-dock button.guixu-dock-button small {
+  position:relative;
+  z-index:1;
+  text-shadow:0 1px rgba(255,255,255,.38);
+}
+.strategy-dock button.guixu-dock-button:hover,
+.strategy-dock button.guixu-dock-button.active {
+  color:#f5ffff;
+  border-color:#1c596c;
+  background:linear-gradient(145deg,#173e50,#28758b 58%,#579bab);
+  box-shadow:inset 0 0 0 2px rgba(226,255,252,.2),0 8px 20px rgba(22,72,88,.28);
+}
+.strategy-dock button.guixu-dock-button:hover span,
+.strategy-dock button.guixu-dock-button:hover small,
+.strategy-dock button.guixu-dock-button.active span,
+.strategy-dock button.guixu-dock-button.active small {
+  text-shadow:0 1px 2px rgba(5,30,40,.45);
+}
 
 .game-confirm-backdrop { position:fixed; z-index:120; inset:0; display:grid; place-items:center; padding:20px; background:rgba(23,28,25,.46); backdrop-filter:blur(4px); }
 .game-confirm-dialog { width:min(520px,calc(100vw - 32px)); padding:30px 34px; border-top:3px solid var(--cinnabar); box-shadow:0 30px 100px rgba(20,30,25,.38); }
