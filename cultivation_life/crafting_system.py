@@ -244,6 +244,37 @@ class CraftingSystemMixin:
                 "role_effects": copy.deepcopy(definition.get("role_effects", {})),
                 "source_kind": "plant", "inventory_item_id": item.id, "quantity": item.quantity,
             })
+        for item in player.inventory:
+            tags = set(item.tags)
+            if item.quantity <= 0 or "guixu_tide" not in tags or not tags.intersection({"crafting_material", "spirit_plant"}):
+                continue
+            potency = max(0.02, min(0.30, math.log10(max(10.0, float(item.plant_value or item.combat_bonus or 10))) * .035))
+            roles = ["primary", "secondary", "quench"]
+            role_effects = {
+                "primary": {
+                    "design_multipliers": {"combat_power": 1.0 + potency},
+                    "description": f"主材：归墟灵性令战力设计值提高 {potency:.0%}。",
+                },
+                "secondary": {
+                    "design_multipliers": {"max_hp": 1.0 + potency / 2, "max_mp": 1.0 + potency / 2},
+                    "description": f"辅材：HP 与 MP 设计值各提高 {potency / 2:.0%}。",
+                },
+                "quench": {
+                    "combat_effect": {"player_stat_multipliers": {"breach": 1.0 + potency / 3}},
+                    "description": f"淬火：破法提高 {potency / 3:.0%}。",
+                },
+            }
+            material_value = max(1, int(item.plant_value or max(10, item.combat_bonus)))
+            for index in range(int(item.quantity)):
+                candidates.append({
+                    "id": f"guixu:{item.id}:{index}", "definition_id": item.id,
+                    "name": item.name, "quality": float(item.plant_quality or 1.0),
+                    "state": "归墟天成", "source": "归墟之潮",
+                    "origin_world": player.world, "material_value": material_value,
+                    "roles": roles, "tags": list(tags), "allow_duplicate_type": True,
+                    "role_effects": role_effects, "source_kind": "inventory",
+                    "inventory_item_id": item.id, "quantity": item.quantity,
+                })
         return candidates
 
     @staticmethod
@@ -395,9 +426,9 @@ class CraftingSystemMixin:
         preview = self._crafting_preview(player, payload)
         # Preview has fully validated all four instance IDs. Consume only after every check passes.
         for material in preview["selected_materials"]:
-            if material.get("source_kind") == "plant":
+            if material.get("source_kind") in {"plant", "inventory"}:
                 if not remove_item(player, str(material["inventory_item_id"])):
-                    raise ValueError("灵田材料数量发生变化，请重新确认配方")
+                    raise ValueError("行囊材料数量发生变化，请重新确认配方")
             else:
                 stored = next((row for row in player.crafting_materials if str(row.get("id")) == str(material["id"])), None)
                 if not stored:

@@ -7,7 +7,7 @@ import uuid
 from functools import lru_cache
 from typing import Any
 
-from .content_registry import CONTENT_DOCUMENTS, REALMS, WORLD_SYSTEMS
+from .content_registry import CONTENT_DOCUMENTS, ITEM_CATALOG, REALMS, WORLD_SYSTEMS
 from .formation_content import expanded_formation_materials
 from .models import GameState, HistoryRecord, Item, Player
 from .runtime import now_iso
@@ -55,6 +55,22 @@ def formation_shared_definitions() -> dict[str, dict[str, Any]]:
             key = str(definition.get("id") or definition.get("item_id") or definition.get("plant_id"))
             definition.setdefault("id", f"{group}:{key}")
             result[str(definition["id"])] = definition
+    nature_by_source = {
+        "canghai": "water", "weir": "space", "bloodriver": "yin",
+        "demon_grave": "law", "beast_vortex": "wood", "yellow_spring": "soul",
+    }
+    for item in ITEM_CATALOG.values():
+        tags = set(item.tags)
+        if "guixu_tide" not in tags or not tags.intersection({"crafting_material", "spirit_plant"}):
+            continue
+        source = next((key for key in nature_by_source if key in tags), "canghai")
+        raw_value = float(item.plant_value or item.combat_bonus or 10)
+        result[f"guixu:{item.id}"] = {
+            "id": f"guixu:{item.id}", "item_id": item.id, "name": item.name,
+            "source_kind": "inventory", "nature": nature_by_source[source],
+            "formation_value": round(max(2.0, math.log10(max(10.0, raw_value)) * 4.0), 2),
+            "tier": 6 if source not in {"canghai", "bloodriver"} else 3,
+        }
     return result
 
 

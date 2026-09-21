@@ -139,7 +139,7 @@
     "time_units": {"0":1,"1":1,"2":1,"3":1,"4":5,"5":10,"6":20,"7":50,"8":100,"9":500,"10":500,"11":500,"12":500},
     "immortal_power_conversion":{"time_unit_years":500,"min_gap_units":10,"base_chance":0.10,"chance_per_unit":0.02,"stages":5},
     "natal_artifact":{
-      "minimum_realm":3,"max_level":12,"level_scale_per_level":0.12,"experience_base":3,"manual_refine_xp":1,"manual_refine_stone_base":18,
+      "minimum_realm":3,"max_level":12,"level_scale_per_level":0.20,"experience_base":3,"manual_refine_xp":1,"manual_refine_stone_base":18,
       "eligible_item_ids":["starfall_blade","mountain_seal","boundary_blade","broken_god","celestial_star_array","wind_thunder_wings","eight_spirit_ruler","virtual_heaven_cauldron","north_pole_origin_mountain","yuan_magnetic_divine_mountain","taiyi_green_mountain","yuanhe_five_poles_mountain","xuanhuang_immortal_armor","heavenly_river_sword_embryo"],
       "slot_unlocks":{"1":2,"3":3,"5":4,"7":5,"9":6,"12":7},
       "materials":[
@@ -155,6 +155,14 @@
         {"item_id":"wind_thunder_plume","name":"风雷翎","minimum_realm":7,"combat_effect":{"player_stat_multipliers":{"mobility":1.08}},"description":"久经风雷淬炼的灵禽翎羽，使战斗开始时身法提高 8%。"},
         {"item_id":"dao_pattern_gold","name":"道纹仙金","minimum_realm":8,"effect":{"combat_bonus":1200000,"opportunity_bonus":0.08},"description":"可自行生长道纹的仙金，战斗力 +1,200,000、机缘效率 +8%。"},
         {"item_id":"myriad_law_glass","name":"万法琉璃","minimum_realm":8,"combat_effect":{"player_stat_multipliers":{"breach":1.10}},"description":"万种灵力熔合而成的琉璃，使战斗开始时破法提高 10%。"},
+        {"item_id":"demon_bloodsteel_core","name":"血炼魔钢心","minimum_realm":3,"effect":{"combat_bonus":420},"description":"魔界结丹层次本命镶材，战斗力 +420。"},
+        {"item_id":"demon_soulflame_crystal","name":"煞魂焰晶","minimum_realm":5,"effect":{"combat_bonus":14500},"description":"魔界化神层次本命镶材，战斗力 +14,500。"},
+        {"item_id":"true_demon_voidbone_jade","name":"虚魔骨玉","minimum_realm":6,"effect":{"combat_bonus":88000},"description":"真魔界炼虚层次本命镶材，战斗力 +88,000。"},
+        {"item_id":"true_demon_primordial_heart_iron","name":"太古魔心铁","minimum_realm":8,"effect":{"combat_bonus":2600000},"description":"真魔界大乘层次本命镶材，战斗力 +2,600,000。"},
+        {"item_id":"hell_forgetful_soul_jade","name":"忘川魂玉","minimum_realm":3,"effect":{"combat_bonus":380,"mp_bonus":520},"description":"地狱界结丹层次本命镶材，战斗力 +380、最大 MP +520。"},
+        {"item_id":"hell_yellow_spring_dark_iron","name":"黄泉冥铁","minimum_realm":6,"effect":{"combat_bonus":76000,"hp_bonus":24000},"description":"地狱界炼虚层次本命镶材，战斗力 +76,000、最大 HP +24,000。"},
+        {"item_id":"asura_warsoul_crystal","name":"修罗战魂晶","minimum_realm":9,"effect":{"combat_bonus":12000000},"description":"修罗界仙阶本命镶材，战斗力 +12,000,000。"},
+        {"item_id":"asura_annihilation_bone_gold","name":"寂灭骨金","minimum_realm":11,"effect":{"combat_bonus":850000000},"description":"修罗界太乙层次本命镶材，战斗力 +850,000,000。"},
         {"item_id":"immortal_aperture_jade","name":"仙窍玉","minimum_realm":9,"effect":{"combat_bonus":8000000,"mp_bonus":420000},"description":"从真仙仙窍中孕生的温润灵玉，战斗力 +8,000,000、最大仙灵力 +420,000。"},
         {"item_id":"boundary_river_silver","name":"界河银","minimum_realm":9,"combat_effect":{"player_stat_multipliers":{"sustain":1.10}},"description":"界河潮落时析出的法则灵银，使战斗开始时续航提高 10%。"},
         {"item_id":"dijiang_tear","name":"帝江之泪","minimum_realm":10,"combat_effect":{"traits":["enemy_escape_lock"]},"description":"上古真神帝江的一滴泪水，蕴含强力空间法则；参与战斗的对方必定无法逃脱。"},

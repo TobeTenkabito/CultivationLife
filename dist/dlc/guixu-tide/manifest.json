@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.guixu-tide",
   "name": "归墟之潮：九死一生",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 140,
   "requires": [],
-  "description": "人、灵、魔、真魔、幻冥、地狱六界各一座周期归墟；NPC会临时结队、相互夺宝并按玩家显露修为恃强索宝，仅依赖本体世界与地图。"
+  "description": "人、灵、魔、真魔、幻冥、地狱六界各一座周期归墟；全量宝物均可实际使用，NPC会临时结队、相互夺宝并按玩家显露修为恃强索宝，仅依赖本体世界与地图。"
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 import operator
 import random
 import uuid
@@ -2142,6 +2143,22 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
                 {"hp_gain": round(hp_gain, 1), "mp_gain": round(mp_gain, 1),
                  "opportunity_gain": round(opportunity_gain, 1)},
                 ["system", "item", "guixu", "consumable"],
+            ))
+        elif "guixu_tide" in item.tags and "spirit_plant" in item.tags:
+            remove_item(game.player, item_id)
+            potency = max(1.0, math.log10(max(10.0, float(item.plant_value or 10))))
+            hp_gain = max_hp(game.player) * min(.45, .08 + potency * .04)
+            mp_gain = max_mp(game.player) * min(.45, .08 + potency * .04)
+            opportunity_gain = REALMS[game.player.realm_index].opportunity_base * min(.90, .10 + potency * .06)
+            game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
+            game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
+            self._add_opportunity(game.player, opportunity_gain)
+            game.history.append(HistoryRecord(
+                "SYS_REFINE_GUIXU_PLANT", 1, game.player.age, "炼化归墟灵植", item_id, "refined",
+                f"你炼化{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}，并获得机缘 {opportunity_gain:.1f}。",
+                {"hp_gain": round(hp_gain, 1), "mp_gain": round(mp_gain, 1),
+                 "opportunity_gain": round(opportunity_gain, 1)},
+                ["system", "item", "guixu", "spirit_plant"],
             ))
         elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
             if game.player.path == "demonic":

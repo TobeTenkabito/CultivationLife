@@ -74,10 +74,11 @@ def validate_guixu_catalog(
         seen_dungeons.add(dungeon_id)
         world = str(dungeon.get("world", ""))
         locations = {
-            str(row.get("id")) for row in map_worlds.get(world, {}).get("locations", [])
+            str(row.get("id")): row for row in map_worlds.get(world, {}).get("locations", [])
             if isinstance(row, dict)
         }
-        if dungeon.get("entry_location_id") not in locations:
+        entry_location = locations.get(str(dungeon.get("entry_location_id", "")))
+        if entry_location is None:
             raise ContentError(f"归墟副本 {dungeon_id} 的入口地域不存在")
         for field in ("max_entry_rank", "eject_rank"):
             rank = dungeon.get(field)
@@ -90,6 +91,8 @@ def validate_guixu_catalog(
                 raise ContentError(f"归墟副本 {dungeon_id} 的 {field} 不合法")
         if tuple(dungeon["max_entry_rank"]) >= tuple(dungeon["eject_rank"]):
             raise ContentError(f"归墟副本 {dungeon_id} 的传出修为必须高于最高入场修为")
+        if int(entry_location.get("min_realm_index", 0)) > int(dungeon["max_entry_rank"][0]):
+            raise ContentError(f"归墟副本 {dungeon_id} 的入口地域高于最高入场修为，玩家无法抵达")
         if any(int(dungeon.get(field, 0)) <= 0 for field in (
             "period_years", "announce_lead_years", "window_days",
         )):
