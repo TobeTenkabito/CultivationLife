@@ -112,6 +112,14 @@
 .guixu-entry-box li.fail b { color:var(--cinnabar); }
 .guixu-session { display:grid; gap:17px; }
 .guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
+.guixu-qi-profile { display:grid; grid-template-columns:auto 1fr; gap:8px 16px; padding:12px 14px; border:1px solid rgba(48,119,137,.24); border-left:3px solid var(--guixu-tide); background:linear-gradient(135deg,rgba(223,245,242,.58),rgba(202,222,235,.34)); }
+.guixu-qi-profile>div:first-child { grid-row:1/3; display:grid; align-content:center; min-width:92px; }
+.guixu-qi-profile>div:first-child small { color:var(--muted); font-size:9px; }
+.guixu-qi-profile>div:first-child b { margin-top:3px; color:var(--guixu-abyss); font-size:13px; }
+.guixu-qi-values { display:grid; grid-template-columns:repeat(4,minmax(70px,1fr)); gap:5px; }
+.guixu-qi-values span { padding:5px 7px; color:#2d6574; background:rgba(255,255,255,.48); font-size:9px; white-space:nowrap; }
+.guixu-qi-values span b { margin-right:4px; color:var(--guixu-abyss); }
+.guixu-qi-values.efficiency span { color:#6d5a35; background:rgba(190,150,74,.09); }
 .guixu-layers button.active {
   color:#fffaff;
   background:linear-gradient(135deg,#443950,var(--guixu-violet));
@@ -120,7 +128,13 @@
 }
 .guixu-actor,.guixu-treasure { padding:10px 11px; margin-top:6px; border-left:3px solid rgba(47,82,69,.25); background:rgba(255,255,255,.38); }
 .guixu-actor>div:last-child { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
-@media (max-width:720px) { .guixu-dungeon-grid { grid-template-columns:1fr; } .guixu-panel { padding:26px 22px; } }
+@media (max-width:720px) {
+  .guixu-dungeon-grid { grid-template-columns:1fr; }
+  .guixu-panel { padding:26px 22px; }
+  .guixu-qi-profile { grid-template-columns:1fr; }
+  .guixu-qi-profile>div:first-child { grid-row:auto; }
+  .guixu-qi-values { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 .panel-heading { display: flex; align-items: center; gap: 12px; }
 .panel-heading button, .history-tools button {
   position: relative; z-index: 2; padding: 6px 10px; color: var(--pine);

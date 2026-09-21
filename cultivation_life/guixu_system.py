@@ -688,9 +688,13 @@ class GuixuSystemMixin:
                 if not session.get("trapped"):
                     raise ValueError("只有被困后才能按年静修")
                 layer = next(row for row in dungeon["layers"] if row["id"] == session["layer_id"])
-                efficiency = max(float(value) for value in layer["qi_gain_efficiencies"].values())
-                gain = REALMS[game.player.realm_index].opportunity_base * efficiency
-                self._add_opportunity(game.player, gain)
+                low, high = ACTIONS["cultivate"]["opportunity"]
+                gain = rng.randint(low, high) * opportunity_multiplier(
+                    game.player, dict(layer["qi_concentrations"]),
+                )
+                self._add_opportunity(
+                    game.player, gain, dict(layer["qi_gain_efficiencies"]),
+                )
                 era_news: list[str] = []
                 advance_player_age(game.player)
                 self._advance_world_year(game, rng, era_news, encounters=False)
@@ -733,8 +737,8 @@ class GuixuSystemMixin:
         )
         if not session or not session.get("trapped"):
             raise ValueError("你当前并未被困归墟")
-        if action not in {"cultivate", "body_train", "sense_train"}:
-            raise ValueError("被困归墟期间只能修炼、炼体或锻炼神识")
+        if action not in {"cultivate", "body_train", "sense_train", "rest"}:
+            raise ValueError("被困归墟期间只能修炼、炼体、锻炼神识或调息")
         dungeon, _ = self._guixu_cycle_and_definition(game, str(session["dungeon_id"]))
         layer = next(row for row in dungeon["layers"] if row["id"] == session["layer_id"])
         rng = decode_rng(game.seed, game.rng_state)
@@ -744,30 +748,30 @@ class GuixuSystemMixin:
         total_opportunity = 0.0
         total_body = 0.0
         total_sense = 0.0
+        hp_before, mp_before = game.player.hp, game.player.mp
+        concentrations = dict(layer["qi_concentrations"])
+        efficiencies = dict(layer["qi_gain_efficiencies"])
         for elapsed in range(requested_years):
             advance_player_age(game.player)
-            if action == "cultivate":
-                efficiency = max(float(value) for value in layer["qi_gain_efficiencies"].values())
-                gain = REALMS[game.player.realm_index].opportunity_base * efficiency
-                total_opportunity += self._add_opportunity(game.player, gain)
-            else:
-                low, high = ACTIONS[action]["opportunity"]
-                gain = rng.randint(low, high) * opportunity_multiplier(game.player)
-                total_opportunity += self._add_opportunity(game.player, gain)
-                if action == "body_train":
-                    body_gain = self._body_training_step(game.player, rng)
-                    required = self._body_progress_required(game.player)
-                    before = game.player.body_progress
-                    game.player.body_progress = min(required, before + body_gain)
-                    total_body += game.player.body_progress - before
-                    if game.player.body_progress >= required:
-                        game.player.awaiting_body_breakthrough = True
-                else:
-                    sense_gain = self._sense_training_step(
-                        game.player, dict(layer["qi_gain_efficiencies"]),
-                    )
-                    game.player.divine_sense_experience += sense_gain
-                    total_sense += sense_gain
+            low, high = ACTIONS[action]["opportunity"]
+            gain = rng.randint(low, high) * opportunity_multiplier(game.player, concentrations)
+            total_opportunity += self._add_opportunity(game.player, gain, efficiencies)
+            if action == "body_train":
+                body_gain = self._body_training_step(game.player, rng, concentrations)
+                required = self._body_progress_required(game.player)
+                before = game.player.body_progress
+                game.player.body_progress = min(required, before + body_gain)
+                total_body += game.player.body_progress - before
+                if game.player.body_progress >= required:
+                    game.player.awaiting_body_breakthrough = True
+            elif action == "sense_train":
+                sense_gain = self._sense_training_step(
+                    game.player, efficiencies, concentrations,
+                )
+                game.player.divine_sense_experience += sense_gain
+                total_sense += sense_gain
+            elif action == "rest" and game.player.heart_demon > 0:
+                game.player.heart_demon = max(0.0, game.player.heart_demon - .5)
             self._apply_action_resources(game.player, action, elapsed == 0)
             self._advance_world_year(game, rng, [], encounters=False)
             if game.player.alive:
@@ -792,6 +796,11 @@ class GuixuSystemMixin:
             detail = f"炼体积累 +{total_body:.1f}，当前炼体{game.player.body_training}层"
         elif action == "sense_train":
             detail = f"神识经验 +{total_sense:.1f}，当前神识{divine_sense_level(game.player)}级"
+        elif action == "rest":
+            detail = (
+                f"气血恢复{game.player.hp - hp_before:.0f}，"
+                f"法力恢复{game.player.mp - mp_before:.0f}"
+            )
         else:
             detail = f"机缘 +{total_opportunity:.1f}"
         game.history.append(HistoryRecord(
