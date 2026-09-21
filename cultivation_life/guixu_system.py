@@ -709,6 +709,26 @@ class GuixuSystemMixin:
         rows = []
         for dungeon_id, dungeon in definitions.items():
             cycle = game.guixu_state["cycles"][dungeon_id]
+            entry_key = f"{dungeon_id}:{cycle['cycle_index']}"
+            location_matches = bool(
+                game.player.world == dungeon["world"]
+                and game.player.location_id == dungeon["entry_location_id"]
+            )
+            rank_matches = (
+                game.player.realm_index, game.player.layer,
+            ) <= tuple(dungeon["max_entry_rank"])
+            not_entered = entry_key not in game.guixu_state["entered_cycles"]
+            no_active_session = not game.guixu_state.get("player_session")
+            phase_open = cycle["phase"] == "open"
+            max_rank_name = self._npc_realm_name(SectNpc(
+                "guixu-entry-limit", "", "", *map(int, dungeon["max_entry_rank"]),
+                game.player.age, None, path=game.player.path, world=dungeon["world"],
+            ))
+            current_rank_name = self._npc_realm_name(SectNpc(
+                "guixu-player-rank", game.player.name, "", game.player.realm_index,
+                game.player.layer, game.player.age, game.player.lifespan,
+                path=game.player.path, world=game.player.world,
+            ))
             round_entries = []
             for row in cycle.get("round_entries", []):
                 definition = self._guixu_entry_definition(dungeon, str(row["pool_entry_id"]))
@@ -727,11 +747,17 @@ class GuixuSystemMixin:
                 "cycle_index": cycle["cycle_index"], "next_open_age": cycle["next_open_age"],
                 "next_announce_age": cycle["next_announce_age"], "pool_remaining": len(cycle["pool_remaining"]),
                 "round_entries": round_entries, "last_report": copy.deepcopy(cycle.get("last_report")),
+                "entry_requirements": {
+                    "phase_open": phase_open, "location_matches": location_matches,
+                    "rank_matches": rank_matches, "not_entered": not_entered,
+                    "no_active_session": no_active_session,
+                    "player_available": bool(game.player.alive and not game.pending_event),
+                    "max_rank_name": max_rank_name, "current_rank_name": current_rank_name,
+                    "suppression_active": bool(game.player.cultivation_suppression),
+                },
                 "can_enter": bool(
-                    cycle["phase"] == "open" and game.player.world == dungeon["world"]
-                    and game.player.location_id == dungeon["entry_location_id"]
-                    and (game.player.realm_index, game.player.layer) <= tuple(dungeon["max_entry_rank"])
-                    and not game.guixu_state.get("player_session")
+                    phase_open and location_matches and rank_matches and not_entered
+                    and no_active_session and game.player.alive and not game.pending_event
                 ),
             })
         session = copy.deepcopy(game.guixu_state.get("player_session"))

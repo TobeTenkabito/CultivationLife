@@ -21,7 +21,8 @@ class ContentError(ValueError):
 
 
 def validate_guixu_catalog(
-    document: dict[str, Any], registry: "ContentRegistry", maps_document: dict[str, Any],
+    document: dict[str, Any], registry: "ContentRegistry",
+    documents: dict[str, dict[str, Any]],
 ) -> None:
     """Validate the finite Guixu dungeon catalog and all cross-table rewards."""
     if document.get("schema_version") != 1 or not isinstance(document.get("dungeons"), list):
@@ -38,9 +39,10 @@ def validate_guixu_catalog(
         for value in action_days.values()
     ):
         raise ContentError("归墟行动天数必须完整配置 search/combat/negotiate/event")
-    map_worlds = maps_document.get("worlds", {})
+    map_worlds = documents.get("maps.json", {"worlds": {}}).get("worlds", {})
     seen_dungeons: set[str] = set()
     seen_entries: set[str] = set()
+    exclusive_content_ids: set[str] = set()
     expected_categories = {
         "technique": 10, "equipment": 12, "consumable": 8,
         "plant": 10, "material": 10, "currency": 10,
@@ -99,14 +101,19 @@ def validate_guixu_catalog(
             category = str(entry.get("category", ""))
             if category not in category_counts:
                 raise ContentError(f"归墟宝物 {entry_id} 的分类不合法")
+            if entry.get("exclusive_source") != "guixu_tide" and category != "currency":
+                raise ContentError(f"归墟重宝 {entry_id} 必须声明 exclusive_source=guixu_tide")
             category_counts[category] += 1
             kind, content_id = str(entry.get("kind", "")), str(entry.get("content_id", ""))
             if kind == "technique":
                 if content_id not in registry.techniques or category != "technique":
                     raise ContentError(f"归墟功法条目 {entry_id} 引用了不存在或分类错误的功法")
+                exclusive_content_ids.add(content_id)
             elif kind in {"item", "item_bundle"}:
                 if content_id not in registry.items:
                     raise ContentError(f"归墟宝物 {entry_id} 引用了不存在的物品：{content_id}")
+                if kind == "item":
+                    exclusive_content_ids.add(content_id)
                 quantity = entry.get("quantity", 1)
                 if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
                     raise ContentError(f"归墟宝物 {entry_id} 的数量必须为正整数")
@@ -121,6 +128,25 @@ def validate_guixu_catalog(
         if category_counts != expected_categories:
             raise ContentError(
                 f"归墟副本 {dungeon_id} 的分类数量须为功法10/装备12/丹符8/灵植10/材料10/灵石10"
+            )
+    def scalar_strings(value: Any):
+        if isinstance(value, dict):
+            for child in value.values():
+                yield from scalar_strings(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from scalar_strings(child)
+        elif isinstance(value, str):
+            yield value
+
+    definition_documents = {"guixu_tide.json", "items.json", "techniques.json"}
+    for name, other_document in documents.items():
+        if name in definition_documents:
+            continue
+        leaked = exclusive_content_ids.intersection(scalar_strings(other_document))
+        if leaked:
+            raise ContentError(
+                f"归墟专属重宝不得被其他内容表引用：{name} -> {sorted(leaked)}"
             )
 
 
@@ -177,8 +203,7 @@ class ContentRegistry:
                 )
             if "guixu_tide.json" in documents:
                 validate_guixu_catalog(
-                    documents["guixu_tide.json"], registry,
-                    documents.get("maps.json", {"worlds": {}}),
+                    documents["guixu_tide.json"], registry, documents,
                 )
             return registry
 
@@ -1563,6 +1588,18 @@ EXTENSION_REPORT = ContentRegistry.extension_report
 GUIXU_TIDE_CONTENT = copy.deepcopy(CONTENT_DOCUMENTS.get(
     "guixu_tide.json", {"schema_version": 1, "settings": {}, "dungeons": []},
 ))
+GUIXU_EXCLUSIVE_ITEM_IDS = frozenset(
+    str(entry["content_id"])
+    for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
+    for entry in dungeon.get("treasure_pool", [])
+    if entry.get("kind") == "item"
+)
+GUIXU_EXCLUSIVE_TECHNIQUE_IDS = frozenset(
+    str(entry["content_id"])
+    for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
+    for entry in dungeon.get("treasure_pool", [])
+    if entry.get("kind") == "technique"
+)
 ITEM_CATALOG = CONTENT.items
 TECHNIQUE_CATALOG = CONTENT.techniques
 TRANSFORMATION_CATALOG = CONTENT.transformations

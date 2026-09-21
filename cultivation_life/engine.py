@@ -9,7 +9,8 @@ from typing import Any
 
 from .content_registry import (
     ACTIONS, FACTION_DEFINITIONS, FACTION_NPC_TEMPLATES, FACTION_REWARDS, FACTION_SYSTEMS,
-    ITEM_CATALOG, KARMA_FACTORS, MARKET_GOODS, MARKET_SETTINGS, PATH_NAMES, REALMS,
+    GUIXU_EXCLUSIVE_TECHNIQUE_IDS, ITEM_CATALOG, KARMA_FACTORS, MARKET_GOODS,
+    MARKET_SETTINGS, PATH_NAMES, REALMS,
     RACE_DEFINITIONS, RACE_SYSTEMS, ROOT_DEFINITIONS, ROOT_NAMES, TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES, TRANSFORMATION_CATALOG, WORLD_NPC_TEMPLATES, WORLD_SYSTEMS,
     STORY_COMBAT_SCENARIOS, CONTENT_DOCUMENTS, MONSTER_BLOODLINE_SETTINGS, MONSTER_SPECIES, ContentError,
@@ -5793,9 +5794,14 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             technique for technique in TECHNIQUE_CATALOG.values()
             if technique.path == npc.path and technique.grade <= max(1, npc.realm_index)
             and technique.element != "sex" and can_practice_technique(npc.spirit_root, technique.element)
+            and technique.id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
         ]
         if not candidates:
-            candidates = [technique for technique in TECHNIQUE_CATALOG.values() if technique.element == "neutral"]
+            candidates = [
+                technique for technique in TECHNIQUE_CATALOG.values()
+                if technique.element == "neutral"
+                and technique.id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
+            ]
         return max(candidates, key=lambda technique: (technique.grade, technique.combat_bonus)).id if candidates else None
 
     def _sync_relationship_records(self, game: GameState) -> bool:

@@ -11,12 +11,24 @@
   }
 
   function renderDungeon(row, act) {
+    const requirements = row.entry_requirements || {};
+    const condition = (passed, label, detail) => (
+      `<li class="${passed ? 'pass' : 'fail'}"><b>${passed ? '✓' : '×'} ${esc(label)}</b><small>${esc(detail)}</small></li>`
+    );
+    const conditions = [
+      condition(!!requirements.phase_open, '开放状态', requirements.phase_open ? `潮门已开启，可探索 ${row.window_days} 天` : `当前${phaseNames[row.phase] || row.phase}`),
+      condition(!!requirements.location_matches, '入口地点', requirements.location_matches ? `已抵达${row.entry_location_name}` : `需前往${row.world === 'human' ? '人界' : '灵界'}·${row.entry_location_name}`),
+      condition(!!requirements.rank_matches, '修为上限', `当前${requirements.current_rank_name || '未知'}${requirements.suppression_active ? '（压制生效；入内解除并越界将被传出）' : ''}；最高${requirements.max_rank_name || '未知'}`),
+      condition(!!requirements.not_entered, '进入次数', requirements.not_entered ? '本届尚未进入' : '本届已经进入过一次'),
+      condition(!!requirements.player_available, '当前状态', requirements.player_available ? '可执行入场行动' : '需先处理事件或恢复可行动状态'),
+    ].join('');
     const entries = (row.round_entries || []).map(entry => (
       `<li><b>${esc(entry.name)}</b><small>${esc(entry.category)} · ${esc(entry.layer_id || '层位未定')} · ${esc(entry.resolution)}</small></li>`
     )).join('');
     return `<section class="guixu-dungeon ${row.phase === 'open' ? 'open' : ''}">
       <header><div><small>${esc(row.world === 'human' ? '人界' : '灵界')} · ${esc(row.entry_location_name)}</small><h3>${esc(row.name)}</h3></div><strong>${esc(phaseNames[row.phase] || row.phase)}</strong></header>
       <p>第 ${esc(row.cycle_index)} 届 · 下次预告 ${esc(row.next_announce_age)} 岁 · 开启 ${esc(row.next_open_age)} 岁 · 主池余 ${esc(row.pool_remaining)}/60</p>
+      <div class="guixu-entry-box"><h4>进入条件</h4><ul>${conditions}</ul></div>
       ${entries ? `<details><summary>本届六件宝物</summary><ul class="guixu-treasure-list">${entries}</ul></details>` : '<p class="muted">本届宝物尚未显潮。</p>'}
       ${button('踏入归墟', 'enter', {dungeon_id:row.id}, !row.can_enter, 'guixu-primary')}
     </section>`;

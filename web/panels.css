@@ -44,6 +44,14 @@
 .guixu-treasure-list { display:grid; gap:5px; margin:8px 0 0; padding:0; list-style:none; }
 .guixu-treasure-list li { display:flex; justify-content:space-between; gap:8px; padding:6px 8px; background:rgba(47,82,69,.05); }
 .guixu-treasure-list small { color:var(--muted); }
+.guixu-entry-box { padding:10px 11px; border:1px solid rgba(47,82,69,.14); background:rgba(47,82,69,.045); }
+.guixu-entry-box h4 { margin:0 0 7px; font-size:12px; }
+.guixu-entry-box ul { display:grid; gap:5px; margin:0; padding:0; list-style:none; }
+.guixu-entry-box li { display:flex; justify-content:space-between; gap:10px; font-size:10px; }
+.guixu-entry-box li b { white-space:nowrap; }
+.guixu-entry-box li small { color:var(--muted); text-align:right; }
+.guixu-entry-box li.pass b { color:var(--pine); }
+.guixu-entry-box li.fail b { color:var(--cinnabar); }
 .guixu-session { display:grid; gap:17px; }
 .guixu-layers,.guixu-actions { display:flex; flex-wrap:wrap; gap:7px; }
 .guixu-layers button.active { color:#fff; background:var(--gold); border-color:var(--gold); }

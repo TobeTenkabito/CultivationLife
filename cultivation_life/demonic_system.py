@@ -6,7 +6,10 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import ITEM_CATALOG, PATH_NAMES, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
+from .content_registry import (
+    GUIXU_EXCLUSIVE_TECHNIQUE_IDS, ITEM_CATALOG, PATH_NAMES, REALMS,
+    TECHNIQUE_CATALOG, WORLD_SYSTEMS,
+)
 from .models import GameState, HistoryRecord, Player, SectNpc
 from .npc_system import party_combat_power
 from .rules import (
@@ -52,7 +55,8 @@ class DemonicSystemMixin:
         affinity = float(npc.affinity or 0) if npc else 0.0
         technique = next(
             (entry for entry in TECHNIQUE_CATALOG.values() if entry.path == path and entry.category == "spiritual"
-             and entry.grade <= max(1, int(victim["realm_index"]))),
+             and entry.grade <= max(1, int(victim["realm_index"]))
+             and entry.id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS),
             None,
         )
         prisoner_id = str(npc_id or f"captive_{uuid.uuid4().hex[:12]}")
