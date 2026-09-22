@@ -420,7 +420,7 @@ function render(data) {
     renderGhostPhaseTwo(ghost.phase_two || {});
   } else {
     $('#hp-text').removeAttribute('title'); $('#hp-text').removeAttribute('data-tooltip');
-    const manaDetail = `灵根法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}；差灵根的战斗法力消耗也会更快`;
+    const manaDetail = `灵根法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}；战斗耗蓝差在同一小境界最明显，随双方小境界与大境界差距递减`;
     $('#mp-text').title = manaDetail; $('#mp-text').dataset.tooltip = manaDetail;
     renderGhostPhaseTwo({enabled:false});
   }
@@ -450,7 +450,7 @@ function render(data) {
   renderWanted(data.wanted || []);
   renderPrison(data.imprisonment);
   $('#root-efficiency').textContent = `×${Number(p.cultivation_efficiency || 0).toFixed(2)}`;
-  $('#root-efficiency').title = `灵根基础 ×${p.spirit_root_efficiency.toFixed(2)}；法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}，并影响战斗续航；最终机缘效率已计入主修功法、物品与气环境`;
+  $('#root-efficiency').title = `灵根基础 ×${p.spirit_root_efficiency.toFixed(2)}；法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}；战斗耗蓝影响在同一小境界完整生效，境界差越大越弱；最终机缘效率已计入主修功法、物品与气环境`;
   const qi = p.qi_environment || {};
   $('#qi-environment').textContent = (qi.display || []).map(entry => `${entry.name}${number(entry.concentration)}`).join(' · ');
   $('#qi-environment').title = qi.main_multiplier == null ? '尚无主修功法' : `当前主修环境倍率 ×${Number(qi.main_multiplier).toFixed(3)}`;

@@ -15,6 +15,7 @@ from ..rules import (
     add_item,
     assign_technique,
     can_player_practice_technique,
+    combat_root_mana_cost_multiplier,
     combat_power,
     expected_combat_power,
     effective_karma,
@@ -27,7 +28,6 @@ from ..rules import (
     root_definition,
     root_elements,
     roll_lifespan,
-    spirit_root_mana_multiplier,
     qi_level,
     divine_sense_level,
 )
@@ -231,12 +231,25 @@ class EngineCombatRuntimeMixin:
         own_power = max(1.0, sum(unit.power * unit.integrity for unit in player_units))
         target_power = max(1.0, float(target["target_power"]))
         ratio = own_power / target_power
+        opponent_ranks = [
+            (
+                int(target.get("target_realm_index", player.realm_index) or player.realm_index),
+                int(target.get("target_layer", 1) or 1),
+            ),
+            *(
+                (int(member.get("realm_index", 0) or 0), int(member.get("layer", 1) or 1))
+                for member in target.get("members", [])
+            ),
+        ]
+        opponent_realm, opponent_layer = max(opponent_ranks)
         resolution = PlayerCombatSystem.resolve(
             player, player_units, target, lethal, rng,
             current_hp_ratio=player.hp / max(1.0, hp_max),
             current_mp_ratio=player.mp / max(1.0, mp_max),
             battlefield_tags=self._combat_battlefield_tags(game, target),
-            mana_cost_multiplier=1.0 / spirit_root_mana_multiplier(player),
+            mana_cost_multiplier=combat_root_mana_cost_multiplier(
+                player, opponent_realm, opponent_layer,
+            ),
         )
         used_formation = (
             target.get("allied_formation_profile", {})
