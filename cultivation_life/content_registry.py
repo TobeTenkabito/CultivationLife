@@ -1086,7 +1086,11 @@ class ContentRegistry:
         realms: tuple[RealmDef, ...], roots: dict[str, dict[str, Any]], paths: dict[str, str],
         races: dict[str, dict[str, Any]],
     ) -> None:
-        required_ids = {"core", "demonic_core", "ghost_core", "monster_core", "confucian_core", "nascent", "spirit", "void", "integration", "mahayana", "true_immortal"}
+        required_ids = {
+            "core", "demonic_core", "ghost_core", "monster_core", "confucian_core",
+            "nascent", "spirit", "void", "demonic_void", "ghost_void", "monster_void",
+            "confucian_void", "buddhist_void", "integration", "mahayana", "true_immortal",
+        }
         if not required_ids <= {str(entry.get("id", "")) for entry in presets}:
             raise ContentError("快速开局必须至少覆盖正统修仙七档、魔界魔丹与地狱界鬼修预设")
         if not all(bool(entry.get("enabled")) for entry in presets):
@@ -1096,7 +1100,10 @@ class ContentRegistry:
                 continue
             if entry.get("spirit_root") not in roots or entry.get("path") not in paths:
                 raise ContentError(f"快速开局 {entry['id']} 的灵根或道路不存在")
-            if entry.get("race") not in races or entry.get("world") not in {"human", "demon", "spirit", "true_demon", "hell", "celestial", "asura"}:
+            if entry.get("race") not in races or entry.get("world") not in {
+                "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
+                "monster_realm", "phantom_underworld", "nether", "reincarnation",
+            }:
                 raise ContentError(f"快速开局 {entry['id']} 的种族或世界不存在")
             if not 1 <= int(entry.get("layer", 0)) <= realms[int(entry["realm_index"])].layers:
                 raise ContentError(f"快速开局 {entry['id']} 的层数不合法")
@@ -1118,7 +1125,13 @@ class ContentRegistry:
                 raise ContentError(f"快速开局 {entry['id']} 的既有剧情标记不合法")
             if int(entry["realm_index"]) >= 6:
                 five = {"metal", "wood", "water", "fire", "earth"}
-                if entry.get("world") not in {"spirit", "celestial"} or not five <= set(entry.get("additional_roots", [])):
+                path_worlds = {
+                    "demonic": {"true_demon", "asura"},
+                    "ghost": {"hell", "reincarnation"},
+                    "monster": {"spirit", "monster_realm", "phantom_underworld", "nether"},
+                }
+                valid_worlds = path_worlds.get(str(entry.get("path")), {"spirit", "celestial"})
+                if entry.get("world") not in valid_worlds or not five <= set(entry.get("additional_roots", [])):
                     raise ContentError(f"快速开局 {entry['id']} 必须出生于对应上界并补齐五行")
 
     @staticmethod

@@ -19,6 +19,30 @@
           {"id":"blood_core_pill","quantity":2},
           {"id":"monster_tempering_blood","quantity":2}
         ]}
+      },
+      {
+        "id": "monster_void",
+        "name": "妖修·天骨炼虚",
+        "description": "妖修 DLC 炼虚开局：自妖界起步，生成本源血脉，以天骨镇界经、万灵吞月典与高阶妖躯承接后续进化。",
+        "category": "异道炼虚",
+        "variant_label": "妖修 DLC",
+        "world": "monster_realm",
+        "body_training": 45,
+        "main_technique": "TECH_MONSTER_HEAVEN_BONE",
+        "support_technique": "TECH_MONSTER_MYRIAD_SPIRITS",
+        "body_technique": "TECH_MONSTER_IMMEMORIAL_BODY",
+        "combat_techniques": ["TECH_MONSTER_HEAVEN_BONE", "TECH_MONSTER_MYRIAD_SPIRITS"],
+        "inventory": {"$replace": [
+          {"id":"spirit_stone","quantity":9000},
+          {"id":"mystic_heaven_blood","quantity":2},
+          {"id":"dharma_soul_pearl","quantity":2},
+          {"id":"realm_severing_halberd","quantity":1},
+          {"id":"empty_heaven_mirror","quantity":1},
+          {"id":"heaven_bone_relic","quantity":1},
+          {"id":"void_molt_pill","quantity":2},
+          {"id":"tribulation_vitality_pill","quantity":2},
+          {"id":"tribulation_mana_dew","quantity":2}
+        ]}
       }
     ],
     "world_names": {"monster_realm": "妖界"},

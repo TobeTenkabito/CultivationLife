@@ -1,11 +1,56 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id": "monster_core",
+        "name": "妖修·血丹初期",
+        "description": "妖修 DLC 开局：生成本源血脉，配置妖丹烘炉法、搬山妖身与结丹期妖族资粮。",
+        "category": "异道结丹",
+        "variant_label": "妖修 DLC",
+        "body_training": 12,
+        "main_technique": "TECH_MONSTER_DEMON_CORE",
+        "support_technique": "TECH_MONSTER_BREATHING",
+        "body_technique": "TECH_MONSTER_GREAT_STRENGTH_BODY",
+        "combat_techniques": ["TECH_MONSTER_DEMON_CORE", "TECH_MONSTER_IRON_BONE"],
+        "inventory": {"$replace": [
+          {"id":"spirit_stone","quantity":150},
+          {"id":"beast_pattern_bone","quantity":14},
+          {"id":"blood_core_pill","quantity":2},
+          {"id":"monster_tempering_blood","quantity":2}
+        ]}
+      },
+      {
+        "id": "monster_void",
+        "name": "妖修·天骨炼虚",
+        "description": "妖修 DLC 炼虚开局：自妖界起步，生成本源血脉，以天骨镇界经、万灵吞月典与高阶妖躯承接后续进化。",
+        "category": "异道炼虚",
+        "variant_label": "妖修 DLC",
+        "world": "monster_realm",
+        "body_training": 45,
+        "main_technique": "TECH_MONSTER_HEAVEN_BONE",
+        "support_technique": "TECH_MONSTER_MYRIAD_SPIRITS",
+        "body_technique": "TECH_MONSTER_IMMEMORIAL_BODY",
+        "combat_techniques": ["TECH_MONSTER_HEAVEN_BONE", "TECH_MONSTER_MYRIAD_SPIRITS"],
+        "inventory": {"$replace": [
+          {"id":"spirit_stone","quantity":9000},
+          {"id":"mystic_heaven_blood","quantity":2},
+          {"id":"dharma_soul_pearl","quantity":2},
+          {"id":"realm_severing_halberd","quantity":1},
+          {"id":"empty_heaven_mirror","quantity":1},
+          {"id":"heaven_bone_relic","quantity":1},
+          {"id":"void_molt_pill","quantity":2},
+          {"id":"tribulation_vitality_pill","quantity":2},
+          {"id":"tribulation_mana_dew","quantity":2}
+        ]}
+      }
+    ],
     "world_names": {"monster_realm": "妖界"},
     "world_profiles": {
       "monster_realm": {
         "tier": 2,
         "npc_realm_cap": 8,
+        "tribulation_base_power_cap": 32000,
         "enabled": true,
         "kind": "world",
         "supports": ["events", "market", "factions", "races"],

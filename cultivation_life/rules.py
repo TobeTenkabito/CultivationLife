@@ -451,8 +451,20 @@ def raw_external_mp_bonus(player: Player) -> float:
     )
 
 
+def spirit_root_mana_multiplier(player: Player) -> float:
+    """Translate root quality into both mana capacity and combat endurance.
+
+    Cultivation speed already uses the raw root efficiency.  Mana needs a
+    steeper curve so poor roots remain a noticeable combat constraint while
+    rare roots gain a real, but bounded, advantage.
+    """
+    efficiency = max(0.0, float(root_definition(player.spirit_root).get("efficiency", 0.0)))
+    return round(max(0.40, min(1.65, 0.12 + efficiency * 0.76)), 4)
+
+
 def max_mp(player: Player) -> int:
-    return round(effective_intrinsic_mp(player) + raw_external_mp_bonus(player) * mp_carry_ratio(player))
+    mana = effective_intrinsic_mp(player) + raw_external_mp_bonus(player) * mp_carry_ratio(player)
+    return max(1, round(mana * spirit_root_mana_multiplier(player)))
 
 
 def combat_power(player: Player) -> float:
@@ -868,6 +880,7 @@ def public_player(player: Player) -> dict[str, Any]:
         spirit_root_name=root_definition(player.spirit_root)["name"],
         spirit_root_tier=root_definition(player.spirit_root)["tier"],
         spirit_root_efficiency=root_definition(player.spirit_root)["efficiency"],
+        spirit_root_mana_multiplier=spirit_root_mana_multiplier(player),
         cultivation_efficiency=round(opportunity_multiplier(player), 4),
         qi_mastery=[
             {

@@ -1,6 +1,43 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id":"ghost_core",
+        "name":"鬼修·魂丹初期",
+        "description":"鬼修 DLC 开局：以夜行炼魂录稳固魂体，并携养魂容器进入魂蚀、拘魂与轮回体系。",
+        "category":"异道结丹",
+        "variant_label":"鬼修 DLC",
+        "main_technique":"TECH_GHOST_NIGHT_PROCESSION_CORE",
+        "support_technique":"TECH_YIN_ADVANCED",
+        "combat_techniques":["TECH_GHOST_NIGHT_PROCESSION_CORE","TECH_GHOSTFIRE_BLADE"],
+        "inventory":{"$replace":[
+          {"id":"spirit_stone","quantity":150},
+          {"id":"soul_lamp","quantity":1},
+          {"id":"ghost_gate_ward","quantity":1},
+          {"id":"ghost_core_pill","quantity":2},
+          {"id":"ghost_nurturing_casket","quantity":1}
+        ]}
+      },
+      {
+        "id":"ghost_void",
+        "name":"鬼修·九狱炼虚",
+        "description":"鬼修 DLC 炼虚开局：在地狱界以九狱空行典稳固魂基，并直接接入魂蚀、往生、百鬼夜行与轮回体系。",
+        "category":"异道炼虚",
+        "variant_label":"鬼修 DLC",
+        "inventory":{"$replace":[
+          {"id":"spirit_stone","quantity":8500},
+          {"id":"mystic_heaven_blood","quantity":2},
+          {"id":"dharma_soul_pearl","quantity":2},
+          {"id":"realm_severing_halberd","quantity":1},
+          {"id":"empty_heaven_mirror","quantity":1},
+          {"id":"lingxu_five_powders","quantity":1},
+          {"id":"tribulation_vitality_pill","quantity":2},
+          {"id":"tribulation_mana_dew","quantity":2},
+          {"id":"ghost_nurturing_casket","quantity":1}
+        ]}
+      }
+    ],
     "ghost_cultivation": {
       "enabled": true,
       "infinite_lifespan": true,
@@ -12,7 +49,27 @@
       "wangsheng_per_layer": 1,
       "wangsheng_cost": 2,
       "wangsheng_erosion_reduction_pp": 0.02,
-      "clear_wangsheng_on_reincarnation": true
+      "clear_wangsheng_on_reincarnation": true,
+      "phase_two": {
+        "enabled": true,
+        "defeat_capture_chance": 0.45,
+        "pressure_modifier_per_point": 0.01,
+        "soul_pressure": {"base": 0.5, "power_cap": 2.0, "power_scale": 5000.0},
+        "soul_slots": {
+          "three_soul_log_coefficient": 0.18,
+          "seven_effect_cap": 0.25,
+          "power_scale": 2500.0
+        },
+        "parade": {
+          "enabled": true,
+          "min_interval_units": 5,
+          "max_interval_units": 9,
+          "duration_units": 2,
+          "soul_count": 6,
+          "participate_reduction_pp": 0.005,
+          "befriend_reduction_pp": 0.002
+        }
+      }
     }
   }
 }

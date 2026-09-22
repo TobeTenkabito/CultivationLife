@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "万妖归宗：血脉进化",
-  "version": "4.9.0",
+  "version": "4.10.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,

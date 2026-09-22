@@ -149,6 +149,7 @@ class PlayerCombatSystem:
         current_hp_ratio: float,
         current_mp_ratio: float,
         battlefield_tags: Iterable[str] = (),
+        mana_cost_multiplier: float = 1.0,
     ) -> CombatResolution:
         objective = cls._objective(target, lethal)
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
@@ -291,6 +292,7 @@ class PlayerCombatSystem:
         # converted from unabsorbed body damage after the fight.
         player_hp = cls._clamp(0.0, 1.0, player_power / player_power_max)
         player_mp = max(0.0, min(1.0, current_mp_ratio))
+        mana_cost_multiplier = cls._clamp(0.60, 1.80, float(mana_cost_multiplier))
         enemy_hp = 1.0
         player_morale = 100.0
         enemy_morale = 85.0 if dragon_pressure_active else 100.0
@@ -300,6 +302,10 @@ class PlayerCombatSystem:
         core_power = max(1.0, next((unit.power for unit in player_units if unit.kind == "player"), player_power))
         rounds: list[dict[str, Any]] = []
         key_events: list[str] = []
+        if mana_cost_multiplier >= 1.10:
+            key_events.append(f"灵根驭气艰涩：战斗法力消耗为常人的 {mana_cost_multiplier:.0%}。")
+        elif mana_cost_multiplier <= 0.90:
+            key_events.append(f"灵根驭气精纯：战斗法力消耗降至常人的 {mana_cost_multiplier:.0%}。")
         if transformation["forms"]:
             names = "、".join(
                 f"{form.name} {weight:.0%}"
@@ -538,7 +544,8 @@ class PlayerCombatSystem:
                 burst_factor = 1.18
                 cost = min(
                     player_mp,
-                    max(0.07 + 0.008 * max(1, art.grade), art.immortal_power_cost if art.requires_immortal_power else 0),
+                    max(0.07 + 0.008 * max(1, art.grade), art.immortal_power_cost if art.requires_immortal_power else 0)
+                    * mana_cost_multiplier,
                 )
                 player_mp -= cost
                 label = f"《{art.name}》"
@@ -672,7 +679,7 @@ class PlayerCombatSystem:
             if actual_received >= 0.12 and bloodline_active("damage_taken_counterforce"):
                 counterforce_ready = True
             base_cost = 0.025 + 0.025 * min(1.6, round_player_stats["might"] / max(1.0, player_power))
-            player_mp = max(0.0, player_mp - min(0.07, base_cost))
+            player_mp = max(0.0, player_mp - min(0.12, base_cost * mana_cost_multiplier))
             if round_no % 2 == 0 and bloodline_active("even_round_mana_recovery"):
                 restored_mp = min(0.03, 1.0 - player_mp)
                 player_mp += restored_mp
