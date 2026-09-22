@@ -399,7 +399,7 @@ function render(data) {
       ? `${ghost.suspension_reason} · 本魂 HP ${number(ihp.current)}/${number(ihp.reference)} · MP ${number(imp.current)}/${number(imp.reference)} · ${capText}`
       : `${ghost.soul_integrity?.label || '魂基'} · ${erosionClock} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;
     const hpDetail = `本体魂基 ${number(ihp.current)} / ${number(ihp.reference)}；本体承载 ${precisePercent(ihp.carry_ratio)}；外物原始 +${number(ihp.external_raw)}，实际 +${number(ihp.external_effective)}`;
-    const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${precisePercent(imp.carry_ratio)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
+    const mpDetail = `本体魂基 ${number(imp.current)} / ${number(imp.reference)}；本体承载 ${precisePercent(imp.carry_ratio)}；灵根法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}；外物原始 +${number(imp.external_raw)}，实际 +${number(imp.external_effective)}`;
     $('#hp-text').title = hpDetail; $('#hp-text').dataset.tooltip = hpDetail;
     $('#mp-text').title = mpDetail; $('#mp-text').dataset.tooltip = mpDetail;
     $('#ghost-integrity-detail').textContent = `${erosionClock}；所有行动共享此进度，只有累计满一个当前境界时间单位才结算魂蚀。魂体完整度 ${precisePercent(ghost.soul_integrity?.ratio || 0)}（${ghost.soul_integrity?.label || '未知'}）。HP：${hpDetail}。MP：${mpDetail}。`;
@@ -420,7 +420,8 @@ function render(data) {
     renderGhostPhaseTwo(ghost.phase_two || {});
   } else {
     $('#hp-text').removeAttribute('title'); $('#hp-text').removeAttribute('data-tooltip');
-    $('#mp-text').removeAttribute('title'); $('#mp-text').removeAttribute('data-tooltip');
+    const manaDetail = `灵根法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}；差灵根的战斗法力消耗也会更快`;
+    $('#mp-text').title = manaDetail; $('#mp-text').dataset.tooltip = manaDetail;
     renderGhostPhaseTwo({enabled:false});
   }
   const combatNode = $('#combat-power');
@@ -449,7 +450,7 @@ function render(data) {
   renderWanted(data.wanted || []);
   renderPrison(data.imprisonment);
   $('#root-efficiency').textContent = `×${Number(p.cultivation_efficiency || 0).toFixed(2)}`;
-  $('#root-efficiency').title = `灵根基础 ×${p.spirit_root_efficiency.toFixed(2)}；最终效率已计入主修功法、物品与气环境`;
+  $('#root-efficiency').title = `灵根基础 ×${p.spirit_root_efficiency.toFixed(2)}；法力容量 ×${Number(p.spirit_root_mana_multiplier || 1).toFixed(2)}，并影响战斗续航；最终机缘效率已计入主修功法、物品与气环境`;
   const qi = p.qi_environment || {};
   $('#qi-environment').textContent = (qi.display || []).map(entry => `${entry.name}${number(entry.concentration)}`).join(' · ');
   $('#qi-environment').title = qi.main_multiplier == null ? '尚无主修功法' : `当前主修环境倍率 ×${Number(qi.main_multiplier).toFixed(3)}`;

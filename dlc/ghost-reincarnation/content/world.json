@@ -18,6 +18,24 @@
           {"id":"ghost_core_pill","quantity":2},
           {"id":"ghost_nurturing_casket","quantity":1}
         ]}
+      },
+      {
+        "id":"ghost_void",
+        "name":"鬼修·九狱炼虚",
+        "description":"鬼修 DLC 炼虚开局：在地狱界以九狱空行典稳固魂基，并直接接入魂蚀、往生、百鬼夜行与轮回体系。",
+        "category":"异道炼虚",
+        "variant_label":"鬼修 DLC",
+        "inventory":{"$replace":[
+          {"id":"spirit_stone","quantity":8500},
+          {"id":"mystic_heaven_blood","quantity":2},
+          {"id":"dharma_soul_pearl","quantity":2},
+          {"id":"realm_severing_halberd","quantity":1},
+          {"id":"empty_heaven_mirror","quantity":1},
+          {"id":"lingxu_five_powders","quantity":1},
+          {"id":"tribulation_vitality_pill","quantity":2},
+          {"id":"tribulation_mana_dew","quantity":2},
+          {"id":"ghost_nurturing_casket","quantity":1}
+        ]}
       }
     ],
     "ghost_cultivation": {

@@ -7,12 +7,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cultivation_life.content_registry import FACTION_DEFINITIONS, WORLD_SYSTEMS
+from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.engine import GameEngine, encode_rng
 from cultivation_life.models import HistoryRecord
 from cultivation_life.rules import (
     TECHNIQUE_CATALOG, add_item, assign_technique, combat_power, create_technique,
     max_hp, max_mp, opportunity_multiplier, opportunity_required, root_definition,
-    qi_level_threshold,
+    qi_level_threshold, spirit_root_mana_multiplier,
 )
 
 
@@ -1332,6 +1333,24 @@ class EngineTests(unittest.TestCase):
         confucian = self.engine.create_game("鸿儒", "none", "dao", 471, preset_id="confucian_core")["player"]
         self.assertIn("confucian_jade_ruler", {row["id"] for row in confucian["inventory"]})
 
+    def test_every_cultivation_path_has_a_void_refinement_quick_start(self):
+        preset_ids = {
+            "dao": "void", "demonic": "demonic_void", "monster": "monster_void",
+            "ghost": "ghost_void", "confucian": "confucian_void", "buddhist": "buddhist_void",
+        }
+        for index, (path, preset_id) in enumerate(preset_ids.items()):
+            with self.subTest(path=path):
+                player = self.engine.create_game(
+                    f"炼虚{path}", "none", "dao", 520 + index, preset_id=preset_id,
+                )["player"]
+                self.assertEqual(player["realm_index"], 6)
+                self.assertEqual(player["path"], path)
+                self.assertTrue({"metal", "wood", "water", "fire", "earth"} <= set(player["additional_roots"]))
+                self.assertIsNotNone(player["technique_slots"]["main"])
+                self.assertIsNotNone(player["technique_slots"]["support"])
+                self.assertGreaterEqual(player["combat_power"] / player["expected_combat_power"], 0.9)
+                self.assertLessEqual(player["combat_power"] / player["expected_combat_power"], 1.1)
+
     def test_spirit_world_exposes_three_joinable_sects_with_raced_rosters(self):
         created = self.engine.create_game("灵界门人", "supreme_metal", "dao", 310)
         game = self.engine.store.load(created["id"])
@@ -1460,7 +1479,9 @@ class EngineTests(unittest.TestCase):
         game = self.engine.store.load(created["id"])
         samples = {
             1: {"pseudo_all": 0.10, "acquired_metal": 0.10, "otherworld": 0.80},
-            2: {"pseudo_all": 0.05, "otherworld": 0.20},
+            2: {"acquired_metal": 0.06, "pseudo_all": 0.08,
+                "heavenly_metal_wood": 0.35, "supreme_metal": 0.42,
+                "mutated_thunder": 0.50, "law_time": 0.58, "otherworld": 0.66},
             3: {"pseudo_all": 0.01, "otherworld": 0.05},
             4: {"acquired_metal": 0.01, "pseudo_all": 0.02, "heavenly_metal_wood": 0.03,
                 "supreme_metal": 0.04, "mutated_thunder": 0.04, "law_time": 0.05,
@@ -1472,6 +1493,33 @@ class EngineTests(unittest.TestCase):
                 game.player.spirit_root = root_id
                 game.player.heart_demon = 0
                 self.assertAlmostEqual(self.engine._breakthrough_chance(game.player, True)["base"], expected)
+
+    def test_spirit_root_quality_controls_mana_capacity_and_combat_consumption(self):
+        poor = self.engine.store.load(self.engine.create_game("杂灵根", "pseudo_all", "dao", 408)["id"]).player
+        rare = self.engine.store.load(self.engine.create_game("异灵根", "otherworld", "dao", 409)["id"]).player
+        poor.realm_index = rare.realm_index = 3
+        poor.layer = rare.layer = 1
+        self.assertLess(spirit_root_mana_multiplier(poor), 0.7)
+        self.assertGreater(spirit_root_mana_multiplier(rare), 1.6)
+        self.assertGreater(max_mp(rare), max_mp(poor) * 2)
+
+        unit = BattleUnit("player", "试法", "player", 1000, 3)
+        target = {
+            "target_name": "试法傀儡", "target_power": 1100,
+            "target_realm_index": 3, "target_layer": 1, "max_rounds": 5,
+        }
+        poor_result = PlayerCombatSystem.resolve(
+            poor, [unit], target, False, random.Random(77),
+            current_hp_ratio=1, current_mp_ratio=1,
+            mana_cost_multiplier=1 / spirit_root_mana_multiplier(poor),
+        )
+        rare_result = PlayerCombatSystem.resolve(
+            rare, [unit], target, False, random.Random(77),
+            current_hp_ratio=1, current_mp_ratio=1,
+            mana_cost_multiplier=1 / spirit_root_mana_multiplier(rare),
+        )
+        self.assertGreater(poor_result.mp_loss_ratio, rare_result.mp_loss_ratio)
+        self.assertTrue(any("灵根驭气艰涩" in event for event in poor_result.key_events))
 
     def test_breakthrough_pill_is_data_driven_and_activates_next_matching_attempt(self):
         created = self.engine.create_game("丹助筑基", "supreme_metal", "dao", 406)

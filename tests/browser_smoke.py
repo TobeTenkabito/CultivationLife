@@ -99,11 +99,13 @@ def main() -> None:
                 assert "解锁条件：取得沧海玄鼎" in page.locator(".achievement-row").first.text_content()
                 page.locator("#achievement-close").click()
                 page.locator("#new-game-form").wait_for(state="visible")
-                assert page.locator(".quick-start-button").count() >= 11
-                assert page.locator(".quick-start-button:not([disabled])").count() >= 11
+                assert page.locator(".quick-start-button").count() >= 16
+                assert page.locator(".quick-start-button:not([disabled])").count() >= 16
                 assert page.locator(".quick-start-button[disabled]").count() == 0
-                assert page.locator(".quick-start-group").count() >= 3
+                assert page.locator(".quick-start-group").count() >= 4
                 assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_core']").text_content()
+                assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_void']").text_content()
+                assert page.locator(".quick-start-button[data-preset-id='buddhist_void']").count() == 1
                 page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 inner_outer_dock = page.locator("[data-panel-target='sage-inner-outer']")

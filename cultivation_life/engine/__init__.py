@@ -48,6 +48,7 @@ from ..rules import (
     root_definition,
     root_elements,
     roll_lifespan,
+    spirit_root_mana_multiplier,
     ensure_technique_set,
     technique_environment_multiplier,
     QI_NAMES,
@@ -273,6 +274,11 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             starting_qi_level = {3: 5, 4: 8, 5: 12, 6: 17, 7: 23, 8: 30, 9: 30}.get(player.realm_index, 0)
             starting_source = "demon" if path == "demonic" else "monster" if path == "monster" else "yin" if path == "ghost" else "spirit"
             player.qi_experience[starting_source] = qi_level_threshold(starting_qi_level)
+            # Compatibility presets may combine a path-native circulation with
+            # neutral upper-realm arts.  Seed spirit mastery as well so every
+            # equipped starting technique is immediately usable.
+            if starting_qi_level and starting_source != "spirit":
+                player.qi_experience["spirit"] = qi_level_threshold(starting_qi_level)
             if player.realm_index >= 6:
                 for affinity in ("metal", "wood", "water", "fire", "earth"):
                     if affinity not in self._base_affinities(player) and affinity not in player.additional_roots:

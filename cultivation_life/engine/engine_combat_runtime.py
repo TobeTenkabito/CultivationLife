@@ -27,6 +27,7 @@ from ..rules import (
     root_definition,
     root_elements,
     roll_lifespan,
+    spirit_root_mana_multiplier,
     qi_level,
     divine_sense_level,
 )
@@ -235,6 +236,7 @@ class EngineCombatRuntimeMixin:
             current_hp_ratio=player.hp / max(1.0, hp_max),
             current_mp_ratio=player.mp / max(1.0, mp_max),
             battlefield_tags=self._combat_battlefield_tags(game, target),
+            mana_cost_multiplier=1.0 / spirit_root_mana_multiplier(player),
         )
         used_formation = (
             target.get("allied_formation_profile", {})

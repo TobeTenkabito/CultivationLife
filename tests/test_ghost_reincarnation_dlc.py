@@ -18,7 +18,9 @@ from cultivation_life.ghost_system import (
     spend_wangsheng_energy,
 )
 from cultivation_life.models import Item, Player
-from cultivation_life.rules import add_item, max_hp, max_mp, opportunity_required, technique_scale
+from cultivation_life.rules import (
+    add_item, max_hp, max_mp, opportunity_required, spirit_root_mana_multiplier, technique_scale,
+)
 
 
 class GhostReincarnationDlcTests(unittest.TestCase):
@@ -55,12 +57,12 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             old_hp_base * (1 + player.support_technique.hp_bonus * technique_scale(player.support_technique))
             + 2 * 37 + 41 + 17
         )
-        expected_mp = round(
+        expected_mp = (
             old_mp_base * (1 + player.support_technique.mp_bonus * technique_scale(player.support_technique))
             + 2 * 29 + 43 + 19
         )
         self.assertEqual(max_hp(player), expected_hp)
-        self.assertEqual(max_mp(player), expected_mp)
+        self.assertEqual(max_mp(player), round(expected_mp * spirit_root_mana_multiplier(player)))
 
     def test_external_power_is_scaled_by_soul_carry_ratio(self):
         player = Player("残灯", "mutated_yin", path="ghost", realm_index=2, layer=1)
@@ -71,7 +73,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         player.ghost_intrinsic_mp_current = 400.0
         player.inventory = [Item("test", "魂甲", hp_bonus=1000, mp_bonus=1000)]
         self.assertEqual(max_hp(player), 1200)
-        self.assertEqual(max_mp(player), 900)
+        self.assertEqual(max_mp(player), round(900 * spirit_root_mana_multiplier(player)))
 
     def test_all_external_sources_can_change_without_mutating_intrinsic_state(self):
         player = Player("器外之魂", "mutated_yin", path="ghost", realm_index=3, layer=4)
