@@ -12,8 +12,8 @@ from cultivation_life.engine import GameEngine, encode_rng
 from cultivation_life.models import HistoryRecord
 from cultivation_life.rules import (
     TECHNIQUE_CATALOG, add_item, assign_technique, combat_power, create_technique,
-    max_hp, max_mp, opportunity_multiplier, opportunity_required, root_definition,
-    qi_level_threshold, spirit_root_mana_multiplier,
+    combat_root_mana_cost_multiplier, max_hp, max_mp, opportunity_multiplier,
+    opportunity_required, root_definition, qi_level_threshold, spirit_root_mana_multiplier,
 )
 
 
@@ -1503,6 +1503,29 @@ class EngineTests(unittest.TestCase):
         self.assertGreater(spirit_root_mana_multiplier(rare), 1.6)
         self.assertGreater(max_mp(rare), max_mp(poor) * 2)
 
+        same_stage_cost = combat_root_mana_cost_multiplier(poor, 3, 1)
+        middle_stage_cost = combat_root_mana_cost_multiplier(poor, 3, 4)
+        late_stage_cost = combat_root_mana_cost_multiplier(poor, 3, 7)
+        adjacent_realm_cost = combat_root_mana_cost_multiplier(poor, 4, 1)
+        two_realm_gap_cost = combat_root_mana_cost_multiplier(poor, 5, 1)
+        self.assertGreater(same_stage_cost, middle_stage_cost)
+        self.assertGreater(middle_stage_cost, late_stage_cost)
+        self.assertGreater(late_stage_cost, adjacent_realm_cost)
+        self.assertGreater(adjacent_realm_cost, two_realm_gap_cost)
+        self.assertEqual(middle_stage_cost, 1.15)
+        self.assertEqual(late_stage_cost, 1.05)
+        self.assertEqual(adjacent_realm_cost, 1.02)
+        self.assertEqual(two_realm_gap_cost, 1.0)
+
+        rare_same = combat_root_mana_cost_multiplier(rare, 3, 1)
+        rare_middle = combat_root_mana_cost_multiplier(rare, 3, 4)
+        self.assertLess(rare_same, rare_middle)
+        self.assertLess(rare_middle, 1.0)
+        self.assertEqual(rare_middle, 0.88)
+        self.assertEqual(combat_root_mana_cost_multiplier(rare, 3, 7), 0.96)
+        self.assertEqual(combat_root_mana_cost_multiplier(rare, 4, 1), 0.98)
+        self.assertEqual(combat_root_mana_cost_multiplier(rare, 5, 1), 1.0)
+
         unit = BattleUnit("player", "试法", "player", 1000, 3)
         target = {
             "target_name": "试法傀儡", "target_power": 1100,
@@ -1511,12 +1534,12 @@ class EngineTests(unittest.TestCase):
         poor_result = PlayerCombatSystem.resolve(
             poor, [unit], target, False, random.Random(77),
             current_hp_ratio=1, current_mp_ratio=1,
-            mana_cost_multiplier=1 / spirit_root_mana_multiplier(poor),
+            mana_cost_multiplier=same_stage_cost,
         )
         rare_result = PlayerCombatSystem.resolve(
             rare, [unit], target, False, random.Random(77),
             current_hp_ratio=1, current_mp_ratio=1,
-            mana_cost_multiplier=1 / spirit_root_mana_multiplier(rare),
+            mana_cost_multiplier=rare_same,
         )
         self.assertGreater(poor_result.mp_loss_ratio, rare_result.mp_loss_ratio)
         self.assertTrue(any("灵根驭气艰涩" in event for event in poor_result.key_events))

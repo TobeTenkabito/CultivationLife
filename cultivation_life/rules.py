@@ -462,6 +462,43 @@ def spirit_root_mana_multiplier(player: Player) -> float:
     return round(max(0.40, min(1.65, 0.12 + efficiency * 0.76)), 4)
 
 
+def combat_root_mana_cost_multiplier(
+    player: Player, opponent_realm_index: int, opponent_layer: int = 1,
+) -> float:
+    """Return realm-aware mana cost pressure from the player's spirit root.
+
+    Root quality is most visible between cultivators in the same cultivation
+    stage.  A small-stage gap already lets realm pressure replace part of that
+    effect; major-realm gaps rapidly make root differences irrelevant.
+    """
+    raw = 1.0 / spirit_root_mana_multiplier(player)
+    opponent_realm = max(0, min(int(opponent_realm_index), len(REALMS) - 1))
+    realm_gap = abs(int(player.realm_index) - opponent_realm)
+    if realm_gap >= 2:
+        return 1.0
+    elif realm_gap == 1:
+        return round(max(0.98, min(1.02, raw)), 4)
+    else:
+        definition = REALMS[int(player.realm_index)]
+
+        def small_stage(layer: int) -> int:
+            bounded = max(1, min(int(layer), int(definition.layers)))
+            if int(definition.layers) <= 1:
+                return 0
+            if int(definition.layers) >= 12:
+                return 0 if bounded <= 4 else 1 if bounded <= 9 else 2
+            return 0 if bounded <= 3 else 1 if bounded <= 6 else 2
+
+        stage_gap = abs(small_stage(player.layer) - small_stage(opponent_layer))
+        if stage_gap == 0:
+            return round(max(0.60, min(1.80, raw)), 4)
+        if stage_gap == 1:
+            faded = 1.0 + (raw - 1.0) * 0.35
+            return round(max(0.88, min(1.15, faded)), 4)
+        faded = 1.0 + (raw - 1.0) * 0.12
+        return round(max(0.96, min(1.05, faded)), 4)
+
+
 def max_mp(player: Player) -> int:
     mana = effective_intrinsic_mp(player) + raw_external_mp_bonus(player) * mp_carry_ratio(player)
     return max(1, round(mana * spirit_root_mana_multiplier(player)))
