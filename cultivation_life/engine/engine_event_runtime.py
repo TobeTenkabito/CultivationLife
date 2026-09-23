@@ -14,7 +14,7 @@ from ..content_registry import (
     STORY_COMBAT_SCENARIOS, MONSTER_BLOODLINE_SETTINGS,
 )
 from ..models import GameState, HistoryRecord, Player, SectNpc
-from ..npc_system import npc_team_combat_power
+from ..system.npc_system import npc_team_combat_power
 from ..rules import (
     add_item,
     assign_technique,
@@ -30,7 +30,7 @@ from ..rules import (
     root_elements,
     add_technique_copy,
 )
-from ..transformation_system import (
+from ..system.transformation_system import (
     active_transformation_profile,
 )
 
@@ -38,7 +38,7 @@ from ..transformation_system import (
 from ..world_state import (
     choose_weighted_race, push_fifo_cache,
 )
-from ..possession_system import (
+from ..system.possession_system import (
     current_body_age,
 )
 from .engine_constants import OPS

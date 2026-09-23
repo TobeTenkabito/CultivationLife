@@ -3,9 +3,9 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from .content_registry import WORLD_SYSTEMS
-from .models import GameState, HistoryRecord
-from .runtime import decode_rng, encode_rng, now_iso
+from ..content_registry import WORLD_SYSTEMS
+from ..models import GameState, HistoryRecord
+from ..runtime import decode_rng, encode_rng, now_iso
 
 
 class HeavenlyCourtSystemMixin:

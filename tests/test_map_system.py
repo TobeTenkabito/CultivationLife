@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cultivation_life.content_registry import CONTENT_DOCUMENTS, MARKET_GOODS, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
-from cultivation_life.map_system import MapCatalog
+from cultivation_life.system.map_system import MapCatalog
 from cultivation_life.rules import TECHNIQUE_CATALOG, assign_technique
 
 

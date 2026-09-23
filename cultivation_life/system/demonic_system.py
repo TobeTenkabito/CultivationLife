@@ -6,17 +6,17 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import (
+from ..content_registry import (
     GUIXU_EXCLUSIVE_TECHNIQUE_IDS, ITEM_CATALOG, PATH_NAMES, REALMS,
     TECHNIQUE_CATALOG, WORLD_SYSTEMS,
 )
-from .models import GameState, HistoryRecord, Player, SectNpc
+from ..models import GameState, HistoryRecord, Player, SectNpc
 from .npc_system import party_combat_power
-from .rules import (
+from ..rules import (
     combat_power, divine_sense_level, has_item, max_hp, max_mp, qi_level,
     puppet_capacity, remove_item, technique_environment_multiplier, technique_scale,
 )
-from .runtime import decode_rng, encode_rng, now_iso
+from ..runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age, current_body_age
 
 

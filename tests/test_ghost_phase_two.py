@@ -5,9 +5,9 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
+from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
-from cultivation_life.ghost_system import (
+from cultivation_life.system.ghost_system import (
     SOUL_SLOTS, active_generated_soul_traits, apply_soul_erosion, ensure_ghost_cultivation_state,
     ghost_opportunity_multiplier, ghost_soul_effects, ghost_soul_pressure,
 )
@@ -15,7 +15,7 @@ from cultivation_life.ghost_soul_traits import (
     describe_generated_soul_trait, generated_soul_trait_id, validate_generated_soul_trait,
 )
 from cultivation_life.models import Item, Player
-from cultivation_life.possession_system import (
+from cultivation_life.system.possession_system import (
     advance_player_age, can_possess, current_body_age, enter_host_body, is_possessed,
     leave_host_body, migrate_possession_timeline, possession_limit,
 )

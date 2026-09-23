@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT))
 from cultivation_life import server as server_module
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import REALMS
-from cultivation_life.ghost_system import grant_intrinsic_progression_if_new_highwater
-from cultivation_life.formation_system import formation_material_definitions, make_formation_material_instance
+from cultivation_life.system.ghost_system import grant_intrinsic_progression_if_new_highwater
+from cultivation_life.system.formation_system import formation_material_definitions, make_formation_material_instance
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, add_technique_copy, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
 
 

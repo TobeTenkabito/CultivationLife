@@ -3,8 +3,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from .content_registry import TRANSFORMATION_CATALOG
-from .models import Player, Technique, TransformationForm
+from ..content_registry import TRANSFORMATION_CATALOG
+from ..models import Player, Technique, TransformationForm
 
 
 STAT_NAMES = {

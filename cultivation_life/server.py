@@ -21,7 +21,7 @@ from .content_registry import (
     MONSTER_SPECIES,
 )
 from .engine import GameEngine
-from .extension_system import write_extension_preference
+from .system.extension_system import write_extension_preference
 from .rules import QI_SOURCE_NAMES
 from .runtime import persistence_root
 from .version import BASE_GAME_VERSION, base_game_metadata

@@ -20,7 +20,7 @@ from cultivation_life.rules import (
     technique_scale,
     upgrade_known_technique,
 )
-from cultivation_life.transformation_system import transformation_technique_limits
+from cultivation_life.system.transformation_system import transformation_technique_limits
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent

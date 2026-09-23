@@ -21,15 +21,15 @@ from ..rules import (
 
 
 from ..runtime import decode_rng, encode_rng
-from ..monster_bloodline_system import (
+from ..system.monster_bloodline_system import (
     bloodline_content_available,
     ensure_monster_bloodline_state,
 )
-from ..ghost_system import (
+from ..system.ghost_system import (
     ensure_ghost_cultivation_state, ghost_cultivation_active,
     grant_intrinsic_progression_if_new_highwater,
 )
-from ..possession_system import (
+from ..system.possession_system import (
     migrate_possession_timeline,
 )
 

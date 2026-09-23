@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.content_registry import ContentRegistry
-from cultivation_life.extension_system import write_extension_preference
+from cultivation_life.system.extension_system import write_extension_preference
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent

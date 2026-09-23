@@ -4,10 +4,10 @@ import random
 from typing import Any
 
 from .content_registry import WORLD_SYSTEMS
-from .map_system import MapContentError
+from .system.map_system import MapContentError
 from .models import GameState, HistoryRecord
 from .runtime import decode_rng, encode_rng, now_iso
-from .possession_system import advance_player_age, current_body_age
+from .system.possession_system import advance_player_age, current_body_age
 
 
 class MapTravelMixin:

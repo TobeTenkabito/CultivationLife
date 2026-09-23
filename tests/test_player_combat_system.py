@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cultivation_life.combat_system import PlayerCombatSystem
+from cultivation_life.system.combat_system import PlayerCombatSystem
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.rules import assign_technique, combat_power, max_hp, max_mp

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.formation_system import formation_material_definitions, make_formation_material_instance
+from cultivation_life.system.formation_system import formation_material_definitions, make_formation_material_instance
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, assign_technique, max_hp, max_mp
 
 

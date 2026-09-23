@@ -7,11 +7,11 @@ import uuid
 from functools import lru_cache
 from typing import Any
 
-from .content_registry import CONTENT_DOCUMENTS, ITEM_CATALOG, REALMS, WORLD_SYSTEMS
-from .formation_content import expanded_formation_materials
-from .models import GameState, HistoryRecord, Item, Player
-from .runtime import now_iso
-from .rules import expected_combat_power
+from ..content_registry import CONTENT_DOCUMENTS, ITEM_CATALOG, REALMS, WORLD_SYSTEMS
+from ..formation_content import expanded_formation_materials
+from ..models import GameState, HistoryRecord, Item, Player
+from ..runtime import now_iso
+from ..rules import expected_combat_power
 
 
 STAT_NAMES = {

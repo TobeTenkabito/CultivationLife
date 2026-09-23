@@ -5,13 +5,13 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import ITEM_CATALOG, MARKET_GOODS, RACE_DEFINITIONS, REALMS, WORLD_SYSTEMS
+from ..content_registry import ITEM_CATALOG, MARKET_GOODS, RACE_DEFINITIONS, REALMS, WORLD_SYSTEMS
 from .formation_system import formation_config
-from .models import GameState, HistoryRecord, SectNpc
+from ..models import GameState, HistoryRecord, SectNpc
 from .npc_system import npc_team_combat_power
-from .rules import add_item, remove_item
-from .runtime import decode_rng, encode_rng, now_iso
-from .world_state import RELATION_LABELS, race_pair
+from ..rules import add_item, remove_item
+from ..runtime import decode_rng, encode_rng, now_iso
+from ..world_state import RELATION_LABELS, race_pair
 
 
 WAR_TERM_DEFS = {

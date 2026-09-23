@@ -6,10 +6,10 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import CONTENT_DOCUMENTS, REALMS, WORLD_SYSTEMS
-from .models import GameState, HistoryRecord, Item, Player
-from .rules import add_item, expected_combat_power, max_hp, max_mp, remove_item
-from .runtime import decode_rng, encode_rng, now_iso
+from ..content_registry import CONTENT_DOCUMENTS, REALMS, WORLD_SYSTEMS
+from ..models import GameState, HistoryRecord, Item, Player
+from ..rules import add_item, expected_combat_power, max_hp, max_mp, remove_item
+from ..runtime import decode_rng, encode_rng, now_iso
 
 
 STAT_NAMES = {

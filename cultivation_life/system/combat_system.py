@@ -3,20 +3,20 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable
 
-from .combat_traits import COMBAT_TRAIT_REGISTRY
-from .content_registry import MONSTER_BLOODLINE_SETTINGS
+from ..combat_traits import COMBAT_TRAIT_REGISTRY
+from ..content_registry import MONSTER_BLOODLINE_SETTINGS
 from .custom_lineage_system import evaluate_custom_lineage_rules
-from .models import Player, Technique
+from ..models import Player, Technique
 from .ghost_system import active_generated_soul_traits, active_soul_traits, ghost_soul_effects
-from .ghost_soul_traits import evaluate_generated_soul_traits
-from .monster_bloodline_traits import (
+from ..ghost_soul_traits import evaluate_generated_soul_traits
+from ..monster_bloodline_traits import (
     BLOODLINE_TRAIT_REGISTRY, bloodline_grants_hook, bloodline_hook_names,
     bloodline_stat_modifiers,
 )
-from .monster_bloodline_rules import evaluate_generated_traits
+from ..monster_bloodline_rules import evaluate_generated_traits
 from .transformation_system import active_transformation_profile
 from .monster_bloodline_system import active_bloodline_profile, bloodline_content_available
-from .monster_general_traits import (
+from ..monster_general_traits import (
     GENERAL_MONSTER_TRAIT_REGISTRY, active_general_monster_traits,
     general_monster_trait_modifiers,
 )

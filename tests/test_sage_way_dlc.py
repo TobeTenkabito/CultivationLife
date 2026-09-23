@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.sage_system import apply_external_influence, disciple_curve, sage_content_available
+from cultivation_life.system.sage_system import apply_external_influence, disciple_curve, sage_content_available
 
 
 class SageWayDlcTests(unittest.TestCase):

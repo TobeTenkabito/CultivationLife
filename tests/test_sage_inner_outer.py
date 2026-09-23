@@ -8,7 +8,7 @@ from pathlib import Path
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_technique_copy, combat_power
-from cultivation_life.sage_system import haoran_level, haoran_passive_effects
+from cultivation_life.system.sage_system import haoran_level, haoran_passive_effects
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent

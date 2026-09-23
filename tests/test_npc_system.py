@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.npc_system import npc_team_combat_power, party_combat_power
+from cultivation_life.system.npc_system import npc_team_combat_power, party_combat_power
 from cultivation_life.models import SectNpc
 from cultivation_life.rules import add_item, max_hp, max_mp, opportunity_required
 

@@ -3,8 +3,8 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from .content_registry import PATH_NAMES, REALMS, TECHNIQUE_CATALOG
-from .models import Player, Technique
+from ..content_registry import PATH_NAMES, REALMS, TECHNIQUE_CATALOG
+from ..models import Player, Technique
 
 
 _BODY_FIELDS = (

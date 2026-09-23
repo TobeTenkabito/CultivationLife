@@ -5,16 +5,16 @@ import math
 import random
 from typing import Any
 
-from .content_registry import (
+from ..content_registry import (
     ACTIONS, GUIXU_TIDE_CONTENT, ITEM_CATALOG, REALMS, TECHNIQUE_CATALOG,
     WORLD_SYSTEMS,
 )
-from .models import GameState, HistoryRecord, SectNpc
-from .rules import (
+from ..models import GameState, HistoryRecord, SectNpc
+from ..rules import (
     acquire_technique, add_item, divine_sense_level, expected_combat_power, has_item,
     max_hp, max_mp, opportunity_multiplier, remove_item,
 )
-from .runtime import decode_rng, encode_rng, now_iso
+from ..runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age
 
 

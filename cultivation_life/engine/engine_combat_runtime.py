@@ -9,7 +9,7 @@ from ..content_registry import (
     RACE_DEFINITIONS, RACE_SYSTEMS, TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES, WORLD_SYSTEMS,
 )
-from ..combat_system import BattleUnit, PlayerCombatSystem, stat_comparison
+from ..system.combat_system import BattleUnit, PlayerCombatSystem, stat_comparison
 from ..models import GameState, HistoryRecord, Player, SectNpc
 from ..rules import (
     add_item,
@@ -36,16 +36,16 @@ from ..rules import (
 from ..world_state import (
     race_pair,
 )
-from ..crafting_system import crafted_artifact_bonuses, crafted_combat_effects
-from ..formation_system import (
+from ..system.crafting_system import crafted_artifact_bonuses, crafted_combat_effects
+from ..system.formation_system import (
     active_formation_profile, ensure_formation_state,
     formation_battle_experience_gain,
 )
-from ..monster_bloodline_system import (
+from ..system.monster_bloodline_system import (
     bloodline_content_available,
 )
 from ..monster_general_traits import grant_random_general_monster_trait
-from ..ghost_system import (
+from ..system.ghost_system import (
     ghost_cultivation_active,
     grant_intrinsic_progression_if_new_highwater,
     grant_wangsheng, reincarnation_breakthrough_bonus,
@@ -1671,7 +1671,7 @@ class EngineCombatRuntimeMixin:
     ) -> None:
         if not game.player.alive:
             return
-        from ..possession_system import is_possessed, leave_host_body
+        from ..system.possession_system import is_possessed, leave_host_body
         if is_possessed(game.player):
             from ..rules import max_hp, max_mp
             host = leave_host_body(game.player)

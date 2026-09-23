@@ -4,7 +4,7 @@ import copy
 import re
 from typing import Any
 
-from .models import GameState, Player
+from ..models import GameState, Player
 
 
 STAT_KEYS = ("might", "guard", "mobility", "sense", "sustain", "breach")

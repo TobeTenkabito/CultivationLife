@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from cultivation_life.content_registry import ITEM_CATALOG, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
-from cultivation_life.ghost_system import (
+from cultivation_life.system.ghost_system import (
     accumulate_soul_erosion_time,
     apply_soul_erosion,
     can_reincarnate,
