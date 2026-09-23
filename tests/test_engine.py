@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cultivation_life.content_registry import FACTION_DEFINITIONS, WORLD_SYSTEMS
-from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
+from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.engine import GameEngine, encode_rng
 from cultivation_life.models import HistoryRecord
 from cultivation_life.rules import (

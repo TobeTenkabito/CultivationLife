@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterable
 
-from .models import Item, SectNpc
+from ..models import Item, SectNpc
 
 
 def npc_breakthrough_chance(npc: SectNpc, settings: dict[str, Any], root_efficiency: float) -> float:

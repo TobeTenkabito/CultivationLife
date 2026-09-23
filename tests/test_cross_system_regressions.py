@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.possession_system import enter_host_body, leave_host_body
+from cultivation_life.system.possession_system import enter_host_body, leave_host_body
 from cultivation_life.rules import add_item, opportunity_required
 
 

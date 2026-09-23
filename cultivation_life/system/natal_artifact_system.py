@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from .content_registry import ITEM_CATALOG, WORLD_SYSTEMS
-from .models import GameState, HistoryRecord
-from .rules import add_item, has_item, remove_item
-from .runtime import now_iso
+from ..content_registry import ITEM_CATALOG, WORLD_SYSTEMS
+from ..models import GameState, HistoryRecord
+from ..rules import add_item, has_item, remove_item
+from ..runtime import now_iso
 
 
 class NatalArtifactSystemMixin:

@@ -10,7 +10,7 @@ from ..content_registry import (
     WORLD_SYSTEMS,
 )
 from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
-from ..npc_system import attitude_label
+from ..system.npc_system import attitude_label
 from ..rules import (
     combat_power_assessment_value,
     opportunity_required,
@@ -19,7 +19,7 @@ from ..rules import (
     QI_NAMES,
     recommended_combat_power,
 )
-from ..transformation_system import (
+from ..system.transformation_system import (
     public_transformation_system,
 )
 
@@ -27,12 +27,12 @@ from ..transformation_system import (
 from ..world_state import (
     RELATION_LABELS, race_pair, split_race_pair,
 )
-from ..monster_bloodline_system import (
+from ..system.monster_bloodline_system import (
     bloodline_content_available,
     public_monster_bloodline,
 )
-from ..concubine_system import gender_name
-from ..possession_system import (
+from ..system.concubine_system import gender_name
+from ..system.possession_system import (
     current_body_age,
 )
 

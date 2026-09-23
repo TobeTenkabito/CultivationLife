@@ -207,7 +207,7 @@ class ContentRegistry:
 
     @classmethod
     def load(cls, content_root: Path, extension_root: Path | None = None) -> "ContentRegistry":
-        from .extension_system import load_extensions
+        from .system.extension_system import load_extensions
 
         def validate(documents: dict[str, dict[str, Any]]) -> "ContentRegistry":
             registry = cls._from_documents(documents)
@@ -447,7 +447,7 @@ class ContentRegistry:
             monster_bloodline_settings=monster_bloodline_settings,
         )
         if "maps.json" in documents:
-            from .map_system import MapCatalog
+            from .system.map_system import MapCatalog
 
             MapCatalog(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
         return registry

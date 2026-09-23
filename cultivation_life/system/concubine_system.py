@@ -4,17 +4,17 @@ import copy
 import random
 from typing import Any
 
-from .content_registry import (
+from ..content_registry import (
     GUIXU_EXCLUSIVE_TECHNIQUE_IDS, ITEM_CATALOG, MARKET_GOODS, PATH_NAMES,
     RACE_DEFINITIONS, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS,
 )
-from .models import GameState, HistoryRecord, Player, SectNpc
+from ..models import GameState, HistoryRecord, Player, SectNpc
 from .possession_system import current_body_age
-from .rules import (
+from ..rules import (
     add_item, can_player_practice_technique, combat_power, learn_technique,
     max_hp, max_mp, opportunity_required, remove_item,
 )
-from .runtime import decode_rng, encode_rng, now_iso
+from ..runtime import decode_rng, encode_rng, now_iso
 
 
 def gender_name(value: str) -> str:

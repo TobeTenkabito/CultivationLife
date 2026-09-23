@@ -255,7 +255,7 @@ class AchievementSystem:
             return bool(player.monster_custom_lineage_id and player.monster_custom_lineage)
         if "monster_bloodline_trait_count" in condition:
             try:
-                from .monster_bloodline_system import active_bloodline_profile
+                from .system.monster_bloodline_system import active_bloodline_profile
 
                 profile = active_bloodline_profile(player)
                 fixed = set(map(str, profile.get("traits", [])))

@@ -6,7 +6,7 @@ from pathlib import Path
 from cultivation_life.content_registry import MARKET_GOODS, TECHNIQUE_CATALOG
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, assign_technique, learn_technique
-from cultivation_life.transformation_system import (
+from cultivation_life.system.transformation_system import (
     BATCH_PAIR_BONUS, absorption_gain, active_transformation_profile, form_potency,
     normalized_transformation_weights,
 )

@@ -5,12 +5,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
+from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.combat_traits import COMBAT_TRAIT_REGISTRY
 from cultivation_life.content_registry import ITEM_CATALOG, MARKET_GOODS, MONSTER_BLOODLINE_SETTINGS, MONSTER_EVOLUTIONS, REALMS, TECHNIQUE_CATALOG
-from cultivation_life.custom_lineage_system import describe_rule, evaluate_custom_lineage_rules, lineage_deed_budget
+from cultivation_life.system.custom_lineage_system import describe_rule, evaluate_custom_lineage_rules, lineage_deed_budget
 from cultivation_life.engine import GameEngine
-from cultivation_life.monster_bloodline_system import (
+from cultivation_life.system.monster_bloodline_system import (
     acquired_species_bloodline_traits, grant_random_species_bloodline_trait,
     generated_species_bloodline_traits, grant_generated_species_bloodline_trait,
     resolved_bloodline_traits,
@@ -25,7 +25,7 @@ from cultivation_life.monster_general_traits import (
     general_monster_trait_modifiers, grant_random_general_monster_trait,
 )
 from cultivation_life.rules import add_item, assign_technique, opportunity_required, qi_level_threshold
-from cultivation_life.transformation_system import active_transformation_profile
+from cultivation_life.system.transformation_system import active_transformation_profile
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -206,14 +206,14 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         player.monster_general_traits = ["monster_common_stout_hide", "monster_common_open_stride"]
         unit = [BattleUnit("player", player.name, "player", 100.0, player.realm_index, "monster")]
         with (
-            patch("cultivation_life.combat_system.bloodline_content_available", return_value=False),
-            patch("cultivation_life.monster_bloodline_system.bloodline_content_available", return_value=False),
+            patch("cultivation_life.system.combat_system.bloodline_content_available", return_value=False),
+            patch("cultivation_life.system.monster_bloodline_system.bloodline_content_available", return_value=False),
         ):
             enabled = PlayerCombatSystem._aggregate_stats(unit, player=player, terrain_tags=["开阔"])
         player.monster_general_traits = []
         with (
-            patch("cultivation_life.combat_system.bloodline_content_available", return_value=False),
-            patch("cultivation_life.monster_bloodline_system.bloodline_content_available", return_value=False),
+            patch("cultivation_life.system.combat_system.bloodline_content_available", return_value=False),
+            patch("cultivation_life.system.monster_bloodline_system.bloodline_content_available", return_value=False),
         ):
             baseline = PlayerCombatSystem._aggregate_stats(unit, player=player, terrain_tags=["开阔"])
         self.assertAlmostEqual(enabled["guard"] / baseline["guard"], 1.03, places=6)

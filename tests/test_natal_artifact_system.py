@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import MARKET_GOODS, WORLD_SYSTEMS
-from cultivation_life.crafting_system import store_crafted_artifact
+from cultivation_life.system.crafting_system import store_crafted_artifact
 from cultivation_life.rules import add_item, combat_power
 
 

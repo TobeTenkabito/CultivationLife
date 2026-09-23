@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.crafting_system import (
+from cultivation_life.system.crafting_system import (
     crafted_artifact_bonuses, crafting_material_definitions, make_crafting_material_instance,
 )
 from cultivation_life.engine import GameEngine

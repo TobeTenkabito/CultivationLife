@@ -5,9 +5,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cultivation_life.combat_system import BattleUnit, PlayerCombatSystem
+from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.engine import GameEngine
-from cultivation_life.formation_system import (
+from cultivation_life.system.formation_system import (
     active_formation_profile, adjacency_matrix, calculate_formation_profile,
     effect_matrix, formation_alpha, formation_battle_experience_gain,
     formation_config, formation_maintenance_definitions, formation_material_definitions,

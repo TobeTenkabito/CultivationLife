@@ -5,10 +5,10 @@ import math
 import random
 from typing import Any
 
-from .content_registry import REALMS, WORLD_SYSTEMS
-from .ghost_soul_traits import generate_soul_trait, validate_generated_soul_trait
-from .models import GameState, HistoryRecord, Player, SectNpc
-from .runtime import now_iso
+from ..content_registry import REALMS, WORLD_SYSTEMS
+from ..ghost_soul_traits import generate_soul_trait, validate_generated_soul_trait
+from ..models import GameState, HistoryRecord, Player, SectNpc
+from ..runtime import now_iso
 from .possession_system import (
     advance_player_age, can_possess, current_body_age, enter_host_body, has_ghost_core,
     is_possessed, leave_host_body, possession_limit,
@@ -303,7 +303,7 @@ def can_reincarnate(player: Player) -> bool:
     if not ghost_cultivation_active(player) or not player.alive or player.realm_index < 1:
         return False
     current_realm = REALMS[player.realm_index]
-    from .rules import opportunity_required
+    from ..rules import opportunity_required
 
     return bool(
         player.layer >= current_realm.layers
@@ -569,7 +569,7 @@ class GhostSystemMixin:
         }
 
     def _generate_parade_souls(self, game: GameState, rng: random.Random) -> list[dict[str, Any]]:
-        from .rules import expected_combat_power
+        from ..rules import expected_combat_power
 
         surnames = "沈顾谢陆萧楚苏宁白叶"
         given = ("无咎", "照夜", "忘川", "玄衣", "引灯", "归尘", "青冥", "幽篁")
@@ -652,7 +652,7 @@ class GhostSystemMixin:
                     captor["location_id"] = phase_rng.choice(locations)
             game.player.location_id = captor.get("location_id", game.player.location_id)
             if phase_rng.random() < 0.12:
-                from .rules import combat_power
+                from ..rules import combat_power
                 contribution = combat_power(game.player)
                 captor_power = max(1.0, float(captor.get("combat_power", 1.0)))
                 owner_id = str(captor.get("npc_id") or captor.get("id", ""))
@@ -696,8 +696,8 @@ class GhostSystemMixin:
                 ))
 
     def ghost_parade_action(self, game_id: str, soul_id: str, action: str) -> dict[str, Any]:
-        from .rules import combat_power
-        from .runtime import decode_rng, encode_rng
+        from ..rules import combat_power
+        from ..runtime import decode_rng, encode_rng
 
         game = self._load(game_id)
         player = game.player
@@ -855,8 +855,8 @@ class GhostSystemMixin:
         return self.present(game)
 
     def ghost_constraint_action(self, game_id: str, action: str) -> dict[str, Any]:
-        from .rules import combat_power, max_hp, max_mp
-        from .runtime import decode_rng, encode_rng
+        from ..rules import combat_power, max_hp, max_mp
+        from ..runtime import decode_rng, encode_rng
 
         game = self._load(game_id); player = game.player
         if not player.alive:
@@ -951,7 +951,7 @@ class GhostSystemMixin:
         return True
 
     def leave_possessed_body(self, game_id: str) -> dict[str, Any]:
-        from .rules import max_hp, max_mp
+        from ..rules import max_hp, max_mp
         game = self._load(game_id); player = game.player
         if not player.alive:
             raise ValueError("此生已经结束")
@@ -971,7 +971,7 @@ class GhostSystemMixin:
         return not completed_units or self._apply_soul_erosion_units(game, completed_units)
 
     def _apply_soul_erosion_units(self, game: GameState, units: int = 1) -> bool:
-        from .rules import max_hp, max_mp
+        from ..rules import max_hp, max_mp
 
         result = apply_soul_erosion(game.player, units)
         if not result["active"]:
@@ -1049,7 +1049,7 @@ class GhostSystemMixin:
     def _complete_ghost_reincarnation(
         self, game: GameState, *, record_history: bool,
     ) -> dict[str, Any]:
-        from .rules import max_hp, max_mp
+        from ..rules import max_hp, max_mp
 
         player = game.player
         transition = perform_reincarnation(player)
@@ -1190,7 +1190,7 @@ class GhostSystemMixin:
         return data
 
     def _public_ghost_system(self, game: GameState) -> dict[str, Any]:
-        from .rules import raw_external_hp_bonus, raw_external_mp_bonus
+        from ..rules import raw_external_hp_bonus, raw_external_mp_bonus
 
         player = game.player
         if not has_ghost_core(player) or (not ghost_cultivation_config().get("enabled", False) and not is_possessed(player)):

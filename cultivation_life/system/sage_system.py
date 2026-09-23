@@ -6,10 +6,10 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import CONTENT_DOCUMENTS, TECHNIQUE_CATALOG
-from .models import GameState, HistoryRecord
-from .rules import REALMS, add_item, expected_combat_power, remove_item, stage_name
-from .runtime import decode_rng, encode_rng, now_iso
+from ..content_registry import CONTENT_DOCUMENTS, TECHNIQUE_CATALOG
+from ..models import GameState, HistoryRecord
+from ..rules import REALMS, add_item, expected_combat_power, remove_item, stage_name
+from ..runtime import decode_rng, encode_rng, now_iso
 
 
 def sage_config() -> dict[str, Any]:

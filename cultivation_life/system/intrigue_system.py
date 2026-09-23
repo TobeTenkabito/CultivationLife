@@ -5,15 +5,15 @@ import random
 import uuid
 from typing import Any
 
-from .content_registry import (
+from ..content_registry import (
     FACTION_SYSTEMS, PATH_NAMES, RACE_DEFINITIONS, REALMS, ROOT_DEFINITIONS,
     WORLD_SYSTEMS,
 )
-from .models import GameState, HistoryRecord, SectNpc, SectState
+from ..models import GameState, HistoryRecord, SectNpc, SectState
 from .npc_system import attitude_label
-from .rules import expected_combat_power
-from .runtime import decode_rng, encode_rng, now_iso
-from .world_state import race_pair
+from ..rules import expected_combat_power
+from ..runtime import decode_rng, encode_rng, now_iso
+from ..world_state import race_pair
 
 
 PLAYER_ID = "player"

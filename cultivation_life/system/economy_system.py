@@ -6,15 +6,15 @@ import random
 import re
 from typing import Any
 
-from .content_registry import (
+from ..content_registry import (
     GUIXU_EXCLUSIVE_ITEM_IDS, ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS,
     REALMS, TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES, WORLD_SYSTEMS,
 )
-from .models import GameState, HistoryRecord, Item, Player
-from .runtime import decode_rng, encode_rng, now_iso
+from ..models import GameState, HistoryRecord, Item, Player
+from ..runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age
-from .rules import (
+from ..rules import (
     QI_SOURCE_NAMES, acquire_technique, add_item, can_player_practice_technique,
     combat_requirement_display, max_hp, max_mp, remove_item,
 )

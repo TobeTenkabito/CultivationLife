@@ -14,7 +14,7 @@ from ..content_registry import (
     MONSTER_BLOODLINE_SETTINGS, MONSTER_SPECIES,
 )
 from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
-from ..npc_system import npc_breakthrough_chance, npc_combat_power, npc_team_combat_power
+from ..system.npc_system import npc_breakthrough_chance, npc_combat_power, npc_team_combat_power
 from ..rules import (
     add_item,
     can_practice_technique,
@@ -29,10 +29,10 @@ from ..rules import (
 from ..world_state import (
     RELATION_LABELS, race_pair, split_race_pair,
 )
-from ..monster_bloodline_system import (
+from ..system.monster_bloodline_system import (
     bloodline_content_available,
 )
-from ..concubine_system import gender_name
+from ..system.concubine_system import gender_name
 from .engine_constants import LEGACY_TRUE_DEMON_RACE_MAP
 
 

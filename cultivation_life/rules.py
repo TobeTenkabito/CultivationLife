@@ -12,14 +12,14 @@ from .content_registry import (
     WORLD_SYSTEMS,
 )
 from .models import Item, Player, RealmDef, Technique
-from .ghost_system import (
+from .system.ghost_system import (
     effective_intrinsic_hp, effective_intrinsic_mp, hp_carry_ratio,
     intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
     ghost_external_hp_bonus, ghost_external_mp_bonus,
     ghost_opportunity_multiplier,
 )
-from .possession_system import current_body_age
-from .transformation_system import (
+from .system.possession_system import current_body_age
+from .system.transformation_system import (
     ensure_transformation_state, equip_transformation_technique, transformation_technique_limits,
 )
 
@@ -410,7 +410,7 @@ def opportunity_required(player: Player) -> int:
 
 
 def raw_external_hp_bonus(player: Player) -> float:
-    from .crafting_system import crafted_artifact_bonuses
+    from .system.crafting_system import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
@@ -433,7 +433,7 @@ def max_hp(player: Player) -> int:
 
 
 def raw_external_mp_bonus(player: Player) -> float:
-    from .crafting_system import crafted_artifact_bonuses
+    from .system.crafting_system import crafted_artifact_bonuses
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
     if player.support_technique:
@@ -505,7 +505,7 @@ def max_mp(player: Player) -> int:
 
 
 def combat_power(player: Player) -> float:
-    from .crafting_system import crafted_artifact_bonuses
+    from .system.crafting_system import crafted_artifact_bonuses
     current = realm(player)
     hp_ratio = max(0.0, min(1.0, player.hp / max_hp(player)))
     mp_ratio = max(0.0, min(1.0, player.mp / max_mp(player)))
@@ -730,7 +730,7 @@ def opportunity_multiplier(
         player.technique.opportunity_bonus * technique_scale(player.technique)
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
     )
-    from .crafting_system import crafted_artifact_bonuses
+    from .system.crafting_system import crafted_artifact_bonuses
     item_bonus = (
         sum(item.opportunity_bonus * item.quantity for item in player.inventory)
         + player.natal_artifact_opportunity_bonus

@@ -17,14 +17,14 @@ from ..content_registry import (
     TECHNIQUE_ELEMENT_NAMES, TRANSFORMATION_CATALOG, WORLD_NPC_TEMPLATES, WORLD_SYSTEMS,
     STORY_COMBAT_SCENARIOS, CONTENT_DOCUMENTS, MONSTER_BLOODLINE_SETTINGS, MONSTER_SPECIES, ContentError,
 )
-from ..combat_system import BattleUnit, PlayerCombatSystem, stat_comparison
+from ..system.combat_system import BattleUnit, PlayerCombatSystem, stat_comparison
 from ..event_repository import EventRepository
-from ..economy_system import EconomySystemMixin
-from ..demonic_system import DemonicSystemMixin
+from ..system.economy_system import EconomySystemMixin
+from ..system.demonic_system import DemonicSystemMixin
 from ..map_runtime import MapTravelMixin
 from ..models import GameState, HistoryRecord, Player, SectNpc, SectState, Technique
-from ..map_system import MapCatalog
-from ..npc_system import attitude_label, npc_breakthrough_chance, npc_combat_power, npc_team_combat_power, party_combat_power
+from ..system.map_system import MapCatalog
+from ..system.npc_system import attitude_label, npc_breakthrough_chance, npc_combat_power, npc_team_combat_power, party_combat_power
 from ..rules import (
     add_item,
     assign_technique,
@@ -64,7 +64,7 @@ from ..rules import (
     merge_technique_copies,
     upgrade_known_technique,
 )
-from ..transformation_system import (
+from ..system.transformation_system import (
     absorption_gain, active_transformation_profile, ensure_transformation_state,
     form_purity, form_stat_progress, forms_are_incompatible, public_transformation_system,
     transformation_technique_limits,
@@ -79,30 +79,30 @@ from ..world_state import (
     RELATION_LABELS, choose_weighted_race, encounter_weight, push_fifo_cache,
     race_pair, relation_status, split_race_pair,
 )
-from ..war_system import WarSystemMixin
-from ..heavenly_court_system import HeavenlyCourtSystemMixin
-from ..natal_artifact_system import NatalArtifactSystemMixin
-from ..crafting_system import CraftingSystemMixin, crafted_artifact_bonuses, crafted_combat_effects
-from ..formation_system import (
+from ..system.war_system import WarSystemMixin
+from ..system.heavenly_court_system import HeavenlyCourtSystemMixin
+from ..system.natal_artifact_system import NatalArtifactSystemMixin
+from ..system.crafting_system import CraftingSystemMixin, crafted_artifact_bonuses, crafted_combat_effects
+from ..system.formation_system import (
     FormationSystemMixin, active_formation_profile, ensure_formation_state,
     formation_battle_experience_gain,
 )
-from ..monster_bloodline_system import (
+from ..system.monster_bloodline_system import (
     MonsterBloodlineSystemMixin, bloodline_content_available,
     ensure_monster_bloodline_state, initialize_monster_bloodline,
     public_monster_bloodline,
 )
 from ..monster_general_traits import grant_random_general_monster_trait
-from ..ghost_system import (
+from ..system.ghost_system import (
     GhostSystemMixin, ensure_ghost_cultivation_state, ghost_cultivation_active,
     grant_intrinsic_growth, grant_intrinsic_progression_if_new_highwater,
     grant_wangsheng, reincarnation_breakthrough_bonus,
 )
-from ..intrigue_system import IntrigueSystemMixin
-from ..sage_system import SageSystemMixin
-from ..concubine_system import ConcubineSystemMixin, gender_name
-from ..guixu_system import GuixuSystemMixin
-from ..possession_system import (
+from ..system.intrigue_system import IntrigueSystemMixin
+from ..system.sage_system import SageSystemMixin
+from ..system.concubine_system import ConcubineSystemMixin, gender_name
+from ..system.guixu_system import GuixuSystemMixin
+from ..system.possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
 from .engine_constants import LEGACY_TRUE_DEMON_RACE_MAP, OPS
