@@ -26,7 +26,14 @@
     {"id":"armor","name":"甲胄胎模","default_name":"玄罡甲","rule":{"name":"披坚执锐","description":"防护提高 8%。","combat_effect":{"player_stat_multipliers":{"guard":1.08}}}},
     {"id":"ring","name":"法环胎模","default_name":"周天环","rule":{"name":"周天自转","description":"续航提高 8%。","combat_effect":{"player_stat_multipliers":{"sustain":1.08}}}},
     {"id":"boat","name":"飞舟胎模","default_name":"渡虚舟","rule":{"name":"御风渡界","description":"身法提高 8%。","combat_effect":{"player_stat_multipliers":{"mobility":1.08}}}},
-    {"id":"seal","name":"法印胎模","default_name":"镇界印","rule":{"name":"一印镇法","description":"敌方防护降低 5%。","combat_effect":{"enemy_stat_multipliers":{"guard":0.95}}}}
+    {"id":"seal","name":"法印胎模","default_name":"镇界印","rule":{"name":"一印镇法","description":"敌方防护降低 5%。","combat_effect":{"enemy_stat_multipliers":{"guard":0.95}}}},
+    {"id":"bow","name":"弓器胎模","default_name":"落日弓","rule":{"name":"弦惊九霄","description":"身法与破法各提高 5%，适合承载远射、追星与锁敌一类器能。","combat_effect":{"player_stat_multipliers":{"mobility":1.05,"breach":1.05}}}},
+    {"id":"halberd","name":"戟器胎模","default_name":"修罗戟","rule":{"name":"横扫千军","description":"威能提高 7%，敌方防护降低 3%，适合承载重兵与战阵杀伐器能。","combat_effect":{"player_stat_multipliers":{"might":1.07},"enemy_stat_multipliers":{"guard":0.97}}}},
+    {"id":"staff","name":"棍器胎模","default_name":"镇岳棍","rule":{"name":"撼山架海","description":"威能与防护各提高 5%，适合承载镇压、架势与刚猛器能。","combat_effect":{"player_stat_multipliers":{"might":1.05,"guard":1.05}}}},
+    {"id":"firearm","name":"铳器胎模","default_name":"雷火铳","rule":{"name":"洞金裂甲","description":"破法提高 9%，敌方防护降低 3%，适合承载灵铳、神炮与机关火器。","combat_effect":{"player_stat_multipliers":{"breach":1.09},"enemy_stat_multipliers":{"guard":0.97}}}},
+    {"id":"orb","name":"宝珠胎模","default_name":"混元珠","rule":{"name":"珠藏周天","description":"神识与续航各提高 5%，适合承载宝珠、灵珠与内景洞天。","combat_effect":{"player_stat_multipliers":{"sense":1.05,"sustain":1.05}}}},
+    {"id":"needle","name":"飞针胎模","default_name":"无影针","rule":{"name":"无影穿神","description":"身法与神识各提高 5%，敌方防护降低 2%，适合承载飞针与细小暗器。","combat_effect":{"player_stat_multipliers":{"mobility":1.05,"sense":1.05},"enemy_stat_multipliers":{"guard":0.98}}}},
+    {"id":"other","name":"异形胎模","default_name":"无定奇兵","rule":{"name":"无定器相","description":"开炉时依材料与器机，从威能、防护、身法、神识、续航、破法中随机获得一条 8% 基础属性。","random_base_stats":["might","guard","mobility","sense","sustain","breach"],"random_multiplier":1.08}}
   ],
   "materials": [
     {"id":"human_cold_iron","name":"寒潭玄铁","world":"human","tier":1,"tags":["metal","yin"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":18,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.18,"max_hp":1.06},"description":"主材：器身坚锐，战力设计值提高18%。"},"secondary":{"special_stats":{"tribulation_reduction":0.006},"description":"辅材：寒意导流，渡劫减伤 +0.6%。"}}},

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import math
 import random
 import uuid
@@ -17,6 +18,11 @@ STAT_NAMES = {
     "opportunity_efficiency": "机缘效率", "body_training_efficiency": "炼体效率",
     "divine_sense_efficiency": "神识效率", "tribulation_reduction": "渡劫减伤",
     "breakthrough_bonus": "突破加成",
+}
+
+MOLD_COMBAT_STAT_NAMES = {
+    "might": "威能", "guard": "防护", "mobility": "身法",
+    "sense": "神识", "sustain": "续航", "breach": "破法",
 }
 
 
@@ -348,9 +354,40 @@ class CraftingSystemMixin:
             raise ValueError("这种材料不允许同时占用两个辅材位")
         return mold, selected
 
+    @staticmethod
+    def _resolve_mold_rule(
+        player: Player, mold: dict[str, Any], selected: list[tuple[str, dict[str, Any]]],
+    ) -> dict[str, Any]:
+        """Freeze the generic mold's one random base stat for this recipe.
+
+        Preview and forging may be called separately, so this cannot consume the
+        save RNG.  The next crafting sequence and the four concrete material
+        instances form a stable roll; changing any material legitimately rerolls
+        the unshaped mold.
+        """
+        resolved = copy.deepcopy(mold)
+        rule = resolved.get("rule", {})
+        candidates = list(map(str, rule.get("random_base_stats", [])))
+        if not candidates:
+            return resolved
+        key = ":".join([
+            player.name, str(player.crafting_sequence + 1),
+            *(str(material.get("id", "")) for _, material in selected),
+        ])
+        digest = hashlib.sha256(key.encode("utf-8")).digest()
+        stat = candidates[int.from_bytes(digest[:4], "big") % len(candidates)]
+        multiplier = float(rule.get("random_multiplier", 1.08))
+        stat_name = MOLD_COMBAT_STAT_NAMES.get(stat, stat)
+        rule["name"] = f"无定器相·{stat_name}"
+        rule["description"] = f"此炉器机定形为{stat_name}，战斗开始时{stat_name}提高 {(multiplier - 1):.0%}。"
+        rule["combat_effect"] = {"player_stat_multipliers": {stat: multiplier}}
+        rule["resolved_random_stat"] = stat
+        return resolved
+
     def _crafting_preview(self, player: Player, payload: dict[str, Any]) -> dict[str, Any]:
         rules = self._crafting_rules()
         mold, selected = self._resolve_crafting_selection(player, payload)
+        mold = self._resolve_mold_rule(player, mold, selected)
         budget = int(rules["budget_by_realm"][max(0, min(12, player.realm_index))])
         raw_allocations = payload.get("allocations", {}) if isinstance(payload.get("allocations"), dict) else {}
         allocations = {key: max(0, int(raw_allocations.get(key, 0) or 0)) for key in STAT_NAMES}

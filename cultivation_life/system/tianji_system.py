@@ -18,7 +18,7 @@ from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 3
+TIANJI_GENERATION_VERSION = 4
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
 TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
     "might": "威能", "guard": "防护", "mobility": "身法",
@@ -191,6 +191,42 @@ class TianjiSystemMixin:
             })
         return result
 
+    def _next_tianji_name(
+        self, rng: random.Random, theme: dict[str, Any], mold_id: str,
+        used_names: set[str], used_stems: set[str], used_prefixes: set[str], index: int,
+    ) -> tuple[str, str]:
+        config = self._tianji_config()
+        noun = str(config["mold_nouns"][mold_id])
+        patterns = list(config.get("name_patterns", ["{word}{style}{noun}"]))
+        linkers = list(config.get("name_linkers", ["御"]))
+        suffixes = list(config.get("name_suffixes", ["玄"]))
+        word = str(theme["words"][0])
+        style = str(config["styles"][0])
+        element = str(theme["elements"][0])
+        for _ in range(600):
+            word = str(rng.choice(theme["words"]))
+            style = str(rng.choice(config["styles"]))
+            element = str(rng.choice(theme["elements"]))
+            name = str(rng.choice(patterns)).format(
+                word=word, style=style, element=element, noun=noun,
+                linker=rng.choice(linkers), suffix=rng.choice(suffixes),
+            )
+            stem = name[:-len(noun)] if noun and name.endswith(noun) else name
+            prefix = name[:4]
+            if name not in used_names and stem not in used_stems and prefix not in used_prefixes:
+                used_names.add(name)
+                used_stems.add(stem)
+                used_prefixes.add(prefix)
+                return name, style
+        # The expanded pools make this practically unreachable.  Keep a
+        # deterministic final form so even hostile modded pools cannot collide.
+        stem = f"{word}{element}{style}{index + 1}号"
+        name = f"{stem}{noun}"
+        used_names.add(name)
+        used_stems.add(stem)
+        used_prefixes.add(name[:4])
+        return name, style
+
     @staticmethod
     def _tianji_rule_effects(rng: random.Random, theme: dict[str, Any], power: int) -> list[dict[str, Any]]:
         preferred = [row for row in PRIMITIVES if row.get("stat") in theme.get("stats", {})]
@@ -267,6 +303,8 @@ class TianjiSystemMixin:
         preset_rows = list(config.get("preset_artifacts", []))
         random_count = int(config["artifact_count"]) - len(preset_rows)
         used_names = {str(row["name"]) for row in preset_rows}
+        used_stems: set[str] = set()
+        used_prefixes = {str(row["name"])[:4] for row in preset_rows}
 
         def recipe_for(theme_id: str) -> list[str]:
             chosen: list[dict[str, Any]] = []
@@ -287,17 +325,9 @@ class TianjiSystemMixin:
             # list is sorted only after every raw value has been generated.
             power = round(math.exp(artifact_rng.uniform(math.log(63_000_000), math.log(34_000_000_000))))
             noun = config["mold_nouns"][mold_id]
-            for _ in range(30):
-                word = name_rng.choice(theme["words"])
-                style = name_rng.choice(config["styles"])
-                name = f"{word}{style}{noun}"
-                if name not in used_names:
-                    break
-            else:
-                name = f"{word}{theme['elements'][index % len(theme['elements'])]}{style}{noun}"
-            if name in used_names:
-                name = f"{name}·{index + 1}"
-            used_names.add(name)
+            name, style = self._next_tianji_name(
+                name_rng, theme, mold_id, used_names, used_stems, used_prefixes, index,
+            )
             artifacts.append({
                 "id": f"tianji-{index + 1:03d}", "name": name, "is_preset": False,
                 "base_combat_power": power, "mold_id": mold_id,
@@ -334,6 +364,38 @@ class TianjiSystemMixin:
                 weights.append(.08 + math.exp(-abs(tier - desired_tier) * 1.25))
             artifact["origin_world"] = world_rng.choices(worlds, weights=weights, k=1)[0]
         return artifacts
+
+    def _refresh_tianji_artifact_names(self, game: GameState) -> None:
+        """Migrate only generated names while preserving every frozen rule and recipe."""
+        state = game.tianji_state
+        config = self._tianji_config()
+        themes = {str(row["id"]): row for row in config["themes"]}
+        preset_ids = {str(row["id"]) for row in config.get("preset_artifacts", [])}
+        used_names = {
+            str(row["name"]) for row in state.get("artifacts", [])
+            if str(row.get("id")) in preset_ids
+        }
+        used_stems: set[str] = set()
+        used_prefixes = {name[:4] for name in used_names}
+        rng = _stable_rng(game.seed, "names")
+        renamed: dict[str, str] = {}
+        generated = sorted(
+            (row for row in state.get("artifacts", []) if str(row.get("id")) not in preset_ids),
+            key=lambda row: str(row.get("id", "")),
+        )
+        for index, artifact in enumerate(generated):
+            theme = themes[str(artifact["theme_id"])]
+            name, style = self._next_tianji_name(
+                rng, theme, str(artifact["mold_id"]), used_names, used_stems, used_prefixes, index,
+            )
+            renamed[str(artifact["id"])] = name
+            artifact["name"] = name
+            noun = config["mold_nouns"][str(artifact["mold_id"])]
+            artifact["description"] = f"以{theme['name']}为核、{style}为势的{noun}形神机，器理与本存档天地法则相扣。"
+        for entry in state.get("discovery_log", []):
+            artifact_id = str(entry.get("artifact_id", ""))
+            if artifact_id in renamed:
+                entry["name"] = renamed[artifact_id]
 
     def _tianji_persistent_npcs(self, game: GameState, world: str) -> list[Any]:
         values: list[Any] = [
@@ -394,21 +456,22 @@ class TianjiSystemMixin:
                 },
                 "holders": {}, "player_artifacts": [], "activated_artifact_id": None,
                 "discovered_material_ids": [], "discovery_log": [],
-                "study_cooldowns": {}, "holder_worlds_initialized": [],
+                "holder_worlds_initialized": [],
             })
             changed = True
         # Never regenerate an older version. Missing additive keys are safe to
         # backfill without touching frozen artifact or recipe definitions.
         defaults = {
             "holders": {}, "player_artifacts": [], "activated_artifact_id": None,
-            "discovered_material_ids": [], "discovery_log": [], "study_cooldowns": {},
+            "discovered_material_ids": [], "discovery_log": [],
             "holder_worlds_initialized": [],
         }
         for key, default in defaults.items():
             if key not in state:
                 state[key] = copy.deepcopy(default)
                 changed = True
-        if int(state.get("generation_version", 1)) < TIANJI_GENERATION_VERSION:
+        old_generation = int(state.get("generation_version", 1))
+        if old_generation < 3:
             themes = {str(row["id"]): row for row in self._tianji_config()["themes"]}
             for artifact in state.get("artifacts", []):
                 theme = themes.get(str(artifact.get("theme_id")))
@@ -418,6 +481,11 @@ class TianjiSystemMixin:
                     _stable_rng(game.seed, f"rules:{artifact['id']}"),
                     theme, int(artifact.get("base_combat_power", 1)),
                 )
+            changed = True
+        if old_generation < 4:
+            self._refresh_tianji_artifact_names(game)
+            changed = True
+        if old_generation < TIANJI_GENERATION_VERSION:
             state["generation_version"] = TIANJI_GENERATION_VERSION
             changed = True
         for artifact_id, holder in list(state["holders"].items()):
@@ -470,6 +538,100 @@ class TianjiSystemMixin:
         })
         state["discovery_log"] = state["discovery_log"][-200:]
         return True
+
+    def _tianji_npc_conversation_clue(
+        self, game: GameState, npc_id: str, rng: random.Random,
+    ) -> str:
+        """Occasionally turn an actual NPC conversation into persistent intel."""
+        if not tianji_content_available():
+            return ""
+        self._ensure_tianji_state(game)
+        state = game.tianji_state
+        held = next((
+            (artifact_id, holder) for artifact_id, holder in state.get("holders", {}).items()
+            if str(holder.get("npc_id", "")) == str(npc_id)
+        ), None)
+        artifact: dict[str, Any] | None = None
+        chance = .12
+        if held:
+            artifact = self._tianji_artifact(state, held[0])
+            chance = .72
+        else:
+            candidates = [
+                row for row in state.get("artifacts", [])
+                if int(state["knowledge"].get(row["id"], 0)) < 3
+                and row.get("origin_world") == game.player.world
+            ]
+            if candidates:
+                artifact = rng.choice(candidates)
+        if not artifact or rng.random() >= chance:
+            return ""
+        old = int(state["knowledge"].get(artifact["id"], 0))
+        target = min(3, old + 1)
+        if target <= old or not self._tianji_reveal(
+            game, str(artifact["id"]), target, f"与{npc_id}交谈所得口述线索",
+        ):
+            return ""
+        return f" 对方谈及一则不肯写入玉简的秘闻，你对【{artifact['name']}】的情报提升至 Lv{target}。"
+
+    def _maybe_tianji_intelligence_event(
+        self, game: GameState, rng: random.Random,
+    ) -> str | None:
+        """Resolve a rare, non-clickable clue event after a real time action."""
+        if not tianji_content_available():
+            return None
+        self._ensure_tianji_state(game)
+        settings = self._tianji_config().get("intelligence_events", {})
+        if rng.random() >= float(settings.get("chance_per_action_unit", .018)):
+            return None
+        state = game.tianji_state
+        realm = game.player.realm_index
+        max_level = 5 if realm >= int(settings.get("minimum_realm_for_level_5", 8)) else 4
+        if realm < int(settings.get("minimum_realm_for_level_4", 6)):
+            max_level = 3
+        partial = [
+            row for row in state.get("artifacts", [])
+            if 0 < int(state["knowledge"].get(row["id"], 0)) < max_level
+        ]
+        unknown = [
+            row for row in state.get("artifacts", [])
+            if int(state["knowledge"].get(row["id"], 0)) == 0
+        ]
+        use_partial = bool(partial) and (
+            not unknown or rng.random() < float(settings.get("partial_chain_chance", .68))
+        )
+        candidates = partial if use_partial else unknown
+        if not candidates:
+            return None
+        weights = []
+        for artifact in candidates:
+            local = 5.0 if artifact.get("origin_world") == game.player.world else 1.0
+            rank = int(artifact.get("rank", 100))
+            secrecy = .28 if rank <= 10 else .55 if rank <= 30 else 1.0
+            current = int(state["knowledge"].get(artifact["id"], 0))
+            depth = (1.0, 1.0, .48, .16, .035)[min(4, current)]
+            weights.append(local * secrecy * depth)
+        artifact = rng.choices(candidates, weights=weights, k=1)[0]
+        old = int(state["knowledge"].get(artifact["id"], 0))
+        new = min(max_level, old + 1)
+        event_sources = {
+            1: ("残卷露名", "你在一卷残破游记的夹层里发现了器名与模糊形制。"),
+            2: ("斗痕辨器", "一处古战场残留的器痕，与坊间密谈相互印证。"),
+            3: ("器纹拓影", "流散黑市的器纹拓片补全了关键材料方向。"),
+            4: ("真方残页", "一页被多重禁制封存的古方，显出了完整材料次序。"),
+            5: ("天机落点", "跨界行商与古阵星图的数处记录，终于指向同一条踪迹。"),
+        }
+        title, body = event_sources[new]
+        if not self._tianji_reveal(game, str(artifact["id"]), new, f"随机事件：{title}"):
+            return None
+        summary = f"{body}【{artifact['name']}】情报提升至 Lv{new}。"
+        game.history.append(HistoryRecord(
+            "SYS_TIANJI_INTELLIGENCE", 1, game.player.age, title,
+            str(artifact["id"]), f"knowledge_lv{new}", summary,
+            {"artifact_id": artifact["id"], "from": old, "to": new},
+            ["system", "tianji", "intelligence", "random_event"],
+        ))
+        return f"{game.player.age}岁：{summary}"
 
     @staticmethod
     def _tianji_public_effect(effect: dict[str, Any]) -> dict[str, Any]:
@@ -715,24 +877,7 @@ class TianjiSystemMixin:
         game = self._load(game_id)
         self._ensure_tianji_state(game)
         artifact = self._tianji_artifact(game.tianji_state, artifact_id)
-        if action == "study":
-            old = int(game.tianji_state["knowledge"].get(artifact_id, 0))
-            if old >= 5:
-                raise ValueError("这件神机的情报已经完全查明")
-            last = int(game.tianji_state["study_cooldowns"].get(artifact_id, -9999))
-            if game.player.age - last < 5:
-                raise ValueError(f"同一件神机每五年只能深入推演一次，还需等待 {5 - (game.player.age - last)} 年")
-            if old == 3 and game.player.realm_index < 8:
-                raise ValueError("破解完整真方至少需要大乘层次的神识与器道承载力")
-            if old == 4 and game.player.realm_index < 9:
-                raise ValueError("追索持有者需要仙境层次的神识")
-            costs = (0, 100, 2_000, 20_000, 500_000, 1_000_000)
-            cost = costs[old + 1]
-            if not remove_item(game.player, "spirit_stone", cost):
-                raise ValueError(f"推演下一层情报需要 {cost:,} 枚灵石")
-            game.tianji_state["study_cooldowns"][artifact_id] = game.player.age
-            self._tianji_reveal(game, artifact_id, old + 1, "器道推演")
-        elif action in {"activate", "deactivate"}:
+        if action in {"activate", "deactivate"}:
             owned_rows = [
                 row for row in game.player.crafted_artifacts
                 if row.get("tianji", {}).get("definition_id") == artifact_id

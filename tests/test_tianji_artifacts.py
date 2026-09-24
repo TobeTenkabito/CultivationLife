@@ -28,6 +28,7 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     assert len(a["artifacts"]) == 100
     assert len(a["materials"]) == 48
     assert len({row["name"] for row in a["artifacts"]}) == 100
+    assert len({row["name"][:4] for row in a["artifacts"]}) == 100
     assert len({row["name"] for row in a["materials"]}) == 48
     assert [row["base_combat_power"] for row in a["artifacts"]] == sorted(
         (row["base_combat_power"] for row in a["artifacts"]), reverse=True,
@@ -52,6 +53,35 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
                 and effect["rule"]["conditions"] == ["player_first"]
             )
     assert found_third_round_initiative
+
+
+def test_ranking_cannot_directly_purchase_or_study_intelligence(
+    tianji_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = tianji_game
+    game = engine.store.load(game_id)
+    artifact_id = game.tianji_state["artifacts"][0]["id"]
+    before = dict(game.tianji_state["knowledge"])
+    with pytest.raises(ValueError, match="未知神机操作"):
+        engine.tianji_action(game_id, "study", artifact_id)
+    assert engine.store.load(game_id).tianji_state["knowledge"] == before
+    source = (Path(__file__).parents[1] / "web" / "app.js").read_text(encoding="utf-8")
+    assert "推演情报" not in source
+    assert "参悟更深情报" not in source
+
+
+def test_low_probability_action_event_advances_one_intelligence_level(
+    tianji_game: tuple[GameEngine, str], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine, game_id = tianji_game
+    game = engine.store.load(game_id)
+    game.player.realm_index = 8
+    settings = engine._tianji_config()["intelligence_events"]
+    monkeypatch.setitem(settings, "chance_per_action_unit", 1.0)
+    news = engine._maybe_tianji_intelligence_event(game, random.Random(731))
+    assert news and "情报提升至 Lv1" in news
+    assert sum(game.tianji_state["knowledge"].values()) == 1
+    assert game.history[-1].event_id == "SYS_TIANJI_INTELLIGENCE"
 
 
 def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: tuple[GameEngine, str]) -> None:
@@ -83,6 +113,27 @@ def test_generated_definitions_freeze_and_public_redaction(tianji_game: tuple[Ga
     assert all(row["name"] == "???" and row["effects"] is None and row["recipe"] is None for row in public["artifacts"])
     engine.get_game(game_id)
     assert engine.store.load(game_id).tianji_state["artifacts"] == frozen
+
+
+def test_generation_three_save_renames_only_and_preserves_rules_and_recipes(
+    tianji_game: tuple[GameEngine, str],
+) -> None:
+    engine, game_id = tianji_game
+    game = engine.store.load(game_id)
+    game.tianji_state["generation_version"] = 3
+    frozen = {
+        row["id"]: (copy.deepcopy(row["effects"]), list(row["recipe"]))
+        for row in game.tianji_state["artifacts"]
+    }
+    for index, artifact in enumerate(game.tianji_state["artifacts"][:3]):
+        artifact["name"] = f"九幽镇世{index}"
+    assert engine._ensure_tianji_state(game)
+    assert game.tianji_state["generation_version"] == 4
+    assert len({row["name"][:4] for row in game.tianji_state["artifacts"]}) == 100
+    assert all(
+        (row["effects"], row["recipe"]) == frozen[row["id"]]
+        for row in game.tianji_state["artifacts"]
+    )
 
 
 def test_debug_reveal_all_sets_every_entry_to_level_five(tianji_game: tuple[GameEngine, str]) -> None:
