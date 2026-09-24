@@ -3,6 +3,7 @@
   "systems": {
     "tianji_artifacts": {
       "enabled": true,
+      "standard_combat_power_bonus": 0.20,
       "generation_version": 7,
       "artifact_count": 100,
       "material_count": 48,
@@ -15,6 +16,19 @@
         "hell": 0.60,
         "celestial": 0.90,
         "asura": 0.90
+      },
+      "world_combat_power_caps": {
+        "human": 99999,
+        "demon": 99999,
+        "spirit": 9999999,
+        "true_demon": 9999999,
+        "monster_realm": 9999999,
+        "phantom_underworld": 9999999,
+        "hell": 9999999,
+        "celestial": null,
+        "asura": null,
+        "nether": null,
+        "reincarnation": null
       },
       "mold_nouns": {
         "sword": "剑", "saber": "刀", "spear": "枪", "umbrella": "伞",

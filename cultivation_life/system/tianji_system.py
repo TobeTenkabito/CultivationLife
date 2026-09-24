@@ -16,7 +16,10 @@ from ..tianji_theme_rules import (
     compile_theme_rules, generate_gameplay_blueprint, gameplay_debug_row,
     sample_total_effect_count, validate_theme_consistency,
 )
-from .crafting_system import store_crafted_artifact
+from .crafting_system import (
+    effective_tianji_combat_power, store_crafted_artifact,
+    tianji_world_combat_power_cap,
+)
 
 
 TIANJI_GENERATION_VERSION = 8
@@ -732,6 +735,7 @@ class TianjiSystemMixin:
         self._ensure_tianji_state(game)
         state = game.tianji_state
         material_names = {row["id"]: row["name"] for row in state["materials"]}
+        world_combat_cap = tianji_world_combat_power_cap(game.player.world)
         rows = []
         for artifact in state["artifacts"]:
             level = int(state["knowledge"].get(artifact["id"], 0))
@@ -741,6 +745,10 @@ class TianjiSystemMixin:
                 "mold_id": artifact["mold_id"] if level >= 1 else None,
                 "mold_name": self._tianji_config()["mold_nouns"].get(artifact["mold_id"], "未知") if level >= 1 else "???",
                 "base_combat_power": artifact["base_combat_power"] if level >= 2 else None,
+                "current_world_combat_power": (
+                    round(effective_tianji_combat_power(artifact["base_combat_power"], game.player.world))
+                    if level >= 2 else None
+                ),
                 "effects": [self._tianji_public_effect(row) for row in artifact["effects"]] if level >= 2 else None,
                 "description": artifact["description"] if level >= 2 else "???",
                 "gameplay_tendency": (
@@ -784,6 +792,8 @@ class TianjiSystemMixin:
         ), None)
         return {
             "available": True, "name": "神机百变：巧夺天工", "generation_version": state["generation_version"],
+            "world_name":WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
+            "world_combat_power_cap":round(world_combat_cap) if world_combat_cap is not None else None,
             "artifacts": rows, "known_count": sum(int(row["knowledge_level"]) > 0 for row in rows),
             "targets": [{"id": row["id"], "rank": row["rank"], "name": row["name"], "knowledge_level": row["knowledge_level"]} for row in rows if row["knowledge_level"] >= 3],
             "activated_artifact_id": state.get("activated_artifact_id"),
@@ -900,6 +910,8 @@ class TianjiSystemMixin:
             replica_ratio = 1.0
         elif forge_kind != "replica":
             raise ValueError("未知的目标炼制类型")
+        raw_combat_power = round(int(artifact["base_combat_power"]) * replica_ratio)
+        combat_power_cap = tianji_world_combat_power_cap(game.player.world)
         return {
             "target": {"id": artifact["id"], "rank": artifact["rank"], "name": artifact["name"], "mold_id": artifact["mold_id"]},
             "selected_materials": [copy.deepcopy(row) | {"role": role} for role, row in selected],
@@ -907,7 +919,9 @@ class TianjiSystemMixin:
             "exact_slots": exact, "recipe_closeness": round(closeness, 4),
             "world_cap": world_cap, "quality_factor": round(quality_factor, 4),
             "replica_ratio": round(replica_ratio, 4), "forge_kind": forge_kind,
-            "combat_power": round(int(artifact["base_combat_power"]) * replica_ratio),
+            "combat_power": raw_combat_power,
+            "effective_combat_power":round(effective_tianji_combat_power(raw_combat_power, game.player.world)),
+            "combat_power_cap":round(combat_power_cap) if combat_power_cap is not None else None,
             "effects": [self._tianji_public_effect(row) for row in artifact["effects"]],
         }
 
@@ -1041,7 +1055,9 @@ class TianjiSystemMixin:
             artifact_id, holder = held
             artifact = self._tianji_artifact(game.tianji_state, artifact_id)
             ratio = float(holder["replica_ratio"])
-            bonus = int(artifact["base_combat_power"]) * ratio
+            bonus = effective_tianji_combat_power(
+                int(artifact["base_combat_power"]) * ratio, game.player.world,
+            )
             if not power_already_injected:
                 total_bonus += bonus
             combat, _ = _scaled_effects(artifact["effects"], ratio)
@@ -1083,7 +1099,9 @@ class TianjiSystemMixin:
                 continue
             artifact_id, holder = held
             artifact = self._tianji_artifact(game.tianji_state, artifact_id)
-            bonus = int(artifact["base_combat_power"]) * float(holder["replica_ratio"])
+            bonus = effective_tianji_combat_power(
+                int(artifact["base_combat_power"]) * float(holder["replica_ratio"]), game.player.world,
+            )
             total += bonus
             for member in target.get("members", []):
                 if str(member.get("npc_id", "")) == npc_id:

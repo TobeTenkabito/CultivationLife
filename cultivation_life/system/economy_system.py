@@ -1109,9 +1109,10 @@ class EconomySystemMixin:
         attendee.update({
             "interacted":True, "affinity":round(npc.affinity, 1), "private_trade_unlocked":True,
         })
+        clue = self._tianji_npc_conversation_clue(game, npc_id, rng)
         game.history.append(HistoryRecord(
             "SYS_AUCTION_NEGOTIATE", 1, game.player.age, "拍卖场交涉", npc_id, "negotiated",
-            f"你借拍卖间隙与{npc.name}交换消息，好感 +{change}。", {"affinity":change},
+            f"你借拍卖间隙与{npc.name}交换消息，好感 +{change}。{clue}", {"affinity":change},
             ["system", "auction", "relationship", f"world:{game.player.world}"],
         ))
         game.updated_at = now_iso()

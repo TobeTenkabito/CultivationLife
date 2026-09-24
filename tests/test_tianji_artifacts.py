@@ -8,7 +8,10 @@ import pytest
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.monster_bloodline_rules import validate_generated_trait
-from cultivation_life.system.crafting_system import active_crafted_artifacts
+from cultivation_life.system.crafting_system import (
+    active_crafted_artifacts, effective_artifact_combat_bonus,
+    tianji_world_combat_power_cap,
+)
 
 
 @pytest.fixture()
@@ -91,6 +94,22 @@ def test_low_probability_action_event_advances_one_intelligence_level(
     assert sum(game.tianji_state["knowledge"].values()) == 1
     assert game.history[-1].event_id == "SYS_TIANJI_INTELLIGENCE"
     assert game.history[-1].title in {row["title"] for row in settings["event_pool"]["1"]}
+
+
+def test_real_npc_conversation_can_reveal_intelligence(tianji_game: tuple[GameEngine, str]) -> None:
+    engine, game_id = tianji_game
+    game = engine.store.load(game_id)
+
+    class CertainClue(random.Random):
+        def random(self) -> float:
+            return 0.0
+
+        def choice(self, seq):
+            return seq[0]
+
+    text = engine._tianji_npc_conversation_clue(game, "passing-cultivator", CertainClue())
+    assert "情报提升至 Lv1" in text
+    assert sum(game.tianji_state["knowledge"].values()) == 1
 
 
 def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: tuple[GameEngine, str]) -> None:
@@ -181,11 +200,26 @@ def test_target_forging_true_body_and_single_active_slot(tianji_game: tuple[Game
     preview = engine.preview_tianji_forge(game_id, payload)
     assert preview["recipe_closeness"] == 1.0
     assert preview["replica_ratio"] == 1.0
+    assert preview["combat_power_cap"] == 9_999_999
+    assert preview["effective_combat_power"] == 9_999_999
     engine.forge_tianji_artifact(game_id, payload)
     engine.tianji_action(game_id, "activate", artifact["id"])
     game = engine.store.load(game_id)
     instance = next(row for row in game.player.crafted_artifacts if row.get("tianji", {}).get("definition_id") == artifact["id"])
     assert instance["actual_stats"]["combat_power"] == artifact["base_combat_power"]
+    assert effective_artifact_combat_bonus(game.player) == 9_999_999
+    game.player.world = "human"
+    assert effective_artifact_combat_bonus(game.player) == 99_999
+    game.player.world = "monster_realm"
+    assert tianji_world_combat_power_cap(game.player.world) == 9_999_999
+    assert effective_artifact_combat_bonus(game.player) == 9_999_999
+    game.player.world = "human"
+    instance["is_natal"] = True
+    game.player.natal_artifact_combat_bonus = 10**12
+    assert effective_artifact_combat_bonus(game.player) == 99_999
+    game.player.world = "celestial"
+    assert tianji_world_combat_power_cap(game.player.world) is None
+    assert effective_artifact_combat_bonus(game.player) == artifact["base_combat_power"] + 10**12
     assert game.tianji_state["true_body_states"][artifact["id"]]["status"] == "player"
     assert [row["id"] for row in active_crafted_artifacts(game.player) if row.get("tianji")] == [instance["id"]]
 
@@ -209,7 +243,11 @@ def test_npc_holder_combat_injection_and_drop(tianji_game: tuple[GameEngine, str
     artifact_id, holder = next(iter(game.tianji_state["holders"].items()))
     target = {"npc_id": holder["npc_id"], "target_power": 1_000.0, "members": []}
     engine._inject_tianji_npc_artifacts(game, target)
-    assert target["target_power"] > 1_000
+    artifact = engine._tianji_artifact(game.tianji_state, artifact_id)
+    expected_bonus = min(
+        int(artifact["base_combat_power"]) * float(holder["replica_ratio"]), 99_999,
+    )
+    assert target["target_power"] == 1_000 + expected_bonus
     assert game.tianji_state["knowledge"][artifact_id] >= 2
     text = engine._tianji_handle_npc_kill(game, holder["npc_id"])
     assert "天工神机" in text

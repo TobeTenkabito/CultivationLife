@@ -2,6 +2,7 @@ import math
 import random
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from cultivation_life.content_registry import MARKET_GOODS
@@ -135,7 +136,13 @@ class AuctionUpdateTests(unittest.TestCase):
         attendee = game.auction_state["attendees"][0]
         before_affinity = attendee["affinity"]
         self.engine.store.save(game)
-        shown = self.engine.negotiate_at_auction(made["id"], attendee["id"])
+        with patch.object(
+            self.engine, "_tianji_npc_conversation_clue",
+            return_value=" 对方提及神机秘闻，情报提升至 Lv1。",
+        ) as clue:
+            shown = self.engine.negotiate_at_auction(made["id"], attendee["id"])
+        clue.assert_called_once()
+        self.assertTrue(any("情报提升至 Lv1" in row["summary"] for row in shown["history"]))
         public_attendee = shown["auction_system"]["attendees"][0]
         self.assertTrue(public_attendee["private_trade_unlocked"])
         self.assertGreaterEqual(public_attendee["affinity"] - before_affinity, 8)

@@ -602,7 +602,7 @@ function renderTianji(system) {
   panel?.classList.toggle('hidden', !system.available); dock?.classList.toggle('hidden', !system.available);
   $('#tianji-debug-lv5')?.classList.toggle('hidden', configData?.debug !== true || !system.available);
   if (!system.available) { window.UtilityPanels?.close('tianji'); return; }
-  $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version}`;
+  $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version} · ${system.world_name || '当前界面'}单件战力${system.world_combat_power_cap == null ? '完全解放' : `上限 ${number(system.world_combat_power_cap)}`}`;
   const root = $('#tianji-ranking'); root.innerHTML = '';
   (system.artifacts || []).forEach(artifact => {
     const row = document.createElement('details'); row.className = `tianji-rank-row knowledge-${artifact.knowledge_level}`;
@@ -615,6 +615,7 @@ function renderTianji(system) {
     const lines = [
       `胎模：${artifact.mold_name || '???'}`,
       `基础战力：${artifact.base_combat_power == null ? '???' : number(artifact.base_combat_power)}`,
+      `当前界面战力：${artifact.current_world_combat_power == null ? '???' : number(artifact.current_world_combat_power)}`,
       `来源世界：${artifact.origin_world_name || '???'}`,
       `器述：${artifact.description || '???'}`,
     ];
@@ -726,7 +727,7 @@ async function previewCrafting() {
       const title=document.createElement('h4'); title.textContent=`目标：第 ${preview.target.rank} 位 · ${preview.target.name}`;
       const match=document.createElement('p'); match.textContent=`四材接近度 ${percent(preview.recipe_closeness)} · 本界上限 ${percent(preview.world_cap)} · 最终发挥 ${percent(preview.replica_ratio)}`;
       const slots=document.createElement('p'); slots.className='muted'; slots.textContent=`主材 / 辅材甲 / 辅材乙 / 淬火：${preview.slot_similarities.map(value=>percent(value)).join(' · ')}`;
-      const power=document.createElement('p'); power.textContent=`成品基础战力：${number(preview.combat_power)}。目标炼制不会继承材料的普通炼器 Buff。`;
+      const power=document.createElement('p'); power.textContent=`成品原始战力：${number(preview.combat_power)}；当前界面${preview.combat_power_cap == null ? '完全解放' : `单件上限 ${number(preview.combat_power_cap)}`}，实际生效 ${number(preview.effective_combat_power)}。目标炼制不会继承材料的普通炼器 Buff。`;
       const forge=document.createElement('button'); forge.className='primary'; forge.textContent=preview.forge_kind==='true_body'?'确认炼制本体':'确认炼制仿品';
       forge.onclick=()=>openGameConfirm({title:'确认神机目标炼制',body:`将永久消耗四份材料，炼成发挥度 ${percent(preview.replica_ratio)} 的${preview.forge_kind==='true_body'?'唯一真体':'仿品'}。`,confirmText:'开炉',onConfirm:()=>mutate(`/api/games/${game.id}/tianji-forge`,craftingPayload())});
       root.append(title,match,slots,power,forge); return;
@@ -1017,6 +1018,7 @@ function renderNatalArtifact(system) {
   const refineAll=document.createElement('button');refineAll.className='natal-action natal-refine-all';refineAll.textContent=`一键温养 ×${number(system.refine_all_count||0)} · ${number(system.refine_all_cost||0)}`;refineAll.dataset.natalUnavailable=system.can_refine_all?'0':'1';refineAll.title='连续消耗灵石温养，直到当前灵石不足；本命法宝等级没有上限';refineAll.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'refine_all'});refineTools.append(refine,refineAll);head.append(identity,refineTools);root.appendChild(head);
   const progress=document.createElement('div');progress.className='natal-level-progress';const fill=document.createElement('i');fill.style.width=`${Math.min(100,Number(system.experience)/Math.max(1,Number(system.experience_required))*100)}%`;const label=document.createElement('span');label.textContent=`祭炼经验 ${system.experience}/${system.experience_required}`;progress.append(fill,label);root.appendChild(progress);
   const bonuses=document.createElement('div');bonuses.className='natal-bonuses';[['战斗力',number(system.bonuses.combat_bonus)],['下一级战力增益',`+${number(system.bonuses.next_level_combat_gain)}`],['最大 HP',number(system.bonuses.hp_bonus)],['最大 MP',number(system.bonuses.mp_bonus)],['机缘效率',`+${Math.round(system.bonuses.opportunity_bonus*100)}%`],['雷劫减免',`+${Math.round(system.bonuses.tribulation_reduction*100)}%`]].forEach(([name,value])=>{const row=document.createElement('span'),small=document.createElement('small'),strong=document.createElement('b');small.textContent=name;strong.textContent=value;row.append(small,strong);bonuses.appendChild(row);});root.appendChild(bonuses);
+  if(system.is_tianji){const note=document.createElement('p');note.className='muted natal-tianji-cap';note.textContent=`神机原始战力（含温养与镶嵌）${number(system.bonuses.raw_combat_bonus)}；${system.bonuses.combat_cap==null?'当前界面完全解放':`当前界面单件上限 ${number(system.bonuses.combat_cap)}`}，实际计入 ${number(system.bonuses.combat_bonus)}。继续温养不会绕过界面上限，其他属性与器理 Buff 不受压制。`;root.appendChild(note);}
   const visual=document.createElement('div');visual.className='natal-artifact-visual';
   const swordShadow=document.createElement('img');swordShadow.className='natal-sword-shadow';swordShadow.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';swordShadow.alt='';swordShadow.setAttribute('aria-hidden','true');
   const sword=document.createElement('img');sword.className='natal-sword natal-sword-body';sword.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';sword.alt='';sword.setAttribute('aria-hidden','true');
@@ -2789,6 +2791,10 @@ function renderInventory(items) {
     const text = document.createElement('span');
     const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact || artifact?.is_natal ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
     const effect = document.createElement('small'); effect.textContent = item.description || '可用于特定事件。';
+    if (artifact?.tianji) {
+      const limit = artifact.world_combat_power_cap == null ? '当前界面完全解放' : `当前界面单件上限 ${number(artifact.world_combat_power_cap)}`;
+      effect.textContent += ` 原始战力 ${number(artifact.raw_combat_power)}；${limit}，实际生效 ${number(artifact.effective_combat_power)}。Buff 与其他属性不受此战力上限影响。`;
+    }
     text.append(name, effect); row.appendChild(text);
     if (item.technique_id) {
       const known = (game?.player?.known_techniques || []).find(art => art.id === item.technique_id);

@@ -26,6 +26,38 @@ MOLD_COMBAT_STAT_NAMES = {
 }
 
 
+def tianji_world_combat_power_cap(world: str) -> float | None:
+    """Return the hard per-artifact combat-power cap of the current world.
+
+    This is deliberately separate from forging/replica caps.  A replica keeps
+    its true inherited power in the save, while only the amount permitted by
+    the current world's laws contributes to combat.
+    """
+    config = WORLD_SYSTEMS.get("tianji_artifacts", {})
+    caps = config.get("world_combat_power_caps", {}) if isinstance(config, dict) else {}
+    world_id = str(world)
+    if isinstance(caps, dict) and world_id in caps:
+        raw = caps[world_id]
+        # An explicit null means this third-tier world fully releases the
+        # artifact.  It must not be confused with an unknown future world.
+        if raw is None:
+            return None
+    else:
+        profile = WORLD_SYSTEMS.get("world_profiles", {}).get(world_id, {})
+        tier = max(1, int(profile.get("tier", 1))) if isinstance(profile, dict) else 1
+        if tier >= 3:
+            return None
+        raw = 9_999_999 if tier == 2 else 99_999
+    value = float(raw)
+    return value if value > 0 else None
+
+
+def effective_tianji_combat_power(raw_power: float, world: str) -> float:
+    raw = max(0.0, float(raw_power))
+    cap = tianji_world_combat_power_cap(world)
+    return min(raw, cap) if cap is not None else raw
+
+
 def crafting_config() -> dict[str, Any]:
     return CONTENT_DOCUMENTS.get("crafting.json", {})
 
@@ -124,6 +156,34 @@ def crafted_artifact_bonuses(player: Player) -> dict[str, float]:
     # 炼器法宝的突破属性永远只取当前生效法宝里的最高值，禁止多件叠加。
     totals["breakthrough_bonus"] = max(breakthrough_values, default=0.0)
     return totals
+
+
+def effective_artifact_combat_bonus(player: Player) -> float:
+    """Resolve crafted and natal combat power after per-Tianji world caps.
+
+    Every active Tianji is capped independently.  If it is also the natal
+    artifact, all refinement, socket and future natal combat growth is folded
+    into that same capped contribution so no secondary progression path can
+    bypass the world's hard ceiling.  Non-combat stats and combat effects are
+    intentionally untouched.
+    """
+    active = active_crafted_artifacts(player)
+    natal_tianji = next(
+        (row for row in player.crafted_artifacts if row.get("is_natal") and row.get("tianji")),
+        None,
+    )
+    total = 0.0
+    for artifact in active:
+        raw = max(0.0, float(artifact.get("actual_stats", {}).get("combat_power", 0.0)))
+        if artifact.get("tianji"):
+            if artifact.get("is_natal"):
+                raw += max(0.0, float(player.natal_artifact_combat_bonus))
+            total += effective_tianji_combat_power(raw, player.world)
+        else:
+            total += raw
+    if natal_tianji is None:
+        total += max(0.0, float(player.natal_artifact_combat_bonus))
+    return total
 
 
 def crafted_combat_effects(player: Player) -> list[dict[str, Any]]:
@@ -664,16 +724,30 @@ class CraftingSystemMixin:
         player = game.player
         rules = self._crafting_rules()
         candidates = self._crafting_material_candidates(player)
+        active_ids = {str(active.get("id")) for active in active_crafted_artifacts(player)}
+        world_combat_cap = tianji_world_combat_power_cap(player.world)
+        artifacts = []
+        for row in player.crafted_artifacts:
+            if not any(item.crafted_artifact_id == str(row.get("id")) and item.quantity > 0 for item in player.inventory):
+                continue
+            public = copy.deepcopy(row)
+            public["equipped"] = str(row.get("id")) in active_ids
+            if row.get("tianji"):
+                raw_power = max(0.0, float(row.get("actual_stats", {}).get("combat_power", 0.0)))
+                if row.get("is_natal"):
+                    raw_power += max(0.0, float(player.natal_artifact_combat_bonus))
+                public["raw_combat_power"] = round(raw_power, 1)
+                public["effective_combat_power"] = round(
+                    effective_tianji_combat_power(raw_power, player.world), 1,
+                )
+                public["world_combat_power_cap"] = (
+                    round(world_combat_cap) if world_combat_cap is not None else None
+                )
+            artifacts.append(public)
         return {
             "visible": bool(crafting_config()) and player.realm_index >= int(rules.get("minimum_realm", 1)),
             "molds": list(copy.deepcopy(self._crafting_molds()).values()),
-            "materials": candidates, "artifacts":[
-                copy.deepcopy(row) | {"equipped": str(row.get("id")) in {
-                    str(active.get("id")) for active in active_crafted_artifacts(player)
-                }}
-                for row in player.crafted_artifacts
-                if any(item.crafted_artifact_id == str(row.get("id")) and item.quantity > 0 for item in player.inventory)
-            ],
+            "materials": candidates, "artifacts":artifacts,
             "blueprints": copy.deepcopy(player.crafting_blueprints),
             "active_count": len(active_crafted_artifacts(player)),
             "budget": int(rules.get("budget_by_realm", [40] * 13)[max(0, min(12, player.realm_index))]),
