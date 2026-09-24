@@ -162,9 +162,10 @@ def _allowed_condition_families(effect: dict[str, Any]) -> frozenset[str]:
         frozenset(definition["family"] for definition in BLOODLINE_RULE_CONDITIONS.values()),
     )
 
-MAX_RAW_POWER: Final = 13.0
-MAX_EXPECTED_POWER: Final = 8.25
-MAX_COLLECTION_EXPECTED_POWER: Final = 96.0
+MAX_EXPLICIT_CONDITIONS: Final = 4
+MAX_RAW_POWER: Final = 52.0
+MAX_EXPECTED_POWER: Final = 15.0
+MAX_COLLECTION_EXPECTED_POWER: Final = 144.0
 MAX_TRAITS: Final = 16
 
 
@@ -232,6 +233,59 @@ def _scheduled(rule: dict[str, Any], round_no: int, context: dict[str, Any]) -> 
     }.get(schedule_id, False)
 
 
+def _condition_strength_multiplier(rule: dict[str, Any]) -> int:
+    """Reward each independent, substantive restriction with one base effect."""
+    restrictive = {
+        str(condition_id) for condition_id in rule.get("conditions", [])
+        if str(condition_id) != "always"
+    }
+    return max(1, len(restrictive))
+
+
+def _effective_effect(rule: dict[str, Any], *, scale: float = 1.0) -> dict[str, Any]:
+    effect = dict(BLOODLINE_RULE_EFFECTS[str(rule["effect"])])
+    condition_multiplier = _condition_strength_multiplier(rule)
+    applied_scale = max(0.0, min(1.20, float(scale)))
+    kind = str(effect["kind"])
+    if kind == "damage_cap":
+        # A lower loss ceiling is stronger. Conditional variants therefore
+        # divide the ceiling instead of multiplying it in the wrong direction.
+        full_strength_cap = float(effect["value"]) / condition_multiplier
+        effect["value"] = 1.0 - (1.0 - full_strength_cap) * applied_scale
+    else:
+        effect["value"] = float(effect["value"]) * condition_multiplier * applied_scale
+    if "cap" in effect:
+        effect["cap"] = float(effect["cap"]) * condition_multiplier * applied_scale
+    effect["condition_multiplier"] = condition_multiplier
+    return effect
+
+
+def _effect_description(rule: dict[str, Any]) -> str:
+    effect = _effective_effect(rule)
+    kind, target = str(effect["kind"]), str(effect["target"])
+    value = float(effect["value"])
+    if kind == "stat_multiplier":
+        direction = "提高" if target == "player" else "降低"
+        owner = "自身" if target == "player" else "敌方"
+        return f"本轮{owner}{STAT_NAMES[str(effect['stat'])]}{direction}{value:.0%}"
+    if kind == "damage_multiplier":
+        return (
+            f"本轮造成的态势损耗提高{value:.0%}"
+            if target == "enemy" else f"本轮受到的态势损耗降低{value:.0%}"
+        )
+    if kind == "damage_cap":
+        return f"使本轮战斗态势损失不超过{value:.0%}"
+    if kind == "reclaim_loss":
+        return f"回收本轮态势损失的{value:.0%}，每轮最多恢复{float(effect['cap']):.0%}"
+    if kind == "restore_state":
+        return f"恢复{value:.0%}最大战斗态势"
+    if kind == "restore_mp":
+        return f"恢复{value:.0%}最大法力"
+    if kind == "modify_morale":
+        return f"恢复{value:g}点己方战意" if target == "player" else f"额外削弱敌方{value:g}点战意"
+    return str(effect["description"])
+
+
 def describe_generated_trait(rule: dict[str, Any]) -> str:
     schedule = BLOODLINE_RULE_SCHEDULES[str(rule["schedule"])]["name"]
     trigger = BLOODLINE_RULE_TRIGGERS[str(rule["trigger"])]["name"]
@@ -239,13 +293,12 @@ def describe_generated_trait(rule: dict[str, Any]) -> str:
     condition_text = ""
     if condition_ids != ["always"]:
         condition_text = "若" + "，且".join(BLOODLINE_RULE_CONDITIONS[item]["name"] for item in condition_ids) + "，"
-    effect = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
-    return f"{schedule}{trigger}，{condition_text}{effect['description']}。"
+    return f"{schedule}{trigger}，{condition_text}{_effect_description(rule)}。"
 
 
 def _power(rule: dict[str, Any]) -> tuple[float, float]:
     effect = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
-    raw = float(effect["power"])
+    raw = float(effect["power"]) * _condition_strength_multiplier(rule)
     uptime = float(BLOODLINE_RULE_SCHEDULES[str(rule["schedule"])]["uptime"])
     condition_uptime = 1.0
     for condition_id in rule.get("conditions", []):
@@ -275,8 +328,8 @@ def validate_generated_trait(rule: Any) -> list[str]:
     if effect_id not in BLOODLINE_RULE_EFFECTS:
         reasons.append("未知效果")
     raw_conditions = rule.get("conditions")
-    if not isinstance(raw_conditions, list) or not 1 <= len(raw_conditions) <= 2:
-        reasons.append("条件数量必须为一至两个")
+    if not isinstance(raw_conditions, list) or not 1 <= len(raw_conditions) <= MAX_EXPLICIT_CONDITIONS:
+        reasons.append(f"条件数量必须为一至{MAX_EXPLICIT_CONDITIONS}个")
         condition_ids: list[str] = []
     else:
         condition_ids = list(map(str, raw_conditions))
@@ -319,14 +372,9 @@ def validate_generated_trait(rule: Any) -> list[str]:
     expected_name = f"{SPECIES_NAMES[species_id]}·{effect['name']}"
     if rule.get("name") and str(rule["name"]) != expected_name:
         reasons.append("特质名称与规则内容不一致")
-    if rule.get("description") and str(rule["description"]) != describe_generated_trait(rule):
-        reasons.append("特质描述与规则内容不一致")
-    saved_power = rule.get("power")
-    if isinstance(saved_power, dict) and (
-        abs(float(saved_power.get("raw", -1)) - raw_power) > 1e-9
-        or abs(float(saved_power.get("expected", -1)) - expected_power) > 1e-9
-    ):
-        reasons.append("特质强度快照与规则内容不一致")
+    # Description and power are derived presentation snapshots. Older saves
+    # retain their frozen rule structure and receive current balance math at
+    # runtime instead of becoming invalid because a displayed value changed.
     return reasons
 
 
@@ -418,9 +466,8 @@ def evaluate_generated_traits(
             continue
         if not all(_condition_met(str(item), context) for item in rule["conditions"]):
             continue
-        effect = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
-        scale = max(0.0, min(1.20, float(rule.get("effect_scale", 1.0))))
-        kind, target, value = str(effect["kind"]), str(effect["target"]), float(effect["value"]) * scale
+        effect = _effective_effect(rule, scale=float(rule.get("effect_scale", 1.0)))
+        kind, target, value = str(effect["kind"]), str(effect["target"]), float(effect["value"])
         if kind == "stat_multiplier":
             bucket = result[f"{target}_stat_multipliers"]
             factor = 1.0 + value if target == "player" else 1.0 - value
@@ -429,34 +476,35 @@ def evaluate_generated_traits(
             key = "dealt_multiplier" if target == "enemy" else "received_multiplier"
             result[key] *= 1.0 + value if target == "enemy" else 1.0 - value
         elif kind == "damage_cap":
-            scaled_cap = 1.0 - (1.0 - float(effect["value"])) * scale
-            result["received_cap"] = scaled_cap if result["received_cap"] is None else min(result["received_cap"], scaled_cap)
+            result["received_cap"] = value if result["received_cap"] is None else min(result["received_cap"], value)
         elif kind == "reclaim_loss":
-            result["player_state_restore"] += min(float(effect["cap"]) * scale, float(context.get("received", 0)) * value)
+            result["player_state_restore"] += min(float(effect["cap"]), float(context.get("received", 0)) * value)
         elif kind == "restore_state":
             result["player_state_restore"] += value
         elif kind == "restore_mp":
             result["player_mp_restore"] += value
         elif kind == "modify_morale":
             result[f"{target}_morale_delta"] += value if target == "player" else -value
-        result["events"].append(f"{rule.get('display_name', rule['name'])}：{rule['description']}")
+        result["events"].append(
+            f"{rule.get('display_name', rule['name'])}：{describe_generated_trait(rule)}"
+        )
         result["triggered_ids"].append(str(rule["id"]))
     # A collection may contain individually legal rules that happen to trigger
     # together. Runtime ceilings prevent multiplicative burst and recovery
     # loops without changing the saved traits.
-    result["dealt_multiplier"] = min(1.18, float(result["dealt_multiplier"]))
-    result["received_multiplier"] = max(0.82, float(result["received_multiplier"]))
+    result["dealt_multiplier"] = min(1.48, float(result["dealt_multiplier"]))
+    result["received_multiplier"] = max(0.52, float(result["received_multiplier"]))
     result["received_cap"] = (
-        max(0.24, float(result["received_cap"]))
+        max(0.06, float(result["received_cap"]))
         if result["received_cap"] is not None else None
     )
-    result["player_state_restore"] = min(0.06, float(result["player_state_restore"]))
-    result["player_mp_restore"] = min(0.06, float(result["player_mp_restore"]))
-    result["player_morale_delta"] = min(10.0, float(result["player_morale_delta"]))
-    result["enemy_morale_delta"] = max(-10.0, float(result["enemy_morale_delta"]))
+    result["player_state_restore"] = min(0.12, float(result["player_state_restore"]))
+    result["player_mp_restore"] = min(0.12, float(result["player_mp_restore"]))
+    result["player_morale_delta"] = min(24.0, float(result["player_morale_delta"]))
+    result["enemy_morale_delta"] = max(-24.0, float(result["enemy_morale_delta"]))
     for bucket_name, lower, upper in (
-        ("player_stat_multipliers", 1.0, 1.16),
-        ("enemy_stat_multipliers", 0.86, 1.0),
+        ("player_stat_multipliers", 1.0, 1.48),
+        ("enemy_stat_multipliers", 0.68, 1.0),
     ):
         result[bucket_name] = {
             stat: max(lower, min(upper, float(multiplier)))
@@ -474,12 +522,21 @@ def _candidate_conditions(trigger: str, effect: dict[str, Any], rng: Any) -> lis
             and definition["family"] in allowed_families
         )
     ]
-    first = rng.choice(compatible)
-    if rng.random() >= 0.38:
-        return [first]
-    first_family = BLOODLINE_RULE_CONDITIONS[first]["family"]
-    seconds = [item for item in compatible if BLOODLINE_RULE_CONDITIONS[item]["family"] != first_family]
-    return [first, rng.choice(seconds)] if seconds else [first]
+    roll = rng.random()
+    target_count = 1 if roll < 0.40 else 2 if roll < 0.74 else 3 if roll < 0.93 else 4
+    selected: list[str] = []
+    used_families: set[str] = set()
+    while len(selected) < target_count:
+        candidates = [
+            item for item in compatible
+            if item not in selected and BLOODLINE_RULE_CONDITIONS[item]["family"] not in used_families
+        ]
+        if not candidates:
+            break
+        chosen = rng.choice(candidates)
+        selected.append(chosen)
+        used_families.add(str(BLOODLINE_RULE_CONDITIONS[chosen]["family"]))
+    return selected
 
 
 def generate_species_bloodline_trait(
@@ -522,14 +579,15 @@ def generate_species_bloodline_trait(
 
 def public_generated_trait(rule: dict[str, Any]) -> dict[str, Any]:
     reasons = validate_generated_trait(rule)
+    power = _power(rule) if not reasons else (0.0, 0.0)
     return {
         "id": str(rule.get("id", "")), "name": str(rule.get("name", "未知族血")),
-        "description": str(rule.get("description", "")), "generated": True,
+        "description": describe_generated_trait(rule) if not reasons else str(rule.get("description", "")), "generated": True,
         "valid": not reasons, "invalid_reasons": reasons,
         "trigger": str(rule.get("trigger", "")), "schedule": str(rule.get("schedule", "")),
         "conditions": list(map(str, rule.get("conditions", []))), "effect": str(rule.get("effect", "")),
         "slot_id": str(rule.get("slot_id", "")),
-        "power": dict(rule.get("power", {})) if isinstance(rule.get("power"), dict) else {},
+        "power": {"raw": power[0], "expected": power[1]} if not reasons else {},
     }
 
 
