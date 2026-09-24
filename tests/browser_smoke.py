@@ -218,12 +218,14 @@ def main() -> None:
                 page.get_by_role("button", name="炼为本命").first.click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#natal-artifact-card .natal-sword").count() == 1
-                assert page.locator("#natal-artifact-card .natal-slot").count() == 7
-                assert page.locator("#natal-artifact-card .natal-slot:not(.locked)").count() == 2
+                assert "无上限" in page.locator("#natal-artifact-heading").text_content()
+                assert page.locator("#natal-artifact-card .natal-slot").count() == 0
+                assert "下一级战力增益" in page.locator("#natal-artifact-card .natal-bonuses").text_content()
                 assert page.locator("#natal-artifact-card .natal-refine-all").is_enabled()
                 page.locator("#natal-artifact-card .natal-refine-all").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.evaluate("game.natal_artifact.level") > 1
+                assert page.locator("#natal-artifact-card .natal-slot:not(.locked)").count() == page.evaluate("game.natal_artifact.unlocked_slots")
                 page.locator("[data-panel-target='inventory']").click()
                 assert page.locator("#inventory-list .natal-artifact-item").count() == 1
                 page.locator("#new-game-button").click()

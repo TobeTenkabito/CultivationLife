@@ -18,7 +18,7 @@ from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 6
+TIANJI_GENERATION_VERSION = 7
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
 TIANJI_WINDOW_SCHEDULES = (
     "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "last", "penultimate",
@@ -233,8 +233,29 @@ class TianjiSystemMixin:
         used_prefixes.add(name[:4])
         return name, style
 
-    @staticmethod
-    def _tianji_rule_effects(rng: random.Random, theme: dict[str, Any], power: int) -> list[dict[str, Any]]:
+    def _next_tianji_buff_name(
+        self, rng: random.Random, theme: dict[str, Any], core: str,
+        used_names: set[str], index: int,
+    ) -> str:
+        config = self._tianji_config()
+        prefixes = list(config.get("buff_name_prefixes", ["太初", "混元", "无极"]))
+        suffixes = list(config.get("buff_name_suffixes", ["神律", "道印", "真解"]))
+        patterns = list(config.get("buff_name_patterns", ["{prefix}{core}", "{core}·{suffix}"]))
+        words = list(theme.get("words", [theme.get("name", "天工")]))
+        elements = list(theme.get("elements", [theme.get("name", "神机")]))
+        for _ in range(160):
+            name = str(rng.choice(patterns)).format(
+                prefix=rng.choice(prefixes), suffix=rng.choice(suffixes), core=core,
+                word=rng.choice(words), element=rng.choice(elements), theme=theme.get("name", "天工"),
+            )
+            if name not in used_names:
+                used_names.add(name)
+                return name
+        fallback = f"{rng.choice(prefixes)}{core}·{rng.choice(suffixes)}{index + 1}"
+        used_names.add(fallback)
+        return fallback
+
+    def _tianji_rule_effects(self, rng: random.Random, theme: dict[str, Any], power: int) -> list[dict[str, Any]]:
         preferred = [row for row in PRIMITIVES if row.get("stat") in theme.get("stats", {})]
         pool = list(PRIMITIVES)
         # A geometric tail has no hard ceiling: nearly all artifacts remain
@@ -255,8 +276,10 @@ class TianjiSystemMixin:
             payload = {"trait": primitive["trait"]}
         else:
             payload = {"persistent": primitive["persistent"]}
+        used_buff_names: set[str] = set()
+        first_name = self._next_tianji_buff_name(rng, theme, str(primitive["name"]), used_buff_names, 0)
         first = {
-            "primitive": primitive["id"], "name": primitive["name"],
+            "primitive": primitive["id"], "name": first_name,
             "magnitude": round(magnitude, 5), "trigger": "combat_start",
             "conditions": [], "targets": "owner",
             "replica_scaling": "numeric" if not primitive.get("trait") else "resistance_chain",
@@ -270,7 +293,7 @@ class TianjiSystemMixin:
             "flame": "ape", "frost": "turtle", "life": "flora", "slaughter": "ape",
         }
         species = species_by_theme.get(str(theme.get("id")), "serpent")
-        for _ in range(count - 1):
+        for effect_index in range(1, count):
             rule = None
             force_windowed_initiative = rng.random() < .34
             while rule is None:
@@ -287,9 +310,12 @@ class TianjiSystemMixin:
                 rule["id"] = generated_trait_id(rule)
                 rule["description"] = describe_generated_trait(rule)
             definition = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
-            rule["display_name"] = str(definition["name"])
+            display_name = self._next_tianji_buff_name(
+                rng, theme, str(definition["name"]), used_buff_names, effect_index,
+            )
+            rule["display_name"] = display_name
             effect = {
-                "primitive": f"rule:{rule['effect']}", "name": str(definition["name"]),
+                "primitive": f"rule:{rule['effect']}", "name": display_name,
                 "description": describe_generated_trait(rule), "trigger": str(rule["trigger"]),
                 "conditions": list(map(str, rule["conditions"])), "targets": "owner",
                 "replica_scaling": "rule_scale", "rule": rule,
@@ -403,6 +429,29 @@ class TianjiSystemMixin:
             if artifact_id in renamed:
                 entry["name"] = renamed[artifact_id]
 
+    def _refresh_tianji_buff_names(self, game: GameState) -> None:
+        """Expand old saves' repeated effect labels without changing any rule."""
+        themes = {str(row["id"]): row for row in self._tianji_config()["themes"]}
+        primitives = {str(row["id"]): row for row in PRIMITIVES}
+        for artifact in game.tianji_state.get("artifacts", []):
+            theme = themes.get(str(artifact.get("theme_id")))
+            if not theme:
+                continue
+            rng = _stable_rng(game.seed, f"buff-names-v7:{artifact.get('id')}")
+            used_names: set[str] = set()
+            for effect_index, effect in enumerate(artifact.get("effects", [])):
+                rule = effect.get("rule")
+                if isinstance(rule, dict):
+                    definition = BLOODLINE_RULE_EFFECTS.get(str(rule.get("effect", "")), {})
+                    core = str(definition.get("name", effect.get("name", "神机")))
+                else:
+                    primitive = primitives.get(str(effect.get("primitive", "")), {})
+                    core = str(primitive.get("name", effect.get("name", "神机")))
+                name = self._next_tianji_buff_name(rng, theme, core, used_names, effect_index)
+                effect["name"] = name
+                if isinstance(rule, dict):
+                    rule["display_name"] = name
+
     def _tianji_persistent_npcs(self, game: GameState, world: str) -> list[Any]:
         values: list[Any] = [
             npc for npc in game.world_npcs.values() if npc.alive and npc.world == world
@@ -509,6 +558,9 @@ class TianjiSystemMixin:
                     rule["description"] = describe_generated_trait(rule)
                     effect["description"] = rule["description"]
                     effect["conditions"] = list(map(str, rule.get("conditions", [])))
+            changed = True
+        if old_generation < 7:
+            self._refresh_tianji_buff_names(game)
             changed = True
         if old_generation < TIANJI_GENERATION_VERSION:
             state["generation_version"] = TIANJI_GENERATION_VERSION
@@ -639,14 +691,20 @@ class TianjiSystemMixin:
         artifact = rng.choices(candidates, weights=weights, k=1)[0]
         old = int(state["knowledge"].get(artifact["id"], 0))
         new = min(max_level, old + 1)
-        event_sources = {
+        fallback_sources = {
             1: ("残卷露名", "你在一卷残破游记的夹层里发现了器名与模糊形制。"),
             2: ("斗痕辨器", "一处古战场残留的器痕，与坊间密谈相互印证。"),
             3: ("器纹拓影", "流散黑市的器纹拓片补全了关键材料方向。"),
             4: ("真方残页", "一页被多重禁制封存的古方，显出了完整材料次序。"),
             5: ("天机落点", "跨界行商与古阵星图的数处记录，终于指向同一条踪迹。"),
         }
-        title, body = event_sources[new]
+        event_pool = settings.get("event_pool", {}).get(str(new), [])
+        source = rng.choice(event_pool) if event_pool else None
+        title, body = (
+            (str(source["title"]), str(source["body"]))
+            if isinstance(source, dict) and source.get("title") and source.get("body")
+            else fallback_sources[new]
+        )
         if not self._tianji_reveal(game, str(artifact["id"]), new, f"随机事件：{title}"):
             return None
         summary = f"{body}【{artifact['name']}】情报提升至 Lv{new}。"

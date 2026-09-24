@@ -103,6 +103,9 @@ class GuixuTideTests(unittest.TestCase):
         add_item(game.player, consumable_id)
         self.engine.store.save(game)
         self.engine.natal_artifact_action(created["id"], "bind", "starfall_blade")
+        game = self.engine.store.load(created["id"])
+        game.natal_artifact["level"] = 10
+        self.engine.store.save(game)
 
         shown = self.engine.get_game(created["id"])
         crafting_ids = {row["definition_id"] for row in shown["crafting_system"]["materials"]}

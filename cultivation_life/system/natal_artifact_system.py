@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from ..content_registry import ITEM_CATALOG, WORLD_SYSTEMS
@@ -71,7 +72,8 @@ class NatalArtifactSystemMixin:
         game.natal_artifact = {
             "item_id":artifact_id, "crafted_artifact_id":artifact_id,
             "name":str(artifact.get("name", "无名法宝")), "level":1,
-            "experience":0, "bound_age":game.player.age, "slots":[None] * 7,
+            "experience":0, "bound_age":game.player.age, "slots":[],
+            "slot_rule_version":2,
         }
         self._sync_natal_artifact_bonuses(game)
 
@@ -89,8 +91,27 @@ class NatalArtifactSystemMixin:
         self._sync_natal_artifact_bonuses(game)
 
     def _natal_slots_for_level(self, level: int) -> int:
-        unlocks = self._natal_artifact_config()["slot_unlocks"]
-        return max(int(amount) for required, amount in unlocks.items() if int(required) <= level)
+        interval = max(1, int(self._natal_artifact_config().get("slot_interval", 10)))
+        return max(0, int(level)) // interval
+
+    def _natal_level_scale(self, level: int) -> float:
+        """Unbounded quadratic stat growth with increasing per-level returns."""
+        config = self._natal_artifact_config()
+        steps = max(0, int(level) - 1)
+        return (
+            1.0
+            + float(config.get("level_growth_linear", 0.25)) * steps
+            + float(config.get("level_growth_quadratic", 0.02)) * steps * steps
+        )
+
+    def _natal_flat_combat_growth(self, level: int) -> float:
+        """Let a humble bonded artifact eventually outgrow its original base item."""
+        steps = max(0, int(level) - 1)
+        coefficient = float(self._natal_artifact_config().get("combat_growth_cubic", 5.0))
+        return coefficient * steps * steps * steps
+
+    def _natal_refine_cost(self, level: int) -> int:
+        return int(self._natal_artifact_config()["manual_refine_stone_base"]) * max(1, int(level))
 
     def _natal_level_required(self, level: int) -> int:
         return int(self._natal_artifact_config()["experience_base"]) * max(1, level)
@@ -131,9 +152,20 @@ class NatalArtifactSystemMixin:
                         changed = True
             artifact.setdefault("level", 1)
             artifact.setdefault("experience", 0)
-            slots = list(artifact.get("slots", []))[:7]
-            if len(slots) < 7:
-                slots.extend([None] * (7 - len(slots)))
+            unlocked = self._natal_slots_for_level(int(artifact["level"]))
+            slots = list(artifact.get("slots", []))
+            if int(artifact.get("slot_rule_version", 1)) < 2:
+                # The former system granted up to seven slots by level 12.
+                # Return now-locked materials instead of deleting or trapping
+                # them when the unbounded ten-level cadence is introduced.
+                for material_id in slots[unlocked:]:
+                    if material_id:
+                        add_item(game.player, str(material_id))
+                slots = slots[:unlocked]
+                artifact["slot_rule_version"] = 2
+                changed = True
+            if len(slots) < unlocked:
+                slots.extend([None] * (unlocked - len(slots)))
             if slots != artifact.get("slots"):
                 artifact["slots"] = slots
                 changed = True
@@ -151,7 +183,8 @@ class NatalArtifactSystemMixin:
         if not artifact:
             return
         level = max(1, int(artifact.get("level", 1)))
-        scale = 1.0 + float(self._natal_artifact_config()["level_scale_per_level"]) * (level - 1)
+        scale = self._natal_level_scale(level)
+        flat_combat_growth = self._natal_flat_combat_growth(level)
         crafted = self._crafted_natal_source(game)
         if crafted:
             stats = crafted.get("actual_stats", {})
@@ -162,7 +195,7 @@ class NatalArtifactSystemMixin:
             totals = {
                 "hp_bonus":float(stats.get("max_hp", 0.0)) * growth,
                 "mp_bonus":float(stats.get("max_mp", 0.0)) * growth,
-                "combat_bonus":float(stats.get("combat_power", 0.0)) * growth,
+                "combat_bonus":float(stats.get("combat_power", 0.0)) * growth + flat_combat_growth,
                 "opportunity_bonus":float(stats.get("opportunity_efficiency", 0.0)) * growth,
                 "tribulation_reduction":float(stats.get("tribulation_reduction", 0.0)) * growth,
             }
@@ -171,7 +204,7 @@ class NatalArtifactSystemMixin:
             totals = {
                 "hp_bonus":float(base.hp_bonus) * scale,
                 "mp_bonus":float(base.mp_bonus) * scale,
-                "combat_bonus":float(base.combat_bonus) * scale,
+                "combat_bonus":float(base.combat_bonus) * scale + flat_combat_growth,
                 "opportunity_bonus":float(base.opportunity_bonus) * scale,
                 "tribulation_reduction":float(base.tribulation_damage_reduction) * scale,
             }
@@ -213,16 +246,18 @@ class NatalArtifactSystemMixin:
         if not artifact or amount <= 0:
             return 0, 0
         old_level = int(artifact["level"])
-        maximum = int(self._natal_artifact_config()["max_level"])
         artifact["experience"] = int(artifact.get("experience", 0)) + int(amount)
-        while int(artifact["level"]) < maximum:
+        while True:
             required = self._natal_level_required(int(artifact["level"]))
             if int(artifact["experience"]) < required:
                 break
             artifact["experience"] -= required
             artifact["level"] = int(artifact["level"]) + 1
-        if int(artifact["level"]) >= maximum:
-            artifact["experience"] = 0
+        unlocked = self._natal_slots_for_level(int(artifact["level"]))
+        slots = list(artifact.get("slots", []))
+        if len(slots) < unlocked:
+            slots.extend([None] * (unlocked - len(slots)))
+            artifact["slots"] = slots
         self._sync_natal_artifact_bonuses(game)
         return old_level, int(artifact["level"])
 
@@ -234,21 +269,27 @@ class NatalArtifactSystemMixin:
         stones = max(0, int(stone_item.quantity)) if stone_item else 0
         level = max(1, int(artifact.get("level", 1)))
         experience = max(0, int(artifact.get("experience", 0)))
-        maximum = int(self._natal_artifact_config()["max_level"])
         base_cost = int(self._natal_artifact_config()["manual_refine_stone_base"])
         refine_xp = int(self._natal_artifact_config()["manual_refine_xp"])
         count = total_cost = 0
-        while level < maximum:
+        while True:
             cost = base_cost * level
-            if stones < cost:
+            affordable = stones // cost
+            if affordable <= 0:
                 break
-            stones -= cost
-            total_cost += cost
-            count += 1
-            experience += refine_xp
-            while level < maximum and experience >= self._natal_level_required(level):
-                experience -= self._natal_level_required(level)
+            required = self._natal_level_required(level)
+            refinements_needed = max(1, math.ceil((required - experience) / refine_xp))
+            batch = min(affordable, refinements_needed)
+            batch_cost = batch * cost
+            stones -= batch_cost
+            total_cost += batch_cost
+            count += batch
+            experience += refine_xp * batch
+            if experience >= required:
+                experience -= required
                 level += 1
+            else:
+                break
         return count, total_cost
 
     def _advance_natal_artifact(self, game: GameState, action: str, units: int) -> str | None:
@@ -296,7 +337,8 @@ class NatalArtifactSystemMixin:
                     raise ValueError("法宝已经不在背包中")
                 game.natal_artifact = {
                     "item_id":item_id, "name":item.name, "level":1,
-                    "experience":0, "bound_age":player.age, "slots":[None] * 7,
+                    "experience":0, "bound_age":player.age, "slots":[],
+                    "slot_rule_version":2,
                 }
             summary = f"你将{item.name}收入丹田，以精血和金丹真火炼为本命法宝。"
             result = "bound"
@@ -304,15 +346,13 @@ class NatalArtifactSystemMixin:
             if not game.natal_artifact:
                 raise ValueError("尚未选择本命法宝")
             level = int(game.natal_artifact["level"])
-            if level >= int(self._natal_artifact_config()["max_level"]):
-                raise ValueError("本命法宝已祭炼至当前上限")
             if action == "refine_all":
                 refine_count, cost = self._natal_refine_all_plan(game)
                 if refine_count <= 0:
                     raise ValueError("灵石不足以继续温养本命法宝")
             else:
                 refine_count = 1
-                cost = int(self._natal_artifact_config()["manual_refine_stone_base"]) * level
+                cost = self._natal_refine_cost(level)
             if not remove_item(player, "spirit_stone", cost):
                 raise ValueError(f"本次温养需要 {cost} 枚灵石")
             old_level, new_level = self._add_natal_artifact_experience(
@@ -421,27 +461,35 @@ class NatalArtifactSystemMixin:
             displayed_base = {key:0.0 for key in (
                 "combat_bonus", "hp_bonus", "mp_bonus", "opportunity_bonus", "tribulation_reduction",
             )}
-        maximum = int(self._natal_artifact_config()["max_level"])
         refine_all_count, refine_all_cost = self._natal_refine_all_plan(game)
+        if crafted:
+            growth_base_combat = float(crafted.get("actual_stats", {}).get("combat_power", 0.0))
+        else:
+            growth_base_combat = float(ITEM_CATALOG[str(artifact["item_id"])].combat_bonus)
+        next_level_combat_gain = (
+            growth_base_combat * (self._natal_level_scale(level + 1) - self._natal_level_scale(level))
+            + self._natal_flat_combat_growth(level + 1) - self._natal_flat_combat_growth(level)
+        )
+        slot_interval = max(1, int(self._natal_artifact_config().get("slot_interval", 10)))
         return {
             "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
             "crafted_artifact_id":artifact.get("crafted_artifact_id"),
-            "description":description, "level": level, "max_level": maximum,
+            "description":description, "level": level, "max_level": None, "unbounded": True,
             "experience": int(artifact["experience"]),
-            "experience_required": self._natal_level_required(level) if level < maximum else 0,
+            "experience_required": self._natal_level_required(level),
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
-            "refine_cost": int(self._natal_artifact_config()["manual_refine_stone_base"]) * level,
+            "next_slot_level": (unlocked + 1) * slot_interval,
+            "refine_cost": self._natal_refine_cost(level),
             "refine_all_count": refine_all_count, "refine_all_cost": refine_all_cost,
             "can_refine_all": refine_all_count > 0,
-            "can_refine": level < maximum and has_item(
-                player, "spirit_stone", int(self._natal_artifact_config()["manual_refine_stone_base"]) * level,
-            ),
+            "can_refine": has_item(player, "spirit_stone", self._natal_refine_cost(level)),
             "bonuses": {
                 "combat_bonus":round(player.natal_artifact_combat_bonus + displayed_base["combat_bonus"], 1),
                 "hp_bonus":round(player.natal_artifact_hp_bonus + displayed_base["hp_bonus"], 1),
                 "mp_bonus":round(player.natal_artifact_mp_bonus + displayed_base["mp_bonus"], 1),
                 "opportunity_bonus":round(player.natal_artifact_opportunity_bonus + displayed_base["opportunity_bonus"], 4),
                 "tribulation_reduction":round(player.natal_artifact_tribulation_reduction + displayed_base["tribulation_reduction"], 4),
+                "next_level_combat_gain":round(next_level_combat_gain, 1),
             },
         }
 

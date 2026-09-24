@@ -41,8 +41,10 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     assert max(len(artifact["effects"]) for artifact in a["artifacts"]) > 3
     generated_schedules: set[str] = set()
     generated_condition_counts: set[int] = set()
+    buff_names: list[str] = []
     for artifact in a["artifacts"]:
         effects = artifact["effects"]
+        buff_names.extend(str(effect["name"]) for effect in effects)
         assert "rule" not in effects[0]
         assert all("rule" in effect for effect in effects[1:])
         assert all("complexity" not in effect for effect in effects)
@@ -55,6 +57,8 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
         "random", "random_two", "first_and_last",
     } <= generated_schedules
     assert {1, 2, 3, 4} <= generated_condition_counts
+    assert len(set(buff_names)) >= 100
+    assert any("·" in name for name in buff_names)
 
 
 def test_ranking_cannot_directly_purchase_or_study_intelligence(
@@ -79,11 +83,14 @@ def test_low_probability_action_event_advances_one_intelligence_level(
     game = engine.store.load(game_id)
     game.player.realm_index = 8
     settings = engine._tianji_config()["intelligence_events"]
+    assert set(settings["event_pool"]) == {"1", "2", "3", "4", "5"}
+    assert all(len(rows) >= 6 for rows in settings["event_pool"].values())
     monkeypatch.setitem(settings, "chance_per_action_unit", 1.0)
     news = engine._maybe_tianji_intelligence_event(game, random.Random(731))
     assert news and "情报提升至 Lv1" in news
     assert sum(game.tianji_state["knowledge"].values()) == 1
     assert game.history[-1].event_id == "SYS_TIANJI_INTELLIGENCE"
+    assert game.history[-1].title in {row["title"] for row in settings["event_pool"]["1"]}
 
 
 def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: tuple[GameEngine, str]) -> None:
@@ -136,7 +143,7 @@ def test_generation_three_save_renames_and_expands_schedules_without_changing_ef
     for index, artifact in enumerate(game.tianji_state["artifacts"][:3]):
         artifact["name"] = f"九幽镇世{index}"
     assert engine._ensure_tianji_state(game)
-    assert game.tianji_state["generation_version"] == 6
+    assert game.tianji_state["generation_version"] == 7
     assert len({row["name"][:4] for row in game.tianji_state["artifacts"]}) == 100
     assert all(
         list(row["recipe"]) == frozen[row["id"]]["recipe"]
