@@ -578,6 +578,7 @@
 .sage-manual b,.sage-manual small { display:block; }
 .sage-manual small { margin-top:4px; color:var(--muted); line-height:1.45; }
 .sage-manual button,.sage-outer-card button { padding:7px 11px; color:#fff; border-color:#315d68; background:#315d68; }
+.sage-manual button:disabled,.sage-outer-card button:disabled { cursor:not-allowed; opacity:.42; }
 .sage-classic { display:grid; grid-template-columns:1fr auto; gap:3px 9px; padding:9px 11px; border-left:3px solid rgba(49,93,104,.35); background:rgba(49,93,104,.05); }
 .sage-classic b { color:#294f58; }
 .sage-classic span,.sage-classic small { color:var(--muted); }

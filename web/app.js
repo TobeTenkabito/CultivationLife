@@ -1320,7 +1320,7 @@ function renderSageSystem(system) {
     const title=document.createElement('b'); title.textContent=`《${manual.name}》Lv.${manual.manual_level} ×${manual.quantity}`;
     const detail=document.createElement('small'); detail.textContent=`原初 ${manual.origin_realm_name}（${manual.origin_realm_index}阶） · 已参 Lv.${manual.refined_level} · ${manual.can_refine ? `新增 Lv.${manual.refined_level + 1}—Lv.${manual.manual_level}，浩然 +${number(manual.gain)}` : '没有新的经典内容'}`;
     info.append(title,detail);
-    const button=document.createElement('button'); button.textContent=manual.can_refine?'炼化':'已参透'; button.disabled=busy||!manual.can_refine||!!game.pending_event||!game.player.alive;
+    const button=document.createElement('button'); button.type='button'; button.className='sage-inner-outer-action'; button.dataset.available=manual.can_refine?'1':'0'; button.textContent=manual.can_refine?'炼化':'已参透'; button.disabled=busy||!manual.can_refine||!!game.pending_event||!game.player.alive;
     button.onclick=()=>openGameConfirm({title:'炼化传承玉简',body:`确认消耗《${manual.name}》Lv.${manual.manual_level}？本次获得 ${number(manual.gain)} 浩然经验；相同或更低等级以后不能再次产生收益。`,confirmText:'炼化',onConfirm:()=>mutate(`/api/games/${game.id}/sage-refine-manual`,{item_id:manual.item_id})});
     row.append(info,button); manualList.appendChild(row);
   });
@@ -1341,7 +1341,7 @@ function renderSageSystem(system) {
     const reward=document.createElement('strong'); reward.textContent=action.reward;
     const cost=document.createElement('span'); cost.textContent=`消耗 ${number(action.cost)} 浩然经验 · Lv.${action.before_level} → Lv.${action.after_level}`;
     const changes=document.createElement('small'); changes.textContent=(action.effect_changes||[]).join('；')||'本次消费不跨越浩然被动档位';
-    const button=document.createElement('button'); button.textContent=action.can_use?'预览并施行':action.reason||'不可施行'; button.disabled=busy||!action.can_use||!!game.pending_event||!game.player.alive;
+    const button=document.createElement('button'); button.type='button'; button.className='sage-inner-outer-action'; button.dataset.available=action.can_use?'1':'0'; button.textContent=action.can_use?'预览并施行':action.reason||'不可施行'; button.disabled=busy||!action.can_use||!!game.pending_event||!game.player.alive;
     button.onclick=()=>openGameConfirm({title:`外王 · ${action.name}`,body:`${action.reward}\n浩然经验：${number(action.before_exp)} → ${number(action.after_exp)}\n浩然等级：Lv.${action.before_level} → Lv.${action.after_level}\n${(action.effect_changes||[]).join('\n')||'长期被动数值不跨档'}\n此消费不可逆。`,confirmText:'确认施行',onConfirm:()=>mutate(`/api/games/${game.id}/sage-outer-king`,{action:action.id})});
     card.append(title,reward,cost,changes,button); outerList.appendChild(card);
   });
@@ -3614,6 +3614,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.relationship-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event;
+  });
+  document.querySelectorAll('.sage-inner-outer-action').forEach(button => {
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.available !== '1';
   });
   document.querySelectorAll('.relationship-exit').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
