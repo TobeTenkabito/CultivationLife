@@ -229,17 +229,25 @@ class PlayerCombatSystem:
         realm_delta = player.realm_index - enemy_realm
         artifact_effects = [
             effect for effect in target.get("natal_artifact_effects", [])
-            if cls._artifact_effect_active(
+            if effect.get("generated_rules") or cls._artifact_effect_active(
                 effect, owner_realm_delta=realm_delta,
                 natural_terrain=natural, artificial_conditions=artificial,
             )
         ]
         enemy_artifact_effects = [
             effect for effect in target.get("enemy_artifact_effects", [])
-            if cls._artifact_effect_active(
+            if effect.get("generated_rules") or cls._artifact_effect_active(
                 effect, owner_realm_delta=-realm_delta,
                 natural_terrain=natural, artificial_conditions=artificial,
             )
+        ]
+        artifact_generated_rules = [
+            dict(rule) for effect in artifact_effects
+            for rule in effect.get("generated_rules", []) if isinstance(rule, dict)
+        ]
+        enemy_artifact_generated_rules = [
+            dict(rule) for effect in enemy_artifact_effects
+            for rule in effect.get("generated_rules", []) if isinstance(rule, dict)
         ]
         artifact_traits: set[str] = set()
         for effect in artifact_effects:
@@ -493,6 +501,32 @@ class PlayerCombatSystem:
             for stat, multiplier in generated_start["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"族血共鸣【{event}】" for event in generated_start["events"])
+            artifact_start = evaluate_generated_traits(
+                artifact_generated_rules, trigger="round_start", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                },
+            )
+            enemy_artifact_start = evaluate_generated_traits(
+                enemy_artifact_generated_rules, trigger="round_start", context={
+                    "round_no": round_no, "realm_delta": -realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                },
+            )
+            for stat, multiplier in artifact_start["player_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            for stat, multiplier in artifact_start["enemy_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            for stat, multiplier in enemy_artifact_start["player_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            for stat, multiplier in enemy_artifact_start["enemy_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            events.extend(f"神机共鸣【{event}】" for event in artifact_start["events"])
+            events.extend(f"敌方神机共鸣【{event}】" for event in enemy_artifact_start["events"])
             soul_start = evaluate_generated_soul_traits(
                 generated_soul_traits, trigger="round_start", context={
                     "round_no": round_no, "realm_delta": realm_delta,
@@ -540,6 +574,38 @@ class PlayerCombatSystem:
             generated_dealt_multiplier = float(generated_initiative["dealt_multiplier"])
             generated_received_multiplier = float(generated_initiative["received_multiplier"])
             events.extend(f"族血共鸣【{event}】" for event in generated_initiative["events"])
+            artifact_initiative = evaluate_generated_traits(
+                artifact_generated_rules, trigger="initiative_resolved", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first,
+                },
+            )
+            enemy_artifact_initiative = evaluate_generated_traits(
+                enemy_artifact_generated_rules, trigger="initiative_resolved", context={
+                    "round_no": round_no, "realm_delta": -realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                    "player_first": not player_first,
+                },
+            )
+            for stat, multiplier in artifact_initiative["player_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            for stat, multiplier in artifact_initiative["enemy_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            for stat, multiplier in enemy_artifact_initiative["player_stat_multipliers"].items():
+                round_enemy_stats[stat] *= multiplier
+            for stat, multiplier in enemy_artifact_initiative["enemy_stat_multipliers"].items():
+                round_player_stats[stat] *= multiplier
+            artifact_dealt_multiplier = float(artifact_initiative["dealt_multiplier"])
+            artifact_received_multiplier = float(artifact_initiative["received_multiplier"])
+            enemy_artifact_dealt_multiplier = float(enemy_artifact_initiative["dealt_multiplier"])
+            enemy_artifact_received_multiplier = float(enemy_artifact_initiative["received_multiplier"])
+            events.extend(f"神机共鸣【{event}】" for event in artifact_initiative["events"])
+            events.extend(f"敌方神机共鸣【{event}】" for event in enemy_artifact_initiative["events"])
             soul_initiative = evaluate_generated_soul_traits(
                 generated_soul_traits, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": realm_delta,
@@ -682,6 +748,40 @@ class PlayerCombatSystem:
             if generated_before_damage["received_cap"] is not None:
                 received = min(received, float(generated_before_damage["received_cap"]))
             events.extend(f"族血共鸣【{event}】" for event in generated_before_damage["events"])
+            artifact_before_damage = evaluate_generated_traits(
+                artifact_generated_rules, trigger="before_damage", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                },
+            )
+            enemy_artifact_before_damage = evaluate_generated_traits(
+                enemy_artifact_generated_rules, trigger="before_damage", context={
+                    "round_no": round_no, "realm_delta": -realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                    "player_first": not player_first, "controlled": False,
+                },
+            )
+            dealt *= (
+                artifact_dealt_multiplier * float(artifact_before_damage["dealt_multiplier"])
+                * enemy_artifact_received_multiplier
+                * float(enemy_artifact_before_damage["received_multiplier"])
+            )
+            received *= (
+                artifact_received_multiplier * float(artifact_before_damage["received_multiplier"])
+                * enemy_artifact_dealt_multiplier
+                * float(enemy_artifact_before_damage["dealt_multiplier"])
+            )
+            if artifact_before_damage["received_cap"] is not None:
+                received = min(received, float(artifact_before_damage["received_cap"]))
+            if enemy_artifact_before_damage["received_cap"] is not None:
+                dealt = min(dealt, float(enemy_artifact_before_damage["received_cap"]))
+            events.extend(f"神机共鸣【{event}】" for event in artifact_before_damage["events"])
+            events.extend(f"敌方神机共鸣【{event}】" for event in enemy_artifact_before_damage["events"])
             soul_before_damage = evaluate_generated_soul_traits(
                 generated_soul_traits, trigger="before_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
@@ -816,6 +916,41 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_after_damage["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_after_damage["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_after_damage["events"])
+            artifact_after_damage = evaluate_generated_traits(
+                artifact_generated_rules, trigger="after_damage", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                    "received": actual_received, "dealt": dealt,
+                },
+            )
+            enemy_artifact_after_damage = evaluate_generated_traits(
+                enemy_artifact_generated_rules, trigger="after_damage", context={
+                    "round_no": round_no, "realm_delta": -realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                    "player_first": not player_first, "controlled": False,
+                    "received": dealt, "dealt": actual_received,
+                },
+            )
+            if player_hp > 0:
+                player_hp = min(1.0, player_hp + artifact_after_damage["player_state_restore"])
+            if enemy_hp > 0:
+                enemy_hp = min(1.0, enemy_hp + enemy_artifact_after_damage["player_state_restore"])
+            player_mp = min(1.0, player_mp + artifact_after_damage["player_mp_restore"])
+            player_morale = cls._clamp(
+                0.0, 100.0, player_morale + artifact_after_damage["player_morale_delta"]
+                + enemy_artifact_after_damage["enemy_morale_delta"],
+            )
+            enemy_morale = cls._clamp(
+                0.0, 100.0, enemy_morale + artifact_after_damage["enemy_morale_delta"]
+                + enemy_artifact_after_damage["player_morale_delta"],
+            )
+            events.extend(f"神机共鸣【{event}】" for event in artifact_after_damage["events"])
+            events.extend(f"敌方神机共鸣【{event}】" for event in enemy_artifact_after_damage["events"])
             soul_after_damage = evaluate_generated_soul_traits(
                 generated_soul_traits, trigger="after_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
@@ -870,6 +1005,41 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_end["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_end["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_end["events"])
+            artifact_end = evaluate_generated_traits(
+                artifact_generated_rules, trigger="round_end", context={
+                    "round_no": round_no, "realm_delta": realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                    "received": actual_received, "dealt": dealt,
+                },
+            )
+            enemy_artifact_end = evaluate_generated_traits(
+                enemy_artifact_generated_rules, trigger="round_end", context={
+                    "round_no": round_no, "realm_delta": -realm_delta,
+                    "natural_terrain": natural, "artificial_conditions": artificial,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                    "player_first": not player_first, "controlled": False,
+                    "received": dealt, "dealt": actual_received,
+                },
+            )
+            if player_hp > 0:
+                player_hp = min(1.0, player_hp + artifact_end["player_state_restore"])
+            if enemy_hp > 0:
+                enemy_hp = min(1.0, enemy_hp + enemy_artifact_end["player_state_restore"])
+            player_mp = min(1.0, player_mp + artifact_end["player_mp_restore"])
+            player_morale = cls._clamp(
+                0.0, 100.0, player_morale + artifact_end["player_morale_delta"]
+                + enemy_artifact_end["enemy_morale_delta"],
+            )
+            enemy_morale = cls._clamp(
+                0.0, 100.0, enemy_morale + artifact_end["enemy_morale_delta"]
+                + enemy_artifact_end["player_morale_delta"],
+            )
+            events.extend(f"神机共鸣【{event}】" for event in artifact_end["events"])
+            events.extend(f"敌方神机共鸣【{event}】" for event in enemy_artifact_end["events"])
             soul_end = evaluate_generated_soul_traits(
                 generated_soul_traits, trigger="round_end", context={
                     "round_no": round_no, "realm_delta": realm_delta,

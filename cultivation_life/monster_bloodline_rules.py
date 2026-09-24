@@ -29,6 +29,7 @@ BLOODLINE_RULE_SCHEDULES: Final[dict[str, dict[str, Any]]] = {
     "every": {"name": "每轮", "uptime": 1.00},
     "odd": {"name": "奇数轮", "uptime": 0.55},
     "even": {"name": "偶数轮", "uptime": 0.55},
+    "third": {"name": "第三轮", "uptime": 0.18},
     "first_two": {"name": "前两轮", "uptime": 0.45},
     "after_second": {"name": "第三轮起每轮", "uptime": 0.55},
 }
@@ -152,7 +153,7 @@ MAX_TRAITS: Final = 16
 def _scheduled(schedule_id: str, round_no: int) -> bool:
     return {
         "every": True, "odd": round_no % 2 == 1, "even": round_no % 2 == 0,
-        "first_two": round_no <= 2, "after_second": round_no >= 3,
+        "third": round_no == 3, "first_two": round_no <= 2, "after_second": round_no >= 3,
     }.get(schedule_id, False)
 
 
@@ -343,7 +344,8 @@ def evaluate_generated_traits(
         if not all(_condition_met(str(item), context) for item in rule["conditions"]):
             continue
         effect = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
-        kind, target, value = str(effect["kind"]), str(effect["target"]), float(effect["value"])
+        scale = max(0.0, min(1.20, float(rule.get("effect_scale", 1.0))))
+        kind, target, value = str(effect["kind"]), str(effect["target"]), float(effect["value"]) * scale
         if kind == "stat_multiplier":
             bucket = result[f"{target}_stat_multipliers"]
             factor = 1.0 + value if target == "player" else 1.0 - value
@@ -352,16 +354,17 @@ def evaluate_generated_traits(
             key = "dealt_multiplier" if target == "enemy" else "received_multiplier"
             result[key] *= 1.0 + value if target == "enemy" else 1.0 - value
         elif kind == "damage_cap":
-            result["received_cap"] = value if result["received_cap"] is None else min(result["received_cap"], value)
+            scaled_cap = 1.0 - (1.0 - float(effect["value"])) * scale
+            result["received_cap"] = scaled_cap if result["received_cap"] is None else min(result["received_cap"], scaled_cap)
         elif kind == "reclaim_loss":
-            result["player_state_restore"] += min(float(effect["cap"]), float(context.get("received", 0)) * value)
+            result["player_state_restore"] += min(float(effect["cap"]) * scale, float(context.get("received", 0)) * value)
         elif kind == "restore_state":
             result["player_state_restore"] += value
         elif kind == "restore_mp":
             result["player_mp_restore"] += value
         elif kind == "modify_morale":
             result[f"{target}_morale_delta"] += value if target == "player" else -value
-        result["events"].append(f"{rule['name']}：{rule['description']}")
+        result["events"].append(f"{rule.get('display_name', rule['name'])}：{rule['description']}")
         result["triggered_ids"].append(str(rule["id"]))
     # A collection may contain individually legal rules that happen to trigger
     # together. Runtime ceilings prevent multiplicative burst and recovery

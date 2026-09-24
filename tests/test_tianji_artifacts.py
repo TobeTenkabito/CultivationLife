@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from cultivation_life.engine import GameEngine
-from cultivation_life.system.combat_system import PlayerCombatSystem
+from cultivation_life.monster_bloodline_rules import validate_generated_trait
 from cultivation_life.system.crafting_system import active_crafted_artifacts
 
 
@@ -37,12 +37,21 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     assert {row["origin_world"] for row in a["artifacts"]} <= {
         "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
     }
+    assert max(len(artifact["effects"]) for artifact in a["artifacts"]) > 3
+    found_third_round_initiative = False
     for artifact in a["artifacts"]:
         effects = artifact["effects"]
-        assert sum(not effect.get("conditions") for effect in effects) == 1
-        assert all(effect.get("conditions") for effect in effects[1:])
-        if len(effects) == 1:
-            assert effects[0]["complexity"] == "simple"
+        assert "rule" not in effects[0]
+        assert all("rule" in effect for effect in effects[1:])
+        assert all("complexity" not in effect for effect in effects)
+        for effect in effects[1:]:
+            assert not validate_generated_trait(effect["rule"])
+            found_third_round_initiative |= (
+                effect["rule"]["schedule"] == "third"
+                and effect["rule"]["trigger"] == "initiative_resolved"
+                and effect["rule"]["conditions"] == ["player_first"]
+            )
+    assert found_third_round_initiative
 
 
 def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: tuple[GameEngine, str]) -> None:
@@ -60,19 +69,9 @@ def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: 
         token not in descriptions
         for token in ("might", "guard", "mobility", "sense", "sustain", "breach", "max_hp", "max_mp")
     )
-    assert shown["effects"][0]["complexity"] == "simple"
-    assert all(effect["complexity"] == "complex" for effect in shown["effects"][1:])
-    assert any("当" in effect["description"] for effect in shown["effects"][1:])
-
-
-def test_conditional_artifact_effects_are_evaluated_from_owner_perspective() -> None:
-    effect = {"conditions": ["enemy_higher", "terrain_narrow"]}
-    assert PlayerCombatSystem._artifact_effect_active(
-        effect, owner_realm_delta=-1, natural_terrain="狭窄", artificial_conditions=[],
-    )
-    assert not PlayerCombatSystem._artifact_effect_active(
-        effect, owner_realm_delta=1, natural_terrain="狭窄", artificial_conditions=[],
-    )
+    assert all("complexity" not in effect for effect in shown["effects"])
+    assert all("简式" not in effect["description"] and "复式" not in effect["description"] for effect in shown["effects"])
+    assert any("若" in effect["description"] for effect in shown["effects"][1:])
 
 
 def test_generated_definitions_freeze_and_public_redaction(tianji_game: tuple[GameEngine, str]) -> None:

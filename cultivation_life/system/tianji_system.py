@@ -8,13 +8,17 @@ import uuid
 from typing import Any
 
 from ..content_registry import REALMS, WORLD_SYSTEMS
+from ..monster_bloodline_rules import (
+    BLOODLINE_RULE_EFFECTS, describe_generated_trait, generate_species_bloodline_trait,
+    generated_trait_id,
+)
 from ..models import GameState, HistoryRecord, Player
 from ..rules import expected_combat_power, remove_item
 from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 2
+TIANJI_GENERATION_VERSION = 3
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
 TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
     "might": "威能", "guard": "防护", "mobility": "身法",
@@ -23,14 +27,6 @@ TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
     "tribulation_reduction": "雷劫与天劫伤害减免",
     "player_debuff_immunity": "削弱效果免疫",
     "enemy_escape_lock": "敌方遁逃封锁",
-}
-TIANJI_RULE_CONDITIONS: dict[str, dict[str, str]] = {
-    "enemy_higher": {"name": "敌方境界高于自身", "family": "realm"},
-    "enemy_same_or_lower": {"name": "敌方境界不高于自身", "family": "realm"},
-    "terrain_open": {"name": "身处开阔战场", "family": "terrain"},
-    "terrain_narrow": {"name": "身处狭窄战场", "family": "terrain"},
-    "terrain_dangerous": {"name": "身处险要战场", "family": "terrain"},
-    "artificial_field": {"name": "战场存在禁制或大阵", "family": "field"},
 }
 PRIMITIVES: tuple[dict[str, Any], ...] = (
     {"id": "might", "name": "神威", "stat": "might", "low": 1.06, "high": 1.22},
@@ -78,6 +74,12 @@ def _scaled_effects(effects: list[dict[str, Any]], ratio: float) -> tuple[list[d
             "tianji_primitive": effect["primitive"],
             "conditions": list(map(str, effect.get("conditions", []))),
         }
+        if isinstance(effect.get("rule"), dict):
+            rule = copy.deepcopy(effect["rule"])
+            rule["effect_scale"] = round(max(0.0, min(1.20, ratio)), 6)
+            result["generated_rules"] = [rule]
+            combat.append(result)
+            continue
         if effect.get("player_stat_multipliers"):
             result["player_stat_multipliers"] = {
                 key: _scaled_multiplier(value, ratio)
@@ -112,12 +114,9 @@ def _scaled_effects(effects: list[dict[str, Any]], ratio: float) -> tuple[list[d
 
 
 def _tianji_effect_description(effect: dict[str, Any]) -> str:
-    conditions = [
-        TIANJI_RULE_CONDITIONS[condition]["name"]
-        for condition in map(str, effect.get("conditions", []))
-        if condition in TIANJI_RULE_CONDITIONS
-    ]
-    prefix = f"当{'，且'.join(conditions)}时，" if conditions else ""
+    if isinstance(effect.get("rule"), dict):
+        return describe_generated_trait(effect["rule"])
+    prefix = ""
     if effect.get("player_stat_multipliers"):
         stat, value = next(iter(effect["player_stat_multipliers"].items()))
         body = f"自身{TIANJI_ATTRIBUTE_NAMES.get(str(stat), str(stat))}提高 {(float(value) - 1):.1%}"
@@ -146,6 +145,7 @@ class TianjiSystemMixin:
         themes = list(config["themes"])
         worlds = [world for world in config["base_worlds"] if world in WORLD_SYSTEMS.get("world_profiles", {})]
         result: list[dict[str, Any]] = []
+        used_names: set[str] = set()
         for index in range(int(config["material_count"])):
             theme = themes[index % len(themes)] if index < len(themes) else rng.choice(themes)
             root = roots[(index // len(themes)) % len(roots)] if index < len(themes) * 2 else rng.choice(roots)
@@ -155,6 +155,10 @@ class TianjiSystemMixin:
             roles = rng.sample(["primary", "secondary", "quench"], rng.choice((1, 2, 3)))
             potency = rng.uniform(.05, .11) * (1 + tier * .22)
             material_id = f"tianji-mat-{index + 1:03d}"
+            name = f"{prefix}{theme['elements'][index % len(theme['elements'])]}{root}"
+            if name in used_names:
+                name = f"{name}·{index + 1}"
+            used_names.add(name)
             tags = {
                 str(theme["id"]): round(rng.uniform(.82, 1.0), 3),
                 str(root): 1.0,
@@ -177,7 +181,7 @@ class TianjiSystemMixin:
                     "description": f"淬火：破法提高 {potency / 2:.0%}。",
                 }
             result.append({
-                "id": material_id, "name": f"{prefix}{theme['elements'][index % len(theme['elements'])]}{root}",
+                "id": material_id, "name": name,
                 "world": world, "tier": tier, "roles": roles,
                 "tags": ["tianji_material", str(theme["id"]), str(root), f"world:{world}"],
                 "tianji_tags": tags, "allow_duplicate_type": True,
@@ -189,55 +193,65 @@ class TianjiSystemMixin:
 
     @staticmethod
     def _tianji_rule_effects(rng: random.Random, theme: dict[str, Any], power: int) -> list[dict[str, Any]]:
-        complexity_roll = rng.random()
-        count = 1 if complexity_roll < .25 else 2 if complexity_roll < .82 else 3
         preferred = [row for row in PRIMITIVES if row.get("stat") in theme.get("stats", {})]
         pool = list(PRIMITIVES)
-        # Each artifact gets exactly one unconditional expression.  Any
-        # additional entries must be real conditional rules, so persistent
-        # out-of-combat attributes are reserved for the simple slot.
-        selected: list[dict[str, Any]] = [rng.choice([*pool, *preferred, *preferred])]
-        complex_pool = [row for row in pool if not row.get("persistent")]
-        for primitive in rng.sample(complex_pool, len(complex_pool)):
-            if primitive["id"] not in {row["id"] for row in selected}:
-                selected.append(primitive)
-            if len(selected) >= count:
-                break
+        # A geometric tail has no hard ceiling: nearly all artifacts remain
+        # readable, while an exceptionally lucky seed can keep adding rules.
+        count = 1
+        while rng.random() < .72:
+            count += 1
         strength = min(1.0, max(0.0, math.log10(max(power, 1) / 63_000_000) / 2.75))
-        effects: list[dict[str, Any]] = []
-        for index, primitive in enumerate(selected):
-            conditions: list[str] = []
-            if index:
-                candidates = list(TIANJI_RULE_CONDITIONS)
-                first = rng.choice(candidates)
-                conditions.append(first)
-                if rng.random() < .45:
-                    first_family = TIANJI_RULE_CONDITIONS[first]["family"]
-                    compatible = [
-                        condition for condition in candidates
-                        if TIANJI_RULE_CONDITIONS[condition]["family"] != first_family
-                    ]
-                    conditions.append(rng.choice(compatible))
-            magnitude = rng.uniform(float(primitive["low"]), float(primitive["high"]))
-            if primitive.get("stat"):
-                magnitude = 1 + (magnitude - 1) * (.78 + strength * .35)
-                row = {"player_stat_multipliers": {primitive["stat"]: round(magnitude, 5)}}
-            elif primitive.get("enemy_stat"):
-                magnitude = 1 - (1 - magnitude) * (.78 + strength * .35)
-                row = {"enemy_stat_multipliers": {primitive["enemy_stat"]: round(max(.65, magnitude), 5)}}
-            elif primitive.get("trait"):
-                row = {"trait": primitive["trait"]}
-            else:
-                row = {"persistent": primitive["persistent"]}
+        primitive = rng.choice([*pool, *preferred, *preferred])
+        magnitude = rng.uniform(float(primitive["low"]), float(primitive["high"]))
+        if primitive.get("stat"):
+            magnitude = 1 + (magnitude - 1) * (.78 + strength * .35)
+            payload = {"player_stat_multipliers": {primitive["stat"]: round(magnitude, 5)}}
+        elif primitive.get("enemy_stat"):
+            magnitude = 1 - (1 - magnitude) * (.78 + strength * .35)
+            payload = {"enemy_stat_multipliers": {primitive["enemy_stat"]: round(max(.65, magnitude), 5)}}
+        elif primitive.get("trait"):
+            payload = {"trait": primitive["trait"]}
+        else:
+            payload = {"persistent": primitive["persistent"]}
+        first = {
+            "primitive": primitive["id"], "name": primitive["name"],
+            "magnitude": round(magnitude, 5), "trigger": "combat_start",
+            "conditions": [], "targets": "owner",
+            "replica_scaling": "numeric" if not primitive.get("trait") else "resistance_chain",
+            **payload,
+        }
+        first["description"] = _tianji_effect_description(first)
+        effects: list[dict[str, Any]] = [first]
+
+        species_by_theme = {
+            "thunder": "avian", "soul": "fox", "star": "avian", "void": "serpent",
+            "flame": "ape", "frost": "turtle", "life": "flora", "slaughter": "ape",
+        }
+        species = species_by_theme.get(str(theme.get("id")), "serpent")
+        for _ in range(count - 1):
+            rule = None
+            force_third_initiative = rng.random() < .24
+            while rule is None:
+                candidate = generate_species_bloodline_trait(species, rng)
+                if candidate is None:
+                    continue
+                if force_third_initiative and candidate["trigger"] != "initiative_resolved":
+                    continue
+                rule = candidate
+            if force_third_initiative:
+                rule["schedule"] = "third"
+                rule["conditions"] = ["player_first"]
+                rule.pop("power", None)
+                rule["id"] = generated_trait_id(rule)
+                rule["description"] = describe_generated_trait(rule)
+            definition = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
+            rule["display_name"] = str(definition["name"])
             effect = {
-                "primitive": primitive["id"], "name": primitive["name"],
-                "magnitude": round(magnitude, 5),
-                "trigger": "combat_start", "conditions": conditions, "targets": "owner",
-                "complexity": "simple" if not conditions else "complex",
-                "replica_scaling": "numeric" if not primitive.get("trait") else "resistance_chain",
-                **row,
+                "primitive": f"rule:{rule['effect']}", "name": str(definition["name"]),
+                "description": describe_generated_trait(rule), "trigger": str(rule["trigger"]),
+                "conditions": list(map(str, rule["conditions"])), "targets": "owner",
+                "replica_scaling": "rule_scale", "rule": rule,
             }
-            effect["description"] = _tianji_effect_description(effect)
             effects.append(effect)
         return effects
 
@@ -463,7 +477,6 @@ class TianjiSystemMixin:
             "name": str(effect["name"]), "description": _tianji_effect_description(effect),
             "trigger": str(effect.get("trigger", "combat_start")),
             "replica_scaling": str(effect.get("replica_scaling", "numeric")),
-            "complexity": "complex" if effect.get("conditions") else "simple",
         }
 
     def _public_tianji(self, game: GameState) -> dict[str, Any]:
