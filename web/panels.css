@@ -381,6 +381,8 @@
 .tianji-rank-row.knowledge-0 summary span { color:#958da0; letter-spacing:.18em; }
 .tianji-rank-detail { padding:4px 14px 14px; border-top:1px solid rgba(91,67,125,.14); }
 .tianji-rank-detail p { margin:7px 0; line-height:1.5; }
+.tianji-rank-detail .tianji-tendency { padding:8px 10px; border-left:3px solid #75608f; background:rgba(117,96,143,.07); color:#514064; }
+.tianji-effect-group { margin:13px 0 5px; color:#6a527f; font-size:.92rem; letter-spacing:.08em; }
 .tianji-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
 .crafting-tianji-mode { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:8px 0 14px; padding:10px; border:1px solid rgba(91,67,125,.24); background:rgba(91,67,125,.055); }
 .crafting-tianji-mode label { display:grid; gap:5px; color:var(--muted); font-size:11px; }

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from itertools import combinations
 from typing import Any, Final, Iterable
 
 
@@ -310,6 +309,12 @@ def _power(rule: dict[str, Any]) -> tuple[float, float]:
 
 
 def validate_generated_trait(rule: Any) -> list[str]:
+    if isinstance(rule, dict) and int(rule.get("schema_version", 1)) >= 2:
+        # Schema-v2 is the shared combat-rule language used by theme-first
+        # systems.  Keep this compatibility entry point for callers and mods
+        # that historically validated every generated rule here.
+        from .combat_rule_engine import validate_rule
+        return validate_rule(rule)
     reasons: list[str] = []
     if not isinstance(rule, dict):
         return ["特质不是对象"]

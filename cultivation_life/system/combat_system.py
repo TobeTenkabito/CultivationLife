@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Iterable
 
 from ..combat_traits import COMBAT_TRAIT_REGISTRY
+from ..combat_rule_engine import BattleRuleRuntime, evaluate_rules, prepare_rules
 from ..content_registry import MONSTER_BLOODLINE_SETTINGS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from ..models import Player, Technique
@@ -13,7 +14,6 @@ from ..monster_bloodline_traits import (
     BLOODLINE_TRAIT_REGISTRY, bloodline_grants_hook, bloodline_hook_names,
     bloodline_stat_modifiers,
 )
-from ..monster_bloodline_rules import evaluate_generated_traits, prepare_generated_trait_schedules
 from .transformation_system import active_transformation_profile
 from .monster_bloodline_system import active_bloodline_profile, bloodline_content_available
 from ..monster_general_traits import (
@@ -337,6 +337,7 @@ class PlayerCombatSystem:
         # converted from unabsorbed body damage after the fight.
         player_hp = cls._clamp(0.0, 1.0, player_power / player_power_max)
         player_mp = max(0.0, min(1.0, current_mp_ratio))
+        enemy_mp = cls._clamp(0.0, 1.0, float(target.get("mp_ratio", 1.0)))
         mana_cost_multiplier = cls._clamp(0.60, 1.80, float(mana_cost_multiplier))
         enemy_hp = 1.0
         player_morale = 100.0
@@ -418,13 +419,13 @@ class PlayerCombatSystem:
         burst_used = False
         quick = ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
-        generated_bloodline_traits = prepare_generated_trait_schedules(
+        generated_bloodline_traits = prepare_rules(
             generated_bloodline_traits, max_rounds=max_rounds, rng=rng,
         )
-        artifact_generated_rules = prepare_generated_trait_schedules(
+        artifact_generated_rules = prepare_rules(
             artifact_generated_rules, max_rounds=max_rounds, rng=rng,
         )
-        enemy_artifact_generated_rules = prepare_generated_trait_schedules(
+        enemy_artifact_generated_rules = prepare_rules(
             enemy_artifact_generated_rules, max_rounds=max_rounds, rng=rng,
         )
         custom_random_rounds: dict[int, tuple[int, ...]] = {}
@@ -437,6 +438,7 @@ class PlayerCombatSystem:
                 )))
         last_round_player_stats = dict(player_stats)
         last_round_enemy_stats = dict(enemy_stats)
+        rule_runtime = BattleRuleRuntime(max_rounds=max_rounds)
 
         # Hunting retains its advertised strict preparation threshold, while the
         # exchanges and losses are still resolved through the detailed model.
@@ -445,6 +447,16 @@ class PlayerCombatSystem:
             forced_outcome = "victory" if ratio > float(target["success_threshold"]) else "defeat"
 
         for round_no in range(1, max_rounds + 1):
+            rule_runtime.begin_round(round_no, {
+                "player": {
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                },
+                "enemy": {
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                },
+            })
             events: list[str] = []
             if "enemy_buff_dispel" in artifact_traits and enemy_buffs:
                 buff = enemy_buffs.pop(0)
@@ -506,7 +518,7 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + custom_start["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + custom_start["enemy_morale_delta"])
             events.extend(f"祖血规则【{event}】" for event in custom_start["events"])
-            generated_start = evaluate_generated_traits(
+            generated_start = evaluate_rules(
                 generated_bloodline_traits, trigger="round_start", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -519,21 +531,21 @@ class PlayerCombatSystem:
             for stat, multiplier in generated_start["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"族血共鸣【{event}】" for event in generated_start["events"])
-            artifact_start = evaluate_generated_traits(
+            artifact_start = evaluate_rules(
                 artifact_generated_rules, trigger="round_start", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
                     "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
                     "player_morale": player_morale, "enemy_morale": enemy_morale,
-                },
+                }, runtime=rule_runtime, side="player",
             )
-            enemy_artifact_start = evaluate_generated_traits(
+            enemy_artifact_start = evaluate_rules(
                 enemy_artifact_generated_rules, trigger="round_start", context={
                     "round_no": round_no, "realm_delta": -realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
-                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
-                },
+                }, runtime=rule_runtime, side="enemy",
             )
             for stat, multiplier in artifact_start["player_stat_multipliers"].items():
                 round_player_stats[stat] *= multiplier
@@ -576,7 +588,7 @@ class PlayerCombatSystem:
                 True if dragon_pressure_active and round_no <= 2
                 else p_init * cls._wave(rng, 0.96, 1.04) >= e_init
             )
-            generated_initiative = evaluate_generated_traits(
+            generated_initiative = evaluate_rules(
                 generated_bloodline_traits, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -592,23 +604,23 @@ class PlayerCombatSystem:
             generated_dealt_multiplier = float(generated_initiative["dealt_multiplier"])
             generated_received_multiplier = float(generated_initiative["received_multiplier"])
             events.extend(f"族血共鸣【{event}】" for event in generated_initiative["events"])
-            artifact_initiative = evaluate_generated_traits(
+            artifact_initiative = evaluate_rules(
                 artifact_generated_rules, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
                     "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
                     "player_morale": player_morale, "enemy_morale": enemy_morale,
                     "player_first": player_first,
-                },
+                }, runtime=rule_runtime, side="player",
             )
-            enemy_artifact_initiative = evaluate_generated_traits(
+            enemy_artifact_initiative = evaluate_rules(
                 enemy_artifact_generated_rules, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": -realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
-                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
                     "player_first": not player_first,
-                },
+                }, runtime=rule_runtime, side="enemy",
             )
             for stat, multiplier in artifact_initiative["player_stat_multipliers"].items():
                 round_player_stats[stat] *= multiplier
@@ -752,7 +764,7 @@ class PlayerCombatSystem:
                 received = 0.24
                 events.append(f"{bloodline_name('per_round_damage_cap')}分散冲击，本轮态势损失被限制为 24%。")
 
-            generated_before_damage = evaluate_generated_traits(
+            generated_before_damage = evaluate_rules(
                 generated_bloodline_traits, trigger="before_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -766,23 +778,23 @@ class PlayerCombatSystem:
             if generated_before_damage["received_cap"] is not None:
                 received = min(received, float(generated_before_damage["received_cap"]))
             events.extend(f"族血共鸣【{event}】" for event in generated_before_damage["events"])
-            artifact_before_damage = evaluate_generated_traits(
+            artifact_before_damage = evaluate_rules(
                 artifact_generated_rules, trigger="before_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
                     "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
                     "player_morale": player_morale, "enemy_morale": enemy_morale,
                     "player_first": player_first, "controlled": controlled,
-                },
+                }, runtime=rule_runtime, side="player",
             )
-            enemy_artifact_before_damage = evaluate_generated_traits(
+            enemy_artifact_before_damage = evaluate_rules(
                 enemy_artifact_generated_rules, trigger="before_damage", context={
                     "round_no": round_no, "realm_delta": -realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
-                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
                     "player_first": not player_first, "controlled": False,
-                },
+                }, runtime=rule_runtime, side="enemy",
             )
             dealt *= (
                 artifact_dealt_multiplier * float(artifact_before_damage["dealt_multiplier"])
@@ -838,6 +850,8 @@ class PlayerCombatSystem:
                 counterforce_ready = True
             base_cost = 0.025 + 0.025 * min(1.6, round_player_stats["might"] / max(1.0, player_power))
             player_mp = max(0.0, player_mp - min(0.12, base_cost * mana_cost_multiplier))
+            enemy_cost = 0.025 + 0.025 * min(1.6, round_enemy_stats["might"] / max(1.0, enemy_power))
+            enemy_mp = max(0.0, enemy_mp - min(0.12, enemy_cost))
             if round_no % 2 == 0 and bloodline_active("even_round_mana_recovery"):
                 restored_mp = min(0.03, 1.0 - player_mp)
                 player_mp += restored_mp
@@ -918,7 +932,7 @@ class PlayerCombatSystem:
                 player_morale = max(8.0, player_morale)
             if "执念" in soul_traits:
                 player_morale = max(8.0, player_morale)
-            generated_after_damage = evaluate_generated_traits(
+            generated_after_damage = evaluate_rules(
                 generated_bloodline_traits, trigger="after_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -934,7 +948,7 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_after_damage["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_after_damage["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_after_damage["events"])
-            artifact_after_damage = evaluate_generated_traits(
+            artifact_after_damage = evaluate_rules(
                 artifact_generated_rules, trigger="after_damage", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -942,23 +956,24 @@ class PlayerCombatSystem:
                     "player_morale": player_morale, "enemy_morale": enemy_morale,
                     "player_first": player_first, "controlled": controlled,
                     "received": actual_received, "dealt": dealt,
-                },
+                }, runtime=rule_runtime, side="player",
             )
-            enemy_artifact_after_damage = evaluate_generated_traits(
+            enemy_artifact_after_damage = evaluate_rules(
                 enemy_artifact_generated_rules, trigger="after_damage", context={
                     "round_no": round_no, "realm_delta": -realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
-                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
                     "player_first": not player_first, "controlled": False,
                     "received": dealt, "dealt": actual_received,
-                },
+                }, runtime=rule_runtime, side="enemy",
             )
             if player_hp > 0:
                 player_hp = min(1.0, player_hp + artifact_after_damage["player_state_restore"])
             if enemy_hp > 0:
                 enemy_hp = min(1.0, enemy_hp + enemy_artifact_after_damage["player_state_restore"])
             player_mp = min(1.0, player_mp + artifact_after_damage["player_mp_restore"])
+            enemy_mp = min(1.0, enemy_mp + enemy_artifact_after_damage["player_mp_restore"])
             player_morale = cls._clamp(
                 0.0, 100.0, player_morale + artifact_after_damage["player_morale_delta"]
                 + enemy_artifact_after_damage["enemy_morale_delta"],
@@ -1008,7 +1023,7 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + custom_end["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + custom_end["enemy_morale_delta"])
             events.extend(f"祖血规则【{event}】" for event in custom_end["events"])
-            generated_end = evaluate_generated_traits(
+            generated_end = evaluate_rules(
                 generated_bloodline_traits, trigger="round_end", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -1024,7 +1039,7 @@ class PlayerCombatSystem:
             player_morale = cls._clamp(0.0, 100.0, player_morale + generated_end["player_morale_delta"])
             enemy_morale = cls._clamp(0.0, 100.0, enemy_morale + generated_end["enemy_morale_delta"])
             events.extend(f"族血共鸣【{event}】" for event in generated_end["events"])
-            artifact_end = evaluate_generated_traits(
+            artifact_end = evaluate_rules(
                 artifact_generated_rules, trigger="round_end", context={
                     "round_no": round_no, "realm_delta": realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
@@ -1032,23 +1047,24 @@ class PlayerCombatSystem:
                     "player_morale": player_morale, "enemy_morale": enemy_morale,
                     "player_first": player_first, "controlled": controlled,
                     "received": actual_received, "dealt": dealt,
-                },
+                }, runtime=rule_runtime, side="player",
             )
-            enemy_artifact_end = evaluate_generated_traits(
+            enemy_artifact_end = evaluate_rules(
                 enemy_artifact_generated_rules, trigger="round_end", context={
                     "round_no": round_no, "realm_delta": -realm_delta,
                     "natural_terrain": natural, "artificial_conditions": artificial,
-                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": 1.0,
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
                     "player_first": not player_first, "controlled": False,
                     "received": dealt, "dealt": actual_received,
-                },
+                }, runtime=rule_runtime, side="enemy",
             )
             if player_hp > 0:
                 player_hp = min(1.0, player_hp + artifact_end["player_state_restore"])
             if enemy_hp > 0:
                 enemy_hp = min(1.0, enemy_hp + enemy_artifact_end["player_state_restore"])
             player_mp = min(1.0, player_mp + artifact_end["player_mp_restore"])
+            enemy_mp = min(1.0, enemy_mp + enemy_artifact_end["player_mp_restore"])
             player_morale = cls._clamp(
                 0.0, 100.0, player_morale + artifact_end["player_morale_delta"]
                 + enemy_artifact_end["enemy_morale_delta"],
@@ -1111,6 +1127,20 @@ class PlayerCombatSystem:
             events.append(
                 f"{'你方' if player_first else '敌方'}抢得先手；你方削去敌方 {dealt * enemy_power:.0f} 战斗态势，承受 {actual_received * player_power_max:.0f} 战斗态势损耗。"
             )
+            rule_runtime.finish_round({
+                "player": {
+                    "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
+                    "player_morale": player_morale, "enemy_morale": enemy_morale,
+                    "player_first": player_first, "controlled": controlled,
+                    "received": actual_received, "dealt": dealt,
+                },
+                "enemy": {
+                    "player_state": enemy_hp, "enemy_state": player_hp, "player_mp": enemy_mp,
+                    "player_morale": enemy_morale, "enemy_morale": player_morale,
+                    "player_first": not player_first, "controlled": False,
+                    "received": dealt, "dealt": actual_received,
+                },
+            })
             last_round_player_stats = dict(round_player_stats)
             last_round_enemy_stats = dict(round_enemy_stats)
             rounds.append({

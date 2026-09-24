@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.tianji-artifacts",
   "name": "神机百变：巧夺天工",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 45,
   "requires": [],
-  "description": "每个存档独立生成天工神机榜、神机材料与真方；神器 Buff 使用多层组合命名词库，情报通过交谈、战斗及三十种低概率事件逐步取得。"
+  "description": "每个新存档以玩法主题蓝图生成并冻结天工神机榜、神机材料与真方；神器可使用战斗记忆形成递增、蓄势和连锁，旧档规则保持不变。"
 }
