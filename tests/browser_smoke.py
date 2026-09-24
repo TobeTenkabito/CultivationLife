@@ -390,6 +390,7 @@ def main() -> None:
                 page.locator("[data-panel-target='tianji']").click()
                 assert page.locator("[data-panel-target='tianji']").evaluate("node => node.parentElement.id") == "strategy-dock"
                 page.locator("#tianji-card").wait_for(state="visible")
+                assert not page.locator("#tianji-card").evaluate("node => node.classList.contains('left-panel')")
                 assert page.locator("#tianji-ranking .tianji-rank-row").count() == 100
                 assert "已识 0 / 100" in page.locator("#tianji-heading").text_content()
                 page.locator("#tianji-toggle").click()
