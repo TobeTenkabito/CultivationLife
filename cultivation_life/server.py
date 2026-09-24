@@ -24,6 +24,7 @@ from .engine import GameEngine
 from .system.extension_system import write_extension_preference
 from .rules import QI_SOURCE_NAMES
 from .runtime import persistence_root
+from .runtime_config import load_runtime_config
 from .version import BASE_GAME_VERSION, base_game_metadata
 
 
@@ -34,9 +35,6 @@ BUNDLED_ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 ENGINE_ROOT = APP_ROOT if (APP_ROOT / "content").is_dir() else BUNDLED_ROOT
 WEB_ROOT = (APP_ROOT / "web") if (APP_ROOT / "web").is_dir() else (BUNDLED_ROOT / "web")
 ENGINE = GameEngine(ENGINE_ROOT, PERSISTENCE_ROOT / "data" / "saves")
-# Developer-only feature gate.  Keep disabled in normal builds; setting this
-# literal to True exposes the matching UI and permits debug mutation routes.
-DEBUG = False
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -46,8 +44,10 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             if path == "/api/config":
+                runtime = load_runtime_config(APP_ROOT)
                 self._json({
-                    "debug": DEBUG,
+                    "debug": bool(runtime["debug"]),
+                    "runtime_mode": runtime["mode"],
                     "base_game": base_game_metadata(),
                     "spirit_roots": ROOT_NAMES,
                     "spirit_root_details": {
@@ -124,7 +124,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "tianji-forge":
                 result = ENGINE.forge_tianji_artifact(game_id, payload)
             elif operation == "tianji-debug-reveal-all":
-                if not DEBUG:
+                if not load_runtime_config(APP_ROOT)["debug"]:
                     raise KeyError("接口不存在")
                 result = ENGINE.debug_reveal_all_tianji(game_id)
             elif operation == "use-item":
