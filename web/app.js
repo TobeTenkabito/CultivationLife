@@ -624,7 +624,6 @@ function renderTianji(system) {
     if (artifact.recipe) { const p=document.createElement('p'); p.textContent=`完整真方：${artifact.recipe.join(' · ')}`; detail.appendChild(p); }
     if (artifact.holder) { const p=document.createElement('p'); p.textContent=`持有者追踪：${artifact.holder.name}${artifact.holder.world_name ? ` · ${artifact.holder.world_name}` : ''}`; detail.appendChild(p); }
     const actions=document.createElement('div'); actions.className='tianji-actions';
-    if (artifact.knowledge_level < 5) { const study=document.createElement('button'); study.textContent=artifact.knowledge_level>=3?'参悟更深情报':'推演情报'; study.onclick=()=>mutate(`/api/games/${game.id}/tianji-action`,{action:'study',artifact_id:artifact.id}); actions.appendChild(study); }
     if ((system.owned_definition_ids || []).includes(artifact.id)) { const active=system.active_definition_id===artifact.id; const button=document.createElement('button'); button.textContent=active?'卸下神机位':'设为当前神机'; button.onclick=()=>mutate(`/api/games/${game.id}/tianji-action`,{action:active?'deactivate':'activate',artifact_id:artifact.id}); actions.appendChild(button); }
     detail.appendChild(actions); row.appendChild(detail); root.appendChild(row);
   });

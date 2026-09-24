@@ -473,8 +473,17 @@ class ContentRegistry:
             raise ContentError("炼器法宝的单件突破属性硬上限必须为 5%")
         molds = document.get("molds", [])
         mold_ids = [str(row.get("id", "")) for row in molds]
-        if len(molds) != 12 or len(set(mold_ids)) != 12 or any(not row.get("rule", {}).get("description") for row in molds):
-            raise ContentError("炼器内容必须配置十二种唯一胎模及固定规则")
+        required_molds = {
+            "sword", "saber", "spear", "umbrella", "mirror", "bell", "cauldron",
+            "banner", "armor", "ring", "boat", "seal", "bow", "halberd", "staff",
+            "firearm", "orb", "needle", "other",
+        }
+        if (
+            not required_molds <= set(mold_ids)
+            or len(set(mold_ids)) != len(molds)
+            or any(not row.get("rule", {}).get("description") for row in molds)
+        ):
+            raise ContentError("炼器内容必须完整配置十九种唯一胎模及其器纹规则")
         roles = {"primary", "secondary", "quench"}
         material_ids: set[str] = set()
         progression = document.get("material_progression", {})

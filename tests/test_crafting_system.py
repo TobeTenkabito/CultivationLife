@@ -63,6 +63,21 @@ class CraftingSystemTests(unittest.TestCase):
         self.assertEqual(bag_item["description"], artifact["description"])
         self.assertIn("equipment", bag_item["tags"])
 
+    def test_extended_weapon_molds_and_other_mold_random_base_stat(self):
+        molds = self.engine._crafting_molds()
+        self.assertTrue({
+            "bow", "halberd", "staff", "firearm", "orb", "needle", "other",
+        } <= set(molds))
+        instances = self._give_human_recipe()
+        payload = self._payload(instances) | {"mold_id": "other", "name": "无定奇兵"}
+        first = self.engine.preview_crafting(self.game_id, payload)
+        second = self.engine.preview_crafting(self.game_id, payload)
+        self.assertEqual(first["mold"]["rule"], second["mold"]["rule"])
+        resolved = first["mold"]["rule"]["resolved_random_stat"]
+        self.assertIn(resolved, {"might", "guard", "mobility", "sense", "sustain", "breach"})
+        multipliers = first["combat_effects"][0]["player_stat_multipliers"]
+        self.assertEqual(multipliers, {resolved: 1.08})
+
     def test_same_instance_cannot_fill_two_slots(self):
         instances = self._give_human_recipe()
         payload = self._payload(instances)

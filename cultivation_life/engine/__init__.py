@@ -715,6 +715,9 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
                 self._advance_concubine_aftermath(game, rng)
                 era_news.extend(self._advance_heavenly_court_unit(game, rng))
                 era_news.extend(self._advance_intrigue_unit(game, rng))
+                tianji_news = self._maybe_tianji_intelligence_event(game, rng)
+                if tianji_news:
+                    era_news.append(tianji_news)
             drained = self._advance_concubine_status(game, completed_units)
             if drained:
                 era_news.append(f"{player.age}岁：侍妾名分被抽走机缘 {drained:.1f}")
@@ -2975,6 +2978,8 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
             source_npc = self._find_npc(game, str(player.dao_companion.get("id", "")))
             if source_npc:
                 source_npc.affinity = float(player.dao_companion.get("affinity", source_npc.affinity or 0))
+        if action == "intimacy" and player.dao_companion:
+            summary += self._tianji_npc_conversation_clue(game, str(player.dao_companion.get("id", "")), rng)
         game.history.append(HistoryRecord(
             "SYS_DAO_COMPANION", 1, player.age, "道侣缘法", action, result, summary,
             {"companion": player.dao_companion.get("id") if player.dao_companion else None},
@@ -3039,6 +3044,8 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
                 result, summary = "friend_discussed", f"你与{friend['name']}交换修炼心得，解开数处疑难，机缘 +{gain}。"
             else:
                 raise ValueError("未知道友互动")
+        if action in {"befriend", "discuss", "spar"}:
+            summary += self._tianji_npc_conversation_clue(game, npc_id, rng)
         game.history.append(HistoryRecord(
             "SYS_DAO_FRIEND",1,player.age,"道友往来",action,result,summary,
             {"friend_id":npc_id},["system","relationship","friend"],
@@ -3236,6 +3243,8 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
             game.governance_actions[key] = player.age
             game.rng_state = encode_rng(rng)
             result, summary = "interacted", f"你与队友交流沿途见闻、互证修炼心得，好感 +{gain}，当前为 {affinity:.0f}。"
+            summary += self._tianji_npc_conversation_clue(game, npc_id, rng)
+            game.rng_state = encode_rng(rng)
         elif action in {"crossing_add", "crossing_remove"}:
             if not any(entry.get("id") == npc_id for entry in player.party):
                 raise ValueError("只有当前队友可以随行飞升")
