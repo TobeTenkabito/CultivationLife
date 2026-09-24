@@ -139,9 +139,8 @@
     "time_units": {"0":1,"1":1,"2":1,"3":1,"4":5,"5":10,"6":20,"7":50,"8":100,"9":500,"10":500,"11":500,"12":500},
     "immortal_power_conversion":{"time_unit_years":500,"min_gap_units":10,"base_chance":0.10,"chance_per_unit":0.02,"stages":5},
     "natal_artifact":{
-      "minimum_realm":3,"max_level":12,"level_scale_per_level":0.20,"experience_base":3,"manual_refine_xp":1,"manual_refine_stone_base":18,
+      "minimum_realm":3,"unbounded_levels":true,"slot_interval":10,"level_growth_linear":0.25,"level_growth_quadratic":0.02,"combat_growth_cubic":5.0,"experience_base":3,"manual_refine_xp":1,"manual_refine_stone_base":15,
       "eligible_item_ids":["starfall_blade","mountain_seal","boundary_blade","broken_god","celestial_star_array","wind_thunder_wings","eight_spirit_ruler","virtual_heaven_cauldron","north_pole_origin_mountain","yuan_magnetic_divine_mountain","taiyi_green_mountain","yuanhe_five_poles_mountain","xuanhuang_immortal_armor","heavenly_river_sword_embryo"],
-      "slot_unlocks":{"1":2,"3":3,"5":4,"7":5,"9":6,"12":7},
       "materials":[
         {"item_id":"star_pattern_copper","name":"星纹赤铜","minimum_realm":3,"effect":{"combat_bonus":220,"hp_bonus":300},"description":"结丹真火反复锻出的星纹灵铜，战斗力 +220、最大 HP +300。"},
         {"item_id":"spirit_jade_sand","name":"涵灵玉髓","minimum_realm":3,"effect":{"mp_bonus":500,"opportunity_bonus":0.02},"description":"能温养金丹与器灵的细碎玉髓，最大 MP +500、机缘效率 +2%。"},

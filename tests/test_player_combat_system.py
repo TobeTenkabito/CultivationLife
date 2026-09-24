@@ -165,7 +165,8 @@ class PlayerCombatSystemTests(unittest.TestCase):
     def test_natal_artifact_start_modifiers_change_real_six_stat_combat(self):
         game = self._game()
         game.natal_artifact = {
-            "item_id":"starfall_blade", "name":"坠星刃", "level":12, "experience":0,
+            "item_id":"starfall_blade", "name":"坠星刃", "level":70, "experience":0,
+            "slot_rule_version":2,
             "slots":["jumang_feather", "rushou_scale", "gonggong_water", "zhurong_flame",
                      "xuanming_rain", "feilian_wind", "houtu_clay"],
         }
@@ -189,7 +190,8 @@ class PlayerCombatSystemTests(unittest.TestCase):
     def test_natal_artifact_round_traits_and_debuff_immunity_are_executed(self):
         game = self._game()
         game.natal_artifact = {
-            "item_id":"starfall_blade", "name":"坠星刃", "level":12, "experience":0,
+            "item_id":"starfall_blade", "name":"坠星刃", "level":70, "experience":0,
+            "slot_rule_version":2,
             "slots":["dijiang_tear", "zhulong_breath", "qiangliang_thunder", "xizi_lightning",
                      "shebishi_orb", None, None],
         }

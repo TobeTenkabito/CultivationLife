@@ -1504,8 +1504,10 @@ class ContentRegistry:
         natal_materials = natal.get("materials", [])
         if (
             int(natal.get("minimum_realm", 0)) != 3
-            or int(natal.get("max_level", 0)) < 10
-            or not natal.get("slot_unlocks")
+            or natal.get("unbounded_levels") is not True
+            or int(natal.get("slot_interval", 0)) != 10
+            or float(natal.get("level_growth_quadratic", 0)) <= 0
+            or float(natal.get("combat_growth_cubic", 0)) <= 0
             or any(item_id not in items for item_id in natal.get("eligible_item_ids", []))
             or any(row.get("item_id") not in items for row in natal_materials)
             or len({row.get("item_id") for row in natal_materials}) != len(natal_materials)

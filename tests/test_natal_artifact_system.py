@@ -34,7 +34,10 @@ class NatalArtifactSystemTests(unittest.TestCase):
         shown = self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         self.assertTrue(shown["natal_artifact"]["bound"])
         self.assertEqual(shown["natal_artifact"]["level"], 1)
-        self.assertEqual(shown["natal_artifact"]["unlocked_slots"], 2)
+        self.assertEqual(shown["natal_artifact"]["unlocked_slots"], 0)
+        self.assertTrue(shown["natal_artifact"]["unbounded"])
+        self.assertEqual(shown["natal_artifact"]["next_slot_level"], 10)
+        self.assertEqual(shown["natal_artifact"]["refine_cost"], 15)
         self.assertEqual(shown["player"]["combat_power"], before_power)
         bound = next(row for row in shown["player"]["inventory"] if row.get("is_natal_artifact"))
         self.assertEqual(bound["id"], "starfall_blade")
@@ -50,7 +53,13 @@ class NatalArtifactSystemTests(unittest.TestCase):
         game = self.engine.store.load(self.game_id)
         old_level, new_level = self.engine._add_natal_artifact_experience(game, 6)
         self.assertEqual((old_level, new_level), (2, 3))
-        self.assertEqual(self.engine._natal_slots_for_level(new_level), 3)
+        self.assertEqual(self.engine._natal_slots_for_level(new_level), 0)
+        game.natal_artifact["level"] = 9
+        game.natal_artifact["experience"] = 0
+        old_level, new_level = self.engine._add_natal_artifact_experience(game, 27)
+        self.assertEqual((old_level, new_level), (9, 10))
+        self.assertEqual(self.engine._natal_slots_for_level(new_level), 1)
+        self.assertEqual(len(game.natal_artifact["slots"]), 1)
 
     def test_one_click_refine_spends_exact_plan_and_uses_stronger_growth(self):
         bound = self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
@@ -67,18 +76,58 @@ class NatalArtifactSystemTests(unittest.TestCase):
         after = self.engine.store.load(self.game_id)
         after_stones = next((row.quantity for row in after.player.inventory if row.id == "spirit_stone"), 0)
         self.assertEqual(before_stones - after_stones, preview["refine_all_cost"])
-        self.assertEqual(shown["natal_artifact"]["level"], shown["natal_artifact"]["max_level"])
+        self.assertGreater(shown["natal_artifact"]["level"], 12)
+        self.assertIsNone(shown["natal_artifact"]["max_level"])
         self.assertGreater(shown["natal_artifact"]["bonuses"]["combat_bonus"], level_one_power * 2)
+
+    def test_unbounded_growth_has_increasing_marginal_combat_returns(self):
+        self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
+        base_power = 380.0
+
+        def marginal(level):
+            return (
+                base_power * (self.engine._natal_level_scale(level + 1) - self.engine._natal_level_scale(level))
+                + self.engine._natal_flat_combat_growth(level + 1)
+                - self.engine._natal_flat_combat_growth(level)
+            )
+
+        self.assertGreater(marginal(20), marginal(10))
+        self.assertGreater(marginal(100), marginal(20) * 10)
+        game = self.engine.store.load(self.game_id)
+        game.natal_artifact["level"] = 100
+        game.natal_artifact["experience"] = 0
+        self.engine._sync_natal_artifact_bonuses(game)
+        self.assertGreater(game.player.natal_artifact_combat_bonus, 4_000_000)
+        old_level, new_level = self.engine._add_natal_artifact_experience(game, 300)
+        self.assertEqual((old_level, new_level), (100, 101))
+        self.assertEqual(self.engine._natal_slots_for_level(new_level), 10)
+
+    def test_legacy_excess_socket_materials_are_returned_on_migration(self):
+        self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
+        game = self.engine.store.load(self.game_id)
+        game.natal_artifact.update(
+            level=12,
+            slots=["star_pattern_copper", "geng_essence", None, None, None, None, None],
+        )
+        game.natal_artifact.pop("slot_rule_version", None)
+        before = next((row.quantity for row in game.player.inventory if row.id == "geng_essence"), 0)
+        self.assertTrue(self.engine._ensure_natal_artifact(game))
+        after = next((row.quantity for row in game.player.inventory if row.id == "geng_essence"), 0)
+        self.assertEqual(game.natal_artifact["slots"], ["star_pattern_copper"])
+        self.assertEqual(after, before + 1)
+        self.assertEqual(game.natal_artifact["slot_rule_version"], 2)
 
     def test_geng_essence_socket_adds_power_and_can_be_recovered(self):
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         game = self.engine.store.load(self.game_id)
         game.player.realm_index = 4
+        game.natal_artifact["level"] = 10
         add_item(game.player, "geng_essence")
         self.engine.store.save(game)
+        before_socket = self.engine.get_game(self.game_id)["natal_artifact"]["bonuses"]["combat_bonus"]
         shown = self.engine.natal_artifact_action(self.game_id, "socket", "geng_essence", 0)
         self.assertEqual(shown["natal_artifact"]["slots"][0]["name"], "庚精")
-        self.assertEqual(shown["natal_artifact"]["bonuses"]["combat_bonus"], 2180)
+        self.assertAlmostEqual(shown["natal_artifact"]["bonuses"]["combat_bonus"] - before_socket, 1800)
         shown = self.engine.natal_artifact_action(self.game_id, "unsocket", slot_index=0)
         self.assertIsNone(shown["natal_artifact"]["slots"][0]["material_id"])
         self.assertIn("geng_essence", {row["id"] for row in shown["player"]["inventory"]})
@@ -87,6 +136,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         game = self.engine.store.load(self.game_id)
         game.player.realm_index = 5
+        game.natal_artifact["level"] = 10
         add_item(game.player, "thunder_calamity_jade")
         self.engine.store.save(game)
         self.engine.natal_artifact_action(self.game_id, "socket", "thunder_calamity_jade", 0)
@@ -127,7 +177,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         game = self.engine.store.load(self.game_id)
         game.player.realm_index = 10
-        game.natal_artifact["level"] = 12
+        game.natal_artifact["level"] = 20
         add_item(game.player, "dijiang_tear")
         add_item(game.player, "jumang_feather")
         self.engine.store.save(game)
@@ -164,6 +214,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
 
         game = self.engine.store.load(self.game_id)
         game.player.realm_index = 4
+        game.natal_artifact["level"] = 10
         add_item(game.player, "geng_essence")
         self.engine.store.save(game)
         socketed = self.engine.natal_artifact_action(self.game_id, "socket", "geng_essence", 0)
