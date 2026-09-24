@@ -40,6 +40,7 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     }
     assert max(len(artifact["effects"]) for artifact in a["artifacts"]) > 3
     generated_schedules: set[str] = set()
+    generated_condition_counts: set[int] = set()
     for artifact in a["artifacts"]:
         effects = artifact["effects"]
         assert "rule" not in effects[0]
@@ -48,10 +49,12 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
         for effect in effects[1:]:
             assert not validate_generated_trait(effect["rule"])
             generated_schedules.add(effect["rule"]["schedule"])
+            generated_condition_counts.add(len(effect["rule"]["conditions"]))
     assert {
         "first", "second", "third", "fourth", "last", "first_two", "first_three",
         "random", "random_two", "first_and_last",
     } <= generated_schedules
+    assert {1, 2, 3, 4} <= generated_condition_counts
 
 
 def test_ranking_cannot_directly_purchase_or_study_intelligence(
@@ -133,7 +136,7 @@ def test_generation_three_save_renames_and_expands_schedules_without_changing_ef
     for index, artifact in enumerate(game.tianji_state["artifacts"][:3]):
         artifact["name"] = f"九幽镇世{index}"
     assert engine._ensure_tianji_state(game)
-    assert game.tianji_state["generation_version"] == 5
+    assert game.tianji_state["generation_version"] == 6
     assert len({row["name"][:4] for row in game.tianji_state["artifacts"]}) == 100
     assert all(
         list(row["recipe"]) == frozen[row["id"]]["recipe"]

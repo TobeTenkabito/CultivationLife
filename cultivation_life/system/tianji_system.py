@@ -18,7 +18,7 @@ from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 5
+TIANJI_GENERATION_VERSION = 6
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
 TIANJI_WINDOW_SCHEDULES = (
     "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "last", "penultimate",

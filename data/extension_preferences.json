@@ -2,6 +2,7 @@
   "schema_version": 1,
   "enabled": {
     "official.monster-bloodlines": true,
-    "official.ghost-reincarnation": true
+    "official.ghost-reincarnation": true,
+    "official.guixu-tide": true
   }
 }

@@ -16,8 +16,9 @@ from cultivation_life.system.monster_bloodline_system import (
     resolved_bloodline_traits,
 )
 from cultivation_life.monster_bloodline_rules import (
-    BLOODLINE_RULE_EFFECTS, BLOODLINE_RULE_SCHEDULES, evaluate_generated_traits,
-    generate_species_bloodline_trait, prepare_generated_trait_schedules,
+    BLOODLINE_RULE_EFFECTS, BLOODLINE_RULE_SCHEDULES, describe_generated_trait,
+    evaluate_generated_traits, generate_species_bloodline_trait, generated_trait_id,
+    prepare_generated_trait_schedules, public_generated_trait,
     validate_generated_collection, validate_generated_trait,
 )
 from cultivation_life.monster_bloodline_traits import BLOODLINE_TRAIT_REGISTRY, bloodline_stat_modifiers
@@ -389,6 +390,7 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
                 self.assertEqual(len({rule["id"] for rule in rules}), 16)
                 self.assertFalse(validate_generated_collection(rules))
                 self.assertTrue(any(len(rule["conditions"]) == 2 for rule in rules))
+                self.assertTrue(any(len(rule["conditions"]) >= 3 for rule in rules))
                 self.assertTrue(all(rule["description"].endswith("。") for rule in rules))
 
     def test_rule_validator_rejects_unavailable_causal_data_and_overpowered_effect(self):
@@ -407,6 +409,60 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
             or definition["target"] == "enemy" and definition["kind"] in {"restore_state", "restore_mp"}
             for definition in BLOODLINE_RULE_EFFECTS.values()
         ))
+
+    def test_compound_conditions_multiply_displayed_and_runtime_strength(self):
+        def rule_with(conditions):
+            rule = {
+                "schema_version": 1, "species_id": "serpent", "trigger": "round_start",
+                "schedule": "every", "conditions": conditions, "effect": "enemy_guard_major",
+            }
+            rule.update(
+                id=generated_trait_id(rule), name="潜鳞·防护侵蚀",
+                # Deliberately stale derived fields simulate an older save.
+                description="旧版描述", power={"raw": 10.0, "expected": 2.8},
+            )
+            return rule
+
+        context = {
+            "round_no": 1, "realm_delta": 0, "player_state": 0.45,
+            "natural_terrain": "狭窄", "artificial_conditions": ["禁制"],
+        }
+        two = rule_with(["enemy_same_or_lower", "terrain_narrow"])
+        three = rule_with(["enemy_same_or_lower", "player_state_50", "terrain_narrow"])
+        four = rule_with([
+            "enemy_same_or_lower", "player_state_50", "terrain_narrow", "artificial_field",
+        ])
+        self.assertFalse(validate_generated_trait(two))
+        self.assertAlmostEqual(evaluate_generated_traits(
+            [two], trigger="round_start", context=context,
+        )["enemy_stat_multipliers"]["guard"], 0.84)
+        self.assertAlmostEqual(evaluate_generated_traits(
+            [three], trigger="round_start", context=context,
+        )["enemy_stat_multipliers"]["guard"], 0.76)
+        self.assertAlmostEqual(evaluate_generated_traits(
+            [four], trigger="round_start", context=context,
+        )["enemy_stat_multipliers"]["guard"], 0.68)
+        self.assertIn("降低16%", public_generated_trait(two)["description"])
+        self.assertIn("降低24%", public_generated_trait(three)["description"])
+        self.assertIn("降低32%", public_generated_trait(four)["description"])
+
+    def test_restrictive_damage_cap_becomes_stronger_in_the_correct_direction(self):
+        rule = {
+            "schema_version": 1, "species_id": "turtle", "trigger": "before_damage",
+            "schedule": "every",
+            "conditions": ["enemy_higher", "player_state_50", "terrain_narrow"],
+            "effect": "damage_cap_24",
+        }
+        rule.update(
+            id=generated_trait_id(rule), name="玄甲·锁命",
+            description=describe_generated_trait(rule),
+        )
+        result = evaluate_generated_traits([rule], trigger="before_damage", context={
+            "round_no": 1, "realm_delta": -1, "player_state": 0.40,
+            "natural_terrain": "狭窄",
+        })
+        self.assertAlmostEqual(result["received_cap"], 0.08)
+        self.assertIn("不超过8%", describe_generated_trait(rule))
 
     def test_generated_damage_cap_and_reclamation_execute_from_saved_rules(self):
         cap = {
