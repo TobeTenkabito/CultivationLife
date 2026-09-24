@@ -393,6 +393,7 @@ def main() -> None:
                 assert not page.locator("#tianji-card").evaluate("node => node.classList.contains('left-panel')")
                 assert page.locator("#tianji-ranking .tianji-rank-row").count() == 100
                 assert "已识 0 / 100" in page.locator("#tianji-heading").text_content()
+                assert not page.locator("#tianji-debug-lv5").is_visible()
                 page.locator("#tianji-toggle").click()
 
                 page.locator("[data-panel-target='intrigue']").click()

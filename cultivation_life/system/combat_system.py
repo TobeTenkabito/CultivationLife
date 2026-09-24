@@ -137,6 +137,22 @@ class PlayerCombatSystem:
     # post-defeat retreat text grant an effectively free escape.
     OVERWHELMING_RETREAT_RATIO = 1 / 3
 
+    @staticmethod
+    def _artifact_effect_active(
+        effect: dict[str, Any], *, owner_realm_delta: int,
+        natural_terrain: str, artificial_conditions: list[str],
+    ) -> bool:
+        conditions = list(map(str, effect.get("conditions", [])))
+        checks = {
+            "enemy_higher": owner_realm_delta < 0,
+            "enemy_same_or_lower": owner_realm_delta >= 0,
+            "terrain_open": natural_terrain == "开阔",
+            "terrain_narrow": natural_terrain == "狭窄",
+            "terrain_dangerous": natural_terrain == "险要",
+            "artificial_field": bool(artificial_conditions),
+        }
+        return all(checks.get(condition, False) for condition in conditions)
+
     @classmethod
     def resolve(
         cls,
@@ -209,8 +225,22 @@ class PlayerCombatSystem:
 
         def bloodline_name(combat_hook: str) -> str:
             return "与".join(bloodline_hook_names(bloodline_traits, combat_hook)) or combat_hook
-        artifact_effects = list(target.get("natal_artifact_effects", []))
-        enemy_artifact_effects = list(target.get("enemy_artifact_effects", []))
+        enemy_realm = max(unit.realm_index for unit in enemy_units)
+        realm_delta = player.realm_index - enemy_realm
+        artifact_effects = [
+            effect for effect in target.get("natal_artifact_effects", [])
+            if cls._artifact_effect_active(
+                effect, owner_realm_delta=realm_delta,
+                natural_terrain=natural, artificial_conditions=artificial,
+            )
+        ]
+        enemy_artifact_effects = [
+            effect for effect in target.get("enemy_artifact_effects", [])
+            if cls._artifact_effect_active(
+                effect, owner_realm_delta=-realm_delta,
+                natural_terrain=natural, artificial_conditions=artificial,
+            )
+        ]
         artifact_traits: set[str] = set()
         for effect in artifact_effects:
             artifact_traits.update(str(trait) for trait in effect.get("traits", []))
@@ -254,8 +284,6 @@ class PlayerCombatSystem:
             buff.update(stat=stat, multiplier=multiplier)
             enemy_stats[stat] *= multiplier
             enemy_buffs.append(buff)
-        enemy_realm = max(unit.realm_index for unit in enemy_units)
-        realm_delta = player.realm_index - enemy_realm
         _, triggered_general_traits = general_monster_trait_modifiers(
             general_monster_traits, natural_terrain=natural, artificial_conditions=artificial,
         )

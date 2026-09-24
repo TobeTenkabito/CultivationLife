@@ -3,7 +3,7 @@
   "systems": {
     "tianji_artifacts": {
       "enabled": true,
-      "generation_version": 1,
+      "generation_version": 2,
       "artifact_count": 100,
       "material_count": 48,
       "base_worlds": ["human", "demon", "spirit", "true_demon", "hell", "celestial", "asura"],
