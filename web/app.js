@@ -335,7 +335,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'guixu', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'guixu', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -558,7 +558,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -592,7 +592,41 @@ function craftingPayload() {
     mold_id:$('#crafting-mold').value, primary_id:$('#crafting-primary').value,
     secondary_a_id:$('#crafting-secondary-a').value, secondary_b_id:$('#crafting-secondary-b').value,
     quench_id:$('#crafting-quench').value, name:$('#crafting-name').value, allocations,
+    target_artifact_id:$('#crafting-target')?.value || '',
+    forge_kind:$('#crafting-forge-kind')?.value || 'replica',
   };
+}
+
+function renderTianji(system) {
+  const panel = $('#tianji-card'), dock = document.querySelector('[data-panel-target="tianji"]');
+  panel?.classList.toggle('hidden', !system.available); dock?.classList.toggle('hidden', !system.available);
+  if (!system.available) { window.UtilityPanels?.close('tianji'); return; }
+  $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version}`;
+  const root = $('#tianji-ranking'); root.innerHTML = '';
+  (system.artifacts || []).forEach(artifact => {
+    const row = document.createElement('details'); row.className = `tianji-rank-row knowledge-${artifact.knowledge_level}`;
+    const summary = document.createElement('summary');
+    const rank = document.createElement('b'); rank.textContent = `第 ${artifact.rank} 位`;
+    const name = document.createElement('span'); name.textContent = artifact.name;
+    const level = document.createElement('small'); level.textContent = `情报 Lv${artifact.knowledge_level}`;
+    summary.append(rank, name, level); row.appendChild(summary);
+    const detail = document.createElement('div'); detail.className = 'tianji-rank-detail';
+    const lines = [
+      `胎模：${artifact.mold_name || '???'}`,
+      `基础战力：${artifact.base_combat_power == null ? '???' : number(artifact.base_combat_power)}`,
+      `来源世界：${artifact.origin_world_name || '???'}`,
+      `器述：${artifact.description || '???'}`,
+    ];
+    lines.forEach(text => { const p=document.createElement('p'); p.textContent=text; detail.appendChild(p); });
+    if (artifact.effects) artifact.effects.forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name}】${effect.description}`; detail.appendChild(p); });
+    if (artifact.recipe_clues) { const p=document.createElement('p'); p.textContent=`真方线索：${artifact.recipe_clues.map(tags => tags.join(' / ')).join('；')}`; detail.appendChild(p); }
+    if (artifact.recipe) { const p=document.createElement('p'); p.textContent=`完整真方：${artifact.recipe.join(' · ')}`; detail.appendChild(p); }
+    if (artifact.holder) { const p=document.createElement('p'); p.textContent=`持有者追踪：${artifact.holder.name}${artifact.holder.world_name ? ` · ${artifact.holder.world_name}` : ''}`; detail.appendChild(p); }
+    const actions=document.createElement('div'); actions.className='tianji-actions';
+    if (artifact.knowledge_level < 5) { const study=document.createElement('button'); study.textContent=artifact.knowledge_level>=3?'参悟更深情报':'推演情报'; study.onclick=()=>mutate(`/api/games/${game.id}/tianji-action`,{action:'study',artifact_id:artifact.id}); actions.appendChild(study); }
+    if ((system.owned_definition_ids || []).includes(artifact.id)) { const active=system.active_definition_id===artifact.id; const button=document.createElement('button'); button.textContent=active?'卸下神机位':'设为当前神机'; button.onclick=()=>mutate(`/api/games/${game.id}/tianji-action`,{action:active?'deactivate':'activate',artifact_id:artifact.id}); actions.appendChild(button); }
+    detail.appendChild(actions); row.appendChild(detail); root.appendChild(row);
+  });
 }
 
 function craftingStatText(stat, value, names) {
@@ -606,6 +640,13 @@ function renderCrafting(system) {
   const panel = $('#crafting-card'), dock = document.querySelector('[data-panel-target="crafting"]');
   panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
   if (!system.visible) { window.UtilityPanels?.close('crafting'); return; }
+  const targets = game?.tianji_artifacts?.targets || [];
+  $('#crafting-tianji-mode').classList.toggle('hidden', !game?.tianji_artifacts?.available);
+  const targetSelect = $('#crafting-target'); targetSelect.innerHTML = '';
+  targets.forEach(target => { const option=document.createElement('option'); option.value=target.id; option.textContent=`第 ${target.rank} 位 · ${target.name} · Lv${target.knowledge_level}`; targetSelect.appendChild(option); });
+  $('#crafting-mode').value = 'free';
+  $('#crafting-mode').onchange = updateCraftingMode;
+  updateCraftingMode();
   $('#crafting-heading').textContent = `炼器 · 材料 ${system.materials?.length || 0} · 包裹成品 ${system.active_count || 0}`;
   const moldSelect = $('#crafting-mold'); moldSelect.innerHTML = '';
   (system.molds || []).forEach(mold => {
@@ -669,8 +710,19 @@ async function previewCrafting() {
   if (busy) return;
   busy = true; document.body.classList.add('busy'); renderButtons();
   try {
-    const preview = await api(`/api/games/${game.id}/crafting-preview`, {method:'POST', body:JSON.stringify(craftingPayload())});
+    const targetMode = $('#crafting-mode')?.value === 'target';
+    const endpoint = targetMode ? 'tianji-preview' : 'crafting-preview';
+    const preview = await api(`/api/games/${game.id}/${endpoint}`, {method:'POST', body:JSON.stringify(craftingPayload())});
     const root = $('#crafting-preview-result'); root.innerHTML = '';
+    if (targetMode) {
+      const title=document.createElement('h4'); title.textContent=`目标：第 ${preview.target.rank} 位 · ${preview.target.name}`;
+      const match=document.createElement('p'); match.textContent=`四材接近度 ${percent(preview.recipe_closeness)} · 本界上限 ${percent(preview.world_cap)} · 最终发挥 ${percent(preview.replica_ratio)}`;
+      const slots=document.createElement('p'); slots.className='muted'; slots.textContent=`主材 / 辅材甲 / 辅材乙 / 淬火：${preview.slot_similarities.map(value=>percent(value)).join(' · ')}`;
+      const power=document.createElement('p'); power.textContent=`成品基础战力：${number(preview.combat_power)}。目标炼制不会继承材料的普通炼器 Buff。`;
+      const forge=document.createElement('button'); forge.className='primary'; forge.textContent=preview.forge_kind==='true_body'?'确认炼制本体':'确认炼制仿品';
+      forge.onclick=()=>openGameConfirm({title:'确认神机目标炼制',body:`将永久消耗四份材料，炼成发挥度 ${percent(preview.replica_ratio)} 的${preview.forge_kind==='true_body'?'唯一真体':'仿品'}。`,confirmText:'开炉',onConfirm:()=>mutate(`/api/games/${game.id}/tianji-forge`,craftingPayload())});
+      root.append(title,match,slots,power,forge); return;
+    }
     const title = document.createElement('h4'); title.textContent = `${preview.mold.rule.name} · 锚定价值 ${number(preview.anchor_value)}灵石`;
     const effects = document.createElement('p'); effects.textContent = [preview.mold.rule.description, ...(preview.material_effects || []).map(row => `${row.name}：${row.description}`)].join(' ');
     const normal = document.createElement('p'); normal.textContent = `普通品质：${Object.entries(preview.theoretical_stats.normal || {}).filter(([,value]) => Number(value)).map(([key,value]) => craftingStatText(key,value,game.crafting_system.stat_names || {})).join(' · ')}`;
@@ -1169,6 +1221,16 @@ function renderIntrigue(system) {
     const log=document.createElement('section');log.className='intrigue-resolution-log';const h3=document.createElement('h3');h3.textContent='近期议决';log.appendChild(h3);
     system.resolutions.forEach(resolution=>{const row=document.createElement('div');const title=document.createElement('b');const detail=document.createElement('small');title.textContent=`${resolution.faction_name} · ${resolution.type_name} · ${resolution.result==='passed'?'通过':'否决'}`;detail.textContent=`${resolution.yes}/${resolution.total} 票赞成 · ${resolution.age} 岁`;row.append(title,detail);log.appendChild(row);});content.appendChild(log);
   }
+}
+
+function updateCraftingMode() {
+  const targetMode=$('#crafting-mode')?.value==='target';
+  document.querySelectorAll('.tianji-target-control').forEach(node=>node.classList.toggle('hidden',!targetMode));
+  $('#crafting-allocations')?.classList.toggle('hidden',targetMode);
+  $('#crafting-budget')?.parentElement?.classList.toggle('hidden',targetMode);
+  $('#crafting-name')?.parentElement?.classList.toggle('hidden',targetMode);
+  $('#crafting-save-blueprint')?.classList.toggle('hidden',targetMode);
+  if (targetMode && !$('#crafting-target')?.options.length) toast('尚无 Lv3 以上神机情报，无法目标炼制。');
 }
 
 function renderSecretArts(system) {
@@ -2748,11 +2810,18 @@ function renderInventory(items) {
       natal.disabled = natalOccupied; natal.dataset.craftingUnavailable = natalOccupied ? '1' : '0';
       if (natalOccupied) natal.title = `已有本命法宝“${game.natal_artifact.name}”，不能重复认主`;
       natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效，已镶材料会全部退回。` : `确认将“${artifact.name}”纳入本命法宝系统？认主后可在“本命”界面温养升级并镶嵌材料。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
-      const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
-      sell.disabled = Boolean(artifact.is_natal); sell.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0';
-      sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开包裹，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
-      tools.append(natal, sell);
-      if (game?.crafting_system?.auction_available && !artifact.is_natal) {
+      tools.appendChild(natal);
+      if (artifact.tianji) {
+        const active=document.createElement('button'); active.textContent=artifact.equipped?'卸下神机位':'设为当前神机';
+        active.onclick=()=>mutate(`/api/games/${game.id}/crafted-artifact`,{artifact_id:artifact.id,action:artifact.equipped?'unequip':'equip'});
+        tools.appendChild(active);
+      } else {
+        const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
+        sell.disabled = Boolean(artifact.is_natal); sell.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0';
+        sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开包裹，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
+        tools.appendChild(sell);
+      }
+      if (!artifact.tianji && game?.crafting_system?.auction_available && !artifact.is_natal) {
         const start = document.createElement('input'); start.type = 'number'; start.min = String(Math.ceil(artifact.anchor_value * .25)); start.max = String(Math.floor(artifact.anchor_value * 5)); start.value = String(Math.round(artifact.anchor_value * .8)); start.title = '寄拍起拍价';
         const consign = document.createElement('button'); consign.textContent = '寄拍'; consign.onclick = () => mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'consign', start_price:Number(start.value || 0)});
         tools.append(start, consign);

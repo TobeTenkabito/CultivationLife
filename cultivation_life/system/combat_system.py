@@ -210,6 +210,7 @@ class PlayerCombatSystem:
         def bloodline_name(combat_hook: str) -> str:
             return "与".join(bloodline_hook_names(bloodline_traits, combat_hook)) or combat_hook
         artifact_effects = list(target.get("natal_artifact_effects", []))
+        enemy_artifact_effects = list(target.get("enemy_artifact_effects", []))
         artifact_traits: set[str] = set()
         for effect in artifact_effects:
             artifact_traits.update(str(trait) for trait in effect.get("traits", []))
@@ -219,6 +220,14 @@ class PlayerCombatSystem:
             for stat, multiplier in effect.get("enemy_stat_multipliers", {}).items():
                 if stat in enemy_stats:
                     enemy_stats[stat] *= max(0.0, float(multiplier))
+        for effect in enemy_artifact_effects:
+            # The same finite DSL is mirrored from the holder's perspective.
+            for stat, multiplier in effect.get("player_stat_multipliers", {}).items():
+                if stat in enemy_stats:
+                    enemy_stats[stat] *= max(0.0, float(multiplier))
+            for stat, multiplier in effect.get("enemy_stat_multipliers", {}).items():
+                if stat in player_stats:
+                    player_stats[stat] *= max(0.0, float(multiplier))
         if "crafted_sense_ward" in artifact_traits and "禁神识" in artificial:
             # The umbrella mold negates the standard 14% forbidden-sense field
             # penalty; its separate +5% sense multiplier remains meaningful.
@@ -325,6 +334,9 @@ class PlayerCombatSystem:
         if artifact_effects:
             names = "、".join(str(effect.get("name", "未知嵌材")) for effect in artifact_effects)
             key_events.append(f"本命法宝嵌材生效：{names}。")
+        if enemy_artifact_effects:
+            names = "、".join(str(effect.get("name", "未知神机")) for effect in enemy_artifact_effects)
+            key_events.append(f"敌方持有的天工神机规则生效：{names}。")
         if debuffs_blocked:
             key_events.append("烛龙之息隔断时序侵蚀，敌方施加的属性削弱未能生效。")
         if dragon_pressure_active:

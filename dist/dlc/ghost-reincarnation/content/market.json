@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "goods": [
+    {"world":"human","kind":"item","content_id":"ghost_nurturing_casket","tier":2,"price":42},
+    {"world":"hell","kind":"item","content_id":"ghost_nurturing_casket","tier":1,"price":18},
+    {"world":"hell","kind":"item","content_id":"nine_nether_soul_lamp","tier":4,"price":1400},
+    {"world":"hell","kind":"item","content_id":"yellow_spring_soul_boat","tier":7,"price":420000},
+    {"world":"hell","kind":"technique","content_id":"TECH_GHOST_BODY_THIEF","tier":5,"price":19000},
+    {"world":"hell","kind":"technique","content_id":"TECH_GHOST_TEN_THOUSAND_HOSTS","tier":8,"price":7600000}
+  ]
+}

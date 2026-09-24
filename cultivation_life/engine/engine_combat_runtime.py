@@ -172,6 +172,7 @@ class EngineCombatRuntimeMixin:
         their legacy aggregate-power logic.
         """
         player = game.player
+        self._inject_tianji_npc_artifacts(game, target)
         ensure_formation_state(player)
         portable_formation = active_formation_profile(player)
         ground_array = None if portable_formation.get("active") else self._local_ground_formation(game)
@@ -410,12 +411,14 @@ class EngineCombatRuntimeMixin:
             target["killed_member"] = victim
             fame_before = player.fame
             treasure_id = victim.get("treasure_item_id")
+            tianji_spoils = self._tianji_handle_npc_kill(game, str(victim.get("npc_id", "")))
             self._apply_cultivator_kill(game, victim, rng)
             demonic_gain = self._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
             spoils = (
                 f" 你夺得{ITEM_CATALOG[treasure_id].name}。"
                 if treasure_id in ITEM_CATALOG and victim.get("npc_id") else ""
             )
+            spoils += tianji_spoils
             fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
             victim_path = str(victim.get("path", "dao"))
             if player.path == "monster" and victim_path != "monster":

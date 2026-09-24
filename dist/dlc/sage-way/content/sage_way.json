@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "enabled": true,
+    "phase": "inner_sage_outer_king",
+    "worlds": ["human", "spirit"],
+    "world_influence_pool": 100.0,
+    "doctrine_influence_cap": 60.0,
+    "influence_floor": 0.1,
+    "founding_influence": 5.0,
+    "max_doctrines": 5,
+    "replacement_threshold": 5.0,
+    "protection_years": 10,
+    "quit_cooldown_years": 10,
+    "inner_decay": 0.03,
+    "control_hysteresis": 1.10,
+    "decision_rank": 3,
+    "extinction_threshold": 3.0,
+    "extinction_years": 20,
+    "ai_found_chance_per_year": 0.005,
+    "ai_found_cooldown_years": 50,
+    "disciple_n0_base": 4,
+    "disciple_n0_per_sense": 2,
+    "disciple_penalty_floor_pp": -8.0,
+    "recruit_chance_per_year": 0.04,
+    "recruit_external_scale_min": 0.50,
+    "recruit_external_scale_max": 2.00,
+    "inner_realm_scale_per_realm": 0.08,
+    "teaching_progress_min": 8.0,
+    "teaching_progress_max": 15.0,
+    "teaching_progress_per_sense": 0.6,
+    "teaching_progress_per_realm": 0.35,
+    "graduation_inner_gain": 1.5,
+    "graduation_external_gain": 0.5,
+    "answer_opportunity_min": 0.5,
+    "answer_opportunity_max": 1.5,
+    "answer_sense_ratio": 0.5,
+    "debate": {
+      "same_doctrine_inner_gain": 1.2,
+      "other_doctrine_external_gain": 0.8,
+      "loss_scale": 0.45,
+      "cooldown_years": 1
+    },
+    "inner_outer": {
+      "haoran": {
+        "exp_per_level_unit": 10.0,
+        "threshold_base": 60.0,
+        "max_level": 30,
+        "realm_weights": {"1":1,"2":2,"3":4,"4":8,"5":16,"6":32,"7":64,"8":128},
+        "passive_half_level": 10.0,
+        "passive_caps": {
+          "affinity_multiplier": 0.30,
+          "opportunity_multiplier": 0.25,
+          "heavenly_tribulation_reduction": 0.12,
+          "thunder_tribulation_reduction": 0.12,
+          "karma_effect_reduction": 0.35,
+          "heart_demon_gain_reduction": 0.35,
+          "sha_qi_gain_reduction": 0.35,
+          "breakthrough_bonus": 0.03
+        }
+      },
+      "outer_king": {
+        "advancement": {
+          "base_cost_by_target_realm": {"1":300,"2":600,"3":1200,"4":2400,"5":4800,"6":8000,"7":12000,"8":18000},
+          "cost_multiplier": 2.0
+        },
+        "combat_power": {"standard_power_ratio":0.05,"base_cost":600,"cost_growth":1.0},
+        "spirit_stone": {
+          "cost":200,
+          "gain_by_realm":{"0":20,"1":50,"2":100,"3":220,"4":500,"5":1100,"6":2400,"7":5200,"8":11000,"9":24000,"10":52000,"11":110000,"12":240000}
+        },
+        "opportunity": {
+          "cost":150,
+          "gain_by_realm":{"0":3,"1":6,"2":15,"3":40,"4":100,"5":250,"6":600,"7":1400,"8":3000,"9":7000,"10":16000,"11":36000,"12":80000}
+        }
+      }
+    },
+    "sage_change_cooldown_years": 10,
+    "combination_choices": {
+      "classic": ["gongyang", "guliang", "zuoshi"],
+      "philosophy": ["principle", "mind"],
+      "practice": ["statecraft", "evidential"],
+      "script": ["old_text", "new_text"]
+    },
+    "choice_details": {
+      "gongyang": {"name": "公羊学", "description": "尊王攘夷，重微言大义，以进取之势强化正面斗法。"},
+      "guliang": {"name": "谷梁学", "description": "持义谨严，审慎守礼，使修行根基更利于破境。"},
+      "zuoshi": {"name": "左氏学", "description": "博采史事，以兴亡得失观世，提高机缘获取效率。"},
+      "principle": {"name": "理学", "description": "格物穷理，持敬存诚，进一步稳固突破根基。"},
+      "mind": {"name": "心学", "description": "反求诸心、知行合一，显著提高解惑所得。"},
+      "statecraft": {"name": "致用", "description": "经世济民，以学问回应现实，提高传道影响力。"},
+      "evidential": {"name": "考据", "description": "实事求是、辨章学术，提高炼丹、炼器与阵法等百艺经验。"},
+      "old_text": {"name": "古文经", "description": "训诂旧章、追索古义，提高神识修炼收益。"},
+      "new_text": {"name": "今文经", "description": "通经致治、阐发当世，提高传道影响力。"}
+    },
+    "actions": {
+      "sage_preach": {"name":"传道","external":0.6,"inner":0.2,"hp_cost_percent":1,"mp_cost_percent":10,"description":"扩大学说声望；传道类被动会进一步放大收益。"},
+      "sage_teach": {"name":"授业","external":0.2,"inner":0.6,"hp_cost_percent":2,"mp_cost_percent":12,"description":"以积累门内威望为主，并推进所有在教门人的出师进度。"},
+      "sage_answer": {"name":"解惑","external":0.1,"inner":0.1,"hp_cost_percent":1,"mp_cost_percent":8,"description":"获得 0.5–1.5 机缘，并得到相当于机缘 50% 的神识经验。"}
+    },
+    "doctrine_passives": {
+      "gongyang": {"combat_multiplier": 0.03},
+      "guliang": {"breakthrough_bonus": 0.005},
+      "zuoshi": {"opportunity_multiplier": 0.04},
+      "principle": {"breakthrough_bonus": 0.005},
+      "mind": {"answer_multiplier": 0.10},
+      "statecraft": {"preach_multiplier": 0.08},
+      "evidential": {"art_experience_multiplier": 0.08},
+      "old_text": {"sense_multiplier": 0.04},
+      "new_text": {"preach_multiplier": 0.05}
+    },
+    "sages": {
+      "confucius": {"name": "孔子", "description": "有教无类，诸家皆可奉祀且始终获得完整加成。", "compatible": ["*"], "effects": {"sense_multiplier": 0.05}},
+      "mencius": {"name": "孟子", "description": "养浩然之气，心学或公羊义统可尽得其力。", "compatible": ["mind", "gongyang"], "effects": {"combat_multiplier": 0.05}},
+      "dong_zhongshu": {"name": "董仲舒", "description": "融通春秋与今文，擅长扩大学说声望。", "compatible": ["gongyang", "new_text"], "effects": {"preach_multiplier": 0.10}},
+      "zhu_xi": {"name": "朱熹", "description": "会通义理与古经，为破境提供最直接的根基增益。", "compatible": ["principle", "old_text"], "effects": {"breakthrough_bonus": 0.01}},
+      "wang_yangming": {"name": "王阳明", "description": "致良知而重践履，最适合心学门人答疑解惑。", "compatible": ["mind"], "effects": {"answer_multiplier": 0.15}},
+      "gu_yanwu": {"name": "顾炎武", "description": "经世致用，强化灵田经营与炼丹所得。", "compatible": ["statecraft"], "effects": {"field_alchemy_multiplier": 0.10}},
+      "dai_zhen": {"name": "戴震", "description": "精核名物制度，强化炼器与阵法研习所得。", "compatible": ["evidential"], "effects": {"crafting_formation_multiplier": 0.10}},
+      "zheng_xuan": {"name": "郑玄", "description": "遍注群经、兼采今古，提高主修、辅修与战斗功法的实际效果。", "compatible": ["old_text", "new_text"], "effects": {"technique_learning_multiplier": 0.10}}
+    },
+    "initial_doctrines": {
+      "human": [
+        {"id":"sage-human-righteous","name":"春秋义统","combo":{"classic":"gongyang","philosophy":"principle","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|principle|statecraft|new_text","external":35.0,"controller_id":"sage-h-r-1","members":[{"id":"sage-h-r-1","name":"公孙弘文","inner":28.0,"realm_index":4},{"id":"sage-h-r-2","name":"陆正言","inner":18.0,"realm_index":3},{"id":"sage-h-r-3","name":"季怀礼","inner":12.0,"realm_index":2},{"id":"sage-h-r-4","name":"许问经","inner":8.0,"realm_index":2}]},
+        {"id":"sage-human-evidence","name":"古义实学","combo":{"classic":"zuoshi","philosophy":"mind","practice":"evidential","script":"old_text"},"combo_key":"zuoshi|mind|evidential|old_text","external":25.0,"controller_id":"sage-h-e-1","members":[{"id":"sage-h-e-1","name":"顾砚秋","inner":24.0,"realm_index":4},{"id":"sage-h-e-2","name":"戴守一","inner":17.0,"realm_index":3},{"id":"sage-h-e-3","name":"郑闻道","inner":11.0,"realm_index":2}]}
+      ],
+      "spirit": [
+        {"id":"sage-spirit-stars","name":"星河理学","combo":{"classic":"guliang","philosophy":"principle","practice":"evidential","script":"old_text"},"combo_key":"guliang|principle|evidential|old_text","external":32.0,"controller_id":"sage-s-s-1","members":[{"id":"sage-s-s-1","name":"孟河图","inner":31.0,"realm_index":6},{"id":"sage-s-s-2","name":"星砚","inner":21.0,"realm_index":5},{"id":"sage-s-s-3","name":"月停舟","inner":19.0,"realm_index":6}]},
+        {"id":"sage-spirit-heart","name":"万族心学","combo":{"classic":"gongyang","philosophy":"mind","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|mind|statecraft|new_text","external":28.0,"controller_id":"sage-s-h-1","members":[{"id":"sage-s-h-1","name":"王照心","inner":27.0,"realm_index":6},{"id":"sage-s-h-2","name":"云无迹","inner":20.0,"realm_index":5},{"id":"sage-s-h-3","name":"木年","inner":13.0,"realm_index":5}]}
+      ]
+    },
+    "future_interfaces": {"faction_ref": true, "tags": true, "inner_sage": true, "outer_kingship": true}
+  }
+}

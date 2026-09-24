@@ -231,6 +231,8 @@ class EnginePersistenceMixin:
             changed = True
         if self._ensure_guixu_state(game):
             changed = True
+        if self._ensure_tianji_state(game):
+            changed = True
         self._refresh_sage_effects(game)
         changed = self._migrate_true_demon_races(game) or changed
         if game.player.faction_id in game.sects:

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.sage-way",
+  "name": "圣人之道：内圣外王",
+  "version": "1.3.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 130,
+  "requires": [],
+  "description": "完整儒修循环：圣人教化、内圣外王，以及人界结丹与灵界炼虚两条六幕专属剧情链。"
+}
