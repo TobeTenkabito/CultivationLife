@@ -619,7 +619,15 @@ function renderTianji(system) {
       `器述：${artifact.description || '???'}`,
     ];
     lines.forEach(text => { const p=document.createElement('p'); p.textContent=text; detail.appendChild(p); });
-    if (artifact.effects) artifact.effects.forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name}】${effect.description}`; detail.appendChild(p); });
+    if (artifact.gameplay_tendency) { const p=document.createElement('p'); p.className='tianji-tendency'; p.textContent=`玩法倾向：${artifact.gameplay_tendency}`; detail.appendChild(p); }
+    const groups = artifact.effect_groups;
+    if (groups) {
+      [['foundation','器基'],['core','核心器理'],['derived','衍生器理']].forEach(([key,label]) => {
+        if (!groups[key]?.length) return;
+        const title=document.createElement('h5'); title.className='tianji-effect-group'; title.textContent=label; detail.appendChild(title);
+        groups[key].forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name}】${effect.description}`; detail.appendChild(p); });
+      });
+    } else if (artifact.effects) artifact.effects.forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name}】${effect.description}`; detail.appendChild(p); });
     if (artifact.recipe_clues) { const p=document.createElement('p'); p.textContent=`真方线索：${artifact.recipe_clues.map(tags => tags.join(' / ')).join('；')}`; detail.appendChild(p); }
     if (artifact.recipe) { const p=document.createElement('p'); p.textContent=`完整真方：${artifact.recipe.join(' · ')}`; detail.appendChild(p); }
     if (artifact.holder) { const p=document.createElement('p'); p.textContent=`持有者追踪：${artifact.holder.name}${artifact.holder.world_name ? ` · ${artifact.holder.world_name}` : ''}`; detail.appendChild(p); }

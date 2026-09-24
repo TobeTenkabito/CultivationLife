@@ -1,24 +1,25 @@
 from __future__ import annotations
 
 import copy
-import hashlib
 import math
 import random
 import uuid
 from typing import Any
 
 from ..content_registry import REALMS, WORLD_SYSTEMS
-from ..monster_bloodline_rules import (
-    BLOODLINE_RULE_EFFECTS, describe_generated_trait, generate_species_bloodline_trait,
-    generated_trait_id,
-)
-from ..models import GameState, HistoryRecord, Player
-from ..rules import expected_combat_power, remove_item
+from ..combat_rule_engine import describe_rule
+from ..monster_bloodline_rules import BLOODLINE_RULE_EFFECTS, describe_generated_trait, generated_trait_id
+from ..models import GameState, HistoryRecord
+from ..rules import remove_item
 from ..runtime import now_iso
+from ..tianji_theme_rules import (
+    compile_theme_rules, generate_gameplay_blueprint, gameplay_debug_row,
+    sample_total_effect_count, validate_theme_consistency,
+)
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 7
+TIANJI_GENERATION_VERSION = 8
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
 TIANJI_WINDOW_SCHEDULES = (
     "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "last", "penultimate",
@@ -121,7 +122,8 @@ def _scaled_effects(effects: list[dict[str, Any]], ratio: float) -> tuple[list[d
 
 def _tianji_effect_description(effect: dict[str, Any]) -> str:
     if isinstance(effect.get("rule"), dict):
-        return describe_generated_trait(effect["rule"])
+        rule = effect["rule"]
+        return describe_rule(rule) if int(rule.get("schema_version", 1)) >= 2 else describe_generated_trait(rule)
     prefix = ""
     if effect.get("player_stat_multipliers"):
         stat, value = next(iter(effect["player_stat_multipliers"].items()))
@@ -255,29 +257,33 @@ class TianjiSystemMixin:
         used_names.add(fallback)
         return fallback
 
-    def _tianji_rule_effects(self, rng: random.Random, theme: dict[str, Any], power: int) -> list[dict[str, Any]]:
+    def _tianji_rule_effects(
+        self, seed: int, artifact_id: str, theme: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        primitive_rng = _stable_rng(seed, f"gameplay-primitive:{artifact_id}")
         preferred = [row for row in PRIMITIVES if row.get("stat") in theme.get("stats", {})]
         pool = list(PRIMITIVES)
-        # A geometric tail has no hard ceiling: nearly all artifacts remain
-        # readable, while an exceptionally lucky seed can keep adding rules.
-        count = 1
-        while rng.random() < .72:
-            count += 1
-        strength = min(1.0, max(0.0, math.log10(max(power, 1) / 63_000_000) / 2.75))
-        primitive = rng.choice([*pool, *preferred, *preferred])
-        magnitude = rng.uniform(float(primitive["low"]), float(primitive["high"]))
+        count = sample_total_effect_count(_stable_rng(seed, f"gameplay-rule-count:{artifact_id}"))
+        blueprint = generate_gameplay_blueprint(
+            blueprint_rng=_stable_rng(seed, f"gameplay-blueprint:{artifact_id}"),
+            axis_count_rng=_stable_rng(seed, f"gameplay-axis-count:{artifact_id}"),
+            archetype_rng=_stable_rng(seed, f"gameplay-archetype:{artifact_id}"),
+            cadence_rng=_stable_rng(seed, f"gameplay-cadence:{artifact_id}"),
+            flavor_theme_id=str(theme.get("id", "")),
+        )
+        primitive = primitive_rng.choice([*pool, *preferred, *preferred])
+        magnitude = primitive_rng.uniform(float(primitive["low"]), float(primitive["high"]))
         if primitive.get("stat"):
-            magnitude = 1 + (magnitude - 1) * (.78 + strength * .35)
             payload = {"player_stat_multipliers": {primitive["stat"]: round(magnitude, 5)}}
         elif primitive.get("enemy_stat"):
-            magnitude = 1 - (1 - magnitude) * (.78 + strength * .35)
             payload = {"enemy_stat_multipliers": {primitive["enemy_stat"]: round(max(.65, magnitude), 5)}}
         elif primitive.get("trait"):
             payload = {"trait": primitive["trait"]}
         else:
             payload = {"persistent": primitive["persistent"]}
         used_buff_names: set[str] = set()
-        first_name = self._next_tianji_buff_name(rng, theme, str(primitive["name"]), used_buff_names, 0)
+        name_rng = _stable_rng(seed, f"gameplay-buff-names:{artifact_id}")
+        first_name = self._next_tianji_buff_name(name_rng, theme, str(primitive["name"]), used_buff_names, 0)
         first = {
             "primitive": primitive["id"], "name": first_name,
             "magnitude": round(magnitude, 5), "trigger": "combat_start",
@@ -287,45 +293,31 @@ class TianjiSystemMixin:
         }
         first["description"] = _tianji_effect_description(first)
         effects: list[dict[str, Any]] = [first]
-
-        species_by_theme = {
-            "thunder": "avian", "soul": "fox", "star": "avian", "void": "serpent",
-            "flame": "ape", "frost": "turtle", "life": "flora", "slaughter": "ape",
-        }
-        species = species_by_theme.get(str(theme.get("id")), "serpent")
-        for effect_index in range(1, count):
-            rule = None
-            force_windowed_initiative = rng.random() < .34
-            while rule is None:
-                candidate = generate_species_bloodline_trait(species, rng)
-                if candidate is None:
-                    continue
-                if force_windowed_initiative and candidate["trigger"] != "initiative_resolved":
-                    continue
-                rule = candidate
-            if force_windowed_initiative:
-                rule["schedule"] = rng.choice(TIANJI_WINDOW_SCHEDULES)
-                rule["conditions"] = ["player_first"]
-                rule.pop("power", None)
-                rule["id"] = generated_trait_id(rule)
-                rule["description"] = describe_generated_trait(rule)
-            definition = BLOODLINE_RULE_EFFECTS[str(rule["effect"])]
+        rules = compile_theme_rules(
+            blueprint, rule_count=max(0, count - 1),
+            rng=_stable_rng(seed, f"gameplay-rules:{artifact_id}"), source_id=artifact_id,
+        )
+        consistency_errors = validate_theme_consistency(blueprint, rules)
+        if consistency_errors:
+            raise ValueError(f"神机玩法蓝图编译失败：{'；'.join(consistency_errors)}")
+        for effect_index, rule in enumerate(rules, 1):
             display_name = self._next_tianji_buff_name(
-                rng, theme, str(definition["name"]), used_buff_names, effect_index,
+                name_rng, theme, str(rule["name"]), used_buff_names, effect_index,
             )
             rule["display_name"] = display_name
             effect = {
-                "primitive": f"rule:{rule['effect']}", "name": display_name,
-                "description": describe_generated_trait(rule), "trigger": str(rule["trigger"]),
+                "primitive": f"rule:{rule['theme_axis']}:{rule['theme_slot']}", "name": display_name,
+                "description": describe_rule(rule), "trigger": str(rule["trigger"]),
                 "conditions": list(map(str, rule["conditions"])), "targets": "owner",
                 "replica_scaling": "rule_scale", "rule": rule,
             }
             effects.append(effect)
-        return effects
+        return effects, blueprint
 
     def _generate_tianji_artifacts(self, game: GameState, materials: list[dict[str, Any]]) -> list[dict[str, Any]]:
         config = self._tianji_config()
-        artifact_rng = _stable_rng(game.seed, "artifacts")
+        flavor_rng = _stable_rng(game.seed, "flavor")
+        power_rng = _stable_rng(game.seed, "powers")
         name_rng = _stable_rng(game.seed, "names")
         recipe_rng = _stable_rng(game.seed, "recipes")
         world_rng = _stable_rng(game.seed, "worlds")
@@ -351,36 +343,37 @@ class TianjiSystemMixin:
             return [str(row["id"]) for row in chosen]
 
         for index in range(random_count):
-            theme = artifact_rng.choice(list(themes.values()))
-            mold_id = artifact_rng.choice(molds)
+            theme = flavor_rng.choice(list(themes.values()))
+            mold_id = flavor_rng.choice(molds)
             # Log distribution covers Mahayana through top Daluo scales.  The
             # list is sorted only after every raw value has been generated.
-            power = round(math.exp(artifact_rng.uniform(math.log(63_000_000), math.log(34_000_000_000))))
+            power = round(math.exp(power_rng.uniform(math.log(63_000_000), math.log(34_000_000_000))))
             noun = config["mold_nouns"][mold_id]
             name, style = self._next_tianji_name(
                 name_rng, theme, mold_id, used_names, used_stems, used_prefixes, index,
             )
+            artifact_id = f"tianji-{index + 1:03d}"
+            effects, gameplay_blueprint = self._tianji_rule_effects(game.seed, artifact_id, theme)
             artifacts.append({
-                "id": f"tianji-{index + 1:03d}", "name": name, "is_preset": False,
+                "id": artifact_id, "name": name, "is_preset": False,
+                "generation_version": TIANJI_GENERATION_VERSION,
                 "base_combat_power": power, "mold_id": mold_id,
                 "theme_id": theme["id"], "theme_name": theme["name"],
                 "recipe": recipe_for(str(theme["id"])),
-                "effects": self._tianji_rule_effects(
-                    _stable_rng(game.seed, f"rules:tianji-{index + 1:03d}"), theme, power,
-                ),
+                "gameplay_blueprint": gameplay_blueprint, "effects": effects,
                 "description": f"以{theme['name']}为核、{style}为势的{noun}形神机，器理与本存档天地法则相扣。",
             })
         for preset in preset_rows:
             theme = themes[str(preset["theme_id"])]
-            power = round(float(preset["power"]) * artifact_rng.uniform(.97, 1.03))
+            power = round(float(preset["power"]) * power_rng.uniform(.97, 1.03))
+            effects, gameplay_blueprint = self._tianji_rule_effects(game.seed, str(preset["id"]), theme)
             artifacts.append({
                 "id": str(preset["id"]), "name": str(preset["name"]), "is_preset": True,
+                "generation_version": TIANJI_GENERATION_VERSION,
                 "base_combat_power": power, "mold_id": str(preset["mold_id"]),
                 "theme_id": theme["id"], "theme_name": theme["name"],
                 "recipe": recipe_for(str(theme["id"])),
-                "effects": self._tianji_rule_effects(
-                    _stable_rng(game.seed, f"rules:{preset['id']}"), theme, power,
-                ),
+                "gameplay_blueprint": gameplay_blueprint, "effects": effects,
                 "description": str(preset["description"]),
             })
         artifacts.sort(key=lambda row: (-int(row["base_combat_power"]), str(row["id"])))
@@ -503,6 +496,7 @@ class TianjiSystemMixin:
             state.clear()
             state.update({
                 "generation_version": TIANJI_GENERATION_VERSION,
+                "generator_mode": "theme-first-v8",
                 "materials": materials, "artifacts": artifacts,
                 "knowledge": {row["id"]: 0 for row in artifacts},
                 "true_body_states": {
@@ -526,21 +520,29 @@ class TianjiSystemMixin:
                 state[key] = copy.deepcopy(default)
                 changed = True
         old_generation = int(state.get("generation_version", 1))
-        if old_generation < 3:
-            themes = {str(row["id"]): row for row in self._tianji_config()["themes"]}
-            for artifact in state.get("artifacts", []):
-                theme = themes.get(str(artifact.get("theme_id")))
-                if not theme:
-                    continue
-                artifact["effects"] = self._tianji_rule_effects(
-                    _stable_rng(game.seed, f"rules:{artifact['id']}"),
-                    theme, int(artifact.get("base_combat_power", 1)),
-                )
+        has_theme_blueprints = bool(state.get("artifacts")) and all(
+            isinstance(row.get("gameplay_blueprint"), dict) for row in state.get("artifacts", [])
+        )
+        if has_theme_blueprints and old_generation < TIANJI_GENERATION_VERSION:
+            # Repair metadata that was manually downgraded or partially saved;
+            # definitions themselves remain untouched.
+            state["generation_version"] = TIANJI_GENERATION_VERSION
+            state["generator_mode"] = "theme-first-v8"
+            old_generation = TIANJI_GENERATION_VERSION
             changed = True
-        if old_generation < 4:
+        is_theme_generation = has_theme_blueprints or str(state.get("generator_mode", "")).startswith("theme-first")
+        display_migration = 7 if is_theme_generation else int(state.get("display_migration_version", old_generation))
+        # Artifact definitions are world facts.  Old saves keep their compiled
+        # rules exactly as written; only explicitly display-only migrations are
+        # allowed below.  Theme blueprints are generated for new worlds only.
+        if old_generation < TIANJI_GENERATION_VERSION:
+            if state.get("generator_mode") != f"legacy-v{old_generation}":
+                state["generator_mode"] = f"legacy-v{old_generation}"
+                changed = True
+        if display_migration < 4:
             self._refresh_tianji_artifact_names(game)
             changed = True
-        if old_generation < 5:
+        if display_migration < 5:
             for artifact_index, artifact in enumerate(state.get("artifacts", [])):
                 for effect_index, effect in enumerate(artifact.get("effects", [])[1:], 1):
                     rule = effect.get("rule")
@@ -559,11 +561,11 @@ class TianjiSystemMixin:
                     effect["description"] = rule["description"]
                     effect["conditions"] = list(map(str, rule.get("conditions", [])))
             changed = True
-        if old_generation < 7:
+        if display_migration < 7:
             self._refresh_tianji_buff_names(game)
             changed = True
-        if old_generation < TIANJI_GENERATION_VERSION:
-            state["generation_version"] = TIANJI_GENERATION_VERSION
+        if display_migration < 7:
+            state["display_migration_version"] = 7
             changed = True
         for artifact_id, holder in list(state["holders"].items()):
             npc = self._find_npc(game, str(holder.get("npc_id", "")))
@@ -741,6 +743,14 @@ class TianjiSystemMixin:
                 "base_combat_power": artifact["base_combat_power"] if level >= 2 else None,
                 "effects": [self._tianji_public_effect(row) for row in artifact["effects"]] if level >= 2 else None,
                 "description": artifact["description"] if level >= 2 else "???",
+                "gameplay_tendency": (
+                    str(artifact.get("gameplay_blueprint", {}).get("tendency", "")) or None
+                ) if level >= 2 else None,
+                "effect_groups": ({
+                    "foundation": [self._tianji_public_effect(artifact["effects"][0])] if artifact.get("effects") else [],
+                    "core": [self._tianji_public_effect(row) for row in artifact.get("effects", [])[1:4]],
+                    "derived": [self._tianji_public_effect(row) for row in artifact.get("effects", [])[4:]],
+                } if level >= 2 else None),
                 "recipe_clues": (
                     [state["materials"][next(i for i, row in enumerate(state["materials"]) if row["id"] == mid)]["tags"][1:3] for mid in artifact["recipe"]]
                     if level == 3 else None
@@ -959,7 +969,7 @@ class TianjiSystemMixin:
     def tianji_action(self, game_id: str, action: str, artifact_id: str) -> dict[str, Any]:
         game = self._load(game_id)
         self._ensure_tianji_state(game)
-        artifact = self._tianji_artifact(game.tianji_state, artifact_id)
+        self._tianji_artifact(game.tianji_state, artifact_id)
         if action in {"activate", "deactivate"}:
             owned_rows = [
                 row for row in game.player.crafted_artifacts
@@ -1002,6 +1012,14 @@ class TianjiSystemMixin:
         game.updated_at = now_iso()
         self.store.save(game)
         return self.present(game)
+
+    def debug_tianji_gameplay(self, game_id: str) -> list[dict[str, Any]]:
+        """Return blueprint diagnostics without mutating the frozen definitions."""
+        game = self._load(game_id)
+        if not tianji_content_available():
+            return []
+        self._ensure_tianji_state(game)
+        return [gameplay_debug_row(artifact) for artifact in game.tianji_state.get("artifacts", [])]
 
     def _inject_tianji_npc_artifacts(self, game: GameState, target: dict[str, Any]) -> None:
         if not tianji_content_available():
