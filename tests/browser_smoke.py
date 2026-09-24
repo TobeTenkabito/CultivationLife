@@ -108,6 +108,12 @@ def main() -> None:
                 assert page.locator(".quick-start-button[data-preset-id='buddhist_void']").count() == 1
                 page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
+                confucian_game_id = page.evaluate("game.id")
+                confucian_game = engine.store.load(confucian_game_id)
+                add_technique_copy(confucian_game.player, TECHNIQUE_CATALOG["TECH_BODY_HUNDRED_REFINEMENT"], level=2)
+                confucian_game.player.haoran_exp = 10_000
+                engine.store.save(confucian_game)
+                page.evaluate("() => loadGame(game.id)")
                 inner_outer_dock = page.locator("[data-panel-target='sage-inner-outer']")
                 assert inner_outer_dock.is_visible()
                 assert "sage-dock-button" in (inner_outer_dock.get_attribute("class") or "")
@@ -117,6 +123,17 @@ def main() -> None:
                 assert "浩然" in page.locator("#sage-haoran-summary").text_content()
                 assert page.locator("#sage-haoran-passives > *").count() >= 1
                 assert page.locator("#sage-outer-list .sage-outer-card").count() == 4
+                manual_refine = page.locator("#sage-manual-list .sage-inner-outer-action").first
+                assert manual_refine.is_enabled()
+                manual_refine.click()
+                page.locator("#game-confirm-dialog").wait_for(state="visible")
+                assert page.locator("#game-confirm-title").text_content() == "炼化传承玉简"
+                with page.expect_response(lambda response: response.url.endswith("/sage-refine-manual")):
+                    page.locator("#game-confirm-accept").click()
+                page.wait_for_function("!document.body.classList.contains('busy')")
+                assert page.locator("#sage-manual-list .sage-manual").count() == 0
+                assert "已参 Lv.2" in page.locator("#sage-classic-list").text_content()
+                assert page.locator("#sage-outer-list .sage-inner-outer-action").first.is_enabled()
                 page.locator("#sage-inner-outer-toggle").click()
                 sage_dock = page.locator("[data-panel-target='sage']")
                 assert sage_dock.is_visible()
