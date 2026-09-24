@@ -5,3 +5,5 @@ build/*
 !build/launcher.spec
 data/saves/*.json
 !data/saves/.gitkeep
+game_config.txt
+dist/game_config.txt
