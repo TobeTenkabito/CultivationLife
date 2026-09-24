@@ -18,8 +18,14 @@ from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 4
+TIANJI_GENERATION_VERSION = 5
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
+TIANJI_WINDOW_SCHEDULES = (
+    "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "last", "penultimate",
+    "first_two", "first_three", "first_four", "last_two", "last_three",
+    "after_second", "after_third", "first_and_last", "second_and_fourth",
+    "odd", "even", "random", "random_two",
+)
 TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
     "might": "威能", "guard": "防护", "mobility": "身法",
     "sense": "神识", "sustain": "续航", "breach": "破法",
@@ -266,16 +272,16 @@ class TianjiSystemMixin:
         species = species_by_theme.get(str(theme.get("id")), "serpent")
         for _ in range(count - 1):
             rule = None
-            force_third_initiative = rng.random() < .24
+            force_windowed_initiative = rng.random() < .34
             while rule is None:
                 candidate = generate_species_bloodline_trait(species, rng)
                 if candidate is None:
                     continue
-                if force_third_initiative and candidate["trigger"] != "initiative_resolved":
+                if force_windowed_initiative and candidate["trigger"] != "initiative_resolved":
                     continue
                 rule = candidate
-            if force_third_initiative:
-                rule["schedule"] = "third"
+            if force_windowed_initiative:
+                rule["schedule"] = rng.choice(TIANJI_WINDOW_SCHEDULES)
                 rule["conditions"] = ["player_first"]
                 rule.pop("power", None)
                 rule["id"] = generated_trait_id(rule)
@@ -484,6 +490,25 @@ class TianjiSystemMixin:
             changed = True
         if old_generation < 4:
             self._refresh_tianji_artifact_names(game)
+            changed = True
+        if old_generation < 5:
+            for artifact_index, artifact in enumerate(state.get("artifacts", [])):
+                for effect_index, effect in enumerate(artifact.get("effects", [])[1:], 1):
+                    rule = effect.get("rule")
+                    if not isinstance(rule, dict):
+                        continue
+                    schedule_rng = _stable_rng(
+                        game.seed, f"schedule-v5:{artifact.get('id')}:{effect_index}",
+                    )
+                    offset = schedule_rng.randrange(len(TIANJI_WINDOW_SCHEDULES))
+                    rule["schedule"] = TIANJI_WINDOW_SCHEDULES[
+                        (artifact_index + effect_index + offset) % len(TIANJI_WINDOW_SCHEDULES)
+                    ]
+                    rule.pop("power", None)
+                    rule["id"] = generated_trait_id(rule)
+                    rule["description"] = describe_generated_trait(rule)
+                    effect["description"] = rule["description"]
+                    effect["conditions"] = list(map(str, rule.get("conditions", [])))
             changed = True
         if old_generation < TIANJI_GENERATION_VERSION:
             state["generation_version"] = TIANJI_GENERATION_VERSION

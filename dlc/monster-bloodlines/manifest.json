@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "万妖归宗：血脉进化",
-  "version": "4.10.0",
+  "version": "4.11.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,
   "requires": [],
-  "description": "八大本源谱系、有限复合族血生成器、双下界往返幽冥界、可稳定传承的自创祖血，以及妖修专属原创长篇剧情链。"
+  "description": "八大本源谱系、二十四种轮次表达式的有限复合族血生成器、双下界往返幽冥界、可稳定传承的自创祖血，以及妖修专属原创长篇剧情链。"
 }

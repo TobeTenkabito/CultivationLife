@@ -39,7 +39,7 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
         "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
     }
     assert max(len(artifact["effects"]) for artifact in a["artifacts"]) > 3
-    found_third_round_initiative = False
+    generated_schedules: set[str] = set()
     for artifact in a["artifacts"]:
         effects = artifact["effects"]
         assert "rule" not in effects[0]
@@ -47,12 +47,11 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
         assert all("complexity" not in effect for effect in effects)
         for effect in effects[1:]:
             assert not validate_generated_trait(effect["rule"])
-            found_third_round_initiative |= (
-                effect["rule"]["schedule"] == "third"
-                and effect["rule"]["trigger"] == "initiative_resolved"
-                and effect["rule"]["conditions"] == ["player_first"]
-            )
-    assert found_third_round_initiative
+            generated_schedules.add(effect["rule"]["schedule"])
+    assert {
+        "first", "second", "third", "fourth", "last", "first_two", "first_three",
+        "random", "random_two", "first_and_last",
+    } <= generated_schedules
 
 
 def test_ranking_cannot_directly_purchase_or_study_intelligence(
@@ -115,23 +114,34 @@ def test_generated_definitions_freeze_and_public_redaction(tianji_game: tuple[Ga
     assert engine.store.load(game_id).tianji_state["artifacts"] == frozen
 
 
-def test_generation_three_save_renames_only_and_preserves_rules_and_recipes(
+def test_generation_three_save_renames_and_expands_schedules_without_changing_effects_or_recipes(
     tianji_game: tuple[GameEngine, str],
 ) -> None:
     engine, game_id = tianji_game
     game = engine.store.load(game_id)
     game.tianji_state["generation_version"] = 3
-    frozen = {
-        row["id"]: (copy.deepcopy(row["effects"]), list(row["recipe"]))
-        for row in game.tianji_state["artifacts"]
-    }
+    frozen = {}
+    for row in game.tianji_state["artifacts"]:
+        frozen[row["id"]] = {
+            "recipe": list(row["recipe"]),
+            "effects": [(
+                effect.get("primitive"),
+                effect.get("rule", {}).get("effect"),
+                tuple(effect.get("rule", {}).get("conditions", [])),
+            ) for effect in row["effects"]],
+        }
     for index, artifact in enumerate(game.tianji_state["artifacts"][:3]):
         artifact["name"] = f"九幽镇世{index}"
     assert engine._ensure_tianji_state(game)
-    assert game.tianji_state["generation_version"] == 4
+    assert game.tianji_state["generation_version"] == 5
     assert len({row["name"][:4] for row in game.tianji_state["artifacts"]}) == 100
     assert all(
-        (row["effects"], row["recipe"]) == frozen[row["id"]]
+        list(row["recipe"]) == frozen[row["id"]]["recipe"]
+        and [(
+            effect.get("primitive"),
+            effect.get("rule", {}).get("effect"),
+            tuple(effect.get("rule", {}).get("conditions", [])),
+        ) for effect in row["effects"]] == frozen[row["id"]]["effects"]
         for row in game.tianji_state["artifacts"]
     )
 
