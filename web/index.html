@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260921-3">
-  <link rel="stylesheet" href="/panels.css?v=20260921-11">
+  <link rel="stylesheet" href="/panels.css?v=20260924-1">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -299,11 +299,21 @@
           <div class="section-title"><div><p class="eyebrow">LIFEBOND ARTIFACT</p><h2>本命法宝</h2></div><div class="panel-heading"><span id="natal-artifact-heading"></span><button id="natal-artifact-toggle" type="button">关闭</button></div></div>
           <div id="natal-artifact-content"></div>
         </article>
+        <article id="tianji-card" class="paper utility-panel left-panel tianji-panel hidden" role="dialog" aria-modal="false" aria-label="天工神机榜">
+          <div class="section-title"><div><p class="eyebrow">HEAVENLY ARTIFACT REGISTRY</p><h2>天工神机榜</h2></div><div class="panel-heading"><span id="tianji-heading"></span><button id="tianji-toggle" type="button">关闭</button></div></div>
+          <p class="muted">榜次只按真品基础战力排列；规则词条、仿品与临时增益均不改榜。情报不足的字段由服务端直接裁去。</p>
+          <div id="tianji-ranking" class="tianji-ranking"></div>
+        </article>
         <article id="crafting-card" class="paper utility-panel left-panel crafting-panel hidden" role="dialog" aria-modal="false" aria-label="组合炼器">
           <div class="section-title"><div><p class="eyebrow">ARTIFACT FORGING</p><h2>组合炼器</h2></div><div class="panel-heading"><span id="crafting-heading"></span><button id="crafting-toggle" type="button">关闭</button></div></div>
           <p class="muted">胎模定器类与固定规则，四份真实材料实例决定特性；属性由你分配，炼制不会彻底失败。</p>
           <section class="crafting-workbench">
             <h3>五位成器</h3>
+            <div id="crafting-tianji-mode" class="crafting-tianji-mode hidden">
+              <label>炼制方式<select id="crafting-mode"><option value="free">自由炼制</option><option value="target">目标炼制</option></select></label>
+              <label class="tianji-target-control hidden">目标神机<select id="crafting-target"></select></label>
+              <label class="tianji-target-control hidden">成器目标<select id="crafting-forge-kind"><option value="replica">炼制仿品</option><option value="true_body">炼制本体（需 Lv4）</option></select></label>
+            </div>
             <div class="crafting-five-slots">
               <label>① 胎模<select id="crafting-mold"></select></label>
               <label>② 主材<select id="crafting-primary"></select></label>
@@ -384,6 +394,7 @@
         <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
         <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
         <button type="button" data-panel-target="crafting" title="组合炼器"><span>器</span><small>炼器</small></button>
+        <button type="button" data-panel-target="tianji" title="天工神机榜" class="hidden tianji-dock-button"><span>机</span><small>神机</small></button>
         <button type="button" data-panel-target="formation" title="九宫阵法"><span>阵</span><small>阵法</small></button>
         <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
         <button type="button" data-panel-target="sage-inner-outer" title="内圣外王" class="hidden sage-dock-button"><span>圣</span><small>内外</small></button>
@@ -422,8 +433,8 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260921-3"></script>
+  <script src="/ui-panels.js?v=20260924-1"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/app.js?v=20260922-2"></script>
+  <script src="/app.js?v=20260924-1"></script>
 </body>
 </html>

@@ -220,6 +220,7 @@ class EnginePresentationMixin:
             "intrigue_system": self._public_intrigue_system(game),
             "sage_system": self._public_sage_system(game),
             "guixu_tide": self._public_guixu(game),
+            "tianji_artifacts": self._public_tianji(game),
             "family": self._public_family(game),
             "governance": self._public_governance(game),
             "dao_companion": self._public_dao_companion(game),

@@ -34,9 +34,17 @@ def active_crafted_artifacts(player: Player) -> list[dict[str, Any]]:
     # the new rule is that every owned crafted artifact is automatically live.
     if not active_ids and player.crafted_artifacts:
         active_ids = {str(row.get("id", "")) for row in player.crafted_artifacts}
+    equipped_tianji = set(map(str, player.equipped_crafted_artifact_ids))
     return [
         row for row in player.crafted_artifacts
         if isinstance(row, dict) and str(row.get("id")) in active_ids
+        and (
+            not row.get("tianji")
+            or (
+                bool(WORLD_SYSTEMS.get("tianji_artifacts", {}).get("enabled"))
+                and str(row.get("id")) in equipped_tianji
+            )
+        )
     ]
 
 
@@ -174,6 +182,11 @@ class CraftingSystemMixin:
             and int(row.get("tier", 1)) <= max(tier, game.player.realm_index) + 1
         ]
         if not definitions:
+            append_tianji = getattr(self, "_append_tianji_market_offers", None)
+            if append_tianji:
+                append_tianji(
+                    game, offers, tier=tier, market_name=market_name, location_id=location_id,
+                )
             return
         count = min(int(self._crafting_rules().get("market_material_offers", 3)), len(definitions))
         selected = rng.sample(definitions, count)
@@ -200,6 +213,11 @@ class CraftingSystemMixin:
                 "rare_next_tier": offer_tier > tier, "sold": False,
                 "material_instance": instance,
             })
+        append_tianji = getattr(self, "_append_tianji_market_offers", None)
+        if append_tianji:
+            append_tianji(
+                game, offers, tier=tier, market_name=market_name, location_id=location_id,
+            )
 
     def _buy_crafting_material_offer(self, game: GameState, offer: dict[str, Any], price: int) -> str:
         instance = copy.deepcopy(offer.get("material_instance"))
@@ -213,13 +231,20 @@ class CraftingSystemMixin:
             )
             game.rng_state = encode_rng(rng)
         game.player.crafting_materials.append(instance)
+        bought_hook = getattr(self, "_tianji_material_bought", None)
+        if bought_hook:
+            bought_hook(game, instance)
         return f"你在{offer['market_name']}支付 {price} 枚灵石，购得{instance['state']}的{instance['name']}。"
 
     def _crafting_material_candidates(self, player: Player) -> list[dict[str, Any]]:
         material_defs = self._crafting_material_defs()
         candidates: list[dict[str, Any]] = []
         for instance in player.crafting_materials:
-            definition = material_defs.get(str(instance.get("material_id", "")))
+            embedded = instance.get("dynamic_definition")
+            definition = (
+                copy.deepcopy(embedded) if isinstance(embedded, dict)
+                else material_defs.get(str(instance.get("material_id", "")))
+            )
             if not definition:
                 continue
             candidates.append(copy.deepcopy(instance) | {
@@ -227,6 +252,8 @@ class CraftingSystemMixin:
                 "tags": list(definition.get("tags", [])),
                 "allow_duplicate_type": bool(definition.get("allow_duplicate_type", False)),
                 "role_effects": copy.deepcopy(definition.get("role_effects", {})),
+                "tianji_tags": copy.deepcopy(definition.get("tianji_tags", {})),
+                "dynamic_definition": copy.deepcopy(definition) if isinstance(embedded, dict) else None,
                 "source_kind": "material",
             })
         plant_defs = self._crafting_plant_defs()
@@ -493,14 +520,40 @@ class CraftingSystemMixin:
         if not artifact:
             raise ValueError("这件炼器法宝不存在")
         if action == "equip":
-            raise ValueError("炼器法宝收入包裹后自动生效，无需另行装备")
+            if artifact.get("tianji"):
+                tianji_ids = {
+                    str(row.get("id")) for row in player.crafted_artifacts if row.get("tianji")
+                }
+                player.equipped_crafted_artifact_ids = [
+                    value for value in player.equipped_crafted_artifact_ids if value not in tianji_ids
+                ] + [artifact_id]
+                game.tianji_state["activated_artifact_id"] = artifact_id
+            else:
+                raise ValueError("炼器法宝收入包裹后自动生效，无需另行装备")
         elif action == "unequip":
-            raise ValueError("炼器法宝与普通装备相同，留在包裹中即自动生效")
+            if artifact.get("tianji"):
+                player.equipped_crafted_artifact_ids = [
+                    value for value in player.equipped_crafted_artifact_ids if value != artifact_id
+                ]
+                if game.tianji_state.get("activated_artifact_id") == artifact_id:
+                    game.tianji_state["activated_artifact_id"] = None
+            else:
+                raise ValueError("炼器法宝与普通装备相同，留在包裹中即自动生效")
         elif action == "natal":
+            if artifact.get("tianji"):
+                tianji_ids = {
+                    str(row.get("id")) for row in player.crafted_artifacts if row.get("tianji")
+                }
+                player.equipped_crafted_artifact_ids = [
+                    value for value in player.equipped_crafted_artifact_ids if value not in tianji_ids
+                ] + [artifact_id]
+                game.tianji_state["activated_artifact_id"] = artifact_id
             self._bind_crafted_natal_artifact(game, artifact)
         elif action == "unbind_natal":
             self._unbind_crafted_natal_artifact(game, artifact_id)
         elif action == "sell":
+            if artifact.get("tianji"):
+                raise ValueError("神机法宝不能按普通成品出售")
             if artifact.get("is_natal"):
                 raise ValueError("已设为本命的法宝不能出售")
             price = max(1, round(int(artifact["anchor_value"]) * float(self._crafting_rules()["ordinary_sell_ratio"])))
@@ -512,6 +565,8 @@ class CraftingSystemMixin:
                 {"spirit_stone":price}, ["system", "crafting", "market"],
             ))
         elif action == "consign":
+            if artifact.get("tianji"):
+                raise ValueError("神机法宝不能进入普通拍卖寄售")
             self._consign_crafted_artifact(game, artifact, int(start_price or 0))
         else:
             raise ValueError("未知炼器法宝操作")
@@ -576,8 +631,11 @@ class CraftingSystemMixin:
             "visible": bool(crafting_config()) and player.realm_index >= int(rules.get("minimum_realm", 1)),
             "molds": list(copy.deepcopy(self._crafting_molds()).values()),
             "materials": candidates, "artifacts":[
-                copy.deepcopy(row) | {"equipped":True}
-                for row in active_crafted_artifacts(player)
+                copy.deepcopy(row) | {"equipped": str(row.get("id")) in {
+                    str(active.get("id")) for active in active_crafted_artifacts(player)
+                }}
+                for row in player.crafted_artifacts
+                if any(item.crafted_artifact_id == str(row.get("id")) and item.quantity > 0 for item in player.inventory)
             ],
             "blueprints": copy.deepcopy(player.crafting_blueprints),
             "active_count": len(active_crafted_artifacts(player)),

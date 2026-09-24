@@ -778,6 +778,9 @@ class GameState:
     # active-session data lives under this one additive container so disabling
     # the package can freeze it without leaking state into unrelated systems.
     guixu_state: dict[str, Any] = field(default_factory=dict)
+    # Optional Tianji artifact DLC state.  Generated definitions, knowledge,
+    # unique-body ownership and sparse NPC holders are frozen together here.
+    tianji_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -829,6 +832,7 @@ class GameState:
             "intrigue_state": self.intrigue_state,
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
+            "tianji_state": self.tianji_state,
             "settings": self.settings,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
@@ -884,6 +888,8 @@ class GameState:
             if isinstance(value.get("sage_state", {}), dict) else {},
             guixu_state=copy.deepcopy(value.get("guixu_state", {}))
             if isinstance(value.get("guixu_state", {}), dict) else {},
+            tianji_state=copy.deepcopy(value.get("tianji_state", {}))
+            if isinstance(value.get("tianji_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

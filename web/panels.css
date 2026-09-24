@@ -370,6 +370,21 @@
 @keyframes ghost-notice-pulse { 50% { transform:scale(1.32); opacity:.66; } }
 
 .crafting-panel { width:min(900px,calc(100vw - 140px)); padding:34px 38px; }
+.tianji-panel { width:min(920px,calc(100vw - 140px)); padding:34px 38px; border-color:rgba(70,53,105,.42); background:linear-gradient(150deg,rgba(246,243,251,.98),rgba(239,234,246,.96)); }
+.tianji-dock-button { color:#4b3766 !important; border-color:rgba(91,67,125,.48) !important; background:linear-gradient(145deg,rgba(224,214,239,.95),rgba(245,240,250,.9)) !important; box-shadow:inset 0 0 0 2px rgba(255,255,255,.45),0 3px 10px rgba(67,45,98,.14); }
+.tianji-dock-button.active { color:#fff !important; background:linear-gradient(145deg,#6a4d8c,#44325d) !important; }
+.tianji-ranking { display:grid; gap:6px; margin-top:18px; }
+.tianji-rank-row { border:1px solid rgba(91,67,125,.2); background:rgba(255,255,255,.48); }
+.tianji-rank-row summary { display:grid; grid-template-columns:90px 1fr auto; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; }
+.tianji-rank-row summary b { color:#634886; }
+.tianji-rank-row summary small { color:var(--muted); }
+.tianji-rank-row.knowledge-0 summary span { color:#958da0; letter-spacing:.18em; }
+.tianji-rank-detail { padding:4px 14px 14px; border-top:1px solid rgba(91,67,125,.14); }
+.tianji-rank-detail p { margin:7px 0; line-height:1.5; }
+.tianji-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.crafting-tianji-mode { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:8px 0 14px; padding:10px; border:1px solid rgba(91,67,125,.24); background:rgba(91,67,125,.055); }
+.crafting-tianji-mode label { display:grid; gap:5px; color:var(--muted); font-size:11px; }
+.crafting-tianji-mode select { width:100%; padding:8px; border:1px solid var(--line); background:rgba(255,255,255,.66); }
 .crafting-panel section { margin-top:20px; }
 .crafting-workbench { padding:16px; border:1px solid rgba(182,139,61,.28); background:linear-gradient(135deg,rgba(182,139,61,.08),rgba(255,255,255,.2)); }
 .crafting-five-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }

@@ -111,6 +111,14 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.choose(game_id, payload.get("choice_id", ""))
             elif operation == "guixu-action":
                 result = ENGINE.guixu_action(game_id, payload.get("action", ""), payload)
+            elif operation == "tianji-action":
+                result = ENGINE.tianji_action(
+                    game_id, payload.get("action", ""), payload.get("artifact_id", "")
+                )
+            elif operation == "tianji-preview":
+                result = ENGINE.preview_tianji_forge(game_id, payload)
+            elif operation == "tianji-forge":
+                result = ENGINE.forge_tianji_artifact(game_id, payload)
             elif operation == "use-item":
                 result = ENGINE.use_item(game_id, payload.get("item_id", ""))
             elif operation == "faction-reward":

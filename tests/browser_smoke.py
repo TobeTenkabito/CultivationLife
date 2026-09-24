@@ -379,12 +379,19 @@ def main() -> None:
 
                 page.locator("[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
-                assert "已识别 5" in page.locator("#extension-summary").text_content()
+                assert "已识别 6" in page.locator("#extension-summary").text_content()
                 extension_text = page.locator("#extension-list").text_content()
                 assert "万妖归宗：血脉进化" in extension_text
                 assert "百鬼夜行：往生轮回" in extension_text
                 assert "明争暗斗：合纵连横" in extension_text
+                assert "神机百变：巧夺天工" in extension_text
                 page.locator("#extension-toggle").click()
+
+                page.locator("[data-panel-target='tianji']").click()
+                page.locator("#tianji-card").wait_for(state="visible")
+                assert page.locator("#tianji-ranking .tianji-rank-row").count() == 100
+                assert "已识 0 / 100" in page.locator("#tianji-heading").text_content()
+                page.locator("#tianji-toggle").click()
 
                 page.locator("[data-panel-target='intrigue']").click()
                 page.locator("#intrigue-card").wait_for(state="visible")

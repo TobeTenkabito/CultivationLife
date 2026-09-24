@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "tianji_artifacts": {
+      "enabled": true,
+      "generation_version": 1,
+      "artifact_count": 100,
+      "material_count": 48,
+      "base_worlds": ["human", "demon", "spirit", "true_demon", "hell", "celestial", "asura"],
+      "world_replica_caps": {
+        "human": 0.20,
+        "demon": 0.20,
+        "spirit": 0.60,
+        "true_demon": 0.60,
+        "hell": 0.60,
+        "celestial": 0.90,
+        "asura": 0.90
+      },
+      "mold_nouns": {
+        "sword": "剑", "saber": "刀", "spear": "枪", "umbrella": "伞",
+        "mirror": "镜", "bell": "钟", "cauldron": "鼎", "banner": "幡",
+        "armor": "甲", "ring": "环", "boat": "舟", "seal": "印"
+      },
+      "themes": [
+        {"id":"thunder","name":"雷霆","words":["九霄","紫电","雷狱"],"elements":["雷","霆","劫"],"stats":{"might":1.12,"breach":1.10}},
+        {"id":"soul","name":"镇魂","words":["玄冥","九幽","镇魄"],"elements":["魂","魄","冥"],"stats":{"sense":1.13,"guard":1.08}},
+        {"id":"star","name":"星辰","words":["周天","星河","太微"],"elements":["星","辰","曜"],"stats":{"sense":1.10,"mobility":1.10}},
+        {"id":"void","name":"虚空","words":["太虚","无相","空玄"],"elements":["虚","空","界"],"stats":{"mobility":1.14,"guard":1.06}},
+        {"id":"flame","name":"神火","words":["焚天","离火","赤霄"],"elements":["炎","火","阳"],"stats":{"might":1.14,"sustain":1.05}},
+        {"id":"frost","name":"玄冰","words":["寒渊","玄霜","冰魄"],"elements":["寒","霜","冰"],"stats":{"guard":1.13,"breach":1.06}},
+        {"id":"life","name":"造化","words":["青帝","长生","万木"],"elements":["生","木","春"],"stats":{"sustain":1.15,"guard":1.05}},
+        {"id":"slaughter","name":"杀伐","words":["诛仙","血海","修罗"],"elements":["戮","煞","锋"],"stats":{"might":1.11,"breach":1.13}}
+      ],
+      "styles": ["镇世", "巡天", "定界", "破妄", "渡厄", "斩道", "摄神", "归元"],
+      "material_roots": ["天晶", "玄铁", "神砂", "灵木", "道玉", "真水", "劫火", "星髓"],
+      "material_prefixes": ["九霄", "太虚", "混元", "玄冥", "赤阳", "青帝", "星河", "万劫"],
+      "preset_artifacts": [
+        {"id":"tianji-preset-heavenscale","name":"量天无极尺","mold_id":"sword","theme_id":"star","power":28600000000,"description":"一尺量天地，星轨皆为刻度。"},
+        {"id":"tianji-preset-soulbell","name":"九幽镇魄钟","mold_id":"bell","theme_id":"soul","power":12400000000,"description":"钟鸣不闻于耳，只响在万灵神魂深处。"},
+        {"id":"tianji-preset-cauldron","name":"造化归元鼎","mold_id":"cauldron","theme_id":"life","power":6800000000,"description":"夺万物余生，返一线造化。"},
+        {"id":"tianji-preset-banner","name":"血海诛仙幡","mold_id":"banner","theme_id":"slaughter","power":19100000000,"description":"幡起血海，锋指仙途。"}
+      ]
+    }
+  }
+}

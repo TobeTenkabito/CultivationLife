@@ -102,6 +102,7 @@ from ..system.intrigue_system import IntrigueSystemMixin
 from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin, gender_name
 from ..system.guixu_system import GuixuSystemMixin
+from ..system.tianji_system import TianjiSystemMixin
 from ..system.possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
@@ -159,7 +160,7 @@ def _include_runtime_methods(*components: type):
     EnginePresentationMixin,
     EnginePersistenceMixin,
 )
-class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -328,6 +329,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
         self._ensure_npc_formations(game)
         self._ensure_sage_state(game)
         self._ensure_guixu_state(game)
+        self._ensure_tianji_state(game)
         if player.world == "celestial":
             self._ensure_heavenly_court(game, rng)
         self._ensure_race_relations(game)
@@ -3460,6 +3462,7 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             cached["last_seen_age"] = player.age
             npc = self._promote_cached_npc(game, npc.id, "再度相逢") or npc
         npc.encountered_player = True
+        self._tianji_observe_npc(game, npc.id)
         perception = self._npc_cultivation_perception(game, npc, True)
         visible = perception["realm_name"] != "无法看清"
         race_definition = RACE_DEFINITIONS.get(npc.race, RACE_DEFINITIONS["human"])
@@ -3477,4 +3480,6 @@ class GameEngine(GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, Intrig
             "treasure_rumored": rng.random() < float(config["treasure_rumor_chance"]),
             "notorious": npc.notorious, "notoriety": npc.notoriety,
         }
-        return self._add_enemy_party(target, settings, rng)
+        target = self._add_enemy_party(target, settings, rng)
+        self._tianji_preview_npc_power(game, target)
+        return target
