@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import re
 from typing import Any
 
@@ -212,6 +213,8 @@ def evaluate_custom_lineage_rules(
     enemy_state: float,
     player_morale: float,
     enemy_morale: float,
+    max_rounds: int = 5,
+    random_rounds: dict[int, tuple[int, ...]] | None = None,
 ) -> dict[str, Any]:
     """Interpret the finite DSL. Invalid/tampered save entries are ignored safely."""
     output: dict[str, Any] = {
@@ -227,11 +230,35 @@ def evaluate_custom_lineage_rules(
     terrain_values = {"narrow": "狭窄", "open": "开阔", "dangerous": "险要"}
     artificial_values = {"forbidden_air": "禁空", "forbidden_sense": "禁神识", "formation": "大阵"}
 
-    def scheduled(schedule_id: str) -> bool:
+    maximum = max(1, int(max_rounds))
+    resolved_random = random_rounds or {}
+
+    def scheduled(schedule_id: str, rule_index: int) -> bool:
+        random_values = resolved_random.get(rule_index)
+        if random_values is None and schedule_id in {"random_one", "random_two"}:
+            count = 1 if schedule_id == "random_one" else 2
+            digest = hashlib.sha256(
+                f"{lineage.get('id', lineage.get('name', 'custom'))}:{rule_index}:{maximum}".encode("utf-8")
+            ).digest()
+            available = list(range(1, maximum + 1))
+            selected: list[int] = []
+            for offset in range(min(count, maximum)):
+                pick = int.from_bytes(digest[offset * 2:offset * 2 + 2], "big") % len(available)
+                selected.append(available.pop(pick))
+            random_values = tuple(selected)
         return {
             "every": True, "odd": round_no % 2 == 1, "even": round_no % 2 == 0,
-            "first_two": round_no <= 2, "first_three": round_no <= 3,
-            **{f"round_{number}": round_no == number for number in range(1, 6)},
+            "first_two": round_no <= 2, "first_three": round_no <= 3, "first_four": round_no <= 4,
+            "last": round_no == maximum,
+            "penultimate": round_no == max(1, maximum - 1),
+            "last_two": round_no >= max(1, maximum - 1),
+            "last_three": round_no >= max(1, maximum - 2),
+            "after_second": round_no >= 3, "after_third": round_no >= 4,
+            "first_and_last": round_no in {1, maximum},
+            "second_and_fourth": round_no in {2, 4},
+            "random_one": round_no in (random_values or ()),
+            "random_two": round_no in (random_values or ()),
+            **{f"round_{number}": round_no == number for number in range(1, 9)},
         }.get(schedule_id, False)
 
     def condition_met(row: dict[str, Any]) -> bool:
@@ -247,12 +274,12 @@ def evaluate_custom_lineage_rules(
             return actual <= float(value)
         return False
 
-    for raw in lineage.get("rules", []):
+    for rule_index, raw in enumerate(lineage.get("rules", [])):
         if not isinstance(raw, dict) or raw.get("phase") != phase or raw.get("phase") not in phases:
             continue
         schedule, condition = schedules.get(str(raw.get("schedule"))), conditions.get(str(raw.get("condition")))
         target, effect = targets.get(str(raw.get("target"))), effects.get(str(raw.get("effect")))
-        if not all((schedule, condition, target, effect)) or not scheduled(str(schedule["id"])) or not condition_met(condition):
+        if not all((schedule, condition, target, effect)) or not scheduled(str(schedule["id"]), rule_index) or not condition_met(condition):
             continue
         value_row = _value_entry(config, str(effect.get("value_pool", "")), raw.get("value"))
         if value_row is None or target["id"] not in effect.get("targets", []) or phase not in effect.get("phases", []):

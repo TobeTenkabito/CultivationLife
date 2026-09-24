@@ -68,6 +68,10 @@ class CraftingSystemTests(unittest.TestCase):
         self.assertTrue({
             "bow", "halberd", "staff", "firearm", "orb", "needle", "other",
         } <= set(molds))
+        self.assertTrue(all(
+            "适合承载" in mold["rule"]["description"]
+            for mold_id, mold in molds.items() if mold_id != "other"
+        ))
         instances = self._give_human_recipe()
         payload = self._payload(instances) | {"mold_id": "other", "name": "无定奇兵"}
         first = self.engine.preview_crafting(self.game_id, payload)

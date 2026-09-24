@@ -27,11 +27,29 @@ BLOODLINE_RULE_TRIGGERS: Final[dict[str, dict[str, Any]]] = {
 }
 BLOODLINE_RULE_SCHEDULES: Final[dict[str, dict[str, Any]]] = {
     "every": {"name": "每轮", "uptime": 1.00},
-    "odd": {"name": "奇数轮", "uptime": 0.55},
-    "even": {"name": "偶数轮", "uptime": 0.55},
-    "third": {"name": "第三轮", "uptime": 0.18},
-    "first_two": {"name": "前两轮", "uptime": 0.45},
-    "after_second": {"name": "第三轮起每轮", "uptime": 0.55},
+    "odd": {"name": "奇数轮", "uptime": 0.60},
+    "even": {"name": "偶数轮", "uptime": 0.40},
+    "first": {"name": "首轮", "uptime": 0.20},
+    "second": {"name": "第二轮", "uptime": 0.20},
+    "third": {"name": "第三轮", "uptime": 0.20},
+    "fourth": {"name": "第四轮", "uptime": 0.20},
+    "fifth": {"name": "第五轮", "uptime": 0.20},
+    "sixth": {"name": "第六轮", "uptime": 0.20},
+    "seventh": {"name": "第七轮", "uptime": 0.20},
+    "eighth": {"name": "第八轮", "uptime": 0.20},
+    "last": {"name": "最后一轮", "uptime": 0.20},
+    "penultimate": {"name": "倒数第二轮", "uptime": 0.20},
+    "first_two": {"name": "前两轮", "uptime": 0.40},
+    "first_three": {"name": "前三轮", "uptime": 0.60},
+    "first_four": {"name": "前四轮", "uptime": 0.80},
+    "last_two": {"name": "最后两轮", "uptime": 0.40},
+    "last_three": {"name": "最后三轮", "uptime": 0.60},
+    "after_second": {"name": "第三轮起每轮", "uptime": 0.60},
+    "after_third": {"name": "第四轮起每轮", "uptime": 0.40},
+    "first_and_last": {"name": "首轮与最后一轮", "uptime": 0.40},
+    "second_and_fourth": {"name": "第二轮与第四轮", "uptime": 0.40},
+    "random": {"name": "每场随机一轮", "uptime": 0.20},
+    "random_two": {"name": "每场随机两轮", "uptime": 0.40},
 }
 
 
@@ -150,10 +168,67 @@ MAX_COLLECTION_EXPECTED_POWER: Final = 96.0
 MAX_TRAITS: Final = 16
 
 
-def _scheduled(schedule_id: str, round_no: int) -> bool:
+def _fallback_random_rounds(rule: dict[str, Any], max_rounds: int, count: int) -> tuple[int, ...]:
+    digest = hashlib.sha256(
+        f"{rule.get('id', generated_trait_id(rule))}:{max_rounds}:schedule".encode("utf-8")
+    ).digest()
+    available = list(range(1, max_rounds + 1))
+    selected: list[int] = []
+    for offset in range(min(count, max_rounds)):
+        index = int.from_bytes(digest[offset * 2:offset * 2 + 2], "big") % len(available)
+        selected.append(available.pop(index))
+    return tuple(sorted(selected))
+
+
+def prepare_generated_trait_schedules(
+    rules: Iterable[dict[str, Any]], *, max_rounds: int, rng: Any,
+) -> list[dict[str, Any]]:
+    """Copy saved rules and resolve battle-local random round windows once."""
+    maximum = max(1, int(max_rounds))
+    prepared: list[dict[str, Any]] = []
+    for raw in rules:
+        rule = dict(raw)
+        rule["_battle_max_rounds"] = maximum
+        count = 1 if rule.get("schedule") == "random" else 2 if rule.get("schedule") == "random_two" else 0
+        if count:
+            rule["_battle_random_rounds"] = sorted(rng.sample(
+                range(1, maximum + 1), min(count, maximum),
+            ))
+        prepared.append(rule)
+    return prepared
+
+
+def _scheduled(rule: dict[str, Any], round_no: int, context: dict[str, Any]) -> bool:
+    schedule_id = str(rule.get("schedule", ""))
+    max_rounds = max(1, int(rule.get("_battle_max_rounds", context.get("max_rounds", 5))))
+    random_rounds = tuple(map(int, rule.get("_battle_random_rounds", ())))
+    if schedule_id in {"random", "random_two"} and not random_rounds:
+        random_rounds = _fallback_random_rounds(rule, max_rounds, 1 if schedule_id == "random" else 2)
     return {
-        "every": True, "odd": round_no % 2 == 1, "even": round_no % 2 == 0,
-        "third": round_no == 3, "first_two": round_no <= 2, "after_second": round_no >= 3,
+        "every": True,
+        "odd": round_no % 2 == 1,
+        "even": round_no % 2 == 0,
+        "first": round_no == 1,
+        "second": round_no == 2,
+        "third": round_no == 3,
+        "fourth": round_no == 4,
+        "fifth": round_no == 5,
+        "sixth": round_no == 6,
+        "seventh": round_no == 7,
+        "eighth": round_no == 8,
+        "last": round_no == max_rounds,
+        "penultimate": round_no == max(1, max_rounds - 1),
+        "first_two": round_no <= 2,
+        "first_three": round_no <= 3,
+        "first_four": round_no <= 4,
+        "last_two": round_no >= max(1, max_rounds - 1),
+        "last_three": round_no >= max(1, max_rounds - 2),
+        "after_second": round_no >= 3,
+        "after_third": round_no >= 4,
+        "first_and_last": round_no in {1, max_rounds},
+        "second_and_fourth": round_no in {2, 4},
+        "random": round_no in random_rounds,
+        "random_two": round_no in random_rounds,
     }.get(schedule_id, False)
 
 
@@ -339,7 +414,7 @@ def evaluate_generated_traits(
     for rule in rules:
         if validate_generated_trait(rule) or rule.get("trigger") != trigger:
             continue
-        if not _scheduled(str(rule["schedule"]), round_no):
+        if not _scheduled(rule, round_no, context):
             continue
         if not all(_condition_met(str(item), context) for item in rule["conditions"]):
             continue

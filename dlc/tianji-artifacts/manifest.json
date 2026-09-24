@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.tianji-artifacts",
   "name": "神机百变：巧夺天工",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 45,
   "requires": [],
-  "description": "每个存档独立生成天工神机榜、神机材料、真方情报、目标炼制与持宝者争夺；情报仅能在实际游戏过程中逐层获得。"
+  "description": "每个存档独立生成天工神机榜、神机材料、真方情报、目标炼制与持宝者争夺；复合器能支持单轮、区间、首尾及每场随机轮次。"
 }

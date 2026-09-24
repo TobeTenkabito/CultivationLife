@@ -741,15 +741,17 @@ class ContentRegistry:
         if any(not isinstance(row.get("name"), str) or not row["name"].strip() for row in custom["phases"]):
             raise ContentError("自创血脉 phase 必须具有可显示名称")
         supported_schedules = {
-            "round_1", "round_2", "round_3", "round_4", "round_5",
-            "first_two", "first_three", "odd", "even", "every",
+            "round_1", "round_2", "round_3", "round_4", "round_5", "round_6", "round_7", "round_8",
+            "first_two", "first_three", "first_four", "last", "penultimate", "last_two", "last_three",
+            "after_second", "after_third", "first_and_last", "second_and_fourth",
+            "random_one", "random_two", "odd", "even", "every",
         }
         if {str(row["id"]) for row in custom["schedules"]} != supported_schedules or any(
             not isinstance(row.get("name"), str) or not row["name"].strip()
             or not nonnegative_integer(row.get("cost"))
             for row in custom["schedules"]
         ):
-            raise ContentError("自创血脉 schedule 必须完整使用受支持的十种轮次计划，并配置非负整数费用")
+            raise ContentError("自创血脉 schedule 必须完整使用受支持的二十四种轮次计划，并配置非负整数费用")
         for condition in custom["conditions"]:
             kind = condition.get("kind")
             if (

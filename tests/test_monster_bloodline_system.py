@@ -16,7 +16,8 @@ from cultivation_life.system.monster_bloodline_system import (
     resolved_bloodline_traits,
 )
 from cultivation_life.monster_bloodline_rules import (
-    BLOODLINE_RULE_EFFECTS, evaluate_generated_traits, generate_species_bloodline_trait,
+    BLOODLINE_RULE_EFFECTS, BLOODLINE_RULE_SCHEDULES, evaluate_generated_traits,
+    generate_species_bloodline_trait, prepare_generated_trait_schedules,
     validate_generated_collection, validate_generated_trait,
 )
 from cultivation_life.monster_bloodline_traits import BLOODLINE_TRAIT_REGISTRY, bloodline_stat_modifiers
@@ -428,6 +429,65 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         )
         self.assertAlmostEqual(result["player_state_restore"], 0.036)
 
+    def test_generated_round_windows_include_single_ranges_last_and_battle_random(self):
+        from cultivation_life.monster_bloodline_rules import generated_trait_id, describe_generated_trait
+
+        expected = {
+            "first": {1}, "second": {2}, "third": {3}, "fourth": {4},
+            "last": {5}, "first_two": {1, 2}, "first_three": {1, 2, 3},
+            "last_two": {4, 5}, "after_third": {4, 5},
+            "first_and_last": {1, 5}, "second_and_fourth": {2, 4},
+        }
+        self.assertTrue({"random", "random_two", *expected} <= set(BLOODLINE_RULE_SCHEDULES))
+        for schedule, active_rounds in expected.items():
+            rule = {
+                "schema_version":1, "species_id":"serpent", "trigger":"round_start",
+                "schedule":schedule, "conditions":["always"], "effect":"self_might_minor",
+            }
+            rule.update(
+                id=generated_trait_id(rule), name="潜鳞·威能滋长",
+                description=describe_generated_trait(rule),
+            )
+            triggered = {
+                round_no for round_no in range(1, 6)
+                if evaluate_generated_traits(
+                    [rule], trigger="round_start", context={"round_no":round_no, "max_rounds":5},
+                )["triggered_ids"]
+            }
+            self.assertEqual(triggered, active_rounds, schedule)
+
+        eighth = {
+            "schema_version":1, "species_id":"serpent", "trigger":"round_start",
+            "schedule":"eighth", "conditions":["always"], "effect":"self_might_minor",
+        }
+        eighth.update(
+            id=generated_trait_id(eighth), name="潜鳞·威能滋长",
+            description=describe_generated_trait(eighth),
+        )
+        self.assertTrue(evaluate_generated_traits(
+            [eighth], trigger="round_start", context={"round_no":8, "max_rounds":8},
+        )["triggered_ids"])
+
+        random_rules = []
+        for schedule in ("random", "random_two"):
+            rule = {
+                "schema_version":1, "species_id":"serpent", "trigger":"round_start",
+                "schedule":schedule, "conditions":["always"], "effect":"self_might_minor",
+            }
+            rule.update(
+                id=generated_trait_id(rule), name="潜鳞·威能滋长",
+                description=describe_generated_trait(rule),
+            )
+            random_rules.append(rule)
+        prepared = prepare_generated_trait_schedules(random_rules, max_rounds=5, rng=random.Random(93))
+        self.assertEqual(len(prepared[0]["_battle_random_rounds"]), 1)
+        self.assertEqual(len(prepared[1]["_battle_random_rounds"]), 2)
+        for rule in prepared:
+            triggered = sum(bool(evaluate_generated_traits(
+                [rule], trigger="round_start", context={"round_no":round_no},
+            )["triggered_ids"]) for round_no in range(1, 6))
+            self.assertEqual(triggered, 1 if rule["schedule"] == "random" else 2)
+
     def test_new_evolution_uses_generated_rule_while_legacy_slots_remain_compatible(self):
         game = self._monster("fox")
         trait = grant_generated_species_bloodline_trait(game.player, random.Random(81))
@@ -681,6 +741,39 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         )
         self.assertAlmostEqual(first["player_stat_multipliers"]["might"], 1.1)
         self.assertEqual(first["player_stat_multipliers"], second["player_stat_multipliers"])
+
+    def test_custom_lineage_editor_and_evaluator_support_last_and_random_rounds(self):
+        game = self._monster("fox")
+        config = MONSTER_BLOODLINE_SETTINGS["custom_lineage"]
+        schedule_ids = {row["id"] for row in config["schedules"]}
+        self.assertTrue({
+            "round_8", "first_four", "last", "penultimate", "last_two", "last_three",
+            "after_second", "after_third", "first_and_last", "second_and_fourth",
+            "random_one", "random_two",
+        } <= schedule_ids)
+        base_rule = {
+            "phase":"round_start", "condition":"always", "target":"player",
+            "effect":"might", "value":0.03,
+        }
+        for schedule, expected_rounds, random_rounds in (
+            ("last", {5}, {}),
+            ("first_and_last", {1, 5}, {}),
+            ("random_one", {3}, {0: (3,)}),
+        ):
+            game.player.monster_custom_lineage = {
+                "id":"schedule-test", "name":"轮转试脉",
+                "rules":[base_rule | {"schedule":schedule}],
+            }
+            triggered = {
+                round_no for round_no in range(1, 6)
+                if evaluate_custom_lineage_rules(
+                    game.player, config, phase="round_start", round_no=round_no,
+                    natural_terrain="开阔", artificial_conditions=[], player_state=1,
+                    enemy_state=1, player_morale=100, enemy_morale=100,
+                    max_rounds=5, random_rounds=random_rounds,
+                )["player_stat_multipliers"]
+            }
+            self.assertEqual(triggered, expected_rounds, schedule)
 
     def test_monster_offspring_inherits_species_and_can_inherit_imprints(self):
         game = self._monster("fox")

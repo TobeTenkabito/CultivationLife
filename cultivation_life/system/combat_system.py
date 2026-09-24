@@ -13,7 +13,7 @@ from ..monster_bloodline_traits import (
     BLOODLINE_TRAIT_REGISTRY, bloodline_grants_hook, bloodline_hook_names,
     bloodline_stat_modifiers,
 )
-from ..monster_bloodline_rules import evaluate_generated_traits
+from ..monster_bloodline_rules import evaluate_generated_traits, prepare_generated_trait_schedules
 from .transformation_system import active_transformation_profile
 from .monster_bloodline_system import active_bloodline_profile, bloodline_content_available
 from ..monster_general_traits import (
@@ -418,6 +418,23 @@ class PlayerCombatSystem:
         burst_used = False
         quick = ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
+        generated_bloodline_traits = prepare_generated_trait_schedules(
+            generated_bloodline_traits, max_rounds=max_rounds, rng=rng,
+        )
+        artifact_generated_rules = prepare_generated_trait_schedules(
+            artifact_generated_rules, max_rounds=max_rounds, rng=rng,
+        )
+        enemy_artifact_generated_rules = prepare_generated_trait_schedules(
+            enemy_artifact_generated_rules, max_rounds=max_rounds, rng=rng,
+        )
+        custom_random_rounds: dict[int, tuple[int, ...]] = {}
+        lineage = player.monster_custom_lineage if isinstance(player.monster_custom_lineage, dict) else {}
+        for rule_index, rule in enumerate(lineage.get("rules", [])):
+            count = 1 if rule.get("schedule") == "random_one" else 2 if rule.get("schedule") == "random_two" else 0
+            if count:
+                custom_random_rounds[rule_index] = tuple(sorted(rng.sample(
+                    range(1, max_rounds + 1), min(count, max_rounds),
+                )))
         last_round_player_stats = dict(player_stats)
         last_round_enemy_stats = dict(enemy_stats)
 
@@ -476,6 +493,7 @@ class PlayerCombatSystem:
                 phase="round_start", round_no=round_no, natural_terrain=natural,
                 artificial_conditions=artificial, player_state=player_hp, enemy_state=enemy_hp,
                 player_morale=player_morale, enemy_morale=enemy_morale,
+                max_rounds=max_rounds, random_rounds=custom_random_rounds,
             )
             for stat, multiplier in custom_start["player_stat_multipliers"].items():
                 round_player_stats[stat] *= multiplier
@@ -981,6 +999,7 @@ class PlayerCombatSystem:
                 phase="round_end", round_no=round_no, natural_terrain=natural,
                 artificial_conditions=artificial, player_state=player_hp, enemy_state=enemy_hp,
                 player_morale=player_morale, enemy_morale=enemy_morale,
+                max_rounds=max_rounds, random_rounds=custom_random_rounds,
             )
             if player_hp > 0:
                 player_hp = min(1.0, player_hp + custom_end["player_state_delta"])
