@@ -9,7 +9,7 @@ from .content_registry import (
     AFFINITY_NAMES, ELEMENT_NAMES, FACTION_DEFINITIONS, FACTION_NPC_TEMPLATES,
     FACTION_REWARDS, ITEM_CATALOG, KARMA_FACTORS, MUTATED_NAMES, PATH_NAMES,
     RACE_DEFINITIONS, REALMS, ROOT_DEFINITIONS, ROOT_NAMES, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES,
-    WORLD_SYSTEMS,
+    GUIXU_TIDE_CONTENT, WORLD_SYSTEMS,
 )
 from .models import Item, Player, RealmDef, Technique
 from .system.ghost_system import (
@@ -505,7 +505,7 @@ def max_mp(player: Player) -> int:
 
 
 def combat_power(player: Player) -> float:
-    from .system.crafting_system import crafted_artifact_bonuses
+    from .system.crafting_system import effective_artifact_combat_bonus
     current = realm(player)
     hp_ratio = max(0.0, min(1.0, player.hp / max_hp(player)))
     mp_ratio = max(0.0, min(1.0, player.mp / max_mp(player)))
@@ -525,7 +525,8 @@ def combat_power(player: Player) -> float:
     total = (
         comprehensive + technique_power + player.faction_combat_bonus
         + player.outer_king_fixed_combat_power
-        + player.natal_artifact_combat_bonus + crafted_artifact_bonuses(player)["combat_power"]
+        + effective_artifact_combat_bonus(player)
+        + player.quick_start_base_combat_power * standard_combat_power_dlc_bonus()
     )
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
@@ -533,18 +534,32 @@ def combat_power(player: Player) -> float:
     return round(total, 1)
 
 
+def standard_combat_power_dlc_bonus() -> float:
+    """Add enabled DLC benchmark bonuses before applying one multiplier."""
+    bonuses: list[float] = []
+    tianji = WORLD_SYSTEMS.get("tianji_artifacts", {})
+    if isinstance(tianji, dict) and tianji.get("enabled"):
+        bonuses.append(max(0.0, float(tianji.get("standard_combat_power_bonus", 0.0))))
+    guixu_settings = GUIXU_TIDE_CONTENT.get("settings", {})
+    if GUIXU_TIDE_CONTENT.get("dungeons") and isinstance(guixu_settings, dict):
+        bonuses.append(max(0.0, float(guixu_settings.get("standard_combat_power_bonus", 0.0))))
+    return sum(bonuses)
+
+
 def expected_combat_power(realm_index: int, layer: int) -> float:
-    """返回玩家、NPC 与动态事件共用的境界战力基准。"""
+    """返回玩家、NPC 与动态事件共用、含已启用 DLC 加成的境界战力基准。"""
     definition = REALMS[realm_index]
     values = WORLD_SYSTEMS["combat_expectations"][definition.id]
     if definition.id == "mortal":
-        return float(values["value"])
-    if definition.id == "qi":
-        return float(values["base"] + values["layer_step"] * (max(1, layer) - 1))
-    if definition.layers == 1:
-        return float(values["value"])
-    stage = "early" if layer <= 3 else "middle" if layer <= 6 else "late"
-    return float(values[stage])
+        base = float(values["value"])
+    elif definition.id == "qi":
+        base = float(values["base"] + values["layer_step"] * (max(1, layer) - 1))
+    elif definition.layers == 1:
+        base = float(values["value"])
+    else:
+        stage = "early" if layer <= 3 else "middle" if layer <= 6 else "late"
+        base = float(values[stage])
+    return base * (1.0 + standard_combat_power_dlc_bonus())
 
 
 def recommended_combat_power(realm_index: int, layer: int) -> float:

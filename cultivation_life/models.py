@@ -320,6 +320,10 @@ class Player:
     faction_hp_bonus: int = 0
     faction_mp_bonus: int = 0
     faction_combat_bonus: float = 0.0
+    # High-realm quick starts are authored against the base-game benchmark.
+    # Keep that original loadout power so enabled DLC benchmark increases can
+    # be applied dynamically rather than being baked into faction rewards.
+    quick_start_base_combat_power: float = 0.0
     natal_artifact_hp_bonus: float = 0.0
     natal_artifact_mp_bonus: float = 0.0
     natal_artifact_combat_bonus: float = 0.0
@@ -475,6 +479,9 @@ class Player:
         data["concubine_escape_reputation"] = max(0, int(data.get("concubine_escape_reputation", 0)))
         data["permanent_intrinsic_hp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_hp_bonus", 0.0)))
         data["permanent_intrinsic_mp_bonus"] = max(0.0, float(data.get("permanent_intrinsic_mp_bonus", 0.0)))
+        data["quick_start_base_combat_power"] = max(
+            0.0, float(data.get("quick_start_base_combat_power", 0.0)),
+        )
         for key in (
             "ghost_intrinsic_hp_reference", "ghost_intrinsic_mp_reference",
             "ghost_intrinsic_hp_current", "ghost_intrinsic_mp_current",

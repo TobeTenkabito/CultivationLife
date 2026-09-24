@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "settings": {
+    "standard_combat_power_bonus": 0.10,
     "draw_per_cycle": 6,
     "action_days": {
       "search": 2,

@@ -470,11 +470,24 @@ class NatalArtifactSystemMixin:
             growth_base_combat * (self._natal_level_scale(level + 1) - self._natal_level_scale(level))
             + self._natal_flat_combat_growth(level + 1) - self._natal_flat_combat_growth(level)
         )
+        raw_combat_bonus = player.natal_artifact_combat_bonus + displayed_base["combat_bonus"]
+        combat_cap = None
+        if crafted and crafted.get("tianji"):
+            from .crafting_system import effective_tianji_combat_power, tianji_world_combat_power_cap
+            combat_cap = tianji_world_combat_power_cap(player.world)
+            effective_combat_bonus = effective_tianji_combat_power(raw_combat_bonus, player.world)
+            next_level_combat_gain = max(0.0, (
+                effective_tianji_combat_power(raw_combat_bonus + next_level_combat_gain, player.world)
+                - effective_combat_bonus
+            ))
+        else:
+            effective_combat_bonus = raw_combat_bonus
         slot_interval = max(1, int(self._natal_artifact_config().get("slot_interval", 10)))
         return {
             "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
             "crafted_artifact_id":artifact.get("crafted_artifact_id"),
             "description":description, "level": level, "max_level": None, "unbounded": True,
+            "is_tianji":bool(crafted and crafted.get("tianji")),
             "experience": int(artifact["experience"]),
             "experience_required": self._natal_level_required(level),
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
@@ -484,7 +497,10 @@ class NatalArtifactSystemMixin:
             "can_refine_all": refine_all_count > 0,
             "can_refine": has_item(player, "spirit_stone", self._natal_refine_cost(level)),
             "bonuses": {
-                "combat_bonus":round(player.natal_artifact_combat_bonus + displayed_base["combat_bonus"], 1),
+                "combat_bonus":round(effective_combat_bonus, 1),
+                "raw_combat_bonus":round(raw_combat_bonus, 1),
+                "combat_cap":round(combat_cap) if combat_cap is not None else None,
+                "combat_capped":combat_cap is not None and raw_combat_bonus > combat_cap,
                 "hp_bonus":round(player.natal_artifact_hp_bonus + displayed_base["hp_bonus"], 1),
                 "mp_bonus":round(player.natal_artifact_mp_bonus + displayed_base["mp_bonus"], 1),
                 "opportunity_bonus":round(player.natal_artifact_opportunity_bonus + displayed_base["opportunity_bonus"], 4),

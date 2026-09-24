@@ -316,6 +316,12 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
             player.lifespan = max(player.lifespan, player.age + 1)
         player.hp = max_hp(player)
         player.mp = max_mp(player)
+        if preset:
+            # Preserve the authored quick-start/benchmark ratio when DLCs raise
+            # every realm's standard.  combat_power() applies the live summed
+            # DLC percentage to this base reference, so configuration changes
+            # never leave a stale permanent bonus in the save.
+            player.quick_start_base_combat_power = combat_power(player)
         if player.realm_index >= 6 and player.world != "celestial":
             thunder = WORLD_SYSTEMS["breakthrough"]["periodic_thunder"]
             player.next_tribulation_age = player.age + int(thunder["interval_years"])

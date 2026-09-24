@@ -3,6 +3,7 @@ import copy
 import unittest
 
 from cultivation_life.models import Player, Technique
+from cultivation_life.content_registry import GUIXU_TIDE_CONTENT, WORLD_SYSTEMS
 from cultivation_life.rules import (
     KARMA_FACTORS,
     REALMS,
@@ -15,6 +16,7 @@ from cultivation_life.rules import (
     can_player_practice_technique,
     effective_karma,
     expected_combat_power,
+    standard_combat_power_dlc_bonus,
     recommended_combat_power,
     combat_power_assessment,
     max_hp,
@@ -77,25 +79,50 @@ class RuleTests(unittest.TestCase):
         self.assertGreater(full, wounded)
 
     def test_expected_combat_power_is_stage_based_and_monotonic(self):
-        self.assertEqual(expected_combat_power(3, 2), 2500)
-        self.assertEqual(expected_combat_power(3, 5), 6100)
-        self.assertEqual(expected_combat_power(3, 8), 8800)
-        self.assertEqual(expected_combat_power(4, 2), 20500)
+        self.assertAlmostEqual(standard_combat_power_dlc_bonus(), 0.30)
+        self.assertEqual(expected_combat_power(3, 2), 3250)
+        self.assertEqual(expected_combat_power(3, 5), 7930)
+        self.assertEqual(expected_combat_power(3, 8), 11440)
+        self.assertEqual(expected_combat_power(4, 2), 26650)
         values = [expected_combat_power(index, 1) for index in range(len(REALMS))]
         self.assertTrue(all(left < right for left, right in zip(values, values[1:])))
 
     def test_npc_expectations_and_player_recommendations_share_the_content_benchmark(self):
-        self.assertEqual(recommended_combat_power(1, 1), 100)
-        self.assertEqual(recommended_combat_power(1, 13), 280)
-        self.assertEqual(recommended_combat_power(4, 2), 20500)
-        self.assertEqual(recommended_combat_power(8, 2), 33000000)
-        self.assertEqual(recommended_combat_power(8, 9), 63000000)
+        self.assertEqual(recommended_combat_power(1, 1), 130)
+        self.assertEqual(recommended_combat_power(1, 13), 364)
+        self.assertEqual(recommended_combat_power(4, 2), 26650)
+        self.assertEqual(recommended_combat_power(8, 2), 42900000)
+        self.assertEqual(recommended_combat_power(8, 9), 81900000)
         for realm_index, realm in enumerate(REALMS):
             for layer in range(1, realm.layers + 1):
                 self.assertEqual(
                     recommended_combat_power(realm_index, layer),
                     expected_combat_power(realm_index, layer),
                 )
+
+    def test_dlc_standard_power_bonuses_add_before_one_multiplier(self):
+        tianji = WORLD_SYSTEMS["tianji_artifacts"]
+        guixu = GUIXU_TIDE_CONTENT["settings"]
+        old_enabled = tianji.get("enabled")
+        old_tianji = tianji.get("standard_combat_power_bonus")
+        old_dungeons = GUIXU_TIDE_CONTENT.get("dungeons")
+        old_guixu = guixu.get("standard_combat_power_bonus")
+        try:
+            tianji["enabled"] = True
+            tianji["standard_combat_power_bonus"] = 0.20
+            GUIXU_TIDE_CONTENT["dungeons"] = [{"id":"test"}]
+            guixu["standard_combat_power_bonus"] = 0.10
+            self.assertAlmostEqual(standard_combat_power_dlc_bonus(), 0.30)
+            self.assertEqual(expected_combat_power(3, 1), 2500 * 1.30)
+            tianji["enabled"] = False
+            GUIXU_TIDE_CONTENT["dungeons"] = []
+            self.assertEqual(standard_combat_power_dlc_bonus(), 0.0)
+            self.assertEqual(expected_combat_power(3, 1), 2500)
+        finally:
+            tianji["enabled"] = old_enabled
+            tianji["standard_combat_power_bonus"] = old_tianji
+            GUIXU_TIDE_CONTENT["dungeons"] = old_dungeons
+            guixu["standard_combat_power_bonus"] = old_guixu
 
     def test_combat_assessment_uses_requested_power_bands(self):
         player = Player("战评", "supreme_metal", realm_index=3, layer=2, hp=0, mp=0)
