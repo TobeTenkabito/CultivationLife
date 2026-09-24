@@ -600,6 +600,7 @@ function craftingPayload() {
 function renderTianji(system) {
   const panel = $('#tianji-card'), dock = document.querySelector('[data-panel-target="tianji"]');
   panel?.classList.toggle('hidden', !system.available); dock?.classList.toggle('hidden', !system.available);
+  $('#tianji-debug-lv5')?.classList.toggle('hidden', configData?.debug !== true || !system.available);
   if (!system.available) { window.UtilityPanels?.close('tianji'); return; }
   $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version}`;
   const root = $('#tianji-ranking'); root.innerHTML = '';
@@ -618,7 +619,7 @@ function renderTianji(system) {
       `器述：${artifact.description || '???'}`,
     ];
     lines.forEach(text => { const p=document.createElement('p'); p.textContent=text; detail.appendChild(p); });
-    if (artifact.effects) artifact.effects.forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name}】${effect.description}`; detail.appendChild(p); });
+    if (artifact.effects) artifact.effects.forEach(effect => { const p=document.createElement('p'); p.textContent=`【${effect.name} · ${effect.complexity === 'complex' ? '复式' : '简式'}】${effect.description}`; detail.appendChild(p); });
     if (artifact.recipe_clues) { const p=document.createElement('p'); p.textContent=`真方线索：${artifact.recipe_clues.map(tags => tags.join(' / ')).join('；')}`; detail.appendChild(p); }
     if (artifact.recipe) { const p=document.createElement('p'); p.textContent=`完整真方：${artifact.recipe.join(' · ')}`; detail.appendChild(p); }
     if (artifact.holder) { const p=document.createElement('p'); p.textContent=`持有者追踪：${artifact.holder.name}${artifact.holder.world_name ? ` · ${artifact.holder.world_name}` : ''}`; detail.appendChild(p); }
@@ -2296,6 +2297,7 @@ $('#ghost-wangsheng-action').onclick = () => mutate(`/api/games/${game.id}/ghost
 $('#ghost-wangsheng-all-action').onclick = () => mutate(`/api/games/${game.id}/ghost-wangsheng`, {all:true});
 $('#ghost-reincarnate-action').onclick = () => mutate(`/api/games/${game.id}/ghost-reincarnation-prompt`, {});
 $('#world-news-debug').onclick = () => mutate(`/api/games/${game.id}/debug-world-news`, {enabled:!game.debug_world_news});
+$('#tianji-debug-lv5').onclick = () => mutate(`/api/games/${game.id}/tianji-debug-reveal-all`, {});
 
 function renderGhostPhaseTwo(system) {
   const enabled = !!system.enabled;

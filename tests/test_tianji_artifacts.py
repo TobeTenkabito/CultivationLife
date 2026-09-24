@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from cultivation_life.engine import GameEngine
+from cultivation_life.system.combat_system import PlayerCombatSystem
 from cultivation_life.system.crafting_system import active_crafted_artifacts
 
 
@@ -36,6 +37,42 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     assert {row["origin_world"] for row in a["artifacts"]} <= {
         "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
     }
+    for artifact in a["artifacts"]:
+        effects = artifact["effects"]
+        assert sum(not effect.get("conditions") for effect in effects) == 1
+        assert all(effect.get("conditions") for effect in effects[1:])
+        if len(effects) == 1:
+            assert effects[0]["complexity"] == "simple"
+
+
+def test_public_effects_use_chinese_attribute_names_and_conditions(tianji_game: tuple[GameEngine, str]) -> None:
+    engine, game_id = tianji_game
+    game = engine.store.load(game_id)
+    artifact = next(row for row in game.tianji_state["artifacts"] if len(row["effects"]) > 1)
+    game.tianji_state["knowledge"][artifact["id"]] = 2
+    engine.store.save(game)
+    shown = next(
+        row for row in engine.get_game(game_id)["tianji_artifacts"]["artifacts"]
+        if row["id"] == artifact["id"]
+    )
+    descriptions = "".join(effect["description"] for effect in shown["effects"])
+    assert all(
+        token not in descriptions
+        for token in ("might", "guard", "mobility", "sense", "sustain", "breach", "max_hp", "max_mp")
+    )
+    assert shown["effects"][0]["complexity"] == "simple"
+    assert all(effect["complexity"] == "complex" for effect in shown["effects"][1:])
+    assert any("当" in effect["description"] for effect in shown["effects"][1:])
+
+
+def test_conditional_artifact_effects_are_evaluated_from_owner_perspective() -> None:
+    effect = {"conditions": ["enemy_higher", "terrain_narrow"]}
+    assert PlayerCombatSystem._artifact_effect_active(
+        effect, owner_realm_delta=-1, natural_terrain="狭窄", artificial_conditions=[],
+    )
+    assert not PlayerCombatSystem._artifact_effect_active(
+        effect, owner_realm_delta=1, natural_terrain="狭窄", artificial_conditions=[],
+    )
 
 
 def test_generated_definitions_freeze_and_public_redaction(tianji_game: tuple[GameEngine, str]) -> None:
@@ -47,6 +84,13 @@ def test_generated_definitions_freeze_and_public_redaction(tianji_game: tuple[Ga
     assert all(row["name"] == "???" and row["effects"] is None and row["recipe"] is None for row in public["artifacts"])
     engine.get_game(game_id)
     assert engine.store.load(game_id).tianji_state["artifacts"] == frozen
+
+
+def test_debug_reveal_all_sets_every_entry_to_level_five(tianji_game: tuple[GameEngine, str]) -> None:
+    engine, game_id = tianji_game
+    shown = engine.debug_reveal_all_tianji(game_id)["tianji_artifacts"]
+    assert shown["known_count"] == 100
+    assert all(row["knowledge_level"] == 5 for row in shown["artifacts"])
 
 
 def _grant_exact_recipe(engine: GameEngine, game_id: str, artifact: dict) -> dict:

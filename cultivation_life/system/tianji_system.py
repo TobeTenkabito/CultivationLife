@@ -14,8 +14,24 @@ from ..runtime import now_iso
 from .crafting_system import store_crafted_artifact
 
 
-TIANJI_GENERATION_VERSION = 1
+TIANJI_GENERATION_VERSION = 2
 SLOT_WEIGHTS = (0.40, 0.20, 0.20, 0.20)
+TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
+    "might": "威能", "guard": "防护", "mobility": "身法",
+    "sense": "神识", "sustain": "续航", "breach": "破法",
+    "max_hp": "气血上限", "max_mp": "法力上限",
+    "tribulation_reduction": "雷劫与天劫伤害减免",
+    "player_debuff_immunity": "削弱效果免疫",
+    "enemy_escape_lock": "敌方遁逃封锁",
+}
+TIANJI_RULE_CONDITIONS: dict[str, dict[str, str]] = {
+    "enemy_higher": {"name": "敌方境界高于自身", "family": "realm"},
+    "enemy_same_or_lower": {"name": "敌方境界不高于自身", "family": "realm"},
+    "terrain_open": {"name": "身处开阔战场", "family": "terrain"},
+    "terrain_narrow": {"name": "身处狭窄战场", "family": "terrain"},
+    "terrain_dangerous": {"name": "身处险要战场", "family": "terrain"},
+    "artificial_field": {"name": "战场存在禁制或大阵", "family": "field"},
+}
 PRIMITIVES: tuple[dict[str, Any], ...] = (
     {"id": "might", "name": "神威", "stat": "might", "low": 1.06, "high": 1.22},
     {"id": "guard", "name": "镇守", "stat": "guard", "low": 1.06, "high": 1.22},
@@ -60,6 +76,7 @@ def _scaled_effects(effects: list[dict[str, Any]], ratio: float) -> tuple[list[d
         result: dict[str, Any] = {
             "source": effect["name"], "name": effect["name"],
             "tianji_primitive": effect["primitive"],
+            "conditions": list(map(str, effect.get("conditions", []))),
         }
         if effect.get("player_stat_multipliers"):
             result["player_stat_multipliers"] = {
@@ -87,9 +104,33 @@ def _scaled_effects(effects: list[dict[str, Any]], ratio: float) -> tuple[list[d
                 persistent[key] = persistent.get(key, 0.0) + value * 1_000_000
             else:
                 persistent[key] = persistent.get(key, 0.0) + value
-        if len(result) > 3:
+        if any(key in result for key in (
+            "player_stat_multipliers", "enemy_stat_multipliers", "traits", "tianji_resistance",
+        )):
             combat.append(result)
     return combat, persistent
+
+
+def _tianji_effect_description(effect: dict[str, Any]) -> str:
+    conditions = [
+        TIANJI_RULE_CONDITIONS[condition]["name"]
+        for condition in map(str, effect.get("conditions", []))
+        if condition in TIANJI_RULE_CONDITIONS
+    ]
+    prefix = f"当{'，且'.join(conditions)}时，" if conditions else ""
+    if effect.get("player_stat_multipliers"):
+        stat, value = next(iter(effect["player_stat_multipliers"].items()))
+        body = f"自身{TIANJI_ATTRIBUTE_NAMES.get(str(stat), str(stat))}提高 {(float(value) - 1):.1%}"
+    elif effect.get("enemy_stat_multipliers"):
+        stat, value = next(iter(effect["enemy_stat_multipliers"].items()))
+        body = f"敌方{TIANJI_ATTRIBUTE_NAMES.get(str(stat), str(stat))}降低 {(1 - float(value)):.1%}"
+    elif effect.get("trait"):
+        trait = TIANJI_ATTRIBUTE_NAMES.get(str(effect["trait"]), str(effect["trait"]))
+        body = f"真体获得完整的{trait}规则，仿品按仿制度转化为对应抗性"
+    else:
+        stat = str(effect.get("persistent", "未知属性"))
+        body = f"{TIANJI_ATTRIBUTE_NAMES.get(stat, stat)}提高 {float(effect.get('magnitude', 0)):.1%}"
+    return f"{prefix}{body}。"
 
 
 class TianjiSystemMixin:
@@ -152,39 +193,52 @@ class TianjiSystemMixin:
         count = 1 if complexity_roll < .25 else 2 if complexity_roll < .82 else 3
         preferred = [row for row in PRIMITIVES if row.get("stat") in theme.get("stats", {})]
         pool = list(PRIMITIVES)
-        selected: list[dict[str, Any]] = []
-        if preferred:
-            selected.append(rng.choice(preferred))
-        for primitive in rng.sample(pool, len(pool)):
+        # Each artifact gets exactly one unconditional expression.  Any
+        # additional entries must be real conditional rules, so persistent
+        # out-of-combat attributes are reserved for the simple slot.
+        selected: list[dict[str, Any]] = [rng.choice([*pool, *preferred, *preferred])]
+        complex_pool = [row for row in pool if not row.get("persistent")]
+        for primitive in rng.sample(complex_pool, len(complex_pool)):
             if primitive["id"] not in {row["id"] for row in selected}:
                 selected.append(primitive)
             if len(selected) >= count:
                 break
         strength = min(1.0, max(0.0, math.log10(max(power, 1) / 63_000_000) / 2.75))
         effects: list[dict[str, Any]] = []
-        for primitive in selected:
+        for index, primitive in enumerate(selected):
+            conditions: list[str] = []
+            if index:
+                candidates = list(TIANJI_RULE_CONDITIONS)
+                first = rng.choice(candidates)
+                conditions.append(first)
+                if rng.random() < .45:
+                    first_family = TIANJI_RULE_CONDITIONS[first]["family"]
+                    compatible = [
+                        condition for condition in candidates
+                        if TIANJI_RULE_CONDITIONS[condition]["family"] != first_family
+                    ]
+                    conditions.append(rng.choice(compatible))
             magnitude = rng.uniform(float(primitive["low"]), float(primitive["high"]))
             if primitive.get("stat"):
                 magnitude = 1 + (magnitude - 1) * (.78 + strength * .35)
-                description = f"{primitive['name']}：自身{primitive['stat']}提高 {(magnitude - 1):.1%}。"
                 row = {"player_stat_multipliers": {primitive["stat"]: round(magnitude, 5)}}
             elif primitive.get("enemy_stat"):
                 magnitude = 1 - (1 - magnitude) * (.78 + strength * .35)
-                description = f"{primitive['name']}：敌方{primitive['enemy_stat']}降低 {(1 - magnitude):.1%}。"
                 row = {"enemy_stat_multipliers": {primitive["enemy_stat"]: round(max(.65, magnitude), 5)}}
             elif primitive.get("trait"):
-                description = f"{primitive['name']}：真体获得完整规则，仿品按仿制度转化为抗性。"
                 row = {"trait": primitive["trait"]}
             else:
-                description = f"{primitive['name']}：获得 {magnitude:.1%} 的{primitive['persistent']}增益。"
                 row = {"persistent": primitive["persistent"]}
-            effects.append({
+            effect = {
                 "primitive": primitive["id"], "name": primitive["name"],
-                "magnitude": round(magnitude, 5), "description": description,
-                "trigger": "combat_start", "conditions": [], "targets": "owner",
+                "magnitude": round(magnitude, 5),
+                "trigger": "combat_start", "conditions": conditions, "targets": "owner",
+                "complexity": "simple" if not conditions else "complex",
                 "replica_scaling": "numeric" if not primitive.get("trait") else "resistance_chain",
                 **row,
-            })
+            }
+            effect["description"] = _tianji_effect_description(effect)
+            effects.append(effect)
         return effects
 
     def _generate_tianji_artifacts(self, game: GameState, materials: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -193,7 +247,6 @@ class TianjiSystemMixin:
         name_rng = _stable_rng(game.seed, "names")
         recipe_rng = _stable_rng(game.seed, "recipes")
         world_rng = _stable_rng(game.seed, "worlds")
-        rule_rng = _stable_rng(game.seed, "rules")
         themes = {str(row["id"]): row for row in config["themes"]}
         molds = list(config["mold_nouns"])
         artifacts: list[dict[str, Any]] = []
@@ -236,7 +289,9 @@ class TianjiSystemMixin:
                 "base_combat_power": power, "mold_id": mold_id,
                 "theme_id": theme["id"], "theme_name": theme["name"],
                 "recipe": recipe_for(str(theme["id"])),
-                "effects": self._tianji_rule_effects(rule_rng, theme, power),
+                "effects": self._tianji_rule_effects(
+                    _stable_rng(game.seed, f"rules:tianji-{index + 1:03d}"), theme, power,
+                ),
                 "description": f"以{theme['name']}为核、{style}为势的{noun}形神机，器理与本存档天地法则相扣。",
             })
         for preset in preset_rows:
@@ -247,7 +302,9 @@ class TianjiSystemMixin:
                 "base_combat_power": power, "mold_id": str(preset["mold_id"]),
                 "theme_id": theme["id"], "theme_name": theme["name"],
                 "recipe": recipe_for(str(theme["id"])),
-                "effects": self._tianji_rule_effects(rule_rng, theme, power),
+                "effects": self._tianji_rule_effects(
+                    _stable_rng(game.seed, f"rules:{preset['id']}"), theme, power,
+                ),
                 "description": str(preset["description"]),
             })
         artifacts.sort(key=lambda row: (-int(row["base_combat_power"]), str(row["id"])))
@@ -337,6 +394,18 @@ class TianjiSystemMixin:
             if key not in state:
                 state[key] = copy.deepcopy(default)
                 changed = True
+        if int(state.get("generation_version", 1)) < TIANJI_GENERATION_VERSION:
+            themes = {str(row["id"]): row for row in self._tianji_config()["themes"]}
+            for artifact in state.get("artifacts", []):
+                theme = themes.get(str(artifact.get("theme_id")))
+                if not theme:
+                    continue
+                artifact["effects"] = self._tianji_rule_effects(
+                    _stable_rng(game.seed, f"rules:{artifact['id']}"),
+                    theme, int(artifact.get("base_combat_power", 1)),
+                )
+            state["generation_version"] = TIANJI_GENERATION_VERSION
+            changed = True
         for artifact_id, holder in list(state["holders"].items()):
             npc = self._find_npc(game, str(holder.get("npc_id", "")))
             if npc and npc.alive:
@@ -391,9 +460,10 @@ class TianjiSystemMixin:
     @staticmethod
     def _tianji_public_effect(effect: dict[str, Any]) -> dict[str, Any]:
         return {
-            "name": str(effect["name"]), "description": str(effect["description"]),
+            "name": str(effect["name"]), "description": _tianji_effect_description(effect),
             "trigger": str(effect.get("trigger", "combat_start")),
             "replica_scaling": str(effect.get("replica_scaling", "numeric")),
+            "complexity": "complex" if effect.get("conditions") else "simple",
         }
 
     def _public_tianji(self, game: GameState) -> dict[str, Any]:
@@ -676,6 +746,18 @@ class TianjiSystemMixin:
                     game.tianji_state["activated_artifact_id"] = None
         else:
             raise ValueError("未知神机操作")
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def debug_reveal_all_tianji(self, game_id: str) -> dict[str, Any]:
+        game = self._load(game_id)
+        if not tianji_content_available():
+            raise ValueError("神机百变 DLC 当前未加载")
+        self._ensure_tianji_state(game)
+        game.tianji_state["knowledge"] = {
+            str(artifact["id"]): 5 for artifact in game.tianji_state.get("artifacts", [])
+        }
         game.updated_at = now_iso()
         self.store.save(game)
         return self.present(game)
