@@ -18,6 +18,7 @@
     target.classList.add('panel-open');
     trigger?.classList.add('active');
     trigger?.setAttribute('aria-expanded', 'true');
+    window.dispatchEvent(new CustomEvent('game:panel-open', {detail:{name,target}}));
   }
 
   function toggle(name) {
@@ -35,7 +36,7 @@
       document.querySelector(`#${name}-toggle`)?.addEventListener('click', () => close(name));
     });
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') panelNames.forEach(close);
+      if (event.key === 'Escape' && !document.querySelector('.appearance-dialog[open]')) panelNames.forEach(close);
     });
   }
 

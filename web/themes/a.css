@@ -1,0 +1,11 @@
+:root[data-theme=a]{color-scheme:light;--background:#EEEAE0;--surface:#F9F6ED;--paper:#F9F6ED;--ink:#283C32;--muted:#697065;--line:#D5D9CA;--pine:#315C47;--pine-dark:#315C47;--cinnabar:#A54B37;--gold:#87662F;--tint:#E9EEDF;--track:#D5D9CA;--on-accent:#FFFDF5;--info:#36748C;--violet:#786589;--rose:#93667A;--radius:6px;--dock-radius:50%;}
+[data-theme=a] .in-game #player-hud{margin-bottom:4px}
+[data-theme=a] .in-game .action-navigation{border-bottom:1px solid var(--line);padding-bottom:0;margin-bottom:22px}
+[data-theme=a] .in-game .hud-track i:after{content:'';display:block;position:absolute;left:var(--progress);top:-3px;width:1px;height:13px;background:var(--meter-color)}
+[data-theme=a] .in-game .action-units{position:absolute;right:30px;top:32px}
+[data-theme=a] .in-game .hud-details-label{margin-right:190px}
+[data-theme=a] .in-game .theme-feedback-active:after{content:'记';position:absolute;right:24px;top:20px;border:2px solid var(--cinnabar);padding:4px 9px;color:var(--cinnabar);pointer-events:none;animation:ink-seal .9s ease both}
+@keyframes ink-seal{0%{opacity:0;transform:scale(1.7) rotate(-12deg)}35%{opacity:.65;transform:scale(1) rotate(-6deg)}100%{opacity:0;transform:scale(1) rotate(-6deg)}}
+@media(max-width:1100px){[data-theme=a] .in-game .action-units{position:static}[data-theme=a] .in-game .hud-details-label{margin-right:0}}
+[data-theme=a] .in-game #cultivate-action b{align-self:flex-start}
+[data-theme=a] .in-game .theme-feedback-active:after{display:block}

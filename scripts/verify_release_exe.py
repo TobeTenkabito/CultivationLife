@@ -41,6 +41,21 @@ def verify(with_dlc):
             assert len(config["worlds"]) == 11
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (6 if with_dlc else 0)
+            for theme in 'abcdef':
+                with urllib.request.urlopen(base + f'/themes/{theme}.css', timeout=5) as response:
+                    assert f'data-theme={theme}'.encode() in response.read()
+            with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
+                assert b'window.GameThemes' in response.read()
+            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg']:
+                with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
+                    assert response.read() == (ROOT / 'web' / asset).read_bytes()
+            request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
+                data=b'{"theme":"f","reduced_motion":true}', headers={'Content-Type':'application/json'})
+            with urllib.request.urlopen(request, timeout=5) as response:
+                assert json.load(response) == {'theme':'f','reduced_motion':True}
+            assert json.loads((folder / 'data/ui_preferences.json').read_text())['theme'] == 'f'
+            with urllib.request.urlopen(base + '/api/ui-preferences', timeout=5) as response:
+                assert json.load(response)['reduced_motion'] is True
             request = urllib.request.Request(base + "/api/games", method="POST",
                 data=json.dumps({"name": "打包验收", "spirit_root": "heavenly", "path": "dao", "seed": 134,
                                  "preset_id": "core"}).encode(), headers={"Content-Type": "application/json"})

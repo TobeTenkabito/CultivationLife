@@ -310,7 +310,7 @@ $('#new-game-form').addEventListener('submit', async event => {
 });
 
 document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => {
-  mutate(`/api/games/${game.id}/advance`, {action: button.dataset.action, years: 1});
+  mutate(`/api/games/${game.id}/advance`, {action: button.dataset.action, years: window.ThemeComposition?.units || 1});
 }));
 
 $('#new-game-button').onclick = showStart;
@@ -332,6 +332,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.GameThemes?.showStart();
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
@@ -561,6 +562,7 @@ function render(data) {
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
+  window.GameThemes?.render(data);
   renderPostBattlePossession();
   renderButtons();
 }
@@ -964,7 +966,7 @@ function drawFormationLines(profile) {
   if (!width || !height) return;
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   const ns = 'http://www.w3.org/2000/svg'; const defs = document.createElementNS(ns, 'defs');
-  const colors = {green:'#3d745d', red:'#a64734', gray:'#8a8d86'};
+  const colors = {green:'var(--pine)', red:'var(--cinnabar)', gray:'var(--muted)'};
   Object.entries(colors).forEach(([name, color]) => {
     const marker = document.createElementNS(ns, 'marker'); marker.id = `formation-arrow-${name}`; marker.setAttribute('markerWidth','6'); marker.setAttribute('markerHeight','6'); marker.setAttribute('refX','5'); marker.setAttribute('refY','3'); marker.setAttribute('orient','auto'); marker.setAttribute('markerUnits','strokeWidth');
     const tip = document.createElementNS(ns, 'path'); tip.setAttribute('d','M0,0 L6,3 L0,6 Z'); tip.setAttribute('fill',color); marker.appendChild(tip); defs.appendChild(marker);
@@ -3782,7 +3784,7 @@ $('#battle-report-open').onclick = () => {
   $('#battle-report-card').classList.remove('report-closed');
 };
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !document.querySelector('.appearance-dialog[open]')) {
     battleReportOpen = false;
     $('#battle-report-card').classList.add('report-closed');
   }
