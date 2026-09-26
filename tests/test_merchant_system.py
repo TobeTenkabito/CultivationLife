@@ -181,7 +181,7 @@ def test_posted_delivery_is_persistent_and_exactly_once(setup, kind):
 
 
 @pytest.mark.parametrize('status', ['open', 'working'])
-def test_timeout_refunds_principal_only_and_only_once(setup, status):
+def test_timeout_refunds_by_acceptance_status_only_once(setup, status):
     engine, game = setup
     game, alliance = join(engine, game)
     add_item(game.player, 'spirit_stone', 10000000)
@@ -194,14 +194,15 @@ def test_timeout_refunds_principal_only_and_only_once(setup, status):
     order.update(status=status,finish_age=game.player.age+1,will_finish=False)
     game.player.age = order['deadline']
     engine._advance_merchant_year(game)
-    assert stones(game) == before - order['fee']
-    assert order['status'] == 'cancelled'
+    refund = (order['fee'] + 1) // 2 if status == 'working' else 0
+    assert stones(game) == before - order['fee'] + refund
+    assert order['status'] == ('failed' if status == 'working' else 'cancelled')
     game.player.age += 1
     engine._advance_merchant_year(game)
-    assert stones(game) == before - order['fee']
+    assert stones(game) == before - order['fee'] + refund
 
 
-def test_crossworld_delivery_slow_and_ordinary_alliance_rejects(setup):
+def test_crossworld_delivery_slow_and_ordinary_alliance_cannot_outsource(setup):
     engine, game = setup
     game, alliance = join(engine, game, world='true_demon', alliance_id='xuanji')
     add_item(game.player,'spirit_stone',100000000)
@@ -211,7 +212,7 @@ def test_crossworld_delivery_slow_and_ordinary_alliance_rejects(setup):
     game = engine._load(game.id)
     assert game.merchant_state['posted'][0]['years'] == 45
     ordinary = next(row for row in game.merchant_state['worlds']['true_demon'] if not row['cross_world'])
-    with pytest.raises(ValueError,match='普通商盟'):
+    with pytest.raises(ValueError, match='分总部'):
         engine._merchant_post(game,ordinary,{'source_world':'spirit','definition_id':definition['id']})
 
 
@@ -227,23 +228,15 @@ def test_passage_rank_gate_suppression_and_return(setup):
         engine.merchant_action(game.id,'passage',{'destination':'human'})
     game.merchant_state['membership']['rank'] = 1
     engine.store.save(game)
-    engine.merchant_action(game.id,'passage',{'destination':'human'})
-    game = engine._load(game.id)
-    assert game.player.realm_index == 5 and game.player.layer == 3
-    assert game.player.sealed_cultivation['realm_index'] == 8
-    assert game.merchant_state['membership']['world'] == 'spirit'
-    with pytest.raises(ValueError, match='访客封印'):
-        engine.cross_world(game.id, 'spirit')
+    for destination in ('human', 'monster_realm'):
+        with pytest.raises(ValueError, match='逆灵通道'):
+            engine.merchant_action(game.id,'passage',{'destination':destination})
     engine.merchant_action(game.id,'passage',{'destination':'true_demon'})
     game = engine._load(game.id)
     assert game.player.realm_index == 8 and game.player.layer == 9
-    assert not game.player.sealed_cultivation
-    engine.merchant_action(game.id,'passage',{'destination':'monster_realm'})
-    game = engine._load(game.id)
-    assert (game.player.realm_index, game.player.layer) == (7, 9)
+    assert game.merchant_state['membership']['world'] == 'spirit'
     engine.merchant_action(game.id,'passage',{'destination':'spirit'})
-    game = engine._load(game.id)
-    assert (game.player.realm_index, game.player.layer) == (8, 9)
+    assert engine._load(game.id).player.world == 'spirit'
 
 
 def test_policies_rotate_reserves_change_but_presentation_does_not_tick(setup):

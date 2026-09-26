@@ -677,5 +677,26 @@
 .merchant-post input, .merchant-post select { width: 100%; min-width: 0; }
 .merchant-post p { grid-column: 1 / -1; }
 .merchant-panel progress { width: 100%; height: 18px; accent-color: #877340; }
+.merchant-panel [hidden] { display: none !important; }
+.merchant-metrics, .merchant-product-preview { grid-column: 1 / -1; min-width: 0; }
+.merchant-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; border: 1px solid #c8b994; }
+.merchant-metrics p { grid-column: 1 / -1; }
+.merchant-product-preview { overflow-x: auto; }
+.merchant-product-preview table { width: 100%; border-collapse: collapse; }
+.merchant-product-preview td, .merchant-product-preview th { padding: 6px; border-bottom: 1px solid #d8cbb1; text-align: left; }
+.merchant-debug-hq { margin: 8px 0; border: 1px dashed #a64734; }
 .strategy-dock .merchant-notice { box-shadow: 0 0 0 2px #bc8d32; }
 @media (max-width: 650px) { .merchant-post { grid-template-columns: 1fr; } }
+
+/* Commission execution ledger keeps terminal outcomes visible. */
+.merchant-order[data-status="failed"]{border-left:3px solid var(--cinnabar);background:rgba(166,71,52,.05)}
+.merchant-order[data-status="completed"]{border-left:3px solid var(--pine)}
+.merchant-order progress{appearance:none;width:100%;height:9px;border:0;border-radius:8px;overflow:hidden;background:#dedfce;accent-color:var(--pine)}
+.merchant-order progress::-webkit-progress-bar{background:#dedfce;border-radius:8px}
+.merchant-order progress::-webkit-progress-value{background:linear-gradient(90deg,var(--pine),#81956a);border-radius:8px}
+.merchant-order progress::-moz-progress-bar{background:var(--pine)}
+.merchant-order[data-status="failed"] progress{accent-color:var(--cinnabar)}
+.merchant-order[data-status="failed"] progress::-webkit-progress-value{background:var(--cinnabar)}
+.merchant-progress-log{margin-top:10px;padding:9px 12px;background:rgba(47,82,69,.045);border-radius:5px}
+.merchant-progress-log p{padding-left:10px;border-left:2px solid var(--gold);font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+.merchant-refund{color:var(--pine);font-weight:600}

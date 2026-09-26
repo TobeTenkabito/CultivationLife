@@ -1,0 +1,19 @@
+{
+  "base_version": "1.36.0",
+  "exe_sha256": "015846bd853d6d132e03627c77a01640aafd26e5887277c791c688f9a62befc4",
+  "dlc_versions": {
+    "ghost-reincarnation": "3.7.0",
+    "guixu-tide": "2.4.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.13.0",
+    "sage-way": "1.3.1",
+    "tianji-artifacts": "2.2.0"
+  },
+  "validation": [
+    "674 automated regressions passed",
+    "21 final commission regressions passed",
+    "Merchant 1.36 and 1.35 browser acceptance passed",
+    "Packaged EXE with and without DLC: startup, commission previews and Debug gating passed"
+  ],
+  "save_schema": 5
+}

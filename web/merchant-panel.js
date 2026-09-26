@@ -1,5 +1,6 @@
 (() => {
   let taskStars = 1;
+  let taskCategory = 'crafting';
   const money = value => Number(value || 0).toLocaleString('zh-CN');
   const element = (tag, text, className = '') => {
     const node = document.createElement(tag);
@@ -7,7 +8,7 @@
     node.className = className;
     return node;
   };
-  function render(system, act) {
+  function render(system, act, capabilities = {}) {
     const root = document.querySelector('#merchant-content');
     document.querySelector('#merchant-card').classList.remove('hidden');
     root.replaceChildren();
@@ -22,7 +23,7 @@
     root.append(element('p', membership ? `${membership.title} · 本部影响力 ${money(membership.influence)}` : '尚未加入商盟。到总部或分部所在地图即可入盟；商盟身份与宗门、家族、种族身份独立。', 'merchant-membership'));
     const rules = element('details'); rules.append(element('summary', '身份与委托规则'));
     rules.append(element('p', '分部成员累计120影响力晋为使节，360晋为特使；600影响力并通过修为、实战考核后，可在总部调任使节。同界各分部共用影响力。总部直入成员不能直接升使节，须前往本界分部从成员历练。总部使节累计360总部影响力可升特使。'));
-    rules.append(element('p', '任务按实际年数消耗时间，途中劫数会中断并保留进度。提交与炼制任务需实物；悬赏和护送会实战，招募及情报可能失败。跨界收集耗时为本界的15倍，委托超时退回全部本金，手续费不退。')); root.append(rules);
+    rules.append(element('p', '任务按实际年数消耗时间，途中劫数会中断并保留进度。提交与炼制任务需实物；悬赏和护送会实战，招募及情报可能失败。仅可委托本盟设有总部或分总部的界面，跨界收集耗时为本界的15倍。星级越高、承接修士境界越低，失败风险越高。无人接取超时退还本金；接单后失败退还全部本金及50%手续费（向上取整）。')); root.append(rules);
     const dock = document.querySelector('[data-panel-target="merchant"]');
     dock.classList.toggle('merchant-notice', !!system.notices?.length);
     dock.title = system.notices?.length ? `商盟 · ${system.notices.length}条传讯` : '商盟';
@@ -50,6 +51,7 @@
       panel.append(element('p', `本界总部：${alliance.hq_name} · 盟主 ${alliance.leader_name}（${alliance.leader_realm}）${alliance.cross_world ? `；总盟主 ${alliance.chief_name}（${alliance.chief_realm}），战力 ${money(alliance.chief_power)}` : ''}`));
       panel.append(element('p', `分部：${alliance.offices.map(row => `${row.name}〔${row.leader} · ${row.realm}〕`).join('、')}`));
       if (!membership) panel.append(button(alliance.local_site ? '加入商盟' : '前往上述据点后可入盟', 'join', {alliance_id:alliance.id}, !alliance.local_site));
+      if(capabilities.debug){const grant=button('Debug：一键总部特使','',{},!!system.active);grant.classList.add('merchant-debug-hq');grant.onclick=()=>capabilities.debugGrant(alliance.id);panel.append(grant);}
       if (alliance.member) {
         const canUse = !!alliance.local_site;
         const tools = element('div', null, 'merchant-tools');
@@ -63,21 +65,24 @@
         const stars = element('select'); stars.setAttribute('aria-label', '任务星级');
         for (let i = 1; i <= 5; i++) { const option = element('option', '★'.repeat(i)); option.value = i; option.selected = i === taskStars; stars.append(option); }
         const rows = element('div', null, 'merchant-task-list');
+        const materialCategory=element('select'); materialCategory.setAttribute('aria-label','提交任务材料分类');
+        [{id:'crafting',name:'炼器材料'},{id:'formation',name:'阵法材料'}].forEach(row=>{const option=element('option',row.name);option.value=row.id;option.selected=row.id===taskCategory;materialCategory.append(option);});
         const draw = () => {
           rows.replaceChildren();
-          alliance.tasks.filter(task => task.stars === taskStars).forEach(task => {
+          alliance.tasks.filter(task => task.stars === taskStars && (task.kind!=='supply' || (task.material_category || 'crafting')===taskCategory)).forEach(task => {
             const row = element('div', null, 'merchant-task');
             row.append(element('strong', task.name));
-            row.append(element('p', `${task.years}年 · ${money(task.reward.stones)}灵石 / ${task.reward.materials}材料 / ${task.reward.opportunity}机缘 / 因果 -${task.reward.karma} / 影响力 +${task.reward.influence}`));
+            row.append(element('p', `${task.kind==='supply'?`需 ${task.material_name} ×${task.quantity} · `:''}${task.years}年 · ${money(task.reward.stones)}灵石 / ${task.reward.materials}材料 / ${task.reward.opportunity}机缘 / 因果 -${task.reward.karma} / 影响力 +${task.reward.influence}`));
             row.append(button('接取', 'accept', {alliance_id:alliance.id, task_id:task.id}, !canUse || !!system.active)); rows.append(row);
           });
         };
         stars.onchange = () => { taskStars = Number(stars.value); draw(); };
-        draw(); board.append(stars, rows); panel.append(board);
-        panel.append(postForm(system, alliance, act, canUse));
+        materialCategory.onchange=()=>{taskCategory=materialCategory.value;draw();};
+        draw(); board.append(stars, materialCategory, rows); panel.append(board);
+        panel.append(window.MerchantCommissionForm(system, alliance, act, canUse, capabilities.preview));
         if (alliance.destinations.length) {
           const passage = element('details'); passage.append(element('summary', '逆灵通道'));
-          passage.append(element('p', '总部或分总部使节、特使可用。凭原签发总部身份在同盟异界总部付费往返，影响力仍归原任职地；人魔两界最多化神三层，妖界逆灵访客最多合体九层。返回承载足够的界面后恢复道果。'));
+          passage.append(element('p', '总部或分总部使节、特使可用。凭原签发总部身份在同盟异界总部付费往返，影响力仍归原任职地；修为受到目的界面的承载上限约束。'));
           alliance.destinations.forEach(destination => passage.append(button(`前往${destination.name} · ${money(destination.cost)}灵石`, 'passage', {alliance_id:alliance.id, destination:destination.id}, membership.site !== 'hq' || membership.rank < 1 || alliance.local_site !== 'hq' || !!system.active)));
           panel.append(passage);
         }
@@ -89,60 +94,24 @@
     if (!system.posted.length) root.append(element('p', '暂无发布记录。', 'muted'));
     [...system.posted].reverse().forEach(order => {
       const row = element('section', null, 'merchant-order');
-      row.append(element('strong', `${'★'.repeat(order.stars)} ${order.name} · ${{open:'等待接取',working:'执行中',completed:'已完成',cancelled:'已取消并退款'}[order.status]}`));
+      row.dataset.status = order.status;
+      row.append(element('strong', `${'★'.repeat(order.stars)} ${order.name} · ${{open:'等待接取',working:'执行中',completed:'已完成',failed:'执行失败 · 已退款',cancelled:'已取消并退款'}[order.status]}`));
       row.append(element('p', `本金 ${money(order.principal)} / 手续费 ${money(order.fee)} · 取消期限：第${order.deadline}年${order.cross_world ? ' · 跨界委托' : ''}`));
-      if (order.status === 'working') {
+      if (order.worker) {
         const progress = element('progress'); progress.max = 1; progress.value = order.progress;
         progress.setAttribute('aria-label', `${order.name}完成进度`); row.append(progress);
-        row.append(element('p', `${order.worker} · ${Math.floor(order.progress * 100)}% · 预计第${order.finish_age}年完成${system.year >= order.finish_age ? '（已延期，期限内未完成将退款）' : ''}`));
+        row.append(element('p', `${order.worker}${order.worker_realm_name ? `（${order.worker_realm_name}）` : ''} · ${Math.floor(order.progress * 100)}%${order.status === 'working' ? ` · 预计第${order.finish_age}年完成` : ''}${order.failure_chance != null ? ` · 接单评估失败风险 ${Math.round(order.failure_chance * 100)}%` : ''}`));
+      }
+      if (order.refund_principal != null) row.append(element('p', `已退本金 ${money(order.refund_principal)} 灵石 + 手续费 ${money(order.refund_fee)} 灵石`, 'merchant-refund'));
+      if (order.logs?.length) {
+        const logs = element('details', null, 'merchant-progress-log'); logs.open = order.status === 'working' || order.status === 'failed';
+        logs.append(element('summary', `执行日志 · ${order.logs.length}条`));
+        order.logs.forEach(entry => logs.append(element('p', `第${entry.age}年 · ${entry.message}`)));
+        row.append(logs);
       }
       if (order.delivery) row.append(element('p', order.delivery)); root.append(row);
+      if(order.spec){const saved=element('details');saved.append(element('summary','已确认成品概览'));saved.append(element('p',`${order.spec.material_tier}阶原料 · ${order.spec.mold?.name || '九宫阵法'}`));saved.append(element('p',order.kind==='formation'?Object.entries(order.spec.profile.metrics).map(([key,value])=>`${system.metric_names[key]} ${value}`).join(' / '):`战斗力 ${money(order.spec.stats.combat_power)} · 气血 ${money(order.spec.stats.max_hp)} · 法力 ${money(order.spec.stats.max_mp)}`));row.append(saved);}
     });
-  }
-  function postForm(system, alliance, act, canUse) {
-    const details = element('details'); details.append(element('summary', '发布委托'));
-    const form = element('form', null, 'merchant-post');
-    const field = (label, input) => { const wrapper = element('label', label); wrapper.append(input); form.append(wrapper); input.setAttribute('aria-label', label); return input; };
-    const kind = field('委托类型', element('select'));
-    Object.entries(system.kinds).forEach(([id, name]) => { const option = element('option', name); option.value = id; kind.append(option); });
-    const world = field('目标界面', element('select'));
-    alliance.catalog.forEach(row => { const option = element('option', row.world_name); option.value = row.world; world.append(option); });
-    const localWorld = alliance.world;
-    if (localWorld) world.value = localWorld;
-    const material = field('所需材料', element('select'));
-    const target = field('悬赏目标', element('select'));
-    const stars = field('星级', element('select'));
-    for (let i=1;i<=5;i++) { const option = element('option', '★'.repeat(i)); option.value = i; stars.append(option); }
-    const quantity = field('材料数量', element('input')); quantity.type = 'number'; quantity.min = 1; quantity.max = 99; quantity.value = 1;
-    const principal = field('悬赏本金', element('input')); principal.type = 'number'; principal.min = 1; principal.max = 1e15; principal.required = true;
-    const quote = element('p', null, 'merchant-quote');
-    const refreshQuote = (reset = false) => {
-      const definition = alliance.catalog.find(row => row.world === world.value)?.materials.find(row => row.id === material.value);
-      const cross = world.value !== localWorld;
-      const base = kind.value === 'supply' ? (definition?.value || 0) * Number(quantity.value) * 3 : 2000 * Number(stars.value) ** 3;
-      const enemy = alliance.catalog.find(row => row.world === world.value)?.targets.find(row => row.id === target.value);
-      const minimum = Math.max(100 * Number(stars.value), base, kind.value === 'bounty' ? Math.ceil((enemy?.power || 0) * 4) : 0) * (cross ? 4 : 1);
-      principal.min = minimum; if (reset) principal.value = minimum;
-      const value = Number(principal.value || 0), fee = Math.max(1, Math.ceil(value * (alliance.policy === 'economy' ? .06 : .1)));
-      quote.textContent = `最低本金 ${money(minimum)}，手续费 ${money(fee)}，合计 ${money(value + fee)}灵石；接单后预计 ${Number(stars.value) * 3 * (cross ? 15 : 1)}年完成。无人完成将全额退回本金。`;
-      material.disabled = kind.value !== 'supply' || !canUse; material.dataset.merchantUnavailable = material.disabled ? '1' : '0';
-      target.disabled = kind.value !== 'bounty' || !canUse; target.dataset.merchantUnavailable = target.disabled ? '1' : '0';
-      target.parentElement.hidden = kind.value !== 'bounty';
-      material.parentElement.hidden = kind.value !== 'supply';
-      quantity.parentElement.hidden = kind.value !== 'supply';
-    };
-    const refreshMaterials = () => {
-      material.replaceChildren(); target.replaceChildren();
-      alliance.catalog.find(row => row.world === world.value)?.materials.forEach(row => { const option = element('option', row.name); option.value = row.id; material.append(option); });
-      alliance.catalog.find(row => row.world === world.value)?.targets.forEach(row => { const option = element('option', `${row.name} · ${row.realm} · 战力${money(row.power)}`); option.value = row.id; target.append(option); }); refreshQuote(true);
-    };
-    world.onchange = refreshMaterials;
-    [kind, material, target, stars, quantity].forEach(input => input.onchange = () => refreshQuote(true));
-    principal.oninput = () => refreshQuote(); refreshMaterials();
-    const submit = element('button', '支付并发布委托'); submit.type = 'submit'; form.append(quote, submit);
-    form.querySelectorAll('input,select,button').forEach(input => { if (!canUse) { input.disabled = true; input.dataset.merchantUnavailable = '1'; } });
-    form.onsubmit = event => { event.preventDefault(); act({action:'post',alliance_id:alliance.id,kind:kind.value,source_world:world.value,definition_id:material.value,target_id:target.value,stars:Number(stars.value),quantity:Number(quantity.value),principal:Number(principal.value)}); };
-    details.append(form); return details;
   }
   window.MerchantPanel = {render};
 })();
