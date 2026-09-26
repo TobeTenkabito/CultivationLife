@@ -139,6 +139,7 @@ class EngineEventRuntimeMixin:
             combat = event["combat"]
             target = self._generate_cultivator_target(game.player, combat["target_name"], combat, rng, game=game)
             combat_type = str(combat.get("combat_type", "cultivator"))
+            target["player_defending"] = bool(combat.get("player_defending") or "defense" in tags)
             if combat_type != "cultivator":
                 target["combat_type"] = combat_type
                 target["action"] = str(combat.get("action", "hunt_beast" if combat_type == "beast" else "slay"))
@@ -543,6 +544,8 @@ class EngineEventRuntimeMixin:
                 game, pending, str(effect.get("role", "")), str(effect.get("mode", "")), rng,
             )
         if kind == "add_karma":
+            if float(value) > 0 and pending.get("runtime", {}).get("player_defending"):
+                return None, "正当防御不增因果。"
             player.karma = max(0, player.karma + float(value))
             sign = "+" if value >= 0 else ""
             return None, f"因果 {sign}{value}。"
@@ -551,6 +554,8 @@ class EngineEventRuntimeMixin:
             sign = "+" if value >= 0 else ""
             return None, f"威名 {sign}{value}。"
         if kind == "add_sha_qi":
+            if float(value) > 0 and pending.get("runtime", {}).get("player_defending"):
+                return None, "正当防御不增煞气。"
             actual = self._sage_scaled_gain(player, float(value), "sha_qi_gain_reduction")
             player.sha_qi = max(0.0, player.sha_qi + actual)
             sign = "+" if actual >= 0 else ""
@@ -597,8 +602,11 @@ class EngineEventRuntimeMixin:
             event_tags = self.events_by_id.get(str(pending.get("id", "")), {}).get("tags", [])
             target["non_story_combat"] = "story_chain" not in event_tags
             action = str(target.get("action", "slay"))
+            target["player_defending"] = bool(target.get("player_defending") or "ambush" in event_tags
+                                               or "AMBUSH" in str(pending.get("id", "")))
             result, summary = self._combat(game, target, bool(effect.get("lethal", False)), rng)
-            return result, self._apply_combat_action_rewards(game, action, result, summary, rng)
+            return result, self._apply_combat_action_rewards(game, action, result, summary, rng,
+                                                           player_defending=target["player_defending"])
         if kind == "cultivator_reaction":
             threshold = float(WORLD_SYSTEMS["faction_conflict"]["fame_deterrence_threshold"])
             if player.fame >= threshold:
@@ -666,6 +674,7 @@ class EngineEventRuntimeMixin:
             target = copy.deepcopy(runtime.get("target") or {})
             if not target:
                 return "revenge_absent", "仇家已不知所踪。"
+            target["player_defending"] = True
             mode = str(effect.get("mode", "fight"))
             if mode == "escape":
                 mp_ratio = player.mp / max(1.0,max_mp(player))
@@ -1107,7 +1116,11 @@ class EngineEventRuntimeMixin:
             return "victory", summary + " 你完成会战目标，宗门贡献有所增加。"
         if kind == "combat":
             target = pending["runtime"]
-            event_tags = self.events_by_id.get(str(pending.get("id", "")), {}).get("tags", [])
+            definition = self.events_by_id.get(str(pending.get("id", "")), {})
+            event_tags = definition.get("tags", [])
+            target["player_defending"] = bool(target.get("player_defending")
+                                               or definition.get("combat", {}).get("player_defending")
+                                               or "defense" in event_tags)
             target["non_story_combat"] = "story_chain" not in event_tags
             return self._combat(game, target, bool(effect.get("lethal")), rng)
         raise ValueError(f"未知效果类型：{kind}")

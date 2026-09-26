@@ -756,6 +756,7 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
                 self._record_era_summary(game, start_world_age, era_news)
 
             self._advance_auction_clock(game, rng)
+            self._advance_exchange_clock(game, rng)
 
         self._finish_sage_action(game)
         # 坊市只在一次玩家操作结束时刷新。旧逻辑在大乘一次行动的 1000 个
@@ -1568,6 +1569,7 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
         rng = decode_rng(game.seed, game.rng_state)
         old_label = public_player(player)["realm_name"]
         chance = self._breakthrough_chance(player, major=major)
+        player.natal_origin_penalty = 0.0
         player.concubine_breakthrough_bonus = 0.0
         if player.path == "demonic":
             player.devouring_breakthrough_bonus = 0.0
@@ -3419,10 +3421,11 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
 
     def _apply_combat_action_rewards(
         self, game: GameState, action: str, result: str, summary: str, rng: random.Random,
+        *, player_defending: bool = False,
     ) -> str:
         player = game.player
         settings = ACTIONS[action]["combat"]
-        if action == "hunt_beast" and result == "killed":
+        if action == "hunt_beast" and result == "killed" and not player_defending:
             sha_gain = rng.randint(*settings["sha_qi_gain"])
             sha_gain = self._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
             player.sha_qi += sha_gain

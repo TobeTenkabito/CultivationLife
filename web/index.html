@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <link rel="stylesheet" href="/style.css?v=20260921-3">
-  <link rel="stylesheet" href="/panels.css?v=20260924-2">
+  <link rel="stylesheet" href="/panels.css?v=20260926-1">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -174,6 +174,10 @@
             <section class="market-stock-section material-market-section"><div class="market-stock-heading"><div><p class="eyebrow">阵材器料</p><h3>材料坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="material-market-offers" class="market-offers"></div></section>
             <section id="market-plant-sell-section" class="market-plant-sell"><h3>出售灵植</h3><div id="market-plant-sellables" class="auction-sellables"></div></section>
           </div>
+        </article>
+        <article id="exchange-card" class="paper utility-panel exchange-panel hidden" role="dialog" aria-modal="false" aria-label="匿名交换会">
+          <div class="section-title"><h2 id="exchange-title">匿名交换会</h2><button id="exchange-toggle" type="button">关闭</button></div>
+          <p id="exchange-description" class="muted"></p><div id="exchange-content"></div>
         </article>
         <article id="auction-card" class="paper utility-panel auction-panel hidden" role="dialog" aria-modal="false" aria-label="拍卖会与黑市">
           <div class="section-title"><div><p class="eyebrow">奇珍易主</p><h2 id="auction-title">拍卖会</h2></div><div class="panel-heading"><strong id="auction-wallet"></strong><button id="auction-toggle" type="button">关闭</button></div></div>
@@ -404,6 +408,7 @@
         <button type="button" data-panel-target="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
+        <button type="button" data-panel-target="exchange" title="匿名交换会" class="hidden"><span>易</span><small>交换会</small></button>
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
         <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
@@ -433,8 +438,8 @@
   </div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=20260924-1"></script>
+  <script src="/ui-panels.js?v=20260926-1"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/app.js?v=20260925-1"></script>
+  <script src="/app.js?v=20260926-1"></script>
 </body>
 </html>

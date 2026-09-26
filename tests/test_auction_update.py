@@ -243,7 +243,7 @@ class AuctionUpdateTests(unittest.TestCase):
         shown = self.engine.search_black_market(made["id"], formation_name)
         result = next(row for row in shown["auction_system"]["black_market_results"] if row["kind"] == "formation_material")
         bought = self.engine.buy_black_market_item(made["id"], result["id"])
-        self.assertTrue(any(row["storage_id"] == result["formation_material_instance"]["id"] for row in bought["formation_system"]["materials"]))
+        self.assertTrue(any(row["definition_id"] == result["content_id"] and row["storage_id"] != result["formation_material_instance"]["id"] for row in bought["formation_system"]["materials"]))
 
         supply_name = next(
             row["name"] for row in self.engine._formation_maintenance_defs().values()

@@ -14,13 +14,14 @@ from ..content_registry import (
 from ..models import GameState, HistoryRecord, Item, Player
 from ..runtime import decode_rng, encode_rng, now_iso
 from .possession_system import advance_player_age
+from .exchange_system import ExchangeSystemMixin
 from ..rules import (
     QI_SOURCE_NAMES, acquire_technique, add_item, can_player_practice_technique,
     combat_requirement_display, max_hp, max_mp, remove_item,
 )
 
 
-class EconomySystemMixin:
+class EconomySystemMixin(ExchangeSystemMixin):
     """坊市库存与探宝奖励的领域实现；主引擎只负责调用和持久化。"""
 
     @staticmethod
@@ -1319,7 +1320,9 @@ class EconomySystemMixin:
         self.store.save(game)
         return self.present(game)
 
-    def buy_black_market_item(self, game_id: str, result_id: str) -> dict[str, Any]:
+    def buy_black_market_item(self, game_id: str, result_id: str, quantity: int = 1) -> dict[str, Any]:
+        if isinstance(quantity, bool) or not isinstance(quantity, int) or not 1 <= quantity <= 999:
+            raise ValueError("购买数量必须为 1–999 的整数")
         game = self._load(game_id)
         state = self._require_auction_access(game, {"black_market"})
         result = next((row for row in state.get("black_market_results", []) if row["id"] == result_id), None)
@@ -1329,30 +1332,43 @@ class EconomySystemMixin:
             game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
         ):
             raise ValueError("这件货物不属于当前世界的流通范围")
-        if not remove_item(game.player, "spirit_stone", int(result["price"])):
-            raise ValueError(f"需要 {result['price']} 枚下品灵石")
         kind = str(result["kind"])
+        total_price = int(result["price"]) * quantity
+        instance_key = {"crafting_material": "material_instance", "formation_material": "formation_material_instance"}.get(kind)
+        if instance_key and not isinstance(result.get(instance_key), dict):
+            raise ValueError("这份黑市材料已经失去灵性")
+        if not remove_item(game.player, "spirit_stone", total_price):
+            raise ValueError(f"需要 {total_price} 枚下品灵石")
         if kind == "crafting_material":
             instance = copy.deepcopy(result.get("material_instance"))
             if not isinstance(instance, dict):
                 raise ValueError("这份黑市炼器材料已经失去灵性")
-            game.player.crafting_materials.append(instance)
+            import uuid
+            for _ in range(quantity):
+                purchased = copy.deepcopy(instance)
+                purchased["id"] = f"material-{uuid.uuid4().hex}"
+                game.player.crafting_materials.append(purchased)
         elif kind == "formation_material":
             instance = copy.deepcopy(result.get("formation_material_instance"))
             if not isinstance(instance, dict):
                 raise ValueError("这份黑市阵材已经失去阵性")
-            game.player.formation_materials.append(instance)
+            import uuid
+            for _ in range(quantity):
+                purchased = copy.deepcopy(instance)
+                purchased["id"] = f"formation-material-{uuid.uuid4().hex}"
+                game.player.formation_materials.append(purchased)
         elif kind == "formation_supply":
             supply_id = str(result["content_id"])
             game.player.formation_repair_supplies[supply_id] = (
-                int(game.player.formation_repair_supplies.get(supply_id, 0)) + 1
+                int(game.player.formation_repair_supplies.get(supply_id, 0)) + quantity
             )
         else:
-            self._grant_auction_content(game.player, kind, str(result["content_id"]))
+            for _ in range(quantity):
+                self._grant_auction_content(game.player, kind, str(result["content_id"]))
         game.history.append(HistoryRecord(
             "SYS_BLACK_MARKET_BUY", 1, game.player.age, "黑市补缺", result_id, "purchased",
-            f"你以严重溢价支付 {result['price']} 枚灵石，购得{result['name']}。",
-            {"spirit_stone":-int(result["price"]), "content_id":result["content_id"]},
+            f"你以严重溢价支付 {total_price} 枚灵石，购得{result['name']} ×{quantity}。",
+            {"spirit_stone":-total_price, "content_id":result["content_id"], "quantity":quantity},
             ["system", "black_market", f"world:{game.player.world}"],
         ))
         game.updated_at = now_iso()

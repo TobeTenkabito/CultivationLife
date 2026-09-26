@@ -133,6 +133,7 @@ class EngineCombatRuntimeMixin:
             "title": f"与{target.get('target_name', '未知对手')}的战报",
             "target_name": target.get("target_name", "未知对手"),
             "result": result,
+            "player_defending": bool(target.get("player_defending")),
             "stat_comparison": stat_comparison(resolution),
             "age": game.player.age,
         })
@@ -421,7 +422,7 @@ class EngineCombatRuntimeMixin:
             spoils += tianji_spoils
             fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
             victim_path = str(victim.get("path", "dao"))
-            if player.path == "monster" and victim_path != "monster":
+            if player.path == "monster" and victim_path != "monster" and not target.get("player_defending"):
                 sha_text = ""
                 if victim_path == "dao":
                     fame_rules = WORLD_SYSTEMS["fame"]
@@ -440,7 +441,7 @@ class EngineCombatRuntimeMixin:
                     + sha_text + fame_text + spoils
                     + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else ""),
                 )
-            if target.get("kill_karma", True):
+            if target.get("kill_karma", True) and not target.get("player_defending"):
                 if victim.get("notorious"):
                     reduction = min(player.karma, max(35.0, float(victim.get("notoriety", 0)) * 0.45))
                     player.karma = max(0.0, player.karma - reduction)
@@ -709,6 +710,7 @@ class EngineCombatRuntimeMixin:
                 return
             # 练气层级仍沿用自动检定；筑基以后所有层级均停留等待手动冲击。
             chance = self._breakthrough_chance(player, major=False, allow_aids=False)
+            player.natal_origin_penalty = 0.0
             if rng.random() >= chance["final"]:
                 player.opportunity = required * float(WORLD_SYSTEMS["breakthrough"]["minor_failure_retention"])
                 gain = self._sage_scaled_gain(
@@ -892,11 +894,12 @@ class EngineCombatRuntimeMixin:
         configured_cap = float(
             WORLD_SYSTEMS.get("ghost_cultivation", {}).get("reincarnation_final_probability_cap", 0.98)
         ) if ghost_cultivation_active(player) else 0.98
-        final_cap = min(0.98, max(0.005, configured_cap))
-        final = max(0.005, min(
+        final_cap = min(0.98, max(0.01, configured_cap))
+        final = max(0.01, min(
             final_cap, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
             + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus + sage_bonus - penalty,
         ))
+        final = max(0.01, final - max(0.0, player.natal_origin_penalty))
         return {
             "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
             "concubine_base_bonus": concubine_base_bonus,
@@ -906,6 +909,7 @@ class EngineCombatRuntimeMixin:
             "sage_bonus": sage_bonus,
             "body_training_bonus": body_training_bonus, "optimal_state_bonus": optimal_state_bonus,
             "heart_demon_penalty": penalty, "final": final,
+            "natal_origin_penalty": player.natal_origin_penalty,
         }
 
     @staticmethod

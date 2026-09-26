@@ -120,6 +120,7 @@ class MapTravelMixin:
                 self._record_era_summary(game, start_age, era_news)
             if player.alive:
                 self._advance_auction_clock(game, rng)
+                self._advance_exchange_clock(game, rng)
         self._compact_world_history(game)
         game.updated_at = now_iso()
         game.rng_state = encode_rng(rng)

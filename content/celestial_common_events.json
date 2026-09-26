@@ -3,73 +3,885 @@
   "world": "celestial",
   "events": [
     {
-      "id":"EVT_CELESTIAL_COMMON_LAW_TIDE_001","version":1,"title":"法则潮汐","body":"法则天海升起一轮潮汐，万千道纹在云层间明灭。此时参悟收获极大，但仙躯也要承受法则冲刷。","category":"celestial_common","tags":["celestial_common","cultivation"],"weight":9,"intent_weights":{"cultivate":2.4,"travel":1.2},
-      "choices":[{"id":"observe","text":"立于潮头参悟道纹","effects":[{"type":"damage","value":0.05},{"type":"add_opportunity","range":[14,28]}]},{"id":"collect","text":"收取潮退后凝结的晶砂","effects":[{"type":"add_item","item_id":"law_crystal"}]},{"id":"retreat","text":"先行避开潮锋","effects":[{"type":"restore_mp","value":0.08}]}]
+      "id": "EVT_CELESTIAL_COMMON_LAW_TIDE_001",
+      "version": 1,
+      "title": "法则潮汐",
+      "body": "法则天海升起一轮潮汐，万千道纹在云层间明灭。此时参悟收获极大，但仙躯也要承受法则冲刷。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "cultivation"
+      ],
+      "weight": 9,
+      "intent_weights": {
+        "cultivate": 2.4,
+        "travel": 1.2
+      },
+      "choices": [
+        {
+          "id": "observe",
+          "text": "立于潮头参悟道纹",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.05
+            },
+            {
+              "type": "add_opportunity",
+              "range": [
+                14,
+                28
+              ]
+            }
+          ]
+        },
+        {
+          "id": "collect",
+          "text": "收取潮退后凝结的晶砂",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "law_crystal"
+            }
+          ]
+        },
+        {
+          "id": "retreat",
+          "text": "先行避开潮锋",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.08
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMMON_ASCENSION_TERRACE_001","version":1,"title":"登仙台值守","body":"一座偏远登仙台传来界壁震荡，值守天官征召附近仙人协力稳住接引阵。","category":"celestial_common","tags":["celestial_common","court_task"],"weight":7,"intent_weights":{"commission":2.8,"travel":1.5},
-      "choices":[{"id":"guard","text":"接令稳固登仙台","effects":[{"type":"restore_mp","value":-0.12},{"type":"add_court_merit","range":[4,8]},{"type":"add_item","item_id":"immortal_origin_stone","quantity":2}]},{"id":"advise","text":"留下修补阵纹的方法","effects":[{"type":"add_court_merit","value":2},{"type":"add_opportunity","value":8}]},{"id":"leave","text":"不领此差","effects":[]}]
+      "id": "EVT_CELESTIAL_COMMON_ASCENSION_TERRACE_001",
+      "version": 1,
+      "title": "登仙台值守",
+      "body": "一座偏远登仙台传来界壁震荡，值守天官征召附近仙人协力稳住接引阵。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "court_task"
+      ],
+      "weight": 7,
+      "intent_weights": {
+        "commission": 2.8,
+        "travel": 1.5
+      },
+      "choices": [
+        {
+          "id": "guard",
+          "text": "接令稳固登仙台",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.12
+            },
+            {
+              "type": "add_court_merit",
+              "range": [
+                4,
+                8
+              ]
+            },
+            {
+              "type": "add_item",
+              "item_id": "immortal_origin_stone",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "id": "advise",
+          "text": "留下修补阵纹的方法",
+          "effects": [
+            {
+              "type": "add_court_merit",
+              "value": 2
+            },
+            {
+              "type": "add_opportunity",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不领此差",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMMON_CLOUD_CARAVAN_001","version":1,"title":"云海商队","body":"一支横渡云海的仙商队伍临时停泊，货主愿用仙元石交换护送，也愿出售少量补给。","category":"celestial_common","tags":["celestial_common","trade"],"weight":7,"intent_weights":{"travel":2.0,"commission":2.0},
-      "choices":[{"id":"escort","text":"护送商队穿过罡风带","effects":[{"type":"restore_mp","value":-0.08},{"type":"add_item","item_id":"immortal_origin_stone","quantity":3},{"type":"add_court_merit","value":2}]},{"id":"study","text":"与领队交换云路图","effects":[{"type":"add_opportunity","range":[8,16]}]},{"id":"leave","text":"各行其路","effects":[]}]
+      "id": "EVT_CELESTIAL_COMMON_CLOUD_CARAVAN_001",
+      "version": 1,
+      "title": "云海商队",
+      "body": "一支横渡云海的仙商队伍临时停泊，货主愿用仙元石交换护送，也愿出售少量补给。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "trade"
+      ],
+      "weight": 7,
+      "intent_weights": {
+        "travel": 2.0,
+        "commission": 2.0
+      },
+      "choices": [
+        {
+          "id": "escort",
+          "text": "护送商队穿过罡风带",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.08
+            },
+            {
+              "type": "add_item",
+              "item_id": "immortal_origin_stone",
+              "quantity": 3
+            },
+            {
+              "type": "add_court_merit",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "id": "study",
+          "text": "与领队交换云路图",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                8,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "各行其路",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMMON_BROKEN_PALACE_001","version":1,"title":"坠落行宫","body":"一角废弃行宫从高天云轨坠下，禁制虽已残破，核心处仍有仙灵波动。","category":"celestial_common","tags":["celestial_common","treasure"],"weight":6,"intent_weights":{"treasure":3.0,"travel":1.6},
-      "choices":[{"id":"enter","text":"破开残禁搜索行宫","effects":[{"type":"damage","value":0.08},{"type":"add_item","item_id":"immortal_jade_marrow"},{"type":"add_opportunity","value":12}]},{"id":"map","text":"只拓印禁制结构","effects":[{"type":"add_opportunity","range":[7,14]}]},{"id":"report","text":"上报天庭等待处置","effects":[{"type":"add_court_merit","value":5}]}]
+      "id": "EVT_CELESTIAL_COMMON_BROKEN_PALACE_001",
+      "version": 1,
+      "title": "坠落行宫",
+      "body": "一角废弃行宫从高天云轨坠下，禁制虽已残破，核心处仍有仙灵波动。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "treasure"
+      ],
+      "weight": 6,
+      "intent_weights": {
+        "treasure": 3.0,
+        "travel": 1.6
+      },
+      "choices": [
+        {
+          "id": "enter",
+          "text": "破开残禁搜索行宫",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.08
+            },
+            {
+              "type": "add_item",
+              "item_id": "immortal_jade_marrow"
+            },
+            {
+              "type": "add_opportunity",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "id": "map",
+          "text": "只拓印禁制结构",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                7,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "id": "report",
+          "text": "上报天庭等待处置",
+          "effects": [
+            {
+              "type": "add_court_merit",
+              "value": 5
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMMON_RAIN_001","version":1,"title":"紫气仙雨","body":"紫气凝成仙雨落满群山，丹田中的旧法力与仙灵力随之重新分层。","category":"celestial_common","tags":["celestial_common","positive"],"weight":8,"intent_weights":{"rest":2.4,"cultivate":1.7},
-      "choices":[{"id":"bathe","text":"在雨中运转完整周天","effects":[{"type":"restore_mp","value":0.28},{"type":"add_opportunity","value":7}]},{"id":"gather","text":"以玉瓶收取仙雨","effects":[{"type":"add_item","item_id":"purple_cloud_immortal_dew"}]}]
+      "id": "EVT_CELESTIAL_COMMON_RAIN_001",
+      "version": 1,
+      "title": "紫气仙雨",
+      "body": "紫气凝成仙雨落满群山，丹田中的旧法力与仙灵力随之重新分层。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "positive"
+      ],
+      "weight": 8,
+      "intent_weights": {
+        "rest": 2.4,
+        "cultivate": 1.7
+      },
+      "choices": [
+        {
+          "id": "bathe",
+          "text": "在雨中运转完整周天",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.28
+            },
+            {
+              "type": "add_opportunity",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "id": "gather",
+          "text": "以玉瓶收取仙雨",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "purple_cloud_immortal_dew"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMMON_COURT_PATROL_001","version":1,"title":"天官巡域","body":"巡域天官正在清查跨域传送记录，恰有一批积压文牍无人复核。","category":"celestial_common","tags":["celestial_common","court_task"],"weight":6,"intent_weights":{"commission":2.5},
-      "choices":[{"id":"assist","text":"协助核验文牍与界印","effects":[{"type":"add_court_merit","range":[3,7]},{"type":"add_opportunity","value":5}]},{"id":"decline","text":"不涉天庭公务","effects":[]}]
+      "id": "EVT_CELESTIAL_COMMON_COURT_PATROL_001",
+      "version": 1,
+      "title": "天官巡域",
+      "body": "巡域天官正在清查跨域传送记录，恰有一批积压文牍无人复核。",
+      "category": "celestial_common",
+      "tags": [
+        "celestial_common",
+        "court_task"
+      ],
+      "weight": 6,
+      "intent_weights": {
+        "commission": 2.5
+      },
+      "choices": [
+        {
+          "id": "assist",
+          "text": "协助核验文牍与界印",
+          "effects": [
+            {
+              "type": "add_court_merit",
+              "range": [
+                3,
+                7
+              ]
+            },
+            {
+              "type": "add_opportunity",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "text": "不涉天庭公务",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_FACTION_DUTY_001","version":1,"title":"仙门轮值","body":"宗门本期负责维护一段法则云轨，执事将轮值名册送到你的洞府。","category":"celestial_faction","tags":["celestial_common","faction","duty"],"weight":6,"conditions":{"path":"player.faction_id","op":"neq","value":null},
-      "choices":[{"id":"serve","text":"按期完成云轨轮值","effects":[{"type":"restore_mp","value":-0.08},{"type":"add_faction_contribution","value":4},{"type":"add_court_merit","value":3}]},{"id":"research","text":"顺便校勘云轨法则","effects":[{"type":"add_faction_contribution","value":2},{"type":"add_opportunity","value":10}]}]
+      "id": "EVT_CELESTIAL_FACTION_DUTY_001",
+      "version": 1,
+      "title": "仙门轮值",
+      "body": "宗门本期负责维护一段法则云轨，执事将轮值名册送到你的洞府。",
+      "category": "celestial_faction",
+      "tags": [
+        "celestial_common",
+        "faction",
+        "duty"
+      ],
+      "weight": 6,
+      "conditions": {
+        "path": "player.faction_id",
+        "op": "neq",
+        "value": null
+      },
+      "choices": [
+        {
+          "id": "serve",
+          "text": "按期完成云轨轮值",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.08
+            },
+            {
+              "type": "add_faction_contribution",
+              "value": 4
+            },
+            {
+              "type": "add_court_merit",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "id": "research",
+          "text": "顺便校勘云轨法则",
+          "effects": [
+            {
+              "type": "add_faction_contribution",
+              "value": 2
+            },
+            {
+              "type": "add_opportunity",
+              "value": 10
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_FACTION_ASSEMBLY_001","version":1,"title":"仙门法会","body":"宗门召集真仙以上门人论议下一期仙域事务，也借此选定上呈天庭的提案。","category":"celestial_faction","tags":["celestial_common","faction"],"weight":5,"conditions":{"path":"player.faction_id","op":"neq","value":null},
-      "choices":[{"id":"debate","text":"参与法会并陈述己见","effects":[{"type":"add_faction_contribution","value":3},{"type":"add_opportunity","range":[8,16]}]},{"id":"court","text":"主动承担提案整理","effects":[{"type":"add_faction_contribution","value":2},{"type":"add_court_merit","value":4}]}]
+      "id": "EVT_CELESTIAL_FACTION_ASSEMBLY_001",
+      "version": 1,
+      "title": "仙门法会",
+      "body": "宗门召集真仙以上门人论议下一期仙域事务，也借此选定上呈天庭的提案。",
+      "category": "celestial_faction",
+      "tags": [
+        "celestial_common",
+        "faction"
+      ],
+      "weight": 5,
+      "conditions": {
+        "path": "player.faction_id",
+        "op": "neq",
+        "value": null
+      },
+      "choices": [
+        {
+          "id": "debate",
+          "text": "参与法会并陈述己见",
+          "effects": [
+            {
+              "type": "add_faction_contribution",
+              "value": 3
+            },
+            {
+              "type": "add_opportunity",
+              "range": [
+                8,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "id": "court",
+          "text": "主动承担提案整理",
+          "effects": [
+            {
+              "type": "add_faction_contribution",
+              "value": 2
+            },
+            {
+              "type": "add_court_merit",
+              "value": 4
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_JOIN_CLOUD_001","version":1,"title":"云霄仙宫开山试","body":"云霄仙宫于九重云域设下护法试炼，愿接纳根基完整、能守界壁的飞升仙人。","category":"celestial_faction","tags":["celestial_common","faction_join"],"weight":4,"repeat":"once","conditions":{"path":"player.faction_id","op":"eq","value":null},
-      "choices":[{"id":"join","text":"登云阶，拜入云霄仙宫","effects":[{"type":"join_faction","faction_id":"cloud_immortal_palace"}]},{"id":"leave","text":"暂不入宫","effects":[]}]
+      "id": "EVT_CELESTIAL_JOIN_CLOUD_001",
+      "version": 1,
+      "title": "云霄仙宫开山试",
+      "body": "云霄仙宫于九重云域设下护法试炼，愿接纳根基完整、能守界壁的飞升仙人。",
+      "category": "celestial_faction",
+      "tags": [
+        "celestial_common",
+        "faction_join"
+      ],
+      "weight": 4,
+      "repeat": "once",
+      "conditions": {
+        "path": "player.faction_id",
+        "op": "eq",
+        "value": null
+      },
+      "choices": [
+        {
+          "id": "join",
+          "text": "登云阶，拜入云霄仙宫",
+          "effects": [
+            {
+              "type": "join_faction",
+              "faction_id": "cloud_immortal_palace"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "暂不入宫",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_JOIN_PILL_001","version":1,"title":"太乙丹宗问火","body":"太乙丹宗在万药仙原开炉问火，能辨仙药性理者可持丹帖入门。","category":"celestial_faction","tags":["celestial_common","faction_join"],"weight":4,"repeat":"once","conditions":{"path":"player.faction_id","op":"eq","value":null},
-      "choices":[{"id":"join","text":"接下丹帖，拜入太乙丹宗","effects":[{"type":"join_faction","faction_id":"taiyi_pill_sect"}]},{"id":"leave","text":"婉拒丹帖","effects":[]}]
+      "id": "EVT_CELESTIAL_JOIN_PILL_001",
+      "version": 1,
+      "title": "太乙丹宗问火",
+      "body": "太乙丹宗在万药仙原开炉问火，能辨仙药性理者可持丹帖入门。",
+      "category": "celestial_faction",
+      "tags": [
+        "celestial_common",
+        "faction_join"
+      ],
+      "weight": 4,
+      "repeat": "once",
+      "conditions": {
+        "path": "player.faction_id",
+        "op": "eq",
+        "value": null
+      },
+      "choices": [
+        {
+          "id": "join",
+          "text": "接下丹帖，拜入太乙丹宗",
+          "effects": [
+            {
+              "type": "join_faction",
+              "faction_id": "taiyi_pill_sect"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "婉拒丹帖",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_JOIN_LAW_SEA_001","version":1,"title":"法海天阁招录","body":"法海天阁开放界河书院，招录愿意校勘法则潮汐与因果记录的仙人。","category":"celestial_faction","tags":["celestial_common","faction_join"],"weight":4,"repeat":"once","conditions":{"path":"player.faction_id","op":"eq","value":null},
-      "choices":[{"id":"join","text":"留名书院，拜入法海天阁","effects":[{"type":"join_faction","faction_id":"law_sea_pavilion"}]},{"id":"leave","text":"只观界河，不入天阁","effects":[]}]
+      "id": "EVT_CELESTIAL_JOIN_LAW_SEA_001",
+      "version": 1,
+      "title": "法海天阁招录",
+      "body": "法海天阁开放界河书院，招录愿意校勘法则潮汐与因果记录的仙人。",
+      "category": "celestial_faction",
+      "tags": [
+        "celestial_common",
+        "faction_join"
+      ],
+      "weight": 4,
+      "repeat": "once",
+      "conditions": {
+        "path": "player.faction_id",
+        "op": "eq",
+        "value": null
+      },
+      "choices": [
+        {
+          "id": "join",
+          "text": "留名书院，拜入法海天阁",
+          "effects": [
+            {
+              "type": "join_faction",
+              "faction_id": "law_sea_pavilion"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "只观界河，不入天阁",
+          "effects": []
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMBAT_CLOUD_RAIDER_001","version":1,"title":"云轨截杀","body":"跨域云轨忽然被锁，一名劫仙从折叠云层中现身。对方修为{target_realm}，战斗力约{target_power}。","category":"celestial_combat","tags":["celestial_common","combat","negative"],"weight":6,"intent_weights":{"travel":2.6,"treasure":1.2},
-      "combat":{"target_name":"云轨劫仙","realm_offsets":[[-1,0.18],[0,0.65],[1,0.17]],"expectation_multiplier":1.04,"power_sigma":0.16,"power_bounds":[0.68,1.48],"max_rounds":6},
-      "choices":[{"id":"fight","text":"交由战斗预案迎击","effects":[{"type":"runtime_combat","lethal":true},{"type":"add_court_merit","value":3}]},{"id":"escape","text":"耗费仙元强穿云轨","effects":[{"type":"restore_mp","value":-0.18}]}]
+      "id": "EVT_CELESTIAL_COMBAT_CLOUD_RAIDER_001",
+      "version": 1,
+      "title": "云轨截杀",
+      "body": "跨域云轨忽然被锁，一名劫仙从折叠云层中现身。对方修为{target_realm}，战斗力约{target_power}。",
+      "category": "celestial_combat",
+      "tags": [
+        "celestial_common",
+        "combat",
+        "negative"
+      ],
+      "weight": 6,
+      "intent_weights": {
+        "travel": 2.6,
+        "treasure": 1.2
+      },
+      "combat": {
+        "target_name": "云轨劫仙",
+        "realm_offsets": [
+          [
+            -1,
+            0.18
+          ],
+          [
+            0,
+            0.65
+          ],
+          [
+            1,
+            0.17
+          ]
+        ],
+        "expectation_multiplier": 1.04,
+        "power_sigma": 0.16,
+        "power_bounds": [
+          0.68,
+          1.48
+        ],
+        "max_rounds": 6,
+        "player_defending": true
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "text": "交由战斗预案迎击",
+          "effects": [
+            {
+              "type": "runtime_combat",
+              "lethal": true
+            },
+            {
+              "type": "add_court_merit",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "id": "escape",
+          "text": "耗费仙元强穿云轨",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.18
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMBAT_LAW_BEAST_001","version":1,"title":"天庭诛妖令","body":"天庭豢养的法则异兽挣脱禁环，正撕裂附近仙脉。诛妖令要求就地斩杀；它的境界为{target_realm}，战斗力约{target_power}。","category":"celestial_combat","tags":["celestial_common","combat","court_task"],"weight":6,"intent_weights":{"commission":2.8,"travel":1.4},
-      "combat":{"target_name":"失控法则异兽","combat_type":"beast","action":"hunt_beast","success_threshold":1.0,"realm_offsets":[[-1,0.24],[0,0.66],[1,0.10]],"expectation_multiplier":0.98,"power_sigma":0.15,"power_bounds":[0.62,1.38],"max_rounds":6},
-      "choices":[{"id":"subdue","text":"接下诛妖令，由预案完成斩杀","effects":[{"type":"runtime_combat","lethal":true},{"type":"add_court_merit","range":[5,9],"if_result":["killed"]}]},{"id":"report","text":"标记位置并上报天庭","effects":[{"type":"add_court_merit","value":2}]}]
+      "id": "EVT_CELESTIAL_COMBAT_LAW_BEAST_001",
+      "version": 1,
+      "title": "天庭诛妖令",
+      "body": "天庭豢养的法则异兽挣脱禁环，正撕裂附近仙脉。诛妖令要求就地斩杀；它的境界为{target_realm}，战斗力约{target_power}。",
+      "category": "celestial_combat",
+      "tags": [
+        "celestial_common",
+        "combat",
+        "court_task"
+      ],
+      "weight": 6,
+      "intent_weights": {
+        "commission": 2.8,
+        "travel": 1.4
+      },
+      "combat": {
+        "target_name": "失控法则异兽",
+        "combat_type": "beast",
+        "action": "hunt_beast",
+        "success_threshold": 1.0,
+        "realm_offsets": [
+          [
+            -1,
+            0.24
+          ],
+          [
+            0,
+            0.66
+          ],
+          [
+            1,
+            0.1
+          ]
+        ],
+        "expectation_multiplier": 0.98,
+        "power_sigma": 0.15,
+        "power_bounds": [
+          0.62,
+          1.38
+        ],
+        "max_rounds": 6
+      },
+      "choices": [
+        {
+          "id": "subdue",
+          "text": "接下诛妖令，由预案完成斩杀",
+          "effects": [
+            {
+              "type": "runtime_combat",
+              "lethal": true
+            },
+            {
+              "type": "add_court_merit",
+              "range": [
+                5,
+                9
+              ],
+              "if_result": [
+                "killed"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "report",
+          "text": "标记位置并上报天庭",
+          "effects": [
+            {
+              "type": "add_court_merit",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMBAT_DAO_DISPUTE_001","version":1,"title":"道场争界","body":"两座移动道场在法则潮中相撞，对方执事要求以斗法决定临时界标。其修为{target_realm}，战斗力约{target_power}。","category":"celestial_combat","tags":["celestial_common","combat","social"],"weight":5,"intent_weights":{"cultivate":1.4,"travel":1.8},
-      "combat":{"target_name":"道场执事","realm_offsets":[[-1,0.12],[0,0.76],[1,0.12]],"expectation_multiplier":1.0,"power_sigma":0.12,"power_bounds":[0.72,1.32],"max_rounds":5},
-      "choices":[{"id":"duel","text":"接受无伤斗法，由预案执行","effects":[{"type":"runtime_combat","lethal":false},{"type":"add_opportunity","value":9}]},{"id":"yield","text":"让出本次界标","effects":[{"type":"add_karma","value":-2}]}]
+      "id": "EVT_CELESTIAL_COMBAT_DAO_DISPUTE_001",
+      "version": 1,
+      "title": "道场争界",
+      "body": "两座移动道场在法则潮中相撞，对方执事要求以斗法决定临时界标。其修为{target_realm}，战斗力约{target_power}。",
+      "category": "celestial_combat",
+      "tags": [
+        "celestial_common",
+        "combat",
+        "social"
+      ],
+      "weight": 5,
+      "intent_weights": {
+        "cultivate": 1.4,
+        "travel": 1.8
+      },
+      "combat": {
+        "target_name": "道场执事",
+        "realm_offsets": [
+          [
+            -1,
+            0.12
+          ],
+          [
+            0,
+            0.76
+          ],
+          [
+            1,
+            0.12
+          ]
+        ],
+        "expectation_multiplier": 1.0,
+        "power_sigma": 0.12,
+        "power_bounds": [
+          0.72,
+          1.32
+        ],
+        "max_rounds": 5
+      },
+      "choices": [
+        {
+          "id": "duel",
+          "text": "接受无伤斗法，由预案执行",
+          "effects": [
+            {
+              "type": "runtime_combat",
+              "lethal": false
+            },
+            {
+              "type": "add_opportunity",
+              "value": 9
+            }
+          ]
+        },
+        {
+          "id": "yield",
+          "text": "让出本次界标",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -2
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMBAT_VOID_INVADER_001","version":1,"title":"界壁外敌","body":"界壁巡灯连成血色，一名从虚空裂隙潜入的异界修士已经锁定你。对方修为{target_realm}，战斗力约{target_power}。","category":"celestial_combat","tags":["celestial_common","combat","court_task","negative"],"weight":4,"intent_weights":{"commission":3.0,"travel":1.5},
-      "combat":{"target_name":"虚空潜入者","realm_offsets":[[0,0.58],[1,0.36],[2,0.06]],"expectation_multiplier":1.08,"power_sigma":0.18,"power_bounds":[0.72,1.62],"max_rounds":7},
-      "choices":[{"id":"intercept","text":"封锁裂隙并迎战","effects":[{"type":"runtime_combat","lethal":true},{"type":"add_court_merit","range":[8,14]},{"type":"add_item","item_id":"law_crystal"}]},{"id":"signal","text":"燃起巡天信标等待援军","effects":[{"type":"add_court_merit","value":2},{"type":"restore_mp","value":-0.08}]}]
+      "id": "EVT_CELESTIAL_COMBAT_VOID_INVADER_001",
+      "version": 1,
+      "title": "界壁外敌",
+      "body": "界壁巡灯连成血色，一名从虚空裂隙潜入的异界修士已经锁定你。对方修为{target_realm}，战斗力约{target_power}。",
+      "category": "celestial_combat",
+      "tags": [
+        "celestial_common",
+        "combat",
+        "court_task",
+        "negative"
+      ],
+      "weight": 4,
+      "intent_weights": {
+        "commission": 3.0,
+        "travel": 1.5
+      },
+      "combat": {
+        "target_name": "虚空潜入者",
+        "realm_offsets": [
+          [
+            0,
+            0.58
+          ],
+          [
+            1,
+            0.36
+          ],
+          [
+            2,
+            0.06
+          ]
+        ],
+        "expectation_multiplier": 1.08,
+        "power_sigma": 0.18,
+        "power_bounds": [
+          0.72,
+          1.62
+        ],
+        "max_rounds": 7,
+        "player_defending": true
+      },
+      "choices": [
+        {
+          "id": "intercept",
+          "text": "封锁裂隙并迎战",
+          "effects": [
+            {
+              "type": "runtime_combat",
+              "lethal": true
+            },
+            {
+              "type": "add_court_merit",
+              "range": [
+                8,
+                14
+              ]
+            },
+            {
+              "type": "add_item",
+              "item_id": "law_crystal"
+            }
+          ]
+        },
+        {
+          "id": "signal",
+          "text": "燃起巡天信标等待援军",
+          "effects": [
+            {
+              "type": "add_court_merit",
+              "value": 2
+            },
+            {
+              "type": "restore_mp",
+              "value": -0.08
+            }
+          ]
+        }
+      ]
     },
     {
-      "id":"EVT_CELESTIAL_COMBAT_STAR_ARENA_001","version":1,"title":"周天演武","body":"天庭演武台随机匹配了一名仙官，对方修为{target_realm}，战斗力约{target_power}。胜负只计功绩，不伤性命。","category":"celestial_combat","tags":["celestial_common","combat","court_task"],"weight":5,"intent_weights":{"commission":2.0,"cultivate":1.6},
-      "combat":{"target_name":"演武仙官","realm_offsets":[[-1,0.10],[0,0.72],[1,0.18]],"expectation_multiplier":1.02,"power_sigma":0.13,"power_bounds":[0.70,1.36],"max_rounds":6},
-      "choices":[{"id":"compete","text":"让战斗预案接管演武","effects":[{"type":"runtime_combat","lethal":false},{"type":"add_court_merit","range":[4,8]},{"type":"add_opportunity","value":7}]},{"id":"observe","text":"只观摩本轮演武","effects":[{"type":"add_opportunity","value":6}]}]
+      "id": "EVT_CELESTIAL_COMBAT_STAR_ARENA_001",
+      "version": 1,
+      "title": "周天演武",
+      "body": "天庭演武台随机匹配了一名仙官，对方修为{target_realm}，战斗力约{target_power}。胜负只计功绩，不伤性命。",
+      "category": "celestial_combat",
+      "tags": [
+        "celestial_common",
+        "combat",
+        "court_task"
+      ],
+      "weight": 5,
+      "intent_weights": {
+        "commission": 2.0,
+        "cultivate": 1.6
+      },
+      "combat": {
+        "target_name": "演武仙官",
+        "realm_offsets": [
+          [
+            -1,
+            0.1
+          ],
+          [
+            0,
+            0.72
+          ],
+          [
+            1,
+            0.18
+          ]
+        ],
+        "expectation_multiplier": 1.02,
+        "power_sigma": 0.13,
+        "power_bounds": [
+          0.7,
+          1.36
+        ],
+        "max_rounds": 6
+      },
+      "choices": [
+        {
+          "id": "compete",
+          "text": "让战斗预案接管演武",
+          "effects": [
+            {
+              "type": "runtime_combat",
+              "lethal": false
+            },
+            {
+              "type": "add_court_merit",
+              "range": [
+                4,
+                8
+              ]
+            },
+            {
+              "type": "add_opportunity",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "只观摩本轮演武",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 6
+            }
+          ]
+        }
+      ]
     }
   ]
 }

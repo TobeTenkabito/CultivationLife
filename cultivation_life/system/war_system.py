@@ -630,6 +630,7 @@ class WarSystemMixin:
         } for npc in opponents]
         target = {
             "target_name": f"{self._war_side_name(game, war['kind'], war[f'{enemy}_id'])}会战队",
+            "player_defending": side == "defender",
             "target_power": max(1.0, required),
             "target_realm_index": max((npc.realm_index for npc in opponents), default=game.player.realm_index),
             "target_layer": max((npc.layer for npc in opponents), default=1),
@@ -796,6 +797,7 @@ class WarSystemMixin:
         } for npc in opponents]
         result, combat_text = self._combat(game, {
             "target_name": enemy_name, "target_power": required,
+            "player_defending": side == "defender",
             "target_realm_index": max((npc.realm_index for npc in opponents), default=game.player.realm_index),
             "target_layer": max((npc.layer for npc in opponents), default=1),
             "combat_type": "cultivator", "members": members, "action": "repel",

@@ -151,6 +151,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.negotiate_at_auction(game_id, payload.get("npc_id", ""))
             elif operation == "auction-identity":
                 result = ENGINE.choose_auction_identity(game_id, payload.get("alias", ""))
+            elif operation == "exchange-action":
+                result = ENGINE.exchange_action(game_id, payload.get("action", ""), payload)
             elif operation == "auction-private-buy":
                 result = ENGINE.buy_private_trade_item(
                     game_id, payload.get("npc_id", ""), payload.get("offer_id", "")
@@ -183,7 +185,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "black-market-search":
                 result = ENGINE.search_black_market(game_id, payload.get("pattern", ""))
             elif operation == "black-market-buy":
-                result = ENGINE.buy_black_market_item(game_id, payload.get("result_id", ""))
+                result = ENGINE.buy_black_market_item(game_id, payload.get("result_id", ""), payload.get("quantity", 1))
             elif operation == "black-market-sell":
                 result = ENGINE.sell_black_market_asset(
                     game_id, payload.get("kind", ""), payload.get("asset_id", "")
