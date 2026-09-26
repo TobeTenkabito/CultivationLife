@@ -3,7 +3,7 @@ import unittest
 import json
 from pathlib import Path
 
-from cultivation_life.content_registry import CONTENT_DOCUMENTS, MARKET_GOODS, WORLD_SYSTEMS
+from cultivation_life.content_registry import CONTENT_DOCUMENTS, MARKET_GOODS, WORLD_SYSTEMS, REALMS
 from cultivation_life.engine import GameEngine
 from cultivation_life.system.map_system import MapCatalog
 from cultivation_life.rules import TECHNIQUE_CATALOG, assign_technique
@@ -73,6 +73,18 @@ class MapCatalogTests(unittest.TestCase):
         self.assertEqual(formerly_blocked.status, "lethal")
         self.assertIn("必然身死道消", formerly_blocked.warning)
         self.assertEqual(self.catalog.travel_plan("human", "wudi_plain", "lancang_sea", 4).status, "ok")
+
+    def test_entry_warnings_use_realm_names_in_every_world(self):
+        for world, geography in self.catalog.worlds.items():
+            for target in geography['locations']:
+                required = target.get('min_realm_index', 0)
+                if not required or target['id'] == geography['default']:
+                    continue
+                plan = self.catalog.travel_plan(world, geography['default'], target['id'], 0)
+                self.assertNotIn('境界序号', plan.warning)
+                if not target.get('failure_reason'):
+                    self.assertIn(REALMS[required].name, plan.warning)
+                self.assertEqual(plan.status, 'lethal')
 
     def test_market_and_treasure_sources_are_regionally_partitioned(self):
         plain = {row["content_id"] for row in self.catalog.localize_goods(MARKET_GOODS, "human", "wudi_plain", "market")}

@@ -2426,6 +2426,7 @@ function renderMap(map, auction) {
   $('#map-current').textContent = `当前：${map.current_name}`;
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
+  const directoryLinks = window.MapDirectory.render(map, auction, game);
   (map.locations || []).forEach(location => {
     const row = document.createElement('article');
     row.className = `map-location${location.current ? ' current' : ''}${location.travel_status === 'lethal' ? ' lethal' : ''}`;
@@ -2434,31 +2435,6 @@ function renderMap(map, auction) {
     const themes = document.createElement('span'); themes.textContent = (location.themes || []).join(' · ');
     heading.append(name, themes);
     const description = document.createElement('p'); description.textContent = location.description;
-    (game?.merchant_system?.alliances || []).forEach(alliance => {
-      const office = alliance.offices.find(site => site.location_id === location.id);
-      if(alliance.hq === location.id || office){const marker=document.createElement('strong');marker.className='auction-map-marker';marker.textContent=`${alliance.name} · ${alliance.hq===location.id?'本界总部':'分部'}`;description.append(' ',marker);}
-    });
-    if (game?.exchange_system?.available && game.exchange_system.location_id === location.id) {
-      const marker=document.createElement('strong');marker.className='auction-map-marker';marker.textContent=game.exchange_system.status==='scheduled'?`交换会 · ${game.exchange_system.actions_until_open}个时间单位后开幕`:'匿名交换会正在举行';row.appendChild(marker);
-    }
-    if (auction?.available && auction.location_id === location.id) {
-      const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
-      marker.textContent = auction.status === 'scheduled' ? `拍卖会预告 · ${auction.actions_until_open}个操作节点后开幕` : auction.status === 'open' ? '拍卖会正在举行' : '散场黑市正在开放';
-      description.append(' ', marker);
-    }
-    if (location.ghost_parade) {
-      const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
-      marker.textContent = location.ghost_parade.status === 'active'
-        ? '百鬼夜行正在发生' : `百鬼夜行预告 · ${timelineText(location.ghost_parade.start_age)}开启`;
-      description.append(' ', marker);
-    }
-    if (location.ground_formations?.length) {
-      const marker = document.createElement('strong'); marker.className = 'auction-map-marker formation-map-marker';
-      marker.textContent = location.ground_formations.map(array =>
-        `${array.name} · ${array.owner_kind === 'sect' ? `${array.owner_name}护山阵` : '私阵'} · 完整度${Number(array.durability).toFixed(0)}%`
-      ).join(' / ');
-      description.append(' ', marker);
-    }
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
     const qiEfficiency = document.createElement('small');
     qiEfficiency.textContent = `气经验：${Object.entries(location.qi_gain_efficiencies || {}).map(([source, value]) => `${qiNames[source] || source} ×${Number(value).toFixed(2)}`).join(' · ')}`;
@@ -2485,7 +2461,10 @@ function renderMap(map, auction) {
       }
       travel();
     };
-    row.append(heading, description, qiEfficiency, route, button); list.appendChild(row);
+    row.dataset.location = location.id; row.tabIndex = -1;
+    row.append(heading, description);
+    const links = directoryLinks(location); if (links) row.append(links);
+    row.append(qiEfficiency, route, button); list.appendChild(row);
   });
 }
 

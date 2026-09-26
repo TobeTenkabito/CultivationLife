@@ -1,0 +1,19 @@
+{
+  "base_version": "1.37.1",
+  "exe_sha256": "846ff33f5a94cb434629d146a210df1e3120f0492b806264a74c470adbc7ec6a",
+  "dlc_versions": {
+    "ghost-reincarnation": "3.7.0",
+    "guixu-tide": "2.4.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.13.0",
+    "sage-way": "1.3.1",
+    "tianji-artifacts": "2.2.0"
+  },
+  "validation": [
+    "50 targeted map, merchant and version regressions passed",
+    "Map directory, overlapping event/office notices, filters, locating and desktop/mobile UI browser acceptance passed",
+    "Merchant execution and representative panel browser regressions passed",
+    "Packaged EXE with and without DLC: startup, map assets, realm warning labels, routes and Debug gating passed"
+  ],
+  "save_schema": 5
+}

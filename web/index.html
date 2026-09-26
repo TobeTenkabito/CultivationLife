@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <link rel="stylesheet" href="/style.css?v=1.37.0">
-  <link rel="stylesheet" href="/panels.css?v=1.37.0">
+  <link rel="stylesheet" href="/style.css?v=1.37.1">
+  <link rel="stylesheet" href="/panels.css?v=1.37.1">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -164,7 +164,10 @@
         </article>
         <article id="map-card" class="paper utility-panel map-panel" role="dialog" aria-modal="false" aria-label="当前界面地图">
           <div class="section-title"><div><p class="eyebrow">山河路远</p><h2 id="map-title">界面地图</h2></div><div class="panel-heading"><span id="map-current"></span><button id="map-toggle" type="button">关闭</button></div></div>
-          <p id="map-description" class="muted"></p><div id="map-locations" class="map-locations"></div>
+          <p id="map-description" class="muted"></p>
+          <nav id="map-view-tabs" class="map-view-tabs" aria-label="地图视图"></nav>
+          <div id="map-locations" class="map-locations"></div>
+          <section id="map-directory" class="map-directory hidden" aria-label="活动与商盟据点"></section>
         </article>
         <article id="market-card" class="paper market-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙坊市">
           <div class="section-title"><div><p class="eyebrow">互通有无</p><h2 id="market-title">修仙坊市</h2></div><div class="market-heading-actions"><strong id="market-wallet"></strong><button id="market-toggle" type="button">关闭</button></div></div>
@@ -445,8 +448,9 @@
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=20260926-2"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/merchant-commission-panel.js?v=1.37.0"></script>
-  <script src="/merchant-panel.js?v=1.37.0"></script>
-  <script src="/app.js?v=1.37.0"></script>
+  <script src="/merchant-commission-panel.js?v=1.37.1"></script>
+  <script src="/merchant-panel.js?v=1.37.1"></script>
+  <script src="/map-directory.js?v=1.37.1"></script>
+  <script src="/app.js?v=1.37.1"></script>
 </body>
 </html>

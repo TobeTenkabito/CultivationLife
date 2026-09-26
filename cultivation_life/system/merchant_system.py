@@ -559,7 +559,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
         for alliance in state["worlds"][game.player.world]:
             owned = bool(member and member["alliance_id"] == alliance["id"] and (member["world"] == game.player.world or alliance["cross_world"]))
             site = self._merchant_site(game, alliance)
-            row = {key: copy.deepcopy(alliance[key]) for key in ("id", "name", "world", "hq", "cross_world", "linked_worlds", "reserves", "relation", "policy", "next_policy_age")}
+            row = {key: copy.deepcopy(alliance[key]) for key in ("id", "name", "world", "hq", "home_world", "cross_world", "linked_worlds", "reserves", "relation", "policy", "next_policy_age")}
             row.update(policy_name=POLICIES[alliance["policy"]], power=self._merchant_power(alliance),
                        hq_name=self.maps.location(game.player.world, alliance["hq"])["name"],
                        leader_name=alliance["leader"]["name"], leader_realm=REALMS[alliance["leader"]["realm_index"]].name,
