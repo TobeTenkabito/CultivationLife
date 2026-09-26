@@ -158,10 +158,12 @@ class MapCatalog:
         required = int(target.get("min_realm_index", 0))
         status, warning = "ok", ""
         if realm_index < required:
+            from ..content_registry import REALMS
+
             status = "lethal"
             warning = str(
                 target.get("failure_reason")
-                or f"你的境界低于此地要求（境界序号 {required}），抵达后必然身死道消"
+                or f"你的境界低于此地要求（至少需{REALMS[required].name}境），抵达后必然身死道消"
             )
         return TravelPlan(origin, destination, base_years, years, tuple(route), status, warning)
 

@@ -89,6 +89,9 @@ def verify(with_dlc):
                 assert b'button, input[type="button"], input[type="submit"]' in response.read()
             with urllib.request.urlopen(base + "/app.js", timeout=5) as response:
                 assert b"function renderExchange" in response.read()
+            with urllib.request.urlopen(base + '/map-directory.js', timeout=5) as response:
+                assert b'window.MapDirectory' in response.read()
+            assert all('境界序号' not in row.get('warning', '') for row in game['map']['locations'])
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

@@ -46,7 +46,7 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.37.0")
+        self.assertEqual(BASE_GAME_VERSION, "1.37.1")
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
         self.assertIn('"version": "3.7.0"', manifest)
 
