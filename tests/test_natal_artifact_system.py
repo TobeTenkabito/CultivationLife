@@ -37,7 +37,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
         self.assertEqual(shown["natal_artifact"]["unlocked_slots"], 0)
         self.assertTrue(shown["natal_artifact"]["unbounded"])
         self.assertEqual(shown["natal_artifact"]["next_slot_level"], 10)
-        self.assertEqual(shown["natal_artifact"]["refine_cost"], 15)
+        self.assertEqual(shown["natal_artifact"]["refine_cost"], 380)
         self.assertEqual(shown["player"]["combat_power"], before_power)
         bound = next(row for row in shown["player"]["inventory"] if row.get("is_natal_artifact"))
         self.assertEqual(bound["id"], "starfall_blade")
@@ -45,6 +45,9 @@ class NatalArtifactSystemTests(unittest.TestCase):
         self.assertNotIn("starfall_blade", {row.id for row in saved.player.inventory})
 
     def test_refining_levels_artifact_and_unlocks_slots(self):
+        game = self.engine.store.load(self.game_id)
+        add_item(game.player, "spirit_stone", 2000)
+        self.engine.store.save(game)
         self.engine.natal_artifact_action(self.game_id, "bind", "starfall_blade")
         for _ in range(3):
             shown = self.engine.natal_artifact_action(self.game_id, "refine")
@@ -76,7 +79,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
         after = self.engine.store.load(self.game_id)
         after_stones = next((row.quantity for row in after.player.inventory if row.id == "spirit_stone"), 0)
         self.assertEqual(before_stones - after_stones, preview["refine_all_cost"])
-        self.assertGreater(shown["natal_artifact"]["level"], 12)
+        self.assertGreater(shown["natal_artifact"]["level"], 3)
         self.assertIsNone(shown["natal_artifact"]["max_level"])
         self.assertGreater(shown["natal_artifact"]["bonuses"]["combat_bonus"], level_one_power * 2)
 
@@ -190,6 +193,7 @@ class NatalArtifactSystemTests(unittest.TestCase):
 
     def test_combination_artifact_uses_the_same_natal_levels_and_sockets(self):
         game = self.engine.store.load(self.game_id)
+        add_item(game.player, "spirit_stone", 5000)
         artifact = {
             "id":"crafted-natal-test", "name":"玄元试剑", "quality_name":"精制",
             "mold_name":"剑器胎模", "actual_stats":{

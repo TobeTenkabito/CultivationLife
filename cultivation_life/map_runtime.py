@@ -17,6 +17,7 @@ class MapTravelMixin:
         self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
     ) -> bool:
         player = game.player
+        self._advance_merchant_year(game)
         era_news.extend(self._advance_sage_year(game, rng))
         self._advance_ghost_phase_two_year(game, rng)
         self._advance_monster_bloodline_year(game)

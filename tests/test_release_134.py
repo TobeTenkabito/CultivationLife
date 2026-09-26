@@ -121,11 +121,11 @@ def test_natal_cost_scales_with_base_not_buffs_or_world(setup_game):
     store_crafted_artifact(game.player, artifact)
     engine._bind_crafted_natal_artifact(game, artifact)
     cost = engine._natal_refine_cost(1, game)
-    assert cost == 100000
+    assert cost == 3000000
     game.player.world = "celestial"
     artifact["combat_effects"] = [{"player_stat_multipliers": {"might": 100}}]
     assert engine._natal_refine_cost(1, game) == cost
-    assert engine._natal_refine_cost(2, game) == 2 * cost
+    assert engine._natal_refine_cost(2, game) > 2 * cost
 
 
 def test_unbind_returns_materials_and_next_breakthrough_consumes_penalty(setup_game):

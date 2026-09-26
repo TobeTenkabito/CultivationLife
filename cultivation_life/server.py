@@ -153,6 +153,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.choose_auction_identity(game_id, payload.get("alias", ""))
             elif operation == "exchange-action":
                 result = ENGINE.exchange_action(game_id, payload.get("action", ""), payload)
+            elif operation == "merchant-action":
+                result = ENGINE.merchant_action(game_id, payload.get("action", ""), payload)
             elif operation == "auction-private-buy":
                 result = ENGINE.buy_private_trade_item(
                     game_id, payload.get("npc_id", ""), payload.get("offer_id", "")

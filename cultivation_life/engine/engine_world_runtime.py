@@ -1758,6 +1758,7 @@ class EngineWorldRuntimeMixin:
         return news
 
     def _annual_world_npc_update(self, game: GameState, rng: random.Random) -> list[str]:
+        self._advance_merchant_year(game)
         news: list[str] = []
         living_human_spirits = sum(
             npc.alive and npc.world == "human" and npc.realm_index == 5
