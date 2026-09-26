@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import os
 import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -30,7 +31,9 @@ from .ui_preferences import load_ui_preferences, write_ui_preferences
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
-APP_ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else SOURCE_ROOT
+APP_ROOT = Path(os.environ["CULTIVATION_APP_ROOT"]) if os.environ.get("CULTIVATION_APP_ROOT") else (
+    Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else SOURCE_ROOT
+)
 PERSISTENCE_ROOT = persistence_root(APP_ROOT)
 BUNDLED_ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 ENGINE_ROOT = APP_ROOT if (APP_ROOT / "content").is_dir() else BUNDLED_ROOT
@@ -80,6 +83,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self._static(path)
         except Exception as error:  # boundary: translate domain errors to JSON
+            self._error(error)
+
+    def do_DELETE(self) -> None:  # noqa: N802
+        try:
+            parts = unquote(urlparse(self.path).path).strip("/").split("/")
+            if len(parts) != 3 or parts[:2] != ["api", "games"]:
+                raise KeyError("接口不存在")
+            ENGINE.delete_game(parts[2])
+            self._json({"deleted": parts[2]})
+        except Exception as error:
             self._error(error)
 
     def do_POST(self) -> None:  # noqa: N802

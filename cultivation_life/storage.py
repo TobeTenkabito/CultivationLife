@@ -33,6 +33,14 @@ class SaveStore:
             raise ValueError("该存档属于旧版大更新前格式，请新建角色")
         return GameState.from_dict(data)
 
+    def delete(self, game_id: str) -> None:
+        """Delete only the requested save; account achievements remain untouched."""
+        path = self._path(game_id)
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            raise KeyError("存档不存在") from None
+
     def list_games(self) -> list[dict[str, str]]:
         games: list[dict[str, str]] = []
         for path in sorted(self.directory.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True):

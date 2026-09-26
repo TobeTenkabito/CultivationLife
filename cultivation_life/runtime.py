@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import os
 import random
 import sys
 from datetime import datetime, timezone
@@ -20,6 +21,8 @@ def persistence_root(app_root: Path | None = None) -> Path:
     library under ``dist/data``.  A genuinely distributed executable keeps
     using its own directory because the development markers are absent.
     """
+    if os.environ.get("CULTIVATION_APP_ROOT"):
+        return Path(os.environ["CULTIVATION_APP_ROOT"]).resolve()
     root = (
         Path(app_root).resolve()
         if app_root is not None

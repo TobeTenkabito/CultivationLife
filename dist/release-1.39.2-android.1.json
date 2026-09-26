@@ -1,0 +1,49 @@
+{
+  "base_version": "1.39.2",
+  "android_version": "1.39.2-android.1",
+  "version_code": 1,
+  "application_id": "com.fusheng.wendao",
+  "min_sdk": 31,
+  "target_sdk": 31,
+  "included_abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "tested_android": "Android 12 / API 31",
+  "tested_abi": "x86_64",
+  "tested_webview": "91.0.4472.114",
+  "physical_device_tested": false,
+  "apk": "浮生问道-v1.39.2-Android12.apk",
+  "apk_sha256": "babdc3ac605283b3d8efc19fa5ffcc4e915b3adf634fb5c79a24d54224765391",
+  "apk_bytes": 47422270,
+  "dlc_versions": {
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.5.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "themes": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "save_schema": 5,
+  "save_import_export": false,
+  "offline": true,
+  "release_debuggable": false,
+  "validation": [
+    "727 Python regressions passed",
+    "Android asset parity, private root and loopback authorization tests passed",
+    "Six themes: native touch actions, panels and Android back passed",
+    "Delete/cancel, background, rotation and cold restart passed",
+    "Six DLC off/on process restarts and DLC API smoke tests passed",
+    "Signed release APK installation, six themes, real advance and native back passed",
+    "Same-signature reinstall, offline cold start, saved character and theme retention passed",
+    "APK signature verified; release Android Lint: no issues found"
+  ]
+}

@@ -92,6 +92,9 @@ class GameEngine(MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageS
     def get_game(self, game_id: str) -> dict[str, Any]:
         return self.present(self._load(game_id))
 
+    def delete_game(self, game_id: str) -> None:
+        self.store.delete(game_id)
+
     def list_games(self) -> list[dict[str, str]]:
         return self.store.list_games()
 

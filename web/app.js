@@ -78,13 +78,40 @@ async function boot() {
   renderQuickStarts(config.quick_starts || []);
   renderExtensions(config.extensions || []);
   renderStartExtensionManager(config.extensions || []);
+  renderSaveList(saves.games);
+}
+
+function renderSaveList(saves) {
   const list = $('#save-list');
-  saves.games.slice(0, 5).forEach(save => {
+  list.replaceChildren();
+  saves.forEach(save => {
+    const row = document.createElement('div');
+    row.className = 'save-entry';
+    row.dataset.saveId = save.id;
     const button = document.createElement('button');
     const saveVersion = save.game_version && save.game_version !== 'pre-1.0.0' ? ` · v${save.game_version}` : '';
     button.textContent = `续接 · ${save.name}${saveVersion}`;
     button.onclick = () => loadGame(save.id);
-    list.appendChild(button);
+    const remove = document.createElement('button');
+    remove.className = 'save-delete';
+    remove.textContent = '删除';
+    remove.setAttribute('aria-label', `删除存档：${save.name}`);
+    remove.onclick = () => {
+      if (busy) return;
+      openGameConfirm({title:'删除此存档', body:`确定删除「${save.name}」的存档吗？此操作无法撤销，其他存档和成就不受影响。`,
+        confirmText:'确认删除', onConfirm:async () => {
+          if (busy) return;
+          busy = true; renderButtons();
+          try {
+            await api(`/api/games/${encodeURIComponent(save.id)}`, {method:'DELETE'});
+            renderSaveList((await api('/api/games')).games);
+            toast(`已删除「${save.name}」的存档`);
+          } catch (error) { toast(error.message); }
+          finally { busy = false; renderButtons(); }
+        }});
+    };
+    row.append(button, remove);
+    list.appendChild(row);
   });
 }
 
@@ -335,6 +362,7 @@ function showStart() {
   window.GameThemes?.showStart();
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
+  api('/api/games').then(saves => renderSaveList(saves.games)).catch(error => toast(error.message));
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
   ['map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="GameTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#263f35</item>
+        <item name="android:navigationBarColor">#263f35</item>
+        <item name="android:windowBackground">#f3f1e7</item>
+        <item name="android:colorAccent">#355d4c</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowSplashScreenBackground">#f3f1e7</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+    </style>
+</resources>
