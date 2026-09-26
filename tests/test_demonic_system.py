@@ -70,6 +70,9 @@ class DemonicSystemTests(unittest.TestCase):
         }
         result, _ = self.engine._capture_cultivator(game, target, 10000, random.Random(1))
         self.assertEqual(result, "captured")
+        # Exercise the successful conversion branch independently of how many
+        # random draws the changing NPC/item catalog needs during new-game setup.
+        game.rng_state = encode_rng(random.Random(1))
         self.engine.store.save(game)
         shown = self.engine.captive_action(game_id, game.player.prisoners[0]["id"], "corpse")
         self.assertEqual(len(shown["demonic_system"]["puppets"]), 1)

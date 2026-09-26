@@ -2,7 +2,11 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v1.37.1**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v1.38.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+
+本体 v1.38.0 支持商盟炼阵六维上下限。高星委托支付更多灵石，更倾向高境界修士承接：采购附赠其他材料，炼器提升验收品质，炼阵在约束内优选稳定阵型并赠送备用阵材。情报查询修士关系，巧夺天工开启时另有概率获取目标界面的多条神机线索。
+
+一级界面炼器、阵法材料覆盖1–5阶，二级界面覆盖1–8阶；补齐变异灵根书卷，魔阙与妖阙统一以天书命名。通用物品、功法与交易来源归入本体，关闭 DLC 仍可使用；专属功能、剧情信物和特殊系统材料仍由对应 DLC 管理。
 
 ## 开始游戏
 
@@ -73,11 +77,11 @@ Debug=False
 
 | 内容包 | 版本 | 主要内容 |
 | --- | --- | --- |
-| [万妖归宗：血脉进化](dlc/monster-bloodlines/manifest.json) | 4.13.0 | 妖修本源、血脉进化、族血规则与高阶路线 |
-| [百鬼夜行：往生轮回](dlc/ghost-reincarnation/manifest.json) | 3.7.0 | 鬼修魂魄、魂蚀、往生与轮回 |
+| [万妖归宗：血脉进化](dlc/monster-bloodlines/manifest.json) | 4.14.0 | 妖修本源、血脉进化、族血规则与高阶路线 |
+| [百鬼夜行：往生轮回](dlc/ghost-reincarnation/manifest.json) | 3.8.0 | 鬼修魂魄、魂蚀、往生与轮回 |
 | [明争暗斗：合纵连横](dlc/intrigue-coalitions/manifest.json) | 1.3.0 | NPC 性格、势力职位、客卿、议案与内政 |
-| [圣人之道：内圣外王](dlc/sage-way/manifest.json) | 1.3.1 | 学说、教化、门人、经典、外王之策与儒修剧情 |
-| [归墟之潮：九死一生](dlc/guixu-tide/manifest.json) | 2.4.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
+| [圣人之道：内圣外王](dlc/sage-way/manifest.json) | 1.4.0 | 学说、教化、门人、经典、外王之策与儒修剧情 |
+| [归墟之潮：九死一生](dlc/guixu-tide/manifest.json) | 2.5.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
 | [神机百变：巧夺天工](dlc/tianji-artifacts/manifest.json) | 2.2.0 | 天工神机榜、分层情报、动态材料、仿制与重铸 |
 
 主页右上角可管理启用状态，游戏内「拓」面板可查看本次启动的加载情况。被禁用、依赖缺失或校验失败的扩展会被跳过；玩家开关不会改写包内清单。扩展格式、合并规则和依赖声明分别见 [DLC 说明](dlc/README.md) 与 [MOD 说明](mods/README.md)。

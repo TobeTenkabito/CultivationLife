@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.guixu-tide",
   "name": "归墟之潮：九死一生",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 140,
   "requires": [],
-  "description": "十一界周期归墟及完整专属宝物池；同境索宝须结队，拒绝勒索按防御战结算。"
+  "description": "十一界周期归墟及完整宝物池；同境索宝须结队，拒绝勒索按防御战结算。 通用物品与功法定义归入本体，保留专属功能和剧情。"
 }

@@ -287,7 +287,7 @@ class FormationIntegrationTests(unittest.TestCase):
         all_natures = set(formation_config()["nature_channels"])
         target_tiers = {
             "human":range(1, 6), "demon":range(1, 6),
-            "spirit":range(1, 9), "true_demon":range(5, 9),
+            "spirit":range(1, 9), "true_demon":range(1, 9),
             "monster_realm":range(1, 9), "phantom_underworld":range(1, 9),
             "hell":range(1, 9),
         }
@@ -298,7 +298,7 @@ class FormationIntegrationTests(unittest.TestCase):
                     if row["world"] == world and int(row["tier"]) == tier
                 }
                 self.assertEqual(covered, all_natures, f"{world} tier {tier}")
-        self.assertEqual(len(definitions), 663)
+        self.assertEqual(len(definitions), 719)
 
     def test_generated_progression_materials_are_monotone_and_rule_neutral(self):
         generated = [

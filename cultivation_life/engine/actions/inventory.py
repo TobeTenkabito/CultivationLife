@@ -160,9 +160,9 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         if is_zique and (game.player.world != "spirit" or game.player.realm_index < 5):
             raise ValueError("紫阙玉书须在灵界达到化神期后方能参悟")
         if is_moque and (game.player.world != "true_demon" or game.player.realm_index < 5):
-            raise ValueError("魔阙须在真魔界达到化魔期后方能参悟")
+            raise ValueError("魔阙天书须在真魔界达到化魔期后方能参悟")
         if is_yaoque and (game.player.world not in {"monster_realm", "phantom_underworld"} or game.player.realm_index < 5):
-            raise ValueError("妖阙骨书须在妖界或幻冥界达到化神期后方能参悟")
+            raise ValueError("妖阙天书须在妖界或幻冥界达到化神期后方能参悟")
         if is_mingque and (game.player.world != "hell" or game.player.realm_index < 5):
             raise ValueError("冥阙魂书须在地狱界达到化神期后方能参悟")
         if not any((is_zique, is_moque, is_yaoque, is_mingque)) and game.player.realm_index < 4:

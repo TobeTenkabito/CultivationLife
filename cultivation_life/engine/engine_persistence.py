@@ -31,6 +31,15 @@ from .dependencies import PersistenceDependencies
 
 def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     game = deps.store.load(game_id)
+    renamed = False
+    for item in game.player.inventory:
+        if item.id.startswith(('moque_', 'yaoque_')) and item.id in ITEM_CATALOG:
+            template = ITEM_CATALOG[item.id]
+            if item.name != template.name:
+                item.name, item.description = template.name, template.description
+                renamed = True
+    if renamed:
+        deps.store.save(game)
     if deps._ensure_merchant(game):
         deps.store.save(game)
     conversion_migrated = False

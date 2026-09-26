@@ -16,10 +16,16 @@
     const mold=field('炼器模具',el('select')); options(mold,system.molds || []);
     const stars=field('星级',el('select')); options(stars,[1,2,3,4,5].map(i=>({id:i,name:'★'.repeat(i)})));
     const quantity=field('材料或道具数量',el('input')); quantity.type='number';quantity.min=1;quantity.max=99;quantity.value=1;quantity.required=true;
-    const metrics=el('fieldset',null,'merchant-metrics'); metrics.append(el('legend','阵法六维最低要求（0表示不限）'));
-    const metricInputs={};
-    Object.entries(system.metric_names || {}).forEach(([id,name])=>{const label=el('label',name),input=el('input');input.type='number';input.min=0;input.max=100;input.step='.01';input.value=0;input.setAttribute('aria-label',`${name}最低要求`);label.append(input);metrics.append(label);metricInputs[id]=input;});
-    metrics.append(el('p','原料等级决定工坊可承接范围；六维相互制约，单维上限不能保证同时达到。成品沿用九宫真实材料和阵法效果。','muted'));
+    const metrics=el('fieldset',null,'merchant-metrics'); metrics.append(el('legend','阵法六维范围（下限0、上限100表示不限）'));
+    const metricInputs={}, maximumInputs={};
+    Object.entries(system.metric_names || {}).forEach(([id,name])=>{
+      const range=el('div',null,'merchant-metric-range');range.append(el('strong',name));
+      [['下限',0,metricInputs,'最低要求'],['上限',100,maximumInputs,'最高要求']].forEach(([title,value,store,aria])=>{
+        const label=el('label',title),input=el('input');input.type='number';input.min=0;input.max=100;input.step='.01';input.value=value;
+        input.setAttribute('aria-label',`${name}${aria}`);label.append(input);range.append(label);store[id]=input;
+      });metrics.append(range);
+    });
+    metrics.append(el('p','六维相互制约，成品必须同时落在全部区间内。高星级在约束内优选稳定阵型，并赠送同阶备用阵材；实际启用数值仍随阵法造诣变化。','muted'));
     form.append(metrics);
     const principal=field('悬赏本金',el('input'));principal.type='number';principal.min=1;principal.max=1e15;principal.required=true;
     const quoteText=el('p','请选择委托条件，获取商盟报价。','merchant-quote');quoteText.setAttribute('aria-live','polite');
@@ -31,15 +37,15 @@
     const enableSubmit=enabled=>{submit.disabled=!enabled;submit.dataset.merchantUnavailable=enabled?'0':'1';};enableSubmit(false);
     const data=()=>({alliance_id:alliance.id,kind:kind.value,source_world:world.value,material_category:category.value,
       definition_id:material.value,target_id:target.value,material_tier:Number(tier.value),mold_id:mold.value,
-      stars:Number(stars.value),quantity:['supply','item'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)]))});
+      stars:Number(stars.value),quantity:['supply','item'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)])),metric_maxima:Object.fromEntries(Object.entries(maximumInputs).map(([key,input])=>[key,Number(input.value)]))});
     const showOverview=result=>{
       overview.replaceChildren();const spec=result.spec;if(!spec)return;
       overview.append(el('h4','预计成品概览'));
       if(result.kind==='formation'){
         overview.append(el('p',`${spec.material_tier}阶原料 · ${spec.profile.occupied_count}个阵位 · 稳定性：${spec.profile.stability} · 阵心：${spec.profile.core_node.name}`));
         const table=el('table'),head=el('tr');['六维','要求','预计成品','工坊单维上限'].forEach(text=>head.append(el('th',text)));table.append(head);
-        Object.entries(system.metric_names).forEach(([key,name])=>{const row=el('tr');[name,number(spec.requirements[key]),number(spec.profile.metrics[key]),number(spec.limits[key])].forEach(text=>row.append(el('td',text)));table.append(row);metricInputs[key].max=spec.limits[key];});overview.append(table);
-        overview.append(el('p',spec.profile.effects.join('；')));
+        Object.entries(system.metric_names).forEach(([key,name])=>{const row=el('tr');[name,`${number(spec.requirements[key])}–${number(spec.maxima?.[key] ?? 100)}`,number(spec.profile.metrics[key]),number(spec.limits[key])].forEach(text=>row.append(el('td',text)));table.append(row);});overview.append(table);
+        overview.append(el('p',spec.profile.effects.join('；')));overview.append(el('p',`另附 ${spec.spare_material_count || 0}份同阶备用阵材。`));
         overview.append(el('p',`使用阵材：${spec.materials.map(row=>row.name).join('、')}。交付阵法预设与每个阵位所需的独立材料；实际启用效果随阵法造诣变化。`));
       }else{
         overview.append(el('p',`${spec.material_tier}阶主材 · ${spec.mold.name} · ${spec.quality_name}验收标准`));
@@ -57,7 +63,7 @@
         if(sequence!==requestSequence || !form.isConnected)return;
         quoted=result;principal.min=result.minimum;principal.value=result.principal;
         delete quoteText.dataset.error;
-        quoteText.textContent=`${result.route_description}。本金 ${number(result.principal)} + 手续费 ${number(result.fee)} = ${number(result.total)}灵石。接单后预计 ${number(result.years)}年；最迟发布后 ${number(result.years*4)}年取消并退还全部本金。接单失败退回全部本金及50%手续费。`;
+        quoteText.textContent=`${result.route_description}。本金 ${number(result.principal)} + 手续费 ${number(result.fee)} = ${number(result.total)}灵石。接单后预计 ${number(result.years)}年；最迟发布后 ${number(result.years*4)}年取消并退还全部本金。接单失败退回全部本金及50%手续费。${result.service_description || ""}。`;
         showOverview(result);enableSubmit(canUse);
       }catch(error){if(sequence===requestSequence && form.isConnected){quoteText.textContent=error.message;quoteText.dataset.error='1';}}
     };
@@ -67,7 +73,7 @@
       const source=alliance.catalog.find(row=>row.world===world.value);
       const list=kind.value==='item'?source?.items:category.value==='formation'?source?.formation_materials:source?.materials;
       options(material,list || []);options(target,(source?.targets || []).map(row=>({id:row.id,name:`${row.name} · ${row.realm} · 战力${number(row.power)}`})));
-      options(tier,(kind.value==='formation'?source?.formation_tiers:source?.weapon_tiers || []).map(value=>({id:value,name:`${value}阶`})));Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});changed();
+      options(tier,(kind.value==='formation'?source?.formation_tiers:source?.weapon_tiers || []).map(value=>({id:value,name:`${value}阶`})));Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});Object.values(maximumInputs).forEach(input=>input.value=100);changed();
     };
     const refreshKind=()=>{
       const previous=world.value,procurement=['supply','item','formation','weapon'].includes(kind.value);
@@ -75,11 +81,11 @@
       if([...world.options].some(row=>row.value===previous))world.value=previous;else world.value=alliance.world;
       show(category,kind.value==='supply');show(material,['supply','item'].includes(kind.value));show(quantity,['supply','item'].includes(kind.value));
       show(target,kind.value==='bounty');show(tier,['formation','weapon'].includes(kind.value));show(mold,kind.value==='weapon');
-      metrics.hidden=kind.value!=='formation';Object.values(metricInputs).forEach(input=>{input.disabled=metrics.hidden;input.dataset.merchantUnavailable=metrics.hidden?'1':'0';});refreshChoices();
+      metrics.hidden=kind.value!=='formation';[...Object.values(metricInputs),...Object.values(maximumInputs)].forEach(input=>{input.disabled=metrics.hidden;input.dataset.merchantUnavailable=metrics.hidden?'1':'0';});refreshChoices();
     };
     kind.onchange=refreshKind;world.onchange=refreshChoices;category.onchange=refreshChoices;
-    tier.onchange=()=>{Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});changed();};
-    [material,target,mold,stars,quantity,...Object.values(metricInputs)].forEach(input=>input.oninput=()=>changed());
+    tier.onchange=()=>{Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});Object.values(maximumInputs).forEach(input=>input.value=100);changed();};
+    [material,target,mold,stars,quantity,...Object.values(metricInputs),...Object.values(maximumInputs)].forEach(input=>input.oninput=()=>changed());
     principal.oninput=()=>changed(false);refresh.onclick=()=>requestQuote(!principal.value);
     form.onsubmit=event=>{event.preventDefault();if(!quoted || submit.disabled)return;const payload={...data(),principal:quoted.principal,preview_token:quoted.preview_token};enableSubmit(false);act({action:'post',...payload});};
     refreshKind();return details;

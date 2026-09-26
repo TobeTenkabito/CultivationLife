@@ -38,7 +38,7 @@ class NatalArtifactSystemMixin:
                 "minimum_realm": realm_by_source[source],
                 "effect": {"combat_bonus": socket_power},
                 "description": (
-                    f"归墟专属镶材；嵌入本命法宝后战斗力 +{socket_power:,.0f}，"
+                    f"归墟遗珍镶材；嵌入本命法宝后战斗力 +{socket_power:,.0f}，"
                     "取下时完整返还。"
                 ),
             }

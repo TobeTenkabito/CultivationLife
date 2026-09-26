@@ -8,98 +8,4046 @@
     "ordinary_sell_ratio": 0.55,
     "refining_experience_base": 100,
     "refining_experience_per_craft": 30,
-    "budget_by_realm": [40, 50, 62, 76, 92, 110, 132, 156, 184, 216, 252, 292, 336],
-    "stat_costs": {"combat_power": 1.0, "max_hp": 1.0, "max_mp": 1.0, "opportunity_efficiency": 1.5, "body_training_efficiency": 1.5, "divine_sense_efficiency": 1.5, "tribulation_reduction": 2.2, "breakthrough_bonus": 4.0},
-    "stat_caps": {"combat_power": 0.12, "max_hp": 0.16, "max_mp": 0.20, "opportunity_efficiency": 0.12, "body_training_efficiency": 0.15, "divine_sense_efficiency": 0.15, "tribulation_reduction": 0.12, "breakthrough_bonus": 0.05},
-    "quality_multipliers": {"damaged": 0.4, "rough": 0.7, "normal": 1.0, "excellent": 1.05, "refined": 1.1, "epic": 1.15, "legendary": 1.2},
-    "quality_names": {"damaged": "残缺", "rough": "粗制", "normal": "普通", "excellent": "优良", "refined": "精制", "epic": "史诗", "legendary": "传世"}
+    "budget_by_realm": [
+      40,
+      50,
+      62,
+      76,
+      92,
+      110,
+      132,
+      156,
+      184,
+      216,
+      252,
+      292,
+      336
+    ],
+    "stat_costs": {
+      "combat_power": 1.0,
+      "max_hp": 1.0,
+      "max_mp": 1.0,
+      "opportunity_efficiency": 1.5,
+      "body_training_efficiency": 1.5,
+      "divine_sense_efficiency": 1.5,
+      "tribulation_reduction": 2.2,
+      "breakthrough_bonus": 4.0
+    },
+    "stat_caps": {
+      "combat_power": 0.12,
+      "max_hp": 0.16,
+      "max_mp": 0.2,
+      "opportunity_efficiency": 0.12,
+      "body_training_efficiency": 0.15,
+      "divine_sense_efficiency": 0.15,
+      "tribulation_reduction": 0.12,
+      "breakthrough_bonus": 0.05
+    },
+    "quality_multipliers": {
+      "damaged": 0.4,
+      "rough": 0.7,
+      "normal": 1.0,
+      "excellent": 1.05,
+      "refined": 1.1,
+      "epic": 1.15,
+      "legendary": 1.2
+    },
+    "quality_names": {
+      "damaged": "残缺",
+      "rough": "粗制",
+      "normal": "普通",
+      "excellent": "优良",
+      "refined": "精制",
+      "epic": "史诗",
+      "legendary": "传世"
+    }
   },
   "molds": [
-    {"id":"sword","name":"剑器胎模","default_name":"无锋剑","rule":{"name":"剑意贯锋","description":"战斗开始时威能提高 6%，适合承载飞剑、长剑、重剑与剑匣一类器型。","combat_effect":{"player_stat_multipliers":{"might":1.06}}}},
-    {"id":"saber","name":"刀器胎模","default_name":"断岳刀","rule":{"name":"破阵重刃","description":"战斗开始时破法提高 6%，适合承载长刀、战刀、双刃与月轮一类器型。","combat_effect":{"player_stat_multipliers":{"breach":1.06}}}},
-    {"id":"spear","name":"枪器胎模","default_name":"逐星枪","rule":{"name":"一线穿云","description":"威能与身法各提高 4%，适合承载长枪、战矛、槊与锥锋一类器型。","combat_effect":{"player_stat_multipliers":{"might":1.04,"mobility":1.04}}}},
-    {"id":"umbrella","name":"伞器胎模","default_name":"千机伞","rule":{"name":"垂幕护神","description":"神识与防护各提高 5%，抵抗神识压制；适合承载法伞、华盖与护身宝幢一类器型。","combat_effect":{"player_stat_multipliers":{"sense":1.05,"guard":1.05},"traits":["crafted_sense_ward"]}}},
-    {"id":"mirror","name":"镜器胎模","default_name":"照玄镜","rule":{"name":"返照破妄","description":"神识与破法各提高 5%，适合承载宝镜、鉴台、照妖镜与留影法器。","combat_effect":{"player_stat_multipliers":{"sense":1.05,"breach":1.05}}}},
-    {"id":"bell","name":"钟器胎模","default_name":"镇魂钟","rule":{"name":"钟鸣定魄","description":"敌方神识降低 5%，适合承载法钟、铃铛、磬与摄魂音器。","combat_effect":{"enemy_stat_multipliers":{"sense":0.95}}}},
-    {"id":"cauldron","name":"鼎器胎模","default_name":"万化鼎","rule":{"name":"炉火绵长","description":"防护与续航各提高 5%，适合承载宝鼎、丹炉、香炉与炼化容器。","combat_effect":{"player_stat_multipliers":{"guard":1.05,"sustain":1.05}}}},
-    {"id":"banner","name":"幡器胎模","default_name":"摄灵幡","rule":{"name":"摄魄扰敌","description":"敌方续航降低 6%，适合承载旗、幡、阵旗与招魂旌节。","combat_effect":{"enemy_stat_multipliers":{"sustain":0.94}}}},
-    {"id":"armor","name":"甲胄胎模","default_name":"玄罡甲","rule":{"name":"披坚执锐","description":"防护提高 8%，适合承载甲胄、法袍、盾牌与护心宝具。","combat_effect":{"player_stat_multipliers":{"guard":1.08}}}},
-    {"id":"ring","name":"法环胎模","default_name":"周天环","rule":{"name":"周天自转","description":"续航提高 8%，适合承载指环、手镯、臂钏与乾坤圈一类器型。","combat_effect":{"player_stat_multipliers":{"sustain":1.08}}}},
-    {"id":"boat","name":"飞舟胎模","default_name":"渡虚舟","rule":{"name":"御风渡界","description":"身法提高 8%，适合承载飞舟、楼船、梭舰与大型载具法宝。","combat_effect":{"player_stat_multipliers":{"mobility":1.08}}}},
-    {"id":"seal","name":"法印胎模","default_name":"镇界印","rule":{"name":"一印镇法","description":"敌方防护降低 5%，适合承载法印、玺、碑、砖与镇压类重宝。","combat_effect":{"enemy_stat_multipliers":{"guard":0.95}}}},
-    {"id":"bow","name":"弓器胎模","default_name":"落日弓","rule":{"name":"弦惊九霄","description":"身法与破法各提高 5%，适合承载远射、追星与锁敌一类器能。","combat_effect":{"player_stat_multipliers":{"mobility":1.05,"breach":1.05}}}},
-    {"id":"halberd","name":"戟器胎模","default_name":"修罗戟","rule":{"name":"横扫千军","description":"威能提高 7%，敌方防护降低 3%，适合承载重兵与战阵杀伐器能。","combat_effect":{"player_stat_multipliers":{"might":1.07},"enemy_stat_multipliers":{"guard":0.97}}}},
-    {"id":"staff","name":"棍器胎模","default_name":"镇岳棍","rule":{"name":"撼山架海","description":"威能与防护各提高 5%，适合承载镇压、架势与刚猛器能。","combat_effect":{"player_stat_multipliers":{"might":1.05,"guard":1.05}}}},
-    {"id":"firearm","name":"铳器胎模","default_name":"雷火铳","rule":{"name":"洞金裂甲","description":"破法提高 9%，敌方防护降低 3%，适合承载灵铳、神炮与机关火器。","combat_effect":{"player_stat_multipliers":{"breach":1.09},"enemy_stat_multipliers":{"guard":0.97}}}},
-    {"id":"orb","name":"宝珠胎模","default_name":"混元珠","rule":{"name":"珠藏周天","description":"神识与续航各提高 5%，适合承载宝珠、灵珠与内景洞天。","combat_effect":{"player_stat_multipliers":{"sense":1.05,"sustain":1.05}}}},
-    {"id":"needle","name":"飞针胎模","default_name":"无影针","rule":{"name":"无影穿神","description":"身法与神识各提高 5%，敌方防护降低 2%，适合承载飞针与细小暗器。","combat_effect":{"player_stat_multipliers":{"mobility":1.05,"sense":1.05},"enemy_stat_multipliers":{"guard":0.98}}}},
-    {"id":"other","name":"异形胎模","default_name":"无定奇兵","rule":{"name":"无定器相","description":"开炉时依材料与器机，从威能、防护、身法、神识、续航、破法中随机获得一条 8% 基础属性。","random_base_stats":["might","guard","mobility","sense","sustain","breach"],"random_multiplier":1.08}}
+    {
+      "id": "sword",
+      "name": "剑器胎模",
+      "default_name": "无锋剑",
+      "rule": {
+        "name": "剑意贯锋",
+        "description": "战斗开始时威能提高 6%，适合承载飞剑、长剑、重剑与剑匣一类器型。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "might": 1.06
+          }
+        }
+      }
+    },
+    {
+      "id": "saber",
+      "name": "刀器胎模",
+      "default_name": "断岳刀",
+      "rule": {
+        "name": "破阵重刃",
+        "description": "战斗开始时破法提高 6%，适合承载长刀、战刀、双刃与月轮一类器型。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "breach": 1.06
+          }
+        }
+      }
+    },
+    {
+      "id": "spear",
+      "name": "枪器胎模",
+      "default_name": "逐星枪",
+      "rule": {
+        "name": "一线穿云",
+        "description": "威能与身法各提高 4%，适合承载长枪、战矛、槊与锥锋一类器型。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "might": 1.04,
+            "mobility": 1.04
+          }
+        }
+      }
+    },
+    {
+      "id": "umbrella",
+      "name": "伞器胎模",
+      "default_name": "千机伞",
+      "rule": {
+        "name": "垂幕护神",
+        "description": "神识与防护各提高 5%，抵抗神识压制；适合承载法伞、华盖与护身宝幢一类器型。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "sense": 1.05,
+            "guard": 1.05
+          },
+          "traits": [
+            "crafted_sense_ward"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mirror",
+      "name": "镜器胎模",
+      "default_name": "照玄镜",
+      "rule": {
+        "name": "返照破妄",
+        "description": "神识与破法各提高 5%，适合承载宝镜、鉴台、照妖镜与留影法器。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "sense": 1.05,
+            "breach": 1.05
+          }
+        }
+      }
+    },
+    {
+      "id": "bell",
+      "name": "钟器胎模",
+      "default_name": "镇魂钟",
+      "rule": {
+        "name": "钟鸣定魄",
+        "description": "敌方神识降低 5%，适合承载法钟、铃铛、磬与摄魂音器。",
+        "combat_effect": {
+          "enemy_stat_multipliers": {
+            "sense": 0.95
+          }
+        }
+      }
+    },
+    {
+      "id": "cauldron",
+      "name": "鼎器胎模",
+      "default_name": "万化鼎",
+      "rule": {
+        "name": "炉火绵长",
+        "description": "防护与续航各提高 5%，适合承载宝鼎、丹炉、香炉与炼化容器。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "guard": 1.05,
+            "sustain": 1.05
+          }
+        }
+      }
+    },
+    {
+      "id": "banner",
+      "name": "幡器胎模",
+      "default_name": "摄灵幡",
+      "rule": {
+        "name": "摄魄扰敌",
+        "description": "敌方续航降低 6%，适合承载旗、幡、阵旗与招魂旌节。",
+        "combat_effect": {
+          "enemy_stat_multipliers": {
+            "sustain": 0.94
+          }
+        }
+      }
+    },
+    {
+      "id": "armor",
+      "name": "甲胄胎模",
+      "default_name": "玄罡甲",
+      "rule": {
+        "name": "披坚执锐",
+        "description": "防护提高 8%，适合承载甲胄、法袍、盾牌与护心宝具。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "guard": 1.08
+          }
+        }
+      }
+    },
+    {
+      "id": "ring",
+      "name": "法环胎模",
+      "default_name": "周天环",
+      "rule": {
+        "name": "周天自转",
+        "description": "续航提高 8%，适合承载指环、手镯、臂钏与乾坤圈一类器型。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "sustain": 1.08
+          }
+        }
+      }
+    },
+    {
+      "id": "boat",
+      "name": "飞舟胎模",
+      "default_name": "渡虚舟",
+      "rule": {
+        "name": "御风渡界",
+        "description": "身法提高 8%，适合承载飞舟、楼船、梭舰与大型载具法宝。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "mobility": 1.08
+          }
+        }
+      }
+    },
+    {
+      "id": "seal",
+      "name": "法印胎模",
+      "default_name": "镇界印",
+      "rule": {
+        "name": "一印镇法",
+        "description": "敌方防护降低 5%，适合承载法印、玺、碑、砖与镇压类重宝。",
+        "combat_effect": {
+          "enemy_stat_multipliers": {
+            "guard": 0.95
+          }
+        }
+      }
+    },
+    {
+      "id": "bow",
+      "name": "弓器胎模",
+      "default_name": "落日弓",
+      "rule": {
+        "name": "弦惊九霄",
+        "description": "身法与破法各提高 5%，适合承载远射、追星与锁敌一类器能。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "mobility": 1.05,
+            "breach": 1.05
+          }
+        }
+      }
+    },
+    {
+      "id": "halberd",
+      "name": "戟器胎模",
+      "default_name": "修罗戟",
+      "rule": {
+        "name": "横扫千军",
+        "description": "威能提高 7%，敌方防护降低 3%，适合承载重兵与战阵杀伐器能。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "might": 1.07
+          },
+          "enemy_stat_multipliers": {
+            "guard": 0.97
+          }
+        }
+      }
+    },
+    {
+      "id": "staff",
+      "name": "棍器胎模",
+      "default_name": "镇岳棍",
+      "rule": {
+        "name": "撼山架海",
+        "description": "威能与防护各提高 5%，适合承载镇压、架势与刚猛器能。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "might": 1.05,
+            "guard": 1.05
+          }
+        }
+      }
+    },
+    {
+      "id": "firearm",
+      "name": "铳器胎模",
+      "default_name": "雷火铳",
+      "rule": {
+        "name": "洞金裂甲",
+        "description": "破法提高 9%，敌方防护降低 3%，适合承载灵铳、神炮与机关火器。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "breach": 1.09
+          },
+          "enemy_stat_multipliers": {
+            "guard": 0.97
+          }
+        }
+      }
+    },
+    {
+      "id": "orb",
+      "name": "宝珠胎模",
+      "default_name": "混元珠",
+      "rule": {
+        "name": "珠藏周天",
+        "description": "神识与续航各提高 5%，适合承载宝珠、灵珠与内景洞天。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "sense": 1.05,
+            "sustain": 1.05
+          }
+        }
+      }
+    },
+    {
+      "id": "needle",
+      "name": "飞针胎模",
+      "default_name": "无影针",
+      "rule": {
+        "name": "无影穿神",
+        "description": "身法与神识各提高 5%，敌方防护降低 2%，适合承载飞针与细小暗器。",
+        "combat_effect": {
+          "player_stat_multipliers": {
+            "mobility": 1.05,
+            "sense": 1.05
+          },
+          "enemy_stat_multipliers": {
+            "guard": 0.98
+          }
+        }
+      }
+    },
+    {
+      "id": "other",
+      "name": "异形胎模",
+      "default_name": "无定奇兵",
+      "rule": {
+        "name": "无定器相",
+        "description": "开炉时依材料与器机，从威能、防护、身法、神识、续航、破法中随机获得一条 8% 基础属性。",
+        "random_base_stats": [
+          "might",
+          "guard",
+          "mobility",
+          "sense",
+          "sustain",
+          "breach"
+        ],
+        "random_multiplier": 1.08
+      }
+    }
   ],
   "materials": [
-    {"id":"human_cold_iron","name":"寒潭玄铁","world":"human","tier":1,"tags":["metal","yin"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":18,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.18,"max_hp":1.06},"description":"主材：器身坚锐，战力设计值提高18%。"},"secondary":{"special_stats":{"tribulation_reduction":0.006},"description":"辅材：寒意导流，渡劫减伤 +0.6%。"}}},
-    {"id":"human_refined_bronze","name":"青炼铜","world":"human","tier":1,"tags":["metal","earth"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":12,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.10,"max_hp":1.04},"description":"主材：凡炉反复精炼的常用器骨，战力与HP设计值小幅提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.015}},"description":"辅材：铜纹补强，防护提高1.5%。"}}},
-    {"id":"human_cold_spring_water","name":"寒泉淬水","world":"human","tier":1,"tags":["water","yin"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":14,"role_effects":{"secondary":{"design_multipliers":{"max_mp":1.06},"description":"辅材：寒泉纳气，MP设计值提高6%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.015}},"description":"淬火：冷热相济，续航提高1.5%。"}}},
-    {"id":"human_cloud_silk","name":"流云天蚕丝","world":"human","tier":2,"tags":["silk","wind"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":42,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.16,"opportunity_efficiency":1.12},"description":"主材：轻灵纳气，MP与机缘设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"mobility":1.025}},"description":"辅材：身法提高2.5%。"}}},
-    {"id":"human_sun_fire","name":"九阳地火","world":"human","tier":3,"tags":["fire","yang"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":130,"role_effects":{"quench":{"special_stats":{"combat_power":180},"combat_effect":{"player_stat_multipliers":{"might":1.03}},"description":"淬火：战力 +180，威能提高3%。"}}},
-
-    {"id":"spirit_star_gold","name":"星髓道金","world":"spirit","tier":6,"tags":["metal","star"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":68000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.28},"description":"主材：战力设计值提高28%。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"breach":1.04}},"description":"辅材：破法提高4%。"}}},
-    {"id":"spirit_cloud_iron","name":"云纹灵铁","world":"spirit","tier":6,"tags":["metal","wind"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":42000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.16,"max_hp":1.08},"description":"主材：灵界工坊常备器骨，战力与HP设计值稳步提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.025}},"description":"辅材：云纹卸力，防护提高2.5%。"}}},
-    {"id":"spirit_tide_essence","name":"沧潮灵液","world":"spirit","tier":6,"tags":["water","spirit"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":48000,"role_effects":{"secondary":{"design_multipliers":{"max_mp":1.10},"description":"辅材：潮汐蓄灵，MP设计值提高10%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.03}},"description":"淬火：灵潮回转，续航提高3%。"}}},
-    {"id":"spirit_bitter_bamboo","name":"苦寒天竹","world":"spirit","tier":7,"tags":["wood","yin"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":190000,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.22,"divine_sense_efficiency":1.12},"description":"主材：HP与神识设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.035,"sense":1.025}},"description":"辅材：防护提高3.5%，神识提高2.5%。"}}},
-    {"id":"spirit_blue_water_thread","name":"蓝水晶丝","world":"spirit","tier":8,"tags":["water","silk"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":620000,"role_effects":{"secondary":{"special_stats":{"max_mp":18000},"description":"辅材：最大MP +18,000。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.05}},"description":"淬火：续航提高5%。"}}},
-
-    {"id":"celestial_cloud_jade","name":"云纹仙玉","world":"celestial","tier":9,"tags":["jade","yang"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":7500000,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.18,"divine_sense_efficiency":1.10},"description":"主材：仙坊常用的纳灵玉胚，MP与神识设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sense":1.03}},"description":"辅材：玉鸣澄念，神识提高3%。"}}},
-    {"id":"celestial_pure_yang_dew","name":"纯阳仙露","world":"celestial","tier":9,"tags":["water","yang"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":8200000,"role_effects":{"secondary":{"combat_effect":{"player_stat_multipliers":{"sustain":1.025}},"description":"辅材：仙露润脉，续航提高2.5%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"might":1.035}},"description":"淬火：纯阳开锋，威能提高3.5%。"}}},
-
-    {"id":"demon_blood_copper","name":"血纹魔铜","world":"demon","tier":2,"tags":["metal","blood"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":65,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.20,"max_hp":1.10},"description":"主材：战力与HP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"might":1.03}},"description":"辅材：威能提高3%。"}}},
-    {"id":"demon_bone_steel","name":"白骨魔钢","world":"demon","tier":2,"tags":["bone","metal"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":48,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.14,"body_training_efficiency":1.08},"description":"主材：骨钢坚韧，HP与炼体设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.02}},"description":"辅材：骨节卸力，防护提高2%。"}}},
-    {"id":"demon_yin_blood_oil","name":"阴血淬油","world":"demon","tier":2,"tags":["blood","yin"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":56,"role_effects":{"secondary":{"combat_effect":{"enemy_stat_multipliers":{"sustain":0.985}},"description":"辅材：阴血滞气，敌方续航降低1.5%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"might":1.02}},"description":"淬火：血煞催锋，威能提高2%。"}}},
-    {"id":"demon_corpse_wood","name":"千尸阴木","world":"demon","tier":4,"tags":["wood","yin","corpse"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":1350,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.20,"divine_sense_efficiency":1.12},"description":"主材：MP与神识设计值提高。"},"secondary":{"combat_effect":{"enemy_stat_multipliers":{"sustain":0.97}},"description":"辅材：敌方续航降低3%。"}}},
-    {"id":"demon_balefire","name":"黑煞魔焰","world":"demon","tier":5,"tags":["fire","demon"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":7200,"role_effects":{"quench":{"combat_effect":{"enemy_stat_multipliers":{"guard":0.96}},"description":"淬火：敌方防护降低4%。"}}},
-
-    {"id":"true_demon_abyss_iron","name":"无间渊铁","world":"true_demon","tier":6,"tags":["metal","abyss"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":78000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.30,"max_hp":1.12},"description":"主材：战力与HP设计值显著提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.04}},"description":"辅材：防护提高4%。"}}},
-    {"id":"true_demon_black_sinew","name":"渊魔韧筋","world":"true_demon","tier":6,"tags":["tendon","abyss"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":62000,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.16,"body_training_efficiency":1.10},"description":"主材：韧筋塑骨，HP与炼体设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sustain":1.025}},"description":"辅材：魔筋回弹，续航提高2.5%。"}}},
-    {"id":"true_demon_ash_flame","name":"劫灰魔火","world":"true_demon","tier":6,"tags":["fire","ash"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":72000,"role_effects":{"secondary":{"combat_effect":{"player_stat_multipliers":{"breach":1.02}},"description":"辅材：劫灰蚀纹，破法提高2%。"},"quench":{"combat_effect":{"enemy_stat_multipliers":{"guard":0.975}},"description":"淬火：灰焰侵甲，敌方防护降低2.5%。"}}},
-    {"id":"true_demon_nightmare_hide","name":"梦魇魔皮","world":"true_demon","tier":7,"tags":["hide","soul"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":260000,"role_effects":{"primary":{"design_multipliers":{"divine_sense_efficiency":1.24,"max_mp":1.14},"description":"主材：神识与MP设计值提高。"},"secondary":{"combat_effect":{"enemy_stat_multipliers":{"sense":0.96}},"description":"辅材：敌方神识降低4%。"}}},
-    {"id":"true_demon_annihilation_flame","name":"寂灭真焰","world":"true_demon","tier":8,"tags":["fire","law"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":980000,"role_effects":{"quench":{"special_stats":{"tribulation_reduction":0.012},"combat_effect":{"player_stat_multipliers":{"breach":1.05}},"description":"淬火：渡劫减伤 +1.2%，破法提高5%。"}}},
-
-    {"id":"asura_blood_steel","name":"修罗血钢","world":"asura","tier":9,"tags":["metal","blood"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":8000000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.18,"max_hp":1.10},"description":"主材：战场回炉的常备血钢，战力与HP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"might":1.03}},"description":"辅材：战意入刃，威能提高3%。"}}},
-    {"id":"asura_war_flame","name":"战魂烈焰","world":"asura","tier":9,"tags":["fire","soul"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":8800000,"role_effects":{"secondary":{"combat_effect":{"player_stat_multipliers":{"breach":1.025}},"description":"辅材：战魂识隙，破法提高2.5%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"might":1.035}},"description":"淬火：烈焰催战，威能提高3.5%。"}}},
-
-    {"id":"monster_green_scale","name":"青罡妖鳞","world":"monster_realm","tier":3,"tags":["scale","wind"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":520,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.20,"body_training_efficiency":1.12},"description":"主材：HP与炼体设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.03}},"description":"辅材：防护提高3%。"}}},
-    {"id":"monster_common_horn","name":"山岳妖角","world":"monster_realm","tier":3,"tags":["horn","earth"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":360,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.14,"body_training_efficiency":1.08},"description":"主材：妖角厚重，战力与炼体设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"might":1.02}},"description":"辅材：角锋聚力，威能提高2%。"}}},
-    {"id":"monster_spirit_marrow","name":"百兽灵髓","world":"monster_realm","tier":3,"tags":["marrow","bloodline"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":410,"role_effects":{"secondary":{"design_multipliers":{"max_hp":1.08},"description":"辅材：灵髓养器，HP设计值提高8%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.02}},"description":"淬火：血气绵长，续航提高2%。"}}},
-    {"id":"monster_earth_tendon","name":"裂地妖筋","world":"monster_realm","tier":4,"tags":["tendon","earth"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":1800,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.20,"max_hp":1.12},"description":"主材：战力与HP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"might":1.03,"sustain":1.02}},"description":"辅材：威能提高3%，续航提高2%。"}}},
-    {"id":"monster_sun_blood_flame","name":"赤阳妖血焰","world":"monster_realm","tier":5,"tags":["fire","bloodline"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":7600,"role_effects":{"quench":{"special_stats":{"body_training_efficiency":0.012},"combat_effect":{"player_stat_multipliers":{"might":1.035}},"description":"淬火：炼体效率 +1.2%，威能提高3.5%。"}}},
-
-    {"id":"monster_moon_bone","name":"月魄妖骨","world":"phantom_underworld","tier":5,"tags":["bone","moon"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":8900,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.24,"body_training_efficiency":1.16},"description":"主材：HP与炼体设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.035}},"description":"辅材：防护提高3.5%。"}}},
-    {"id":"monster_shadow_hide","name":"幻影妖皮","world":"phantom_underworld","tier":5,"tags":["hide","shadow"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":6800,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.16,"max_mp":1.08},"description":"主材：幻皮藏形，HP与MP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"mobility":1.025}},"description":"辅材：影随器走，身法提高2.5%。"}}},
-    {"id":"monster_moonwell_dew","name":"月井灵露","world":"phantom_underworld","tier":5,"tags":["water","moon"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":7600,"role_effects":{"secondary":{"combat_effect":{"player_stat_multipliers":{"sense":1.02}},"description":"辅材：月华清神，神识提高2%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.025}},"description":"淬火：月露回灵，续航提高2.5%。"}}},
-    {"id":"monster_phantom_tendon","name":"幻潮灵筋","world":"phantom_underworld","tier":6,"tags":["tendon","water"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":56000,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.18,"opportunity_efficiency":1.14},"description":"主材：MP与机缘设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"mobility":1.04}},"description":"辅材：身法提高4%。"}}},
-    {"id":"monster_ancestral_flame","name":"返祖妖火","world":"phantom_underworld","tier":7,"tags":["fire","bloodline"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":310000,"role_effects":{"quench":{"special_stats":{"body_training_efficiency":0.018},"combat_effect":{"player_stat_multipliers":{"might":1.04}},"description":"淬火：炼体效率 +1.8%，威能提高4%。"}}},
-
-    {"id":"nether_true_spirit_scale","name":"太初真灵鳞","world":"nether","tier":9,"tags":["scale","primordial"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":9200000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.34,"max_hp":1.20},"description":"主材：战力与HP设计值大幅提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.055}},"description":"辅材：防护提高5.5%。"}}},
-    {"id":"nether_ancient_bone","name":"洪荒灵骨","world":"nether","tier":9,"tags":["bone","primordial"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":7200000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.18,"max_hp":1.10},"description":"主材：洪荒遗骨稳固器身，战力与HP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.03}},"description":"辅材：古骨承压，防护提高3%。"}}},
-    {"id":"nether_world_sap","name":"界树灵浆","world":"nether","tier":9,"tags":["wood","world"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":8100000,"role_effects":{"secondary":{"design_multipliers":{"max_mp":1.12},"description":"辅材：界树灵浆蓄气，MP设计值提高12%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"sustain":1.035}},"description":"淬火：生机不绝，续航提高3.5%。"}}},
-    {"id":"nether_worldtree_heart","name":"界树祖心","world":"nether","tier":10,"tags":["wood","world"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":68000000,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.28,"opportunity_efficiency":1.22},"description":"主材：MP与机缘设计值大幅提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sustain":1.06}},"description":"辅材：续航提高6%。"}}},
-    {"id":"nether_chaos_fire","name":"太荒混沌火","world":"nether","tier":11,"tags":["fire","chaos"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":420000000,"role_effects":{"quench":{"special_stats":{"combat_power":12000000},"combat_effect":{"player_stat_multipliers":{"might":1.06,"breach":1.06}},"description":"淬火：战力 +12,000,000，威能与破法各提高6%。"}}},
-
-    {"id":"hell_soul_iron","name":"锁魂冥铁","world":"hell","tier":3,"tags":["metal","soul"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":420,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.18,"divine_sense_efficiency":1.16},"description":"主材：战力与神识设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sense":1.03}},"description":"辅材：神识提高3%。"}}},
-    {"id":"hell_yin_clay","name":"九幽阴陶","world":"hell","tier":3,"tags":["earth","yin"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":300,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.14,"max_mp":1.08},"description":"主材：阴陶镇魂，HP与MP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.02}},"description":"辅材：陶纹消力，防护提高2%。"}}},
-    {"id":"hell_soul_lamp_oil","name":"引魂灯油","world":"hell","tier":3,"tags":["oil","soul"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":360,"role_effects":{"secondary":{"combat_effect":{"player_stat_multipliers":{"sense":1.02}},"description":"辅材：灯焰照魂，神识提高2%。"},"quench":{"combat_effect":{"enemy_stat_multipliers":{"sense":0.98}},"description":"淬火：幽焰惑神，敌方神识降低2%。"}}},
-    {"id":"hell_forgetful_water","name":"忘川阴水","world":"hell","tier":5,"tags":["water","yin"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":7600,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.22,"tribulation_reduction":1.12},"description":"主材：MP与渡劫设计值提高。"},"secondary":{"combat_effect":{"enemy_stat_multipliers":{"might":0.97}},"description":"辅材：敌方威能降低3%。"}}},
-    {"id":"hell_karmic_flame","name":"业火余烬","world":"hell","tier":6,"tags":["fire","karma"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":88000,"role_effects":{"quench":{"special_stats":{"breakthrough_bonus":0.006},"description":"淬火：成品突破加成 +0.6%（仍受单件5%上限）。"}}},
-
-    {"id":"reincarnation_wheel_gold","name":"轮回道金","world":"reincarnation","tier":9,"tags":["metal","reincarnation"],"roles":["primary","secondary"],"allow_duplicate_type":false,"base_material_value":11000000,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.32,"breakthrough_bonus":1.18},"description":"主材：战力与突破设计值提高。"},"secondary":{"special_stats":{"breakthrough_bonus":0.008},"description":"辅材：成品突破加成 +0.8%（仍受单件5%上限）。"}}},
-    {"id":"reincarnation_shore_stone","name":"彼岸青石","world":"reincarnation","tier":9,"tags":["earth","reincarnation"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":8600000,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.18,"max_mp":1.10},"description":"主材：彼岸石质稳定，HP与MP设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"guard":1.03}},"description":"辅材：青石镇身，防护提高3%。"}}},
-    {"id":"reincarnation_karma_ash","name":"因果劫灰","world":"reincarnation","tier":9,"tags":["ash","karma"],"roles":["secondary","quench"],"allow_duplicate_type":true,"base_material_value":9500000,"role_effects":{"secondary":{"design_multipliers":{"opportunity_efficiency":1.08},"description":"辅材：因果留痕，机缘设计值提高8%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"breach":1.035}},"description":"淬火：劫灰辨隙，破法提高3.5%。"}}},
-    {"id":"reincarnation_mengpo_silk","name":"往生魂丝","world":"reincarnation","tier":10,"tags":["silk","soul"],"roles":["primary","secondary"],"allow_duplicate_type":true,"base_material_value":76000000,"role_effects":{"primary":{"design_multipliers":{"max_mp":1.26,"divine_sense_efficiency":1.22},"description":"主材：MP与神识设计值提高。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sense":1.055,"sustain":1.035}},"description":"辅材：神识提高5.5%，续航提高3.5%。"}}},
-    {"id":"reincarnation_nirvana_fire","name":"彼岸涅槃火","world":"reincarnation","tier":11,"tags":["fire","rebirth"],"roles":["quench"],"allow_duplicate_type":false,"base_material_value":480000000,"role_effects":{"quench":{"special_stats":{"tribulation_reduction":0.018},"combat_effect":{"player_stat_multipliers":{"sustain":1.07}},"description":"淬火：渡劫减伤 +1.8%，续航提高7%。"}}}
+    {
+      "id": "human_cold_iron",
+      "name": "寒潭玄铁",
+      "world": "human",
+      "tier": 1,
+      "tags": [
+        "metal",
+        "yin"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 18,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.06
+          },
+          "description": "主材：器身坚锐，战力设计值提高18%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.006
+          },
+          "description": "辅材：寒意导流，渡劫减伤 +0.6%。"
+        }
+      }
+    },
+    {
+      "id": "human_refined_bronze",
+      "name": "青炼铜",
+      "world": "human",
+      "tier": 1,
+      "tags": [
+        "metal",
+        "earth"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 12,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.1,
+            "max_hp": 1.04
+          },
+          "description": "主材：凡炉反复精炼的常用器骨，战力与HP设计值小幅提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.015
+            }
+          },
+          "description": "辅材：铜纹补强，防护提高1.5%。"
+        }
+      }
+    },
+    {
+      "id": "human_cold_spring_water",
+      "name": "寒泉淬水",
+      "world": "human",
+      "tier": 1,
+      "tags": [
+        "water",
+        "yin"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 14,
+      "role_effects": {
+        "secondary": {
+          "design_multipliers": {
+            "max_mp": 1.06
+          },
+          "description": "辅材：寒泉纳气，MP设计值提高6%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.015
+            }
+          },
+          "description": "淬火：冷热相济，续航提高1.5%。"
+        }
+      }
+    },
+    {
+      "id": "human_cloud_silk",
+      "name": "流云天蚕丝",
+      "world": "human",
+      "tier": 2,
+      "tags": [
+        "silk",
+        "wind"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 42,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.16,
+            "opportunity_efficiency": 1.12
+          },
+          "description": "主材：轻灵纳气，MP与机缘设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.025
+            }
+          },
+          "description": "辅材：身法提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "human_sun_fire",
+      "name": "九阳地火",
+      "world": "human",
+      "tier": 3,
+      "tags": [
+        "fire",
+        "yang"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 130,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "combat_power": 180
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "淬火：战力 +180，威能提高3%。"
+        }
+      }
+    },
+    {
+      "id": "spirit_star_gold",
+      "name": "星髓道金",
+      "world": "spirit",
+      "tier": 6,
+      "tags": [
+        "metal",
+        "star"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 68000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.28
+          },
+          "description": "主材：战力设计值提高28%。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "辅材：破法提高4%。"
+        }
+      }
+    },
+    {
+      "id": "spirit_cloud_iron",
+      "name": "云纹灵铁",
+      "world": "spirit",
+      "tier": 6,
+      "tags": [
+        "metal",
+        "wind"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 42000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.16,
+            "max_hp": 1.08
+          },
+          "description": "主材：灵界工坊常备器骨，战力与HP设计值稳步提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.025
+            }
+          },
+          "description": "辅材：云纹卸力，防护提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "spirit_tide_essence",
+      "name": "沧潮灵液",
+      "world": "spirit",
+      "tier": 6,
+      "tags": [
+        "water",
+        "spirit"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 48000,
+      "role_effects": {
+        "secondary": {
+          "design_multipliers": {
+            "max_mp": 1.1
+          },
+          "description": "辅材：潮汐蓄灵，MP设计值提高10%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "淬火：灵潮回转，续航提高3%。"
+        }
+      }
+    },
+    {
+      "id": "spirit_bitter_bamboo",
+      "name": "苦寒天竹",
+      "world": "spirit",
+      "tier": 7,
+      "tags": [
+        "wood",
+        "yin"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 190000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.22,
+            "divine_sense_efficiency": 1.12
+          },
+          "description": "主材：HP与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.035,
+              "sense": 1.025
+            }
+          },
+          "description": "辅材：防护提高3.5%，神识提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "spirit_blue_water_thread",
+      "name": "蓝水晶丝",
+      "world": "spirit",
+      "tier": 8,
+      "tags": [
+        "water",
+        "silk"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 620000,
+      "role_effects": {
+        "secondary": {
+          "special_stats": {
+            "max_mp": 18000
+          },
+          "description": "辅材：最大MP +18,000。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "淬火：续航提高5%。"
+        }
+      }
+    },
+    {
+      "id": "celestial_cloud_jade",
+      "name": "云纹仙玉",
+      "world": "celestial",
+      "tier": 9,
+      "tags": [
+        "jade",
+        "yang"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7500000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.18,
+            "divine_sense_efficiency": 1.1
+          },
+          "description": "主材：仙坊常用的纳灵玉胚，MP与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "辅材：玉鸣澄念，神识提高3%。"
+        }
+      }
+    },
+    {
+      "id": "celestial_pure_yang_dew",
+      "name": "纯阳仙露",
+      "world": "celestial",
+      "tier": 9,
+      "tags": [
+        "water",
+        "yang"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8200000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.025
+            }
+          },
+          "description": "辅材：仙露润脉，续航提高2.5%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.035
+            }
+          },
+          "description": "淬火：纯阳开锋，威能提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "demon_blood_copper",
+      "name": "血纹魔铜",
+      "world": "demon",
+      "tier": 2,
+      "tags": [
+        "metal",
+        "blood"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 65,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2,
+            "max_hp": 1.1
+          },
+          "description": "主材：战力与HP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "辅材：威能提高3%。"
+        }
+      }
+    },
+    {
+      "id": "demon_bone_steel",
+      "name": "白骨魔钢",
+      "world": "demon",
+      "tier": 2,
+      "tags": [
+        "bone",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 48,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.14,
+            "body_training_efficiency": 1.08
+          },
+          "description": "主材：骨钢坚韧，HP与炼体设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "辅材：骨节卸力，防护提高2%。"
+        }
+      }
+    },
+    {
+      "id": "demon_yin_blood_oil",
+      "name": "阴血淬油",
+      "world": "demon",
+      "tier": 2,
+      "tags": [
+        "blood",
+        "yin"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 56,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "sustain": 0.985
+            }
+          },
+          "description": "辅材：阴血滞气，敌方续航降低1.5%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.02
+            }
+          },
+          "description": "淬火：血煞催锋，威能提高2%。"
+        }
+      }
+    },
+    {
+      "id": "demon_corpse_wood",
+      "name": "千尸阴木",
+      "world": "demon",
+      "tier": 4,
+      "tags": [
+        "wood",
+        "yin",
+        "corpse"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1350,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.2,
+            "divine_sense_efficiency": 1.12
+          },
+          "description": "主材：MP与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "sustain": 0.97
+            }
+          },
+          "description": "辅材：敌方续航降低3%。"
+        }
+      }
+    },
+    {
+      "id": "demon_balefire",
+      "name": "黑煞魔焰",
+      "world": "demon",
+      "tier": 5,
+      "tags": [
+        "fire",
+        "demon"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 7200,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "guard": 0.96
+            }
+          },
+          "description": "淬火：敌方防护降低4%。"
+        }
+      }
+    },
+    {
+      "id": "true_demon_abyss_iron",
+      "name": "无间渊铁",
+      "world": "true_demon",
+      "tier": 6,
+      "tags": [
+        "metal",
+        "abyss"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 78000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.3,
+            "max_hp": 1.12
+          },
+          "description": "主材：战力与HP设计值显著提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "辅材：防护提高4%。"
+        }
+      }
+    },
+    {
+      "id": "true_demon_black_sinew",
+      "name": "渊魔韧筋",
+      "world": "true_demon",
+      "tier": 6,
+      "tags": [
+        "tendon",
+        "abyss"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 62000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.16,
+            "body_training_efficiency": 1.1
+          },
+          "description": "主材：韧筋塑骨，HP与炼体设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.025
+            }
+          },
+          "description": "辅材：魔筋回弹，续航提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "true_demon_ash_flame",
+      "name": "劫灰魔火",
+      "world": "true_demon",
+      "tier": 6,
+      "tags": [
+        "fire",
+        "ash"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 72000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.02
+            }
+          },
+          "description": "辅材：劫灰蚀纹，破法提高2%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "guard": 0.975
+            }
+          },
+          "description": "淬火：灰焰侵甲，敌方防护降低2.5%。"
+        }
+      }
+    },
+    {
+      "id": "true_demon_nightmare_hide",
+      "name": "梦魇魔皮",
+      "world": "true_demon",
+      "tier": 7,
+      "tags": [
+        "hide",
+        "soul"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 260000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "divine_sense_efficiency": 1.24,
+            "max_mp": 1.14
+          },
+          "description": "主材：神识与MP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "sense": 0.96
+            }
+          },
+          "description": "辅材：敌方神识降低4%。"
+        }
+      }
+    },
+    {
+      "id": "true_demon_annihilation_flame",
+      "name": "寂灭真焰",
+      "world": "true_demon",
+      "tier": 8,
+      "tags": [
+        "fire",
+        "law"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 980000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.012
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.05
+            }
+          },
+          "description": "淬火：渡劫减伤 +1.2%，破法提高5%。"
+        }
+      }
+    },
+    {
+      "id": "asura_blood_steel",
+      "name": "修罗血钢",
+      "world": "asura",
+      "tier": 9,
+      "tags": [
+        "metal",
+        "blood"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.1
+          },
+          "description": "主材：战场回炉的常备血钢，战力与HP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "辅材：战意入刃，威能提高3%。"
+        }
+      }
+    },
+    {
+      "id": "asura_war_flame",
+      "name": "战魂烈焰",
+      "world": "asura",
+      "tier": 9,
+      "tags": [
+        "fire",
+        "soul"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8800000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.025
+            }
+          },
+          "description": "辅材：战魂识隙，破法提高2.5%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.035
+            }
+          },
+          "description": "淬火：烈焰催战，威能提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "monster_green_scale",
+      "name": "青罡妖鳞",
+      "world": "monster_realm",
+      "tier": 3,
+      "tags": [
+        "scale",
+        "wind"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 520,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.2,
+            "body_training_efficiency": 1.12
+          },
+          "description": "主材：HP与炼体设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "辅材：防护提高3%。"
+        }
+      }
+    },
+    {
+      "id": "monster_common_horn",
+      "name": "山岳妖角",
+      "world": "monster_realm",
+      "tier": 3,
+      "tags": [
+        "horn",
+        "earth"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 360,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.14,
+            "body_training_efficiency": 1.08
+          },
+          "description": "主材：妖角厚重，战力与炼体设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.02
+            }
+          },
+          "description": "辅材：角锋聚力，威能提高2%。"
+        }
+      }
+    },
+    {
+      "id": "monster_spirit_marrow",
+      "name": "百兽灵髓",
+      "world": "monster_realm",
+      "tier": 3,
+      "tags": [
+        "marrow",
+        "bloodline"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 410,
+      "role_effects": {
+        "secondary": {
+          "design_multipliers": {
+            "max_hp": 1.08
+          },
+          "description": "辅材：灵髓养器，HP设计值提高8%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬火：血气绵长，续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "monster_earth_tendon",
+      "name": "裂地妖筋",
+      "world": "monster_realm",
+      "tier": 4,
+      "tags": [
+        "tendon",
+        "earth"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2,
+            "max_hp": 1.12
+          },
+          "description": "主材：战力与HP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03,
+              "sustain": 1.02
+            }
+          },
+          "description": "辅材：威能提高3%，续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "monster_sun_blood_flame",
+      "name": "赤阳妖血焰",
+      "world": "monster_realm",
+      "tier": 5,
+      "tags": [
+        "fire",
+        "bloodline"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 7600,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "body_training_efficiency": 0.012
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.035
+            }
+          },
+          "description": "淬火：炼体效率 +1.2%，威能提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "monster_moon_bone",
+      "name": "月魄妖骨",
+      "world": "phantom_underworld",
+      "tier": 5,
+      "tags": [
+        "bone",
+        "moon"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8900,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.24,
+            "body_training_efficiency": 1.16
+          },
+          "description": "主材：HP与炼体设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.035
+            }
+          },
+          "description": "辅材：防护提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "monster_shadow_hide",
+      "name": "幻影妖皮",
+      "world": "phantom_underworld",
+      "tier": 5,
+      "tags": [
+        "hide",
+        "shadow"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 6800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.16,
+            "max_mp": 1.08
+          },
+          "description": "主材：幻皮藏形，HP与MP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.025
+            }
+          },
+          "description": "辅材：影随器走，身法提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "monster_moonwell_dew",
+      "name": "月井灵露",
+      "world": "phantom_underworld",
+      "tier": 5,
+      "tags": [
+        "water",
+        "moon"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7600,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.02
+            }
+          },
+          "description": "辅材：月华清神，神识提高2%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.025
+            }
+          },
+          "description": "淬火：月露回灵，续航提高2.5%。"
+        }
+      }
+    },
+    {
+      "id": "monster_phantom_tendon",
+      "name": "幻潮灵筋",
+      "world": "phantom_underworld",
+      "tier": 6,
+      "tags": [
+        "tendon",
+        "water"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 56000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.18,
+            "opportunity_efficiency": 1.14
+          },
+          "description": "主材：MP与机缘设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.04
+            }
+          },
+          "description": "辅材：身法提高4%。"
+        }
+      }
+    },
+    {
+      "id": "monster_ancestral_flame",
+      "name": "返祖妖火",
+      "world": "phantom_underworld",
+      "tier": 7,
+      "tags": [
+        "fire",
+        "bloodline"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 310000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "body_training_efficiency": 0.018
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "淬火：炼体效率 +1.8%，威能提高4%。"
+        }
+      }
+    },
+    {
+      "id": "nether_true_spirit_scale",
+      "name": "太初真灵鳞",
+      "world": "nether",
+      "tier": 9,
+      "tags": [
+        "scale",
+        "primordial"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 9200000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.34,
+            "max_hp": 1.2
+          },
+          "description": "主材：战力与HP设计值大幅提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.055
+            }
+          },
+          "description": "辅材：防护提高5.5%。"
+        }
+      }
+    },
+    {
+      "id": "nether_ancient_bone",
+      "name": "洪荒灵骨",
+      "world": "nether",
+      "tier": 9,
+      "tags": [
+        "bone",
+        "primordial"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7200000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.1
+          },
+          "description": "主材：洪荒遗骨稳固器身，战力与HP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "辅材：古骨承压，防护提高3%。"
+        }
+      }
+    },
+    {
+      "id": "nether_world_sap",
+      "name": "界树灵浆",
+      "world": "nether",
+      "tier": 9,
+      "tags": [
+        "wood",
+        "world"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8100000,
+      "role_effects": {
+        "secondary": {
+          "design_multipliers": {
+            "max_mp": 1.12
+          },
+          "description": "辅材：界树灵浆蓄气，MP设计值提高12%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.035
+            }
+          },
+          "description": "淬火：生机不绝，续航提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "nether_worldtree_heart",
+      "name": "界树祖心",
+      "world": "nether",
+      "tier": 10,
+      "tags": [
+        "wood",
+        "world"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 68000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.28,
+            "opportunity_efficiency": 1.22
+          },
+          "description": "主材：MP与机缘设计值大幅提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "辅材：续航提高6%。"
+        }
+      }
+    },
+    {
+      "id": "nether_chaos_fire",
+      "name": "太荒混沌火",
+      "world": "nether",
+      "tier": 11,
+      "tags": [
+        "fire",
+        "chaos"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 420000000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "combat_power": 12000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06,
+              "breach": 1.06
+            }
+          },
+          "description": "淬火：战力 +12,000,000，威能与破法各提高6%。"
+        }
+      }
+    },
+    {
+      "id": "hell_soul_iron",
+      "name": "锁魂冥铁",
+      "world": "hell",
+      "tier": 3,
+      "tags": [
+        "metal",
+        "soul"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 420,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "divine_sense_efficiency": 1.16
+          },
+          "description": "主材：战力与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "辅材：神识提高3%。"
+        }
+      }
+    },
+    {
+      "id": "hell_yin_clay",
+      "name": "九幽阴陶",
+      "world": "hell",
+      "tier": 3,
+      "tags": [
+        "earth",
+        "yin"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 300,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.14,
+            "max_mp": 1.08
+          },
+          "description": "主材：阴陶镇魂，HP与MP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "辅材：陶纹消力，防护提高2%。"
+        }
+      }
+    },
+    {
+      "id": "hell_soul_lamp_oil",
+      "name": "引魂灯油",
+      "world": "hell",
+      "tier": 3,
+      "tags": [
+        "oil",
+        "soul"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 360,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.02
+            }
+          },
+          "description": "辅材：灯焰照魂，神识提高2%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "sense": 0.98
+            }
+          },
+          "description": "淬火：幽焰惑神，敌方神识降低2%。"
+        }
+      }
+    },
+    {
+      "id": "hell_forgetful_water",
+      "name": "忘川阴水",
+      "world": "hell",
+      "tier": 5,
+      "tags": [
+        "water",
+        "yin"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7600,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.22,
+            "tribulation_reduction": 1.12
+          },
+          "description": "主材：MP与渡劫设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "might": 0.97
+            }
+          },
+          "description": "辅材：敌方威能降低3%。"
+        }
+      }
+    },
+    {
+      "id": "hell_karmic_flame",
+      "name": "业火余烬",
+      "world": "hell",
+      "tier": 6,
+      "tags": [
+        "fire",
+        "karma"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 88000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "breakthrough_bonus": 0.006
+          },
+          "description": "淬火：成品突破加成 +0.6%（仍受单件5%上限）。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_wheel_gold",
+      "name": "轮回道金",
+      "world": "reincarnation",
+      "tier": 9,
+      "tags": [
+        "metal",
+        "reincarnation"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 11000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.32,
+            "breakthrough_bonus": 1.18
+          },
+          "description": "主材：战力与突破设计值提高。"
+        },
+        "secondary": {
+          "special_stats": {
+            "breakthrough_bonus": 0.008
+          },
+          "description": "辅材：成品突破加成 +0.8%（仍受单件5%上限）。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_shore_stone",
+      "name": "彼岸青石",
+      "world": "reincarnation",
+      "tier": 9,
+      "tags": [
+        "earth",
+        "reincarnation"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8600000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.18,
+            "max_mp": 1.1
+          },
+          "description": "主材：彼岸石质稳定，HP与MP设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "辅材：青石镇身，防护提高3%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_karma_ash",
+      "name": "因果劫灰",
+      "world": "reincarnation",
+      "tier": 9,
+      "tags": [
+        "ash",
+        "karma"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 9500000,
+      "role_effects": {
+        "secondary": {
+          "design_multipliers": {
+            "opportunity_efficiency": 1.08
+          },
+          "description": "辅材：因果留痕，机缘设计值提高8%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.035
+            }
+          },
+          "description": "淬火：劫灰辨隙，破法提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_mengpo_silk",
+      "name": "往生魂丝",
+      "world": "reincarnation",
+      "tier": 10,
+      "tags": [
+        "silk",
+        "soul"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 76000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.26,
+            "divine_sense_efficiency": 1.22
+          },
+          "description": "主材：MP与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.055,
+              "sustain": 1.035
+            }
+          },
+          "description": "辅材：神识提高5.5%，续航提高3.5%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_nirvana_fire",
+      "name": "彼岸涅槃火",
+      "world": "reincarnation",
+      "tier": 11,
+      "tags": [
+        "fire",
+        "rebirth"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 480000000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.018
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.07
+            }
+          },
+          "description": "淬火：渡劫减伤 +1.8%，续航提高7%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_2_quench_dew",
+      "name": "凡尘二阶淬灵露",
+      "world": "human",
+      "tier": 2,
+      "tags": [
+        "metal",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 48,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_3_forge_crystal",
+      "name": "凡尘三阶铸器玄晶",
+      "world": "human",
+      "tier": 3,
+      "tags": [
+        "metal",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 360,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_4_forge_crystal",
+      "name": "凡尘四阶铸器玄晶",
+      "world": "human",
+      "tier": 4,
+      "tags": [
+        "metal",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1400,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_4_quench_dew",
+      "name": "凡尘四阶淬灵露",
+      "world": "human",
+      "tier": 4,
+      "tags": [
+        "metal",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1120,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_5_forge_crystal",
+      "name": "凡尘五阶铸器玄晶",
+      "world": "human",
+      "tier": 5,
+      "tags": [
+        "metal",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_human_5_quench_dew",
+      "name": "凡尘五阶淬灵露",
+      "world": "human",
+      "tier": 5,
+      "tags": [
+        "metal",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6240,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_1_forge_crystal",
+      "name": "魔渊一阶铸器玄晶",
+      "world": "demon",
+      "tier": 1,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 19,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_1_quench_dew",
+      "name": "魔渊一阶淬灵露",
+      "world": "demon",
+      "tier": 1,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 15,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_3_forge_crystal",
+      "name": "魔渊三阶铸器玄晶",
+      "world": "demon",
+      "tier": 3,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 382,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_3_quench_dew",
+      "name": "魔渊三阶淬灵露",
+      "world": "demon",
+      "tier": 3,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 306,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_4_quench_dew",
+      "name": "魔渊四阶淬灵露",
+      "world": "demon",
+      "tier": 4,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1187,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_demon_5_forge_crystal",
+      "name": "魔渊五阶铸器玄晶",
+      "world": "demon",
+      "tier": 5,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8268,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_1_forge_crystal",
+      "name": "灵霄一阶铸器玄晶",
+      "world": "spirit",
+      "tier": 1,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 18,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_1_quench_dew",
+      "name": "灵霄一阶淬灵露",
+      "world": "spirit",
+      "tier": 1,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 14,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_2_forge_crystal",
+      "name": "灵霄二阶铸器玄晶",
+      "world": "spirit",
+      "tier": 2,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 60,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_2_quench_dew",
+      "name": "灵霄二阶淬灵露",
+      "world": "spirit",
+      "tier": 2,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 48,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_3_forge_crystal",
+      "name": "灵霄三阶铸器玄晶",
+      "world": "spirit",
+      "tier": 3,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 360,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_3_quench_dew",
+      "name": "灵霄三阶淬灵露",
+      "world": "spirit",
+      "tier": 3,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 288,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_4_forge_crystal",
+      "name": "灵霄四阶铸器玄晶",
+      "world": "spirit",
+      "tier": 4,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1400,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_4_quench_dew",
+      "name": "灵霄四阶淬灵露",
+      "world": "spirit",
+      "tier": 4,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1120,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_5_forge_crystal",
+      "name": "灵霄五阶铸器玄晶",
+      "world": "spirit",
+      "tier": 5,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_5_quench_dew",
+      "name": "灵霄五阶淬灵露",
+      "world": "spirit",
+      "tier": 5,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6240,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_7_quench_dew",
+      "name": "灵霄七阶淬灵露",
+      "world": "spirit",
+      "tier": 7,
+      "tags": [
+        "yang",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 208000,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_spirit_8_forge_crystal",
+      "name": "灵霄八阶铸器玄晶",
+      "world": "spirit",
+      "tier": 8,
+      "tags": [
+        "yang",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 900000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_1_forge_crystal",
+      "name": "真魔一阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 1,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 21,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_1_quench_dew",
+      "name": "真魔一阶淬灵露",
+      "world": "true_demon",
+      "tier": 1,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 17,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_2_forge_crystal",
+      "name": "真魔二阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 2,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 69,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_2_quench_dew",
+      "name": "真魔二阶淬灵露",
+      "world": "true_demon",
+      "tier": 2,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 55,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_3_forge_crystal",
+      "name": "真魔三阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 3,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 414,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_3_quench_dew",
+      "name": "真魔三阶淬灵露",
+      "world": "true_demon",
+      "tier": 3,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 331,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_4_forge_crystal",
+      "name": "真魔四阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 4,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1610,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_4_quench_dew",
+      "name": "真魔四阶淬灵露",
+      "world": "true_demon",
+      "tier": 4,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1288,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_5_forge_crystal",
+      "name": "真魔五阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 5,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8970,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_5_quench_dew",
+      "name": "真魔五阶淬灵露",
+      "world": "true_demon",
+      "tier": 5,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 7176,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_7_quench_dew",
+      "name": "真魔七阶淬灵露",
+      "world": "true_demon",
+      "tier": 7,
+      "tags": [
+        "fire",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 239200,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_true_demon_8_forge_crystal",
+      "name": "真魔八阶铸器玄晶",
+      "world": "true_demon",
+      "tier": 8,
+      "tags": [
+        "fire",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1035000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_1_forge_crystal",
+      "name": "百兽一阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 1,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 19,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_1_quench_dew",
+      "name": "百兽一阶淬灵露",
+      "world": "monster_realm",
+      "tier": 1,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 15,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_2_forge_crystal",
+      "name": "百兽二阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 2,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 62,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_2_quench_dew",
+      "name": "百兽二阶淬灵露",
+      "world": "monster_realm",
+      "tier": 2,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 50,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_4_quench_dew",
+      "name": "百兽四阶淬灵露",
+      "world": "monster_realm",
+      "tier": 4,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1165,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_5_forge_crystal",
+      "name": "百兽五阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 5,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8112,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_6_forge_crystal",
+      "name": "百兽六阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 6,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 70720,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_6_quench_dew",
+      "name": "百兽六阶淬灵露",
+      "world": "monster_realm",
+      "tier": 6,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 56576,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_7_forge_crystal",
+      "name": "百兽七阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 7,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 270400,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_7_quench_dew",
+      "name": "百兽七阶淬灵露",
+      "world": "monster_realm",
+      "tier": 7,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 216320,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_8_forge_crystal",
+      "name": "百兽八阶铸器玄晶",
+      "world": "monster_realm",
+      "tier": 8,
+      "tags": [
+        "wood",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 936000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_monster_realm_8_quench_dew",
+      "name": "百兽八阶淬灵露",
+      "world": "monster_realm",
+      "tier": 8,
+      "tags": [
+        "wood",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 748800,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_1_forge_crystal",
+      "name": "幻冥一阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 1,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 19,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_1_quench_dew",
+      "name": "幻冥一阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 1,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 15,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_2_forge_crystal",
+      "name": "幻冥二阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 2,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 65,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_2_quench_dew",
+      "name": "幻冥二阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 2,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 52,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_3_forge_crystal",
+      "name": "幻冥三阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 3,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 389,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_3_quench_dew",
+      "name": "幻冥三阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 3,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 311,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_4_forge_crystal",
+      "name": "幻冥四阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 4,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1512,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_4_quench_dew",
+      "name": "幻冥四阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 4,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1210,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_6_quench_dew",
+      "name": "幻冥六阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 6,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 58752,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_7_forge_crystal",
+      "name": "幻冥七阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 7,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 280800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_8_forge_crystal",
+      "name": "幻冥八阶铸器玄晶",
+      "world": "phantom_underworld",
+      "tier": 8,
+      "tags": [
+        "water",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 972000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_phantom_underworld_8_quench_dew",
+      "name": "幻冥八阶淬灵露",
+      "world": "phantom_underworld",
+      "tier": 8,
+      "tags": [
+        "water",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 777600,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_1_forge_crystal",
+      "name": "阴司一阶铸器玄晶",
+      "world": "hell",
+      "tier": 1,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 20,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_1_quench_dew",
+      "name": "阴司一阶淬灵露",
+      "world": "hell",
+      "tier": 1,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 16,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_2_forge_crystal",
+      "name": "阴司二阶铸器玄晶",
+      "world": "hell",
+      "tier": 2,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 66,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_2_quench_dew",
+      "name": "阴司二阶淬灵露",
+      "world": "hell",
+      "tier": 2,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 53,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_4_forge_crystal",
+      "name": "阴司四阶铸器玄晶",
+      "world": "hell",
+      "tier": 4,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1540,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_4_quench_dew",
+      "name": "阴司四阶淬灵露",
+      "world": "hell",
+      "tier": 4,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 1232,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_5_quench_dew",
+      "name": "阴司五阶淬灵露",
+      "world": "hell",
+      "tier": 5,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6864,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_6_forge_crystal",
+      "name": "阴司六阶铸器玄晶",
+      "world": "hell",
+      "tier": 6,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 74800,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_7_forge_crystal",
+      "name": "阴司七阶铸器玄晶",
+      "world": "hell",
+      "tier": 7,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 286000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_7_quench_dew",
+      "name": "阴司七阶淬灵露",
+      "world": "hell",
+      "tier": 7,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 228800,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_8_forge_crystal",
+      "name": "阴司八阶铸器玄晶",
+      "world": "hell",
+      "tier": 8,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 990000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "base_hell_8_quench_dew",
+      "name": "阴司八阶淬灵露",
+      "world": "hell",
+      "tier": 8,
+      "tags": [
+        "yin",
+        "water"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 792000,
+      "role_effects": {
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.02
+            }
+          },
+          "description": "淬灵定形：续航提高2%。"
+        }
+      }
+    }
   ],
   "spirit_plants": [
-    {"plant_id":"mystic_heaven_vine","name":"枯荣藤","roles":["primary","secondary"],"allow_duplicate_type":false,"role_effects":{"primary":{"design_multipliers":{"max_hp":1.18,"max_mp":1.18},"description":"主材：枯荣相济，HP与MP设计值各提高18%。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"sustain":1.04}},"description":"辅材：续航提高4%。"}}},
-    {"plant_id":"golden_thunder_bamboo","name":"雷音竹","roles":["primary","secondary","quench"],"allow_duplicate_type":true,"role_effects":{"primary":{"design_multipliers":{"combat_power":1.20},"description":"主材：战力设计值提高20%。"},"secondary":{"combat_effect":{"player_stat_multipliers":{"mobility":1.03}},"description":"辅材：身法提高3%。"},"quench":{"combat_effect":{"player_stat_multipliers":{"breach":1.04}},"description":"淬火：破法提高4%。"}}},
-    {"plant_id":"nebula_manjushaka","name":"渡劫花","roles":["secondary","quench"],"allow_duplicate_type":false,"role_effects":{"secondary":{"special_stats":{"tribulation_reduction":0.008},"description":"辅材：渡劫减伤 +0.8%。"},"quench":{"special_stats":{"tribulation_reduction":0.015},"description":"淬火：渡劫减伤 +1.5%。"}}},
-    {"plant_id":"heaven_heart_lotus","name":"天心莲","roles":["primary","secondary"],"allow_duplicate_type":true,"role_effects":{"primary":{"design_multipliers":{"opportunity_efficiency":1.15,"divine_sense_efficiency":1.15},"description":"主材：机缘与神识设计值提高15%。"},"secondary":{"special_stats":{"opportunity_efficiency":0.008},"description":"辅材：机缘效率 +0.8%。"}}}
+    {
+      "plant_id": "mystic_heaven_vine",
+      "name": "枯荣藤",
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": false,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_hp": 1.18,
+            "max_mp": 1.18
+          },
+          "description": "主材：枯荣相济，HP与MP设计值各提高18%。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "辅材：续航提高4%。"
+        }
+      }
+    },
+    {
+      "plant_id": "golden_thunder_bamboo",
+      "name": "雷音竹",
+      "roles": [
+        "primary",
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": true,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2
+          },
+          "description": "主材：战力设计值提高20%。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.03
+            }
+          },
+          "description": "辅材：身法提高3%。"
+        },
+        "quench": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "淬火：破法提高4%。"
+        }
+      }
+    },
+    {
+      "plant_id": "nebula_manjushaka",
+      "name": "渡劫花",
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "role_effects": {
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.008
+          },
+          "description": "辅材：渡劫减伤 +0.8%。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.015
+          },
+          "description": "淬火：渡劫减伤 +1.5%。"
+        }
+      }
+    },
+    {
+      "plant_id": "heaven_heart_lotus",
+      "name": "天心莲",
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "opportunity_efficiency": 1.15,
+            "divine_sense_efficiency": 1.15
+          },
+          "description": "主材：机缘与神识设计值提高15%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "opportunity_efficiency": 0.008
+          },
+          "description": "辅材：机缘效率 +0.8%。"
+        }
+      }
+    }
   ]
 }
