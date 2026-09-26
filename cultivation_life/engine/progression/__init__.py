@@ -1,1 +1,1 @@
-"""Breakthrough and trial resolution with the existing cultivation rules."""
+"""Engine functions with explicit dependency contracts."""

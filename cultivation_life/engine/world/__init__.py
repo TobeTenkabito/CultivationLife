@@ -1,1 +1,1 @@
-"""NPC, relationship, faction and hostility updates for the existing world state."""
+"""Engine functions with explicit dependency contracts."""

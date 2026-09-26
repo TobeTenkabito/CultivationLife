@@ -1,1 +1,1 @@
-"""Player operations, attached to GameEngine without changing their behavior."""
+"""Engine functions with explicit dependency contracts."""
