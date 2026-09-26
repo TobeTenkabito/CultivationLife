@@ -26,6 +26,7 @@ from .rules import QI_SOURCE_NAMES
 from .runtime import persistence_root
 from .runtime_config import load_runtime_config
 from .version import BASE_GAME_VERSION, base_game_metadata
+from .ui_preferences import load_ui_preferences, write_ui_preferences
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -67,6 +68,8 @@ class Handler(BaseHTTPRequestHandler):
                     "extensions": EXTENSION_REPORT,
                     "monster_species": MONSTER_SPECIES,
                 })
+            elif path == "/api/ui-preferences":
+                self._json(load_ui_preferences(PERSISTENCE_ROOT))
             elif path == "/api/games":
                 self._json({"games": ENGINE.list_games()})
             elif path == "/api/achievements":
@@ -83,6 +86,9 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             payload = self._body()
+            if path == "/api/ui-preferences":
+                self._json(write_ui_preferences(PERSISTENCE_ROOT, payload))
+                return
             if path.startswith("/api/extensions/"):
                 package_id = unquote(path.removeprefix("/api/extensions/").strip("/"))
                 if not isinstance(payload.get("enabled"), bool):

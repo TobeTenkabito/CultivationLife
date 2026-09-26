@@ -1,0 +1,42 @@
+:root[data-theme=d]{color-scheme:dark;--background:#201E1C;--surface:#2C2925;--paper:#2C2925;--ink:#EFE5CF;--muted:#C1B4A0;--line:#64513D;--pine:#DAB677;--pine-dark:#DAB677;--cinnabar:#E39C82;--gold:#DAB677;--tint:#393025;--track:#64513D;--on-accent:#2B211A;--info:#80BCD0;--violet:#B7A3D8;--rose:#D6A0BA;--radius:0px;--dock-radius:4px;}
+[data-theme=d] .in-game #action-card{padding:0;border:0;background:none}
+[data-theme=d] .in-game #player-hud{display:block;margin-bottom:14px}
+[data-theme=d] .in-game .hud-identity{padding:10px 30px;min-height:60px;background:var(--tint);border:1px solid var(--line);outline:1px solid var(--line);outline-offset:-6px;gap:22px}
+[data-theme=d] .in-game .hud-identity-copy{display:flex;flex-wrap:wrap;gap:22px;align-items:center}
+[data-theme=d] .in-game .hud-identity-copy strong,[data-theme=d] .in-game .hud-identity-copy b{font:25px var(--serif);color:var(--gold)}
+[data-theme=d] .in-game .hud-identity-copy b:before{content:'·';padding-right:20px}
+[data-theme=d] .in-game .hud-identity-copy>span{gap:20px}[data-theme=d] .in-game #hud-power{margin-left:auto;color:var(--ink);font-size:15px}
+[data-theme=d] .in-game .hud-details-label{padding:8px 35px;border-radius:0;white-space:nowrap;background:var(--paper)}
+[data-theme=d] .in-game .action-navigation{margin:0 0 24px}[data-theme=d] .in-game #action-card>.hud-resources{gap:20px;margin-bottom:20px}
+[data-theme=d] .in-game .hud-resource{padding:0 26px;gap:12px 6px}
+[data-theme=d] .in-game .hud-track{height:9px;border-radius:0;background:repeating-linear-gradient(90deg,var(--tint) 0 calc(10% - 3px),transparent calc(10% - 3px) 10%);outline:1px solid var(--line);outline-offset:3px}
+[data-theme=d] .in-game .hud-track i{mask-image:repeating-linear-gradient(90deg,#000 0 calc(10% - 3px),transparent calc(10% - 3px) 10%)}
+[data-theme=d] .in-game .primary-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+[data-theme=d] .in-game #cultivation-core{grid-column:auto;grid-row:auto}
+[data-theme=d] .in-game .primary-actions>button,[data-theme=d] .in-game #cultivate-action{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;padding:27px 26px 18px;min-height:250px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:0;text-align:center;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px)}
+[data-theme=d] .in-game .primary-actions button:before{content:'';position:absolute;left:16px;right:16px;top:13px;border-top:1px solid var(--gold);opacity:.5}
+[data-theme=d] .in-game .primary-actions button .action-emblem{position:static;border:0;border-radius:0;background:var(--tint);outline:1px solid var(--line);width:44px;height:44px;margin:3px 0 13px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);font-size:24px;flex-shrink:0}
+[data-theme=d] .in-game .primary-actions button b,[data-theme=d] .in-game #cultivate-action b{font:29px var(--serif);margin:0}
+[data-theme=d] .in-game .primary-actions button>span,[data-theme=d] .in-game #cultivate-action>span{color:var(--muted);font:14px var(--sans);margin:0;line-height:1.4}
+[data-theme=d] .in-game .primary-actions button .action-duration{display:block;font:12px var(--sans)}
+[data-theme=d] .in-game .primary-actions button .action-cta{display:block;width:100%;padding:8px 10px;border:1px solid var(--line);font:18px var(--serif);margin-top:auto;border-radius:0;background:transparent;color:var(--ink)}
+[data-theme=d] .in-game #cultivate-action .action-cta{background:var(--gold);color:var(--on-accent);border-color:var(--gold)}
+[data-theme=d] .in-game .secondary-actions{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);background:var(--paper);padding:16px 14px;gap:0}
+[data-theme=d] .in-game .secondary-actions button{display:flex;align-items:center;gap:14px;padding:0 16px 0 0;min-height:42px;background:none;border:0;border-radius:0;box-shadow:none;text-align:left;color:var(--ink)}
+[data-theme=d] .in-game .secondary-actions button+button{padding-left:16px;border-left:1px solid var(--line)}
+[data-theme=d] .in-game .secondary-actions .action-emblem{flex-shrink:0;width:42px;height:42px;font-size:22px}[data-theme=d] .in-game .secondary-actions b{font:20px var(--serif);white-space:nowrap}[data-theme=d] .in-game .secondary-actions span{font:13px var(--sans);color:var(--muted)}[data-theme=d] .in-game .secondary-actions .action-cta{margin-left:auto;font-size:16px}
+[data-theme=d] .in-game .journal-area{padding:0;border:0;background:none;gap:20px;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr)}
+[data-theme=d] .in-game .history-card{padding:22px 26px;border:1px solid var(--line);background:var(--paper)}
+[data-theme=d] .in-game .record{grid-template-columns:72px 1fr;gap:18px;min-height:62px;padding:14px 0;border-top:1px solid var(--line)}
+[data-theme=d] .in-game .record .story{display:flex;gap:20px;padding:0;border:0;align-items:baseline}[data-theme=d] .in-game .record h3{font-size:12px;min-width:48px;margin:0}[data-theme=d] .in-game .record p{font-size:14px}[data-theme=d] .in-game .record .year{font:16px var(--sans);color:var(--gold)}[data-theme=d] .in-game .record:before,[data-theme=d] .in-game .record .story:before{display:none}
+[data-theme=d] .in-game .journal-letter{position:relative;padding:26px;margin:0;background:var(--paper);border:1px solid var(--line);min-height:278px}
+[data-theme=d] .in-game .letter-seal{display:grid;place-items:center;position:absolute;right:26px;top:20px;width:40px;height:40px;background:#984b39;color:#fff0d9;font:23px var(--serif)}[data-theme=d] .in-game .letter-copy h3{margin-top:25px}[data-theme=d] .in-game .journal-letter>button{border-radius:0}
+[data-theme=d] .in-game .theme-feedback-active:after{content:'道';position:absolute;right:24px;top:20px;border:double 4px var(--gold);padding:4px 10px;color:var(--gold);pointer-events:none;animation:ink-seal .9s ease both}
+@media(max-width:1100px){[data-theme=d] .in-game .hud-identity{padding:14px 20px}[data-theme=d] .in-game #hud-power{margin-left:0;font-size:13px}[data-theme=d] .in-game .hud-resource{padding:0 12px}[data-theme=d] .in-game .primary-actions>button,[data-theme=d] .in-game #cultivate-action{padding:26px 16px 18px}[data-theme=d] .in-game .secondary-actions span{display:none}[data-theme=d] .in-game .primary-actions button b,[data-theme=d] .in-game #cultivate-action b{font-size:25px}}
+@media(max-width:800px){[data-theme=d] .in-game .hud-identity{gap:12px}[data-theme=d] .in-game .hud-identity-copy{gap:6px}[data-theme=d] .in-game .hud-identity-copy>span{gap:10px}[data-theme=d] .in-game .hud-identity-copy strong,[data-theme=d] .in-game .hud-identity-copy b{font-size:21px}[data-theme=d] .in-game .hud-details-label{padding:8px 12px;font-size:11px}[data-theme=d] .in-game .primary-actions{gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}[data-theme=d] .in-game .primary-actions>button,[data-theme=d] .in-game #cultivate-action{min-height:270px;padding:24px 8px 14px;gap:10px}[data-theme=d] .in-game .primary-actions button b,[data-theme=d] .in-game #cultivate-action b{font-size:22px;line-height:1.35}[data-theme=d] .in-game .primary-actions button>span,[data-theme=d] .in-game #cultivate-action>span{font-size:11px}[data-theme=d] .in-game .primary-actions button .action-cta{font-size:13px;padding:10px 2px}[data-theme=d] .in-game .hud-resource{padding:0 6px}[data-theme=d] .in-game #action-card>.hud-resources{gap:10px}[data-theme=d] .in-game .secondary-actions button{gap:8px;padding-right:8px}[data-theme=d] .in-game .secondary-actions button+button{padding-left:8px}[data-theme=d] .in-game .secondary-actions b{font-size:17px}[data-theme=d] .in-game .secondary-actions .action-emblem{width:30px;height:30px;font-size:20px}[data-theme=d] .in-game .journal-area{grid-template-columns:1fr}[data-theme=d] .in-game .record .story{display:block}}
+[data-theme=d] .in-game #cultivate-action .action-emblem{position:static;margin:3px 0 13px}
+[data-theme=d] .in-game #cultivate-action .action-cta{border-radius:0}
+[data-theme=d] .in-game .hud-track{mask-image:repeating-linear-gradient(90deg,#000 0 calc(10% - 3px),transparent calc(10% - 3px) 10%)}
+[data-theme=d] .in-game .hud-track i{mask-image:none!important}
+[data-theme=d] .in-game .primary-actions button .action-emblem,[data-theme=d] .in-game #cultivate-action .action-emblem{align-self:center;width:60px;height:60px;margin:0}
+[data-theme=d] .in-game .theme-feedback-active:after{display:block}
