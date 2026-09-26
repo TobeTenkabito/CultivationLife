@@ -1,0 +1,70 @@
+plugins {
+    id 'com.android.application'
+    id 'com.chaquo.python'
+}
+
+def gameRoot = rootProject.projectDir.parentFile
+def gameVersion = (new File(gameRoot, 'cultivation_life/version.py').text =~ /BASE_GAME_VERSION = "([^"]+)"/)[0][1]
+
+android {
+    namespace 'com.fusheng.wendao'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.fusheng.wendao'
+        minSdk 31
+        targetSdk 31
+        versionCode 1
+        versionName "${gameVersion}-android.1"
+        testInstrumentationRunner 'com.fusheng.wendao.ReleaseSmokeInstrumentation'
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+    }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('CULTIVATION_KEYSTORE') ?: '../../private-missing-keystore')
+            storePassword System.getenv('CULTIVATION_KEYSTORE_PASSWORD')
+            keyAlias 'cultivation-life'
+            keyPassword System.getenv('CULTIVATION_KEYSTORE_PASSWORD')
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
+        release { signingConfig signingConfigs.release; minifyEnabled false }
+    }
+    buildFeatures { buildConfig true }
+    testBuildType project.findProperty('testBuildType') ?: 'debug'
+    // Deliberately distributed as an Android 12 APK, not submitted to Google Play.
+    lint { disable 'ExpiredTargetSdkVersion' }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/gameAssets')
+}
+
+chaquopy {
+    defaultConfig {
+        version = '3.13'
+        buildPython(System.getenv('CULTIVATION_BUILD_PYTHON') ?: 'python')
+    }
+    sourceSets.main { srcDir layout.buildDirectory.dir('generated/gamePython') }
+}
+
+def copyGamePython = tasks.register('copyGamePython', Sync) {
+    from(new File(gameRoot, 'cultivation_life')) { into 'cultivation_life'; include '**/*.py' }
+    into layout.buildDirectory.dir('generated/gamePython')
+}
+def prepareGameAssets = tasks.register('prepareGameAssets', Exec) {
+    inputs.files(fileTree(new File(gameRoot, 'web')), fileTree(new File(gameRoot, 'content')),
+                 fileTree(new File(gameRoot, 'dlc')), fileTree('src/main/mobile'),
+                 new File(gameRoot, 'scripts/prepare_android_assets.py'), new File(gameRoot, 'scripts/android_css.py'))
+    outputs.dir layout.buildDirectory.dir('generated/gameAssets')
+    commandLine(System.getenv('CULTIVATION_BUILD_PYTHON') ?: 'python',
+                new File(gameRoot, 'scripts/prepare_android_assets.py'),
+                layout.buildDirectory.dir('generated/gameAssets').get().asFile)
+}
+tasks.configureEach {
+    if (name.startsWith('merge') && name.endsWith('PythonSources')) dependsOn copyGamePython
+    if (name == 'preBuild' || name.startsWith('generate') && name.endsWith('PythonAssets')) {
+        dependsOn copyGamePython, prepareGameAssets
+    }
+}

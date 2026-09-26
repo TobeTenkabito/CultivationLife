@@ -1,0 +1,37 @@
+@font-face{font-family:'Wendao Serif';src:url('/android/fonts/WendaoSerif.woff2') format('woff2');font-weight:200 900;font-display:swap}
+:root{--serif:'Wendao Serif',serif;--sans:'Noto Sans CJK SC',Roboto,sans-serif}
+body{font-family:var(--serif);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+button,input,select,textarea{touch-action:manipulation}
+button:focus-visible{outline-offset:1px}
+.android-restart{display:block;margin:12px 0 0;min-height:44px}
+.theme-choice-art{border-color:currentColor}
+.android-license{font-size:12px;color:var(--muted);margin-top:16px}
+.android-license summary{min-height:44px;display:flex;align-items:center}
+.android-license pre{white-space:pre-wrap;font:12px/1.6 var(--sans);max-height:240px;overflow-y:auto}
+@media(max-width:800px){
+  input,select,textarea{font-size:16px;min-height:44px}
+  button,.theme-choice{min-height:44px}
+  .strategy-dock button{min-height:48px;min-width:48px}
+  .in-game .brand{padding-right:0}
+  .in-game .action-navigation{flex-direction:column;align-items:stretch;gap:8px;height:auto}
+  .in-game .action-tabs{width:100%;justify-content:space-between;gap:8px;flex:none}
+  .in-game .action-tabs button{flex:1;font-size:12px;white-space:normal}
+  .in-game .action-units{position:static;align-self:flex-end;margin-left:0}
+  .in-game .action-units button{min-width:40px}
+  .in-game .action-units input{min-width:34px}
+  .strategy-dock.settings-dock{bottom:158px}
+  .android-panel-open .strategy-dock.settings-dock{display:none!important}
+  .utility-panel{max-height:calc(100vh - 170px)!important;max-height:calc(100dvh - 170px)!important;overscroll-behavior:contain}
+  .utility-panel>.section-title{position:sticky;top:-1px;z-index:5;background:var(--paper);padding-top:10px;padding-bottom:10px}
+  .utility-panel>.section-title button{min-width:44px}
+  .appearance-dialog{max-width:calc(100vw - 24px);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)}
+  .hud-identity-copy small,.hud-details-label,.hud-meter-heading,.hud-values small,.theme-letter small{font-size:12px}
+  .android-keyboard .strategy-dock{display:none!important}
+  .android-keyboard .utility-panel{max-height:calc(100vh - 24px)!important;max-height:calc(100dvh - 24px)!important}
+  .save-list{max-height:340px}
+}
+@media(max-width:380px){
+  .in-game .shell{width:calc(100% - 24px)}
+  .hud-resources{gap:12px}
+  .hud-values strong{font-size:20px}
+}

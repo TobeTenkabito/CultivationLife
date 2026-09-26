@@ -10,3 +10,8 @@ dist/game_config.txt
 data/ui_preferences.json
 data/.ui-preferences-*.tmp
 design/
+android/.gradle/
+android/**/build/
+android/local.properties
+*.keystore
+*.jks

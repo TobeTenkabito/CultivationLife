@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import copy
 import math
+import os
 import sys
 from dataclasses import dataclass
 from itertools import combinations
@@ -1624,6 +1625,8 @@ class ContentRegistry:
 
 
 def default_content_root() -> Path:
+    if os.environ.get("CULTIVATION_APP_ROOT"):
+        return Path(os.environ["CULTIVATION_APP_ROOT"]) / "content"
     source_root = Path(__file__).resolve().parent.parent
     if getattr(sys, "frozen", False):
         editable_content = Path(sys.executable).resolve().parent / "content"
@@ -1634,6 +1637,8 @@ def default_content_root() -> Path:
 
 
 def default_extension_root() -> Path:
+    if os.environ.get("CULTIVATION_APP_ROOT"):
+        return Path(os.environ["CULTIVATION_APP_ROOT"])
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parent.parent
