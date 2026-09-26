@@ -37,6 +37,8 @@ from ..system.possession_system import (
 class EnginePersistenceMixin:
     def _load(self, game_id: str) -> GameState:
         game = self.store.load(game_id)
+        if self._ensure_merchant(game):
+            self.store.save(game)
         conversion_migrated = False
         monster_lifespan_migrated = False
         sense_baseline_migrated = False

@@ -660,3 +660,22 @@
 .sage-worship-card strong { margin-top:auto; color:#315d68; font-size:10px; line-height:1.45; }
 .sage-worship-card.active strong { color:#f3dfad; }
 @media(max-width:800px){.sage-panel{width:calc(100vw - 20px);padding:28px 18px}.sage-doctrine-list,.sage-combo-grid,.sage-worship-list,.sage-manual-list,.sage-classic-list,.sage-outer-list{grid-template-columns:1fr}.sage-subheading,.sage-founding-submit{align-items:stretch;flex-direction:column}.sage-subheading>small{text-align:left}.sage-founding-submit{display:grid}}
+.merchant-panel { padding: 22px; }
+.merchant-panel .section-title { position: sticky; top: -22px; background: #f8f5e8; z-index: 2; padding: 12px 0; }
+.merchant-panel p { line-height: 1.7; overflow-wrap: anywhere; }
+.merchant-panel details { margin: 12px 0; }
+.merchant-panel summary { cursor: pointer; font-weight: 600; padding: 7px 0; }
+.merchant-alliance, .merchant-active, .merchant-order { border: 1px solid #c8b994; border-radius: 9px; margin: 16px 0; padding: 14px; }
+.merchant-membership, .merchant-quote { background: #e9ddc4; padding: 12px; border-radius: 7px; }
+.merchant-active { background: #eee5d2; }
+.merchant-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.merchant-task { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; border-bottom: 1px solid #d8cbb1; padding: 10px 0; }
+.merchant-task p { grid-column: 1; font-size: .86rem; margin: 0; }
+.merchant-task button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.merchant-post { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.merchant-post label { display: grid; gap: 4px; }
+.merchant-post input, .merchant-post select { width: 100%; min-width: 0; }
+.merchant-post p { grid-column: 1 / -1; }
+.merchant-panel progress { width: 100%; height: 18px; accent-color: #877340; }
+.strategy-dock .merchant-notice { box-shadow: 0 0 0 2px #bc8d32; }
+@media (max-width: 650px) { .merchant-post { grid-template-columns: 1fr; } }

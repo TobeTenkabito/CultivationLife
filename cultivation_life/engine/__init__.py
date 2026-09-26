@@ -103,6 +103,7 @@ from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin, gender_name
 from ..system.guixu_system import GuixuSystemMixin
 from ..system.tianji_system import TianjiSystemMixin
+from ..system.merchant_system import MerchantSystemMixin
 from ..system.possession_system import (
     advance_player_age, current_body_age, migrate_possession_timeline,
 )
@@ -160,7 +161,7 @@ def _include_runtime_methods(*components: type):
     EnginePresentationMixin,
     EnginePersistenceMixin,
 )
-class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -1441,6 +1442,8 @@ class GameEngine(TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, Concubine
         player = game.player
         if not player.alive or game.pending_event or player.imprisonment:
             raise ValueError("当前状态无法跨越界面")
+        if (player.sealed_cultivation or {}).get("merchant_passage"):
+            raise ValueError("逆灵通道的访客封印须经商盟通道返界解除")
         pairs = {
             "spirit": "human", "true_demon": "demon", "celestial": "spirit",
             "asura": "true_demon", "nether": "phantom_underworld", "hell": "human",

@@ -113,21 +113,25 @@ class NatalArtifactSystemMixin:
         return coefficient * steps * steps * steps
 
     def _natal_refine_cost(self, level: int, game: GameState | None = None) -> int:
-        base_cost = int(self._natal_artifact_config()["manual_refine_stone_base"])
+        power = float(self._natal_artifact_config()["manual_refine_stone_base"])
         if game and game.natal_artifact:
             crafted = self._crafted_natal_source(game)
             if crafted:
                 stats = crafted.get("actual_stats", {})
-                power, hp, mp = (max(0.0, float(stats.get(key, 0))) for key in ("combat_power", "max_hp", "max_mp"))
-                if crafted.get("tianji"):
-                    hp = mp = 0.0  # Persistent buff effects are not raw base attributes.
+                power = max(0.0, float(stats.get("combat_power", 0)))
             else:
                 item = ITEM_CATALOG[str(game.natal_artifact["item_id"])]
-                power, hp, mp = item.combat_bonus, item.hp_bonus, item.mp_bonus
-            # Price raw permanent stats, excluding level growth, sockets, buffs
-            # and temporary world suppression. Humble artifacts retain the floor.
-            base_cost = max(base_cost, math.ceil((power + (hp + mp) * .25) / 30))
-        return base_cost * max(1, int(level))
+                power = max(0.0, item.combat_bonus)
+        level = max(1, int(level))
+        # Lv.1 is priced solely by immutable, unsuppressed base combat power.
+        # Later levels also price the cubic growth, so a cheap base cannot
+        # become an increasingly efficient source of effectively free power.
+        if level == 1:
+            return max(1, math.ceil(power))
+        current = power * self._natal_level_scale(level) + self._natal_flat_combat_growth(level)
+        gain = (power * (self._natal_level_scale(level + 1) - self._natal_level_scale(level))
+                + self._natal_flat_combat_growth(level + 1) - self._natal_flat_combat_growth(level))
+        return max(1, math.ceil(max(current, gain * 4) * level))
 
     def _natal_level_required(self, level: int) -> int:
         return int(self._natal_artifact_config()["experience_base"]) * max(1, level)
@@ -285,11 +289,10 @@ class NatalArtifactSystemMixin:
         stones = max(0, int(stone_item.quantity)) if stone_item else 0
         level = max(1, int(artifact.get("level", 1)))
         experience = max(0, int(artifact.get("experience", 0)))
-        base_cost = self._natal_refine_cost(1, game)
         refine_xp = int(self._natal_artifact_config()["manual_refine_xp"])
         count = total_cost = 0
         while True:
-            cost = base_cost * level
+            cost = self._natal_refine_cost(level, game)
             affordable = stones // cost
             if affordable <= 0:
                 break
@@ -524,6 +527,7 @@ class NatalArtifactSystemMixin:
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
             "next_slot_level": (unlocked + 1) * slot_interval,
             "refine_cost": self._natal_refine_cost(level, game),
+            "pricing_description": "一级每次消耗等同法宝原始基础战力；后续按当前基础培养战力、下级增幅与等级递增。镶嵌、临时增益和界面压制不参与定价。",
             "refine_all_count": refine_all_count, "refine_all_cost": refine_all_cost,
             "can_refine_all": refine_all_count > 0,
             "can_refine": has_item(player, "spirit_stone", self._natal_refine_cost(level, game)),

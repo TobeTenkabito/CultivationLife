@@ -765,6 +765,7 @@ class GameState:
     auction_state: dict[str, Any] = field(default_factory=dict)
     exchange_state: dict[str, Any] = field(default_factory=dict)
     exchange_sequence: int = 0
+    merchant_state: dict[str, Any] = field(default_factory=dict)
     auction_sequence: int = 0
     debug_world_news: bool = False
     active_trial: dict[str, Any] | None = None
@@ -831,6 +832,7 @@ class GameState:
             "auction_state": self.auction_state,
             "exchange_state": self.exchange_state,
             "exchange_sequence": self.exchange_sequence,
+            "merchant_state": self.merchant_state,
             "auction_sequence": self.auction_sequence,
             "debug_world_news": self.debug_world_news,
             "active_trial": self.active_trial,
@@ -882,6 +884,7 @@ class GameState:
             auction_state=dict(value.get("auction_state", {})),
             exchange_state=dict(value.get("exchange_state", {})),
             exchange_sequence=int(value.get("exchange_sequence", 0)),
+            merchant_state=copy.deepcopy(value.get("merchant_state", {})),
             auction_sequence=int(value.get("auction_sequence", 0)),
             debug_world_news=bool(value.get("debug_world_news", False)),
             active_trial=value.get("active_trial"),

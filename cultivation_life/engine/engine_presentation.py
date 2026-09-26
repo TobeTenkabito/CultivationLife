@@ -206,6 +206,7 @@ class EnginePresentationMixin:
             "market": self._public_market(game),
             "auction_system": self._public_auction(game),
             "exchange_system": self._public_exchange(game),
+            "merchant_system": self._public_merchant(game),
             "spirit_field": self._public_spirit_field(game.player),
             "art_skills": self._public_art_skills(game.player),
             "map": self._public_map_with_ghost_parade(game, location_id),
