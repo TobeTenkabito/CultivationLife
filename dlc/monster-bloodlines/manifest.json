@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "万妖归宗：血脉进化",
-  "version": "4.13.0",
+  "version": "4.14.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,
   "requires": [],
-  "description": "界面与地图迁入本体；血脉进化、寻祖剧情与自成血脉等专属系统保持独立。"
+  "description": "界面与地图迁入本体；血脉进化、寻祖剧情与自成血脉等专属系统保持独立。 通用物品与功法定义归入本体，保留专属功能和剧情。"
 }

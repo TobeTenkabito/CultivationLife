@@ -48,7 +48,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.4.0")
+        self.assertEqual(manifest["version"], "2.5.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
@@ -235,13 +235,17 @@ class GuixuTideTests(unittest.TestCase):
 
     def test_guixu_validator_rejects_any_declarative_side_channel(self):
         documents = copy.deepcopy(CONTENT_DOCUMENTS)
-        leaked_id = next(iter(GUIXU_EXCLUSIVE_ITEM_IDS))
+        catalog = copy.deepcopy(GUIXU_TIDE_CONTENT)
+        entry = next(row for row in catalog['dungeons'][0]['treasure_pool'] if row['kind']=='item')
+        entry['exclusive_source'] = 'guixu_tide'
+        leaked_id = entry['content_id']
+        documents['market.json']['goods'] = [row for row in documents['market.json']['goods'] if row['content_id'] != leaked_id]
         documents["illegal_events.json"] = {
             "schema_version": 1,
             "events": [{"id": "LEAK", "choices": [{"effects": [{"item_id": leaked_id}]}]}],
         }
         with self.assertRaisesRegex(ContentError, "不得被其他内容表引用"):
-            validate_guixu_catalog(GUIXU_TIDE_CONTENT, CONTENT, documents)
+            validate_guixu_catalog(catalog, CONTENT, documents)
 
     def test_enter_search_and_close_permanently_depletes_pool(self):
         game_id, dungeon = self._open_human_dungeon()

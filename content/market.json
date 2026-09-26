@@ -1,374 +1,7183 @@
-{"schema_version":1,"settings":{"offer_count":6,"material_offer_count":6,"next_tier_chance":0.02,"price_multiplier":[0.9,1.1],"commission_stones":{"1":[2,5],"2":[8,16],"3":[28,55],"4":[110,220],"5":[420,760],"6":[1800,3200],"7":[9000,16000],"8":[45000,80000],"9":[260000,480000],"10":[1500000,2800000],"11":[9000000,16000000],"12":[52000000,90000000]}},"goods":[
-{"world":"human","kind":"item","content_id":"qi_gathering_bead","tier":1,"price":4},
-{"world":"human","kind":"item","content_id":"iron_skin_talisman","tier":1,"price":5},
-{"world":"human","kind":"item","content_id":"cloudstep_boots","tier":1,"price":6},
-{"world":"human","kind":"item","content_id":"foundation_pill","tier":1,"price":12},
-{"world":"human","kind":"item","content_id":"foundation_dew","tier":2,"price":22},
-{"world":"human","kind":"item","content_id":"earth_vein_essence","tier":2,"price":28},
-{"world":"human","kind":"item","content_id":"sea_of_qi_jade","tier":2,"price":30},
-{"world":"human","kind":"item","content_id":"formation_plate","tier":2,"price":36},
-{"world":"human","kind":"item","content_id":"true_origin_pill","tier":2,"price":38},
-{"world":"human","kind":"item","content_id":"condensing_spirit_pill","tier":2,"price":75},
-{"world":"human","kind":"item","content_id":"dust_settling_pill","tier":2,"price":75},
-{"world":"human","kind":"item","content_id":"golden_core_dew","tier":3,"price":95},
-{"world":"human","kind":"item","content_id":"dragon_blood_crystal","tier":3,"price":120},
-{"world":"human","kind":"item","content_id":"soul_spring","tier":3,"price":125},
-{"world":"human","kind":"item","content_id":"starfall_blade","tier":3,"price":150},
-{"world":"human","kind":"item","content_id":"star_pattern_copper","tier":3,"price":260},
-{"world":"human","kind":"item","content_id":"spirit_jade_sand","tier":3,"price":290},
-{"world":"human","kind":"item","content_id":"marrow_cleansing_pill","tier":3,"price":180},
-{"world":"human","kind":"item","content_id":"nine_curve_ginseng","tier":3,"price":430},
-{"world":"human","kind":"item","content_id":"repair_sky_pill","tier":3,"price":430},
-{"world":"human","kind":"item","content_id":"nascent_incense","tier":4,"price":520},
-{"world":"human","kind":"item","content_id":"phoenix_marrow","tier":4,"price":650},
-{"world":"human","kind":"item","content_id":"void_soul_crystal","tier":4,"price":680},
-{"world":"human","kind":"item","content_id":"mountain_seal","tier":4,"price":820},
-{"world":"human","kind":"item","content_id":"geng_essence","tier":4,"price":1250},
-{"world":"human","kind":"item","content_id":"nascent_flame_crystal","tier":4,"price":1600},
-{"world":"human","kind":"item","content_id":"heaven_origin_pill","tier":4,"price":900},
-{"world":"human","kind":"item","content_id":"return_heaven_herb","tier":4,"price":2200},
-{"world":"human","kind":"item","content_id":"ascension_spirit_dew","tier":4,"price":2200},
-{"world":"human","kind":"item","content_id":"law_fragment","tier":5,"price":2800},
-{"world":"human","kind":"item","content_id":"celestial_lotus","tier":5,"price":3400},
-{"world":"human","kind":"item","content_id":"spirit_origin_pearl","tier":5,"price":3600},
-{"world":"human","kind":"item","content_id":"boundary_blade","tier":5,"price":4600},
-{"world":"human","kind":"item","content_id":"thunder_calamity_jade","tier":5,"price":5200},
-{"world":"human","kind":"item","content_id":"mind_settling_heartwood","tier":5,"price":6500},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_QI","tier":1,"price":8},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_FOUNDATION","tier":2,"price":45},
-{"world":"human","kind":"technique","content_id":"TECH_METAL_SCRIPTURE","tier":2,"price":48},
-{"world":"human","kind":"technique","content_id":"TECH_WOOD_SCRIPTURE","tier":2,"price":48},
-{"world":"human","kind":"technique","content_id":"TECH_WATER_SCRIPTURE","tier":2,"price":48},
-{"world":"human","kind":"technique","content_id":"TECH_FIRE_SCRIPTURE","tier":2,"price":48},
-{"world":"human","kind":"technique","content_id":"TECH_EARTH_SCRIPTURE","tier":2,"price":48},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_CORE","tier":3,"price":190},
-{"world":"human","kind":"technique","content_id":"TECH_HEHUAN_SECRET","tier":3,"price":230},
-{"world":"human","kind":"technique","content_id":"TECH_WIND_ADVANCED","tier":3,"price":210},
-{"world":"human","kind":"technique","content_id":"TECH_THUNDER_ADVANCED","tier":3,"price":220},
-{"world":"human","kind":"technique","content_id":"TECH_YIN_ADVANCED","tier":3,"price":210},
-{"world":"human","kind":"technique","content_id":"TECH_YANG_ADVANCED","tier":3,"price":210},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_LUO","tier":3,"price":210},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_NASCENT","tier":4,"price":980},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_GUI","tier":4,"price":980},
-{"world":"human","kind":"technique","content_id":"TECH_COMMON_SPIRIT","tier":5,"price":5200},
-{"world":"human","kind":"technique","content_id":"TECH_SEA","tier":5,"price":5200},
-
-{"world":"spirit","kind":"item","content_id":"spirit_star_marrow","tier":5,"price":5400},
-{"world":"spirit","kind":"item","content_id":"taiyi_lotus","tier":5,"price":6200},
-{"world":"spirit","kind":"item","content_id":"mysterious_soul_jade","tier":5,"price":6500},
-{"world":"spirit","kind":"item","content_id":"heaven_reaching_treasure","tier":5,"price":8200},
-{"world":"spirit","kind":"item","content_id":"creation_rebirth_pill","tier":5,"price":6800},
-{"world":"spirit","kind":"item","content_id":"purple_soul_ginseng","tier":5,"price":6100},
-{"world":"spirit","kind":"item","content_id":"divine_clarity_pill","tier":5,"price":6500},
-{"world":"spirit","kind":"item","content_id":"primordial_spirit_dew","tier":5,"price":6700},
-{"world":"spirit","kind":"item","content_id":"haotian_powder","tier":5,"price":12000},
-{"world":"spirit","kind":"item","content_id":"void_refining_pill","tier":5,"price":10800},
-{"world":"spirit","kind":"item","content_id":"void_spirit_flower","tier":5,"price":9800},
-{"world":"spirit","kind":"item","content_id":"five_elements_void_pill","tier":5,"price":13800},
-{"world":"spirit","kind":"item","content_id":"void_origin_essence","tier":5,"price":11600},
-{"world":"spirit","kind":"item","content_id":"qilin_fruit","tier":5,"price":12800},
-{"world":"spirit","kind":"item","content_id":"tribulation_vitality_pill","tier":5,"price":5800},
-{"world":"spirit","kind":"item","content_id":"tribulation_mana_dew","tier":5,"price":5800},
-{"world":"spirit","kind":"item","content_id":"zique_metal","tier":5,"price":9000},
-{"world":"spirit","kind":"item","content_id":"zique_wood","tier":5,"price":9000},
-{"world":"spirit","kind":"item","content_id":"zique_water","tier":5,"price":9000},
-{"world":"spirit","kind":"item","content_id":"zique_fire","tier":5,"price":9000},
-{"world":"spirit","kind":"item","content_id":"zique_earth","tier":5,"price":9000},
-{"world":"spirit","kind":"technique","content_id":"TECH_COMMON_SPIRIT","tier":5,"price":7600},
-{"world":"spirit","kind":"technique","content_id":"TECH_YINYANG_BLISS","tier":5,"price":9800},
-{"world":"spirit","kind":"technique","content_id":"TECH_SEA","tier":5,"price":8200},
-
-{"world":"spirit","kind":"item","content_id":"broken_god","tier":6,"price":18000},
-{"world":"spirit","kind":"item","content_id":"void_law_crystal","tier":6,"price":22000},
-{"world":"spirit","kind":"item","content_id":"mystic_heaven_blood","tier":6,"price":26000},
-{"world":"spirit","kind":"item","content_id":"dharma_soul_pearl","tier":6,"price":28000},
-{"world":"spirit","kind":"item","content_id":"realm_severing_halberd","tier":6,"price":36000},
-{"world":"spirit","kind":"item","content_id":"lingxu_five_powders","tier":6,"price":32000},
-{"world":"spirit","kind":"item","content_id":"taixu_jade_liquid","tier":6,"price":28500},
-{"world":"spirit","kind":"item","content_id":"void_meridian_pill","tier":6,"price":30500},
-{"world":"spirit","kind":"item","content_id":"heaven_void_fruit","tier":6,"price":35000},
-{"world":"spirit","kind":"item","content_id":"innate_sand","tier":6,"price":68000},
-{"world":"spirit","kind":"item","content_id":"void_spirit_silver","tier":6,"price":74000},
-{"world":"spirit","kind":"item","content_id":"mystic_gang_marrow","tier":6,"price":88000},
-{"world":"spirit","kind":"item","content_id":"unity_heaven_pill","tier":6,"price":59000},
-{"world":"spirit","kind":"item","content_id":"yin_yang_convergence_flower","tier":6,"price":64000},
-{"world":"spirit","kind":"item","content_id":"three_origin_unity_pill","tier":6,"price":76000},
-{"world":"spirit","kind":"item","content_id":"heaven_man_unity_essence","tier":6,"price":71000},
-{"world":"spirit","kind":"item","content_id":"tribulation_vitality_pill","tier":6,"price":24000},
-{"world":"spirit","kind":"item","content_id":"tribulation_mana_dew","tier":6,"price":24000},
-{"world":"spirit","kind":"technique","content_id":"TECH_Hexagram","tier":6,"price":42000},
-{"world":"spirit","kind":"technique","content_id":"TECH_COMMON_VOID","tier":6,"price":48000},
-
-{"world":"spirit","kind":"item","content_id":"dao_union_marrow","tier":7,"price":110000},
-{"world":"spirit","kind":"item","content_id":"imperishable_bone","tier":7,"price":135000},
-{"world":"spirit","kind":"item","content_id":"myriad_law_orb","tier":7,"price":145000},
-{"world":"spirit","kind":"item","content_id":"celestial_star_array","tier":7,"price":190000},
-{"world":"spirit","kind":"item","content_id":"star_marrow_crystal","tier":7,"price":240000},
-{"world":"spirit","kind":"item","content_id":"wind_thunder_plume","tier":7,"price":290000},
-{"world":"spirit","kind":"item","content_id":"clear_mind_lotus","tier":7,"price":180000},
-{"world":"spirit","kind":"item","content_id":"myriad_dharma_pill","tier":7,"price":155000},
-{"world":"spirit","kind":"item","content_id":"dao_heart_lotus_seed","tier":7,"price":168000},
-{"world":"spirit","kind":"item","content_id":"spirit_origin_essence","tier":7,"price":195000},
-{"world":"spirit","kind":"item","content_id":"god_integration_milk","tier":7,"price":220000},
-{"world":"spirit","kind":"item","content_id":"sanqi_divine_fruit","tier":7,"price":360000},
-{"world":"spirit","kind":"item","content_id":"great_ascension_pill","tier":7,"price":295000},
-{"world":"spirit","kind":"item","content_id":"five_spirit_fruit","tier":7,"price":315000},
-{"world":"spirit","kind":"item","content_id":"nine_heavens_creation_dew","tier":7,"price":390000},
-{"world":"spirit","kind":"item","content_id":"grand_dao_pill","tier":7,"price":430000},
-{"world":"spirit","kind":"item","content_id":"tribulation_vitality_pill","tier":7,"price":130000},
-{"world":"spirit","kind":"item","content_id":"tribulation_mana_dew","tier":7,"price":130000},
-{"world":"spirit","kind":"technique","content_id":"TECH_COMMON_INTEGRATION","tier":7,"price":240000},
-{"world":"spirit","kind":"technique","content_id":"TECH_CONNECT_WIND_RAIN","tier":7,"price":200000},
-
-{"world":"spirit","kind":"item","content_id":"creation_jade_marrow","tier":8,"price":720000},
-{"world":"spirit","kind":"item","content_id":"chaos_sacred_blood","tier":8,"price":880000},
-{"world":"spirit","kind":"item","content_id":"primordial_spirit_sea","tier":8,"price":920000},
-{"world":"spirit","kind":"item","content_id":"mahayana_spirit_pill","tier":8,"price":760000},
-{"world":"spirit","kind":"item","content_id":"dao_origin_lotus","tier":8,"price":690000},
-{"world":"spirit","kind":"item","content_id":"nine_heavens_spirit_marrow","tier":8,"price":820000},
-{"world":"spirit","kind":"item","content_id":"primordial_dao_fruit","tier":8,"price":960000},
-{"world":"spirit","kind":"item","content_id":"heavenly_law_essence","tier":8,"price":780000},
-{"world":"spirit","kind":"item","content_id":"three_purity_creation_pill","tier":8,"price":1050000},
-{"world":"spirit","kind":"item","content_id":"dao_embryo_jade","tier":8,"price":900000},
-{"world":"spirit","kind":"item","content_id":"myriad_tribulation_heart_lotus","tier":8,"price":1100000},
-{"world":"spirit","kind":"item","content_id":"dao_pattern_gold","tier":8,"price":1350000},
-{"world":"spirit","kind":"item","content_id":"myriad_law_glass","tier":8,"price":1750000},
-{"world":"spirit","kind":"item","content_id":"tribulation_vitality_pill","tier":8,"price":700000},
-{"world":"spirit","kind":"item","content_id":"tribulation_mana_dew","tier":8,"price":700000},
-{"world":"spirit","kind":"technique","content_id":"TECH_COMMON_MAHAYANA","tier":8,"price":1500000},
-{"world":"human","kind":"item","content_id":"spirit_channel_pill","tier":1,"price":9},
-{"world":"human","kind":"item","content_id":"green_bamboo_sword","tier":1,"price":11},
-{"world":"human","kind":"item","content_id":"jade_marrow_pill","tier":2,"price":34},
-{"world":"human","kind":"item","content_id":"golden_origin_pill","tier":2,"price":62},
-{"world":"human","kind":"item","content_id":"spirit_spring_pendant","tier":2,"price":42},
-{"world":"human","kind":"technique","content_id":"TECH_MYSTIC_MOUNTAIN","tier":2,"price":54},
-{"world":"human","kind":"item","content_id":"purple_mansion_pill","tier":3,"price":155},
-{"world":"human","kind":"item","content_id":"infant_origin_fruit","tier":3,"price":390},
-{"world":"human","kind":"item","content_id":"purple_flame_furnace","tier":3,"price":175},
-{"world":"human","kind":"technique","content_id":"TECH_PURPLE_CORE_CANON","tier":3,"price":240},
-{"world":"human","kind":"item","content_id":"infant_transformation_pill","tier":4,"price":780},
-{"world":"human","kind":"item","content_id":"god_transformation_dew","tier":4,"price":1950},
-{"world":"human","kind":"item","content_id":"soul_banner","tier":4,"price":1350},
-{"world":"spirit","kind":"item","content_id":"soul_wandering_pill","tier":5,"price":6400},
-{"world":"spirit","kind":"item","content_id":"void_breaking_paste","tier":5,"price":11200},
-{"world":"spirit","kind":"item","content_id":"starlight_dharma_robe","tier":5,"price":8800},
-{"world":"spirit","kind":"technique","content_id":"TECH_TAIYI_LIGHT","tier":5,"price":12500},
-{"world":"spirit","kind":"item","content_id":"primordial_void_pill","tier":6,"price":30000},
-{"world":"spirit","kind":"item","content_id":"heavenly_union_dew","tier":6,"price":65000},
-{"world":"spirit","kind":"item","content_id":"empty_heaven_mirror","tier":6,"price":78000},
-{"world":"spirit","kind":"technique","content_id":"TECH_EMPTY_VOID_CANON","tier":6,"price":82000},
-{"world":"spirit","kind":"item","content_id":"dharma_image_pill","tier":7,"price":175000},
-{"world":"spirit","kind":"item","content_id":"heaven_ascending_fruit","tier":7,"price":350000},
-{"world":"spirit","kind":"item","content_id":"myriad_law_wheel","tier":7,"price":330000},
-{"world":"spirit","kind":"technique","content_id":"TECH_NINE_TURN_UNITY","tier":7,"price":390000},
-{"world":"spirit","kind":"item","content_id":"mystic_truth_pill","tier":8,"price":850000},
-{"world":"spirit","kind":"item","content_id":"chaos_dao_bell","tier":8,"price":1800000},
-{"world":"spirit","kind":"technique","content_id":"TECH_CHAOS_OPENING","tier":8,"price":2200000},
-{"world":"human","kind":"technique","content_id":"TECH_BODY_MORTAL","tier":1,"price":10},
-{"world":"human","kind":"technique","content_id":"TECH_BODY_HUNDRED_REFINEMENT","tier":2,"price":68},
-{"world":"human","kind":"technique","content_id":"TECH_BODY_DRAGON_ELEPHANT","tier":3,"price":420},
-{"world":"spirit","kind":"technique","content_id":"TECH_BODY_STARS","tier":6,"price":96000},
-{"world":"spirit","kind":"technique","content_id":"TECH_BODY_MYSTIC_HEAVEN","tier":7,"price":460000},
-{"world":"spirit","kind":"technique","content_id":"TECH_BODY_CHAOS","tier":8,"price":2600000},
-{"world":"human","kind":"technique","content_id":"TECH_SPIRIT_SENSE","tier":1,"price":18},
-
-{"world":"demon","kind":"item","content_id":"spirit_channel_pill","tier":1,"price":9},
-{"world":"demon","kind":"item","content_id":"green_bamboo_sword","tier":1,"price":11},
-{"world":"demon","kind":"technique","content_id":"TECH_DEMON_BREATHING","tier":1,"price":10},
-{"world":"demon","kind":"item","content_id":"jade_marrow_pill","tier":2,"price":34},
-{"world":"demon","kind":"item","content_id":"spirit_spring_pendant","tier":2,"price":42},
-{"world":"demon","kind":"technique","content_id":"TECH_BLOOD_RIVER","tier":2,"price":52},
-{"world":"demon","kind":"item","content_id":"purple_mansion_pill","tier":3,"price":155},
-{"world":"demon","kind":"item","content_id":"purple_flame_furnace","tier":3,"price":175},
-{"world":"demon","kind":"technique","content_id":"TECH_WANMO","tier":3,"price":230},
-{"world":"demon","kind":"technique","content_id":"TECH_CORPSE_YIN_CANON","tier":3,"price":270},
-{"world":"demon","kind":"item","content_id":"infant_transformation_pill","tier":4,"price":780},
-{"world":"demon","kind":"item","content_id":"soul_banner","tier":4,"price":1350},
-{"world":"demon","kind":"technique","content_id":"TECH_BLOOD_SEA_EMBRYO","tier":4,"price":1100},
-{"world":"demon","kind":"item","content_id":"soul_wandering_pill","tier":5,"price":6400},
-{"world":"demon","kind":"item","content_id":"starlight_dharma_robe","tier":5,"price":8800},
-{"world":"demon","kind":"technique","content_id":"TECH_HEAVEN_DEMON_VOID","tier":5,"price":8600},
-{"world":"demon","kind":"technique","content_id":"TECH_FOUR_SOURCE_DEVOURING","tier":5,"price":9800},
-
-{"world":"true_demon","kind":"item","content_id":"soul_wandering_pill","tier":5,"price":6400},
-{"world":"true_demon","kind":"item","content_id":"starlight_dharma_robe","tier":5,"price":8800},
-{"world":"true_demon","kind":"technique","content_id":"TECH_HEAVEN_DEMON_VOID","tier":5,"price":8600},
-{"world":"true_demon","kind":"item","content_id":"moque_metal","tier":5,"price":9000},
-{"world":"true_demon","kind":"item","content_id":"moque_wood","tier":5,"price":9000},
-{"world":"true_demon","kind":"item","content_id":"moque_water","tier":5,"price":9000},
-{"world":"true_demon","kind":"item","content_id":"moque_fire","tier":5,"price":9000},
-{"world":"true_demon","kind":"item","content_id":"moque_earth","tier":5,"price":9000},
-{"world":"true_demon","kind":"item","content_id":"primordial_void_pill","tier":6,"price":30000},
-{"world":"true_demon","kind":"item","content_id":"empty_heaven_mirror","tier":6,"price":78000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_FORMLESS_DEMON_DOMAIN","tier":6,"price":88000},
-{"world":"true_demon","kind":"item","content_id":"dharma_image_pill","tier":7,"price":175000},
-{"world":"true_demon","kind":"item","content_id":"myriad_law_wheel","tier":7,"price":330000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_ALL_HEAVENS_DEMON","tier":7,"price":410000},
-{"world":"true_demon","kind":"item","content_id":"mystic_truth_pill","tier":8,"price":850000},
-{"world":"true_demon","kind":"item","content_id":"chaos_dao_bell","tier":8,"price":1800000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_PRIMORDIAL_DEMON_LORD","tier":8,"price":2300000},
-{"world":"human","kind":"item","content_id":"dew_grass_seed","tier":1,"price":6},
-{"world":"human","kind":"item","content_id":"purple_cloud_ginseng_seed","tier":1,"price":18},
-{"world":"human","kind":"item","content_id":"earth_vein_lingzhi_seed","tier":1,"price":42},
-{"world":"human","kind":"item","content_id":"heaven_heart_lotus_seed","tier":1,"price":90},
-{"world":"demon","kind":"item","content_id":"dew_grass_seed","tier":1,"price":7},
-{"world":"demon","kind":"item","content_id":"purple_cloud_ginseng_seed","tier":1,"price":20},
-{"world":"demon","kind":"item","content_id":"earth_vein_lingzhi_seed","tier":1,"price":46},
-{"world":"demon","kind":"item","content_id":"heaven_heart_lotus_seed","tier":1,"price":98},
-{"world":"spirit","kind":"item","content_id":"dew_grass_seed","tier":5,"price":6},
-{"world":"spirit","kind":"item","content_id":"purple_cloud_ginseng_seed","tier":5,"price":18},
-{"world":"spirit","kind":"item","content_id":"earth_vein_lingzhi_seed","tier":5,"price":42},
-{"world":"spirit","kind":"item","content_id":"heaven_heart_lotus_seed","tier":5,"price":90},
-{"world":"true_demon","kind":"item","content_id":"dew_grass_seed","tier":5,"price":7},
-{"world":"true_demon","kind":"item","content_id":"purple_cloud_ginseng_seed","tier":5,"price":20},
-{"world":"true_demon","kind":"item","content_id":"earth_vein_lingzhi_seed","tier":5,"price":46},
-{"world":"true_demon","kind":"item","content_id":"heaven_heart_lotus_seed","tier":5,"price":98},
-{"world":"human","kind":"item","content_id":"nine_curve_herb_seed","tier":3,"price":520},
-{"world":"demon","kind":"item","content_id":"nine_curve_herb_seed","tier":3,"price":560},
-{"world":"spirit","kind":"item","content_id":"nine_curve_herb_seed","tier":5,"price":520},
-{"world":"true_demon","kind":"item","content_id":"nine_curve_herb_seed","tier":5,"price":560},
-{"world":"spirit","kind":"item","content_id":"mystic_heaven_vine_seed","tier":6,"price":28000},
-{"world":"spirit","kind":"item","content_id":"golden_thunder_bamboo_seed","tier":6,"price":22000},
-{"world":"spirit","kind":"item","content_id":"nebula_manjushaka_seed","tier":6,"price":26000},
-{"world":"true_demon","kind":"item","content_id":"mystic_heaven_vine_seed","tier":6,"price":32000},
-{"world":"true_demon","kind":"item","content_id":"golden_thunder_bamboo_seed","tier":6,"price":25000},
-{"world":"true_demon","kind":"item","content_id":"nebula_manjushaka_seed","tier":6,"price":29000},
-{"world":"spirit","kind":"item","content_id":"creation_heaven_dew","tier":7,"price":260000},
-{"world":"spirit","kind":"item","content_id":"formless_sumeru_water","tier":7,"price":320000},
-{"world":"true_demon","kind":"item","content_id":"creation_heaven_dew","tier":7,"price":300000},
-{"world":"true_demon","kind":"item","content_id":"formless_sumeru_water","tier":7,"price":360000},
-{"world":"human","kind":"technique","content_id":"TECH_BEAST_TRANSFORMATION","tier":4,"price":4800},
-{"world":"spirit","kind":"technique","content_id":"TECH_BEAST_TRANSFORMATION","tier":5,"price":4800},
-{"world":"human","kind":"technique","content_id":"TECH_MYRIAD_FORM_SPECTRUM","tier":4,"price":5600},
-{"world":"spirit","kind":"technique","content_id":"TECH_TRUE_SPIRIT_METAMORPHOSIS","tier":5,"price":18000},
-{"world":"spirit","kind":"technique","content_id":"TECH_HEAVENLY_FORM_CYCLE","tier":6,"price":96000},
-{"world":"spirit","kind":"technique","content_id":"TECH_MYRIAD_FORM_RETURN","tier":7,"price":520000},
-{"world":"spirit","kind":"technique","content_id":"TECH_PRIMORDIAL_SPIRIT_TRANSFORMATION","tier":8,"price":3000000},
-{"world":"demon","kind":"technique","content_id":"TECH_BLOOD_SHADOW_TRANSFORMATION","tier":4,"price":6200},
-{"world":"demon","kind":"technique","content_id":"TECH_HEAVEN_DEMON_METAMORPHOSIS","tier":5,"price":22000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_HEAVEN_DEMON_METAMORPHOSIS","tier":5,"price":22000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_FORMLESS_DEMON_TRANSFORMATION","tier":6,"price":115000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_ALL_HEAVENS_DEMON_TRANSFORMATION","tier":7,"price":610000},
-{"world":"true_demon","kind":"technique","content_id":"TECH_PRIMORDIAL_DEMON_TRANSFORMATION","tier":8,"price":3200000},
-{"world":"spirit","kind":"item","content_id":"azure_luan_blood","tier":7,"price":210000},
-{"world":"spirit","kind":"item","content_id":"azure_luan_essence","tier":8,"price":920000},
-{"world":"spirit","kind":"item","content_id":"mountain_ape_blood","tier":7,"price":260000},
-{"world":"spirit","kind":"item","content_id":"mountain_ape_soul","tier":8,"price":1500000},
-{"world":"spirit","kind":"item","content_id":"true_dragon_blood_trace","tier":7,"price":180000},
-{"world":"spirit","kind":"item","content_id":"true_dragon_soul_essence","tier":8,"price":2100000},
-{"world":"spirit","kind":"item","content_id":"phoenix_blood","tier":7,"price":320000},
-{"world":"spirit","kind":"item","content_id":"phoenix_soul_flame","tier":8,"price":2400000},
-{"world":"spirit","kind":"item","content_id":"kunpeng_essence","tier":7,"price":360000},
-{"world":"spirit","kind":"item","content_id":"kunpeng_true_soul","tier":8,"price":2550000},
-{"world":"spirit","kind":"item","content_id":"qilin_blood","tier":7,"price":380000},
-{"world":"spirit","kind":"item","content_id":"qilin_essence","tier":8,"price":2600000},
-{"world":"spirit","kind":"item","content_id":"white_tiger_blood","tier":7,"price":420000},
-{"world":"spirit","kind":"item","content_id":"white_tiger_soul","tier":8,"price":2800000},
-{"world":"spirit","kind":"item","content_id":"vermillion_bird_blood","tier":7,"price":460000},
-{"world":"spirit","kind":"item","content_id":"vermillion_bird_soul","tier":8,"price":3000000},
-{"world":"spirit","kind":"item","content_id":"xuanwu_blood","tier":7,"price":440000},
-{"world":"spirit","kind":"item","content_id":"xuanwu_essence","tier":8,"price":2900000},
-{"world":"celestial","kind":"item","content_id":"immortal_origin_stone","tier":9,"price":18000000},
-{"world":"celestial","kind":"item","content_id":"law_crystal","tier":9,"price":32000000},
-{"world":"celestial","kind":"item","content_id":"immortal_aperture_jade","tier":9,"price":95000000},
-{"world":"celestial","kind":"item","content_id":"boundary_river_silver","tier":9,"price":110000000},
-{"world":"celestial","kind":"item","content_id":"purple_cloud_immortal_dew","tier":9,"price":12000000},
-{"world":"celestial","kind":"item","content_id":"dijiang_tear","tier":10,"price":1350000000},
-{"world":"celestial","kind":"item","content_id":"zhulong_breath","tier":10,"price":1350000000},
-{"world":"celestial","kind":"item","content_id":"jumang_feather","tier":10,"price":920000000},
-{"world":"celestial","kind":"item","content_id":"rushou_scale","tier":10,"price":920000000},
-{"world":"celestial","kind":"item","content_id":"gonggong_water","tier":10,"price":920000000},
-{"world":"celestial","kind":"item","content_id":"zhurong_flame","tier":10,"price":920000000},
-{"world":"celestial","kind":"item","content_id":"qiangliang_thunder","tier":10,"price":1180000000},
-{"world":"celestial","kind":"item","content_id":"xizi_lightning","tier":10,"price":1180000000},
-{"world":"celestial","kind":"item","content_id":"xuanming_rain","tier":10,"price":980000000},
-{"world":"celestial","kind":"item","content_id":"feilian_wind","tier":10,"price":980000000},
-{"world":"celestial","kind":"item","content_id":"shebishi_orb","tier":10,"price":1260000000},
-{"world":"celestial","kind":"item","content_id":"houtu_clay","tier":10,"price":920000000},
-{"world":"celestial","kind":"item","content_id":"taiyi_dao_marrow","tier":11,"price":6800000000},
-{"world":"celestial","kind":"item","content_id":"primordial_mother_qi","tier":12,"price":32000000000},
-{"world":"celestial","kind":"item","content_id":"asura_blood_trace","tier":10,"price":88000000},
-{"world":"celestial","kind":"item","content_id":"asura_soul_shard","tier":12,"price":1800000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_CELESTIAL_BREATHING","tier":9,"price":120000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_PRIMORDIAL_IMMORTAL_LIGHT","tier":9,"price":220000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_TAIYI_SWORD_CANON","tier":10,"price":480000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_NINE_HEAVENS_THUNDER","tier":10,"price":440000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_PURPLE_MANSION_SENSE","tier":9,"price":260000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_IMMORTAL_BODY_FORGING","tier":10,"price":520000000},
-{"world":"celestial","kind":"technique","content_id":"TECH_HEAVENLY_RIVER_REFINING","tier":9,"price":240000000},
-{"world":"celestial","kind":"item","content_id":"xuanhuang_immortal_armor","tier":10,"price":680000000},
-{"world":"celestial","kind":"item","content_id":"heavenly_river_sword_embryo","tier":10,"price":820000000},
-{"world":"celestial","kind":"item","content_id":"purple_extreme_soul_pill","tier":9,"price":160000000},
-{"world":"celestial","kind":"item","content_id":"immortal_jade_marrow","tier":9,"price":180000000},
-{"world":"celestial","kind":"item","content_id":"law_dao_fruit","tier":11,"price":2400000000},
-{"world":"celestial","kind":"item","content_id":"cloudstep_immortal_boots","tier":9,"price":310000000},
-{"world":"asura","kind":"item","content_id":"asura_blood_crystal","tier":9,"price":95000000},
-{"world":"asura","kind":"item","content_id":"heavenly_demon_heart_marrow","tier":9,"price":140000000},
-{"world":"asura","kind":"item","content_id":"blood_moon_divine_pill","tier":9,"price":120000000},
-{"world":"asura","kind":"item","content_id":"war_soul_banner","tier":9,"price":360000000},
-{"world":"asura","kind":"technique","content_id":"TECH_ASURA_WAR_HEAVEN","tier":9,"price":180000000},
-{"world":"asura","kind":"technique","content_id":"TECH_BLOOD_SEA_IMPERISHABLE","tier":9,"price":240000000},
-{"world":"asura","kind":"item","content_id":"annihilation_demon_blade","tier":10,"price":1600000000},
-{"world":"asura","kind":"technique","content_id":"TECH_MYRIAD_CALAMITY_DEMON_FORM","tier":10,"price":780000000},
-{"world":"asura","kind":"technique","content_id":"TECH_ANNIHILATION_SKY_BLADE","tier":10,"price":980000000},
-{"world":"asura","kind":"technique","content_id":"TECH_WUSHENG_SOUL_CANON","tier":10,"price":720000000},
-{"world":"asura","kind":"technique","content_id":"TECH_ASURA_TRUE_BODY","tier":10,"price":860000000},
-{"world":"asura","kind":"item","content_id":"wusheng_dao_embryo","tier":11,"price":8200000000},
-{"world":"asura","kind":"item","content_id":"primordial_asura_bone","tier":12,"price":46000000000},
-{"world":"human","kind":"item","content_id":"concord_birth_pill","tier":3,"price":360},
-{"world":"demon","kind":"item","content_id":"blood_womb_pill","tier":3,"price":420},
-{"world":"spirit","kind":"item","content_id":"yin_yang_creation_dew","tier":5,"price":7600},
-{"world":"true_demon","kind":"item","content_id":"heavenly_demon_heir_pill","tier":5,"price":8800},
-{"world":"celestial","kind":"item","content_id":"immortal_embryo_elixir","tier":9,"price":180000000},
-{"world":"asura","kind":"item","content_id":"war_soul_heir_pill","tier":9,"price":160000000},
-{"world":"hell","kind":"item","content_id":"yin_foundation_pill","tier":1,"price":12},
-{"world":"hell","kind":"item","content_id":"yin_soul_stone","tier":1,"price":7},
-{"world":"hell","kind":"technique","content_id":"TECH_GHOST_BREATHING","tier":1,"price":9},
-{"world":"hell","kind":"technique","content_id":"TECH_SOUL_ECHO_SENSE","tier":1,"price":12},
-{"world":"hell","kind":"item","content_id":"soul_meridian_pill","tier":2,"price":38},
-{"world":"hell","kind":"item","content_id":"yin_core_pill","tier":2,"price":82},
-{"world":"hell","kind":"item","content_id":"ghost_silk_robe","tier":2,"price":44},
-{"world":"hell","kind":"technique","content_id":"TECH_YIN","tier":2,"price":52},
-{"world":"hell","kind":"item","content_id":"ghost_core_pill","tier":3,"price":190},
-{"world":"hell","kind":"item","content_id":"soul_infant_marrow","tier":3,"price":460},
-{"world":"hell","kind":"item","content_id":"soul_lamp","tier":3,"price":260},
-{"world":"hell","kind":"item","content_id":"ghost_gate_ward","tier":3,"price":760},
-{"world":"hell","kind":"technique","content_id":"TECH_YIN_ADVANCED","tier":3,"price":220},
-{"world":"hell","kind":"technique","content_id":"TECH_GHOSTFIRE_BLADE","tier":3,"price":260},
-{"world":"hell","kind":"technique","content_id":"TECH_BONE_VESSEL_BODY","tier":3,"price":310},
-{"world":"hell","kind":"item","content_id":"infant_soul_dew","tier":4,"price":980},
-{"world":"hell","kind":"item","content_id":"spirit_calling_incense","tier":4,"price":2350},
-{"world":"hell","kind":"item","content_id":"memory_pearl","tier":4,"price":1600},
-{"world":"hell","kind":"technique","content_id":"TECH_SOUL_LAMP_CANON","tier":4,"price":3400},
-{"world":"hell","kind":"item","content_id":"wandering_soul_pill","tier":5,"price":6900},
-{"world":"hell","kind":"item","content_id":"void_soul_elixir","tier":5,"price":11800},
-{"world":"hell","kind":"item","content_id":"yin_birth_dew","tier":5,"price":8200},
-{"world":"hell","kind":"item","content_id":"mingque_metal","tier":5,"price":9000},
-{"world":"hell","kind":"item","content_id":"mingque_wood","tier":5,"price":9000},
-{"world":"hell","kind":"item","content_id":"mingque_water","tier":5,"price":9000},
-{"world":"hell","kind":"item","content_id":"mingque_fire","tier":5,"price":9000},
-{"world":"hell","kind":"item","content_id":"mingque_earth","tier":5,"price":9000},
-{"world":"hell","kind":"item","content_id":"iron_tree_heartwood","tier":5,"price":9200},
-{"world":"hell","kind":"technique","content_id":"TECH_NETHER_TIDE_CANON","tier":5,"price":10600},
-{"world":"hell","kind":"technique","content_id":"TECH_FORGETFUL_RIVER_SENSE","tier":5,"price":12800},
-{"world":"hell","kind":"item","content_id":"void_soul_return_pill","tier":6,"price":36000},
-{"world":"hell","kind":"item","content_id":"soul_covenant_pill","tier":6,"price":72000},
-{"world":"hell","kind":"item","content_id":"nine_prison_seal","tier":6,"price":64000},
-{"world":"hell","kind":"technique","content_id":"TECH_NINE_PRISON_VOID","tier":6,"price":76000},
-{"world":"hell","kind":"item","content_id":"united_soul_dew","tier":7,"price":310000},
-{"world":"hell","kind":"item","content_id":"great_crossing_incense","tier":7,"price":580000},
-{"world":"hell","kind":"item","content_id":"nether_tide_banner","tier":7,"price":520000},
-{"world":"hell","kind":"technique","content_id":"TECH_YIN_YANG_SOUL_UNITY","tier":7,"price":620000},
-{"world":"hell","kind":"technique","content_id":"TECH_UNDYING_GHOST_BODY","tier":7,"price":760000},
-{"world":"hell","kind":"item","content_id":"mahayana_soul_marrow","tier":8,"price":2500000},
-{"world":"hell","kind":"item","content_id":"karma_mirror_disc","tier":8,"price":4100000},
-{"world":"hell","kind":"technique","content_id":"TECH_REINCARNATION_GATE_CANON","tier":8,"price":5200000},
-{"world":"demon","kind":"item","content_id":"demon_bloodsteel_core","tier":3,"price":320},
-{"world":"demon","kind":"item","content_id":"demon_soulflame_crystal","tier":5,"price":9200},
-{"world":"true_demon","kind":"item","content_id":"true_demon_voidbone_jade","tier":6,"price":78000},
-{"world":"true_demon","kind":"item","content_id":"true_demon_primordial_heart_iron","tier":8,"price":2400000},
-{"world":"hell","kind":"item","content_id":"hell_forgetful_soul_jade","tier":3,"price":300},
-{"world":"hell","kind":"item","content_id":"hell_yellow_spring_dark_iron","tier":6,"price":68000},
-{"world":"asura","kind":"item","content_id":"asura_warsoul_crystal","tier":9,"price":130000000},
-{"world":"asura","kind":"item","content_id":"asura_annihilation_bone_gold","tier":11,"price":9800000000}
-]}
+{
+  "schema_version": 1,
+  "settings": {
+    "offer_count": 6,
+    "material_offer_count": 6,
+    "next_tier_chance": 0.02,
+    "price_multiplier": [
+      0.9,
+      1.1
+    ],
+    "commission_stones": {
+      "1": [
+        2,
+        5
+      ],
+      "2": [
+        8,
+        16
+      ],
+      "3": [
+        28,
+        55
+      ],
+      "4": [
+        110,
+        220
+      ],
+      "5": [
+        420,
+        760
+      ],
+      "6": [
+        1800,
+        3200
+      ],
+      "7": [
+        9000,
+        16000
+      ],
+      "8": [
+        45000,
+        80000
+      ],
+      "9": [
+        260000,
+        480000
+      ],
+      "10": [
+        1500000,
+        2800000
+      ],
+      "11": [
+        9000000,
+        16000000
+      ],
+      "12": [
+        52000000,
+        90000000
+      ]
+    }
+  },
+  "goods": [
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "qi_gathering_bead",
+      "tier": 1,
+      "price": 4
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "iron_skin_talisman",
+      "tier": 1,
+      "price": 5
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "cloudstep_boots",
+      "tier": 1,
+      "price": 6
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "foundation_pill",
+      "tier": 1,
+      "price": 12
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "foundation_dew",
+      "tier": 2,
+      "price": 22
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "earth_vein_essence",
+      "tier": 2,
+      "price": 28
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "sea_of_qi_jade",
+      "tier": 2,
+      "price": 30
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "formation_plate",
+      "tier": 2,
+      "price": 36
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "true_origin_pill",
+      "tier": 2,
+      "price": 38
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "condensing_spirit_pill",
+      "tier": 2,
+      "price": 75
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "dust_settling_pill",
+      "tier": 2,
+      "price": 75
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "golden_core_dew",
+      "tier": 3,
+      "price": 95
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "dragon_blood_crystal",
+      "tier": 3,
+      "price": 120
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "soul_spring",
+      "tier": 3,
+      "price": 125
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "starfall_blade",
+      "tier": 3,
+      "price": 150
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "star_pattern_copper",
+      "tier": 3,
+      "price": 260
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "spirit_jade_sand",
+      "tier": 3,
+      "price": 290
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "marrow_cleansing_pill",
+      "tier": 3,
+      "price": 180
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "nine_curve_ginseng",
+      "tier": 3,
+      "price": 430
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "repair_sky_pill",
+      "tier": 3,
+      "price": 430
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "nascent_incense",
+      "tier": 4,
+      "price": 520
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "phoenix_marrow",
+      "tier": 4,
+      "price": 650
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "void_soul_crystal",
+      "tier": 4,
+      "price": 680
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "mountain_seal",
+      "tier": 4,
+      "price": 820
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "geng_essence",
+      "tier": 4,
+      "price": 1250
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "nascent_flame_crystal",
+      "tier": 4,
+      "price": 1600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "heaven_origin_pill",
+      "tier": 4,
+      "price": 900
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "return_heaven_herb",
+      "tier": 4,
+      "price": 2200
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "ascension_spirit_dew",
+      "tier": 4,
+      "price": 2200
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "law_fragment",
+      "tier": 5,
+      "price": 2800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "celestial_lotus",
+      "tier": 5,
+      "price": 3400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "spirit_origin_pearl",
+      "tier": 5,
+      "price": 3600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "boundary_blade",
+      "tier": 5,
+      "price": 4600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "thunder_calamity_jade",
+      "tier": 5,
+      "price": 5200
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "mind_settling_heartwood",
+      "tier": 5,
+      "price": 6500
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_QI",
+      "tier": 1,
+      "price": 8
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_FOUNDATION",
+      "tier": 2,
+      "price": 45
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_METAL_SCRIPTURE",
+      "tier": 2,
+      "price": 48
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_WOOD_SCRIPTURE",
+      "tier": 2,
+      "price": 48
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_WATER_SCRIPTURE",
+      "tier": 2,
+      "price": 48
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_FIRE_SCRIPTURE",
+      "tier": 2,
+      "price": 48
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_EARTH_SCRIPTURE",
+      "tier": 2,
+      "price": 48
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_CORE",
+      "tier": 3,
+      "price": 190
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HEHUAN_SECRET",
+      "tier": 3,
+      "price": 230
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_WIND_ADVANCED",
+      "tier": 3,
+      "price": 210
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_THUNDER_ADVANCED",
+      "tier": 3,
+      "price": 220
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_YIN_ADVANCED",
+      "tier": 3,
+      "price": 210
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_YANG_ADVANCED",
+      "tier": 3,
+      "price": 210
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_LUO",
+      "tier": 3,
+      "price": 210
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_NASCENT",
+      "tier": 4,
+      "price": 980
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_GUI",
+      "tier": 4,
+      "price": 980
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_SPIRIT",
+      "tier": 5,
+      "price": 5200
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_SEA",
+      "tier": 5,
+      "price": 5200
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "spirit_star_marrow",
+      "tier": 5,
+      "price": 5400
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "taiyi_lotus",
+      "tier": 5,
+      "price": 6200
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mysterious_soul_jade",
+      "tier": 5,
+      "price": 6500
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heaven_reaching_treasure",
+      "tier": 5,
+      "price": 8200
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "creation_rebirth_pill",
+      "tier": 5,
+      "price": 6800
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "purple_soul_ginseng",
+      "tier": 5,
+      "price": 6100
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "divine_clarity_pill",
+      "tier": 5,
+      "price": 6500
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "primordial_spirit_dew",
+      "tier": 5,
+      "price": 6700
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "haotian_powder",
+      "tier": 5,
+      "price": 12000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_refining_pill",
+      "tier": 5,
+      "price": 10800
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_spirit_flower",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "five_elements_void_pill",
+      "tier": 5,
+      "price": 13800
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_origin_essence",
+      "tier": 5,
+      "price": 11600
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "qilin_fruit",
+      "tier": 5,
+      "price": 12800
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "tribulation_vitality_pill",
+      "tier": 8,
+      "price": 700000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "tribulation_mana_dew",
+      "tier": 8,
+      "price": 700000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_metal",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_wood",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_water",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_fire",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_earth",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_SPIRIT",
+      "tier": 5,
+      "price": 7600
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_YINYANG_BLISS",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SEA",
+      "tier": 5,
+      "price": 8200
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "broken_god",
+      "tier": 6,
+      "price": 18000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_law_crystal",
+      "tier": 6,
+      "price": 22000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mystic_heaven_blood",
+      "tier": 6,
+      "price": 26000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dharma_soul_pearl",
+      "tier": 6,
+      "price": 28000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "realm_severing_halberd",
+      "tier": 6,
+      "price": 36000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "lingxu_five_powders",
+      "tier": 6,
+      "price": 32000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "taixu_jade_liquid",
+      "tier": 6,
+      "price": 28500
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_meridian_pill",
+      "tier": 6,
+      "price": 30500
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heaven_void_fruit",
+      "tier": 6,
+      "price": 35000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "innate_sand",
+      "tier": 6,
+      "price": 68000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_spirit_silver",
+      "tier": 6,
+      "price": 74000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mystic_gang_marrow",
+      "tier": 6,
+      "price": 88000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "unity_heaven_pill",
+      "tier": 6,
+      "price": 59000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "yin_yang_convergence_flower",
+      "tier": 6,
+      "price": 64000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "three_origin_unity_pill",
+      "tier": 6,
+      "price": 76000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heaven_man_unity_essence",
+      "tier": 6,
+      "price": 71000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_Hexagram",
+      "tier": 6,
+      "price": 42000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_VOID",
+      "tier": 6,
+      "price": 48000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dao_union_marrow",
+      "tier": 7,
+      "price": 110000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "imperishable_bone",
+      "tier": 7,
+      "price": 135000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "myriad_law_orb",
+      "tier": 7,
+      "price": 145000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "celestial_star_array",
+      "tier": 7,
+      "price": 190000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "star_marrow_crystal",
+      "tier": 7,
+      "price": 240000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "wind_thunder_plume",
+      "tier": 7,
+      "price": 290000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "clear_mind_lotus",
+      "tier": 7,
+      "price": 180000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "myriad_dharma_pill",
+      "tier": 7,
+      "price": 155000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dao_heart_lotus_seed",
+      "tier": 7,
+      "price": 168000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "spirit_origin_essence",
+      "tier": 7,
+      "price": 195000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "god_integration_milk",
+      "tier": 7,
+      "price": 220000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "sanqi_divine_fruit",
+      "tier": 7,
+      "price": 360000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "great_ascension_pill",
+      "tier": 7,
+      "price": 295000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "five_spirit_fruit",
+      "tier": 7,
+      "price": 315000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "nine_heavens_creation_dew",
+      "tier": 7,
+      "price": 390000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "grand_dao_pill",
+      "tier": 7,
+      "price": 430000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_INTEGRATION",
+      "tier": 7,
+      "price": 240000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_CONNECT_WIND_RAIN",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "creation_jade_marrow",
+      "tier": 8,
+      "price": 720000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "chaos_sacred_blood",
+      "tier": 8,
+      "price": 880000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "primordial_spirit_sea",
+      "tier": 8,
+      "price": 920000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mahayana_spirit_pill",
+      "tier": 8,
+      "price": 760000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dao_origin_lotus",
+      "tier": 8,
+      "price": 690000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "nine_heavens_spirit_marrow",
+      "tier": 8,
+      "price": 820000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "primordial_dao_fruit",
+      "tier": 8,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heavenly_law_essence",
+      "tier": 8,
+      "price": 780000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "three_purity_creation_pill",
+      "tier": 8,
+      "price": 1050000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dao_embryo_jade",
+      "tier": 8,
+      "price": 900000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "myriad_tribulation_heart_lotus",
+      "tier": 8,
+      "price": 1100000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dao_pattern_gold",
+      "tier": 8,
+      "price": 1350000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "myriad_law_glass",
+      "tier": 8,
+      "price": 1750000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_COMMON_MAHAYANA",
+      "tier": 8,
+      "price": 1500000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "spirit_channel_pill",
+      "tier": 1,
+      "price": 9
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "green_bamboo_sword",
+      "tier": 1,
+      "price": 11
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "jade_marrow_pill",
+      "tier": 2,
+      "price": 34
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "golden_origin_pill",
+      "tier": 2,
+      "price": 62
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "spirit_spring_pendant",
+      "tier": 2,
+      "price": 42
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MYSTIC_MOUNTAIN",
+      "tier": 2,
+      "price": 54
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "purple_mansion_pill",
+      "tier": 3,
+      "price": 155
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "infant_origin_fruit",
+      "tier": 3,
+      "price": 390
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "purple_flame_furnace",
+      "tier": 3,
+      "price": 175
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_PURPLE_CORE_CANON",
+      "tier": 3,
+      "price": 240
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "infant_transformation_pill",
+      "tier": 4,
+      "price": 780
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "god_transformation_dew",
+      "tier": 4,
+      "price": 1950
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "soul_banner",
+      "tier": 4,
+      "price": 1350
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "soul_wandering_pill",
+      "tier": 5,
+      "price": 6400
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "void_breaking_paste",
+      "tier": 5,
+      "price": 11200
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "starlight_dharma_robe",
+      "tier": 5,
+      "price": 8800
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_TAIYI_LIGHT",
+      "tier": 5,
+      "price": 12500
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "primordial_void_pill",
+      "tier": 6,
+      "price": 30000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heavenly_union_dew",
+      "tier": 6,
+      "price": 65000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "empty_heaven_mirror",
+      "tier": 6,
+      "price": 78000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_EMPTY_VOID_CANON",
+      "tier": 6,
+      "price": 82000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dharma_image_pill",
+      "tier": 7,
+      "price": 175000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heaven_ascending_fruit",
+      "tier": 7,
+      "price": 350000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "myriad_law_wheel",
+      "tier": 7,
+      "price": 330000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_NINE_TURN_UNITY",
+      "tier": 7,
+      "price": 390000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mystic_truth_pill",
+      "tier": 8,
+      "price": 850000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "chaos_dao_bell",
+      "tier": 8,
+      "price": 1800000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_CHAOS_OPENING",
+      "tier": 8,
+      "price": 2200000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_BODY_MORTAL",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_BODY_HUNDRED_REFINEMENT",
+      "tier": 2,
+      "price": 68
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_BODY_DRAGON_ELEPHANT",
+      "tier": 3,
+      "price": 420
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_BODY_STARS",
+      "tier": 6,
+      "price": 96000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_BODY_MYSTIC_HEAVEN",
+      "tier": 7,
+      "price": 460000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_BODY_CHAOS",
+      "tier": 8,
+      "price": 2600000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_SENSE",
+      "tier": 1,
+      "price": 18
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "spirit_channel_pill",
+      "tier": 1,
+      "price": 9
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "green_bamboo_sword",
+      "tier": 1,
+      "price": 11
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_BREATHING",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jade_marrow_pill",
+      "tier": 2,
+      "price": 34
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "spirit_spring_pendant",
+      "tier": 2,
+      "price": 42
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_BLOOD_RIVER",
+      "tier": 2,
+      "price": 52
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "purple_mansion_pill",
+      "tier": 3,
+      "price": 155
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "purple_flame_furnace",
+      "tier": 3,
+      "price": 175
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_WANMO",
+      "tier": 3,
+      "price": 230
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_CORPSE_YIN_CANON",
+      "tier": 3,
+      "price": 270
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "infant_transformation_pill",
+      "tier": 4,
+      "price": 780
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "soul_banner",
+      "tier": 4,
+      "price": 1350
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_BLOOD_SEA_EMBRYO",
+      "tier": 4,
+      "price": 1100
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "soul_wandering_pill",
+      "tier": 5,
+      "price": 6400
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "starlight_dharma_robe",
+      "tier": 5,
+      "price": 8800
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_HEAVEN_DEMON_VOID",
+      "tier": 5,
+      "price": 8600
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_FOUR_SOURCE_DEVOURING",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "soul_wandering_pill",
+      "tier": 5,
+      "price": 6400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "starlight_dharma_robe",
+      "tier": 5,
+      "price": 8800
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_HEAVEN_DEMON_VOID",
+      "tier": 5,
+      "price": 8600
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_metal",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_wood",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_water",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_fire",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_earth",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "primordial_void_pill",
+      "tier": 6,
+      "price": 30000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "empty_heaven_mirror",
+      "tier": 6,
+      "price": 78000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_FORMLESS_DEMON_DOMAIN",
+      "tier": 6,
+      "price": 88000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "dharma_image_pill",
+      "tier": 7,
+      "price": 175000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "myriad_law_wheel",
+      "tier": 7,
+      "price": 330000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_ALL_HEAVENS_DEMON",
+      "tier": 7,
+      "price": 410000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "mystic_truth_pill",
+      "tier": 8,
+      "price": 850000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "chaos_dao_bell",
+      "tier": 8,
+      "price": 1800000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_PRIMORDIAL_DEMON_LORD",
+      "tier": 8,
+      "price": 2300000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "dew_grass_seed",
+      "tier": 1,
+      "price": 6
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "purple_cloud_ginseng_seed",
+      "tier": 1,
+      "price": 18
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "earth_vein_lingzhi_seed",
+      "tier": 1,
+      "price": 42
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "heaven_heart_lotus_seed",
+      "tier": 1,
+      "price": 90
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "dew_grass_seed",
+      "tier": 1,
+      "price": 7
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "purple_cloud_ginseng_seed",
+      "tier": 1,
+      "price": 20
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "earth_vein_lingzhi_seed",
+      "tier": 1,
+      "price": 46
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "heaven_heart_lotus_seed",
+      "tier": 1,
+      "price": 98
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "dew_grass_seed",
+      "tier": 5,
+      "price": 6
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "purple_cloud_ginseng_seed",
+      "tier": 5,
+      "price": 18
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "earth_vein_lingzhi_seed",
+      "tier": 5,
+      "price": 42
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "heaven_heart_lotus_seed",
+      "tier": 5,
+      "price": 90
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "dew_grass_seed",
+      "tier": 5,
+      "price": 7
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "purple_cloud_ginseng_seed",
+      "tier": 5,
+      "price": 20
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "earth_vein_lingzhi_seed",
+      "tier": 5,
+      "price": 46
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "heaven_heart_lotus_seed",
+      "tier": 5,
+      "price": 98
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "nine_curve_herb_seed",
+      "tier": 3,
+      "price": 520
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "nine_curve_herb_seed",
+      "tier": 3,
+      "price": 560
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "nine_curve_herb_seed",
+      "tier": 5,
+      "price": 520
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "nine_curve_herb_seed",
+      "tier": 5,
+      "price": 560
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mystic_heaven_vine_seed",
+      "tier": 6,
+      "price": 28000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "golden_thunder_bamboo_seed",
+      "tier": 6,
+      "price": 22000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "nebula_manjushaka_seed",
+      "tier": 6,
+      "price": 26000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "mystic_heaven_vine_seed",
+      "tier": 6,
+      "price": 32000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "golden_thunder_bamboo_seed",
+      "tier": 6,
+      "price": 25000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "nebula_manjushaka_seed",
+      "tier": 6,
+      "price": 29000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "creation_heaven_dew",
+      "tier": 7,
+      "price": 260000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "formless_sumeru_water",
+      "tier": 7,
+      "price": 320000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "creation_heaven_dew",
+      "tier": 7,
+      "price": 300000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "formless_sumeru_water",
+      "tier": 7,
+      "price": 360000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_BEAST_TRANSFORMATION",
+      "tier": 4,
+      "price": 4800
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_BEAST_TRANSFORMATION",
+      "tier": 5,
+      "price": 4800
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MYRIAD_FORM_SPECTRUM",
+      "tier": 4,
+      "price": 5600
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_SPIRIT_METAMORPHOSIS",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_HEAVENLY_FORM_CYCLE",
+      "tier": 6,
+      "price": 96000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_MYRIAD_FORM_RETURN",
+      "tier": 7,
+      "price": 520000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_PRIMORDIAL_SPIRIT_TRANSFORMATION",
+      "tier": 8,
+      "price": 3000000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_BLOOD_SHADOW_TRANSFORMATION",
+      "tier": 4,
+      "price": 6200
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_HEAVEN_DEMON_METAMORPHOSIS",
+      "tier": 5,
+      "price": 22000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_HEAVEN_DEMON_METAMORPHOSIS",
+      "tier": 5,
+      "price": 22000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_FORMLESS_DEMON_TRANSFORMATION",
+      "tier": 6,
+      "price": 115000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_ALL_HEAVENS_DEMON_TRANSFORMATION",
+      "tier": 7,
+      "price": 610000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_PRIMORDIAL_DEMON_TRANSFORMATION",
+      "tier": 8,
+      "price": 3200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "azure_luan_blood",
+      "tier": 7,
+      "price": 210000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "azure_luan_essence",
+      "tier": 8,
+      "price": 920000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mountain_ape_blood",
+      "tier": 7,
+      "price": 260000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "mountain_ape_soul",
+      "tier": 8,
+      "price": 1500000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "true_dragon_blood_trace",
+      "tier": 7,
+      "price": 180000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "true_dragon_soul_essence",
+      "tier": 8,
+      "price": 2100000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "phoenix_blood",
+      "tier": 7,
+      "price": 320000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "phoenix_soul_flame",
+      "tier": 8,
+      "price": 2400000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "kunpeng_essence",
+      "tier": 7,
+      "price": 360000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "kunpeng_true_soul",
+      "tier": 8,
+      "price": 2550000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "qilin_blood",
+      "tier": 7,
+      "price": 380000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "qilin_essence",
+      "tier": 8,
+      "price": 2600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "white_tiger_blood",
+      "tier": 7,
+      "price": 420000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "white_tiger_soul",
+      "tier": 8,
+      "price": 2800000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "vermillion_bird_blood",
+      "tier": 7,
+      "price": 460000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "vermillion_bird_soul",
+      "tier": 8,
+      "price": 3000000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "xuanwu_blood",
+      "tier": 7,
+      "price": 440000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "xuanwu_essence",
+      "tier": 8,
+      "price": 2900000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "immortal_origin_stone",
+      "tier": 9,
+      "price": 18000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "law_crystal",
+      "tier": 9,
+      "price": 32000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "immortal_aperture_jade",
+      "tier": 9,
+      "price": 95000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "boundary_river_silver",
+      "tier": 9,
+      "price": 110000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "purple_cloud_immortal_dew",
+      "tier": 9,
+      "price": 12000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "dijiang_tear",
+      "tier": 10,
+      "price": 1350000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "zhulong_breath",
+      "tier": 10,
+      "price": 1350000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "jumang_feather",
+      "tier": 10,
+      "price": 920000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "rushou_scale",
+      "tier": 10,
+      "price": 920000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "gonggong_water",
+      "tier": 10,
+      "price": 920000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "zhurong_flame",
+      "tier": 10,
+      "price": 920000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "qiangliang_thunder",
+      "tier": 10,
+      "price": 1180000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "xizi_lightning",
+      "tier": 10,
+      "price": 1180000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "xuanming_rain",
+      "tier": 10,
+      "price": 980000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "feilian_wind",
+      "tier": 10,
+      "price": 980000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "shebishi_orb",
+      "tier": 10,
+      "price": 1260000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "houtu_clay",
+      "tier": 10,
+      "price": 920000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "taiyi_dao_marrow",
+      "tier": 11,
+      "price": 6800000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "primordial_mother_qi",
+      "tier": 12,
+      "price": 32000000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "asura_blood_trace",
+      "tier": 10,
+      "price": 88000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "asura_soul_shard",
+      "tier": 12,
+      "price": 1800000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_BREATHING",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_PRIMORDIAL_IMMORTAL_LIGHT",
+      "tier": 9,
+      "price": 220000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_TAIYI_SWORD_CANON",
+      "tier": 10,
+      "price": 480000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_NINE_HEAVENS_THUNDER",
+      "tier": 10,
+      "price": 440000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_PURPLE_MANSION_SENSE",
+      "tier": 9,
+      "price": 260000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_IMMORTAL_BODY_FORGING",
+      "tier": 10,
+      "price": 520000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_HEAVENLY_RIVER_REFINING",
+      "tier": 9,
+      "price": 240000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "xuanhuang_immortal_armor",
+      "tier": 10,
+      "price": 680000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "heavenly_river_sword_embryo",
+      "tier": 10,
+      "price": 820000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "purple_extreme_soul_pill",
+      "tier": 9,
+      "price": 160000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "immortal_jade_marrow",
+      "tier": 9,
+      "price": 180000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "law_dao_fruit",
+      "tier": 11,
+      "price": 2400000000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "cloudstep_immortal_boots",
+      "tier": 9,
+      "price": 310000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_blood_crystal",
+      "tier": 9,
+      "price": 95000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "heavenly_demon_heart_marrow",
+      "tier": 9,
+      "price": 140000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "blood_moon_divine_pill",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "war_soul_banner",
+      "tier": 9,
+      "price": 360000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_WAR_HEAVEN",
+      "tier": 9,
+      "price": 180000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_BLOOD_SEA_IMPERISHABLE",
+      "tier": 9,
+      "price": 240000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "annihilation_demon_blade",
+      "tier": 10,
+      "price": 1600000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_MYRIAD_CALAMITY_DEMON_FORM",
+      "tier": 10,
+      "price": 780000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ANNIHILATION_SKY_BLADE",
+      "tier": 10,
+      "price": 980000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_WUSHENG_SOUL_CANON",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_TRUE_BODY",
+      "tier": 10,
+      "price": 860000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "wusheng_dao_embryo",
+      "tier": 11,
+      "price": 8200000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "primordial_asura_bone",
+      "tier": 12,
+      "price": 46000000000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "concord_birth_pill",
+      "tier": 3,
+      "price": 360
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "blood_womb_pill",
+      "tier": 3,
+      "price": 420
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "yin_yang_creation_dew",
+      "tier": 5,
+      "price": 7600
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "heavenly_demon_heir_pill",
+      "tier": 5,
+      "price": 8800
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "immortal_embryo_elixir",
+      "tier": 9,
+      "price": 180000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "war_soul_heir_pill",
+      "tier": 9,
+      "price": 160000000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "yin_foundation_pill",
+      "tier": 1,
+      "price": 12
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "yin_soul_stone",
+      "tier": 1,
+      "price": 7
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GHOST_BREATHING",
+      "tier": 1,
+      "price": 9
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_SOUL_ECHO_SENSE",
+      "tier": 1,
+      "price": 12
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "soul_meridian_pill",
+      "tier": 2,
+      "price": 38
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "yin_core_pill",
+      "tier": 2,
+      "price": 82
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "ghost_silk_robe",
+      "tier": 2,
+      "price": 44
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_YIN",
+      "tier": 2,
+      "price": 52
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "ghost_core_pill",
+      "tier": 3,
+      "price": 190
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "soul_infant_marrow",
+      "tier": 3,
+      "price": 460
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "soul_lamp",
+      "tier": 3,
+      "price": 260
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "ghost_gate_ward",
+      "tier": 3,
+      "price": 760
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_YIN_ADVANCED",
+      "tier": 3,
+      "price": 220
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GHOSTFIRE_BLADE",
+      "tier": 3,
+      "price": 260
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_BONE_VESSEL_BODY",
+      "tier": 3,
+      "price": 310
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "infant_soul_dew",
+      "tier": 4,
+      "price": 980
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "spirit_calling_incense",
+      "tier": 4,
+      "price": 2350
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "memory_pearl",
+      "tier": 4,
+      "price": 1600
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_SOUL_LAMP_CANON",
+      "tier": 4,
+      "price": 3400
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "wandering_soul_pill",
+      "tier": 5,
+      "price": 6900
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "void_soul_elixir",
+      "tier": 5,
+      "price": 11800
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "yin_birth_dew",
+      "tier": 5,
+      "price": 8200
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_metal",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_wood",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_water",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_fire",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_earth",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "iron_tree_heartwood",
+      "tier": 5,
+      "price": 9200
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_TIDE_CANON",
+      "tier": 5,
+      "price": 10600
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_FORGETFUL_RIVER_SENSE",
+      "tier": 5,
+      "price": 12800
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "void_soul_return_pill",
+      "tier": 6,
+      "price": 36000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "soul_covenant_pill",
+      "tier": 6,
+      "price": 72000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "nine_prison_seal",
+      "tier": 6,
+      "price": 64000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_NINE_PRISON_VOID",
+      "tier": 6,
+      "price": 76000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "united_soul_dew",
+      "tier": 7,
+      "price": 310000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "great_crossing_incense",
+      "tier": 7,
+      "price": 580000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "nether_tide_banner",
+      "tier": 7,
+      "price": 520000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_YIN_YANG_SOUL_UNITY",
+      "tier": 7,
+      "price": 620000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_UNDYING_GHOST_BODY",
+      "tier": 7,
+      "price": 760000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mahayana_soul_marrow",
+      "tier": 8,
+      "price": 2500000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "karma_mirror_disc",
+      "tier": 8,
+      "price": 4100000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_GATE_CANON",
+      "tier": 8,
+      "price": 5200000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "demon_bloodsteel_core",
+      "tier": 3,
+      "price": 320
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "demon_soulflame_crystal",
+      "tier": 5,
+      "price": 9200
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "true_demon_voidbone_jade",
+      "tier": 6,
+      "price": 78000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "true_demon_primordial_heart_iron",
+      "tier": 8,
+      "price": 2400000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "hell_forgetful_soul_jade",
+      "tier": 3,
+      "price": 300
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "hell_yellow_spring_dark_iron",
+      "tier": 6,
+      "price": 68000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_warsoul_crystal",
+      "tier": 9,
+      "price": 130000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_annihilation_bone_gold",
+      "tier": 11,
+      "price": 9800000000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "monster_tempering_blood",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "beast_pattern_bone",
+      "tier": 2,
+      "price": 58
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_HIDE_FORGING",
+      "tier": 1,
+      "price": 14
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_IRON_BONE",
+      "tier": 2,
+      "price": 62
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_GREAT_STRENGTH_BODY",
+      "tier": 3,
+      "price": 460
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_DEMON_CORE",
+      "tier": 3,
+      "price": 520
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "monster_tempering_blood",
+      "tier": 1,
+      "price": 8
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "beast_pattern_bone",
+      "tier": 1,
+      "price": 46
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "ancestral_beast_amber",
+      "tier": 4,
+      "price": 1200
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "thunder_plume_talisman",
+      "tier": 4,
+      "price": 1900
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "azure_scale_heart",
+      "tier": 5,
+      "price": 9200
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "ancestral_court_seal",
+      "tier": 7,
+      "price": 360000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "primordial_beast_marrow",
+      "tier": 8,
+      "price": 980000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "myriad_demon_crown",
+      "tier": 8,
+      "price": 1900000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "monster_meridian_pill",
+      "tier": 2,
+      "price": 34
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "blood_core_pill",
+      "tier": 3,
+      "price": 165
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "beast_infant_pill",
+      "tier": 4,
+      "price": 820
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "ancestral_soul_marrow",
+      "tier": 5,
+      "price": 6100
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "void_molt_pill",
+      "tier": 6,
+      "price": 29500
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "unity_blood_pill",
+      "tier": 7,
+      "price": 168000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "myriad_ancestor_pill",
+      "tier": 8,
+      "price": 710000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_HIDE_FORGING",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_IRON_BONE",
+      "tier": 2,
+      "price": 50
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_GREAT_STRENGTH_BODY",
+      "tier": 3,
+      "price": 390
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_DEMON_CORE",
+      "tier": 3,
+      "price": 440
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_MYRIAD_SPIRITS",
+      "tier": 5,
+      "price": 13500
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_IMMEMORIAL_BODY",
+      "tier": 6,
+      "price": 118000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_HEAVEN_BONE",
+      "tier": 6,
+      "price": 130000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_ANCESTRAL_COURT",
+      "tier": 7,
+      "price": 920000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_PRIMORDIAL_BODY",
+      "tier": 8,
+      "price": 6800000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "monster_tempering_blood",
+      "tier": 1,
+      "price": 11
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "beast_pattern_bone",
+      "tier": 1,
+      "price": 54
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "moon_marrow_pearl",
+      "tier": 3,
+      "price": 380
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "ancestral_beast_amber",
+      "tier": 4,
+      "price": 1350
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "phantom_tide_crystal",
+      "tier": 6,
+      "price": 52000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "heaven_bone_relic",
+      "tier": 6,
+      "price": 110000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "myriad_spirit_seed",
+      "tier": 7,
+      "price": 410000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "monster_meridian_pill",
+      "tier": 2,
+      "price": 39
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "blood_core_pill",
+      "tier": 3,
+      "price": 185
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "beast_infant_pill",
+      "tier": 4,
+      "price": 910
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "ancestral_soul_marrow",
+      "tier": 5,
+      "price": 6800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "void_molt_pill",
+      "tier": 6,
+      "price": 33000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "unity_blood_pill",
+      "tier": 7,
+      "price": 186000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "myriad_ancestor_pill",
+      "tier": 8,
+      "price": 780000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_HIDE_FORGING",
+      "tier": 1,
+      "price": 13
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_MOON_FORM",
+      "tier": 4,
+      "price": 2800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_MYRIAD_SPIRITS",
+      "tier": 5,
+      "price": 14800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_IMMEMORIAL_BODY",
+      "tier": 6,
+      "price": 126000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_HEAVEN_BONE",
+      "tier": 6,
+      "price": 142000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_PRIMORDIAL_BODY",
+      "tier": 9,
+      "price": 9800000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_ANCESTRAL_COURT",
+      "tier": 9,
+      "price": 5200000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "myriad_beast_progeny_pill",
+      "tier": 3,
+      "price": 420
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "phantom_womb_dew",
+      "tier": 5,
+      "price": 8200
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "ancestral_lineage_seed_pill",
+      "tier": 9,
+      "price": 14000000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_01",
+      "tier": 4,
+      "price": 9600
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_02",
+      "tier": 4,
+      "price": 14400
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_03",
+      "tier": 4,
+      "price": 20000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_04",
+      "tier": 4,
+      "price": 28800
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_05",
+      "tier": 4,
+      "price": 40000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_06",
+      "tier": 4,
+      "price": 57600
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_07",
+      "tier": 4,
+      "price": 80000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_08",
+      "tier": 4,
+      "price": 112000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_09",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CANGHAI_10",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_01",
+      "tier": 4,
+      "price": 6400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_02",
+      "tier": 4,
+      "price": 9600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_03",
+      "tier": 4,
+      "price": 14400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_04",
+      "tier": 4,
+      "price": 20000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_05",
+      "tier": 4,
+      "price": 28800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_06",
+      "tier": 4,
+      "price": 40000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_07",
+      "tier": 4,
+      "price": 57600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_08",
+      "tier": 4,
+      "price": 80000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_09",
+      "tier": 4,
+      "price": 112000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_10",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_11",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_equipment_12",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_01",
+      "tier": 4,
+      "price": 6400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_02",
+      "tier": 4,
+      "price": 9600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_03",
+      "tier": 4,
+      "price": 14400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_04",
+      "tier": 4,
+      "price": 20000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_05",
+      "tier": 4,
+      "price": 28800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_06",
+      "tier": 4,
+      "price": 40000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_07",
+      "tier": 4,
+      "price": 57600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_consumable_08",
+      "tier": 4,
+      "price": 80000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_01",
+      "tier": 4,
+      "price": 6400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_02",
+      "tier": 4,
+      "price": 9600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_03",
+      "tier": 4,
+      "price": 14400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_04",
+      "tier": 4,
+      "price": 20000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_05",
+      "tier": 4,
+      "price": 28800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_06",
+      "tier": 4,
+      "price": 40000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_07",
+      "tier": 4,
+      "price": 57600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_08",
+      "tier": 4,
+      "price": 80000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_09",
+      "tier": 4,
+      "price": 112000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_plant_10",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_01",
+      "tier": 4,
+      "price": 6400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_02",
+      "tier": 4,
+      "price": 9600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_03",
+      "tier": 4,
+      "price": 14400
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_04",
+      "tier": 4,
+      "price": 20000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_05",
+      "tier": 4,
+      "price": 28800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_06",
+      "tier": 4,
+      "price": 40000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_07",
+      "tier": 4,
+      "price": 57600
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_08",
+      "tier": 4,
+      "price": 80000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_09",
+      "tier": 4,
+      "price": 112000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "guixu_canghai_material_10",
+      "tier": 4,
+      "price": 160000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_01",
+      "tier": 6,
+      "price": 640000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_02",
+      "tier": 6,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_03",
+      "tier": 6,
+      "price": 1440000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_04",
+      "tier": 6,
+      "price": 2080000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_05",
+      "tier": 6,
+      "price": 2880000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_06",
+      "tier": 6,
+      "price": 4000000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_07",
+      "tier": 6,
+      "price": 5600000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_08",
+      "tier": 6,
+      "price": 7200000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_09",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_WEIR_10",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_01",
+      "tier": 6,
+      "price": 400000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_02",
+      "tier": 6,
+      "price": 640000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_03",
+      "tier": 6,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_04",
+      "tier": 6,
+      "price": 1440000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_05",
+      "tier": 6,
+      "price": 2080000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_06",
+      "tier": 6,
+      "price": 2880000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_07",
+      "tier": 6,
+      "price": 4000000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_08",
+      "tier": 6,
+      "price": 5600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_09",
+      "tier": 6,
+      "price": 7200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_10",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_11",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_equipment_12",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_01",
+      "tier": 6,
+      "price": 400000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_02",
+      "tier": 6,
+      "price": 640000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_03",
+      "tier": 6,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_04",
+      "tier": 6,
+      "price": 1440000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_05",
+      "tier": 6,
+      "price": 2080000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_06",
+      "tier": 6,
+      "price": 2880000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_07",
+      "tier": 6,
+      "price": 4000000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_consumable_08",
+      "tier": 6,
+      "price": 5600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_01",
+      "tier": 6,
+      "price": 400000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_02",
+      "tier": 6,
+      "price": 640000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_03",
+      "tier": 6,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_04",
+      "tier": 6,
+      "price": 1440000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_05",
+      "tier": 6,
+      "price": 2080000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_06",
+      "tier": 6,
+      "price": 2880000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_07",
+      "tier": 6,
+      "price": 4000000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_08",
+      "tier": 6,
+      "price": 5600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_09",
+      "tier": 6,
+      "price": 7200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_plant_10",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_01",
+      "tier": 6,
+      "price": 400000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_02",
+      "tier": 6,
+      "price": 640000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_03",
+      "tier": 6,
+      "price": 960000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_04",
+      "tier": 6,
+      "price": 1440000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_05",
+      "tier": 6,
+      "price": 2080000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_06",
+      "tier": 6,
+      "price": 2880000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_07",
+      "tier": 6,
+      "price": 4000000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_08",
+      "tier": 6,
+      "price": 5600000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_09",
+      "tier": 6,
+      "price": 7200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "guixu_weir_material_10",
+      "tier": 6,
+      "price": 9600000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_01",
+      "tier": 4,
+      "price": 17600
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_02",
+      "tier": 4,
+      "price": 26080
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_03",
+      "tier": 4,
+      "price": 38560
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_04",
+      "tier": 4,
+      "price": 57040
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_05",
+      "tier": 4,
+      "price": 84480
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_06",
+      "tier": 4,
+      "price": 124960
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_07",
+      "tier": 4,
+      "price": 184960
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_08",
+      "tier": 4,
+      "price": 273760
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_09",
+      "tier": 4,
+      "price": 405120
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BLOODRIVER_10",
+      "tier": 4,
+      "price": 599600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_01",
+      "tier": 4,
+      "price": 17600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_02",
+      "tier": 4,
+      "price": 26080
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_03",
+      "tier": 4,
+      "price": 38560
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_04",
+      "tier": 4,
+      "price": 57040
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_05",
+      "tier": 4,
+      "price": 84480
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_06",
+      "tier": 4,
+      "price": 124960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_07",
+      "tier": 4,
+      "price": 184960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_08",
+      "tier": 4,
+      "price": 273760
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_09",
+      "tier": 4,
+      "price": 405120
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_10",
+      "tier": 4,
+      "price": 599600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_11",
+      "tier": 4,
+      "price": 887440
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_equipment_12",
+      "tier": 4,
+      "price": 1313360
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_01",
+      "tier": 4,
+      "price": 17600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_02",
+      "tier": 4,
+      "price": 26080
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_03",
+      "tier": 4,
+      "price": 38560
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_04",
+      "tier": 4,
+      "price": 57040
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_05",
+      "tier": 4,
+      "price": 84480
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_06",
+      "tier": 4,
+      "price": 124960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_07",
+      "tier": 4,
+      "price": 184960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_consumable_08",
+      "tier": 4,
+      "price": 273760
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_01",
+      "tier": 4,
+      "price": 17600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_02",
+      "tier": 4,
+      "price": 26080
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_03",
+      "tier": 4,
+      "price": 38560
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_04",
+      "tier": 4,
+      "price": 57040
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_05",
+      "tier": 4,
+      "price": 84480
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_06",
+      "tier": 4,
+      "price": 124960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_07",
+      "tier": 4,
+      "price": 184960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_08",
+      "tier": 4,
+      "price": 273760
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_09",
+      "tier": 4,
+      "price": 405120
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_plant_10",
+      "tier": 4,
+      "price": 599600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_01",
+      "tier": 4,
+      "price": 17600
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_02",
+      "tier": 4,
+      "price": 26080
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_03",
+      "tier": 4,
+      "price": 38560
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_04",
+      "tier": 4,
+      "price": 57040
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_05",
+      "tier": 4,
+      "price": 84480
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_06",
+      "tier": 4,
+      "price": 124960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_07",
+      "tier": 4,
+      "price": 184960
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_08",
+      "tier": 4,
+      "price": 273760
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_09",
+      "tier": 4,
+      "price": 405120
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "guixu_bloodriver_material_10",
+      "tier": 4,
+      "price": 599600
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_01",
+      "tier": 6,
+      "price": 480000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_02",
+      "tier": 6,
+      "price": 710400
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_03",
+      "tier": 6,
+      "price": 1051360
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_04",
+      "tier": 6,
+      "price": 1556080
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_05",
+      "tier": 6,
+      "price": 2302960
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_06",
+      "tier": 6,
+      "price": 3408400
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_07",
+      "tier": 6,
+      "price": 5044400
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_08",
+      "tier": 6,
+      "price": 7465760
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_09",
+      "tier": 6,
+      "price": 11049280
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_DEMON_GRAVE_10",
+      "tier": 6,
+      "price": 16352960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_01",
+      "tier": 6,
+      "price": 480000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_02",
+      "tier": 6,
+      "price": 710400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_03",
+      "tier": 6,
+      "price": 1051360
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_04",
+      "tier": 6,
+      "price": 1556080
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_05",
+      "tier": 6,
+      "price": 2302960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_06",
+      "tier": 6,
+      "price": 3408400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_07",
+      "tier": 6,
+      "price": 5044400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_08",
+      "tier": 6,
+      "price": 7465760
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_09",
+      "tier": 6,
+      "price": 11049280
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_10",
+      "tier": 6,
+      "price": 16352960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_11",
+      "tier": 6,
+      "price": 24202400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_equipment_12",
+      "tier": 6,
+      "price": 35819520
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_01",
+      "tier": 6,
+      "price": 480000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_02",
+      "tier": 6,
+      "price": 710400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_03",
+      "tier": 6,
+      "price": 1051360
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_04",
+      "tier": 6,
+      "price": 1556080
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_05",
+      "tier": 6,
+      "price": 2302960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_06",
+      "tier": 6,
+      "price": 3408400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_07",
+      "tier": 6,
+      "price": 5044400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_consumable_08",
+      "tier": 6,
+      "price": 7465760
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_01",
+      "tier": 6,
+      "price": 480000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_02",
+      "tier": 6,
+      "price": 710400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_03",
+      "tier": 6,
+      "price": 1051360
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_04",
+      "tier": 6,
+      "price": 1556080
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_05",
+      "tier": 6,
+      "price": 2302960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_06",
+      "tier": 6,
+      "price": 3408400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_07",
+      "tier": 6,
+      "price": 5044400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_08",
+      "tier": 6,
+      "price": 7465760
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_09",
+      "tier": 6,
+      "price": 11049280
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_plant_10",
+      "tier": 6,
+      "price": 16352960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_01",
+      "tier": 6,
+      "price": 480000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_02",
+      "tier": 6,
+      "price": 710400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_03",
+      "tier": 6,
+      "price": 1051360
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_04",
+      "tier": 6,
+      "price": 1556080
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_05",
+      "tier": 6,
+      "price": 2302960
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_06",
+      "tier": 6,
+      "price": 3408400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_07",
+      "tier": 6,
+      "price": 5044400
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_08",
+      "tier": 6,
+      "price": 7465760
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_09",
+      "tier": 6,
+      "price": 11049280
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "guixu_demon_grave_material_10",
+      "tier": 6,
+      "price": 16352960
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_01",
+      "tier": 6,
+      "price": 416000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_02",
+      "tier": 6,
+      "price": 615680
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_03",
+      "tier": 6,
+      "price": 911200
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_04",
+      "tier": 6,
+      "price": 1348560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_05",
+      "tier": 6,
+      "price": 1995920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_06",
+      "tier": 6,
+      "price": 2953920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_07",
+      "tier": 6,
+      "price": 4371840
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_08",
+      "tier": 6,
+      "price": 6470320
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_09",
+      "tier": 6,
+      "price": 9576080
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_BEAST_VORTEX_10",
+      "tier": 6,
+      "price": 14172560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_01",
+      "tier": 6,
+      "price": 416000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_02",
+      "tier": 6,
+      "price": 615680
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_03",
+      "tier": 6,
+      "price": 911200
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_04",
+      "tier": 6,
+      "price": 1348560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_05",
+      "tier": 6,
+      "price": 1995920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_06",
+      "tier": 6,
+      "price": 2953920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_07",
+      "tier": 6,
+      "price": 4371840
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_08",
+      "tier": 6,
+      "price": 6470320
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_09",
+      "tier": 6,
+      "price": 9576080
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_10",
+      "tier": 6,
+      "price": 14172560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_11",
+      "tier": 6,
+      "price": 20975440
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_equipment_12",
+      "tier": 6,
+      "price": 31043600
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_01",
+      "tier": 6,
+      "price": 416000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_02",
+      "tier": 6,
+      "price": 615680
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_03",
+      "tier": 6,
+      "price": 911200
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_04",
+      "tier": 6,
+      "price": 1348560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_05",
+      "tier": 6,
+      "price": 1995920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_06",
+      "tier": 6,
+      "price": 2953920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_07",
+      "tier": 6,
+      "price": 4371840
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_consumable_08",
+      "tier": 6,
+      "price": 6470320
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_01",
+      "tier": 6,
+      "price": 416000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_02",
+      "tier": 6,
+      "price": 615680
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_03",
+      "tier": 6,
+      "price": 911200
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_04",
+      "tier": 6,
+      "price": 1348560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_05",
+      "tier": 6,
+      "price": 1995920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_06",
+      "tier": 6,
+      "price": 2953920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_07",
+      "tier": 6,
+      "price": 4371840
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_08",
+      "tier": 6,
+      "price": 6470320
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_09",
+      "tier": 6,
+      "price": 9576080
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_plant_10",
+      "tier": 6,
+      "price": 14172560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_01",
+      "tier": 6,
+      "price": 416000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_02",
+      "tier": 6,
+      "price": 615680
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_03",
+      "tier": 6,
+      "price": 911200
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_04",
+      "tier": 6,
+      "price": 1348560
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_05",
+      "tier": 6,
+      "price": 1995920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_06",
+      "tier": 6,
+      "price": 2953920
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_07",
+      "tier": 6,
+      "price": 4371840
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_08",
+      "tier": 6,
+      "price": 6470320
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_09",
+      "tier": 6,
+      "price": 9576080
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "guixu_beast_vortex_material_10",
+      "tier": 6,
+      "price": 14172560
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_01",
+      "tier": 6,
+      "price": 448000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_02",
+      "tier": 6,
+      "price": 663040
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_03",
+      "tier": 6,
+      "price": 981280
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_04",
+      "tier": 6,
+      "price": 1452320
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_05",
+      "tier": 6,
+      "price": 2149440
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_06",
+      "tier": 6,
+      "price": 3181200
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_07",
+      "tier": 6,
+      "price": 4708160
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_08",
+      "tier": 6,
+      "price": 6968000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_09",
+      "tier": 6,
+      "price": 10312720
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_YELLOW_SPRING_10",
+      "tier": 6,
+      "price": 15262800
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_01",
+      "tier": 6,
+      "price": 448000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_02",
+      "tier": 6,
+      "price": 663040
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_03",
+      "tier": 6,
+      "price": 981280
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_04",
+      "tier": 6,
+      "price": 1452320
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_05",
+      "tier": 6,
+      "price": 2149440
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_06",
+      "tier": 6,
+      "price": 3181200
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_07",
+      "tier": 6,
+      "price": 4708160
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_08",
+      "tier": 6,
+      "price": 6968000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_09",
+      "tier": 6,
+      "price": 10312720
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_10",
+      "tier": 6,
+      "price": 15262800
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_11",
+      "tier": 6,
+      "price": 22588880
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_equipment_12",
+      "tier": 6,
+      "price": 33431600
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_01",
+      "tier": 6,
+      "price": 448000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_02",
+      "tier": 6,
+      "price": 663040
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_03",
+      "tier": 6,
+      "price": 981280
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_04",
+      "tier": 6,
+      "price": 1452320
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_05",
+      "tier": 6,
+      "price": 2149440
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_06",
+      "tier": 6,
+      "price": 3181200
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_07",
+      "tier": 6,
+      "price": 4708160
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_consumable_08",
+      "tier": 6,
+      "price": 6968000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_01",
+      "tier": 6,
+      "price": 448000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_02",
+      "tier": 6,
+      "price": 663040
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_03",
+      "tier": 6,
+      "price": 981280
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_04",
+      "tier": 6,
+      "price": 1452320
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_05",
+      "tier": 6,
+      "price": 2149440
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_06",
+      "tier": 6,
+      "price": 3181200
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_07",
+      "tier": 6,
+      "price": 4708160
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_08",
+      "tier": 6,
+      "price": 6968000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_09",
+      "tier": 6,
+      "price": 10312720
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_plant_10",
+      "tier": 6,
+      "price": 15262800
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_01",
+      "tier": 6,
+      "price": 448000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_02",
+      "tier": 6,
+      "price": 663040
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_03",
+      "tier": 6,
+      "price": 981280
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_04",
+      "tier": 6,
+      "price": 1452320
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_05",
+      "tier": 6,
+      "price": 2149440
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_06",
+      "tier": 6,
+      "price": 3181200
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_07",
+      "tier": 6,
+      "price": 4708160
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_08",
+      "tier": 6,
+      "price": 6968000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_09",
+      "tier": 6,
+      "price": 10312720
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "guixu_yellow_spring_material_10",
+      "tier": 6,
+      "price": 15262800
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_01",
+      "tier": 6,
+      "price": 336000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_02",
+      "tier": 6,
+      "price": 497280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_03",
+      "tier": 6,
+      "price": 736000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_04",
+      "tier": 6,
+      "price": 1089280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_05",
+      "tier": 6,
+      "price": 1612080
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_06",
+      "tier": 6,
+      "price": 2385840
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_07",
+      "tier": 6,
+      "price": 3531120
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_08",
+      "tier": 6,
+      "price": 5226000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_09",
+      "tier": 6,
+      "price": 7734480
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_MONSTER_REALM_10",
+      "tier": 6,
+      "price": 11447040
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_01",
+      "tier": 6,
+      "price": 336000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_02",
+      "tier": 6,
+      "price": 497280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_03",
+      "tier": 6,
+      "price": 736000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_04",
+      "tier": 6,
+      "price": 1089280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_05",
+      "tier": 6,
+      "price": 1612080
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_06",
+      "tier": 6,
+      "price": 2385840
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_07",
+      "tier": 6,
+      "price": 3531120
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_08",
+      "tier": 6,
+      "price": 5226000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_09",
+      "tier": 6,
+      "price": 7734480
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_10",
+      "tier": 6,
+      "price": 11447040
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_11",
+      "tier": 6,
+      "price": 16941680
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_equipment_12",
+      "tier": 6,
+      "price": 25073680
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_01",
+      "tier": 6,
+      "price": 336000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_02",
+      "tier": 6,
+      "price": 497280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_03",
+      "tier": 6,
+      "price": 736000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_04",
+      "tier": 6,
+      "price": 1089280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_05",
+      "tier": 6,
+      "price": 1612080
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_06",
+      "tier": 6,
+      "price": 2385840
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_07",
+      "tier": 6,
+      "price": 3531120
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_consumable_08",
+      "tier": 6,
+      "price": 5226000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_01",
+      "tier": 6,
+      "price": 336000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_02",
+      "tier": 6,
+      "price": 497280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_03",
+      "tier": 6,
+      "price": 736000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_04",
+      "tier": 6,
+      "price": 1089280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_05",
+      "tier": 6,
+      "price": 1612080
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_06",
+      "tier": 6,
+      "price": 2385840
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_07",
+      "tier": 6,
+      "price": 3531120
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_08",
+      "tier": 6,
+      "price": 5226000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_09",
+      "tier": 6,
+      "price": 7734480
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_plant_10",
+      "tier": 6,
+      "price": 11447040
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_01",
+      "tier": 6,
+      "price": 336000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_02",
+      "tier": 6,
+      "price": 497280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_03",
+      "tier": 6,
+      "price": 736000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_04",
+      "tier": 6,
+      "price": 1089280
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_05",
+      "tier": 6,
+      "price": 1612080
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_06",
+      "tier": 6,
+      "price": 2385840
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_07",
+      "tier": 6,
+      "price": 3531120
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_08",
+      "tier": 6,
+      "price": 5226000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_09",
+      "tier": 6,
+      "price": 7734480
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "guixu_monster_realm_material_10",
+      "tier": 6,
+      "price": 11447040
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_CELESTIAL_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_11",
+      "tier": 11,
+      "price": 484047920
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_equipment_12",
+      "tier": 11,
+      "price": 716390960
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_consumable_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_plant_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "guixu_celestial_material_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_ASURA_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_11",
+      "tier": 11,
+      "price": 484047920
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_equipment_12",
+      "tier": 11,
+      "price": 716390960
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_consumable_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_plant_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_01",
+      "tier": 11,
+      "price": 9600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_02",
+      "tier": 11,
+      "price": 14208000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_03",
+      "tier": 11,
+      "price": 21027840
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_04",
+      "tier": 11,
+      "price": 31121200
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_05",
+      "tier": 11,
+      "price": 46059360
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_06",
+      "tier": 11,
+      "price": 68167920
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_07",
+      "tier": 11,
+      "price": 100888480
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_08",
+      "tier": 11,
+      "price": 149314960
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_09",
+      "tier": 11,
+      "price": 220986080
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "guixu_asura_material_10",
+      "tier": 11,
+      "price": 327059440
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_01",
+      "tier": 11,
+      "price": 10400000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_02",
+      "tier": 11,
+      "price": 15392000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_03",
+      "tier": 11,
+      "price": 22780160
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_04",
+      "tier": 11,
+      "price": 33714640
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_05",
+      "tier": 11,
+      "price": 49897680
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_06",
+      "tier": 11,
+      "price": 73848560
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_07",
+      "tier": 11,
+      "price": 109295840
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_08",
+      "tier": 11,
+      "price": 161757840
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_09",
+      "tier": 11,
+      "price": 239401600
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_NETHER_10",
+      "tier": 11,
+      "price": 354314400
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_01",
+      "tier": 11,
+      "price": 10400000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_02",
+      "tier": 11,
+      "price": 15392000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_03",
+      "tier": 11,
+      "price": 22780160
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_04",
+      "tier": 11,
+      "price": 33714640
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_05",
+      "tier": 11,
+      "price": 49897680
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_06",
+      "tier": 11,
+      "price": 73848560
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_07",
+      "tier": 11,
+      "price": 109295840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_08",
+      "tier": 11,
+      "price": 161757840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_09",
+      "tier": 11,
+      "price": 239401600
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_10",
+      "tier": 11,
+      "price": 354314400
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_11",
+      "tier": 11,
+      "price": 524385280
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_equipment_12",
+      "tier": 11,
+      "price": 776090240
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_01",
+      "tier": 11,
+      "price": 10400000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_02",
+      "tier": 11,
+      "price": 15392000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_03",
+      "tier": 11,
+      "price": 22780160
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_04",
+      "tier": 11,
+      "price": 33714640
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_05",
+      "tier": 11,
+      "price": 49897680
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_06",
+      "tier": 11,
+      "price": 73848560
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_07",
+      "tier": 11,
+      "price": 109295840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_consumable_08",
+      "tier": 11,
+      "price": 161757840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_01",
+      "tier": 11,
+      "price": 10400000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_02",
+      "tier": 11,
+      "price": 15392000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_03",
+      "tier": 11,
+      "price": 22780160
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_04",
+      "tier": 11,
+      "price": 33714640
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_05",
+      "tier": 11,
+      "price": 49897680
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_06",
+      "tier": 11,
+      "price": 73848560
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_07",
+      "tier": 11,
+      "price": 109295840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_08",
+      "tier": 11,
+      "price": 161757840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_09",
+      "tier": 11,
+      "price": 239401600
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_plant_10",
+      "tier": 11,
+      "price": 354314400
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_01",
+      "tier": 11,
+      "price": 10400000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_02",
+      "tier": 11,
+      "price": 15392000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_03",
+      "tier": 11,
+      "price": 22780160
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_04",
+      "tier": 11,
+      "price": 33714640
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_05",
+      "tier": 11,
+      "price": 49897680
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_06",
+      "tier": 11,
+      "price": 73848560
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_07",
+      "tier": 11,
+      "price": 109295840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_08",
+      "tier": 11,
+      "price": 161757840
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_09",
+      "tier": 11,
+      "price": 239401600
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "guixu_nether_material_10",
+      "tier": 11,
+      "price": 354314400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_01",
+      "tier": 11,
+      "price": 10000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_02",
+      "tier": 11,
+      "price": 14800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_03",
+      "tier": 11,
+      "price": 21904000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_04",
+      "tier": 11,
+      "price": 32417920
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_05",
+      "tier": 11,
+      "price": 47978560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_06",
+      "tier": 11,
+      "price": 71008240
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_07",
+      "tier": 11,
+      "price": 105092160
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_08",
+      "tier": 11,
+      "price": 155536400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_09",
+      "tier": 11,
+      "price": 230193840
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_GUIXU_REINCARNATION_10",
+      "tier": 11,
+      "price": 340686880
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_01",
+      "tier": 11,
+      "price": 10000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_02",
+      "tier": 11,
+      "price": 14800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_03",
+      "tier": 11,
+      "price": 21904000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_04",
+      "tier": 11,
+      "price": 32417920
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_05",
+      "tier": 11,
+      "price": 47978560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_06",
+      "tier": 11,
+      "price": 71008240
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_07",
+      "tier": 11,
+      "price": 105092160
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_08",
+      "tier": 11,
+      "price": 155536400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_09",
+      "tier": 11,
+      "price": 230193840
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_10",
+      "tier": 11,
+      "price": 340686880
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_11",
+      "tier": 11,
+      "price": 504216640
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_equipment_12",
+      "tier": 11,
+      "price": 746240560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_01",
+      "tier": 11,
+      "price": 10000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_02",
+      "tier": 11,
+      "price": 14800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_03",
+      "tier": 11,
+      "price": 21904000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_04",
+      "tier": 11,
+      "price": 32417920
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_05",
+      "tier": 11,
+      "price": 47978560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_06",
+      "tier": 11,
+      "price": 71008240
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_07",
+      "tier": 11,
+      "price": 105092160
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_consumable_08",
+      "tier": 11,
+      "price": 155536400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_01",
+      "tier": 11,
+      "price": 10000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_02",
+      "tier": 11,
+      "price": 14800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_03",
+      "tier": 11,
+      "price": 21904000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_04",
+      "tier": 11,
+      "price": 32417920
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_05",
+      "tier": 11,
+      "price": 47978560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_06",
+      "tier": 11,
+      "price": 71008240
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_07",
+      "tier": 11,
+      "price": 105092160
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_08",
+      "tier": 11,
+      "price": 155536400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_09",
+      "tier": 11,
+      "price": 230193840
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_plant_10",
+      "tier": 11,
+      "price": 340686880
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_01",
+      "tier": 11,
+      "price": 10000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_02",
+      "tier": 11,
+      "price": 14800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_03",
+      "tier": 11,
+      "price": 21904000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_04",
+      "tier": 11,
+      "price": 32417920
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_05",
+      "tier": 11,
+      "price": 47978560
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_06",
+      "tier": 11,
+      "price": 71008240
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_07",
+      "tier": 11,
+      "price": 105092160
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_08",
+      "tier": 11,
+      "price": 155536400
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_09",
+      "tier": 11,
+      "price": 230193840
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "guixu_reincarnation_material_10",
+      "tier": 11,
+      "price": 340686880
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_BREATHING",
+      "tier": 1,
+      "price": 100
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_GHOST_NIGHT_PROCESSION_CORE",
+      "tier": 3,
+      "price": 2700
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_PRIMER",
+      "tier": 1,
+      "price": 100
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_RITES",
+      "tier": 1,
+      "price": 100
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_SPRING_AUTUMN",
+      "tier": 2,
+      "price": 800
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_CLASSICS",
+      "tier": 2,
+      "price": 800
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_RECTIFY_HEART",
+      "tier": 3,
+      "price": 2700
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_VAST_QI",
+      "tier": 3,
+      "price": 2700
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_HEART_MIND",
+      "tier": 3,
+      "price": 2700
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_HEAVEN_MAN",
+      "tier": 4,
+      "price": 14000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_GREAT_LEARNING",
+      "tier": 4,
+      "price": 15600
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_PEOPLE_ROOT",
+      "tier": 4,
+      "price": 16800
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_CONFUCIAN_EVIDENTIAL",
+      "tier": 4,
+      "price": 12800
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "confucian_jade_ruler",
+      "tier": 4,
+      "price": 5000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_wind",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_thunder",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_yin",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "zique_yang",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_wind",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_thunder",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_yin",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "moque_yang",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_wind",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_thunder",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_yin",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "mingque_yang",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_metal",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_wood",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_water",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_fire",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_earth",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_wind",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_thunder",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_yin",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "jinque_yang",
+      "tier": 4,
+      "price": 50000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_metal",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_wood",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_water",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_fire",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_earth",
+      "tier": 5,
+      "price": 9000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_metal",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_wood",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_water",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_fire",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_earth",
+      "tier": 5,
+      "price": 9800
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_wind",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_thunder",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_yin",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "yaoque_yang",
+      "tier": 5,
+      "price": 18000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_wind",
+      "tier": 5,
+      "price": 19600
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_thunder",
+      "tier": 5,
+      "price": 19600
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_yin",
+      "tier": 5,
+      "price": 19600
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "yaoque_yang",
+      "tier": 5,
+      "price": 19600
+    }
+  ]
+}

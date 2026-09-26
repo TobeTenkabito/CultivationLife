@@ -131,18 +131,19 @@ def validate_guixu_catalog(
             category = str(entry.get("category", ""))
             if category not in category_counts:
                 raise ContentError(f"归墟宝物 {entry_id} 的分类不合法")
-            if entry.get("exclusive_source") != "guixu_tide" and category != "currency":
-                raise ContentError(f"归墟重宝 {entry_id} 必须声明 exclusive_source=guixu_tide")
+            if entry.get("exclusive_source") not in {"guixu_tide", "base"} and category != "currency":
+                raise ContentError(f"归墟重宝 {entry_id} 必须声明有效的本体或归墟归属")
             category_counts[category] += 1
             kind, content_id = str(entry.get("kind", "")), str(entry.get("content_id", ""))
             if kind == "technique":
                 if content_id not in registry.techniques or category != "technique":
                     raise ContentError(f"归墟功法条目 {entry_id} 引用了不存在或分类错误的功法")
-                exclusive_content_ids.add(content_id)
+                if entry.get("exclusive_source") == "guixu_tide":
+                    exclusive_content_ids.add(content_id)
             elif kind in {"item", "item_bundle"}:
                 if content_id not in registry.items:
                     raise ContentError(f"归墟宝物 {entry_id} 引用了不存在的物品：{content_id}")
-                if kind == "item":
+                if kind == "item" and entry.get("exclusive_source") == "guixu_tide":
                     exclusive_content_ids.add(content_id)
                 quantity = entry.get("quantity", 1)
                 if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
@@ -487,30 +488,8 @@ class ContentRegistry:
             raise ContentError("炼器内容必须完整配置十九种唯一胎模及其器纹规则")
         roles = {"primary", "secondary", "quench"}
         material_ids: set[str] = set()
-        progression = document.get("material_progression", {})
-        progression_natures = list(map(str, progression.get("natures", [])))
-        progression_worlds = progression.get("worlds", {})
-        progression_tiers = progression.get("tiers", {})
-        if progression and (
-            set(progression_natures) != natures
-            or set(progression.get("nature_names", {})) != natures
-            or set(progression.get("nature_value_multipliers", {})) != natures
-            or not isinstance(progression_worlds, dict) or not progression_worlds
-            or any(
-                not row.get("prefix") or float(row.get("value_multiplier", 0)) <= 0
-                or not row.get("tiers") or any(str(int(tier)) not in progression_tiers for tier in row.get("tiers", []))
-                for row in progression_worlds.values()
-            )
-            or any(
-                not row.get("label") or int(row.get("base_value", 0)) <= 0
-                or float(row.get("formation_value", 0)) <= 0
-                for row in progression_tiers.values()
-            )
-        ):
-            raise ContentError("阶段阵材族必须完整声明十四阵性、界面阶段与正数价值")
-
         covered_worlds: set[str] = set()
-        for material in expanded_formation_materials(document):
+        for material in document.get("materials", []):
             material_id = str(material.get("id", ""))
             declared_roles = set(material.get("roles", []))
             if (
@@ -580,6 +559,28 @@ class ContentRegistry:
             if set(targets) - natures or any(not -1.0 <= float(value) <= 1.0 for value in targets.values()):
                 raise ContentError(f"阵性 {source} 的有向关系超出 V1 档位")
 
+        progression = document.get("material_progression", {})
+        progression_natures = list(map(str, progression.get("natures", [])))
+        progression_worlds = progression.get("worlds", {})
+        progression_tiers = progression.get("tiers", {})
+        if progression and (
+            set(progression_natures) != natures
+            or set(progression.get("nature_names", {})) != natures
+            or set(progression.get("nature_value_multipliers", {})) != natures
+            or not isinstance(progression_worlds, dict) or not progression_worlds
+            or any(
+                not row.get("prefix") or float(row.get("value_multiplier", 0)) <= 0
+                or not row.get("tiers") or any(str(int(tier)) not in progression_tiers for tier in row.get("tiers", []))
+                for row in progression_worlds.values()
+            )
+            or any(
+                not row.get("label") or int(row.get("base_value", 0)) <= 0
+                or float(row.get("formation_value", 0)) <= 0
+                for row in progression_tiers.values()
+            )
+        ):
+            raise ContentError("阶段阵材族必须完整声明十四阵性、界面阶段与正数价值")
+
         identifiers: set[str] = set()
         hooks = {None, "forbidden_air", "forbidden_sense"}
 
@@ -597,7 +598,7 @@ class ContentRegistry:
             identifiers.add(identifier)
 
         covered_worlds: set[str] = set()
-        for material in document.get("materials", []):
+        for material in expanded_formation_materials(document):
             validate_profile(material, "专用")
             if int(material.get("base_value", 0)) <= 0 or int(material.get("tier", -1)) not in range(13):
                 raise ContentError(f"阵材价格或境界不合法：{material.get('id')}")
@@ -1648,13 +1649,13 @@ GUIXU_EXCLUSIVE_ITEM_IDS = frozenset(
     str(entry["content_id"])
     for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
     for entry in dungeon.get("treasure_pool", [])
-    if entry.get("kind") == "item"
+    if entry.get("kind") == "item" and entry.get("exclusive_source") == "guixu_tide"
 )
 GUIXU_EXCLUSIVE_TECHNIQUE_IDS = frozenset(
     str(entry["content_id"])
     for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
     for entry in dungeon.get("treasure_pool", [])
-    if entry.get("kind") == "technique"
+    if entry.get("kind") == "technique" and entry.get("exclusive_source") == "guixu_tide"
 )
 ITEM_CATALOG = CONTENT.items
 TECHNIQUE_CATALOG = CONTENT.techniques

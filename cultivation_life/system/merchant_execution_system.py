@@ -81,7 +81,10 @@ class MerchantExecutionMixin:
                    if npc.alive and npc.world == order['source_world'] and npc.id != order.get('target_id')]
         if not workers:
             return  # No cultivator is available; leave the commission posted.
-        worker = rng.choice(workers)
+        # Increasing stars monotonically tilts the pool toward senior cultivators.
+        lowest = min(npc.realm_index for npc in workers)
+        weights = [math.exp(.45 * (order['stars'] - 1) * (npc.realm_index - lowest)) for npc in workers]
+        worker = rng.choices(workers, weights=weights, k=1)[0]
         required = max(1, self._merchant_realm_cap(order['source_world']) - 5 + order['stars'])
         required = max(required, int((order.get('spec') or {}).get('material_tier', 0)))
         if order.get('target_id'):

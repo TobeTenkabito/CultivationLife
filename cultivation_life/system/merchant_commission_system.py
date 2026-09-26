@@ -43,8 +43,55 @@ def _formation_designs(serialized, config_json, alpha):
 
 
 class MerchantCommissionMixin:
+    def _merchant_intelligence(self, game, world, stars, rng):
+        """Report actual NPC ties; optional Tianji clues use the real knowledge ledger."""
+        from .tianji_system import tianji_content_available
+        from ..world_state import race_pair
+        npcs = [npc for npc in self._all_world_npcs(game) if npc.alive and npc.world == world]
+        rng.shuffle(npcs)
+        facts, pairs = [], set()
+        for first in npcs:
+            peers = [npc for npc in npcs if npc.id != first.id and npc.faction_id and first.faction_id]
+            peers.sort(key=lambda npc: npc.faction_id != first.faction_id)
+            for second in peers[:3]:
+                key = tuple(sorted((first.id, second.id)))
+                if key in pairs:
+                    continue
+                pairs.add(key)
+                if first.faction_id == second.faction_id:
+                    fact = f'{first.name}与{second.name}同属一门，互为同门'
+                else:
+                    relation = game.sect_relations.get(race_pair(first.faction_id, second.faction_id), {})
+                    label = {'war':'交战', 'alliance':'结盟', 'truce':'停战'}.get(relation.get('status'))
+                    if not label:
+                        continue
+                    fact = f'{first.name}与{second.name}分属的宗门目前{label}'
+                facts.append(fact)
+                break
+            if len(facts) >= stars:
+                break
+        if not facts:
+            facts.append('未查到可核实的修士关系，商盟没有提供猜测')
+        clues = []
+        if tianji_content_available():
+            self._ensure_tianji_state(game)
+            state = game.tianji_state
+            candidates = [row for row in state.get('artifacts', []) if row.get('origin_world') == world
+                          and int(state['knowledge'].get(row['id'], 0)) < 5]
+            # One roll per star, without replacement: more stars improve both
+            # the chance of any clue and the possible number of discoveries.
+            for _ in range(stars):
+                if not candidates or rng.random() >= .12 + stars * .08:
+                    continue
+                artifact = rng.choice(candidates)
+                candidates.remove(artifact)
+                level = int(state['knowledge'].get(artifact['id'], 0)) + 1
+                if self._tianji_reveal(game, artifact['id'], level, f'{stars}星商盟情报委托'):
+                    clues.append(f"【{artifact['name']}】情报提升至 Lv{level}")
+        return f"{WORLD_SYSTEMS['world_names'][world]}修士关系：" + '；'.join(facts) + ('；神机榜线索：' + '；'.join(clues) if clues else '')
+
     def _merchant_commission_available(self, order):
-        if order.get("commission_version") != 2:
+        if order.get("commission_version", 1) < 2:
             return True
         if order["kind"] == "item":
             return order["definition_id"] in ITEM_CATALOG
@@ -106,15 +153,30 @@ class MerchantCommissionMixin:
         targets = {key: float(raw.get(key, 0)) for key in METRICS}
         if any(not math.isfinite(value) or not 0 <= value <= 100 for value in targets.values()):
             raise ValueError("阵法六维必须为0–100之间的有限数值")
+        upper = payload.get('metric_maxima', {})
+        if not isinstance(upper, dict) or set(upper) - METRICS.keys():
+            raise ValueError('阵法六维上限无效')
+        maxima = {key: float(upper.get(key, 100)) for key in METRICS}
+        if any(not math.isfinite(value) or not targets[key] <= value <= 100 for key, value in maxima.items()):
+            raise ValueError('阵法上限须为0–100之间的有限数值，且不得低于下限')
         designs = _formation_designs(json.dumps(definitions, sort_keys=True),
                                      json.dumps(formation_config(), sort_keys=True), formation_alpha(game.player))
         limits = {key: max((row["profile"]["metrics"][key] for row in designs), default=0) for key in METRICS}
-        feasible = [row for row in designs if all(row["profile"]["metrics"][key] + .001 >= value for key, value in targets.items())]
+        feasible = [row for row in designs if all(value <= row['profile']['metrics'][key] <= maxima[key] for key, value in targets.items())]
         if not feasible:
-            raise ValueError("此原料等级无法同时满足六维要求，请降低要求。单维可选上限：" + "、".join(f"{METRICS[key]} {value:g}" for key, value in limits.items()))
-        design = min(feasible, key=lambda row: (row["value"], sum(row["profile"]["metrics"].values())))
+            raise ValueError("此原料等级无法同时满足六维要求，请调整上下限。单维可选上限：" + "、".join(f"{METRICS[key]} {value:g}" for key, value in limits.items()))
+        stars = int(payload.get('stars', 1))
+        # Higher service grades search a larger price envelope for a stable
+        # physical layout. No quality multiplier may violate a metric ceiling.
+        cheapest = min(row['value'] for row in feasible)
+        shortlist = [row for row in feasible if row['value'] <= cheapest * (1 + (stars - 1) * .75)]
+        design = min(shortlist, key=lambda row: (
+            -{'低':0, '中':1, '高':2}[row['profile']['stability']] if stars > 1 else 0,
+            -row['profile']['metrics']['balance'] if stars > 2 else 0,
+            row['value'], sum(row['profile']['metrics'].values())))
         spec = copy.deepcopy(design)
-        spec.update(material_tier=tier, requirements=targets, limits=limits, metric_names=METRICS,
+        spec.update(material_tier=tier, requirements=targets, maxima=maxima, limits=limits, metric_names=METRICS,
+                    spare_material_count=stars - 1,
                     materials=[{"id": row["id"], "name": row["name"], "tier": row["tier"]} for row in definitions if row["id"] in design["slots"]])
         return spec
 
@@ -149,10 +211,11 @@ class MerchantCommissionMixin:
         preview = self._crafting_preview(smith, {"mold_id": mold_id, "primary_id": "commission-material-0",
             "secondary_a_id": "commission-material-1", "secondary_b_id": "commission-material-2", "quench_id": "commission-material-3",
             "allocations": {"combat_power": budget - hp * 2, "max_hp": hp, "max_mp": hp}})
+        quality = ['normal', 'excellent', 'refined', 'epic', 'legendary'][int(payload.get('stars', 1)) - 1]
         return {"material_tier": tier, "mold": preview["mold"], "materials": preview["selected_materials"],
-                "stats": preview["theoretical_stats"]["normal"], "combat_effects": preview["combat_effects"],
+                "stats": preview["theoretical_stats"][quality], "quality": quality, "combat_effects": preview["combat_effects"],
                 "material_effects": preview["material_effects"], "anchor_value": preview["anchor_value"],
-                "value": sum(row["material_value"] for row in preview["selected_materials"]), "quality_name": preview["quality_names"]["normal"]}
+                "value": sum(row["material_value"] for row in preview["selected_materials"]), "quality_name": preview["quality_names"][quality]}
 
     def _merchant_quote(self, game, alliance, payload):
         from .merchant_system import KINDS
@@ -200,7 +263,7 @@ class MerchantCommissionMixin:
                 raise ValueError("请选择目标界面内仍存活的悬赏修士")
             value = max(value, math.ceil(self._npc_power(target) * 4))
             target_id, name = target.id, name + f" · {target.name}"
-        minimum = math.ceil(max(100 * stars, value) * price_factor)
+        minimum = math.ceil(max(100 * stars, value) * price_factor * (1 + .4 * (stars - 1)))
         principal = int(payload.get("principal", minimum))
         if principal < minimum or principal > 10 ** 15:
             raise ValueError(f"此委托悬赏本金至少 {minimum:,} 灵石")
@@ -209,7 +272,12 @@ class MerchantCommissionMixin:
         quote = {"kind": kind, "name": name, "stars": stars, "quantity": quantity, "source_world": world,
                  "definition_id": definition_id, "target_id": target_id, "material_category": category,
                  "minimum": minimum, "principal": principal, "fee": fee, "total": principal + fee, "years": years,
-                 "cross_world": cross, "unlinked": not linked, "spec": spec, "commission_version": 2,
+                 "cross_world": cross, "unlinked": not linked, "spec": spec, "commission_version": 3,
+                 "service_description": f"{stars}星：更倾向高境界修士承接；" + (
+                     f"附赠{stars - 1}份同界其他材料" if kind in {'item','supply'} else
+                     f"{spec['quality_name']}品质验收" if kind == 'weapon' else
+                     f"范围内优选稳定阵型，附赠{stars - 1}份同阶备用阵材" if kind == 'formation' else
+                     "打听修士关系；神机开启时有机会获得本界榜单的多条情报" if kind == 'intel' else '按星级提供商路服务'),
                  "route_description": "跨界商路：时间×15、基础费用×4" if cross else "本界商路"}
         quote["preview_token"] = hashlib.sha256(json.dumps(quote, sort_keys=True).encode()).hexdigest()
         return quote
@@ -227,7 +295,7 @@ class MerchantCommissionMixin:
         rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
         if kind == "item":
             add_item(game.player, order["definition_id"], order["quantity"])
-            return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}"
+            return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + self._merchant_procurement_bonus(game, order, rng)
         if kind == "supply":
             category = order["material_category"]
             definition = (self._formation_material_defs() if category == "formation" else self._crafting_material_defs())[order["definition_id"]]
@@ -236,7 +304,7 @@ class MerchantCommissionMixin:
                     game.player.formation_materials.append(make_formation_material_instance(definition, source="商盟委托", origin_world=world))
                 else:
                     game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=world))
-            return f"获得{definition['name']} ×{order['quantity']}"
+            return f"获得{definition['name']} ×{order['quantity']}" + self._merchant_procurement_bonus(game, order, rng)
         spec = order["spec"]
         if kind == "formation":
             for material_id in spec["slots"]:
@@ -245,16 +313,42 @@ class MerchantCommissionMixin:
             game.player.formation_sequence += 1
             game.player.formation_loadouts.append({"id": f"formation-{game.id}-{game.player.formation_sequence}",
                 "name": f"商盟{order['stars']}星护行阵", "slots": list(spec["slots"]), "created_year": game.player.age})
-            return f"获得{spec['material_tier']}阶原料定制阵法及全部独立阵材，可在阵法面板启用"
+            spares = int(spec.get('spare_material_count', 0))
+            for _ in range(spares):
+                material_id = rng.choice([key for key in spec['slots'] if key])
+                game.player.formation_materials.append(make_formation_material_instance(self._formation_material_defs()[material_id], source='商盟赠送备用阵材', origin_world=world))
+            return f"获得{spec['material_tier']}阶原料定制阵法及全部独立阵材，可在阵法面板启用；另附{spares}份同阶备用阵材"
         artifact = {"id": f"merchant-weapon-{game.id}-{order['id']}", "name": f"商盟订制{spec['mold']['name']}",
-            "mold_id": spec["mold"]["id"], "mold_name": spec["mold"]["name"], "quality": "normal", "quality_name": spec["quality_name"],
+            "mold_id": spec["mold"]["id"], "mold_name": spec["mold"]["name"], "quality": spec.get('quality', 'normal'), "quality_name": spec["quality_name"],
             "creator_name": order["worker"], "created_year": game.player.age, "scaling_realm_index": spec["material_tier"],
             "actual_stats": copy.deepcopy(spec["stats"]), "designed_stats": copy.deepcopy(spec["stats"]),
             "anchor_value": spec["anchor_value"], "materials": copy.deepcopy(spec["materials"]),
             "material_effects": copy.deepcopy(spec["material_effects"]), "combat_effects": copy.deepcopy(spec["combat_effects"]),
             "mold_rule_description": spec["mold"]["rule"].get("description", ""), "is_natal": False}
         store_crafted_artifact(game.player, artifact)
-        return f"获得{artifact['name']}，属性与委托验收概览一致"
+        return f"获得{artifact['quality_name']}品质{artifact['name']}，属性与委托验收概览一致"
+
+    def _merchant_procurement_bonus(self, game, order, rng):
+        if order.get('commission_version', 1) < 3 or order['stars'] <= 1:
+            return ''
+        formation = order['kind'] == 'supply' and order['material_category'] == 'formation'
+        definitions = self._formation_material_defs().values() if formation else self._crafting_material_defs().values()
+        value_key = 'base_value' if formation else 'base_material_value'
+        budget = max(1, order['minimum'] * .08 / (order['stars'] - 1))
+        candidates = [row for row in definitions if row['world'] == order['source_world']
+                      and row['id'] != order['definition_id'] and row[value_key] <= budget]
+        if not candidates:
+            return '；本次未找到合适的附赠材料'
+        rewards = []
+        for _ in range(order['stars'] - 1):
+            row = rng.choice(candidates)
+            if formation:
+                game.player.formation_materials.append(make_formation_material_instance(row, source='商盟星级附赠', origin_world=order['source_world']))
+            else:
+                game.player.crafting_materials.append(make_crafting_material_instance(row, rng, source='商盟星级附赠', origin_world=order['source_world']))
+            rewards.append(row['name'])
+        order['bonus_items'] = rewards
+        return '；额外获得：' + '、'.join(rewards)
 
     def debug_merchant_hq(self, game_id, alliance_id):
         """Only exposed by a runtime-Debug-gated server operation."""

@@ -59,15 +59,22 @@ def verify(with_dlc):
             assert joined["merchant_system"]["membership"]["alliance_id"] == local["id"]
             owned = next(row for row in joined['merchant_system']['alliances'] if row['member'])
             assert [row['world'] for row in owned['catalog']] == ['human']
+            assert 'guixu_canghai_equipment_01' in {row['id'] for row in owned['catalog'][0]['items']}
+            assert owned['catalog'][0]['weapon_tiers'] == [1,2,3,4,5]
             def post(operation, payload):
                 request = urllib.request.Request(base + f"/api/games/{game['id']}/{operation}", method="POST",
                     data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
                 with urllib.request.urlopen(request, timeout=30) as response:
                     return json.load(response)
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "weapon", "material_tier": 1, "mold_id": "mirror"})
-            assert quote["spec"]["mold"]["id"] == "mirror" and quote["commission_version"] == 2
+            assert quote["spec"]["mold"]["id"] == "mirror" and quote["commission_version"] == 3
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "formation", "material_tier": 1})
             assert len(quote["spec"]["profile"]["metrics"]) == 6
+            quote = post('merchant-preview', {'alliance_id':local['id'], 'kind':'formation', 'stars':5,
+                                              'material_tier':2, 'metric_maxima':{'kill':0}})
+            assert quote['spec']['profile']['metrics']['kill'] == 0 and quote['spec']['spare_material_count'] == 4
+            quote = post('merchant-preview', {'alliance_id':local['id'], 'kind':'weapon', 'stars':5, 'material_tier':2})
+            assert quote['spec']['quality'] == 'legendary'
             try:
                 post('merchant-preview', {'alliance_id':local['id'], 'kind':'weapon', 'source_world':'spirit'})
                 raise AssertionError('Unlinked world must be rejected')

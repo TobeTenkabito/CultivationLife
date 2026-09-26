@@ -243,7 +243,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
                 self._merchant_tick_order(game, order)
 
     def _merchant_deliver_order(self, game, order):
-        if order.get("commission_version") == 2 and order["kind"] in PROCUREMENT_KINDS:
+        if order.get("commission_version", 1) >= 2 and order["kind"] in PROCUREMENT_KINDS:
             order["delivery"] = self._merchant_deliver_commission(game, order)
             return
         rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
@@ -286,9 +286,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             game.player.opportunity += stars * 20
             game.player.karma = max(0, game.player.karma - stars * 3)
             if kind == "intel":
-                world = order["source_world"]
-                detail = "、".join(row["name"] for row in self._merchant_materials(world))
-                order["delivery"] = f"获得{WORLD_SYSTEMS['world_names'][world]}材料情报：{detail}；机缘 +{stars * 20}"
+                order["delivery"] = self._merchant_intelligence(game, order["source_world"], stars, rng)
             else:
                 order["delivery"] = f"{KINDS[kind]}完成，机缘 +{stars * 20}，因果 -{stars * 3}"
 
@@ -352,6 +350,8 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             state["active"] = None
             self._merchant_notice(game, f"{task['stars']}星「{task['name']}」失败，未获得报酬。{detail}")
             return
+        if kind == "intel":
+            detail = self._merchant_intelligence(game, task["world"], task["stars"], rng)
         if kind == "supply":
             for row in materials:
                 (game.player.formation_materials if task.get("material_category") == "formation" else game.player.crafting_materials).remove(row)

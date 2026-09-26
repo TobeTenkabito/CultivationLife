@@ -110,6 +110,8 @@
         row.append(logs);
       }
       if (order.delivery) row.append(element('p', order.delivery)); root.append(row);
+      if(order.service_description) row.append(element('p',order.service_description));
+      if(order.spec?.maxima) row.append(element('p',Object.entries(system.metric_names).map(([key,name])=>`${name} ${order.spec.requirements[key]}–${order.spec.maxima[key]}`).join(' / ')));
       if(order.spec){const saved=element('details');saved.append(element('summary','已确认成品概览'));saved.append(element('p',`${order.spec.material_tier}阶原料 · ${order.spec.mold?.name || '九宫阵法'}`));saved.append(element('p',order.kind==='formation'?Object.entries(order.spec.profile.metrics).map(([key,value])=>`${system.metric_names[key]} ${value}`).join(' / '):`战斗力 ${money(order.spec.stats.combat_power)} · 气血 ${money(order.spec.stats.max_hp)} · 法力 ${money(order.spec.stats.max_mp)}`));row.append(saved);}
     });
   }
