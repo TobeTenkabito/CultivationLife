@@ -1,1 +1,1 @@
-"""Game creation and action advancement with the existing execution order."""
+"""Engine functions with explicit dependency contracts."""
