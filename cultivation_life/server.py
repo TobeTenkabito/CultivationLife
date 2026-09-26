@@ -155,6 +155,12 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.exchange_action(game_id, payload.get("action", ""), payload)
             elif operation == "merchant-action":
                 result = ENGINE.merchant_action(game_id, payload.get("action", ""), payload)
+            elif operation == "merchant-preview":
+                result = ENGINE.preview_merchant_commission(game_id, payload)
+            elif operation == "merchant-debug-hq":
+                if not load_runtime_config(APP_ROOT)["debug"]:
+                    raise KeyError("接口不存在")
+                result = ENGINE.debug_merchant_hq(game_id, str(payload.get("alliance_id", "")))
             elif operation == "auction-private-buy":
                 result = ENGINE.buy_private_trade_item(
                     game_id, payload.get("npc_id", ""), payload.get("offer_id", "")

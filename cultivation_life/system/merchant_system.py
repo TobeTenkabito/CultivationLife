@@ -13,20 +13,22 @@ from .crafting_system import make_crafting_material_instance, store_crafted_arti
 from .formation_system import make_formation_material_instance
 from .exchange_system import EXCHANGE_VENUES
 from .possession_system import advance_player_age
+from .merchant_execution_system import MerchantExecutionMixin
+from .merchant_commission_system import MerchantCommissionMixin, PROCUREMENT_KINDS, METRICS
 
 
 POLICIES = {"economy": "重商兴利", "materials": "积储资材", "cultivation": "尊修育才"}
 KINDS = {"supply": "提交特定物品", "escort": "护送雇主", "bounty": "击杀悬赏修士",
-         "recruit": "招募人手", "formation": "炼制阵法", "weapon": "炼制武器", "intel": "获取情报"}
+         "recruit": "招募人手", "formation": "炼制阵法", "weapon": "炼制武器", "intel": "获取情报", "item": "获取道具"}
 RANKS = ["成员", "使节", "特使"]
 CROSS_ALLIANCES = {
-    "xuanji": ("璇玑商盟", "spirit", ["spirit", "true_demon", "monster_realm", "human"]),
+    "xuanji": ("璇玑商盟", "spirit", ["spirit", "true_demon"]),
     "jiukun": ("九坤商盟", "phantom_underworld", ["phantom_underworld", "true_demon", "hell"]),
     "taiyuan": ("太元商盟", "celestial", ["celestial", "asura", "nether"]),
 }
 
 
-class MerchantSystemMixin:
+class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
     """World-local offices, persistent commissions and independently held membership."""
 
     @staticmethod
@@ -35,10 +37,12 @@ class MerchantSystemMixin:
         return int(profile.get("npc_realm_cap", {1: 5, 2: 8, 3: 12}[int(profile["tier"])]))
 
     def _ensure_merchant(self, game) -> bool:
-        if game.merchant_state.get("version") == 1:
+        if game.merchant_state.get("version") == 2:
             return False
+        if game.merchant_state.get("version") == 1:
+            return self._migrate_merchant_routes(game)
         state = game.merchant_state = {
-            "version": 1, "worlds": {}, "membership": None, "influence": {},
+            "version": 2, "worlds": {}, "membership": None, "influence": {},
             "posted": [], "active": None, "completed": [], "notices": [],
             "last_age": game.player.age, "sequence": 0,
         }
@@ -128,9 +132,9 @@ class MerchantSystemMixin:
             power = expected_combat_power(target_realm, min(3, REALMS[target_realm].layers))
             definition = materials[min(len(materials) - 1, (stars - 1) * len(materials) // 5)]
             for kind_index, (kind, name) in enumerate(KINDS.items()):
+                if kind == "item":
+                    continue  # Item acquisition is a player-issued commission.
                 identifier = f"{alliance['world']}:{alliance['id']}:{alliance['board_epoch']}:{kind}:{stars}"
-                if identifier in game.merchant_state["completed"]:
-                    continue
                 base_years = stars * 2 + kind_index % 3
                 # Exact year durations, accelerated by realm without rounding to action units.
                 years = max(1, math.ceil(base_years / (1 + max(0, game.player.realm_index - target_realm) * .7)))
@@ -148,7 +152,19 @@ class MerchantSystemMixin:
                               "definition_id": definition["id"], "material_name": definition["name"],
                               "quantity": stars, "reward": reward, "policy": alliance["policy"],
                               "world": alliance["world"], "alliance_id": alliance["id"]})
-        return board
+        formation = sorted((row for row in self._formation_material_defs().values() if row.get("world") == alliance["world"]), key=lambda row: (row["tier"], row["id"]))
+        for original in list(board):
+            if original["kind"] != "supply":
+                continue
+            original["material_category"] = "crafting"
+            if formation:
+                task = copy.deepcopy(original)
+                definition = formation[min(len(formation) - 1, (task["stars"] - 1) * len(formation) // 5)]
+                task.update(id=task["id"] + ":formation", material_category="formation",
+                            reward_definition_id=task["definition_id"], definition_id=definition["id"], material_name=definition["name"])
+                task["reward"]["stones"] = max(task["reward"]["stones"], math.ceil(definition["base_value"] * task["quantity"] * 1.2))
+                board.append(task)
+        return [row for row in board if row["id"] not in game.merchant_state["completed"]]
 
     def _advance_merchant_year(self, game):
         self._ensure_merchant(game)
@@ -202,34 +218,34 @@ class MerchantSystemMixin:
         for order in state["posted"]:
             if order["status"] not in {"open", "working"}:
                 continue
+            alliance = self._merchant_alliance(game, order["world"], order["alliance_id"])
+            if not self._merchant_route_exists(game, alliance, order["source_world"]):
+                self._merchant_refund(game, order, "cancelled", "目标界面未设本盟总部，商路不可用", order["fee"])
+                continue
+            if not self._merchant_commission_available(order):
+                self._merchant_refund(game, order, "cancelled", "所需内容当前不可用")
+                continue
             if order.get("target_id"):
                 target = self._find_npc(game, order["target_id"])
                 if not target or not target.alive:
-                    order["status"] = "cancelled"
-                    add_item(game.player, "spirit_stone", order["principal"])
-                    self._merchant_notice(game, f"委托「{order['name']}」目标已失效，取消委托并全额退还本金 {order['principal']:,} 灵石。")
+                    self._merchant_refund(game, order, "cancelled", "悬赏目标已失效")
                     continue
-            if game.player.age >= order["deadline"]:
-                order["status"] = "cancelled"
-                add_item(game.player, "spirit_stone", order["principal"])
-                self._merchant_notice(game, f"委托「{order['name']}」逾期取消，悬赏本金 {order['principal']:,} 灵石已全额退还；手续费不退。")
-                continue
-            if order["status"] == "open" and game.player.age >= order["check_age"]:
-                rng = random.Random(f"merchant-order:{game.seed}:{order['id']}:{order['check_age']}")
-                order["check_age"] = game.player.age + max(1, order["years"] // 3)
-                if rng.random() < order["accept_chance"]:
-                    order.update(status="working", started_age=game.player.age,
-                                 finish_age=game.player.age + order["years"], worker=rng.choice(["青衣散人", "商路行者", "无尘客", "白鹤道人"]))
-                    order["will_finish"] = rng.random() < .88
-                    self._merchant_notice(game, f"{order['worker']}接取了「{order['name']}」，预计道历第 {order['finish_age']} 年完成。")
-            if order["status"] == "working" and game.player.age >= order["finish_age"] and order["will_finish"]:
-                self._merchant_deliver_order(game, order)
-                order["status"] = "completed"
-                alliance = self._merchant_alliance(game, order["world"], order["alliance_id"])
-                alliance["reserves"] += max(1, order["fee"] + order["principal"] // 10)
-                self._merchant_notice(game, f"委托「{order['name']}」已完成：{order['delivery']}。")
+            if order["status"] == "open":
+                if game.player.age >= order["deadline"]:
+                    self._merchant_refund(game, order, "cancelled", "长期无人接取，已逾期")
+                    continue
+                if game.player.age >= order["check_age"]:
+                    rng = random.Random(f"merchant-order:{game.seed}:{order['id']}:{order['check_age']}")
+                    order["check_age"] = game.player.age + max(1, order["years"] // 3)
+                    if rng.random() < order["accept_chance"]:
+                        self._merchant_start_order(game, order, rng)
+            if order["status"] == "working":
+                self._merchant_tick_order(game, order)
 
     def _merchant_deliver_order(self, game, order):
+        if order.get("commission_version") == 2 and order["kind"] in PROCUREMENT_KINDS:
+            order["delivery"] = self._merchant_deliver_commission(game, order)
+            return
         rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
         kind, stars = order["kind"], order["stars"]
         if kind == "supply":
@@ -279,9 +295,10 @@ class MerchantSystemMixin:
     def _merchant_task_ready(self, game, task):
         player = game.player
         if task["kind"] == "supply":
-            rows = [row for row in player.crafting_materials if row["material_id"] == task["definition_id"]]
+            bag = player.formation_materials if task.get("material_category") == "formation" else player.crafting_materials
+            rows = [row for row in bag if row["material_id"] == task["definition_id"]]
             if len(rows) < task["quantity"]:
-                raise ValueError(f"需准备 {task['material_name']} ×{task['quantity']}（炼器材料背包）")
+                raise ValueError(f"需准备 {task['material_name']} ×{task['quantity']}（对应分类的闲置材料）")
             return rows[:task["quantity"]]
         if task["kind"] == "weapon":
             rows = [row for row in player.crafted_artifacts if not row.get("is_natal") and not row.get("tianji")
@@ -337,7 +354,7 @@ class MerchantSystemMixin:
             return
         if kind == "supply":
             for row in materials:
-                game.player.crafting_materials.remove(row)
+                (game.player.formation_materials if task.get("material_category") == "formation" else game.player.crafting_materials).remove(row)
         elif kind == "weapon":
             artifact = materials[0]
             remove_item(game.player, artifact["id"])
@@ -350,7 +367,7 @@ class MerchantSystemMixin:
         add_item(game.player, "spirit_stone", reward["stones"])
         game.player.opportunity += reward["opportunity"]
         game.player.karma = max(0, game.player.karma - reward["karma"])
-        definition = self._crafting_material_defs()[task["definition_id"]]
+        definition = self._crafting_material_defs()[task.get("reward_definition_id", task["definition_id"])]
         for _ in range(reward["materials"]):
             game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟报酬", origin_world=task["world"]))
         key = task["influence_key"]
@@ -366,7 +383,7 @@ class MerchantSystemMixin:
         member = game.merchant_state["membership"]
         if member["site"] != "hq" or member["rank"] < 1 or self._merchant_site(game, alliance) != "hq":
             raise ValueError("只有在任总部或分总部使节、特使，可从总部启用逆灵通道")
-        if not alliance["cross_world"] or destination not in alliance["linked_worlds"] or destination == game.player.world:
+        if not alliance["cross_world"] or not self._merchant_route_exists(game, alliance, destination) or destination == game.player.world:
             raise ValueError("商盟没有通往该界面的逆灵通道")
         if not WORLD_SYSTEMS["world_profiles"][destination].get("enabled", True):
             raise ValueError("该界面尚未开放")
@@ -509,55 +526,23 @@ class MerchantSystemMixin:
         state = game.merchant_state
         if sum(row["status"] in {"open", "working"} for row in state["posted"]) >= 12:
             raise ValueError("最多同时发布12个委托")
-        kind = str(payload.get("kind", "supply"))
-        stars = int(payload.get("stars", 1))
-        quantity = int(payload.get("quantity", 1))
-        if kind not in KINDS or not 1 <= stars <= 5 or not 1 <= quantity <= 99:
-            raise ValueError("任务类型、星级或数量无效")
-        world = str(payload.get("source_world") or game.player.world)
-        if world not in alliance["linked_worlds"]:
-            raise ValueError("普通商盟不承接异界委托，该商盟亦未打通目标商路")
-        definitions = self._merchant_materials(world)
-        definition = next((row for row in definitions if row["id"] == payload.get("definition_id")), None)
-        if kind == "supply" and not definition:
-            raise ValueError("请选择目标界面的具体材料")
-        if kind == "formation" and not any(row.get("world") == world for row in self._formation_material_defs().values()):
-            raise ValueError("目标界面没有可委托的阵材")
-        cross = world != game.player.world
-        minimum = self._merchant_post_minimum(kind, stars, quantity, definition, cross)
-        target = None
-        if kind == "bounty":
-            target = self._find_npc(game, str(payload.get("target_id", "")))
-            if not target or not target.alive or target.world != world:
-                raise ValueError("请选择目标界面内仍存活的悬赏修士")
-            minimum = max(minimum, math.ceil(self._npc_power(target) * 4) * (4 if cross else 1))
-        principal = int(payload.get("principal", minimum))
-        if principal < minimum or principal > 10 ** 15:
-            raise ValueError(f"此委托悬赏本金至少 {minimum:,} 灵石")
-        fee = max(1, math.ceil(principal * (.06 if alliance["policy"] == "economy" else .1)))
-        if not has_item(game.player, "spirit_stone", principal + fee):
-            raise ValueError(f"发布需悬赏本金 {principal:,} + 手续费 {fee:,} 灵石")
-        remove_item(game.player, "spirit_stone", principal + fee)
+        quote = self._merchant_quote(game, alliance, payload)
+        if payload.get("preview_token") and payload["preview_token"] != quote["preview_token"]:
+            raise ValueError("委托条件或报价已变化，请重新预览")
+        if not has_item(game.player, "spirit_stone", quote["total"]):
+            raise ValueError(f"发布需悬赏本金 {quote['principal']:,} + 手续费 {quote['fee']:,} 灵石")
+        remove_item(game.player, "spirit_stone", quote["total"])
         state["sequence"] += 1
-        years = stars * 3 * (15 if cross else 1)
-        name = f"收集{definition['name']} ×{quantity}" if kind == "supply" else KINDS[kind]
-        if target:
-            name += f" · {target.name}"
-        state["posted"].append({"id": state["sequence"], "kind": kind, "name": name, "stars": stars,
-                                "world": game.player.world, "alliance_id": alliance["id"], "source_world": world,
-                                "definition_id": definition["id"] if definition else "", "quantity": quantity,
-                                "target_id": target.id if target else None,
-                                "principal": principal, "fee": fee, "years": years, "posted_age": game.player.age,
-                                "check_age": game.player.age + max(1, years // 3), "deadline": game.player.age + years * 4,
-                                "status": "open", "accept_chance": min(.85, .3 + .15 * principal / minimum), "cross_world": cross})
+        years = quote["years"]
+        state["posted"].append(copy.deepcopy(quote) | {
+            "id": state["sequence"], "world": game.player.world, "alliance_id": alliance["id"],
+            "posted_age": game.player.age, "check_age": game.player.age + max(1, years // 3),
+            "deadline": game.player.age + years * 4, "status": "open",
+            "accept_chance": min(.85, .3 + .15 * quote["principal"] / quote["minimum"]),
+        })
         terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"}]
         for old in terminal[:-30]:
             state["posted"].remove(old)
-
-    @staticmethod
-    def _merchant_post_minimum(kind, stars, quantity, definition, cross):
-        base = int(definition["base_material_value"]) * quantity * 3 if kind == "supply" and definition else 2000 * stars ** 3
-        return max(100 * stars, base) * (4 if cross else 1)
 
     def _public_merchant(self, game):
         self._ensure_merchant(game)
@@ -585,18 +570,16 @@ class MerchantSystemMixin:
                        tasks=self._merchant_board(game, alliance) if owned else [])
             row["destinations"] = [{"id": world, "name": WORLD_SYSTEMS["world_names"][world],
                                      "cost": self._merchant_passage_cost(game, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
-            row["catalog"] = [{"world": world, "world_name": WORLD_SYSTEMS["world_names"][world],
-                               "targets": [{"id": npc.id, "name": npc.name, "realm": REALMS[npc.realm_index].name,
-                                            "power": self._npc_power(npc)} for npc in self._all_world_npcs(game)
-                                           if npc.alive and npc.world == world][:60],
-                               "materials": [{"id": d["id"], "name": d["name"], "value": d["base_material_value"]} for d in self._merchant_materials(world)]}
-                              for world in alliance["linked_worlds"]] if owned else []
+            row["catalog"] = self._merchant_procurement_catalog(game, alliance) if owned else []
             visible.append(row)
         orders = copy.deepcopy(state["posted"])
         for order in orders:
             order.pop("will_finish", None)
+            order.pop("failure_age", None)
             order.pop("accept_chance", None)
-            order["progress"] = min(.99, max(0, (game.player.age - order.get("started_age", game.player.age)) / order["years"])) if order["status"] == "working" else 1 if order["status"] == "completed" else 0
+            order["progress"] = min(.99, max(0, (game.player.age - order.get("started_age", game.player.age)) / order["years"])) if order["status"] == "working" else 1 if order["status"] == "completed" else order.get("progress", 0)
         return {"alliances": visible, "membership": membership, "active": copy.deepcopy(state["active"]),
                 "posted": orders, "notices": copy.deepcopy(state["notices"]), "kinds": KINDS,
-                "hired_hands": state.get("hired_hands", 0), "year": game.player.age}
+                "hired_hands": state.get("hired_hands", 0), "year": game.player.age,
+                "molds": [{"id": row["id"], "name": row["name"], "description": row["rule"].get("description", "")} for row in self._crafting_molds().values()],
+                "metric_names": METRICS}
