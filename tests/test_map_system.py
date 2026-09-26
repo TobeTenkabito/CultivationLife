@@ -37,15 +37,17 @@ class MapCatalogTests(unittest.TestCase):
             {"celestial":3, "asura":5, "nether":9, "reincarnation":3},
         )
 
-    def test_monster_and_ghost_map_additions_live_in_their_dlc_packages(self):
+    def test_monster_and_ghost_maps_live_in_base_content(self):
         base = json.loads((SOURCE_ROOT / "content" / "maps.json").read_text(encoding="utf-8"))
         monster = json.loads((SOURCE_ROOT / "dlc" / "monster-bloodlines" / "content" / "maps.json").read_text(encoding="utf-8"))
         ghost = json.loads((SOURCE_ROOT / "dlc" / "ghost-reincarnation" / "content" / "maps.json").read_text(encoding="utf-8"))
-        self.assertNotIn("monster_realm", base["worlds"])
-        self.assertNotIn("yin_market_capital", {row["id"] for row in base["worlds"]["hell"]["locations"]})
-        self.assertIn("tiger_roar_cliff", {row["id"] for row in monster["worlds"]["monster_realm"]["locations"]})
-        self.assertIn("hollow_moon_chasm", {row["id"] for row in monster["worlds"]["phantom_underworld"]["locations"]})
-        self.assertIn("yin_market_capital", {row["id"] for row in ghost["worlds"]["hell"]["locations"]})
+        self.assertEqual(monster["worlds"], {})
+        self.assertEqual(ghost["worlds"], {})
+        self.assertIn("monster_realm", base["worlds"])
+        self.assertIn("yin_market_capital", {row["id"] for row in base["worlds"]["hell"]["locations"]})
+        self.assertIn("tiger_roar_cliff", {row["id"] for row in base["worlds"]["monster_realm"]["locations"]})
+        self.assertIn("hollow_moon_chasm", {row["id"] for row in base["worlds"]["phantom_underworld"]["locations"]})
+        self.assertIn("yin_market_capital", {row["id"] for row in base["worlds"]["hell"]["locations"]})
 
     def test_every_location_has_distinct_four_qi_gain_efficiencies(self):
         expected = {"spirit", "demon", "monster", "yin"}

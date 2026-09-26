@@ -44,19 +44,19 @@ class GuixuTideTests(unittest.TestCase):
         self.engine.store.save(game)
         return created["id"], dungeon
 
-    def test_content_has_six_rich_non_repeating_pools(self):
+    def test_content_has_eleven_rich_non_repeating_pools(self):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.3.0")
+        self.assertEqual(manifest["version"], "2.4.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
-            {"human", "spirit", "demon", "true_demon", "phantom_underworld", "hell"},
+            set(WORLD_SYSTEMS["world_profiles"]),
         )
         self.assertEqual(
             {row["name"] for row in dungeons},
-            {"葬海天渊", "诸界尾闾", "血河沉渊", "太古葬魔墟", "万兽祖涡", "黄泉无底狱"},
+            {"葬海天渊", "诸界尾闾", "血河沉渊", "太古葬魔墟", "万兽祖涡", "黄泉无底狱", "妖祖沉庭", "天律沉宫", "修罗劫海", "太初龙渊", "无时轮回墟"},
         )
         seen = set()
         expected = {
@@ -171,8 +171,8 @@ class GuixuTideTests(unittest.TestCase):
         game.player.world = "celestial"
         self.engine.store.save(game)
         celestial = self.engine.get_game(game_id)["guixu_tide"]
-        self.assertFalse(celestial["available"])
-        self.assertEqual(celestial["dungeons"], [])
+        self.assertTrue(celestial["available"])
+        self.assertEqual(len(celestial["dungeons"]), 1)
 
     def test_dlc_loads_with_only_base_content_and_uses_base_map_entries(self):
         with tempfile.TemporaryDirectory() as directory:

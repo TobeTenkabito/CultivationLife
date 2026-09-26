@@ -25,6 +25,7 @@ class NatalArtifactSystemMixin:
         realm_by_source = {
             "canghai": 3, "bloodriver": 3, "weir": 6,
             "demon_grave": 6, "beast_vortex": 6, "yellow_spring": 6,
+            "monster_realm": 6, "celestial": 9, "asura": 9, "nether": 9, "reincarnation": 9,
         }
         for item in ITEM_CATALOG.values():
             tags = set(item.tags)
@@ -88,6 +89,7 @@ class NatalArtifactSystemMixin:
             if str(row.get("id", "")) == str(artifact_id):
                 row["is_natal"] = False
         game.natal_artifact = {}
+        game.player.natal_origin_penalty += 0.10
         self._sync_natal_artifact_bonuses(game)
 
     def _natal_slots_for_level(self, level: int) -> int:
@@ -110,8 +112,22 @@ class NatalArtifactSystemMixin:
         coefficient = float(self._natal_artifact_config().get("combat_growth_cubic", 5.0))
         return coefficient * steps * steps * steps
 
-    def _natal_refine_cost(self, level: int) -> int:
-        return int(self._natal_artifact_config()["manual_refine_stone_base"]) * max(1, int(level))
+    def _natal_refine_cost(self, level: int, game: GameState | None = None) -> int:
+        base_cost = int(self._natal_artifact_config()["manual_refine_stone_base"])
+        if game and game.natal_artifact:
+            crafted = self._crafted_natal_source(game)
+            if crafted:
+                stats = crafted.get("actual_stats", {})
+                power, hp, mp = (max(0.0, float(stats.get(key, 0))) for key in ("combat_power", "max_hp", "max_mp"))
+                if crafted.get("tianji"):
+                    hp = mp = 0.0  # Persistent buff effects are not raw base attributes.
+            else:
+                item = ITEM_CATALOG[str(game.natal_artifact["item_id"])]
+                power, hp, mp = item.combat_bonus, item.hp_bonus, item.mp_bonus
+            # Price raw permanent stats, excluding level growth, sockets, buffs
+            # and temporary world suppression. Humble artifacts retain the floor.
+            base_cost = max(base_cost, math.ceil((power + (hp + mp) * .25) / 30))
+        return base_cost * max(1, int(level))
 
     def _natal_level_required(self, level: int) -> int:
         return int(self._natal_artifact_config()["experience_base"]) * max(1, level)
@@ -269,7 +285,7 @@ class NatalArtifactSystemMixin:
         stones = max(0, int(stone_item.quantity)) if stone_item else 0
         level = max(1, int(artifact.get("level", 1)))
         experience = max(0, int(artifact.get("experience", 0)))
-        base_cost = int(self._natal_artifact_config()["manual_refine_stone_base"])
+        base_cost = self._natal_refine_cost(1, game)
         refine_xp = int(self._natal_artifact_config()["manual_refine_xp"])
         count = total_cost = 0
         while True:
@@ -342,6 +358,21 @@ class NatalArtifactSystemMixin:
                 }
             summary = f"你将{item.name}收入丹田，以精血和金丹真火炼为本命法宝。"
             result = "bound"
+        elif action == "unbind":
+            if not game.natal_artifact:
+                raise ValueError("尚未选择本命法宝")
+            old = dict(game.natal_artifact)
+            if old.get("crafted_artifact_id"):
+                self._unbind_crafted_natal_artifact(game, old["crafted_artifact_id"])
+            else:
+                add_item(player, str(old["item_id"]))
+                for material_id in old.get("slots", []):
+                    if material_id:
+                        add_item(player, str(material_id))
+                game.natal_artifact = {}
+                player.natal_origin_penalty += .10
+            summary = f"你解除{old['name']}的本命联系，法宝与镶材归还，温养散去。本源受损，下次修为突破概率降低10个百分点。"
+            result = "unbound"
         elif action in {"refine", "refine_all"}:
             if not game.natal_artifact:
                 raise ValueError("尚未选择本命法宝")
@@ -352,7 +383,7 @@ class NatalArtifactSystemMixin:
                     raise ValueError("灵石不足以继续温养本命法宝")
             else:
                 refine_count = 1
-                cost = self._natal_refine_cost(level)
+                cost = self._natal_refine_cost(level, game)
             if not remove_item(player, "spirit_stone", cost):
                 raise ValueError(f"本次温养需要 {cost} 枚灵石")
             old_level, new_level = self._add_natal_artifact_experience(
@@ -492,11 +523,13 @@ class NatalArtifactSystemMixin:
             "experience_required": self._natal_level_required(level),
             "unlocked_slots": unlocked, "slots": slots, "materials": materials,
             "next_slot_level": (unlocked + 1) * slot_interval,
-            "refine_cost": self._natal_refine_cost(level),
+            "refine_cost": self._natal_refine_cost(level, game),
             "refine_all_count": refine_all_count, "refine_all_cost": refine_all_cost,
             "can_refine_all": refine_all_count > 0,
-            "can_refine": has_item(player, "spirit_stone", self._natal_refine_cost(level)),
+            "can_refine": has_item(player, "spirit_stone", self._natal_refine_cost(level, game)),
             "bonuses": {
+                "base_combat_bonus": round(growth_base_combat, 1),
+                "cultivation_combat_bonus": round(raw_combat_bonus - growth_base_combat, 1),
                 "combat_bonus":round(effective_combat_bonus, 1),
                 "raw_combat_bonus":round(raw_combat_bonus, 1),
                 "combat_cap":round(combat_cap) if combat_cap is not None else None,

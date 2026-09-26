@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "settings": {
-    "standard_combat_power_bonus": 0.10,
+    "standard_combat_power_bonus": 0.1,
     "draw_per_cycle": 6,
     "action_days": {
       "search": 2,
@@ -6450,6 +6450,5366 @@
           "quantity": 1907850,
           "tier": "normal",
           "value": 1907850,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_depths",
+      "name": "妖祖沉庭",
+      "world": "monster_realm",
+      "entry_location_id": "ancestral_mountain",
+      "max_entry_rank": [
+        6,
+        9
+      ],
+      "eject_rank": [
+        7,
+        1
+      ],
+      "period_years": 180,
+      "first_open_year": 180,
+      "announce_lead_years": 18,
+      "window_days": 49,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "祖山裂隙",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 0.72,
+            "demon": 0.5,
+            "monster": 2.64,
+            "yin": 0.61
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.72,
+            "demon": 0.5,
+            "monster": 2.64,
+            "yin": 0.61
+          }
+        },
+        {
+          "id": "middle",
+          "name": "兽骨古道",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 0.81,
+            "demon": 0.56,
+            "monster": 3.0,
+            "yin": 0.69
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.81,
+            "demon": 0.56,
+            "monster": 3.0,
+            "yin": 0.69
+          }
+        },
+        {
+          "id": "inner",
+          "name": "妖庭沉殿",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 0.91,
+            "demon": 0.63,
+            "monster": 3.36,
+            "yin": 0.77
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.91,
+            "demon": 0.63,
+            "monster": 3.36,
+            "yin": 0.77
+          }
+        },
+        {
+          "id": "final",
+          "name": "万灵祖座",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 1.01,
+            "demon": 0.7,
+            "monster": 3.72,
+            "yin": 0.85
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 1.01,
+            "demon": 0.7,
+            "monster": 3.72,
+            "yin": 0.85
+          }
+        },
+        {
+          "id": "secret",
+          "name": "初血秘窟",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 1.11,
+            "demon": 0.77,
+            "monster": 4.08,
+            "yin": 0.94
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 1.11,
+            "demon": 0.77,
+            "monster": 4.08,
+            "yin": 0.94
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "monster_realm_technique_01",
+          "name": "祖灵归潮经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_01",
+          "tier": "major",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_technique_02",
+          "name": "祖灵定界录",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_02",
+          "tier": "major",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_technique_03",
+          "name": "祖灵炼身篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_03",
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_technique_04",
+          "name": "祖灵照神法",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_04",
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_technique_05",
+          "name": "祖灵渡厄诀",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_05",
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_technique_06",
+          "name": "祖灵不灭典",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_06",
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_technique_07",
+          "name": "祖灵隐虚术",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_07",
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_technique_08",
+          "name": "祖灵遁空篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_08",
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_technique_09",
+          "name": "祖灵溯源经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_09",
+          "tier": "normal",
+          "value": 966810,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_technique_10",
+          "name": "祖灵太初书",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_MONSTER_REALM_10",
+          "tier": "normal",
+          "value": 1430880,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_equipment_01",
+          "name": "祖灵镇海珠",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_01",
+          "tier": "major",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_equipment_02",
+          "name": "祖灵归潮旗",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_02",
+          "tier": "major",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_equipment_03",
+          "name": "祖灵裂界剑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_03",
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_equipment_04",
+          "name": "祖灵定天甲",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_04",
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_equipment_05",
+          "name": "祖灵照魂鼎",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_05",
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_equipment_06",
+          "name": "祖灵渡劫轮",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_06",
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_equipment_07",
+          "name": "祖灵天心镜",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_07",
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_equipment_08",
+          "name": "祖灵流光舟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_08",
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_equipment_09",
+          "name": "祖灵界尺",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_09",
+          "tier": "normal",
+          "value": 966810,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_equipment_10",
+          "name": "祖灵镇源碑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_10",
+          "tier": "normal",
+          "value": 1430880,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_equipment_11",
+          "name": "祖灵无相钟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_11",
+          "tier": "normal",
+          "value": 2117710,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_equipment_12",
+          "name": "祖灵太初印",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_equipment_12",
+          "tier": "normal",
+          "value": 3134210,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_consumable_01",
+          "name": "祖灵还元丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_01",
+          "tier": "normal",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_consumable_02",
+          "name": "祖灵定魂露",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_02",
+          "tier": "normal",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_consumable_03",
+          "name": "祖灵续命丸",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_03",
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_consumable_04",
+          "name": "祖灵洗脉丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_04",
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_consumable_05",
+          "name": "祖灵回天散",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_05",
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_consumable_06",
+          "name": "祖灵养神液",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_06",
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_consumable_07",
+          "name": "祖灵生肌膏",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_07",
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_consumable_08",
+          "name": "祖灵渡厄丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_consumable_08",
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_plant_01",
+          "name": "祖灵九叶莲",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_01",
+          "tier": "normal",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_plant_02",
+          "name": "祖灵灵芝",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_02",
+          "tier": "normal",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_plant_03",
+          "name": "祖灵玉参",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_03",
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_plant_04",
+          "name": "祖灵长生藤",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_04",
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_plant_05",
+          "name": "祖灵归元草",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_05",
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_plant_06",
+          "name": "祖灵照神花",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_06",
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_plant_07",
+          "name": "祖灵太初果",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_07",
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_plant_08",
+          "name": "祖灵镇魂苔",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_08",
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_plant_09",
+          "name": "祖灵天葵",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_09",
+          "tier": "normal",
+          "value": 966810,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_plant_10",
+          "name": "祖灵万年桑",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_plant_10",
+          "tier": "normal",
+          "value": 1430880,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_material_01",
+          "name": "祖灵母金",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_01",
+          "tier": "major",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_material_02",
+          "name": "祖灵源晶",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_02",
+          "tier": "major",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_material_03",
+          "name": "祖灵法砂",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_03",
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_material_04",
+          "name": "祖灵玄钢",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_04",
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_material_05",
+          "name": "祖灵界石",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_05",
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_material_06",
+          "name": "祖灵玉髓",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_06",
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_material_07",
+          "name": "祖灵神铜",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_07",
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_material_08",
+          "name": "祖灵天银",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_08",
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_material_09",
+          "name": "祖灵灵玉",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_09",
+          "tier": "normal",
+          "value": 966810,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_material_10",
+          "name": "祖灵太初核",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_monster_realm_material_10",
+          "tier": "normal",
+          "value": 1430880,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_currency_01",
+          "name": "祖灵灵匣·1",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 42000,
+          "tier": "normal",
+          "value": 42000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_currency_02",
+          "name": "祖灵灵匣·2",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 62160,
+          "tier": "normal",
+          "value": 62160,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_currency_03",
+          "name": "祖灵灵匣·3",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 92000,
+          "tier": "normal",
+          "value": 92000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "monster_realm_currency_04",
+          "name": "祖灵灵匣·4",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 136160,
+          "tier": "normal",
+          "value": 136160,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_currency_05",
+          "name": "祖灵灵匣·5",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 201510,
+          "tier": "normal",
+          "value": 201510,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_currency_06",
+          "name": "祖灵灵匣·6",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 298230,
+          "tier": "normal",
+          "value": 298230,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "monster_realm_currency_07",
+          "name": "祖灵灵匣·7",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 441390,
+          "tier": "normal",
+          "value": 441390,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_currency_08",
+          "name": "祖灵灵匣·8",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 653250,
+          "tier": "normal",
+          "value": 653250,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "monster_realm_currency_09",
+          "name": "祖灵灵匣·9",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 966810,
+          "tier": "normal",
+          "value": 966810,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "monster_realm_currency_10",
+          "name": "祖灵灵匣·10",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1430880,
+          "tier": "normal",
+          "value": 1430880,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_celestial_depths",
+      "name": "天律沉宫",
+      "world": "celestial",
+      "entry_location_id": "law_sea",
+      "max_entry_rank": [
+        11,
+        1
+      ],
+      "eject_rank": [
+        12,
+        1
+      ],
+      "period_years": 300,
+      "first_open_year": 300,
+      "announce_lead_years": 24,
+      "window_days": 56,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "碎律海岸",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 4.4,
+            "demon": 0.28,
+            "monster": 0.55,
+            "yin": 0.55
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 4.4,
+            "demon": 0.28,
+            "monster": 0.55,
+            "yin": 0.55
+          }
+        },
+        {
+          "id": "middle",
+          "name": "仙舟遗港",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 5.0,
+            "demon": 0.31,
+            "monster": 0.62,
+            "yin": 0.62
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 5.0,
+            "demon": 0.31,
+            "monster": 0.62,
+            "yin": 0.62
+          }
+        },
+        {
+          "id": "inner",
+          "name": "失序天廊",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 5.6,
+            "demon": 0.35,
+            "monster": 0.7,
+            "yin": 0.7
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 5.6,
+            "demon": 0.35,
+            "monster": 0.7,
+            "yin": 0.7
+          }
+        },
+        {
+          "id": "final",
+          "name": "沉天法座",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 6.2,
+            "demon": 0.39,
+            "monster": 0.78,
+            "yin": 0.78
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 6.2,
+            "demon": 0.39,
+            "monster": 0.78,
+            "yin": 0.78
+          }
+        },
+        {
+          "id": "secret",
+          "name": "无字律藏",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 6.8,
+            "demon": 0.43,
+            "monster": 0.85,
+            "yin": 0.85
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 6.8,
+            "demon": 0.43,
+            "monster": 0.85,
+            "yin": 0.85
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "celestial_technique_01",
+          "name": "天律归潮经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_technique_02",
+          "name": "天律定界录",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_technique_03",
+          "name": "天律炼身篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_technique_04",
+          "name": "天律照神法",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_technique_05",
+          "name": "天律渡厄诀",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_technique_06",
+          "name": "天律不灭典",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_technique_07",
+          "name": "天律隐虚术",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_technique_08",
+          "name": "天律遁空篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_technique_09",
+          "name": "天律溯源经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_technique_10",
+          "name": "天律太初书",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_CELESTIAL_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_equipment_01",
+          "name": "天律镇海珠",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_equipment_02",
+          "name": "天律归潮旗",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_equipment_03",
+          "name": "天律裂界剑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_equipment_04",
+          "name": "天律定天甲",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_equipment_05",
+          "name": "天律照魂鼎",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_equipment_06",
+          "name": "天律渡劫轮",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_equipment_07",
+          "name": "天律天心镜",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_equipment_08",
+          "name": "天律流光舟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_equipment_09",
+          "name": "天律界尺",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_equipment_10",
+          "name": "天律镇源碑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_equipment_11",
+          "name": "天律无相钟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_11",
+          "tier": "normal",
+          "value": 60505990,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_equipment_12",
+          "name": "天律太初印",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_equipment_12",
+          "tier": "normal",
+          "value": 89548870,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_consumable_01",
+          "name": "天律还元丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_01",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_consumable_02",
+          "name": "天律定魂露",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_02",
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_consumable_03",
+          "name": "天律续命丸",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_consumable_04",
+          "name": "天律洗脉丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_consumable_05",
+          "name": "天律回天散",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_consumable_06",
+          "name": "天律养神液",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_consumable_07",
+          "name": "天律生肌膏",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_consumable_08",
+          "name": "天律渡厄丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_consumable_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_plant_01",
+          "name": "天律九叶莲",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_01",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_plant_02",
+          "name": "天律灵芝",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_02",
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_plant_03",
+          "name": "天律玉参",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_plant_04",
+          "name": "天律长生藤",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_plant_05",
+          "name": "天律归元草",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_plant_06",
+          "name": "天律照神花",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_plant_07",
+          "name": "天律太初果",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_plant_08",
+          "name": "天律镇魂苔",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_plant_09",
+          "name": "天律天葵",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_plant_10",
+          "name": "天律万年桑",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_plant_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_material_01",
+          "name": "天律母金",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_material_02",
+          "name": "天律源晶",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_material_03",
+          "name": "天律法砂",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_material_04",
+          "name": "天律玄钢",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_material_05",
+          "name": "天律界石",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_material_06",
+          "name": "天律玉髓",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_material_07",
+          "name": "天律神铜",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_material_08",
+          "name": "天律天银",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_material_09",
+          "name": "天律灵玉",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_material_10",
+          "name": "天律太初核",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_celestial_material_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_currency_01",
+          "name": "天律灵匣·1",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1200000,
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_currency_02",
+          "name": "天律灵匣·2",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1776000,
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_currency_03",
+          "name": "天律灵匣·3",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 2628480,
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "celestial_currency_04",
+          "name": "天律灵匣·4",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 3890150,
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_currency_05",
+          "name": "天律灵匣·5",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 5757420,
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_currency_06",
+          "name": "天律灵匣·6",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 8520990,
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "celestial_currency_07",
+          "name": "天律灵匣·7",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 12611060,
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_currency_08",
+          "name": "天律灵匣·8",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 18664370,
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "celestial_currency_09",
+          "name": "天律灵匣·9",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 27623260,
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "celestial_currency_10",
+          "name": "天律灵匣·10",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 40882430,
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_asura_depths",
+      "name": "修罗劫海",
+      "world": "asura",
+      "entry_location_id": "destruction_sea",
+      "max_entry_rank": [
+        11,
+        1
+      ],
+      "eject_rank": [
+        12,
+        1
+      ],
+      "period_years": 300,
+      "first_open_year": 300,
+      "announce_lead_years": 24,
+      "window_days": 56,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "赤潮断岸",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 0.28,
+            "demon": 4.4,
+            "monster": 1.1,
+            "yin": 1.1
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.28,
+            "demon": 4.4,
+            "monster": 1.1,
+            "yin": 1.1
+          }
+        },
+        {
+          "id": "middle",
+          "name": "万兵海沟",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 0.31,
+            "demon": 5.0,
+            "monster": 1.25,
+            "yin": 1.25
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.31,
+            "demon": 5.0,
+            "monster": 1.25,
+            "yin": 1.25
+          }
+        },
+        {
+          "id": "inner",
+          "name": "不灭战冢",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 0.35,
+            "demon": 5.6,
+            "monster": 1.4,
+            "yin": 1.4
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.35,
+            "demon": 5.6,
+            "monster": 1.4,
+            "yin": 1.4
+          }
+        },
+        {
+          "id": "final",
+          "name": "劫主残庭",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 0.39,
+            "demon": 6.2,
+            "monster": 1.55,
+            "yin": 1.55
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.39,
+            "demon": 6.2,
+            "monster": 1.55,
+            "yin": 1.55
+          }
+        },
+        {
+          "id": "secret",
+          "name": "寂灭刃藏",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 0.43,
+            "demon": 6.8,
+            "monster": 1.7,
+            "yin": 1.7
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.43,
+            "demon": 6.8,
+            "monster": 1.7,
+            "yin": 1.7
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "asura_technique_01",
+          "name": "劫刃归潮经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_technique_02",
+          "name": "劫刃定界录",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_technique_03",
+          "name": "劫刃炼身篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_technique_04",
+          "name": "劫刃照神法",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_technique_05",
+          "name": "劫刃渡厄诀",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_technique_06",
+          "name": "劫刃不灭典",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_technique_07",
+          "name": "劫刃隐虚术",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_technique_08",
+          "name": "劫刃遁空篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_technique_09",
+          "name": "劫刃溯源经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_technique_10",
+          "name": "劫刃太初书",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_ASURA_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_equipment_01",
+          "name": "劫刃镇海珠",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_equipment_02",
+          "name": "劫刃归潮旗",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_equipment_03",
+          "name": "劫刃裂界剑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_equipment_04",
+          "name": "劫刃定天甲",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_equipment_05",
+          "name": "劫刃照魂鼎",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_equipment_06",
+          "name": "劫刃渡劫轮",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_equipment_07",
+          "name": "劫刃天心镜",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_equipment_08",
+          "name": "劫刃流光舟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_equipment_09",
+          "name": "劫刃界尺",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_equipment_10",
+          "name": "劫刃镇源碑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_equipment_11",
+          "name": "劫刃无相钟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_11",
+          "tier": "normal",
+          "value": 60505990,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_equipment_12",
+          "name": "劫刃太初印",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_equipment_12",
+          "tier": "normal",
+          "value": 89548870,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_consumable_01",
+          "name": "劫刃还元丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_01",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_consumable_02",
+          "name": "劫刃定魂露",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_02",
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_consumable_03",
+          "name": "劫刃续命丸",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_consumable_04",
+          "name": "劫刃洗脉丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_consumable_05",
+          "name": "劫刃回天散",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_consumable_06",
+          "name": "劫刃养神液",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_consumable_07",
+          "name": "劫刃生肌膏",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_consumable_08",
+          "name": "劫刃渡厄丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_consumable_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_plant_01",
+          "name": "劫刃九叶莲",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_01",
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_plant_02",
+          "name": "劫刃灵芝",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_02",
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_plant_03",
+          "name": "劫刃玉参",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_plant_04",
+          "name": "劫刃长生藤",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_plant_05",
+          "name": "劫刃归元草",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_plant_06",
+          "name": "劫刃照神花",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_plant_07",
+          "name": "劫刃太初果",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_plant_08",
+          "name": "劫刃镇魂苔",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_plant_09",
+          "name": "劫刃天葵",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_plant_10",
+          "name": "劫刃万年桑",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_plant_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_material_01",
+          "name": "劫刃母金",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_01",
+          "tier": "major",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_material_02",
+          "name": "劫刃源晶",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_02",
+          "tier": "major",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_material_03",
+          "name": "劫刃法砂",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_03",
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_material_04",
+          "name": "劫刃玄钢",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_04",
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_material_05",
+          "name": "劫刃界石",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_05",
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_material_06",
+          "name": "劫刃玉髓",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_06",
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_material_07",
+          "name": "劫刃神铜",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_07",
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_material_08",
+          "name": "劫刃天银",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_08",
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_material_09",
+          "name": "劫刃灵玉",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_09",
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_material_10",
+          "name": "劫刃太初核",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_asura_material_10",
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_currency_01",
+          "name": "劫刃灵匣·1",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1200000,
+          "tier": "normal",
+          "value": 1200000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_currency_02",
+          "name": "劫刃灵匣·2",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1776000,
+          "tier": "normal",
+          "value": 1776000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_currency_03",
+          "name": "劫刃灵匣·3",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 2628480,
+          "tier": "normal",
+          "value": 2628480,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "asura_currency_04",
+          "name": "劫刃灵匣·4",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 3890150,
+          "tier": "normal",
+          "value": 3890150,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_currency_05",
+          "name": "劫刃灵匣·5",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 5757420,
+          "tier": "normal",
+          "value": 5757420,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_currency_06",
+          "name": "劫刃灵匣·6",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 8520990,
+          "tier": "normal",
+          "value": 8520990,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "asura_currency_07",
+          "name": "劫刃灵匣·7",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 12611060,
+          "tier": "normal",
+          "value": 12611060,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_currency_08",
+          "name": "劫刃灵匣·8",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 18664370,
+          "tier": "normal",
+          "value": 18664370,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "asura_currency_09",
+          "name": "劫刃灵匣·9",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 27623260,
+          "tier": "normal",
+          "value": 27623260,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "asura_currency_10",
+          "name": "劫刃灵匣·10",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 40882430,
+          "tier": "normal",
+          "value": 40882430,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_nether_depths",
+      "name": "太初龙渊",
+      "world": "nether",
+      "entry_location_id": "dragon_origin_sea",
+      "max_entry_rank": [
+        11,
+        1
+      ],
+      "eject_rank": [
+        12,
+        1
+      ],
+      "period_years": 300,
+      "first_open_year": 300,
+      "announce_lead_years": 18,
+      "window_days": 49,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "鳞沙浅洲",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 0.11,
+            "demon": 0.55,
+            "monster": 4.4,
+            "yin": 2.2
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.11,
+            "demon": 0.55,
+            "monster": 4.4,
+            "yin": 2.2
+          }
+        },
+        {
+          "id": "middle",
+          "name": "古龙沉脊",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 0.12,
+            "demon": 0.62,
+            "monster": 5.0,
+            "yin": 2.5
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.12,
+            "demon": 0.62,
+            "monster": 5.0,
+            "yin": 2.5
+          }
+        },
+        {
+          "id": "inner",
+          "name": "源血潮眼",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 0.14,
+            "demon": 0.7,
+            "monster": 5.6,
+            "yin": 2.8
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.14,
+            "demon": 0.7,
+            "monster": 5.6,
+            "yin": 2.8
+          }
+        },
+        {
+          "id": "final",
+          "name": "初龙遗庭",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 0.16,
+            "demon": 0.78,
+            "monster": 6.2,
+            "yin": 3.1
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.16,
+            "demon": 0.78,
+            "monster": 6.2,
+            "yin": 3.1
+          }
+        },
+        {
+          "id": "secret",
+          "name": "万祖心室",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 0.17,
+            "demon": 0.85,
+            "monster": 6.8,
+            "yin": 3.4
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.17,
+            "demon": 0.85,
+            "monster": 6.8,
+            "yin": 3.4
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "nether_technique_01",
+          "name": "龙源归潮经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_01",
+          "tier": "major",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_technique_02",
+          "name": "龙源定界录",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_02",
+          "tier": "major",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_technique_03",
+          "name": "龙源炼身篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_03",
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_technique_04",
+          "name": "龙源照神法",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_04",
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_technique_05",
+          "name": "龙源渡厄诀",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_05",
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_technique_06",
+          "name": "龙源不灭典",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_06",
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_technique_07",
+          "name": "龙源隐虚术",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_07",
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_technique_08",
+          "name": "龙源遁空篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_08",
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_technique_09",
+          "name": "龙源溯源经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_09",
+          "tier": "normal",
+          "value": 29925200,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_technique_10",
+          "name": "龙源太初书",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_NETHER_10",
+          "tier": "normal",
+          "value": 44289300,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_equipment_01",
+          "name": "龙源镇海珠",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_01",
+          "tier": "major",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_equipment_02",
+          "name": "龙源归潮旗",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_02",
+          "tier": "major",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_equipment_03",
+          "name": "龙源裂界剑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_03",
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_equipment_04",
+          "name": "龙源定天甲",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_04",
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_equipment_05",
+          "name": "龙源照魂鼎",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_05",
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_equipment_06",
+          "name": "龙源渡劫轮",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_06",
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_equipment_07",
+          "name": "龙源天心镜",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_07",
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_equipment_08",
+          "name": "龙源流光舟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_08",
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_equipment_09",
+          "name": "龙源界尺",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_09",
+          "tier": "normal",
+          "value": 29925200,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_equipment_10",
+          "name": "龙源镇源碑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_10",
+          "tier": "normal",
+          "value": 44289300,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_equipment_11",
+          "name": "龙源无相钟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_11",
+          "tier": "normal",
+          "value": 65548160,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_equipment_12",
+          "name": "龙源太初印",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_equipment_12",
+          "tier": "normal",
+          "value": 97011280,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_consumable_01",
+          "name": "龙源还元丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_01",
+          "tier": "normal",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_consumable_02",
+          "name": "龙源定魂露",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_02",
+          "tier": "normal",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_consumable_03",
+          "name": "龙源续命丸",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_03",
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_consumable_04",
+          "name": "龙源洗脉丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_04",
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_consumable_05",
+          "name": "龙源回天散",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_05",
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_consumable_06",
+          "name": "龙源养神液",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_06",
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_consumable_07",
+          "name": "龙源生肌膏",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_07",
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_consumable_08",
+          "name": "龙源渡厄丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_consumable_08",
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_plant_01",
+          "name": "龙源九叶莲",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_01",
+          "tier": "normal",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_plant_02",
+          "name": "龙源灵芝",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_02",
+          "tier": "normal",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_plant_03",
+          "name": "龙源玉参",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_03",
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_plant_04",
+          "name": "龙源长生藤",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_04",
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_plant_05",
+          "name": "龙源归元草",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_05",
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_plant_06",
+          "name": "龙源照神花",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_06",
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_plant_07",
+          "name": "龙源太初果",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_07",
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_plant_08",
+          "name": "龙源镇魂苔",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_08",
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_plant_09",
+          "name": "龙源天葵",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_09",
+          "tier": "normal",
+          "value": 29925200,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_plant_10",
+          "name": "龙源万年桑",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_plant_10",
+          "tier": "normal",
+          "value": 44289300,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_material_01",
+          "name": "龙源母金",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_01",
+          "tier": "major",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_material_02",
+          "name": "龙源源晶",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_02",
+          "tier": "major",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_material_03",
+          "name": "龙源法砂",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_03",
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_material_04",
+          "name": "龙源玄钢",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_04",
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_material_05",
+          "name": "龙源界石",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_05",
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_material_06",
+          "name": "龙源玉髓",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_06",
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_material_07",
+          "name": "龙源神铜",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_07",
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_material_08",
+          "name": "龙源天银",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_08",
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_material_09",
+          "name": "龙源灵玉",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_09",
+          "tier": "normal",
+          "value": 29925200,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_material_10",
+          "name": "龙源太初核",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_nether_material_10",
+          "tier": "normal",
+          "value": 44289300,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_currency_01",
+          "name": "龙源灵匣·1",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1300000,
+          "tier": "normal",
+          "value": 1300000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_currency_02",
+          "name": "龙源灵匣·2",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1924000,
+          "tier": "normal",
+          "value": 1924000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_currency_03",
+          "name": "龙源灵匣·3",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 2847520,
+          "tier": "normal",
+          "value": 2847520,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "nether_currency_04",
+          "name": "龙源灵匣·4",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 4214330,
+          "tier": "normal",
+          "value": 4214330,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_currency_05",
+          "name": "龙源灵匣·5",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 6237210,
+          "tier": "normal",
+          "value": 6237210,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_currency_06",
+          "name": "龙源灵匣·6",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 9231070,
+          "tier": "normal",
+          "value": 9231070,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "nether_currency_07",
+          "name": "龙源灵匣·7",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 13661980,
+          "tier": "normal",
+          "value": 13661980,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_currency_08",
+          "name": "龙源灵匣·8",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 20219730,
+          "tier": "normal",
+          "value": 20219730,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "nether_currency_09",
+          "name": "龙源灵匣·9",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 29925200,
+          "tier": "normal",
+          "value": 29925200,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "nether_currency_10",
+          "name": "龙源灵匣·10",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 44289300,
+          "tier": "normal",
+          "value": 44289300,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_depths",
+      "name": "无时轮回墟",
+      "world": "reincarnation",
+      "entry_location_id": "timeless_grave",
+      "max_entry_rank": [
+        11,
+        1
+      ],
+      "eject_rank": [
+        12,
+        1
+      ],
+      "period_years": 300,
+      "first_open_year": 300,
+      "announce_lead_years": 21,
+      "window_days": 49,
+      "layers": [
+        {
+          "id": "outer",
+          "name": "旧梦墓岸",
+          "travel_days": 1,
+          "roster_size": 12,
+          "qi_concentrations": {
+            "spirit": 0.11,
+            "demon": 0.55,
+            "monster": 0.55,
+            "yin": 4.4
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.11,
+            "demon": 0.55,
+            "monster": 0.55,
+            "yin": 4.4
+          }
+        },
+        {
+          "id": "middle",
+          "name": "逆岁碑廊",
+          "travel_days": 3,
+          "roster_size": 8,
+          "qi_concentrations": {
+            "spirit": 0.12,
+            "demon": 0.62,
+            "monster": 0.62,
+            "yin": 5.0
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.12,
+            "demon": 0.62,
+            "monster": 0.62,
+            "yin": 5.0
+          }
+        },
+        {
+          "id": "inner",
+          "name": "千生魂海",
+          "travel_days": 4,
+          "roster_size": 5,
+          "qi_concentrations": {
+            "spirit": 0.14,
+            "demon": 0.7,
+            "monster": 0.7,
+            "yin": 5.6
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.14,
+            "demon": 0.7,
+            "monster": 0.7,
+            "yin": 5.6
+          }
+        },
+        {
+          "id": "final",
+          "name": "无时轮座",
+          "travel_days": 5,
+          "roster_size": 3,
+          "qi_concentrations": {
+            "spirit": 0.16,
+            "demon": 0.78,
+            "monster": 0.78,
+            "yin": 6.2
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.16,
+            "demon": 0.78,
+            "monster": 0.78,
+            "yin": 6.2
+          }
+        },
+        {
+          "id": "secret",
+          "name": "未生秘藏",
+          "travel_days": 2,
+          "roster_size": 0,
+          "qi_concentrations": {
+            "spirit": 0.17,
+            "demon": 0.85,
+            "monster": 0.85,
+            "yin": 6.8
+          },
+          "qi_gain_efficiencies": {
+            "spirit": 0.17,
+            "demon": 0.85,
+            "monster": 0.85,
+            "yin": 6.8
+          }
+        }
+      ],
+      "treasure_pool": [
+        {
+          "id": "reincarnation_technique_01",
+          "name": "溯魂归潮经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_01",
+          "tier": "major",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_technique_02",
+          "name": "溯魂定界录",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_02",
+          "tier": "major",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_technique_03",
+          "name": "溯魂炼身篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_03",
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_technique_04",
+          "name": "溯魂照神法",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_04",
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_technique_05",
+          "name": "溯魂渡厄诀",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_05",
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_technique_06",
+          "name": "溯魂不灭典",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_06",
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_technique_07",
+          "name": "溯魂隐虚术",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_07",
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_technique_08",
+          "name": "溯魂遁空篇",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_08",
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_technique_09",
+          "name": "溯魂溯源经",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_09",
+          "tier": "normal",
+          "value": 28774230,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_technique_10",
+          "name": "溯魂太初书",
+          "category": "technique",
+          "kind": "technique",
+          "exclusive_source": "guixu_tide",
+          "content_id": "TECH_GUIXU_REINCARNATION_10",
+          "tier": "normal",
+          "value": 42585860,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_equipment_01",
+          "name": "溯魂镇海珠",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_01",
+          "tier": "major",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_equipment_02",
+          "name": "溯魂归潮旗",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_02",
+          "tier": "major",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_equipment_03",
+          "name": "溯魂裂界剑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_03",
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_equipment_04",
+          "name": "溯魂定天甲",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_04",
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_equipment_05",
+          "name": "溯魂照魂鼎",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_05",
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_equipment_06",
+          "name": "溯魂渡劫轮",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_06",
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_equipment_07",
+          "name": "溯魂天心镜",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_07",
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_equipment_08",
+          "name": "溯魂流光舟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_08",
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_equipment_09",
+          "name": "溯魂界尺",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_09",
+          "tier": "normal",
+          "value": 28774230,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_equipment_10",
+          "name": "溯魂镇源碑",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_10",
+          "tier": "normal",
+          "value": 42585860,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_equipment_11",
+          "name": "溯魂无相钟",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_11",
+          "tier": "normal",
+          "value": 63027080,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_equipment_12",
+          "name": "溯魂太初印",
+          "category": "equipment",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_equipment_12",
+          "tier": "normal",
+          "value": 93280070,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_consumable_01",
+          "name": "溯魂还元丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_01",
+          "tier": "normal",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_consumable_02",
+          "name": "溯魂定魂露",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_02",
+          "tier": "normal",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_consumable_03",
+          "name": "溯魂续命丸",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_03",
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_consumable_04",
+          "name": "溯魂洗脉丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_04",
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_consumable_05",
+          "name": "溯魂回天散",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_05",
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_consumable_06",
+          "name": "溯魂养神液",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_06",
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_consumable_07",
+          "name": "溯魂生肌膏",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_07",
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_consumable_08",
+          "name": "溯魂渡厄丹",
+          "category": "consumable",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_consumable_08",
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_plant_01",
+          "name": "溯魂九叶莲",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_01",
+          "tier": "normal",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_plant_02",
+          "name": "溯魂灵芝",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_02",
+          "tier": "normal",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_plant_03",
+          "name": "溯魂玉参",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_03",
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_plant_04",
+          "name": "溯魂长生藤",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_04",
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_plant_05",
+          "name": "溯魂归元草",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_05",
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_plant_06",
+          "name": "溯魂照神花",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_06",
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_plant_07",
+          "name": "溯魂太初果",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_07",
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_plant_08",
+          "name": "溯魂镇魂苔",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_08",
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_plant_09",
+          "name": "溯魂天葵",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_09",
+          "tier": "normal",
+          "value": 28774230,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_plant_10",
+          "name": "溯魂万年桑",
+          "category": "plant",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_plant_10",
+          "tier": "normal",
+          "value": 42585860,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_material_01",
+          "name": "溯魂母金",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_01",
+          "tier": "major",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_material_02",
+          "name": "溯魂源晶",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_02",
+          "tier": "major",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_material_03",
+          "name": "溯魂法砂",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_03",
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_material_04",
+          "name": "溯魂玄钢",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_04",
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_material_05",
+          "name": "溯魂界石",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_05",
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_material_06",
+          "name": "溯魂玉髓",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_06",
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_material_07",
+          "name": "溯魂神铜",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_07",
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_material_08",
+          "name": "溯魂天银",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_08",
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_material_09",
+          "name": "溯魂灵玉",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_09",
+          "tier": "normal",
+          "value": 28774230,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_material_10",
+          "name": "溯魂太初核",
+          "category": "material",
+          "kind": "item",
+          "exclusive_source": "guixu_tide",
+          "content_id": "guixu_reincarnation_material_10",
+          "tier": "normal",
+          "value": 42585860,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_currency_01",
+          "name": "溯魂灵匣·1",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1250000,
+          "tier": "normal",
+          "value": 1250000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_currency_02",
+          "name": "溯魂灵匣·2",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 1850000,
+          "tier": "normal",
+          "value": 1850000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_currency_03",
+          "name": "溯魂灵匣·3",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 2738000,
+          "tier": "normal",
+          "value": 2738000,
+          "layer_weights": {
+            "outer": 6,
+            "middle": 3,
+            "inner": 1,
+            "final": 0
+          }
+        },
+        {
+          "id": "reincarnation_currency_04",
+          "name": "溯魂灵匣·4",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 4052240,
+          "tier": "normal",
+          "value": 4052240,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_currency_05",
+          "name": "溯魂灵匣·5",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 5997320,
+          "tier": "normal",
+          "value": 5997320,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_currency_06",
+          "name": "溯魂灵匣·6",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 8876030,
+          "tier": "normal",
+          "value": 8876030,
+          "layer_weights": {
+            "outer": 3,
+            "middle": 4,
+            "inner": 2,
+            "final": 1
+          }
+        },
+        {
+          "id": "reincarnation_currency_07",
+          "name": "溯魂灵匣·7",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 13136520,
+          "tier": "normal",
+          "value": 13136520,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_currency_08",
+          "name": "溯魂灵匣·8",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 19442050,
+          "tier": "normal",
+          "value": 19442050,
+          "layer_weights": {
+            "outer": 1,
+            "middle": 3,
+            "inner": 4,
+            "final": 2
+          }
+        },
+        {
+          "id": "reincarnation_currency_09",
+          "name": "溯魂灵匣·9",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 28774230,
+          "tier": "normal",
+          "value": 28774230,
+          "layer_weights": {
+            "outer": 0,
+            "middle": 1,
+            "inner": 3,
+            "final": 6
+          }
+        },
+        {
+          "id": "reincarnation_currency_10",
+          "name": "溯魂灵匣·10",
+          "category": "currency",
+          "kind": "item_bundle",
+          "content_id": "spirit_stone",
+          "quantity": 42585860,
+          "tier": "normal",
+          "value": 42585860,
           "layer_weights": {
             "outer": 0,
             "middle": 1,

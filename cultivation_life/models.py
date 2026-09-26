@@ -325,6 +325,7 @@ class Player:
     # be applied dynamically rather than being baked into faction rewards.
     quick_start_base_combat_power: float = 0.0
     natal_artifact_hp_bonus: float = 0.0
+    natal_origin_penalty: float = 0.0
     natal_artifact_mp_bonus: float = 0.0
     natal_artifact_combat_bonus: float = 0.0
     natal_artifact_opportunity_bonus: float = 0.0
@@ -762,6 +763,8 @@ class GameState:
     market_age: int | None = None
     market_offers: list[dict[str, Any]] = field(default_factory=list)
     auction_state: dict[str, Any] = field(default_factory=dict)
+    exchange_state: dict[str, Any] = field(default_factory=dict)
+    exchange_sequence: int = 0
     auction_sequence: int = 0
     debug_world_news: bool = False
     active_trial: dict[str, Any] | None = None
@@ -826,6 +829,8 @@ class GameState:
             "market_age": self.market_age,
             "market_offers": self.market_offers,
             "auction_state": self.auction_state,
+            "exchange_state": self.exchange_state,
+            "exchange_sequence": self.exchange_sequence,
             "auction_sequence": self.auction_sequence,
             "debug_world_news": self.debug_world_news,
             "active_trial": self.active_trial,
@@ -875,6 +880,8 @@ class GameState:
             market_age=value.get("market_age"),
             market_offers=value.get("market_offers", []),
             auction_state=dict(value.get("auction_state", {})),
+            exchange_state=dict(value.get("exchange_state", {})),
+            exchange_sequence=int(value.get("exchange_sequence", 0)),
             auction_sequence=int(value.get("auction_sequence", 0)),
             debug_world_news=bool(value.get("debug_world_news", False)),
             active_trial=value.get("active_trial"),

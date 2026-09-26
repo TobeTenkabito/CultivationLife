@@ -652,7 +652,11 @@ class GuixuSystemMixin:
             if actor.get("status") == "active"
             and actor.get("layer_id") == session.get("layer_id")
             and str(actor.get("actor_id")) not in already_threatened
-            and (int(actor.get("realm_index", 0)), int(actor.get("layer", 1))) > visible_rank
+            and (
+                int(actor.get("realm_index", 0)) > visible_rank[0]
+                or (int(actor.get("realm_index", 0)) == visible_rank[0]
+                    and len(self._guixu_active_team(cycle, actor)) > 1)
+            )
         ]
         if not candidates or rng.random() >= float(
             self._guixu_settings().get("npc_threat_chance_per_action", .58)
@@ -672,7 +676,7 @@ class GuixuSystemMixin:
         game.history.append(HistoryRecord(
             "SYS_GUIXU_NPC_THREAT", 1, game.player.age, "归墟恃强索宝",
             str(actor["actor_id"]), "threatened",
-            f"{actor['name']}只看见你显露的修为，自恃境界更高，逼你交出{definition['name']}保命。",
+            f"{actor['name']}只看见你显露的修为，倚仗境界或同伴，逼你交出{definition['name']}保命。",
             {"dungeon_id": dungeon["id"], **copy.deepcopy(session["pending_threat"])},
             ["system", "guixu", "npc", "threat"],
         ))
@@ -750,7 +754,7 @@ class GuixuSystemMixin:
             return "侍妾"
         return None
 
-    def _break_guixu_relationship(self, game: GameState, npc_id: str) -> None:
+    def _break_guixu_relationship(self, game: GameState, npc_id: str, *, player_defending: bool = False) -> None:
         player = game.player
         player.party = [row for row in player.party if str(row.get("id")) != npc_id]
         if player.master and str(player.master.get("id")) == npc_id:
@@ -760,12 +764,21 @@ class GuixuSystemMixin:
         player.dao_friends = [row for row in player.dao_friends if str(row.get("id")) != npc_id]
         player.disciples = [row for row in player.disciples if str(row.get("id")) != npc_id]
         player.concubines = [row for row in player.concubines if str(row.get("id")) != npc_id]
-        player.karma += 60
+        if not player_defending:
+            player.karma += 60
         player.fame += 25
+
+    @staticmethod
+    def _guixu_active_team(cycle, actor):
+        if not actor.get("team_id"):
+            return [actor]
+        return [row for row in cycle.get("roster", []) if row.get("team_id") == actor["team_id"]
+                and row.get("status") == "active" and row.get("layer_id") == actor.get("layer_id")]
 
     def _guixu_fight(
         self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
         session: dict[str, Any], actor: dict[str, Any], rng: random.Random,
+        *, player_defending: bool = False,
     ) -> tuple[str, str]:
         allies = []
         for ally_id in session.get("recruited_actor_ids", []):
@@ -776,6 +789,7 @@ class GuixuSystemMixin:
                     "realm_offset": int(ally["realm_index"]) - game.player.realm_index,
                 })
         target = {
+            "player_defending": player_defending,
             "target_name": actor["name"], "target_power": float(actor["power"]),
             "primary_power": float(actor["power"]), "target_realm_index": int(actor["realm_index"]),
             "target_layer": int(actor["layer"]), "combat_type": "cultivator", "action": "slay",
@@ -789,8 +803,17 @@ class GuixuSystemMixin:
                 self._guixu_settings().get("combat_pursuit_chance_bonus", .22)
             ),
         }
+        team = self._guixu_active_team(cycle, actor)
+        if len(team) > 1:
+            target["members"] = [{"name": row["name"], "power": float(row["power"]),
+                                  "realm_index": int(row["realm_index"]), "layer": int(row["layer"]),
+                                  "npc_id": row.get("npc_id") or row["actor_id"], "actor_id": row["actor_id"]}
+                                 for row in team]
+            target["target_power"] = sum(float(row["power"]) for row in team)
         result, summary = self._combat(game, target, True, rng)
         if result == "killed":
+            killed_id = target.get("killed_member", {}).get("actor_id")
+            actor = next((row for row in team if row["actor_id"] == killed_id), actor)
             actor["status"] = "dead"
             if actor.get("team_id"):
                 self._dissolve_guixu_npc_team(
@@ -801,7 +824,7 @@ class GuixuSystemMixin:
                 if row.get("holder_id") == actor["actor_id"]:
                     self._guixu_grant_entry(game, dungeon, row, "combat")
             if actor.get("npc_id") and self._guixu_relationship_role(game, str(actor["npc_id"])):
-                self._break_guixu_relationship(game, str(actor["npc_id"]))
+                self._break_guixu_relationship(game, str(actor["npc_id"]), player_defending=player_defending)
         self._consume_guixu_days(
             game, dungeon, cycle, session,
             int(self._guixu_settings()["action_days"]["combat"]), rng,
@@ -869,7 +892,7 @@ class GuixuSystemMixin:
                 actor = self._guixu_actor(cycle, str(pending_threat["actor_id"]))
                 session["pending_threat"] = None
                 result, combat_summary = self._guixu_fight(
-                    game, dungeon, cycle, session, actor, rng,
+                    game, dungeon, cycle, session, actor, rng, player_defending=True,
                 )
                 summary = f"你拒绝交宝，与{actor['name']}当场开战。{combat_summary}"
                 history_event = "SYS_GUIXU_THREAT_RESPONSE"

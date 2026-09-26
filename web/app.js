@@ -335,7 +335,7 @@ function showStart() {
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'guixu', 'market', 'auction', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'guixu', 'market', 'auction', 'exchange', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -471,7 +471,7 @@ function render(data) {
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
@@ -558,7 +558,7 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   renderPostBattlePossession();
@@ -615,7 +615,7 @@ function renderTianji(system) {
     const lines = [
       `胎模：${artifact.mold_name || '???'}`,
       `基础战力：${artifact.base_combat_power == null ? '???' : number(artifact.base_combat_power)}`,
-      `当前界面战力：${artifact.current_world_combat_power == null ? '???' : number(artifact.current_world_combat_power)}`,
+      artifact.player_crafted ? '玩家法宝按当前单件战力参与排名' : '神机榜值为原始战力，不随温养、镶嵌或界面压制改变',
       `来源世界：${artifact.origin_world_name || '???'}`,
       `器述：${artifact.description || '???'}`,
     ];
@@ -1018,7 +1018,8 @@ function renderNatalArtifact(system) {
   const refineAll=document.createElement('button');refineAll.className='natal-action natal-refine-all';refineAll.textContent=`一键温养 ×${number(system.refine_all_count||0)} · ${number(system.refine_all_cost||0)}`;refineAll.dataset.natalUnavailable=system.can_refine_all?'0':'1';refineAll.title='连续消耗灵石温养，直到当前灵石不足；本命法宝等级没有上限';refineAll.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'refine_all'});refineTools.append(refine,refineAll);head.append(identity,refineTools);root.appendChild(head);
   const progress=document.createElement('div');progress.className='natal-level-progress';const fill=document.createElement('i');fill.style.width=`${Math.min(100,Number(system.experience)/Math.max(1,Number(system.experience_required))*100)}%`;const label=document.createElement('span');label.textContent=`祭炼经验 ${system.experience}/${system.experience_required}`;progress.append(fill,label);root.appendChild(progress);
   const bonuses=document.createElement('div');bonuses.className='natal-bonuses';[['战斗力',number(system.bonuses.combat_bonus)],['下一级战力增益',`+${number(system.bonuses.next_level_combat_gain)}`],['最大 HP',number(system.bonuses.hp_bonus)],['最大 MP',number(system.bonuses.mp_bonus)],['机缘效率',`+${Math.round(system.bonuses.opportunity_bonus*100)}%`],['雷劫减免',`+${Math.round(system.bonuses.tribulation_reduction*100)}%`]].forEach(([name,value])=>{const row=document.createElement('span'),small=document.createElement('small'),strong=document.createElement('b');small.textContent=name;strong.textContent=value;row.append(small,strong);bonuses.appendChild(row);});root.appendChild(bonuses);
-  if(system.is_tianji){const note=document.createElement('p');note.className='muted natal-tianji-cap';note.textContent=`神机原始战力（含温养与镶嵌）${number(system.bonuses.raw_combat_bonus)}；${system.bonuses.combat_cap==null?'当前界面完全解放':`当前界面单件上限 ${number(system.bonuses.combat_cap)}`}，实际计入 ${number(system.bonuses.combat_bonus)}。继续温养不会绕过界面上限，其他属性与器理 Buff 不受压制。`;root.appendChild(note);}
+  if(system.is_tianji){const note=document.createElement('p');note.className='muted natal-tianji-cap';note.textContent=`神机原始战力 ${number(system.bonuses.base_combat_bonus)}；培养与镶嵌加成 +${number(system.bonuses.cultivation_combat_bonus)}；合计 ${number(system.bonuses.raw_combat_bonus)}；${system.bonuses.combat_cap==null?'当前界面完全解放':`当前界面单件上限 ${number(system.bonuses.combat_cap)}`}，实际计入 ${number(system.bonuses.combat_bonus)}。继续温养不会绕过界面上限，其他属性与器理 Buff 不受压制。`;root.appendChild(note);}
+  const unbind=document.createElement('button');unbind.className='natal-action';unbind.textContent='移除本命 · 下次突破 −10%';unbind.onclick=()=>openGameConfirm({title:'移除本命法宝',body:'法宝与镶材归还，温养等级清除。损耗大量本源，下次修为突破概率降低10个百分点，重复移除累加。是否继续？',confirmText:'损耗本源并移除',onConfirm:()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'unbind'})});refineTools.appendChild(unbind);
   const visual=document.createElement('div');visual.className='natal-artifact-visual';
   const swordShadow=document.createElement('img');swordShadow.className='natal-sword-shadow';swordShadow.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';swordShadow.alt='';swordShadow.setAttribute('aria-hidden','true');
   const sword=document.createElement('img');sword.className='natal-sword natal-sword-body';sword.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';sword.alt='';sword.setAttribute('aria-hidden','true');
@@ -2392,6 +2393,32 @@ function renderGhostPhaseTwo(system) {
   if (!attachment.children.length) attachment.innerHTML='<p class="empty">行囊中没有可附灵器物。</p>';
 }
 
+function renderExchange(system) {
+  const card=$('#exchange-card'),dock=document.querySelector('[data-panel-target="exchange"]');
+  card.classList.toggle('hidden',!system.available);dock.classList.toggle('hidden',!system.available);
+  if(!system.available){window.UtilityPanels?.close('exchange');return;}
+  dock.querySelector('small').textContent=system.status==='scheduled'?`${system.actions_until_open}时后`:'交换会';
+  dock.title=`${system.location_name} · 匿名交换会`;
+  $('#exchange-title').textContent=`${system.location_name} · 匿名交换会`;
+  $('#exchange-description').textContent=system.status==='scheduled'?`还有 ${system.actions_until_open} 个时间单位开幕。固定会址无境界限制。`:`只收材料，不收灵石。需求清单保证成交；替代材料总值须不低于需求总值，成功率65%，多付不找零，被拒绝不扣材料。剩余 ${system.remaining} 个时间单位。`;
+  const root=$('#exchange-content');root.innerHTML='';
+  if(system.last_result){const message=document.createElement('p');message.textContent=system.last_result;root.append(message);}
+  if(!system.at_location){const travel=document.createElement('button');travel.textContent=`前往${system.location_name}`;travel.onclick=()=>{window.UtilityPanels?.open('map');};root.append(travel);return;}
+  if(system.status!=='open')return;
+  const identities=document.createElement('div');identities.className='auction-identities';
+  system.aliases.forEach(alias=>{const button=document.createElement('button');button.textContent=alias===system.alias?`${alias}（当前）`:alias;button.dataset.exchangeUnavailable=alias===system.alias?'1':'0';button.disabled=alias===system.alias;button.onclick=()=>mutate(`/api/games/${game.id}/exchange-action`,{action:'identity',alias});identities.append(button);});root.append(identities);
+  (system.offers||[]).forEach(offer=>{
+    const row=document.createElement('section');row.className='auction-lot';
+    const info=document.createElement('div'),heading=document.createElement('h3'),details=document.createElement('p');
+    heading.textContent=`${offer.npc_alias} · ${offer.reward.name} ×1 · 总价值 ${number(offer.reward_value)}`;
+    details.textContent=`需求：${offer.demands.map(d=>`${d.name} ×${d.quantity}（单价 ${number(d.unit_value)}）`).join('、')}；总价值 ${number(offer.demand_value)}`;info.append(heading,details);row.append(info);
+    if(offer.completed){const done=document.createElement('p');done.textContent='已成交';info.append(done);root.append(row);return;}
+    const form=document.createElement('form'),selection=document.createElement('details'),summary=document.createElement('summary'),total=document.createElement('p');summary.textContent='选择支付材料';selection.append(summary);const inputs=[];
+    (system.materials||[]).forEach(material=>{const label=document.createElement('label'),input=document.createElement('input');input.type='number';input.min='0';input.max=String(material.quantity);input.step='1';input.value='0';input.style.width='5em';label.textContent=`${material.name} · 单值 ${number(material.value)} · 持有 ${material.quantity} `;label.style.display='block';label.append(input);selection.append(label);inputs.push({material,input});input.oninput=()=>{total.textContent=`已选材料总价值 ${number(inputs.reduce((v,x)=>v+x.material.value*Number(x.input.value||0),0))}`;};});
+    total.textContent='已选材料总价值 0';const submit=document.createElement('button');submit.type='submit';submit.textContent=offer.substitution_attempted?'按需求清单交换':'提交交换';submit.dataset.exchangeUnavailable=system.alias?'0':'1';submit.disabled=!system.alias;form.append(selection,total,submit);form.onsubmit=event=>{event.preventDefault();mutate(`/api/games/${game.id}/exchange-action`,{action:'trade',offer_id:offer.id,materials:inputs.filter(x=>Number(x.input.value)>0).map(x=>({id:x.material.id,quantity:Number(x.input.value)}))});};info.append(form);root.append(row);
+  });
+}
+
 function renderMap(map, auction) {
   if (!map) return;
   $('#map-title').textContent = `${map.world_name}地图`;
@@ -2406,6 +2433,9 @@ function renderMap(map, auction) {
     const themes = document.createElement('span'); themes.textContent = (location.themes || []).join(' · ');
     heading.append(name, themes);
     const description = document.createElement('p'); description.textContent = location.description;
+    if (game?.exchange_system?.available && game.exchange_system.location_id === location.id) {
+      const marker=document.createElement('strong');marker.className='auction-map-marker';marker.textContent=game.exchange_system.status==='scheduled'?`交换会 · ${game.exchange_system.actions_until_open}个时间单位后开幕`:'匿名交换会正在举行';row.appendChild(marker);
+    }
     if (auction?.available && auction.location_id === location.id) {
       const marker = document.createElement('strong'); marker.className = 'auction-map-marker';
       marker.textContent = auction.status === 'scheduled' ? `拍卖会预告 · ${auction.actions_until_open}个操作节点后开幕` : auction.status === 'open' ? '拍卖会正在举行' : '散场黑市正在开放';
@@ -2649,8 +2679,10 @@ function renderAuction(system) {
     const title = document.createElement('b'); title.textContent = `${result.kind === 'technique' ? '《' : ''}${result.name}${result.kind === 'technique' ? '》' : ''}`;
     const detail = document.createElement('small'); detail.textContent = `${result.tier_name} · ${result.description}`; info.append(title, detail);
     const buy = document.createElement('button'); buy.textContent = `${number(result.price)} 灵石`; buy.dataset.auctionUnavailable = system.spirit_stones < result.price ? '1' : '0'; buy.disabled = buy.dataset.auctionUnavailable === '1';
-    buy.onclick = () => mutate(`/api/games/${game.id}/black-market-buy`, {result_id:result.id});
-    row.append(info, buy); results.appendChild(row);
+    const quantity = document.createElement('input'); quantity.type='number'; quantity.min='1'; quantity.max='999'; quantity.step='1'; quantity.value='1'; quantity.setAttribute('aria-label',`${result.name}购买数量`); quantity.style.width='5em';
+    const updatePrice=()=>{const count=Number(quantity.value);const valid=Number.isInteger(count)&&count>=1&&count<=999;buy.textContent=`购买 · ${number(result.price*(valid?count:0))} 灵石`;buy.dataset.auctionUnavailable=valid&&system.spirit_stones>=result.price*count?'0':'1';buy.disabled=buy.dataset.auctionUnavailable==='1';};quantity.oninput=updatePrice;updatePrice();
+    buy.onclick = () => mutate(`/api/games/${game.id}/black-market-buy`, {result_id:result.id,quantity:Number(quantity.value)});
+    row.append(info, quantity, buy); results.appendChild(row);
   });
   const sellables = $('#black-market-sellables'); sellables.innerHTML = '';
   [...(system.black_market_sellable_items || []).map(item => ({...item, kind:'item'})), ...(system.black_market_sellable_puppets || []).map(item => ({...item, kind:'puppet'}))].forEach(asset => {
@@ -2824,7 +2856,7 @@ function renderInventory(items) {
       const natalOccupied = Boolean(game?.natal_artifact?.bound && !artifact.is_natal);
       natal.disabled = natalOccupied; natal.dataset.craftingUnavailable = natalOccupied ? '1' : '0';
       if (natalOccupied) natal.title = `已有本命法宝“${game.natal_artifact.name}”，不能重复认主`;
-      natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效，已镶材料会全部退回。` : `确认将“${artifact.name}”纳入本命法宝系统？认主后可在“本命”界面温养升级并镶嵌材料。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
+      natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效，已镶材料会全部退回，温养等级清除；损耗本源，下次修为突破概率降低10个百分点（重复移除累加）。` : `确认将“${artifact.name}”纳入本命法宝系统？认主后可在“本命”界面温养升级并镶嵌材料。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
       tools.appendChild(natal);
       if (artifact.tianji) {
         const active=document.createElement('button'); active.textContent=artifact.equipped?'卸下神机位':'设为当前神机';
@@ -3597,6 +3629,7 @@ function renderButtons() {
   document.querySelectorAll('.market-lock').forEach(button => {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
   });
+  document.querySelectorAll('#exchange-card button, #exchange-card input').forEach(control=>{if(control.id!=='exchange-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.exchangeUnavailable==='1';});
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {
     if (control.id !== 'auction-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.auctionUnavailable === '1';
   });

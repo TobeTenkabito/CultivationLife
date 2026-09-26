@@ -58,6 +58,7 @@ def formation_shared_definitions() -> dict[str, dict[str, Any]]:
     nature_by_source = {
         "canghai": "water", "weir": "space", "bloodriver": "yin",
         "demon_grave": "law", "beast_vortex": "wood", "yellow_spring": "soul",
+        "monster_realm": "wood", "celestial": "law", "asura": "fire", "nether": "water", "reincarnation": "soul",
     }
     for item in ITEM_CATALOG.values():
         tags = set(item.tags)
@@ -69,7 +70,7 @@ def formation_shared_definitions() -> dict[str, dict[str, Any]]:
             "id": f"guixu:{item.id}", "item_id": item.id, "name": item.name,
             "source_kind": "inventory", "nature": nature_by_source[source],
             "formation_value": round(max(2.0, math.log10(max(10.0, raw_value)) * 4.0), 2),
-            "tier": 6 if source not in {"canghai", "bloodriver"} else 3,
+            "tier": 9 if source in {"celestial", "asura", "nether", "reincarnation"} else 6 if source not in {"canghai", "bloodriver"} else 3,
         }
     return result
 
@@ -91,6 +92,14 @@ def ensure_formation_state(player: Player) -> None:
     player.formation_materials = [
         copy.deepcopy(row) for row in player.formation_materials if isinstance(row, dict)
     ]
+    # Preserve the first ID referenced by an existing loadout; split duplicate
+    # black-market copies from older saves into independent physical objects.
+    for materials in (player.formation_materials, player.crafting_materials):
+        material_ids = set()
+        for material in materials:
+            if not material.get("id") or material["id"] in material_ids:
+                material["id"] = f"material-{uuid.uuid4().hex}"
+            material_ids.add(material["id"])
     loadouts: list[dict[str, Any]] = []
     seen: set[str] = set()
     for row in player.formation_loadouts:

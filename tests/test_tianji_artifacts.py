@@ -39,7 +39,7 @@ def test_generation_is_exact_sorted_deterministic_and_base_world_only(tmp_path: 
     assert a["artifacts"] == b["artifacts"]
     assert a["materials"] == b["materials"]
     assert {row["origin_world"] for row in a["artifacts"]} <= {
-        "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
+        "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura", "monster_realm", "phantom_underworld", "nether", "reincarnation",
     }
     assert max(len(artifact["effects"]) for artifact in a["artifacts"]) > 3
     generated_schedules: set[str] = set()

@@ -6,7 +6,7 @@ import random
 import uuid
 from typing import Any
 
-from ..content_registry import REALMS, WORLD_SYSTEMS
+from ..content_registry import ITEM_CATALOG, REALMS, WORLD_SYSTEMS
 from ..combat_rule_engine import describe_rule
 from ..monster_bloodline_rules import BLOODLINE_RULE_EFFECTS, describe_generated_trait, generated_trait_id
 from ..models import GameState, HistoryRecord
@@ -161,7 +161,7 @@ class TianjiSystemMixin:
             theme = themes[index % len(themes)] if index < len(themes) else rng.choice(themes)
             root = roots[(index // len(themes)) % len(roots)] if index < len(themes) * 2 else rng.choice(roots)
             prefix = prefixes[index % len(prefixes)] if index < len(prefixes) else rng.choice(prefixes)
-            world = rng.choice(worlds)
+            world = worlds[index % len(worlds)] if index < len(worlds) else rng.choice(worlds)
             tier = int(WORLD_SYSTEMS["world_profiles"].get(world, {}).get("tier", 1))
             roles = rng.sample(["primary", "secondary", "quench"], rng.choice((1, 2, 3)))
             potency = rng.uniform(.05, .11) * (1 + tier * .22)
@@ -469,7 +469,8 @@ class TianjiSystemMixin:
         rng = _stable_rng(game.seed, f"holders:{world}")
         available = [
             row for row in state["artifacts"]
-            if row["origin_world"] == world and row["id"] not in state["holders"]
+            if state.get("world_distribution", {}).get(row["id"], row["origin_world"]) == world
+            and row["id"] not in state["holders"]
             and state["true_body_states"][row["id"]]["status"] == "unmanifested"
         ]
         rng.shuffle(available)
@@ -579,6 +580,26 @@ class TianjiSystemMixin:
                 state["true_body_states"][artifact_id] = {
                     "status": "destroyed", "holder_ref": None,
                 }
+            changed = True
+        if not state.get("expanded_world_distribution"):
+            # Extend circulation without rerolling old artifact definitions,
+            # material qualities, recipes, owned instances or current holders.
+            distribution = state.setdefault("world_distribution", {})
+            extras = state.setdefault("material_extra_worlds", {})
+            worlds = list(self._tianji_config()["base_worlds"])
+            existing = {row["origin_world"] for row in state["artifacts"]}
+            free = [row for row in state["artifacts"] if row["id"] not in state["holders"]
+                    and state["true_body_states"].get(row["id"], {}).get("status") == "unmanifested"]
+            for index, world in enumerate(w for w in worlds if w not in existing):
+                if index < len(free):
+                    distribution[free[index]["id"]] = world
+                if world in state["holder_worlds_initialized"]:
+                    state["holder_worlds_initialized"].remove(world)
+            material_worlds = {row["world"] for row in state["materials"]}
+            for index, world in enumerate(w for w in worlds if w not in material_worlds):
+                for row in state["materials"][index::len(worlds)]:
+                    extras.setdefault(row["id"], []).append(world)
+            state["expanded_world_distribution"] = True
             changed = True
         if self._assign_tianji_holders_for_world(game, game.player.world):
             changed = True
@@ -780,6 +801,43 @@ class TianjiSystemMixin:
                 else:
                     public["holder"] = {"name": "暂无可追踪持有人"}
             rows.append(public)
+        # Rankings use frozen divine-artifact power; cultivation must never
+        # rewrite a world's original hundred definitions or recipes.
+        ranking_power = {a["id"]: float(a["base_combat_power"]) for a in state["artifacts"]}
+        player_artifacts = list(game.player.crafted_artifacts)
+        for item in game.player.inventory:
+            if not item.crafted_artifact_id and self._natal_artifact_candidate(item):
+                player_artifacts.append({"id": f"inventory:{item.id}", "name": item.name,
+                                         "description": item.description, "actual_stats": {"combat_power": item.combat_bonus}})
+        natal = game.natal_artifact
+        if natal and not natal.get("crafted_artifact_id") and natal.get("item_id") in ITEM_CATALOG:
+            item = ITEM_CATALOG[natal["item_id"]]
+            player_artifacts.append({"id": f"natal:{item.id}", "name": natal["name"],
+                                     "description": item.description,
+                                     "actual_stats": {"combat_power": game.player.natal_artifact_combat_bonus}})
+        for artifact in player_artifacts:
+            if artifact.get("tianji"):
+                continue
+            power = float(artifact.get("actual_stats", {}).get("combat_power", 0))
+            if artifact.get("is_natal"):
+                power += game.player.natal_artifact_combat_bonus
+            if power < min(ranking_power.values(), default=float("inf")):
+                continue
+            ranking_power[artifact["id"]] = power
+            rows.append({"id": artifact["id"], "rank": 0, "knowledge_level": 2,
+                         "name": artifact["name"], "base_combat_power": round(power),
+                         "current_world_combat_power": round(power), "mold_name": "自炼法宝",
+                         "description": artifact.get("description", ""), "effects": [],
+                         "origin_world_name": WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
+                         "holder": {"name": game.player.name}, "player_crafted": True})
+        rows.sort(key=lambda row: (-ranking_power[row["id"]], row["id"]))
+        for index, row in enumerate(rows, 1):
+            row["rank"] = index
+        # Falling out of the top hundred must not remove a learned recipe.
+        targets = [{"id": row["id"], "rank": row["rank"], "name": row["name"],
+                    "knowledge_level": row["knowledge_level"]}
+                   for row in rows if row["knowledge_level"] >= 3 and not row.get("player_crafted")]
+        rows = rows[:int(self._tianji_config()["artifact_count"])]
         discovered = set(state.get("discovered_material_ids", []))
         owned_definitions = {
             str(row.get("tianji", {}).get("definition_id"))
@@ -794,8 +852,8 @@ class TianjiSystemMixin:
             "available": True, "name": "神机百变：巧夺天工", "generation_version": state["generation_version"],
             "world_name":WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
             "world_combat_power_cap":round(world_combat_cap) if world_combat_cap is not None else None,
-            "artifacts": rows, "known_count": sum(int(row["knowledge_level"]) > 0 for row in rows),
-            "targets": [{"id": row["id"], "rank": row["rank"], "name": row["name"], "knowledge_level": row["knowledge_level"]} for row in rows if row["knowledge_level"] >= 3],
+            "artifacts": rows, "known_count": sum(int(level) > 0 for level in state["knowledge"].values()),
+            "targets": targets,
             "activated_artifact_id": state.get("activated_artifact_id"),
             "owned_artifact_ids": list(state.get("player_artifacts", [])),
             "owned_definition_ids": sorted(owned_definitions),
@@ -824,7 +882,8 @@ class TianjiSystemMixin:
         rng = _stable_rng(game.seed, f"material-market:{game.player.world}:{location_id}:{game.player.age}")
         definitions = [
             row for row in game.tianji_state["materials"]
-            if row["world"] == game.player.world and int(row["tier"]) <= max(tier, game.player.realm_index) + 1
+            if (row["world"] == game.player.world or game.player.world in game.tianji_state.get("material_extra_worlds", {}).get(row["id"], []))
+            and int(row["tier"]) <= max(tier, game.player.realm_index) + 1
         ]
         if not definitions:
             return

@@ -3384,6 +3384,2826 @@
         "treasure"
       ],
       "combat_bonus": 33600
+    },
+    {
+      "id": "guixu_monster_realm_equipment_01",
+      "name": "祖灵镇海珠",
+      "description": "祖灵镇海珠出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 18900,
+      "hp_bonus": 132,
+      "mp_bonus": 156
+    },
+    {
+      "id": "guixu_monster_realm_equipment_02",
+      "name": "祖灵归潮旗",
+      "description": "祖灵归潮旗出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 26460,
+      "hp_bonus": 264,
+      "mp_bonus": 312
+    },
+    {
+      "id": "guixu_monster_realm_equipment_03",
+      "name": "祖灵裂界剑",
+      "description": "祖灵裂界剑出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 34020,
+      "hp_bonus": 396,
+      "mp_bonus": 468
+    },
+    {
+      "id": "guixu_monster_realm_equipment_04",
+      "name": "祖灵定天甲",
+      "description": "祖灵定天甲出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 41580,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_monster_realm_equipment_05",
+      "name": "祖灵照魂鼎",
+      "description": "祖灵照魂鼎出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 49140,
+      "hp_bonus": 660,
+      "mp_bonus": 780
+    },
+    {
+      "id": "guixu_monster_realm_equipment_06",
+      "name": "祖灵渡劫轮",
+      "description": "祖灵渡劫轮出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 56699,
+      "hp_bonus": 792,
+      "mp_bonus": 936
+    },
+    {
+      "id": "guixu_monster_realm_equipment_07",
+      "name": "祖灵天心镜",
+      "description": "祖灵天心镜出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 64260,
+      "hp_bonus": 924,
+      "mp_bonus": 1092
+    },
+    {
+      "id": "guixu_monster_realm_equipment_08",
+      "name": "祖灵流光舟",
+      "description": "祖灵流光舟出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 71820,
+      "hp_bonus": 1056,
+      "mp_bonus": 1248
+    },
+    {
+      "id": "guixu_monster_realm_equipment_09",
+      "name": "祖灵界尺",
+      "description": "祖灵界尺出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 79380,
+      "hp_bonus": 1188,
+      "mp_bonus": 1404
+    },
+    {
+      "id": "guixu_monster_realm_equipment_10",
+      "name": "祖灵镇源碑",
+      "description": "祖灵镇源碑出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 86940,
+      "hp_bonus": 1320,
+      "mp_bonus": 1560
+    },
+    {
+      "id": "guixu_monster_realm_equipment_11",
+      "name": "祖灵无相钟",
+      "description": "祖灵无相钟出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 94500,
+      "hp_bonus": 1452,
+      "mp_bonus": 1716
+    },
+    {
+      "id": "guixu_monster_realm_equipment_12",
+      "name": "祖灵太初印",
+      "description": "祖灵太初印出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 102060,
+      "hp_bonus": 1584,
+      "mp_bonus": 1872
+    },
+    {
+      "id": "guixu_monster_realm_consumable_01",
+      "name": "祖灵还元丹",
+      "description": "祖灵还元丹出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_02",
+      "name": "祖灵定魂露",
+      "description": "祖灵定魂露出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_03",
+      "name": "祖灵续命丸",
+      "description": "祖灵续命丸出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_04",
+      "name": "祖灵洗脉丹",
+      "description": "祖灵洗脉丹出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_05",
+      "name": "祖灵回天散",
+      "description": "祖灵回天散出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_06",
+      "name": "祖灵养神液",
+      "description": "祖灵养神液出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_07",
+      "name": "祖灵生肌膏",
+      "description": "祖灵生肌膏出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_consumable_08",
+      "name": "祖灵渡厄丹",
+      "description": "祖灵渡厄丹出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "monster_realm",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_monster_realm_plant_01",
+      "name": "祖灵九叶莲",
+      "description": "祖灵九叶莲出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 144,
+      "mp_bonus": 168,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_monster_realm_plant_01",
+      "plant_years": 1800,
+      "plant_kind": "guixu",
+      "plant_value": 42000
+    },
+    {
+      "id": "guixu_monster_realm_plant_02",
+      "name": "祖灵灵芝",
+      "description": "祖灵灵芝出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 288,
+      "mp_bonus": 336,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_monster_realm_plant_02",
+      "plant_years": 2300,
+      "plant_kind": "guixu",
+      "plant_value": 62160
+    },
+    {
+      "id": "guixu_monster_realm_plant_03",
+      "name": "祖灵玉参",
+      "description": "祖灵玉参出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 432,
+      "mp_bonus": 504,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_monster_realm_plant_03",
+      "plant_years": 2800,
+      "plant_kind": "guixu",
+      "plant_value": 92000
+    },
+    {
+      "id": "guixu_monster_realm_plant_04",
+      "name": "祖灵长生藤",
+      "description": "祖灵长生藤出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_monster_realm_plant_04",
+      "plant_years": 3300,
+      "plant_kind": "guixu",
+      "plant_value": 136160
+    },
+    {
+      "id": "guixu_monster_realm_plant_05",
+      "name": "祖灵归元草",
+      "description": "祖灵归元草出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 720,
+      "mp_bonus": 840,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_monster_realm_plant_05",
+      "plant_years": 3800,
+      "plant_kind": "guixu",
+      "plant_value": 201510
+    },
+    {
+      "id": "guixu_monster_realm_plant_06",
+      "name": "祖灵照神花",
+      "description": "祖灵照神花出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 864,
+      "mp_bonus": 1008,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_monster_realm_plant_06",
+      "plant_years": 4300,
+      "plant_kind": "guixu",
+      "plant_value": 298230
+    },
+    {
+      "id": "guixu_monster_realm_plant_07",
+      "name": "祖灵太初果",
+      "description": "祖灵太初果出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1008,
+      "mp_bonus": 1176,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_monster_realm_plant_07",
+      "plant_years": 4800,
+      "plant_kind": "guixu",
+      "plant_value": 441390
+    },
+    {
+      "id": "guixu_monster_realm_plant_08",
+      "name": "祖灵镇魂苔",
+      "description": "祖灵镇魂苔出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1152,
+      "mp_bonus": 1344,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_monster_realm_plant_08",
+      "plant_years": 5300,
+      "plant_kind": "guixu",
+      "plant_value": 653250
+    },
+    {
+      "id": "guixu_monster_realm_plant_09",
+      "name": "祖灵天葵",
+      "description": "祖灵天葵出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1296,
+      "mp_bonus": 1512,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_monster_realm_plant_09",
+      "plant_years": 5800,
+      "plant_kind": "guixu",
+      "plant_value": 966810
+    },
+    {
+      "id": "guixu_monster_realm_plant_10",
+      "name": "祖灵万年桑",
+      "description": "祖灵万年桑出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1440,
+      "mp_bonus": 1680,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_monster_realm_plant_10",
+      "plant_years": 6300,
+      "plant_kind": "guixu",
+      "plant_value": 1430880
+    },
+    {
+      "id": "guixu_monster_realm_material_01",
+      "name": "祖灵母金",
+      "description": "祖灵母金出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 2520
+    },
+    {
+      "id": "guixu_monster_realm_material_02",
+      "name": "祖灵源晶",
+      "description": "祖灵源晶出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 5040
+    },
+    {
+      "id": "guixu_monster_realm_material_03",
+      "name": "祖灵法砂",
+      "description": "祖灵法砂出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 7560
+    },
+    {
+      "id": "guixu_monster_realm_material_04",
+      "name": "祖灵玄钢",
+      "description": "祖灵玄钢出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 10080
+    },
+    {
+      "id": "guixu_monster_realm_material_05",
+      "name": "祖灵界石",
+      "description": "祖灵界石出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 12600
+    },
+    {
+      "id": "guixu_monster_realm_material_06",
+      "name": "祖灵玉髓",
+      "description": "祖灵玉髓出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 15120
+    },
+    {
+      "id": "guixu_monster_realm_material_07",
+      "name": "祖灵神铜",
+      "description": "祖灵神铜出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 17640
+    },
+    {
+      "id": "guixu_monster_realm_material_08",
+      "name": "祖灵天银",
+      "description": "祖灵天银出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 20160
+    },
+    {
+      "id": "guixu_monster_realm_material_09",
+      "name": "祖灵灵玉",
+      "description": "祖灵灵玉出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 22680
+    },
+    {
+      "id": "guixu_monster_realm_material_10",
+      "name": "祖灵太初核",
+      "description": "祖灵太初核出自妖祖沉庭，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "monster_realm",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 25200
+    },
+    {
+      "id": "guixu_celestial_equipment_01",
+      "name": "天律镇海珠",
+      "description": "天律镇海珠出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 540000,
+      "hp_bonus": 176,
+      "mp_bonus": 208
+    },
+    {
+      "id": "guixu_celestial_equipment_02",
+      "name": "天律归潮旗",
+      "description": "天律归潮旗出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 756000,
+      "hp_bonus": 352,
+      "mp_bonus": 416
+    },
+    {
+      "id": "guixu_celestial_equipment_03",
+      "name": "天律裂界剑",
+      "description": "天律裂界剑出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 972000,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_celestial_equipment_04",
+      "name": "天律定天甲",
+      "description": "天律定天甲出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1188000,
+      "hp_bonus": 704,
+      "mp_bonus": 832
+    },
+    {
+      "id": "guixu_celestial_equipment_05",
+      "name": "天律照魂鼎",
+      "description": "天律照魂鼎出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1404000,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_celestial_equipment_06",
+      "name": "天律渡劫轮",
+      "description": "天律渡劫轮出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1619999,
+      "hp_bonus": 1056,
+      "mp_bonus": 1248
+    },
+    {
+      "id": "guixu_celestial_equipment_07",
+      "name": "天律天心镜",
+      "description": "天律天心镜出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1836000,
+      "hp_bonus": 1232,
+      "mp_bonus": 1456
+    },
+    {
+      "id": "guixu_celestial_equipment_08",
+      "name": "天律流光舟",
+      "description": "天律流光舟出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2052000,
+      "hp_bonus": 1408,
+      "mp_bonus": 1664
+    },
+    {
+      "id": "guixu_celestial_equipment_09",
+      "name": "天律界尺",
+      "description": "天律界尺出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2268000,
+      "hp_bonus": 1584,
+      "mp_bonus": 1872
+    },
+    {
+      "id": "guixu_celestial_equipment_10",
+      "name": "天律镇源碑",
+      "description": "天律镇源碑出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2484000,
+      "hp_bonus": 1760,
+      "mp_bonus": 2080
+    },
+    {
+      "id": "guixu_celestial_equipment_11",
+      "name": "天律无相钟",
+      "description": "天律无相钟出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2700000,
+      "hp_bonus": 1936,
+      "mp_bonus": 2288
+    },
+    {
+      "id": "guixu_celestial_equipment_12",
+      "name": "天律太初印",
+      "description": "天律太初印出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2916000,
+      "hp_bonus": 2112,
+      "mp_bonus": 2496
+    },
+    {
+      "id": "guixu_celestial_consumable_01",
+      "name": "天律还元丹",
+      "description": "天律还元丹出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_02",
+      "name": "天律定魂露",
+      "description": "天律定魂露出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_03",
+      "name": "天律续命丸",
+      "description": "天律续命丸出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_04",
+      "name": "天律洗脉丹",
+      "description": "天律洗脉丹出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_05",
+      "name": "天律回天散",
+      "description": "天律回天散出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_06",
+      "name": "天律养神液",
+      "description": "天律养神液出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_07",
+      "name": "天律生肌膏",
+      "description": "天律生肌膏出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_consumable_08",
+      "name": "天律渡厄丹",
+      "description": "天律渡厄丹出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "celestial",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_celestial_plant_01",
+      "name": "天律九叶莲",
+      "description": "天律九叶莲出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 192,
+      "mp_bonus": 224,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_celestial_plant_01",
+      "plant_years": 2400,
+      "plant_kind": "guixu",
+      "plant_value": 1200000
+    },
+    {
+      "id": "guixu_celestial_plant_02",
+      "name": "天律灵芝",
+      "description": "天律灵芝出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 384,
+      "mp_bonus": 448,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_celestial_plant_02",
+      "plant_years": 2900,
+      "plant_kind": "guixu",
+      "plant_value": 1776000
+    },
+    {
+      "id": "guixu_celestial_plant_03",
+      "name": "天律玉参",
+      "description": "天律玉参出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_celestial_plant_03",
+      "plant_years": 3400,
+      "plant_kind": "guixu",
+      "plant_value": 2628480
+    },
+    {
+      "id": "guixu_celestial_plant_04",
+      "name": "天律长生藤",
+      "description": "天律长生藤出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 768,
+      "mp_bonus": 896,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_celestial_plant_04",
+      "plant_years": 3900,
+      "plant_kind": "guixu",
+      "plant_value": 3890150
+    },
+    {
+      "id": "guixu_celestial_plant_05",
+      "name": "天律归元草",
+      "description": "天律归元草出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_celestial_plant_05",
+      "plant_years": 4400,
+      "plant_kind": "guixu",
+      "plant_value": 5757420
+    },
+    {
+      "id": "guixu_celestial_plant_06",
+      "name": "天律照神花",
+      "description": "天律照神花出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1152,
+      "mp_bonus": 1344,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_celestial_plant_06",
+      "plant_years": 4900,
+      "plant_kind": "guixu",
+      "plant_value": 8520990
+    },
+    {
+      "id": "guixu_celestial_plant_07",
+      "name": "天律太初果",
+      "description": "天律太初果出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1344,
+      "mp_bonus": 1568,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_celestial_plant_07",
+      "plant_years": 5400,
+      "plant_kind": "guixu",
+      "plant_value": 12611060
+    },
+    {
+      "id": "guixu_celestial_plant_08",
+      "name": "天律镇魂苔",
+      "description": "天律镇魂苔出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1536,
+      "mp_bonus": 1792,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_celestial_plant_08",
+      "plant_years": 5900,
+      "plant_kind": "guixu",
+      "plant_value": 18664370
+    },
+    {
+      "id": "guixu_celestial_plant_09",
+      "name": "天律天葵",
+      "description": "天律天葵出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1728,
+      "mp_bonus": 2016,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_celestial_plant_09",
+      "plant_years": 6400,
+      "plant_kind": "guixu",
+      "plant_value": 27623260
+    },
+    {
+      "id": "guixu_celestial_plant_10",
+      "name": "天律万年桑",
+      "description": "天律万年桑出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1920,
+      "mp_bonus": 2240,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_celestial_plant_10",
+      "plant_years": 6900,
+      "plant_kind": "guixu",
+      "plant_value": 40882430
+    },
+    {
+      "id": "guixu_celestial_material_01",
+      "name": "天律母金",
+      "description": "天律母金出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 72000
+    },
+    {
+      "id": "guixu_celestial_material_02",
+      "name": "天律源晶",
+      "description": "天律源晶出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 144000
+    },
+    {
+      "id": "guixu_celestial_material_03",
+      "name": "天律法砂",
+      "description": "天律法砂出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 216000
+    },
+    {
+      "id": "guixu_celestial_material_04",
+      "name": "天律玄钢",
+      "description": "天律玄钢出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 288000
+    },
+    {
+      "id": "guixu_celestial_material_05",
+      "name": "天律界石",
+      "description": "天律界石出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 360000
+    },
+    {
+      "id": "guixu_celestial_material_06",
+      "name": "天律玉髓",
+      "description": "天律玉髓出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 432000
+    },
+    {
+      "id": "guixu_celestial_material_07",
+      "name": "天律神铜",
+      "description": "天律神铜出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 504000
+    },
+    {
+      "id": "guixu_celestial_material_08",
+      "name": "天律天银",
+      "description": "天律天银出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 576000
+    },
+    {
+      "id": "guixu_celestial_material_09",
+      "name": "天律灵玉",
+      "description": "天律灵玉出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 648000
+    },
+    {
+      "id": "guixu_celestial_material_10",
+      "name": "天律太初核",
+      "description": "天律太初核出自天律沉宫，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "celestial",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 720000
+    },
+    {
+      "id": "guixu_asura_equipment_01",
+      "name": "劫刃镇海珠",
+      "description": "劫刃镇海珠出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 540000,
+      "hp_bonus": 176,
+      "mp_bonus": 208
+    },
+    {
+      "id": "guixu_asura_equipment_02",
+      "name": "劫刃归潮旗",
+      "description": "劫刃归潮旗出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 756000,
+      "hp_bonus": 352,
+      "mp_bonus": 416
+    },
+    {
+      "id": "guixu_asura_equipment_03",
+      "name": "劫刃裂界剑",
+      "description": "劫刃裂界剑出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 972000,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_asura_equipment_04",
+      "name": "劫刃定天甲",
+      "description": "劫刃定天甲出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1188000,
+      "hp_bonus": 704,
+      "mp_bonus": 832
+    },
+    {
+      "id": "guixu_asura_equipment_05",
+      "name": "劫刃照魂鼎",
+      "description": "劫刃照魂鼎出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1404000,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_asura_equipment_06",
+      "name": "劫刃渡劫轮",
+      "description": "劫刃渡劫轮出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1619999,
+      "hp_bonus": 1056,
+      "mp_bonus": 1248
+    },
+    {
+      "id": "guixu_asura_equipment_07",
+      "name": "劫刃天心镜",
+      "description": "劫刃天心镜出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1836000,
+      "hp_bonus": 1232,
+      "mp_bonus": 1456
+    },
+    {
+      "id": "guixu_asura_equipment_08",
+      "name": "劫刃流光舟",
+      "description": "劫刃流光舟出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2052000,
+      "hp_bonus": 1408,
+      "mp_bonus": 1664
+    },
+    {
+      "id": "guixu_asura_equipment_09",
+      "name": "劫刃界尺",
+      "description": "劫刃界尺出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2268000,
+      "hp_bonus": 1584,
+      "mp_bonus": 1872
+    },
+    {
+      "id": "guixu_asura_equipment_10",
+      "name": "劫刃镇源碑",
+      "description": "劫刃镇源碑出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2484000,
+      "hp_bonus": 1760,
+      "mp_bonus": 2080
+    },
+    {
+      "id": "guixu_asura_equipment_11",
+      "name": "劫刃无相钟",
+      "description": "劫刃无相钟出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2700000,
+      "hp_bonus": 1936,
+      "mp_bonus": 2288
+    },
+    {
+      "id": "guixu_asura_equipment_12",
+      "name": "劫刃太初印",
+      "description": "劫刃太初印出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2916000,
+      "hp_bonus": 2112,
+      "mp_bonus": 2496
+    },
+    {
+      "id": "guixu_asura_consumable_01",
+      "name": "劫刃还元丹",
+      "description": "劫刃还元丹出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_02",
+      "name": "劫刃定魂露",
+      "description": "劫刃定魂露出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_03",
+      "name": "劫刃续命丸",
+      "description": "劫刃续命丸出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_04",
+      "name": "劫刃洗脉丹",
+      "description": "劫刃洗脉丹出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_05",
+      "name": "劫刃回天散",
+      "description": "劫刃回天散出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_06",
+      "name": "劫刃养神液",
+      "description": "劫刃养神液出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_07",
+      "name": "劫刃生肌膏",
+      "description": "劫刃生肌膏出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_consumable_08",
+      "name": "劫刃渡厄丹",
+      "description": "劫刃渡厄丹出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "asura",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_asura_plant_01",
+      "name": "劫刃九叶莲",
+      "description": "劫刃九叶莲出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 192,
+      "mp_bonus": 224,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_asura_plant_01",
+      "plant_years": 2400,
+      "plant_kind": "guixu",
+      "plant_value": 1200000
+    },
+    {
+      "id": "guixu_asura_plant_02",
+      "name": "劫刃灵芝",
+      "description": "劫刃灵芝出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 384,
+      "mp_bonus": 448,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_asura_plant_02",
+      "plant_years": 2900,
+      "plant_kind": "guixu",
+      "plant_value": 1776000
+    },
+    {
+      "id": "guixu_asura_plant_03",
+      "name": "劫刃玉参",
+      "description": "劫刃玉参出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_asura_plant_03",
+      "plant_years": 3400,
+      "plant_kind": "guixu",
+      "plant_value": 2628480
+    },
+    {
+      "id": "guixu_asura_plant_04",
+      "name": "劫刃长生藤",
+      "description": "劫刃长生藤出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 768,
+      "mp_bonus": 896,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_asura_plant_04",
+      "plant_years": 3900,
+      "plant_kind": "guixu",
+      "plant_value": 3890150
+    },
+    {
+      "id": "guixu_asura_plant_05",
+      "name": "劫刃归元草",
+      "description": "劫刃归元草出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_asura_plant_05",
+      "plant_years": 4400,
+      "plant_kind": "guixu",
+      "plant_value": 5757420
+    },
+    {
+      "id": "guixu_asura_plant_06",
+      "name": "劫刃照神花",
+      "description": "劫刃照神花出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1152,
+      "mp_bonus": 1344,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_asura_plant_06",
+      "plant_years": 4900,
+      "plant_kind": "guixu",
+      "plant_value": 8520990
+    },
+    {
+      "id": "guixu_asura_plant_07",
+      "name": "劫刃太初果",
+      "description": "劫刃太初果出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1344,
+      "mp_bonus": 1568,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_asura_plant_07",
+      "plant_years": 5400,
+      "plant_kind": "guixu",
+      "plant_value": 12611060
+    },
+    {
+      "id": "guixu_asura_plant_08",
+      "name": "劫刃镇魂苔",
+      "description": "劫刃镇魂苔出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1536,
+      "mp_bonus": 1792,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_asura_plant_08",
+      "plant_years": 5900,
+      "plant_kind": "guixu",
+      "plant_value": 18664370
+    },
+    {
+      "id": "guixu_asura_plant_09",
+      "name": "劫刃天葵",
+      "description": "劫刃天葵出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1728,
+      "mp_bonus": 2016,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_asura_plant_09",
+      "plant_years": 6400,
+      "plant_kind": "guixu",
+      "plant_value": 27623260
+    },
+    {
+      "id": "guixu_asura_plant_10",
+      "name": "劫刃万年桑",
+      "description": "劫刃万年桑出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1920,
+      "mp_bonus": 2240,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_asura_plant_10",
+      "plant_years": 6900,
+      "plant_kind": "guixu",
+      "plant_value": 40882430
+    },
+    {
+      "id": "guixu_asura_material_01",
+      "name": "劫刃母金",
+      "description": "劫刃母金出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 72000
+    },
+    {
+      "id": "guixu_asura_material_02",
+      "name": "劫刃源晶",
+      "description": "劫刃源晶出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 144000
+    },
+    {
+      "id": "guixu_asura_material_03",
+      "name": "劫刃法砂",
+      "description": "劫刃法砂出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 216000
+    },
+    {
+      "id": "guixu_asura_material_04",
+      "name": "劫刃玄钢",
+      "description": "劫刃玄钢出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 288000
+    },
+    {
+      "id": "guixu_asura_material_05",
+      "name": "劫刃界石",
+      "description": "劫刃界石出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 360000
+    },
+    {
+      "id": "guixu_asura_material_06",
+      "name": "劫刃玉髓",
+      "description": "劫刃玉髓出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 432000
+    },
+    {
+      "id": "guixu_asura_material_07",
+      "name": "劫刃神铜",
+      "description": "劫刃神铜出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 504000
+    },
+    {
+      "id": "guixu_asura_material_08",
+      "name": "劫刃天银",
+      "description": "劫刃天银出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 576000
+    },
+    {
+      "id": "guixu_asura_material_09",
+      "name": "劫刃灵玉",
+      "description": "劫刃灵玉出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 648000
+    },
+    {
+      "id": "guixu_asura_material_10",
+      "name": "劫刃太初核",
+      "description": "劫刃太初核出自修罗劫海，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "asura",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 720000
+    },
+    {
+      "id": "guixu_nether_equipment_01",
+      "name": "龙源镇海珠",
+      "description": "龙源镇海珠出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 585000,
+      "hp_bonus": 176,
+      "mp_bonus": 208
+    },
+    {
+      "id": "guixu_nether_equipment_02",
+      "name": "龙源归潮旗",
+      "description": "龙源归潮旗出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 819000,
+      "hp_bonus": 352,
+      "mp_bonus": 416
+    },
+    {
+      "id": "guixu_nether_equipment_03",
+      "name": "龙源裂界剑",
+      "description": "龙源裂界剑出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1053000,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_nether_equipment_04",
+      "name": "龙源定天甲",
+      "description": "龙源定天甲出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1287000,
+      "hp_bonus": 704,
+      "mp_bonus": 832
+    },
+    {
+      "id": "guixu_nether_equipment_05",
+      "name": "龙源照魂鼎",
+      "description": "龙源照魂鼎出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1521000,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_nether_equipment_06",
+      "name": "龙源渡劫轮",
+      "description": "龙源渡劫轮出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1754999,
+      "hp_bonus": 1056,
+      "mp_bonus": 1248
+    },
+    {
+      "id": "guixu_nether_equipment_07",
+      "name": "龙源天心镜",
+      "description": "龙源天心镜出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1989000,
+      "hp_bonus": 1232,
+      "mp_bonus": 1456
+    },
+    {
+      "id": "guixu_nether_equipment_08",
+      "name": "龙源流光舟",
+      "description": "龙源流光舟出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2223000,
+      "hp_bonus": 1408,
+      "mp_bonus": 1664
+    },
+    {
+      "id": "guixu_nether_equipment_09",
+      "name": "龙源界尺",
+      "description": "龙源界尺出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2457000,
+      "hp_bonus": 1584,
+      "mp_bonus": 1872
+    },
+    {
+      "id": "guixu_nether_equipment_10",
+      "name": "龙源镇源碑",
+      "description": "龙源镇源碑出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2691000,
+      "hp_bonus": 1760,
+      "mp_bonus": 2080
+    },
+    {
+      "id": "guixu_nether_equipment_11",
+      "name": "龙源无相钟",
+      "description": "龙源无相钟出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2925000,
+      "hp_bonus": 1936,
+      "mp_bonus": 2288
+    },
+    {
+      "id": "guixu_nether_equipment_12",
+      "name": "龙源太初印",
+      "description": "龙源太初印出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 3159000,
+      "hp_bonus": 2112,
+      "mp_bonus": 2496
+    },
+    {
+      "id": "guixu_nether_consumable_01",
+      "name": "龙源还元丹",
+      "description": "龙源还元丹出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_02",
+      "name": "龙源定魂露",
+      "description": "龙源定魂露出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_03",
+      "name": "龙源续命丸",
+      "description": "龙源续命丸出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_04",
+      "name": "龙源洗脉丹",
+      "description": "龙源洗脉丹出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_05",
+      "name": "龙源回天散",
+      "description": "龙源回天散出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_06",
+      "name": "龙源养神液",
+      "description": "龙源养神液出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_07",
+      "name": "龙源生肌膏",
+      "description": "龙源生肌膏出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_consumable_08",
+      "name": "龙源渡厄丹",
+      "description": "龙源渡厄丹出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "nether",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_nether_plant_01",
+      "name": "龙源九叶莲",
+      "description": "龙源九叶莲出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 192,
+      "mp_bonus": 224,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_nether_plant_01",
+      "plant_years": 2400,
+      "plant_kind": "guixu",
+      "plant_value": 1300000
+    },
+    {
+      "id": "guixu_nether_plant_02",
+      "name": "龙源灵芝",
+      "description": "龙源灵芝出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 384,
+      "mp_bonus": 448,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_nether_plant_02",
+      "plant_years": 2900,
+      "plant_kind": "guixu",
+      "plant_value": 1924000
+    },
+    {
+      "id": "guixu_nether_plant_03",
+      "name": "龙源玉参",
+      "description": "龙源玉参出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_nether_plant_03",
+      "plant_years": 3400,
+      "plant_kind": "guixu",
+      "plant_value": 2847520
+    },
+    {
+      "id": "guixu_nether_plant_04",
+      "name": "龙源长生藤",
+      "description": "龙源长生藤出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 768,
+      "mp_bonus": 896,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_nether_plant_04",
+      "plant_years": 3900,
+      "plant_kind": "guixu",
+      "plant_value": 4214330
+    },
+    {
+      "id": "guixu_nether_plant_05",
+      "name": "龙源归元草",
+      "description": "龙源归元草出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_nether_plant_05",
+      "plant_years": 4400,
+      "plant_kind": "guixu",
+      "plant_value": 6237210
+    },
+    {
+      "id": "guixu_nether_plant_06",
+      "name": "龙源照神花",
+      "description": "龙源照神花出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1152,
+      "mp_bonus": 1344,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_nether_plant_06",
+      "plant_years": 4900,
+      "plant_kind": "guixu",
+      "plant_value": 9231070
+    },
+    {
+      "id": "guixu_nether_plant_07",
+      "name": "龙源太初果",
+      "description": "龙源太初果出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1344,
+      "mp_bonus": 1568,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_nether_plant_07",
+      "plant_years": 5400,
+      "plant_kind": "guixu",
+      "plant_value": 13661980
+    },
+    {
+      "id": "guixu_nether_plant_08",
+      "name": "龙源镇魂苔",
+      "description": "龙源镇魂苔出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1536,
+      "mp_bonus": 1792,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_nether_plant_08",
+      "plant_years": 5900,
+      "plant_kind": "guixu",
+      "plant_value": 20219730
+    },
+    {
+      "id": "guixu_nether_plant_09",
+      "name": "龙源天葵",
+      "description": "龙源天葵出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1728,
+      "mp_bonus": 2016,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_nether_plant_09",
+      "plant_years": 6400,
+      "plant_kind": "guixu",
+      "plant_value": 29925200
+    },
+    {
+      "id": "guixu_nether_plant_10",
+      "name": "龙源万年桑",
+      "description": "龙源万年桑出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1920,
+      "mp_bonus": 2240,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_nether_plant_10",
+      "plant_years": 6900,
+      "plant_kind": "guixu",
+      "plant_value": 44289300
+    },
+    {
+      "id": "guixu_nether_material_01",
+      "name": "龙源母金",
+      "description": "龙源母金出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 78000
+    },
+    {
+      "id": "guixu_nether_material_02",
+      "name": "龙源源晶",
+      "description": "龙源源晶出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 156000
+    },
+    {
+      "id": "guixu_nether_material_03",
+      "name": "龙源法砂",
+      "description": "龙源法砂出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 234000
+    },
+    {
+      "id": "guixu_nether_material_04",
+      "name": "龙源玄钢",
+      "description": "龙源玄钢出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 312000
+    },
+    {
+      "id": "guixu_nether_material_05",
+      "name": "龙源界石",
+      "description": "龙源界石出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 390000
+    },
+    {
+      "id": "guixu_nether_material_06",
+      "name": "龙源玉髓",
+      "description": "龙源玉髓出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 468000
+    },
+    {
+      "id": "guixu_nether_material_07",
+      "name": "龙源神铜",
+      "description": "龙源神铜出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 546000
+    },
+    {
+      "id": "guixu_nether_material_08",
+      "name": "龙源天银",
+      "description": "龙源天银出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 624000
+    },
+    {
+      "id": "guixu_nether_material_09",
+      "name": "龙源灵玉",
+      "description": "龙源灵玉出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 702000
+    },
+    {
+      "id": "guixu_nether_material_10",
+      "name": "龙源太初核",
+      "description": "龙源太初核出自太初龙渊，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "nether",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 780000
+    },
+    {
+      "id": "guixu_reincarnation_equipment_01",
+      "name": "溯魂镇海珠",
+      "description": "溯魂镇海珠出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 562500,
+      "hp_bonus": 176,
+      "mp_bonus": 208
+    },
+    {
+      "id": "guixu_reincarnation_equipment_02",
+      "name": "溯魂归潮旗",
+      "description": "溯魂归潮旗出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 787500,
+      "hp_bonus": 352,
+      "mp_bonus": 416
+    },
+    {
+      "id": "guixu_reincarnation_equipment_03",
+      "name": "溯魂裂界剑",
+      "description": "溯魂裂界剑出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1012500,
+      "hp_bonus": 528,
+      "mp_bonus": 624
+    },
+    {
+      "id": "guixu_reincarnation_equipment_04",
+      "name": "溯魂定天甲",
+      "description": "溯魂定天甲出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1237500,
+      "hp_bonus": 704,
+      "mp_bonus": 832
+    },
+    {
+      "id": "guixu_reincarnation_equipment_05",
+      "name": "溯魂照魂鼎",
+      "description": "溯魂照魂鼎出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1462500,
+      "hp_bonus": 880,
+      "mp_bonus": 1040
+    },
+    {
+      "id": "guixu_reincarnation_equipment_06",
+      "name": "溯魂渡劫轮",
+      "description": "溯魂渡劫轮出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1687499,
+      "hp_bonus": 1056,
+      "mp_bonus": 1248
+    },
+    {
+      "id": "guixu_reincarnation_equipment_07",
+      "name": "溯魂天心镜",
+      "description": "溯魂天心镜出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 1912500,
+      "hp_bonus": 1232,
+      "mp_bonus": 1456
+    },
+    {
+      "id": "guixu_reincarnation_equipment_08",
+      "name": "溯魂流光舟",
+      "description": "溯魂流光舟出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2137500,
+      "hp_bonus": 1408,
+      "mp_bonus": 1664
+    },
+    {
+      "id": "guixu_reincarnation_equipment_09",
+      "name": "溯魂界尺",
+      "description": "溯魂界尺出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2362500,
+      "hp_bonus": 1584,
+      "mp_bonus": 1872
+    },
+    {
+      "id": "guixu_reincarnation_equipment_10",
+      "name": "溯魂镇源碑",
+      "description": "溯魂镇源碑出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2587500,
+      "hp_bonus": 1760,
+      "mp_bonus": 2080
+    },
+    {
+      "id": "guixu_reincarnation_equipment_11",
+      "name": "溯魂无相钟",
+      "description": "溯魂无相钟出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 2812500,
+      "hp_bonus": 1936,
+      "mp_bonus": 2288
+    },
+    {
+      "id": "guixu_reincarnation_equipment_12",
+      "name": "溯魂太初印",
+      "description": "溯魂太初印出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "equipment",
+        "treasure"
+      ],
+      "combat_bonus": 3037500,
+      "hp_bonus": 2112,
+      "mp_bonus": 2496
+    },
+    {
+      "id": "guixu_reincarnation_consumable_01",
+      "name": "溯魂还元丹",
+      "description": "溯魂还元丹出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_02",
+      "name": "溯魂定魂露",
+      "description": "溯魂定魂露出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_03",
+      "name": "溯魂续命丸",
+      "description": "溯魂续命丸出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_04",
+      "name": "溯魂洗脉丹",
+      "description": "溯魂洗脉丹出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_05",
+      "name": "溯魂回天散",
+      "description": "溯魂回天散出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_06",
+      "name": "溯魂养神液",
+      "description": "溯魂养神液出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_07",
+      "name": "溯魂生肌膏",
+      "description": "溯魂生肌膏出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_consumable_08",
+      "name": "溯魂渡厄丹",
+      "description": "溯魂渡厄丹出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "guixu_consumable",
+        "reincarnation",
+        "consumable",
+        "pill"
+      ]
+    },
+    {
+      "id": "guixu_reincarnation_plant_01",
+      "name": "溯魂九叶莲",
+      "description": "溯魂九叶莲出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 192,
+      "mp_bonus": 224,
+      "opportunity_bonus": 0.016,
+      "plant_id": "guixu_reincarnation_plant_01",
+      "plant_years": 2400,
+      "plant_kind": "guixu",
+      "plant_value": 1250000
+    },
+    {
+      "id": "guixu_reincarnation_plant_02",
+      "name": "溯魂灵芝",
+      "description": "溯魂灵芝出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 384,
+      "mp_bonus": 448,
+      "opportunity_bonus": 0.02,
+      "plant_id": "guixu_reincarnation_plant_02",
+      "plant_years": 2900,
+      "plant_kind": "guixu",
+      "plant_value": 1850000
+    },
+    {
+      "id": "guixu_reincarnation_plant_03",
+      "name": "溯魂玉参",
+      "description": "溯魂玉参出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 576,
+      "mp_bonus": 672,
+      "opportunity_bonus": 0.024,
+      "plant_id": "guixu_reincarnation_plant_03",
+      "plant_years": 3400,
+      "plant_kind": "guixu",
+      "plant_value": 2738000
+    },
+    {
+      "id": "guixu_reincarnation_plant_04",
+      "name": "溯魂长生藤",
+      "description": "溯魂长生藤出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 768,
+      "mp_bonus": 896,
+      "opportunity_bonus": 0.028,
+      "plant_id": "guixu_reincarnation_plant_04",
+      "plant_years": 3900,
+      "plant_kind": "guixu",
+      "plant_value": 4052240
+    },
+    {
+      "id": "guixu_reincarnation_plant_05",
+      "name": "溯魂归元草",
+      "description": "溯魂归元草出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 960,
+      "mp_bonus": 1120,
+      "opportunity_bonus": 0.032,
+      "plant_id": "guixu_reincarnation_plant_05",
+      "plant_years": 4400,
+      "plant_kind": "guixu",
+      "plant_value": 5997320
+    },
+    {
+      "id": "guixu_reincarnation_plant_06",
+      "name": "溯魂照神花",
+      "description": "溯魂照神花出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1152,
+      "mp_bonus": 1344,
+      "opportunity_bonus": 0.036,
+      "plant_id": "guixu_reincarnation_plant_06",
+      "plant_years": 4900,
+      "plant_kind": "guixu",
+      "plant_value": 8876030
+    },
+    {
+      "id": "guixu_reincarnation_plant_07",
+      "name": "溯魂太初果",
+      "description": "溯魂太初果出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1344,
+      "mp_bonus": 1568,
+      "opportunity_bonus": 0.04,
+      "plant_id": "guixu_reincarnation_plant_07",
+      "plant_years": 5400,
+      "plant_kind": "guixu",
+      "plant_value": 13136520
+    },
+    {
+      "id": "guixu_reincarnation_plant_08",
+      "name": "溯魂镇魂苔",
+      "description": "溯魂镇魂苔出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1536,
+      "mp_bonus": 1792,
+      "opportunity_bonus": 0.044,
+      "plant_id": "guixu_reincarnation_plant_08",
+      "plant_years": 5900,
+      "plant_kind": "guixu",
+      "plant_value": 19442050
+    },
+    {
+      "id": "guixu_reincarnation_plant_09",
+      "name": "溯魂天葵",
+      "description": "溯魂天葵出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1728,
+      "mp_bonus": 2016,
+      "opportunity_bonus": 0.048,
+      "plant_id": "guixu_reincarnation_plant_09",
+      "plant_years": 6400,
+      "plant_kind": "guixu",
+      "plant_value": 28774230
+    },
+    {
+      "id": "guixu_reincarnation_plant_10",
+      "name": "溯魂万年桑",
+      "description": "溯魂万年桑出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "spirit_plant",
+        "treasure"
+      ],
+      "hp_bonus": 1920,
+      "mp_bonus": 2240,
+      "opportunity_bonus": 0.052,
+      "plant_id": "guixu_reincarnation_plant_10",
+      "plant_years": 6900,
+      "plant_kind": "guixu",
+      "plant_value": 42585860
+    },
+    {
+      "id": "guixu_reincarnation_material_01",
+      "name": "溯魂母金",
+      "description": "溯魂母金出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 75000
+    },
+    {
+      "id": "guixu_reincarnation_material_02",
+      "name": "溯魂源晶",
+      "description": "溯魂源晶出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 150000
+    },
+    {
+      "id": "guixu_reincarnation_material_03",
+      "name": "溯魂法砂",
+      "description": "溯魂法砂出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 225000
+    },
+    {
+      "id": "guixu_reincarnation_material_04",
+      "name": "溯魂玄钢",
+      "description": "溯魂玄钢出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 300000
+    },
+    {
+      "id": "guixu_reincarnation_material_05",
+      "name": "溯魂界石",
+      "description": "溯魂界石出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 375000
+    },
+    {
+      "id": "guixu_reincarnation_material_06",
+      "name": "溯魂玉髓",
+      "description": "溯魂玉髓出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 450000
+    },
+    {
+      "id": "guixu_reincarnation_material_07",
+      "name": "溯魂神铜",
+      "description": "溯魂神铜出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 525000
+    },
+    {
+      "id": "guixu_reincarnation_material_08",
+      "name": "溯魂天银",
+      "description": "溯魂天银出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 600000
+    },
+    {
+      "id": "guixu_reincarnation_material_09",
+      "name": "溯魂灵玉",
+      "description": "溯魂灵玉出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 675000
+    },
+    {
+      "id": "guixu_reincarnation_material_10",
+      "name": "溯魂太初核",
+      "description": "溯魂太初核出自无时轮回墟，无法从归墟之外的途径获得。",
+      "tags": [
+        "guixu_tide",
+        "reincarnation",
+        "crafting_material",
+        "treasure"
+      ],
+      "combat_bonus": 750000
     }
   ]
 }

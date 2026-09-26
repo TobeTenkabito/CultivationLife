@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.tianji-artifacts",
   "name": "神机百变：巧夺天工",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 45,
   "requires": [],
-  "description": "主题化生成天工神机、材料、真方与战斗记忆器理；神机战力受当前界面单件硬上限约束，并通过真实交谈、战斗与事件逐层解锁情报。"
+  "description": "神机与材料散布十一界；自炼法宝动态入榜，神机保留原始榜值，本命分列原始战力和培养加成。"
 }

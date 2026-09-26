@@ -1104,7 +1104,7 @@ class EngineWorldRuntimeMixin:
             "combat_type":"cultivator","race":enemy.race,"race_name":race_definition["name"],
             "race_description":race_definition["description"],"world":enemy.world,"npc_id":enemy.id,
             "faction_id":self._npc_faction_id(game,enemy.id),"treasure_item_id":enemy.treasure_item_id,
-            "kill_karma":False,"action":"revenge",
+            "kill_karma":False,"action":"revenge", "player_defending": True,
         }
         event = self.events_by_id["EVT_PERSONAL_REVENGE_001"]
         game.pending_event = self._instantiate_event(event, game, rng)
@@ -1176,6 +1176,7 @@ class EngineWorldRuntimeMixin:
         target = runtime.get("target") or {}
         config = WORLD_SYSTEMS["faction_conflict"]
         if response == "fight":
+            target["player_defending"] = True
             target["kill_karma"] = True
             target["non_story_combat"] = True
             result, summary = self._combat(game, target, True, rng)
@@ -2253,6 +2254,7 @@ class EngineWorldRuntimeMixin:
             return False
         enemy = rng.choice(enemies)
         target = self._generate_cultivator_target(player, "边境截杀者", ACTIONS["slay"]["combat"], rng, game=game, forced_race=enemy)
+        target["player_defending"] = True
         target["kill_karma"] = True
         target["action"] = "slay"
         self._cache_encounter_target(game, target, rng)

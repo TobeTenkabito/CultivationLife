@@ -7,13 +7,57 @@
       "title": "一念通明",
       "body": "吐纳之间，你忽然察觉到灵气流转中一处往日未曾留意的关窍。",
       "category": "routine",
-      "tags": ["cultivation", "positive"],
+      "tags": [
+        "cultivation",
+        "positive"
+      ],
       "weight": 12,
-      "intent_weights": {"cultivate": 3.2, "rest": 0.6},
-      "conditions": {"not": {"path": "player.spirit_root", "op": "eq", "value": "none"}},
+      "intent_weights": {
+        "cultivate": 3.2,
+        "rest": 0.6
+      },
+      "conditions": {
+        "not": {
+          "path": "player.spirit_root",
+          "op": "eq",
+          "value": "none"
+        }
+      },
       "choices": [
-        {"id": "meditate", "text": "循着灵感继续参悟", "effects": [{"type": "add_opportunity", "range": [7, 15]}, {"type": "restore_mp", "value": 0.1}]},
-        {"id": "record", "text": "记下感悟，稳固根基", "effects": [{"type": "add_opportunity", "range": [3, 7]}, {"type": "technique_level", "value": 1}]}
+        {
+          "id": "meditate",
+          "text": "循着灵感继续参悟",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                7,
+                15
+              ]
+            },
+            {
+              "type": "restore_mp",
+              "value": 0.1
+            }
+          ]
+        },
+        {
+          "id": "record",
+          "text": "记下感悟，稳固根基",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                3,
+                7
+              ]
+            },
+            {
+              "type": "technique_level",
+              "value": 1
+            }
+          ]
+        }
       ]
     },
     {
@@ -22,14 +66,59 @@
       "title": "崖边灵草",
       "body": "峭壁边生着一株尚未成熟的回春草，附近山石上留有妖兽抓痕。",
       "category": "encounter",
-      "tags": ["travel", "treasure"],
+      "tags": [
+        "travel",
+        "treasure"
+      ],
       "weight": 10,
-      "intent_weights": {"travel": 2.2, "treasure": 2.6},
+      "intent_weights": {
+        "travel": 2.2,
+        "treasure": 2.6
+      },
       "conditions": {},
       "choices": [
-        {"id": "pick", "text": "冒险采下", "effects": [{"type": "damage", "value": 0.1, "reason": "采药时失足坠崖"}, {"type": "add_item", "item_id": "healing_pill"}, {"type": "add_opportunity", "value": 4}]},
-        {"id": "wait", "text": "在旁守候成熟", "effects": [{"type": "add_opportunity", "range": [5, 12]}]},
-        {"id": "leave", "text": "不为外物所动", "effects": [{"type": "add_karma", "value": -1}]}
+        {
+          "id": "pick",
+          "text": "冒险采下",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.1,
+              "reason": "采药时失足坠崖"
+            },
+            {
+              "type": "add_item",
+              "item_id": "healing_pill"
+            },
+            {
+              "type": "add_opportunity",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "text": "在旁守候成熟",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                5,
+                12
+              ]
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不为外物所动",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -1
+            }
+          ]
+        }
       ]
     },
     {
@@ -38,14 +127,67 @@
       "title": "负伤修士",
       "body": "一名负伤修士倒在古道旁。他的气息微弱，腰间储物袋却灵光隐现。",
       "category": "encounter",
-      "tags": ["moral", "karma"],
+      "tags": [
+        "moral",
+        "karma"
+      ],
       "weight": 8,
-      "intent_weights": {"travel": 2.0},
+      "intent_weights": {
+        "travel": 2.0
+      },
       "conditions": {},
       "choices": [
-        {"id": "help", "text": "赠丹相救", "conditions": {"has_item": "healing_pill"}, "disabled_reason": "需要回春丹", "effects": [{"type": "remove_item", "item_id": "healing_pill"}, {"type": "add_karma", "value": -8}, {"type": "add_opportunity", "value": 14}]},
-        {"id": "rob", "text": "趁人之危夺走储物袋", "effects": [{"type": "add_karma", "value": 18}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 8}, {"type": "add_opportunity", "value": 10}]},
-        {"id": "leave", "text": "谨慎离开", "effects": [{"type": "add_karma", "value": 2}]}
+        {
+          "id": "help",
+          "text": "赠丹相救",
+          "conditions": {
+            "has_item": "healing_pill"
+          },
+          "disabled_reason": "需要回春丹",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "healing_pill"
+            },
+            {
+              "type": "add_karma",
+              "value": -8
+            },
+            {
+              "type": "add_opportunity",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "id": "rob",
+          "text": "趁人之危夺走储物袋",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": 18
+            },
+            {
+              "type": "add_item",
+              "item_id": "spirit_stone",
+              "quantity": 8
+            },
+            {
+              "type": "add_opportunity",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "谨慎离开",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": 2
+            }
+          ]
+        }
       ]
     },
     {
@@ -54,15 +196,55 @@
       "title": "无名洞府",
       "body": "藤蔓之后露出半扇石门，门上禁制已经黯淡，洞内却传来若有若无的低语。",
       "category": "encounter",
-      "tags": ["treasure", "risk"],
+      "tags": [
+        "treasure",
+        "risk"
+      ],
       "weight": 5,
-      "intent_weights": {"treasure": 4.0, "travel": 1.6},
+      "intent_weights": {
+        "treasure": 4.0,
+        "travel": 1.6
+      },
       "repeat": "once",
       "conditions": {},
       "choices": [
-        {"id": "enter", "text": "破开禁制", "effects": [{"type": "damage", "value": 0.18, "reason": "命丧无名洞府禁制"}, {"type": "add_item", "item_id": "ancient_jade"}, {"type": "add_opportunity", "range": [18, 35]}]},
-        {"id": "mark", "text": "记下位置，来日再访", "effects": [{"type": "add_opportunity", "value": 5}]},
-        {"id": "leave", "text": "洞中低语令人不安，转身离开", "effects": []}
+        {
+          "id": "enter",
+          "text": "破开禁制",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.18,
+              "reason": "命丧无名洞府禁制"
+            },
+            {
+              "type": "add_item",
+              "item_id": "ancient_jade"
+            },
+            {
+              "type": "add_opportunity",
+              "range": [
+                18,
+                35
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mark",
+          "text": "记下位置，来日再访",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "洞中低语令人不安，转身离开",
+          "effects": []
+        }
       ]
     },
     {
@@ -71,16 +253,112 @@
       "title": "拦路劫修",
       "body": "一名劫修拦住去路。你判断其修为为{target_realm}，气机显露出的战斗力约为 {target_power}。他要你交出所有灵石。",
       "category": "combat",
-      "tags": ["combat", "negative"],
+      "tags": [
+        "combat",
+        "negative"
+      ],
       "weight": 6,
-      "intent_weights": {"travel": 2.3, "treasure": 2.0, "rest": 0.4},
-      "conditions": {"all": [{"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.realm_index", "op": "lt", "value": 4}]},
-      "combat": {"target_name": "拦路劫修", "realm_offsets": [[-1,0.18],[0,0.62],[1,0.18],[2,0.02]], "expectation_multiplier": 1.0, "power_sigma": 0.18, "power_bounds": [0.6,1.55]},
+      "intent_weights": {
+        "travel": 2.3,
+        "treasure": 2.0,
+        "rest": 0.4
+      },
+      "conditions": {
+        "all": [
+          {
+            "path": "player.realm_index",
+            "op": "gte",
+            "value": 1
+          },
+          {
+            "path": "player.realm_index",
+            "op": "lt",
+            "value": 4
+          }
+        ]
+      },
+      "combat": {
+        "target_name": "拦路劫修",
+        "realm_offsets": [
+          [
+            -1,
+            0.18
+          ],
+          [
+            0,
+            0.62
+          ],
+          [
+            1,
+            0.18
+          ],
+          [
+            2,
+            0.02
+          ]
+        ],
+        "expectation_multiplier": 1.0,
+        "power_sigma": 0.18,
+        "power_bounds": [
+          0.6,
+          1.55
+        ],
+        "player_defending": true
+      },
       "choices": [
-        {"id": "fight", "text": "迎战并将其击退", "effects": [{"type": "combat", "lethal": false}, {"type": "add_opportunity", "value": 8, "if_result": ["victory"]}]},
-        {"id": "kill", "text": "迎战并尝试斩草除根", "effects": [{"type": "combat", "lethal": true}]},
-        {"id": "pay", "text": "交出灵石消灾", "conditions": {"has_item": "spirit_stone"}, "disabled_reason": "身上没有灵石", "effects": [{"type": "remove_item", "item_id": "spirit_stone", "quantity": 1}]},
-        {"id": "flee", "text": "避其锋芒", "effects": [{"type": "damage", "value": 0.08, "reason": "逃离劫修追杀时伤重不治"}]}
+        {
+          "id": "fight",
+          "text": "迎战并将其击退",
+          "effects": [
+            {
+              "type": "combat",
+              "lethal": false
+            },
+            {
+              "type": "add_opportunity",
+              "value": 8,
+              "if_result": [
+                "victory"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "kill",
+          "text": "迎战并尝试斩草除根",
+          "effects": [
+            {
+              "type": "combat",
+              "lethal": true
+            }
+          ]
+        },
+        {
+          "id": "pay",
+          "text": "交出灵石消灾",
+          "conditions": {
+            "has_item": "spirit_stone"
+          },
+          "disabled_reason": "身上没有灵石",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "spirit_stone",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "id": "flee",
+          "text": "避其锋芒",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.08,
+              "reason": "逃离劫修追杀时伤重不治"
+            }
+          ]
+        }
       ]
     },
     {
@@ -89,15 +367,93 @@
       "title": "携宝散修",
       "body": "你发现一名携带异宝的散修。你判断其修为为{target_realm}，战斗力约为 {target_power}，似乎并未察觉你的窥视。",
       "category": "combat",
-      "tags": ["combat", "moral"],
+      "tags": [
+        "combat",
+        "moral"
+      ],
       "weight": 3,
-      "intent_weights": {"treasure": 2.8, "travel": 1.2},
-      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
-      "combat": {"target_name": "携宝散修", "realm_offsets": [[-2,0.36],[-1,0.44],[0,0.18],[1,0.02]], "expectation_multiplier": 0.82, "power_sigma": 0.16, "power_bounds": [0.48,1.25]},
+      "intent_weights": {
+        "treasure": 2.8,
+        "travel": 1.2
+      },
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "combat": {
+        "target_name": "携宝散修",
+        "realm_offsets": [
+          [
+            -2,
+            0.36
+          ],
+          [
+            -1,
+            0.44
+          ],
+          [
+            0,
+            0.18
+          ],
+          [
+            1,
+            0.02
+          ]
+        ],
+        "expectation_multiplier": 0.82,
+        "power_sigma": 0.16,
+        "power_bounds": [
+          0.48,
+          1.25
+        ]
+      },
       "choices": [
-        {"id": "rob", "text": "杀人夺宝", "effects": [{"type": "combat", "lethal": true}, {"type": "add_item", "item_id": "spirit_sword", "if_result": ["killed"]}]},
-        {"id": "trade", "text": "现身提出交易", "conditions": {"has_item": "spirit_stone"}, "disabled_reason": "需要灵石", "effects": [{"type": "remove_item", "item_id": "spirit_stone"}, {"type": "add_opportunity", "value": 9}]},
-        {"id": "leave", "text": "压下贪念", "effects": [{"type": "add_karma", "value": -3}]}
+        {
+          "id": "rob",
+          "text": "杀人夺宝",
+          "effects": [
+            {
+              "type": "combat",
+              "lethal": true
+            },
+            {
+              "type": "add_item",
+              "item_id": "spirit_sword",
+              "if_result": [
+                "killed"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "trade",
+          "text": "现身提出交易",
+          "conditions": {
+            "has_item": "spirit_stone"
+          },
+          "disabled_reason": "需要灵石",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "spirit_stone"
+            },
+            {
+              "type": "add_opportunity",
+              "value": 9
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "压下贪念",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -3
+            }
+          ]
+        }
       ]
     },
     {
@@ -106,13 +462,50 @@
       "title": "业火入梦",
       "body": "旧日恶念在识海中化作业火。你越想将其压下，耳边的哭喊便越清晰。",
       "category": "negative",
-      "tags": ["negative", "karma"],
+      "tags": [
+        "negative",
+        "karma"
+      ],
       "weight": 5,
-      "intent_weights": {"cultivate": 1.8, "rest": 1.8},
-      "conditions": {"path": "player.effective_karma", "op": "gte", "value": 25},
+      "intent_weights": {
+        "cultivate": 1.8,
+        "rest": 1.8
+      },
+      "conditions": {
+        "path": "player.effective_karma",
+        "op": "gte",
+        "value": 25
+      },
       "choices": [
-        {"id": "suppress", "text": "强行镇压", "effects": [{"type": "damage", "value": 0.16, "reason": "业火焚心"}, {"type": "add_karma", "value": 4}]},
-        {"id": "face", "text": "直面过往", "effects": [{"type": "restore_mp", "value": -0.25}, {"type": "add_karma", "value": -4}]}
+        {
+          "id": "suppress",
+          "text": "强行镇压",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.16,
+              "reason": "业火焚心"
+            },
+            {
+              "type": "add_karma",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "face",
+          "text": "直面过往",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.25
+            },
+            {
+              "type": "add_karma",
+              "value": -4
+            }
+          ]
+        }
       ]
     },
     {
@@ -121,12 +514,47 @@
       "title": "仇家寻踪",
       "body": "你留下的血债终于被人循迹追来。仇家尚未现身，一枚染血传讯符已落在门前。",
       "category": "negative",
-      "tags": ["negative", "karma", "revenge"],
+      "tags": [
+        "negative",
+        "karma",
+        "revenge"
+      ],
       "weight": 4,
-      "conditions": {"path": "player.effective_karma", "op": "gte", "value": 55},
+      "conditions": {
+        "path": "player.effective_karma",
+        "op": "gte",
+        "value": 55
+      },
       "choices": [
-        {"id": "hide", "text": "毁去痕迹，远遁千里", "effects": [{"type": "damage", "value": 0.12, "reason": "逃亡中力竭而亡"}, {"type": "add_karma", "value": 6}]},
-        {"id": "prepare", "text": "布阵等候", "effects": [{"type": "restore_mp", "value": -0.35}, {"type": "add_opportunity", "value": 12}]}
+        {
+          "id": "hide",
+          "text": "毁去痕迹，远遁千里",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.12,
+              "reason": "逃亡中力竭而亡"
+            },
+            {
+              "type": "add_karma",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "text": "布阵等候",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.35
+            },
+            {
+              "type": "add_opportunity",
+              "value": 12
+            }
+          ]
+        }
       ]
     },
     {
@@ -135,14 +563,63 @@
       "title": "古寺晨钟",
       "body": "山中古寺传来晨钟。老僧不问来历，只说：‘因果不空，回头不晚。’",
       "category": "story",
-      "tags": ["karma", "redemption"],
+      "tags": [
+        "karma",
+        "redemption"
+      ],
       "weight": 3,
-      "intent_weights": {"travel": 2.0, "rest": 1.5},
-      "conditions": {"path": "player.karma", "op": "gte", "value": 15},
+      "intent_weights": {
+        "travel": 2.0,
+        "rest": 1.5
+      },
+      "conditions": {
+        "path": "player.karma",
+        "op": "gte",
+        "value": 15
+      },
       "choices": [
-        {"id": "confess", "text": "留寺三年偿还业债", "effects": [{"type": "add_karma", "value": -12}, {"type": "add_opportunity", "value": -6}]},
-        {"id": "mock", "text": "嗤笑因果之说", "effects": [{"type": "add_karma", "value": 7}, {"type": "add_opportunity", "value": 5}]},
-        {"id": "listen", "text": "听完一场早课", "effects": [{"type": "add_karma", "value": -3}, {"type": "restore_mp", "value": 0.18}]}
+        {
+          "id": "confess",
+          "text": "留寺三年偿还业债",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -12
+            },
+            {
+              "type": "add_opportunity",
+              "value": -6
+            }
+          ]
+        },
+        {
+          "id": "mock",
+          "text": "嗤笑因果之说",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": 7
+            },
+            {
+              "type": "add_opportunity",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "id": "listen",
+          "text": "听完一场早课",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -3
+            },
+            {
+              "type": "restore_mp",
+              "value": 0.18
+            }
+          ]
+        }
       ]
     },
     {
@@ -151,13 +628,41 @@
       "title": "游方丹师",
       "body": "一名游方丹师借你的屋檐避雨，临行前留下两枚温润丹丸。",
       "category": "routine",
-      "tags": ["rest", "item", "positive"],
+      "tags": [
+        "rest",
+        "item",
+        "positive"
+      ],
       "weight": 8,
-      "intent_weights": {"rest": 3.0},
+      "intent_weights": {
+        "rest": 3.0
+      },
       "conditions": {},
       "choices": [
-        {"id": "accept", "text": "收下丹药", "effects": [{"type": "add_item", "item_id": "healing_pill", "quantity": 2}]},
-        {"id": "ask", "text": "请教丹道", "effects": [{"type": "add_opportunity", "range": [7, 13]}]}
+        {
+          "id": "accept",
+          "text": "收下丹药",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "healing_pill",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "id": "ask",
+          "text": "请教丹道",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                7,
+                13
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -166,13 +671,40 @@
       "title": "坊市杂役",
       "body": "坊市正缺搬运货箱的人手。活计不难，只是颇为耗时。",
       "category": "routine",
-      "tags": ["market"],
+      "tags": [
+        "market"
+      ],
       "weight": 8,
-      "intent_weights": {"travel": 1.8, "rest": 1.2},
+      "intent_weights": {
+        "travel": 1.8,
+        "rest": 1.2
+      },
       "conditions": {},
       "choices": [
-        {"id": "work", "text": "做完一天活计", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 3}]},
-        {"id": "observe", "text": "观察修士交易", "effects": [{"type": "add_opportunity", "range": [4, 9]}]}
+        {
+          "id": "work",
+          "text": "做完一天活计",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "spirit_stone",
+              "quantity": 3
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "观察修士交易",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                4,
+                9
+              ]
+            }
+          ]
+        }
       ]
     },
     {
@@ -181,15 +713,69 @@
       "title": "荒冢魂幡",
       "body": "荒冢深处插着一面残破魂幡。阴气森然，却与你所修之法隐隐呼应。",
       "category": "rare",
-      "tags": ["treasure", "karma", "negative"],
+      "tags": [
+        "treasure",
+        "karma",
+        "negative"
+      ],
       "weight": 2,
-      "intent_weights": {"treasure": 3.0},
+      "intent_weights": {
+        "treasure": 3.0
+      },
       "repeat": "once",
-      "conditions": {"any": [{"path": "player.path", "op": "eq", "value": "ghost"}, {"path": "player.path", "op": "eq", "value": "demonic"}]},
+      "conditions": {
+        "any": [
+          {
+            "path": "player.path",
+            "op": "eq",
+            "value": "ghost"
+          },
+          {
+            "path": "player.path",
+            "op": "eq",
+            "value": "demonic"
+          }
+        ]
+      },
       "choices": [
-        {"id": "take", "text": "炼化魂幡", "effects": [{"type": "add_item", "item_id": "blood_banner"}, {"type": "add_karma", "value": 24}]},
-        {"id": "purify", "text": "超度其中残魂", "effects": [{"type": "add_karma", "value": -10}, {"type": "add_opportunity", "value": 16}]},
-        {"id": "leave", "text": "封住荒冢", "effects": [{"type": "add_karma", "value": -2}]}
+        {
+          "id": "take",
+          "text": "炼化魂幡",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "blood_banner"
+            },
+            {
+              "type": "add_karma",
+              "value": 24
+            }
+          ]
+        },
+        {
+          "id": "purify",
+          "text": "超度其中残魂",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -10
+            },
+            {
+              "type": "add_opportunity",
+              "value": 16
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "封住荒冢",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -2
+            }
+          ]
+        }
       ]
     },
     {
@@ -198,13 +784,66 @@
       "title": "凡骨亦可争命",
       "body": "你没有灵根，吐纳而来的灵气转瞬便散。山野武师告诉你：仙路难求，凡躯却未必不能向天多借几年。",
       "category": "mortal_story",
-      "tags": ["mortal", "body_training"],
+      "tags": [
+        "mortal",
+        "body_training"
+      ],
       "weight": 24,
-      "intent_weights": {"cultivate": 5.0, "rest": 1.5},
-      "conditions": {"all": [{"path": "player.spirit_root", "op": "eq", "value": "none"}, {"path": "player.realm_index", "op": "eq", "value": 0}, {"path": "player.body_training", "op": "eq", "value": 0}]},
+      "intent_weights": {
+        "cultivate": 5.0,
+        "rest": 1.5
+      },
+      "conditions": {
+        "all": [
+          {
+            "path": "player.spirit_root",
+            "op": "eq",
+            "value": "none"
+          },
+          {
+            "path": "player.realm_index",
+            "op": "eq",
+            "value": 0
+          },
+          {
+            "path": "player.body_training",
+            "op": "eq",
+            "value": 0
+          }
+        ]
+      },
       "choices": [
-        {"id": "begin", "text": "接过《铁骨锻身诀》，以凡骨争寿", "effects": [{"type": "learn_technique", "technique_id": "TECH_BODY_MORTAL"}, {"type": "equip_technique", "technique_id": "TECH_BODY_MORTAL", "slot": "body"}, {"type": "body_training", "value": 1}, {"type": "extend_lifespan", "range": [8, 15]}]},
-        {"id": "refuse", "text": "不信血肉能胜岁月", "effects": []}
+        {
+          "id": "begin",
+          "text": "接过《铁骨锻身诀》，以凡骨争寿",
+          "effects": [
+            {
+              "type": "learn_technique",
+              "technique_id": "TECH_BODY_MORTAL"
+            },
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_BODY_MORTAL",
+              "slot": "body"
+            },
+            {
+              "type": "body_training",
+              "value": 1
+            },
+            {
+              "type": "extend_lifespan",
+              "range": [
+                8,
+                15
+              ]
+            }
+          ]
+        },
+        {
+          "id": "refuse",
+          "text": "不信血肉能胜岁月",
+          "effects": []
+        }
       ]
     },
     {
@@ -213,13 +852,73 @@
       "title": "打熬筋骨",
       "body": "寒暑相催，你以药浴、桩功与一次次濒临极限的锤炼打磨凡躯。炼体能延长凡人寿命，但三百岁便是肉身极限。",
       "category": "mortal_routine",
-      "tags": ["mortal", "body_training"],
+      "tags": [
+        "mortal",
+        "body_training"
+      ],
       "weight": 18,
-      "intent_weights": {"cultivate": 4.0, "rest": 1.8},
-      "conditions": {"all": [{"path": "player.spirit_root", "op": "eq", "value": "none"}, {"path": "player.realm_index", "op": "eq", "value": 0}, {"path": "player.body_training", "op": "gte", "value": 1}, {"knows_technique": "TECH_BODY_MORTAL"}]},
+      "intent_weights": {
+        "cultivate": 4.0,
+        "rest": 1.8
+      },
+      "conditions": {
+        "all": [
+          {
+            "path": "player.spirit_root",
+            "op": "eq",
+            "value": "none"
+          },
+          {
+            "path": "player.realm_index",
+            "op": "eq",
+            "value": 0
+          },
+          {
+            "path": "player.body_training",
+            "op": "gte",
+            "value": 1
+          },
+          {
+            "knows_technique": "TECH_BODY_MORTAL"
+          }
+        ]
+      },
       "choices": [
-        {"id": "temper", "text": "继续淬炼肉身", "effects": [{"type": "damage", "value": 0.1, "reason": "炼体走火，伤重而亡"}, {"type": "add_body_progress", "range": [20, 35]}, {"type": "extend_lifespan", "range": [3, 9]}]},
-        {"id": "recover", "text": "放缓脚步，温养暗伤", "effects": [{"type": "heal", "value": 0.25}]}
+        {
+          "id": "temper",
+          "text": "继续淬炼肉身",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.1,
+              "reason": "炼体走火，伤重而亡"
+            },
+            {
+              "type": "add_body_progress",
+              "range": [
+                20,
+                35
+              ]
+            },
+            {
+              "type": "extend_lifespan",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ]
+        },
+        {
+          "id": "recover",
+          "text": "放缓脚步，温养暗伤",
+          "effects": [
+            {
+              "type": "heal",
+              "value": 0.25
+            }
+          ]
+        }
       ]
     },
     {
@@ -228,13 +927,52 @@
       "title": "获得金阙残书",
       "body": "你从古宅夹墙、旧朝秘库或江湖异人口中拼出一页金阙残书。书中记载着补全某一种灵根的逆天法门。",
       "category": "mortal_story",
-      "tags": ["mortal", "jinque", "jinque_acquisition", "rare"],
+      "tags": [
+        "mortal",
+        "jinque",
+        "jinque_acquisition",
+        "rare"
+      ],
       "weight": 3,
-      "intent_weights": {"treasure": 5.0, "travel": 2.0},
-      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}]},
+      "intent_weights": {
+        "treasure": 5.0,
+        "travel": 2.0
+      },
+      "conditions": {
+        "all": [
+          {
+            "path": "player.born_rootless",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "path": "player.spirit_root",
+            "op": "eq",
+            "value": "none"
+          }
+        ]
+      },
       "choices": [
-        {"id": "take", "text": "收下残书，寻找逆天改命之机", "effects": [{"type": "add_random_jinque"}]},
-        {"id": "sell", "text": "不信仙缘，换成灵石", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 5}]}
+        {
+          "id": "take",
+          "text": "收下残书，寻找逆天改命之机",
+          "effects": [
+            {
+              "type": "add_random_jinque"
+            }
+          ]
+        },
+        {
+          "id": "sell",
+          "text": "不信仙缘，换成灵石",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "spirit_stone",
+              "quantity": 5
+            }
+          ]
+        }
       ]
     },
     {
@@ -243,20 +981,276 @@
       "title": "补全灵根",
       "body": "金阙残书在月色下浮出完整法门。凡人一生只有这一次逆天改命的窗口，你可以按手中残书补成对应灵根。",
       "category": "mortal_story",
-      "tags": ["mortal", "root_repair", "jinque", "rare"],
+      "tags": [
+        "mortal",
+        "root_repair",
+        "jinque",
+        "rare"
+      ],
       "weight": 12,
-      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.spirit_root", "op": "eq", "value": "none"}, {"path": "player.age", "op": "gte", "value": 35}, {"any": [{"has_item": "jinque_wind"}, {"has_item": "jinque_thunder"}, {"has_item": "jinque_yin"}, {"has_item": "jinque_yang"}, {"has_item": "jinque_fire"}, {"has_item": "jinque_water"}, {"has_item": "jinque_wood"}, {"has_item": "jinque_metal"}, {"has_item": "jinque_earth"}]}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.born_rootless",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "path": "player.spirit_root",
+            "op": "eq",
+            "value": "none"
+          },
+          {
+            "path": "player.age",
+            "op": "gte",
+            "value": 35
+          },
+          {
+            "any": [
+              {
+                "has_item": "jinque_wind"
+              },
+              {
+                "has_item": "jinque_thunder"
+              },
+              {
+                "has_item": "jinque_yin"
+              },
+              {
+                "has_item": "jinque_yang"
+              },
+              {
+                "has_item": "jinque_fire"
+              },
+              {
+                "has_item": "jinque_water"
+              },
+              {
+                "has_item": "jinque_wood"
+              },
+              {
+                "has_item": "jinque_metal"
+              },
+              {
+                "has_item": "jinque_earth"
+              }
+            ]
+          }
+        ]
+      },
       "choices": [
-        {"id": "wind", "text": "依风卷补全风灵根", "conditions": {"has_item": "jinque_wind"}, "disabled_reason": "缺少金阙残书·风", "effects": [{"type": "remove_item", "item_id": "jinque_wind"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "wind"}]},
-        {"id": "thunder", "text": "依雷卷补全雷灵根", "conditions": {"has_item": "jinque_thunder"}, "disabled_reason": "缺少金阙残书·雷", "effects": [{"type": "remove_item", "item_id": "jinque_thunder"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "thunder"}]},
-        {"id": "yin", "text": "依阴卷补全阴灵根", "conditions": {"has_item": "jinque_yin"}, "disabled_reason": "缺少金阙残书·阴", "effects": [{"type": "remove_item", "item_id": "jinque_yin"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "yin"}]},
-        {"id": "yang", "text": "依阳卷补全阳灵根", "conditions": {"has_item": "jinque_yang"}, "disabled_reason": "缺少金阙残书·阳", "effects": [{"type": "remove_item", "item_id": "jinque_yang"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "yang"}]},
-        {"id": "fire", "text": "依火卷补全火灵根", "conditions": {"has_item": "jinque_fire"}, "disabled_reason": "缺少金阙残书·火", "effects": [{"type": "remove_item", "item_id": "jinque_fire"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "fire"}]},
-        {"id": "water", "text": "依水卷补全水灵根", "conditions": {"has_item": "jinque_water"}, "disabled_reason": "缺少金阙残书·水", "effects": [{"type": "remove_item", "item_id": "jinque_water"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "water"}]},
-        {"id": "wood", "text": "依木卷补全木灵根", "conditions": {"has_item": "jinque_wood"}, "disabled_reason": "缺少金阙残书·木", "effects": [{"type": "remove_item", "item_id": "jinque_wood"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "wood"}]},
-        {"id": "metal", "text": "依金卷补全金灵根", "conditions": {"has_item": "jinque_metal"}, "disabled_reason": "缺少金阙残书·金", "effects": [{"type": "remove_item", "item_id": "jinque_metal"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "metal"}]},
-        {"id": "earth", "text": "依土卷补全土灵根", "conditions": {"has_item": "jinque_earth"}, "disabled_reason": "缺少金阙残书·土", "effects": [{"type": "remove_item", "item_id": "jinque_earth"}, {"type": "damage", "value": 0.2, "reason": "补全灵根时经脉崩毁"}, {"type": "acquire_root", "affinity": "earth"}]},
-        {"id": "wait", "text": "暂不冒险", "effects": []}
+        {
+          "id": "wind",
+          "text": "依风卷补全风灵根",
+          "conditions": {
+            "has_item": "jinque_wind"
+          },
+          "disabled_reason": "缺少金阙残书·风",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_wind"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "wind"
+            }
+          ]
+        },
+        {
+          "id": "thunder",
+          "text": "依雷卷补全雷灵根",
+          "conditions": {
+            "has_item": "jinque_thunder"
+          },
+          "disabled_reason": "缺少金阙残书·雷",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_thunder"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "thunder"
+            }
+          ]
+        },
+        {
+          "id": "yin",
+          "text": "依阴卷补全阴灵根",
+          "conditions": {
+            "has_item": "jinque_yin"
+          },
+          "disabled_reason": "缺少金阙残书·阴",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_yin"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "yin"
+            }
+          ]
+        },
+        {
+          "id": "yang",
+          "text": "依阳卷补全阳灵根",
+          "conditions": {
+            "has_item": "jinque_yang"
+          },
+          "disabled_reason": "缺少金阙残书·阳",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_yang"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "yang"
+            }
+          ]
+        },
+        {
+          "id": "fire",
+          "text": "依火卷补全火灵根",
+          "conditions": {
+            "has_item": "jinque_fire"
+          },
+          "disabled_reason": "缺少金阙残书·火",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_fire"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "fire"
+            }
+          ]
+        },
+        {
+          "id": "water",
+          "text": "依水卷补全水灵根",
+          "conditions": {
+            "has_item": "jinque_water"
+          },
+          "disabled_reason": "缺少金阙残书·水",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_water"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "water"
+            }
+          ]
+        },
+        {
+          "id": "wood",
+          "text": "依木卷补全木灵根",
+          "conditions": {
+            "has_item": "jinque_wood"
+          },
+          "disabled_reason": "缺少金阙残书·木",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_wood"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "wood"
+            }
+          ]
+        },
+        {
+          "id": "metal",
+          "text": "依金卷补全金灵根",
+          "conditions": {
+            "has_item": "jinque_metal"
+          },
+          "disabled_reason": "缺少金阙残书·金",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_metal"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "metal"
+            }
+          ]
+        },
+        {
+          "id": "earth",
+          "text": "依土卷补全土灵根",
+          "conditions": {
+            "has_item": "jinque_earth"
+          },
+          "disabled_reason": "缺少金阙残书·土",
+          "effects": [
+            {
+              "type": "remove_item",
+              "item_id": "jinque_earth"
+            },
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "补全灵根时经脉崩毁"
+            },
+            {
+              "type": "acquire_root",
+              "affinity": "earth"
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "text": "暂不冒险",
+          "effects": []
+        }
       ]
     },
     {
@@ -265,12 +1259,44 @@
       "title": "无名吐纳诀",
       "body": "旧书摊底压着一册无人问津的吐纳法。它粗浅，却是你真正踏入修行所缺的第一把钥匙。",
       "category": "mortal_story",
-      "tags": ["mortal", "technique"],
+      "tags": [
+        "mortal",
+        "technique"
+      ],
       "weight": 20,
-      "conditions": {"all": [{"not": {"path": "player.spirit_root", "op": "eq", "value": "none"}}, {"path": "player.has_main_technique", "op": "eq", "value": false}]},
+      "conditions": {
+        "all": [
+          {
+            "not": {
+              "path": "player.spirit_root",
+              "op": "eq",
+              "value": "none"
+            }
+          },
+          {
+            "path": "player.has_main_technique",
+            "op": "eq",
+            "value": false
+          }
+        ]
+      },
       "choices": [
-        {"id": "learn", "text": "研读并设为主修", "effects": [{"type": "equip_technique", "technique_id": "TECH_BASIC_QI", "slot": "main"}]},
-        {"id": "leave", "text": "一本无名残卷，不值得浪费光阴", "effects": []}
+        {
+          "id": "learn",
+          "text": "研读并设为主修",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_BASIC_QI",
+              "slot": "main"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "一本无名残卷，不值得浪费光阴",
+          "effects": []
+        }
       ]
     },
     {
@@ -279,15 +1305,77 @@
       "title": "而立之前",
       "body": "二十五岁将近，你的炼体仍未迈入三重。仙路遥不可及，凡尘却有万般活法；今日的志向将改变往后遇见的人与事。",
       "category": "mortal_milestone",
-      "tags": ["mortal", "aspiration"],
+      "tags": [
+        "mortal",
+        "aspiration"
+      ],
       "weight": 100,
       "repeat": "once",
-      "conditions": {"all": [{"path": "player.born_rootless", "op": "eq", "value": true}, {"path": "player.age", "op": "gte", "value": 25}, {"path": "player.body_training", "op": "lt", "value": 3}, {"path": "player.mortal_aspiration", "op": "eq", "value": null}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.born_rootless",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "path": "player.age",
+            "op": "gte",
+            "value": 25
+          },
+          {
+            "path": "player.body_training",
+            "op": "lt",
+            "value": 3
+          },
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": null
+          }
+        ]
+      },
       "choices": [
-        {"id": "family", "text": "娶妻荫子，经营一方家业", "effects": [{"type": "set_mortal_aspiration", "aspiration": "family"}]},
-        {"id": "scholar", "text": "寒窗苦读，考试入仕", "effects": [{"type": "set_mortal_aspiration", "aspiration": "scholar"}]},
-        {"id": "military", "text": "投身军伍，沙场效忠", "effects": [{"type": "set_mortal_aspiration", "aspiration": "military"}]},
-        {"id": "jianghu", "text": "仗剑远游，江湖驰骋", "effects": [{"type": "set_mortal_aspiration", "aspiration": "jianghu"}]}
+        {
+          "id": "family",
+          "text": "娶妻荫子，经营一方家业",
+          "effects": [
+            {
+              "type": "set_mortal_aspiration",
+              "aspiration": "family"
+            }
+          ]
+        },
+        {
+          "id": "scholar",
+          "text": "寒窗苦读，考试入仕",
+          "effects": [
+            {
+              "type": "set_mortal_aspiration",
+              "aspiration": "scholar"
+            }
+          ]
+        },
+        {
+          "id": "military",
+          "text": "投身军伍，沙场效忠",
+          "effects": [
+            {
+              "type": "set_mortal_aspiration",
+              "aspiration": "military"
+            }
+          ]
+        },
+        {
+          "id": "jianghu",
+          "text": "仗剑远游，江湖驰骋",
+          "effects": [
+            {
+              "type": "set_mortal_aspiration",
+              "aspiration": "jianghu"
+            }
+          ]
+        }
       ]
     },
     {
@@ -296,13 +1384,46 @@
       "title": "良缘",
       "body": "媒人踏雪而来，为你说起邻郡一位性情温厚的良人。",
       "category": "mortal_life",
-      "tags": ["mortal", "family"],
+      "tags": [
+        "mortal",
+        "family"
+      ],
       "weight": 14,
       "repeat": "once",
-      "conditions": {"all": [{"path": "player.mortal_aspiration", "op": "eq", "value": "family"}, {"path": "player.spouse", "op": "eq", "value": false}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": "family"
+          },
+          {
+            "path": "player.spouse",
+            "op": "eq",
+            "value": false
+          }
+        ]
+      },
       "choices": [
-        {"id": "marry", "text": "结下良缘", "effects": [{"type": "set_spouse", "value": true}, {"type": "add_karma", "value": -2}]},
-        {"id": "decline", "text": "心中仍念远方", "effects": []}
+        {
+          "id": "marry",
+          "text": "结下良缘",
+          "effects": [
+            {
+              "type": "set_spouse",
+              "value": true
+            },
+            {
+              "type": "add_karma",
+              "value": -2
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "text": "心中仍念远方",
+          "effects": []
+        }
       ]
     },
     {
@@ -311,10 +1432,48 @@
       "title": "灯下新啼",
       "body": "深夜的一声婴啼，让这座寻常小院忽然有了绵延百年的意义。",
       "category": "mortal_life",
-      "tags": ["mortal", "family"],
+      "tags": [
+        "mortal",
+        "family"
+      ],
       "weight": 10,
-      "conditions": {"all": [{"path": "player.mortal_aspiration", "op": "eq", "value": "family"}, {"path": "player.spouse", "op": "eq", "value": true}, {"path": "player.children", "op": "lt", "value": 5}]},
-      "choices": [{"id": "raise", "text": "尽心抚养", "effects": [{"type": "mortal_progress", "field": "children", "value": 1, "text": "家中添了一名子女。"}, {"type": "add_karma", "value": -1}]}]
+      "conditions": {
+        "all": [
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": "family"
+          },
+          {
+            "path": "player.spouse",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "path": "player.children",
+            "op": "lt",
+            "value": 5
+          }
+        ]
+      },
+      "choices": [
+        {
+          "id": "raise",
+          "text": "尽心抚养",
+          "effects": [
+            {
+              "type": "mortal_progress",
+              "field": "children",
+              "value": 1,
+              "text": "家中添了一名子女。"
+            },
+            {
+              "type": "add_karma",
+              "value": -1
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "EVT_MORTAL_SCHOLAR_EXAM_001",
@@ -322,12 +1481,39 @@
       "title": "秋闱开榜",
       "body": "十年寒窗在今日落笔。榜墙之外人潮汹涌，纸上的每个字都可能改写命数。",
       "category": "mortal_life",
-      "tags": ["mortal", "scholar", "jinque_acquisition"],
+      "tags": [
+        "mortal",
+        "scholar",
+        "jinque_acquisition"
+      ],
       "weight": 14,
-      "conditions": {"path": "player.mortal_aspiration", "op": "eq", "value": "scholar"},
+      "conditions": {
+        "path": "player.mortal_aspiration",
+        "op": "eq",
+        "value": "scholar"
+      },
       "choices": [
-        {"id": "exam", "text": "入场应试", "effects": [{"type": "mortal_progress", "field": "official_rank", "value": 1, "text": "你榜上有名，得授一阶官身。"}]},
-        {"id": "withdraw", "text": "弃卷访道", "effects": [{"type": "add_random_jinque"}]}
+        {
+          "id": "exam",
+          "text": "入场应试",
+          "effects": [
+            {
+              "type": "mortal_progress",
+              "field": "official_rank",
+              "value": 1,
+              "text": "你榜上有名，得授一阶官身。"
+            }
+          ]
+        },
+        {
+          "id": "withdraw",
+          "text": "弃卷访道",
+          "effects": [
+            {
+              "type": "add_random_jinque"
+            }
+          ]
+        }
       ]
     },
     {
@@ -336,12 +1522,53 @@
       "title": "一方父母",
       "body": "灾年粮仓告急，豪绅却不肯开仓。官印在案，你必须决定它究竟为谁而用。",
       "category": "mortal_life",
-      "tags": ["mortal", "scholar", "karma"],
+      "tags": [
+        "mortal",
+        "scholar",
+        "karma"
+      ],
       "weight": 9,
-      "conditions": {"all": [{"path": "player.mortal_aspiration", "op": "eq", "value": "scholar"}, {"path": "player.official_rank", "op": "gte", "value": 1}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": "scholar"
+          },
+          {
+            "path": "player.official_rank",
+            "op": "gte",
+            "value": 1
+          }
+        ]
+      },
       "choices": [
-        {"id": "people", "text": "强开粮仓赈民", "effects": [{"type": "add_karma", "value": -6}]},
-        {"id": "power", "text": "维护豪绅以求升迁", "effects": [{"type": "mortal_progress", "field": "official_rank", "value": 1, "text": "你官升一级。"}, {"type": "add_karma", "value": 8}]}
+        {
+          "id": "people",
+          "text": "强开粮仓赈民",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -6
+            }
+          ]
+        },
+        {
+          "id": "power",
+          "text": "维护豪绅以求升迁",
+          "effects": [
+            {
+              "type": "mortal_progress",
+              "field": "official_rank",
+              "value": 1,
+              "text": "你官升一级。"
+            },
+            {
+              "type": "add_karma",
+              "value": 8
+            }
+          ]
+        }
       ]
     },
     {
@@ -350,12 +1577,51 @@
       "title": "边关烽火",
       "body": "敌骑压境，军令要你守住孤城三日。身后是百姓，城外是十倍之敌。",
       "category": "mortal_life",
-      "tags": ["mortal", "military", "combat"],
+      "tags": [
+        "mortal",
+        "military",
+        "combat"
+      ],
       "weight": 13,
-      "conditions": {"path": "player.mortal_aspiration", "op": "eq", "value": "military"},
+      "conditions": {
+        "path": "player.mortal_aspiration",
+        "op": "eq",
+        "value": "military"
+      },
       "choices": [
-        {"id": "hold", "text": "死守孤城", "effects": [{"type": "damage", "value": 0.28, "reason": "战死边关"}, {"type": "mortal_progress", "field": "military_merit", "value": 2, "text": "你守住孤城，军功大涨。"}, {"type": "add_karma", "value": -3}]},
-        {"id": "retreat", "text": "保存实力撤退", "effects": [{"type": "mortal_progress", "field": "military_merit", "value": -1, "text": "你因退守失去军功。"}]}
+        {
+          "id": "hold",
+          "text": "死守孤城",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.28,
+              "reason": "战死边关"
+            },
+            {
+              "type": "mortal_progress",
+              "field": "military_merit",
+              "value": 2,
+              "text": "你守住孤城，军功大涨。"
+            },
+            {
+              "type": "add_karma",
+              "value": -3
+            }
+          ]
+        },
+        {
+          "id": "retreat",
+          "text": "保存实力撤退",
+          "effects": [
+            {
+              "type": "mortal_progress",
+              "field": "military_merit",
+              "value": -1,
+              "text": "你因退守失去军功。"
+            }
+          ]
+        }
       ]
     },
     {
@@ -364,12 +1630,47 @@
       "title": "封侯与归隐",
       "body": "多年军功终于换来封赏；同夜，一名异人也向你递来一页金阙残书。",
       "category": "mortal_life",
-      "tags": ["mortal", "military", "jinque", "jinque_acquisition"],
+      "tags": [
+        "mortal",
+        "military",
+        "jinque",
+        "jinque_acquisition"
+      ],
       "weight": 7,
-      "conditions": {"all": [{"path": "player.mortal_aspiration", "op": "eq", "value": "military"}, {"path": "player.military_merit", "op": "gte", "value": 4}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": "military"
+          },
+          {
+            "path": "player.military_merit",
+            "op": "gte",
+            "value": 4
+          }
+        ]
+      },
       "choices": [
-        {"id": "title", "text": "受封效忠至暮年", "effects": [{"type": "add_karma", "value": -4}]},
-        {"id": "immortal", "text": "辞去封赏，接过残书", "effects": [{"type": "add_random_jinque"}]}
+        {
+          "id": "title",
+          "text": "受封效忠至暮年",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -4
+            }
+          ]
+        },
+        {
+          "id": "immortal",
+          "text": "辞去封赏，接过残书",
+          "effects": [
+            {
+              "type": "add_random_jinque"
+            }
+          ]
+        }
       ]
     },
     {
@@ -378,12 +1679,54 @@
       "title": "快意江湖",
       "body": "恶寨截断商路已久，百姓凑出薄酒一坛，请你主持公道。",
       "category": "mortal_life",
-      "tags": ["mortal", "jianghu", "combat"],
+      "tags": [
+        "mortal",
+        "jianghu",
+        "combat"
+      ],
       "weight": 13,
-      "conditions": {"path": "player.mortal_aspiration", "op": "eq", "value": "jianghu"},
+      "conditions": {
+        "path": "player.mortal_aspiration",
+        "op": "eq",
+        "value": "jianghu"
+      },
       "choices": [
-        {"id": "justice", "text": "仗剑破寨", "effects": [{"type": "damage", "value": 0.2, "reason": "命丧江湖恶战"}, {"type": "mortal_progress", "field": "jianghu_reputation", "value": 2, "text": "你的侠名传遍数郡。"}, {"type": "add_karma", "value": -2}]},
-        {"id": "profit", "text": "与恶寨分利", "effects": [{"type": "add_item", "item_id": "spirit_stone", "quantity": 4}, {"type": "add_karma", "value": 7}]}
+        {
+          "id": "justice",
+          "text": "仗剑破寨",
+          "effects": [
+            {
+              "type": "damage",
+              "value": 0.2,
+              "reason": "命丧江湖恶战"
+            },
+            {
+              "type": "mortal_progress",
+              "field": "jianghu_reputation",
+              "value": 2,
+              "text": "你的侠名传遍数郡。"
+            },
+            {
+              "type": "add_karma",
+              "value": -2
+            }
+          ]
+        },
+        {
+          "id": "profit",
+          "text": "与恶寨分利",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "spirit_stone",
+              "quantity": 4
+            },
+            {
+              "type": "add_karma",
+              "value": 7
+            }
+          ]
+        }
       ]
     },
     {
@@ -392,10 +1735,38 @@
       "title": "绝顶石刻",
       "body": "侠名引你登上绝顶。石壁武学之后，竟藏着一页不属于凡间的金阙残书。",
       "category": "mortal_life",
-      "tags": ["mortal", "jianghu", "jinque", "jinque_acquisition"],
+      "tags": [
+        "mortal",
+        "jianghu",
+        "jinque",
+        "jinque_acquisition"
+      ],
       "weight": 7,
-      "conditions": {"all": [{"path": "player.mortal_aspiration", "op": "eq", "value": "jianghu"}, {"path": "player.jianghu_reputation", "op": "gte", "value": 4}]},
-      "choices": [{"id": "take", "text": "拓下残书", "effects": [{"type": "add_random_jinque"}]}]
+      "conditions": {
+        "all": [
+          {
+            "path": "player.mortal_aspiration",
+            "op": "eq",
+            "value": "jianghu"
+          },
+          {
+            "path": "player.jianghu_reputation",
+            "op": "gte",
+            "value": 4
+          }
+        ]
+      },
+      "choices": [
+        {
+          "id": "take",
+          "text": "拓下残书",
+          "effects": [
+            {
+              "type": "add_random_jinque"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "EVT_TECHNIQUE_STELE_001",
@@ -403,15 +1774,56 @@
       "title": "太虚功碑",
       "body": "残碑中留有一部《太虚周天经》。此法机缘、炼体、养神与斗法四诀俱全，你可以决定让其中哪一部分成为当前修行核心。",
       "category": "rare",
-      "tags": ["technique", "treasure", "rare"],
+      "tags": [
+        "technique",
+        "treasure",
+        "rare"
+      ],
       "weight": 3,
-      "intent_weights": {"treasure": 3.5, "cultivate": 1.4},
+      "intent_weights": {
+        "treasure": 3.5,
+        "cultivate": 1.4
+      },
       "repeat": "once",
-      "conditions": {"path": "player.realm_index", "op": "gte", "value": 1},
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
       "choices": [
-        {"id": "main", "text": "设为主修，启用机缘增益", "effects": [{"type": "equip_technique", "technique_id": "TECH_VOID_CYCLE", "slot": "main"}]},
-        {"id": "support", "text": "设为辅修，启用 HP 与 MP 增益", "effects": [{"type": "equip_technique", "technique_id": "TECH_VOID_CYCLE", "slot": "support"}]},
-        {"id": "combat", "text": "列为战斗功法，启用独立战力", "effects": [{"type": "equip_technique", "technique_id": "TECH_VOID_CYCLE", "slot": "combat"}]}
+        {
+          "id": "main",
+          "text": "设为主修，启用机缘增益",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_VOID_CYCLE",
+              "slot": "main"
+            }
+          ]
+        },
+        {
+          "id": "support",
+          "text": "设为辅修，启用 HP 与 MP 增益",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_VOID_CYCLE",
+              "slot": "support"
+            }
+          ]
+        },
+        {
+          "id": "combat",
+          "text": "列为战斗功法，启用独立战力",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_VOID_CYCLE",
+              "slot": "combat"
+            }
+          ]
+        }
       ]
     },
     {
@@ -420,13 +1832,50 @@
       "title": "九章遗府",
       "body": "你在一处坍塌遗府中发现金阙残书。元婴修士可以主动参悟并补全对应灵根；境界不足者只能暂存。",
       "category": "rare",
-      "tags": ["jinque", "jinque_acquisition", "treasure", "rare"],
+      "tags": [
+        "jinque",
+        "jinque_acquisition",
+        "treasure",
+        "rare"
+      ],
       "weight": 2,
-      "intent_weights": {"treasure": 4.0},
-      "conditions": {"all": [{"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.realm_index", "op": "lt", "value": 3}]},
+      "intent_weights": {
+        "treasure": 4.0
+      },
+      "conditions": {
+        "all": [
+          {
+            "path": "player.realm_index",
+            "op": "gte",
+            "value": 1
+          },
+          {
+            "path": "player.realm_index",
+            "op": "lt",
+            "value": 3
+          }
+        ]
+      },
       "choices": [
-        {"id": "take", "text": "收取一页金阙残书", "effects": [{"type": "add_random_jinque"}]},
-        {"id": "leave", "text": "不染这桩因果", "effects": [{"type": "add_karma", "value": -1}]}
+        {
+          "id": "take",
+          "text": "收取一页金阙残书",
+          "effects": [
+            {
+              "type": "add_random_jinque"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不染这桩因果",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -1
+            }
+          ]
+        }
       ]
     },
     {
@@ -435,14 +1884,85 @@
       "title": "异相传承",
       "body": "四道传承虚影分别化作风痕、雷纹、阴月与阳轮。只有真正具有对应变异灵根者才能承载其一。",
       "category": "rare",
-      "tags": ["technique", "mutated", "rare"],
+      "tags": [
+        "technique",
+        "mutated",
+        "rare"
+      ],
       "weight": 3,
-      "conditions": {"any": [{"has_affinity": "wind"}, {"has_affinity": "thunder"}, {"has_affinity": "yin"}, {"has_affinity": "yang"}]},
+      "conditions": {
+        "any": [
+          {
+            "has_affinity": "wind"
+          },
+          {
+            "has_affinity": "thunder"
+          },
+          {
+            "has_affinity": "yin"
+          },
+          {
+            "has_affinity": "yang"
+          }
+        ]
+      },
       "choices": [
-        {"id": "wind", "text": "收下《扶摇风经》传承", "conditions": {"has_affinity": "wind"}, "disabled_reason": "需要风灵根", "effects": [{"type": "learn_technique", "technique_id": "TECH_WIND"}]},
-        {"id": "thunder", "text": "收下《九霄雷法》传承", "conditions": {"has_affinity": "thunder"}, "disabled_reason": "需要雷灵根", "effects": [{"type": "learn_technique", "technique_id": "TECH_THUNDER"}]},
-        {"id": "yin", "text": "收下《玄阴真经》传承", "conditions": {"has_affinity": "yin"}, "disabled_reason": "需要阴灵根", "effects": [{"type": "learn_technique", "technique_id": "TECH_YIN"}]},
-        {"id": "yang", "text": "收下《纯阳道典》传承", "conditions": {"has_affinity": "yang"}, "disabled_reason": "需要阳灵根", "effects": [{"type": "learn_technique", "technique_id": "TECH_YANG"}]}
+        {
+          "id": "wind",
+          "text": "收下《扶摇风经》传承",
+          "conditions": {
+            "has_affinity": "wind"
+          },
+          "disabled_reason": "需要风灵根",
+          "effects": [
+            {
+              "type": "learn_technique",
+              "technique_id": "TECH_WIND"
+            }
+          ]
+        },
+        {
+          "id": "thunder",
+          "text": "收下《九霄雷法》传承",
+          "conditions": {
+            "has_affinity": "thunder"
+          },
+          "disabled_reason": "需要雷灵根",
+          "effects": [
+            {
+              "type": "learn_technique",
+              "technique_id": "TECH_THUNDER"
+            }
+          ]
+        },
+        {
+          "id": "yin",
+          "text": "收下《玄阴真经》传承",
+          "conditions": {
+            "has_affinity": "yin"
+          },
+          "disabled_reason": "需要阴灵根",
+          "effects": [
+            {
+              "type": "learn_technique",
+              "technique_id": "TECH_YIN"
+            }
+          ]
+        },
+        {
+          "id": "yang",
+          "text": "收下《纯阳道典》传承",
+          "conditions": {
+            "has_affinity": "yang"
+          },
+          "disabled_reason": "需要阳灵根",
+          "effects": [
+            {
+              "type": "learn_technique",
+              "technique_id": "TECH_YANG"
+            }
+          ]
+        }
       ]
     },
     {
@@ -451,14 +1971,54 @@
       "title": "明镜照业",
       "body": "一卷《明镜因果篇》映出你身后的业影。它同样包含完整四诀，若作为主修，还能额外削弱因果对你的影响。",
       "category": "story",
-      "tags": ["technique", "karma"],
+      "tags": [
+        "technique",
+        "karma"
+      ],
       "weight": 2,
       "repeat": "once",
-      "conditions": {"all": [{"path": "player.realm_index", "op": "gte", "value": 1}, {"path": "player.karma", "op": "gte", "value": 10}]},
+      "conditions": {
+        "all": [
+          {
+            "path": "player.realm_index",
+            "op": "gte",
+            "value": 1
+          },
+          {
+            "path": "player.karma",
+            "op": "gte",
+            "value": 10
+          }
+        ]
+      },
       "choices": [
-        {"id": "main", "text": "以此为主修，兼修明心消业", "effects": [{"type": "equip_technique", "technique_id": "TECH_KARMA_MIRROR", "slot": "main"}]},
-        {"id": "support", "text": "以此为辅修，只取养身蕴神之效", "effects": [{"type": "equip_technique", "technique_id": "TECH_KARMA_MIRROR", "slot": "support"}]},
-        {"id": "leave", "text": "不改当前功法", "effects": []}
+        {
+          "id": "main",
+          "text": "以此为主修，兼修明心消业",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_KARMA_MIRROR",
+              "slot": "main"
+            }
+          ]
+        },
+        {
+          "id": "support",
+          "text": "以此为辅修，只取养身蕴神之效",
+          "effects": [
+            {
+              "type": "equip_technique",
+              "technique_id": "TECH_KARMA_MIRROR",
+              "slot": "support"
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不改当前功法",
+          "effects": []
+        }
       ]
     }
   ]

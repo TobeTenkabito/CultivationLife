@@ -30,9 +30,10 @@ def validate_guixu_catalog(
     dungeons = document["dungeons"]
     expected_worlds = {
         "human", "spirit", "demon", "true_demon", "phantom_underworld", "hell",
+        "monster_realm", "celestial", "asura", "nether", "reincarnation",
     }
     if len(dungeons) != len(expected_worlds) or {row.get("world") for row in dungeons} != expected_worlds:
-        raise ContentError("归墟必须在人、灵、魔、真魔、幻冥、地狱六界各配置一座副本")
+        raise ContentError("归墟必须在本体十一界各配置一座副本")
     settings = document.get("settings", {})
     if int(settings.get("draw_per_cycle", 0)) <= 0:
         raise ContentError("归墟每届抽取数量必须为正数")
