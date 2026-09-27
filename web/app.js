@@ -1156,16 +1156,7 @@ function renderIntrigue(system) {
         ? `${member.realm_name} · 玩家本人 · 有票`
         : `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
       info.append(name, detail);
-    if (art.next_level_gains) {
-      const gains = art.next_level_gains;
-      const growth = document.createElement('small'); growth.className = 'technique-growth';
-      const common = `机缘 +${percent(gains.opportunity_bonus)} · HP +${percent(gains.hp_bonus)} · MP +${percent(gains.mp_bonus)} · 战力 +${number(gains.combat_bonus)}`;
-      const specialty = art.category === 'body' ? `炼体突破 +${percent(gains.body_breakthrough_bonus)}`
-        : art.category === 'divine_sense' ? `神识修炼 +${percent(gains.divine_sense_bonus)}`
-        : art.category === 'transformation' ? `容量 +${gains.transformation_capacity} · 空间 +${gains.transformation_space}` : common;
-      growth.textContent = `下一级增益：${specialty}`; info.append(growth);
-    }
-    row.appendChild(info);
+      row.appendChild(info);
       if (section.control_authority) {
         const tools = document.createElement('div'); tools.className = 'intrigue-member-tools';
         [['reward','赏'],['punish','罚'],['dismiss','撤职'],['expel','逐出']].forEach(([action,label]) => {

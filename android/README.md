@@ -1,10 +1,16 @@
 # 浮生问道 · Android 12
 
-本体 **v1.41.0**，安卓版本 **1.41.0-android.4**（versionCode 4）。以 Android 12 / API 31 为适配目标，APK 包含 arm64-v8a 手机和 x86_64 模拟器两种架构。其他系统版本未列入本轮验收；不提供 32 位运行时。
+本体 **v1.41.1**，安卓版本 **1.41.1-android.5**（versionCode 5）。以 Android 12 / API 31 为适配目标，APK 包含 arm64-v8a 手机和 x86_64 模拟器两种架构。其他系统版本未列入本轮验收；不提供 32 位运行时。
 
-本版同步家族互动与内政、英姿神武口服液及归墟之潮2.6.0。使用原正式签名覆盖升级；不必卸载旧版。新增字段兼容旧存档，初始口服液仅发给本版新建角色。
+本版修复魔修炼虚开局及内政成员显示的 `art is not defined`，使用米白瓷底、青玉山月浅色图标。使用原正式签名覆盖升级，不必卸载旧版；六主题、六 DLC 及已有存档保留。
 
-新增验收：`tests/browser_family_1400.py` 测试实际传功、赠装、同行、灌顶与婚配请求，并检查六主题、四种宽度下的家族及归墟按钮；独立测试 APK 的 `phase=family` 在 Android 12 上检验同份界面样例和真实服药接口。测试代码不包含于正式 APK。
+新增验收：`tests/browser_quick_start_1411.py` 和独立测试 APK 的 `phase=quickstart` 使用真实魔修炼虚等七种快速开局，验证完整渲染、行动和读档；魔修炼虚额外覆盖六主题。测试代码不包含于正式 APK。
+
+## 更高版本系统
+
+Android 12 是最低要求，并非最高限制。`minSdk=31`、`targetSdk=31` 且没有 `maxSdkVersion`；按 [Android 官方 SDK 规则](https://developer.android.com/guide/topics/manifest/uses-sdk-element)，更高系统可采用兼容行为运行旧目标版本应用。因此预计可以在更高版本的 64 位安卓设备上运行，但目前仅完成 Android 12 模拟器验收，未承诺所有新系统及厂商 ROM 均兼容。
+
+Android 15 起部分设备使用 [16 KB 内存页](https://developer.android.com/guide/practices/page-sizes)。本包 132 个原生 ELF 库的载入段对齐均至少为 16 KB；这项静态检查不能代替更高版本、16 KB 设备上的实际运行测试。
 
 ## 游戏与安装
 

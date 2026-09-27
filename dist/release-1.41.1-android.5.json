@@ -1,7 +1,7 @@
 {
-  "base_version": "1.41.0",
-  "android_version": "1.41.0-android.4",
-  "version_code": 4,
+  "base_version": "1.41.1",
+  "android_version": "1.41.1-android.5",
+  "version_code": 5,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -13,9 +13,9 @@
   "tested_abi": "x86_64",
   "tested_webview": "91.0.4472.114",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.41.0-Android12.apk",
-  "apk_sha256": "c74d0608a01a9f59a2312bcdfb385229efb9619c82bc9efc0d821f43485f6b19",
-  "apk_bytes": 47490482,
+  "apk": "浮生问道-v1.41.1-Android12.apk",
+  "apk_sha256": "dc883d5e2219f55169f6b46c2d6341b128bcebeca9429d1d4012e24c4702407b",
+  "apk_bytes": 47490242,
   "dlc_versions": {
     "ghost-reincarnation": "3.8.0",
     "guixu-tide": "2.6.0",
@@ -37,14 +37,11 @@
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "784 Python regressions passed",
-    "80 final targeted regressions passed, including war-encounter cooldown after save/reload",
-    "Twelve world-transition RNG scenarios match v1.40.0",
+    "22 targeted Python regressions passed",
     "Android asset parity, private root and loopback authentication passed",
-    "Chromium: faction map and technique upgrade API, six themes at four widths passed",
-    "Signed Android 12 release: faction map, war notices and technique growth in all six themes passed",
+    "Chromium and signed Android 12 release: seven real quick starts, actions and reload passed; demonic void in six themes",
     "Signed release APK: six themes, real advance and native back passed",
-    "v1.40.0 to v1.41.0 same-signature upgrade: offline saved character, progress and theme retained",
+    "v1.41.0 to v1.41.1 same-signature upgrade: offline saved character, progress and theme retained",
     "APK signature verified; release Android Lint: no issues found"
   ]
 }

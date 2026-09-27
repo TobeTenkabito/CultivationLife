@@ -59,7 +59,7 @@ headers={'Cookie':'cultivation_session='+token}
 config=json.load(urllib.request.urlopen(urllib.request.Request(base+'/api/config',headers=headers)))
 assert config['debug'] is False
 assert len(config['extensions'])==6
-assert config['base_game']['version']=='1.41.0'
+assert config['base_game']['version']=='1.41.1'
 from cultivation_life import server
 assert server.PERSISTENCE_ROOT==root/'game'
 assert server.WEB_ROOT==root/'game/web'
