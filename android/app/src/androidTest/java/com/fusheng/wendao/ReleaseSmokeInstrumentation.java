@@ -59,6 +59,68 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     private void check(boolean condition,String message) { if(!condition) throw new AssertionError(message); }
 
+    private void waitForJs(String condition, String message) throws Exception {
+        long deadline=System.currentTimeMillis()+15000;
+        while(System.currentTimeMillis()<deadline) {
+            if(Boolean.TRUE.equals(js(condition))) return;
+            Thread.sleep(100);
+        }
+        throw new AssertionError(message);
+    }
+
+    /** Tap the actual input and send text through Android's IME InputConnection. */
+    private void enterCommissionNumber(String label, String value) throws Exception {
+        String selector=JSONObject.quote(".merchant-metrics input[aria-label='"+label+"']");
+        js("window.__imeField=document.querySelector("+selector+");__imeField.scrollIntoView({block:'center'});true");
+        Thread.sleep(350);
+        JSONObject point=new JSONObject((String)js("JSON.stringify((()=>{const r=__imeField.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,width:innerWidth}})())"));
+        int[] origin=new int[2];
+        runOnMainSync(()->web.getLocationOnScreen(origin));
+        float scale=web.getWidth()/(float)point.getDouble("width");
+        float x=origin[0]+(float)point.getDouble("x")*scale, y=origin[1]+(float)point.getDouble("y")*scale;
+        long now=android.os.SystemClock.uptimeMillis();
+        for(int action:new int[]{android.view.MotionEvent.ACTION_DOWN,android.view.MotionEvent.ACTION_UP}) {
+            android.view.MotionEvent event=android.view.MotionEvent.obtain(now,android.os.SystemClock.uptimeMillis(),action,x,y,0);
+            sendPointerSync(event);event.recycle();
+        }
+        waitForJs("document.activeElement===__imeField",label+": tap did not focus input");
+        AtomicReference<Boolean> keyboard=new AtomicReference<>(false);
+        long keyboardDeadline=System.currentTimeMillis()+10000;
+        while(!keyboard.get() && System.currentTimeMillis()<keyboardDeadline) {
+            runOnMainSync(()->keyboard.set(web.getRootWindowInsets().isVisible(android.view.WindowInsets.Type.ime())));
+            Thread.sleep(150);
+        }
+        if(!keyboard.get()) capture("commission-keyboard-failure");
+        check(keyboard.get(),label+": soft keyboard not visible");
+        int length=((Number)js("__imeField.value.length")).intValue();
+        AtomicReference<Boolean> committed=new AtomicReference<>(false);
+        AtomicReference<android.view.inputmethod.InputConnection> connection=new AtomicReference<>();
+        runOnMainSync(()->{
+            android.view.inputmethod.EditorInfo info=new android.view.inputmethod.EditorInfo();
+            connection.set(web.onCreateInputConnection(info));
+        });
+        android.view.inputmethod.InputConnection input=connection.get();
+        check(input!=null,label+": no input connection");
+        android.os.Handler inputHandler=input.getHandler();
+        if(inputHandler==null) inputHandler=web.getHandler();
+        CountDownLatch edited=new CountDownLatch(1);
+        AtomicReference<Throwable> editError=new AtomicReference<>();
+        inputHandler.post(()->{
+            try {
+                input.beginBatchEdit();
+                boolean selected=input.setSelection(0,length);
+                committed.set(selected && input.commitText(value,1));
+                input.endBatchEdit();
+            } catch(Throwable error) { editError.set(error); }
+            finally { edited.countDown(); }
+        });
+        check(edited.await(10,TimeUnit.SECONDS) && editError.get()==null,label+": IME dispatch failed: "+editError.get());
+        check(committed.get(),label+": IME rejected input");
+        waitForJs("__imeField.value==="+JSONObject.quote(value),label+": wrong entered value");
+        Thread.sleep(450);
+        check(Boolean.TRUE.equals(js("document.activeElement===__imeField")),label+": quote stole focus");
+    }
+
     private void capture(String name) throws Exception {
         js("scrollTo(0,0)");
         async("document.fonts.ready");
@@ -89,10 +151,32 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.41.1' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.41.2' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("quickstart")) {
+            if(phase.equals("commission")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'输入法委托验收',preset_id:'core',seed:1412})});return g.id;})()");
+                // Test APK only: place this newly created test character at its alliance HQ.
+                com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",
+                    "from cultivation_life import server\nfrom cultivation_life.rules import add_item\ng=server.ENGINE._load("+JSONObject.quote(id)+")\ng.player.location_id=g.merchant_state['worlds']['human'][0]['hq']\nadd_item(g.player,'spirit_stone',10**12)\nserver.ENGINE.store.save(g)",
+                    com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
+                async("loadGame("+JSONObject.quote(id)+")");
+                async("mutate('/api/games/'+game.id+'/merchant-action',{action:'join',alliance_id:game.merchant_system.alliances[0].id})");
+                js("UtilityPanels.open('merchant');const form=document.querySelector('.merchant-post');form.parentElement.open=true;const kind=form.querySelector('[aria-label=委托类型]');kind.value='formation';kind.dispatchEvent(new Event('change'));true");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
+                    async("GameThemes.saved");
+                    enterCommissionNumber("杀势最低要求","0.25");
+                    enterCommissionNumber("杀势最高要求","99.75");
+                    waitForJs("!document.querySelector('.merchant-post button[type=submit]').disabled","No valid commission quote: "+theme);
+                    capture("commission-ime-"+theme);
+                }
+                js("document.querySelector('.merchant-post button[type=submit]').click()");
+                waitForJs("game.merchant_system.posted.length===1 && !busy","Commission was not published");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.merchant_system.posted[0].spec.requirements.kill===0.25 && game.merchant_system.posted[0].spec.maxima.kill===99.75")),"Saved bounds differ from IME input");
+                capture("commission-published");
+            } else if(phase.equals("quickstart")) {
                 try(java.io.InputStream input=getContext().getAssets().open("quick_start_regression.js")) {
                     java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
                     byte[] chunk=new byte[4096];int length;
