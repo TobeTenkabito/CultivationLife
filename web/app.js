@@ -1589,8 +1589,29 @@ function renderFaction(faction) {
     if (npc.is_player) row.classList.add('self');
     const order = document.createElement('i'); order.textContent = String(index + 1).padStart(2, '0');
     const relation = npc.is_master ? ' · 师父' : npc.is_disciple ? ' · 弟子' : npc.is_friend ? ' · 道友' : '';
-    const identity = document.createElement('span'); identity.innerHTML = `<b>${npc.name}${npc.is_player ? '（你）' : ''}${relation}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}</b><small>${npc.title} · ${npc.gender_name || '性别未明'} · ${npc.race_name || '种族未明'} · ${npc.path_name || '道统未明'} · ${npc.spirit_root_name || '灵根未明'} · ${npc.age} 岁 · 寿元 ${npc.lifespan == null ? '无尽' : npc.lifespan}</small><small>战力 ${number(npc.combat_power || 0)} · ${npc.breakthrough_chance == null ? '当前无瓶颈' : `突破率 ${percent(npc.breakthrough_chance)}`} · ${npc.affinity == null ? '' : `好感 ${number(npc.affinity)} / ${npc.attitude}`}${npc.treasure_name ? ` · 重宝 ${npc.treasure_name}` : ''}</small>`;
+    const identity = document.createElement('div'); identity.className = 'roster-identity';
+    const heading = document.createElement('div'); heading.className = 'roster-heading';
+    const name = document.createElement('b'); name.textContent = `${npc.name}${npc.is_player ? '（你）' : ''}${relation}`;
     const cultivation = document.createElement('strong'); cultivation.textContent = npc.realm_name;
+    heading.append(name, cultivation); identity.appendChild(heading);
+    const biography = document.createElement('p'); biography.className = 'roster-biography';
+    biography.textContent = [npc.title, npc.gender_name || '性别未明', npc.race_name || '种族未明', npc.path_name || '道统未明', npc.spirit_root_name || '灵根未明'].filter(Boolean).join(' · ');
+    identity.appendChild(biography);
+    const status = document.createElement('dl'); status.className = 'roster-status';
+    const addStatus = (label, value, warning = false) => {
+      const field = document.createElement('div'); if (warning) field.className = 'warning';
+      const term = document.createElement('dt'); term.textContent = label;
+      const detail = document.createElement('dd'); detail.textContent = value;
+      field.append(term, detail); status.appendChild(field);
+    };
+    addStatus('年龄', `${npc.age} 岁`);
+    addStatus('寿元', npc.lifespan == null ? '无尽' : `${npc.lifespan} 岁`);
+    addStatus('战力', number(npc.combat_power || 0));
+    addStatus('突破', npc.breakthrough_chance == null ? '当前无瓶颈' : percent(npc.breakthrough_chance));
+    if (npc.affinity != null) addStatus('好感', `${number(npc.affinity)}${npc.attitude ? ` · ${npc.attitude}` : ''}`);
+    if (npc.wounds) addStatus('伤势', `负伤 ${npc.wounds} 级`, true);
+    if (npc.treasure_name) addStatus('重宝', npc.treasure_name);
+    identity.appendChild(status);
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
     if (npc.can_request_master) controls.appendChild(relationshipButton(npc, 'master', '拜师'));
     if (npc.can_accept_disciple) controls.appendChild(relationshipButton(npc, 'disciple', '收徒'));
@@ -1608,7 +1629,7 @@ function renderFaction(faction) {
       intercept.onclick = () => mutate(`/api/games/${game.id}/faction-intercept`, {npc_id:npc.id});
       controls.appendChild(intercept);
     }
-    row.append(order, identity, cultivation, controls); list.appendChild(row);
+    row.append(order, identity, controls); list.appendChild(row);
   });
 
   function relationshipButton(npc, role, label) {

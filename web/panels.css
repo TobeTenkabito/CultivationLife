@@ -664,16 +664,17 @@
 .sage-ranking-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
 .sage-ranking-title b { color:var(--tone-blue); font-size:11px; }
 .sage-ranking-title small { color:var(--muted); font-size:8px; }
-.sage-member-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:7px 8px; border:1px solid color-mix(in srgb, var(--tone-blue) 10%, transparent); background:color-mix(in srgb, var(--tone-blue) 4.5%, transparent); }
+.sage-member-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:7px 8px; border:1px solid color-mix(in srgb, var(--tone-blue) 10%, transparent); background:color-mix(in srgb, var(--tone-blue) 4.5%, transparent); }
 .sage-member-row.player { border-left:3px solid var(--tone-gold); background:color-mix(in srgb, var(--tone-gold) 9%, transparent); }
-.sage-member-identity { display:flex; align-items:center; gap:8px; min-width:0; }
+.sage-member-identity { flex:1 1 140px; display:flex; align-items:center; gap:8px; min-width:0; }
 .sage-member-identity>i { display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; border-radius:50%; color:var(--on-accent); background:var(--tone-blue); font:normal 11px serif; }
 .sage-member-identity b,.sage-member-identity small,.sage-member-values b,.sage-member-values small { display:block; }
 .sage-member-identity b { font-size:11px; }
 .sage-member-identity small,.sage-member-values small { margin-top:2px; color:var(--muted); font-size:8px; }
-.sage-member-values { text-align:right; white-space:nowrap; }
+.sage-member-identity>span { min-width:0; overflow-wrap:anywhere; }
+.sage-member-values { margin-left:auto; overflow-wrap:anywhere; }
 .sage-member-values b { color:var(--tone-blue); font-size:10px; }
-.sage-member-row .sage-debate-button { grid-column:1/-1; padding:6px 8px; color:var(--tone-blue); border:1px solid color-mix(in srgb, var(--tone-blue) 22%, transparent); background:color-mix(in srgb, var(--tone-blue) 9%, transparent); font-size:9px; }
+.sage-member-row .sage-debate-button { flex-basis:100%; padding:6px 8px; color:var(--tone-blue); border:1px solid color-mix(in srgb, var(--tone-blue) 22%, transparent); background:color-mix(in srgb, var(--tone-blue) 9%, transparent); font-size:9px; }
 .sage-member-row .sage-debate-button:hover:not(:disabled) { color:var(--on-accent); background:var(--tone-blue); }
 .sage-member-row .sage-debate-button:disabled { opacity:.45; cursor:not-allowed; }
 .sage-founding { padding:15px; border:1px solid color-mix(in srgb, var(--tone-gold) 24%, transparent); background:color-mix(in srgb, var(--surface) 47%, transparent); }
