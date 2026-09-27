@@ -89,10 +89,21 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.41.0' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.41.1' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("world")) {
+            if(phase.equals("quickstart")) {
+                try(java.io.InputStream input=getContext().getAssets().open("quick_start_regression.js")) {
+                    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
+                    byte[] chunk=new byte[4096];int length;
+                    while((length=input.read(chunk))!=-1) buffer.write(chunk,0,length);
+                    js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
+                }
+                for(String preset:new String[]{"demonic_void","core","void","ghost_void","monster_void","confucian_void","buddhist_void"}) {
+                    async("QuickStartProbe.run('"+preset+"')");
+                    if(preset.equals("demonic_void")) capture("quickstart-demonic-void");
+                }
+            } else if(phase.equals("world")) {
                 async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'山河界壁验收',spirit_root:'supreme_metal',path:'dao',seed:1410,preset_id:'core'})});render(g);return g.id;})()");
                 check(Boolean.TRUE.equals(js("game.map.locations.some(p=>p.factions && p.factions.length>0)")),"Missing faction map addresses");
                 try(java.io.InputStream input=getContext().getAssets().open("world_update_layout.js")) {
