@@ -21,7 +21,7 @@
     Object.entries(system.metric_names || {}).forEach(([id,name])=>{
       const range=el('div',null,'merchant-metric-range');range.append(el('strong',name));
       [['下限',0,metricInputs,'最低要求'],['上限',100,maximumInputs,'最高要求']].forEach(([title,value,store,aria])=>{
-        const label=el('label',title),input=el('input');input.type='number';input.min=0;input.max=100;input.step='.01';input.value=value;
+        const label=el('label',title),input=el('input');input.type='number';input.inputMode='decimal';input.min=0;input.max=100;input.step='.01';input.required=true;input.value=value;
         input.setAttribute('aria-label',`${name}${aria}`);label.append(input);range.append(label);store[id]=input;
       });metrics.append(range);
     });

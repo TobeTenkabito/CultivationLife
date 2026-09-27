@@ -29,7 +29,12 @@ button:focus-visible{outline-offset:1px}
   .android-keyboard .strategy-dock{display:none!important}
   .android-keyboard .utility-panel{max-height:calc(100vh - 24px)!important;max-height:calc(100dvh - 24px)!important}
   .save-list{max-height:340px}
+  .merchant-metrics{grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:10px}
+  .merchant-metric-range{min-width:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .merchant-metric-range input{font-size:16px;min-height:44px;padding:10px;appearance:textfield;-moz-appearance:textfield}
+  .merchant-metric-range input::-webkit-inner-spin-button,.merchant-metric-range input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 }
+@media(max-width:650px){.merchant-metrics{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:380px){
   .in-game .shell{width:calc(100% - 24px)}
   .hud-resources{gap:12px}
