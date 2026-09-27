@@ -21,7 +21,7 @@ BATCH_PAIR_BONUS = 0.30
 
 def transformation_technique_limits(technique: Technique) -> tuple[int, int]:
     """Scale structural transformation slots to the nearest whole slot by level."""
-    multiplier = technique.level_multiplier
+    multiplier = technique.stat_multiplier("transformation_capacity")
     capacity = max(
         int(technique.transformation_capacity),
         math.floor(float(technique.transformation_capacity) * multiplier + 0.5),

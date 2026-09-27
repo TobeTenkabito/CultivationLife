@@ -44,6 +44,10 @@ class EconomyMarketMethods:
         )
 
     def _ensure_market(self, game: GameState, rng: Any) -> bool:
+        from cultivation_life.system.world_transition_system import finish_world_transition
+        return finish_world_transition(game, rng, self._refresh_world_market)
+
+    def _refresh_world_market(self, game: GameState, rng: Any) -> bool:
         player = game.player
         # Drop stale/locked offers from saves made before source restrictions.
         previous_count = len(game.market_offers)

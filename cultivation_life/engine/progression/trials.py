@@ -205,14 +205,10 @@ def _resolve_celestial_ascension_step(
         return "trial_step_success", f"第 {trial['step_index']}/9 关通过（{detail}），HP -{hp_loss:.0f}、MP -{mp_loss:.0f}{reduction_text}。"
 
     origin = player.world
-    companion_kept, friend_ids, friend_names, fallen_names = deps._resolve_selected_ascension_entourage(
-        game, "celestial", rng,
-    )
-    deps._prepare_permanent_world_transition(
-        game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
-    )
-    player.world = "celestial"
-    player.location_id = deps.maps.default_location("celestial")
+    plan = deps._plan_world_transition(game, "celestial", reason="九重劫关完成")
+    entourage = deps._resolve_selected_ascension_entourage(game, "celestial", rng)
+    companion_kept, friend_ids, friend_names, fallen_names = entourage
+    deps._apply_world_transition(game, plan, entourage=entourage)
     player.realm_index = 9
     player.layer = 1
     player.opportunity = 0.0
@@ -228,7 +224,6 @@ def _resolve_celestial_ascension_step(
     player.tribulation_power = None
     player.hp = max_hp(player)
     player.mp = 0.0
-    deps._clear_market(game)
     deps._ensure_heavenly_court(game, rng)
     game.active_trial = None
     game.pending_event = None
@@ -319,14 +314,10 @@ def _resolve_asura_ascension_step(
 
     origin = player.world
     lost_puppets = len(player.puppets)
-    companion_kept, friend_ids, friend_names, fallen_names = deps._resolve_selected_ascension_entourage(
-        game, "asura", rng,
-    )
-    deps._prepare_permanent_world_transition(
-        game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
-    )
-    player.world = "asura"
-    player.location_id = deps.maps.default_location("asura")
+    plan = deps._plan_world_transition(game, "asura", reason="九重劫关完成")
+    entourage = deps._resolve_selected_ascension_entourage(game, "asura", rng)
+    companion_kept, friend_ids, friend_names, fallen_names = entourage
+    deps._apply_world_transition(game, plan, entourage=entourage)
     player.realm_index = 9
     player.layer = 1
     player.opportunity = 0.0
@@ -338,7 +329,6 @@ def _resolve_asura_ascension_step(
     player.tribulation_power = None
     player.hp = max_hp(player)
     player.mp = max_mp(player)
-    deps._clear_market(game)
     deps._ensure_market(game, rng)
     game.active_trial = None
     game.pending_event = None

@@ -505,6 +505,8 @@ def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id
     existing = deps._npc_faction_id(game, npc_id)
     if existing:
         raise ValueError("此人已经有所属宗门")
+    from ...system.faction_geography import require_faction_admission
+    require_faction_admission(sect, relation)
     npc = deps._persist_relationship_npc(game, relation, "受邀加入宗门")
     npc.faction_id = sect.id
     relation["source"] = "world"

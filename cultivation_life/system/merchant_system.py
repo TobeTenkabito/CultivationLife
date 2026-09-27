@@ -394,41 +394,10 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             raise ValueError(f"逆灵通道需支付 {price:,} 灵石")
         target_alliance = self._merchant_alliance(game, destination, alliance["id"])
         player = game.player
-        hp_ratio, mp_ratio = player.hp / max(1, max_hp(player)), player.mp / max(1, max_mp(player))
-        old_world = player.world
-        cap = self._merchant_realm_cap(destination)
-        cap_layer = 3 if cap == 5 else REALMS[cap].layers
-        # The reverse-spirit route into the monster world bears a tighter
-        # visitor seal than its native cultivation ceiling. Keep native NPCs
-        # and ordinary ascension rules independent of this paid passage.
-        if destination == "monster_realm":
-            cap, cap_layer = 7, 9
-        sealed = player.sealed_cultivation
-        original_realm, original_layer = (int(sealed["realm_index"]), int(sealed["layer"])) if sealed else (player.realm_index, player.layer)
-        if (original_realm, original_layer) > (cap, cap_layer):
-            if not sealed:
-                sealed = {"realm_index": original_realm, "layer": original_layer, "upper_world": old_world,
-                          "lifespan": player.lifespan, "tribulation_remaining": max(0, player.next_tribulation_age - player.age) if player.next_tribulation_age is not None else None}
-            sealed["lower_world"] = destination
-            sealed["merchant_passage"] = True
-            player.sealed_cultivation = sealed
-            player.realm_index, player.layer = cap, cap_layer
-        elif sealed:
-            player.realm_index, player.layer = original_realm, original_layer
-            player.lifespan = sealed.get("lifespan")
-            remaining = sealed.get("tribulation_remaining")
-            player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
-            player.sealed_cultivation = None
+        plan = self._plan_world_transition(game, destination, "passage",
+                                           arrival_location=target_alliance["hq"], reason="商盟逆灵通道")
+        self._apply_world_transition(game, plan)
         remove_item(player, "spirit_stone", price)
-        self._cancel_auction_for_world_change(game)
-        player.world, player.location_id = destination, target_alliance["hq"]
-        player.awaiting_major_breakthrough = False
-        player.awaiting_minor_breakthrough = False
-        player.awaiting_spirit_realm_crossing = False
-        player.active_breakthrough_aids = []
-        player.party = []
-        player.hp, player.mp = max_hp(player) * hp_ratio, max_mp(player) * mp_ratio
-        self._clear_market(game)
         # Credentials remain issued by the original regional HQ. Reciprocal
         # offices recognise the rank, but do not silently transfer local influence.
         self._merchant_notice(game, f"支付 {price:,} 灵石，乘{alliance['name']}逆灵通道抵达{WORLD_SYSTEMS['world_names'][destination]}。" + ("修为已按当地界面法则压制。" if player.sealed_cultivation else ""))
@@ -515,6 +484,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
                     if state["active"]:
                         raise ValueError("请先完成或放弃当前商盟任务")
                     self._merchant_passage(game, alliance, str(payload.get("destination", "")))
+                    self._ensure_market(game, rng)
                 else:
                     raise ValueError("未知商盟操作")
         game.rng_state = encode_rng(rng)

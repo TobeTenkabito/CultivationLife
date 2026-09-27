@@ -65,6 +65,7 @@ def create_technique(
     required_body_training: int = 0,
     possession_limit_bonus: int = 0,
     ignore_possession_limit: bool = False,
+    growth_preference: str = "balanced",
 ) -> Technique:
     technique = Technique(
         id=technique_id, name=name, path=path, element=element, grade=grade, level=level,
@@ -83,6 +84,7 @@ def create_technique(
         required_body_training=required_body_training,
         possession_limit_bonus=possession_limit_bonus,
         ignore_possession_limit=ignore_possession_limit,
+        growth_preference=growth_preference,
     )
     validate_technique(technique)
     return technique
@@ -91,6 +93,8 @@ def create_technique(
 def validate_technique(technique: Technique) -> None:
     """每一部功法自身必须完整覆盖机缘、HP、MP 与独立战力四项。"""
     values = (technique.opportunity_bonus, technique.hp_bonus, technique.mp_bonus, technique.combat_bonus)
+    if technique.growth_preference not in {"balanced", "main", "support", "combat"}:
+        raise ValueError("未知功法成长倾向")
     if any(value <= 0 for value in values):
         raise ValueError(f"功法 {technique.name} 缺少四项必备属性")
     if technique.karma_multiplier <= 0:
@@ -130,10 +134,10 @@ def validate_technique(technique: Technique) -> None:
         raise ValueError("功法的战斗使用门槛表达式不合法")
 
 
-def technique_scale(technique: Technique) -> float:
+def technique_scale(technique: Technique, stat: str = "combat_bonus") -> float:
     """Keep the established grade balance and apply the explicit Lv.1–9 multiplier."""
     grade_multiplier = 1.0 + 0.12 * (max(1, int(technique.grade)) - 1)
-    return grade_multiplier * technique.level_multiplier
+    return grade_multiplier * technique.stat_multiplier(stat)
 
 
 def effective_technique_karma_multiplier(technique: Technique) -> float:
@@ -317,6 +321,9 @@ def ensure_technique_set(player: Player) -> None:
         if technique and not technique.combat_requirements and technique.id in TECHNIQUE_CATALOG:
             technique.combat_requirements = copy.deepcopy(TECHNIQUE_CATALOG[technique.id].combat_requirements)
         if technique and technique.id in TECHNIQUE_CATALOG:
+            technique.growth_preference = TECHNIQUE_CATALOG[technique.id].growth_preference
+            if technique.id == "TECH_COMMON_GUI":
+                technique.combat_bonus = 5000
             technique.required_body_training = int(TECHNIQUE_CATALOG[technique.id].required_body_training)
             technique.possession_limit_bonus = int(TECHNIQUE_CATALOG[technique.id].possession_limit_bonus)
             technique.ignore_possession_limit = bool(TECHNIQUE_CATALOG[technique.id].ignore_possession_limit)
@@ -415,7 +422,7 @@ def raw_external_hp_bonus(player: Player) -> float:
     support_bonus = 0.0
     if player.support_technique:
         support_bonus = (
-            player.support_technique.hp_bonus * technique_scale(player.support_technique)
+            player.support_technique.hp_bonus * technique_scale(player.support_technique, "hp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         )
     return (
@@ -438,7 +445,7 @@ def raw_external_mp_bonus(player: Player) -> float:
     support_bonus = 0.0
     if player.support_technique:
         support_bonus = (
-            player.support_technique.mp_bonus * technique_scale(player.support_technique)
+            player.support_technique.mp_bonus * technique_scale(player.support_technique, "mp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         )
     return (
@@ -742,7 +749,7 @@ def opportunity_multiplier(
     if player.technique is None:
         return 0.0
     main_bonus = (
-        player.technique.opportunity_bonus * technique_scale(player.technique)
+        player.technique.opportunity_bonus * technique_scale(player.technique, "opportunity_bonus")
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
     )
     from .system.crafting_system import crafted_artifact_bonuses
@@ -870,15 +877,29 @@ def public_player(player: Player) -> dict[str, Any]:
         ):
             base_value = float(getattr(technique, field_name))
             result[f"base_{field_name}"] = base_value
-            result[field_name] = base_value * effect_multiplier
+            result[field_name] = base_value * technique_scale(technique, field_name)
         result["base_body_breakthrough_bonus"] = float(technique.body_breakthrough_bonus)
-        result["body_breakthrough_bonus"] = float(technique.body_breakthrough_bonus) * level_multiplier
+        result["body_breakthrough_bonus"] = float(technique.body_breakthrough_bonus) * technique.stat_multiplier("body_breakthrough_bonus")
         capacity, space = transformation_technique_limits(technique)
         result["base_transformation_capacity"] = technique.transformation_capacity
         result["base_transformation_space"] = technique.transformation_space
         result["transformation_capacity"] = capacity
         result["transformation_space"] = space
+        if technique.level < TECHNIQUE_MAX_LEVEL:
+            next_level = copy.copy(technique)
+            next_level.level += 1
+            result["next_level_gains"] = {
+                key: float(getattr(technique, key)) * (technique_scale(next_level, key) - technique_scale(technique, key))
+                for key in ("opportunity_bonus", "hp_bonus", "mp_bonus", "combat_bonus", "divine_sense_bonus")
+            }
+            result["next_level_gains"]["body_breakthrough_bonus"] = technique.body_breakthrough_bonus * (
+                next_level.stat_multiplier("body_breakthrough_bonus") - technique.stat_multiplier("body_breakthrough_bonus"))
+            next_capacity, next_space = transformation_technique_limits(next_level)
+            result["next_level_gains"].update(transformation_capacity=next_capacity-capacity,
+                                              transformation_space=next_space-space)
         result.update(
+            growth_name=technique.growth_name,
+            growth_multipliers={key: technique.stat_multiplier(key) for key in ("opportunity_bonus", "hp_bonus", "mp_bonus", "combat_bonus", "divine_sense_bonus", "body_breakthrough_bonus", "transformation_capacity")},
             level_multiplier=level_multiplier,
             effect_multiplier=effect_multiplier,
             max_level=TECHNIQUE_MAX_LEVEL,

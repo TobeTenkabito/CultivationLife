@@ -6,6 +6,7 @@ from ...models import GameState, HistoryRecord, Player, SectNpc, SectState
 from ...runtime import decode_rng, encode_rng, now_iso
 from ...world_state import race_pair
 from ..dependencies import FactionActionDependencies
+from ...system.faction_geography import can_enter_faction, require_faction_admission
 
 
 def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> dict[str, Any]:
@@ -25,7 +26,7 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
     sect = SectState(
         sect_id, clean_name, player.world, [],
         description=f"由{player.name}于{player.age}岁开创的宗门。", path=path,
-        founded_by_player=True, founder_player_id=game.id,
+        founded_by_player=True, founder_player_id=game.id, location_id=player.location_id, player_founded_site=True,
         allegiance_race=player.allegiance_race or player.race,
     )
     rng = decode_rng(game.seed, game.rng_state)
@@ -40,7 +41,8 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
             path=path, race=player.race, world=player.world, affinity=rng.uniform(28, 48),
         )
         npc.treasure_item_id = deps._select_npc_treasure(npc, rng)
-        sect.npcs.append(npc)
+        if can_enter_faction(sect, npc):
+            sect.npcs.append(npc)
     game.sects[sect_id] = sect
     player.faction_id = sect_id
     player.allegiance_race = sect.allegiance_race
@@ -92,10 +94,13 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
         family_id, clean_name, player.world, [],
         description=f"由{player.name}与后代共同建立的修仙家族，亦接纳外姓门人。",
         path=player.technique.path if player.technique else player.path,
-        founded_by_player=True, founder_player_id=game.id,
+        founded_by_player=True, founder_player_id=game.id, location_id=player.location_id, player_founded_site=True,
         allegiance_race=deps._player_allegiance_race(player),
         kind="family",
     )
+    heirs = [child for child in heirs if can_enter_faction(family, child)]
+    if not heirs:
+        raise ValueError("后代尚不能进入此地，请到无境界限制的地图建立家族")
     for child in heirs:
         existing = independent.get(child['id'])
         if existing:
@@ -280,6 +285,7 @@ def transfer_vassal_personnel(
     npc.title = "附庸外援"
     if kind == "sect":
         destination = game.sects[str(own_id)]
+        require_faction_admission(destination, npc)
         npc.faction_id = destination.id
         destination.npcs.append(npc)
         destination_name = destination.name

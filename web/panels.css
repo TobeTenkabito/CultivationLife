@@ -747,3 +747,8 @@
 .merchant-metric-range{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:9px;border:1px solid var(--line);border-radius:5px;background:color-mix(in srgb, var(--tone-green) 3.5%, transparent);}
 .merchant-metric-range>strong{grid-column:1/-1;font-size:12px;color:var(--pine);}
 .merchant-metric-range label{min-width:0;font-size:11px;}.merchant-metric-range input{width:100%;min-width:0;}
+
+/* Faction atlas and technique growth inherit each independent theme palette. */
+.map-directory-entry.faction { --entry-ink: var(--pine); }
+.map-directory-entry.war { --entry-ink: var(--cinnabar); }
+.technique-growth { display: block; margin-top: .35rem; color: var(--pine); line-height: 1.6; overflow-wrap: anywhere; }

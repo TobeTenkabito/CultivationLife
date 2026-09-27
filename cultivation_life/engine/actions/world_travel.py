@@ -95,7 +95,6 @@ def _prepare_permanent_world_transition(
             row for row in record.get("guests", []) if row.get("npc_id") != "player"
         ]
     deps._intrigue_state(game)["pending_guest_invitation"] = None
-    deps._cancel_auction_for_world_change(game)
     return {"removed": removed, "faction_handover": handover}
 
 
@@ -336,17 +335,12 @@ def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) 
     old_fame = player.fame
     lost_puppets = len(player.puppets)
     rng = decode_rng(game.seed, game.rng_state)
-    companion_kept, friend_ids, friend_names, fallen_names = deps._resolve_selected_ascension_entourage(
-        game, destination, rng,
-    )
-    deps._prepare_permanent_world_transition(
-        game, keep_companion=companion_kept, keep_friend_ids=friend_ids,
-    )
-    player.world = destination
-    player.location_id = deps.maps.default_location(destination)
+    plan = deps._plan_world_transition(game, destination, reason="魔道飞升")
+    entourage = deps._resolve_selected_ascension_entourage(game, destination, rng)
+    companion_kept, friend_ids, friend_names, fallen_names = entourage
+    deps._apply_world_transition(game, plan, entourage=entourage)
     player.awaiting_ascension = False
     player.awaiting_spirit_realm_crossing = False
-    deps._clear_market(game)
     deps._ensure_market(game, rng)
     origin_name = WORLD_SYSTEMS["world_names"][origin]
     destination_name = WORLD_SYSTEMS["world_names"][destination]
@@ -357,7 +351,7 @@ def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) 
         + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else "")
     )
     game.history.append(HistoryRecord(
-        "SYS_DEMONIC_ASCENSION", 1, player.age, f"飞升{destination_name}", destination, "ascended",
+        "SYS_DEMONIC_ASCENSION", 1, player.age, f"{'平移' if plan.direction.value == 'lateral' else '飞升'}{destination_name}", destination, "ascended",
         f"你撕开{origin_name}界壁，降临{destination_name}。{puppet_text}{entourage_text}",
         {"world": [origin, destination], "lost_puppets": lost_puppets, "fame": [old_fame, 0]},
         ["system", "ascension", "demonic", "world:global"],
@@ -368,101 +362,44 @@ def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) 
     return deps.present(game)
 
 
-def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -> dict[str, Any]:
-    """Let Mahayana/Mozun cultivators visit their corresponding lower world."""
-    game = deps._load(game_id)
+def plan_public_crossing(game, destination, maps):
     player = game.player
     if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法跨越界面")
     if (player.sealed_cultivation or {}).get("merchant_passage"):
         raise ValueError("逆灵通道的访客封印须经商盟通道返界解除")
-    pairs = {
-        "spirit": "human", "true_demon": "demon", "celestial": "spirit",
-        "asura": "true_demon", "nether": "phantom_underworld", "hell": "human",
-    }
-    nether_lower_worlds = {"monster_realm", "phantom_underworld"}
-    reverse_pairs = {lower: upper for upper, lower in pairs.items()}
-    if destination not in {*pairs, *reverse_pairs, *nether_lower_worlds} or destination == player.world:
-        raise ValueError("目标界面无效")
-    travel_rules = WORLD_SYSTEMS["world_travel"]
-    descending = bool(
-        (player.world == "nether" and destination in nether_lower_worlds)
-        or (player.world in pairs and destination == pairs[player.world])
-    )
+    route = next((row for row in WORLD_SYSTEMS["world_transition_routes"]
+                  if row.get("generic_cross_world") and row["enabled"] and row["source"] == player.world
+                  and row["destination"] == destination), None)
+    descending = route is not None
     if descending:
-        upper_world, lower_world = player.world, destination
-        if upper_world == "celestial" and not player.immortal_power_converted:
+        if player.world == "celestial" and not player.immortal_power_converted:
             raise ValueError("仙灵力尚未完全转化，无法承受逆行界壁的消耗")
-        required_realm = int(
-            travel_rules["celestial_required_realm"] if upper_world in {"celestial", "asura", "nether"}
-            else travel_rules["required_realm"]
-        )
-        if player.realm_index < required_realm or player.sealed_cultivation:
-            realm_name = "真仙" if upper_world == "celestial" else "迦楼罗" if upper_world == "asura" else "幽冥真灵" if upper_world == "nether" else "魔尊" if upper_world == "true_demon" else "大乘"
-            raise ValueError(f"只有身处上界的{realm_name}修士才能重返对应下界")
-        deps._cancel_auction_for_world_change(game)
-        player.sealed_cultivation = {
-            "realm_index": player.realm_index,
-            "layer": player.layer,
-            "upper_world": upper_world,
-            "lower_world": lower_world,
-            "hp_ratio": player.hp / max(1.0, max_hp(player)),
-            "mp_ratio": player.mp / max(1.0, max_mp(player)),
-            "lifespan": player.lifespan,
-            "tribulation_remaining": (
-                max(0, player.next_tribulation_age - player.age)
-                if player.next_tribulation_age is not None else None
-            ),
-        }
-        player.world = lower_world
-        player.location_id = deps.maps.default_location(lower_world)
-        player.realm_index = int(
-            travel_rules["spirit_suppression_realm"] if upper_world in {"celestial", "asura", "nether"}
-            else travel_rules["human_suppression_realm"]
-        )
-        player.layer = int(
-            travel_rules["spirit_suppression_layer"] if upper_world in {"celestial", "asura", "nether"}
-            else travel_rules["human_suppression_layer"]
-        )
-        player.awaiting_major_breakthrough = False
-        player.awaiting_minor_breakthrough = False
-        player.awaiting_spirit_realm_crossing = False
-        player.active_breakthrough_aids = []
-        player.hp = max_hp(player) * float(player.sealed_cultivation["hp_ratio"])
-        player.mp = max_mp(player) * float(player.sealed_cultivation["mp_ratio"])
-        player.party = []
-        upper_realm = "仙境" if upper_world == "celestial" else "修罗道果" if upper_world == "asura" else "真灵道果" if upper_world == "nether" else "魔尊" if upper_world == "true_demon" else "大乘"
-        lower_realm = "大乘九层" if lower_world in {"spirit", "monster_realm", "phantom_underworld"} else "魔尊九层" if lower_world == "true_demon" else "化魔初期三层" if lower_world == "demon" else "化神初期三层"
-        summary = f"你逆穿界壁重返{WORLD_SYSTEMS['world_names'][lower_world]}。天地法则立刻压下，{upper_realm}修为被封至{lower_realm}，但真实道果仍在。"
-        result = f"returned_{lower_world}"
-    else:
-        sealed = player.sealed_cultivation
-        # 兼容旧存档：旧封印没有记录上下界时，按灵界—人界处理。
-        expected_upper = str((sealed or {}).get("upper_world", reverse_pairs.get(player.world, "")))
-        expected_lower = str((sealed or {}).get("lower_world", "human"))
-        if not sealed or player.world != expected_lower or destination != expected_upper or int(sealed.get("realm_index", 0)) < 8:
-            raise ValueError("你没有可在目标上界复原的封存道果")
-        deps._cancel_auction_for_world_change(game)
-        hp_ratio = player.hp / max(1.0, max_hp(player))
-        mp_ratio = player.mp / max(1.0, max_mp(player))
-        player.world = expected_upper
-        player.location_id = deps.maps.default_location(expected_upper)
-        player.realm_index = int(sealed["realm_index"])
-        player.layer = int(sealed["layer"])
-        player.lifespan = sealed.get("lifespan")
-        remaining = sealed.get("tribulation_remaining")
-        player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
-        player.sealed_cultivation = None
-        player.hp = max_hp(player) * hp_ratio
-        player.mp = max_mp(player) * mp_ratio
-        player.party = []
-        true_realm = "仙境" if expected_upper == "celestial" else "修罗道果" if expected_upper == "asura" else "真灵道果" if expected_upper == "nether" else "魔尊" if expected_upper == "true_demon" else "大乘"
-        summary = f"你再入{WORLD_SYSTEMS['world_names'][expected_upper]}，界面压制尽去，被封存的{true_realm}道果与法力层次完全复原。"
-        result = f"returned_{expected_upper}"
-    deps._clear_market(game)
+        profile = WORLD_SYSTEMS["world_profiles"][player.world]
+        rules = WORLD_SYSTEMS["world_travel"]
+        required = int(rules["celestial_required_realm"] if profile["tier"] >= 3 else rules["required_realm"])
+        if player.realm_index < required:
+            raise ValueError(f"只有达到{REALMS[required].name}境的修士才能重返对应下界")
+    from ...system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
+    mode = TransitionMode.SEALED_DESCENT if descending else TransitionMode.SEALED_RETURN
+    request = WorldTransitionRequest(destination, mode, route["id"] if route else "sealed_return", "循原界壁往返")
+    return plan_world_transition(game, request, WORLD_SYSTEMS, maps)
+
+
+def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -> dict[str, Any]:
+    """Authorize the public reversible routes; progression is never a shortcut."""
+    game = deps._load(game_id)
+    player = game.player
+    plan = plan_public_crossing(game, destination, deps.maps)
+    descending = plan.mode.value == "sealed_descent"
+    deps._apply_world_transition(game, plan)
+    world_name = WORLD_SYSTEMS['world_names'][destination]
+    summary = (f"你逆穿界壁重返{world_name}。天地法则将修为压至{REALMS[player.realm_index].name}{player.layer}层，真实道果仍在。"
+               if descending else f"你再入{world_name}，界面压制尽去，被封存的道果与法力层次完全复原。")
+    result = f"returned_{destination}"
     game.history.append(HistoryRecord(
         "SYS_CROSS_WORLD", 1, player.age, "跨界往返", destination, result, summary,
-        {"world": player.world, "cultivation_suppressed": bool(player.sealed_cultivation)},
+        {"world": player.world, "cultivation_suppressed": bool(player.sealed_cultivation), "direction": plan.direction.value},
         ["system", "world_crossing", "world:global"],
     ))
     rng = decode_rng(game.seed, game.rng_state)

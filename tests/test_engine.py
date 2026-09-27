@@ -1283,7 +1283,14 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(player["mp"], player["max_mp"])
             power_ratio = player["combat_power"] / player["expected_combat_power"]
             self.assertGreaterEqual(power_ratio, 0.9, preset_id)
-            self.assertLessEqual(power_ratio, 1.1, preset_id)
+            if preset_id == "nascent":
+                # v1.41 explicitly strengthens the preset's inherited sword art.
+                # Its 5000 base exceeds the old average-power balancing target.
+                sword_art = next(t for t in player["technique_slots"]["combat"] if t["id"] == "TECH_COMMON_GUI")
+                self.assertEqual(sword_art["base_combat_bonus"], 5000)
+                self.assertGreater(player["combat_power"], player["expected_combat_power"])
+            else:
+                self.assertLessEqual(power_ratio, 1.1, preset_id)
             rewarded_story_flags = {
                 "wind_thunder_wings": "wind_wings_completed",
                 "virtual_heaven_cauldron": "xutian_completed",

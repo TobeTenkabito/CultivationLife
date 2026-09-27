@@ -90,6 +90,18 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
             self, bloodline_content_available=lambda: bloodline_content_available(),
         )
 
+    def _plan_world_transition(self, game, destination, mode="progression", *, route_id=None, arrival_location=None, reason=""):
+        from ..system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
+        route_id = route_id or ("sealed_return" if mode == "sealed_return" else f"{mode}:{game.player.world}:{destination}")
+        request = WorldTransitionRequest(destination, TransitionMode(mode), route_id, reason, arrival_location)
+        return plan_world_transition(game, request, WORLD_SYSTEMS, self.maps)
+
+    def _apply_world_transition(self, game, plan, *, entourage=None):
+        from ..system.world_transition_system import WorldTransitionPorts, apply_world_transition
+        ports = WorldTransitionPorts(self._cancel_auction_for_world_change, self._clear_market,
+                                     self._prepare_permanent_world_transition)
+        return apply_world_transition(game, plan, ports, entourage=entourage)
+
     def get_game(self, game_id: str) -> dict[str, Any]:
         return self.present(self._load(game_id))
 
@@ -338,7 +350,20 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
 
     def _resolve_selected_ascension_entourage(self, game: GameState, destination: str, rng: random.Random) -> tuple[bool, set[str], list[str], list[str]]:
         'Resolve explicitly invited partner/friends before permanent cleanup.'
-        return world_travel_actions._resolve_selected_ascension_entourage(self._dependencies.world_travel_actions, game, destination, rng)
+        from copy import deepcopy
+        from ..system.world_transition_system import EntourageManifest
+        shadow = deepcopy(game)
+        result = world_travel_actions._resolve_selected_ascension_entourage(self._dependencies.world_travel_actions, shadow, destination, rng)
+        kept, survivors, names, fallen = result
+        selected = [*shadow.player.dao_friends, *([shadow.player.dao_companion] if kept else [])]
+        original = {str(row.get("id")): row for row in [*game.player.dao_friends, *([game.player.dao_companion] if game.player.dao_companion else [])]}
+        snapshots = []
+        for row in selected:
+            npc_id = str(row.get("id", ""))
+            before = original.get(npc_id, {})
+            if row.get("world") != before.get("world") or row.get("alive", True) != before.get("alive", True):
+                snapshots.append((npc_id, row.get("alive", True), row.get("death_reason") or f"与{game.player.name}共同飞升{WORLD_SYSTEMS['world_names'][destination]}"))
+        return EntourageManifest(kept, frozenset(survivors), tuple(names), tuple(fallen), tuple(snapshots))
 
     def _maybe_founder_return_event(self, game: GameState, rng: random.Random) -> bool:
         return world_travel_actions._maybe_founder_return_event(self._dependencies.world_travel_actions, game, rng)
@@ -879,7 +904,7 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
         return world_factions._simulate_war_casualties(self._dependencies.world_factions, game, rng, kind)
 
     def _maybe_race_war_ambush(self, game: GameState, rng: random.Random) -> bool:
-        return world_factions._maybe_race_war_ambush(self._dependencies.world_factions, game, rng)
+        return self._maybe_map_war_encounter(game, rng) or world_factions._maybe_race_war_ambush(self._dependencies.world_factions, game, rng)
 
     @staticmethod
     def _hostility_key(kind: str, entity_id: str) -> str:

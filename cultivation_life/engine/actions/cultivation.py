@@ -329,7 +329,7 @@ def _body_breakthrough_chance(deps: CultivationActionDependencies, player: Playe
     if player.body_technique and target <= int(player.body_technique.body_bonus_max_layer or 0):
         technique_bonus = (
             float(player.body_technique.body_breakthrough_bonus)
-            * player.body_technique.level_multiplier
+            * player.body_technique.stat_multiplier("body_breakthrough_bonus")
         )
     failures = int(player.body_breakthrough_pity.get(deps._body_pity_key(player), 0))
     pity_bonus = 0.0

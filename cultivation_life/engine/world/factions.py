@@ -260,6 +260,8 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             < int(FACTION_SYSTEMS.get("max_members", 36))
         ):
             newcomer = deps._recruit_sect_npc(sect, player.age, rng)
+            if newcomer is None:
+                continue
             if newcomer.realm_index >= 3:
                 if sect.world == player.world:
                     news.append(f"{player.age}岁：{newcomer.name}以{deps._npc_realm_name(newcomer)}修为加入{sect.name}")

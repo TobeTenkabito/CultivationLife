@@ -1702,6 +1702,10 @@
           "demon": 0.25,
           "monster": 0.25,
           "yin": 0.25
+        },
+        "cultivation_ceiling": {
+          "realm_index": 5,
+          "layer": 3
         }
       },
       "demon": {
@@ -1720,6 +1724,10 @@
           "demon": 1.35,
           "monster": 0.55,
           "yin": 0.8
+        },
+        "cultivation_ceiling": {
+          "realm_index": 5,
+          "layer": 3
         }
       },
       "spirit": {
@@ -1740,6 +1748,10 @@
           "demon": 0.5,
           "monster": 0.75,
           "yin": 0.5
+        },
+        "cultivation_ceiling": {
+          "realm_index": 8,
+          "layer": 9
         }
       },
       "true_demon": {
@@ -1760,6 +1772,10 @@
           "demon": 2,
           "monster": 0.5,
           "yin": 0.75
+        },
+        "cultivation_ceiling": {
+          "realm_index": 8,
+          "layer": 9
         }
       },
       "phantom_underworld": {
@@ -1779,7 +1795,11 @@
           "monster": 2,
           "yin": 0.75
         },
-        "npc_realm_cap": 8
+        "npc_realm_cap": 8,
+        "cultivation_ceiling": {
+          "realm_index": 8,
+          "layer": 9
+        }
       },
       "hell": {
         "tier": 2,
@@ -1798,6 +1818,10 @@
           "demon": 0.5,
           "monster": 0.25,
           "yin": 2
+        },
+        "cultivation_ceiling": {
+          "realm_index": 8,
+          "layer": 9
         }
       },
       "celestial": {
@@ -1815,7 +1839,8 @@
           "demon": 0.25,
           "monster": 0.5,
           "yin": 0.5
-        }
+        },
+        "cultivation_ceiling": null
       },
       "asura": {
         "tier": 3,
@@ -1832,7 +1857,8 @@
           "demon": 4,
           "monster": 1,
           "yin": 1
-        }
+        },
+        "cultivation_ceiling": null
       },
       "nether": {
         "tier": 3,
@@ -1850,7 +1876,8 @@
           "monster": 4.0,
           "yin": 2.0
         },
-        "npc_realm_cap": 12
+        "npc_realm_cap": 12,
+        "cultivation_ceiling": null
       },
       "reincarnation": {
         "tier": 3,
@@ -1866,7 +1893,8 @@
           "demon": 0.5,
           "monster": 0.5,
           "yin": 4
-        }
+        },
+        "cultivation_ceiling": null
       },
       "monster_realm": {
         "tier": 2,
@@ -1885,6 +1913,14 @@
           "demon": 0.45,
           "monster": 2.4,
           "yin": 0.55
+        },
+        "cultivation_ceiling": {
+          "realm_index": 8,
+          "layer": 9
+        },
+        "passage_ceiling": {
+          "realm_index": 7,
+          "layer": 9
         }
       }
     },
@@ -3073,7 +3109,221 @@
           260
         ]
       }
-    }
+    },
+    "world_transition_routes": [
+      {
+        "id": "sealed_descent:spirit:human",
+        "source": "spirit",
+        "destination": "human",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:true_demon:demon",
+        "source": "true_demon",
+        "destination": "demon",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:celestial:spirit",
+        "source": "celestial",
+        "destination": "spirit",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:asura:true_demon",
+        "source": "asura",
+        "destination": "true_demon",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:nether:phantom_underworld",
+        "source": "nether",
+        "destination": "phantom_underworld",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:hell:human",
+        "source": "hell",
+        "destination": "human",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "sealed_descent:nether:monster_realm",
+        "source": "nether",
+        "destination": "monster_realm",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
+      },
+      {
+        "id": "progression:human:spirit",
+        "source": "human",
+        "destination": "spirit",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:human:demon",
+        "source": "human",
+        "destination": "demon",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:human:hell",
+        "source": "human",
+        "destination": "hell",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:human:monster_realm",
+        "source": "human",
+        "destination": "monster_realm",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:demon:true_demon",
+        "source": "demon",
+        "destination": "true_demon",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:spirit:celestial",
+        "source": "spirit",
+        "destination": "celestial",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:true_demon:asura",
+        "source": "true_demon",
+        "destination": "asura",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:spirit:nether",
+        "source": "spirit",
+        "destination": "nether",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:true_demon:nether",
+        "source": "true_demon",
+        "destination": "nether",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:phantom_underworld:nether",
+        "source": "phantom_underworld",
+        "destination": "nether",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:hell:nether",
+        "source": "hell",
+        "destination": "nether",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:monster_realm:nether",
+        "source": "monster_realm",
+        "destination": "nether",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "passage:spirit:true_demon",
+        "source": "spirit",
+        "destination": "true_demon",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:true_demon:spirit",
+        "source": "true_demon",
+        "destination": "spirit",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:phantom_underworld:true_demon",
+        "source": "phantom_underworld",
+        "destination": "true_demon",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:phantom_underworld:hell",
+        "source": "phantom_underworld",
+        "destination": "hell",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:true_demon:phantom_underworld",
+        "source": "true_demon",
+        "destination": "phantom_underworld",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:true_demon:hell",
+        "source": "true_demon",
+        "destination": "hell",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:hell:phantom_underworld",
+        "source": "hell",
+        "destination": "phantom_underworld",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "passage:hell:true_demon",
+        "source": "hell",
+        "destination": "true_demon",
+        "mode": "passage",
+        "enabled": true
+      },
+      {
+        "id": "story:human:spirit",
+        "source": "human",
+        "destination": "spirit",
+        "mode": "story",
+        "enabled": true,
+        "seal_recovery": true
+      },
+      {
+        "id": "story:monster_realm:spirit",
+        "source": "monster_realm",
+        "destination": "spirit",
+        "mode": "story",
+        "enabled": true,
+        "seal_recovery": true
+      }
+    ]
   },
   "realms": [
     {

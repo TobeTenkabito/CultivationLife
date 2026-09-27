@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..faction_geography import can_enter_faction, require_faction_admission
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -87,6 +89,9 @@ class IntrigueGuestMethods:
                     npc = self._persist_relationship_npc(game, relation, "受邀担任客卿")
                 if not npc:
                     raise ValueError("目标人物已经失联")
+                entity = self._intrigue_entity(game, kind, faction_id)
+                if entity:
+                    require_faction_admission(entity, npc)
                 if relation:
                     npc.affinity = max(float(npc.affinity or 0), float(relation.get("affinity", 0)))
                 personality = self._ensure_intrigue_personality(game, npc)
@@ -139,6 +144,9 @@ class IntrigueGuestMethods:
                 vacancy = next((pid for pid, spec in specs.items() if pid not in {"leader", "family_head"} and not record["positions"].get(pid) and npc.realm_index >= int(spec.get("minimum_realm", 0))), None)
                 if not vacancy:
                     raise ValueError("没有符合其修为的正式职位空缺")
+                entity = self._intrigue_entity(game, kind, faction_id)
+                if entity:
+                    require_faction_admission(entity, npc)
                 game.player.faction_contribution -= 30
                 guests.remove(guest)
                 entity = self._intrigue_entity(game, kind, faction_id)

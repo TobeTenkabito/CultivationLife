@@ -613,7 +613,7 @@ class DemonicSystemMixin:
     def _soul_refine_gain(self, player: Player) -> float:
         technique = player.divine_sense_technique
         multiplier = (
-            (1 + technique.divine_sense_bonus * technique_scale(technique))
+            (1 + technique.divine_sense_bonus * technique_scale(technique, "divine_sense_bonus"))
             * technique_environment_multiplier(technique, player.world)
             if technique else 0.5
         )

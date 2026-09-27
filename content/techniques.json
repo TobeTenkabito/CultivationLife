@@ -53,7 +53,8 @@
       "hp_bonus": 0.05,
       "mp_bonus": 0.06,
       "combat_bonus": 8,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "balanced"
     },
     {
       "id": "TECH_VOID_CYCLE",
@@ -66,7 +67,8 @@
       "hp_bonus": 0.12,
       "mp_bonus": 0.16,
       "combat_bonus": 38,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_KARMA_MIRROR",
@@ -79,7 +81,8 @@
       "hp_bonus": 0.1,
       "mp_bonus": 0.18,
       "combat_bonus": 34,
-      "karma_multiplier": 0.85
+      "karma_multiplier": 0.85,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_BLOOD_RIVER",
@@ -92,7 +95,8 @@
       "hp_bonus": 0.2,
       "mp_bonus": 0.08,
       "combat_bonus": 52,
-      "karma_multiplier": 1.12
+      "karma_multiplier": 1.12,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_DEMON_BREATHING",
@@ -105,7 +109,8 @@
       "hp_bonus": 0.08,
       "mp_bonus": 0.11,
       "combat_bonus": 18,
-      "karma_multiplier": 1.05
+      "karma_multiplier": 1.05,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_WIND",
@@ -118,7 +123,8 @@
       "hp_bonus": 0.08,
       "mp_bonus": 0.16,
       "combat_bonus": 44,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_THUNDER",
@@ -131,7 +137,8 @@
       "hp_bonus": 0.1,
       "mp_bonus": 0.14,
       "combat_bonus": 52,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_YIN",
@@ -144,7 +151,8 @@
       "hp_bonus": 0.09,
       "mp_bonus": 0.2,
       "combat_bonus": 46,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_YANG",
@@ -157,7 +165,8 @@
       "hp_bonus": 0.18,
       "mp_bonus": 0.1,
       "combat_bonus": 48,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_TIANJIAN",
@@ -170,7 +179,8 @@
       "hp_bonus": 0.14,
       "mp_bonus": 0.16,
       "combat_bonus": 72,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_WANMO",
@@ -183,7 +193,8 @@
       "hp_bonus": 0.18,
       "mp_bonus": 0.14,
       "combat_bonus": 78,
-      "karma_multiplier": 1.08
+      "karma_multiplier": 1.08,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_CORPSE_YIN_CANON",
@@ -200,7 +211,8 @@
       "sources": {
         "demon": 0.55,
         "yin": 0.45
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_BLOOD_SEA_EMBRYO",
@@ -213,7 +225,8 @@
       "hp_bonus": 0.35,
       "mp_bonus": 0.24,
       "combat_bonus": 3100,
-      "karma_multiplier": 1.12
+      "karma_multiplier": 1.12,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_HEAVEN_DEMON_VOID",
@@ -226,7 +239,8 @@
       "hp_bonus": 0.39,
       "mp_bonus": 0.47,
       "combat_bonus": 14500,
-      "karma_multiplier": 1.14
+      "karma_multiplier": 1.14,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_FOUR_SOURCE_DEVOURING",
@@ -245,7 +259,8 @@
         "demon": 0.55,
         "monster": 0.15,
         "yin": 0.15
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_FORMLESS_DEMON_DOMAIN",
@@ -258,7 +273,8 @@
       "hp_bonus": 0.54,
       "mp_bonus": 0.61,
       "combat_bonus": 98000,
-      "karma_multiplier": 1.16
+      "karma_multiplier": 1.16,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_ALL_HEAVENS_DEMON",
@@ -275,7 +291,8 @@
       "sources": {
         "demon": 0.8,
         "yin": 0.2
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_PRIMORDIAL_DEMON_LORD",
@@ -293,7 +310,8 @@
         "demon": 0.7,
         "yin": 0.15,
         "monster": 0.15
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_PUTI",
@@ -306,7 +324,8 @@
       "hp_bonus": 0.16,
       "mp_bonus": 0.22,
       "combat_bonus": 64,
-      "karma_multiplier": 0.78
+      "karma_multiplier": 0.78,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_METAL_SCRIPTURE",
@@ -319,7 +338,8 @@
       "hp_bonus": 0.11,
       "mp_bonus": 0.09,
       "combat_bonus": 42,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_WOOD_SCRIPTURE",
@@ -332,7 +352,8 @@
       "hp_bonus": 0.16,
       "mp_bonus": 0.1,
       "combat_bonus": 36,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_WATER_SCRIPTURE",
@@ -345,7 +366,8 @@
       "hp_bonus": 0.1,
       "mp_bonus": 0.17,
       "combat_bonus": 38,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_FIRE_SCRIPTURE",
@@ -358,7 +380,8 @@
       "hp_bonus": 0.1,
       "mp_bonus": 0.11,
       "combat_bonus": 50,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_EARTH_SCRIPTURE",
@@ -371,7 +394,8 @@
       "hp_bonus": 0.18,
       "mp_bonus": 0.12,
       "combat_bonus": 40,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_WIND_ADVANCED",
@@ -384,7 +408,8 @@
       "hp_bonus": 0.13,
       "mp_bonus": 0.18,
       "combat_bonus": 88,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_THUNDER_ADVANCED",
@@ -397,7 +422,8 @@
       "hp_bonus": 0.15,
       "mp_bonus": 0.16,
       "combat_bonus": 105,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_YIN_ADVANCED",
@@ -410,7 +436,8 @@
       "hp_bonus": 0.14,
       "mp_bonus": 0.22,
       "combat_bonus": 92,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_YANG_ADVANCED",
@@ -423,7 +450,8 @@
       "hp_bonus": 0.22,
       "mp_bonus": 0.14,
       "combat_bonus": 96,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_QI",
@@ -436,7 +464,8 @@
       "hp_bonus": 0.07,
       "mp_bonus": 0.08,
       "combat_bonus": 14,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_FOUNDATION",
@@ -449,7 +478,8 @@
       "hp_bonus": 0.14,
       "mp_bonus": 0.14,
       "combat_bonus": 45,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_COMMON_CORE",
@@ -462,7 +492,8 @@
       "hp_bonus": 0.18,
       "mp_bonus": 0.19,
       "combat_bonus": 105,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_COMMON_LUO",
@@ -475,7 +506,8 @@
       "hp_bonus": 0.1,
       "mp_bonus": 0.1,
       "combat_bonus": 150,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_NASCENT",
@@ -488,7 +520,8 @@
       "hp_bonus": 0.24,
       "mp_bonus": 0.28,
       "combat_bonus": 320,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_GUI",
@@ -500,8 +533,9 @@
       "opportunity_bonus": 0.2,
       "hp_bonus": 0.24,
       "mp_bonus": 0.5,
-      "combat_bonus": 800,
-      "karma_multiplier": 1.0
+      "combat_bonus": 5000,
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_COMMON_SPIRIT",
@@ -514,7 +548,8 @@
       "hp_bonus": 0.31,
       "mp_bonus": 0.36,
       "combat_bonus": 1050,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_SEA",
@@ -527,7 +562,8 @@
       "hp_bonus": 0.11,
       "mp_bonus": 0.1,
       "combat_bonus": 300,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_Hexagram",
@@ -546,7 +582,8 @@
         "demon": 0.25,
         "monster": 0.25,
         "yin": 0.25
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_VOID",
@@ -559,7 +596,8 @@
       "hp_bonus": 0.45,
       "mp_bonus": 0.5,
       "combat_bonus": 22000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_COMMON_INTEGRATION",
@@ -572,7 +610,8 @@
       "hp_bonus": 0.62,
       "mp_bonus": 0.68,
       "combat_bonus": 140000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_COMMON_MAHAYANA",
@@ -585,7 +624,8 @@
       "hp_bonus": 0.82,
       "mp_bonus": 0.9,
       "combat_bonus": 900000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_DRY_BLUE_ICE_FLAME",
@@ -598,7 +638,8 @@
       "hp_bonus": 0.22,
       "mp_bonus": 0.34,
       "combat_bonus": 2600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_YUAN_MAGNETIC_LIGHT",
@@ -611,7 +652,8 @@
       "hp_bonus": 0.38,
       "mp_bonus": 0.44,
       "combat_bonus": 12000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_SPIRIT_REFINING_ART",
@@ -624,7 +666,8 @@
       "hp_bonus": 0.38,
       "mp_bonus": 0.72,
       "combat_bonus": 90000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_HEHUAN_SECRET",
@@ -637,7 +680,8 @@
       "hp_bonus": 0.2,
       "mp_bonus": 0.24,
       "combat_bonus": 180,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_YINYANG_BLISS",
@@ -654,7 +698,8 @@
       "sources": {
         "spirit": 0.5,
         "yin": 0.5
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONNECT_WIND_RAIN",
@@ -667,7 +712,8 @@
       "hp_bonus": 1.0,
       "mp_bonus": 1.0,
       "combat_bonus": 180000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_ORIGIN_GANG_SHIELD",
@@ -680,7 +726,8 @@
       "hp_bonus": 0.95,
       "mp_bonus": 0.65,
       "combat_bonus": 1400000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_QINGYUAN_SWORD",
@@ -693,7 +740,8 @@
       "hp_bonus": 0.08,
       "mp_bonus": 0.11,
       "combat_bonus": 22,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_MYSTIC_MOUNTAIN",
@@ -706,7 +754,8 @@
       "hp_bonus": 0.22,
       "mp_bonus": 0.13,
       "combat_bonus": 58,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_PURPLE_CORE_CANON",
@@ -719,7 +768,8 @@
       "hp_bonus": 0.2,
       "mp_bonus": 0.24,
       "combat_bonus": 145,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_DAGENG_SWORD_ARRAY",
@@ -732,7 +782,8 @@
       "hp_bonus": 0.25,
       "mp_bonus": 0.38,
       "combat_bonus": 3600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_TAIYI_LIGHT",
@@ -745,7 +796,8 @@
       "hp_bonus": 0.4,
       "mp_bonus": 0.48,
       "combat_bonus": 15000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_EMPTY_VOID_CANON",
@@ -758,7 +810,8 @@
       "hp_bonus": 0.52,
       "mp_bonus": 0.62,
       "combat_bonus": 105000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_NINE_TURN_UNITY",
@@ -771,7 +824,8 @@
       "hp_bonus": 0.68,
       "mp_bonus": 0.75,
       "combat_bonus": 680000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_QINGPAN_SWORD_ARRAY",
@@ -784,7 +838,8 @@
       "hp_bonus": 0.63,
       "mp_bonus": 0.78,
       "combat_bonus": 880000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CHUNLI_SWORD_ARRAY",
@@ -797,7 +852,8 @@
       "hp_bonus": 0.72,
       "mp_bonus": 0.66,
       "combat_bonus": 760000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_CHAOS_OPENING",
@@ -810,7 +866,8 @@
       "hp_bonus": 0.9,
       "mp_bonus": 1.02,
       "combat_bonus": 5200000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_BODY_MORTAL",
@@ -1161,7 +1218,8 @@
       "combat_bonus": 18000000,
       "karma_multiplier": 1.0,
       "requires_immortal_power": true,
-      "immortal_power_cost": 0.08
+      "immortal_power_cost": 0.08,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_PRIMORDIAL_IMMORTAL_LIGHT",
@@ -1176,7 +1234,8 @@
       "combat_bonus": 28000000,
       "karma_multiplier": 1.0,
       "requires_immortal_power": true,
-      "immortal_power_cost": 0.12
+      "immortal_power_cost": 0.12,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_TAIYI_SWORD_CANON",
@@ -1191,7 +1250,8 @@
       "combat_bonus": 38000000,
       "karma_multiplier": 1.0,
       "requires_immortal_power": true,
-      "immortal_power_cost": 0.14
+      "immortal_power_cost": 0.14,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_NINE_HEAVENS_THUNDER",
@@ -1206,7 +1266,8 @@
       "combat_bonus": 34000000,
       "karma_multiplier": 1.0,
       "requires_immortal_power": true,
-      "immortal_power_cost": 0.13
+      "immortal_power_cost": 0.13,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_PURPLE_MANSION_SENSE",
@@ -1256,7 +1317,8 @@
       "combat_bonus": 24000000,
       "karma_multiplier": 1.0,
       "requires_immortal_power": true,
-      "immortal_power_cost": 0.09
+      "immortal_power_cost": 0.09,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_ASURA_WAR_HEAVEN",
@@ -1269,7 +1331,8 @@
       "hp_bonus": 1.18,
       "mp_bonus": 1.08,
       "combat_bonus": 22000000,
-      "karma_multiplier": 0.78
+      "karma_multiplier": 0.78,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_BLOOD_SEA_IMPERISHABLE",
@@ -1282,7 +1345,8 @@
       "hp_bonus": 1.48,
       "mp_bonus": 1.12,
       "combat_bonus": 26000000,
-      "karma_multiplier": 0.76
+      "karma_multiplier": 0.76,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MYRIAD_CALAMITY_DEMON_FORM",
@@ -1295,7 +1359,8 @@
       "hp_bonus": 1.26,
       "mp_bonus": 1.24,
       "combat_bonus": 42000000,
-      "karma_multiplier": 0.74
+      "karma_multiplier": 0.74,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_ANNIHILATION_SKY_BLADE",
@@ -1308,7 +1373,8 @@
       "hp_bonus": 0.98,
       "mp_bonus": 1.16,
       "combat_bonus": 68000000,
-      "karma_multiplier": 0.72
+      "karma_multiplier": 0.72,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_WUSHENG_SOUL_CANON",
@@ -1352,7 +1418,8 @@
       "hp_bonus": 0.26,
       "mp_bonus": 0.16,
       "combat_bonus": 190,
-      "karma_multiplier": 0.86
+      "karma_multiplier": 0.86,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CORPSE_MOON_SOUL",
@@ -1396,7 +1463,8 @@
       "hp_bonus": 0.62,
       "mp_bonus": 0.58,
       "combat_bonus": 180000,
-      "karma_multiplier": 0.8
+      "karma_multiplier": 0.8,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_STAR_DEVOURING_BODY",
@@ -1425,7 +1493,8 @@
       "hp_bonus": 1.08,
       "mp_bonus": 1.12,
       "combat_bonus": 6200000,
-      "karma_multiplier": 0.76
+      "karma_multiplier": 0.76,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GHOST_BREATHING",
@@ -1438,7 +1507,8 @@
       "hp_bonus": 0.06,
       "mp_bonus": 0.14,
       "combat_bonus": 15,
-      "karma_multiplier": 0.98
+      "karma_multiplier": 0.98,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_SOUL_ECHO_SENSE",
@@ -1470,7 +1540,8 @@
       "sources": {
         "yin": 0.8,
         "demon": 0.2
-      }
+      },
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_BONE_VESSEL_BODY",
@@ -1499,7 +1570,8 @@
       "hp_bonus": 0.25,
       "mp_bonus": 0.38,
       "combat_bonus": 2700,
-      "karma_multiplier": 0.95
+      "karma_multiplier": 0.95,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_NETHER_TIDE_CANON",
@@ -1516,7 +1588,8 @@
       "sources": {
         "yin": 0.85,
         "spirit": 0.15
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_FORGETFUL_RIVER_SENSE",
@@ -1544,7 +1617,8 @@
       "hp_bonus": 0.49,
       "mp_bonus": 0.66,
       "combat_bonus": 92000,
-      "karma_multiplier": 0.92
+      "karma_multiplier": 0.92,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_YIN_YANG_SOUL_UNITY",
@@ -1561,7 +1635,8 @@
       "sources": {
         "yin": 0.75,
         "spirit": 0.25
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_UNDYING_GHOST_BODY",
@@ -1594,7 +1669,8 @@
       "sources": {
         "yin": 0.9,
         "spirit": 0.1
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_BREATHING",
@@ -1611,7 +1687,8 @@
       "category": "spiritual",
       "sources": {
         "monster": 1.0
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_IRON_BONE",
@@ -1625,7 +1702,8 @@
       "mp_bonus": 0.12,
       "combat_bonus": 58,
       "karma_multiplier": 1.0,
-      "required_body_training": 5
+      "required_body_training": 5,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_DEMON_CORE",
@@ -1639,7 +1717,8 @@
       "mp_bonus": 0.2,
       "combat_bonus": 180,
       "karma_multiplier": 1.0,
-      "required_body_training": 12
+      "required_body_training": 12,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_MOON_FORM",
@@ -1657,7 +1736,8 @@
       "sources": {
         "monster": 0.8,
         "yin": 0.2
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_MYRIAD_SPIRITS",
@@ -1671,7 +1751,8 @@
       "mp_bonus": 0.45,
       "combat_bonus": 15800,
       "karma_multiplier": 1.0,
-      "required_body_training": 30
+      "required_body_training": 30,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_HEAVEN_BONE",
@@ -1689,7 +1770,8 @@
       "sources": {
         "monster": 0.85,
         "spirit": 0.15
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_ANCESTRAL_COURT",
@@ -1703,7 +1785,8 @@
       "mp_bonus": 0.74,
       "combat_bonus": 860000,
       "karma_multiplier": 1.0,
-      "required_body_training": 60
+      "required_body_training": 60,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_PRIMORDIAL_BODY",
@@ -1717,7 +1800,8 @@
       "mp_bonus": 0.91,
       "combat_bonus": 6200000,
       "karma_multiplier": 1.0,
-      "required_body_training": 80
+      "required_body_training": 80,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_MONSTER_HIDE_FORGING",
@@ -1781,7 +1865,8 @@
       "karma_multiplier": 1.0,
       "sources": {
         "yin": 1.0
-      }
+      },
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_PRIMER",
@@ -1794,7 +1879,8 @@
       "hp_bonus": 0.06,
       "mp_bonus": 0.1,
       "combat_bonus": 16,
-      "karma_multiplier": 0.96
+      "karma_multiplier": 0.96,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_CONFUCIAN_RITES",
@@ -1807,7 +1893,8 @@
       "hp_bonus": 0.08,
       "mp_bonus": 0.09,
       "combat_bonus": 18,
-      "karma_multiplier": 0.94
+      "karma_multiplier": 0.94,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_SPRING_AUTUMN",
@@ -1820,7 +1907,8 @@
       "hp_bonus": 0.12,
       "mp_bonus": 0.18,
       "combat_bonus": 52,
-      "karma_multiplier": 0.94
+      "karma_multiplier": 0.94,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_CLASSICS",
@@ -1833,7 +1921,8 @@
       "hp_bonus": 0.14,
       "mp_bonus": 0.16,
       "combat_bonus": 48,
-      "karma_multiplier": 0.93
+      "karma_multiplier": 0.93,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_RECTIFY_HEART",
@@ -1846,7 +1935,8 @@
       "hp_bonus": 0.2,
       "mp_bonus": 0.26,
       "combat_bonus": 150,
-      "karma_multiplier": 0.92
+      "karma_multiplier": 0.92,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_VAST_QI",
@@ -1859,7 +1949,8 @@
       "hp_bonus": 0.24,
       "mp_bonus": 0.2,
       "combat_bonus": 185,
-      "karma_multiplier": 0.92
+      "karma_multiplier": 0.92,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_HEART_MIND",
@@ -1872,7 +1963,8 @@
       "hp_bonus": 0.18,
       "mp_bonus": 0.28,
       "combat_bonus": 165,
-      "karma_multiplier": 0.91
+      "karma_multiplier": 0.91,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_HEAVEN_MAN",
@@ -1885,7 +1977,8 @@
       "hp_bonus": 0.27,
       "mp_bonus": 0.36,
       "combat_bonus": 3500,
-      "karma_multiplier": 0.9
+      "karma_multiplier": 0.9,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_GREAT_LEARNING",
@@ -1898,7 +1991,8 @@
       "hp_bonus": 0.31,
       "mp_bonus": 0.34,
       "combat_bonus": 3900,
-      "karma_multiplier": 0.9
+      "karma_multiplier": 0.9,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_PEOPLE_ROOT",
@@ -1911,7 +2005,8 @@
       "hp_bonus": 0.38,
       "mp_bonus": 0.29,
       "combat_bonus": 4200,
-      "karma_multiplier": 0.89
+      "karma_multiplier": 0.89,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_CONFUCIAN_EVIDENTIAL",
@@ -1924,7 +2019,8 @@
       "hp_bonus": 0.25,
       "mp_bonus": 0.39,
       "combat_bonus": 3200,
-      "karma_multiplier": 0.9
+      "karma_multiplier": 0.9,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_01",
@@ -1937,7 +2033,8 @@
       "hp_bonus": 0.192,
       "mp_bonus": 0.214,
       "combat_bonus": 1420,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_02",
@@ -1950,7 +2047,8 @@
       "hp_bonus": 0.204,
       "mp_bonus": 0.228,
       "combat_bonus": 1940,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_03",
@@ -1963,7 +2061,8 @@
       "hp_bonus": 0.216,
       "mp_bonus": 0.242,
       "combat_bonus": 2460,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_04",
@@ -1976,7 +2075,8 @@
       "hp_bonus": 0.228,
       "mp_bonus": 0.256,
       "combat_bonus": 2980,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_05",
@@ -1989,7 +2089,8 @@
       "hp_bonus": 0.24,
       "mp_bonus": 0.27,
       "combat_bonus": 3500,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_06",
@@ -2002,7 +2103,8 @@
       "hp_bonus": 0.252,
       "mp_bonus": 0.284,
       "combat_bonus": 4020,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_07",
@@ -2015,7 +2117,8 @@
       "hp_bonus": 0.264,
       "mp_bonus": 0.298,
       "combat_bonus": 4540,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_08",
@@ -2028,7 +2131,8 @@
       "hp_bonus": 0.276,
       "mp_bonus": 0.312,
       "combat_bonus": 5060,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_09",
@@ -2041,7 +2145,8 @@
       "hp_bonus": 0.288,
       "mp_bonus": 0.326,
       "combat_bonus": 5580,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CANGHAI_10",
@@ -2054,7 +2159,8 @@
       "hp_bonus": 0.3,
       "mp_bonus": 0.34,
       "combat_bonus": 6100,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_01",
@@ -2067,7 +2173,8 @@
       "hp_bonus": 0.372,
       "mp_bonus": 0.434,
       "combat_bonus": 19200,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_02",
@@ -2080,7 +2187,8 @@
       "hp_bonus": 0.384,
       "mp_bonus": 0.448,
       "combat_bonus": 24400,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_GUIXU_WEIR_03",
@@ -2093,7 +2201,8 @@
       "hp_bonus": 0.396,
       "mp_bonus": 0.462,
       "combat_bonus": 29600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_04",
@@ -2106,7 +2215,8 @@
       "hp_bonus": 0.408,
       "mp_bonus": 0.476,
       "combat_bonus": 34800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_05",
@@ -2119,7 +2229,8 @@
       "hp_bonus": 0.42,
       "mp_bonus": 0.49,
       "combat_bonus": 40000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_06",
@@ -2132,7 +2243,8 @@
       "hp_bonus": 0.432,
       "mp_bonus": 0.504,
       "combat_bonus": 45200,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_07",
@@ -2145,7 +2257,8 @@
       "hp_bonus": 0.444,
       "mp_bonus": 0.518,
       "combat_bonus": 50400,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_08",
@@ -2158,7 +2271,8 @@
       "hp_bonus": 0.456,
       "mp_bonus": 0.532,
       "combat_bonus": 55600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_09",
@@ -2171,7 +2285,8 @@
       "hp_bonus": 0.468,
       "mp_bonus": 0.546,
       "combat_bonus": 60800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_WEIR_10",
@@ -2184,7 +2299,8 @@
       "hp_bonus": 0.48,
       "mp_bonus": 0.56,
       "combat_bonus": 66000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_01",
@@ -2197,7 +2313,8 @@
       "hp_bonus": 0.29,
       "mp_bonus": 0.322,
       "combat_bonus": 1540,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_02",
@@ -2210,7 +2327,8 @@
       "hp_bonus": 0.304,
       "mp_bonus": 0.338,
       "combat_bonus": 2068,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_03",
@@ -2223,7 +2341,8 @@
       "hp_bonus": 0.318,
       "mp_bonus": 0.354,
       "combat_bonus": 2596,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_04",
@@ -2236,7 +2355,8 @@
       "hp_bonus": 0.332,
       "mp_bonus": 0.37,
       "combat_bonus": 3124,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_05",
@@ -2249,7 +2369,8 @@
       "hp_bonus": 0.346,
       "mp_bonus": 0.386,
       "combat_bonus": 3652,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_06",
@@ -2262,7 +2383,8 @@
       "hp_bonus": 0.36,
       "mp_bonus": 0.402,
       "combat_bonus": 4180,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_07",
@@ -2275,7 +2397,8 @@
       "hp_bonus": 0.374,
       "mp_bonus": 0.418,
       "combat_bonus": 4707,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_08",
@@ -2288,7 +2411,8 @@
       "hp_bonus": 0.388,
       "mp_bonus": 0.434,
       "combat_bonus": 5236,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_09",
@@ -2301,7 +2425,8 @@
       "hp_bonus": 0.402,
       "mp_bonus": 0.45,
       "combat_bonus": 5764,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_BLOODRIVER_10",
@@ -2314,7 +2439,8 @@
       "hp_bonus": 0.416,
       "mp_bonus": 0.466,
       "combat_bonus": 6292,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_01",
@@ -2327,7 +2453,8 @@
       "hp_bonus": 0.35,
       "mp_bonus": 0.39,
       "combat_bonus": 42000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_02",
@@ -2340,7 +2467,8 @@
       "hp_bonus": 0.364,
       "mp_bonus": 0.406,
       "combat_bonus": 56400,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_03",
@@ -2353,7 +2481,8 @@
       "hp_bonus": 0.378,
       "mp_bonus": 0.422,
       "combat_bonus": 70800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_04",
@@ -2366,7 +2495,8 @@
       "hp_bonus": 0.392,
       "mp_bonus": 0.438,
       "combat_bonus": 85200,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_05",
@@ -2379,7 +2509,8 @@
       "hp_bonus": 0.406,
       "mp_bonus": 0.454,
       "combat_bonus": 99600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_06",
@@ -2392,7 +2523,8 @@
       "hp_bonus": 0.42,
       "mp_bonus": 0.47,
       "combat_bonus": 114000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_07",
@@ -2405,7 +2537,8 @@
       "hp_bonus": 0.434,
       "mp_bonus": 0.486,
       "combat_bonus": 128399,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_08",
@@ -2418,7 +2551,8 @@
       "hp_bonus": 0.448,
       "mp_bonus": 0.502,
       "combat_bonus": 142800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_09",
@@ -2431,7 +2565,8 @@
       "hp_bonus": 0.462,
       "mp_bonus": 0.518,
       "combat_bonus": 157200,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_DEMON_GRAVE_10",
@@ -2444,7 +2579,8 @@
       "hp_bonus": 0.476,
       "mp_bonus": 0.534,
       "combat_bonus": 171600,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_01",
@@ -2457,7 +2593,8 @@
       "hp_bonus": 0.35,
       "mp_bonus": 0.39,
       "combat_bonus": 36400,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_02",
@@ -2470,7 +2607,8 @@
       "hp_bonus": 0.364,
       "mp_bonus": 0.406,
       "combat_bonus": 48880,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_03",
@@ -2483,7 +2621,8 @@
       "hp_bonus": 0.378,
       "mp_bonus": 0.422,
       "combat_bonus": 61360,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_04",
@@ -2496,7 +2635,8 @@
       "hp_bonus": 0.392,
       "mp_bonus": 0.438,
       "combat_bonus": 73840,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_05",
@@ -2509,7 +2649,8 @@
       "hp_bonus": 0.406,
       "mp_bonus": 0.454,
       "combat_bonus": 86320,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_06",
@@ -2522,7 +2663,8 @@
       "hp_bonus": 0.42,
       "mp_bonus": 0.47,
       "combat_bonus": 98800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_07",
@@ -2535,7 +2677,8 @@
       "hp_bonus": 0.434,
       "mp_bonus": 0.486,
       "combat_bonus": 111279,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_08",
@@ -2548,7 +2691,8 @@
       "hp_bonus": 0.448,
       "mp_bonus": 0.502,
       "combat_bonus": 123760,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_09",
@@ -2561,7 +2705,8 @@
       "hp_bonus": 0.462,
       "mp_bonus": 0.518,
       "combat_bonus": 136240,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_BEAST_VORTEX_10",
@@ -2574,7 +2719,8 @@
       "hp_bonus": 0.476,
       "mp_bonus": 0.534,
       "combat_bonus": 148720,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_01",
@@ -2587,7 +2733,8 @@
       "hp_bonus": 0.35,
       "mp_bonus": 0.39,
       "combat_bonus": 39200,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_02",
@@ -2600,7 +2747,8 @@
       "hp_bonus": 0.364,
       "mp_bonus": 0.406,
       "combat_bonus": 52640,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_03",
@@ -2613,7 +2761,8 @@
       "hp_bonus": 0.378,
       "mp_bonus": 0.422,
       "combat_bonus": 66080,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_04",
@@ -2626,7 +2775,8 @@
       "hp_bonus": 0.392,
       "mp_bonus": 0.438,
       "combat_bonus": 79520,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_05",
@@ -2639,7 +2789,8 @@
       "hp_bonus": 0.406,
       "mp_bonus": 0.454,
       "combat_bonus": 92960,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_06",
@@ -2652,7 +2803,8 @@
       "hp_bonus": 0.42,
       "mp_bonus": 0.47,
       "combat_bonus": 106400,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_07",
@@ -2665,7 +2817,8 @@
       "hp_bonus": 0.434,
       "mp_bonus": 0.486,
       "combat_bonus": 119839,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "support"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_08",
@@ -2678,7 +2831,8 @@
       "hp_bonus": 0.448,
       "mp_bonus": 0.502,
       "combat_bonus": 133280,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_09",
@@ -2691,7 +2845,8 @@
       "hp_bonus": 0.462,
       "mp_bonus": 0.518,
       "combat_bonus": 146720,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_10",
@@ -2704,7 +2859,8 @@
       "hp_bonus": 0.476,
       "mp_bonus": 0.534,
       "combat_bonus": 160160,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_01",
@@ -2717,7 +2873,8 @@
       "hp_bonus": 0.38,
       "mp_bonus": 0.424,
       "combat_bonus": 29399,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_02",
@@ -2730,7 +2887,8 @@
       "hp_bonus": 0.394,
       "mp_bonus": 0.44,
       "combat_bonus": 39480,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_03",
@@ -2743,7 +2901,8 @@
       "hp_bonus": 0.408,
       "mp_bonus": 0.456,
       "combat_bonus": 49560,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_04",
@@ -2756,7 +2915,8 @@
       "hp_bonus": 0.422,
       "mp_bonus": 0.472,
       "combat_bonus": 59640,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_05",
@@ -2769,7 +2929,8 @@
       "hp_bonus": 0.436,
       "mp_bonus": 0.488,
       "combat_bonus": 69720,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_06",
@@ -2782,7 +2943,8 @@
       "hp_bonus": 0.45,
       "mp_bonus": 0.504,
       "combat_bonus": 79800,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_07",
@@ -2795,7 +2957,8 @@
       "hp_bonus": 0.464,
       "mp_bonus": 0.52,
       "combat_bonus": 89879,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_08",
@@ -2808,7 +2971,8 @@
       "hp_bonus": 0.478,
       "mp_bonus": 0.536,
       "combat_bonus": 99960,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_09",
@@ -2821,7 +2985,8 @@
       "hp_bonus": 0.492,
       "mp_bonus": 0.552,
       "combat_bonus": 110040,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_10",
@@ -2834,7 +2999,8 @@
       "hp_bonus": 0.506,
       "mp_bonus": 0.568,
       "combat_bonus": 120120,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_01",
@@ -2847,7 +3013,8 @@
       "hp_bonus": 0.44,
       "mp_bonus": 0.492,
       "combat_bonus": 840000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_02",
@@ -2860,7 +3027,8 @@
       "hp_bonus": 0.454,
       "mp_bonus": 0.508,
       "combat_bonus": 1128000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_03",
@@ -2873,7 +3041,8 @@
       "hp_bonus": 0.468,
       "mp_bonus": 0.524,
       "combat_bonus": 1416000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_04",
@@ -2886,7 +3055,8 @@
       "hp_bonus": 0.482,
       "mp_bonus": 0.54,
       "combat_bonus": 1704000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_05",
@@ -2899,7 +3069,8 @@
       "hp_bonus": 0.496,
       "mp_bonus": 0.556,
       "combat_bonus": 1992000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_06",
@@ -2912,7 +3083,8 @@
       "hp_bonus": 0.51,
       "mp_bonus": 0.572,
       "combat_bonus": 2280000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_07",
@@ -2925,7 +3097,8 @@
       "hp_bonus": 0.524,
       "mp_bonus": 0.588,
       "combat_bonus": 2567999,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_08",
@@ -2938,7 +3111,8 @@
       "hp_bonus": 0.538,
       "mp_bonus": 0.604,
       "combat_bonus": 2856000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_09",
@@ -2951,7 +3125,8 @@
       "hp_bonus": 0.552,
       "mp_bonus": 0.62,
       "combat_bonus": 3144000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_10",
@@ -2964,7 +3139,8 @@
       "hp_bonus": 0.566,
       "mp_bonus": 0.636,
       "combat_bonus": 3432000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_01",
@@ -2977,7 +3153,8 @@
       "hp_bonus": 0.44,
       "mp_bonus": 0.492,
       "combat_bonus": 840000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_02",
@@ -2990,7 +3167,8 @@
       "hp_bonus": 0.454,
       "mp_bonus": 0.508,
       "combat_bonus": 1128000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_03",
@@ -3003,7 +3181,8 @@
       "hp_bonus": 0.468,
       "mp_bonus": 0.524,
       "combat_bonus": 1416000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_04",
@@ -3016,7 +3195,8 @@
       "hp_bonus": 0.482,
       "mp_bonus": 0.54,
       "combat_bonus": 1704000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_05",
@@ -3029,7 +3209,8 @@
       "hp_bonus": 0.496,
       "mp_bonus": 0.556,
       "combat_bonus": 1992000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_06",
@@ -3042,7 +3223,8 @@
       "hp_bonus": 0.51,
       "mp_bonus": 0.572,
       "combat_bonus": 2280000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_07",
@@ -3055,7 +3237,8 @@
       "hp_bonus": 0.524,
       "mp_bonus": 0.588,
       "combat_bonus": 2567999,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_08",
@@ -3068,7 +3251,8 @@
       "hp_bonus": 0.538,
       "mp_bonus": 0.604,
       "combat_bonus": 2856000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_09",
@@ -3081,7 +3265,8 @@
       "hp_bonus": 0.552,
       "mp_bonus": 0.62,
       "combat_bonus": 3144000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_ASURA_10",
@@ -3094,7 +3279,8 @@
       "hp_bonus": 0.566,
       "mp_bonus": 0.636,
       "combat_bonus": 3432000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_01",
@@ -3107,7 +3293,8 @@
       "hp_bonus": 0.44,
       "mp_bonus": 0.492,
       "combat_bonus": 910000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_02",
@@ -3120,7 +3307,8 @@
       "hp_bonus": 0.454,
       "mp_bonus": 0.508,
       "combat_bonus": 1222000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_03",
@@ -3133,7 +3321,8 @@
       "hp_bonus": 0.468,
       "mp_bonus": 0.524,
       "combat_bonus": 1534000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_04",
@@ -3146,7 +3335,8 @@
       "hp_bonus": 0.482,
       "mp_bonus": 0.54,
       "combat_bonus": 1846000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_05",
@@ -3159,7 +3349,8 @@
       "hp_bonus": 0.496,
       "mp_bonus": 0.556,
       "combat_bonus": 2158000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_06",
@@ -3172,7 +3363,8 @@
       "hp_bonus": 0.51,
       "mp_bonus": 0.572,
       "combat_bonus": 2470000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_07",
@@ -3185,7 +3377,8 @@
       "hp_bonus": 0.524,
       "mp_bonus": 0.588,
       "combat_bonus": 2781999,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_08",
@@ -3198,7 +3391,8 @@
       "hp_bonus": 0.538,
       "mp_bonus": 0.604,
       "combat_bonus": 3094000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_09",
@@ -3211,7 +3405,8 @@
       "hp_bonus": 0.552,
       "mp_bonus": 0.62,
       "combat_bonus": 3406000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_NETHER_10",
@@ -3224,7 +3419,8 @@
       "hp_bonus": 0.566,
       "mp_bonus": 0.636,
       "combat_bonus": 3718000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_01",
@@ -3237,7 +3433,8 @@
       "hp_bonus": 0.44,
       "mp_bonus": 0.492,
       "combat_bonus": 875000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_02",
@@ -3250,7 +3447,8 @@
       "hp_bonus": 0.454,
       "mp_bonus": 0.508,
       "combat_bonus": 1175000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_03",
@@ -3263,7 +3461,8 @@
       "hp_bonus": 0.468,
       "mp_bonus": 0.524,
       "combat_bonus": 1475000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_04",
@@ -3276,7 +3475,8 @@
       "hp_bonus": 0.482,
       "mp_bonus": 0.54,
       "combat_bonus": 1775000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_05",
@@ -3289,7 +3489,8 @@
       "hp_bonus": 0.496,
       "mp_bonus": 0.556,
       "combat_bonus": 2075000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_06",
@@ -3302,7 +3503,8 @@
       "hp_bonus": 0.51,
       "mp_bonus": 0.572,
       "combat_bonus": 2375000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_07",
@@ -3315,7 +3517,8 @@
       "hp_bonus": 0.524,
       "mp_bonus": 0.588,
       "combat_bonus": 2674999,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_08",
@@ -3328,7 +3531,8 @@
       "hp_bonus": 0.538,
       "mp_bonus": 0.604,
       "combat_bonus": 2975000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_09",
@@ -3341,7 +3545,8 @@
       "hp_bonus": 0.552,
       "mp_bonus": 0.62,
       "combat_bonus": 3275000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_10",
@@ -3354,7 +3559,8 @@
       "hp_bonus": 0.566,
       "mp_bonus": 0.636,
       "combat_bonus": 3575000,
-      "karma_multiplier": 1.0
+      "karma_multiplier": 1.0,
+      "growth_preference": "main"
     }
   ]
 }

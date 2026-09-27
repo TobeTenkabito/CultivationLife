@@ -503,10 +503,8 @@ class MonsterBloodlineSystemMixin:
                 ["system", "monster", "bloodline", "trait", "major", "milestone"],
             ))
         if old_realm_index == 8 and player.realm_index == 9:
-            self._prepare_permanent_world_transition(game)
-            player.world = "nether"
-            player.location_id = self.maps.default_location("nether")
-            self._clear_market(game)
+            plan = self._plan_world_transition(game, "nether", reason="血脉蜕变祖路")
+            self._apply_world_transition(game, plan)
             game.history.append(HistoryRecord(
                 "SYS_MONSTER_NETHER_ASCENSION", 1, player.age, "飞升幽冥界", evolution_id, "ascended",
                 f"血脉蜕变撕开上界祖路，你从{WORLD_SYSTEMS['world_names'][old_world]}飞升幽冥界。",

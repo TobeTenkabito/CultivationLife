@@ -36,6 +36,14 @@
       live:exchange.status !== 'scheduled',
     });
     places.forEach(place => {
+      (place.factions || []).forEach(faction => add(place.id, {
+        kind:'faction', title:faction.name, seal:faction.kind === 'family' ? '家' : faction.kind === 'race' ? '族' : '宗',
+        detail:`${faction.kind === 'family' ? '修仙家族驻地' : faction.kind === 'race' ? '种族聚居地' : '宗门山门'}${faction.owned ? ' · 你所创立' : ''}`,
+      }));
+      (place.wars || []).forEach(war => add(place.id, {
+        kind:'event', theme:'war', title:`${war.attacker} · ${war.defender}`, seal:'战', live:true,
+        detail:'两军交战 · 此地截杀风险提高；两次战区遭遇之间至少休整一个行动单位',
+      }));
       if (place.ghost_parade) add(place.id, {
         kind:'event', theme:'ghost', title:'百鬼夜行', seal:'夜', live:place.ghost_parade.status === 'active',
         detail:place.ghost_parade.status === 'active' ? '正在发生' : `${timelineText(place.ghost_parade.start_age)}开启`,
@@ -45,7 +53,7 @@
         detail:`${array.owner_kind === 'sect' ? `${array.owner_name}护山阵` : '私阵'} · 完整度 ${Number(array.durability).toFixed(0)}%`,
       }));
     });
-    entries.forEach(rows => rows.sort((a, b) => ({event:0, merchant:1, formation:2}[a.kind] - {event:0, merchant:1, formation:2}[b.kind])));
+    entries.forEach(rows => rows.sort((a, b) => ({event:0, merchant:1, faction:2, formation:3}[a.kind] - {event:0, merchant:1, faction:2, formation:3}[b.kind])));
     const tabs = document.querySelector('#map-view-tabs');
     const terrain = document.querySelector('#map-locations');
     const directory = document.querySelector('#map-directory');
@@ -63,11 +71,11 @@
       directory.classList.toggle('hidden', mode !== 'directory');
       directory.replaceChildren();
       const intro = node('div', null, 'map-directory-intro');
-      intro.append(node('strong', '坊间见闻 · 商旅名录'), node('p', '会期、异象与商盟地址，依所在地域收录。'));
+      intro.append(node('strong', '坊间见闻 · 商旅名录'), node('p', '会期、战事与各方驻地，依所在地域收录。'));
       directory.append(intro);
       const filters = node('div', null, 'map-directory-filters');
       filters.setAttribute('aria-label', '名录分类');
-      [['all','全部'],['event','时令活动'],['merchant','商盟据点']].forEach(([id, title]) => {
+      [['all','全部'],['event','时令活动'],['merchant','商盟据点'],['faction','宗族山门']].forEach(([id, title]) => {
         const filter = button(title, () => { category = id; draw(); });
         filter.setAttribute('aria-pressed', String(category === id)); filters.append(filter);
       });
@@ -112,7 +120,7 @@
       const rows = entries.get(location.id) || [];
       if (!rows.length) return null;
       const strip = node('div', null, 'map-directory-links');
-      [['event','活动'],['merchant','商盟'],['formation','驻阵']].forEach(([id, title]) => {
+      [['event','活动'],['merchant','商盟'],['faction','势力'],['formation','驻阵']].forEach(([id, title]) => {
         const count = rows.filter(entry => entry.kind === id).length;
         if (!count) return;
         const link = button(`${title} · ${count}`, () => {

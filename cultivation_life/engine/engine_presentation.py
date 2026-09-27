@@ -165,6 +165,21 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
     new_achievements = deps.achievements.evaluate(
         game, player_rank=ranking_data.get("player_rank"),
     )
+    from .actions.world_travel import plan_public_crossing
+    travel_routes = []
+    for destination in WORLD_SYSTEMS["world_profiles"]:
+        try:
+            plan = plan_public_crossing(game, destination, deps.maps)
+        except ValueError:
+            continue
+        restoring = plan.mode.value == "sealed_return"
+        label = "返回" if restoring else "下界"
+        target_shell = SectNpc("arrival", "", "", *plan.target_rank, 0, None, world=destination)
+        travel_routes.append({"destination": destination, "direction": plan.direction.value,
+                              "mode": plan.mode.value, "label": label + WORLD_SYSTEMS["world_names"][destination],
+                              "hint": "解除界面压制，完整恢复封存道果" if restoring else
+                              f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
+    eligible = {row["destination"] for row in travel_routes}
     return {
         "id": game.id,
         "seed": game.seed,
@@ -233,57 +248,15 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 and not game.player.sealed_cultivation and not game.pending_event
                 and not game.active_trial and game.player.alive
             ),
-            "can_return_human": bool(
-                game.player.world in {"spirit", "hell"}
-                and game.player.realm_index == int(WORLD_SYSTEMS["world_travel"]["required_realm"])
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_return_spirit": bool(
-                game.player.world == "human" and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "spirit" and game.player.alive
-            ),
-            "can_return_hell": bool(
-                game.player.world == "human" and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "hell" and game.player.alive
-            ),
-            "can_return_demon": bool(
-                game.player.world == "true_demon"
-                and game.player.realm_index == int(WORLD_SYSTEMS["world_travel"]["required_realm"])
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_return_true_demon": bool(
-                game.player.world == "demon" and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "true_demon" and game.player.alive
-            ),
-            "can_descend_spirit": bool(
-                game.player.world == "celestial" and game.player.realm_index >= 9
-                and game.player.immortal_power_converted
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_return_celestial": bool(
-                game.player.world == "spirit" and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "celestial" and game.player.alive
-            ),
-            "can_descend_true_demon": bool(
-                game.player.world == "asura" and game.player.realm_index >= 9
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_return_asura": bool(
-                game.player.world == "true_demon" and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "asura" and game.player.alive
-            ),
-            "can_descend_phantom": bool(
-                game.player.world == "nether" and game.player.realm_index >= 9
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_descend_monster": bool(
-                game.player.world == "nether" and game.player.realm_index >= 9
-                and not game.player.sealed_cultivation and game.player.alive
-            ),
-            "can_return_nether": bool(
-                game.player.world in {"monster_realm", "phantom_underworld"} and game.player.sealed_cultivation
-                and game.player.sealed_cultivation.get("upper_world") == "nether" and game.player.alive
-            ),
+            "routes": travel_routes,
+            **{key: destination in eligible for key, destination in {
+                "can_return_human": "human", "can_return_spirit": "spirit", "can_return_hell": "hell",
+                "can_return_demon": "demon", "can_return_true_demon": "true_demon",
+                "can_descend_spirit": "spirit", "can_return_celestial": "celestial",
+                "can_descend_true_demon": "true_demon", "can_return_asura": "asura",
+                "can_descend_phantom": "phantom_underworld", "can_descend_monster": "monster_realm",
+                "can_return_nether": "nether",
+            }.items()},
             "suppressed": bool(game.player.sealed_cultivation),
         },
         "trial": trial_data,
