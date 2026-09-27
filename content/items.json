@@ -2,6 +2,12 @@
   "schema_version": 1,
   "items": [
     {
+      "id": "heroic_progeny_elixir",
+      "name": "英姿神武口服液",
+      "description": "价值985灵石。服用后，下一次有效缠绵100%诞下后代，无视化神及以上境界的不育限制；后代必定获得单灵根或变异灵根。每个新角色仅赠一瓶，也可寄拍拍卖会换取灵石。无法购买或索取。",
+      "tags": ["consumable", "starter_exclusive", "family"]
+    },
+    {
       "id": "spirit_stone",
       "name": "下品灵石",
       "description": "修仙界通行货币，可用于交易与事件。",

@@ -43,7 +43,7 @@ class IntrigueStateMethods:
         return None
 
     def _intrigue_find_npc(self, game: GameState, npc_id: str) -> SectNpc | None:
-        if game.family:
+        if game.family and not game.family.extinct:
             member = next((row for row in game.family.npcs if row.id == npc_id), None)
             if member:
                 return member

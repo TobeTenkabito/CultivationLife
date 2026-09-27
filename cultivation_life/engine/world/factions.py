@@ -463,7 +463,7 @@ def _pressure_weak_npc_powers(deps: FactionDependencies, game: GameState, rng: r
     for sect in game.sects.values():
         if sect.extinct or not sect.founded_by_npc:
             continue
-        threshold = deps._governance_threshold(sect.world)
+        threshold = (2 + int(WORLD_SYSTEMS['world_profiles'].get(sect.world,{}).get('tier',1))) if sect.kind == 'family' else deps._governance_threshold(sect.world)
         if any(npc.alive and npc.world == sect.world and npc.realm_index >= threshold for npc in deps._sect_members(game, sect)):
             sect.pressure = max(0, sect.pressure - 1)
             continue

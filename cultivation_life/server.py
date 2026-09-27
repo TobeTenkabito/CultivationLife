@@ -430,6 +430,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.create_faction(game_id, payload.get("name", ""))
             elif operation == "create-family":
                 result = ENGINE.create_family(game_id, payload.get("name", ""))
+            elif operation == "family-action":
+                result = ENGINE.family_action(game_id, payload.get("action", ""), payload)
             elif operation == "race-diplomacy":
                 result = ENGINE.propose_race_diplomacy(
                     game_id, payload.get("target_id", ""), payload.get("status", "")

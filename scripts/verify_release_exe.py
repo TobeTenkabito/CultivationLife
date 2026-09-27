@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg']:
+            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -62,6 +62,8 @@ def verify(with_dlc):
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
+            assert next(i for i in game['player']['inventory'] if i['id']=='heroic_progeny_elixir')['quantity']==1
+            assert game['family']['intrigue_enabled']==with_dlc
             assert game["tianji_artifacts"]["available"] == with_dlc
             assert len(game["merchant_system"]["alliances"]) == 3
             assert all(row['id'] != 'xuanji' for row in game['merchant_system']['alliances'])
@@ -74,13 +76,17 @@ def verify(with_dlc):
             assert joined["merchant_system"]["membership"]["alliance_id"] == local["id"]
             owned = next(row for row in joined['merchant_system']['alliances'] if row['member'])
             assert [row['world'] for row in owned['catalog']] == ['human']
-            assert 'guixu_canghai_equipment_01' in {row['id'] for row in owned['catalog'][0]['items']}
+            assert 'guixu_canghai_equipment_01' not in {row['id'] for row in owned['catalog'][0]['items']}
+            assert 'heroic_progeny_elixir' not in {row['id'] for row in owned['catalog'][0]['items']}
             assert owned['catalog'][0]['weapon_tiers'] == [1,2,3,4,5]
             def post(operation, payload):
                 request = urllib.request.Request(base + f"/api/games/{game['id']}/{operation}", method="POST",
                     data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
                 with urllib.request.urlopen(request, timeout=30) as response:
                     return json.load(response)
+            consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
+            assert consumed['player']['guaranteed_progeny']
+            assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "weapon", "material_tier": 1, "mold_id": "mirror"})
             assert quote["spec"]["mold"]["id"] == "mirror" and quote["commission_version"] == 3
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "formation", "material_tier": 1})

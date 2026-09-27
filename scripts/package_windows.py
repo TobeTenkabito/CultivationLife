@@ -6,13 +6,13 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-version = '1.39.3'
-test_log = (ROOT / 'build/release-1393-tests.log').read_text(encoding='utf-8', errors='replace')
+version = '1.40.0'
+test_log = (ROOT / 'build/release-1400-tests.log').read_text(encoding='utf-8', errors='replace')
 passed = re.search(r'(\d+) passed in', test_log)
 assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
-exe_log = (ROOT / 'build/exe-1393-verification.log').read_text(encoding='utf-8', errors='replace')
+exe_log = (ROOT / 'build/exe-1400-verification.log').read_text(encoding='utf-8', errors='replace')
 assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in ['browser-character-1393.log']:
+for file in ['browser-character-1400.log','browser-family-1400.log','family-guixu-final-1400.log']:
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
 exe = ROOT / 'dist/launcher.exe'
@@ -23,6 +23,8 @@ manifest = {
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
     'validation':[f'{passed.group(1)} automated regressions passed',
+                  'Final family/Guixu targeted regressions passed, including carried-treasure legacy saves and refounded clans',
+                  'Family live API interactions; six themes and four widths: family, invitation and treasure transfer controls passed',
                   'Six themes, four browser widths and five populated character lists: geometry and game-state isolation passed',
                   'Packaged EXE with and without DLC: theme assets, appearance API persistence, startup, commission previews and Debug gating passed'],
     'save_schema':5,

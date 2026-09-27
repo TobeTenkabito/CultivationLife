@@ -6,6 +6,7 @@ import uuid
 from typing import Any
 from ...content_registry import (
     PATH_NAMES,
+    ROOT_DEFINITIONS,
     REALMS,
     RACE_DEFINITIONS,
     WORLD_SYSTEMS,
@@ -248,9 +249,11 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
     family_rules = WORLD_SYSTEMS["family"]
     natural_chance = float(family_rules["conception_chance_by_realm"].get(str(realm_index), 0.0))
     medicine_bonus = max(0.0, float(player.next_companion_conception_bonus))
-    chance = min(0.95, natural_chance + medicine_bonus)
+    guaranteed = player.guaranteed_progeny
+    chance = 1.0 if guaranteed else min(0.95, natural_chance + medicine_bonus)
     # 药力只绑定一次有效的缠绵互动；即使本次未能诞下后代也会消耗。
     player.next_companion_conception_bonus = 0.0
+    player.guaranteed_progeny = False
     if chance <= 0 or rng.random() >= chance:
         if chance > 0:
             source = f"（自然 {natural_chance:.1%} + 丹药 {medicine_bonus:.1%}）" if medicine_bonus else ""
@@ -261,6 +264,9 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
     companion_innate = companion_root != "none" and not companion.get("acquired_root", False)
     has_root = player_innate and companion_innate and rng.random() < float(family_rules["spirit_root_inheritance_chance"])
     child_root = rng.choice([player.spirit_root, companion_root]) if has_root else "none"
+    if guaranteed:
+        has_root = True
+        child_root = rng.choice([key for key in ROOT_DEFINITIONS if key.startswith(("supreme_", "mutated_"))])
     surn = player.name[:1] if player.name else "韩"
     child = {
         "id":f"child_{game.id.replace('-', '')[:8]}_{len(player.offspring)}", "name":surn + rng.choice(["宁","安","澄","昭","遥","真","元","清"]),
@@ -312,9 +318,13 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
 def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: GameState, rng: random.Random) -> list[str]:
     news: list[str] = []
     player = game.player
-    family_ids = {npc.id for npc in game.family.npcs} if game.family else set()
+    family_ids = {npc.id for npc in game.family.npcs} if game.family and not game.family.extinct else set()
+    independent = {npc.id:npc for sect in game.sects.values() for npc in sect.npcs}
     for child in player.offspring:
         if not child.get("alive", True) or child.get("id") in family_ids:
+            continue
+        if child.get("id") in independent:
+            child.update(independent[child["id"]].to_dict())
             continue
         child["age"] = int(child.get("age", 0)) + 1
         if child.get("lifespan") is not None and child["age"] >= int(child["lifespan"]):

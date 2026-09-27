@@ -588,6 +588,9 @@ class PlayerCombatSystem:
                 True if dragon_pressure_active and round_no <= 2
                 else p_init * cls._wave(rng, 0.96, 1.04) >= e_init
             )
+            if round_no == 1 and target.get("enemy_first_round"):
+                player_first = False
+                events.append("临时队友突然背刺，敌方在第一轮抢先出手。")
             generated_initiative = evaluate_rules(
                 generated_bloodline_traits, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": realm_delta,

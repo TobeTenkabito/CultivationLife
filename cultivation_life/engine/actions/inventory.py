@@ -4,6 +4,7 @@ import copy
 import math
 from typing import Any
 from ...content_registry import (
+    restricted_acquisition,
     ITEM_CATALOG,
     REALMS,
     TECHNIQUE_CATALOG,
@@ -65,6 +66,16 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             "SYS_TRIAL_RECOVERY", 1, game.player.age, "劫中服药", item_id, "recovered",
             f"你在劫隙中使用{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}。",
             {"hp_gain": hp_gain, "mp_gain": mp_gain}, ["system", "item", "tribulation"],
+        ))
+    elif item.id == "heroic_progeny_elixir":
+        if game.player.guaranteed_progeny:
+            raise ValueError("口服液的药力仍在，等待下一次有效缠绵即可")
+        remove_item(game.player, item_id)
+        game.player.guaranteed_progeny = True
+        game.history.append(HistoryRecord(
+            "SYS_GUARANTEED_PROGENY", 1, game.player.age, "英姿神武", item_id, "activated",
+            "你服下英姿神武口服液：下一次有效缠绵必定诞下后代，无视境界不育，后代必为单灵根或变异灵根。",
+            {}, ["system", "item", "family", "offspring"],
         ))
     elif item.conception_bonus > 0:
         companion = game.player.dao_companion
@@ -209,6 +220,8 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
     offer = next((entry for entry in game.market_offers if entry["id"] == offer_id), None)
     if not offer or offer.get("sold"):
         raise ValueError("该货物已经售出或不在本期坊市")
+    if restricted_acquisition(str(offer["kind"]), str(offer["content_id"])):
+        raise ValueError("此物只能通过其专属来源获得，不能在坊市购买")
     if offer.get("world", "human") != game.player.world:
         raise ValueError("此物不属于当前世界的坊市货池")
     price = int(offer["price"])

@@ -2,7 +2,7 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v1.39.3**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v1.40.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
 
 本体 v1.39.1 按第三版 SVG 原稿恢复六套独立主界面布局（A 仅作为后续功能优先适配对象）：A 松烟书院（默认）、B 月下观星、C 青玉留白、D 丹砂金阙、E 江山行卷、F 竹简纪年。启动页、顶部主题入口和设置均可切换，偏好独立保存在 `data/ui_preferences.json`，不改变存档。侧栏、功能窗口与人物资源展示随主题适配，设置可减弱动态效果。
 
@@ -16,7 +16,7 @@ v1.39.2 在初始界面提供逐个存档删除，确认后仅删除所选角色
 
 ### Android 12 首版
 
-安卓安装包基于 v1.39.3，完整携带六套独立主题与六个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；本轮适配与验证范围为 Android 12。没有存档导入、导出或云同步功能。使用与构建说明见 [安卓说明](android/README.md)。
+安卓安装包基于 v1.40.0，完整携带六套独立主题与六个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；本轮适配与验证范围为 Android 12。没有存档导入、导出或云同步功能。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 
@@ -89,7 +89,7 @@ Debug=False
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/manifest.json) | 3.8.0 | 鬼修魂魄、魂蚀、往生与轮回 |
 | [明争暗斗：合纵连横](dlc/intrigue-coalitions/manifest.json) | 1.3.0 | NPC 性格、势力职位、客卿、议案与内政 |
 | [圣人之道：内圣外王](dlc/sage-way/manifest.json) | 1.4.0 | 学说、教化、门人、经典、外王之策与儒修剧情 |
-| [归墟之潮：九死一生](dlc/guixu-tide/manifest.json) | 2.5.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
+| [归墟之潮：九死一生](dlc/guixu-tide/manifest.json) | 2.6.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
 | [神机百变：巧夺天工](dlc/tianji-artifacts/manifest.json) | 2.2.0 | 天工神机榜、分层情报、动态材料、仿制与重铸 |
 
 主页右上角可管理启用状态，游戏内「拓」面板可查看本次启动的加载情况。被禁用、依赖缺失或校验失败的扩展会被跳过；玩家开关不会改写包内清单。扩展格式、合并规则和依赖声明分别见 [DLC 说明](dlc/README.md) 与 [MOD 说明](mods/README.md)。

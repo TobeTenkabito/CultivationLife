@@ -74,18 +74,37 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
         raise ValueError("当前状态无法建立家族")
     if game.family and not game.family.extinct:
         raise ValueError("你已经建立修仙家族")
-    heirs = [child for child in player.offspring if child.get("alive", True) and child.get("cultivation_started")]
+    independent = {npc.id:npc for sect in game.sects.values() for npc in sect.npcs}
+    independent.update(game.notable_npcs)
+    for child in player.offspring:
+        if child.get('id') in independent:
+            child.update(independent[child['id']].to_dict())
+    heirs = [child for child in player.offspring if child.get("alive", True) and child.get("cultivation_started")
+             and child.get("world") == player.world and not child.get("family_traits", {}).get("expelled")]
     if not heirs:
         raise ValueError("至少要有一名拥有灵根并已经踏入仙途的后代，才能建立修仙家族")
     family_id = f"family_{game.id.replace('-', '')[:10]}"
+    if game.family:
+        # A rebuilt clan must not inherit the extinct clan's treasury, relations or NPC IDs.
+        generation = sum(row.event_id == 'SYS_FOUND_FAMILY' for row in game.history)
+        family_id += f'_rebuilt_{generation}'
     family = SectState(
         family_id, clean_name, player.world, [],
         description=f"由{player.name}与后代共同建立的修仙家族，亦接纳外姓门人。",
         path=player.technique.path if player.technique else player.path,
         founded_by_player=True, founder_player_id=game.id,
         allegiance_race=deps._player_allegiance_race(player),
+        kind="family",
     )
     for child in heirs:
+        existing = independent.get(child['id'])
+        if existing:
+            # Keep one simulated NPC while the sect reads dual membership through _sect_members.
+            for sect in game.sects.values():
+                sect.npcs[:] = [member for member in sect.npcs if member.id != existing.id]
+            game.notable_npcs.pop(existing.id, None)
+            family.npcs.append(existing)
+            continue
         root = str(child.get("spirit_root", "none"))
         npc = SectNpc(
             str(child["id"]), str(child["name"]), "嫡系后人", int(child.get("realm_index", 1)),
@@ -93,9 +112,12 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
             spirit_root=root, path=str(child.get("path", family.path)), race=player.race,
             world=player.world, affinity=60.0,
             gender=str(child.get("gender") or deps._stable_gender(str(child.get("id", "")))),
+            family_traits=dict(child.get("family_traits", {})),
+            family_combat_bonus=float(child.get("family_combat_bonus", 0)),
         )
         family.npcs.append(npc)
     game.family = family
+    game.family_state = {}
     game.history.append(HistoryRecord(
         "SYS_FOUND_FAMILY", 1, player.age, "仙族初立", family_id, "founded",
         f"你以{clean_name}为号建立修仙家族，{len(heirs)}名踏入仙途的后代列入族谱，山门同时向外姓低阶修士开放。",

@@ -41,7 +41,7 @@ def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:
     treasure = ITEM_CATALOG.get(npc.treasure_item_id or "")
     return npc_combat_power(
         npc, expected_combat_power, deps._npc_root_efficiency(npc.spirit_root), treasure
-    ) * max(0.1, float(getattr(npc, "combat_factor", 1.0))) * max(0.35, 1 - int(getattr(npc, "wounds", 0)) * 0.15)
+    ) * max(0.1, float(getattr(npc, "combat_factor", 1.0))) * max(0.35, 1 - int(getattr(npc, "wounds", 0)) * 0.15) + npc.family_combat_bonus
 
 
 def _npc_breakthrough_probability(deps: NpcDependencies, npc: SectNpc) -> float:
@@ -67,10 +67,27 @@ def _sect_members(deps: NpcDependencies, game: GameState, sect: SectState) -> li
     for npc in [*game.world_npcs.values(), *game.notable_npcs.values()]:
         if npc.faction_id == sect.id:
             members[npc.id] = npc
+    if game.family and not game.family.extinct:
+        for npc in game.family.npcs:
+            if npc.faction_id == sect.id:
+                members[npc.id] = npc
     return list(members.values())
 
 
 def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | None:
+    if game.family and not game.family.extinct:
+        member = next((npc for npc in game.family.npcs if npc.id == npc_id), None)
+        if member:
+            return member
+    existing = game.world_npcs.get(npc_id) or game.notable_npcs.get(npc_id) or next(
+        (npc for sect in game.sects.values() for npc in sect.npcs if npc.id == npc_id), None)
+    if existing:
+        return existing
+    child = next((row for row in game.player.offspring if row.get("id") == npc_id), None)
+    if child:
+        return SectNpc(**{key:value for key,value in child.items() if key in SectNpc.__dataclass_fields__} |
+                       {"title":"后代", "realm_index":int(child.get("realm_index",0)), "layer":int(child.get("layer",1)),
+                        "age":int(child.get("age",0)), "lifespan":child.get("lifespan")})
     if npc_id in game.world_npcs:
         return game.world_npcs[npc_id]
     if npc_id in game.notable_npcs:

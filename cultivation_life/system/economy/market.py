@@ -45,6 +45,10 @@ class EconomyMarketMethods:
 
     def _ensure_market(self, game: GameState, rng: Any) -> bool:
         player = game.player
+        # Drop stale/locked offers from saves made before source restrictions.
+        previous_count = len(game.market_offers)
+        game.market_offers[:] = [row for row in game.market_offers if not restricted_acquisition(
+            str(row.get("kind", "")), str(row.get("content_id", "")))]
         if player.realm_index == 0:
             changed = bool(
                 game.market_offers or game.market_realm_index is not None
@@ -66,7 +70,7 @@ class EconomyMarketMethods:
                 or len(current_material_offers) == int(MARKET_SETTINGS.get("material_offer_count", 6))
             )
         ):
-            return False
+            return len(game.market_offers) != previous_count
         same_market = (
             game.market_realm_index == tier and game.market_world == player.world
             and game.market_location_id == location_id
@@ -278,6 +282,8 @@ class EconomyMarketMethods:
 
     @staticmethod
     def _catalog_price(kind: str, content_id: str) -> int:
+        if content_id == "heroic_progeny_elixir":
+            return 985
         prices = sorted(
             int(row["price"]) for row in MARKET_GOODS
             if row["kind"] == kind and row["content_id"] == content_id
@@ -296,6 +302,8 @@ class EconomyMarketMethods:
         return 5
 
     def _is_world_market_good(self, world: str, kind: str, content_id: str) -> bool:
+        if restricted_acquisition(kind, content_id):
+            return False
         if any(
             str(row.get("world", "human")) == world
             and str(row.get("kind")) == kind

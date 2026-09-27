@@ -97,7 +97,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     available = [
         {"id": sect.id, **deps._faction_meta(game, sect.id), "extinct": sect.extinct}
         for sect in game.sects.values()
-        if sect.world == player.world and not sect.extinct
+        if sect.world == player.world and not sect.extinct and sect.kind != "family"
     ]
     if not player.faction_id:
         return {
@@ -284,7 +284,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
 def _public_sect_diplomacy(deps: FactionViewDependencies, game: GameState, sect: SectState) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for other in game.sects.values():
-        if other.id == sect.id or other.world != sect.world or other.extinct:
+        if other.id == sect.id or other.world != sect.world or other.extinct or other.kind == "family":
             continue
         relation = game.sect_relations.get(race_pair(sect.id, other.id), {})
         status = str(relation.get("status", "neutral"))

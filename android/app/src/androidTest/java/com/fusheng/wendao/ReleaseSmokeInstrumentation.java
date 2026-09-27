@@ -89,10 +89,37 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.39.3' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.40.0' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("characters")) {
+            if(phase.equals("family")) {
+                async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'家族归墟验收',spirit_root:'supreme_metal',path:'dao',seed:1400,preset_id:'core'})});render(g);return g.id;})()");
+                check(Boolean.TRUE.equals(js("game.player.inventory.some(i=>i.id==='heroic_progeny_elixir' && i.quantity===1)")),"Missing starter elixir");
+                async("(async()=>{await mutate('/api/games/'+game.id+'/use-item',{item_id:'heroic_progeny_elixir'});return true})()");
+                check(Boolean.TRUE.equals(js("game.player.guaranteed_progeny && !game.player.inventory.some(i=>i.id==='heroic_progeny_elixir')")),"Elixir consumption failed");
+                try(java.io.InputStream input=getContext().getAssets().open("family_guixu_layout.js")) {
+                    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
+                    byte[] chunk=new byte[4096];int length;
+                    while((length=input.read(chunk))!=-1) buffer.write(chunk,0,length);
+                    js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
+                }
+                String before=(String)js("JSON.stringify(game)");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
+                    async("GameThemes.saved");
+                    for(String panel:new String[]{"family","offer","guixu"}) {
+                        js("FamilyGuixuProbe.mount('"+panel+"')");Thread.sleep(1100);
+                        String failures=(String)js("JSON.stringify(FamilyGuixuProbe.check('"+panel+"'))");
+                        check("[]".equals(failures),theme+" / "+panel+": "+failures);
+                        if(panel.equals("family")) {
+                            js("(()=>{const c=document.querySelector('#family-card'),r=c.querySelector('.family-member');c.scrollTop+=r.getBoundingClientRect().top-c.getBoundingClientRect().top-110;})()");
+                            capture("family-1400-"+theme);
+                        }
+                        js("UtilityPanels.close('"+(panel.equals("family")?"family":"guixu")+"')");
+                    }
+                }
+                check(before.equals(js("JSON.stringify(game)")),"Family rendering changed game state");
+            } else if(phase.equals("characters")) {
                 async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'人物布局验收',spirit_root:'supreme_metal',path:'dao',seed:1393,preset_id:'core'})});render(g);return g.id;})()");
                 try(java.io.InputStream input=getContext().getAssets().open("character_layout.js")) {
                     java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
@@ -110,7 +137,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         check("[]".equals(failures),theme+" / "+panel+": "+failures);
                         if(panel.equals("faction")) {
                             js("(()=>{const c=document.querySelector('#faction-card'),r=document.querySelector('#faction-roster');c.scrollTop+=r.getBoundingClientRect().top-c.getBoundingClientRect().top-110;})()");
-                            capture("sect-1393-"+theme);
+                            capture("sect-1400-"+theme);
                         }
                         js("UtilityPanels.close('"+panel+"')");
                     }
