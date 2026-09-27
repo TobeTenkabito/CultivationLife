@@ -37,7 +37,8 @@
   function renderSession(session) {
     const current = session.layer_id;
     const pendingThreat = session.pending_threat;
-    const interactionLocked = !!pendingThreat;
+    const offer = session.pending_team_offer;
+    const interactionLocked = !!pendingThreat || !!offer;
     const currentLayer = (session.layers || []).find(layer => layer.current) || {};
     const qiNames = {spirit:'灵气', demon:'魔气', monster:'妖气', yin:'阴气'};
     const qiLine = (values, marker) => Object.entries(values || {}).map(([source, value]) => (
@@ -72,12 +73,14 @@
     return `<section class="guixu-session">
       <div class="guixu-session-head"><div><p class="eyebrow">${esc(session.trapped ? 'TRAPPED' : 'EXPEDITION')}</p><h3>${esc(session.dungeon_name)}</h3></div><strong>${session.trapped ? '已被困' : `余 ${esc(session.remaining_days)} 天`}</strong></div>
       ${threat}
+      ${offer?`<aside class="guixu-threat"><h4>${esc(offer.name)}邀你临时同行</h4><p>对方修为高于你，愿结伴探宝。若你得宝后对方一直空手，两个行动间隔后将在第三个间隔背刺；可及时主动分宝。</p><div>${button('接受邀请','team_accept')}${button('独自探索','team_decline')}</div></aside>`:''}
       <div class="guixu-layers">${layers}</div>
       <div class="guixu-qi-profile"><div><small>当前层位气源</small><b>${esc(currentLayer.name || '')}</b></div><div class="guixu-qi-values">${qiLine(currentLayer.qi_concentrations, '浓度 ')}</div><div class="guixu-qi-values efficiency">${qiLine(currentLayer.qi_gain_efficiencies, '吸收 ×')}</div></div>
       <div class="guixu-actions">${button('调息（恢复气血与法力）', 'rest', {}, interactionLocked, 'guixu-rest')}${button('搜寻此层', 'search', {}, !!session.trapped || interactionLocked, 'guixu-primary')}${button(`返回入口（${session.return_days}天）`, 'return', {}, !!session.trapped || interactionLocked, 'guixu-return')}</div>
       ${session.trapped ? '<p class="muted">潮门闭合后，可回主界面使用修炼、炼体、神识训练及对应突破；外界行动仍被封锁。</p>' : ''}
       <section><h4>本层宝物</h4>${treasures}</section>
       <section><h4>本层修士</h4>${actors}</section>
+      ${(session.companions || []).length?`<section><h4>同行分宝</h4>${session.companions.map(ally=>`<div class="guixu-actor"><div><b>${esc(ally.name)}</b><small>${ally.has_treasure?'已有收获，暂无分宝不满':`尚无宝物${session.player_ever_claimed?' · 得宝后已过 '+ally.empty_intervals+' 个行动间隔':''}`}</small></div><div>${(session.transferable_treasures || []).map(t=>button(`赠予${t.name}`,'gift_treasure',{actor_id:ally.actor_id,pool_entry_id:t.pool_entry_id},interactionLocked)).join('') || '<small>暂无可转移宝物；已习得功法不能转让。</small>'}</div></div>`).join('')}</section>`:''}
       ${incidents ? `<details class="guixu-incidents"><summary>副本内修士相残记录</summary><ul>${incidents}</ul></details>` : ''}
     </section>`;
   }

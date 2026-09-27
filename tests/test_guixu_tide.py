@@ -26,6 +26,9 @@ class GuixuTideTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.engine = GameEngine(SOURCE_ROOT, Path(self.temp.name) / "saves")
+        self.team_offer = patch.object(self.engine, "_guixu_offer_team")
+        self.team_offer.start()
+        self.addCleanup(self.team_offer.stop)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -48,7 +51,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.5.0")
+        self.assertEqual(manifest["version"], "2.6.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},

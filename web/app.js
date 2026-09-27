@@ -1507,7 +1507,7 @@ function renderFaction(faction) {
   $('#faction-title').textContent = faction.name; $('#faction-role').textContent = faction.role;
   $('#faction-description').textContent = faction.description;
   const details = document.createElement('p'); details.className = 'faction-meta';
-  details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution}`; summary.appendChild(details);
+  details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution} · 宗门总战力 ${number(faction.total_power || 0)}`; summary.appendChild(details);
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);
@@ -1846,28 +1846,9 @@ function renderFamily(family, governance) {
     ? family.description
     : '与道侣缠绵可能孕育后代；双方境界越高概率越低，化神起无法自然孕育。拥有踏入仙途的后代后方可立族。';
 
-  const children = document.createElement('div'); children.className = 'family-list';
-  const childTitle = document.createElement('h3'); childTitle.textContent = '血脉后代'; children.appendChild(childTitle);
-  if (!family?.offspring?.length) children.innerHTML += '<p class="empty">族谱尚无后代。</p>';
-  (family?.offspring || []).forEach(child => {
-    const row = document.createElement('div'); row.className = 'family-row';
-    row.innerHTML = `<b>${child.name}</b><small>${child.age} 岁 · ${child.spirit_root_name} · ${child.realm_name}</small>`;
-    children.appendChild(row);
-  });
-  content.appendChild(children);
-  if (!family?.exists && family?.can_found) {
+  window.FamilyPanel?.render(content, family, payload => mutate(`/api/games/${game.id}/family-action`, payload));
+  if ((!family?.exists || family?.extinct) && family?.can_found) {
     content.appendChild(namedCreationForm('建立修仙家族', '家族名号', '开枝立族', name => mutate(`/api/games/${game.id}/create-family`, {name})));
-  }
-  if (family?.exists) {
-    const roster = document.createElement('div'); roster.className = 'family-list';
-    roster.innerHTML = '<h3>家族名册</h3>';
-    if (!family.same_world && !(family.roster || []).length) roster.innerHTML += '<p class="empty">界面阻隔，无法获知下界家族近况；开启跨界 Debug 后可查看。</p>';
-    (family.roster || []).forEach(member => {
-      const row = document.createElement('div'); row.className = `family-row${member.alive ? '' : ' fallen'}`;
-      row.innerHTML = `<b>${member.name} · ${member.member_type}${member.wounds ? `（负伤${member.wounds}级）` : ''}</b><small>${member.realm_name} · ${member.spirit_root_name} · ${member.age} 岁 · 战力 ${number(member.combat_power)}</small>`;
-      roster.appendChild(row);
-    });
-    content.appendChild(roster);
   }
   const bounty = document.createElement('div'); bounty.className = 'family-list';
   bounty.innerHTML = '<h3>势力通缉令</h3>';
@@ -2913,7 +2894,7 @@ function renderInventory(items) {
     const trialRecovery = (item.trial_restore_hp > 0 || item.trial_restore_mp > 0) && game.trial?.active;
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
-    const normalUse = item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const normalUse = item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
@@ -3297,6 +3278,11 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
   const row = document.createElement('div'); row.className = `companion-row${companion.alive ? '' : ' fallen'}`;
   const same = companion.same_cultivation ? ` · 同法同境，突破 +${percent(companion.breakthrough_bonus)}` : '';
   row.innerHTML = `<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
+  if (game?.player?.guaranteed_progeny) {
+    const medicine = document.createElement('p'); medicine.className = 'section-note';
+    medicine.textContent = '英姿神武药力：下一次有效缠绵100%有后代，必为单灵根或变异灵根，无视境界不育。';
+    list.appendChild(medicine);
+  }
   if (conceptionBonus > 0) {
     const medicine = document.createElement('small'); medicine.className = 'positive';
     medicine.textContent = `孕育药力：下一次缠绵的后代概率 +${percent(conceptionBonus)}`;

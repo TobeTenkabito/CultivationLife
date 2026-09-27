@@ -158,3 +158,16 @@ button, input[type="button"], input[type="submit"] {
 .roster-status .warning dd{color:var(--cinnabar);}
 .world-npc-row>div,.party-member-info{min-width:0;overflow-wrap:anywhere;}
 .roster-head,.faction-heading-actions{flex-wrap:wrap;gap:8px;}
+.family-management section{margin:18px 0;padding-top:10px;border-top:1px solid var(--line);min-width:0;}
+.family-management p,.family-management small{color:var(--muted);line-height:1.7;overflow-wrap:anywhere;}
+.family-management small{display:block;}
+.family-member.family-row{display:block;padding:14px 10px;background:color-mix(in srgb, var(--tone-green) 5%, transparent);margin:8px 0;}
+.family-member-heading,.family-member-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;min-width:0;}
+.family-member-heading>b{flex:1 1 10em;}.family-member-heading>strong{color:var(--pine);font-size:12px;}
+.family-member-actions{margin-top:10px;align-items:center;}
+.family-member-actions label{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:100%;color:var(--muted);font-size:12px;}
+.family-management button,.family-management select,.family-management input{padding:8px 10px;border:1px solid var(--line);background:var(--surface);color:var(--pine);border-radius:var(--radius);max-width:100%;min-width:0;}
+.family-management select{flex:1 1 130px;}.family-management input{width:110px;}
+.family-management button:disabled{opacity:.45;cursor:not-allowed;}.family-management button:hover:not(:disabled){background:var(--pine);color:var(--on-accent);}
+.family-other{display:grid;gap:7px;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere;}
+.family-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;}.family-metrics>span{padding:10px;background:color-mix(in srgb, var(--tone-gold) 8%, transparent);min-width:0;overflow-wrap:anywhere;}

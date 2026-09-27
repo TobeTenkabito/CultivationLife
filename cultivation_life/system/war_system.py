@@ -31,6 +31,17 @@ class WarSystemMixin:
     """行动单位制战争。年度模拟不遍历战争，避免后期按数百年放大成本。"""
 
     @staticmethod
+    def _war_sect(game, power_id):
+        return game.family if game.family and game.family.id == power_id else game.sects.get(power_id)
+
+    def _war_player_identity(self, game, war):
+        if war['kind'] == 'race':
+            return self._player_allegiance_race(game.player)
+        if game.family and not game.family.extinct and self._participant_side(war, game.family.id):
+            return game.family.id
+        return game.player.faction_id
+
+    @staticmethod
     def _war_rules() -> dict[str, Any]:
         return WORLD_SYSTEMS.get("war_system", {})
 
@@ -52,8 +63,8 @@ class WarSystemMixin:
         return None
 
     def _war_world(self, game: GameState, kind: str, side_id: str) -> str:
-        if kind == "sect" and side_id in game.sects:
-            return game.sects[side_id].world
+        if kind == "sect" and self._war_sect(game, side_id):
+            return self._war_sect(game, side_id).world
         worlds = list(RACE_DEFINITIONS.get(side_id, {}).get("worlds", []))
         if game.player.world in worlds:
             return game.player.world
@@ -62,12 +73,12 @@ class WarSystemMixin:
     def _war_side_name(self, game: GameState, kind: str, side_id: str) -> str:
         if kind == "race":
             return str(RACE_DEFINITIONS.get(side_id, {}).get("name") or side_id or "未知势力")
-        sect = game.sects.get(side_id)
+        sect = self._war_sect(game, side_id)
         return str(sect.name if sect and sect.name else side_id or "未知势力")
 
     def _war_side_members(self, game: GameState, kind: str, side_id: str, world: str) -> list[SectNpc]:
         if kind == "sect":
-            sect = game.sects.get(side_id)
+            sect = self._war_sect(game, side_id)
             people = self._sect_members(game, sect) if sect and not sect.extinct else []
         else:
             people = [npc for npc in self._all_world_npcs(game) if npc.race == side_id]
@@ -139,7 +150,7 @@ class WarSystemMixin:
 
     def _power_exists_in_world(self, game: GameState, kind: str, power_id: str, world: str) -> bool:
         if kind == "sect":
-            sect = game.sects.get(power_id)
+            sect = self._war_sect(game, power_id)
             return bool(sect and not sect.extinct and sect.world == world)
         return world in RACE_DEFINITIONS.get(power_id, {}).get("worlds", [])
 
@@ -222,16 +233,18 @@ class WarSystemMixin:
         if game.player.world != war.get("world"):
             return None
         self._ensure_war_shape(game, war)
-        own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+        own_id = self._war_player_identity(game, war)
         return self._participant_side(war, own_id) or self._intrigue_player_guest_side(game, war)
 
     def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
         side = self._player_war_side(game, war)
         if not side:
             return False
-        own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+        own_id = self._war_player_identity(game, war)
         if own_id != war.get(f"{side}_id"):
             return False
+        if game.family and own_id == game.family.id:
+            return bool(game.family.founded_by_player or self._has_family_voice(game))
         return self._has_race_voice(game) if war["kind"] == "race" else self._has_sect_voice(game)
 
     def _start_war(self, game: GameState, kind: str, attacker: str, defender: str) -> dict[str, Any]:
@@ -318,7 +331,7 @@ class WarSystemMixin:
             self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
             for npc in members
         ]
-        own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+        own_id = self._war_player_identity(game, war)
         if (
             include_player and game.player.alive and game.player.world == war.get("world")
             and own_id in self._coalition_ids(war, side)
@@ -480,7 +493,7 @@ class WarSystemMixin:
             npc.realm_index,
             self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id),
         ) for npc in members]
-        own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+        own_id = self._war_player_identity(game, war)
         if (
             include_player and game.player.alive and game.player.world == war.get("world")
             and own_id in self._coalition_ids(war, side)
@@ -502,7 +515,7 @@ class WarSystemMixin:
             self._npc_power(npc) * self._npc_formation_power_multiplier(game, npc.id)
             for npc in self._available_warriors(game, war, side, power_id)
         ]
-        own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+        own_id = self._war_player_identity(game, war)
         if game.player.alive and game.player.world == war.get("world") and own_id == power_id:
             powers.append(self._player_intrinsic_combat_power(game.player))
         guard_power = (
@@ -1018,7 +1031,7 @@ class WarSystemMixin:
             detail = f"{loser_name}被迫对第三方改为{RELATION_LABELS.get(third_status, third_status)}"
         elif term == "stones":
             amount = int(self._war_rules().get("stone_tribute", 10000))
-            own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+            own_id = self._war_player_identity(game, war)
             if own_id == winner_id:
                 add_item(game.player, "spirit_stone", amount)
             elif own_id == loser_id:
@@ -1029,7 +1042,7 @@ class WarSystemMixin:
                 amount = paid
             detail = f"{loser_name}向{winner_name}上供灵石 {amount}"
         elif term == "supplies":
-            own_id = game.player.faction_id if war["kind"] == "sect" else self._player_allegiance_race(game.player)
+            own_id = self._war_player_identity(game, war)
             supplied: list[str] = []
             if own_id == winner_id:
                 pool = [row["content_id"] for row in MARKET_GOODS if row["kind"] == "item" and row["content_id"] in ITEM_CATALOG
@@ -1047,8 +1060,8 @@ class WarSystemMixin:
         elif term in {"dissolve", "annex"}:
             if war["kind"] != "sect":
                 raise ValueError("种族与界面势力不能被解散或合并")
-            loser_sect = game.sects.get(loser_id)
-            winner_sect = game.sects.get(winner_id)
+            loser_sect = self._war_sect(game, loser_id)
+            winner_sect = self._war_sect(game, winner_id)
             if not loser_sect:
                 raise ValueError("战败宗门已经不存在")
             winner_power = self._war_total_power(game, war, beneficiary)

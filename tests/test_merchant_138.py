@@ -128,9 +128,11 @@ def test_generic_dlc_content_is_available_without_any_dlc(tmp_path):
         base = ContentRegistry.load(ROOT/'content',tmp_path)
         base_ids = {row['id'] for row in json.loads((ROOT/'content/items.json').read_text(encoding='utf-8'))['items']}
         assert base_ids <= base.items.keys()
-        for key in ('guixu_canghai_equipment_01','monster_tempering_blood','confucian_jade_ruler','moque_wind','yaoque_thunder'):
+        for key in ('monster_tempering_blood','confucian_jade_ruler','moque_wind','yaoque_thunder'):
             assert key in base.items
             assert any(row['content_id']==key for row in base.market_goods)
+        assert 'guixu_canghai_equipment_01' in base.items  # Owned items remain readable without DLC.
+        assert not any(row['content_id']=='guixu_canghai_equipment_01' for row in base.market_goods)
         assert 'TECH_GUIXU_CANGHAI_01' in base.techniques and 'TECH_MONSTER_BREATHING' in base.techniques
         assert 'people_annals_bamboo' not in base.items and 'ghost_nurturing_casket' not in base.items
         assert 'TECH_GHOST_BODY_THIEF' not in base.techniques

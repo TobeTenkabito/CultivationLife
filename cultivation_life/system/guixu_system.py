@@ -605,6 +605,7 @@ class GuixuSystemMixin:
         session = game.guixu_state.get("player_session")
         if session is not None:
             session.setdefault("carried_entry_ids", []).append(row["pool_entry_id"])
+            session["player_ever_claimed"] = True
         treasure_result = "last_treasure" if row.get("pool_last") else source
         game.history.append(HistoryRecord(
             "SYS_GUIXU_TREASURE", 1, game.player.age, "归墟得宝", row["pool_entry_id"], treasure_result,
@@ -639,8 +640,12 @@ class GuixuSystemMixin:
     ) -> None:
         if (
             not game.player.alive or session.get("pending_threat")
+            or session.get("pending_team_offer")
             or session.get("trapped") or cycle.get("phase") != "open"
         ):
+            return
+        if int(session.get("threat_cooldown", 0)) > 0:
+            session["threat_cooldown"] -= 1
             return
         transferable = self._guixu_transferable_player_entries(game, dungeon, cycle, session)
         if not transferable:
@@ -778,7 +783,7 @@ class GuixuSystemMixin:
     def _guixu_fight(
         self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
         session: dict[str, Any], actor: dict[str, Any], rng: random.Random,
-        *, player_defending: bool = False,
+        *, player_defending: bool = False, enemy_first_round: bool = False,
     ) -> tuple[str, str]:
         allies = []
         for ally_id in session.get("recruited_actor_ids", []):
@@ -789,6 +794,7 @@ class GuixuSystemMixin:
                     "realm_offset": int(ally["realm_index"]) - game.player.realm_index,
                 })
         target = {
+            "enemy_first_round": enemy_first_round,
             "player_defending": player_defending,
             "target_name": actor["name"], "target_power": float(actor["power"]),
             "primary_power": float(actor["power"]), "target_realm_index": int(actor["realm_index"]),
@@ -831,6 +837,54 @@ class GuixuSystemMixin:
         )
         return result, summary
 
+    def _guixu_offer_team(self, game, cycle, session):
+        if (not game.player.alive or cycle.get("phase") != "open"
+                or session.get("team_offer_made") or session.get("trapped") or game.player.party
+                or session.get("recruited_actor_ids") or session.get("pending_threat")):
+            return
+        candidates = [a for a in cycle.get("roster", []) if a.get("status") == "active"
+                      and (int(a.get("realm_index", 0)), int(a.get("layer", 1)))
+                          > (game.player.realm_index, game.player.layer)]
+        if candidates:
+            actor = min(candidates, key=lambda a: (a["realm_index"], a["layer"], a["actor_id"]))
+            session["team_offer_made"] = True
+            session["pending_team_offer"] = {"actor_id":actor["actor_id"], "name":actor["name"]}
+
+    def _guixu_team_tick(self, game, dungeon, cycle, session, rng):
+        """One tick per time-consuming player action, never per repaint/response."""
+        session["action_serial"] = int(session.get("action_serial", 0)) + 1
+        serial = session["action_serial"]
+        for actor in cycle.get("roster", []):
+            if actor.get("actor_id") not in session.get("recruited_actor_ids", []) or actor.get("status") != "recruited":
+                continue
+            actor["layer_id"] = session["layer_id"]
+            if not actor.get("temporary_invitation"):
+                continue
+            has_treasure = any(row.get("holder_id") == actor["actor_id"] and row.get("resolution") == "held"
+                               for row in cycle.get("round_entries", []))
+            if has_treasure:
+                actor.pop("empty_since_action", None)
+                continue
+            if not session.get("player_ever_claimed"):
+                continue
+            since = actor.setdefault("empty_since_action", serial)
+            if serial - since < 3:
+                continue
+            session["recruited_actor_ids"].remove(actor["actor_id"])
+            actor["status"] = "active"
+            actor.pop("team_id", None)
+            session["pending_threat"] = None
+            result, summary = self._guixu_fight(game, dungeon, cycle, session, actor, rng,
+                                               player_defending=True, enemy_first_round=True)
+            session["threat_cooldown"] = 1
+            game.history.append(HistoryRecord(
+                "SYS_GUIXU_TEAM_BETRAYAL", 1, game.player.age, "临时队友背刺", actor["actor_id"], result,
+                f"{actor['name']}见你得宝而自己迟迟空手，在第三个行动间隔突然背刺！{summary}",
+                {"enemy_first_round":True, "player_defending":True}, ["guixu", "combat", "betrayal"],
+            ))
+            return True
+        return False
+
     def guixu_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         game = self._load(game_id)
         if not guixu_content_available():
@@ -842,6 +896,7 @@ class GuixuSystemMixin:
             raise ValueError("此生已经结束")
         rng = decode_rng(game.seed, game.rng_state)
         session = game.guixu_state.get("player_session")
+        before_days = int(session.get("remaining_days", 0)) if session else 0
         result, summary = action, ""
         history_event = "SYS_GUIXU_ACTION"
 
@@ -869,6 +924,7 @@ class GuixuSystemMixin:
                 "pending_threat": None, "threatened_actor_ids": [],
             }
             game.guixu_state["player_session"] = session
+            self._guixu_offer_team(game, cycle, session)
             result, summary, history_event = "entered", f"你踏入{dungeon['name']}，抵达外层。", "SYS_GUIXU_ENTER"
         else:
             if not session:
@@ -880,17 +936,52 @@ class GuixuSystemMixin:
                 raise ValueError("必须先回应拦路修士的交宝威胁")
             if not pending_threat and action in threat_actions:
                 raise ValueError("当前没有修士向你索要宝物")
-            if action == "threat_surrender":
+            offer = session.get("pending_team_offer")
+            if offer and action not in {"team_accept", "team_decline"}:
+                raise ValueError("请先回应临时组队邀请")
+            if action in {"team_accept", "team_decline"} and not offer:
+                raise ValueError("当前没有临时组队邀请")
+            if action in {"team_accept", "team_decline"}:
+                if action == "team_accept":
+                    if game.player.party or session.get("recruited_actor_ids"):
+                        raise ValueError("你已有队友，无法接受独行邀请")
+                    actor = self._guixu_actor(cycle, str(offer["actor_id"]))
+                    if actor.get("team_id"):
+                        self._dissolve_guixu_npc_team(game, dungeon, cycle, str(actor["team_id"]), "改与玩家临时同行")
+                    actor.update(status="recruited", layer_id=session["layer_id"], temporary_invitation=True)
+                    session.setdefault("recruited_actor_ids", []).append(actor["actor_id"])
+                    # Old in-dungeon saves can already contain player-owned treasure.
+                    if session.get("player_ever_claimed") or session.get("carried_entry_ids"):
+                        session["player_ever_claimed"] = True
+                        actor["empty_since_action"] = int(session.get("action_serial", 0))
+                    result, summary = "joined", f"{actor['name']}与你临时结伴。所得宝物若只归你一人，对方可能起异心。"
+                else:
+                    result, summary = "declined", "你婉拒了临时同行的邀请。"
+                session["pending_team_offer"] = None
+            elif action == "gift_treasure":
+                actor = next((a for a in cycle["roster"] if a["actor_id"] == payload.get("actor_id")
+                              and a.get("status") == "recruited" and a["actor_id"] in session.get("recruited_actor_ids", [])), None)
+                if not actor:
+                    raise ValueError("只能向当前临时队友分宝")
+                entry_id = str(payload.get("pool_entry_id", ""))
+                if entry_id not in {r["pool_entry_id"] for r, _ in self._guixu_transferable_player_entries(game, dungeon, cycle, session)}:
+                    raise ValueError("这件宝物不在本届可转移清单中")
+                name = self._surrender_guixu_treasure(game, dungeon, cycle, session, {"pool_entry_id":entry_id}, actor)
+                actor.pop("empty_since_action", None)
+                result, summary = "gifted", f"你将{name}交给{actor['name']}，对方已有收获，空手不满消退。"
+            elif action == "threat_surrender":
                 actor = self._guixu_actor(cycle, str(pending_threat["actor_id"]))
                 name = self._surrender_guixu_treasure(
                     game, dungeon, cycle, session, pending_threat, actor,
                 )
                 session["pending_threat"] = None
+                session["threat_cooldown"] = 1
                 result, summary = "surrendered", f"你交出{name}，{actor['name']}暂且放你离开。"
                 history_event = "SYS_GUIXU_THREAT_RESPONSE"
             elif action == "threat_resist":
                 actor = self._guixu_actor(cycle, str(pending_threat["actor_id"]))
                 session["pending_threat"] = None
+                session["threat_cooldown"] = 1
                 result, combat_summary = self._guixu_fight(
                     game, dungeon, cycle, session, actor, rng, player_defending=True,
                 )
@@ -1091,13 +1182,15 @@ class GuixuSystemMixin:
         if (
             active_session is session and session and action not in {"enter", "threat_surrender", "threat_resist"}
             and not session.get("trapped")
+            and int(session.get("remaining_days", 0)) < before_days
         ):
             active_dungeon, active_cycle = self._guixu_cycle_and_definition(
                 game, str(session["dungeon_id"]),
             )
-            self._maybe_guixu_npc_threat(
-                game, active_dungeon, active_cycle, session, rng,
-            )
+            betrayed = self._guixu_team_tick(game, active_dungeon, active_cycle, session, rng)
+            if not betrayed:
+                self._guixu_offer_team(game, active_cycle, session)
+                self._maybe_guixu_npc_threat(game, active_dungeon, active_cycle, session, rng)
 
         game.history.append(HistoryRecord(
             history_event, 1, game.player.age, "归墟行动", action, result, summary,
@@ -1280,6 +1373,13 @@ class GuixuSystemMixin:
         session = copy.deepcopy(game.guixu_state.get("player_session"))
         if session:
             dungeon, cycle = self._guixu_cycle_and_definition(game, str(session["dungeon_id"]))
+            session["transferable_treasures"] = [{"pool_entry_id":row["pool_entry_id"], "name":definition["name"]}
+                for row, definition in self._guixu_transferable_player_entries(game, dungeon, cycle, session)]
+            session["companions"] = [{
+                "actor_id":actor["actor_id"], "name":actor["name"],
+                "has_treasure":any(row.get("holder_id") == actor["actor_id"] and row.get("resolution") == "held" for row in cycle.get("round_entries", [])),
+                "empty_intervals": max(0, int(session.get("action_serial", 0)) - int(actor.get("empty_since_action", session.get("action_serial", 0)))),
+            } for actor in cycle.get("roster", []) if actor["actor_id"] in session.get("recruited_actor_ids", []) and actor.get("status") == "recruited"]
             session["dungeon_name"] = dungeon["name"]
             session["return_days"] = self._guixu_return_days(str(session["layer_id"]))
             session["layers"] = [{

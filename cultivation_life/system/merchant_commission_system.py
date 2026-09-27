@@ -8,7 +8,7 @@ import math
 import random
 from functools import lru_cache
 
-from ..content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, WORLD_SYSTEMS
+from ..content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, WORLD_SYSTEMS, restricted_acquisition
 from ..models import Player
 from ..rules import add_item
 from ..runtime import now_iso
@@ -91,6 +91,8 @@ class MerchantCommissionMixin:
         return f"{WORLD_SYSTEMS['world_names'][world]}修士关系：" + '；'.join(facts) + ('；神机榜线索：' + '；'.join(clues) if clues else '')
 
     def _merchant_commission_available(self, order):
+        if restricted_acquisition(str(order.get('kind','')), str(order.get('definition_id',''))):
+            return False
         if order.get("commission_version", 1) < 2:
             return True
         if order["kind"] == "item":

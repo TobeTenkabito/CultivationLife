@@ -9,6 +9,7 @@ from typing import Any
 # Moved methods still use this module's globals; retain the imports below.
 
 from ..content_registry import (
+    restricted_acquisition,
     GUIXU_EXCLUSIVE_ITEM_IDS, ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS,
     REALMS, TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES, WORLD_SYSTEMS,

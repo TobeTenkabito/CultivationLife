@@ -1651,21 +1651,24 @@ GUIXU_TIDE_CONTENT = copy.deepcopy(CONTENT_DOCUMENTS.get(
     "guixu_tide.json", {"schema_version": 1, "settings": {}, "dungeons": []},
 ))
 GUIXU_EXCLUSIVE_ITEM_IDS = frozenset(
-    str(entry["content_id"])
-    for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
-    for entry in dungeon.get("treasure_pool", [])
-    if entry.get("kind") == "item" and entry.get("exclusive_source") == "guixu_tide"
+    item.id for item in CONTENT.items.values() if "guixu_tide" in item.tags
 )
 GUIXU_EXCLUSIVE_TECHNIQUE_IDS = frozenset(
-    str(entry["content_id"])
-    for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", [])
-    for entry in dungeon.get("treasure_pool", [])
-    if entry.get("kind") == "technique" and entry.get("exclusive_source") == "guixu_tide"
+    key for key in CONTENT.techniques if key.startswith("TECH_GUIXU_")
 )
 ITEM_CATALOG = CONTENT.items
 TECHNIQUE_CATALOG = CONTENT.techniques
 TRANSFORMATION_CATALOG = CONTENT.transformations
-MARKET_GOODS = CONTENT.market_goods
+
+def restricted_acquisition(kind: str, content_id: str) -> bool:
+    """Definitions may live in the base game without becoming generic loot."""
+    if kind == "technique":
+        return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
+    return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "heroic_progeny_elixir"
+
+
+MARKET_GOODS = tuple(row for row in CONTENT.market_goods
+                     if not restricted_acquisition(str(row["kind"]), str(row["content_id"])))
 REALMS = CONTENT.realms
 PATH_NAMES = CONTENT.path_names
 KARMA_FACTORS = CONTENT.karma_factors

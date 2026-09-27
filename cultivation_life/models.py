@@ -177,6 +177,8 @@ class SectNpc:
     # describe the disguise seen by insufficient divine sense.
     concealed_realm_index: int | None = None
     concealed_layer: int | None = None
+    family_traits: dict[str, Any] = field(default_factory=dict)
+    family_combat_bonus: float = 0.0
 
     def __post_init__(self) -> None:
         if self.gender not in {"male", "female"}:
@@ -360,6 +362,7 @@ class Player:
     # Consumed by the next valid entwine interaction.  Kept separate from the
     # realm table so medicine can still work when natural conception is zero.
     next_companion_conception_bonus: float = 0.0
+    guaranteed_progeny: bool = False
     breakthrough_pity: dict[str, int] = field(default_factory=dict)
     joint_spirit_crossing: dict[str, Any] | None = None
     joint_friend_crossing: list[dict[str, Any]] = field(default_factory=list)
@@ -755,6 +758,7 @@ class GameState:
     sect_relations: dict[str, dict[str, Any]] = field(default_factory=dict)
     story_trigger_attempts: dict[str, int] = field(default_factory=dict)
     family: SectState | None = None
+    family_state: dict[str, Any] = field(default_factory=dict)
     player_bounties: list[dict[str, Any]] = field(default_factory=list)
     governance_actions: dict[str, int] = field(default_factory=dict)
     market_realm_index: int | None = None
@@ -822,6 +826,7 @@ class GameState:
             "sect_relations": self.sect_relations,
             "story_trigger_attempts": self.story_trigger_attempts,
             "family": self.family.to_dict() if self.family else None,
+            "family_state": copy.deepcopy(self.family_state),
             "player_bounties": self.player_bounties,
             "governance_actions": self.governance_actions,
             "market_realm_index": self.market_realm_index,
@@ -874,6 +879,7 @@ class GameState:
             sect_relations=dict(value.get("sect_relations", {})),
             story_trigger_attempts={str(key): int(count) for key, count in value.get("story_trigger_attempts", {}).items()},
             family=SectState.from_dict(value["family"]) if value.get("family") else None,
+            family_state=copy.deepcopy(value.get("family_state", {})),
             player_bounties=list(value.get("player_bounties", [])),
             governance_actions={str(key): int(age) for key, age in value.get("governance_actions", {}).items()},
             market_realm_index=value.get("market_realm_index"),

@@ -25,6 +25,7 @@ from ..system.intrigue_system import IntrigueSystemMixin
 from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin
 from ..system.guixu_system import GuixuSystemMixin
+from ..system.family_system import FamilySystemMixin
 from ..system.tianji_system import TianjiSystemMixin
 from ..system.merchant_system import MerchantSystemMixin
 from . import engine_world_runtime as world_runtime
@@ -55,7 +56,7 @@ from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 
 
-class GameEngine(MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -782,7 +783,10 @@ class GameEngine(MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageS
         return world_relationships._try_conceive_child(self._dependencies.world_relationships, game, rng)
 
     def _annual_offspring_and_family_update(self, game: GameState, rng: random.Random) -> list[str]:
-        return world_relationships._annual_offspring_and_family_update(self._dependencies.world_relationships, game, rng)
+        self._family_register_children(game)
+        news = world_relationships._annual_offspring_and_family_update(self._dependencies.world_relationships, game, rng)
+        news.extend(self._family_annual_governance(game, rng))
+        return news
 
     def _relationship_cultivation_perception(self, game: GameState, person: dict[str, Any], title: str='故交') -> dict[str, Any]:
         'Apply the same secret-art visibility rules to compact relationship snapshots.'
@@ -962,13 +966,15 @@ class GameEngine(MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageS
         return world_view._public_world_route(self._dependencies.world_view, game)
 
     def _public_family(self, game: GameState) -> dict[str, Any]:
-        return faction_view._public_family(self._dependencies.faction_view, game)
+        return self._family_presentation(game, faction_view._public_family(self._dependencies.faction_view, game))
 
     def _public_governance(self, game: GameState) -> dict[str, Any]:
         return faction_view._public_governance(self._dependencies.faction_view, game)
 
     def _public_faction(self, game: GameState) -> dict[str, Any]:
-        return faction_view._public_faction(self._dependencies.faction_view, game)
+        result = faction_view._public_faction(self._dependencies.faction_view, game)
+        result["total_power"] = sum(float(row.get("combat_power", 0)) for row in result.get("roster", []))
+        return result
 
     def _public_sect_diplomacy(self, game: GameState, sect: SectState) -> list[dict[str, Any]]:
         return faction_view._public_sect_diplomacy(self._dependencies.faction_view, game, sect)
