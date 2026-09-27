@@ -8,24 +8,24 @@ import shutil
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.39.2'
+VERSION='1.39.3'
 
 
 def main():
     logs={name:(ROOT/'build'/name).read_text(encoding='utf-8',errors='replace') for name in (
-        'release-1392-tests.log','android-adapter-tests.log','android-acceptance.log',
-        'android-dlc-lifecycle.log','android-signed-initial.log','android-signed-upgrade.log',
-        'android-signature-verification.log','android-apk-metadata.log')}
-    passed=re.search(r'(\d+) passed in',logs['release-1392-tests.log'])
-    assert passed and 'failed' not in logs['release-1392-tests.log']
-    assert '5 passed' in logs['android-adapter-tests.log']
-    assert 'cold restart passed' in logs['android-acceptance.log']
-    assert 'offline cold start, bundled font, theme and save persistence passed' in logs['android-dlc-lifecycle.log']
-    for name in ('android-signed-initial.log','android-signed-upgrade.log'):
-        assert 'status=passed' in logs[name] and 'status=failed' not in logs[name]
-    assert 'Verifies' in logs['android-signature-verification.log']
-    assert "sdkVersion:'31'" in logs['android-apk-metadata.log']
-    assert 'application-debuggable' not in logs['android-apk-metadata.log']
+        'release-1393-tests.log','browser-character-1393.log','android-character-1393.log',
+        'android-signed-upgrade-1393.log','android-signed-initial-1393.log',
+        'android-signature-1393.log','android-metadata-1393.log')}
+    passed=re.search(r'(\d+) passed in',logs['release-1393-tests.log'])
+    assert passed and 'failed' not in logs['release-1393-tests.log']
+    assert 'state isolation passed' in logs['browser-character-1393.log']
+    for name in ('android-character-1393.log','android-signed-upgrade-1393.log','android-signed-initial-1393.log'):
+        assert 'status=passed' in logs[name] and 'status=failed' not in logs[name],name
+    assert 'Verifies' in logs['android-signature-1393.log']
+    assert "sdkVersion:'31'" in logs['android-metadata-1393.log']
+    assert "versionName='1.39.3-android.2'" in logs['android-metadata-1393.log']
+    assert "versionCode='2'" in logs['android-metadata-1393.log']
+    assert 'application-debuggable' not in logs['android-metadata-1393.log']
     lint=(ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8')
     assert lint.strip()=='No issues found.'
     source=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
@@ -42,7 +42,7 @@ def main():
     target=ROOT/f'dist/浮生问道-v{VERSION}-Android12.apk'
     shutil.copy2(source,target)
     manifest={
-        'base_version':VERSION,'android_version':'1.39.2-android.1','version_code':1,
+        'base_version':VERSION,'android_version':'1.39.3-android.2','version_code':2,
         'application_id':'com.fusheng.wendao','min_sdk':31,'target_sdk':31,
         'included_abis':['arm64-v8a','x86_64'],'tested_android':'Android 12 / API 31',
         'tested_abi':'x86_64','tested_webview':'91.0.4472.114','physical_device_tested':False,
@@ -51,16 +51,15 @@ def main():
         'save_schema':5,'save_import_export':False,'offline':True,'release_debuggable':False,
         'validation':[
             f'{passed.group(1)} Python regressions passed',
-            'Android asset parity, private root and loopback authorization tests passed',
-            'Six themes: native touch actions, panels and Android back passed',
-            'Delete/cancel, background, rotation and cold restart passed',
-            'Six DLC off/on process restarts and DLC API smoke tests passed',
-            'Signed release APK installation, six themes, real advance and native back passed',
-            'Same-signature reinstall, offline cold start, saved character and theme retention passed',
+            'Android asset parity, private root and loopback authorization regressions passed',
+            'Six themes, four browser widths and five populated character lists passed',
+            'Signed Android 12 release: same character layout fixtures and game-state isolation passed',
+            'Signed release APK: six themes, real advance and native back passed',
+            'v1.39.2 to v1.39.3 same-signature upgrade: offline saved character, progress and theme retained',
             'APK signature verified; release Android Lint: no issues found',
         ],
     }
-    report=ROOT/'dist/release-1.39.2-android.1.json'
+    report=ROOT/'dist/release-1.39.3-android.2.json'
     report.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     archive=ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip'
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as package:
@@ -69,14 +68,14 @@ def main():
             package.write(path,name)
     with zipfile.ZipFile(archive) as package: assert package.testzip() is None
     # Share the exact release screenshots, after waiting for WebView's visual-state fence.
-    gallery=ROOT/'design/android-1.39.2';gallery.mkdir(parents=True,exist_ok=True)
+    gallery=ROOT/'design/android-1.39.3';gallery.mkdir(parents=True,exist_ok=True)
     names=['松烟书院','月下观星','青玉留白','丹砂金阙','江山行卷','竹简纪年']
     cards=[]
     for theme,name in zip('abcdef',names):
-        filename=f'release-{theme}.png'
-        shutil.copy2(ROOT/'build/android-signed-screenshots/verification'/filename,gallery/filename)
+        filename=f'sect-1393-{theme}.png'
+        shutil.copy2(ROOT/'build/android-1393-screenshots/verification'/filename,gallery/filename)
         cards.append(f'<figure><figcaption>{theme.upper()} · {name}</figcaption><a href="{filename}"><img src="{filename}" alt="{name}安卓截图" loading="lazy"></a></figure>')
-    (gallery/'index.html').write_text('''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>浮生问道 · Android 12 首版</title><style>body{margin:0;padding:36px;background:#eeeae0;color:#283c32;font:16px/1.7 system-ui}h1{font:32px Georgia,serif}p{color:#697065}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}figure{margin:0;padding:16px;background:#f9f6ed;border:1px solid #d5d9ca;border-radius:16px}figcaption{margin-bottom:12px}img{width:100%;height:auto;display:block;border-radius:12px}a{color:inherit}</style><h1>浮生问道 · Android 12 首版</h1><p>本体 v1.39.2 · 正式签名 APK · 六主题独立布局<br>截图来自 Android 12 / WebView 91 模拟器；点击查看原图。</p><div class="grid">'''+''.join(cards)+'</div></html>',encoding='utf-8')
+    (gallery/'index.html').write_text('''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>浮生问道 · Android 12 人物界面修复</title><style>body{margin:0;padding:36px;background:#eeeae0;color:#283c32;font:16px/1.7 system-ui}h1{font:32px Georgia,serif}p{color:#697065}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}figure{margin:0;padding:16px;background:#f9f6ed;border:1px solid #d5d9ca;border-radius:16px}figcaption{margin-bottom:12px}img{width:100%;height:auto;display:block;border-radius:12px}a{color:inherit}</style><h1>浮生问道 · Android 12 人物界面修复</h1><p>本体 v1.39.3 · 正式签名 APK · 六主题独立布局<br>截图来自 Android 12 / WebView 91 模拟器；点击查看原图。</p><div class="grid">'''+''.join(cards)+'</div></html>',encoding='utf-8')
     print(json.dumps({'apk':str(target),'bytes':manifest['apk_bytes'],'sha256':manifest['apk_sha256'],
                       'archive':str(archive),'preview':str(gallery/'index.html')},ensure_ascii=False))
 

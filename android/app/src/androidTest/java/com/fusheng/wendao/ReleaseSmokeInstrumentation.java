@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -88,10 +89,34 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.39.2' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.39.3' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("upgrade")) {
+            if(phase.equals("characters")) {
+                async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'人物布局验收',spirit_root:'supreme_metal',path:'dao',seed:1393,preset_id:'core'})});render(g);return g.id;})()");
+                try(java.io.InputStream input=getContext().getAssets().open("character_layout.js")) {
+                    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
+                    byte[] chunk=new byte[4096];int length;
+                    while((length=input.read(chunk))!=-1) buffer.write(chunk,0,length);
+                    js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
+                }
+                String before=(String)js("JSON.stringify(game)");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
+                    async("GameThemes.saved");
+                    for(String panel:new String[]{"faction","world-npc","family","relationship","sage"}) {
+                        js("CharacterLayoutProbe.mount('"+panel+"')");Thread.sleep(1100);
+                        String failures=(String)js("JSON.stringify(CharacterLayoutProbe.check('"+panel+"'))");
+                        check("[]".equals(failures),theme+" / "+panel+": "+failures);
+                        if(panel.equals("faction")) {
+                            js("(()=>{const c=document.querySelector('#faction-card'),r=document.querySelector('#faction-roster');c.scrollTop+=r.getBoundingClientRect().top-c.getBoundingClientRect().top-110;})()");
+                            capture("sect-1393-"+theme);
+                        }
+                        js("UtilityPanels.close('"+panel+"')");
+                    }
+                }
+                check(before.equals(js("JSON.stringify(game)")),"Character rendering changed game state");
+            } else if(phase.equals("upgrade")) {
                 String id=marker.getString("id",null);
                 check(id!=null,"Missing upgrade verification save");
                 check("f".equals(js("document.documentElement.dataset.theme")),"Theme lost during upgrade");

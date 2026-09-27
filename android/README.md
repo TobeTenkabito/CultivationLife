@@ -1,6 +1,6 @@
-# 浮生问道 · 安卓首版
+# 浮生问道 · Android 12
 
-本体 **v1.39.2**，安卓版本 **1.39.2-android.1**（versionCode 1）。以 Android 12 / API 31 为适配目标，APK 包含 arm64-v8a 手机和 x86_64 模拟器两种架构。其他系统版本未列入本轮验收；不提供 32 位运行时。
+本体 **v1.39.3**，安卓版本 **1.39.3-android.2**（versionCode 2）。以 Android 12 / API 31 为适配目标，APK 包含 arm64-v8a 手机和 x86_64 模拟器两种架构。其他系统版本未列入本轮验收；不提供 32 位运行时。
 
 ## 游戏与安装
 
@@ -29,6 +29,8 @@ Gradle 自动从仓库复制 Python 源码、打包 content / web / dlc，不维
 本地服务只监听随机的 127.0.0.1 端口，使用每次进程启动生成的随机会话令牌，并检查 Host / Origin。WebView 限制在该源，不申请存储权限。游戏请求串行结算，资源更新不触碰 data 目录。发布包关闭 WebView 调试。
 
 ## 验收
+
+v1.39.3 增加 `tests/browser_character_layout_1393.py`：六主题、四种宽度、宗门／世界修士／家族／同行／圣贤门人的长文本与多操作布局回归。同一份人物样例由独立测试 APK 的 `phase=characters` 在 Android 12 WebView 中执行；测试样例不进入正式 APK。另验证 v1.39.2 覆盖升级后的离线存档、进度及主题保留。
 
 `tests/android_acceptance_1392.py --serial <本工程的模拟器序号>` 使用原生触摸检查六主题、行动、功能窗口、删除确认、后台／旋转和进程重启。`tests/android_dlc_lifecycle_1392.py` 检查 DLC 冷重载和离线存档。仅在独立测试模拟器运行这些测试。
 
