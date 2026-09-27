@@ -11,6 +11,7 @@ from ..rules import add_item, combat_power, remove_item
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..world_state import race_pair, RELATION_LABELS
 from .crafting_system import remove_crafted_artifact
+from .faction_geography import can_enter_faction, require_faction_admission
 
 
 class FamilySystemMixin:
@@ -47,7 +48,7 @@ class FamilySystemMixin:
         for child in game.player.offspring:
             if (child.get('alive', True) and child.get('cultivation_started')
                     and child.get('world') == family.world and child['id'] not in known
-                    and not child.get('family_traits', {}).get('expelled')):
+                    and not child.get('family_traits', {}).get('expelled') and can_enter_faction(family, child)):
                 member = self._family_child_npc(child)
                 member.family_traits['kin'] = True
                 family.npcs.append(member)
@@ -209,6 +210,7 @@ class FamilySystemMixin:
                     '姻亲族人', rank, 1, max(18, min(npc.age, 40)), max(110, int(REALMS[rank].lifespan[0])) if REALMS[rank].lifespan else None,
                     spirit_root=self._random_npc_root(rank, rng), world=family.world, path=family.path,
                     gender='female' if npc.gender == 'male' else 'male', affinity=50, family_traits={'kin':True})
+                require_faction_admission(family, partner)
                 family.npcs.append(partner)
             npc.family_traits['spouse_id'] = partner.id
             partner.family_traits['spouse_id'] = npc.id
@@ -221,6 +223,7 @@ class FamilySystemMixin:
                 raise ValueError('家族须与目标宗门结盟或确立依附关系')
             if npc.faction_id:
                 raise ValueError('该族人已经在宗门任职')
+            require_faction_admission(sect, npc)
             npc.faction_id = sect.id
             self._family_assign_office(game, npc, sect)
             summary = f'{npc.name}进入{sect.name}，保留族籍。' + ('凭修为获得议事权。' if self._family_decision_member(game,npc,sect) else '从门下历练起步。')
@@ -379,7 +382,7 @@ class FamilySystemMixin:
         family.extinct = True
         for npc in family.npcs:
             child = next((c for c in game.player.offspring if c.get('id')==npc.id),None)
-            if absorber and npc.alive:
+            if absorber and npc.alive and can_enter_faction(absorber, npc):
                 npc.faction_id = absorber.id
                 if not any(n.id==npc.id for n in absorber.npcs):absorber.npcs.append(npc)
             elif not child and npc.alive:

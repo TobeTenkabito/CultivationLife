@@ -1,0 +1,720 @@
+{
+  "spirit": {
+    "rng": "6242ada7ef7995e1e432a91e6642aa6122970fd182c3ea920d34b9a1de23b92c",
+    "world": "spirit",
+    "realm": [
+      5,
+      3
+    ],
+    "hp": 2602,
+    "mp": 3513,
+    "market": [
+      [
+        "purple_cloud_ginseng_seed",
+        18
+      ],
+      [
+        "zique_thunder",
+        19586
+      ],
+      [
+        "TECH_BEAST_TRANSFORMATION",
+        4795
+      ],
+      [
+        "zique_fire",
+        8732
+      ],
+      [
+        "earth_vein_lingzhi_seed",
+        42
+      ],
+      [
+        "yin_yang_convergence_flower",
+        58657
+      ],
+      [
+        "spirit_star_gold",
+        51252
+      ],
+      [
+        "base_spirit_5_forge_crystal",
+        6725
+      ],
+      [
+        "base_spirit_3_forge_crystal",
+        349
+      ],
+      [
+        "progression_spirit_5_water",
+        7654
+      ],
+      [
+        "progression_spirit_1_space",
+        18
+      ],
+      [
+        "spirit_cloud_resin",
+        71079
+      ]
+    ],
+    "friends": [
+      [
+        "probe-friend",
+        "spirit",
+        true
+      ]
+    ],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_FRIEND_CROSSING"
+    ]
+  },
+  "celestial": {
+    "rng": "857643902dd439bc6f5e35b699daa1476869626b8b39c9476fb4d441372d36f3",
+    "world": "celestial",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 90617,
+    "mp": 0.0,
+    "market": [
+      [
+        "immortal_embryo_elixir",
+        172272984
+      ],
+      [
+        "TECH_NINE_HEAVENS_THUNDER",
+        426498791
+      ],
+      [
+        "cloudstep_immortal_boots",
+        311088883
+      ],
+      [
+        "TECH_HEAVENLY_RIVER_REFINING",
+        238821052
+      ],
+      [
+        "immortal_jade_marrow",
+        188292617
+      ],
+      [
+        "immortal_embryo_elixir",
+        175748368
+      ],
+      [
+        "celestial_pure_yang_dew",
+        6408333
+      ],
+      [
+        "celestial_cloud_jade",
+        7913989
+      ],
+      [
+        "tianji-mat-019",
+        497902693437294
+      ],
+      [
+        "celestial_sun_law_crystal",
+        8813740
+      ],
+      [
+        "celestial_white_gold_token",
+        7445524
+      ],
+      [
+        "celestial_law_dew",
+        12613667
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_CELESTIAL_ASCENSION_COMPLETE"
+    ]
+  },
+  "asura": {
+    "rng": "34262e41987829a03b886edc087d3a2efcf3773f809d7b02dd6087912cd4be78",
+    "world": "asura",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 90617,
+    "mp": 125412,
+    "market": [
+      [
+        "asura_war_flame",
+        6876637
+      ],
+      [
+        "asura_blood_steel",
+        7929848
+      ],
+      [
+        "tianji-mat-013",
+        629284990951810
+      ],
+      [
+        "asura_scorched_earth_stake",
+        8589297
+      ],
+      [
+        "asura_blood_iron_flag",
+        8525690
+      ],
+      [
+        "asura_war_ichor",
+        14837947
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_ASURA_ASCENSION_COMPLETE"
+    ]
+  },
+  "demon": {
+    "rng": "11eeb45bb808bb22a57566998c0bb658d350eb2d46674a6e31d60ac8fb9b77c1",
+    "world": "demon",
+    "realm": [
+      5,
+      3
+    ],
+    "hp": 2602,
+    "mp": 3513,
+    "market": [
+      [
+        "dew_grass_seed",
+        7
+      ],
+      [
+        "demon_soulflame_crystal",
+        8357
+      ],
+      [
+        "TECH_HEAVEN_DEMON_VOID",
+        7744
+      ],
+      [
+        "starlight_dharma_robe",
+        9559
+      ],
+      [
+        "starlight_dharma_robe",
+        8178
+      ],
+      [
+        "starlight_dharma_robe",
+        8719
+      ],
+      [
+        "demon_blood_copper",
+        60
+      ],
+      [
+        "demon_balefire",
+        8504
+      ],
+      [
+        "base_demon_1_quench_dew",
+        14
+      ],
+      [
+        "progression_demon_2_wind",
+        68
+      ],
+      [
+        "progression_demon_3_law",
+        405
+      ],
+      [
+        "demon_blood_marrow",
+        120
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_DEMONIC_ASCENSION"
+    ]
+  },
+  "true_demon": {
+    "rng": "11eeb45bb808bb22a57566998c0bb658d350eb2d46674a6e31d60ac8fb9b77c1",
+    "world": "true_demon",
+    "realm": [
+      5,
+      3
+    ],
+    "hp": 2602,
+    "mp": 3513,
+    "market": [
+      [
+        "dew_grass_seed",
+        7
+      ],
+      [
+        "moque_earth",
+        8175
+      ],
+      [
+        "moque_metal",
+        8104
+      ],
+      [
+        "nine_curve_herb_seed",
+        608
+      ],
+      [
+        "nine_curve_herb_seed",
+        520
+      ],
+      [
+        "nine_curve_herb_seed",
+        555
+      ],
+      [
+        "base_true_demon_4_quench_dew",
+        1356
+      ],
+      [
+        "true_demon_black_sinew",
+        59152
+      ],
+      [
+        "base_true_demon_4_forge_crystal",
+        1792
+      ],
+      [
+        "progression_true_demon_1_soul",
+        20
+      ],
+      [
+        "progression_true_demon_3_yang",
+        430
+      ],
+      [
+        "true_demon_void_tar",
+        100477
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_DEMONIC_ASCENSION"
+    ]
+  },
+  "spirit:human:roundtrip": {
+    "rng": "97f1a272cd498499d18ee9f846e9d975c51b618b09389bcf80d5011cc0fb82a9",
+    "world": "spirit",
+    "realm": [
+      8,
+      9
+    ],
+    "hp": 22617.0,
+    "mp": 20849.600000000002,
+    "market": [
+      [
+        "earth_vein_lingzhi_seed",
+        44
+      ],
+      [
+        "nine_heavens_spirit_marrow",
+        774113
+      ],
+      [
+        "creation_jade_marrow",
+        733692
+      ],
+      [
+        "TECH_CHAOS_OPENING",
+        2405990
+      ],
+      [
+        "TECH_CHAOS_OPENING",
+        2391543
+      ],
+      [
+        "qilin_essence",
+        2804201
+      ],
+      [
+        "base_spirit_4_quench_dew",
+        1265
+      ],
+      [
+        "base_spirit_5_quench_dew",
+        4462
+      ],
+      [
+        "base_spirit_3_forge_crystal",
+        404
+      ],
+      [
+        "spirit_five_phase_core",
+        727758
+      ],
+      [
+        "progression_spirit_7_star",
+        244353
+      ],
+      [
+        "spirit_cloud_resin",
+        65630
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "true_demon:demon:roundtrip": {
+    "rng": "c593804838131784a8013d548369e8697af32f85a98c320e3fcb9a39ffda3a38",
+    "world": "true_demon",
+    "realm": [
+      8,
+      9
+    ],
+    "hp": 22617.0,
+    "mp": 20849.600000000002,
+    "market": [
+      [
+        "nine_curve_herb_seed",
+        529
+      ],
+      [
+        "chaos_dao_bell",
+        1834231
+      ],
+      [
+        "true_demon_primordial_heart_iron",
+        2608530
+      ],
+      [
+        "chaos_dao_bell",
+        1941370
+      ],
+      [
+        "true_demon_primordial_heart_iron",
+        2304379
+      ],
+      [
+        "TECH_PRIMORDIAL_DEMON_TRANSFORMATION",
+        3055464
+      ],
+      [
+        "base_true_demon_7_quench_dew",
+        260968
+      ],
+      [
+        "true_demon_abyss_iron",
+        65920
+      ],
+      [
+        "base_true_demon_1_quench_dew",
+        16
+      ],
+      [
+        "progression_true_demon_6_law",
+        81765
+      ],
+      [
+        "progression_true_demon_6_fire",
+        72722
+      ],
+      [
+        "true_demon_void_tar",
+        102297
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "celestial:spirit:roundtrip": {
+    "rng": "ff66c8a113e6151e238fd2f76adb9d81e255ed9c86a5aadfc031ade667981822",
+    "world": "celestial",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 54370.2,
+    "mp": 50164.8,
+    "market": [
+      [
+        "TECH_HEAVENLY_RIVER_REFINING",
+        236340538
+      ],
+      [
+        "boundary_river_silver",
+        110910078
+      ],
+      [
+        "TECH_PRIMORDIAL_IMMORTAL_LIGHT",
+        201087033
+      ],
+      [
+        "TECH_PRIMORDIAL_IMMORTAL_LIGHT",
+        233678910
+      ],
+      [
+        "immortal_embryo_elixir",
+        164160405
+      ],
+      [
+        "cloudstep_immortal_boots",
+        293067467
+      ],
+      [
+        "celestial_pure_yang_dew",
+        8889998
+      ],
+      [
+        "celestial_cloud_jade",
+        6905704
+      ],
+      [
+        "tianji-mat-028",
+        538381768855537
+      ],
+      [
+        "celestial_jade_dew_node",
+        7417422
+      ],
+      [
+        "celestial_sun_law_crystal",
+        9668394
+      ],
+      [
+        "celestial_law_dew",
+        12001109
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "asura:true_demon:roundtrip": {
+    "rng": "9e65eb85d0e8b44531bbdc8e06dca55f4934516128db6c958d60dff7936ef7fc",
+    "world": "asura",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 54370.2,
+    "mp": 50164.8,
+    "market": [
+      [
+        "asura_blood_steel",
+        7918260
+      ],
+      [
+        "asura_war_flame",
+        8867172
+      ],
+      [
+        "tianji-mat-008",
+        420625581996184
+      ],
+      [
+        "asura_blood_iron_flag",
+        8440532
+      ],
+      [
+        "asura_war_thunder_drum",
+        10035926
+      ],
+      [
+        "asura_war_ichor",
+        13361305
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "nether:phantom_underworld:roundtrip": {
+    "rng": "afe2383324ea07ac8a99889a5375cdc259b00e0c5f5cc18ac8e932382195399b",
+    "world": "nether",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 54370.2,
+    "mp": 50164.8,
+    "market": [
+      [
+        "nether_world_sap",
+        8275856
+      ],
+      [
+        "nether_worldtree_heart",
+        68678147
+      ],
+      [
+        "nether_true_spirit_scale",
+        6487461
+      ],
+      [
+        "nether_primordial_starbone",
+        89212516
+      ],
+      [
+        "nether_worldtree_stake",
+        9378816
+      ],
+      [
+        "nether_worldtree_resin",
+        13229432
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "nether:monster_realm:roundtrip": {
+    "rng": "afe2383324ea07ac8a99889a5375cdc259b00e0c5f5cc18ac8e932382195399b",
+    "world": "nether",
+    "realm": [
+      9,
+      1
+    ],
+    "hp": 54370.2,
+    "mp": 50164.8,
+    "market": [
+      [
+        "nether_world_sap",
+        8275856
+      ],
+      [
+        "nether_worldtree_heart",
+        68678147
+      ],
+      [
+        "nether_true_spirit_scale",
+        6487461
+      ],
+      [
+        "nether_primordial_starbone",
+        89212516
+      ],
+      [
+        "nether_worldtree_stake",
+        9378816
+      ],
+      [
+        "nether_worldtree_resin",
+        13229432
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  },
+  "hell:human:roundtrip": {
+    "rng": "4d53ee0365b99ac6d8773e7fd8b89fd0b962a1fb9b043180c961390d42b8e940",
+    "world": "hell",
+    "realm": [
+      8,
+      9
+    ],
+    "hp": 22617.0,
+    "mp": 20849.600000000002,
+    "market": [
+      [
+        "void_soul_elixir",
+        12727
+      ],
+      [
+        "mingque_earth",
+        9492
+      ],
+      [
+        "mingque_earth",
+        9824
+      ],
+      [
+        "TECH_NETHER_TIDE_CANON",
+        9779
+      ],
+      [
+        "void_soul_elixir",
+        11612
+      ],
+      [
+        "mingque_fire",
+        9563
+      ],
+      [
+        "hell_forgetful_water",
+        7355
+      ],
+      [
+        "base_hell_5_quench_dew",
+        5792
+      ],
+      [
+        "base_hell_7_quench_dew",
+        262826
+      ],
+      [
+        "progression_hell_5_neutral",
+        9166
+      ],
+      [
+        "progression_hell_4_fire",
+        1634
+      ],
+      [
+        "hell_forgetful_mud",
+        775
+      ]
+    ],
+    "friends": [],
+    "history": [
+      "SYS_BIRTH",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_WAR_DECLARED",
+      "SYS_CROSS_WORLD",
+      "SYS_CROSS_WORLD"
+    ]
+  }
+}

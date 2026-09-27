@@ -342,6 +342,12 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         return None, effect.get("text", "新的险局接踵而至。")
     if kind == "enter_spirit_realm":
         destination = deps._ascension_destination(player.path)
+        from copy import deepcopy
+        from ...system.world_transition_system import EntourageManifest
+        plan = deps._plan_world_transition(game, destination, reason="穿越空间节点")
+        original_game, original_player = game, player
+        game = deepcopy(game)
+        player = game.player
         lost_puppets = len(player.puppets)
         player.awaiting_spirit_realm_crossing = False
         joint_crossing = player.joint_spirit_crossing
@@ -389,13 +395,20 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                 if npc:
                     npc.alive = False
                     npc.death_reason = "偷渡界壁时迷失于空间风暴"
-        deps._prepare_permanent_world_transition(
-            game, keep_companion=crossed_together,
-            keep_friend_ids=friend_survivor_ids,
-        )
-        player.world = destination
-        player.location_id = deps.maps.default_location(destination)
-        deps._clear_market(game)
+        snapshots = []
+        selected_ids = {str(row.get("id", "")) for row in crossing_friends}
+        if crossed_together:
+            selected_ids.add(str(companion["id"]))
+        for npc_id in selected_ids:
+            npc = deps._find_npc(game, npc_id)
+            row = next((r for r in [*player.dao_friends, *([companion] if companion else [])] if str(r.get("id")) == npc_id), None)
+            alive = row.get("alive", True) if row else bool(npc and npc.alive)
+            snapshots.append((npc_id, alive, (row or {}).get("death_reason") or (npc.death_reason if npc and not alive else f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}")))
+        entourage = EntourageManifest(crossed_together, frozenset(friend_survivor_ids),
+                                      tuple(friend_survivors), tuple(friend_fallen), tuple(snapshots))
+        game, player = original_game, original_player
+        player.awaiting_spirit_realm_crossing = False
+        deps._apply_world_transition(game, plan, entourage=entourage)
         destination_name = WORLD_SYSTEMS["world_names"][destination]
         companion_text = f" {companion['name']}也与你一同落地，道侣关系得以保留。" if crossed_together else ""
         friend_text = ""

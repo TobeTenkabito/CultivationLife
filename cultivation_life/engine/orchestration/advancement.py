@@ -267,7 +267,7 @@ def _sense_training_step(
     )
     return (
         float(WORLD_SYSTEMS["demonic_cultivation"]["divine_sense_training_base"])
-        * (1 + sense.divine_sense_bonus * technique_scale(sense))
+        * (1 + sense.divine_sense_bonus * technique_scale(sense, "divine_sense_bonus"))
         * technique_environment_multiplier(sense, player.world, concentrations)
         * regional_multiplier
         * (1 + crafted_artifact_bonuses(player)["divine_sense_efficiency"])
@@ -286,7 +286,7 @@ def _body_training_step(
     return (
         rng.randint(*body_rules["progress_per_year"])
         * (1 + 0.04 * max(0, player.body_technique.grade - 1))
-        * player.body_technique.level_multiplier
+        * player.body_technique.stat_multiplier("body_breakthrough_bonus")
         * technique_environment_multiplier(player.body_technique, player.world, concentrations)
         * (
             float(WORLD_SYSTEMS.get("monster_cultivation", {}).get("body_training_multiplier", 1.5))

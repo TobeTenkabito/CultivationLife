@@ -442,6 +442,8 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
         and len([npc for npc in family.npcs if npc.alive]) < int(family_rules["max_members"])
     ):
         newcomer = deps._recruit_sect_npc(family, player.age, rng)
+        if newcomer is None:
+            return news
         newcomer.title = "外姓门人"
         summary = f"低阶散修{newcomer.name}请求依附{family.name}，列入外门。"
         game.history.append(HistoryRecord(

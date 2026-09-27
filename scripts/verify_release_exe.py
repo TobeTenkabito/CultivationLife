@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js']:
+            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -120,6 +120,16 @@ def verify(with_dlc):
             with urllib.request.urlopen(base + '/map-directory.js', timeout=5) as response:
                 assert b'window.MapDirectory' in response.read()
             assert all('境界序号' not in row.get('warning', '') for row in game['map']['locations'])
+            assert any(row.get('factions') for row in game['map']['locations'])
+            assert 'routes' in game['world_travel']
+            request = urllib.request.Request(base + '/api/games', method='POST',
+                data=json.dumps({'name':'剑诀验收','preset_id':'nascent','seed':1410}).encode(),
+                headers={'Content-Type':'application/json'})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                nascent = json.load(response)
+            sword = next(row for row in nascent['player']['known_techniques'] if row['id']=='TECH_COMMON_GUI')
+            assert sword['base_combat_bonus']==5000 and sword['growth_name']=='战斗'
+            assert sword['next_level_gains']['combat_bonus']>0
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

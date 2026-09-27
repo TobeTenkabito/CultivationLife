@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..faction_geography import can_enter_faction, require_faction_admission
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -158,6 +160,8 @@ class IntrigueResolutionMethods:
                               "新晋成员", realm_index, 1, age, lifespan, path=entity.path,
                               race=entity.allegiance_race or "human", world=entity.world,
                               affinity=rng.uniform(8, 28), faction_id=faction_id if kind == "sect" else None)
+                if not can_enter_faction(entity, npc):
+                    continue
                 entity.npcs.append(npc)
                 self._ensure_intrigue_personality(game, npc)
             record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 2)

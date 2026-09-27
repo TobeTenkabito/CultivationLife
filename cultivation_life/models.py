@@ -97,6 +97,7 @@ class Technique:
     required_body_training: int = 0
     possession_limit_bonus: int = 0
     ignore_possession_limit: bool = False
+    growth_preference: str = "balanced"
 
     def __post_init__(self) -> None:
         self.level = max(1, min(9, int(self.level)))
@@ -125,6 +126,38 @@ class Technique:
             1: 1.0, 2: 1.1, 3: 1.2, 4: 1.3, 5: 1.4, 6: 1.5,
             7: 1.8, 8: 2.4, 9: 3.0,
         }[self.level]
+
+    @property
+    def growth_name(self) -> str:
+        preference = self.category if self.category != "spiritual" else self.growth_preference
+        return {"balanced": "均衡", "main": "主修", "support": "辅修", "combat": "战斗",
+                "body": "炼体", "divine_sense": "神识", "transformation": "变化"}.get(preference, "均衡")
+
+    def stat_multiplier(self, stat: str) -> float:
+        """Level one always retains its base; specialized arts use their own curves."""
+        progress = self.level_multiplier - 1.0
+        preference = self.category if self.category != "spiritual" else self.growth_preference
+        weights = {
+            "main": {"opportunity_bonus": 1.8, "hp_bonus": .6, "mp_bonus": .8, "combat_bonus": .5},
+            "support": {"opportunity_bonus": .6, "hp_bonus": 1.6, "mp_bonus": 1.8, "combat_bonus": .5},
+            "combat": {"opportunity_bonus": .4, "hp_bonus": .5, "mp_bonus": .6, "combat_bonus": 2.2},
+        }
+        if preference in weights:
+            return 1.0 + progress * weights[preference].get(stat, .7)
+        if preference in {"body", "divine_sense", "transformation"}:
+            specialized = {
+                "body": {"body_breakthrough_bonus", "hp_bonus"},
+                "divine_sense": {"divine_sense_bonus"},
+                "transformation": {"transformation_capacity", "transformation_space"},
+            }[preference]
+            if stat in specialized:
+                # Continuous, category-specific progression, independent of the generic thresholds.
+                steps = self.level - 1
+                rate, acceleration = {"body": (.20, .016), "divine_sense": (.26, .025),
+                                      "transformation": (.18, .012)}[preference]
+                return 1.0 + rate * steps + acceleration * steps * steps
+            return 1.0 + .35 * progress
+        return self.level_multiplier
 
 
 @dataclass(frozen=True)
@@ -209,6 +242,8 @@ class SectState:
     founded_by_npc: bool = False
     founder_npc_id: str | None = None
     allegiance_race: str | None = None
+    location_id: str | None = None
+    player_founded_site: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -220,6 +255,8 @@ class SectState:
             "kind": self.kind, "founded_by_npc": self.founded_by_npc,
             "founder_npc_id": self.founder_npc_id,
             "allegiance_race": self.allegiance_race,
+            "location_id": self.location_id,
+            "player_founded_site": self.player_founded_site,
         }
 
     @classmethod
@@ -239,6 +276,8 @@ class SectState:
             founded_by_npc=bool(value.get("founded_by_npc", False)),
             founder_npc_id=value.get("founder_npc_id"),
             allegiance_race=value.get("allegiance_race"),
+            location_id=value.get("location_id"),
+            player_founded_site=bool(value.get("player_founded_site", value.get("founded_by_player", False))),
         )
 
 
@@ -806,6 +845,7 @@ class GameState:
     created_with_game_version: str = BASE_GAME_VERSION
     last_saved_with_game_version: str = BASE_GAME_VERSION
     version: int = 5
+    map_war_last_encounter_unit: int = -2
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -853,6 +893,7 @@ class GameState:
             "guixu_state": self.guixu_state,
             "tianji_state": self.tianji_state,
             "settings": self.settings,
+            "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
             "world_rules_version": self.world_rules_version,
             "created_with_game_version": self.created_with_game_version,
             "last_saved_with_game_version": self.last_saved_with_game_version,
@@ -920,6 +961,7 @@ class GameState:
                 "guixu_event_popup": bool(value.get("settings", {}).get("guixu_event_popup", True)),
             },
             world_rules_version=value.get("world_rules_version", 1),
+            map_war_last_encounter_unit=int(value.get("map_war_last_encounter_unit", -2)),
             created_with_game_version=str(value.get("created_with_game_version", "pre-1.0.0")),
             last_saved_with_game_version=str(value.get("last_saved_with_game_version", "pre-1.0.0")),
             version=value.get("version", 1),

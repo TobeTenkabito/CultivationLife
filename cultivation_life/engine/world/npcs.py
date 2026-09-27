@@ -638,5 +638,8 @@ def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rn
     )
     npc.affinity = rng.uniform(-6, 10)
     npc.treasure_item_id = deps._select_npc_treasure(npc, rng)
+    from ...system.faction_geography import can_enter_faction
+    if not can_enter_faction(sect, npc):
+        return None
     sect.npcs.append(npc)
     return npc

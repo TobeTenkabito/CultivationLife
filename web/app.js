@@ -542,7 +542,7 @@ function render(data) {
   ) : [];
   crossing.classList.toggle('hidden', !canCross);
   crossing.dataset.operation = canCelestialCross ? 'celestial-ascension' : canAsuraCross ? 'asura-ascension' : 'spirit-crossing';
-  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? `飞升${p.world === 'human' ? '魔界' : '真魔界'}` : `偷渡${p.path === 'ghost' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
+  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? (p.world === 'human' ? '平移魔界' : '飞升真魔界') : `偷渡${p.path === 'ghost' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
   crossing.querySelector('span').textContent = canCelestialCross
     ? '开启九重飞升判定；第三、六、九关为可受雷伤减免影响的仙雷'
     : canAsuraCross
@@ -557,33 +557,15 @@ function render(data) {
   const worldTravel = data.world_travel || {};
   const crossWorld = $('#cross-world-action');
   const crossWorldSecondary = $('#cross-world-secondary-action');
-  const netherDestinations = worldTravel.can_descend_monster && worldTravel.can_descend_phantom
-    ? ['monster_realm', 'phantom_underworld'] : [];
-  const crossDestination = netherDestinations[0] || (worldTravel.can_return_human ? 'human' : worldTravel.can_return_spirit ? 'spirit' : worldTravel.can_return_hell ? 'hell' : worldTravel.can_return_demon ? 'demon' : worldTravel.can_return_true_demon ? 'true_demon' : worldTravel.can_descend_spirit ? 'spirit' : worldTravel.can_return_celestial ? 'celestial' : worldTravel.can_descend_true_demon ? 'true_demon' : worldTravel.can_return_asura ? 'asura' : worldTravel.can_descend_phantom ? 'phantom_underworld' : worldTravel.can_return_nether ? 'nether' : '');
-  crossWorld.classList.toggle('hidden', !crossDestination);
-  crossWorld.dataset.destination = crossDestination;
-  const secondaryDestination = netherDestinations[1] || '';
-  crossWorldSecondary.classList.toggle('hidden', !secondaryDestination);
-  crossWorldSecondary.dataset.destination = secondaryDestination;
-  const destinationNames = {human:'人界', spirit:'灵界', demon:'魔界', true_demon:'真魔界', hell:'地狱界', reincarnation:'轮回界', celestial:'仙界', asura:'修罗界', monster_realm:'妖界', phantom_underworld:'幻冥界', nether:'幽冥界'};
-  $('#cross-world-title').textContent = crossDestination ? `${netherDestinations.length ? '下界' : '返回'}${destinationNames[crossDestination]}` : '跨界移动';
-  $('#cross-world-secondary-title').textContent = secondaryDestination ? `下界${destinationNames[secondaryDestination]}` : '跨界移动';
-  $('#cross-world-secondary-hint').textContent = '真灵道果将封存至大乘九层；可随时重返幽冥界';
-  $('#cross-world-hint').textContent = worldTravel.can_descend_spirit
-    ? '仙境修为将受灵界法则压制至大乘九层；飞升按钮不会再次出现'
-    : worldTravel.can_descend_true_demon
-    ? '修罗道果将受真魔界法则压制至魔尊九层；可随时重返修罗界'
-    : worldTravel.can_descend_phantom
-    ? '真灵道果将受下界法则压制至大乘九层；可随时重返幽冥界'
-    : crossDestination === 'celestial'
-      ? '解除灵界压制，完整复原仙境道果'
-      : crossDestination === 'asura'
-        ? '解除真魔界压制，完整复原修罗道果'
-      : crossDestination === 'nether'
-        ? '解除妖界或幻冥界压制，完整复原真灵道果'
-      : ['human', 'demon'].includes(crossDestination)
-        ? `修为将受界面压制至${crossDestination === 'demon' ? '化魔' : '化神'}初期三层`
-        : `解除界面压制，完整复原${crossDestination === 'true_demon' ? '魔尊' : '大乘'}道果`;
+  const routes = worldTravel.routes || [];
+  [crossWorld, crossWorldSecondary].forEach((button, index) => {
+    const route = routes[index];
+    button.classList.toggle('hidden', !route);
+    button.dataset.destination = route?.destination || '';
+    const prefix = index ? '#cross-world-secondary' : '#cross-world';
+    $(`${prefix}-title`).textContent = route?.label || '跨界移动';
+    $(`${prefix}-hint`).textContent = route?.hint || '';
+  });
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
@@ -1173,7 +1155,17 @@ function renderIntrigue(system) {
       detail.textContent = member.is_player
         ? `${member.realm_name} · 玩家本人 · 有票`
         : `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
-      info.append(name, detail); row.appendChild(info);
+      info.append(name, detail);
+    if (art.next_level_gains) {
+      const gains = art.next_level_gains;
+      const growth = document.createElement('small'); growth.className = 'technique-growth';
+      const common = `机缘 +${percent(gains.opportunity_bonus)} · HP +${percent(gains.hp_bonus)} · MP +${percent(gains.mp_bonus)} · 战力 +${number(gains.combat_bonus)}`;
+      const specialty = art.category === 'body' ? `炼体突破 +${percent(gains.body_breakthrough_bonus)}`
+        : art.category === 'divine_sense' ? `神识修炼 +${percent(gains.divine_sense_bonus)}`
+        : art.category === 'transformation' ? `容量 +${gains.transformation_capacity} · 空间 +${gains.transformation_space}` : common;
+      growth.textContent = `下一级增益：${specialty}`; info.append(growth);
+    }
+    row.appendChild(info);
       if (section.control_authority) {
         const tools = document.createElement('div'); tools.className = 'intrigue-member-tools';
         [['reward','赏'],['punish','罚'],['dismiss','撤职'],['expel','逐出']].forEach(([action,label]) => {
@@ -3008,7 +3000,7 @@ function renderTechniques(slots) {
   const add = (role, technique, activeText) => {
     if (!technique) return;
     const row = document.createElement('div'); row.className = 'technique-row';
-    const name = document.createElement('b'); name.textContent = `${role} · ${technique.name} Lv.${technique.level} · 等级倍率 ×${Number(technique.level_multiplier || 1).toFixed(1)}`;
+    const name = document.createElement('b'); name.textContent = `${role} · ${technique.name} Lv.${technique.level} · ${technique.growth_name || "均衡"}倾向`;
     const effect = document.createElement('small'); effect.textContent = activeText(technique);
     row.append(name, effect); list.appendChild(row);
   };
@@ -3038,7 +3030,7 @@ function renderKnownTechniques(techniques) {
   if (!techniques.length) { list.innerHTML = '<p class="empty">尚无可配置功法。</p>'; return; }
   techniques.forEach(art => {
     const row = document.createElement('div'); row.className = 'known-technique';
-    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.category_name || '修仙'} · ${art.element_name}`;
+    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.growth_name || "均衡"}倾向 · ${art.category_name || '修仙'} · ${art.element_name}`;
     const sourceText = art.source_display || '灵源';
     const detail = document.createElement('small'); detail.textContent = art.category === 'body'
       ? `${sourceText} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（至 ${art.body_bonus_max_layer} 层） · 通用四维：机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`
@@ -3047,7 +3039,17 @@ function renderKnownTechniques(techniques) {
       : art.category === 'transformation'
         ? `变身容量 ${art.transformation_capacity} · 战斗空间 ${art.transformation_space} · 形态由真灵素材独立解锁`
       : `${sourceText} · 战斗门槛 ${art.combat_requirement_display}${art.required_body_training ? ` · 炼体门槛 ${art.required_body_training} 层${art.body_requirement_met ? '' : '（未满足）'}` : ''}${art.requires_immortal_power ? ` · 仙灵力消耗 ${percent(art.immortal_power_cost)}` : ''} · 机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`;
-    info.append(name, detail); row.appendChild(info);
+    info.append(name, detail);
+    if (art.next_level_gains) {
+      const gains = art.next_level_gains;
+      const growth = document.createElement('small'); growth.className = 'technique-growth';
+      const common = `机缘 +${percent(gains.opportunity_bonus)} · HP +${percent(gains.hp_bonus)} · MP +${percent(gains.mp_bonus)} · 战力 +${number(gains.combat_bonus)}`;
+      const specialty = art.category === 'body' ? `炼体突破 +${percent(gains.body_breakthrough_bonus)}`
+        : art.category === 'divine_sense' ? `神识修炼 +${percent(gains.divine_sense_bonus)}`
+        : art.category === 'transformation' ? `容量 +${gains.transformation_capacity} · 空间 +${gains.transformation_space}` : common;
+      growth.textContent = `下一级增益：${specialty}`; info.append(growth);
+    }
+    row.appendChild(info);
     const buttons = document.createElement('div'); buttons.className = 'technique-equip-buttons';
     const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主'],['support','辅'],['combat','战']];
     slotChoices.forEach(([slot,label]) => {

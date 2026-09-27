@@ -31,7 +31,8 @@ from .dependencies import PersistenceDependencies
 
 def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     game = deps.store.load(game_id)
-    renamed = False
+    from ..system.faction_geography import ensure_faction_sites
+    renamed = ensure_faction_sites(game)
     for item in game.player.inventory:
         if item.id.startswith(('moque_', 'yaoque_')) and item.id in ITEM_CATALOG:
             template = ITEM_CATALOG[item.id]

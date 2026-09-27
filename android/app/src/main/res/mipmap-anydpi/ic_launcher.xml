@@ -1,0 +1,6 @@
+<!-- This release targets Android 12 only; API 33 themed icons are outside its scope. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:ignore="MonochromeLauncherIcon">
+    <background android:drawable="@color/launcher_ink" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>

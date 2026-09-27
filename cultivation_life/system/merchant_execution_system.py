@@ -42,18 +42,9 @@ class MerchantExecutionMixin:
         sealed = player.sealed_cultivation
         if player.world in {'human', 'monster_realm'} and sealed and sealed.get('merchant_passage'):
             # A withdrawn route must not strand a visitor behind its old seal.
-            self._cancel_auction_for_world_change(game)
-            player.world = 'spirit'
-            player.location_id = self._merchant_alliance(game, 'spirit', 'xuanji')['hq']
-            hp, mp = player.hp / max(1, max_hp(player)), player.mp / max(1, max_mp(player))
-            player.realm_index, player.layer = sealed['realm_index'], sealed['layer']
-            player.lifespan = sealed.get('lifespan')
-            remaining = sealed.get('tribulation_remaining')
-            player.next_tribulation_age = player.age + remaining if remaining is not None else None
-            player.sealed_cultivation = None
-            player.hp, player.mp = max_hp(player) * hp, max_mp(player) * mp
-            player.party = []
-            self._clear_market(game)
+            plan = self._plan_world_transition(game, 'spirit', 'story',
+                        arrival_location=self._merchant_alliance(game, 'spirit', 'xuanji')['hq'], reason='旧逆灵通道撤销护送')
+            self._apply_world_transition(game, plan)
             self._merchant_notice(game, '旧逆灵通道撤销，商盟已免费护送你返回灵界总部，恢复原有道果。')
         state['version'] = 2
         return True

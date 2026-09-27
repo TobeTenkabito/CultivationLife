@@ -88,8 +88,8 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
             player.opportunity = min(player.opportunity, required)
             if not any(entry.event_id == "SYS_HUMAN_DEMONIC_LIMIT" for entry in game.history):
                 game.history.append(HistoryRecord(
-                    "SYS_HUMAN_DEMONIC_LIMIT", 1, player.age, "魔界飞升瓶颈", None, "blocked",
-                    "你已在人界修至化魔初期；下一步须飞升魔界。",
+                    "SYS_HUMAN_DEMONIC_LIMIT", 1, player.age, "魔界越界瓶颈", None, "blocked",
+                    "你已在人界修至化魔初期；下一步须平移至同阶魔界。",
                     {"awaiting_ascension": True}, ["system", "realm_limit", "demonic", "milestone"],
                 ))
             return

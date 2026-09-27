@@ -288,6 +288,8 @@ def bind_dependencies(
             bloodline_content_available=bloodline_content_available,
         ),
         world_travel_actions=WorldTravelDependencies(
+            _plan_world_transition=lambda *args, **kwargs: engine._plan_world_transition(*args, **kwargs),
+            _apply_world_transition=lambda *args, **kwargs: engine._apply_world_transition(*args, **kwargs),
             _ascension_destination=lambda *args, **kwargs: engine._ascension_destination(*args, **kwargs),
             _cancel_auction_for_world_change=lambda *args, **kwargs: engine._cancel_auction_for_world_change(*args, **kwargs),
             _clear_market=lambda *args, **kwargs: engine._clear_market(*args, **kwargs),
@@ -453,6 +455,8 @@ def bind_dependencies(
             bloodline_content_available=bloodline_content_available,
         ),
         trials=TrialDependencies(
+            _plan_world_transition=lambda *args, **kwargs: engine._plan_world_transition(*args, **kwargs),
+            _apply_world_transition=lambda *args, **kwargs: engine._apply_world_transition(*args, **kwargs),
             _body_tribulation_damage_reduction=lambda *args, **kwargs: engine._body_tribulation_damage_reduction(*args, **kwargs),
             _clear_market=lambda *args, **kwargs: engine._clear_market(*args, **kwargs),
             _complete_major_breakthrough=lambda *args, **kwargs: engine._complete_major_breakthrough(*args, **kwargs),
@@ -500,6 +504,8 @@ def bind_dependencies(
             _get_events_by_id=lambda: engine.events_by_id,
         ),
         effects=EffectDependencies(
+            _plan_world_transition=lambda *args, **kwargs: engine._plan_world_transition(*args, **kwargs),
+            _apply_world_transition=lambda *args, **kwargs: engine._apply_world_transition(*args, **kwargs),
             _add_court_merit=lambda *args, **kwargs: engine._add_court_merit(*args, **kwargs),
             _add_opportunity=lambda *args, **kwargs: engine._add_opportunity(*args, **kwargs),
             _adjust_person_affinity=lambda *args, **kwargs: engine._adjust_person_affinity(*args, **kwargs),

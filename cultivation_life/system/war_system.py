@@ -12,6 +12,7 @@ from .npc_system import npc_team_combat_power
 from ..rules import add_item, remove_item
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..world_state import RELATION_LABELS, race_pair
+from .faction_geography import war_site, can_enter_faction
 
 
 WAR_TERM_DEFS = {
@@ -29,6 +30,43 @@ WAR_TERM_DEFS = {
 
 class WarSystemMixin:
     """行动单位制战争。年度模拟不遍历战争，避免后期按数百年放大成本。"""
+
+    def _maybe_map_war_encounter(self, game, rng):
+        player = game.player
+        if game.pending_event or not player.alive or player.imprisonment:
+            return False
+        last = game.map_war_last_encounter_unit
+        if game.diplomacy_unit - last < 2:
+            return False
+        fronts = [war for war in game.wars if war.get("kind") == "sect"
+                  and war.get("status") == "active" and war.get("world") == player.world
+                  and war_site(self.maps, war)["id"] == player.location_id]
+        if not fronts or rng.random() >= .42:
+            return False
+        war = rng.choice(fronts)
+        self._ensure_war_shape(game, war)
+        own = self._participant_side(war, self._war_player_identity(game, war))
+        sides = ["defender" if own == "attacker" else "attacker"] if own else ["attacker", "defender"]
+        candidates = [self._find_npc(game, npc_id) for side in sides for npc_id in war.get("roster", {}).get(side, [])]
+        candidates = [npc for npc in candidates if npc and npc.alive and npc.world == player.world]
+        if not candidates:
+            return False
+        npc = rng.choice(candidates)
+        power = self._npc_power(npc)
+        target = {"npc_id": npc.id, "target_name": npc.name, "target_power": power,
+                  "primary_power": power, "target_expected_power": power,
+                  "target_realm_index": npc.realm_index, "target_layer": npc.layer,
+                  "target_realm_visible": True, "target_realm_display": self._npc_realm_name(npc),
+                  "target_power_display": power, "path": npc.path, "race": npc.race,
+                  "faction_id": self._npc_faction_id(game, npc.id), "combat_type": "cultivator",
+                  "player_defending": True, "kill_karma": False, "action": "slay", "war_id": war["id"]}
+        event = self._instantiate_event(self.events_by_id["EVT_ENCOUNTER_AMBUSH_001"], game, rng)
+        site = war_site(self.maps, war)
+        event.update(title="战区遭遇", runtime=target,
+                     body=f"{self._war_side_name(game, 'sect', war['attacker_id'])}与{self._war_side_name(game, 'sect', war['defender_id'])}正在{site['name']}交战。{npc.name}将你截住，来者修为{self._npc_realm_name(npc)}。")
+        game.pending_event = event
+        game.map_war_last_encounter_unit = game.diplomacy_unit
+        return True
 
     @staticmethod
     def _war_sect(game, power_id):
@@ -92,6 +130,10 @@ class WarSystemMixin:
     def _ensure_war_shape(self, game: GameState, war: dict[str, Any]) -> bool:
         """Lazily migrate pre-coalition wars without invalidating existing saves."""
         changed = False
+        if war.get("kind") == "sect" and war.get("world") in self.maps.worlds:
+            before = war.get("location_id")
+            war_site(self.maps, war)
+            changed = before != war.get("location_id")
         raw_coalitions = war.get("coalitions") if isinstance(war.get("coalitions"), dict) else {}
         coalitions: dict[str, list[dict[str, Any]]] = {}
         for side in ("attacker", "defender"):
@@ -1074,7 +1116,10 @@ class WarSystemMixin:
                     raise ValueError("双方战力差距尚不足以执行合并")
                 if winner_sect:
                     for npc in self._sect_members(game, loser_sect):
-                        if npc.alive:
+                        if npc.alive and not can_enter_faction(winner_sect, npc):
+                            npc.faction_id = None
+                            game.notable_npcs.setdefault(npc.id, npc)
+                        elif npc.alive:
                             npc.faction_id = winner_id
                             if all(existing.id != npc.id for existing in winner_sect.npcs):
                                 winner_sect.npcs.append(npc)

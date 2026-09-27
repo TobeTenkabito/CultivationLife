@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..faction_geography import can_enter_faction, require_faction_admission
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -191,6 +193,8 @@ class IntrigueRecruitmentMethods:
             ]))
             if len(requested) > capacity:
                 raise ValueError(f"宗门名册仅余 {capacity} 个空位")
+            for candidate_id in requested:
+                require_faction_admission(sect, available[candidate_id]["npc"])
             joined: list[SectNpc] = []
             for candidate_id in requested:
                 npc = SectNpc.from_dict(copy.deepcopy(available[candidate_id]["npc"]))

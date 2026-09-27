@@ -267,6 +267,12 @@ class ContentRegistry:
             raise ContentError("功法内容必须为一至八品配置战斗气等级门槛")
         purity_caps = techniques_doc.get("combat_purity_caps_by_path", {})
         for row in techniques_doc.get("techniques", []):
+            if "growth_preference" not in row:
+                name = str(row.get("name", ""))
+                row["growth_preference"] = (
+                    "combat" if any(word in name for word in ("剑", "刀", "战", "杀", "斩")) else
+                    "support" if any(word in name for word in ("护", "养", "守", "盾", "寿", "莲")) else "main"
+                )
             if "sources" not in row:
                 row["sources"] = dict(source_defaults.get(row.get("path"), {}))
             if "combat_requirements" not in row:
@@ -449,6 +455,12 @@ class ContentRegistry:
             monster_evolutions=monster_evolutions,
             monster_bloodline_settings=monster_bloodline_settings,
         )
+        from .system.world_transition_system import validate_transition_content
+        try:
+            validate_transition_content(registry.world_systems["world_profiles"],
+                                        registry.world_systems.get("world_transition_routes", []), realms)
+        except (ValueError, KeyError, TypeError) as error:
+            raise ContentError(f"跨界配置不合法：{error}") from error
         if "maps.json" in documents:
             from .system.map_system import MapCatalog
 
@@ -1236,6 +1248,8 @@ class ContentRegistry:
             ):
                 raise ContentError(f"真灵素材 {item.id} 的形态、来源或纯度不合法")
         for technique in techniques.values():
+            if technique.growth_preference not in {"balanced", "main", "support", "combat"}:
+                raise ContentError(f"功法 {technique.id} 的成长倾向未知")
             if technique.element not in affinities or technique.path not in paths:
                 raise ContentError(f"功法 {technique.id} 的流派或属性未知")
             required = (

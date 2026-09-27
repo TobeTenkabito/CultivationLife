@@ -333,6 +333,8 @@ class CultivationActionDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WorldTravelDependencies:
+    _plan_world_transition: Callable
+    _apply_world_transition: Callable
     _ascension_destination: Callable[..., str]
     _cancel_auction_for_world_change: Callable[..., None]
     _clear_market: Callable[..., None]
@@ -556,6 +558,8 @@ class BreakthroughDependencies:
 
 @dataclass(frozen=True, slots=True)
 class TrialDependencies:
+    _plan_world_transition: Callable
+    _apply_world_transition: Callable
     _body_tribulation_damage_reduction: Callable[..., float]
     _clear_market: Callable[..., None]
     _complete_major_breakthrough: Callable[..., None]
@@ -623,6 +627,8 @@ class EncounterDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EffectDependencies:
+    _plan_world_transition: Callable
+    _apply_world_transition: Callable
     _add_court_merit: Callable[..., str]
     _add_opportunity: Callable[..., float]
     _adjust_person_affinity: Callable[..., float]
