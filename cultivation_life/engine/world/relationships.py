@@ -60,8 +60,10 @@ def _party_crossing_candidate(deps: RelationshipDependencies, game: GameState, n
 
 
 def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, relation: dict[str, Any], reason: str) -> SectNpc:
+    from ...system.npc_social import instantiate_social
     existing = deps._find_npc(game, str(relation.get("id", "")))
     if existing:
+        instantiate_social(game, existing)
         return existing
     npc = SectNpc(
         id=str(relation.get("id") or f"relation_{uuid.uuid4().hex[:12]}"),
@@ -80,13 +82,17 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
         tribulation_power=relation.get("tribulation_power"),
     )
     game.notable_npcs[npc.id] = npc
+    instantiate_social(game, npc)
     relation["id"] = npc.id
     relation["source"] = "world"
     return npc
 
 
 def _adjust_person_affinity(deps: RelationshipDependencies, game: GameState, npc_id: str, delta: float) -> float:
+    from ...system.npc_social import instantiate_social
     npc = deps._find_npc(game, npc_id)
+    if npc:
+        instantiate_social(game, npc)
     relation = next((entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
     base = float(relation.get("affinity", 0)) if relation else float(npc.affinity or 0) if npc else 0.0
     value = base + deps._sage_affinity_gain(game.player, delta)

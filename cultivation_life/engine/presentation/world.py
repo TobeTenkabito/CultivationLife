@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...system.path_modifiers import modifier
+from ...system.npc_social import social_hint
 
 import copy
 from typing import Any
@@ -35,6 +36,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         else:
             status = "不在当前界面，生死不明"
         public_npc = npc.to_dict()
+        public_npc.pop("social_profile", None)
+        public_npc["social_hint"] = social_hint(game, npc) if same_world else {}
         perception = deps._npc_cultivation_perception(game, npc) if same_world and npc.alive else None
         if not same_world:
             public_npc["departure_reason"] = None

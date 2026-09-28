@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...system.semantic_events import emit
+from ...system.npc_social import instantiate_social
 
 from typing import Any
 from ...content_registry import (
@@ -116,6 +117,7 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         if any(entry["id"] == npc_id for entry in player.disciples):
             raise ValueError("此人已经是你的弟子")
 
+    instantiate_social(game, npc)
     rng = decode_rng(game.seed, game.rng_state)
     player.relationship_attempts.append(attempt_key)
     realm_gap = abs(player.realm_index - npc.realm_index)
@@ -191,11 +193,30 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
         raise ValueError("你尚无师承")
     if not master.get("alive", True):
         raise ValueError("师父已经陨落，无法回应请求")
-    if kind not in {"item", "technique"}:
+    if kind not in {"item", "technique", "consult"}:
         raise ValueError("未知索取类型")
     last_requests = master.setdefault("last_requests", {})
     if last_requests.get(kind) == player.age:
         raise ValueError("本年度已经向师父提出过这类请求")
+
+    if kind == "consult":
+        if not player.alive or player.imprisonment or master.get("world", player.world) != player.world:
+            raise ValueError("当前无法当面向师父请教")
+        rng = decode_rng(game.seed, game.rng_state)
+        npc = deps._persist_relationship_npc(game, master, "师承请教")
+        instantiate_social(game, npc)
+        gain = deps._add_opportunity(player, max(1.0, opportunity_required(player) * .04))
+        deps._adjust_person_affinity(game, npc.id, 3.0)
+        last_requests[kind] = player.age
+        summary = f"你向{master['name']}请益修行，获得机缘 {gain:.1f}，师徒情谊更深。"
+        summary += deps._tianji_npc_conversation_clue(game, npc.id, rng)
+        emit(game, "master.consulted", npc_id=npc.id, opportunity=gain)
+        game.history.append(HistoryRecord("SYS_MASTER_CONSULT", 1, player.age, "师门请益", kind,
+            "consulted", summary, {"opportunity": gain, "npc_id": npc.id}, ["system", "relationship", "master"]))
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
 
     master_realm = int(master["realm_index"])
     if kind == "item":
@@ -673,6 +694,7 @@ def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str
         npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, "结伴同行")
         if not npc or not npc.alive or npc.world != player.world:
             raise ValueError("此人当前无法同行")
+        instantiate_social(game, npc)
         rng = decode_rng(game.seed, game.rng_state)
         faction_id = deps._npc_faction_id(game, npc.id)
         global_hostility = max(

@@ -22,7 +22,13 @@ from .dependencies import PresentationDependencies
 
 
 def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
-    history = [entry for entry in game.history if deps._history_visible_in_world(entry, game)]
+    history = []
+    for entry in reversed(game.history):
+        if deps._history_visible_in_world(entry, game):
+            history.append(entry)
+            if len(history) == 80:
+                break
+    history.reverse()
     deps._ensure_natal_artifact(game)
     player_data = public_player(game.player)
     player_data.update(raw_fame=game.player.fame, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
