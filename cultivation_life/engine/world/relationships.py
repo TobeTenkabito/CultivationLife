@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...system.combat.npc_lifecycle import initialize_native
 
 import copy
 import random
@@ -80,6 +81,7 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
         next_tribulation_age=relation.get("next_tribulation_age"),
         tribulation_count=int(relation.get("tribulation_count", 0)),
         tribulation_power=relation.get("tribulation_power"),
+        transcendence=copy.deepcopy(relation.get("transcendence")),
     )
     game.notable_npcs[npc.id] = npc
     instantiate_social(game, npc)
@@ -538,18 +540,20 @@ def _generated_relationship(deps: RelationshipDependencies, player: Player, role
         4: (450, 1200), 5: (1200, 2600), 6: (2800, 7000),
         7: (7000, 18000), 8: (18000, 80000),
     }
-    age = rng.randint(*age_ranges[realm_index])
+    age = rng.randint(*age_ranges.get(realm_index, (1000, 10000)))
     span = REALMS[realm_index].lifespan
     lifespan = max(age + 1, rng.randint(*span)) if span else None
     spirit_root = deps._random_npc_root(realm_index, rng) if realm_index > 0 else "none"
     path = (player.technique.path if player.technique else player.path) if role == "companion" else rng.choice(list(PATH_NAMES))
     lifespan = deps._scale_npc_lifespan(lifespan, path, age)
-    return deps._relationship_snapshot(
+    relation = deps._relationship_snapshot(
         person_id, name, realm_index, layer, "event", age, lifespan,
         spirit_root=spirit_root, path=path, race="human", world=player.world,
         main_technique_id=player.technique.id if role == "companion" and player.technique else None,
         affinity=28.0 if role == "companion" else 20.0,
     )
+    initialize_native(relation, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
+    return relation
 
 
 def _sync_relationship_records(deps: RelationshipDependencies, game: GameState) -> bool:

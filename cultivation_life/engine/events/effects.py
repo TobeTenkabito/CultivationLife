@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...system.combat.npc_lifecycle import move_world
 
 import copy
 import random
@@ -360,10 +361,10 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             and companion.get("id") == joint_crossing.get("id")
         )
         if crossed_together:
-            companion["world"] = destination
+            move_world(companion, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
             npc = deps._find_npc(game, str(companion.get("id", "")))
             if npc:
-                npc.world = destination
+                move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                 npc.departed_age = npc.age
                 npc.departure_reason = f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}"
         else:
@@ -383,11 +384,11 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             name = str((friend or candidate).get("name", npc.name if npc else "无名队友"))
             if rng.random() < survival_chance:
                 if friend:
-                    friend["world"] = destination
+                    move_world(friend, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                 friend_survivors.append(name)
                 friend_survivor_ids.add(str(candidate.get("id", "")))
                 if npc:
-                    npc.world = destination
+                    move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                     npc.departed_age = npc.age
                     npc.departure_reason = f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}"
             else:

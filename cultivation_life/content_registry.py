@@ -460,8 +460,10 @@ class ContentRegistry:
         )
         from .system.world_transition_system import validate_transition_content
         from .system.combat.contracts import domain_definitions
+        from .system.combat.npc_lifecycle import validate_lifecycle
         try:
             domain_definitions(registry.world_systems.get("transcendent_combat", {}))
+            validate_lifecycle(registry.world_systems.get("transcendent_combat", {}))
         except (ValueError, KeyError, TypeError) as error:
             raise ContentError(f"仙域能力配置不合法：{error}") from error
         try:

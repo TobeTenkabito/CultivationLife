@@ -16,6 +16,7 @@ from ..content_registry import (
 from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
 from .engine_constants import LEGACY_TRUE_DEMON_RACE_MAP
 from .dependencies import WorldRuntimeDependencies
+from ..system.combat.npc_lifecycle import initialize_native
 
 
 def _new_sects() -> dict[str, SectState]:
@@ -36,6 +37,7 @@ def _new_sects() -> dict[str, SectState]:
         for npc in sect.npcs:
             npc.faction_id = sect_id
             npc.world = sect.world
+            initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}))
     return sects
 
 
@@ -112,7 +114,10 @@ def _compact_world_history(game: GameState) -> bool:
 
 
 def _new_world_npcs() -> dict[str, SectNpc]:
-    return {npc_id: copy.deepcopy(npc) for npc_id, npc in WORLD_NPC_TEMPLATES.items()}
+    npcs = {npc_id: copy.deepcopy(npc) for npc_id, npc in WORLD_NPC_TEMPLATES.items()}
+    for npc in npcs.values():
+        initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}))
+    return npcs
 
 
 def _ensure_world_npcs(deps: WorldRuntimeDependencies, game: GameState) -> bool:

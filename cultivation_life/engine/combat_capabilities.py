@@ -13,36 +13,60 @@ from ..models import GameState
 from ..rules import max_mp
 from ..system.combat.contracts import Combatant, ResourceSupply, domain_definitions, resolve_capabilities
 from ..system.combat.domains import DomainBattle
+from ..system.combat.npc_lifecycle import NpcResourceBinding, prepare
 from ..system.combat_system import BattleUnit, PlayerCombatSystem
 
 
 def persistent_owner(game: GameState, key: str) -> Any | None:
-    if key == "player":
-        return game.player
-    if game.family:
-        member = next((npc for npc in game.family.npcs if npc.id == key), None)
-        if member is not None:
-            return member
+    return persistent_owners(game, {key}).get(key)
+
+
+def persistent_owners(game: GameState, keys: set[str]) -> dict[str, Any]:
+    """One bounded lookup per battle, not a full-world scan per participant.
+
+    No persistent index: recruitment, death and cache promotion cannot leave
+    stale pointers. Precedence matches the authoritative family record.
+    """
+    pending, found = set(keys), {}
+
+    def collect(key, owner):
+        if key in pending:
+            found[key] = owner
+            pending.remove(key)
+
+    collect("player", game.player)
+    if game.family and pending:
+        for npc in game.family.npcs:
+            collect(npc.id, npc)
     for group in (game.world_npcs, game.notable_npcs):
-        if key in group:
-            return group[key]
+        for key in tuple(pending):
+            if key in group:
+                collect(key, group[key])
     for sect in game.sects.values():
-        member = next((npc for npc in sect.npcs if npc.id == key), None)
-        if member is not None:
-            return member
-    for row in game.encounter_npc_cache:
-        if row.get("id") == key:
-            return row["npc"]
-    for row in [*game.player.offspring, *game.player.puppets]:
-        if row.get("id") == key:
-            return row
-    return None
+        if not pending:
+            break
+        for npc in sect.npcs:
+            collect(npc.id, npc)
+    if pending:
+        for row in game.encounter_npc_cache:
+            collect(row.get("id"), row["npc"])
+    if pending:
+        for group in (game.player.offspring, game.player.puppets):
+            for row in group:
+                collect(row.get("id"), row)
+    if pending:
+        for row in (game.player.master, game.player.dao_companion, *game.player.dao_friends,
+                    *game.player.disciples, *game.player.concubines):
+            if row:
+                collect(row.get("id"), row)
+    return found
 
 
 @dataclass
 class CapabilityBinding:
     battle: DomainBattle
     owners: dict[str, Any]
+    resources: dict[str, NpcResourceBinding]
 
     def commit(self, updates: list[dict[str, Any]], *, lethal: bool = False) -> None:
         for update in updates:
@@ -55,7 +79,9 @@ class CapabilityBinding:
                 owner.mp = update["current"]
                 continue
             state = owner.get("transcendence") if isinstance(owner, dict) else owner.transcendence
-            if state is not None:
+            if update["id"] in self.resources:
+                self.resources[update["id"]].commit(update["current"])
+            elif state is not None:
                 state["current"] = update["current"]
             if update["id"] == "player":
                 continue
@@ -74,14 +100,17 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                       config: Mapping[str, Any]) -> CapabilityBinding:
     definitions = domain_definitions(config)
     owners: dict[str, Any] = {}
+    resources: dict[str, NpcResourceBinding] = {}
     combatants: list[Combatant] = []
     raw_enemies = target.get("members") or [target]
     ephemeral = {str(row.get("npc_id") or f"enemy-{index}"): row for index, row in enumerate(raw_enemies)}
     ephemeral.update({str(row.get("npc_id") or f"story-ally-{index}"): row
                       for index, row in enumerate(target.get("player_allies", []))})
-    for side, units in (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target))):
+    rosters = (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target)))
+    persistent = persistent_owners(game, {unit.id for _, units in rosters for unit in units})
+    for side, units in rosters:
         for unit in units:
-            owner = persistent_owner(game, unit.id)
+            owner = persistent.get(unit.id)
             if owner is None:
                 owner = ephemeral.get(unit.id)
             state = owner.get("transcendence") if isinstance(owner, dict) else getattr(owner, "transcendence", None)
@@ -90,6 +119,14 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             # schema; realm alone must not fabricate resource mastery.
             if unit.id != "player" and state and state.get("resource_link") == "legacy_mp":
                 raise ValueError("Only the player currently owns a legacy MP pool")
+            if unit.id != "player" and state is not None:
+                resources[unit.id] = prepare(owner, game.player.age, config)
+                state = resources[unit.id].state
+            elif (unit.id == "player" and state is None and game.player.realm_index >= 9
+                  and game.player.immortal_power_converted):
+                # Existing conversion is an explicit fact; realm alone grants
+                # nothing. Use the one MP pool and never fabricate attainment.
+                state = config.get("converted_player_state")
             capabilities = resolve_capabilities(
                 state, definitions,
                 linked_current=game.player.mp if unit.id == "player" else 0,
@@ -100,4 +137,4 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 owners[unit.id] = owner
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))
     return CapabilityBinding(DomainBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
-                                         supplies=supplies), owners)
+                                         supplies=supplies), owners, resources)

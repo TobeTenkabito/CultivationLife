@@ -181,11 +181,12 @@ class IntrigueResolutionMethods:
             record["resources"] = int(record.get("resources", 0)) + 25
             record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 4)
         elif resolution_type == "relocate" and kind in {"sect", "family"} and target_id in WORLD_SYSTEMS.get("world_profiles", {}):
+            from .combat.npc_lifecycle import move_world
             entity = self._intrigue_entity(game, kind, faction_id)
             if entity:
                 entity.world = target_id
                 for npc in entity.npcs:
-                    npc.world = target_id
+                    move_world(npc, target_id, game.player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
         elif resolution_type == "policy" and target_id in STYLE_LABELS:
             record["policy"] = target_id
         elif resolution_type == "intervene_war":

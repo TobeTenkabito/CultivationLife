@@ -1,4 +1,6 @@
 from __future__ import annotations
+from copy import deepcopy
+from ...system.combat.npc_lifecycle import initialize_native
 
 from ...system.semantic_events import emit
 
@@ -44,6 +46,7 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
         )
         npc.treasure_item_id = deps._select_npc_treasure(npc, rng)
         if can_enter_faction(sect, npc):
+            initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
             sect.npcs.append(npc)
     game.sects[sect_id] = sect
     player.faction_id = sect_id
@@ -121,6 +124,7 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
             gender=str(child.get("gender") or deps._stable_gender(str(child.get("id", "")))),
             family_traits=dict(child.get("family_traits", {})),
             family_combat_bonus=float(child.get("family_combat_bonus", 0)),
+            transcendence=deepcopy(child.get("transcendence")),
         )
         family.npcs.append(npc)
     game.family = family

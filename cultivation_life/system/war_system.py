@@ -631,6 +631,7 @@ class WarSystemMixin:
         domain_result = resolve_npc_engagement(
             [(striker, attack_power)], [(target, defend_power)],
             WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
+            now=game.player.age,
         )
         if domain_result is not None:
             war["last_domain_engagement"] = list(domain_result.rounds)
@@ -953,6 +954,7 @@ class WarSystemMixin:
                 [(npc, self._npc_power(npc) * float(contexts["defender"].get("modifier", 1)))
                  for npc in self._available_warriors(game, war, "defender")],
                 WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
+                now=game.player.age,
             )
             if domain_result is not None:
                 war["last_domain_engagement"] = list(domain_result.rounds)

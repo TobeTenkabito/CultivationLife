@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...system.combat.npc_lifecycle import initialize_native
 
 import random
 from functools import lru_cache
@@ -651,4 +652,5 @@ def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rn
     if not can_enter_faction(sect, npc):
         return None
     sect.npcs.append(npc)
+    initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=world_age)
     return npc

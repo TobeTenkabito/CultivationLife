@@ -103,8 +103,10 @@ class GameEngine(RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMix
 
     def _apply_world_transition(self, game, plan, *, entourage=None):
         from ..system.world_transition_system import WorldTransitionPorts, apply_world_transition
+        from ..system.combat.npc_lifecycle import move_world
         ports = WorldTransitionPorts(self._cancel_auction_for_world_change, self._clear_market,
-                                     self._prepare_permanent_world_transition)
+                                     self._prepare_permanent_world_transition,
+                                     lambda npc, world, now: move_world(npc, world, now, WORLD_SYSTEMS.get("transcendent_combat", {})))
         return apply_world_transition(game, plan, ports, entourage=entourage)
 
     def get_game(self, game_id: str) -> dict[str, Any]:
