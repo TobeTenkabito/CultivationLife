@@ -84,14 +84,29 @@ async function boot() {
 function renderSaveList(saves) {
   const list = $('#save-list');
   list.replaceChildren();
+  $('#save-count').textContent = saves.length ? `共 ${saves.length} 卷 · 最近落笔的旅程在前` : '尚无修行卷';
+  if (!saves.length) {
+    const empty = document.createElement('p'); empty.className = 'save-empty';
+    empty.textContent = '开启新旅程，或导入旧存档，让前缘继续。'; list.appendChild(empty);
+  }
   saves.forEach(save => {
     const row = document.createElement('div');
     row.className = 'save-entry';
     row.dataset.saveId = save.id;
     const button = document.createElement('button');
+    button.className = 'save-resume';
     const saveVersion = save.game_version && save.game_version !== 'pre-1.0.0' ? ` · v${save.game_version}` : '';
-    button.textContent = `续接 · ${save.name}${saveVersion}`;
+    const title = document.createElement('strong'); title.textContent = save.name;
+    const details = document.createElement('span'); details.textContent = `${save.realm_name || '修行者'} · ${save.layer || 1} 层 · ${save.age || 0} 岁 · ${save.world_name || '人界'}`;
+    const meta = document.createElement('small');
+    const savedAt = new Date(save.updated_at);
+    meta.textContent = `${save.path_name || ''}${saveVersion} · ${Number.isNaN(savedAt.getTime()) ? '落笔时间未明' : savedAt.toLocaleString('zh-CN', {hour12:false})}`;
+    const resume = document.createElement('span'); resume.className = 'save-resume-label'; resume.textContent = save.alive === false ? '回望此生 →' : '续接此生 →';
+    button.append(title, details, meta, resume);
     button.onclick = () => loadGame(save.id);
+    const exportButton = document.createElement('button'); exportButton.className = 'save-export';
+    exportButton.textContent = '导出'; exportButton.setAttribute('aria-label', `导出存档：${save.name}`);
+    exportButton.onclick = () => window.SaveTransfer?.exportSave(save.id);
     const remove = document.createElement('button');
     remove.className = 'save-delete';
     remove.textContent = '删除';
@@ -110,7 +125,8 @@ function renderSaveList(saves) {
           finally { busy = false; renderButtons(); }
         }});
     };
-    row.append(button, remove);
+    const tools = document.createElement('div'); tools.className = 'save-entry-tools'; tools.append(exportButton, remove);
+    row.append(button, tools);
     list.appendChild(row);
   });
 }
@@ -3252,7 +3268,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     }
     if (person.can_recruit_concubine) tools.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
     if (person.can_invite_guest) tools.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
-    tools.appendChild(violenceButton('disciple', person, '处死（战斗）'));
+    tools.appendChild(violenceButton('disciple', person, '处死'));
     tools.appendChild(interactionButton('逐出门下', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'disciple', npc_id:person.id}), 'danger'));
     return tools;
   }

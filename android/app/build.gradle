@@ -13,8 +13,8 @@ android {
         applicationId 'com.fusheng.wendao'
         minSdk 31
         targetSdk 31
-        versionCode 7
-        versionName "${gameVersion}-android.7"
+        versionCode 8
+        versionName "${gameVersion}-android.8"
         testInstrumentationRunner 'com.fusheng.wendao.ReleaseSmokeInstrumentation'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
@@ -40,6 +40,7 @@ android {
     }
     sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/gameAssets')
     sourceSets.androidTest.assets.srcDir new File(gameRoot, 'tests/fixtures')
+    sourceSets.androidTest.assets.srcDir new File(gameRoot, 'build/transfer-fixtures')
 }
 
 chaquopy {

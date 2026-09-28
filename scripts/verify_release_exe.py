@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
+            for asset in ['save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -62,6 +62,18 @@ def verify(with_dlc):
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
+            def transfer(operation, payload):
+                request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
+                    data=json.dumps(payload).encode(), headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    return json.load(response)
+            snapshot_file = folder/'data/saves'/f"{game['id']}.json"
+            original = json.loads(snapshot_file.read_bytes())
+            exported = transfer('export', {'id':game['id']})
+            preview = transfer('preview', {'payload':exported['payload']})
+            assert preview['existing_hash']
+            transfer('import', {'payload':exported['payload'], 'existing_hash':preview['existing_hash']})
+            assert json.loads(snapshot_file.read_bytes()) == original
             assert next(i for i in game['player']['inventory'] if i['id']=='heroic_progeny_elixir')['quantity']==1
             assert game['family']['intrigue_enabled']==with_dlc
             assert game["tianji_artifacts"]["available"] == with_dlc

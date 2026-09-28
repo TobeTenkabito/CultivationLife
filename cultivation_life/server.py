@@ -28,6 +28,7 @@ from .runtime import persistence_root
 from .runtime_config import load_runtime_config
 from .version import BASE_GAME_VERSION, base_game_metadata
 from .ui_preferences import load_ui_preferences, write_ui_preferences
+from .save_transfer import export_snapshot, preview_snapshot, import_snapshot
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -99,6 +100,20 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             payload = self._body()
+            if path.startswith("/api/save-transfer/"):
+                operation = path.rsplit('/', 1)[-1]
+                if operation == 'export':
+                    result = export_snapshot(ENGINE.store, payload.get('id', ''), EXTENSION_REPORT)
+                elif operation == 'preview':
+                    result = preview_snapshot(ENGINE.store, payload.get('payload', ''), EXTENSION_REPORT)
+                elif operation == 'import':
+                    if 'existing_hash' not in payload:
+                        raise ValueError('请先预览存档')
+                    result = import_snapshot(ENGINE.store, payload.get('payload', ''), payload['existing_hash'])
+                else:
+                    raise KeyError('接口不存在')
+                self._json(result)
+                return
             if path == "/api/ui-preferences":
                 self._json(write_ui_preferences(PERSISTENCE_ROOT, payload))
                 return
@@ -509,11 +524,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def _body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
-        if length > 1_000_000:
+        limit = 17 * 1024 * 1024 if urlparse(self.path).path in {'/api/save-transfer/preview', '/api/save-transfer/import'} else 1_000_000
+        if length < 0 or length > limit:
             raise ValueError("请求体过大")
         if not length:
             return {}
-        return json.loads(self.rfile.read(length).decode("utf-8"))
+        data = json.loads(self.rfile.read(length).decode("utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("请求必须为对象")
+        return data
 
     def _json(self, data: object, status: HTTPStatus = HTTPStatus.OK) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")

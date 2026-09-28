@@ -8,31 +8,33 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.44.0'
-ANDROID_VERSION = VERSION + '-android.7'
+VERSION = '1.45.0'
+ANDROID_VERSION = VERSION + '-android.8'
 
 def main():
     def log(name):
         return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
-    tests = log('release-1440-tests.log')
+    tests = log('release-1450-tests.log')
     passed = re.search(r'(\d+) passed in', tests)
     assert passed and 'failed' not in tests
-    for name in ('android-social-1440.log', 'android-social-portrait-1440.log', 'android-initial-1440.log'):
+    for name in ('android-save-transfer-1450.log', 'android-initial-1450.log'):
         assert 'status=passed' in log(name) and 'status=failed' not in log(name), name
-    assert 'Verifies' in log('android-signature-1440.log')
-    metadata = log('android-metadata-1440.log')
-    assert "versionCode='7'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
+    assert 'roundtrip passed' in log('save-crossplatform-1450.log')
+    assert 'Verifies' in log('android-signature-1450.log')
+    metadata = log('android-metadata-1450.log')
+    assert "versionCode='8'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
     assert "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata
     assert (ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.'
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest in log('android-installed-sha256-1440.log').lower()
+    assert digest in log('android-installed-sha256-1450.log').lower()
     with zipfile.ZipFile(source) as apk:
         assert apk.testzip() is None
         for abi in ('arm64-v8a', 'x86_64'):
             assert f'lib/{abi}/libpython3.13.so' in apk.namelist()
         with zipfile.ZipFile(io.BytesIO(apk.read('assets/game-assets.zip'))) as assets:
             assert assets.read('web/app.js') == (ROOT/'web/app.js').read_bytes()
+            assert assets.read('web/save-transfer.js') == (ROOT/'web/save-transfer.js').read_bytes()
             for theme in 'abcdef':
                 assert f'web/themes/{theme}.css' in assets.namelist()
             manifests = [n for n in assets.namelist() if n.startswith('dlc/') and n.endswith('/manifest.json')]
@@ -43,16 +45,16 @@ def main():
     shutil.copy2(source, target)
     report = ROOT/f'dist/release-{ANDROID_VERSION}.json'
     manifest = {
-        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 7,
+        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 8,
         'application_id': 'com.fusheng.wendao', 'min_sdk': 31, 'target_sdk': 31,
         'included_abis': ['arm64-v8a', 'x86_64'], 'tested_android': 'Android 12 / API 31',
         'tested_abi': 'x86_64', 'physical_device_tested': False,
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
-        'save_import_export': False, 'offline': True, 'release_debuggable': False,
+        'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [f'{passed.group(1)} Python regressions passed',
-                       'Signed Android 12 APK: native bloodline tap in landscape and portrait',
-                       '310-year NPC simulation: action completion and persisted progress',
+                       'Signed Android 12 APK: six themes, native clipboard, >10MB save, reversed segments, confirmation and lossless restore',
+                       'Windows to signed Android 12 to Windows: all JSON fields preserved',
                        'Six themes, real action, native back; signature and metadata verified',
                        'Android release lint: no issues found'],
     }
