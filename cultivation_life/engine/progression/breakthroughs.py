@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import modifier
+
 import copy
 import random
 from typing import Any
@@ -55,7 +57,7 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
             player.awaiting_major_breakthrough = False
             player.awaiting_minor_breakthrough = False
             return
-        if player.world == "spirit" and player.realm_index == 8 and player.layer >= REALMS[8].layers:
+        if modifier(player, "ascension_source", player.world == "spirit") and player.realm_index == 8 and player.layer >= REALMS[8].layers:
             player.awaiting_ascension = True
             player.awaiting_major_breakthrough = False
             player.opportunity = min(player.opportunity, required)
@@ -284,7 +286,8 @@ def _breakthrough_chance(deps: BreakthroughDependencies, player: Player, major: 
         if (player.realm_index, player.layer) < owner_rank:
             dependent_bonus = 0.02
     concubine_base_bonus = min(0.02, player.concubine_breakthrough_bonus) + dependent_bonus
-    base += concubine_base_bonus
+    wish_base_bonus = modifier(player, "breakthrough_base_bonus", 0.0)
+    base += concubine_base_bonus + wish_base_bonus
     scope = f"{'major' if major else 'minor'}:{source}"
     aid_bonus = sum(
         float(ITEM_CATALOG[item_id].breakthrough_bonus)
@@ -345,6 +348,7 @@ def _breakthrough_chance(deps: BreakthroughDependencies, player: Player, major: 
     return {
         "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
         "concubine_base_bonus": concubine_base_bonus,
+        "wish_base_bonus": wish_base_bonus,
         "artifact_bonus": artifact_bonus, "pity_bonus": pity_bonus,
         "devouring_bonus": devouring_bonus,
         "reincarnation_bonus": reincarnation_bonus,

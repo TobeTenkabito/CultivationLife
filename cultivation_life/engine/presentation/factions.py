@@ -12,7 +12,7 @@ from ...content_registry import (
 )
 from ...models import GameState, SectNpc, SectState
 from ...system.npc_system import attitude_label
-from ...rules import public_player
+from ...rules import public_player, has_living_master
 from ...world_state import RELATION_LABELS, race_pair
 from ...system.concubine_system import gender_name
 from ...system.possession_system import current_body_age
@@ -188,7 +188,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         entry["can_intercept"] = True
         entry["can_request_master"] = (
             unrelated and entry["id"] not in concubine_ids
-            and player.master is None and npc_rank > player_rank
+            and not has_living_master(player) and npc_rank > player_rank
             and f"master:{entry['id']}" not in player.relationship_attempts
         )
         entry["can_accept_disciple"] = (

@@ -1089,6 +1089,123 @@
         "soul": -0.75
       },
       "field_hook": "forbidden_sense"
+    },
+    {
+      "id": "reincarnation_formations_t3",
+      "name": "轮生忘川镇魂石",
+      "world": "reincarnation",
+      "tier": 3,
+      "base_value": 460,
+      "formation_value": 3.8,
+      "nature": "water",
+      "relation_overrides": {
+        "soul": 0.5
+      },
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t5",
+      "name": "轮生锁魂链枢",
+      "world": "reincarnation",
+      "tier": 5,
+      "base_value": 8200,
+      "formation_value": 5.5,
+      "nature": "soul",
+      "relation_overrides": {
+        "yang": -0.75
+      },
+      "field_hook": "forbidden_sense"
+    },
+    {
+      "id": "reincarnation_formations_t6",
+      "name": "轮生业火阵烽",
+      "world": "reincarnation",
+      "tier": 6,
+      "base_value": 92000,
+      "formation_value": 6.3,
+      "nature": "fire",
+      "relation_overrides": {
+        "yin": -0.75
+      },
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t1",
+      "name": "轮生玄阴石",
+      "world": "reincarnation",
+      "tier": 1,
+      "base_value": 18,
+      "formation_value": 2.2,
+      "nature": "yin",
+      "relation_overrides": {},
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t2",
+      "name": "轮生青木阵桩",
+      "world": "reincarnation",
+      "tier": 2,
+      "base_value": 48,
+      "formation_value": 3.1,
+      "nature": "wood",
+      "relation_overrides": {},
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t4",
+      "name": "轮生寂识镜片",
+      "world": "reincarnation",
+      "tier": 4,
+      "base_value": 620,
+      "formation_value": 4.0,
+      "nature": "soul",
+      "relation_overrides": {
+        "yang": -0.75
+      },
+      "field_hook": "forbidden_sense"
+    },
+    {
+      "id": "reincarnation_formations_t7",
+      "name": "轮生九霄风枢",
+      "world": "reincarnation",
+      "tier": 7,
+      "base_value": 180000,
+      "formation_value": 6.5,
+      "nature": "wind",
+      "relation_overrides": {
+        "space": 0.75
+      },
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t8",
+      "name": "轮生五行归元核",
+      "world": "reincarnation",
+      "tier": 8,
+      "base_value": 680000,
+      "formation_value": 7.2,
+      "nature": "neutral",
+      "relation_overrides": {
+        "metal": 0.5,
+        "wood": 0.5,
+        "water": 0.5,
+        "fire": 0.5,
+        "earth": 0.5
+      },
+      "field_hook": null
+    },
+    {
+      "id": "reincarnation_formations_t12",
+      "name": "太初因果阵心",
+      "world": "reincarnation",
+      "tier": 12,
+      "base_value": 2900000000,
+      "formation_value": 10.9,
+      "nature": "space",
+      "relation_overrides": {
+        "soul": -0.75
+      },
+      "field_hook": "forbidden_sense"
     }
   ],
   "crafting_materials": [

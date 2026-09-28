@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .system.semantic_events import emit
+
 import random
 from typing import Any
 
@@ -17,6 +19,8 @@ class MapTravelMixin:
         self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
     ) -> bool:
         player = game.player
+        emit(game, "time.elapsed", years=1, unit_years=WORLD_SYSTEMS["time_units"][str(player.realm_index)])
+        self._advance_buddhist_year(game)
         self._advance_merchant_year(game)
         era_news.extend(self._advance_sage_year(game, rng))
         self._advance_ghost_phase_two_year(game, rng)

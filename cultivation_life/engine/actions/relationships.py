@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.semantic_events import emit
+
 from typing import Any
 from ...content_registry import (
     FACTION_SYSTEMS,
@@ -14,6 +16,7 @@ from ...rules import (
     can_practice_technique,
     can_player_practice_technique,
     learn_technique,
+    has_living_master,
     opportunity_multiplier,
     opportunity_required,
     remove_item,
@@ -101,7 +104,7 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
     npc_rank = (npc.realm_index, npc.layer)
     max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
     if role == "master":
-        if player.master:
+        if has_living_master(player):
             raise ValueError("你已经拜有师承")
         if npc_rank <= player_rank:
             raise ValueError("只能拜修为严格高于自己的修士为师")
@@ -130,6 +133,7 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         result = "master_accepted"
     elif accepted:
         player.disciples.append(relation)
+        emit(game, "disciple.recruited", target_id=relation["id"])
         summary = f"{npc.name}愿执弟子礼，正式拜入你的门下。"
         result = "disciple_accepted"
     else:
@@ -162,6 +166,7 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
     player.disciple_requests.remove(request)
     if accept:
         player.disciples.append(request)
+        emit(game, "disciple.recruited", target_id=request["id"])
         result = "disciple_accepted"
         summary = f"你亲自收下{request['name']}的拜师帖，正式将其收入门下。"
     else:
@@ -357,6 +362,7 @@ def manage_dao_companion(
                 deps._add_opportunity(player, gain)
             gain_text = f" 合欢功法运转，机缘 +{gain:g}。" if gain else ""
             child_text = deps._try_conceive_child(game, rng)
+            emit(game, "companion.entwined", target_id=companion["id"])
             result, summary = "companion_entwined", f"你与{companion['name']}缠绵共参，心魔 -{reduction:g}。{gain_text}{child_text}"
         elif action in {"request_item", "request_technique"}:
             last[action] = player.age

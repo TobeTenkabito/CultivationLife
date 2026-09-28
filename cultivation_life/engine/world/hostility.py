@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import pursuit_immunity
+from ...rules import effective_fame
+
 import random
 from typing import Any
 from ...content_registry import (
@@ -38,10 +41,10 @@ def _maybe_wanted_encounter(deps: HostilityDependencies, game: GameState, rng: r
     else:
         amnesty_fame = deps._world_coalition_amnesty_fame(player, player.world)
         issue_threshold = max(coalition_threshold, amnesty_fame)
-        if player.fame > issue_threshold:
+        if effective_fame(player) > issue_threshold and not pursuit_immunity(game, "fame"):
             player.hostility[key] = max(
                 player.hostility.get(key, 0),
-                player.fame - issue_threshold + float(config["wanted_threshold"]),
+                effective_fame(player) - issue_threshold + float(config["wanted_threshold"]),
             )
     hostiles: list[tuple[str, float]] = []
     for key, value in list(player.hostility.items()):
@@ -102,7 +105,7 @@ def _world_coalition_amnesty_fame(player: Player, world: str) -> float:
 def _record_world_coalition_amnesty(player: Player, world: str) -> None:
     prefix = f"world_coalition_amnesty:{world}:"
     player.story_flags = [flag for flag in player.story_flags if not flag.startswith(prefix)]
-    player.story_flags.append(f"{prefix}{max(0.0, player.fame):.1f}")
+    player.story_flags.append(f"{prefix}{max(0.0, effective_fame(player)):.1f}")
 
 
 def _player_protected_npc_ids(deps: HostilityDependencies, game: GameState) -> set[str]:

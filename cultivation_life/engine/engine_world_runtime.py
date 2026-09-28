@@ -23,6 +23,7 @@ def _new_sects() -> dict[str, SectState]:
         sect_id: SectState(
             id=sect_id,
             name=FACTION_DEFINITIONS[sect_id]["name"],
+            location_id=FACTION_DEFINITIONS[sect_id].get("location_id", ""),
             world=FACTION_DEFINITIONS[sect_id].get("world", "human"),
             npcs=[SectNpc(**copy.deepcopy(npc)) for npc in templates],
             description=FACTION_DEFINITIONS[sect_id].get("description", ""),

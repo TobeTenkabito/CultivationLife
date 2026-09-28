@@ -28,7 +28,7 @@ class GhostSystemTests(unittest.TestCase):
         self.assertTrue({"events", "market", "factions", "ranking"} <= set(profile["supports"]))
         route = WORLD_SYSTEMS["cultivation_routes"]["ghost"]
         self.assertTrue(next(stage for stage in route["stages"] if stage.get("world") == "hell")["enabled"])
-        self.assertFalse(next(stage for stage in route["stages"] if stage.get("world") == "reincarnation")["enabled"])
+        self.assertTrue(next(stage for stage in route["stages"] if stage.get("world") == "reincarnation")["enabled"])
 
     def test_native_ghost_start_has_starter_manual_sense_map_and_sects(self):
         shown = self.engine.create_game(

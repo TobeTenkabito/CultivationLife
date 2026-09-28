@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .path_modifiers import adjusted_cost
+
 import copy
 import math
 import random

@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "enabled": true,
+    "karma_fame_ratio": 1,
+    "sha_fame_ratio": 1,
+    "negative_combat_cap": 0.2,
+    "grace_units": 5,
+    "upkeep_follower_scale": 5,
+    "upkeep_floor": 0.2,
+    "annual_karma_cap": 4,
+    "follower_income_scale": 100,
+    "follower_income_coefficient": 0.45,
+    "temple_karma": 0.1,
+    "temple_tier_scale": 20,
+    "permission_fee": 100,
+    "permission_years": 12,
+    "burden_karma_weight": 1,
+    "burden_sha_weight": 1.5,
+    "attendance_base": 30,
+    "attendance_realm": 25,
+    "attendance_fame": 2,
+    "attendance_followers": 3,
+    "attendance_temple": 30,
+    "technique_level_score": 5,
+    "negative_chance_cap": 0.9,
+    "negative_chance_base": 0.15,
+    "negative_chance_scale": 0.0015,
+    "unlicensed_risk": 0.12,
+    "burden_difficulty_cap": 2,
+    "burden_difficulty_scale": 0.003,
+    "debate_burden_scale": 0.0008,
+    "spar_win_score": 24,
+    "spar_loss_score": -20,
+    "debate_win_score": 22,
+    "debate_loss_score": -14,
+    "choice_scores": {
+      "teach": 15,
+      "listen": 8,
+      "withdraw": -12
+    },
+    "burden_score_penalty": 0.06,
+    "intervention_chance": 0.45,
+    "intervention_score_penalty": 15,
+    "intervention_wanted_chance": 0.25,
+    "great_threshold": 80,
+    "success_threshold": 48,
+    "normal_threshold": 15,
+    "ascension_selector": {
+      "upper_qi": "spirit",
+      "lower_qi": "yin",
+      "lower_weight": 1
+    },
+    "temples": [
+      {
+        "floor": 0,
+        "decay": 0.1,
+        "cost": 0
+      },
+      {
+        "floor": 20,
+        "decay": 0.07,
+        "cost": 1500
+      },
+      {
+        "floor": 80,
+        "decay": 0.05,
+        "cost": 6000
+      },
+      {
+        "floor": 200,
+        "decay": 0.03,
+        "cost": 24000
+      }
+    ],
+    "positive_events": [
+      "EVT_DHARMA_LISTENERS",
+      "EVT_DHARMA_PATRON",
+      "EVT_DHARMA_RECOGNITION"
+    ],
+    "negative_events": [
+      "EVT_DHARMA_DEBATE",
+      "EVT_DHARMA_CHALLENGE"
+    ],
+    "outcomes": {
+      "great": {
+        "name": "大成",
+        "followers_ratio": 0.65,
+        "karma": 18,
+        "fame": 12
+      },
+      "success": {
+        "name": "成功",
+        "followers_ratio": 0.35,
+        "karma": 10,
+        "fame": 6
+      },
+      "normal": {
+        "name": "平稳收场",
+        "followers_ratio": 0.12,
+        "karma": 4,
+        "fame": 2
+      },
+      "failure": {
+        "name": "失利",
+        "followers_ratio": -0.15,
+        "karma": -12,
+        "fame": -3
+      }
+    },
+    "blessings": {
+      "market": {
+        "name": "市易清净",
+        "description": "坊市与黑市购买价格降低20%；卖出与拍卖不受影响。",
+        "upkeep": 1.2,
+        "multiplier": 0.8
+      },
+      "commission": {
+        "name": "行愿神速",
+        "description": "新接取及发布的商盟委托耗时缩短20%，按年向上取整。",
+        "upkeep": 1.0,
+        "multiplier": 0.8
+      },
+      "natal": {
+        "name": "法器无碍",
+        "description": "本命法宝手动单次及批量温养消耗降低20%。",
+        "upkeep": 1.2,
+        "multiplier": 0.8
+      },
+      "stipend": {
+        "name": "檀施有余",
+        "description": "本界有信众时，按当前境界每年获得固定灵石。",
+        "upkeep": 1.5,
+        "realm_stones": [
+          0,
+          20,
+          60,
+          180,
+          540,
+          1620,
+          4860,
+          14580,
+          43740,
+          131220,
+          393660,
+          1180980,
+          3542940
+        ]
+      },
+      "karma_decay": {
+        "name": "因果渐消",
+        "description": "每年消减原始因果的3%，至少1点，下限为0。",
+        "upkeep": 1,
+        "minimum": 1,
+        "rate": 0.03
+      },
+      "sha_decay": {
+        "name": "煞气自净",
+        "description": "每年消减原始煞气的3%，至少1点，下限为0。",
+        "upkeep": 1,
+        "minimum": 1,
+        "rate": 0.03
+      }
+    },
+    "reincarnation_trial_events": [
+      "EVT_BUDDHIST_REINCARNATION_001",
+      "EVT_BUDDHIST_REINCARNATION_002",
+      "EVT_BUDDHIST_REINCARNATION_003",
+      "EVT_BUDDHIST_REINCARNATION_004",
+      "EVT_BUDDHIST_REINCARNATION_005",
+      "EVT_BUDDHIST_REINCARNATION_006",
+      "EVT_BUDDHIST_REINCARNATION_007",
+      "EVT_BUDDHIST_REINCARNATION_008",
+      "EVT_BUDDHIST_REINCARNATION_009"
+    ],
+    "intervention_purge_chance": 0.15,
+    "intervention_dispersion_chance": 0.5,
+    "intervention_retention": 0.5
+  }
+}

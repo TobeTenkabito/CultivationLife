@@ -1,0 +1,52 @@
+/* A: warm paper, muted saffron and green-black ink. Other themes retain their existing layout. */
+#buddhist-card { --dharma-gold: #99783e; --dharma-ink: #465349; padding:28px 30px; }
+#buddhist-card > .section-title { top:-28px; padding:12px 0; background:var(--paper, #f5f2e7); }
+#buddhist-content { display:grid; gap:24px; }
+#buddhist-content section { border-top:1px solid #99783e33; padding-top:18px; }
+#buddhist-content h3 { margin:0 0 12px; }
+#buddhist-content p { line-height:1.75; }
+.dharma-hero { display:flex; align-items:center; gap:22px; padding:20px; background:linear-gradient(120deg,#bda56c20,transparent); border:1px solid #99783e30; }
+.dharma-seal { color:var(--dharma-gold); font-size:36px; border:1px solid #99783e77; border-radius:50%; width:72px; height:72px; display:grid; place-items:center; flex:none; box-shadow:0 0 0 5px #99783e0c; }
+.dharma-number { font-size:36px; color:var(--dharma-ink); font-variant-numeric:tabular-nums; }
+.dharma-meter { height:13px; margin:16px 0 8px; position:relative; background:linear-gradient(90deg,#a8584422 50%,#9b834722 50%); border-radius:8px; }
+.dharma-meter i { position:absolute; top:0; height:100%; border-radius:6px; }
+.dharma-meter .negative { background:#a46050; }.dharma-meter .positive { background:#9b8347; }
+.dharma-zero,.dharma-warning { position:absolute; top:-4px; bottom:-4px; width:1px; background:#5e695e; left:50%; }
+.dharma-warning { left:37.5%; background:#a46050; }
+.dharma-ticks { position:relative; height:22px; color:#7c7e70; font-size:12px; font-variant-numeric:tabular-nums; }
+.dharma-ticks span { position:absolute; top:0; }.dharma-ticks span:nth-child(1) { left:0; }.dharma-ticks span:nth-child(2) { left:37.5%; transform:translateX(-50%); }.dharma-ticks span:nth-child(3) { left:50%; transform:translateX(-50%); }.dharma-ticks span:nth-child(4) { right:0; }
+.dharma-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:20px 0; }
+.dharma-metrics div { border-left:2px solid #99783e66; padding:8px 14px; }.dharma-metrics small,.dharma-metrics strong { display:block; }.dharma-metrics strong { font-size:24px; margin-top:6px; }
+.dharma-blessings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+#buddhist-card .dharma-blessing { text-align:left; color:var(--dharma-ink); background:#99783e08; border:1px solid #99783e44; padding:16px; box-shadow:none; border-radius:6px; }
+#buddhist-card .dharma-blessing p { font-size:13px; font-weight:normal; margin:9px 0; }
+#buddhist-card .dharma-blessing.selected { background:#b89d5724; border-color:#99783e; box-shadow:inset 3px 0 #99783e; }
+#buddhist-card button:focus-visible { outline:2px solid #99783e; outline-offset:3px; }
+.dharma-alert { color:#a3543e; }.dharma-permissions>div,.dharma-actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; margin:12px 0; }
+.dharma-techniques { display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; }
+#buddhist-card .dharma-techniques button { background:#99783e12; color:var(--dharma-ink); border:1px solid #99783e55; box-shadow:none; }
+#buddhist-card .dharma-techniques .selected { background:#6c674c; color:#fff9e9; }
+.dharma-stages { display:flex; list-style:none; padding:0; gap:8px; }.dharma-stages li { flex:1; padding:12px; text-align:center; background:#99783e0e; border-bottom:2px solid #99783e33; }.dharma-stages .current { border-color:#99783e; color:#84632c; }.dharma-stages .done { color:#536c56; }
+#buddhist-card progress { width:100%; height:8px; accent-color:#99783e; }
+.dharma-sites { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }.dharma-sites>div { padding:14px; border:1px solid #99783e33; }.dharma-sites p { margin:8px 0; }.dharma-sites small { color:#7b7a68; }
+html[data-theme="a"] .strategy-dock .buddhist-dock-button { color:#886b36; border-color:#b69a6255; background:linear-gradient(135deg,#f8f2df,#eeeadc); }
+html[data-theme="a"] .strategy-dock .buddhist-dock-button.active { background:#857142; color:#fff9e9; }
+@media(max-width:700px) { .dharma-blessings,.dharma-sites {grid-template-columns:1fr;} .dharma-hero {gap:12px;padding:14px;} .dharma-ticks {font-size:10px;} }
+#buddhist-wish-card {padding:28px 30px;}
+@media (min-width:901px) {
+  [data-theme=a] #buddhist-wish-card {left:180px;width:min(760px,calc(100vw - 280px));}
+}
+#buddhist-wish-content {display:grid;gap:18px;}
+.wish-balance {padding:24px;background:linear-gradient(135deg,rgba(126,104,57,.12),transparent);border:1px solid var(--line,#d6d9ca);border-radius:14px;}
+.wish-number {display:block;font-size:38px;color:var(--accent,#31584b);font-variant-numeric:tabular-nums;}
+.wish-balance progress {width:100%;height:10px;margin:16px 0;accent-color:#8f7847;border:none;border-radius:20px;overflow:hidden;}
+.wish-balance progress::-webkit-progress-bar {background:#dce2d3;}
+.wish-balance progress::-webkit-progress-value {background:linear-gradient(90deg,#355d4f,#ae945a);border-radius:20px;}
+.wish-benefits {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.wish-benefits small,.wish-benefits b {display:block;line-height:1.8;}
+.wish-section {padding:18px 0;border-top:1px solid var(--line,#d6d9ca);line-height:1.8;}
+.wish-section h3 {margin:0 0 12px;}
+.wish-quiet {display:grid;grid-template-columns:1fr auto;gap:2px 14px;margin:12px 0;}
+.wish-quiet small {grid-column:1/-1;color:var(--muted,#798278);}
+.wish-active {color:#497653;font-weight:600;}
+.wish-section summary {cursor:pointer;}

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import adjusted_cost
+
 import copy
 import math
 from typing import Any
@@ -163,7 +165,7 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             f"你服下{item.name}，下次对应突破成功率 +{item.breakthrough_bonus:.0%}。",
             {"scope": item.breakthrough_scope, "bonus": item.breakthrough_bonus}, ["system", "item", "breakthrough"],
         ))
-    elif item_id.startswith(("jinque_", "zique_", "moque_", "yaoque_", "mingque_")):
+    elif item.root_grant:
         is_zique = item_id.startswith("zique_")
         is_moque = item_id.startswith("moque_")
         is_yaoque = item_id.startswith("yaoque_")
@@ -224,7 +226,7 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
         raise ValueError("此物只能通过其专属来源获得，不能在坊市购买")
     if offer.get("world", "human") != game.player.world:
         raise ValueError("此物不属于当前世界的坊市货池")
-    price = int(offer["price"])
+    price = adjusted_cost(game, int(offer["price"]), "market")
     if not remove_item(game.player, "spirit_stone", price):
         raise ValueError(f"需要 {price} 枚下品灵石")
     if offer["kind"] == "crafting_material":

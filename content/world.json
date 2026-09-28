@@ -743,6 +743,56 @@
           "use_years": 5000,
           "thunder_reduction": 0.1,
           "harvest": {}
+        },
+        "reincarnation_lotus": {
+          "name": "轮生莲",
+          "seed_id": "reincarnation_lotus_seed",
+          "kind": "medicinal",
+          "optimal_years": 1000,
+          "base_value": 1600000,
+          "harvest": {
+            "ten": {
+              "item_id": "reincarnation_lotus_ten",
+              "value": 400000
+            },
+            "hundred": {
+              "item_id": "reincarnation_lotus_hundred",
+              "value": 800000
+            },
+            "thousand": {
+              "item_id": "reincarnation_lotus_thousand",
+              "value": 1600000
+            },
+            "myriad": {
+              "item_id": "reincarnation_lotus_myriad",
+              "value": 1400000
+            }
+          }
+        },
+        "reincarnation_forgetting_grass": {
+          "name": "忘忧草",
+          "seed_id": "reincarnation_forgetting_grass_seed",
+          "kind": "medicinal",
+          "optimal_years": 1000,
+          "base_value": 1600000,
+          "harvest": {
+            "ten": {
+              "item_id": "reincarnation_forgetting_grass_ten",
+              "value": 400000
+            },
+            "hundred": {
+              "item_id": "reincarnation_forgetting_grass_hundred",
+              "value": 800000
+            },
+            "thousand": {
+              "item_id": "reincarnation_forgetting_grass_thousand",
+              "value": 1600000
+            },
+            "myriad": {
+              "item_id": "reincarnation_forgetting_grass_myriad",
+              "value": 1400000
+            }
+          }
         }
       }
     },
@@ -1881,7 +1931,7 @@
       },
       "reincarnation": {
         "tier": 3,
-        "enabled": false,
+        "enabled": true,
         "kind": "world",
         "supports": [
           "events",
@@ -1894,7 +1944,8 @@
           "monster": 0.5,
           "yin": 4
         },
-        "cultivation_ceiling": null
+        "cultivation_ceiling": null,
+        "npc_realm_cap": 12
       },
       "monster_realm": {
         "tier": 2,
@@ -2090,7 +2141,7 @@
           {
             "world": "reincarnation",
             "label": "轮回界",
-            "enabled": false
+            "enabled": true
           },
           {
             "system": "heavens",
@@ -3322,6 +3373,21 @@
         "mode": "story",
         "enabled": true,
         "seal_recovery": true
+      },
+      {
+        "id": "progression:hell:reincarnation",
+        "source": "hell",
+        "destination": "reincarnation",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "sealed_descent:reincarnation:hell",
+        "source": "reincarnation",
+        "destination": "hell",
+        "mode": "sealed_descent",
+        "enabled": true,
+        "generic_cross_world": true
       }
     ]
   },

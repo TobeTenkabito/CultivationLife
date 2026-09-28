@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from ..system.semantic_events import emit, relationship_roles
+
+from ..system.path_modifiers import modifier
+
 import copy
 import random
 from typing import Any
@@ -46,6 +50,8 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         ))
 
     for relation in deps._public_party(game):
+        if str(relation.get("id")) in (target or {}).get("exclude_allied_ids", []):
+            continue
         power = max(0.0, float(relation.get("combat_power", 0)))
         units.append(BattleUnit(
             str(relation.get("id", "companion")), str(relation.get("name", "同行者")),
@@ -148,6 +154,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         their legacy aggregate-power logic.
         """
     player = game.player
+    if lethal and not target.get("player_defending") and not target.get("execution"):
+        attacked = deps._find_npc(game, str(target.get("npc_id", "")))
+        roles = relationship_roles(game, target.get("npc_id"), target.get("faction_id") or (attacked.faction_id if attacked else None))
+        if roles or target.get("relationship_kind") == "party":
+            emit(game, "relationship.attacked", roles=roles, kind=target.get("relationship_kind"))
+            target["penalty_handled"] = True
     deps._inject_tianji_npc_artifacts(game, target)
     ensure_formation_state(player)
     portable_formation = active_formation_profile(player)
@@ -224,6 +236,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         current_hp_ratio=player.hp / max(1.0, hp_max),
         current_mp_ratio=player.mp / max(1.0, mp_max),
         battlefield_tags=deps._combat_battlefield_tags(game, target),
+        player_stat_multiplier=modifier(game, "combat_stats"),
         mana_cost_multiplier=combat_root_mana_cost_multiplier(
             player, opponent_realm, opponent_layer,
         ),
@@ -272,7 +285,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
     mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
     player.hp = max(0.0 if lethal else 1.0, player.hp - hp_loss)
-    if resolution.retreat_impossible and not resolution.death_prevented:
+    if lethal and resolution.retreat_impossible and not resolution.death_prevented:
         # Ordinary battle injury is capped, but an overwhelmingly stronger
         # lethal pursuer leaves no valid route for that generic retreat.
         player.hp = 0.0
@@ -388,6 +401,8 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         fame_before = player.fame
         treasure_id = victim.get("treasure_item_id")
         tianji_spoils = deps._tianji_handle_npc_kill(game, str(victim.get("npc_id", "")))
+        victim.update(in_combat=True, defending=bool(target.get("player_defending")),
+                      execution=bool(target.get("execution")), penalty_handled=bool(target.get("penalty_handled")))
         deps._apply_cultivator_kill(game, victim, rng)
         demonic_gain = deps._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
         spoils = (
@@ -442,12 +457,19 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
 
 def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: dict[str, Any], rng: random.Random) -> None:
     player = game.player
+    emit(game, "cultivator.killed", **victim)
     config = WORLD_SYSTEMS["faction_conflict"]
     fame_config = WORLD_SYSTEMS["fame"]
     player.fame += float(fame_config["kill_gain_base"]) + int(victim["realm_index"]) * float(fame_config["kill_realm_scale"])
     if victim.get("notorious"):
         player.fame += max(40.0, float(victim.get("notoriety", 0)) * 0.55)
     npc_id = victim.get("npc_id")
+    if npc_id:
+        for relation in [player.master, player.dao_companion, *player.disciples, *player.concubines, *player.dao_friends]:
+            if relation and str(relation.get("npc_id") or relation.get("id")) == str(npc_id):
+                relation["alive"] = False
+                relation["death_reason"] = f"被{player.name}击杀"
+        player.party = [row for row in player.party if str(row.get("id")) != str(npc_id)]
     npc = deps._find_npc(game, str(npc_id)) if npc_id else None
     if npc:
         npc.alive = False

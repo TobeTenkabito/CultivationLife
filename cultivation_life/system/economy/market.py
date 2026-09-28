@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..path_modifiers import adjusted_cost
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -222,6 +224,9 @@ class EconomyMarketMethods:
                 continue
             shown = dict(offer)
             shown["locked"] = bool(offer.get("locked", False))
+            shown["base_price"] = offer["price"]
+            shown["price"] = adjusted_cost(game, offer["price"], "market")
+            shown["affordable"] = stones >= shown["price"]
             shown["market_group"] = self._market_offer_group(offer)
             shown["known"] = bool(
                 offer["kind"] == "technique"

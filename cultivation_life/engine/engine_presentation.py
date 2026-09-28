@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from ..system.path_modifiers import modifier, pursuit_immunity, projected_resource
+from ..rules import effective_fame, effective_sha_qi, effective_karma
+
 import copy
 from typing import Any
 from ..content_registry import ACTIONS, FACTION_DEFINITIONS, KARMA_FACTORS, REALMS, WORLD_SYSTEMS
@@ -22,6 +25,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
     history = [entry for entry in game.history if deps._history_visible_in_world(entry, game)]
     deps._ensure_natal_artifact(game)
     player_data = public_player(game.player)
+    player_data.update(raw_fame=game.player.fame, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
+                       fame=effective_fame(game.player), karma=projected_resource(game.player, "karma"), sha_qi=effective_sha_qi(game.player), effective_karma=effective_karma(game.player))
     natal_inventory_item = deps._natal_artifact_inventory_item(game)
     if natal_inventory_item:
         player_data["inventory"].insert(0, natal_inventory_item)
@@ -122,11 +127,11 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "威压全界，本界围杀势力已经低头"
         if f"world_coalition_subdued:{game.player.world}" in game.player.story_flags else
         "凶名震世，各方势力正在酝酿包围网"
-        if game.player.fame > coalition_threshold else
+        if effective_fame(game.player) > coalition_threshold and not pursuit_immunity(game, "fame") else
         "威名过盛，修仙界已经明显警觉"
-        if game.player.fame >= float(fame_config["alarmed_threshold"]) else
+        if effective_fame(game.player) >= float(fame_config["alarmed_threshold"]) else
         "声名足以使同道敬重"
-        if game.player.fame >= float(fame_config["respected_threshold"]) else
+        if effective_fame(game.player) >= float(fame_config["respected_threshold"]) else
         "尚未在修仙界留下显赫名声"
     )
     party = deps._public_party(game)
@@ -232,11 +237,12 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "breakthrough": deps._public_major_breakthrough(game.player),
         "body_cultivation": deps._public_body_cultivation(game.player),
         "world_travel": {
+            "ascension_destination": modifier(game.player, "ascension_destination", "celestial" if game.player.world == "spirit" else "hell" if game.player.path == "ghost" else "demon" if game.player.path == "monster" else "spirit"),
             "can_ascend_celestial": bool(
-                game.player.world == "spirit" and game.player.realm_index == 8
+                modifier(game.player, "ascension_source", game.player.world == "spirit") and game.player.realm_index == 8
                 and game.player.layer == REALMS[8].layers
                 and game.player.opportunity >= opportunity_required(game.player)
-                and game.player.path in {"dao", "buddhist", "confucian"}
+                and (game.player.world == "hell" or game.player.path in {"dao", "buddhist", "confucian"})
                 and not game.player.sealed_cultivation and not game.pending_event
                 and not game.active_trial and game.player.alive
             ),

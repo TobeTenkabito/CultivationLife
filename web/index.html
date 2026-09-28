@@ -4,17 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <script src="/theme-boot.js?v=1.41.2"></script>
-  <link rel="stylesheet" href="/style.css?v=1.41.2">
-  <link rel="stylesheet" href="/panels.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/common.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/composition.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/a.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/b.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/c.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/d.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/e.css?v=1.41.2">
-  <link rel="stylesheet" href="/themes/f.css?v=1.41.2">
+  <script src="/theme-boot.js?v=1.43.0"></script>
+  <link rel="stylesheet" href="/style.css?v=1.43.0">
+  <link rel="stylesheet" href="/buddhist-panel.css?v=1.43.0">
+  <link rel="stylesheet" href="/panels.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/common.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/composition.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/a.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/b.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/c.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/d.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/e.css?v=1.43.0">
+  <link rel="stylesheet" href="/themes/f.css?v=1.43.0">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -385,6 +386,8 @@
           <section><h3>已参经典</h3><div id="sage-classic-list" class="sage-classic-list"></div></section>
           <section><div class="sage-subheading"><div><p class="eyebrow">OUTER KING</p><h3>外王经世</h3></div><small>先扣除浩然经验再结算收益；等级与所有长期被动可能立即下降。</small></div><div id="sage-outer-list" class="sage-outer-list"></div></section>
         </article>
+        <article id="buddhist-wish-card" class="paper utility-panel left-panel hidden" role="dialog" aria-modal="false" aria-label="愿力"><div class="section-title"><div><p class="eyebrow">诸法无我 · 一念清明</p><h2>愿力</h2></div><button id="buddhist-wish-toggle" type="button">关闭</button></div><div id="buddhist-wish-content"></div></article>
+        <article id="buddhist-card" class="paper utility-panel hidden" role="dialog" aria-modal="false" aria-label="诸法无我"><div class="section-title"><div><p class="eyebrow">诸法无我 · 众生为镜</p><h2>弘法人间</h2></div><button id="buddhist-toggle" type="button">关闭</button></div><div id="buddhist-content"></div></article>
         <article id="sage-card" class="paper utility-panel sage-panel hidden" role="dialog" aria-modal="false" aria-label="圣人教化">
           <div class="section-title"><div><p class="eyebrow">THE WAY OF THE SAGE</p><h2>圣人教化</h2></div><div class="panel-heading"><span id="sage-heading"></span><button id="sage-toggle" type="button">关闭</button></div></div>
           <p id="sage-note" class="muted"></p>
@@ -410,6 +413,7 @@
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
+        <button type="button" data-panel-target="buddhist-wish" title="愿力 · 清净道心" class="hidden"><span>愿</span><small>愿力</small></button>
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
         <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
@@ -435,6 +439,7 @@
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
         <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
+        <button type="button" data-panel-target="buddhist" title="诸法无我 · 弘法人间" class="hidden buddhist-dock-button"><span>佛</span><small>弘法</small></button>
         <button type="button" data-panel-target="sage" title="圣人教化" class="hidden sage-dock-button"><span>教</span><small>教化</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
@@ -473,14 +478,16 @@
   <div id="theme-feedback" aria-hidden="true"></div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=1.41.2"></script>
+  <script src="/ui-panels.js?v=1.43.0"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/merchant-commission-panel.js?v=1.41.2"></script>
-  <script src="/merchant-panel.js?v=1.41.2"></script>
-  <script src="/map-directory.js?v=1.41.2"></script>
-  <script src="/theme-manager.js?v=1.41.2"></script>
-  <script src="/theme-composition.js?v=1.41.2"></script>
-  <script src="/family-panel.js?v=1.41.2"></script>
-  <script src="/app.js?v=1.41.2"></script>
+  <script src="/merchant-commission-panel.js?v=1.43.0"></script>
+  <script src="/merchant-panel.js?v=1.43.0"></script>
+  <script src="/map-directory.js?v=1.43.0"></script>
+  <script src="/theme-manager.js?v=1.43.0"></script>
+  <script src="/theme-composition.js?v=1.43.0"></script>
+  <script src="/family-panel.js?v=1.43.0"></script>
+  <script src="/buddhist-wish.js?v=1.43.0"></script>
+  <script src="/buddhist-panel.js?v=1.43.0"></script>
+  <script src="/app.js?v=1.43.0"></script>
 </body>
 </html>

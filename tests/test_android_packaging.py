@@ -29,7 +29,7 @@ def test_android_bundle_contains_complete_desktop_content(tmp_path):
     assert hashlib.sha256(archive.read_bytes()).hexdigest() == (tmp_path/'game-assets.sha256').read_text()
     with zipfile.ZipFile(archive) as bundle:
         manifests = [n for n in bundle.namelist() if n.startswith('dlc/') and n.endswith('/manifest.json')]
-        assert len(manifests) == 6
+        assert len(manifests) == len(list((ROOT/'dlc').glob('*/manifest.json')))
         for directory in ('content','dlc'):
             for path in (ROOT/directory).rglob('*.json'):
                 assert bundle.read(path.relative_to(ROOT).as_posix()) == path.read_bytes()
@@ -58,8 +58,9 @@ except urllib.error.HTTPError as e: assert e.code==403
 headers={'Cookie':'cultivation_session='+token}
 config=json.load(urllib.request.urlopen(urllib.request.Request(base+'/api/config',headers=headers)))
 assert config['debug'] is False
-assert len(config['extensions'])==6
-assert config['base_game']['version']=='1.41.2'
+assert len(config['extensions'])==len(list((Path(sys.argv[1])/'dlc').glob('*/manifest.json')))
+from cultivation_life.version import BASE_GAME_VERSION
+assert config['base_game']['version']==BASE_GAME_VERSION
 from cultivation_life import server
 assert server.PERSISTENCE_ROOT==root/'game'
 assert server.WEB_ROOT==root/'game/web'

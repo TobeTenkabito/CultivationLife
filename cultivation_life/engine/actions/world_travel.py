@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import modifier
+
 import random
 from typing import Any
 from ...content_registry import REALMS, WORLD_SYSTEMS
@@ -217,11 +219,11 @@ def begin_spirit_crossing(deps: WorldTravelDependencies, game_id: str) -> dict[s
         if (candidate := deps._party_crossing_candidate(game, npc_id)) is not None
         and any(str(member.get("id")) == npc_id for member in player.party)
     ]
-    destination = deps._ascension_destination(player.path)
+    destination = deps._ascension_destination(player.path, player)
     destination_name = WORLD_SYSTEMS["world_names"][destination]
     event = deps.events_by_id["EVT_SPIRIT_CROSSING_001"]
     game.pending_event = deps._instantiate_event(event, game, rng)
-    if player.path in {"monster", "ghost"}:
+    if destination != "spirit":
         game.pending_event["title"] = f"偷渡{destination_name}"
         game.pending_event["body"] = str(game.pending_event.get("body", "")).replace("灵界", destination_name)
     game.history.append(HistoryRecord(
@@ -249,23 +251,25 @@ def begin_celestial_ascension(deps: WorldTravelDependencies, game_id: str) -> di
         raise ValueError("身陷牢狱时无法渡劫飞升")
     if player.sealed_cultivation:
         raise ValueError("真实道果正受下界压制，不能在封印状态下飞升")
-    if player.path not in {"dao", "buddhist", "confucian"}:
+    if player.world != "hell" and player.path not in {"dao", "buddhist", "confucian"}:
         raise ValueError("当前道统尚未开放飞升仙界路线")
-    if player.world != "spirit" or player.realm_index != 8 or player.layer != REALMS[8].layers:
-        raise ValueError("只有身处灵界且大乘九层圆满，方可渡劫飞升")
+    if not modifier(player, "ascension_source", player.world == "spirit") or player.realm_index != 8 or player.layer != REALMS[8].layers:
+        raise ValueError("须身处灵界或地狱界，且本界最高大境界九层圆满，方可渡劫飞升")
     if player.opportunity < opportunity_required(player):
         raise ValueError("大乘九层机缘尚未圆满")
-    event_ids = [f"EVT_CELESTIAL_ASCENSION_{index:03d}" for index in range(1, 10)]
+    destination = modifier(player, "ascension_destination", "celestial")
+    event_ids = modifier(player, "ascension_events", [f"EVT_CELESTIAL_ASCENSION_{index:03d}" for index in range(1, 10)])
     rng = decode_rng(game.seed, game.rng_state)
     game.active_trial = {
         "kind":"celestial_ascension", "source_realm":8, "target_realm":9,
         "target_layer":1, "major":True, "old_label":public_player(player)["realm_name"],
         "step_index":0, "event_ids":event_ids, "lethal":True,
+        "destination": destination,
     }
     game.pending_event = deps._instantiate_event(deps.events_by_id[event_ids[0]], game, rng)
     game.history.append(HistoryRecord(
         "SYS_CELESTIAL_ASCENSION_BEGIN", 1, player.age, "渡劫飞升", None, "started",
-        "你以大乘九层圆满道果叩问仙门；九重判定已经开始，其中第三、六、九关皆为仙雷。",
+        f"你以大乘九层圆满道果叩问{WORLD_SYSTEMS['world_names'][destination]}之门；九重判定已经开始，其中第三、六、九关皆为劫雷。",
         {"trial_steps":9}, ["system", "ascension", "celestial", "milestone"],
     ))
     game.updated_at = now_iso()

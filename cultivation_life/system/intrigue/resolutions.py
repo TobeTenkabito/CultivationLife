@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..semantic_events import emit
+
 from ..faction_geography import can_enter_faction, require_faction_admission
 
 from typing import TYPE_CHECKING
@@ -106,6 +108,8 @@ class IntrigueResolutionMethods:
         }
         if passed:
             self._intrigue_apply_resolution(game, record, resolution_type, target_id, rng, context=context)
+            if proposer_id == PLAYER_ID and resolution_type == "declare_war":
+                emit(game, "diplomacy.proposal_passed", status="war")
             if resolution_type == "disciple_recruitment":
                 pending = record.get("pending_recruitment") or {}
                 resolution["candidate_count"] = len(pending.get("candidates", []))

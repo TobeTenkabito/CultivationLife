@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.semantic_events import emit
+
 from typing import Any
 from ...content_registry import FACTION_REWARDS, REALMS, RACE_DEFINITIONS, WORLD_SYSTEMS
 from ...models import GameState, HistoryRecord, Player, SectNpc, SectState
@@ -179,6 +181,7 @@ def propose_race_diplomacy(deps: FactionActionDependencies, game_id: str, target
     passed = yes > len(ballots) / 2
     old_status = str(relation.get("status", "neutral"))
     if passed:
+        emit(game, "diplomacy.proposal_passed", status=status)
         affinity = {"war": -75, "alliance": 80, "truce": -5, "neutral": 0, "vassal": 65}[status]
         deps._set_diplomatic_relation(game, relation, status, "human", target_race, "race", affinity)
     relation["last_vote"] = {"age": player.age, "proposal": status, "yes": yes, "total": len(ballots), "passed": passed, "ballots": ballots}
@@ -229,6 +232,7 @@ def propose_sect_diplomacy(deps: FactionActionDependencies, game_id: str, target
     passed = yes > len(ballots) / 2
     old_status = str(relation.get("status", "neutral"))
     if passed:
+        emit(game, "diplomacy.proposal_passed", status=status)
         deps._set_diplomatic_relation(
             game, relation, status, own.id, target.id, "sect",
             float({"war":-75,"alliance":80,"truce":-5,"neutral":0,"vassal":65}[status]),

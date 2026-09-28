@@ -551,6 +551,8 @@ def _sync_relationship_records(deps: RelationshipDependencies, game: GameState) 
     changed = False
     relations = [entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.concubines, *game.player.disciples, *game.player.disciple_requests] if entry]
     for relation in relations:
+        if relation in game.player.concubines and relation.get("source") == "captive":
+            continue
         before = copy.deepcopy(relation)
         source = relation.get("source", "event")
         npc = deps._find_npc(game, str(relation.get("npc_id") or relation.get("id")))
@@ -615,7 +617,8 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     rng = rng or random.Random(f"relationships:{game.seed}:{player.age}")
     event_relations = [
         entry for entry in [player.master, player.dao_companion, *player.dao_friends, *player.concubines, *player.disciples, *player.disciple_requests]
-        if entry and not deps._find_npc(game, str(entry.get("npc_id") or entry.get("id", "")))
+        if entry and ((entry in player.concubines and entry.get("source") == "captive")
+                      or not deps._find_npc(game, str(entry.get("npc_id") or entry.get("id", ""))))
     ]
     for relation in event_relations:
         if not relation.get("alive", True):

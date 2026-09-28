@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .system.path_modifiers import projected_resource, modifier
+
 import copy
 import math
 import random
@@ -596,7 +598,15 @@ def combat_power_assessment_value(actual: float, expected: float) -> str:
     return "你的额外资产与特殊体系令战力远超当前境界推荐线"
 
 
-def effective_karma(player: Player) -> float:
+def has_living_master(player: Player) -> bool:
+    """A deceased mentor remains in the record, but no longer blocks new mentorship."""
+    return bool(player.master and player.master.get("alive", True))
+
+
+def effective_karma(player: Player, context: str = "general") -> float:
+    projected = modifier(player, "karma", None, context=context)
+    if projected is not None:
+        return float(projected)
     if player.path == "demonic":
         return 0.0
     if player.technique:
@@ -607,6 +617,14 @@ def effective_karma(player: Player) -> float:
     else:
         value = max(0.0, player.karma)
     return value * max(0.0, 1.0 - float(player.sage_effects.get("karma_effect_reduction", 0.0)))
+
+
+def effective_sha_qi(player: Player, context: str = "general") -> float:
+    return projected_resource(player, "sha_qi", context)
+
+
+def effective_fame(player: Player) -> float:
+    return projected_resource(player, "fame")
 
 
 def negative_event_multiplier(player: Player) -> float:
@@ -763,6 +781,7 @@ def opportunity_multiplier(
         root_efficiency * inner_multiplier
         * technique_environment_multiplier(player.technique, player.world, concentrations)
         * ghost_opportunity_multiplier(player)
+        * modifier(player, "opportunity_efficiency", 1.0)
         * (1 + max(0.0, float(player.sage_effects.get("opportunity_multiplier", 0.0))))
         * (0.8 if player.concubine_status else 1.0)
     )

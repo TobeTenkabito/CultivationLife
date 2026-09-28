@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .semantic_events import emit
+
 import copy
 import random
 import uuid
@@ -1058,6 +1060,8 @@ class WarSystemMixin:
                 raise ValueError("指定处死的修士不属于战败方参战名册")
             victim.alive = False
             victim.death_reason = "战败和约指定处死"
+            if not automatic and self._player_war_side(game, war) == beneficiary:
+                emit(game, "cultivator.killed", npc_id=victim.id, execution=True)
             detail = f"{victim.name}依约被处死"
         elif term == "alliance":
             self._set_diplomatic_relation(game, relation, "alliance", winner_id, loser_id, war["kind"], 72)

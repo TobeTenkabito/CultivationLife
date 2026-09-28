@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .semantic_events import emit
+
 from .faction_geography import can_enter_faction, require_faction_admission
 
 import copy

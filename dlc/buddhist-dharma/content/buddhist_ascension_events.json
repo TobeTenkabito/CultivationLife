@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_001",
+      "version": 1,
+      "title": "渡劫飞升·法身关",
+      "body": "轮回法光先验法体。九重飞升劫已经开启，开劫后不可中途退出。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "endure",
+          "text": "以圆满法体承接轮回法光",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_body"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_002",
+      "version": 1,
+      "title": "渡劫飞升·界壁关",
+      "body": "灵界与轮回界之间的罡风层层闭合，只有元神与法力同时稳定才能穿过。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "cross",
+          "text": "定住元神，强渡界壁",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_space"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_003",
+      "version": 1,
+      "title": "渡劫飞升·一九轮回劫雷",
+      "body": "第一重轮回劫雷循轮回法光落下。所有雷伤减免均会对本关生效。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "thunder",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "receive",
+          "text": "迎击第一重轮回劫雷",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_thunder_1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_004",
+      "version": 1,
+      "title": "渡劫飞升·因果关",
+      "body": "下界数万年因果化为锁链。业障越重，轮回之门反噬越强。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "sever",
+          "text": "梳理因果，斩断尘缘锁链",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_karma"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_005",
+      "version": 1,
+      "title": "渡劫飞升·域外天魔",
+      "body": "域外天魔借飞升者最深的执念显形，试图夺舍这具即将蜕变的法身。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "outer_demon",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "destroy",
+          "text": "守住道心，斩灭天魔",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_demon"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_006",
+      "version": 1,
+      "title": "渡劫飞升·二九轮回劫雷",
+      "body": "第二重轮回劫雷已带有轮回界法则，雷威远胜前劫。所有雷伤减免均会对本关生效。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "thunder",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "receive",
+          "text": "迎击第二重轮回劫雷",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_thunder_2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_007",
+      "version": 1,
+      "title": "渡劫飞升·法则关",
+      "body": "轮回界法则拒绝未经淬炼的下界道果。你必须以自身战斗体系撑开一线立足之地。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "anchor",
+          "text": "以完整道果锚定轮回界",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_law"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_008",
+      "version": 1,
+      "title": "渡劫飞升·问心关",
+      "body": "过去所有失败、杀伐与遗憾一同回返。心魔若未平息，轮回之门便会化为死门。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "answer",
+          "text": "守住本心，直面旧念",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_heart"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_BUDDHIST_REINCARNATION_009",
+      "version": 1,
+      "title": "渡劫飞升·三九轮回劫雷",
+      "body": "最后一重轮回劫雷贯穿灵界与轮回界。渡过此雷，凡躯才会真正化作法身。所有雷伤减免均会对本关生效。",
+      "category": "buddhist_ascension",
+      "tags": [
+        "manual_only",
+        "celestial_ascension",
+        "trial_item_use",
+        "thunder",
+        "buddhist",
+        "world:hell"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "ascend",
+          "text": "迎击最后轮回劫雷，叩开轮回之门",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "ascension_thunder_3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

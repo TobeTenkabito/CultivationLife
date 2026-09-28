@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "world_transition_routes": [
+      {
+        "id": "progression:human:hell",
+        "source": "human",
+        "destination": "hell",
+        "mode": "progression",
+        "enabled": true
+      },
+      {
+        "id": "progression:hell:reincarnation",
+        "source": "hell",
+        "destination": "reincarnation",
+        "mode": "progression",
+        "enabled": true
+      }
+    ]
+  }
+}

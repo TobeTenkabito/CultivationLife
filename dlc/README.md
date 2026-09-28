@@ -19,7 +19,7 @@ dlc/
 ```
 
 系统型 DLC 还可以提供本体已声明为可选扩展点的内容表，例如
-`monster_bloodlines.json`、`sage_way.json` 与 `guixu_tide.json`。具体物种、
+`monster_bloodlines.json`、`sage_way.json`、`guixu_tide.json` 与 `buddhist_way.json`。具体物种、
 圣道条目与归墟副本/宝池仍属于 DLC；本体只保留
 通用的读取、存档兼容与运行时接口。
 
@@ -47,3 +47,5 @@ dlc/
 玩家可以在初始主界面右上角展开“DLC / MOD”管理器。开关保存在程序目录的
 `data/extension_preferences.json`，优先于清单中的默认 `enabled`，并在下次启动时生效；
 扩展包的 `manifest.json` 不会被改写，更新或替换内容包时也不会丢失玩家选择。
+
+诸法无我：众生为镜 v1.0.0 在本体 v1.43.0 接入愿力、清净持守、涅槃与高阶弘法威慑。轮回界地图、宗门、商货和通用飞升入口属于本体，关闭 DLC 后仍然存在。
