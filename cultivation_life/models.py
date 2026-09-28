@@ -213,6 +213,9 @@ class SectNpc:
     family_traits: dict[str, Any] = field(default_factory=dict)
     family_combat_bonus: float = 0.0
     social_profile: dict[str, Any] | None = None
+    # Optional, versioned cultivation facts. Domain definitions live in content,
+    # while coverage, initiative and active fields exist only during a battle.
+    transcendence: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.gender not in {"male", "female"}:
@@ -350,6 +353,7 @@ class Player:
     next_tribulation_age: int | None = None
     next_thunder_damage_reduction: float = 0.0
     immortal_power_converted: bool = False
+    transcendence: dict[str, Any] | None = None
     immortal_conversion_stage: int = 0
     immortal_conversion_last_age: int | None = None
     immortal_conversion_checked_units: int = 0

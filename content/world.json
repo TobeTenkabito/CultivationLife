@@ -245,6 +245,11 @@
     }
   },
   "systems": {
+    "transcendent_combat": {
+      "version": 1,
+      "contest_ratio": 1.25,
+      "domains": []
+    },
     "secret_arts": {
       "npc_concealment_chance": 0.18,
       "npc_max_realm_drop": 3,

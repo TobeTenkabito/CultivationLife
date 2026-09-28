@@ -459,6 +459,11 @@ class ContentRegistry:
             monster_bloodline_settings=monster_bloodline_settings,
         )
         from .system.world_transition_system import validate_transition_content
+        from .system.combat.contracts import domain_definitions
+        try:
+            domain_definitions(registry.world_systems.get("transcendent_combat", {}))
+        except (ValueError, KeyError, TypeError) as error:
+            raise ContentError(f"仙域能力配置不合法：{error}") from error
         try:
             validate_transition_content(registry.world_systems["world_profiles"],
                                         registry.world_systems.get("world_transition_routes", []), realms)
