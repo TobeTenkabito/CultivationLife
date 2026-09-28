@@ -124,7 +124,7 @@ class ContentRegistryTests(unittest.TestCase):
             for row in registry.market_goods
             if row["kind"] == "item" and registry.items[row["content_id"]].conception_bonus > 0
         }
-        self.assertEqual(sold_worlds, {"human", "demon", "spirit", "true_demon", "hell", "celestial", "asura", "monster_realm", "phantom_underworld", "nether"})
+        self.assertEqual(sold_worlds, {"human", "demon", "spirit", "true_demon", "hell", "celestial", "asura", "monster_realm", "phantom_underworld", "nether", "reincarnation"})
         self.assertEqual(registry.world_systems["demonic_cultivation"]["divine_sense_training_base"], 40)
         self.assertEqual(registry.world_systems["family"]["conception_chance_by_realm"]["5"], 0.0)
 

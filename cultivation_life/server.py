@@ -128,10 +128,15 @@ class Handler(BaseHTTPRequestHandler):
             game_id, operation = parts[2], parts[3]
             ENGINE.assert_ghost_operation_allowed(game_id, operation)
             ENGINE.assert_guixu_operation_allowed(game_id, operation)
+            ENGINE.assert_buddhist_operation_allowed(game_id, operation)
             if operation == "advance":
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
             elif operation == "choice":
                 result = ENGINE.choose(game_id, payload.get("choice_id", ""))
+            elif operation == "relationship-violence":
+                result = ENGINE.relationship_violence(game_id, **payload)
+            elif operation == "buddhist-action":
+                result = ENGINE.buddhist_action(game_id, **payload)
             elif operation == "guixu-action":
                 result = ENGINE.guixu_action(game_id, payload.get("action", ""), payload)
             elif operation == "tianji-action":

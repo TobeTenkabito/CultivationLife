@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .path_modifiers import commission_duration
+
 import copy
 import math
 import random
@@ -138,6 +140,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
                 base_years = stars * 2 + kind_index % 3
                 # Exact year durations, accelerated by realm without rounding to action units.
                 years = max(1, math.ceil(base_years / (1 + max(0, game.player.realm_index - target_realm) * .7)))
+                years = commission_duration(game, years)
                 material_cost = int(definition["base_material_value"]) * stars
                 value = max(100 * stars ** 2, int(power * .1), material_cost * 2)
                 scale = 1 + min(.5, math.log10(max(1, self._merchant_power(alliance))) / 20)
@@ -279,7 +282,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
         else:
             if kind == "bounty":
                 target = self._find_npc(game, order["target_id"])
-                self._apply_cultivator_kill(game, {"npc_id": target.id, "name": target.name,
+                self._apply_cultivator_kill(game, {"actor": "commission", "npc_id": target.id, "name": target.name,
                     "realm_index": target.realm_index, "faction_id": target.faction_id, "race": target.race}, rng)
                 target.death_reason = f"被{order['worker']}依商盟悬赏击杀"
                 self._tianji_handle_npc_kill(game, target.id)

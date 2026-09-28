@@ -59,3 +59,23 @@ def war_site(maps, war):
         current = pool[index]
         war["location_id"] = current["id"]
     return current
+
+
+def local_authorities(game, world, location):
+    """Actual living local sects and families, independent of diplomacy DLCs."""
+    entities = {row.id: row for row in game.sects.values()}
+    if game.family:
+        entities[game.family.id] = game.family
+    return [row for row in entities.values() if not row.extinct and row.world == world
+            and faction_site(row)["id"] == location]
+
+
+def authority_permission_exempt(game, authority):
+    from ..world_state import race_pair
+    own = {game.player.faction_id}
+    if game.family and not game.family.extinct and game.family.world == game.player.world:
+        own.add(game.family.id)
+    if authority.id in own:
+        return True
+    return any(game.sect_relations.get(race_pair(identity, authority.id), {}).get("status")
+               in {"alliance", "vassal"} for identity in own if identity)

@@ -3939,6 +3939,278 @@
           "description": "淬灵定形：续航提高2%。"
         }
       }
+    },
+    {
+      "id": "reincarnation_crafting_t1",
+      "name": "轮生阴司一阶铸器玄晶",
+      "world": "reincarnation",
+      "tier": 1,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 20,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t2",
+      "name": "轮生阴司二阶铸器玄晶",
+      "world": "reincarnation",
+      "tier": 2,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 66,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t3",
+      "name": "轮生锁魂冥铁",
+      "world": "reincarnation",
+      "tier": 3,
+      "tags": [
+        "metal",
+        "soul"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 420,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "divine_sense_efficiency": 1.16
+          },
+          "description": "主材：战力与神识设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "辅材：神识提高3%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t4",
+      "name": "轮生阴司四阶铸器玄晶",
+      "world": "reincarnation",
+      "tier": 4,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 1540,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t5",
+      "name": "轮生忘川阴水",
+      "world": "reincarnation",
+      "tier": 5,
+      "tags": [
+        "water",
+        "yin"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 7600,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "max_mp": 1.22,
+            "tribulation_reduction": 1.12
+          },
+          "description": "主材：MP与渡劫设计值提高。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "enemy_stat_multipliers": {
+              "might": 0.97
+            }
+          },
+          "description": "辅材：敌方威能降低3%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t6",
+      "name": "轮生业火余烬",
+      "world": "reincarnation",
+      "tier": 6,
+      "tags": [
+        "fire",
+        "karma"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 88000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "breakthrough_bonus": 0.006
+          },
+          "description": "淬火：成品突破加成 +0.6%（仍受单件5%上限）。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t7",
+      "name": "轮生阴司七阶铸器玄晶",
+      "world": "reincarnation",
+      "tier": 7,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 286000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t8",
+      "name": "轮生阴司八阶铸器玄晶",
+      "world": "reincarnation",
+      "tier": 8,
+      "tags": [
+        "yin",
+        "metal"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 990000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.12,
+            "max_hp": 1.06
+          },
+          "description": "凝晶定器：战斗力设计值提高12%，气血设计值提高6%。"
+        },
+        "secondary": {
+          "special_stats": {
+            "tribulation_reduction": 0.004
+          },
+          "description": "凝固器纹：渡劫减伤 +0.4%。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_crafting_t12",
+      "name": "太初轮盘道金",
+      "world": "reincarnation",
+      "tier": 12,
+      "tags": [
+        "fire",
+        "rebirth"
+      ],
+      "roles": [
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 2400000000,
+      "role_effects": {
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.018
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.07
+            }
+          },
+          "description": "淬火：渡劫减伤 +1.8%，续航提高7%。"
+        }
+      }
     }
   ],
   "spirit_plants": [

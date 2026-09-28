@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import modifier
+
+from ...rules import effective_sha_qi
+
 import copy
 import random
-from ...content_registry import TECHNIQUE_CATALOG, WORLD_SYSTEMS
+from ...content_registry import TECHNIQUE_CATALOG, WORLD_SYSTEMS, REALMS
 from ...models import GameState, HistoryRecord, Player
 from ...rules import (
     add_item,
@@ -15,6 +19,7 @@ from ...rules import (
     qi_level,
 )
 from ...system.crafting_system import crafted_artifact_bonuses
+from ...system.ghost_system import grant_intrinsic_progression_if_new_highwater
 from ..dependencies import TrialDependencies
 
 
@@ -65,7 +70,7 @@ def _resolve_trial_step(deps: TrialDependencies, game: GameState, step: str, rng
                 passed, detail = True, "魔修或鬼修以煞入道，本关跳过"
             else:
                 limit = float(config["sha_qi_limit"])
-                passed, detail = player.sha_qi <= limit, f"煞气 {player.sha_qi}/{limit:.0f}"
+                passed, detail = effective_sha_qi(player) <= limit, f"煞气 {effective_sha_qi(player)}/{limit:.0f}"
         elif step == "heaven_heart":
             limit = float(config["heart_demon_limit"])
             passed, detail = player.heart_demon <= limit, f"心魔 {player.heart_demon:.1f}/{limit:.0f}"
@@ -205,17 +210,22 @@ def _resolve_celestial_ascension_step(
         return "trial_step_success", f"第 {trial['step_index']}/9 关通过（{detail}），HP -{hp_loss:.0f}、MP -{mp_loss:.0f}{reduction_text}。"
 
     origin = player.world
-    plan = deps._plan_world_transition(game, "celestial", reason="九重劫关完成")
-    entourage = deps._resolve_selected_ascension_entourage(game, "celestial", rng)
+    destination = trial.get("destination", "celestial")
+    destination_name = WORLD_SYSTEMS["world_names"][destination]
+    plan = deps._plan_world_transition(game, destination, reason="九重劫关完成")
+    entourage = deps._resolve_selected_ascension_entourage(game, destination, rng)
     companion_kept, friend_ids, friend_names, fallen_names = entourage
     deps._apply_world_transition(game, plan, entourage=entourage)
     player.realm_index = 9
     player.layer = 1
+    grant_intrinsic_progression_if_new_highwater(player)
+    if REALMS[player.realm_index].lifespan is None:
+        player.lifespan = None
     player.opportunity = 0.0
     player.awaiting_ascension = False
     player.awaiting_major_breakthrough = False
     player.awaiting_minor_breakthrough = False
-    player.immortal_power_converted = False
+    player.immortal_power_converted = destination != "celestial"
     player.immortal_conversion_stage = 0
     player.immortal_conversion_last_age = player.age
     player.immortal_conversion_checked_units = 0
@@ -223,21 +233,22 @@ def _resolve_celestial_ascension_step(
     player.next_tribulation_age = None
     player.tribulation_power = None
     player.hp = max_hp(player)
-    player.mp = 0.0
-    deps._ensure_heavenly_court(game, rng)
+    player.mp = 0.0 if destination == "celestial" else max_mp(player)
+    if destination == "celestial":
+        deps._ensure_heavenly_court(game, rng)
     game.active_trial = None
     game.pending_event = None
     game.history.append(HistoryRecord(
-        "SYS_CELESTIAL_ASCENSION_COMPLETE", 1, player.age, "飞升仙界", None, "ascended",
-        "你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个长期阶段逐步转化为仙灵力。首次机缘最早在十个仙界时间单位后出现。"
-        + (" 道侣与你一同登临仙界。" if companion_kept else "")
+        "SYS_CELESTIAL_ASCENSION_COMPLETE", 1, player.age, f"飞升{destination_name}", None, "ascended",
+        ("你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个长期阶段逐步转化为仙灵力。首次机缘最早在十个仙界时间单位后出现。" if destination == "celestial" else "你渡过九重飞升劫，自地狱界登临轮回界，原有道统不改。")
+        + (f" 道侣与你一同登临{destination_name}。" if companion_kept else "")
         + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")
         + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else ""),
-        {"world":[origin, "celestial"], "realm_index":[8, 9]},
-        ["system", "ascension", "celestial", "milestone"],
+        {"world":[origin, destination], "realm_index":[8, 9]},
+        ["system", "ascension", destination, "milestone"],
     ))
     reduction_text = f"，雷伤减免 {reduction:.0%}" if reduction else ""
-    return "trial_completed", f"第 9/9 关通过（{detail}），HP -{hp_loss:.0f}、MP -{mp_loss:.0f}{reduction_text}；你已登临仙界。"
+    return "trial_completed", f"第 9/9 关通过（{detail}），HP -{hp_loss:.0f}、MP -{mp_loss:.0f}{reduction_text}；你已登临{destination_name}。"
 
 
 def _resolve_asura_ascension_step(
@@ -284,7 +295,7 @@ def _resolve_asura_ascension_step(
         drain_hp, drain_mp = (0.06, 0.10), (0.08, 0.12)
     elif step == "asura_sha":
         minimum = int(config["sha_qi_min"])
-        passed, detail = player.sha_qi >= minimum, f"煞气 {player.sha_qi}/{minimum}"
+        passed, detail = effective_sha_qi(player) >= minimum, f"煞气 {effective_sha_qi(player)}/{minimum}"
         drain_hp, drain_mp = (0.04, 0.08), (0.05, 0.09)
     elif step == "asura_heart":
         limit = float(config["heart_demon_limit"])
@@ -435,7 +446,8 @@ def _tribulation_damage_reduction(deps: TrialDependencies, player: Player, kind:
     sage_reduction = max(0.0, float(player.sage_effects.get(sage_key, 0.0)))
     return min(
         0.75,
-        item_reduction + deps._body_tribulation_damage_reduction(player) + one_time + sage_reduction,
+        item_reduction + deps._body_tribulation_damage_reduction(player) + one_time + sage_reduction
+        + modifier(player, "thunder_damage_reduction", 0.0, kind=kind),
     )
 
 

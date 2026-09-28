@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .path_modifiers import adjusted_cost
+
 import math
 from typing import Any
 
@@ -127,11 +129,11 @@ class NatalArtifactSystemMixin:
         # Later levels also price the cubic growth, so a cheap base cannot
         # become an increasingly efficient source of effectively free power.
         if level == 1:
-            return max(1, math.ceil(power))
+            return adjusted_cost(game, power, "natal") if game else max(1, math.ceil(power))
         current = power * self._natal_level_scale(level) + self._natal_flat_combat_growth(level)
         gain = (power * (self._natal_level_scale(level + 1) - self._natal_level_scale(level))
                 + self._natal_flat_combat_growth(level + 1) - self._natal_flat_combat_growth(level))
-        return max(1, math.ceil(max(current, gain * 4) * level))
+        return adjusted_cost(game, max(current, gain * 4) * level, "natal") if game else max(1, math.ceil(max(current, gain * 4) * level))
 
     def _natal_level_required(self, level: int) -> int:
         return int(self._natal_artifact_config()["experience_base"]) * max(1, level)

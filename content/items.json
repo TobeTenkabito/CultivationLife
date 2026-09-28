@@ -5,7 +5,11 @@
       "id": "heroic_progeny_elixir",
       "name": "英姿神武口服液",
       "description": "价值985灵石。服用后，下一次有效缠绵100%诞下后代，无视化神及以上境界的不育限制；后代必定获得单灵根或变异灵根。每个新角色仅赠一瓶，也可寄拍拍卖会换取灵石。无法购买或索取。",
-      "tags": ["consumable", "starter_exclusive", "family"]
+      "tags": [
+        "consumable",
+        "starter_exclusive",
+        "family"
+      ]
     },
     {
       "id": "spirit_stone",
@@ -10183,6 +10187,328 @@
         "hell_world",
         "yang",
         "mutated_root"
+      ]
+    },
+    {
+      "id": "reincarnation_soul_lamp",
+      "name": "引魂莲灯",
+      "description": "轮回界寻常护魂法宝，莲焰为行者照亮识海。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "combat_bonus": 18000000,
+      "mp_bonus": 180000
+    },
+    {
+      "id": "reincarnation_shore_robe",
+      "name": "彼岸法衣",
+      "description": "以彼岸灵丝织就，替行者隔开轮回阴风。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "hp_bonus": 220000,
+      "tribulation_damage_reduction": 0.015
+    },
+    {
+      "id": "reincarnation_ferry_blade",
+      "name": "渡川剑",
+      "description": "忘川剑阁向诸界行者出售的制式护道剑。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "combat_bonus": 62000000,
+      "mp_bonus": 260000
+    },
+    {
+      "id": "reincarnation_causal_mirror",
+      "name": "三生因果镜",
+      "description": "道院以三生纹路炼成的观照镜，可助参悟过往。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "combat_bonus": 180000000,
+      "opportunity_bonus": 0.12
+    },
+    {
+      "id": "reincarnation_wheel_seal",
+      "name": "六道镇魂印",
+      "description": "以轮回道金铸就的重印，工序繁复，寻常商会只接受预约。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "combat_bonus": 620000000,
+      "hp_bonus": 1600000
+    },
+    {
+      "id": "reincarnation_soul_dew",
+      "name": "澄魂露",
+      "description": "照魂湖凝成的清露，可在渡劫时服用恢复法力。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "pill"
+      ],
+      "trial_restore_mp": 0.5
+    },
+    {
+      "id": "reincarnation_lotus_pill",
+      "name": "还生莲丹",
+      "description": "莲灯寺丹房的疗伤丹药，渡劫时亦可服用。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "pill"
+      ],
+      "trial_restore_hp": 0.5
+    },
+    {
+      "id": "reincarnation_causal_jade",
+      "name": "前尘玉髓",
+      "description": "记载零散前尘道韵的天然玉髓。",
+      "tags": [
+        "market",
+        "reincarnation",
+        "treasure"
+      ],
+      "opportunity_bonus": 0.06
+    },
+    {
+      "id": "reincarnation_lotus_seed",
+      "name": "轮生莲种子",
+      "description": "轮回界常见灵植，可在灵田中培育。",
+      "tags": [
+        "seed",
+        "spirit_plant",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_lotus"
+    },
+    {
+      "id": "reincarnation_lotus_ten",
+      "name": "十年轮生莲",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:ten",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_lotus",
+      "plant_value": 400000
+    },
+    {
+      "id": "reincarnation_lotus_hundred",
+      "name": "百年轮生莲",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:hundred",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_lotus",
+      "plant_value": 800000
+    },
+    {
+      "id": "reincarnation_lotus_thousand",
+      "name": "千年轮生莲",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:thousand",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_lotus",
+      "plant_value": 1600000
+    },
+    {
+      "id": "reincarnation_lotus_myriad",
+      "name": "万年轮生莲",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:myriad",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_lotus",
+      "plant_value": 1400000
+    },
+    {
+      "id": "reincarnation_forgetting_grass_seed",
+      "name": "忘忧草种子",
+      "description": "轮回界常见灵植，可在灵田中培育。",
+      "tags": [
+        "seed",
+        "spirit_plant",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_forgetting_grass"
+    },
+    {
+      "id": "reincarnation_forgetting_grass_ten",
+      "name": "十年忘忧草",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:ten",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_forgetting_grass",
+      "plant_value": 400000
+    },
+    {
+      "id": "reincarnation_forgetting_grass_hundred",
+      "name": "百年忘忧草",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:hundred",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_forgetting_grass",
+      "plant_value": 800000
+    },
+    {
+      "id": "reincarnation_forgetting_grass_thousand",
+      "name": "千年忘忧草",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:thousand",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_forgetting_grass",
+      "plant_value": 1600000
+    },
+    {
+      "id": "reincarnation_forgetting_grass_myriad",
+      "name": "万年忘忧草",
+      "description": "轮回灵田生长的护魂药材，可出售，也可用作通用灵植材料。",
+      "tags": [
+        "spirit_plant",
+        "herb",
+        "age:myriad",
+        "reincarnation"
+      ],
+      "plant_id": "reincarnation_forgetting_grass",
+      "plant_value": 1400000
+    },
+    {
+      "id": "reincarnation_root_metal",
+      "name": "轮阙天书·金",
+      "root_grant": "metal",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "metal",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_wood",
+      "name": "轮阙天书·木",
+      "root_grant": "wood",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "wood",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_water",
+      "name": "轮阙天书·水",
+      "root_grant": "water",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "water",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_fire",
+      "name": "轮阙天书·火",
+      "root_grant": "fire",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "fire",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_earth",
+      "name": "轮阙天书·土",
+      "root_grant": "earth",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "earth",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_wind",
+      "name": "轮阙天书·风",
+      "root_grant": "wind",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "wind",
+        "mutated_root",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_thunder",
+      "name": "轮阙天书·雷",
+      "root_grant": "thunder",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "thunder",
+        "mutated_root",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_yin",
+      "name": "轮阙天书·阴",
+      "root_grant": "yin",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "yin",
+        "mutated_root",
+        "reincarnation"
+      ]
+    },
+    {
+      "id": "reincarnation_root_yang",
+      "name": "轮阙天书·阳",
+      "root_grant": "yang",
+      "description": "轮回界流传的通用补灵天书；元婴及以上修士可参悟一次，补全对应灵根。",
+      "tags": [
+        "root_manual",
+        "yang",
+        "mutated_root",
+        "reincarnation"
       ]
     }
   ]

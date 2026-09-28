@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_DHARMA_LISTENERS",
+      "version": 1,
+      "title": "众生问法",
+      "body": "新来的听众围坐坛下，有人问生死，有人只求来年安稳。",
+      "category": "buddhist",
+      "tags": [
+        "buddhist",
+        "dharma_assembly",
+        "manual_only",
+        "all_realms"
+      ],
+      "weight": 0,
+      "conditions": {
+        "path": "player.path",
+        "op": "eq",
+        "value": "buddhist"
+      },
+      "choices": [
+        {
+          "id": "teach",
+          "text": "以所修功法阐释修行之理",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "teach"
+            }
+          ]
+        },
+        {
+          "id": "listen",
+          "text": "先听众人各自的困惑",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "listen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_DHARMA_PATRON",
+      "version": 1,
+      "title": "檀越来访",
+      "body": "一位本地檀越带着友人前来，希望你把深奥的法义讲给普通人听。",
+      "category": "buddhist",
+      "tags": [
+        "buddhist",
+        "dharma_assembly",
+        "manual_only",
+        "all_realms"
+      ],
+      "weight": 0,
+      "conditions": {
+        "path": "player.path",
+        "op": "eq",
+        "value": "buddhist"
+      },
+      "choices": [
+        {
+          "id": "teach",
+          "text": "从日用常行讲起",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "teach"
+            }
+          ]
+        },
+        {
+          "id": "listen",
+          "text": "与众人围坐交谈",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "listen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_DHARMA_RECOGNITION",
+      "version": 1,
+      "title": "同道闻法",
+      "body": "游历至此的修士驻足听法，愿与你切磋所学。",
+      "category": "buddhist",
+      "tags": [
+        "buddhist",
+        "dharma_assembly",
+        "manual_only",
+        "all_realms"
+      ],
+      "weight": 0,
+      "conditions": {
+        "path": "player.path",
+        "op": "eq",
+        "value": "buddhist"
+      },
+      "choices": [
+        {
+          "id": "debate",
+          "text": "以法义相互印证",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "debate"
+            }
+          ]
+        },
+        {
+          "id": "teach",
+          "text": "将心得从头细讲",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "teach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_DHARMA_DEBATE",
+      "version": 1,
+      "title": "问难于坛",
+      "body": "有听众质疑：若自身因果与煞气未解，又凭什么教人安顿此心？",
+      "category": "buddhist",
+      "tags": [
+        "buddhist",
+        "dharma_assembly",
+        "manual_only",
+        "all_realms"
+      ],
+      "weight": 0,
+      "conditions": {
+        "path": "player.path",
+        "op": "eq",
+        "value": "buddhist"
+      },
+      "choices": [
+        {
+          "id": "debate",
+          "text": "直面疑问，当众论法",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "debate"
+            }
+          ]
+        },
+        {
+          "id": "withdraw",
+          "text": "承认不足，暂缓论述",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "withdraw"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_DHARMA_CHALLENGE",
+      "version": 1,
+      "title": "以法印心",
+      "body": "一位问法修士请你演示所讲功法。双方约定点到即止。",
+      "category": "buddhist",
+      "tags": [
+        "buddhist",
+        "dharma_assembly",
+        "manual_only",
+        "all_realms"
+      ],
+      "weight": 0,
+      "conditions": {
+        "path": "player.path",
+        "op": "eq",
+        "value": "buddhist"
+      },
+      "choices": [
+        {
+          "id": "spar",
+          "text": "上坛切磋，点到即止",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "spar"
+            }
+          ]
+        },
+        {
+          "id": "withdraw",
+          "text": "婉拒演武，继续答疑",
+          "effects": [
+            {
+              "type": "buddhist_assembly",
+              "action": "withdraw"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..path_modifiers import adjusted_cost
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,7 +26,7 @@ class EconomyBlackMarketMethods:
         ):
             raise ValueError("这件货物不属于当前世界的流通范围")
         kind = str(result["kind"])
-        total_price = int(result["price"]) * quantity
+        total_price = adjusted_cost(game, int(result["price"]), "black_market") * quantity
         instance_key = {"crafting_material": "material_instance", "formation_material": "formation_material_instance"}.get(kind)
         if instance_key and not isinstance(result.get(instance_key), dict):
             raise ValueError("这份黑市材料已经失去灵性")

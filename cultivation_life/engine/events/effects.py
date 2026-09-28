@@ -19,7 +19,10 @@ from ...rules import (
     assign_technique,
     expected_combat_power,
     effective_karma,
+    effective_fame,
+    effective_sha_qi,
     has_item,
+    has_living_master,
     acquire_technique,
     max_hp,
     max_mp,
@@ -121,9 +124,9 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                                                        player_defending=target["player_defending"])
     if kind == "cultivator_reaction":
         threshold = float(WORLD_SYSTEMS["faction_conflict"]["fame_deterrence_threshold"])
-        if player.fame >= threshold:
+        if effective_fame(player) >= threshold:
             return "deterred", "你的威名足以压住贪念，对方最终不敢追来。"
-        chance = float(effect.get("chance", 0.2)) * max(0.0, 1 - player.fame / max(1.0, threshold))
+        chance = float(effect.get("chance", 0.2)) * max(0.0, 1 - effective_fame(player) / max(1.0, threshold))
         if rng.random() >= chance:
             return "ignored", "对方虽有不满，最终没有节外生枝。"
         target = deps._generate_cultivator_target(player, "心生贪念的修士", ACTIONS["slay"]["combat"], rng, game=game)
@@ -298,9 +301,9 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                     "mp_ratio": player.mp / max_mp(player),
                     "combat_ratio": deps._player_intrinsic_combat_power(player) / max(1.0, expected_combat_power(player.realm_index, player.layer)),
                     "karma": effective_karma(player),
-                    "sha_qi": player.sha_qi,
+                    "sha_qi": effective_sha_qi(player),
                     "heart_demon": player.heart_demon,
-                    "fame": player.fame,
+                    "fame": effective_fame(player),
                 }.get(stat)
                 if actual is None:
                     raise ValueError(f"未知属性判定：{stat}")
@@ -341,7 +344,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         game.pending_event = deps._instantiate_event(event, game, rng)
         return None, effect.get("text", "新的险局接踵而至。")
     if kind == "enter_spirit_realm":
-        destination = deps._ascension_destination(player.path)
+        destination = deps._ascension_destination(player.path, player)
         from copy import deepcopy
         from ...system.world_transition_system import EntourageManifest
         plan = deps._plan_world_transition(game, destination, reason="穿越空间节点")
@@ -451,7 +454,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             if learned else f"你已经掌握《{template.name}》，同源传承玉简已收入包裹，可用于升级。"
         )
     if kind == "gain_generated_master":
-        if player.master:
+        if has_living_master(player):
             return "already_has_master", "你已有师承，没有再行拜师。"
         relation = deps._generated_relationship(player, "master", rng)
         if rng.random() >= float(effect.get("accept_chance", 0.55)):

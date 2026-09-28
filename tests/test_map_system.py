@@ -23,7 +23,7 @@ class MapCatalogTests(unittest.TestCase):
         self.assertTrue({"无棣原", "穆陵沙漠", "岚疆草原", "风语群岛", "澜沧海"}.issubset(human_names))
         self.assertEqual(len(human_names), 10)
 
-    def test_lower_and_middle_world_maps_expand_while_upper_worlds_stay_fixed(self):
+    def test_world_map_counts_include_reincarnation_expansion(self):
         expected_counts = {
             "human":10, "spirit":10, "demon":9, "true_demon":9,
             "monster_realm":16, "phantom_underworld":16, "hell":12,
@@ -34,7 +34,7 @@ class MapCatalogTests(unittest.TestCase):
         )
         self.assertEqual(
             {world:len(self.catalog.worlds[world]["locations"]) for world in ("celestial", "asura", "nether", "reincarnation")},
-            {"celestial":3, "asura":5, "nether":9, "reincarnation":3},
+            {"celestial":3, "asura":5, "nether":9, "reincarnation":10},
         )
 
     def test_monster_and_ghost_maps_live_in_base_content(self):

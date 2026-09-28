@@ -40,13 +40,13 @@ def verify(with_dlc):
             assert config["base_game"]["version"] == VERSION
             assert len(config["worlds"]) == 11
             assert all(x["status"] == "loaded" for x in config["extensions"])
-            assert len(config["extensions"]) == (6 if with_dlc else 0)
+            assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
             for theme in 'abcdef':
                 with urllib.request.urlopen(base + f'/themes/{theme}.css', timeout=5) as response:
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css']:
+            for asset in ['theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -130,6 +130,37 @@ def verify(with_dlc):
             sword = next(row for row in nascent['player']['known_techniques'] if row['id']=='TECH_COMMON_GUI')
             assert sword['base_combat_bonus']==5000 and sword['growth_name']=='战斗'
             assert sword['next_level_gains']['combat_bonus']>0
+            request = urllib.request.Request(base + '/api/games', method='POST',
+                data=json.dumps({'name':'照尘验收','spirit_root':'supreme_wood','path':'buddhist','seed':1420}).encode(),
+                headers={'Content-Type':'application/json'})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                buddhist = json.load(response)
+            assert buddhist['buddhist_system']['available'] == with_dlc
+            if with_dlc:
+                assert len(buddhist['buddhist_system']['blessings']) == 6
+            # Verify a base-game upper-world entry and content against the executable's own API.
+            save_path = folder / 'data/saves' / f"{buddhist['id']}.json"
+            saved = json.loads(save_path.read_text(encoding='utf-8'))
+            map_worlds = json.loads((ROOT/'content/maps.json').read_text(encoding='utf-8'))['worlds']
+            saved['player'].update(world='hell', location_id=map_worlds['hell']['default'], realm_index=8, layer=9,
+                                   opportunity=1e12, hp=1e12, mp=1e12)
+            saved['pending_event'] = None
+            save_path.write_text(json.dumps(saved, ensure_ascii=False), encoding='utf-8')
+            request = urllib.request.Request(base + f"/api/games/{buddhist['id']}/celestial-ascension", method='POST',
+                                             data=b'{}', headers={'Content-Type':'application/json'})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                ascended = json.load(response)
+            trial_saved = json.loads(save_path.read_text(encoding='utf-8'))
+            assert trial_saved['active_trial']['destination'] == 'reincarnation'
+            assert trial_saved['active_trial']['event_ids'][0].startswith('EVT_BUDDHIST_' if with_dlc else 'EVT_REINCARNATION_')
+            trial_saved['active_trial'] = None; trial_saved['pending_event'] = None
+            trial_saved['player'].update(world='reincarnation', location_id='reincarnation_well', realm_index=9, layer=1)
+            save_path.write_text(json.dumps(trial_saved, ensure_ascii=False), encoding='utf-8')
+            with urllib.request.urlopen(base + f"/api/games/{buddhist['id']}", timeout=20) as response:
+                upper = json.load(response)
+            assert len(upper['map']['locations']) == 10
+            assert any(row.get('factions') for row in upper['map']['locations'])
+            assert upper['buddhist_system']['available'] == with_dlc
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

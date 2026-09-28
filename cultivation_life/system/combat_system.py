@@ -166,6 +166,7 @@ class PlayerCombatSystem:
         current_mp_ratio: float,
         battlefield_tags: Iterable[str] = (),
         mana_cost_multiplier: float = 1.0,
+        player_stat_multiplier: float = 1.0,
     ) -> CombatResolution:
         objective = cls._objective(target, lethal)
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
@@ -200,7 +201,7 @@ class PlayerCombatSystem:
         enemy_power = max(1.0, sum(unit.power for unit in enemy_units))
         ratio = player_power / enemy_power
         assessment = cls._assessment(ratio)
-        player_stats = cls._aggregate_stats(player_units, player=player, terrain_tags=tags)
+        player_stats = cls._aggregate_stats(player_units, player=player, terrain_tags=tags, player_stat_multiplier=player_stat_multiplier)
         enemy_stats = cls._aggregate_stats(enemy_units, terrain_tags=tags)
         soul_effects = ghost_soul_effects(player)
         soul_traits = active_soul_traits(player)
@@ -1372,6 +1373,7 @@ class PlayerCombatSystem:
         *,
         player: Player | None = None,
         terrain_tags: list[str],
+        player_stat_multiplier: float = 1.0,
     ) -> dict[str, float]:
         stats = {key: 0.0 for key in STAT_KEYS}
         for unit in units:
@@ -1425,6 +1427,9 @@ class PlayerCombatSystem:
             stats["guard"] *= 1 + body_bonus
             stats["sustain"] *= 1 + body_bonus * 0.8
             stats["sense"] *= 1 + sense_bonus
+        if player is not None and player_stat_multiplier != 1.0:
+            allies = cls._aggregate_stats([unit for unit in units if unit.kind != "player"], terrain_tags=terrain_tags)
+            stats = {key: allies[key] + (value - allies[key]) * player_stat_multiplier for key, value in stats.items()}
         return stats
 
     @classmethod

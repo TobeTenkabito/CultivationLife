@@ -1667,8 +1667,7 @@
       "combat_bonus": 4400000,
       "karma_multiplier": 0.88,
       "sources": {
-        "yin": 0.9,
-        "spirit": 0.1
+        "yin": 1.0
       },
       "growth_preference": "main"
     },
@@ -3561,6 +3560,87 @@
       "combat_bonus": 3575000,
       "karma_multiplier": 1.0,
       "growth_preference": "main"
+    },
+    {
+      "id": "TECH_REINCARNATION_BREATH",
+      "name": "轮生引气经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.2,
+      "hp_bonus": 1.05,
+      "mp_bonus": 1.28,
+      "combat_bonus": 18000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "growth_preference": "main",
+      "sources": {
+        "yin": 1.0
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_SWORD",
+      "name": "忘川渡厄剑",
+      "path": "dao",
+      "element": "yin",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.1,
+      "hp_bonus": 0.96,
+      "mp_bonus": 1.18,
+      "combat_bonus": 28000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "growth_preference": "combat",
+      "sources": {
+        "yin": 1.0
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_BODY",
+      "name": "不灭莲华身",
+      "path": "buddhist",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.02,
+      "hp_bonus": 0.88,
+      "mp_bonus": 1.06,
+      "combat_bonus": 38000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "growth_preference": "balanced",
+      "category": "body",
+      "body_breakthrough_bonus": 0.1,
+      "body_bonus_max_layer": 100,
+      "sources": {
+        "yin": 1.0
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_SENSE",
+      "name": "三生照魂诀",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.06,
+      "hp_bonus": 0.92,
+      "mp_bonus": 1.12,
+      "combat_bonus": 34000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "divine_sense_bonus": 1.4,
+      "sources": {
+        "yin": 1.0
+      }
     }
   ]
 }

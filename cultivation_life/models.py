@@ -827,6 +827,7 @@ class GameState:
     intrigue_state: dict[str, Any] = field(default_factory=dict)
     # Additive DLC container: old saves default to an empty state and disabling
     # the package freezes it byte-for-byte.
+    buddhist_state: dict[str, Any] = field(default_factory=dict)
     sage_state: dict[str, Any] = field(default_factory=dict)
     # Optional Guixu Tide DLC state. All cycle, roster, treasure ownership and
     # active-session data lives under this one additive container so disabling
@@ -846,6 +847,10 @@ class GameState:
     last_saved_with_game_version: str = BASE_GAME_VERSION
     version: int = 5
     map_war_last_encounter_unit: int = -2
+
+    def __post_init__(self):
+        # Runtime-only reference: no duplicated derived bonuses enter save data.
+        self.player._modifier_context = self.buddhist_state
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -889,6 +894,7 @@ class GameState:
             "ghost_parade": self.ghost_parade,
             "npc_formations": self.npc_formations,
             "intrigue_state": self.intrigue_state,
+            "buddhist_state": self.buddhist_state,
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
             "tianji_state": self.tianji_state,
@@ -948,6 +954,7 @@ class GameState:
             } if isinstance(value.get("npc_formations", {}), dict) else {},
             intrigue_state=copy.deepcopy(value.get("intrigue_state", {}))
             if isinstance(value.get("intrigue_state", {}), dict) else {},
+            buddhist_state=copy.deepcopy(value.get("buddhist_state", {})) if isinstance(value.get("buddhist_state", {}), dict) else {},
             sage_state=copy.deepcopy(value.get("sage_state", {}))
             if isinstance(value.get("sage_state", {}), dict) else {},
             guixu_state=copy.deepcopy(value.get("guixu_state", {}))

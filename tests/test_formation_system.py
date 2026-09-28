@@ -298,7 +298,7 @@ class FormationIntegrationTests(unittest.TestCase):
                     if row["world"] == world and int(row["tier"]) == tier
                 }
                 self.assertEqual(covered, all_natures, f"{world} tier {tier}")
-        self.assertEqual(len(definitions), 719)
+        self.assertEqual(len(definitions), 728)
 
     def test_generated_progression_materials_are_monotone_and_rule_neutral(self):
         generated = [
@@ -317,9 +317,9 @@ class FormationIntegrationTests(unittest.TestCase):
             self.assertEqual(prices, sorted(prices))
             self.assertEqual(values, sorted(values))
 
-    def test_excluded_upper_world_formation_catalogs_are_unchanged(self):
+    def test_upper_world_formation_catalogs_include_reincarnation_expansion(self):
         definitions = list(formation_material_definitions().values())
-        expected = {"celestial":5, "asura":4, "nether":5, "reincarnation":5}
+        expected = {"celestial":5, "asura":4, "nether":5, "reincarnation":14}
         self.assertEqual(
             {world:sum(row["world"] == world for row in definitions) for world in expected},
             expected,

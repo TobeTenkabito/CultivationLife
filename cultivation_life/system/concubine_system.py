@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .semantic_events import emit
+
 import copy
 import random
 from typing import Any
@@ -466,6 +468,7 @@ class ConcubineSystemMixin:
             else:
                 normalized["joined_age"] = player.age
                 player.concubines.append(normalized)
+                emit(game, "concubine.recruited", target_id=normalized["id"])
                 if source == "captive":
                     player.prisoners = [row for row in player.prisoners if row is not target]
                 player.party = [row for row in player.party if str(row.get("id")) != target_id]
@@ -482,7 +485,7 @@ class ConcubineSystemMixin:
                 raise ValueError("侍妾名册中没有此人")
             name = str(existing.get("name", "无名修士"))
             npc = self._find_npc(game, str(existing.get("npc_id", target_id)))
-            alive = bool(npc.alive) if npc else bool(existing.get("alive", True))
+            alive = bool(npc.alive) if npc and existing.get("source") != "captive" else bool(existing.get("alive", True))
             world = str(npc.world) if npc else str(existing.get("world", ""))
             if action in {"cauldron", "corpse"} and (not alive or world != player.world):
                 raise ValueError("此人已经陨落或不在当前界面，无法处置")
@@ -521,8 +524,11 @@ class ConcubineSystemMixin:
                 player.concubines = [row for row in player.concubines if row is not existing]
                 npc = self._find_npc(game, str(existing.get("npc_id", target_id)))
                 if npc and existing.get("source") == "captive":
-                    npc.alive = True
-                    npc.death_reason = None
+                    for field in ("age", "lifespan", "realm_index", "layer", "cultivation_progress"):
+                        if field in existing:
+                            setattr(npc, field, existing[field])
+                    npc.alive = bool(existing.get("alive", True))
+                    npc.death_reason = None if npc.alive else existing.get("death_reason", npc.death_reason)
                 self._set_person_affinity(
                     game, str(existing.get("npc_id", target_id)),
                     float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
@@ -909,7 +915,7 @@ class ConcubineSystemMixin:
         for entry in game.player.concubines:
             row = copy.deepcopy(entry)
             npc = self._find_npc(game, str(row.get("npc_id", row.get("id", ""))))
-            if npc:
+            if npc and row.get("source") != "captive":
                 row.update(
                     realm_index=npc.realm_index, layer=npc.layer,
                     realm_name=self._npc_realm_name(npc), age=npc.age,

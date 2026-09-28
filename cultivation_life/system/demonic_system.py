@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .semantic_events import emit
+
 import copy
 import math
 import random
@@ -201,6 +203,8 @@ class DemonicSystemMixin:
                 npc.affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
 
     def captive_action(self, game_id: str, target_id: str, action: str) -> dict[str, Any]:
+        if action == "execute":
+            return self.relationship_violence(game_id, "captive", target_id)
         game = self._load(game_id)
         player = game.player
         if not player.alive or game.pending_event or player.imprisonment:
@@ -249,12 +253,14 @@ class DemonicSystemMixin:
                 raise ValueError("弟子不能通过俘虏释放")
             player.prisoners.remove(target)
             self._restore_captive_npc(game, target, affinity_gain=10)
+            emit(game, "captive.released", target_id=target_id)
             result, summary = "released", f"你解开禁制释放{name}，其好感有所回升。"
         elif action == "torture":
             if disciple:
                 raise ValueError("弟子不能作为俘虏拷打")
             target["affinity"] = float(target.get("affinity", 0)) - 12
             player.fame += 2
+            emit(game, "captive.tortured", target_id=target_id)
             result, summary = "tortured", f"你拷打{name}逼问情报；好感 -12，威名 +2。"
         else:
             result, summary = self._convert_to_puppet(game, target, action, rng, bool(disciple))

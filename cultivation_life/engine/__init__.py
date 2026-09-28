@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from ..system import realm_ascension  # register base-world route defaults first
+from ..system.buddhist_system import BuddhistSystemMixin
+from ..system.relationship_violence import RelationshipViolenceMixin
+from ..system.path_modifiers import modifier
+
 import random
 from pathlib import Path
 from typing import Any
@@ -56,7 +61,7 @@ from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 
 
-class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -264,14 +269,18 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
         return combat_runtime._diff(before, after)
 
     def present(self, game: GameState) -> dict[str, Any]:
-        return presentation_runtime.present(self._dependencies.presentation_runtime, game)
+        result = presentation_runtime.present(self._dependencies.presentation_runtime, game)
+        result["buddhist_system"] = self._public_buddhist(game)
+        return result
 
     @staticmethod
     def _history_visible_in_world(record: HistoryRecord, game: GameState) -> bool:
         return presentation_runtime._history_visible_in_world(record, game)
 
     def _load(self, game_id: str) -> GameState:
-        return persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
+        game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
+        self._ensure_buddhist_state(game)
+        return game
 
     def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male') -> dict[str, Any]:
         return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender)
@@ -647,6 +656,8 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
         return encounters._maybe_faction_event(self._dependencies.encounters, game, rng)
 
     def _effect(self, effect: dict[str, Any], game: GameState, pending: dict[str, Any], rng: random.Random) -> tuple[str | None, str]:
+        if effect["type"] == "buddhist_assembly":
+            return self._resolve_buddhist_assembly(effect, game, pending, rng)
         return effects._effect(self._dependencies.effects, effect, game, pending, rng)
 
     @staticmethod
@@ -725,8 +736,9 @@ class GameEngine(FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, Guix
         return npcs._resolve_npc_periodic_tribulation(self._dependencies.npcs, game, npc, rng, affiliation)
 
     @staticmethod
-    def _ascension_destination(path: str) -> str:
-        return npcs._ascension_destination(path)
+    def _ascension_destination(path: str, player=None) -> str:
+        default = npcs._ascension_destination(path)
+        return modifier(player, "ascension_destination", default) if player else default
 
     @staticmethod
     def _npc_realm_name(npc: SectNpc) -> str:

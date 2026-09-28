@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..rules import effective_fame
+
 import copy
 import math
 import random
@@ -1101,7 +1103,7 @@ class GuixuSystemMixin:
                 elif action == "recruit":
                     if len(session.get("recruited_actor_ids", [])) >= int(self._guixu_settings().get("recruit_cap", 2)):
                         raise ValueError("临时队友已经达到上限")
-                    chance = max(.05, min(.82, .24 + game.player.fame / 1000 + max(0, game.player.realm_index - int(actor["realm_index"])) * .08))
+                    chance = max(.05, min(.82, .24 + effective_fame(game.player) / 1000 + max(0, game.player.realm_index - int(actor["realm_index"])) * .08))
                     if rng.random() < chance:
                         if actor.get("team_id"):
                             self._dissolve_guixu_npc_team(

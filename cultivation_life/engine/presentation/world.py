@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.path_modifiers import modifier
+
 import copy
 from typing import Any
 from ...content_registry import PATH_NAMES, RACE_DEFINITIONS, RACE_SYSTEMS, WORLD_SYSTEMS
@@ -289,6 +291,9 @@ def _public_world_route(deps: WorldViewDependencies, game: GameState) -> dict[st
         ),
         ("orthodox", WORLD_SYSTEMS.get("cultivation_routes", {}).get("orthodox", {})),
     )
+    selected = modifier(player, "ascension_route", None)
+    if selected:
+        route_id, route = selected
     stages = []
     for stage in route.get("stages", []):
         is_system = bool(stage.get("system"))

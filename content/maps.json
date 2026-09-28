@@ -2188,6 +2188,127 @@
             "monster": 0.6,
             "yin": 2.35
           }
+        },
+        {
+          "id": "other_shore_ferry",
+          "name": "彼岸渡",
+          "description": "忘川两岸的渡舟与商旅在此交汇；接引台通向因果天城，低阶魂修亦可安居。",
+          "themes": [
+            "渡口",
+            "商贸"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 1.85
+          }
+        },
+        {
+          "id": "lotus_lamp_mountain",
+          "name": "莲灯山",
+          "description": "莲灯寺山门坐落在平缓山麓，长明灯照引迷途魂魄，讲经与收徒不设修为门槛。",
+          "themes": [
+            "寺院",
+            "山门"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 2.0
+          }
+        },
+        {
+          "id": "three_lives_valley",
+          "name": "三生谷",
+          "description": "溪流串起前尘石与今生田，三生道院在谷口授业，以魂药与阵材互通有无。",
+          "themes": [
+            "药田",
+            "道院"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 1.95
+          }
+        },
+        {
+          "id": "forgetting_terrace",
+          "name": "忘忧台",
+          "description": "立在渡口上游的高台，忘川剑阁驻于此处，商旅可循石阶进入山门。",
+          "themes": [
+            "剑阁",
+            "商旅"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 2.1
+          }
+        },
+        {
+          "id": "mirror_lake",
+          "name": "照魂湖",
+          "description": "平静湖水映出魂魄旧痕，岸边有采药人、散修与常年交换灵材的湖市。",
+          "themes": [
+            "湖泊",
+            "药材"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 2.15
+          }
+        },
+        {
+          "id": "six_paths_abyss",
+          "name": "六道深渊",
+          "description": "轮回罡风在崖下撕裂神魂，须有金仙层次的道果方能抵御。此处没有宗门或商盟驻地。",
+          "themes": [
+            "险地",
+            "轮回"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 2.65
+          },
+          "min_realm_index": 10
+        },
+        {
+          "id": "origin_wheel",
+          "name": "太初轮盘",
+          "description": "远古轮盘外缘缠绕时空碎流，太乙层次以下不可近观。此处不承载普通聚落。",
+          "themes": [
+            "法则",
+            "禁地"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.65,
+            "demon": 0.65,
+            "monster": 0.7,
+            "yin": 2.85
+          },
+          "min_realm_index": 11
         }
       ],
       "routes": [
@@ -2200,6 +2321,41 @@
           "from": "karma_city",
           "to": "timeless_grave",
           "years": 175
+        },
+        {
+          "from": "reincarnation_well",
+          "to": "other_shore_ferry",
+          "years": 45
+        },
+        {
+          "from": "karma_city",
+          "to": "lotus_lamp_mountain",
+          "years": 65
+        },
+        {
+          "from": "karma_city",
+          "to": "three_lives_valley",
+          "years": 75
+        },
+        {
+          "from": "other_shore_ferry",
+          "to": "forgetting_terrace",
+          "years": 90
+        },
+        {
+          "from": "three_lives_valley",
+          "to": "mirror_lake",
+          "years": 100
+        },
+        {
+          "from": "timeless_grave",
+          "to": "six_paths_abyss",
+          "years": 220
+        },
+        {
+          "from": "six_paths_abyss",
+          "to": "origin_wheel",
+          "years": 300
         }
       ]
     },

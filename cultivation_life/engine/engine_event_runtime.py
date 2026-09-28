@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..system.path_modifiers import projected_resource
+
 import copy
 import random
 from typing import Any
@@ -9,6 +11,7 @@ from ..rules import (
     expected_combat_power,
     effective_karma,
     has_item,
+    has_living_master,
     max_hp,
     max_mp,
     negative_event_multiplier,
@@ -176,7 +179,7 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
     mapping = {
         "player.alive": game.player.alive,
         "player.age": game.player.age,
-        "player.karma": game.player.karma,
+        "player.karma": projected_resource(game.player, "karma"),
         "player.effective_karma": effective_karma(game.player),
         "player.realm_index": game.player.realm_index,
         "player.layer": game.player.layer,
@@ -189,7 +192,7 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
         "player.monster.adaptations": game.player.monster_adaptations,
         "player.monster.imprints": game.player.monster_bloodline_imprints,
         "player.monster.history": game.player.monster_evolution_history,
-        "player.has_master": game.player.master is not None,
+        "player.has_master": has_living_master(game.player),
         "player.master_available": bool(
             game.player.master and game.player.master.get("alive", True)
             and game.player.master.get("world", game.player.world) == game.player.world
@@ -204,8 +207,8 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
             entry.get("alive", True) and entry.get("world", game.player.world) == game.player.world
             for entry in game.player.disciples
         ),
-        "player.sha_qi": game.player.sha_qi,
-        "player.fame": game.player.fame,
+        "player.sha_qi": projected_resource(game.player, "sha_qi"),
+        "player.fame": projected_resource(game.player, "fame"),
         "player.born_rootless": game.player.born_rootless,
         "player.mortal_aspiration": game.player.mortal_aspiration,
         "player.spouse": game.player.spouse,

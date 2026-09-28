@@ -233,6 +233,9 @@ class ContentRegistry:
                         "monster_imprints":registry.monster_bloodline_settings.get("imprints", {}),
                     },
                 )
+            if "buddhist_way.json" in documents:
+                from .buddhist_content import validate_buddhist_content
+                validate_buddhist_content(documents["buddhist_way.json"], documents)
             if "guixu_tide.json" in documents:
                 validate_guixu_catalog(
                     documents["guixu_tide.json"], registry, documents,

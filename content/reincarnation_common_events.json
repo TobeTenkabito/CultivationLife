@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "world": "reincarnation",
+  "events": [
+    {
+      "id": "EVT_REINCARNATION_COMMON_FERRY",
+      "version": 1,
+      "title": "彼岸问渡",
+      "body": "渡舟客要你辨别契约上的前尘笔迹，辨清后愿以引魂莲灯相谢。",
+      "category": "reincarnation_common",
+      "tags": [
+        "reincarnation",
+        "world:reincarnation"
+      ],
+      "weight": 8,
+      "choices": [
+        {
+          "id": "accept",
+          "text": "结此善缘",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "reincarnation_soul_lamp"
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "静观其变，体悟轮生之道",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                14,
+                28
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_REINCARNATION_COMMON_LAKE",
+      "version": 1,
+      "title": "照魂湖潮",
+      "body": "湖中清露随潮涌起，岸边散修邀请你一同采集。",
+      "category": "reincarnation_common",
+      "tags": [
+        "reincarnation",
+        "world:reincarnation"
+      ],
+      "weight": 8,
+      "choices": [
+        {
+          "id": "accept",
+          "text": "结此善缘",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "reincarnation_soul_dew"
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "静观其变，体悟轮生之道",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                14,
+                28
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_REINCARNATION_COMMON_TEMPLE",
+      "version": 1,
+      "title": "莲灯夜话",
+      "body": "古寺执事请你校对一卷经义，丹房备有谢礼。",
+      "category": "reincarnation_common",
+      "tags": [
+        "reincarnation",
+        "world:reincarnation"
+      ],
+      "weight": 8,
+      "choices": [
+        {
+          "id": "accept",
+          "text": "结此善缘",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "reincarnation_lotus_pill"
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "静观其变，体悟轮生之道",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                14,
+                28
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_REINCARNATION_COMMON_STONE",
+      "version": 1,
+      "title": "三生石畔",
+      "body": "无主的前尘玉髓嵌在谷口石壁，过路人可自行参悟。",
+      "category": "reincarnation_common",
+      "tags": [
+        "reincarnation",
+        "world:reincarnation"
+      ],
+      "weight": 8,
+      "choices": [
+        {
+          "id": "accept",
+          "text": "结此善缘",
+          "effects": [
+            {
+              "type": "add_item",
+              "item_id": "reincarnation_causal_jade"
+            }
+          ]
+        },
+        {
+          "id": "observe",
+          "text": "静观其变，体悟轮生之道",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "range": [
+                14,
+                28
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

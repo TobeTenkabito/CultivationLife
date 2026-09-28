@@ -1,6 +1,8 @@
 """Server-priced procurement and reproducible, physically realizable commissions."""
 from __future__ import annotations
 
+from .path_modifiers import commission_duration
+
 import copy
 import hashlib
 import json
@@ -270,7 +272,7 @@ class MerchantCommissionMixin:
         if principal < minimum or principal > 10 ** 15:
             raise ValueError(f"此委托悬赏本金至少 {minimum:,} 灵石")
         fee = max(1, math.ceil(principal * (.06 if alliance["policy"] == "economy" else .1)))
-        years = max(stars * 3, int((spec or {}).get("material_tier", 0)) ** 2) * time_factor
+        years = commission_duration(game, max(stars * 3, int((spec or {}).get("material_tier", 0)) ** 2) * time_factor)
         quote = {"kind": kind, "name": name, "stars": stars, "quantity": quantity, "source_world": world,
                  "definition_id": definition_id, "target_id": target_id, "material_category": category,
                  "minimum": minimum, "principal": principal, "fee": fee, "total": principal + fee, "years": years,

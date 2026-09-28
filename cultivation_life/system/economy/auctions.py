@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..path_modifiers import adjusted_cost
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -425,6 +427,7 @@ class EconomyAuctionMethods:
         ]
         return {
             **state, "available":True, "at_location":at_location,
+            "black_market_results": [{**row, "base_price": row["price"], "price": adjusted_cost(game, row["price"], "black_market")} for row in state.get("black_market_results", [])],
             "spirit_stones":self._spirit_stones(game.player), "lots":lots,
             "consignable_items":consignable_inventory, "black_market_sellable_items":inventory,
             "private_sellable_items":inventory,

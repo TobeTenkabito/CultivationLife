@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..semantic_events import emit
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -198,6 +200,7 @@ class IntrigueGovernanceMethods:
                 raise ValueError("目标不在本势力监狱")
             self._intrigue_state(game)["npc_prisons"].pop(npc.id, None)
             record["fear"] = max(0.0, float(record.get("fear", 0)) - 3)
+            emit(game, "captive.released", target_id=npc.id)
             summary = f"你下令释放{npc.name}。"
         elif action in {"reward", "punish"}:
             delta = 10 if action == "reward" else -10

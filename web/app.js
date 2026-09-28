@@ -364,7 +364,7 @@ function showStart() {
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/games').then(saves => renderSaveList(saves.games)).catch(error => toast(error.message));
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -500,7 +500,7 @@ function render(data) {
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.wish_base_bonus ? `，其中愿力 +${percent(breakthrough.chance.wish_base_bonus)}` : ''}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
@@ -542,7 +542,7 @@ function render(data) {
   ) : [];
   crossing.classList.toggle('hidden', !canCross);
   crossing.dataset.operation = canCelestialCross ? 'celestial-ascension' : canAsuraCross ? 'asura-ascension' : 'spirit-crossing';
-  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? (p.world === 'human' ? '平移魔界' : '飞升真魔界') : `偷渡${p.path === 'ghost' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
+  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? (p.world === 'human' ? '平移魔界' : '飞升真魔界') : `偷渡${data.world_travel?.ascension_destination === 'hell' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
   crossing.querySelector('span').textContent = canCelestialCross
     ? '开启九重飞升判定；第三、六、九关为可受雷伤减免影响的仙雷'
     : canAsuraCross
@@ -569,7 +569,8 @@ function render(data) {
   $('#seed-label').textContent = `天机数 ${data.seed}`;
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   window.GameThemes?.render(data);
@@ -1939,7 +1940,7 @@ function renderParty(party) {
     }
     const leave = document.createElement('button'); leave.className = 'party-action'; leave.textContent = '离队'; leave.dataset.available = '1';
     leave.onclick = () => mutate(`/api/games/${game.id}/party`, {npc_id:member.id, action:'leave'});
-    tools.appendChild(leave); row.append(info, tools); list.appendChild(row);
+    tools.appendChild(leave); tools.appendChild(violenceButton("party", member, "突然袭击")); row.append(info, tools); list.appendChild(row);
   });
 }
 
@@ -2877,11 +2878,11 @@ function renderInventory(items) {
     const trialRecovery = (item.trial_restore_hp > 0 || item.trial_restore_mp > 0) && game.trial?.active;
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
-    const normalUse = item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_') || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const normalUse = item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
-      if (item.id.startsWith('jinque_') || item.id.startsWith('zique_') || item.id.startsWith('moque_')) use.textContent = '参悟';
+      if (item.root_grant) use.textContent = '参悟';
       if (specialPlantUse) { use.textContent = '使用'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }
       const ghostBreakthroughPill = Boolean(game.ghost_system?.available && item.breakthrough_bonus > 0);
       if (ghostBreakthroughPill) {
@@ -2918,6 +2919,7 @@ function renderDemonicSystem(system) {
       if (action === 'possess') { button.disabled = busy || !person.can_possess; button.title = person.possession_reason || '夺舍失败将魂飞魄散'; }
       button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
+    tools.appendChild(violenceButton("captive", person, "处死"));
     row.appendChild(tools); captiveList.appendChild(row);
   });
   if (!captiveList.children.length) captiveList.innerHTML = '<p class="empty">尚未生擒任何修士。</p>';
@@ -3218,6 +3220,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     if (person.can_invite_guest) actions.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
     if (game.player.path === 'demonic') actions.appendChild(interactionButton('尝试生擒师父', '1', () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'master'}), 'danger'));
     if (person.can_recruit_concubine) actions.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
+    actions.appendChild(violenceButton('master', person, '截杀师父'));
     actions.appendChild(interactionButton('脱离师门', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'master', npc_id:person.id}), 'danger'));
     return actions;
   }
@@ -3239,6 +3242,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     }
     if (person.can_recruit_concubine) tools.appendChild(interactionButton('纳为侍妾', '1', () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'})));
     if (person.can_invite_guest) tools.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
+    tools.appendChild(violenceButton('disciple', person, '处死（战斗）'));
     tools.appendChild(interactionButton('逐出门下', '1', () => mutate(`/api/games/${game.id}/relationship-exit`, {kind:'disciple', npc_id:person.id}), 'danger'));
     return tools;
   }
@@ -3302,6 +3306,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
       const capture = companionButton('尝试生擒道侣', '1', null, 'danger');
       capture.onclick = () => mutate(`/api/games/${game.id}/relationship-capture`, {kind:'companion'}); actions.appendChild(capture);
     }
+    actions.appendChild(violenceButton('companion', companion, '截杀道侣'));
     actions.appendChild(companionButton('解除道侣', '1', {relationship_exit:'companion'}, 'danger'));
     const giftSelect = companionSelect(inventory.filter(item => item.quantity > 0), item => item.id, item => `${item.name} ×${item.quantity}`, '无物可赠');
     const gift = companionButton('赠送物品', giftSelect.dataset.available, null);
@@ -3446,6 +3451,7 @@ function renderConcubines(system) {
     const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
     cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});
     tools.appendChild(cauldron);
+    if (person.alive && person.same_world) tools.appendChild(violenceButton("concubine", person, "处死"));
     if (game.player.path === 'demonic') {
       const corpse = document.createElement('button'); corpse.className = 'danger'; corpse.textContent = '炼尸';
       corpse.disabled = !person.alive || !person.same_world;
@@ -3819,3 +3825,17 @@ document.addEventListener('keydown', event => {
 });
 
 boot().catch(error => toast(error.message));
+
+function violenceButton(kind, person, label) {
+  const button = document.createElement('button'); button.type = 'button'; button.className = 'danger relationship-interact'; button.textContent = label;
+  button.dataset.available = person.alive === false ? '0' : '1';
+  button.disabled = busy || !game.player.alive || !!game.pending_event || !!game.active_trial || !!game.player.imprisonment || person.alive === false;
+  button.onclick = async () => {
+    if (busy || button.disabled) return;
+    const battle = !['captive', 'concubine'].includes(kind);
+    const warning = battle ? '将进行真实战斗，对方可能逃脱或反杀；关系与队伍也会受到影响。' : '对方将直接死亡，此操作无法撤销。';
+    if (!confirm(`${label}：${person.name}？\n${warning}`)) return;
+    await mutate(`/api/games/${game.id}/relationship-violence`, {kind, target_id:person.id});
+  };
+  return button;
+}
