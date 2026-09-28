@@ -717,7 +717,8 @@ class PlayerCombatSystem:
                 events.append(f"{pressure_name}镇住敌方气机，本轮由你方强制取得先手。")
             usable_combat_techniques = [
                 art for art in player.combat_techniques
-                if not art.requires_immortal_power or player.immortal_power_converted
+                if art.active_in(player.world)
+                and (not art.requires_immortal_power or player.immortal_power_converted)
             ]
             burst = bool(
                 usable_combat_techniques and player_mp >= 0.28
@@ -1524,7 +1525,7 @@ class PlayerCombatSystem:
                 *player.combat_techniques,
             ]
             total_power = max(1.0, sum(unit.power for unit in units))
-            for technique in (entry for entry in techniques if entry):
+            for technique in (entry for entry in techniques if entry and entry.active_in(player.world)):
                 cls._apply_technique(stats, technique, total_power)
             body_bonus = min(0.22, max(0, player.body_training) * 0.0022)
             sense_bonus = min(0.28, max(0, player.divine_sense_rank) * 0.018)

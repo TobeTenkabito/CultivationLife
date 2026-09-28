@@ -32,6 +32,7 @@ from ..system.concubine_system import ConcubineSystemMixin
 from ..system.guixu_system import GuixuSystemMixin
 from ..system.family_system import FamilySystemMixin
 from ..system.tianji_system import TianjiSystemMixin
+from ..system.doctrine_system import DoctrineSystemMixin
 from ..system.merchant_system import MerchantSystemMixin
 from . import engine_world_runtime as world_runtime
 from . import engine_event_runtime as event_runtime
@@ -61,7 +62,7 @@ from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 
 
-class GameEngine(RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")

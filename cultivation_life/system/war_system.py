@@ -12,6 +12,7 @@ from .formation_system import formation_config
 from ..models import GameState, HistoryRecord, SectNpc
 from .npc_system import npc_team_combat_power
 from .combat.npc_battle import resolve_npc_engagement
+from .doctrine.provider import battle_sources
 from ..rules import add_item, remove_item
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..world_state import RELATION_LABELS, race_pair
@@ -632,6 +633,7 @@ class WarSystemMixin:
             [(striker, attack_power)], [(target, defend_power)],
             WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
             now=game.player.age,
+            sources=battle_sources(game, {striker.id: striker, target.id: target}),
         )
         if domain_result is not None:
             war["last_domain_engagement"] = list(domain_result.rounds)
@@ -948,13 +950,16 @@ class WarSystemMixin:
             defend_power = max(
                 1.0, float(defend_profile["composite"]) * float(contexts["defender"]["modifier"]),
             )
+            domain_rosters = {side: self._available_warriors(game, war, side)
+                              for side in ("attacker", "defender")}
             domain_result = resolve_npc_engagement(
                 [(npc, self._npc_power(npc) * float(contexts["attacker"].get("modifier", 1)))
-                 for npc in self._available_warriors(game, war, "attacker")],
+                 for npc in domain_rosters["attacker"]],
                 [(npc, self._npc_power(npc) * float(contexts["defender"].get("modifier", 1)))
-                 for npc in self._available_warriors(game, war, "defender")],
+                 for npc in domain_rosters["defender"]],
                 WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
                 now=game.player.age,
+                sources=battle_sources(game, {npc.id: npc for roster in domain_rosters.values() for npc in roster}),
             )
             if domain_result is not None:
                 war["last_domain_engagement"] = list(domain_result.rounds)

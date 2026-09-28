@@ -238,6 +238,8 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
         changed = True
     if deps._ensure_tianji_state(game):
         changed = True
+    if deps._ensure_doctrines(game):
+        changed = True
     deps._refresh_sage_effects(game)
     changed = deps._migrate_true_demon_races(game) or changed
     if game.player.faction_id in game.sects:

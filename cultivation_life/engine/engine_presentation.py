@@ -229,6 +229,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "sage_system": deps._public_sage_system(game),
         "guixu_tide": deps._public_guixu(game),
         "tianji_artifacts": deps._public_tianji(game),
+        "doctrines": deps._public_doctrines(game),
         "family": deps._public_family(game),
         "governance": deps._public_governance(game),
         "dao_companion": deps._public_dao_companion(game),

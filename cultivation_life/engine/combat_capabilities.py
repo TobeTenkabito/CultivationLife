@@ -11,7 +11,8 @@ from typing import Any, Mapping
 
 from ..models import GameState
 from ..rules import max_mp
-from ..system.combat.contracts import Combatant, ResourceSupply, domain_definitions, resolve_capabilities
+from ..system.combat.contracts import Combatant, ResourceSupply, domain_definitions, resolve_source
+from ..system.doctrine.provider import battle_sources, conversion_state
 from ..system.combat.domains import DomainBattle
 from ..system.combat.npc_lifecycle import NpcResourceBinding, prepare
 from ..system.combat_system import BattleUnit, PlayerCombatSystem
@@ -108,6 +109,7 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                       for index, row in enumerate(target.get("player_allies", []))})
     rosters = (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target)))
     persistent = persistent_owners(game, {unit.id for _, units in rosters for unit in units})
+    sources = battle_sources(game, {**ephemeral, **persistent})
     for side, units in rosters:
         for unit in units:
             owner = persistent.get(unit.id)
@@ -127,8 +129,10 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 # Existing conversion is an explicit fact; realm alone grants
                 # nothing. Use the one MP pool and never fabricate attainment.
                 state = config.get("converted_player_state")
-            capabilities = resolve_capabilities(
-                state, definitions,
+            if unit.id == "player" and game.player.transcendence is None:
+                state = conversion_state(game.player) or state
+            capabilities = resolve_source(
+                state, definitions, sources.get(unit.id),
                 linked_current=game.player.mp if unit.id == "player" else 0,
                 linked_capacity=max_mp(game.player) if unit.id == "player" else 0,
             )

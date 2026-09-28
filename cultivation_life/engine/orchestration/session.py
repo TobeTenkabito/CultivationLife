@@ -176,6 +176,7 @@ def create_game(
     deps._ensure_sage_state(game)
     deps._ensure_guixu_state(game)
     deps._ensure_tianji_state(game)
+    deps._ensure_doctrines(game)
     if player.world == "celestial":
         deps._ensure_heavenly_court(game, rng)
     deps._ensure_race_relations(game)

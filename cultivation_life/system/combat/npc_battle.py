@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .contracts import Combatant, domain_definitions, resolve_capabilities
+from .contracts import CapabilitySource, Combatant, domain_definitions, resolve_source
 from .domains import DomainBattle
 from .ordinary import exchange_damage
 from .npc_lifecycle import prepare
@@ -24,10 +24,11 @@ class NpcEngagement:
 
 def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[tuple[Any, float]],
                            config: Mapping[str, Any], rng: Any, *, max_rounds: int = 5,
-                           now: float | None = None) -> NpcEngagement | None:
+                           now: float | None = None,
+                           sources: Mapping[str, CapabilitySource] | None = None) -> NpcEngagement | None:
     # Most background encounters are mortal. Do not parse definitions or build
     # a domain battle for them, and preserve the legacy RNG sequence.
-    if not any(npc.transcendence for roster in (attackers, defenders) for npc, _ in roster):
+    if not sources and not any(npc.transcendence for roster in (attackers, defenders) for npc, _ in roster):
         return None
     definitions = domain_definitions(config)
     owners = {npc.id: npc for npc, _ in [*attackers, *defenders]}
@@ -36,7 +37,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
     for side, roster in (("player", attackers), ("enemy", defenders)):
         for npc, power in roster:
             resources[npc.id] = prepare(npc, now, config)
-            capabilities = resolve_capabilities(resources[npc.id].state, definitions)
+            capabilities = resolve_source(resources[npc.id].state, definitions, (sources or {}).get(npc.id))
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
             units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities))

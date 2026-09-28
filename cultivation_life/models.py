@@ -98,6 +98,11 @@ class Technique:
     possession_limit_bonus: int = 0
     ignore_possession_limit: bool = False
     growth_preference: str = "balanced"
+    doctrine_id: str | None = None
+    effective_worlds: list[str] = field(default_factory=list)
+
+    def active_in(self, world: str) -> bool:
+        return not self.effective_worlds or world in self.effective_worlds
 
     def __post_init__(self) -> None:
         self.level = max(1, min(9, int(self.level)))
@@ -846,6 +851,7 @@ class GameState:
     # Optional Tianji artifact DLC state.  Generated definitions, knowledge,
     # unique-body ownership and sparse NPC holders are frozen together here.
     tianji_state: dict[str, Any] = field(default_factory=dict)
+    doctrine_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -908,6 +914,7 @@ class GameState:
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
             "tianji_state": self.tianji_state,
+            "doctrine_state": self.doctrine_state,
             "settings": self.settings,
             "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
             "world_rules_version": self.world_rules_version,
@@ -971,6 +978,8 @@ class GameState:
             if isinstance(value.get("guixu_state", {}), dict) else {},
             tianji_state=copy.deepcopy(value.get("tianji_state", {}))
             if isinstance(value.get("tianji_state", {}), dict) else {},
+            doctrine_state=copy.deepcopy(value.get("doctrine_state", {}))
+            if isinstance(value.get("doctrine_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),
