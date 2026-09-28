@@ -16,7 +16,7 @@ REGISTRY_DOCUMENTS = (
 CORE_DOCUMENTS = (*REGISTRY_DOCUMENTS, "maps.json")
 OPTIONAL_DOCUMENTS = (
     "monster_bloodlines.json", "achievements.json", "crafting.json", "formations.json",
-    "sage_way.json", "guixu_tide.json", "buddhist_way.json",
+    "sage_way.json", "guixu_tide.json", "buddhist_way.json", "doctrines.json",
 )
 PACKAGE_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,63}$")
 PREFERENCES_FILE = "extension_preferences.json"
@@ -116,6 +116,9 @@ def base_documents(content_root: Path) -> dict[str, dict[str, Any]]:
     formations_path = content_root / "formations.json"
     if formations_path.is_file():
         documents[formations_path.name] = read_json(formations_path)
+    doctrine_path = content_root / "doctrines.json"
+    if doctrine_path.is_file():
+        documents[doctrine_path.name] = read_json(doctrine_path)
     for path in sorted(content_root.glob("*_events.json")):
         documents[path.name] = read_json(path)
     events_path = content_root / "events.json"

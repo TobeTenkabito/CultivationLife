@@ -154,6 +154,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.buddhist_action(game_id, **payload)
             elif operation == "guixu-action":
                 result = ENGINE.guixu_action(game_id, payload.get("action", ""), payload)
+            elif operation == "doctrine-action":
+                result = ENGINE.doctrine_action(game_id, str(payload.get("action", "")),
+                                                payload.get("doctrine_id"), payload.get("manual_id"),
+                                                payload.get("confirm_origin", False))
             elif operation == "tianji-action":
                 result = ENGINE.tianji_action(
                     game_id, payload.get("action", ""), payload.get("artifact_id", "")

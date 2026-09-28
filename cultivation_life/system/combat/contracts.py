@@ -31,6 +31,10 @@ class DomainDefinition:
     max_investment: float = 0.0
     extra_target_cost: float = 0.0
     max_targets: int = 1
+    stability: float | None = None
+    incursion: float | None = None
+    authority: float | None = None
+    features: tuple[Mapping[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id or not self.attainment:
@@ -47,6 +51,36 @@ class DomainDefinition:
             raise ValueError("Domain max_targets must be a positive integer")
         if self.effect_power > 1:
             raise ValueError("Domain effect_power must be <= 1")
+        for key in ("stability", "incursion", "authority"):
+            if getattr(self, key) is not None:
+                number(getattr(self, key), key)
+        if len(self.features) > 3:
+            raise ValueError("A domain supports at most three operational features")
+        seen = set()
+        for feature in self.features:
+            kind = feature.get("kind")
+            if kind not in {"fortify", "opening", "retaliate", "sacrifice", "frugal", "shelter", "execution"} or kind in seen:
+                raise ValueError("Invalid or duplicate domain feature")
+            seen.add(kind)
+            if number(feature.get("value", 0), "feature value") > .5:
+                raise ValueError("Domain feature value must be <= .5")
+
+
+@dataclass(frozen=True)
+class CapabilitySource:
+    """Optional cultivation-provider output. The battle does not know its origin."""
+    domains: tuple[DomainDefinition, ...] = ()
+    attainments: Mapping[str, float] = field(default_factory=dict)
+
+
+def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
+    if source and source.domains:
+        state = dict(state or {})
+        # A provider's explicit active selection takes precedence over old grants.
+        state["domain_ids"] = [d.id for d in source.domains]
+        state["attainments"] = {**state.get("attainments", {}), **source.attainments}
+        definitions = {**definitions, **{d.id: d for d in source.domains}}
+    return resolve_capabilities(state, definitions, **kwargs)
 
 
 @dataclass(frozen=True)

@@ -586,6 +586,7 @@ function render(data) {
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
+  window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm});
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
@@ -3566,6 +3567,12 @@ function renderBattleReport(report) {
     const row = document.createElement('p'); row.textContent = text; keyList.appendChild(row);
   });
 
+  const overview = $('#battle-domain-overview'); overview.replaceChildren();
+  const openingDomainRound = (report.rounds || []).find(round => round.domain?.fields?.length);
+  if (openingDomainRound) {
+    const view = window.DoctrinePanel?.battleRound(openingDomainRound);
+    if (view) { view.querySelector('h4').textContent = `第 ${openingDomainRound.round} 轮 · 领域展开`; overview.appendChild(view); }
+  }
   const stats = $('#battle-stat-grid'); stats.innerHTML = '';
   (report.stat_comparison || []).forEach(stat => {
     const row = document.createElement('div');
@@ -3580,8 +3587,9 @@ function renderBattleReport(report) {
   const rounds = $('#battle-round-list'); rounds.innerHTML = '';
   (report.rounds || []).forEach(round => {
     const block = document.createElement('section');
-    const title = document.createElement('b'); title.textContent = `第 ${round.round} 轮 · ${round.initiative === 'player' ? '你方先手' : '敌方先手'}`;
+    const title = document.createElement('b'); title.textContent = `第 ${round.round} 轮 · ${round.initiative === 'domain' ? '领域阶段' : round.initiative === 'player' ? '你方先手' : '敌方先手'}`;
     block.appendChild(title);
+    const domainView = window.DoctrinePanel?.battleRound(round); if (domainView) block.appendChild(domainView);
     (round.events || []).forEach(text => { const event = document.createElement('p'); event.textContent = text; block.appendChild(event); });
     const state = document.createElement('small');
     state.textContent = `你方战斗态势 ${number(round.player_combat_state)}/${number(round.player_combat_state_max)} · 敌方 ${number(round.enemy_combat_state)}/${number(round.enemy_combat_state_max)} · MP ${percent(round.player_mp_ratio)} · 双方战意 ${number(round.player_morale)}/${number(round.enemy_morale)}`;

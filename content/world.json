@@ -1,6 +1,8 @@
 {
   "schema_version": 1,
   "actions": {
+    "doctrine_study": {"name": "参悟道统", "opportunity": [0, 0], "hp": 0, "mp": 0},
+    "immortal_conversion": {"name": "转化仙灵力", "opportunity": [0, 0], "hp": 0, "mp": 0},
     "cultivate": {
       "name": "潜心修炼",
       "opportunity": [

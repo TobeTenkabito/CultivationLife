@@ -236,6 +236,12 @@ class ContentRegistry:
             if "buddhist_way.json" in documents:
                 from .buddhist_content import validate_buddhist_content
                 validate_buddhist_content(documents["buddhist_way.json"], documents)
+            if "doctrines.json" in documents:
+                from .system.doctrine.generation import validate_content
+                try:
+                    validate_content(documents["doctrines.json"])
+                except (ValueError, KeyError, TypeError) as error:
+                    raise ContentError(f"道统内容不合法：{error}") from error
             if "guixu_tide.json" in documents:
                 validate_guixu_catalog(
                     documents["guixu_tide.json"], registry, documents,

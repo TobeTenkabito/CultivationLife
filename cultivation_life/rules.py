@@ -190,7 +190,7 @@ def _normalize_technique_manuals(player: Player) -> None:
         technique_name = known_names.get(technique_id) or (template.name if template else item.name)
         technique_name = technique_name.removeprefix("《").split("》", 1)[0]
         origin_realm_index = max(1, min(
-            8,
+            len(REALMS) - 1,
             int(item.technique_origin_realm_index or (template.grade if template else 1)),
         ))
         manuals[key] = Item(
@@ -239,10 +239,10 @@ def add_technique_copy(
         quantity=quantity,
         technique_id=technique.id,
         technique_level=manual_level,
-        technique_origin_realm_index=max(1, min(8, int(technique.grade))),
+        technique_origin_realm_index=max(1, min(len(REALMS) - 1, int(technique.grade))),
         description=(
-            f"原初境界：{REALMS[max(1, min(8, int(technique.grade)))].name}"
-            f"（{max(1, min(8, int(technique.grade)))}阶）。"
+            f"原初境界：{REALMS[max(1, min(len(REALMS) - 1, int(technique.grade)))].name}"
+            f"（{max(1, min(len(REALMS) - 1, int(technique.grade)))}阶）。"
             + technique_manual_description(technique.name, manual_level)
         ),
         tags=["technique_manual"],
@@ -345,6 +345,10 @@ def learn_technique(player: Player, technique: Technique) -> bool:
 
 
 def assign_technique(player: Player, technique: Technique, slot: str) -> None:
+    if not technique.active_in(player.world):
+        raise ValueError("此道统功法只在仙界生效")
+    if technique.doctrine_id and player.realm_index < technique.grade:
+        raise ValueError("境界尚不足以配置此道统功法")
     known = next((entry for entry in player.known_techniques if entry.id == technique.id), None)
     if known is not None:
         technique.level = max(technique.level, known.level)
@@ -422,7 +426,7 @@ def raw_external_hp_bonus(player: Player) -> float:
     from .system.crafting_system import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
-    if player.support_technique:
+    if player.support_technique and player.support_technique.active_in(player.world):
         support_bonus = (
             player.support_technique.hp_bonus * technique_scale(player.support_technique, "hp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
@@ -445,7 +449,7 @@ def raw_external_mp_bonus(player: Player) -> float:
     from .system.crafting_system import crafted_artifact_bonuses
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
-    if player.support_technique:
+    if player.support_technique and player.support_technique.active_in(player.world):
         support_bonus = (
             player.support_technique.mp_bonus * technique_scale(player.support_technique, "mp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
@@ -528,6 +532,7 @@ def combat_power(player: Player) -> float:
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         for entry in player.combat_techniques
         if combat_requirement_met(entry.combat_requirements, current_qi_levels)
+        and entry.active_in(player.world)
         and (not entry.requires_immortal_power or player.immortal_power_converted)
     )
     comprehensive = current.base_power * layer_factor * status + current.base_power * progress * 0.15 + item_power + player.body_training * 8
@@ -649,6 +654,8 @@ def technique_environment_multiplier(
     technique: Technique, world: str, concentrations: dict[str, float] | None = None,
 ) -> float:
     """按功法内部源权重求环境倍率；多源收益不会直接相加。"""
+    if not technique.active_in(world):
+        return 0.0
     if (
         not technique.sources
         or set(technique.sources) - set(QI_SOURCE_NAMES)

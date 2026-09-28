@@ -19,6 +19,9 @@ class UnitState:
     active_domain: str | None = None
     suppressed: bool = False
     escape_locked: bool = False
+    sustained_rounds: int = 0
+    resisted: bool = False
+    seal_progress: float = 0.0
 
     @property
     def fighting(self) -> bool:
@@ -33,6 +36,8 @@ class Field:
     strength: float
     protects: tuple[str, ...]
     targets: tuple[str, ...]
+    stability: float = 0
+    authority: float | None = None
 
 
 class DomainBattle:
@@ -77,6 +82,9 @@ class DomainBattle:
             d.strength + d.strength_per_level * max(0, c.attainments.get(d.attainment, 0) - d.required_level), d.id),
             reverse=True)
         for definition in candidates:
+            features = {row["kind"]: row["value"] for row in definition.features}
+            continued = owner.active_domain == definition.id
+            rounds = owner.sustained_rounds + 1 if continued else 1
             protects = [owner.unit.id]
             if c.stance == "protect":
                 protects += [key for key in c.protect_ids if key in self.units and key != owner.unit.id
@@ -94,7 +102,8 @@ class DomainBattle:
             # Shrink optional coverage before giving up protection of the caster.
             while True:
                 extras = len(protects) - 1 + len(targets)
-                cost = opening + definition.upkeep_cost + extras * definition.extra_target_cost
+                upkeep = definition.upkeep_cost * (1 - features.get("frugal", 0) if rounds > 1 else 1)
+                cost = opening + upkeep + extras * definition.extra_target_cost
                 if cost <= owner.current:
                     break
                 if targets:
@@ -109,11 +118,19 @@ class DomainBattle:
             owner.current -= cost + investment
             base = definition.strength + definition.strength_per_level * max(
                 0.0, c.attainments.get(definition.attainment, 0) - definition.required_level)
-            strength = base * max(0.0, condition) * (1 + investment / max(1.0, definition.max_investment))
-            strength /= 1 + 0.25 * (len(protects) - 1 + len(targets))
+            factor = max(0.0, condition) * (1 + investment / max(1.0, definition.max_investment))
+            factor /= 1 + 0.25 * (1 - features.get("shelter", 0)) * (len(protects) - 1 + len(targets))
+            strength = (base if definition.incursion is None else definition.incursion) * factor
+            stability = (base if definition.stability is None else definition.stability) * factor
+            stability *= 1 + features.get("fortify", 0) * min(3, rounds - 1)
+            strength *= 1 + (features.get("opening", 0) if rounds == 1 else 0)
+            strength *= 1 + (features.get("retaliate", 0) if owner.resisted and continued else 0)
+            strength *= 1 + features.get("sacrifice", 0)
+            stability *= 1 - features.get("sacrifice", 0)
             owner.active_domain = definition.id
+            owner.sustained_rounds = rounds
             self.frame.events.append(f"{owner.unit.name}维持【{definition.name}】，仙灵力消耗 {cost + investment:g}。")
-            return Field(owner.unit.id, definition, strength, tuple(protects), tuple(targets))
+            return Field(owner.unit.id, definition, strength, tuple(protects), tuple(targets), stability, definition.authority)
         if candidates:
             self.frame.events.append(f"{owner.unit.name}仙灵力不足，无法展开或维持仙域。")
         owner.active_domain = None
@@ -153,11 +170,11 @@ class DomainBattle:
             attackers = [f for f in self.fields if key in f.targets]
             defenders = [f for f in self.fields if key in f.protects]
             attack = max(attackers, key=lambda f: (f.strength, f.owner), default=None)
-            defense = max(defenders, key=lambda f: (f.strength, f.owner), default=None)
+            defense = max(defenders, key=lambda f: (f.stability, f.owner), default=None)
             relation = "uncovered"
             if attack:
-                if defense and attack.strength <= defense.strength * self.contest_ratio:
-                    relation = "pressed" if attack.strength > defense.strength else "contested"
+                if defense and attack.strength <= defense.stability * self.contest_ratio:
+                    relation = "pressed" if attack.strength > defense.stability else "contested"
                 else:
                     relation = "dominated"
                     self._dominated[key] = attack.owner
@@ -165,31 +182,41 @@ class DomainBattle:
                 "relation": relation, "attacker": attack.owner if attack else None,
                 "protector": defense.owner if defense else None,
                 "attack_strength": round(attack.strength, 4) if attack else 0,
-                "defense_strength": round(defense.strength, 4) if defense else 0,
+                "defense_strength": round(defense.stability, 4) if defense else 0,
             }
-        # A caster whose own protection failed cannot execute an offensive action.
-        # No effects are applied during relation construction (roster-order neutral).
+            state.resisted = relation in {"pressed", "contested"}
+        # Mutual breaches execute together; otherwise a dominated caster cannot
+        # act. No effects run during relation construction (roster-order neutral).
         effects: list[tuple[str, str, DomainDefinition]] = []
         for field in self.fields:
             owner = self.units[field.owner]
             victims = [key for key in field.targets if self._dominated.get(key) == field.owner]
-            if not victims or field.owner in self._dominated or owner.current < field.definition.effect_cost:
+            mutual = self._dominated.get(self._dominated.get(field.owner)) == field.owner
+            if not victims or (field.owner in self._dominated and not mutual) or owner.current < field.definition.effect_cost:
                 continue
             owner.current -= field.definition.effect_cost
             self._acted.add(field.owner)
             effects.extend((field.owner, key, field.definition) for key in victims)
         for owner, victim, definition in effects:
             target = self.units[victim]
+            power = definition.effect_power
+            if definition.authority is not None:
+                power = min(1, power * definition.authority / 100)
+                if target.vitality < .5:
+                    power = min(1, power * (1 + next((f["value"] for f in definition.features if f["kind"] == "execution"), 0)))
             if definition.effect == "strike":
-                self._lose(victim, definition.effect_power)
+                self._lose(victim, power)
             elif definition.effect == "suppress":
-                target.suppressed = True
-                self._lose(victim, target.vitality)
+                self._lose(victim, target.vitality if definition.authority is None else power)
+                target.suppressed = target.vitality <= .12
             else:
                 target.escape_locked = True
+                if definition.authority is not None:
+                    target.seal_progress = min(1.0, target.seal_progress + power)
+                    target.suppressed = target.seal_progress >= 1.0
             self.frame.events.append(
                 f"{self.units[owner].unit.name}的【{definition.name}】支配{target.unit.name}："
-                f"{'镇压' if definition.effect == 'suppress' else '封锁退路' if definition.effect == 'seal' else '仙域杀伤'}。")
+                f"{('镇压' if target.suppressed else '镇压侵蚀') if definition.effect == 'suppress' else ('封禁成形' if target.suppressed else '封锁退路') if definition.effect == 'seal' else '仙域杀伤'}。")
         self.frame.ordinary_player = self._has_ordinary("player")
         self.frame.ordinary_enemy = self._has_ordinary("enemy")
         return self.frame
@@ -336,9 +363,15 @@ class DomainBattle:
         return {
             "relations": self.frame.relations,
             "fields": [{"owner": f.owner, "domain_id": f.definition.id,
+                        "name": f.definition.name, "effect": f.definition.effect,
+                        "stability": round(f.stability, 4), "incursion": round(f.strength, 4),
+                        "authority": f.authority, "sustained_rounds": self.units[f.owner].sustained_rounds,
                         "strength": round(f.strength, 4), "protects": list(f.protects),
                         "targets": list(f.targets)} for f in self.fields],
             "resources": {key: round(s.current, 6) for key, s in self.units.items()},
+            "seal_progress": {key: round(s.seal_progress, 4) for key, s in self.units.items() if s.seal_progress > 0},
+            "participants": {key: {"name": s.unit.name, "side": s.unit.side} for key, s in self.units.items()},
+            "ordinary": {"player": self.frame.ordinary_player, "enemy": self.frame.ordinary_enemy},
         }
 
     def updates(self) -> list[dict[str, Any]]:

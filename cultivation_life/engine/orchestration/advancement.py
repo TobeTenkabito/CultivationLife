@@ -31,7 +31,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("请先处理当前事件")
     if game.heavenly_court.get("open_election"):
         raise ValueError("天庭大选正在进行；选举不流逝时间，请先在天庭界面完成投票")
-    if player.world == "celestial" and not player.immortal_power_converted and action not in {"cultivate", "rest", "commission"}:
+    if player.world == "celestial" and not player.immortal_power_converted and action not in {"cultivate", "rest", "commission", "immortal_conversion", "doctrine_study"}:
         raise ValueError("仙灵力尚未完全转化，当前只能修行、调息或承接坊市委托")
     if player.imprisonment:
         raise ValueError("你身陷大牢，只能选择服刑或尝试越狱")
@@ -39,6 +39,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("魂印受制时只能等待、有限修炼、反抗或夺舍拘魂者")
     if action not in ACTIONS:
         raise ValueError("未知行动")
+    deps._begin_doctrine_action(game, action)
     guixu_session = (
         game.guixu_state.get("player_session")
         if isinstance(game.guixu_state, dict) else None
@@ -138,6 +139,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             deps._advance_soul_erosion_time(game, 1)
         if not continue_world or not player.alive:
             break
+    deps._finish_doctrine_action(game, action, player.age - start_world_age)
     if player.alive:
         action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
         action_summary = (

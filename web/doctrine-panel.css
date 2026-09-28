@@ -1,0 +1,23 @@
+#doctrine-card { width: min(900px, calc(100vw - 24px)); max-height: calc(100dvh - 100px); overflow-y: auto; padding: 20px; box-sizing: border-box; }
+#doctrine-content { display: grid; gap: 20px; overflow-wrap: anywhere; }
+#doctrine-content h3, #doctrine-content h4 { margin: 0 0 8px; }
+#doctrine-content p { margin: 8px 0; }
+#doctrine-content small { display: block; }
+#doctrine-content progress { width: 100%; height: 10px; accent-color: var(--accent, #877141); }
+.doctrine-lead { font-weight: 700; letter-spacing: .06em; }
+.doctrine-conversion, .doctrine-entry, .doctrine-book { border: 1px solid var(--line, #b9b099); padding: 16px; border-radius: 8px; background: var(--paper, #f5f0e3); }
+.doctrine-entry { margin-bottom: 12px; }
+.doctrine-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.doctrine-chapter { padding: 12px 0; border-bottom: 1px solid var(--line, #b9b099); }
+.doctrine-note { font-weight: 600; }
+.doctrine-book-grid, .domain-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.doctrine-book button { margin-top: 12px; }
+.domain-round { border: 1px solid var(--line, #b9b099); padding: 12px; margin: 10px 0; border-radius: 8px; }
+.domain-round h4 { margin: 0 0 10px; }
+.domain-field { padding: 10px; border-left: 3px solid #527c77; background: rgba(82,124,119,.08); }
+.domain-field.hostile { border-left-color: #9c6159; background: rgba(156,97,89,.08); }
+.domain-field small { display: block; }
+.domain-relation { margin-top: 12px; }
+.domain-relation.dominated { font-weight: 600; }
+.domain-comparison { height: 6px; margin: 6px 0; border-radius: 3px; background: linear-gradient(to right, #a66b61 var(--invasion-share), #5d8881 var(--invasion-share)); }
+@media (max-width: 600px) { .doctrine-book-grid, .domain-field-grid { grid-template-columns: 1fr; } #doctrine-card { max-height: calc(100dvh - 80px); padding: 14px; } .doctrine-actions button { flex: 1 1 140px; } }

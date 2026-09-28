@@ -359,6 +359,8 @@ def _resolve_asura_ascension_step(
 
 def _maybe_immortal_conversion_event(deps: TrialDependencies, game: GameState, rng: random.Random) -> bool:
     player = game.player
+    if game.doctrine_state.get("player", {}).get("conversion_active"):
+        return False
     if (
         player.world != "celestial" or player.realm_index < 9 or player.immortal_power_converted
         or player.immortal_conversion_stage >= 5 or game.pending_event or game.active_trial
@@ -410,7 +412,8 @@ def _complete_immortal_conversion_stage(deps: TrialDependencies, game: GameState
     if expected_stage < 5:
         return "immortal_conversion_stage", (
             f"第 {expected_stage}/5 阶段完成，可用仙灵力上限现为 {expected_stage * 20}%。"
-            "下一阶段需再间隔至少 10 个仙界时间单位。"
+            + ("可继续主动转化，积累不会因调息或战斗倒退。" if game.doctrine_state.get("player", {}).get("conversion_active")
+               else "下一阶段需再间隔至少 10 个仙界时间单位。")
         )
     player.immortal_power_converted = True
     learn_technique(player, copy.deepcopy(TECHNIQUE_CATALOG["TECH_CELESTIAL_BREATHING"]))

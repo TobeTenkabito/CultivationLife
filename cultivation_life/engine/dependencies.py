@@ -138,6 +138,7 @@ class PresentationDependencies:
     _public_spirit_field: Callable[..., dict[str, Any]]
     _public_spirit_ranking: Callable[..., dict[str, Any]]
     _public_tianji: Callable[..., dict[str, Any]]
+    _public_doctrines: Callable[..., dict[str, Any]]
     _public_wanted: Callable[..., list[dict[str, Any]]]
     _public_war_system: Callable[..., dict[str, Any]]
     _public_world_npcs: Callable[..., list[dict[str, Any]]]
@@ -177,6 +178,7 @@ class PersistenceDependencies:
     _ensure_sect_relations: Callable[..., bool]
     _ensure_sects: Callable[..., None]
     _ensure_tianji_state: Callable[..., bool]
+    _ensure_doctrines: Callable[..., bool]
     _ensure_wars: Callable[..., bool]
     _ensure_world_npcs: Callable[..., bool]
     _manual_breakthrough_kind: Callable[..., str | None]
@@ -217,6 +219,7 @@ class SessionDependencies:
     _ensure_sect_relations: Callable[..., bool]
     _ensure_sects: Callable[..., None]
     _ensure_tianji_state: Callable[..., bool]
+    _ensure_doctrines: Callable[..., bool]
     _ensure_world_npcs: Callable[..., bool]
     _new_sects: Callable[..., dict[str, SectState]]
     _new_world_npcs: Callable[..., dict[str, SectNpc]]
@@ -242,6 +245,8 @@ class SessionDependencies:
 
 @dataclass(frozen=True, slots=True)
 class AdvancementDependencies:
+    _begin_doctrine_action: Callable[..., None]
+    _finish_doctrine_action: Callable[..., None]
     _add_opportunity: Callable[..., float]
     _advance_auction_clock: Callable[..., None]
     _advance_concubine_aftermath: Callable[..., bool]
