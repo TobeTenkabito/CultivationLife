@@ -156,12 +156,17 @@ def _would_enter_spirit_ranking(deps: EncounterDependencies, game: GameState, np
 
 
 def _promote_cached_npc(deps: EncounterDependencies, game: GameState, npc_id: str, reason: str) -> SectNpc | None:
+    from ...system.npc_social import instantiate_social
     entry = next((row for row in game.encounter_npc_cache if row.get("id") == npc_id), None)
     if not entry:
-        return game.notable_npcs.get(npc_id)
+        npc = game.notable_npcs.get(npc_id)
+        if npc:
+            instantiate_social(game, npc)
+        return npc
     npc = SectNpc.from_dict(entry["npc"])
     npc.age += max(0, game.player.age - int(entry.get("last_seen_age", game.player.age)))
     game.notable_npcs[npc.id] = npc
+    instantiate_social(game, npc)
     game.encounter_npc_cache = [row for row in game.encounter_npc_cache if row.get("id") != npc_id]
     game.history.append(HistoryRecord(
         "SYS_NPC_PROMOTED", 1, game.player.age, "人物留名", reason, "promoted",

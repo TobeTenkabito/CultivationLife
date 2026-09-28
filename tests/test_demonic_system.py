@@ -330,8 +330,8 @@ class DemonicSystemTests(unittest.TestCase):
         game.player.location_id = self.engine.maps.default_location("true_demon")
         shown = self.engine.present(game)
         experts = {row["name"]: row for row in shown["world_npcs"] if row["perceived_alive"]}
-        self.assertEqual(experts["巫迟烟"]["realm_name"], "合体中期")
-        self.assertEqual(experts["曾砺川"]["realm_name"], "合体中期")
+        self.assertEqual(experts["巫行云"]["realm_name"], "合体中期")
+        self.assertEqual(experts["曾沧海"]["realm_name"], "合体中期")
         self.assertEqual(
             {row["name"] for row in shown["faction"]["available"]},
             {"天魔宫", "万魂渊", "黑日神殿"},

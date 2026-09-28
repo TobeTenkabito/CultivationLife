@@ -107,9 +107,12 @@ class AchievementSystem:
         self.metadata.ensure_exists()
 
     def evaluate(self, game: GameState, *, player_rank: int | None = None) -> list[dict[str, Any]]:
+        history_index = {}
+        for record in game.history:
+            history_index.setdefault(record.event_id, []).append(record)
         completed = [
             definition for definition in self.definitions
-            if self._matches(definition["condition"], game, player_rank=player_rank)
+            if self._matches(definition["condition"], game, player_rank=player_rank, history_index=history_index)
         ]
         return self.metadata.unlock(completed, game)
 
@@ -127,12 +130,12 @@ class AchievementSystem:
         unlocked = sum(1 for row in rows if row["unlocked"])
         return {"achievements": rows, "unlocked": unlocked, "total": len(rows)}
 
-    def _matches(self, condition: dict[str, Any], game: GameState, *, player_rank: int | None) -> bool:
+    def _matches(self, condition: dict[str, Any], game: GameState, *, player_rank: int | None, history_index: dict | None = None) -> bool:
         player = game.player
         if set(condition) == {"all"}:
-            return all(self._matches(child, game, player_rank=player_rank) for child in condition["all"])
+            return all(self._matches(child, game, player_rank=player_rank, history_index=history_index) for child in condition["all"])
         if set(condition) == {"any"}:
-            return any(self._matches(child, game, player_rank=player_rank) for child in condition["any"])
+            return any(self._matches(child, game, player_rank=player_rank, history_index=history_index) for child in condition["any"])
         if "item" in condition:
             return any(item.id == condition["item"] and item.quantity > 0 for item in player.inventory)
         if "flag" in condition:
@@ -161,13 +164,20 @@ class AchievementSystem:
             return set(map(str, condition["techniques"])) <= known
         if "history" in condition:
             expected = condition["history"]
+            records = game.history
+            if history_index is not None:
+                if expected.get("event_id"):
+                    records = history_index.get(expected["event_id"], ())
+                elif expected.get("event_prefix"):
+                    records = (record for key, rows in history_index.items()
+                               if key.startswith(expected["event_prefix"]) for record in rows)
             return any(
                 (not expected.get("event_id") or record.event_id == expected["event_id"])
                 and (not expected.get("event_prefix") or record.event_id.startswith(expected["event_prefix"]))
                 and (not expected.get("choice_id") or record.choice_id == expected["choice_id"])
                 and (not expected.get("result") or record.result == expected["result"])
                 and record.result not in expected.get("exclude_results", [])
-                for record in game.history
+                for record in records
             )
         if "relationship" in condition:
             expected = condition["relationship"]

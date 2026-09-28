@@ -26,6 +26,7 @@ from ..system.ghost_system import (
     grant_intrinsic_progression_if_new_highwater,
 )
 from ..system.possession_system import migrate_possession_timeline
+from ..system.npc_social import migrate_fixed_couple
 from .dependencies import PersistenceDependencies
 
 
@@ -39,10 +40,8 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
             if item.name != template.name:
                 item.name, item.description = template.name, template.description
                 renamed = True
-    if renamed:
-        deps.store.save(game)
-    if deps._ensure_merchant(game):
-        deps.store.save(game)
+    merchant_changed = deps._ensure_merchant(game)
+    social_changed = migrate_fixed_couple(game)
     conversion_migrated = False
     monster_lifespan_migrated = False
     sense_baseline_migrated = False
@@ -197,7 +196,7 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
         game.player.divine_sense_rank = natural_sense
         sense_baseline_migrated = True
     changed = (
-        ghost_migrated or conversion_migrated or monster_lifespan_migrated
+        renamed or merchant_changed or social_changed or ghost_migrated or conversion_migrated or monster_lifespan_migrated
         or possession_timeline_migrated or version_changed or location_changed
         or sense_baseline_migrated
         or bloodline_changed or before_manuals != after_manuals
@@ -269,8 +268,6 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     if deps._ensure_market(game, rng):
         game.rng_state = encode_rng(rng)
         changed = True
-    if changed:
-        deps.store.save(game)
     if game.pending_event:
         post_battle_possession = game.pending_event.get("id") == "SYS_POST_BATTLE_POSSESSION"
         event = deps.events_by_id.get(game.pending_event.get("id"))
@@ -292,7 +289,7 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
                 "SYS_CONTENT_MIGRATION", 1, game.player.age, "命途校正", None, "migrated",
                 "旧版本中与当前境界不相容的待处理事件已移出事件池。", {}, ["system", "migration"],
             ))
-            deps.store.save(game)
+            changed = True
     elif game.active_trial:
         game.active_trial = None
         game.history.append(HistoryRecord(
@@ -300,5 +297,7 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
             "旧存档中失去对应事件的突破或雷劫状态已经清理，可以继续行动。", {},
             ["system", "migration", "tribulation"],
         ))
+        changed = True
+    if changed:
         deps.store.save(game)
     return game

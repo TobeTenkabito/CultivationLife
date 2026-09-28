@@ -1594,6 +1594,8 @@ function renderFaction(faction) {
     addStatus('突破', npc.breakthrough_chance == null ? '当前无瓶颈' : percent(npc.breakthrough_chance));
     if (npc.affinity != null) addStatus('好感', `${number(npc.affinity)}${npc.attitude ? ` · ${npc.attitude}` : ''}`);
     if (npc.wounds) addStatus('伤势', `负伤 ${npc.wounds} 级`, true);
+    if (npc.social_hint?.companion_name) addStatus('道侣', npc.social_hint.companion_name);
+    if (npc.social_hint?.concubine_count) addStatus('侍妾', `${npc.social_hint.concubine_count} 人`);
     if (npc.treasure_name) addStatus('重宝', npc.treasure_name);
     identity.appendChild(status);
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
@@ -1872,6 +1874,8 @@ function renderWorldNpcs(npcs) {
     detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}`;
     const combat = npc.combat_power == null ? '' : ` · 战力 ${number(npc.combat_power)} · 好感 ${number(npc.affinity)} / ${npc.attitude}`;
     detail.textContent += combat;
+    if (npc.social_hint?.companion_name) detail.textContent += ` · 道侣 ${npc.social_hint.companion_name}`;
+    if (npc.social_hint?.concubine_count) detail.textContent += ` · 侍妾 ${npc.social_hint.concubine_count} 人`;
     if (npc.formation) detail.textContent += ` · 阵法 ${npc.formation.name}（完整度 ${Number(npc.formation.durability).toFixed(0)}%，离屏战力 +${Number(npc.formation.bonus).toFixed(2)}%）`;
     const controls = document.createElement('div'); controls.className = 'world-npc-controls';
     const status = document.createElement('span'); status.textContent = npc.status; controls.appendChild(status);
@@ -2054,6 +2058,13 @@ function renderWorldRoute(route) {
   });
 }
 
+function bloodlineDetail(name, description, style = '') {
+  const details = document.createElement('details'); details.className = `bloodline-detail ${style}`;
+  const summary = document.createElement('summary'); summary.textContent = name;
+  const text = document.createElement('p'); text.textContent = description || '此词条暂无额外数值效果。';
+  details.append(summary, text); return details;
+}
+
 function renderMonsterBloodline(system) {
   const panel = $('#bloodline-card');
   const dock = document.querySelector('[data-panel-target="bloodline"]');
@@ -2077,8 +2088,7 @@ function renderMonsterBloodline(system) {
     current.appendChild(heading);
     const traitList = document.createElement('div'); traitList.className = 'bloodline-traits';
     generalTraits.forEach(trait => {
-      const chip = document.createElement('span'); chip.className = 'general';
-      chip.textContent = trait.name; chip.title = trait.description; traitList.appendChild(chip);
+      traitList.appendChild(bloodlineDetail(trait.name, trait.description, 'general'));
     });
     if (!generalTraits.length) {
       const empty = document.createElement('p'); empty.className = 'empty';
@@ -2108,7 +2118,7 @@ function renderMonsterBloodline(system) {
   current.appendChild(stats);
   const currentTraits = document.createElement('div'); currentTraits.className = 'bloodline-traits';
   (system.current.traits || []).forEach(trait => {
-    const chip = document.createElement('span'); chip.textContent = trait.name; chip.title = trait.description; currentTraits.appendChild(chip);
+    currentTraits.appendChild(bloodlineDetail(trait.name, trait.description));
   });
   (system.current.abilities || []).forEach(ability => {
     const chip = document.createElement('span'); chip.className = 'ability'; chip.textContent = ability; currentTraits.appendChild(chip);
@@ -2122,8 +2132,7 @@ function renderMonsterBloodline(system) {
     ...(system.general_traits || []).map(row => ({...row, kind:'冻结通用'})),
   ];
   markRows.forEach(mark => {
-    const chip = document.createElement('span'); chip.className = mark.kind === '血脉' ? 'imprint' : mark.kind === '冻结通用' ? 'general frozen' : '';
-    chip.textContent = `${mark.kind} · ${mark.name}`; chip.title = mark.description || ''; marks.appendChild(chip);
+    marks.appendChild(bloodlineDetail(`${mark.kind} · ${mark.name}`, mark.description, mark.kind === '血脉' ? 'imprint' : mark.kind === '冻结通用' ? 'general frozen' : ''));
   });
   if (!markRows.length) { const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = '尚未获得适应印记或特殊血脉印记。'; marks.appendChild(empty); }
   (system.history || []).forEach((node, index) => {
@@ -3213,6 +3222,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     const requested = person.last_requests || {};
     actions.append(
+      interactionButton('请教修行', requested.consult === worldClock() || person.world !== game.player.world ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'consult'})),
       interactionButton('索要物品', requested.item === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
       interactionButton('请教功法', requested.technique === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
     );

@@ -212,6 +212,7 @@ class SectNpc:
     concealed_layer: int | None = None
     family_traits: dict[str, Any] = field(default_factory=dict)
     family_combat_bonus: float = 0.0
+    social_profile: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.gender not in {"male", "female"}:
@@ -775,7 +776,12 @@ class HistoryRecord:
     tags: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        # Scalar fields need no recursive dataclass traversal. Keep mutable values
+        # detached so callers retain the same snapshot semantics as asdict.
+        return {"event_id": self.event_id, "event_version": self.event_version,
+                "age": self.age, "title": self.title, "choice_id": self.choice_id,
+                "result": self.result, "summary": self.summary,
+                "state_diff": copy.deepcopy(self.state_diff), "tags": list(self.tags)}
 
 
 @dataclass

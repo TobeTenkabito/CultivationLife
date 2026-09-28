@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+from functools import lru_cache
 from typing import Any
 from ...content_registry import (
     FACTION_SYSTEMS,
@@ -20,21 +21,29 @@ from ...rules import can_practice_technique, expected_combat_power, divine_sense
 from ..dependencies import NpcClassDependencies, NpcDependencies
 
 
+@lru_cache(maxsize=1)
+def _treasure_pools(goods_identity: int, items_identity: int) -> tuple:
+    """Catalogues are fixed for a process; replacement invalidates the index."""
+    pools = {}
+    worlds = set()
+    for row in MARKET_GOODS:
+        world = str(row.get("world", "human"))
+        worlds.add(world)
+        if row["kind"] != "item" or {"currency", "root_manual"} & set(ITEM_CATALOG[row["content_id"]].tags):
+            continue
+        pools.setdefault((world, int(row["tier"])), []).append(row)
+    return worlds, {key: tuple(str(row["content_id"]) for row in sorted(rows, key=lambda row: int(row["price"]), reverse=True)[:4])
+                    for key, rows in pools.items()}
+
+
 def _select_npc_treasure(npc: SectNpc, rng: random.Random) -> str | None:
     tier = max(1, min(8, npc.realm_index))
-    market_worlds = {str(row.get("world", "human")) for row in MARKET_GOODS}
+    market_worlds, pools = _treasure_pools(id(MARKET_GOODS), id(ITEM_CATALOG))
     world = npc.world if npc.world in market_worlds else ("spirit" if npc.realm_index >= 6 else "human")
-    candidates = [
-        row for row in MARKET_GOODS
-        if row["kind"] == "item" and row.get("world", "human") == world
-        and int(row["tier"]) == tier
-        and "currency" not in ITEM_CATALOG[row["content_id"]].tags
-        and "root_manual" not in ITEM_CATALOG[row["content_id"]].tags
-    ]
+    candidates = pools.get((world, tier), ())
     if not candidates:
         return None
-    candidates.sort(key=lambda row: int(row["price"]), reverse=True)
-    return str(rng.choice(candidates[: min(4, len(candidates))])["content_id"])
+    return rng.choice(candidates)
 
 
 def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:

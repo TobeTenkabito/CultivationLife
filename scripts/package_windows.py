@@ -6,18 +6,15 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-version = '1.43.0'
-test_log = (ROOT / 'build/release-1430-tests.log').read_text(encoding='utf-8', errors='replace')
+version = '1.44.0'
+test_log = (ROOT / 'build/release-1440-tests.log').read_text(encoding='utf-8', errors='replace')
 passed = re.search(r'(\d+) passed in', test_log)
 assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
-exe_log = (ROOT / 'build/exe-1430-verification.log').read_text(encoding='utf-8', errors='replace')
+exe_log = (ROOT / 'build/exe-1440-verification.log').read_text(encoding='utf-8', errors='replace')
 assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in ['buddhist-ui-1430.log']:
+for file in ['npc-social-ui-1440.log']:
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
-focused_log = (ROOT / 'build/buddhist-wish-focused.log').read_text(encoding='utf-8', errors='replace')
-focused = re.search(r'(\d+) passed in', focused_log)
-assert focused and 'failed' not in focused_log
 exe = ROOT / 'dist/launcher.exe'
 digest = hashlib.sha256(exe.read_bytes()).hexdigest()
 manifest = {
@@ -26,10 +23,9 @@ manifest = {
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
     'validation':[f'{passed.group(1)} automated regressions passed',
-                  f'{focused.group(1)} focused wish, relationship and base reincarnation regressions passed',
-                  'A-theme live browser checks: left wish panel, one-layer nirvana, Dharma panel, blessing toggle, preserved assembly and root manual; no JavaScript errors',
+                  'A-theme live browser: NPC social hints, master consultation cooldown, touch bloodline descriptions; no JavaScript errors',
                   'Packaged EXE starts with and without optional DLC; all seven packages, wish UI assets, base reincarnation content and Buddhist entry verified',
-                  'No Android APK built; no dedicated B-F theme adaptation in this release'],
+                  'Android 12 companion release; no dedicated B-F theme redesign'],
     'save_schema':5,
 }
 manifest_path = ROOT / f'dist/release-{version}.json'

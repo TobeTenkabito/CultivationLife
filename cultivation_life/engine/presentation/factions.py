@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from ...system.npc_social import social_hint
 from typing import Any
 from ...content_registry import (
     FACTION_REWARDS,
@@ -126,6 +127,8 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
             continue
         perception = deps._npc_cultivation_perception(game, npc)
         public_npc = npc.to_dict()
+        public_npc.pop("social_profile", None)
+        public_npc["social_hint"] = social_hint(game, npc)
         public_npc.pop("concealed_realm_index", None)
         public_npc.pop("concealed_layer", None)
         roster.append({

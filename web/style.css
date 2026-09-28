@@ -171,3 +171,10 @@ button, input[type="button"], input[type="submit"] {
 .family-management button:disabled{opacity:.45;cursor:not-allowed;}.family-management button:hover:not(:disabled){background:var(--pine);color:var(--on-accent);}
 .family-other{display:grid;gap:7px;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere;}
 .family-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;}.family-metrics>span{padding:10px;background:color-mix(in srgb, var(--tone-gold) 8%, transparent);min-width:0;overflow-wrap:anywhere;}
+
+/* Touch-readable bloodline rules; native disclosure also supports keyboards. */
+.bloodline-detail{flex:1 1 160px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--pine)}
+.bloodline-detail summary{cursor:pointer;padding:12px;min-height:44px;box-sizing:border-box;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.bloodline-detail[open]{flex-basis:100%;border-color:var(--gold)}
+.bloodline-detail p{padding:0 12px 12px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8;color:var(--ink)}
+.bloodline-detail summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}

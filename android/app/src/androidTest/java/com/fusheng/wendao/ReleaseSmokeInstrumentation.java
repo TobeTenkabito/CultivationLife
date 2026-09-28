@@ -121,6 +121,21 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("document.activeElement===__imeField")),label+": quote stole focus");
     }
 
+    private void tapSelector(String selector) throws Exception {
+        String quoted=JSONObject.quote(selector);
+        js("document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
+        Thread.sleep(300);
+        JSONObject point=new JSONObject((String)js("JSON.stringify((()=>{const r=document.querySelector("+quoted+").getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,width:innerWidth}})())"));
+        int[] origin=new int[2];runOnMainSync(()->web.getLocationOnScreen(origin));
+        float scale=web.getWidth()/(float)point.getDouble("width");
+        float x=origin[0]+(float)point.getDouble("x")*scale,y=origin[1]+(float)point.getDouble("y")*scale;
+        long now=android.os.SystemClock.uptimeMillis();
+        for(int action:new int[]{android.view.MotionEvent.ACTION_DOWN,android.view.MotionEvent.ACTION_UP}) {
+            android.view.MotionEvent event=android.view.MotionEvent.obtain(now,android.os.SystemClock.uptimeMillis(),action,x,y,0);
+            sendPointerSync(event);event.recycle();
+        }
+    }
+
     private void capture(String name) throws Exception {
         js("scrollTo(0,0)");
         async("document.fonts.ready");
@@ -143,6 +158,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         Bundle result=new Bundle();
         try {
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             long deadline=System.currentTimeMillis()+60000;
             while(web==null && System.currentTimeMillis()<deadline) {
                 runOnMainSync(()->web=findWeb(activity.findViewById(android.R.id.content)));
@@ -151,10 +167,30 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.41.2' && !configData.debug && configData.extensions.length===6 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.44.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("commission")) {
+            if(phase.equals("npc-social")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'血脉长存档验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'serpent',seed:1440})});return g.id;})()");
+                com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",
+                    "from cultivation_life import server\nfrom cultivation_life.system.monster_bloodline_system import grant_random_species_bloodline_trait\nfrom cultivation_life.system.possession_system import advance_player_age\nimport random\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.lifespan=2000\nrng=random.Random(1440)\nfor _ in range(310):\n advance_player_age(g.player)\n e._annual_sect_update(g,rng)\n e._annual_world_npc_update(g,rng)\ng.pending_event=None\ng.active_trial=None\ngrant_random_species_bloodline_trait(g.player,rng)\ne.store.save(g)",
+                    com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("UtilityPanels.open('bloodline')");
+                Thread.sleep(500);
+                tapSelector("#bloodline-card .bloodline-detail summary");
+                waitForJs("document.querySelector('#bloodline-card .bloodline-detail').open","Bloodline tap did not open description");
+                check(Boolean.TRUE.equals(js("document.querySelector('#bloodline-card .bloodline-detail p').textContent.length>8")),"Empty bloodline rules");
+                capture("bloodline-tap-1440");
+                js("UtilityPanels.close('bloodline');window.__beforeAge=game.player.age");
+                long started=System.nanoTime();
+                async("(async()=>{await mutate('/api/games/'+game.id+'/advance',{action:'rest',years:1});return true})()");
+                result.putString("long_save_action_ms",String.valueOf((System.nanoTime()-started)/1000000));
+                check(Boolean.TRUE.equals(js("game.player.age>__beforeAge && game.player.realm_index===4")),"Long save action failed");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.player.age>__beforeAge")),"Long save progress not persisted");
+                capture("long-save-1440");
+            } else if(phase.equals("commission")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'输入法委托验收',preset_id:'core',seed:1412})});return g.id;})()");
                 // Test APK only: place this newly created test character at its alliance HQ.
                 com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",

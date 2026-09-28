@@ -367,7 +367,8 @@
     },
     {
       "id": "wu_xingyun",
-      "name": "巫迟烟",
+      "name": "巫行云",
+      "gender": "female",
       "title": "天外魔海散修",
       "realm_index": 7,
       "layer": 4,
@@ -381,7 +382,8 @@
     },
     {
       "id": "zeng_canghai",
-      "name": "曾砺川",
+      "name": "曾沧海",
+      "gender": "male",
       "title": "沧海魔宫旧主",
       "realm_index": 7,
       "layer": 6,

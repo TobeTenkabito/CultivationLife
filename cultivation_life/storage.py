@@ -21,7 +21,7 @@ class SaveStore:
         game.last_saved_with_game_version = BASE_GAME_VERSION
         path = self._path(game.id)
         temporary = path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(game.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+        temporary.write_text(json.dumps(game.to_dict(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         temporary.replace(path)
 
     def load(self, game_id: str) -> GameState:

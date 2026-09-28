@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Specific names and signature terms from external fiction that previously
 # appeared in player-visible content.  Legacy ASCII record IDs are deliberately
 # outside this list: keeping them is required for existing save compatibility.
+# v1.44: 用户明确指定恢复曾沧海、巫行云，二者不再属于禁用名。
 BANNED_VISIBLE_TERMS = (
     "虚天殿", "虚天鼎", "乾蓝冰焰", "补天丹", "乱星海", "玄骨上人", "极阴祖师",
     "万天明", "天悟子", "青易居士", "蛮胡子", "风雷翅", "风希", "昆吾山",
@@ -23,7 +24,7 @@ BANNED_VISIBLE_TERMS = (
     "炼神术", "银蝌古文", "青元剑诀", "大庚剑阵", "青蟠剑阵", "春黎剑阵",
     "青元子", "青竹蜂云剑", "玄天仙藤", "玄天斩灵剑", "掌天瓶", "金雷竹",
     "辟邪神雷", "九曲灵参", "金阙玉书", "雷鸣大陆", "角蚩族",
-    "海王族", "夜叉族", "阴罗宗", "化仙宗", "天渊城", "巫行云", "曾沧海",
+    "海王族", "夜叉族", "阴罗宗", "化仙宗", "天渊城",
     "玄天血髓", "虚天炼界篇", "玄天万劫体",
 )
 

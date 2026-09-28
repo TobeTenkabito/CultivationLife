@@ -29,7 +29,7 @@ def main(destination):
             if source.is_file():
                 bundle.write(source, 'web/android/' + source.relative_to(mobile).as_posix())
     (destination / 'game-assets.sha256').write_text(hashlib.sha256(archive.read_bytes()).hexdigest(), encoding='ascii')
-    print(f'Android game bundle: {archive.stat().st_size:,} bytes; six themes and six DLC')
+    print(f'Android game bundle: {archive.stat().st_size:,} bytes; six themes and all installed DLC')
 
 
 if __name__ == '__main__':
