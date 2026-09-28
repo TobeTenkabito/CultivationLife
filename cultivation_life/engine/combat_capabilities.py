@@ -1,0 +1,103 @@
+"""Game-state adapter for the pure domain engine.
+
+Only this boundary locates persistent owners and writes resource ledgers back.
+Cached strangers, family dictionaries and normal NPCs retain one authoritative
+record; a temporary SectNpc returned by a presentation helper is never written.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Mapping
+
+from ..models import GameState
+from ..rules import max_mp
+from ..system.combat.contracts import Combatant, ResourceSupply, domain_definitions, resolve_capabilities
+from ..system.combat.domains import DomainBattle
+from ..system.combat_system import BattleUnit, PlayerCombatSystem
+
+
+def persistent_owner(game: GameState, key: str) -> Any | None:
+    if key == "player":
+        return game.player
+    if game.family:
+        member = next((npc for npc in game.family.npcs if npc.id == key), None)
+        if member is not None:
+            return member
+    for group in (game.world_npcs, game.notable_npcs):
+        if key in group:
+            return group[key]
+    for sect in game.sects.values():
+        member = next((npc for npc in sect.npcs if npc.id == key), None)
+        if member is not None:
+            return member
+    for row in game.encounter_npc_cache:
+        if row.get("id") == key:
+            return row["npc"]
+    for row in [*game.player.offspring, *game.player.puppets]:
+        if row.get("id") == key:
+            return row
+    return None
+
+
+@dataclass
+class CapabilityBinding:
+    battle: DomainBattle
+    owners: dict[str, Any]
+
+    def commit(self, updates: list[dict[str, Any]], *, lethal: bool = False) -> None:
+        for update in updates:
+            owner = self.owners.get(update["id"])
+            if owner is None:
+                continue
+            if update["resource_link"] == "legacy_mp":
+                # Linked resource costs are authoritative, including domain-only
+                # rounds and stories which normally waive conventional MP loss.
+                owner.mp = update["current"]
+                continue
+            state = owner.get("transcendence") if isinstance(owner, dict) else owner.transcendence
+            if state is not None:
+                state["current"] = update["current"]
+            if update["id"] == "player":
+                continue
+            wounds = min(4, int((1 - update["vitality"]) * 4))
+            if isinstance(owner, dict):
+                owner["wounds"] = max(int(owner.get("wounds", 0)), wounds)
+                if lethal and update["vitality"] <= 0 and not update["suppressed"]:
+                    owner.update(alive=False, death_reason="仙域斗法中陨落")
+            else:
+                owner.wounds = max(owner.wounds, wounds)
+                if lethal and update["vitality"] <= 0 and not update["suppressed"]:
+                    owner.alive, owner.death_reason = False, "仙域斗法中陨落"
+
+
+def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: dict[str, Any],
+                      config: Mapping[str, Any]) -> CapabilityBinding:
+    definitions = domain_definitions(config)
+    owners: dict[str, Any] = {}
+    combatants: list[Combatant] = []
+    raw_enemies = target.get("members") or [target]
+    ephemeral = {str(row.get("npc_id") or f"enemy-{index}"): row for index, row in enumerate(raw_enemies)}
+    ephemeral.update({str(row.get("npc_id") or f"story-ally-{index}"): row
+                      for index, row in enumerate(target.get("player_allies", []))})
+    for side, units in (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target))):
+        for unit in units:
+            owner = persistent_owner(game, unit.id)
+            if owner is None:
+                owner = ephemeral.get(unit.id)
+            state = owner.get("transcendence") if isinstance(owner, dict) else getattr(owner, "transcendence", None)
+            # Absence means legacy content, for players and NPCs alike. The
+            # conversion/attainment provider explicitly opts actors into this
+            # schema; realm alone must not fabricate resource mastery.
+            if unit.id != "player" and state and state.get("resource_link") == "legacy_mp":
+                raise ValueError("Only the player currently owns a legacy MP pool")
+            capabilities = resolve_capabilities(
+                state, definitions,
+                linked_current=game.player.mp if unit.id == "player" else 0,
+                linked_capacity=max_mp(game.player) if unit.id == "player" else 0,
+            )
+            combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity))
+            if owner is not None:
+                owners[unit.id] = owner
+    supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))
+    return CapabilityBinding(DomainBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
+                                         supplies=supplies), owners)

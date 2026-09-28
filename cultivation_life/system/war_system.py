@@ -11,6 +11,7 @@ from ..content_registry import ITEM_CATALOG, MARKET_GOODS, RACE_DEFINITIONS, REA
 from .formation_system import formation_config
 from ..models import GameState, HistoryRecord, SectNpc
 from .npc_system import npc_team_combat_power
+from .combat.npc_battle import resolve_npc_engagement
 from ..rules import add_item, remove_item
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..world_state import RELATION_LABELS, race_pair
@@ -361,7 +362,7 @@ class WarSystemMixin:
 
     def _available_warriors(self, game: GameState, war: dict[str, Any], side: str, power_id: str = "") -> list[SectNpc]:
         self._ensure_war_shape(game, war)
-        escaped = set(war.get("escaped", {}).get(side, []))
+        escaped = set(war.get("escaped", {}).get(side, [])) | set(war.get("domain_suppressed", []))
         return [npc for npc_id in war.get("roster", {}).get(side, [])
                 if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
                 and (npc := self._war_npc(game, npc_id)) and npc.alive
@@ -627,6 +628,20 @@ class WarSystemMixin:
         contexts = formation_contexts or self._war_formation_contexts(game, war)
         attack_power *= float(contexts[attacking].get("modifier", 1.0))
         defend_power *= float(contexts[defending].get("modifier", 1.0))
+        domain_result = resolve_npc_engagement(
+            [(striker, attack_power)], [(target, defend_power)],
+            WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
+        )
+        if domain_result is not None:
+            war["last_domain_engagement"] = list(domain_result.rounds)
+            war["domain_suppressed"] = list(dict.fromkeys([*war.get("domain_suppressed", []), *domain_result.suppressed]))
+            if domain_result.outcome == "stalemate":
+                return f"{striker.name}与{target.name}仙域及有效攻防相持，双方消耗已保留。"
+            loser = defending if domain_result.outcome == "victory" else attacking
+            self._shift_war_morale(war, loser, 19.0 if domain_result.killed else 9.0, 3.0,
+                                   attacker_kill=bool(domain_result.killed))
+            winner = striker if domain_result.outcome == "victory" else target
+            return f"{winner.name}取得仙域斗法胜利；伤亡与镇压按实际交锋结算。"
         ratio = attack_power * rng.uniform(0.85, 1.18) / max(1.0, defend_power)
         if ratio < 1:
             return f"{striker.name}攻势受阻，{target.name}守住阵线。"
@@ -932,6 +947,35 @@ class WarSystemMixin:
             defend_power = max(
                 1.0, float(defend_profile["composite"]) * float(contexts["defender"]["modifier"]),
             )
+            domain_result = resolve_npc_engagement(
+                [(npc, self._npc_power(npc) * float(contexts["attacker"].get("modifier", 1)))
+                 for npc in self._available_warriors(game, war, "attacker")],
+                [(npc, self._npc_power(npc) * float(contexts["defender"].get("modifier", 1)))
+                 for npc in self._available_warriors(game, war, "defender")],
+                WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
+            )
+            if domain_result is not None:
+                war["last_domain_engagement"] = list(domain_result.rounds)
+                war["domain_suppressed"] = list(dict.fromkeys([*war.get("domain_suppressed", []), *domain_result.suppressed]))
+                war["abstract_rounds"] = int(war.get("abstract_rounds", 0)) + 1
+                war["battles"] = int(war.get("battles", 0)) + 1
+                self._wear_war_guard_arrays(game, war)
+                for side in ("attacker", "defender"):
+                    war["exhaustion"][side] = min(100.0, float(war["exhaustion"][side]) + 7.0)
+                if domain_result.outcome != "stalemate":
+                    loser = "defender" if domain_result.outcome == "victory" else "attacker"
+                    self._shift_war_morale(war, loser, 12.0, 2.5)
+                self._append_war_log(game, war, "仙域 AI 战报",
+                                     "仙域交锋" + {"victory": "攻方取胜", "defeat": "守方取胜", "stalemate": "相持"}[domain_result.outcome]
+                                     + "；保留实际资源消耗和伤亡。")
+                if self._finish_war_by_morale(game, war):
+                    winner = str(war["winner"])
+                    offer = self._generate_ai_peace_offer(game, war, winner)
+                    war["peace_offer"] = offer
+                    self._conclude_war_bundle(game, war, offer["demands"], winner, automatic=True)
+                elif min(war["exhaustion"].values()) >= float(self._war_rules().get("white_peace_exhaustion", 78)):
+                    self._conclude_war(game, war, "white_peace", "attacker", automatic=True)
+                continue
             ratio = attack_power * rng.uniform(0.86, 1.16) / defend_power
             if ratio >= 1:
                 loss = min(24.0, 7.0 + (ratio - 1) * 9.0)

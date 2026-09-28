@@ -261,6 +261,7 @@ def _resolve_story_combat_check(
             "realm_index": member_realm,
             "path": str(member.get("path", "dao")),
             "kind": str(member.get("kind", "cultivator")),
+            **({"transcendence": copy.deepcopy(member["transcendence"])} if "transcendence" in member else {}),
         })
     target = {
         "target_name": scenario["target_name"],
@@ -286,6 +287,8 @@ def _resolve_story_combat_check(
     result, combat_summary = deps._combat(game, target, False, rng)
     if result == "victory":
         return "check_success", f"{combat_summary}{effect.get('success_text', '')}"
+    if result in {"stalemate", "controlled", "victory_controlled", "defeat_trapped"}:
+        return "check_failed", combat_summary
     transformation_revives = "prevent_defeat_once" in active_transformation_profile(game.player)["traits"]
     reason = str(effect.get("failure_reason", "未能战胜剧情强敌"))
     if transformation_revives:

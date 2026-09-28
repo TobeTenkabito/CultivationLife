@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable
 
 from ..combat_traits import COMBAT_TRAIT_REGISTRY
@@ -21,6 +21,8 @@ from ..monster_general_traits import (
     general_monster_trait_modifiers,
 )
 from .formation_system import active_formation_profile, formation_round_effects
+from .combat.contracts import CombatPhases
+from .combat.ordinary import exchange_damage
 
 
 STAT_KEYS = ("might", "guard", "mobility", "sense", "sustain", "breach")
@@ -82,6 +84,10 @@ class CombatResolution:
     formation_integrity_end: float | None = None
     enemy_formation_integrity_end: float | None = None
     formation_experience_gain: float = 0.0
+    capability_updates: list[dict[str, Any]] = field(default_factory=list)
+    domain_controlled: bool = False
+    domain_lethal: bool = False
+    domain_escape_locked: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -167,6 +173,7 @@ class PlayerCombatSystem:
         battlefield_tags: Iterable[str] = (),
         mana_cost_multiplier: float = 1.0,
         player_stat_multiplier: float = 1.0,
+        phases: CombatPhases | None = None,
     ) -> CombatResolution:
         objective = cls._objective(target, lethal)
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
@@ -418,7 +425,12 @@ class PlayerCombatSystem:
         devouring_soul_stacks = 0
         counterforce_ready = False
         burst_used = False
-        quick = ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO
+        phases = phases if phases is not None and phases.enabled else None
+        if phases is not None:
+            player_hp = max(0.0, 1.0 - phases.ordinary_loss("player"))
+            enemy_hp = max(0.0, 1.0 - phases.ordinary_loss("enemy"))
+            initial_hp = player_hp
+        quick = phases is None and (ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO)
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
         generated_bloodline_traits = prepare_rules(
             generated_bloodline_traits, max_rounds=max_rounds, rng=rng,
@@ -444,10 +456,44 @@ class PlayerCombatSystem:
         # Hunting retains its advertised strict preparation threshold, while the
         # exchanges and losses are still resolved through the detailed model.
         forced_outcome: str | None = None
-        if target.get("combat_type") == "beast" and target.get("success_threshold") is not None:
+        if phases is None and target.get("combat_type") == "beast" and target.get("success_threshold") is not None:
             forced_outcome = "victory" if ratio > float(target["success_threshold"]) else "defeat"
 
         for round_no in range(1, max_rounds + 1):
+            phase = None
+            ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
+            if phases is not None:
+                phase = phases.begin_round(
+                    round_no, player_condition=player_hp, enemy_condition=enemy_hp,
+                    player_mp=player_mp, enemy_mp=enemy_mp,
+                )
+                player_mp = phases.mp_ratio("player", player_mp)
+                enemy_mp = phases.mp_ratio("enemy", enemy_mp)
+                player_hp = max(0.0, player_hp - phase.player_loss)
+                enemy_hp = max(0.0, enemy_hp - phase.enemy_loss)
+                body_damage_ratio += phase.primary_loss * 0.46
+                ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
+                if not phase.ordinary or phases.verdict() is not None:
+                    # Domain-only rounds never call ordinary initiative, rules,
+                    # minimum damage, revival, or the conventional power shortcut.
+                    key_events.extend(f"第{round_no}轮，{event}" for event in phase.events)
+                    rounds.append({
+                        "round": round_no, "initiative": "domain", "events": list(phase.events),
+                        "player_hp_ratio": round(player_hp, 4), "player_mp_ratio": round(player_mp, 4),
+                        "enemy_hp_ratio": round(enemy_hp, 4),
+                        "player_combat_state": round(player_power_max * player_hp, 1),
+                        "player_combat_state_max": round(player_power_max, 1),
+                        "enemy_combat_state": round(enemy_power * enemy_hp, 1),
+                        "enemy_combat_state_max": round(enemy_power, 1),
+                        "player_morale": round(player_morale, 1), "enemy_morale": round(enemy_morale, 1),
+                        "formation_integrity": formation_integrity if formation_name else None,
+                        "enemy_formation_integrity": enemy_formation_integrity if enemy_formation_name else None,
+                        "domain": phases.report(),
+                    })
+                    phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                    if phases.verdict() is not None:
+                        break
+                    continue
             rule_runtime.begin_round(round_no, {
                 "player": {
                     "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
@@ -458,7 +504,7 @@ class PlayerCombatSystem:
                     "player_morale": enemy_morale, "enemy_morale": player_morale,
                 },
             })
-            events: list[str] = []
+            events: list[str] = list(phase.events) if phase is not None else []
             if "enemy_buff_dispel" in artifact_traits and enemy_buffs:
                 buff = enemy_buffs.pop(0)
                 enemy_stats[buff["stat"]] /= max(1.0, float(buff["multiplier"]))
@@ -675,6 +721,7 @@ class PlayerCombatSystem:
             ]
             burst = bool(
                 usable_combat_techniques and player_mp >= 0.28
+                and (phase is None or phase.ordinary_player)
                 and (round_no == 1 and objective == "kill" or enemy_hp <= 0.58 or player_hp <= 0.48)
             )
             burst_factor = 1.0
@@ -724,6 +771,8 @@ class PlayerCombatSystem:
                 + (player.realm_index - max(unit.realm_index for unit in enemy_units)) * 0.04,
             )
             controlled = cls._roll(rng) < control_chance
+            if phase is not None and not phase.ordinary_player:
+                controlled = False
             if controlled:
                 e_attack *= 0.86
                 events.append("神识压制奏效，敌方攻势出现短暂迟滞。")
@@ -731,16 +780,10 @@ class PlayerCombatSystem:
                     enemy_morale = max(0.0, enemy_morale - 4.0)
                     events.append(f"{bloodline_name('control_morale_shock')}随神识侵入梦境，敌方战意额外降低 4 点。")
 
-            dealt = cls._clamp(
-                0.045, 0.42,
-                0.135 * (p_attack / max(1.0, e_defense)) ** 0.58
-                * (0.88 + min(0.28, p_breach * 0.13)) * cls._wave(rng, 0.90, 1.10),
-            )
-            received = cls._clamp(
-                0.035, 0.40,
-                0.125 * (e_attack / max(1.0, p_defense)) ** 0.58
-                * (0.88 + min(0.28, e_breach * 0.13)) * cls._wave(rng, 0.90, 1.10),
-            )
+            dealt = exchange_damage(p_attack, e_defense, p_breach, cls._wave(rng, 0.90, 1.10),
+                                    coefficient=0.135, minimum=0.045, maximum=0.42)
+            received = exchange_damage(e_attack, p_defense, e_breach, cls._wave(rng, 0.90, 1.10),
+                                       coefficient=0.125, minimum=0.035, maximum=0.40)
             dealt *= global_damage_multiplier * player_damage_multiplier
             received *= global_damage_multiplier * enemy_damage_multiplier
             if player_first:
@@ -836,16 +879,26 @@ class PlayerCombatSystem:
                 guard_name = transformation_trait_name("first_round_full_state")
                 events.append(f"{guard_name}生效：第一轮己方战斗态势锁定为最大值。")
 
+            if phases is not None:
+                phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                event_count = len(phase.events)
+                dealt, received = phases.ordinary_damage(dealt, received)
+                events.extend(phase.events[event_count:])
+                player_mp = phases.mp_ratio("player", player_mp)
+                enemy_mp = phases.mp_ratio("enemy", enemy_mp)
+
             received_amount = received * player_power_max
-            absorbed_amount, guard_event = cls._absorb_with_support(
+            absorbed_amount, guard_event = (cls._absorb_with_support(
                 player_units, received_amount, support_updates,
-            )
+            ) if phases is None else (0.0, ""))
             if guard_event:
                 events.append(guard_event)
                 key_events.append(f"第{round_no}轮，{guard_event}")
             body_received_amount = max(0.0, received_amount - absorbed_amount)
-            body_damage_ratio += body_received_amount / core_power * 0.46
-            actual_received = 0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received)
+            body_damage_ratio += (body_received_amount / core_power * 0.46 if phases is None
+                                  else phases.primary_ordinary_loss * 0.46)
+            actual_received = (received if phases is not None else
+                               0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received))
             enemy_hp = max(0.0, enemy_hp - dealt)
             player_hp = max(0.0, player_hp - actual_received)
             if "噬灵" in soul_traits and dealt > 0 and devouring_soul_stacks < 3:
@@ -853,9 +906,11 @@ class PlayerCombatSystem:
             if actual_received >= 0.12 and bloodline_active("damage_taken_counterforce"):
                 counterforce_ready = True
             base_cost = 0.025 + 0.025 * min(1.6, round_player_stats["might"] / max(1.0, player_power))
-            player_mp = max(0.0, player_mp - min(0.12, base_cost * mana_cost_multiplier))
+            if phase is None or phase.ordinary_player:
+                player_mp = max(0.0, player_mp - min(0.12, base_cost * mana_cost_multiplier))
             enemy_cost = 0.025 + 0.025 * min(1.6, round_enemy_stats["might"] / max(1.0, enemy_power))
-            enemy_mp = max(0.0, enemy_mp - min(0.12, enemy_cost))
+            if phase is None or phase.ordinary_enemy:
+                enemy_mp = max(0.0, enemy_mp - min(0.12, enemy_cost))
             if round_no % 2 == 0 and bloodline_active("even_round_mana_recovery"):
                 restored_mp = min(0.03, 1.0 - player_mp)
                 player_mp += restored_mp
@@ -1007,6 +1062,8 @@ class PlayerCombatSystem:
             if player_hp <= 0 and "prevent_defeat_once" in transformation_traits and not death_prevented:
                 death_prevented = True
                 player_hp = 0.12
+                if phases is not None:
+                    phases.revive_primary(0.12)
                 player_morale = max(12.0, player_morale)
                 revival_name = transformation_trait_name("prevent_defeat_once")
                 event = f"{revival_name}在战斗态势归零时自行复苏，抵御了本场一次陨落。"
@@ -1165,7 +1222,24 @@ class PlayerCombatSystem:
                     round(enemy_formation_integrity, 4) if enemy_formation_name else None
                 ),
             })
-            if enemy_hp <= 0.12 or enemy_morale <= 8 or player_hp <= 0 or player_morale <= 5:
+            if phases is not None:
+                phases.restore_ordinary("player", player_hp - ordinary_start_player + actual_received)
+                phases.restore_ordinary("enemy", enemy_hp - ordinary_start_enemy + dealt)
+                player_hp = max(0.0, 1.0 - phases.ordinary_loss("player"))
+                enemy_hp = max(0.0, 1.0 - phases.ordinary_loss("enemy"))
+                phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                player_mp = phases.mp_ratio("player", player_mp)
+                enemy_mp = phases.mp_ratio("enemy", enemy_mp)
+                rounds[-1]["domain"] = phases.report()
+                rounds[-1]["player_mp_ratio"] = round(player_mp, 4)
+                rounds[-1]["player_hp_ratio"] = round(player_hp, 4)
+                rounds[-1]["enemy_hp_ratio"] = round(enemy_hp, 4)
+                rounds[-1]["player_combat_state"] = round(player_power_max * player_hp, 1)
+                rounds[-1]["enemy_combat_state"] = round(enemy_power * enemy_hp, 1)
+                key_events.extend(f"第{round_no}轮，{event}" for event in phase.events)
+                if phases.verdict() is not None:
+                    break
+            elif enemy_hp <= 0.12 or enemy_morale <= 8 or player_hp <= 0 or player_morale <= 5:
                 break
 
         if quick and ratio >= 3.0:
@@ -1192,7 +1266,9 @@ class PlayerCombatSystem:
                 rounds[-1]["player_combat_state"] = round(player_power_max * player_hp, 1)
                 rounds[-1]["player_morale"] = round(player_morale, 1)
 
-        if forced_outcome:
+        if phases is not None:
+            outcome = phases.verdict() or "stalemate"
+        elif forced_outcome:
             outcome = forced_outcome
         elif enemy_hp <= 0.12 or enemy_morale <= 8:
             outcome = "victory"
@@ -1208,7 +1284,7 @@ class PlayerCombatSystem:
                 outcome = "victory" if margin > 0 else "defeat"
 
         retreat_impossible = bool(
-            lethal and outcome == "defeat"
+            phases is None and lethal and outcome == "defeat"
             and ratio <= cls.OVERWHELMING_RETREAT_RATIO
         )
         if quick:
@@ -1220,7 +1296,9 @@ class PlayerCombatSystem:
             )
         if burst_used and rounds:
             key_events.append(f"第{rounds[-1]['round']}轮前，战斗预案自动调度了高消耗术式。")
-        if outcome == "victory":
+        if outcome == "stalemate":
+            key_events.append("仙域与有效攻防尚未分出胜负，本次交锋以僵持结束。")
+        elif outcome == "victory":
             key_events.append("敌方战斗状态或战意跌破临界点，你方取得战场控制权。")
         else:
             key_events.append("预案判断继续纠缠的代价过高，自动转入脱离与保命流程。")
@@ -1244,9 +1322,16 @@ class PlayerCombatSystem:
                 or player.realm_index > enemy_realm
             )
         )
+        if phases is not None:
+            kill_ready = kill_ready or (outcome == "victory" and lethal and phases.enemy_killed())
+            capture_ready = capture_ready or (outcome == "victory" and objective == "capture" and phases.enemy_suppressed())
         if escape_locked and outcome == "victory":
             key_events.append("帝江之泪封闭空间退路，敌方无法从败势中遁逃。")
-        if outcome == "victory":
+        if outcome == "stalemate":
+            grade = "僵持"
+        elif phases is not None and phases.primary_suppressed():
+            grade = "受制"
+        elif outcome == "victory":
             losses = max(0.0, initial_hp - player_hp)
             grade = "完胜" if losses < 0.08 else "胜利" if losses < 0.24 else "惨胜"
         elif retreat_impossible and death_prevented:
@@ -1258,11 +1343,22 @@ class PlayerCombatSystem:
         else:
             grade = "战败"
 
+        if phases is not None:
+            phase_updates = {row["id"]: row for row in phases.updates()}
+            for unit in player_units:
+                vitality = phase_updates[unit.id]["vitality"]
+                if unit.persistent_field and vitality < unit.integrity:
+                    support_updates[unit.id] = {
+                        "id": unit.id, "name": unit.name, "kind": unit.kind,
+                        "field": unit.persistent_field, "before": round(unit.integrity * 100, 1),
+                        "after": round(vitality * 100, 1), "destroyed": vitality <= 0.05,
+                    }
+                unit.integrity = vitality
         return CombatResolution(
             outcome=outcome,
             result_grade=grade,
             objective=objective,
-            mode="快速结算" if quick else "标准自动战斗",
+            mode="仙域自动战斗" if phases is not None else "快速结算" if quick else "标准自动战斗",
             rounds=rounds,
             key_events=key_events[:4],
             hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio), 4),
@@ -1317,6 +1413,13 @@ class PlayerCombatSystem:
             enemy_formation_integrity_end=(
                 round(enemy_formation_integrity, 4) if enemy_formation_name else None
             ),
+            capability_updates=phases.updates() if phases is not None else [],
+            domain_controlled=phases.primary_suppressed() if phases is not None else False,
+            domain_lethal=phases.primary_dead() if phases is not None else False,
+            domain_escape_locked=(
+                phases.report()["relations"].get("player", {}).get("relation") == "dominated"
+                or any(row["id"] == "player" and row["escape_locked"] for row in phases.updates())
+            ) if phases is not None else False,
         )
 
     @staticmethod
@@ -1348,6 +1451,7 @@ class PlayerCombatSystem:
     @classmethod
     def _enemy_units(cls, target: dict[str, Any]) -> list[BattleUnit]:
         raw = target.get("members") or [{
+            "npc_id": target.get("npc_id"),
             "name": target.get("target_name", "未知对手"),
             "power": target.get("target_power", 1),
             "realm_index": target.get("target_realm_index", 0),

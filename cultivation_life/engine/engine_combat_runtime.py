@@ -27,6 +27,7 @@ from ..system.formation_system import (
     formation_battle_experience_gain,
 )
 from .dependencies import CombatDependencies
+from .combat_capabilities import bind_capabilities
 
 
 def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict[str, Any] | None = None) -> list[BattleUnit]:
@@ -77,7 +78,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         effective_power = target_power * float(ally["power_ratio"])
         ally_realm = max(0, min(len(REALMS) - 1, player.realm_index + int(ally.get("realm_offset", 0))))
         units.append(BattleUnit(
-            f"story-ally-{index}", str(ally["name"]), "story_ally",
+            str(ally.get("npc_id") or f"story-ally-{index}"), str(ally["name"]), "story_ally",
             effective_power, ally_realm, str(ally.get("path", "dao")),
             full_power=deps._story_unit_full_power(ally, ally_realm, effective_power),
         ))
@@ -154,6 +155,8 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         their legacy aggregate-power logic.
         """
     player = game.player
+    target.pop("resolved_capture_ids", None)
+    target.pop("disabled_combat_objects", None)
     if lethal and not target.get("player_defending") and not target.get("execution"):
         attacked = deps._find_npc(game, str(target.get("npc_id", "")))
         roles = relationship_roles(game, target.get("npc_id"), target.get("faction_id") or (attacked.faction_id if attacked else None))
@@ -231,12 +234,14 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         ),
     ]
     opponent_realm, opponent_layer = max(opponent_ranks)
+    capabilities = bind_capabilities(game, player_units, target, WORLD_SYSTEMS.get("transcendent_combat", {}))
     resolution = PlayerCombatSystem.resolve(
         player, player_units, target, lethal, rng,
         current_hp_ratio=player.hp / max(1.0, hp_max),
         current_mp_ratio=player.mp / max(1.0, mp_max),
         battlefield_tags=deps._combat_battlefield_tags(game, target),
         player_stat_multiplier=modifier(game, "combat_stats"),
+        phases=capabilities.battle,
         mana_cost_multiplier=combat_root_mana_cost_multiplier(
             player, opponent_realm, opponent_layer,
         ),
@@ -292,11 +297,57 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     if resolution.death_prevented:
         player.hp = max(1.0, player.hp)
     player.mp = max(0.0, player.mp - mp_loss)
+    capabilities.commit(resolution.capability_updates, lethal=lethal)
+    if lethal and resolution.domain_lethal:
+        player.hp = 0.0
     deps._apply_support_damage(player, resolution.support_updates)
     lead = deps._combat_report_lead(resolution, hp_loss, mp_loss)
 
+    resolved_kills = []
+    resolved_captures = []
+    if resolution.capability_updates:
+        enemy_updates = {row["id"]: row for row in resolution.capability_updates if row["side"] == "enemy"}
+        members = target.get("members") or [{
+            "name": target["target_name"], "power": target_power,
+            "realm_index": target["target_realm_index"], "npc_id": target.get("npc_id"),
+            "faction_id": target.get("faction_id"), "race": target.get("race", "human"),
+            "treasure_item_id": target.get("treasure_item_id"),
+        }]
+        for index, member in enumerate(members):
+            key = str(member.get("npc_id") or f"enemy-{index}")
+            update = enemy_updates.get(key, {})
+            if member.get("kind") in {"artifact", "formation", "environment", "mechanical", "corpse"}:
+                if update.get("vitality", 1) <= 0:
+                    target.setdefault("disabled_combat_objects", []).append(key)
+                continue
+            if update.get("suppressed"):
+                resolved_captures.append(key)
+            elif update.get("vitality", 1) <= 0 and lethal:
+                resolved_kills.append(member)
+        if resolved_kills and target.get("combat_type") != "beast":
+            summaries = []
+            for victim in resolved_kills:
+                _, summary = _settle_combat_kill(deps, game, target, resolution, victim, rng, "")
+                summaries.append(summary.replace("在追击阶段", "在交锋中"))
+            lead += " ".join(summaries)
+        target["resolved_capture_ids"] = resolved_captures
+
+    if resolution.outcome == "stalemate":
+        deps._record_player_combat(game, target, resolution, "stalemate")
+        return "stalemate", lead + "交锋尚未分出全局胜负；已记录各单位后果，不额外判定击杀、擒获或撤离成功。"
+    if resolution.domain_controlled:
+        deps._record_player_combat(game, target, resolution, "controlled")
+        return "controlled", lead + "你的仙域庇护失守，被对方仙域镇压，本次战斗目标失败。"
+    if resolution.outcome == "defeat" and resolution.domain_escape_locked and not resolution.domain_lethal:
+        deps._record_player_combat(game, target, resolution, "defeat_trapped")
+        return "defeat_trapped", lead + "你已失去继续抵抗的态势，仍受敌方仙域封锁，不能按普通败退判定脱离。"
+
     if target.get("combat_type") == "beast":
         threshold = float(target.get("success_threshold", 1.2))
+        if resolution.capability_updates and resolution.outcome == "victory" and not resolution.kill_ready:
+            result = "victory_controlled" if resolved_captures else "victory"
+            deps._record_player_combat(game, target, resolution, result)
+            return result, lead + "你已制伏对手，但本次结果没有形成实际击杀。"
         if resolution.outcome == "victory":
             fame_config = WORLD_SYSTEMS["fame"]
             fame_gain = (
@@ -378,6 +429,17 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         result, capture_summary = deps._capture_cultivator(game, target, own_power, rng)
         deps._record_player_combat(game, target, resolution, result)
         return result, lead + capture_summary
+    if resolved_captures and lethal and resolution.objective == "kill":
+        result = "victory_controlled"
+        deps._record_player_combat(game, target, resolution, result)
+        return result, lead + "你以仙域镇压对手，使其失去战斗能力；镇压不自动等同于击杀。"
+    if resolved_kills:
+        deps._record_player_combat(game, target, resolution, "killed")
+        return "killed", lead
+    if resolution.capability_updates and target.get("disabled_combat_objects"):
+        result = "victory"
+        deps._record_player_combat(game, target, resolution, result)
+        return result, lead + "指定战场目标已失去作用；器物与阵势不计为修士击杀。"
     if not lethal or resolution.objective == "repel":
         result = "victory"
         deps._record_player_combat(game, target, resolution, result)
@@ -397,62 +459,69 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         + max(0.0, float(target.get("pursuit_chance_bonus", 0.0))),
     )
     if resolution.kill_ready and rng.uniform(0.0, 1.0) < pursuit_chance:
-        target["killed_member"] = victim
-        fame_before = player.fame
-        treasure_id = victim.get("treasure_item_id")
-        tianji_spoils = deps._tianji_handle_npc_kill(game, str(victim.get("npc_id", "")))
-        victim.update(in_combat=True, defending=bool(target.get("player_defending")),
-                      execution=bool(target.get("execution")), penalty_handled=bool(target.get("penalty_handled")))
-        deps._apply_cultivator_kill(game, victim, rng)
-        demonic_gain = deps._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
-        spoils = (
-            f" 你夺得{ITEM_CATALOG[treasure_id].name}。"
-            if treasure_id in ITEM_CATALOG and victim.get("npc_id") else ""
-        )
-        spoils += tianji_spoils
-        fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
-        victim_path = str(victim.get("path", "dao"))
-        if player.path == "monster" and victim_path != "monster" and not target.get("player_defending"):
-            sha_text = ""
-            if victim_path == "dao":
-                fame_rules = WORLD_SYSTEMS["fame"]
-                sha_gain = round(
-                    float(fame_rules["monster_dao_kill_sha_base"])
-                    + int(victim["realm_index"]) * float(fame_rules["monster_dao_kill_sha_realm_scale"])
-                )
-                sha_gain = deps._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
-                player.sha_qi += sha_gain
-                sha_text = f" 煞气 +{sha_gain}。"
-            result = "killed"
-            deps._record_player_combat(game, target, resolution, result)
-            return (
-                result,
-                lead + f"你在追击阶段击杀了{victim['name']}；妖修猎杀异道不沾因果。"
-                + sha_text + fame_text + spoils
-                + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else ""),
-            )
-        if target.get("kill_karma", True) and not target.get("player_defending"):
-            if victim.get("notorious"):
-                reduction = min(player.karma, max(35.0, float(victim.get("notoriety", 0)) * 0.45))
-                player.karma = max(0.0, player.karma - reduction)
-                result = "killed"
-                deps._record_player_combat(game, target, resolution, result)
-                return result, lead + f"你在追击阶段诛杀恶贯满盈的{victim['name']}，因果 -{reduction:.0f}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
-            karma_gain = round(18 + int(victim["realm_index"]) * 7)
-            alliance = deps._race_alliance(game, player.world, deps._player_allegiance_race(player), str(victim.get("race", "human")))
-            if alliance:
-                karma_gain = round(karma_gain * float(alliance["kill_karma_multiplier"]) + float(alliance["kill_karma_flat"]))
-            player.karma += karma_gain
-            warning = f" 你违背了{alliance['name']}。" if alliance else ""
-            result = "killed"
-            deps._record_player_combat(game, target, resolution, result)
-            return result, lead + f"你在追击阶段击杀了{victim['name']}，因果 +{karma_gain}。{warning}{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
-        result = "killed"
-        deps._record_player_combat(game, target, resolution, result)
-        return result, lead + f"你在追击阶段击杀了{victim['name']}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+        return _settle_combat_kill(deps, game, target, resolution, victim, rng, lead)
     result = "victory_escape"
     deps._record_player_combat(game, target, resolution, result)
     return result, lead + f"你已击溃对方，但{victim['name']}仍在追击阶段摆脱封锁。"
+
+
+def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[str, Any],
+                        resolution: Any, victim: dict[str, Any], rng: random.Random, lead: str) -> tuple[str, str]:
+    """Shared rewards and consequences for an actually resolved kill."""
+    player = game.player
+    target["killed_member"] = victim
+    fame_before = player.fame
+    treasure_id = victim.get("treasure_item_id")
+    tianji_spoils = deps._tianji_handle_npc_kill(game, str(victim.get("npc_id", "")))
+    victim.update(in_combat=True, defending=bool(target.get("player_defending")),
+                  execution=bool(target.get("execution")), penalty_handled=bool(target.get("penalty_handled")))
+    deps._apply_cultivator_kill(game, victim, rng)
+    demonic_gain = deps._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
+    spoils = (
+        f" 你夺得{ITEM_CATALOG[treasure_id].name}。"
+        if treasure_id in ITEM_CATALOG and victim.get("npc_id") else ""
+    )
+    spoils += tianji_spoils
+    fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
+    victim_path = str(victim.get("path", "dao"))
+    if player.path == "monster" and victim_path != "monster" and not target.get("player_defending"):
+        sha_text = ""
+        if victim_path == "dao":
+            fame_rules = WORLD_SYSTEMS["fame"]
+            sha_gain = round(
+                float(fame_rules["monster_dao_kill_sha_base"])
+                + int(victim["realm_index"]) * float(fame_rules["monster_dao_kill_sha_realm_scale"])
+            )
+            sha_gain = deps._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
+            player.sha_qi += sha_gain
+            sha_text = f" 煞气 +{sha_gain}。"
+        result = "killed"
+        deps._record_player_combat(game, target, resolution, result)
+        return (
+            result,
+            lead + f"你在追击阶段击杀了{victim['name']}；妖修猎杀异道不沾因果。"
+            + sha_text + fame_text + spoils
+            + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else ""),
+        )
+    if target.get("kill_karma", True) and not target.get("player_defending"):
+        if victim.get("notorious"):
+            reduction = min(player.karma, max(35.0, float(victim.get("notoriety", 0)) * 0.45))
+            player.karma = max(0.0, player.karma - reduction)
+            result = "killed"
+            deps._record_player_combat(game, target, resolution, result)
+            return result, lead + f"你在追击阶段诛杀恶贯满盈的{victim['name']}，因果 -{reduction:.0f}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+        karma_gain = round(18 + int(victim["realm_index"]) * 7)
+        alliance = deps._race_alliance(game, player.world, deps._player_allegiance_race(player), str(victim.get("race", "human")))
+        if alliance:
+            karma_gain = round(karma_gain * float(alliance["kill_karma_multiplier"]) + float(alliance["kill_karma_flat"]))
+        player.karma += karma_gain
+        warning = f" 你违背了{alliance['name']}。" if alliance else ""
+        result = "killed"
+        deps._record_player_combat(game, target, resolution, result)
+        return result, lead + f"你在追击阶段击杀了{victim['name']}，因果 +{karma_gain}。{warning}{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+    result = "killed"
+    deps._record_player_combat(game, target, resolution, result)
+    return result, lead + f"你在追击阶段击杀了{victim['name']}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
 
 
 def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: dict[str, Any], rng: random.Random) -> None:
