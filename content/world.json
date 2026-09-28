@@ -248,7 +248,33 @@
     "transcendent_combat": {
       "version": 1,
       "contest_ratio": 1.25,
-      "domains": []
+      "domains": [],
+      "converted_player_state": {
+        "version": 1, "resource_link": "legacy_mp", "conversion": 1,
+        "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100
+      },
+      "npc_lifecycle": {
+        "native_worlds": ["celestial", "asura", "nether", "reincarnation"],
+        "native_min_realm": 9,
+        "native_state": {
+          "version": 1, "conversion": 1, "capacity": 1000, "current": 1000,
+          "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100,
+          "attainments": {}, "domain_ids": []
+        },
+        "environments": {
+          "human": {"recovery_per_year": 0, "available_fraction": 0.02},
+          "demon": {"recovery_per_year": 0, "available_fraction": 0.02},
+          "spirit": {"recovery_per_year": 0, "available_fraction": 0.1},
+          "true_demon": {"recovery_per_year": 0, "available_fraction": 0.1},
+          "phantom_underworld": {"recovery_per_year": 0, "available_fraction": 0.1},
+          "hell": {"recovery_per_year": 0, "available_fraction": 0.1},
+          "monster_realm": {"recovery_per_year": 0, "available_fraction": 0.1},
+          "celestial": {"recovery_per_year": 0.01, "available_fraction": 1},
+          "asura": {"recovery_per_year": 0.01, "available_fraction": 1},
+          "nether": {"recovery_per_year": 0.01, "available_fraction": 1},
+          "reincarnation": {"recovery_per_year": 0.01, "available_fraction": 1}
+        }
+      }
     },
     "secret_arts": {
       "npc_concealment_chance": 0.18,

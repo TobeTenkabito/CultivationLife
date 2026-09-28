@@ -131,6 +131,8 @@ class IntrigueRecruitmentMethods:
             ratio = power / max(1.0, expected_combat_power(realm_index, layer))
             if ratio < minimum_ratio:
                 continue
+            from .combat.npc_lifecycle import initialize_native
+            initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
             candidates.append({
                 "npc": npc.to_dict(), "combat_power": round(power, 1),
                 "combat_ratio": round(ratio, 3),

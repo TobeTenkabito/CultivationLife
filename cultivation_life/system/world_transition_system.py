@@ -64,6 +64,7 @@ class WorldTransitionPorts:
     cancel_auction: Callable
     clear_market: Callable
     permanent_departure: Callable
+    move_npc: Callable | None = None
 
 
 def classify_transition(profiles, source, destination):
@@ -189,7 +190,7 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
     if plan.mode == TransitionMode.PROGRESSION:
         keep_companion, keep_ids = False, set()
         if entourage:
-            keep_companion, keep_ids = entourage.commit(game, plan.destination)
+            keep_companion, keep_ids = entourage.commit(game, plan.destination, move_npc=ports.move_npc)
         ports.permanent_departure(game, keep_companion=keep_companion, keep_friend_ids=keep_ids)
     seal = normalized_seal(player)
     if plan.seal_action == "seal":
@@ -250,7 +251,7 @@ class EntourageManifest:
         yield list(self.survivor_names)
         yield list(self.fallen_names)
 
-    def commit(self, game, destination):
+    def commit(self, game, destination, *, move_npc=None):
         player = game.player
         people = [*game.world_npcs.values(), *game.notable_npcs.values(),
                   *(npc for sect in game.sects.values() for npc in sect.npcs),
@@ -260,13 +261,20 @@ class EntourageManifest:
             for row in records:
                 if str(row.get("id")) == npc_id:
                     if alive:
-                        row["world"] = destination
+                        if move_npc:
+                            move_npc(row, destination, player.age)
+                        else:
+                            row["world"] = destination
                     else:
                         row.update(alive=False, death_reason=reason)
             for npc in people:
                 if npc.id == npc_id:
                     if alive:
-                        npc.world, npc.departed_age, npc.departure_reason = destination, npc.age, reason
+                        if move_npc:
+                            move_npc(npc, destination, player.age)
+                        else:
+                            npc.world = destination
+                        npc.departed_age, npc.departure_reason = npc.age, reason
                     else:
                         npc.alive, npc.death_reason = False, reason
         return self.companion_kept, set(self.survivor_ids)

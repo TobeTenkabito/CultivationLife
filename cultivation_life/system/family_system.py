@@ -211,6 +211,8 @@ class FamilySystemMixin:
                     spirit_root=self._random_npc_root(rank, rng), world=family.world, path=family.path,
                     gender='female' if npc.gender == 'male' else 'male', affinity=50, family_traits={'kin':True})
                 require_faction_admission(family, partner)
+                from .combat.npc_lifecycle import initialize_native
+                initialize_native(partner, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
                 family.npcs.append(partner)
             npc.family_traits['spouse_id'] = partner.id
             partner.family_traits['spouse_id'] = npc.id

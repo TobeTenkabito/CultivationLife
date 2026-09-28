@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import random
 import uuid
+from copy import deepcopy
 from typing import Any
 from ...content_registry import PATH_NAMES, REALMS, RACE_DEFINITIONS, RACE_SYSTEMS, WORLD_SYSTEMS
 from ...models import GameState, HistoryRecord, Player, SectNpc
 from ...system.npc_system import npc_team_combat_power
+from ...system.combat.npc_lifecycle import initialize_native
 from ...rules import expected_combat_power, has_item
 from ...world_state import choose_weighted_race, push_fifo_cache
 from ..dependencies import EncounterDependencies
@@ -109,7 +111,9 @@ def _cache_encounter_target(deps: EncounterDependencies, game: GameState, target
             realm_index, layer, age, lifespan,
             spirit_root=deps._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
             race=race_id, world=game.player.world, affinity=rng.uniform(-18, 12),
+            transcendence=deepcopy(member.get("transcendence")),
         )
+        initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
         if index == 0 and target.get("npc_concealed_realm_index") is not None:
             npc.concealed_realm_index = int(target["npc_concealed_realm_index"])
             npc.concealed_layer = int(target.get("npc_concealed_layer") or 1)
@@ -188,6 +192,7 @@ def _add_enemy_party(
         "npc_id": target.get("npc_id"), "faction_id": target.get("faction_id"), "path": target.get("path", "dao"),
         "race": target.get("race", "human"), "treasure_item_id": target.get("treasure_item_id"),
         "notorious": bool(target.get("notorious", False)), "notoriety": int(target.get("notoriety", 0)),
+        **({"transcendence": deepcopy(target["transcendence"])} if "transcendence" in target else {}),
     }]
     if rng.random() < float(WORLD_SYSTEMS["faction_conflict"]["npc_team_chance"]):
         total = rng.randint(2, 3)

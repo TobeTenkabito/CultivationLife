@@ -11,6 +11,7 @@ from typing import Any, Mapping
 from .contracts import Combatant, domain_definitions, resolve_capabilities
 from .domains import DomainBattle
 from .ordinary import exchange_damage
+from .npc_lifecycle import prepare
 
 
 @dataclass(frozen=True)
@@ -22,19 +23,26 @@ class NpcEngagement:
 
 
 def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[tuple[Any, float]],
-                           config: Mapping[str, Any], rng: Any, *, max_rounds: int = 5) -> NpcEngagement | None:
+                           config: Mapping[str, Any], rng: Any, *, max_rounds: int = 5,
+                           now: float | None = None) -> NpcEngagement | None:
+    # Most background encounters are mortal. Do not parse definitions or build
+    # a domain battle for them, and preserve the legacy RNG sequence.
+    if not any(npc.transcendence for roster in (attackers, defenders) for npc, _ in roster):
+        return None
     definitions = domain_definitions(config)
     owners = {npc.id: npc for npc, _ in [*attackers, *defenders]}
+    resources = {}
     units = []
     for side, roster in (("player", attackers), ("enemy", defenders)):
         for npc, power in roster:
-            capabilities = resolve_capabilities(npc.transcendence, definitions)
+            resources[npc.id] = prepare(npc, now, config)
+            capabilities = resolve_capabilities(resources[npc.id].state, definitions)
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
             units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities))
     battle = DomainBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
     if not battle.enabled:
-        return None  # No RNG or state changes on the legacy path.
+        return None  # No combat RNG or combat costs on the conventional path.
     reports = []
     for round_no in range(1, max(1, min(8, max_rounds)) + 1):
         p = max(0.0, 1 - battle.ordinary_loss("player"))
@@ -54,8 +62,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
     killed, suppressed = [], []
     for update in battle.updates():
         npc = owners[update["id"]]
-        if npc.transcendence is not None:
-            npc.transcendence["current"] = update["current"]
+        resources[npc.id].commit(update["current"])
         if update["suppressed"]:
             suppressed.append(npc.id)
             npc.wounds = max(npc.wounds, 4)

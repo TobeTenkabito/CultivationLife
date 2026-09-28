@@ -6,6 +6,8 @@ import random
 from functools import lru_cache
 
 from ..models import GameState, SectNpc
+from ..content_registry import WORLD_SYSTEMS
+from .combat.npc_lifecycle import initialize_native
 
 FIXED_COUPLE = {
     "zeng_canghai": ("曾沧海", "male", "wu_xingyun", "巫行云"),
@@ -64,6 +66,7 @@ def instantiate_social(game: GameState, npc: SectNpc) -> None:
         social_profile={"companion_id": npc.id, "companion_name": npc.name, "concubine_count": 0},
     )
     game.notable_npcs[partner_id] = partner
+    initialize_native(partner, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
 
 
 def migrate_fixed_couple(game: GameState) -> bool:
