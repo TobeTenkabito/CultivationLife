@@ -112,6 +112,23 @@ public class MainActivity extends Activity {
     }
 
     public class Bridge {
+        @JavascriptInterface public boolean copySaveCode(String text) {
+            if (text == null || text.length() > 120000 || !(text.startsWith("FSWD1.") || text.startsWith("FSWDP1."))) return false;
+            try {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("浮生问道存档码", text));
+                return true;
+            } catch (RuntimeException error) { return false; }
+        }
+        @JavascriptInterface public String readSaveCode() {
+            try {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                android.content.ClipData clip = clipboard.getPrimaryClip();
+                if (clip == null || clip.getItemCount() == 0) return "";
+                CharSequence text = clip.getItemAt(0).getText();
+                return text != null && text.length() <= 17 * 1024 * 1024 ? text.toString() : "";
+            } catch (RuntimeException error) { return ""; }
+        }
         @JavascriptInterface public void setTheme(String theme) {
             int color = switch (theme) {
                 case "b" -> Color.rgb(20, 28, 47);

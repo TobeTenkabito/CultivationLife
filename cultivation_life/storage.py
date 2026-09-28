@@ -41,8 +41,9 @@ class SaveStore:
         except FileNotFoundError:
             raise KeyError("存档不存在") from None
 
-    def list_games(self) -> list[dict[str, str]]:
-        games: list[dict[str, str]] = []
+    def list_games(self) -> list[dict]:
+        from .content_registry import REALMS, WORLD_SYSTEMS, PATH_NAMES
+        games: list[dict] = []
         for path in sorted(self.directory.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True):
             try:
                 data = json.loads(path.read_text(encoding="utf-8"))
@@ -53,7 +54,17 @@ class SaveStore:
                     "name": data["player"]["name"],
                     "updated_at": data["updated_at"],
                     "game_version": str(data.get("last_saved_with_game_version", "pre-1.0.0")),
+                    "age": data['player'].get('age', 0),
+                    "realm_index": data['player'].get('realm_index', 0),
+                    "layer": data['player'].get('layer', 1),
+                    "world": data['player'].get('world', 'human'),
+                    "path": data['player'].get('path', 'dao'),
+                    "alive": data['player'].get('alive', True),
+                    "bytes": path.stat().st_size,
+                    "realm_name": REALMS[int(data['player'].get('realm_index', 0))].name,
+                    "world_name": WORLD_SYSTEMS['world_names'].get(data['player'].get('world', 'human'), '未知界面'),
+                    "path_name": PATH_NAMES.get(data['player'].get('path', 'dao'), '修行者'),
                 })
-            except (KeyError, json.JSONDecodeError):
+            except (KeyError, TypeError, ValueError, IndexError):
                 continue
         return games

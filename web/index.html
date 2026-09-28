@@ -4,18 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <script src="/theme-boot.js?v=1.44.0"></script>
-  <link rel="stylesheet" href="/style.css?v=1.44.0">
-  <link rel="stylesheet" href="/buddhist-panel.css?v=1.44.0">
-  <link rel="stylesheet" href="/panels.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/common.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/composition.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/a.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/b.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/c.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/d.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/e.css?v=1.44.0">
-  <link rel="stylesheet" href="/themes/f.css?v=1.44.0">
+  <script src="/theme-boot.js?v=1.45.0"></script>
+  <link rel="stylesheet" href="/style.css?v=1.45.0">
+  <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
+  <link rel="stylesheet" href="/panels.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/common.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/composition.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/a.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/b.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/c.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/d.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/e.css?v=1.45.0">
+  <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
+  <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -48,8 +49,8 @@
         <label>天机数 <span>可留空</span><input name="seed" type="number" min="1" placeholder="随机"></label>
         <button class="primary" type="submit">叩问长生</button>
       </form>
+      <section class="save-library" aria-labelledby="save-library-title"><div class="save-library-heading"><div><p class="eyebrow">前尘有迹 · 道途可续</p><h3 id="save-library-title">我的修行卷</h3><p id="save-count" class="muted"></p></div><button type="button" data-save-import>导入存档</button></div><p class="save-library-note">行止皆自动落笔。续接旧旅程，或将存档码带往另一台设备。</p><div id="save-list" class="save-list"></div></section>
       <div class="quick-start"><div><p class="eyebrow">快速开始</p><h3>承接一段既有道途</h3><p class="muted">按道途分组展示预设。妖修、鬼修与儒修会读取当前启用的 DLC 配置；未启用对应 DLC 时采用本体兼容数值。</p></div><div id="quick-start-list" class="quick-start-list"></div></div>
-      <div id="save-list" class="save-list"></div>
     </section>
 
     <section id="achievement-screen" class="paper achievement-screen hidden" aria-label="成就">
@@ -401,6 +402,7 @@
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
           <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
+          <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
             <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
@@ -413,7 +415,7 @@
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
-        <button type="button" data-panel-target="buddhist-wish" title="愿力 · 清净道心" class="hidden"><span>愿</span><small>愿力</small></button>
+        <button type="button" data-panel-target="buddhist-wish" data-dlc="buddhist" title="愿力 · 清净道心" class="hidden buddhist-dock-button"><span>愿</span><small>愿力</small></button>
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
         <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
@@ -439,7 +441,7 @@
         <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
         <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
-        <button type="button" data-panel-target="buddhist" title="诸法无我 · 弘法人间" class="hidden buddhist-dock-button"><span>佛</span><small>弘法</small></button>
+        <button type="button" data-panel-target="buddhist" data-dlc="buddhist" title="诸法无我 · 弘法人间" class="hidden buddhist-dock-button"><span>佛</span><small>弘法</small></button>
         <button type="button" data-panel-target="sage" title="圣人教化" class="hidden sage-dock-button"><span>教</span><small>教化</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
@@ -478,16 +480,17 @@
   <div id="theme-feedback" aria-hidden="true"></div>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=1.44.0"></script>
+  <script src="/ui-panels.js?v=1.45.0"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/merchant-commission-panel.js?v=1.44.0"></script>
-  <script src="/merchant-panel.js?v=1.44.0"></script>
-  <script src="/map-directory.js?v=1.44.0"></script>
-  <script src="/theme-manager.js?v=1.44.0"></script>
-  <script src="/theme-composition.js?v=1.44.0"></script>
-  <script src="/family-panel.js?v=1.44.0"></script>
-  <script src="/buddhist-wish.js?v=1.44.0"></script>
-  <script src="/buddhist-panel.js?v=1.44.0"></script>
-  <script src="/app.js?v=1.44.0"></script>
+  <script src="/merchant-commission-panel.js?v=1.45.0"></script>
+  <script src="/merchant-panel.js?v=1.45.0"></script>
+  <script src="/map-directory.js?v=1.45.0"></script>
+  <script src="/theme-manager.js?v=1.45.0"></script>
+  <script src="/theme-composition.js?v=1.45.0"></script>
+  <script src="/family-panel.js?v=1.45.0"></script>
+  <script src="/buddhist-wish.js?v=1.45.0"></script>
+  <script src="/buddhist-panel.js?v=1.45.0"></script>
+  <script src="/app.js?v=1.45.0"></script>
+  <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

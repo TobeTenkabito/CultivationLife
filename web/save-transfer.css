@@ -1,0 +1,49 @@
+:root[data-theme=a]{--dlc-buddhist:#886b36}
+:root[data-theme=b]{--dlc-buddhist:#c5b4ec}
+:root[data-theme=c]{--dlc-buddhist:#916523}
+:root[data-theme=d]{--dlc-buddhist:#91c4b4}
+:root[data-theme=e]{--dlc-buddhist:#8c643e}
+:root[data-theme=f]{--dlc-buddhist:#806141}
+html[data-theme] .strategy-dock button[data-dlc=buddhist]{--dock-color:var(--dlc-buddhist);color:var(--dock-color);border-color:color-mix(in srgb,var(--dock-color) 38%,var(--surface));background:color-mix(in srgb,var(--dock-color) 9%,var(--surface))}
+html[data-theme] .strategy-dock button[data-dlc=buddhist].active,html[data-theme] .strategy-dock button[data-dlc=buddhist]:hover:not(:disabled){background:var(--dock-color);color:var(--on-accent)}
+.save-library{grid-column:1/-1;min-width:0;padding-top:28px;border-top:1px solid var(--line)}
+.save-library-heading,.transfer-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.save-library-heading h3{font-size:24px;margin:4px 0 8px;color:var(--ink)}
+.save-library-heading p{margin:4px 0}.save-library-note{font-size:13px;color:var(--muted);line-height:1.8}
+.save-library .save-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;border:0;padding:8px 4px 4px;max-height:460px}
+.save-library .save-entry{position:relative;display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);overflow:hidden;gap:0}
+.save-library .save-resume{display:grid;gap:7px;width:100%;text-align:left;flex:auto;border:0;padding:20px;min-width:0;background:transparent;color:var(--ink);box-shadow:none;border-radius:0}
+.save-resume strong{font-size:21px;overflow-wrap:anywhere}.save-resume>span{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.save-resume small{font-size:11px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.save-resume .save-resume-label{color:var(--pine);font-size:13px;margin-top:8px}
+.save-entry-tools{display:flex;justify-content:flex-end;gap:10px;padding:8px 14px;border-top:1px solid var(--line)}
+.save-library .save-entry-tools button{background:transparent;border:0;min-height:40px;padding:8px 12px;color:var(--pine)}
+.save-library .save-entry-tools .save-delete{color:var(--cinnabar)}
+.save-library .save-empty{grid-column:1/-1;padding:25px 18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}
+.save-library button:focus-visible,.save-transfer-dialog :focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.save-library-heading button,.settings-save-transfer button,.save-transfer-dialog button{min-height:44px;box-sizing:border-box;padding:9px 16px;border:1px solid var(--line);background:var(--tint);color:var(--pine);border-radius:var(--radius);font:inherit;font-size:14px}
+.save-transfer-dialog{box-sizing:border-box;width:min(740px,calc(100vw - 28px));max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow:auto;padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);box-shadow:var(--shadow);scrollbar-color:var(--muted) var(--surface)}
+.save-transfer-dialog::backdrop{background:#101923aa;backdrop-filter:blur(3px)}
+.transfer-heading h2{margin:0;font-size:28px}.transfer-heading .eyebrow{margin:0 0 8px}.transfer-heading>button{flex-shrink:0}
+.save-transfer-dialog p{line-height:1.8;font-size:14px;overflow-wrap:anywhere}
+#transfer-status{min-height:26px;color:var(--pine)}#transfer-status.error{color:var(--cinnabar)}
+.transfer-label{display:block;margin-bottom:8px;font-size:13px;color:var(--muted)}
+#transfer-code{display:block;box-sizing:border-box;width:100%;height:160px;resize:vertical;min-height:100px;padding:14px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;border:1px solid var(--line);border-radius:var(--radius);background:var(--background);color:var(--ink);font:13px/1.6 ui-monospace,Consolas,monospace;-webkit-user-select:text;user-select:text}
+.transfer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0}.transfer-actions button{flex:0 1 auto}
+#transfer-paging{justify-content:space-between;font-size:13px;color:var(--muted)}
+.transfer-preview{padding:18px;border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--tint);border-radius:var(--radius);margin:16px 0}
+.transfer-preview h3{margin:0 0 8px;font-size:24px}.transfer-preview p{margin:6px 0}
+.transfer-replace{display:flex;gap:10px;align-items:flex-start;line-height:1.8;margin:14px 0;font-size:14px;color:var(--cinnabar)}
+.transfer-replace input{flex:0 0 20px;width:20px;height:20px;margin-top:4px;accent-color:var(--pine)}
+.save-transfer-dialog .primary{background:var(--pine);color:var(--on-accent);border-color:var(--pine);width:100%}
+.save-transfer-dialog button:disabled{opacity:.45;cursor:default}.settings-save-transfer{padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+[data-theme=a] .save-entry{border-left:3px solid var(--pine)}
+[data-theme=b] .save-entry{background:linear-gradient(135deg,var(--tint),var(--surface));border-color:var(--line)}
+[data-theme=b] .save-entry:after{content:'✦';position:absolute;right:18px;top:17px;color:var(--gold);opacity:.5;pointer-events:none}
+[data-theme=b] .save-resume{padding-right:40px}
+[data-theme=c] .save-entry{box-shadow:0 6px 18px #173d3410}.save-library .save-resume:hover{background:color-mix(in srgb,var(--pine) 5%,var(--surface))}
+[data-theme=d] .save-entry{border-top:3px solid var(--gold)}[data-theme=d] .save-library-heading h3{letter-spacing:.15em}
+[data-theme=e] .save-entry{background:linear-gradient(170deg,var(--surface) 65%,var(--tint));border-bottom:2px solid var(--pine)}
+[data-theme=f] .save-entry{border-left:6px double var(--gold);box-shadow:3px 3px 0 var(--line)}
+[data-theme=f] .save-transfer-dialog{border-left:7px double var(--gold)}
+@media(max-width:680px){.save-library .save-list{grid-template-columns:1fr;max-height:520px}.save-library-heading{align-items:flex-start}.save-library-heading h3{font-size:22px}.save-library-heading>button{flex-shrink:0;padding:9px 12px}.save-library .save-resume{padding:16px}.save-transfer-dialog{padding:20px;width:calc(100vw - 24px);max-height:calc(100vh - 32px)}.transfer-heading h2{font-size:25px}.transfer-actions{gap:8px}.transfer-actions button{flex:1 1 auto}.save-entry-tools button{min-height:44px!important}.transfer-heading>button{padding:8px 12px}#transfer-code{font-size:16px;height:150px}}

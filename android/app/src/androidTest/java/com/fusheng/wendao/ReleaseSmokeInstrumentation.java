@@ -136,6 +136,19 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         }
     }
 
+    private void python(String code) {
+        com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",code,
+            com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
+    }
+    private String assetText(String name) throws Exception {
+        try(java.io.InputStream input=getContext().getAssets().open(name)) {
+            java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
+            byte[] chunk=new byte[8192];int length;
+            while((length=input.read(chunk))!=-1) buffer.write(chunk,0,length);
+            return new String(buffer.toByteArray(),StandardCharsets.UTF_8);
+        }
+    }
+
     private void capture(String name) throws Exception {
         js("scrollTo(0,0)");
         async("document.fonts.ready");
@@ -167,10 +180,52 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.44.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.45.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("npc-social")) {
+            if(phase.equals("save-transfer")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓长卷验收',spirit_root:'supreme_wood',path:'buddhist',seed:1450})});return g.id;})()");
+                python("from cultivation_life import server\nimport json,copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.age=330\ng.player.lifespan=2000\nd=g.to_dict()\nt=d['history'][0]\nd['history']=[{**copy.deepcopy(t),'age':i,'summary':f'第{i}年，修士于山门往返、闭关、游历，记录功法与人间事。'*8,'state_diff':{'npc_id':f'npc_{i%1000}','opportunity':i*3.2}} for i in range(12000)]\nraw=json.dumps(d,ensure_ascii=False,indent=2)\nassert len(raw.encode())>10000000\ne.store._path(g.id).write_text(raw,encoding='utf-8')\nserver._transfer_test_original=d");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");
+                    async("GameThemes.saved");
+                    async("SaveTransfer.exportSave("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!SaveTransfer.isWorking() && document.querySelector('#transfer-code').value.startsWith('FSWDP1.')")),"Large export did not split");
+                    js("window.__segments=[]");
+                    while(true) {
+                        tapSelector("#transfer-copy");
+                        waitForJs("document.querySelector('#transfer-status').textContent.includes('已复制')","Native copy failed");
+                        check(Boolean.TRUE.equals(js("AndroidGame.readSaveCode()===document.querySelector('#transfer-code').value")),"Clipboard truncation");
+                        js("__segments.push(AndroidGame.readSaveCode())");
+                        if(Boolean.TRUE.equals(js("document.querySelector('#transfer-next').disabled"))) break;
+                        tapSelector("#transfer-next");
+                    }
+                    js("document.querySelector('#transfer-close').click();SaveTransfer.openImport()");
+                    int count=((Number)js("__segments.length")).intValue();
+                    for(int i=count-1;i>=0;i--) {
+                        check(Boolean.TRUE.equals(js("AndroidGame.copySaveCode(__segments["+i+"])")),"Native clipboard write failed");
+                        tapSelector("#transfer-paste");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#transfer-code').value===__segments["+i+"]")),"Native paste changed text");
+                        tapSelector("#transfer-preview");
+                        waitForJs("!SaveTransfer.isWorking()","Import preview stalled");
+                    }
+                    check(Boolean.TRUE.equals(js("document.querySelector('#transfer-status').textContent.includes('校验通过')")),"Large preview failed");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#transfer-import').disabled")),"Overwrite not confirmed");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#save-transfer-dialog').scrollWidth<=document.querySelector('#save-transfer-dialog').clientWidth+1")),"Dialog overflow");
+                    capture("save-import-"+theme+"-1450");
+                    tapSelector("#transfer-replace-check");tapSelector("#transfer-import");
+                    waitForJs("!SaveTransfer.isWorking() && document.querySelector('#transfer-status').textContent.includes('已恢复')","Restore failed");
+                    python("from cultivation_life import server\nimport json\nassert json.loads(server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes())==server._transfer_test_original");
+                    js("document.querySelector('#transfer-close').click()");
+                }
+                String incoming=assetText("from-windows.txt");
+                js("window.__windowsCode="+JSONObject.quote(incoming));
+                String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
+                String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1450.txt");
+                try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
+                result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
+            } else if(phase.equals("npc-social")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'血脉长存档验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'serpent',seed:1440})});return g.id;})()");
                 com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",
                     "from cultivation_life import server\nfrom cultivation_life.system.monster_bloodline_system import grant_random_species_bloodline_trait\nfrom cultivation_life.system.possession_system import advance_player_age\nimport random\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.lifespan=2000\nrng=random.Random(1440)\nfor _ in range(310):\n advance_player_age(g.player)\n e._annual_sect_update(g,rng)\n e._annual_world_npc_update(g,rng)\ng.pending_event=None\ng.active_trial=None\ngrant_random_species_bloodline_trait(g.player,rng)\ne.store.save(g)",
