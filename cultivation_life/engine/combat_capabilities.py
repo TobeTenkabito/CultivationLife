@@ -131,6 +131,9 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 state = config.get("converted_player_state")
             if unit.id == "player" and game.player.transcendence is None:
                 state = conversion_state(game.player) or state
+            if unit.id == 'player' and state is not None:
+                from ..system.immortal_cultivation import golden_light
+                state = {**state, 'ward_tier': 2 if golden_light(game.player) else 1}
             capabilities = resolve_source(
                 state, definitions, sources.get(unit.id),
                 linked_current=game.player.mp if unit.id == "player" else 0,

@@ -1564,10 +1564,10 @@ class ContentRegistry:
             if set(combat_effect.get("traits", [])) - combat_traits:
                 raise ContentError("本命法宝材料引用了未知战斗特质")
         breakthrough = world.get("breakthrough", {})
-        if set(breakthrough.get("major_base", {})) != {str(index) for index in range(1, 8)}:
-            raise ContentError("大境界基础突破概率必须覆盖练气至合体")
-        if set(breakthrough.get("minor_base", {})) != {str(index) for index in range(2, 9)}:
-            raise ContentError("小境界基础突破概率必须覆盖筑基至大乘")
+        if set(breakthrough.get("major_base", {})) != {str(index) for index in (*range(1, 8), 9, 10, 11)}:
+            raise ContentError("大境界基础突破概率须覆盖练气至合体、真仙至太乙")
+        if set(breakthrough.get("minor_base", {})) != {str(index) for index in range(2, 13)}:
+            raise ContentError("小境界基础突破概率须覆盖筑基至大罗")
         all_chances = [
             float(value) for table in breakthrough.get("major_base", {}).values() for value in table.values()
         ] + [float(value) for value in breakthrough.get("minor_base", {}).values()]

@@ -41,7 +41,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             "百鬼夜行：往生轮回",
         )
 
-    def test_intrinsic_external_refactor_preserves_non_ghost_totals(self):
+    def test_intrinsic_external_totals_include_body_hp_and_mp(self):
         player = Player("守常", "supreme_metal", realm_index=3, layer=5, body_training=7)
         player.support_technique = copy.deepcopy(next(
             technique for technique in TECHNIQUE_CATALOG.values()
@@ -52,7 +52,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         player.natal_artifact_hp_bonus, player.natal_artifact_mp_bonus = 17, 19
         definition = REALMS[player.realm_index]
         old_hp_base = 100 + int(definition.base_power ** 0.5 * 16) + player.layer * 8 + player.body_training * 12
-        old_mp_base = 40 + int(definition.base_power ** 0.5 * 20) + player.layer * 11
+        old_mp_base = 40 + int(definition.base_power ** 0.5 * 20) + player.layer * 11 + player.body_training * 10
         expected_hp = round(
             old_hp_base * (1 + player.support_technique.hp_bonus * technique_scale(player.support_technique))
             + 2 * 37 + 41 + 17

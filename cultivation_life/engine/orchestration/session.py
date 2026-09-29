@@ -63,7 +63,7 @@ def create_game(
     player = Player(
         name=clean_name, spirit_root=spirit_root, path=path, gender=gender,
         born_rootless=spirit_root == "none",
-        world=selected_start_world,
+        world=selected_start_world, immortal_trace_rng=actual_seed,
     )
     if path == "monster" and deps.bloodline_content_available():
         player.race = "monster"

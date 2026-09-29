@@ -85,12 +85,9 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
             return
         record = player_record(game)
         if action == "immortal_trace_gather":
-            total = record.get("trace_progress", 0) + elapsed
-            amount, record["trace_progress"] = divmod(total, config()["cultivation"]["trace_years"])
-            if amount:
-                add_item(game.player, "immortal_trace", int(amount))
-            game.history.append(HistoryRecord("SYS_IMMORTAL_TRACES", 1, game.player.age, "感悟仙痕", None,
-                                             "gathered", f"感悟 {elapsed:g} 年，凝得仙痕 {int(amount)} 枚。", {}, ["system"]))
+            # Legacy action still earns normal opportunity; only the common award
+            # boundary may roll for traces. Elapsed time grants no guaranteed traces.
+            record.pop("trace_progress", None)
             return
         if action == "daomen_explore":
             key = record["explore_target"]
@@ -280,7 +277,7 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                                          "cost": training_cost(training.get(axis, 0), rules),
                                          "max": rules["voisinage_max_training"]} for axis in AXES]})
         return dict(available=True, count=25, max_level=9, voisinage_level=4, origin_level=5,
-                    veins=self._public_immortal(game), voisinages=voisinages,
+                    veins=self._public_immortal(game), immortal_body=self._public_immortal_body(game), voisinages=voisinages,
                     explore_price=rules["explore_price"], annotation_price=rules["annotation_price"],
                     unit_years=WORLD_SYSTEMS["time_units"][str(game.player.realm_index)], rows=rows,
                     conversion={"stage": stage, "complete": game.player.immortal_power_converted,

@@ -34,6 +34,7 @@ def main():
         add_item(game.player, 'spirit_stone', 10**8)
         add_item(game.player, 'immortal_trace', 1000)
         game.player.opportunity = 10**8
+        game.player.immortal_vein_pity = {f'9:{n}':100 for n in range(1,4)}
         engine.store.save(game)
         httpd = ThreadingHTTPServer(('127.0.0.1', 0), QuietHandler)
         threading.Thread(target=httpd.serve_forever, daemon=True).start()
@@ -43,6 +44,7 @@ def main():
                     patch.object(engine, '_advance_guixu_calendar', return_value=False):
                 browser = p.chromium.launch()
                 page = browser.new_page(viewport={'width': 1440, 'height': 1080})
+                page.emulate_media(reduced_motion='reduce')
                 page.on('pageerror', lambda err: errors.append(str(err)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData !== null')
@@ -54,6 +56,8 @@ def main():
                 assert page.locator('#strategy-dock [data-panel-target="daomen"]').count() == 1
                 assert '无尽' in page.locator('#opportunity-text').inner_text()
                 assert page.locator('#hud-opportunity .hud-percent').inner_text() == '无尽'
+                assert page.locator('[data-panel-target=voisinage]').is_hidden()
+                assert page.locator('.left-dock [data-panel-target=immortal-body]').is_visible()
                 assert page.locator('.doctrine-book').count() == 5
                 page.locator('.doctrine-book button').first.click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.learned)')
@@ -101,15 +105,61 @@ def main():
                 assert page.locator('#doctrine-card').evaluate('(e) => e.scrollWidth <= e.clientWidth + 1')
                 page.evaluate("UtilityPanels.close('doctrine'); UtilityPanels.open('immortal-veins')")
                 for n in range(1, 4):
-                    page.get_by_role('button', name='开启下一条仙脉', exact=True).click()
+                    page.get_by_role('button', name='尝试开启下一条仙脉', exact=True).click()
                     page.wait_for_function('(n) => game.doctrines.veins.opened === n', arg=n)
-                assert page.evaluate('game.player.layer') == 2
+                assert page.evaluate('game.player.layer') == 1
+                assert page.get_by_role('button', name='手动突破下一层',exact=True).is_enabled()
+                with patch.object(engine, '_breakthrough_chance', return_value={'final':1}):
+                    page.get_by_role('button',name='手动突破下一层',exact=True).click()
+                    page.wait_for_function('game.player.layer===2')
                 page.screenshot(path=str(ROOT / 'build/immortal-veins-mobile.png'))
                 page.evaluate("UtilityPanels.close('immortal-veins'); UtilityPanels.open('voisinage')")
                 page.get_by_role('button', name='温养稳固', exact=False).click()
                 page.wait_for_function('game.doctrines.voisinages[0].axes[0].rank === 1')
                 page.screenshot(path=str(ROOT / 'build/voisinage-mobile.png'))
                 assert page.locator('#voisinage-card').evaluate('(e) => e.scrollWidth <= e.clientWidth + 1')
+                # Six themes, portrait and desktop: same live panels and resource ledger.
+                saved = engine.store.load(game.id)
+                saved.pending_event = None
+                saved.heavenly_court['open_election'] = None
+                saved.player.body_training = 100
+                saved.player.hp = max_hp(saved.player) * .65
+                saved.player.mp = max_mp(saved.player) * .60
+                engine.store.save(saved)
+                page.evaluate('(id)=>loadGame(id)',game.id)
+                page.evaluate("UtilityPanels.close('voisinage'); UtilityPanels.open('daomen')")
+                page.get_by_role('button',name='求取传承 · 180,000 灵石',exact=True).click()
+                page.wait_for_function('game.doctrines.immortal_body.manual === "jade_marrows"')
+                for name in ['玉髓仙草','九叶仙芝']:
+                    page.get_by_role('button',name=name,exact=False).click()
+                    page.wait_for_function('(name)=>game.doctrines.immortal_body.recipe.some(r=>r.name===name && r.owned>0)',arg=name)
+                saved=engine.store.load(game.id)
+                saved.player.immortal_body['failures']=100
+                engine.store.save(saved)
+                page.evaluate('(id)=>loadGame(id)',game.id)
+                page.evaluate("UtilityPanels.close('daomen');UtilityPanels.open('immortal-body')")
+                page.get_by_role('button',name='以仙药淬炼下一层',exact=True).click()
+                page.wait_for_function('game.doctrines.immortal_body.level===1')
+                for theme in 'abcdef':
+                    page.evaluate('(theme)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${theme}]`).click()',theme)
+                    page.evaluate('GameThemes.saved')
+                    for width,height in [(1440,1080),(412,915)]:
+                        page.set_viewport_size({'width':width,'height':height})
+                        page.evaluate("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-veins')")
+                        assert page.locator('.meridian-node circle').count()==27
+                        assert page.locator('.meridian-node.opened').count()==3
+                        assert page.locator('#immortal-veins-card').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+                        page.locator('.meridian-figure').scroll_into_view_if_needed()
+                        page.wait_for_timeout(450)
+                        page.screenshot(path=str(ROOT/f'build/meridians-{theme}-{width}.png'))
+                        page.evaluate("UtilityPanels.close('immortal-veins');UtilityPanels.open('immortal-body')")
+                        assert page.locator('#immortal-body-card').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+                        page.wait_for_timeout(450)
+                        page.screenshot(path=str(ROOT/f'build/immortal-body-{theme}-{width}.png'))
+                        assert page.locator('#hud-hp .hud-track i').evaluate('(e)=>getComputedStyle(e).backgroundImage.includes("linear-gradient")')
+                        assert page.locator('#hud-mp').evaluate('(e)=>e.title.includes("本源")')
+                        assert page.locator('#hud-power').inner_text().find('仙痕')>=0
+                page.evaluate("UtilityPanels.close('immortal-body')")
                 saved = engine.store.load(game.id)
                 saved.player.hp, saved.player.mp = max_hp(saved.player), max_mp(saved.player)
                 engine._combat(saved, {'target_name': '试域石像', 'target_power': 100, 'target_realm_index': 8}, False, random.Random(1))

@@ -48,24 +48,29 @@ def test_true_immortal_time_and_unbounded_reserve(prepared):
     assert game.player.realm_index == 9 and game.player.layer == 1
 
 
-def test_every_three_veins_one_layer_and_27_for_next_realm(prepared):
+def test_every_three_veins_requires_manual_layer_and_body_20_for_major(prepared):
     engine, game, _ = prepared
     before = game.player.opportunity
-    for n in range(1, 28):
-        result = engine.immortal_action(game.id, 'open_vein')
-        assert result['player']['layer'] == min(9, 1 + n // 3)
-        assert result['doctrines']['veins']['opened'] == n
-        if n == 26:
-            with pytest.raises(ValueError, match='27'):
-                engine.immortal_action(game.id, 'breakthrough')
-    saved = engine.store.load(game.id)
-    assert saved.player.opportunity == before - sum(vein_cost(9, i, RULES)['opportunity'] for i in range(27))
-    reserve = saved.player.opportunity
-    result = engine.immortal_action(game.id, 'breakthrough')
-    assert result['player']['realm_index'] == 10 and result['player']['layer'] == 1
-    assert result['player']['opportunity'] == reserve
-    assert result['doctrines']['veins']['opened'] == 0
-    assert result['doctrines']['veins']['next_cost'] == vein_cost(10, 0, RULES)
+    with patch('cultivation_life.system.immortal_system.decode_rng', side_effect=lambda *a: random.Random(1)), \
+            patch.object(engine, '_breakthrough_chance', return_value={'final': 1}):
+        for layer in range(1, 10):
+            for _ in range(3):
+                shown = engine.immortal_action(game.id, 'open_vein')
+                assert shown['player']['layer'] == layer
+            assert shown['doctrines']['veins']['opened'] == layer * 3
+            with pytest.raises(ValueError, match='手动'):
+                engine.immortal_action(game.id, 'open_vein')
+            if layer == 9:
+                with pytest.raises(ValueError, match='20'):
+                    engine.immortal_action(game.id, 'breakthrough')
+                saved = engine.store.load(game.id)
+                saved.player.immortal_body = {'level': 20}
+                engine.store.save(saved)
+            shown = engine.immortal_action(game.id, 'breakthrough')
+    assert shown['player']['realm_index'] == 10 and shown['player']['layer'] == 1
+    assert 0 < shown['player']['opportunity'] < before
+    assert shown['doctrines']['veins']['opened'] == 0
+    assert shown['doctrines']['veins']['next_cost'] == vein_cost(10, 0, RULES)
 
 
 def test_vein_cost_is_linear_across_realm_boundary():
@@ -77,7 +82,7 @@ def test_vein_cost_is_linear_across_realm_boundary():
 
 def test_insufficient_resources_cannot_partially_pay(prepared):
     engine, game, _ = prepared
-    game.player.inventory = [i for i in game.player.inventory if i.id != 'immortal_trace']
+    game.player.immortal_traces = 0
     engine.store.save(game)
     before = engine.store.load(game.id).player.to_dict()
     with pytest.raises(ValueError, match='不足'):
@@ -85,13 +90,11 @@ def test_insufficient_resources_cannot_partially_pay(prepared):
     assert engine.store.load(game.id).player.to_dict() == before
 
 
-def test_trace_gather_retains_fractional_time(prepared):
+def test_elapsed_time_alone_does_not_award_traces(prepared):
     engine, game, _ = prepared
-    start = item_quantity(game.player, 'immortal_trace')
-    engine._finish_doctrine_action(game, 'immortal_trace_gather', 7)
-    assert item_quantity(game.player, 'immortal_trace') == start
-    engine._finish_doctrine_action(game, 'immortal_trace_gather', 3)
-    assert item_quantity(game.player, 'immortal_trace') == start + 1
+    start = game.player.immortal_traces
+    engine._finish_doctrine_action(game, 'immortal_trace_gather', 100)
+    assert game.player.immortal_traces == start
 
 
 def test_manual_and_annotation_both_required(prepared):

@@ -31,6 +31,8 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
     major = kind == "major"
     deterministic_monster_evolution = bool(major and player.path == "monster" and deps.bloodline_content_available())
     waiting = player.awaiting_major_breakthrough if major else player.awaiting_minor_breakthrough
+    if player.world == 'celestial' and player.realm_index >= 9:
+        waiting = at_bottleneck
     requirement = deps._major_breakthrough_requirement(player) if major else {
         "met": True, "reason": "尚未抵达大境界瓶颈。", "missing_affinities": [],
     }

@@ -242,6 +242,8 @@ def _add_opportunity(
     player.opportunity = max(0.0, before + float(amount))
     actual_gain = player.opportunity - before
     if actual_gain > 0:
+        from ...system.immortal_cultivation import grant_trace_chance
+        grant_trace_chance(player, actual_gain)
         grant_qi_experience(
             player, actual_gain,
             regional_efficiencies

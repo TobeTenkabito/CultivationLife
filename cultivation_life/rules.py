@@ -838,6 +838,9 @@ def roll_lifespan(player: Player, rng: random.Random) -> int | None:
 
 
 def add_item(player: Player, item_id: str, quantity: int = 1) -> None:
+    if item_id == 'immortal_trace':
+        player.immortal_traces += max(0, int(quantity))
+        return
     for item in player.inventory:
         if item.id == item_id:
             item.quantity += quantity
@@ -858,6 +861,19 @@ def remove_item(player: Player, item_id: str, quantity: int = 1) -> bool:
 
 def has_item(player: Player, item_id: str, quantity: int = 1) -> bool:
     return any(item.id == item_id and item.quantity >= quantity for item in player.inventory)
+
+
+def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:
+    result = {}
+    for key, maximum, intrinsic in (
+        ('hp', max_hp(player), effective_intrinsic_hp(player)),
+        ('mp', max_mp(player), effective_intrinsic_mp(player) * spirit_root_mana_multiplier(player)),
+    ):
+        capacity = min(maximum, max(0.0, intrinsic))
+        ratio = min(1.0, max(0.0, getattr(player, key) / max(1, maximum)))
+        result[key] = {'maximum': capacity, 'current': capacity * ratio,
+                       'share': capacity / max(1, maximum)}
+    return result
 
 
 def public_player(player: Player) -> dict[str, Any]:
@@ -963,6 +979,7 @@ def public_player(player: Player) -> dict[str, Any]:
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),
         opportunity_unbounded=max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9,
+        intrinsic_resources=intrinsic_resource_breakdown(player),
         max_hp=max_hp(player),
         max_mp=max_mp(player),
         combat_power=combat_power(player),

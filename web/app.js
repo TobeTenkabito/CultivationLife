@@ -414,7 +414,7 @@ function render(data) {
     $('#opportunity-bar').style.width = '100%';
   }
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
-  meter('hp', p.hp, p.max_hp); meter('mp', p.mp, p.max_mp);
+  meter('hp', p.hp, p.max_hp, p.intrinsic_resources?.hp); meter('mp', p.mp, p.max_mp, p.intrinsic_resources?.mp);
   $('#mp-label').textContent = p.resource_name || 'MP';
   $('#mp-meter').classList.toggle('blue', p.resource_kind !== 'immortal');
   $('#mp-meter').classList.toggle('purple', p.resource_kind === 'immortal');
@@ -2724,8 +2724,13 @@ function renderAuction(system) {
   $('#black-market-leave').onclick = () => mutate(`/api/games/${game.id}/black-market-leave`, {});
 }
 
-function meter(id, value, maximum) {
+function meter(id, value, maximum, intrinsic) {
   const current = Math.max(0, Number(value));
+  if (intrinsic) {
+    const bar = document.querySelector(`#${id}-bar`);
+    bar.style.setProperty('--intrinsic-share', `${intrinsic.share * 100}%`);
+    bar.title = `本源 ${number(intrinsic.current)} / ${number(intrinsic.maximum)}；深色段为本源`;
+  }
   $(`#${id}-text`).textContent = `${number(current)} / ${number(maximum)}`;
   $(`#${id}-bar`).style.width = `${Math.min(100, current / maximum * 100)}%`;
 }

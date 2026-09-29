@@ -1,18 +1,20 @@
 import hashlib
 import json
 import re
+import runpy
 import shutil
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-version = '1.45.0'
-test_log = (ROOT / 'build/release-1450-tests.log').read_text(encoding='utf-8', errors='replace')
+version = runpy.run_path(str(ROOT / 'cultivation_life/version.py'))['BASE_GAME_VERSION']
+release_id = version.replace('.', '')
+test_log = (ROOT / f'build/release-{release_id}-tests.log').read_text(encoding='utf-8', errors='replace')
 passed = re.search(r'(\d+) passed in', test_log)
 assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
-exe_log = (ROOT / 'build/exe-1450-verification.log').read_text(encoding='utf-8', errors='replace')
+exe_log = (ROOT / f'build/exe-{release_id}-verification.log').read_text(encoding='utf-8', errors='replace')
 assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in ['save-transfer-ui-1450.log']:
+for file in [f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log']:
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
 exe = ROOT / 'dist/launcher.exe'
@@ -23,6 +25,7 @@ manifest = {
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
     'validation':[f'{passed.group(1)} automated regressions passed',
+                  'Six-theme immortal meridians, manual realm breakthrough, immortal body cultivation and intrinsic resource bars verified',
                   'Six-theme live browser: save library, import/export, encryption and chunk roundtrips, Buddhist colours; no JavaScript errors',
                   'Packaged EXE starts with and without optional DLC; all seven packages, wish UI assets, base reincarnation content and Buddhist entry verified',
                   'Android 12 companion release with six-theme save UI adaptation'],

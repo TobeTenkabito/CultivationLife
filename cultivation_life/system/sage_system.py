@@ -418,7 +418,7 @@ class SageSystemMixin:
                     float(cfg.get("answer_opportunity_min", 0.5)),
                     float(cfg.get("answer_opportunity_max", 1.5)),
                 ) * (1.0 + float(game.player.sage_effects.get("answer_multiplier", 0.0)))
-                game.player.opportunity += reward
+                self._add_opportunity(game.player, reward)
                 game.player.divine_sense_experience += reward * float(cfg.get("answer_sense_ratio", 0.5)) * (
                     1.0 + float(game.player.sage_effects.get("sense_multiplier", 0.0))
                 )

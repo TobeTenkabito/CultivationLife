@@ -127,7 +127,8 @@ def conversion_state(player):
     """Existing MP is the sole pool; partial conversion controls usable capacity."""
     if player.world != "celestial" or player.realm_index < 9:
         return None
+    from ..immortal_cultivation import golden_light
     ratio = 1.0 if player.immortal_power_converted else max(0, min(5, player.immortal_conversion_stage)) / 5
     return dict(version=1, resource_link="legacy_mp", conversion=ratio,
-                force_tier=2 if ratio else 1, ward_tier=2 if ratio else 1,
+                force_tier=2 if ratio else 1, ward_tier=2 if golden_light(player) and ratio else 1,
                 attack_cost=10, ward_cost=100)

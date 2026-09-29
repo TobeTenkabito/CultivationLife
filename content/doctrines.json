@@ -887,12 +887,76 @@
     "vein_opportunity_step": 30000,
     "vein_trace_base": 6,
     "vein_trace_step": 2,
-    "trace_years": 10,
     "voisinage_max_training": 10,
     "voisinage_training_gain": 0.03,
     "voisinage_opportunity_base": 40000,
     "voisinage_trace_base": 8,
     "annotation_price": 3000,
-    "explore_price": 1000
+    "explore_price": 1000,
+    "trace_gain_chance": 0.07,
+    "vein_success_rates": [
+      0.85,
+      0.8,
+      0.75,
+      0.68,
+      0.61,
+      0.54,
+      0.46,
+      0.38,
+      0.3
+    ],
+    "vein_pity_step": 0.05,
+    "body": {
+      "required_training": 100,
+      "max_level": 100,
+      "golden_light_level": 20,
+      "base_chance": 0.85,
+      "chance_step": 0.012,
+      "minimum_chance": 0.15,
+      "pity_step": 0.05,
+      "hp_per_level": 5000,
+      "mp_per_level": 4000,
+      "manuals": [
+        {
+          "id": "jade_marrows",
+          "name": "玉髓混元仙身经",
+          "description": "以玉髓固本，辅以九叶仙芝，循序淬炼仙躯。",
+          "price": 180000,
+          "chance_bonus": 0,
+          "recipe": {
+            "immortal_jade_herb": 12,
+            "nine_leaf_immortal_lingzhi": 6
+          }
+        },
+        {
+          "id": "golden_lotus",
+          "name": "金莲无垢仙躯录",
+          "description": "炼化金莲与仙芝，药力更重，淬体成功率额外提高五个百分点。",
+          "price": 480000,
+          "chance_bonus": 0.05,
+          "recipe": {
+            "golden_lotus_elixir": 8,
+            "nine_leaf_immortal_lingzhi": 12
+          }
+        }
+      ],
+      "supplies": [
+        {
+          "id": "immortal_jade_herb",
+          "quantity": 60,
+          "price": 30000
+        },
+        {
+          "id": "nine_leaf_immortal_lingzhi",
+          "quantity": 30,
+          "price": 36000
+        },
+        {
+          "id": "golden_lotus_elixir",
+          "quantity": 40,
+          "price": 80000
+        }
+      ]
+    }
   }
 }
