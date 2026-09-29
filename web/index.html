@@ -508,10 +508,9 @@
   <dialog id="tutorial-dialog" class="tutorial-dialog" aria-labelledby="tutorial-heading">
     <div class="tutorial-header"><div><small id="tutorial-progress"></small><h2 id="tutorial-heading">新手教程</h2></div><button id="tutorial-close" type="button">暂时收起</button></div>
     <label class="tutorial-switch"><span>开启新手教程<small id="tutorial-toggle-description"></small></span><input id="tutorial-enabled" type="checkbox"></label>
-    <select id="tutorial-chapter" aria-label="教程章节"></select>
     <p id="tutorial-status" class="tutorial-status" role="status"></p>
-    <div id="tutorial-body"></div>
-    <div class="tutorial-footer"><button id="tutorial-prev" type="button">上一课</button><button id="tutorial-next" type="button">我已了解，下一课</button></div>
+    <p>跟着箭头点亮真实按钮：亲自修炼、探宝、配置功法、拜师与加入宗门。每次教学操作会先告诉你结果，可随时暂停，稍后续接。</p>
+    <div class="tutorial-footer"><button id="tutorial-handbook-open" type="button">查看修行说明</button><button id="tutorial-start" type="button">开始操作引导</button></div>
   </dialog>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
@@ -529,6 +528,7 @@
   <script src="/immortal-aperture-panel.js?v=2"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
+  <script src="/tutorial-steps.js?v=1"></script>
   <script src="/tutorial.js?v=1"></script>
   <script src="/app.js?v=1.45.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>

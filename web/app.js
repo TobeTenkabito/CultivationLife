@@ -1513,6 +1513,11 @@ function renderFaction(faction) {
       const name = document.createElement('b'); name.textContent = entry.name;
       const detail = document.createElement('span'); detail.textContent = `${entry.path} · ${entry.description}`;
       card.append(name, detail); summary.appendChild(card);
+      if (game.tutorial?.guide.active && game.tutorial.guide.step === 'join' && game.tutorial.guide.admissions.some(s => s.id === entry.id)) {
+        const join = document.createElement('button'); join.type = 'button'; join.className = 'tutorial-faction-join';
+        join.dataset.factionId = entry.id; join.textContent = `接受引荐，加入${entry.name}`;
+        join.onclick = () => mutate(`/api/games/${game.id}/tutorial`, {action:'guide_join', step:'join', target_id:entry.id}); card.append(join);
+      }
     });
     if (faction.can_found) summary.appendChild(namedCreationForm('创建自己的宗门', '宗门名号', '开宗立派', name => mutate(`/api/games/${game.id}/create-faction`, {name})));
     return;
@@ -3111,6 +3116,7 @@ function renderKnownTechniques(techniques) {
     const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主'],['support','辅'],['combat','战']];
     slotChoices.forEach(([slot,label]) => {
       const button = document.createElement('button'); button.className = 'technique-equip'; button.textContent = label;
+      if (slot === 'main' && art.id === game.tutorial?.guide.art?.id) button.dataset.guideEquip = art.id;
       const eligible = art.compatible && (slot !== 'combat' || art.combat_requirement_met);
       button.dataset.compatible = eligible ? '1' : '0';
       button.title = art.requires_immortal_power && !art.immortal_power_met
@@ -3673,7 +3679,7 @@ function renderBattleRoundProgress(report, shouldPlay) {
 }
 
 function renderEvent() {
-  const event = game.pending_event;
+  const event = game.pending_event || game.tutorial?.guide.event;
   const postBattlePossession = event?.id === 'SYS_POST_BATTLE_POSSESSION';
   $('#event-card').classList.toggle('hidden', !event || postBattlePossession);
   $('#action-card').classList.toggle('hidden', !!event || !game.player.alive);
@@ -3685,7 +3691,11 @@ function renderEvent() {
     const button = document.createElement('button');
     button.textContent = choice.enabled === false ? `${choice.text}（${choice.disabled_reason || '条件不满足'}）` : choice.text;
     button.disabled = choice.enabled === false;
-    button.onclick = () => mutate(`/api/games/${game.id}/choice`, {choice_id:choice.id}); choices.appendChild(button);
+    if (event.id === 'SYS_TUTORIAL_GUIDED_MENTOR') {
+      button.dataset.guideChoice = choice.id;
+      button.onclick = () => mutate(`/api/games/${game.id}/tutorial`, {action:choice.id, step:'mentor_choice'});
+    } else button.onclick = () => mutate(`/api/games/${game.id}/choice`, {choice_id:choice.id});
+    choices.appendChild(button);
   });
 }
 
@@ -3705,7 +3715,7 @@ function renderButtons() {
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);
-    const choice = game?.pending_event?.choices?.[index];
+    const choice = (game?.pending_event || game?.tutorial?.guide.event)?.choices?.[index];
     button.disabled = busy || !choice || choice.enabled === false;
   });
   $('#new-game-button').disabled = busy;
