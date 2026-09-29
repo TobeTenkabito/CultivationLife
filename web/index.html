@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=1">
+  <link rel="stylesheet" href="/tutorial.css?v=1">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -34,6 +35,7 @@
       <div class="theme-choices" data-theme-picker="start"></div>
     </section>
     <section id="start-screen" class="paper start-card">
+      <button type="button" data-tutorial-open class="tutorial-entry">新手教程</button>
       <details id="start-extension-manager" class="start-extension-manager">
         <summary>DLC / MOD</summary>
         <p>独立开关 · 下次启动生效</p>
@@ -114,6 +116,7 @@
           <details class="battle-round-details"><summary>展开逐轮演算</summary><div id="battle-round-list"></div></details>
         </article>
         <article id="action-card" class="paper action-card">
+          <button type="button" data-tutorial-open class="tutorial-entry">新手教程：已关闭</button>
           <p class="eyebrow">岁月流转</p><h2 id="action-heading">这一年，你将如何度过？</h2><p id="time-unit-hint" class="muted"></p>
           <div id="breakthrough-panel" class="breakthrough-panel hidden">
             <div><b id="breakthrough-title">大境界瓶颈</b><span id="breakthrough-reason"></span></div>
@@ -425,6 +428,7 @@
             <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
           </div>
+          <section class="tutorial-handbook"><h3>新手教程与修行指南</h3><p class="muted">随时开启或关闭引导，也可在这里按章节查阅。</p><button id="setting-tutorial-open" type="button">打开教程与开关</button><div id="tutorial-handbook"></div></section>
         </article>
         <article id="ending-card" class="paper ending-card hidden"><p class="eyebrow">尘缘已了</p><h2>此生落幕</h2><p id="death-reason"></p><div id="post-battle-possession" class="hidden"><p class="post-battle-possession-lead">本魂尚可借俘虏肉身还魂。选择后将立即消耗一次夺舍次数，并改用该 NPC 的年龄与寿元。</p><div id="post-battle-possession-choices" class="choices"></div><p class="muted">若不夺舍，可直接再入轮回，结束此存档的人生。</p></div><button id="restart-button" class="primary">再入轮回</button></article>
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
@@ -501,6 +505,14 @@
     <div id="player-details-content"></div>
   </dialog>
   <div id="theme-feedback" aria-hidden="true"></div>
+  <dialog id="tutorial-dialog" class="tutorial-dialog" aria-labelledby="tutorial-heading">
+    <div class="tutorial-header"><div><small id="tutorial-progress"></small><h2 id="tutorial-heading">新手教程</h2></div><button id="tutorial-close" type="button">暂时收起</button></div>
+    <label class="tutorial-switch"><span>开启新手教程<small id="tutorial-toggle-description"></small></span><input id="tutorial-enabled" type="checkbox"></label>
+    <select id="tutorial-chapter" aria-label="教程章节"></select>
+    <p id="tutorial-status" class="tutorial-status" role="status"></p>
+    <div id="tutorial-body"></div>
+    <div class="tutorial-footer"><button id="tutorial-prev" type="button">上一课</button><button id="tutorial-next" type="button">我已了解，下一课</button></div>
+  </dialog>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
   <script src="/ui-panels.js?v=1.45.0"></script>
@@ -516,6 +528,8 @@
   <script src="/doctrine-panel.js?v=1"></script>
   <script src="/immortal-aperture-panel.js?v=2"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
+  <script src="/tutorial-content.js?v=1"></script>
+  <script src="/tutorial.js?v=1"></script>
   <script src="/app.js?v=1.45.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

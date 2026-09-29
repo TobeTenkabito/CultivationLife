@@ -368,6 +368,7 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 
 async function mutate(path, payload) {
   if (busy) return;
+  if(path==='/api/games')payload={...payload,tutorial_enabled:window.TutorialGuide?.enabledForNewGame()||false};
   busy = true; document.body.classList.add('busy'); renderButtons();
   try { render(await api(path, {method:'POST', body:JSON.stringify(payload)})); }
   catch (error) { toast(error.message); }
@@ -375,6 +376,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.TutorialGuide?.reset();
   window.GameThemes?.showStart();
   closeGameConfirm();
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
@@ -602,6 +604,7 @@ function render(data) {
   window.GameThemes?.render(data);
   renderPostBattlePossession();
   renderButtons();
+  window.TutorialGuide?.render(data,payload=>mutate(`/api/games/${data.id}/tutorial`,payload));
 }
 
 function renderPostBattlePossession() {

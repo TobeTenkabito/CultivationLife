@@ -13,8 +13,8 @@ android {
         applicationId 'com.fusheng.wendao'
         minSdk 31
         targetSdk 31
-        versionCode 11
-        versionName "${gameVersion}-android.11"
+        versionCode 12
+        versionName "${gameVersion}-android.12"
         testInstrumentationRunner 'com.fusheng.wendao.ReleaseSmokeInstrumentation'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }

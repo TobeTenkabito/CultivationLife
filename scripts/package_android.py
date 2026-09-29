@@ -6,36 +6,42 @@ import re
 import shutil
 import zipfile
 from pathlib import Path
+from android_css import compile_css
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.47.1'
-ANDROID_VERSION = VERSION + '-android.11'
+VERSION = '1.48.0'
+ANDROID_VERSION = VERSION + '-android.12'
 
 def main():
     def log(name):
         return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
-    tests = log('release-1471-tests.log')
+    tests = log('release-1480-tests.log')
     passed = re.search(r'(\d+) passed in', tests)
     assert passed and 'failed' not in tests
-    for name in ('android-save-transfer-1471.log', 'android-initial-1471.log', 'android-immortal-1471.log', 'android-minor-1471.log'):
+    for name in ('android-save-transfer-1480.log', 'android-initial-1480.log', 'android-immortal-1480.log', 'android-minor-1480.log', 'android-tutorial-1480.log'):
         assert 'status=passed' in log(name) and 'status=failed' not in log(name), name
-    assert 'roundtrip passed' in log('save-crossplatform-1471.log')
-    assert 'Verifies' in log('android-signature-1471.log')
-    metadata = log('android-metadata-1471.log')
-    assert "versionCode='11'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
+    assert 'roundtrip passed' in log('save-crossplatform-1480.log')
+    assert 'Verifies' in log('android-signature-1480.log')
+    metadata = log('android-metadata-1480.log')
+    assert "versionCode='12'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
     assert "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata
     assert (ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.'
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest in log('android-installed-sha256-1471.log').lower()
+    assert digest in log('android-installed-sha256-1480.log').lower()
     with zipfile.ZipFile(source) as apk:
         assert apk.testzip() is None
         for abi in ('arm64-v8a', 'x86_64'):
             assert f'lib/{abi}/libpython3.13.so' in apk.namelist()
         with zipfile.ZipFile(io.BytesIO(apk.read('assets/game-assets.zip'))) as assets:
             assert assets.read('web/app.js') == (ROOT/'web/app.js').read_bytes()
-            for name in ('web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
-                assert assets.read(name) == (ROOT/name).read_bytes(), name
+            for name in ('web/tutorial.js', 'web/tutorial-content.js', 'web/tutorial.css', 'web/index.html', 'web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
+                expected = (ROOT/name).read_bytes()
+                if name.endswith('.css'):
+                    expected = compile_css(expected.decode('utf-8')).encode('utf-8')
+                if name == 'web/index.html':
+                    expected = expected.decode('utf-8').replace('</head>', '<link rel="stylesheet" href="/android/mobile.css"></head>').replace('</body>', '<script src="/android/mobile.js"></script></body>').encode('utf-8')
+                assert assets.read(name) == expected, name
             assert assets.read('web/save-transfer.js') == (ROOT/'web/save-transfer.js').read_bytes()
             for theme in 'abcdef':
                 assert f'web/themes/{theme}.css' in assets.namelist()
@@ -47,7 +53,7 @@ def main():
     shutil.copy2(source, target)
     report = ROOT/f'dist/release-{ANDROID_VERSION}.json'
     manifest = {
-        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 11,
+        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 12,
         'application_id': 'com.fusheng.wendao', 'min_sdk': 31, 'target_sdk': 31,
         'included_abis': ['arm64-v8a', 'x86_64'], 'tested_android': 'Android 12 / API 31',
         'tested_abi': 'x86_64', 'physical_device_tested': False,
@@ -55,6 +61,7 @@ def main():
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [f'{passed.group(1)} Python regressions passed',
+                       'Android 12 six-theme optional tutorial, fixed apprenticeship, persisted progress and native back verified',
                        'Android 12 six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified',
                        'Immortal meridians, manual realm gate, six themes, intrinsic resource bars and body level20 verified on signed APK',
                        'Signed Android 12 APK: six themes, native clipboard, >10MB save, reversed segments, confirmation and lossless restore',
