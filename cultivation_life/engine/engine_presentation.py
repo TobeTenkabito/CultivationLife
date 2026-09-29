@@ -20,6 +20,7 @@ from ..system.monster_bloodline_system import public_monster_bloodline
 from ..system.concubine_system import gender_name
 from ..system.immortal_aperture import public_aperture
 from ..system.combat_plan import public_plan
+from ..system.tutorial_system import public_tutorial
 from .dependencies import PresentationDependencies
 
 
@@ -203,6 +204,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "last_combat_report": copy.deepcopy(game.last_combat_report),
         "settings": {**game.settings, 'manual_combat_plan': bool(game.player.combat_plan.get('manual'))},
         "combat_plan": public_plan(game.player),
+        "tutorial": public_tutorial(game),
         "new_achievements": new_achievements,
         "secret_arts": secret_arts,
         "transformation_system": public_transformation_system(game.player),

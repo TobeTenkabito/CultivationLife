@@ -135,6 +135,8 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("monster_species_id"),
                     payload.get("gender", "male"),
                 )
+                if payload.get('tutorial_enabled') is True:
+                    result = ENGINE.tutorial_action(result['id'], 'enable')
                 self._json(result, HTTPStatus.CREATED)
                 return
             parts = path.strip("/").split("/")
@@ -240,6 +242,8 @@ class Handler(BaseHTTPRequestHandler):
                 )
             elif operation == 'combat-plan':
                 result = ENGINE.update_combat_plan(game_id, payload)
+            elif operation == 'tutorial':
+                result = ENGINE.tutorial_action(game_id, payload.get('action', ''), payload.get('step'))
             elif operation == "black-market-search":
                 result = ENGINE.search_black_market(game_id, payload.get("pattern", ""))
             elif operation == "black-market-buy":

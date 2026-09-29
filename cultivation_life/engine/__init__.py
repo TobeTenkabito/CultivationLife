@@ -167,6 +167,10 @@ class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemM
         self.store.save(game)
         return self.present(game)
 
+    def tutorial_action(self, game_id, action, step=None):
+        from ..system.tutorial_system import perform
+        return perform(self, game_id, action, step)
+
     @staticmethod
     def _new_sects() -> dict[str, SectState]:
         return world_runtime._new_sects()

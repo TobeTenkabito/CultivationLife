@@ -180,10 +180,41 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.47.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.48.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("save-transfer")) {
+            if(phase.equals("tutorial")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'新手教程验收',spirit_root:'supreme_wood',path:'dao',seed:1480,tutorial_enabled:true})});return g.id;})()");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.tutorial.enabled && document.querySelector('#tutorial-dialog').open")),"Opt-in guide did not open");
+                js("window.__tutorialAge=game.player.age");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    check(Boolean.TRUE.equals(js("(()=>{const s=document.querySelector('#tutorial-chapter');s.value='6';s.dispatchEvent(new Event('change'));return true;})()")),"Chapter selection failed");
+                    waitForJs("!busy && game.tutorial.step===6","Chapter progress not saved");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-dialog').scrollWidth<=document.querySelector('#tutorial-dialog').clientWidth+1")),"Tutorial overflow");
+                    if(theme.equals("a")) {
+                        tapSelector(".tutorial-mentor button");waitForJs("!busy && !!game.tutorial.mentor","Mentor not offered");
+                        tapSelector(".tutorial-mentor button");waitForJs("!busy && game.tutorial.mentor_result==='accepted'","Mentor not accepted");
+                        python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nassert g.player.master['realm_index']==3\nassert len([h for h in g.history if h.event_id=='SYS_TUTORIAL_MENTOR'])==2");
+                    }
+                    capture("tutorial-"+theme+"-1480");
+                    tapSelector("#tutorial-enabled");waitForJs("!busy && !game.tutorial.enabled","Disable guide failed");
+                    check(Boolean.TRUE.equals(js("game.player.age===__tutorialAge")),"Reading advanced age");
+                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+                    waitForJs("!document.querySelector('#tutorial-dialog').open","Native back did not close guide");
+                    js("UtilityPanels.open('settings');true");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#tutorial-handbook details').length===10")),"Missing handbook");
+                    tapSelector("#setting-tutorial-open");waitForJs("document.querySelector('#tutorial-dialog').open","Settings guide failed");
+                    tapSelector("#tutorial-enabled");waitForJs("!busy && game.tutorial.enabled","Enable guide failed");
+                }
+                check(Boolean.TRUE.equals(js("(()=>{const s=document.querySelector('#tutorial-chapter');s.value='9';s.dispatchEvent(new Event('change'));return true;})()")),"Last chapter selection failed");
+                waitForJs("!busy && game.tutorial.step===9","Last chapter not saved");
+                tapSelector("#tutorial-next");waitForJs("!busy && game.tutorial.completed && !game.tutorial.enabled","Finish tutorial failed");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("!document.querySelector('#tutorial-dialog').open && game.tutorial.mentor_result==='accepted' && game.player.age===__tutorialAge")),"Tutorial persistence failed");
+                result.putString("tutorial_scope","Six themes; native taps; deterministic Core Formation mentor; settings handbook; no elapsed time; persistent progress; native back");
+            } else if(phase.equals("save-transfer")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓长卷验收',spirit_root:'supreme_wood',path:'buddhist',seed:1450})});return g.id;})()");
                 python("from cultivation_life import server\nimport json,copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.age=330\ng.player.lifespan=2000\nd=g.to_dict()\nt=d['history'][0]\nd['history']=[{**copy.deepcopy(t),'age':i,'summary':f'第{i}年，修士于山门往返、闭关、游历，记录功法与人间事。'*8,'state_diff':{'npc_id':f'npc_{i%1000}','opportunity':i*3.2}} for i in range(12000)]\nraw=json.dumps(d,ensure_ascii=False,indent=2)\nassert len(raw.encode())>10000000\ne.store._path(g.id).write_text(raw,encoding='utf-8')\nserver._transfer_test_original=d");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
@@ -222,7 +253,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1471.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1480.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
