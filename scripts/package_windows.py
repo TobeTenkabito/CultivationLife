@@ -25,7 +25,7 @@ manifest = {
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
     'validation':[f'{passed.group(1)} automated regressions passed',
-                  'Six-theme optional tutorial, deterministic Core Formation mentor, settings handbook and persisted reading verified',
+                  'Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified',
                   'Six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified',
                   'Six-theme immortal meridians, manual realm breakthrough, immortal body cultivation and intrinsic resource bars verified',
                   'Six-theme live browser: save library, import/export, encryption and chunk roundtrips, Buddhist colours; no JavaScript errors',
@@ -41,7 +41,7 @@ shutil.copy2(exe, ROOT/'launcher.exe')
 archive = ROOT / f'dist/浮生问道-v{version}-Windows.zip'
 with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
     for path, name in [(exe,'launcher.exe'),(manifest_path,manifest_path.name),
-                       (ROOT/'README.md','README.md'),(ROOT/'CHANGELOG.md','CHANGELOG.md'),(ROOT/'android/README.md','android/README.md'),(ROOT/'docs/save-code-format.md','docs/save-code-format.md'),(ROOT/'docs/immortal-1470.md','docs/immortal-1470.md'),(ROOT/'docs/immortal-1471.md','docs/immortal-1471.md'),(ROOT/'docs/tutorial-1480.md','docs/tutorial-1480.md')]:
+                       (ROOT/'README.md','README.md'),(ROOT/'CHANGELOG.md','CHANGELOG.md'),(ROOT/'android/README.md','android/README.md'),(ROOT/'docs/save-code-format.md','docs/save-code-format.md'),(ROOT/'docs/immortal-1470.md','docs/immortal-1470.md'),(ROOT/'docs/immortal-1471.md','docs/immortal-1471.md'),(ROOT/'docs/tutorial-1480.md','docs/tutorial-1480.md'),(ROOT/'docs/tutorial-1481.md','docs/tutorial-1481.md')]:
         package.write(path, name)
     package.writestr('game_config.txt', 'Debug=False\n')
     for directory in ('dlc','mods'):

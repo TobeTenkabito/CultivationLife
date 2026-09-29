@@ -243,7 +243,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == 'combat-plan':
                 result = ENGINE.update_combat_plan(game_id, payload)
             elif operation == 'tutorial':
-                result = ENGINE.tutorial_action(game_id, payload.get('action', ''), payload.get('step'))
+                result = ENGINE.tutorial_action(game_id, payload.get('action', ''), payload.get('step'), payload.get('target_id'))
             elif operation == "black-market-search":
                 result = ENGINE.search_black_market(game_id, payload.get("pattern", ""))
             elif operation == "black-market-buy":

@@ -150,7 +150,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
     }
 
     private void capture(String name) throws Exception {
-        js("scrollTo(0,0)");
+        if(!Boolean.TRUE.equals(js("!!window.TutorialGuide && TutorialGuide.isGuiding()"))) js("scrollTo(0,0)");
         async("document.fonts.ready");
         CountDownLatch frame=new CountDownLatch(1);
         runOnMainSync(()->web.postVisualStateCallback(System.nanoTime(),new WebView.VisualStateCallback(){
@@ -180,40 +180,42 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.48.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.48.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             if(phase.equals("tutorial")) {
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'新手教程验收',spirit_root:'supreme_wood',path:'dao',seed:1480,tutorial_enabled:true})});return g.id;})()");
-                async("loadGame("+JSONObject.quote(id)+")");
-                check(Boolean.TRUE.equals(js("game.tutorial.enabled && document.querySelector('#tutorial-dialog').open")),"Opt-in guide did not open");
-                js("window.__tutorialAge=game.player.age");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
-                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
-                    check(Boolean.TRUE.equals(js("(()=>{const s=document.querySelector('#tutorial-chapter');s.value='6';s.dispatchEvent(new Event('change'));return true;})()")),"Chapter selection failed");
-                    waitForJs("!busy && game.tutorial.step===6","Chapter progress not saved");
-                    check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-dialog').scrollWidth<=document.querySelector('#tutorial-dialog').clientWidth+1")),"Tutorial overflow");
-                    if(theme.equals("a")) {
-                        tapSelector(".tutorial-mentor button");waitForJs("!busy && !!game.tutorial.mentor","Mentor not offered");
-                        tapSelector(".tutorial-mentor button");waitForJs("!busy && game.tutorial.mentor_result==='accepted'","Mentor not accepted");
-                        python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nassert g.player.master['realm_index']==3\nassert len([h for h in g.history if h.event_id=='SYS_TUTORIAL_MENTOR'])==2");
+                    js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1481,tutorial_enabled:true})});return g.id;})()");
+                    async("loadGame("+JSONObject.quote(id)+")");js("window.__tutorialAge=game.player.age");
+                    for(int i=0;i<32;i++) {
+                        String step=(String)js("game.tutorial.guide.step");
+                        check(Boolean.TRUE.equals(js("TutorialGuide.isGuiding()")),"Guide missing: "+step);
+                        if(step.equals("gain")) {
+                            sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+                            waitForJs("!busy && !game.tutorial.enabled && !TutorialGuide.isGuiding()","Native back did not pause");
+                            tapSelector("#action-card [data-tutorial-open]");waitForJs("document.querySelector('#tutorial-dialog').open","Guide menu missing");
+                            tapSelector("#tutorial-start");waitForJs("!busy && game.tutorial.enabled && TutorialGuide.isGuiding()","Resume failed");
+                            check(Boolean.TRUE.equals(js("game.tutorial.guide.step==='gain'")),"Resume lost step");
+                        }
+                        if(step.equals("practice") || step.equals("join")) capture("guide-"+theme+"-"+step+"-1481");
+                        check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.tutorial-coach').getBoundingClientRect();return r.right<=innerWidth+1 && r.bottom<=innerHeight+1;})()")),"Coach outside viewport: "+step);
+                        if(Boolean.TRUE.equals(js("!document.querySelector('#guide-next').hidden"))) tapSelector("#guide-next");
+                        else {
+                            if(step.equals("mentor_choice")) tapSelector("[data-guide-choice=guide_accept]");
+                            else {
+                                check(Boolean.TRUE.equals(js("(()=>{document.querySelectorAll('[data-native-guide-target]').forEach(n=>n.removeAttribute('data-native-guide-target'));const target=Array.from(document.querySelectorAll(TutorialSteps[game.tutorial.guide.step].target)).find(n=>{const r=n.getBoundingClientRect();return r.width>0&&r.height>0&&!n.closest('.hidden');});if(!target||target.disabled)return false;target.setAttribute('data-native-guide-target','true');return true;})()")),"Missing live target: "+step);
+                                tapSelector("[data-native-guide-target]");
+                            }
+                        }
+                        waitForJs("!busy && (game.tutorial.guide.step!=="+JSONObject.quote(step)+" || game.tutorial.guide.completed)","Real tap did not advance: "+theme+" "+step);
+                        check(Boolean.TRUE.equals(js("game.player.age===__tutorialAge")),"Teaching advanced time");
                     }
-                    capture("tutorial-"+theme+"-1480");
-                    tapSelector("#tutorial-enabled");waitForJs("!busy && !game.tutorial.enabled","Disable guide failed");
-                    check(Boolean.TRUE.equals(js("game.player.age===__tutorialAge")),"Reading advanced age");
-                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
-                    waitForJs("!document.querySelector('#tutorial-dialog').open","Native back did not close guide");
-                    js("UtilityPanels.open('settings');true");
-                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#tutorial-handbook details').length===10")),"Missing handbook");
-                    tapSelector("#setting-tutorial-open");waitForJs("document.querySelector('#tutorial-dialog').open","Settings guide failed");
-                    tapSelector("#tutorial-enabled");waitForJs("!busy && game.tutorial.enabled","Enable guide failed");
+                    python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nassert g.player.master['realm_index']==3\nassert g.player.faction_id in g.sects\nassert g.player.tutorial_state['guide_completed']\nassert len([h for h in g.history if h.event_id=='SYS_TUTORIAL_MENTOR'])==2");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!TutorialGuide.isGuiding() && game.faction.member && game.player.age===__tutorialAge")),"Guide completion persistence");
                 }
-                check(Boolean.TRUE.equals(js("(()=>{const s=document.querySelector('#tutorial-chapter');s.value='9';s.dispatchEvent(new Event('change'));return true;})()")),"Last chapter selection failed");
-                waitForJs("!busy && game.tutorial.step===9","Last chapter not saved");
-                tapSelector("#tutorial-next");waitForJs("!busy && game.tutorial.completed && !game.tutorial.enabled","Finish tutorial failed");
-                async("loadGame("+JSONObject.quote(id)+")");
-                check(Boolean.TRUE.equals(js("!document.querySelector('#tutorial-dialog').open && game.tutorial.mentor_result==='accepted' && game.player.age===__tutorialAge")),"Tutorial persistence failed");
-                result.putString("tutorial_scope","Six themes; native taps; deterministic Core Formation mentor; settings handbook; no elapsed time; persistent progress; native back");
+                result.putString("tutorial_scope","Six themes; live native taps with spotlight and arrows; deterministic cultivation, treasure, technique, master and sect; native back pause/resume; no elapsed time; reload persistence");
             } else if(phase.equals("save-transfer")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓长卷验收',spirit_root:'supreme_wood',path:'buddhist',seed:1450})});return g.id;})()");
                 python("from cultivation_life import server\nimport json,copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.age=330\ng.player.lifespan=2000\nd=g.to_dict()\nt=d['history'][0]\nd['history']=[{**copy.deepcopy(t),'age':i,'summary':f'第{i}年，修士于山门往返、闭关、游历，记录功法与人间事。'*8,'state_diff':{'npc_id':f'npc_{i%1000}','opportunity':i*3.2}} for i in range(12000)]\nraw=json.dumps(d,ensure_ascii=False,indent=2)\nassert len(raw.encode())>10000000\ne.store._path(g.id).write_text(raw,encoding='utf-8')\nserver._transfer_test_original=d");
@@ -226,10 +228,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     while(true) {
                         tapSelector("#transfer-copy");
                         waitForJs("document.querySelector('#transfer-status').textContent.includes('已复制')","Native copy failed");
-                        check(Boolean.TRUE.equals(js("AndroidGame.readSaveCode()===document.querySelector('#transfer-code').value")),"Clipboard truncation");
+                        waitForJs("AndroidGame.readSaveCode()===document.querySelector('#transfer-code').value","Clipboard content did not match the current segment");
                         js("__segments.push(AndroidGame.readSaveCode())");
                         if(Boolean.TRUE.equals(js("document.querySelector('#transfer-next').disabled"))) break;
+                        js("window.__previousSegment=document.querySelector('#transfer-code').value");
                         tapSelector("#transfer-next");
+                        waitForJs("document.querySelector('#transfer-code').value!==__previousSegment","Segment navigation did not complete");
                     }
                     js("document.querySelector('#transfer-close').click();SaveTransfer.openImport()");
                     int count=((Number)js("__segments.length")).intValue();
@@ -253,7 +257,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1480.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1481.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
@@ -477,6 +481,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
+            try {
+                result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML,rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML:null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
+                capture("failure-1481");
+            } catch(Exception ignored) { /* Preserve the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString());
             finish(Activity.RESULT_CANCELED,result);
         }

@@ -16,6 +16,7 @@
   window.AndroidUI = {back:() => {
     if (window.SaveTransfer?.isWorking()) { toast('正在处理存档，请稍候'); return true; }
     if (typeof busy !== 'undefined' && busy) { toast('正在结算，请稍候'); return true; }
+    if (window.TutorialGuide?.isGuiding()) { window.TutorialGuide.pause(); return true; }
     const confirm = document.querySelector('#game-confirm-backdrop:not(.hidden)');
     if (confirm) { closeGameConfirm(); return true; }
     const dialog = document.querySelector('dialog[open]');
