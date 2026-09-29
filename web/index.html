@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=1">
-  <link rel="stylesheet" href="/tutorial.css?v=1">
+  <link rel="stylesheet" href="/tutorial.css?v=2">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -428,7 +428,7 @@
             <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
           </div>
-          <section class="tutorial-handbook"><h3>新手教程与修行指南</h3><p class="muted">随时开启或关闭引导，也可在这里按章节查阅。</p><button id="setting-tutorial-open" type="button">打开教程与开关</button><div id="tutorial-handbook"></div></section>
+          <section class="tutorial-handbook"><h3>新手百科与修行指南</h3><p class="muted">按本次已加载的 DLC 展示规则，支持搜索与分类查阅；操作教程可随时暂停或继续。</p><button id="setting-tutorial-open" type="button">打开教程与开关</button><div id="tutorial-handbook"></div></section>
         </article>
         <article id="ending-card" class="paper ending-card hidden"><p class="eyebrow">尘缘已了</p><h2>此生落幕</h2><p id="death-reason"></p><div id="post-battle-possession" class="hidden"><p class="post-battle-possession-lead">本魂尚可借俘虏肉身还魂。选择后将立即消耗一次夺舍次数，并改用该 NPC 的年龄与寿元。</p><div id="post-battle-possession-choices" class="choices"></div><p class="muted">若不夺舍，可直接再入轮回，结束此存档的人生。</p></div><button id="restart-button" class="primary">再入轮回</button></article>
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
@@ -528,8 +528,9 @@
   <script src="/immortal-aperture-panel.js?v=2"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
+  <script src="/handbook-content.js?v=1"></script>
   <script src="/tutorial-steps.js?v=1"></script>
-  <script src="/tutorial.js?v=1"></script>
+  <script src="/tutorial.js?v=2"></script>
   <script src="/app.js?v=1.45.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
