@@ -1,6 +1,6 @@
 {
-  "base_version": "1.45.0",
-  "exe_sha256": "e596f4252a312c747acb007ac0b5cbc30c882936743cf0336f5eed5fa33b4b1c",
+  "base_version": "1.46.0",
+  "exe_sha256": "0f6ce7d52be68bd6e77b41e052ad3e4cc5fe96c7d462080dfaf3e7738421d324",
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -11,7 +11,8 @@
     "tianji-artifacts": "2.2.0"
   },
   "validation": [
-    "885 automated regressions passed",
+    "990 automated regressions passed",
+    "Six-theme immortal meridians, manual realm breakthrough, immortal body cultivation and intrinsic resource bars verified",
     "Six-theme live browser: save library, import/export, encryption and chunk roundtrips, Buddhist colours; no JavaScript errors",
     "Packaged EXE starts with and without optional DLC; all seven packages, wish UI assets, base reincarnation content and Buddhist entry verified",
     "Android 12 companion release with six-theme save UI adaptation"

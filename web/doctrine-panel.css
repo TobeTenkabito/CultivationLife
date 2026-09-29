@@ -22,8 +22,21 @@
 .voisinage-comparison { height: 6px; margin: 6px 0; border-radius: 3px; background: linear-gradient(to right, #a66b61 var(--invasion-share), #5d8881 var(--invasion-share)); }
 @media (max-width: 600px) { .doctrine-book-grid, .voisinage-field-grid { grid-template-columns: 1fr; } #doctrine-card, .immortal-panel { max-height: calc(100dvh - 80px); padding: 14px; } .doctrine-actions button { flex: 1 1 140px; } }
 
-.vein-grid { display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:6px; }
-.vein-grid span { border:1px solid var(--line); border-radius:50%; text-align:center; padding:8px 0; opacity:.5; }
-.vein-grid .opened { background:var(--accent,#305a47); color:white; opacity:1; }
 .immortal-content button { margin:6px 6px 6px 0; max-width:100%; white-space:normal; }
 .immortal-content progress { width:100%; }
+
+.meridian-figure { margin:0; display:grid; justify-items:center; gap:12px; }
+.meridian-figure svg { display:block; width:min(100%,390px); height:auto; color:var(--pine,#416450); }
+.meridian-body { fill:var(--paper,#f5f0e3); stroke:var(--muted,#8a8479); stroke-width:1.5; }
+.meridian-channel { fill:none; stroke:currentColor; stroke-width:1.4; opacity:.42; }
+.meridian-node circle { fill:var(--surface,var(--paper,#f5f0e3)); stroke:currentColor; stroke-width:1.4; }
+.meridian-node text { fill:var(--ink,#28342e); font:10px Arial,sans-serif; }
+.meridian-node.opened circle { fill:currentColor; }
+.meridian-node.opened text { fill:var(--surface,#fff); }
+.meridian-node.next circle { stroke-width:3; }
+.meridian-node.sealed { opacity:.62; }
+.meridian-figure figcaption { color:var(--muted); font-size:12px; text-align:center; max-width:440px; }
+.hud-hp .hud-track i, .hud-mp .hud-track i {
+  background:linear-gradient(to right,rgba(0,0,0,.25) 0%,rgba(0,0,0,.25) var(--intrinsic-share,0%),transparent var(--intrinsic-share,0%),transparent 100%),var(--meter-color);
+}
+#hp-bar, #mp-bar { background-image:linear-gradient(to right,rgba(0,0,0,.25) 0%,rgba(0,0,0,.25) var(--intrinsic-share,0%),transparent var(--intrinsic-share,0%),transparent 100%); }

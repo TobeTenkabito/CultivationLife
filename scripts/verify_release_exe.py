@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
+            for asset in ['doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -173,6 +173,20 @@ def verify(with_dlc):
             assert len(upper['map']['locations']) == 10
             assert any(row.get('factions') for row in upper['map']['locations'])
             assert upper['buddhist_system']['available'] == with_dlc
+            request = urllib.request.Request(base + '/api/games', method='POST',
+                data=json.dumps({'name':'仙躯打包验收','preset_id':'true_immortal','seed':1460}).encode(),
+                headers={'Content-Type':'application/json'})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                immortal = json.load(response)
+            assert immortal['player']['time_unit_years'] == 100
+            assert immortal['player']['opportunity_unbounded']
+            assert 'immortal_traces' in immortal['player']
+            assert set(immortal['player']['intrinsic_resources']) == {'hp','mp'}
+            assert immortal['doctrines']['veins']['total'] == 27
+            assert immortal['doctrines']['veins']['trace_chance'] == .07
+            assert immortal['doctrines']['immortal_body']['required_training'] == 100
+            assert immortal['doctrines']['immortal_body']['golden_light_level'] == 20
+            assert len(immortal['doctrines']['immortal_body']['manuals']) >= 1
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

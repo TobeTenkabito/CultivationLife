@@ -1,17 +1,19 @@
 """Player-only vein and voisinage cultivation actions; no annual NPC hooks."""
 from ..content_registry import REALMS
 from ..models import HistoryRecord
-from ..rules import remove_item, public_player
+from ..rules import remove_item, public_player, opportunity_required
 from ..runtime import now_iso, decode_rng, encode_rng
 from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, vein_cost, training_cost
+from .immortal_cultivation import vein_probability, vein_ready, golden_light
+from .immortal_body_system import ImmortalBodyMixin
 
 
 def item_quantity(player, item_id):
     return sum(item.quantity for item in player.inventory if item.id == item_id)
 
 
-class ImmortalCultivationMixin:
+class ImmortalCultivationMixin(ImmortalBodyMixin):
     def _cultivation_game(self, game_id):
         game = self._load(game_id)
         p = game.player
@@ -31,35 +33,39 @@ class ImmortalCultivationMixin:
         self.store.save(game)
         return self.present(game)
 
-    def immortal_action(self, game_id, action, doctrine_id=None, axis=None):
+    def immortal_action(self, game_id, action, doctrine_id=None, axis=None, supply_id=None):
         game = self._cultivation_game(game_id)
         p, record, rules = game.player, player_record(game), config()["cultivation"]
         if action == "gather":
-            return self.advance(game_id, "immortal_trace_gather", 1)
+            return self.advance(game_id, "cultivate", 1)
+        if action in {'train_body', 'buy_body_manual', 'select_body_manual', 'buy_body_supply'}:
+            return self._immortal_body_action(game, action, supply_id)
+        if action == 'breakthrough':
+            if not vein_ready(p):
+                raise ValueError(f'本层须先开启 {p.layer * 3} 条仙脉（本境共 27 条）')
+            return self.breakthrough(game_id)
+        if p.sealed_cultivation or p.cultivation_suppression:
+            raise ValueError('修为受压制，不能开启仙脉或温养邻域')
         if not p.immortal_power_converted:
             raise ValueError("须先完成仙灵力转化")
         opened = p.immortal_veins.get(str(p.realm_index), 0)
         if action == "open_vein":
-            if opened >= rules["veins_per_realm"]:
-                raise ValueError("本境仙脉已经全部开启")
+            if opened >= min(rules["veins_per_realm"], p.layer * rules["veins_per_layer"]):
+                raise ValueError("本层仙脉已经贯通，请先手动突破境界")
             cost = vein_cost(p.realm_index, opened, rules)
+            probability = vein_probability(p)
             self._spend_cultivation(p, cost)
-            p.immortal_veins[str(p.realm_index)] = opened + 1
-            layer = min(9, 1 + (opened + 1) // rules["veins_per_layer"])
-            if layer > p.layer:
-                rng = decode_rng(game.seed, game.rng_state)
-                self._complete_minor_breakthrough(game, rng, public_player(p)["realm_name"])
-                game.rng_state = encode_rng(rng)
-            summary = f"开启本境第 {opened + 1}/27 条仙脉，当前{public_player(p)['realm_name']}。"
-        elif action == "breakthrough":
-            if opened < rules["veins_per_realm"] or p.layer < 9:
-                raise ValueError("须先开启本境全部 27 条仙脉")
-            if p.realm_index >= len(REALMS) - 1:
-                raise ValueError("已达当前开放的最高大境界")
             rng = decode_rng(game.seed, game.rng_state)
-            self._complete_major_breakthrough(game, rng, public_player(p)["realm_name"])
+            success = rng.random() < probability
             game.rng_state = encode_rng(rng)
-            summary = f"二十七脉贯通，进阶{public_player(p)['realm_name']}。机缘余量保留。"
+            key = f'{p.realm_index}:{opened + 1}'
+            if success:
+                p.immortal_veins[str(p.realm_index)] = opened + 1
+                p.immortal_vein_pity.pop(key, None)
+                summary = f"开启本境第 {opened + 1}/27 条仙脉（成功率 {probability:.0%}）。境界不自动进阶。"
+            else:
+                p.immortal_vein_pity[key] = p.immortal_vein_pity.get(key, 0) + 1
+                summary = f"开脉失败，本次机缘与仙痕已消耗；下次成功率 {vein_probability(p):.0%}。"
         elif action == "train_voisinage":
             level = record["progress"].get(doctrine_id, {}).get("level", 0)
             if level < 4 or axis not in AXES:
@@ -77,18 +83,24 @@ class ImmortalCultivationMixin:
 
     @staticmethod
     def _spend_cultivation(player, cost):
-        if player.opportunity < cost["opportunity"] or item_quantity(player, "immortal_trace") < cost["traces"]:
+        if player.opportunity < cost["opportunity"] or player.immortal_traces < cost["traces"]:
             raise ValueError("机缘或仙痕不足")
-        remove_item(player, "immortal_trace", cost["traces"])
+        player.immortal_traces -= cost["traces"]
         player.opportunity -= cost["opportunity"]
 
-    @staticmethod
-    def _public_immortal(game):
+    def _public_immortal(self, game):
         rules, p = config()["cultivation"], game.player
         opened = p.immortal_veins.get(str(p.realm_index), 0)
+        major = p.layer >= REALMS[p.realm_index].layers
+        ready = vein_ready(p) and (not major or p.realm_index < len(REALMS) - 1)
+        requirement = self._major_breakthrough_requirement(p) if major else {"met": True, "reason": "每层三脉贯通后手动冲关。"}
         return {"opened": opened, "total": rules["veins_per_realm"], "per_layer": rules["veins_per_layer"],
                 "realm": REALMS[p.realm_index].name, "layer": p.layer, "opportunity": p.opportunity,
-                "traces": item_quantity(p, "immortal_trace"), "converted": p.immortal_power_converted,
-                "next_cost": vein_cost(p.realm_index, opened, rules) if opened < rules["veins_per_realm"] else None,
-                "can_breakthrough": opened >= rules["veins_per_realm"] and p.realm_index < len(REALMS) - 1,
-                "trace_years": rules["trace_years"]}
+                "traces": p.immortal_traces, "converted": p.immortal_power_converted,
+                "next_cost": vein_cost(p.realm_index, opened, rules) if opened < min(rules["veins_per_realm"], p.layer * rules["veins_per_layer"]) else None,
+                "can_breakthrough": ready and requirement["met"] and p.immortal_power_converted and p.opportunity >= opportunity_required(p),
+                "ready": ready, "major": major, "requirement": requirement["reason"],
+                "breakthrough_cost": opportunity_required(p),
+                "breakthrough_chance": self._breakthrough_chance(p, major=major)["final"] if ready else None,
+                "chance": vein_probability(p), "pity_step": rules["vein_pity_step"],
+                "trace_chance": rules["trace_gain_chance"]}

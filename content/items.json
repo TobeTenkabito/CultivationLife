@@ -1,7 +1,15 @@
 {
   "schema_version": 1,
   "items": [
-    {"id": "immortal_trace", "name": "仙痕", "description": "感悟仙界法则凝成的痕迹，用于开启仙脉与温养邻域。", "tags": ["material", "immortal"]},
+    {
+      "id": "immortal_trace",
+      "name": "仙痕",
+      "description": "感悟仙界法则凝成的痕迹，用于开启仙脉与温养邻域。",
+      "tags": [
+        "material",
+        "immortal"
+      ]
+    },
     {
       "id": "heroic_progeny_elixir",
       "name": "英姿神武口服液",
@@ -10510,6 +10518,36 @@
         "yang",
         "mutated_root",
         "reincarnation"
+      ]
+    },
+    {
+      "id": "immortal_jade_herb",
+      "name": "玉髓仙草",
+      "description": "汲取仙界本源长成的仙草，用于仙躯淬炼。",
+      "tags": [
+        "material",
+        "immortal",
+        "body_medicine"
+      ]
+    },
+    {
+      "id": "nine_leaf_immortal_lingzhi",
+      "name": "九叶仙芝",
+      "description": "药力温厚，调和仙躯淬炼时的药性。",
+      "tags": [
+        "material",
+        "immortal",
+        "body_medicine"
+      ]
+    },
+    {
+      "id": "golden_lotus_elixir",
+      "name": "金莲琼液",
+      "description": "九转金莲炼成的灵药，用于无垢仙躯的淬炼。",
+      "tags": [
+        "material",
+        "immortal",
+        "body_medicine"
       ]
     }
   ]

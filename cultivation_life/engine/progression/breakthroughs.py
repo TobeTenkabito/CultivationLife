@@ -180,6 +180,13 @@ def _manual_minor_layers(player: Player) -> set[int]:
 
 
 def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) -> str | None:
+    if player.world == 'celestial' and player.realm_index >= 9:
+        from ...system.immortal_cultivation import vein_ready
+        if not player.immortal_power_converted or not vein_ready(player):
+            return None
+        if player.layer < realm(player).layers:
+            return 'minor'
+        return 'major' if player.realm_index < len(REALMS) - 1 else None
     monster_upper_evolution = bool(
         player.path == "monster" and deps.bloodline_content_available()
         and WORLD_SYSTEMS.get("world_profiles", {}).get("nether", {}).get("enabled")
@@ -237,6 +244,11 @@ def _clear_minor_pity(deps: BreakthroughDependencies, player: Player) -> None:
 
 
 def _major_breakthrough_requirement(player: Player) -> dict[str, Any]:
+    if player.world == 'celestial' and player.realm_index == 9:
+        from ...system.immortal_cultivation import golden_light
+        met = golden_light(player)
+        return {'met': met, 'reason': '仙脉与真仙之躯圆满，可冲击金仙。' if met else
+                '进阶金仙须将真仙之躯修至第 20 层，解锁护体金光。', 'missing_affinities': []}
     if player.path == "demonic" and player.world == "demon" and player.realm_index == 5:
         return {
             "met": False,

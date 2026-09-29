@@ -286,7 +286,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
                     "realm_index": target.realm_index, "faction_id": target.faction_id, "race": target.race}, rng)
                 target.death_reason = f"被{order['worker']}依商盟悬赏击杀"
                 self._tianji_handle_npc_kill(game, target.id)
-            game.player.opportunity += stars * 20
+            self._add_opportunity(game.player, stars * 20)
             game.player.karma = max(0, game.player.karma - stars * 3)
             if kind == "intel":
                 order["delivery"] = self._merchant_intelligence(game, order["source_world"], stars, rng)
@@ -368,7 +368,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             self._grant_art_experience(game.player, "formation", task["stars"] * 20)
         reward = task["reward"]
         add_item(game.player, "spirit_stone", reward["stones"])
-        game.player.opportunity += reward["opportunity"]
+        self._add_opportunity(game.player, reward["opportunity"])
         game.player.karma = max(0, game.player.karma - reward["karma"])
         definition = self._crafting_material_defs()[task.get("reward_definition_id", task["definition_id"])]
         for _ in range(reward["materials"]):

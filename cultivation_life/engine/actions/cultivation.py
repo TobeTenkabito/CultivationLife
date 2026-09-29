@@ -226,6 +226,11 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
         raise ValueError("当前修为受下界法则压制，不能在封印状态下突破")
     if player.cultivation_suppression:
         raise ValueError("当前修为受秘法压制，解除压制后方可突破")
+    if player.world == 'celestial' and player.realm_index >= 9 and (
+        game.active_trial or player.ghost_captor or game.heavenly_court.get('open_election')
+        or (game.guixu_state.get('player_session') or {}).get('trapped')
+    ):
+        raise ValueError('当前状态无法冲关，请先处理事件或脱离拘束')
     current = realm(player)
     required = opportunity_required(player)
     breakthrough_kind = deps._manual_breakthrough_kind(player)
@@ -255,7 +260,9 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     if rng.random() >= chance["final"]:
         player.joint_companion_breakthrough = None
         failure_type = "major" if major else "minor"
-        player.opportunity = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])
+        retained = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])
+        player.opportunity = (max(0, player.opportunity - required + retained)
+                              if player.realm_index >= 9 else retained)
         gain = deps._sage_scaled_gain(
             player, float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_heart_demon"]),
             "heart_demon_gain_reduction",
@@ -287,7 +294,14 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
         )
         player.opportunity = max(0.0, player.opportunity - required)
         source = player.realm_index
-        if major:
+        if source >= 9 and player.world == 'celestial':
+            # Immortal calamities are a separate extension point; do not reuse
+            # lower-world lightning scripts for an undesigned celestial calamity.
+            if major:
+                deps._complete_major_breakthrough(game, rng, old_label)
+            else:
+                deps._complete_minor_breakthrough(game, rng, old_label)
+        elif major:
             if source >= 3:
                 kind = (
                     "heavenly_demon" if player.path == "demonic" and source >= 6
@@ -376,7 +390,7 @@ def body_breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict
     else:
         old = player.body_training
         player.body_training = target
-        grant_intrinsic_growth(player, hp=12.0)
+        grant_intrinsic_growth(player, hp=12.0, mp=10.0)
         player.body_progress = 0.0
         player.awaiting_body_breakthrough = False
         player.body_breakthrough_pity.pop(key, None)

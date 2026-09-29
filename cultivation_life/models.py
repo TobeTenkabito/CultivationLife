@@ -359,6 +359,10 @@ class Player:
     next_thunder_damage_reduction: float = 0.0
     immortal_power_converted: bool = False
     immortal_veins: dict[str, int] = field(default_factory=dict)
+    immortal_vein_pity: dict[str, int] = field(default_factory=dict)
+    immortal_traces: int = 0
+    immortal_trace_rng: int = 0
+    immortal_body: dict[str, Any] = field(default_factory=dict)
     transcendence: dict[str, Any] | None = None
     immortal_conversion_stage: int = 0
     immortal_conversion_last_age: int | None = None
@@ -513,6 +517,12 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(value)
+        data['immortal_traces'] = max(0, int(data.get('immortal_traces', 0))) + sum(
+            max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
+        data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
+        data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
+        data['immortal_body'] = copy.deepcopy(data.get('immortal_body', {}))
+        data.setdefault('immortal_trace_rng', 0)
         data["gender"] = str(data.get("gender", "male"))
         if data["gender"] not in {"male", "female"}:
             data["gender"] = "male"
@@ -933,7 +943,7 @@ class GameState:
         return cls(
             id=value["id"],
             seed=value["seed"],
-            player=Player.from_dict(value["player"]),
+            player=Player.from_dict({"immortal_trace_rng": value["seed"], **value["player"]}),
             created_at=value["created_at"],
             updated_at=value["updated_at"],
             rng_state=value.get("rng_state", ""),

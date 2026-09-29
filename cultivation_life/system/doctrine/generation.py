@@ -46,10 +46,37 @@ def validate_content(config: Mapping[str, Any]) -> None:
     if rules["veins_per_layer"] != 3 or rules["veins_per_realm"] != 27:
         raise ValueError("每层三条仙脉，每境二十七条")
     for key in ("vein_opportunity_base", "vein_opportunity_step", "vein_trace_base", "vein_trace_step",
-                "trace_years", "voisinage_max_training", "voisinage_opportunity_base", "voisinage_trace_base",
+                "voisinage_max_training", "voisinage_opportunity_base", "voisinage_trace_base",
                 "annotation_price", "explore_price"):
         if type(rules[key]) is not int or rules[key] <= 0:
             raise ValueError(f"Invalid cultivation parameter {key}")
+    if rules['trace_gain_chance'] != .07 or len(rules['vein_success_rates']) != 9:
+        raise ValueError('仙痕判定须为 7%，仙脉须配置九层成功率')
+    for rate in [*rules['vein_success_rates'], rules['vein_pity_step']]:
+        if not 0 < number(rate, 'vein probability') <= 1:
+            raise ValueError('仙脉概率无效')
+    body = rules['body']
+    if body['required_training'] != 100 or body['golden_light_level'] != 20:
+        raise ValueError('仙躯须炼体百层起修、二十层激发金光')
+    for key in ('max_level', 'hp_per_level', 'mp_per_level'):
+        number(body[key], key, minimum=1)
+    if body['max_level'] < body['golden_light_level']:
+        raise ValueError('仙躯上限不能低于金光门槛')
+    for key in ('base_chance', 'chance_step', 'minimum_chance', 'pity_step'):
+        if not 0 < number(body[key], key) <= 1:
+            raise ValueError('仙躯概率无效')
+    if not body['manuals'] or len({m['id'] for m in body['manuals']}) != len(body['manuals']):
+        raise ValueError('仙躯功法须具有独立标识')
+    supplies = {s['id'] for s in body['supplies']}
+    for manual in body['manuals']:
+        if not manual['recipe'] or set(manual['recipe']) - supplies:
+            raise ValueError('仙躯配方引用了不可获得的药材')
+        number(manual['price'], 'manual price', minimum=1)
+        if not 0 <= number(manual['chance_bonus'], 'manual bonus') < 1:
+            raise ValueError('仙躯功法概率加成无效')
+        for quantity in manual['recipe'].values():
+            if type(quantity) is not int or quantity <= 0:
+                raise ValueError('药材数量须为正整数')
     if not 0 < number(rules["voisinage_training_gain"], "voisinage training gain") <= .1:
         raise ValueError("额外邻域温养不能替代道统成就")
 

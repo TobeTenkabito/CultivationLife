@@ -180,7 +180,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.45.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.46.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             if(phase.equals("save-transfer")) {
@@ -222,9 +222,41 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1450.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1460.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
+            } else if(phase.equals("immortal")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'仙脉仙躯验收',preset_id:'true_immortal',seed:1460})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.rules import add_item,max_hp,max_mp\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.active_trial=None\ng.heavenly_court['open_election']=None\ng.player.next_tribulation_age=None\ng.player.opportunity=10**9\ng.player.immortal_traces=10000\ng.player.immortal_vein_pity={'9:1':100,'9:2':100,'9:3':100}\nadd_item(g.player,'spirit_stone',10**8)\ng.player.hp=max_hp(g.player)*.6\ng.player.mp=max_mp(g.player)*.6\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=voisinage]').classList.contains('hidden') && !document.querySelector('[data-panel-target=immortal-body]').classList.contains('hidden')")),"Immortal entry gates");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
+                    async("GameThemes.saved");
+                    js("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-veins');document.querySelector('.meridian-figure').scrollIntoView({block:'center'});true");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.meridian-node circle').length===27 && document.querySelector('#immortal-veins-card').scrollWidth<=document.querySelector('#immortal-veins-card').clientWidth+1")),"Meridian layout: "+theme);
+                    check(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('#hud-hp .hud-track i')).backgroundImage.includes('linear-gradient') && document.querySelector('#hud-power').textContent.includes('仙痕')")),"Intrinsic resource and trace HUD: "+theme);
+                    capture("immortal-meridians-"+theme);
+                    js("UtilityPanels.close('immortal-veins');UtilityPanels.open('immortal-body');true");
+                    check(Boolean.TRUE.equals(js("!game.doctrines.immortal_body.can_train && document.querySelector('#immortal-body-card').scrollWidth<=document.querySelector('#immortal-body-card').clientWidth+1")),"Body prerequisites: "+theme);
+                    capture("immortal-body-"+theme);
+                }
+                js("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-veins');true");
+                for(int n=1;n<=3;n++) {
+                    tapSelector("#immortal-veins-content button");
+                    waitForJs("game.doctrines.veins.opened==="+n,"Tap to open vein "+n);
+                    check(Boolean.TRUE.equals(js("game.player.layer===1")),"Veins auto-promoted realm");
+                }
+                python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.body_training=100\ng.player.immortal_body={'level':19,'failures':100}\nadd_item(g.player,'immortal_jade_herb',1000)\nadd_item(g.player,'nine_leaf_immortal_lingzhi',1000)\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                async("mutate('/api/games/'+game.id+'/immortal-action',{action:'buy_body_manual',supply_id:'jade_marrows'})");
+                js("UtilityPanels.close('immortal-veins');UtilityPanels.open('immortal-body');true");
+                tapSelector("#immortal-body-content button:last-child");
+                waitForJs("game.doctrines.immortal_body.level===20 && game.doctrines.immortal_body.golden_light","Body level20 golden light");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.doctrines.immortal_body.level===20 && game.player.immortal_traces>0 && !game.player.inventory.some(i=>i.id==='immortal_trace')")),"Immortal save persistence");
+                capture("immortal-golden-light");
+                result.putString("immortal_scope","Six themes, meridian circles, hidden voisinage entry, intrinsic bars, trace counter, actual tap opening three veins without automatic realm promotion, immortal body level20 and persistence");
             } else if(phase.equals("npc-social")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'血脉长存档验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'serpent',seed:1440})});return g.id;})()");
                 com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",

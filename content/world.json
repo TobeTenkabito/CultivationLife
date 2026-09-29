@@ -1,10 +1,42 @@
 {
   "schema_version": 1,
   "actions": {
-    "daomen_explore": {"name": "访求道门", "opportunity": [0, 0], "hp": 0, "mp": 0},
-    "immortal_trace_gather": {"name": "感悟仙痕", "opportunity": [2, 4], "hp": 0, "mp": 0},
-    "doctrine_study": {"name": "参悟道统", "opportunity": [0, 0], "hp": 0, "mp": 0},
-    "immortal_conversion": {"name": "转化仙灵力", "opportunity": [0, 0], "hp": 0, "mp": 0},
+    "daomen_explore": {
+      "name": "访求道门",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "immortal_trace_gather": {
+      "name": "感悟机缘",
+      "opportunity": [
+        2,
+        4
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "doctrine_study": {
+      "name": "参悟道统",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "immortal_conversion": {
+      "name": "转化仙灵力",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
     "cultivate": {
       "name": "潜心修炼",
       "opportunity": [
@@ -254,29 +286,79 @@
       "contest_ratio": 1.25,
       "voisinages": [],
       "converted_player_state": {
-        "version": 1, "resource_link": "legacy_mp", "conversion": 1,
-        "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100
+        "version": 1,
+        "resource_link": "legacy_mp",
+        "conversion": 1,
+        "force_tier": 2,
+        "ward_tier": 2,
+        "attack_cost": 10,
+        "ward_cost": 100
       },
       "npc_lifecycle": {
-        "native_worlds": ["celestial", "asura", "nether", "reincarnation"],
+        "native_worlds": [
+          "celestial",
+          "asura",
+          "nether",
+          "reincarnation"
+        ],
         "native_min_realm": 9,
         "native_state": {
-          "version": 1, "conversion": 1, "capacity": 1000, "current": 1000,
-          "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100,
-          "attainments": {}, "voisinage_ids": []
+          "version": 1,
+          "conversion": 1,
+          "capacity": 1000,
+          "current": 1000,
+          "force_tier": 2,
+          "ward_tier": 2,
+          "attack_cost": 10,
+          "ward_cost": 100,
+          "attainments": {},
+          "voisinage_ids": []
         },
         "environments": {
-          "human": {"recovery_per_year": 0, "available_fraction": 0.02},
-          "demon": {"recovery_per_year": 0, "available_fraction": 0.02},
-          "spirit": {"recovery_per_year": 0, "available_fraction": 0.1},
-          "true_demon": {"recovery_per_year": 0, "available_fraction": 0.1},
-          "phantom_underworld": {"recovery_per_year": 0, "available_fraction": 0.1},
-          "hell": {"recovery_per_year": 0, "available_fraction": 0.1},
-          "monster_realm": {"recovery_per_year": 0, "available_fraction": 0.1},
-          "celestial": {"recovery_per_year": 0.01, "available_fraction": 1},
-          "asura": {"recovery_per_year": 0.01, "available_fraction": 1},
-          "nether": {"recovery_per_year": 0.01, "available_fraction": 1},
-          "reincarnation": {"recovery_per_year": 0.01, "available_fraction": 1}
+          "human": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.02
+          },
+          "demon": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.02
+          },
+          "spirit": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.1
+          },
+          "true_demon": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.1
+          },
+          "phantom_underworld": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.1
+          },
+          "hell": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.1
+          },
+          "monster_realm": {
+            "recovery_per_year": 0,
+            "available_fraction": 0.1
+          },
+          "celestial": {
+            "recovery_per_year": 0.01,
+            "available_fraction": 1
+          },
+          "asura": {
+            "recovery_per_year": 0.01,
+            "available_fraction": 1
+          },
+          "nether": {
+            "recovery_per_year": 0.01,
+            "available_fraction": 1
+          },
+          "reincarnation": {
+            "recovery_per_year": 0.01,
+            "available_fraction": 1
+          }
         }
       }
     },
@@ -1544,6 +1626,15 @@
           "mutated": 0.04,
           "law": 0.05,
           "otherworld": 0.06
+        },
+        "9": {
+          "default": 0.3
+        },
+        "10": {
+          "default": 0.22
+        },
+        "11": {
+          "default": 0.15
         }
       },
       "minor_base": {
@@ -1553,7 +1644,11 @@
         "5": 0.3,
         "6": 0.22,
         "7": 0.16,
-        "8": 0.1
+        "8": 0.1,
+        "9": 0.45,
+        "10": 0.35,
+        "11": 0.25,
+        "12": 0.18
       },
       "minor_pity": {
         "eligible_source_layers": [
