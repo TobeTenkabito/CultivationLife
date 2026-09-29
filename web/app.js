@@ -58,6 +58,7 @@ $('#game-confirm-backdrop').addEventListener('click', event => {
 async function boot() {
   const [config, saves, achievements] = await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
   configData = config;
+  window.TutorialGuide?.configure(config);
   const baseGame = config.base_game || {};
   const versionLabel = baseGame.version_label || `本体 v${baseGame.version || '?'}`;
   $('#base-game-version').textContent = versionLabel;
@@ -255,6 +256,7 @@ function renderStartExtensionManager(extensions) {
           method: 'POST', body: JSON.stringify({enabled: input.checked}),
         });
         extension.next_enabled = result.enabled;
+        window.TutorialGuide?.configure(configData);
         renderStartExtensionManager(extensions);
         renderExtensions(extensions);
         toast(result.message);

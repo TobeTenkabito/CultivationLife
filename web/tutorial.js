@@ -5,7 +5,58 @@
   let data=null,send=null,working=false,startEnabled=false,currentKey='',focus=null,frame=0,preparing=false,selectedSect='',duration=null;
   try{startEnabled=localStorage.getItem('wendao-tutorial-next-life')==='true';}catch(_){}
   const handbook=$('#tutorial-handbook');
-  TutorialChapters.forEach((c,i)=>{const d=node('details'),body=node('div',null,'tutorial-copy');d.append(node('summary',`${i+1}. ${c.title}`));body.append(node('p',c.lead));for(const [title,...ps] of c.sections){body.append(node('h3',title));ps.forEach(p=>body.append(node('p',p)));}d.append(body);handbook.append(d);});
+  const handbookTools=node('div',null,'handbook-tools'),edition=node('p',null,'handbook-edition');
+  const searchLabel=node('label','查找你遇到的问题','handbook-search-label'),search=node('input');
+  search.type='search';search.placeholder='搜索：飞升、魔气、愿力、阵法、存档……';search.id='handbook-search';search.maxLength=100;
+  searchLabel.htmlFor=search.id;
+  const categories=node('div',null,'handbook-categories');categories.setAttribute('role','group');categories.setAttribute('aria-label','百科章节分类');
+  const matches=node('p',null,'handbook-matches');matches.setAttribute('role','status');
+  handbookTools.append(edition,searchLabel,search,categories,matches);handbook.before(handbookTools);
+  let handbookCategory='全部',handbookRows=[];
+  function filterHandbook(){
+    const words=search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    let count=0;
+    for(const row of handbookRows){
+      row.element.hidden=(handbookCategory!=='全部'&&row.chapter.category!==handbookCategory)||!words.every(w=>row.text.includes(w));
+      if(!row.element.hidden)count++;
+      row.element.open=words.length? !row.element.hidden:row.expanded;
+    }
+    for(const b of categories.children)b.setAttribute('aria-pressed',String(b.textContent===handbookCategory));
+    matches.textContent=count?`找到 ${count} / ${handbookRows.length} 章 · 点击标题展开`:'没有匹配章节。可换个关键词或切回“全部”；未加载 DLC 的专属章节不会显示。';
+  }
+  function resetHandbookFilter(){search.value='';handbookCategory='全部';filterHandbook();}
+  function renderHandbook(config){
+    const opened=new Set(handbookRows.filter(r=>r.expanded).map(r=>r.chapter.id));
+    const chapters=TutorialHandbook.build(config);
+    if(handbookCategory!=='全部'&&!chapters.some(c=>c.category===handbookCategory))handbookCategory='全部';
+    handbook.replaceChildren();categories.replaceChildren();handbookRows=[];
+    const loaded=(config.extensions||[]).filter(e=>e.status==='loaded'&&e.kind==='dlc');
+    const hasMods=(config.extensions||[]).some(e=>e.status==='loaded'&&e.kind==='mod');
+    edition.textContent=`本体 v${config.base_game?.version||'—'} · ${loaded.length?`已加载 ${loaded.length} 个 DLC`:hasMods?'未加载 DLC，另有 MOD':'纯本体规则'}。`+
+      (loaded.length?`当前：${loaded.map(e=>e.name).join('、')}。`:'')+
+      ((config.extensions||[]).some(e=>e.next_enabled!=null)?' 开关有待重启改动，本百科仍按当前已加载内容显示。':'')+
+      ' 先读入门；卡关时按问题查，不必一口气读完。';
+    for(const category of ['全部',...new Set(chapters.map(c=>c.category))]){
+      const b=node('button',category);b.type='button';b.onclick=()=>{handbookCategory=category;filterHandbook();};categories.append(b);
+    }
+    chapters.forEach((c,i)=>{
+      const d=node('details'),body=node('div',null,'tutorial-copy');d.dataset.chapter=c.id;
+      const summary=node('summary');summary.append(node('span',`${String(i+1).padStart(2,'0')} · ${c.category}`,'handbook-chapter-meta'),node('span',c.title));d.append(summary);
+      body.append(node('p',c.lead,'tutorial-lead'));
+      if(c.table){
+        const wrap=node('div',null,'handbook-table-wrap'),table=node('table');table.append(node('caption',c.table.caption));
+        const head=node('thead'),hr=node('tr');for(const label of c.table.headers){const th=node('th',label);th.scope='col';hr.append(th);}head.append(hr);table.append(head);
+        const tbody=node('tbody');for(const cells of c.table.rows){const tr=node('tr');cells.forEach((text,index)=>{const cell=node(index?'td':'th',text);if(!index)cell.scope='row';tr.append(cell);});tbody.append(tr);}table.append(tbody);wrap.append(table);body.append(wrap);
+      }
+      for(const [title,...ps] of c.sections){body.append(node('h3',title));ps.forEach(p=>body.append(node('p',p)));}
+      d.append(body);handbook.append(d);
+      const row={element:d,chapter:c,text:JSON.stringify(c).toLocaleLowerCase(),expanded:opened.has(c.id)};handbookRows.push(row);
+      d.addEventListener('toggle',()=>{if(!search.value.trim())row.expanded=d.open;});
+    });
+    filterHandbook();
+  }
+  search.addEventListener('input',filterHandbook);
+  renderHandbook({});
   const root=node('div',null,'tutorial-tour');root.hidden=true;
   root.innerHTML='<svg class="tutorial-shade" aria-hidden="true"><path fill-rule="evenodd"/></svg><div class="tutorial-focus" aria-hidden="true"></div><svg class="tutorial-arrow" aria-hidden="true"><defs><marker id="tutorial-arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z"/></marker></defs><path marker-end="url(#tutorial-arrowhead)"/></svg><section class="tutorial-coach" role="region" aria-label="操作引导"><small id="guide-progress"></small><h2 id="guide-title"></h2><p id="guide-copy" aria-live="polite"></p><p id="guide-hint"></p><div><button id="guide-pause" type="button">暂停引导</button><button id="guide-next" type="button">明白了，继续</button></div></section>';
   document.body.append(root);
@@ -18,6 +69,7 @@
   function stop(){root.hidden=true;focus=null;currentKey='';observer.disconnect();}
   async function act(action,extra={}){if(working||!send)return;working=true;draw();try{await send({action,step:data?.tutorial.guide.step,...extra});}finally{working=false;draw();}}
   function context(step){
+    if(data?.tutorial.guide.step==='handbook')resetHandbookFilter();
     if(step.context==='details'){if(!$('#player-details-dialog').open)$('#player-details-dialog').showModal();}
     else if(['living','daily'].includes(step.context))$(`#tab-${step.context}`).click();
     else if(step.context&&!$(`#${step.context}-card`).classList.contains('panel-open'))UtilityPanels.open(step.context);
@@ -119,6 +171,6 @@
   document.addEventListener('close',()=>{if(data?.tutorial.guide.active)queueMicrotask(draw);},true);
   addEventListener('resize',schedule);addEventListener('scroll',schedule,true);
   window.TutorialGuide={enabledForNewGame:()=>startEnabled,reset(){data=null;send=null;stop();dialog.close();draw();},
-    render(value,callback){data=value;send=callback;draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable')};
+    configure:renderHandbook,render(value,callback){data=value;send=callback;draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable')};
   draw();
 })();
