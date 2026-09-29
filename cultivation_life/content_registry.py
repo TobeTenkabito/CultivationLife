@@ -465,10 +465,10 @@ class ContentRegistry:
             monster_bloodline_settings=monster_bloodline_settings,
         )
         from .system.world_transition_system import validate_transition_content
-        from .system.combat.contracts import domain_definitions
+        from .system.combat.contracts import voisinage_definitions
         from .system.combat.npc_lifecycle import validate_lifecycle
         try:
-            domain_definitions(registry.world_systems.get("transcendent_combat", {}))
+            voisinage_definitions(registry.world_systems.get("transcendent_combat", {}))
             validate_lifecycle(registry.world_systems.get("transcendent_combat", {}))
         except (ValueError, KeyError, TypeError) as error:
             raise ContentError(f"仙域能力配置不合法：{error}") from error
@@ -1506,11 +1506,11 @@ class ContentRegistry:
             if not isinstance(cultivation.get(field), (int, float)) or float(cultivation[field]) <= 0:
                 raise ContentError(f"人界 NPC 修炼参数 {field} 必须为正数")
         time_units = world.get("time_units", {})
-        if time_units != {"0": 1, "1": 1, "2": 1, "3": 1, "4": 5, "5": 10, "6": 20, "7": 50, "8": 100, "9": 500, "10": 500, "11": 500, "12": 500}:
+        if time_units != {"0": 1, "1": 1, "2": 1, "3": 1, "4": 5, "5": 10, "6": 20, "7": 50, "8": 100, "9": 100, "10": 500, "11": 500, "12": 500}:
             raise ContentError("境界时间单位配置不符合 1/5/10/20/50/100 年规则")
         conversion = world.get("immortal_power_conversion", {})
         if (
-            int(conversion.get("time_unit_years", 0)) != 500
+            int(conversion.get("time_unit_years", 0)) != 100
             or int(conversion.get("min_gap_units", 0)) < 10
             or int(conversion.get("stages", 0)) != 5
             or not 0 < float(conversion.get("base_chance", 0)) <= 1

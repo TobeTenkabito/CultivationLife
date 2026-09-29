@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "items": [
+    {"id": "immortal_trace", "name": "仙痕", "description": "感悟仙界法则凝成的痕迹，用于开启仙脉与温养邻域。", "tags": ["material", "immortal"]},
     {
       "id": "heroic_progeny_elixir",
       "name": "英姿神武口服液",

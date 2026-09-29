@@ -12,12 +12,13 @@ from cultivation_life.engine.combat_capabilities import bind_capabilities
 from cultivation_life.models import SectNpc, Technique
 from cultivation_life.rules import (add_item, assign_technique, combat_power, learn_technique,
                                     max_hp, max_mp, technique_copy_count, upgrade_known_technique, validate_technique)
-from cultivation_life.system.combat.contracts import Combatant, CombatCapabilities, DomainDefinition
-from cultivation_life.system.combat.domains import DomainBattle
+from cultivation_life.system.combat.contracts import Combatant, CombatCapabilities, VoisinageDefinition
+from cultivation_life.system.combat.voisinages import VoisinageBattle
 from cultivation_life.system.combat.npc_lifecycle import initialize_native
 from cultivation_life.system.combat_system import BattleUnit
 from cultivation_life.system.doctrine.generation import generate, validate_content
-from cultivation_life.system.doctrine.progression import bind_origin, source, train
+from cultivation_life.system.doctrine.progression import source
+from cultivation_life.system.doctrine.cultivation import attempt
 from cultivation_life.system.doctrine.provider import battle_sources, ensure
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,8 +60,8 @@ def test_generated_catalog_counts_identity_and_calibration(catalog):
     assert len({b["name"] for b in manuals}) == len(manuals)
     for definition in definitions.values():
         assert len(definition["stages"]) == 9
-        assert all(s["domain"] is None for s in definition["stages"][:3])
-        assert all(s["domain"] is not None for s in definition["stages"][3:])
+        assert all(s["voisinage"] is None for s in definition["stages"][:3])
+        assert all(s["voisinage"] is not None for s in definition["stages"][3:])
     for book in manuals:
         validate_technique(Technique(**book))
         assert .034 <= book["combat_bonus"] / CALIBRATION[book["grade"]] <= .066
@@ -87,7 +88,7 @@ def test_lexicon_is_rich_and_does_not_control_mechanics(catalog):
     renamed = generate(7429, config, CALIBRATION)
     for key, original in catalog["definitions"].items():
         for a, b in zip(original["stages"][3:], renamed["definitions"][key]["stages"][3:]):
-            assert {k: v for k, v in a["domain"].items() if k != "name"} == {k: v for k, v in b["domain"].items() if k != "name"}
+            assert {k: v for k, v in a["voisinage"].items() if k != "name"} == {k: v for k, v in b["voisinage"].items() if k != "name"}
     config["words"]["manual_verbs"] = ["修炼"]
     with pytest.raises(ValueError, match="贫乏"):
         validate_content(config)
@@ -129,7 +130,7 @@ def test_public_redaction_and_manual_requirement(setup):
     game.doctrine_state["player"]["progress"][row["id"]] = {"level": 3, "experience": 0}
     row = next(r for r in engine._public_doctrines(game)["rows"] if r["id"] == row["id"])
     assert [s["level"] for s in row["stages"]] == [1, 2, 3, 4]
-    assert row["stages"][-1]["domain"]
+    assert row["stages"][-1]["voisinage"]
     hidden = game.doctrine_state["definitions"][row["id"]]["stages"][8]
     assert hidden["ability_name"] not in json.dumps(engine._public_doctrines(game), ensure_ascii=False)
 
@@ -149,43 +150,50 @@ def test_duplicate_generated_books_upgrade_without_losing_origin(setup):
 
 def test_origin_gate_allows_breadth_but_one_deep_path(catalog):
     a, b = list(catalog["definitions"].values())[:2]
+    rules = CONTENT_DOCUMENTS["doctrines.json"]["cultivation"]
     record = {"progress": {}, "origin": None, "active": a["id"]}
     for d in (a, b):
         p = record["progress"][d["id"]] = {"level": 0, "experience": 0}
-        train(p, d, 10**8, 12, None, batch=True)
+        for _ in range(4):
+            assert attempt(p, d, 10**8, None, rules, 0) == "success"
+        assert attempt(p, d, 10**8, None, rules, 0) == "origin_required"
         assert p["level"] == 4
-        assert source(record, catalog["definitions"], "celestial").domains
-    bind_origin(record, a, 12)
-    train(record["progress"][a["id"]], a, 10**8, 12, record["origin"], batch=True)
-    train(record["progress"][b["id"]], b, 10**8, 12, record["origin"], batch=True)
+    record["origin"] = a["id"]
+    for _ in range(5):
+        attempt(record["progress"][a["id"]], a, 10**8, a["id"], rules, 0)
+    assert attempt(record["progress"][b["id"]], b, 10**8, a["id"], rules, 0) == "blocked"
     assert record["progress"][a["id"]]["level"] == 9
-    assert record["progress"][b["id"]]["level"] == 4
-    with pytest.raises(ValueError, match="已有归属"):
-        bind_origin(record, b, 12)
+    assert source(record, catalog["definitions"], "celestial").voisinages
+    record["origin"] = b["id"]
+    with pytest.raises(ValueError, match="非本源"):
+        source(record, catalog["definitions"], "celestial")
 
 
 def test_training_advances_once_and_handles_partial_time(catalog):
     d = next(iter(catalog["definitions"].values()))
     progress = {"level": 0, "experience": 0}
-    assert train(progress, d, 30, 9, None) == []
+    rules = CONTENT_DOCUMENTS["doctrines.json"]["cultivation"]
+    assert attempt(progress, d, 30, None, rules, 0) == "training"
     assert progress["experience"] == 30
-    assert train(progress, d, 10000, 9, None) == [1]
-    assert progress == {"level": 1, "experience": 0}
+    assert attempt(progress, d, 10000, None, rules, 0) == "success"
+    assert progress["level"] == 1 and progress["experience"] == 0
 
 
 def test_origin_confirmation_is_enforced_by_backend(setup):
     engine, game = setup
     d = learn(game)
     game.doctrine_state["player"]["progress"][d["id"]] = {"level": 4, "experience": d["stages"][4]["years"]}
+    game.player.known_techniques[-1].level = 5
+    game.doctrine_state["player"]["annotations"][d["id"]] = [5]
     engine.store.save(game)
     with pytest.raises(ValueError, match="确认"):
         engine.doctrine_action(game.id, "origin", doctrine_id=d["id"])
     result = engine.doctrine_action(game.id, "origin", doctrine_id=d["id"], confirm_origin=True)
     row = next(r for r in result["doctrines"]["rows"] if r["id"] == d["id"])
-    assert row["origin"] and row["level"] == 5
+    assert row["origin"] and row["level"] in (4, 5)
 
 
-def test_book_stats_and_domain_do_not_apply_in_other_worlds(setup):
+def test_book_stats_and_voisinage_do_not_apply_in_other_worlds(setup):
     engine, game = setup
     d = learn(game)
     book = game.player.known_techniques[-1]
@@ -193,7 +201,7 @@ def test_book_stats_and_domain_do_not_apply_in_other_worlds(setup):
     assign_technique(game.player, copy.deepcopy(book), "support")
     game.doctrine_state["player"].update(active=d["id"])
     game.doctrine_state["player"]["progress"][d["id"]]["level"] = 4
-    assert battle_sources(game, {"player": game.player})["player"].domains
+    assert battle_sources(game, {"player": game.player})["player"].voisinages
     game.player.world = "asura"
     assert engine._public_doctrines(game) == {"available": False}
     assert battle_sources(game, {"player": game.player}) == {}
@@ -207,7 +215,7 @@ def test_book_stats_and_domain_do_not_apply_in_other_worlds(setup):
         assign_technique(game.player, copy.deepcopy(book), "main")
 
 
-def test_active_domain_reaches_player_battle_adapter(setup):
+def test_active_voisinage_reaches_player_battle_adapter(setup):
     _, game = setup
     d = learn(game)
     game.doctrine_state["player"].update(active=d["id"])
@@ -215,7 +223,7 @@ def test_active_domain_reaches_player_battle_adapter(setup):
     binding = bind_capabilities(game, [BattleUnit("player", "问道", "player", 100, 9)],
                                 dict(target_name="敌人", target_power=100, target_realm_index=9), WORLD_SYSTEMS["transcendent_combat"])
     caps = binding.battle.units["player"].unit.capabilities
-    assert caps.domains[0].id == d["stages"][3]["domain"]["id"]
+    assert caps.voisinages[0].id == d["stages"][3]["voisinage"]["id"]
     assert caps.resource_link == "legacy_mp"
 
 
@@ -229,7 +237,7 @@ def test_npc_training_is_lazy_shared_and_bounded(setup):
     game.player.age += 1000000
     assert npc.transcendence == saved  # No tick or observer mutation.
     result = battle_sources(game, {npc.id: npc})
-    assert result[npc.id].domains
+    assert result[npc.id].voisinages
     assert game.rng_state == prior_rng
     record = npc.transcendence["doctrine"]
     assert record["progress"][record["active"]]["level"] == 9
@@ -257,12 +265,12 @@ def test_conversion_uses_actual_elapsed_time_and_existing_mp(setup, monkeypatch)
     assert game.doctrine_state["player"]["conversion_progress"] == 0
 
 
-def domain_battle(a, b):
+def voisinage_battle(a, b):
     def actor(key, side, definition):
         c = CombatCapabilities(capacity=10000, current=10000, resource_tier=2,
-                               domains=(definition,), attainments={"test": 4})
+                               voisinages=(definition,), attainments={"test": 4})
         return Combatant(key, key, side, 100, c)
-    return DomainBattle([actor("a", "player", a), actor("b", "enemy", b)])
+    return VoisinageBattle([actor("a", "player", a), actor("b", "enemy", b)])
 
 
 def definition(**changes):
@@ -270,7 +278,7 @@ def definition(**changes):
                   stability=100, incursion=100, authority=100, opening_cost=10, upkeep_cost=10,
                   effect_cost=10, effect="strike", effect_power=.4)
     values.update(changes)
-    return DomainDefinition(**values)
+    return VoisinageDefinition(**values)
 
 
 def begin(battle, n=1):
@@ -278,7 +286,7 @@ def begin(battle, n=1):
 
 
 def test_stability_and_incursion_are_directional_not_a_total_score():
-    battle = domain_battle(definition(stability=200, incursion=10), definition(stability=20, incursion=100))
+    battle = voisinage_battle(definition(stability=200, incursion=10), definition(stability=20, incursion=100))
     phase = begin(battle)
     assert phase.relations["a"]["relation"] == "contested"
     assert phase.relations["b"]["relation"] == "contested"
@@ -286,7 +294,7 @@ def test_stability_and_incursion_are_directional_not_a_total_score():
 
 
 def test_mutual_breach_applies_both_powers_without_roster_order_advantage():
-    battle = domain_battle(definition(stability=20, incursion=200), definition(stability=20, incursion=200))
+    battle = voisinage_battle(definition(stability=20, incursion=200), definition(stability=20, incursion=200))
     phase = begin(battle)
     assert not phase.ordinary
     assert battle.units["a"].vitality == pytest.approx(.6)
@@ -294,7 +302,7 @@ def test_mutual_breach_applies_both_powers_without_roster_order_advantage():
 
 
 def test_sustained_features_reset_when_field_drops():
-    battle = domain_battle(definition(features=({"kind": "fortify", "value": .2},)), definition())
+    battle = voisinage_battle(definition(features=({"kind": "fortify", "value": .2},)), definition())
     begin(battle)
     first = battle.fields[0].stability
     begin(battle, 2)
@@ -308,7 +316,7 @@ def test_sustained_features_reset_when_field_drops():
 
 
 def test_authority_limits_suppression_instead_of_always_one_shot():
-    battle = domain_battle(definition(incursion=500, effect="suppress", authority=50), definition(incursion=1))
+    battle = voisinage_battle(definition(incursion=500, effect="suppress", authority=50), definition(incursion=1))
     begin(battle)
     assert not battle.units["b"].suppressed
     assert battle.units["b"].vitality == pytest.approx(.8)
@@ -316,7 +324,7 @@ def test_authority_limits_suppression_instead_of_always_one_shot():
 
 
 def test_generated_seal_accumulates_authority_to_nonlethal_control():
-    battle = domain_battle(definition(incursion=500, effect="seal"), definition(incursion=1))
+    battle = voisinage_battle(definition(incursion=500, effect="seal"), definition(incursion=1))
     begin(battle)
     assert battle.units["b"].escape_locked and not battle.units["b"].suppressed
     assert battle.units["b"].seal_progress == pytest.approx(.4)

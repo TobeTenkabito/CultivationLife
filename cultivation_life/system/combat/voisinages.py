@@ -1,4 +1,4 @@
-"""Deterministic domain arbitration with per-unit coverage and resource ledgers.
+"""Deterministic voisinage arbitration with per-unit coverage and resource ledgers.
 
 There is no game-state mutation, RNG, world lookup or cultivation progression
 here. Definitions express capabilities, not executable content or callbacks.
@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .contracts import Combatant, DomainDefinition, PhaseRound, ResourceSupply, number
+from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, number
 
 
 @dataclass
@@ -16,7 +16,7 @@ class UnitState:
     unit: Combatant
     current: float
     vitality: float
-    active_domain: str | None = None
+    active_voisinage: str | None = None
     suppressed: bool = False
     escape_locked: bool = False
     sustained_rounds: int = 0
@@ -32,7 +32,7 @@ class UnitState:
 @dataclass(frozen=True)
 class Field:
     owner: str
-    definition: DomainDefinition
+    definition: VoisinageDefinition
     strength: float
     protects: tuple[str, ...]
     targets: tuple[str, ...]
@@ -40,7 +40,7 @@ class Field:
     authority: float | None = None
 
 
-class DomainBattle:
+class VoisinageBattle:
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -66,7 +66,7 @@ class DomainBattle:
 
     @property
     def enabled(self) -> bool:
-        return any(s.unit.capabilities.domains or s.unit.capabilities.force_tier > 1
+        return any(s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 for s in self.units.values())
 
     def _can_reach(self, owner: UnitState, target: str) -> bool:
@@ -76,14 +76,14 @@ class DomainBattle:
     def _field(self, owner: UnitState, condition: float) -> Field | None:
         c = owner.unit.capabilities
         if not owner.fighting or c.sealed or c.stance == "off" or c.resource_tier < 2:
-            owner.active_domain = None
+            owner.active_voisinage = None
             return None
-        candidates = sorted((d for d in c.domains if c.attainments.get(d.attainment, 0) >= d.required_level), key=lambda d: (
+        candidates = sorted((d for d in c.voisinages if c.attainments.get(d.attainment, 0) >= d.required_level), key=lambda d: (
             d.strength + d.strength_per_level * max(0, c.attainments.get(d.attainment, 0) - d.required_level), d.id),
             reverse=True)
         for definition in candidates:
             features = {row["kind"]: row["value"] for row in definition.features}
-            continued = owner.active_domain == definition.id
+            continued = owner.active_voisinage == definition.id
             rounds = owner.sustained_rounds + 1 if continued else 1
             protects = [owner.unit.id]
             if c.stance == "protect":
@@ -98,7 +98,7 @@ class DomainBattle:
                            and self.units[key].fighting and self._can_reach(owner, key)]
             protects = list(dict.fromkeys(protects))[:definition.max_targets]
             targets = list(dict.fromkeys(targets))[:definition.max_targets]
-            opening = definition.opening_cost if owner.active_domain != definition.id else 0.0
+            opening = definition.opening_cost if owner.active_voisinage != definition.id else 0.0
             # Shrink optional coverage before giving up protection of the caster.
             while True:
                 extras = len(protects) - 1 + len(targets)
@@ -127,13 +127,13 @@ class DomainBattle:
             strength *= 1 + (features.get("retaliate", 0) if owner.resisted and continued else 0)
             strength *= 1 + features.get("sacrifice", 0)
             stability *= 1 - features.get("sacrifice", 0)
-            owner.active_domain = definition.id
+            owner.active_voisinage = definition.id
             owner.sustained_rounds = rounds
             self.frame.events.append(f"{owner.unit.name}维持【{definition.name}】，仙灵力消耗 {cost + investment:g}。")
             return Field(owner.unit.id, definition, strength, tuple(protects), tuple(targets), stability, definition.authority)
         if candidates:
             self.frame.events.append(f"{owner.unit.name}仙灵力不足，无法展开或维持仙域。")
-        owner.active_domain = None
+        owner.active_voisinage = None
         return None
 
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
@@ -187,7 +187,7 @@ class DomainBattle:
             state.resisted = relation in {"pressed", "contested"}
         # Mutual breaches execute together; otherwise a dominated caster cannot
         # act. No effects run during relation construction (roster-order neutral).
-        effects: list[tuple[str, str, DomainDefinition]] = []
+        effects: list[tuple[str, str, VoisinageDefinition]] = []
         for field in self.fields:
             owner = self.units[field.owner]
             victims = [key for key in field.targets if self._dominated.get(key) == field.owner]
@@ -313,7 +313,7 @@ class DomainBattle:
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
                 state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
             if not state.fighting:
-                state.active_domain = None
+                state.active_voisinage = None
         self.fields = [f for f in self.fields if self.units[f.owner].fighting]
 
     def ordinary_loss(self, side: str) -> float:
@@ -362,7 +362,7 @@ class DomainBattle:
     def report(self) -> dict[str, Any]:
         return {
             "relations": self.frame.relations,
-            "fields": [{"owner": f.owner, "domain_id": f.definition.id,
+            "fields": [{"owner": f.owner, "voisinage_id": f.definition.id,
                         "name": f.definition.name, "effect": f.definition.effect,
                         "stability": round(f.stability, 4), "incursion": round(f.strength, 4),
                         "authority": f.authority, "sustained_rounds": self.units[f.owner].sustained_rounds,

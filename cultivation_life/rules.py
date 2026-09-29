@@ -568,8 +568,8 @@ def expected_combat_power(realm_index: int, layer: int) -> float:
         base = float(values["value"])
     elif definition.id == "qi":
         base = float(values["base"] + values["layer_step"] * (max(1, layer) - 1))
-    elif definition.layers == 1:
-        base = float(values["value"])
+    elif "value" in values:
+        base = float(values["value"]) * (1 + .08 * (max(1, min(9, layer)) - 1))
     else:
         stage = "early" if layer <= 3 else "middle" if layer <= 6 else "late"
         base = float(values[stage])
@@ -962,6 +962,7 @@ def public_player(player: Player) -> dict[str, Any]:
         realm_id=realm(player).id,
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),
+        opportunity_unbounded=max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9,
         max_hp=max_hp(player),
         max_mp=max_mp(player),
         combat_power=combat_power(player),

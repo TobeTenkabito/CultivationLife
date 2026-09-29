@@ -42,7 +42,7 @@ def test_native_creation_is_explicit_and_never_grants_doctrine(config):
     assert prepare(npc, 100, config).state is None
     initialize_native(npc, config, now=100)
     assert npc.transcendence["conversion"] == 1
-    assert npc.transcendence["domain_ids"] == []
+    assert npc.transcendence["voisinage_ids"] == []
     assert npc.transcendence["attainments"] == {}
     npc.transcendence["current"] = 37
     initialize_native(npc, config, now=200)
@@ -83,7 +83,7 @@ def test_migration_and_repeated_access_do_not_refill(config):
 
 def test_crossing_settles_each_environment_and_preserves_mastery(config):
     npc = immortal(config)
-    npc.transcendence.update(attainments={"future_doctrine": 4}, domain_ids=["future_domain"])
+    npc.transcendence.update(attainments={"future_doctrine": 4}, voisinage_ids=["future_voisinage"])
     settle(npc, 100, config)
     move_world(npc, "human", 130, config)
     settle(npc, 230, config)
@@ -97,7 +97,7 @@ def test_crossing_settles_each_environment_and_preserves_mastery(config):
     assert npc.transcendence["current"] == 585
     assert npc.transcendence["capacity"] == 1000
     assert npc.transcendence["attainments"] == {"future_doctrine": 4}
-    assert npc.transcendence["domain_ids"] == ["future_domain"]
+    assert npc.transcendence["voisinage_ids"] == ["future_voisinage"]
 
 
 def test_unrecorded_world_change_cannot_create_recovery(config):
@@ -158,12 +158,12 @@ def test_npc_background_combat_uses_clock_and_keeps_inaccessible_reserve(config)
     assert npc.transcendence["current"] == 80
 
 
-def test_restored_resource_enables_npc_domain_in_background_combat(config):
-    config["domains"] = [dict(id="test", name="仙域", attainment="test", required_level=4,
+def test_restored_resource_enables_npc_voisinage_in_background_combat(config):
+    config["voisinages"] = [dict(id="test", name="仙域", attainment="test", required_level=4,
                               strength=100, opening_cost=120, upkeep_cost=40,
                               effect="suppress", effect_cost=20)]
     npc = immortal(config, current=0)
-    npc.transcendence.update(domain_ids=["test"], attainments={"test": 4})
+    npc.transcendence.update(voisinage_ids=["test"], attainments={"test": 4})
     settle(npc, 100, config)
     victim = SectNpc("victim", "敌人", "", 8, 1, 100, None)
     result = resolve_npc_engagement([(npc, 1)], [(victim, 1e12)], config, random.Random(1), now=120)
@@ -228,7 +228,7 @@ def test_encounter_cache_retains_explicit_unconverted_state(engine_game):
     owner = persistent_owners(game, {key})[key]
     state = owner.get("transcendence") if isinstance(owner, dict) else owner.transcendence
     assert state["conversion"] == 0
-    assert state.get("domain_ids", []) == []
+    assert state.get("voisinage_ids", []) == []
 
 
 def test_new_upper_world_recruits_receive_basic_resources(engine_game):
@@ -253,7 +253,7 @@ def test_entourage_move_uses_resource_port(engine_game, config):
     assert npc.transcendence["current"] == 300
 
 
-def test_converted_player_uses_existing_mp_without_acquiring_domain(engine_game, config):
+def test_converted_player_uses_existing_mp_without_acquiring_voisinage(engine_game, config):
     _, game = engine_game
     game.player.realm_index = 9
     game.player.immortal_power_converted = True
@@ -262,7 +262,7 @@ def test_converted_player_uses_existing_mp_without_acquiring_domain(engine_game,
     caps = bound.battle.units["player"].unit.capabilities
     assert caps.resource_link == "legacy_mp"
     assert caps.current == game.player.mp
-    assert caps.force_tier == 2 and not caps.domains
+    assert caps.force_tier == 2 and not caps.voisinages
     assert game.player.transcendence is None
     game.player.immortal_power_converted = False
     bound = bind_capabilities(game, [BattleUnit("player", "主角", "player", 1000, 9)],

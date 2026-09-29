@@ -49,8 +49,8 @@ class DemonicSystemMixin:
         realm_gap = game.player.realm_index - int(victim["realm_index"])
         chance = max(0.08, min(0.92, 0.28 + (ratio - 1) * 0.18 + realm_gap * 0.07))
         victim_index = next(index for index, member in enumerate(members) if member is victim)
-        domain_captured = str(victim.get("npc_id") or f"enemy-{victim_index}") in target.get("resolved_capture_ids", [])
-        if not domain_captured and rng.random() >= chance:
+        voisinage_captured = str(victim.get("npc_id") or f"enemy-{victim_index}") in target.get("resolved_capture_ids", [])
+        if not voisinage_captured and rng.random() >= chance:
             return "victory_escape", f"你虽击败{victim['name']}，却未能封住其遁术（生擒率 {chance:.0%}）。"
 
         npc_id = victim.get("npc_id")

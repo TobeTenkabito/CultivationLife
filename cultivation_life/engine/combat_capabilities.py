@@ -1,4 +1,4 @@
-"""Game-state adapter for the pure domain engine.
+"""Game-state adapter for the pure voisinage engine.
 
 Only this boundary locates persistent owners and writes resource ledgers back.
 Cached strangers, family dictionaries and normal NPCs retain one authoritative
@@ -11,9 +11,9 @@ from typing import Any, Mapping
 
 from ..models import GameState
 from ..rules import max_mp
-from ..system.combat.contracts import Combatant, ResourceSupply, domain_definitions, resolve_source
+from ..system.combat.contracts import Combatant, ResourceSupply, voisinage_definitions, resolve_source
 from ..system.doctrine.provider import battle_sources, conversion_state
-from ..system.combat.domains import DomainBattle
+from ..system.combat.voisinages import VoisinageBattle
 from ..system.combat.npc_lifecycle import NpcResourceBinding, prepare
 from ..system.combat_system import BattleUnit, PlayerCombatSystem
 
@@ -65,7 +65,7 @@ def persistent_owners(game: GameState, keys: set[str]) -> dict[str, Any]:
 
 @dataclass
 class CapabilityBinding:
-    battle: DomainBattle
+    battle: VoisinageBattle
     owners: dict[str, Any]
     resources: dict[str, NpcResourceBinding]
 
@@ -75,7 +75,7 @@ class CapabilityBinding:
             if owner is None:
                 continue
             if update["resource_link"] == "legacy_mp":
-                # Linked resource costs are authoritative, including domain-only
+                # Linked resource costs are authoritative, including voisinage-only
                 # rounds and stories which normally waive conventional MP loss.
                 owner.mp = update["current"]
                 continue
@@ -99,7 +99,7 @@ class CapabilityBinding:
 
 def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: dict[str, Any],
                       config: Mapping[str, Any]) -> CapabilityBinding:
-    definitions = domain_definitions(config)
+    definitions = voisinage_definitions(config)
     owners: dict[str, Any] = {}
     resources: dict[str, NpcResourceBinding] = {}
     combatants: list[Combatant] = []
@@ -140,5 +140,5 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             if owner is not None:
                 owners[unit.id] = owner
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))
-    return CapabilityBinding(DomainBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
+    return CapabilityBinding(VoisinageBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
                                          supplies=supplies), owners, resources)

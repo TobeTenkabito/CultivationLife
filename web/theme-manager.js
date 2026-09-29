@@ -100,17 +100,19 @@
   for(const [name,family] of Object.entries(dlc)){const b=$(`[data-panel-target="${name}"]`);if(b){b.dataset.dlc=family;b.title=`${b.title} · DLC`;}}
   const precise=value=>Number.isFinite(Number(value))?Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2}):'—';
   function compact(value){value=Number(value);if(!Number.isFinite(value))return '—';if(Math.abs(value)>=1e12)return precise(value/1e12)+'万亿';if(Math.abs(value)>=1e8)return precise(value/1e8)+'亿';if(Math.abs(value)>=1e6)return precise(value/1e4)+'万';return precise(value);}
-  function resource(key,now,max,label) {
+  function resource(key,now,max,label,unbounded=false) {
     const node=key==='opportunity'?opportunity:$(`#hud-${key}`);
-    const ratio=Number(max)>0?Math.max(0,Math.min(1,Number(now)/Number(max))):0;
+    const ratio=unbounded?1:Number(max)>0?Math.max(0,Math.min(1,Number(now)/Number(max))):0;
     const percent=Number.isFinite(ratio)?Math.round(ratio*1000)/10:0;
     node.querySelector('.hud-meter-label').textContent=label;
-    node.querySelector('.hud-percent').textContent=`${percent}%`;
+    node.querySelector('.hud-percent').textContent=unbounded?'无尽':`${percent}%`;
     node.querySelector('.hud-values strong').textContent=compact(now);
-    node.querySelector('.hud-values small').textContent=`/ ${compact(max)}`;
-    const exact=`${label}：${precise(now)} / ${precise(max)}，${percent}%`;
+    node.querySelector('.hud-values small').textContent=unbounded?'/ 无尽':`/ ${compact(max)}`;
+    const exact=unbounded?`${label}：${precise(now)}，无储量上限`:`${label}：${precise(now)} / ${precise(max)}，${percent}%`;
     node.title=exact;node.setAttribute('aria-label',exact+'，查看人物详情');
     const bar=node.querySelector('.hud-track');bar.setAttribute('aria-label',label);bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax',String(Math.max(0,Number(max)||0)));bar.setAttribute('aria-valuenow',String(Math.max(0,Math.min(Number(max)||0,Number(now)||0))));bar.setAttribute('aria-valuetext',exact);
+    bar.setAttribute('role',unbounded?'img':'progressbar');
+    if(unbounded){bar.removeAttribute('aria-valuemin');bar.removeAttribute('aria-valuemax');bar.removeAttribute('aria-valuenow');bar.setAttribute('aria-label',exact);}
     node.style.setProperty('--progress',`${percent}%`);node.style.setProperty('--ratio',String(percent));
     const low=key==='hp'&&Number(now)>0&&ratio<.25;node.classList.toggle('low',low);node.querySelector('.hud-resource-warning').textContent=low?'气血偏低':'';
     if(key==='opportunity')ring.querySelector('.orbit-value').style.strokeDasharray=`${percent} 100`;
@@ -134,7 +136,7 @@
     $('#hud-age').textContent=`${p.age} 岁 · ${p.lifespan==null?'寿元无尽':`寿元 ${precise(p.lifespan)} 年`} · ${p.world_name} / ${p.location_name}`;
     $('#hud-power').textContent=`战斗力 ${compact(p.combat_power)} · ${p.path_name}`;
     $('#hud-power').title=`战斗力 ${precise(p.combat_power)} · 组队战力 ${precise(p.battle_power||p.combat_power)}`;
-    resource('opportunity',p.opportunity,p.opportunity_required,'机缘');resource('hp',p.hp,p.max_hp,'气血 HP');resource('mp',p.mp,p.max_mp,p.resource_name&&p.resource_name!=='MP'?p.resource_name:'法力 MP');
+    resource('opportunity',p.opportunity,p.opportunity_required,'机缘',p.opportunity_unbounded);resource('hp',p.hp,p.max_hp,'气血 HP');resource('mp',p.mp,p.max_mp,p.resource_name&&p.resource_name!=='MP'?p.resource_name:'法力 MP');
     hud.classList.toggle('immortal-resource',p.resource_kind==='immortal');
     const notices=[];
     if(Number(p.hp)>0&&Number(p.hp)/Math.max(1,Number(p.max_hp))<.25)notices.push('气血偏低，请留意行动风险');

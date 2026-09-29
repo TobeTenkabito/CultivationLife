@@ -1,15 +1,15 @@
-"""Bounded NPC-only engagements using the same domain/tier arbitration.
+"""Bounded NPC-only engagements using the same voisinage/tier arbitration.
 
 NPC combat still uses a compact conventional exchange. It cannot bypass a
-domain by adding power, rolling an unrelated casualty or resetting resources.
+voisinage by adding power, rolling an unrelated casualty or resetting resources.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .contracts import CapabilitySource, Combatant, domain_definitions, resolve_source
-from .domains import DomainBattle
+from .contracts import CapabilitySource, Combatant, voisinage_definitions, resolve_source
+from .voisinages import VoisinageBattle
 from .ordinary import exchange_damage
 from .npc_lifecycle import prepare
 
@@ -27,10 +27,10 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
                            now: float | None = None,
                            sources: Mapping[str, CapabilitySource] | None = None) -> NpcEngagement | None:
     # Most background encounters are mortal. Do not parse definitions or build
-    # a domain battle for them, and preserve the legacy RNG sequence.
+    # a voisinage battle for them, and preserve the legacy RNG sequence.
     if not sources and not any(npc.transcendence for roster in (attackers, defenders) for npc, _ in roster):
         return None
-    definitions = domain_definitions(config)
+    definitions = voisinage_definitions(config)
     owners = {npc.id: npc for npc, _ in [*attackers, *defenders]}
     resources = {}
     units = []
@@ -41,7 +41,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
             units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities))
-    battle = DomainBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
+    battle = VoisinageBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
     if not battle.enabled:
         return None  # No combat RNG or combat costs on the conventional path.
     reports = []
@@ -57,7 +57,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
                                        rng.uniform(.90, 1.10), coefficient=.135, minimum=.045, maximum=.42)
             battle.ordinary_damage(dealt, received)
         battle.finish_round(player_mp=1, enemy_mp=1)
-        reports.append({"round": round_no, "domain": battle.report(), "events": list(frame.events)})
+        reports.append({"round": round_no, "voisinage": battle.report(), "events": list(frame.events)})
         if battle.verdict() is not None:
             break
     killed, suppressed = [], []

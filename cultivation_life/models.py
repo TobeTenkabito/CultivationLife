@@ -218,7 +218,7 @@ class SectNpc:
     family_traits: dict[str, Any] = field(default_factory=dict)
     family_combat_bonus: float = 0.0
     social_profile: dict[str, Any] | None = None
-    # Optional, versioned cultivation facts. Domain definitions live in content,
+    # Optional, versioned cultivation facts. Voisinage definitions live in content,
     # while coverage, initiative and active fields exist only during a battle.
     transcendence: dict[str, Any] | None = None
 
@@ -358,6 +358,7 @@ class Player:
     next_tribulation_age: int | None = None
     next_thunder_damage_reduction: float = 0.0
     immortal_power_converted: bool = False
+    immortal_veins: dict[str, int] = field(default_factory=dict)
     transcendence: dict[str, Any] | None = None
     immortal_conversion_stage: int = 0
     immortal_conversion_last_age: int | None = None
@@ -872,6 +873,7 @@ class GameState:
         return {
             "id": self.id,
             "seed": self.seed,
+            "voisinage_schema": 1,
             "player": self.player.to_dict(),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -925,6 +927,9 @@ class GameState:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
+        if not value.get("voisinage_schema"):
+            from .system.combat.migration import migrate
+            value = migrate(value)
         return cls(
             id=value["id"],
             seed=value["seed"],
