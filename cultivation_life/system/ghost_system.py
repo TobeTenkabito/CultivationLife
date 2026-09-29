@@ -1215,6 +1215,8 @@ class GhostSystemMixin:
                     "owner_name": str(row.get("owner_name", game.player.name)),
                     "durability": round(float(row.get("durability", 0.0)), 1),
                 } for row in arrays]
+        from .teleport_system import public_teleport
+        data['teleport'] = public_teleport(game, self.maps)
         return data
 
     def _public_ghost_system(self, game: GameState) -> dict[str, Any]:

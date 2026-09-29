@@ -35,10 +35,15 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             status = "魂灯熄灭，当前界面将其记录为死亡"
         else:
             status = "不在当前界面，生死不明"
+        from ...system.cultivation_ranks import public_ranks
+        ranks = public_ranks(npc)
         public_npc = npc.to_dict()
+        public_npc["cultivation_ranks"] = ranks
         public_npc.pop("social_profile", None)
         public_npc["social_hint"] = social_hint(game, npc) if same_world else {}
         perception = deps._npc_cultivation_perception(game, npc) if same_world and npc.alive else None
+        from ...system.cultivation_ranks import mask_unrevealed
+        mask_unrevealed(public_npc, perception)
         if not same_world:
             public_npc["departure_reason"] = None
         public_npc.pop("concealed_realm_index", None)

@@ -402,6 +402,8 @@ function render(data) {
     ? '猎杀异道不沾因果；击杀道修额外增长煞气'
     : '寻找弱者下手，夺宝但增加因果';
   $('#realm-name').textContent = p.awaiting_spirit_realm_crossing && p.world === 'human' ? `${p.realm_name} · 人界绝巅` : p.realm_name;
+  let ranks=$('#cultivation-ranks');if(!ranks){ranks=document.createElement('p');ranks.id='cultivation-ranks';ranks.className='rank-triplet';$('#realm-name').after(ranks);}
+  ranks.textContent=p.cultivation_ranks?`修为 ${p.cultivation_ranks.cultivation.name} · 炼体 ${p.cultivation_ranks.body.name} · 神识 ${p.cultivation_ranks.sense.name}`:'';
   const worldAge = p.world_age !== p.age ? ` · 世界纪年 ${p.world_age}` : '';
   $('#age-line').textContent = (p.lifespan == null ? `${p.age} 岁 · 寿元无尽` : `${p.age} 岁 · 寿元 ${p.lifespan}`) + worldAge;
   const tribulationLine = $('#tribulation-line');
@@ -416,6 +418,7 @@ function render(data) {
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
   meter('hp', p.hp, p.max_hp, p.intrinsic_resources?.hp); meter('mp', p.mp, p.max_mp, p.intrinsic_resources?.mp);
   $('#mp-label').textContent = p.resource_name || 'MP';
+  if(data.aperture?.available && p.immortal_power?.visible){meter('mp',data.aperture.conversion*100,100);$('#mp-label').textContent='仙灵力转化';$('#mp-text').textContent=`${Math.round(data.aperture.conversion*100)}%`;}
   $('#mp-meter').classList.toggle('blue', p.resource_kind !== 'immortal');
   $('#mp-meter').classList.toggle('purple', p.resource_kind === 'immortal');
   const immortalPower = p.immortal_power || {};
@@ -590,6 +593,7 @@ function render(data) {
   $('#world-news-debug').textContent = `跨界 Debug：${data.debug_world_news ? '开' : '关'}`;
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
+  window.ImmortalAperturePanel?.render(data.aperture || {}, payload=>mutate(`/api/games/${data.id}/aperture-action`,payload),{pending:!!data.pending_event,alive:data.player.alive});
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
@@ -1597,7 +1601,7 @@ function renderFaction(faction) {
     const identity = document.createElement('div'); identity.className = 'roster-identity';
     const heading = document.createElement('div'); heading.className = 'roster-heading';
     const name = document.createElement('b'); name.textContent = `${npc.name}${npc.is_player ? '（你）' : ''}${relation}`;
-    const cultivation = document.createElement('strong'); cultivation.textContent = npc.realm_name;
+    const cultivation = document.createElement('strong'); cultivation.textContent = npc.cultivation_ranks ? `修为 ${npc.realm_name} · 炼体 ${npc.cultivation_ranks.body.name} · 神识 ${npc.cultivation_ranks.sense.name}` : npc.realm_name;
     heading.append(name, cultivation); identity.appendChild(heading);
     const biography = document.createElement('p'); biography.className = 'roster-biography';
     biography.textContent = [npc.title, npc.gender_name || '性别未明', npc.race_name || '种族未明', npc.path_name || '道统未明', npc.spirit_root_name || '灵根未明'].filter(Boolean).join(' · ');
@@ -1892,7 +1896,7 @@ function renderWorldNpcs(npcs) {
     const info = document.createElement('div');
     const name = document.createElement('b'); name.textContent = `${npc.name} · ${npc.title}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}`;
     const detail = document.createElement('small');
-    detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}`;
+    detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}${npc.cultivation_ranks ? ` · 炼体 ${npc.cultivation_ranks.body.name} · 神识 ${npc.cultivation_ranks.sense.name}` : ''}`;
     const combat = npc.combat_power == null ? '' : ` · 战力 ${number(npc.combat_power)} · 好感 ${number(npc.affinity)} / ${npc.attitude}`;
     detail.textContent += combat;
     if (npc.social_hint?.companion_name) detail.textContent += ` · 道侣 ${npc.social_hint.companion_name}`;
@@ -2472,6 +2476,12 @@ function renderMap(map, auction) {
   $('#map-current').textContent = `当前：${map.current_name}`;
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
+  const tp=map.teleport;
+  if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。可用 ${number(tp.bribe)} 灵石买通守阵人单次偷渡。`;box.append(label);
+    const action=(text,payload,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.className='map-teleport';b.dataset.unavailable=disabled?'1':'0';b.disabled=disabled||busy||!!game.pending_event||!game.player.alive;b.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,payload);box.append(b);};
+    action(tp.origin.licensed?'已取得许可':'申请通行许可',{action:'request'},tp.origin.licensed||!tp.can_request);
+    for(const dest of tp.destinations)action(`${tp.origin.licensed?'传送':'偷渡'}至${dest.name} · 瞬息`,{action:tp.origin.licensed?'travel':'bribe',destination:dest.id});list.append(box);
+  }
   const directoryLinks = window.MapDirectory.render(map, auction, game);
   (map.locations || []).forEach(location => {
     const row = document.createElement('article');
@@ -2510,7 +2520,10 @@ function renderMap(map, auction) {
     row.dataset.location = location.id; row.tabIndex = -1;
     row.append(heading, description);
     const links = directoryLinks(location); if (links) row.append(links);
-    row.append(qiEfficiency, route, button); list.appendChild(row);
+    row.append(qiEfficiency, route, button);
+    const array=map.teleport?.arrays.find(a=>a.id===location.id);
+    if(array){const badge=document.createElement('small');badge.textContent=`传送阵 · ${array.owner_name} · ${array.licensed?'已许可':'未许可'}`;row.append(badge);}
+    list.appendChild(row);
   });
 }
 
@@ -3782,7 +3795,7 @@ function renderButtons() {
   $('#ghost-wangsheng-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-wangsheng-all-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-reincarnate-action').disabled = busy || !game?.ghost_system?.can_reincarnate;
-  document.querySelectorAll('.map-travel').forEach(button => {
+  document.querySelectorAll('.map-travel, .map-teleport').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1' || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   const bodyTrain = $('#body-train-action');

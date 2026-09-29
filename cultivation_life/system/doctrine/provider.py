@@ -52,6 +52,9 @@ def _npc_record(game, npc):
     if state is None or not game.doctrine_state:
         return None
     record = state.get("doctrine")
+    from ..cultivation_ranks import npc_voisinage_limit, ensure_npc
+    ensure_npc(npc)
+    limit = npc_voisinage_limit(npc)
     world, now = read(npc, "world"), game.player.age
     if record is None:
         # Respect scripted grants; old unconverted actors retain their legacy path.
@@ -63,11 +66,15 @@ def _npc_record(game, npc):
         key = rng.choice(list(definitions))
         level = min(9, max(1, (read(npc, "realm_index") - 9) * 2 + rng.choice([1, 2, 3, 4, 4, 5])))
         level = min(level, max(s["level"] for s in definitions[key]["stages"] if s["realm"] <= read(npc, "realm_index")))
+        level = min(level, limit)
         book = definitions[key]["manuals"][0]["id"]
         record = state["doctrine"] = {"manuals": [book], "manual_level": level, "annotations": list(range(1, level + 1)),
                                       "progress": {key: {"level": level, "experience": 0}},
                                       "active": key, "origin": key if level >= 5 else None,
                                       "at": now, "world": world}
+    for progress in record.get("progress", {}).values():
+        if progress.get("level", 0) > limit:
+            progress.update(level=limit, experience=0)
     if "manual_level" not in record:
         mastered = record.get("progress", {}).get(record.get("active"), {}).get("level", 0)
         record.update(manual_level=mastered, annotations=list(range(1, mastered + 1)))
@@ -83,7 +90,7 @@ def _npc_record(game, npc):
             rules = config()["cultivation"]
             for _ in range(9):
                 level = progress.get("level", 0)
-                if level >= 9 or definition["stages"][level]["realm"] > read(npc, "realm_index"):
+                if level >= min(9, limit) or definition["stages"][level]["realm"] > read(npc, "realm_index"):
                     break
                 rng = rng_for(game.seed, game.doctrine_state["version"], f"npc-study:{read(npc, 'id')}:{key}:{level + 1}")
                 failures = 0
@@ -110,25 +117,32 @@ def _npc_record(game, npc):
 def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     # Do not generate a celestial catalog for unrelated lower-world battles.
     ensure(game, celestial_context=any(read(owner, "world") == "celestial" and read(owner, "transcendence") for owner in owners.values()))
-    if not game.doctrine_state:
-        return {}
-    definitions = game.doctrine_state["definitions"]
+    from ..spirit_voisinage import player_source, npc_source, diminished
+    from ..immortal_aperture import lower_world
+    definitions = game.doctrine_state.get("definitions", {})
     results = {}
     for key, owner in owners.items():
+        if key == 'player' and lower_world(game.player):
+            value = player_source(game)
+            if value.voisinages:
+                results[key] = value
+            continue
+        if key != 'player' and lower_world(game.player):
+            spirit = npc_source(game, owner)
+            if spirit.voisinages:
+                results[key] = spirit
+                continue
         record = player_record(game) if key == "player" else _npc_record(game, owner)
         if record:
-            value = source(record, definitions, read(owner, "world"), training_gain=config()["cultivation"]["voisinage_training_gain"])
+            domain_world = 'celestial' if lower_world(game.player) else read(owner, 'world')
+            value = source(record, definitions, domain_world, training_gain=config()["cultivation"]["voisinage_training_gain"])
+            if lower_world(game.player):
+                value = diminished(value)
             if value.voisinages:
                 results[key] = value
     return results
 
 
 def conversion_state(player):
-    """Existing MP is the sole pool; partial conversion controls usable capacity."""
-    if player.world != "celestial" or player.realm_index < 9:
-        return None
-    from ..immortal_cultivation import golden_light
-    ratio = 1.0 if player.immortal_power_converted else max(0, min(5, player.immortal_conversion_stage)) / 5
-    return dict(version=1, resource_link="legacy_mp", conversion=ratio,
-                force_tier=2 if ratio else 1, ward_tier=2 if golden_light(player) and ratio else 1,
-                attack_cost=10, ward_cost=100)
+    from ..immortal_aperture import energy_state
+    return energy_state(player)

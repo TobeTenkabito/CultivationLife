@@ -10,9 +10,10 @@ from .system.map_system import MapContentError
 from .models import GameState, HistoryRecord
 from .runtime import decode_rng, encode_rng, now_iso
 from .system.possession_system import advance_player_age, current_body_age
+from .system.teleport_system import TeleportMixin
 
 
-class MapTravelMixin:
+class MapTravelMixin(TeleportMixin):
     """地图旅行的流程编排；依赖主引擎提供年度世界结算的领域钩子。"""
 
     def _advance_world_year(

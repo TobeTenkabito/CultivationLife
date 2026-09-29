@@ -21,6 +21,7 @@ from .system.ghost_system import (
     ghost_opportunity_multiplier,
 )
 from .system.possession_system import current_body_age
+from .system.cultivation_ranks import public_ranks
 from .system.transformation_system import (
     ensure_transformation_state, equip_transformation_technique, transformation_technique_limits,
 )
@@ -979,6 +980,7 @@ def public_player(player: Player) -> dict[str, Any]:
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),
         opportunity_unbounded=max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9,
+        cultivation_ranks=public_ranks(player, player=True),
         intrinsic_resources=intrinsic_resource_breakdown(player),
         max_hp=max_hp(player),
         max_mp=max_mp(player),

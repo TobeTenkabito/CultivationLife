@@ -11,7 +11,10 @@
     const figure = el('figure', null, 'meridian-figure');
     const svg = svgNode('svg', {viewBox:'0 0 360 540', role:'img', 'aria-label':`人体仙脉图：已开 ${v.opened} 条，本层需要 ${v.layer * v.per_layer} 条`});
     const title = svgNode('title'); title.textContent = '二十七仙脉 · 人体经络示意'; svg.append(title);
-    svg.append(svgNode('path', {class:'meridian-body',d:'M167 91 C138 81 140 26 180 24 C220 26 222 81 193 91 L197 104 Q233 107 243 136 L268 203 L298 282 Q306 307 292 311 L276 290 L248 240 L232 186 L223 271 Q226 303 218 335 L215 417 L212 478 L233 505 Q238 518 211 515 L195 508 L189 418 L180 348 L171 418 L165 508 L149 515 Q122 518 127 505 L148 478 L145 417 L142 335 Q134 303 137 271 L128 186 L112 240 L84 290 L68 311 Q54 307 62 282 L92 203 L117 136 Q127 107 163 104 Z'}));
+    figure.style.setProperty('--vein-color',v.phase?.color || '#587e72');
+    svg.append(svgNode('ellipse',{class:'meridian-halo',cx:180,cy:235,rx:152,ry:216}),svgNode('circle',{class:'meridian-halo',cx:180,cy: 64,r:52}));
+    svg.append(svgNode('path',{class:'meridian-body',d:'M171 29 Q162 12 180 8 Q198 12 189 29 Q204 33 204 54 Q204 76 190 88 L191 104 Q218 106 236 126 Q246 153 253 180 L306 297 Q292 317 271 304 L234 227 L230 302 Q245 356 252 467 L216 502 L194 490 L180 374 L166 490 L144 502 L108 467 Q115 356 130 302 L126 227 L89 304 Q68 317 54 297 L107 180 Q114 153 124 126 Q142 106 169 104 L170 88 Q156 76 156 54 Q156 33 171 29Z'}));
+    for(const d of ['M160 43 Q180 23 200 43 M167 62 L173 63 M187 63 L193 62 M177 77 Q180 80 184 77','M169 102 L201 151 L181 211 L145 131 M191 103 L160 149','M126 140 Q156 179 141 255 L180 290 L219 255 Q204 179 234 140','M133 295 Q180 315 227 295 M140 323 L122 463 L151 475 M220 323 L238 463 L209 475','M80 474 Q180 522 280 474 M98 492 Q180 531 262 492'])svg.append(svgNode('path',{class:'meridian-robe',d}));
     const center = [[180,48],[180,78],[180,114],[180,149],[180,184],[180,219],[180,254],[180,288],[180,318]];
     const left = [[142,126],[123,159],[106,202],[88,251],[72,291],[157,340],[159,395],[157,454],[148,499]];
     const right = left.map(([x,y])=>[360-x,y]);
@@ -20,9 +23,9 @@
       [center[i],left[i],right[i]].forEach(([px,py],side)=>{
         const n=i*3+side, opened=n<v.opened, next=n===v.opened && n<v.layer*v.per_layer;
         const group=svgNode('g',{class:`meridian-node ${opened?'opened':next?'next':'sealed'}`,'data-vein':n+1});
-        const label=svgNode('title');label.textContent=`第 ${n+1} 脉 · ${opened?'已贯通':next?'下一条可开':'未贯通'}`;
-        const circle=svgNode('circle',{cx:px,cy:py,r:10});
-        const text=svgNode('text',{x:px,y:py+3.5,'text-anchor':'middle'});text.textContent=n+1;
+        const label=svgNode('title');label.textContent=`第 ${n+1} ${v.phase?.name || "仙脉"} · ${v.names?.[n] || ""} · ${opened?'已贯通':next?'下一条可开':'未贯通'}`;
+        const circle=svgNode('circle',{cx:px,cy:py,r:13});
+        const text=svgNode('text',{x:px,y:py+3.5,'text-anchor':'middle'});text.textContent=v.names?.[n] || n+1;
         group.append(label,circle,text);svg.append(group);
       });
     });
@@ -36,6 +39,7 @@
       document.querySelector(`[data-panel-target="${name}"]`).classList.toggle('hidden', !visible);
       if (!visible) window.UtilityPanels?.close(name);
     }
+    const market = document.querySelector('#immortal-market-content'); market.replaceChildren(); market.classList.toggle('hidden', !data.available);
     if (!data.available) return;
     const content = document.querySelector('#doctrine-content'); content.replaceChildren();
     const veins = document.querySelector('#immortal-veins-content'); veins.replaceChildren();
@@ -58,7 +62,7 @@
     } else conversion.append(el('p', '仙元已成。消耗仙灵力不会使转化程度倒退。', 'muted'));
     veins.append(conversion);
     const v = data.veins;
-    veins.append(el('h3', `${v.realm} · 第 ${v.layer} 层`), el('p', `已开仙脉 ${v.opened} / ${v.total} · 每层须开 ${v.per_layer} 条，再手动突破；第九层需本境 27 脉贯通。`),
+    veins.append(el('h3', `${v.realm} · ${v.phase?.name || '仙脉'} · 第 ${v.layer} 层`), el('p', `已开仙脉 ${v.opened} / ${v.total} · 每层须开 ${v.per_layer} 条，再手动突破；第九层需本境 27 脉贯通。`),
       meter(v.opened, v.total, '本境仙脉'), el('p', `机缘 ${fmt(v.opportunity)} / 无尽 · 仙痕 ${fmt(v.traces)}`));
     veins.append(meridians(v));
     if (v.next_cost) veins.append(el('p', `下一脉：机缘 ${fmt(v.next_cost.opportunity)} · 仙痕 ${v.next_cost.traces}`),
@@ -73,7 +77,7 @@
       meter(b.level, b.golden_light ? b.max_level : b.golden_light_level, '仙躯修炼进度'),
       el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。护体金光以仙灵力维持，可抵御低阶攻击。`, 'muted'));
     const manuals = b.manuals.filter(m=>m.owned);
-    if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「道门」可求取传承与淬体药材；旧炼体功法不能用于仙躯。'));
+    if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「坊市」可购置传承与淬体药材；旧炼体功法不能用于仙躯。'));
     for (const manual of manuals) body.append(button(`${b.manual === manual.id ? '当前修习：' : '改修：'}《${manual.name}》`, {action:'select_body_manual',supply_id:manual.id}, b.manual === manual.id, options.immortal));
     if(b.manual) {
       body.append(el('p', `下层配方：${b.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · ')}`),
@@ -83,10 +87,10 @@
     const bodyShop=el('section',null,'doctrine-entry');bodyShop.append(el('h3','仙躯传承与仙药'));
     for(const manual of b.manuals) bodyShop.append(el('h4',`《${manual.name}》`),el('p',manual.description),button(manual.owned?'已掌握':`求取传承 · ${fmt(manual.price)} 灵石`,{action:'buy_body_manual',supply_id:manual.id},manual.owned,options.immortal));
     for(const supply of b.supplies) bodyShop.append(button(`${supply.name} ×${supply.quantity} · ${fmt(supply.price)} 灵石（持有 ${fmt(supply.owned)}）`,{action:'buy_body_supply',supply_id:supply.id},false,options.immortal));
-    daomen.append(bodyShop);
+    market.append(bodyShop);
     const owned = el('section'); owned.append(el('h3', '已获传承'));
     const learned = data.rows.filter(row => row.learned);
-    if (!learned.length) owned.append(el('p', '尚未获得道统功法。前往右侧「道门」承接传承、访求同道。', 'muted'));
+    if (!learned.length) owned.append(el('p', '尚未获得道统功法。前往「坊市」取得传承，再去「道门」访求同道。', 'muted'));
     for (const row of learned) {
       const panel = el('section', null, 'doctrine-entry'); panel.dataset.doctrineId = row.id;
       panel.append(el('h4', `${row.name} · Lv${row.level}${row.origin ? ' · 本源归属' : ''}${row.active ? ' · 当前仙域' : ''}`), el('p', row.description));
@@ -147,7 +151,7 @@
         person.append(el('b', `${peer.name} · 道统 Lv${peer.level}${peer.available ? '' : ' · 当前无法请教'}`));
         if (row.level < 9) person.append(button(row.has_annotation ? `Lv${row.level + 1} 注解已收录` : `求取 Lv${row.level + 1} 注解 · ${fmt(data.annotation_price * (row.level + 1))} 灵石`,
           {action:'annotation',doctrine_id:row.id,npc_id:peer.id}, !peer.available || row.has_annotation || peer.level <= row.level));
-        for (const book of row.manuals.filter(b => b.level < 9 && b.level < peer.level)) person.append(button(`请教《${book.name}》至 Lv${book.level + 1} · ${fmt(data.annotation_price * (book.level + 1) ** 2)} 灵石`,
+        for (const book of row.manuals.filter(b => b.level < 9 && b.level < peer.level)) person.append(button(`求取《${book.name}》Lv${book.level} 玉简（合参至 Lv${book.level + 1}） · ${fmt(data.annotation_price * (book.level + 1) ** 2)} 灵石`,
           {action:'teach_manual',doctrine_id:row.id,npc_id:peer.id,manual_id:book.id}, !peer.available));
         entry.append(person);
       }
@@ -162,7 +166,7 @@
         button(`${book.owned ? '再购玉简' : '承接传承'} · ${fmt(book.price)} 灵石`, {action: 'buy', manual_id: book.id}));
       books.append(entry);
     }
-    shop.append(books); daomen.append(shop);
+    shop.append(books); market.append(shop);
     const unknown = el('details'); unknown.append(el('summary', '仙界道统名录'));
     for (const row of data.rows.filter(row => !row.learned)) unknown.append(el('p', `${row.name}：${row.description}`));
     daomen.append(unknown);

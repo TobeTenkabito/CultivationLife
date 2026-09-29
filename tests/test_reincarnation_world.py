@@ -18,7 +18,7 @@ def test_base_world_catalog_complete_without_any_dlc(tmp_path):
     content = ContentRegistry.load(ROOT / "content", tmp_path / "no-dlc")
     assert content.world_systems["world_profiles"]["reincarnation"]["enabled"]
     region = content.loaded_documents["maps.json"]["worlds"]["reincarnation"]
-    assert len(region["locations"]) == 10
+    assert len(region["locations"]) == 28
     locations = {row["id"]: row for row in region["locations"]}
     seen = {region["default"]}
     for _ in range(len(locations)):

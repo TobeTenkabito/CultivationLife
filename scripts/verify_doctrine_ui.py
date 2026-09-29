@@ -30,6 +30,11 @@ def main():
         game = engine.store.load(shown['id'])
         game.pending_event = None
         game.player.next_tribulation_age = None
+        game.player.known_techniques = [t for t in game.player.known_techniques if not t.doctrine_id]
+        game.doctrine_state['player']['annotations'] = {}
+        game.player.immortal_body = {}
+        game.player.body_training = 0
+        game.player.inventory = [i for i in game.player.inventory if i.id not in {'immortal_jade_herb','nine_leaf_immortal_lingzhi'}]
         game.heavenly_court['open_election'] = None
         add_item(game.player, 'spirit_stone', 10**8)
         add_item(game.player, 'immortal_trace', 1000)
@@ -49,7 +54,7 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData !== null')
                 page.evaluate('(id) => loadGame(id)', game.id)
-                page.evaluate("UtilityPanels.open('daomen')")
+                page.evaluate("UtilityPanels.open('market')")
                 assert page.locator('.left-dock [data-panel-target="doctrine"]').count() == 1
                 assert page.locator('.left-dock [data-panel-target="immortal-veins"]').count() == 1
                 assert page.locator('.left-dock [data-panel-target="voisinage"]').count() == 1
@@ -61,6 +66,7 @@ def main():
                 assert page.locator('.doctrine-book').count() == 5
                 page.locator('.doctrine-book button').first.click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.learned)')
+                page.evaluate("UtilityPanels.close('market');UtilityPanels.open('daomen')")
                 assert page.locator('#doctrine-content .doctrine-chapter').count() == 1
                 page.get_by_role('button', name='访求同道', exact=False).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.peers.length === 1)')
@@ -127,7 +133,7 @@ def main():
                 saved.player.mp = max_mp(saved.player) * .60
                 engine.store.save(saved)
                 page.evaluate('(id)=>loadGame(id)',game.id)
-                page.evaluate("UtilityPanels.close('voisinage'); UtilityPanels.open('daomen')")
+                page.evaluate("UtilityPanels.close('voisinage'); UtilityPanels.open('market')")
                 page.get_by_role('button',name='求取传承 · 180,000 灵石',exact=True).click()
                 page.wait_for_function('game.doctrines.immortal_body.manual === "jade_marrows"')
                 for name in ['玉髓仙草','九叶仙芝']:
@@ -137,7 +143,7 @@ def main():
                 saved.player.immortal_body['failures']=100
                 engine.store.save(saved)
                 page.evaluate('(id)=>loadGame(id)',game.id)
-                page.evaluate("UtilityPanels.close('daomen');UtilityPanels.open('immortal-body')")
+                page.evaluate("UtilityPanels.close('market');UtilityPanels.open('immortal-body')")
                 page.get_by_role('button',name='以仙药淬炼下一层',exact=True).click()
                 page.wait_for_function('game.doctrines.immortal_body.level===1')
                 for theme in 'abcdef':
@@ -157,8 +163,13 @@ def main():
                         page.wait_for_timeout(450)
                         page.screenshot(path=str(ROOT/f'build/immortal-body-{theme}-{width}.png'))
                         assert page.locator('#hud-hp .hud-track i').evaluate('(e)=>getComputedStyle(e).backgroundImage.includes("linear-gradient")')
-                        assert page.locator('#hud-mp').evaluate('(e)=>e.title.includes("本源")')
+                        assert page.locator('#hud-mp').evaluate('(e)=>e.title.includes("转化")')
                         assert page.locator('#hud-power').inner_text().find('仙痕')>=0
+                        page.evaluate("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-aperture')")
+                        assert page.locator('.aperture-orb').is_visible()
+                        assert page.locator('#immortal-aperture-card').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+                        page.screenshot(path=str(ROOT/f'build/aperture-{theme}-{width}.png'))
+                        page.evaluate("UtilityPanels.close('immortal-aperture');UtilityPanels.open('immortal-body')")
                 page.evaluate("UtilityPanels.close('immortal-body')")
                 saved = engine.store.load(game.id)
                 saved.player.hp, saved.player.mp = max_hp(saved.player), max_mp(saved.player)

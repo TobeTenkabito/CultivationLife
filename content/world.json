@@ -3245,8 +3245,35 @@
           {
             "id": "purple_cloud_immortal_dew",
             "quantity": 3
+          },
+          {
+            "id": "immortal_jade_herb",
+            "quantity": 120
+          },
+          {
+            "id": "nine_leaf_immortal_lingzhi",
+            "quantity": 60
           }
-        ]
+        ],
+        "body_training": 100,
+        "immortal_traces": 20,
+        "immortal_body": {
+          "level": 1,
+          "manuals": [
+            "jade_marrows"
+          ],
+          "active_manual": "jade_marrows",
+          "failures": 0
+        },
+        "immortal_aperture": {
+          "version": 1,
+          "current": 300,
+          "capacity": 1000,
+          "imitation_current": 0,
+          "imitation_capacity": 60
+        },
+        "doctrine_starter": true,
+        "opportunity_reserve": 300000
       }
     ],
     "stage_lifespan_bonus": {

@@ -21,7 +21,11 @@ class EconomyBlackMarketMethods:
         result = next((row for row in state.get("black_market_results", []) if row["id"] == result_id), None)
         if not result:
             raise ValueError("请先检索并选择一件黑市商品")
-        if not self._is_world_market_good(
+        from cultivation_life.system.spirit_voisinage import secondary, catalog, grant
+        spirit = result.get('kind') == 'spirit_manual'
+        if spirit and (not secondary(game.player.world) or result.get('content_id') not in catalog(game)):
+            raise ValueError('当前界面没有这份灵域传承')
+        if not spirit and not self._is_world_market_good(
             game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
         ):
             raise ValueError("这件货物不属于当前世界的流通范围")
@@ -32,7 +36,10 @@ class EconomyBlackMarketMethods:
             raise ValueError("这份黑市材料已经失去灵性")
         if not remove_item(game.player, "spirit_stone", total_price):
             raise ValueError(f"需要 {total_price} 枚下品灵石")
-        if kind == "crafting_material":
+        if spirit:
+            for _ in range(quantity):
+                grant(game, result['content_id'])
+        elif kind == "crafting_material":
             instance = copy.deepcopy(result.get("material_instance"))
             if not isinstance(instance, dict):
                 raise ValueError("这份黑市炼器材料已经失去灵性")

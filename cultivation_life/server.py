@@ -158,6 +158,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.doctrine_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("manual_id"),
                                                 payload.get("confirm_origin", False), payload.get("npc_id"))
+            elif operation == "aperture-action":
+                result = ENGINE.aperture_action(game_id, str(payload.get("action", "")), payload.get("manual_id"))
             elif operation == "immortal-action":
                 result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"))
@@ -314,6 +316,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.use_harvested_plant(game_id, payload.get("item_id", ""))
             elif operation == "black-market-leave":
                 result = ENGINE.leave_black_market(game_id)
+            elif operation == 'teleport-action':
+                result = ENGINE.teleport_action(game_id, payload.get('action', ''), payload.get('destination'))
             elif operation == "map-travel":
                 result = ENGINE.travel_map(game_id, payload.get("destination", ""))
             elif operation == "equip-technique":
