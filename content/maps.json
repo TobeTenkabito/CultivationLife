@@ -37,7 +37,8 @@
             "demon": 0.45,
             "monster": 0.55,
             "yin": 0.5
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "muling_desert",
@@ -144,7 +145,8 @@
             "demon": 0.38,
             "monster": 0.78,
             "yin": 0.82
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "frost_reed_marsh",
@@ -200,78 +202,483 @@
           },
           "min_realm_index": 5,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_human_1",
+          "name": "青岚古道",
+          "description": "青岚古道位于人界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.75,
+            "demon": 0.45,
+            "monster": 0.68,
+            "yin": 0.38
+          }
+        },
+        {
+          "id": "expanse_human_2",
+          "name": "白鹿书山",
+          "description": "白鹿书山位于人界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.31,
+            "demon": 0.37,
+            "monster": 0.59,
+            "yin": 0.66
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_3",
+          "name": "镜湖水府外境",
+          "description": "镜湖水府位于人界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.15,
+            "demon": 0.63,
+            "monster": 0.5,
+            "yin": 0.57
+          }
+        },
+        {
+          "id": "expanse_human_4",
+          "name": "伏龙岭",
+          "description": "伏龙岭位于人界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.99,
+            "demon": 0.55,
+            "monster": 0.41,
+            "yin": 0.49
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_5",
+          "name": "丹霞药谷",
+          "description": "丹霞药谷位于人界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.83,
+            "demon": 0.48,
+            "monster": 0.72,
+            "yin": 0.41
+          }
+        },
+        {
+          "id": "expanse_human_6",
+          "name": "听潮渡",
+          "description": "听潮渡位于人界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.39,
+            "demon": 0.41,
+            "monster": 0.63,
+            "yin": 0.7
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_7",
+          "name": "栖霞古城",
+          "description": "栖霞古城位于人界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.23,
+            "demon": 0.34,
+            "monster": 0.54,
+            "yin": 0.61
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_8",
+          "name": "松风峡",
+          "description": "松风峡位于人界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.07,
+            "demon": 0.59,
+            "monster": 0.46,
+            "yin": 0.54
+          }
+        },
+        {
+          "id": "expanse_human_9",
+          "name": "赤铜山",
+          "description": "赤铜山位于人界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.91,
+            "demon": 0.52,
+            "monster": 0.76,
+            "yin": 0.46
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_10",
+          "name": "乌篷泽",
+          "description": "乌篷泽位于人界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.75,
+            "demon": 0.45,
+            "monster": 0.68,
+            "yin": 0.38
+          }
+        },
+        {
+          "id": "expanse_human_11",
+          "name": "长春林",
+          "description": "长春林位于人界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.31,
+            "demon": 0.37,
+            "monster": 0.59,
+            "yin": 0.66
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_12",
+          "name": "天井关",
+          "description": "天井关位于人界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.15,
+            "demon": 0.63,
+            "monster": 0.5,
+            "yin": 0.57
+          }
+        },
+        {
+          "id": "expanse_human_13",
+          "name": "落星滩",
+          "description": "落星滩位于人界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.99,
+            "demon": 0.55,
+            "monster": 0.41,
+            "yin": 0.49
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_14",
+          "name": "白沙驿",
+          "description": "白沙驿位于人界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.83,
+            "demon": 0.48,
+            "monster": 0.72,
+            "yin": 0.41
+          }
+        },
+        {
+          "id": "expanse_human_15",
+          "name": "玉门荒原",
+          "description": "玉门荒原位于人界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.39,
+            "demon": 0.41,
+            "monster": 0.63,
+            "yin": 0.7
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_16",
+          "name": "雁回峰",
+          "description": "雁回峰位于人界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.23,
+            "demon": 0.34,
+            "monster": 0.54,
+            "yin": 0.61
+          }
+        },
+        {
+          "id": "expanse_human_17",
+          "name": "云梦泽",
+          "description": "云梦泽位于人界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.07,
+            "demon": 0.59,
+            "monster": 0.46,
+            "yin": 0.54
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_human_18",
+          "name": "问津台",
+          "description": "问津台位于人界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.91,
+            "demon": 0.52,
+            "monster": 0.76,
+            "yin": 0.46
+          }
         }
       ],
       "routes": [
         {
           "from": "wudi_plain",
           "to": "muling_desert",
-          "years": 4
+          "years": 12
         },
         {
           "from": "wudi_plain",
           "to": "lanjiang_steppe",
-          "years": 3
+          "years": 9
         },
         {
           "from": "wudi_plain",
           "to": "whisper_archipelago",
-          "years": 7
+          "years": 21
         },
         {
           "from": "muling_desert",
           "to": "lanjiang_steppe",
-          "years": 5
+          "years": 15
         },
         {
           "from": "lanjiang_steppe",
           "to": "whisper_archipelago",
-          "years": 6
+          "years": 18
         },
         {
           "from": "whisper_archipelago",
           "to": "lancang_sea",
-          "years": 8
+          "years": 24
         },
         {
           "from": "wudi_plain",
           "to": "lancang_sea",
-          "years": 14
+          "years": 42
         },
         {
           "from": "muling_desert",
           "to": "cangwu_mountains",
-          "years": 4
+          "years": 12
         },
         {
           "from": "cangwu_mountains",
           "to": "skyfire_crater",
-          "years": 6
+          "years": 18
         },
         {
           "from": "lanjiang_steppe",
           "to": "mirror_lake",
-          "years": 4
+          "years": 12
         },
         {
           "from": "mirror_lake",
           "to": "frost_reed_marsh",
-          "years": 3
+          "years": 9
         },
         {
           "from": "frost_reed_marsh",
           "to": "whisper_archipelago",
-          "years": 5
+          "years": 15
         },
         {
           "from": "lancang_sea",
           "to": "border_void_watch",
-          "years": 11
+          "years": 33
         },
         {
           "from": "skyfire_crater",
           "to": "border_void_watch",
-          "years": 13
+          "years": 39
+        },
+        {
+          "from": "wudi_plain",
+          "to": "expanse_human_1",
+          "years": 16
+        },
+        {
+          "from": "expanse_human_1",
+          "to": "expanse_human_2",
+          "years": 24
+        },
+        {
+          "from": "expanse_human_2",
+          "to": "expanse_human_3",
+          "years": 32
+        },
+        {
+          "from": "expanse_human_3",
+          "to": "expanse_human_4",
+          "years": 40
+        },
+        {
+          "from": "expanse_human_4",
+          "to": "expanse_human_5",
+          "years": 16
+        },
+        {
+          "from": "expanse_human_5",
+          "to": "expanse_human_6",
+          "years": 24
+        },
+        {
+          "from": "muling_desert",
+          "to": "expanse_human_7",
+          "years": 32
+        },
+        {
+          "from": "expanse_human_7",
+          "to": "expanse_human_8",
+          "years": 40
+        },
+        {
+          "from": "expanse_human_8",
+          "to": "expanse_human_9",
+          "years": 16
+        },
+        {
+          "from": "expanse_human_9",
+          "to": "expanse_human_10",
+          "years": 24
+        },
+        {
+          "from": "expanse_human_10",
+          "to": "expanse_human_11",
+          "years": 32
+        },
+        {
+          "from": "expanse_human_11",
+          "to": "expanse_human_12",
+          "years": 40
+        },
+        {
+          "from": "lanjiang_steppe",
+          "to": "expanse_human_13",
+          "years": 16
+        },
+        {
+          "from": "expanse_human_13",
+          "to": "expanse_human_14",
+          "years": 24
+        },
+        {
+          "from": "expanse_human_14",
+          "to": "expanse_human_15",
+          "years": 32
+        },
+        {
+          "from": "expanse_human_15",
+          "to": "expanse_human_16",
+          "years": 40
+        },
+        {
+          "from": "expanse_human_16",
+          "to": "expanse_human_17",
+          "years": 16
+        },
+        {
+          "from": "expanse_human_17",
+          "to": "expanse_human_18",
+          "years": 24
         }
       ]
     },
@@ -293,7 +700,8 @@
             "demon": 0.65,
             "monster": 1,
             "yin": 0.7
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "thunder_continent",
@@ -397,7 +805,8 @@
             "demon": 0.66,
             "monster": 1.0,
             "yin": 0.78
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "five_thunder_basin",
@@ -433,7 +842,8 @@
             "demon": 0.45,
             "monster": 1.12,
             "yin": 0.74
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "void_whale_trench",
@@ -453,78 +863,483 @@
           },
           "min_realm_index": 7,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_spirit_1",
+          "name": "青冥山海",
+          "description": "青冥山海位于灵界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.01,
+            "demon": 0.64,
+            "monster": 1.23,
+            "yin": 0.52
+          }
+        },
+        {
+          "id": "expanse_spirit_2",
+          "name": "九曲灵河",
+          "description": "九曲灵河位于灵界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.77,
+            "demon": 0.54,
+            "monster": 1.07,
+            "yin": 0.92
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_3",
+          "name": "悬空仙城",
+          "description": "悬空仙城位于灵界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.55,
+            "demon": 0.9,
+            "monster": 0.91,
+            "yin": 0.8
+          }
+        },
+        {
+          "id": "expanse_spirit_4",
+          "name": "云鲸牧场",
+          "description": "云鲸牧场位于灵界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.34,
+            "demon": 0.8,
+            "monster": 0.75,
+            "yin": 0.69
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_5",
+          "name": "琉璃洞天",
+          "description": "琉璃洞天位于灵界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.12,
+            "demon": 0.7,
+            "monster": 1.31,
+            "yin": 0.58
+          }
+        },
+        {
+          "id": "expanse_spirit_6",
+          "name": "沧浪墟",
+          "description": "沧浪墟位于灵界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.88,
+            "demon": 0.59,
+            "monster": 1.15,
+            "yin": 0.97
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_7",
+          "name": "星砂走廊",
+          "description": "星砂走廊位于灵界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.66,
+            "demon": 0.49,
+            "monster": 0.99,
+            "yin": 0.86
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_8",
+          "name": "天青古林",
+          "description": "天青古林位于灵界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.44,
+            "demon": 0.85,
+            "monster": 0.83,
+            "yin": 0.75
+          }
+        },
+        {
+          "id": "expanse_spirit_9",
+          "name": "万族驿",
+          "description": "万族驿位于灵界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.23,
+            "demon": 0.75,
+            "monster": 1.39,
+            "yin": 0.64
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_10",
+          "name": "云璧关",
+          "description": "云璧关位于灵界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.01,
+            "demon": 0.64,
+            "monster": 1.23,
+            "yin": 0.52
+          }
+        },
+        {
+          "id": "expanse_spirit_11",
+          "name": "寒螭渊",
+          "description": "寒螭渊位于灵界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.77,
+            "demon": 0.54,
+            "monster": 1.07,
+            "yin": 0.92
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_12",
+          "name": "赤霞云泽",
+          "description": "赤霞云泽位于灵界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.55,
+            "demon": 0.9,
+            "monster": 0.91,
+            "yin": 0.8
+          }
+        },
+        {
+          "id": "expanse_spirit_13",
+          "name": "雪魄冰原",
+          "description": "雪魄冰原位于灵界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.34,
+            "demon": 0.8,
+            "monster": 0.75,
+            "yin": 0.69
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_14",
+          "name": "神木天池",
+          "description": "神木天池位于灵界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.12,
+            "demon": 0.7,
+            "monster": 1.31,
+            "yin": 0.58
+          }
+        },
+        {
+          "id": "expanse_spirit_15",
+          "name": "太虚残庭",
+          "description": "太虚残庭位于灵界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.88,
+            "demon": 0.59,
+            "monster": 1.15,
+            "yin": 0.97
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_16",
+          "name": "苍梧灵丘",
+          "description": "苍梧灵丘位于灵界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.66,
+            "demon": 0.49,
+            "monster": 0.99,
+            "yin": 0.86
+          }
+        },
+        {
+          "id": "expanse_spirit_17",
+          "name": "风雷隘",
+          "description": "风雷隘位于灵界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.44,
+            "demon": 0.85,
+            "monster": 0.83,
+            "yin": 0.75
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_spirit_18",
+          "name": "落仙渡",
+          "description": "落仙渡位于灵界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.23,
+            "demon": 0.75,
+            "monster": 1.39,
+            "yin": 0.64
+          }
         }
       ],
       "routes": [
         {
           "from": "tianyuan_realm",
           "to": "thunder_continent",
-          "years": 18
+          "years": 270
         },
         {
           "from": "tianyuan_realm",
           "to": "mist_sea_isles",
-          "years": 25
+          "years": 375
         },
         {
           "from": "tianyuan_realm",
           "to": "hundred_race_city",
-          "years": 32
+          "years": 480
         },
         {
           "from": "thunder_continent",
           "to": "guanghan_wilds",
-          "years": 38
+          "years": 570
         },
         {
           "from": "mist_sea_isles",
           "to": "guanghan_wilds",
-          "years": 28
+          "years": 420
         },
         {
           "from": "guanghan_wilds",
           "to": "hundred_race_city",
-          "years": 45
+          "years": 675
         },
         {
           "from": "tianyuan_realm",
           "to": "jade_bamboo_domain",
-          "years": 16
+          "years": 240
         },
         {
           "from": "jade_bamboo_domain",
           "to": "hundred_medicine_valley",
-          "years": 21
+          "years": 315
         },
         {
           "from": "hundred_medicine_valley",
           "to": "hundred_race_city",
-          "years": 24
+          "years": 360
         },
         {
           "from": "hundred_race_city",
           "to": "floating_star_fjord",
-          "years": 19
+          "years": 285
         },
         {
           "from": "thunder_continent",
           "to": "five_thunder_basin",
-          "years": 26
+          "years": 390
         },
         {
           "from": "five_thunder_basin",
           "to": "floating_star_fjord",
-          "years": 31
+          "years": 465
         },
         {
           "from": "mist_sea_isles",
           "to": "void_whale_trench",
-          "years": 33
+          "years": 495
         },
         {
           "from": "void_whale_trench",
           "to": "guanghan_wilds",
-          "years": 36
+          "years": 540
+        },
+        {
+          "from": "tianyuan_realm",
+          "to": "expanse_spirit_1",
+          "years": 180
+        },
+        {
+          "from": "expanse_spirit_1",
+          "to": "expanse_spirit_2",
+          "years": 270
+        },
+        {
+          "from": "expanse_spirit_2",
+          "to": "expanse_spirit_3",
+          "years": 360
+        },
+        {
+          "from": "expanse_spirit_3",
+          "to": "expanse_spirit_4",
+          "years": 450
+        },
+        {
+          "from": "expanse_spirit_4",
+          "to": "expanse_spirit_5",
+          "years": 180
+        },
+        {
+          "from": "expanse_spirit_5",
+          "to": "expanse_spirit_6",
+          "years": 270
+        },
+        {
+          "from": "thunder_continent",
+          "to": "expanse_spirit_7",
+          "years": 360
+        },
+        {
+          "from": "expanse_spirit_7",
+          "to": "expanse_spirit_8",
+          "years": 450
+        },
+        {
+          "from": "expanse_spirit_8",
+          "to": "expanse_spirit_9",
+          "years": 180
+        },
+        {
+          "from": "expanse_spirit_9",
+          "to": "expanse_spirit_10",
+          "years": 270
+        },
+        {
+          "from": "expanse_spirit_10",
+          "to": "expanse_spirit_11",
+          "years": 360
+        },
+        {
+          "from": "expanse_spirit_11",
+          "to": "expanse_spirit_12",
+          "years": 450
+        },
+        {
+          "from": "mist_sea_isles",
+          "to": "expanse_spirit_13",
+          "years": 180
+        },
+        {
+          "from": "expanse_spirit_13",
+          "to": "expanse_spirit_14",
+          "years": 270
+        },
+        {
+          "from": "expanse_spirit_14",
+          "to": "expanse_spirit_15",
+          "years": 360
+        },
+        {
+          "from": "expanse_spirit_15",
+          "to": "expanse_spirit_16",
+          "years": 450
+        },
+        {
+          "from": "expanse_spirit_16",
+          "to": "expanse_spirit_17",
+          "years": 180
+        },
+        {
+          "from": "expanse_spirit_17",
+          "to": "expanse_spirit_18",
+          "years": 270
         }
       ]
     },
@@ -546,7 +1361,8 @@
             "demon": 1.25,
             "monster": 0.65,
             "yin": 0.8
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "corpse_refining_valley",
@@ -633,7 +1449,8 @@
             "demon": 1.58,
             "monster": 0.92,
             "yin": 1.15
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "blood_moon_fort",
@@ -689,63 +1506,468 @@
           },
           "min_realm_index": 5,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_demon_1",
+          "name": "血雾荒丘",
+          "description": "血雾荒丘位于魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 1.24,
+            "monster": 0.8,
+            "yin": 0.6
+          }
+        },
+        {
+          "id": "expanse_demon_2",
+          "name": "枯骨渡",
+          "description": "枯骨渡位于魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 1.04,
+            "monster": 0.7,
+            "yin": 1.05
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_3",
+          "name": "赤焰窟",
+          "description": "赤焰窟位于魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.74,
+            "monster": 0.59,
+            "yin": 0.92
+          }
+        },
+        {
+          "id": "expanse_demon_4",
+          "name": "黑棘谷",
+          "description": "黑棘谷位于魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 1.54,
+            "monster": 0.49,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_5",
+          "name": "断魂坡",
+          "description": "断魂坡位于魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 1.34,
+            "monster": 0.85,
+            "yin": 0.66
+          }
+        },
+        {
+          "id": "expanse_demon_6",
+          "name": "铁棺岭",
+          "description": "铁棺岭位于魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 1.14,
+            "monster": 0.75,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_7",
+          "name": "魔风峡",
+          "description": "魔风峡位于魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.94,
+            "monster": 0.64,
+            "yin": 0.98
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_8",
+          "name": "蚀月城",
+          "description": "蚀月城位于魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 1.64,
+            "monster": 0.54,
+            "yin": 0.86
+          }
+        },
+        {
+          "id": "expanse_demon_9",
+          "name": "炼魄坛",
+          "description": "炼魄坛位于魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 1.44,
+            "monster": 0.9,
+            "yin": 0.73
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_10",
+          "name": "腐泉泽",
+          "description": "腐泉泽位于魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 1.24,
+            "monster": 0.8,
+            "yin": 0.6
+          }
+        },
+        {
+          "id": "expanse_demon_11",
+          "name": "天煞原",
+          "description": "天煞原位于魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 1.04,
+            "monster": 0.7,
+            "yin": 1.05
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_12",
+          "name": "血藤林",
+          "description": "血藤林位于魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.74,
+            "monster": 0.59,
+            "yin": 0.92
+          }
+        },
+        {
+          "id": "expanse_demon_13",
+          "name": "沉锋矿场",
+          "description": "沉锋矿场位于魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 1.54,
+            "monster": 0.49,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_14",
+          "name": "夜哭关",
+          "description": "夜哭关位于魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 1.34,
+            "monster": 0.85,
+            "yin": 0.66
+          }
+        },
+        {
+          "id": "expanse_demon_15",
+          "name": "焚骨滩",
+          "description": "焚骨滩位于魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 1.14,
+            "monster": 0.75,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_16",
+          "name": "悬颅山",
+          "description": "悬颅山位于魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.94,
+            "monster": 0.64,
+            "yin": 0.98
+          }
+        },
+        {
+          "id": "expanse_demon_17",
+          "name": "幽火渡",
+          "description": "幽火渡位于魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 1.64,
+            "monster": 0.54,
+            "yin": 0.86
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_demon_18",
+          "name": "血日台",
+          "description": "血日台位于魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 1.44,
+            "monster": 0.9,
+            "yin": 0.73
+          }
         }
       ],
       "routes": [
         {
           "from": "gathering_baleful_plain",
           "to": "corpse_refining_valley",
-          "years": 8
+          "years": 24
         },
         {
           "from": "gathering_baleful_plain",
           "to": "red_marrow_city",
-          "years": 6
+          "years": 18
         },
         {
           "from": "corpse_refining_valley",
           "to": "heaven_devouring_rift",
-          "years": 18
+          "years": 54
         },
         {
           "from": "red_marrow_city",
           "to": "heaven_devouring_rift",
-          "years": 15
+          "years": 45
         },
         {
           "from": "gathering_baleful_plain",
           "to": "nine_yin_marsh",
-          "years": 7
+          "years": 21
         },
         {
           "from": "nine_yin_marsh",
           "to": "soul_eating_mine",
-          "years": 11
+          "years": 33
         },
         {
           "from": "corpse_refining_valley",
           "to": "soul_eating_mine",
-          "years": 9
+          "years": 27
         },
         {
           "from": "red_marrow_city",
           "to": "blood_moon_fort",
-          "years": 8
+          "years": 24
         },
         {
           "from": "blood_moon_fort",
           "to": "bone_sand_sea",
-          "years": 10
+          "years": 30
         },
         {
           "from": "bone_sand_sea",
           "to": "shattered_gate",
-          "years": 16
+          "years": 48
         },
         {
           "from": "shattered_gate",
           "to": "heaven_devouring_rift",
-          "years": 9
+          "years": 27
+        },
+        {
+          "from": "gathering_baleful_plain",
+          "to": "expanse_demon_1",
+          "years": 16
+        },
+        {
+          "from": "expanse_demon_1",
+          "to": "expanse_demon_2",
+          "years": 24
+        },
+        {
+          "from": "expanse_demon_2",
+          "to": "expanse_demon_3",
+          "years": 32
+        },
+        {
+          "from": "expanse_demon_3",
+          "to": "expanse_demon_4",
+          "years": 40
+        },
+        {
+          "from": "expanse_demon_4",
+          "to": "expanse_demon_5",
+          "years": 16
+        },
+        {
+          "from": "expanse_demon_5",
+          "to": "expanse_demon_6",
+          "years": 24
+        },
+        {
+          "from": "corpse_refining_valley",
+          "to": "expanse_demon_7",
+          "years": 32
+        },
+        {
+          "from": "expanse_demon_7",
+          "to": "expanse_demon_8",
+          "years": 40
+        },
+        {
+          "from": "expanse_demon_8",
+          "to": "expanse_demon_9",
+          "years": 16
+        },
+        {
+          "from": "expanse_demon_9",
+          "to": "expanse_demon_10",
+          "years": 24
+        },
+        {
+          "from": "expanse_demon_10",
+          "to": "expanse_demon_11",
+          "years": 32
+        },
+        {
+          "from": "expanse_demon_11",
+          "to": "expanse_demon_12",
+          "years": 40
+        },
+        {
+          "from": "red_marrow_city",
+          "to": "expanse_demon_13",
+          "years": 16
+        },
+        {
+          "from": "expanse_demon_13",
+          "to": "expanse_demon_14",
+          "years": 24
+        },
+        {
+          "from": "expanse_demon_14",
+          "to": "expanse_demon_15",
+          "years": 32
+        },
+        {
+          "from": "expanse_demon_15",
+          "to": "expanse_demon_16",
+          "years": 40
+        },
+        {
+          "from": "expanse_demon_16",
+          "to": "expanse_demon_17",
+          "years": 16
+        },
+        {
+          "from": "expanse_demon_17",
+          "to": "expanse_demon_18",
+          "years": 24
         }
       ]
     },
@@ -767,7 +1989,8 @@
             "demon": 1.25,
             "monster": 0.65,
             "yin": 0.8
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "bloodflame_range",
@@ -873,7 +2096,8 @@
             "demon": 1.76,
             "monster": 0.62,
             "yin": 1.22
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "void_storm_eye",
@@ -912,68 +2136,473 @@
           },
           "min_realm_index": 8,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_true_demon_1",
+          "name": "七杀魔岭",
+          "description": "七杀魔岭位于真魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 1.24,
+            "monster": 0.8,
+            "yin": 0.6
+          }
+        },
+        {
+          "id": "expanse_true_demon_2",
+          "name": "黑日旷野",
+          "description": "黑日旷野位于真魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 1.04,
+            "monster": 0.7,
+            "yin": 1.05
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_3",
+          "name": "魔龙寝宫",
+          "description": "魔龙寝宫位于真魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.74,
+            "monster": 0.59,
+            "yin": 0.92
+          }
+        },
+        {
+          "id": "expanse_true_demon_4",
+          "name": "燃魂河",
+          "description": "燃魂河位于真魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 1.54,
+            "monster": 0.49,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_5",
+          "name": "万劫铜城",
+          "description": "万劫铜城位于真魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 1.34,
+            "monster": 0.85,
+            "yin": 0.66
+          }
+        },
+        {
+          "id": "expanse_true_demon_6",
+          "name": "虚骸海",
+          "description": "虚骸海位于真魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 1.14,
+            "monster": 0.75,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_7",
+          "name": "血莲秘谷",
+          "description": "血莲秘谷位于真魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.94,
+            "monster": 0.64,
+            "yin": 0.98
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_8",
+          "name": "撕天峡",
+          "description": "撕天峡位于真魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 1.64,
+            "monster": 0.54,
+            "yin": 0.86
+          }
+        },
+        {
+          "id": "expanse_true_demon_9",
+          "name": "苍夜魔林",
+          "description": "苍夜魔林位于真魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 1.44,
+            "monster": 0.9,
+            "yin": 0.73
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_10",
+          "name": "无生荒原",
+          "description": "无生荒原位于真魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 1.24,
+            "monster": 0.8,
+            "yin": 0.6
+          }
+        },
+        {
+          "id": "expanse_true_demon_11",
+          "name": "罪火天池",
+          "description": "罪火天池位于真魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 1.04,
+            "monster": 0.7,
+            "yin": 1.05
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_12",
+          "name": "紫煞古关",
+          "description": "紫煞古关位于真魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.74,
+            "monster": 0.59,
+            "yin": 0.92
+          }
+        },
+        {
+          "id": "expanse_true_demon_13",
+          "name": "碎星魔渊",
+          "description": "碎星魔渊位于真魔界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 1.54,
+            "monster": 0.49,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_14",
+          "name": "蚀天古道",
+          "description": "蚀天古道位于真魔界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 1.34,
+            "monster": 0.85,
+            "yin": 0.66
+          }
+        },
+        {
+          "id": "expanse_true_demon_15",
+          "name": "魔心渡",
+          "description": "魔心渡位于真魔界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 1.14,
+            "monster": 0.75,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_16",
+          "name": "赤月魔墟",
+          "description": "赤月魔墟位于真魔界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.94,
+            "monster": 0.64,
+            "yin": 0.98
+          }
+        },
+        {
+          "id": "expanse_true_demon_17",
+          "name": "千刃寒丘",
+          "description": "千刃寒丘位于真魔界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 1.64,
+            "monster": 0.54,
+            "yin": 0.86
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_true_demon_18",
+          "name": "万魇台",
+          "description": "万魇台位于真魔界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 1.44,
+            "monster": 0.9,
+            "yin": 0.73
+          }
         }
       ],
       "routes": [
         {
           "from": "black_sun_plain",
           "to": "bloodflame_range",
-          "years": 20
+          "years": 300
         },
         {
           "from": "black_sun_plain",
           "to": "abyss_city",
-          "years": 14
+          "years": 210
         },
         {
           "from": "abyss_city",
           "to": "fallen_star_sea",
-          "years": 36
+          "years": 540
         },
         {
           "from": "bloodflame_range",
           "to": "fallen_star_sea",
-          "years": 42
+          "years": 630
         },
         {
           "from": "black_sun_plain",
           "to": "abyss_blood_lake",
-          "years": 18
+          "years": 270
         },
         {
           "from": "abyss_blood_lake",
           "to": "black_lotus_city",
-          "years": 22
+          "years": 330
         },
         {
           "from": "abyss_city",
           "to": "black_lotus_city",
-          "years": 17
+          "years": 255
         },
         {
           "from": "bloodflame_range",
           "to": "fallen_god_ridge",
-          "years": 24
+          "years": 360
         },
         {
           "from": "fallen_god_ridge",
           "to": "void_storm_eye",
-          "years": 39
+          "years": 585
         },
         {
           "from": "fallen_star_sea",
           "to": "void_storm_eye",
-          "years": 31
+          "years": 465
         },
         {
           "from": "void_storm_eye",
           "to": "ancient_demon_grave",
-          "years": 58
+          "years": 870
         },
         {
           "from": "black_lotus_city",
           "to": "ancient_demon_grave",
-          "years": 72
+          "years": 1080
+        },
+        {
+          "from": "black_sun_plain",
+          "to": "expanse_true_demon_1",
+          "years": 180
+        },
+        {
+          "from": "expanse_true_demon_1",
+          "to": "expanse_true_demon_2",
+          "years": 270
+        },
+        {
+          "from": "expanse_true_demon_2",
+          "to": "expanse_true_demon_3",
+          "years": 360
+        },
+        {
+          "from": "expanse_true_demon_3",
+          "to": "expanse_true_demon_4",
+          "years": 450
+        },
+        {
+          "from": "expanse_true_demon_4",
+          "to": "expanse_true_demon_5",
+          "years": 180
+        },
+        {
+          "from": "expanse_true_demon_5",
+          "to": "expanse_true_demon_6",
+          "years": 270
+        },
+        {
+          "from": "bloodflame_range",
+          "to": "expanse_true_demon_7",
+          "years": 360
+        },
+        {
+          "from": "expanse_true_demon_7",
+          "to": "expanse_true_demon_8",
+          "years": 450
+        },
+        {
+          "from": "expanse_true_demon_8",
+          "to": "expanse_true_demon_9",
+          "years": 180
+        },
+        {
+          "from": "expanse_true_demon_9",
+          "to": "expanse_true_demon_10",
+          "years": 270
+        },
+        {
+          "from": "expanse_true_demon_10",
+          "to": "expanse_true_demon_11",
+          "years": 360
+        },
+        {
+          "from": "expanse_true_demon_11",
+          "to": "expanse_true_demon_12",
+          "years": 450
+        },
+        {
+          "from": "abyss_city",
+          "to": "expanse_true_demon_13",
+          "years": 180
+        },
+        {
+          "from": "expanse_true_demon_13",
+          "to": "expanse_true_demon_14",
+          "years": 270
+        },
+        {
+          "from": "expanse_true_demon_14",
+          "to": "expanse_true_demon_15",
+          "years": 360
+        },
+        {
+          "from": "expanse_true_demon_15",
+          "to": "expanse_true_demon_16",
+          "years": 450
+        },
+        {
+          "from": "expanse_true_demon_16",
+          "to": "expanse_true_demon_17",
+          "years": 180
+        },
+        {
+          "from": "expanse_true_demon_17",
+          "to": "expanse_true_demon_18",
+          "years": 270
         }
       ]
     },
@@ -995,7 +2624,8 @@
             "demon": 0.75,
             "monster": 1.3,
             "yin": 1
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "myriad_spirit_forest",
@@ -1084,7 +2714,8 @@
             "demon": 0.55,
             "monster": 1.7,
             "yin": 1.5
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "moon_insect_cavern",
@@ -1102,7 +2733,8 @@
             "demon": 0.65,
             "monster": 1.85,
             "yin": 1.4
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "kun_shadow_abyss",
@@ -1140,7 +2772,8 @@
             "demon": 0.4,
             "monster": 1.7,
             "yin": 1.35
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "mirror_moon_sandbar",
@@ -1176,7 +2809,8 @@
             "demon": 0.75,
             "monster": 1.75,
             "yin": 1.55
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "ancient_vine_bridge",
@@ -1234,7 +2868,8 @@
             "demon": 0.58,
             "monster": 1.82,
             "yin": 1.62
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "hollow_moon_chasm",
@@ -1273,133 +2908,538 @@
             "monster": 1.88,
             "yin": 1.58
           }
+        },
+        {
+          "id": "expanse_phantom_underworld_1",
+          "name": "千灯幻河",
+          "description": "千灯幻河位于幻冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 0.74,
+            "monster": 1.6,
+            "yin": 0.75
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_2",
+          "name": "蜃月楼台",
+          "description": "蜃月楼台位于幻冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 0.62,
+            "monster": 1.39,
+            "yin": 1.31
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_3",
+          "name": "狐梦竹海",
+          "description": "狐梦竹海位于幻冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.04,
+            "monster": 1.18,
+            "yin": 1.15
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_4",
+          "name": "流萤古渡",
+          "description": "流萤古渡位于幻冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 0.92,
+            "monster": 0.98,
+            "yin": 0.99
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_5",
+          "name": "无相长街",
+          "description": "无相长街位于幻冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 0.8,
+            "monster": 1.7,
+            "yin": 0.83
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_6",
+          "name": "三生幻壁",
+          "description": "三生幻壁位于幻冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 0.68,
+            "monster": 1.49,
+            "yin": 1.39
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_7",
+          "name": "照影潭",
+          "description": "照影潭位于幻冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.56,
+            "monster": 1.29,
+            "yin": 1.23
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_8",
+          "name": "梦蝶云谷",
+          "description": "梦蝶云谷位于幻冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 0.98,
+            "monster": 1.08,
+            "yin": 1.07
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_9",
+          "name": "玉魇古城",
+          "description": "玉魇古城位于幻冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 0.86,
+            "monster": 1.81,
+            "yin": 0.91
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_10",
+          "name": "月镜山",
+          "description": "月镜山位于幻冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 0.74,
+            "monster": 1.6,
+            "yin": 0.75
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_11",
+          "name": "魂香林",
+          "description": "魂香林位于幻冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.59,
+            "demon": 0.62,
+            "monster": 1.39,
+            "yin": 1.31
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_12",
+          "name": "忘尘台",
+          "description": "忘尘台位于幻冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 1.04,
+            "monster": 1.18,
+            "yin": 1.15
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_13",
+          "name": "绮霞幻海",
+          "description": "绮霞幻海位于幻冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.45,
+            "demon": 0.92,
+            "monster": 0.98,
+            "yin": 0.99
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_14",
+          "name": "空花驿",
+          "description": "空花驿位于幻冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 0.8,
+            "monster": 1.7,
+            "yin": 0.83
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_15",
+          "name": "琉梦关",
+          "description": "琉梦关位于幻冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.63,
+            "demon": 0.68,
+            "monster": 1.49,
+            "yin": 1.39
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_16",
+          "name": "九色眠丘",
+          "description": "九色眠丘位于幻冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.55,
+            "demon": 0.56,
+            "monster": 1.29,
+            "yin": 1.23
+          }
+        },
+        {
+          "id": "expanse_phantom_underworld_17",
+          "name": "玉笙深谷",
+          "description": "玉笙深谷位于幻冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.48,
+            "demon": 0.98,
+            "monster": 1.08,
+            "yin": 1.07
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_phantom_underworld_18",
+          "name": "缘灭荒台",
+          "description": "缘灭荒台位于幻冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.41,
+            "demon": 0.86,
+            "monster": 1.81,
+            "yin": 0.91
+          }
         }
       ],
       "routes": [
         {
           "from": "moonbeast_plain",
           "to": "myriad_spirit_forest",
-          "years": 16
+          "years": 240
         },
         {
           "from": "moonbeast_plain",
           "to": "sky_bone_ridge",
-          "years": 24
+          "years": 360
         },
         {
           "from": "myriad_spirit_forest",
           "to": "phantom_tide",
-          "years": 34
+          "years": 510
         },
         {
           "from": "sky_bone_ridge",
           "to": "phantom_tide",
-          "years": 30
+          "years": 450
         },
         {
           "from": "moonbeast_plain",
           "to": "nine_tail_dream_city",
-          "years": 13
+          "years": 195
         },
         {
           "from": "moonbeast_plain",
           "to": "mirror_moon_sandbar",
-          "years": 12
+          "years": 180
         },
         {
           "from": "myriad_spirit_forest",
           "to": "sleepless_flower_sea",
-          "years": 11
+          "years": 165
         },
         {
           "from": "myriad_spirit_forest",
           "to": "ancient_vine_bridge",
-          "years": 18
+          "years": 270
         },
         {
           "from": "sky_bone_ridge",
           "to": "moon_insect_cavern",
-          "years": 15
+          "years": 225
         },
         {
           "from": "sky_bone_ridge",
           "to": "silent_shadow_valley",
-          "years": 17
+          "years": 255
         },
         {
           "from": "phantom_tide",
           "to": "kun_shadow_abyss",
-          "years": 21
+          "years": 315
         },
         {
           "from": "phantom_tide",
           "to": "black_shell_underlake",
-          "years": 19
+          "years": 285
         },
         {
           "from": "nine_tail_dream_city",
           "to": "silent_shadow_valley",
-          "years": 14
+          "years": 210
         },
         {
           "from": "nine_tail_dream_city",
           "to": "sleepless_flower_sea",
-          "years": 12
+          "years": 180
         },
         {
           "from": "black_shell_underlake",
           "to": "kun_shadow_abyss",
-          "years": 16
+          "years": 240
         },
         {
           "from": "moon_insect_cavern",
           "to": "ancient_vine_bridge",
-          "years": 17
+          "years": 255
         },
         {
           "from": "mirror_moon_sandbar",
           "to": "kun_shadow_abyss",
-          "years": 22
+          "years": 330
         },
         {
           "from": "mirror_moon_sandbar",
           "to": "silent_shadow_valley",
-          "years": 15
+          "years": 225
         },
         {
           "from": "sleepless_flower_sea",
           "to": "ancient_vine_bridge",
-          "years": 13
+          "years": 195
         },
         {
           "from": "ancient_vine_bridge",
           "to": "inverted_sky_forest",
-          "years": 16
+          "years": 240
         },
         {
           "from": "inverted_sky_forest",
           "to": "hollow_moon_chasm",
-          "years": 27
+          "years": 405
         },
         {
           "from": "nine_tail_dream_city",
           "to": "beast_soul_lantern_city",
-          "years": 11
+          "years": 165
         },
         {
           "from": "beast_soul_lantern_city",
           "to": "mirage_bone_field",
-          "years": 14
+          "years": 210
         },
         {
           "from": "mirror_moon_sandbar",
           "to": "mirage_bone_field",
-          "years": 10
+          "years": 150
         },
         {
           "from": "hollow_moon_chasm",
           "to": "kun_shadow_abyss",
-          "years": 20
+          "years": 300
+        },
+        {
+          "from": "moonbeast_plain",
+          "to": "expanse_phantom_underworld_1",
+          "years": 180
+        },
+        {
+          "from": "expanse_phantom_underworld_1",
+          "to": "expanse_phantom_underworld_2",
+          "years": 270
+        },
+        {
+          "from": "expanse_phantom_underworld_2",
+          "to": "expanse_phantom_underworld_3",
+          "years": 360
+        },
+        {
+          "from": "expanse_phantom_underworld_3",
+          "to": "expanse_phantom_underworld_4",
+          "years": 450
+        },
+        {
+          "from": "expanse_phantom_underworld_4",
+          "to": "expanse_phantom_underworld_5",
+          "years": 180
+        },
+        {
+          "from": "expanse_phantom_underworld_5",
+          "to": "expanse_phantom_underworld_6",
+          "years": 270
+        },
+        {
+          "from": "myriad_spirit_forest",
+          "to": "expanse_phantom_underworld_7",
+          "years": 360
+        },
+        {
+          "from": "expanse_phantom_underworld_7",
+          "to": "expanse_phantom_underworld_8",
+          "years": 450
+        },
+        {
+          "from": "expanse_phantom_underworld_8",
+          "to": "expanse_phantom_underworld_9",
+          "years": 180
+        },
+        {
+          "from": "expanse_phantom_underworld_9",
+          "to": "expanse_phantom_underworld_10",
+          "years": 270
+        },
+        {
+          "from": "expanse_phantom_underworld_10",
+          "to": "expanse_phantom_underworld_11",
+          "years": 360
+        },
+        {
+          "from": "expanse_phantom_underworld_11",
+          "to": "expanse_phantom_underworld_12",
+          "years": 450
+        },
+        {
+          "from": "sky_bone_ridge",
+          "to": "expanse_phantom_underworld_13",
+          "years": 180
+        },
+        {
+          "from": "expanse_phantom_underworld_13",
+          "to": "expanse_phantom_underworld_14",
+          "years": 270
+        },
+        {
+          "from": "expanse_phantom_underworld_14",
+          "to": "expanse_phantom_underworld_15",
+          "years": 360
+        },
+        {
+          "from": "expanse_phantom_underworld_15",
+          "to": "expanse_phantom_underworld_16",
+          "years": 450
+        },
+        {
+          "from": "expanse_phantom_underworld_16",
+          "to": "expanse_phantom_underworld_17",
+          "years": 180
+        },
+        {
+          "from": "expanse_phantom_underworld_17",
+          "to": "expanse_phantom_underworld_18",
+          "years": 270
         }
       ]
     },
@@ -1421,7 +3461,8 @@
             "demon": 0.7,
             "monster": 0.55,
             "yin": 1.3
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "forgetful_river",
@@ -1509,7 +3550,8 @@
             "demon": 0.58,
             "monster": 0.52,
             "yin": 1.72
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "frost_mirror_prison",
@@ -1567,7 +3609,8 @@
             "demon": 0.55,
             "monster": 0.5,
             "yin": 1.68
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "wailing_mine",
@@ -1628,83 +3671,488 @@
           },
           "min_realm_index": 7,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_hell_1",
+          "name": "黄泉外渡",
+          "description": "黄泉外渡位于地狱界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.22,
+            "demon": 0.69,
+            "monster": 0.68,
+            "yin": 0.98
+          }
+        },
+        {
+          "id": "expanse_hell_2",
+          "name": "望乡孤城",
+          "description": "望乡孤城位于地狱界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.39,
+            "demon": 0.58,
+            "monster": 0.59,
+            "yin": 1.7
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_3",
+          "name": "阴风旧关",
+          "description": "阴风旧关位于地狱界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 0.97,
+            "monster": 0.5,
+            "yin": 1.49
+          }
+        },
+        {
+          "id": "expanse_hell_4",
+          "name": "白骨石林",
+          "description": "白骨石林位于地狱界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.3,
+            "demon": 0.86,
+            "monster": 0.41,
+            "yin": 1.29
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_5",
+          "name": "血池寒潭",
+          "description": "血池寒潭位于地狱界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.25,
+            "demon": 0.75,
+            "monster": 0.72,
+            "yin": 1.08
+          }
+        },
+        {
+          "id": "expanse_hell_6",
+          "name": "孽镜台",
+          "description": "孽镜台位于地狱界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.42,
+            "demon": 0.64,
+            "monster": 0.63,
+            "yin": 1.81
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_7",
+          "name": "纸马驿",
+          "description": "纸马驿位于地狱界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 0.52,
+            "monster": 0.54,
+            "yin": 1.6
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_8",
+          "name": "无常渡",
+          "description": "无常渡位于地狱界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.32,
+            "demon": 0.92,
+            "monster": 0.46,
+            "yin": 1.39
+          }
+        },
+        {
+          "id": "expanse_hell_9",
+          "name": "冥钱古巷",
+          "description": "冥钱古巷位于地狱界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.27,
+            "demon": 0.8,
+            "monster": 0.76,
+            "yin": 1.18
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_10",
+          "name": "哭竹峡",
+          "description": "哭竹峡位于地狱界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.22,
+            "demon": 0.69,
+            "monster": 0.68,
+            "yin": 0.98
+          }
+        },
+        {
+          "id": "expanse_hell_11",
+          "name": "烬灯荒原",
+          "description": "烬灯荒原位于地狱界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.39,
+            "demon": 0.58,
+            "monster": 0.59,
+            "yin": 1.7
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_12",
+          "name": "枉生涧",
+          "description": "枉生涧位于地狱界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.34,
+            "demon": 0.97,
+            "monster": 0.5,
+            "yin": 1.49
+          }
+        },
+        {
+          "id": "expanse_hell_13",
+          "name": "玄阴矿窟",
+          "description": "玄阴矿窟位于地狱界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.3,
+            "demon": 0.86,
+            "monster": 0.41,
+            "yin": 1.29
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_14",
+          "name": "鬼门山",
+          "description": "鬼门山位于地狱界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.25,
+            "demon": 0.75,
+            "monster": 0.72,
+            "yin": 1.08
+          }
+        },
+        {
+          "id": "expanse_hell_15",
+          "name": "寂声古寺",
+          "description": "寂声古寺位于地狱界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.42,
+            "demon": 0.64,
+            "monster": 0.63,
+            "yin": 1.81
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_16",
+          "name": "幽都旧墟",
+          "description": "幽都旧墟位于地狱界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.37,
+            "demon": 0.52,
+            "monster": 0.54,
+            "yin": 1.6
+          }
+        },
+        {
+          "id": "expanse_hell_17",
+          "name": "残魂泽",
+          "description": "残魂泽位于地狱界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.32,
+            "demon": 0.92,
+            "monster": 0.46,
+            "yin": 1.39
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_hell_18",
+          "name": "引魂长堤",
+          "description": "引魂长堤位于地狱界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.27,
+            "demon": 0.8,
+            "monster": 0.76,
+            "yin": 1.18
+          }
         }
       ],
       "routes": [
         {
           "from": "ghost_gate",
           "to": "forgetful_river",
-          "years": 12
+          "years": 180
         },
         {
           "from": "ghost_gate",
           "to": "iron_tree_wastes",
-          "years": 18
+          "years": 270
         },
         {
           "from": "forgetful_river",
           "to": "ninefold_prison",
-          "years": 40
+          "years": 600
         },
         {
           "from": "iron_tree_wastes",
           "to": "ninefold_prison",
-          "years": 33
+          "years": 495
         },
         {
           "from": "ghost_gate",
           "to": "yin_market_capital",
-          "years": 9
+          "years": 135
         },
         {
           "from": "yin_market_capital",
           "to": "soul_lantern_harbor",
-          "years": 8
+          "years": 120
         },
         {
           "from": "soul_lantern_harbor",
           "to": "forgetful_river",
-          "years": 7
+          "years": 105
         },
         {
           "from": "iron_tree_wastes",
           "to": "wailing_mine",
-          "years": 12
+          "years": 180
         },
         {
           "from": "wailing_mine",
           "to": "frost_mirror_prison",
-          "years": 15
+          "years": 225
         },
         {
           "from": "frost_mirror_prison",
           "to": "ghost_cypress_forest",
-          "years": 13
+          "years": 195
         },
         {
           "from": "ghost_cypress_forest",
           "to": "forgetful_river",
-          "years": 11
+          "years": 165
         },
         {
           "from": "yin_market_capital",
           "to": "karmic_flame_field",
-          "years": 17
+          "years": 255
         },
         {
           "from": "karmic_flame_field",
           "to": "judge_tablet_mountain",
-          "years": 26
+          "years": 390
         },
         {
           "from": "judge_tablet_mountain",
           "to": "ninefold_prison",
-          "years": 29
+          "years": 435
         },
         {
           "from": "ninefold_prison",
           "to": "bottomless_abyss",
-          "years": 46
+          "years": 690
+        },
+        {
+          "from": "ghost_gate",
+          "to": "expanse_hell_1",
+          "years": 180
+        },
+        {
+          "from": "expanse_hell_1",
+          "to": "expanse_hell_2",
+          "years": 270
+        },
+        {
+          "from": "expanse_hell_2",
+          "to": "expanse_hell_3",
+          "years": 360
+        },
+        {
+          "from": "expanse_hell_3",
+          "to": "expanse_hell_4",
+          "years": 450
+        },
+        {
+          "from": "expanse_hell_4",
+          "to": "expanse_hell_5",
+          "years": 180
+        },
+        {
+          "from": "expanse_hell_5",
+          "to": "expanse_hell_6",
+          "years": 270
+        },
+        {
+          "from": "forgetful_river",
+          "to": "expanse_hell_7",
+          "years": 360
+        },
+        {
+          "from": "expanse_hell_7",
+          "to": "expanse_hell_8",
+          "years": 450
+        },
+        {
+          "from": "expanse_hell_8",
+          "to": "expanse_hell_9",
+          "years": 180
+        },
+        {
+          "from": "expanse_hell_9",
+          "to": "expanse_hell_10",
+          "years": 270
+        },
+        {
+          "from": "expanse_hell_10",
+          "to": "expanse_hell_11",
+          "years": 360
+        },
+        {
+          "from": "expanse_hell_11",
+          "to": "expanse_hell_12",
+          "years": 450
+        },
+        {
+          "from": "iron_tree_wastes",
+          "to": "expanse_hell_13",
+          "years": 180
+        },
+        {
+          "from": "expanse_hell_13",
+          "to": "expanse_hell_14",
+          "years": 270
+        },
+        {
+          "from": "expanse_hell_14",
+          "to": "expanse_hell_15",
+          "years": 360
+        },
+        {
+          "from": "expanse_hell_15",
+          "to": "expanse_hell_16",
+          "years": 450
+        },
+        {
+          "from": "expanse_hell_16",
+          "to": "expanse_hell_17",
+          "years": 180
+        },
+        {
+          "from": "expanse_hell_17",
+          "to": "expanse_hell_18",
+          "years": 270
         }
       ]
     },
@@ -1726,7 +4174,8 @@
             "demon": 0.4,
             "monster": 0.7,
             "yin": 0.6
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "jade_capital",
@@ -1760,19 +4209,425 @@
             "demon": 0.3,
             "monster": 0.8,
             "yin": 0.75
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_1",
+          "name": "太清云海",
+          "description": "太清云海位于仙界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.35,
+            "demon": 0.4,
+            "monster": 0.86,
+            "yin": 0.45
           }
+        },
+        {
+          "id": "expanse_celestial_2",
+          "name": "玉宸仙洲",
+          "description": "玉宸仙洲位于仙界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.36,
+            "demon": 0.33,
+            "monster": 0.75,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_3",
+          "name": "玄都天市",
+          "description": "玄都天市位于仙界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.07,
+            "demon": 0.56,
+            "monster": 0.64,
+            "yin": 0.69
+          }
+        },
+        {
+          "id": "expanse_celestial_4",
+          "name": "碧落星桥",
+          "description": "碧落星桥位于仙界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.78,
+            "demon": 0.49,
+            "monster": 0.52,
+            "yin": 0.59
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_5",
+          "name": "紫微仙阙",
+          "description": "紫微仙阙位于仙界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.49,
+            "demon": 0.43,
+            "monster": 0.92,
+            "yin": 0.5
+          }
+        },
+        {
+          "id": "expanse_celestial_6",
+          "name": "昆仑道场",
+          "description": "昆仑道场位于仙界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.5,
+            "demon": 0.36,
+            "monster": 0.8,
+            "yin": 0.83
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_7",
+          "name": "蓬莱外海",
+          "description": "蓬莱外海位于仙界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.21,
+            "demon": 0.3,
+            "monster": 0.69,
+            "yin": 0.74
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_8",
+          "name": "瑶池药圃",
+          "description": "瑶池药圃位于仙界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.93,
+            "demon": 0.52,
+            "monster": 0.58,
+            "yin": 0.64
+          }
+        },
+        {
+          "id": "expanse_celestial_9",
+          "name": "大荒仙庭",
+          "description": "大荒仙庭位于仙界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.64,
+            "demon": 0.46,
+            "monster": 0.97,
+            "yin": 0.55
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_10",
+          "name": "无量星沙",
+          "description": "无量星沙位于仙界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.35,
+            "demon": 0.4,
+            "monster": 0.86,
+            "yin": 0.45
+          }
+        },
+        {
+          "id": "expanse_celestial_11",
+          "name": "天河古渡",
+          "description": "天河古渡位于仙界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.36,
+            "demon": 0.33,
+            "monster": 0.75,
+            "yin": 0.79
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_12",
+          "name": "玄牝山",
+          "description": "玄牝山位于仙界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.07,
+            "demon": 0.56,
+            "monster": 0.64,
+            "yin": 0.69
+          }
+        },
+        {
+          "id": "expanse_celestial_13",
+          "name": "太素冰原",
+          "description": "太素冰原位于仙界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.78,
+            "demon": 0.49,
+            "monster": 0.52,
+            "yin": 0.59
+          }
+        },
+        {
+          "id": "expanse_celestial_14",
+          "name": "赤明仙城",
+          "description": "赤明仙城位于仙界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.49,
+            "demon": 0.43,
+            "monster": 0.92,
+            "yin": 0.5
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_15",
+          "name": "洞真云谷",
+          "description": "洞真云谷位于仙界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.5,
+            "demon": 0.36,
+            "monster": 0.8,
+            "yin": 0.83
+          }
+        },
+        {
+          "id": "expanse_celestial_16",
+          "name": "归元天关",
+          "description": "归元天关位于仙界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 2.21,
+            "demon": 0.3,
+            "monster": 0.69,
+            "yin": 0.74
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_celestial_17",
+          "name": "昊天遗墟",
+          "description": "昊天遗墟位于仙界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.93,
+            "demon": 0.52,
+            "monster": 0.58,
+            "yin": 0.64
+          }
+        },
+        {
+          "id": "expanse_celestial_18",
+          "name": "混元石林",
+          "description": "混元石林位于仙界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.64,
+            "demon": 0.46,
+            "monster": 0.97,
+            "yin": 0.55
+          },
+          "teleport_array": true
         }
       ],
       "routes": [
         {
           "from": "ascension_terrace",
           "to": "jade_capital",
-          "years": 80
+          "years": 8000
         },
         {
           "from": "jade_capital",
           "to": "law_sea",
-          "years": 160
+          "years": 16000
+        },
+        {
+          "from": "ascension_terrace",
+          "to": "expanse_celestial_1",
+          "years": 1800
+        },
+        {
+          "from": "expanse_celestial_1",
+          "to": "expanse_celestial_2",
+          "years": 2700
+        },
+        {
+          "from": "expanse_celestial_2",
+          "to": "expanse_celestial_3",
+          "years": 3600
+        },
+        {
+          "from": "expanse_celestial_3",
+          "to": "expanse_celestial_4",
+          "years": 4500
+        },
+        {
+          "from": "expanse_celestial_4",
+          "to": "expanse_celestial_5",
+          "years": 1800
+        },
+        {
+          "from": "expanse_celestial_5",
+          "to": "expanse_celestial_6",
+          "years": 2700
+        },
+        {
+          "from": "jade_capital",
+          "to": "expanse_celestial_7",
+          "years": 3600
+        },
+        {
+          "from": "expanse_celestial_7",
+          "to": "expanse_celestial_8",
+          "years": 4500
+        },
+        {
+          "from": "expanse_celestial_8",
+          "to": "expanse_celestial_9",
+          "years": 1800
+        },
+        {
+          "from": "expanse_celestial_9",
+          "to": "expanse_celestial_10",
+          "years": 2700
+        },
+        {
+          "from": "expanse_celestial_10",
+          "to": "expanse_celestial_11",
+          "years": 3600
+        },
+        {
+          "from": "expanse_celestial_11",
+          "to": "expanse_celestial_12",
+          "years": 4500
+        },
+        {
+          "from": "law_sea",
+          "to": "expanse_celestial_13",
+          "years": 1800
+        },
+        {
+          "from": "expanse_celestial_13",
+          "to": "expanse_celestial_14",
+          "years": 2700
+        },
+        {
+          "from": "expanse_celestial_14",
+          "to": "expanse_celestial_15",
+          "years": 3600
+        },
+        {
+          "from": "expanse_celestial_15",
+          "to": "expanse_celestial_16",
+          "years": 4500
+        },
+        {
+          "from": "expanse_celestial_16",
+          "to": "expanse_celestial_17",
+          "years": 1800
+        },
+        {
+          "from": "expanse_celestial_17",
+          "to": "expanse_celestial_18",
+          "years": 2700
         }
       ]
     },
@@ -1794,7 +4649,8 @@
             "demon": 3.6,
             "monster": 0.9,
             "yin": 1.2
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "ten_thousand_battle_city",
@@ -1828,7 +4684,8 @@
             "demon": 4.45,
             "monster": 1.35,
             "yin": 1.7
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "destruction_sea",
@@ -1865,33 +4722,438 @@
           },
           "min_realm_index": 10,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_asura_1",
+          "name": "战魂血海",
+          "description": "战魂血海位于修罗界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.19,
+            "demon": 3.56,
+            "monster": 1.11,
+            "yin": 0.9
+          }
+        },
+        {
+          "id": "expanse_asura_2",
+          "name": "修罗断岳",
+          "description": "修罗断岳位于修罗界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.33,
+            "demon": 2.99,
+            "monster": 0.96,
+            "yin": 1.57
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_3",
+          "name": "千军古垒",
+          "description": "千军古垒位于修罗界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.29,
+            "demon": 5.0,
+            "monster": 0.82,
+            "yin": 1.38
+          }
+        },
+        {
+          "id": "expanse_asura_4",
+          "name": "赤刃城",
+          "description": "赤刃城位于修罗界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.25,
+            "demon": 4.43,
+            "monster": 0.68,
+            "yin": 1.19
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_5",
+          "name": "不败战台",
+          "description": "不败战台位于修罗界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.21,
+            "demon": 3.85,
+            "monster": 1.18,
+            "yin": 1.0
+          }
+        },
+        {
+          "id": "expanse_asura_6",
+          "name": "铸戟天炉",
+          "description": "铸戟天炉位于修罗界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.35,
+            "demon": 3.28,
+            "monster": 1.03,
+            "yin": 1.67
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_7",
+          "name": "杀心原",
+          "description": "杀心原位于修罗界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.31,
+            "demon": 2.7,
+            "monster": 0.89,
+            "yin": 1.48
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_8",
+          "name": "血莲战谷",
+          "description": "血莲战谷位于修罗界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.27,
+            "demon": 4.72,
+            "monster": 0.75,
+            "yin": 1.28
+          }
+        },
+        {
+          "id": "expanse_asura_9",
+          "name": "劫火桥",
+          "description": "劫火桥位于修罗界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.23,
+            "demon": 4.14,
+            "monster": 1.25,
+            "yin": 1.09
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_10",
+          "name": "断旗岭",
+          "description": "断旗岭位于修罗界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.19,
+            "demon": 3.56,
+            "monster": 1.11,
+            "yin": 0.9
+          }
+        },
+        {
+          "id": "expanse_asura_11",
+          "name": "万骨沙场",
+          "description": "万骨沙场位于修罗界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.33,
+            "demon": 2.99,
+            "monster": 0.96,
+            "yin": 1.57
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_12",
+          "name": "九狱关",
+          "description": "九狱关位于修罗界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.29,
+            "demon": 5.0,
+            "monster": 0.82,
+            "yin": 1.38
+          }
+        },
+        {
+          "id": "expanse_asura_13",
+          "name": "狂战天池",
+          "description": "狂战天池位于修罗界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.25,
+            "demon": 4.43,
+            "monster": 0.68,
+            "yin": 1.19
+          }
+        },
+        {
+          "id": "expanse_asura_14",
+          "name": "无生战庭",
+          "description": "无生战庭位于修罗界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.21,
+            "demon": 3.85,
+            "monster": 1.18,
+            "yin": 1.0
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_15",
+          "name": "天罚古道",
+          "description": "天罚古道位于修罗界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.35,
+            "demon": 3.28,
+            "monster": 1.03,
+            "yin": 1.67
+          }
+        },
+        {
+          "id": "expanse_asura_16",
+          "name": "逆锋山",
+          "description": "逆锋山位于修罗界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.31,
+            "demon": 2.7,
+            "monster": 0.89,
+            "yin": 1.48
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_asura_17",
+          "name": "神骸巨谷",
+          "description": "神骸巨谷位于修罗界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.27,
+            "demon": 4.72,
+            "monster": 0.75,
+            "yin": 1.28
+          }
+        },
+        {
+          "id": "expanse_asura_18",
+          "name": "终焉战墟",
+          "description": "终焉战墟位于修罗界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.23,
+            "demon": 4.14,
+            "monster": 1.25,
+            "yin": 1.09
+          },
+          "teleport_array": true
         }
       ],
       "routes": [
         {
           "from": "asura_gate",
           "to": "ten_thousand_battle_city",
-          "years": 75
+          "years": 7500
         },
         {
           "from": "ten_thousand_battle_city",
           "to": "blood_moon_wilds",
-          "years": 120
+          "years": 12000
         },
         {
           "from": "ten_thousand_battle_city",
           "to": "destruction_sea",
-          "years": 170
+          "years": 17000
         },
         {
           "from": "blood_moon_wilds",
           "to": "destruction_sea",
-          "years": 95
+          "years": 9500
         },
         {
           "from": "destruction_sea",
           "to": "wusheng_battlefield",
-          "years": 260
+          "years": 26000
+        },
+        {
+          "from": "asura_gate",
+          "to": "expanse_asura_1",
+          "years": 1800
+        },
+        {
+          "from": "expanse_asura_1",
+          "to": "expanse_asura_2",
+          "years": 2700
+        },
+        {
+          "from": "expanse_asura_2",
+          "to": "expanse_asura_3",
+          "years": 3600
+        },
+        {
+          "from": "expanse_asura_3",
+          "to": "expanse_asura_4",
+          "years": 4500
+        },
+        {
+          "from": "expanse_asura_4",
+          "to": "expanse_asura_5",
+          "years": 1800
+        },
+        {
+          "from": "expanse_asura_5",
+          "to": "expanse_asura_6",
+          "years": 2700
+        },
+        {
+          "from": "ten_thousand_battle_city",
+          "to": "expanse_asura_7",
+          "years": 3600
+        },
+        {
+          "from": "expanse_asura_7",
+          "to": "expanse_asura_8",
+          "years": 4500
+        },
+        {
+          "from": "expanse_asura_8",
+          "to": "expanse_asura_9",
+          "years": 1800
+        },
+        {
+          "from": "expanse_asura_9",
+          "to": "expanse_asura_10",
+          "years": 2700
+        },
+        {
+          "from": "expanse_asura_10",
+          "to": "expanse_asura_11",
+          "years": 3600
+        },
+        {
+          "from": "expanse_asura_11",
+          "to": "expanse_asura_12",
+          "years": 4500
+        },
+        {
+          "from": "blood_moon_wilds",
+          "to": "expanse_asura_13",
+          "years": 1800
+        },
+        {
+          "from": "expanse_asura_13",
+          "to": "expanse_asura_14",
+          "years": 2700
+        },
+        {
+          "from": "expanse_asura_14",
+          "to": "expanse_asura_15",
+          "years": 3600
+        },
+        {
+          "from": "expanse_asura_15",
+          "to": "expanse_asura_16",
+          "years": 4500
+        },
+        {
+          "from": "expanse_asura_16",
+          "to": "expanse_asura_17",
+          "years": 1800
+        },
+        {
+          "from": "expanse_asura_17",
+          "to": "expanse_asura_18",
+          "years": 2700
         }
       ]
     },
@@ -1914,7 +5176,8 @@
             "demon": 0.7,
             "monster": 1.9,
             "yin": 0.9
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "world_tree_crown",
@@ -1948,7 +5211,8 @@
             "demon": 0.85,
             "monster": 2.35,
             "yin": 1.15
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "dragon_origin_sea",
@@ -2069,68 +5333,473 @@
           },
           "min_realm_index": 10,
           "failure": "blocked"
+        },
+        {
+          "id": "expanse_nether_1",
+          "name": "祖灵天海",
+          "description": "祖灵天海位于幽冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.6,
+            "demon": 0.69,
+            "monster": 2.34,
+            "yin": 0.68
+          }
+        },
+        {
+          "id": "expanse_nether_2",
+          "name": "太古兽庭",
+          "description": "太古兽庭位于幽冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.05,
+            "demon": 0.58,
+            "monster": 2.03,
+            "yin": 1.18
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_3",
+          "name": "玄冥星原",
+          "description": "玄冥星原位于幽冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.92,
+            "demon": 0.97,
+            "monster": 1.73,
+            "yin": 1.03
+          }
+        },
+        {
+          "id": "expanse_nether_4",
+          "name": "万象古林",
+          "description": "万象古林位于幽冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.79,
+            "demon": 0.86,
+            "monster": 1.42,
+            "yin": 0.89
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_5",
+          "name": "天妖道场",
+          "description": "天妖道场位于幽冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.66,
+            "demon": 0.75,
+            "monster": 2.49,
+            "yin": 0.75
+          }
+        },
+        {
+          "id": "expanse_nether_6",
+          "name": "灵皇玉阙",
+          "description": "灵皇玉阙位于幽冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.11,
+            "demon": 0.64,
+            "monster": 2.18,
+            "yin": 1.25
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_7",
+          "name": "吞天渊",
+          "description": "吞天渊位于幽冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.98,
+            "demon": 0.52,
+            "monster": 1.88,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_8",
+          "name": "麒麟石关",
+          "description": "麒麟石关位于幽冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.86,
+            "demon": 0.92,
+            "monster": 1.58,
+            "yin": 0.96
+          }
+        },
+        {
+          "id": "expanse_nether_9",
+          "name": "流火凤巢",
+          "description": "流火凤巢位于幽冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.73,
+            "demon": 0.8,
+            "monster": 2.64,
+            "yin": 0.82
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_10",
+          "name": "苍龙天池",
+          "description": "苍龙天池位于幽冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.6,
+            "demon": 0.69,
+            "monster": 2.34,
+            "yin": 0.68
+          }
+        },
+        {
+          "id": "expanse_nether_11",
+          "name": "白泽书山",
+          "description": "白泽书山位于幽冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.05,
+            "demon": 0.58,
+            "monster": 2.03,
+            "yin": 1.18
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_12",
+          "name": "玄武寒洲",
+          "description": "玄武寒洲位于幽冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.92,
+            "demon": 0.97,
+            "monster": 1.73,
+            "yin": 1.03
+          }
+        },
+        {
+          "id": "expanse_nether_13",
+          "name": "九尾仙谷",
+          "description": "九尾仙谷位于幽冥界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.79,
+            "demon": 0.86,
+            "monster": 1.42,
+            "yin": 0.89
+          }
+        },
+        {
+          "id": "expanse_nether_14",
+          "name": "神木星桥",
+          "description": "神木星桥位于幽冥界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.66,
+            "demon": 0.75,
+            "monster": 2.49,
+            "yin": 0.75
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_15",
+          "name": "万灵祭台",
+          "description": "万灵祭台位于幽冥界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.11,
+            "demon": 0.64,
+            "monster": 2.18,
+            "yin": 1.25
+          }
+        },
+        {
+          "id": "expanse_nether_16",
+          "name": "归祖古道",
+          "description": "归祖古道位于幽冥界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.98,
+            "demon": 0.52,
+            "monster": 1.88,
+            "yin": 1.11
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_nether_17",
+          "name": "蛮荒天柱",
+          "description": "蛮荒天柱位于幽冥界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.86,
+            "demon": 0.92,
+            "monster": 1.58,
+            "yin": 0.96
+          }
+        },
+        {
+          "id": "expanse_nether_18",
+          "name": "昆吾秘境",
+          "description": "昆吾秘境位于幽冥界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.73,
+            "demon": 0.8,
+            "monster": 2.64,
+            "yin": 0.82
+          },
+          "teleport_array": true
         }
       ],
       "routes": [
         {
           "from": "ancestral_beast_garden",
           "to": "world_tree_crown",
-          "years": 90
+          "years": 9000
         },
         {
           "from": "world_tree_crown",
           "to": "primal_chaos_wilds",
-          "years": 180
+          "years": 18000
         },
         {
           "from": "ancestral_beast_garden",
           "to": "dragon_origin_sea",
-          "years": 105
+          "years": 10500
         },
         {
           "from": "ancestral_beast_garden",
           "to": "phoenix_nirvana_field",
-          "years": 115
+          "years": 11500
         },
         {
           "from": "world_tree_crown",
           "to": "first_dream_court",
-          "years": 92
+          "years": 9200
         },
         {
           "from": "world_tree_crown",
           "to": "xuanwu_world_shell",
-          "years": 145
+          "years": 14500
         },
         {
           "from": "primal_chaos_wilds",
           "to": "myriad_insect_star_nest",
-          "years": 130
+          "years": 13000
         },
         {
           "from": "primal_chaos_wilds",
           "to": "self_ancestor_wilds",
-          "years": 108
+          "years": 10800
         },
         {
           "from": "dragon_origin_sea",
           "to": "xuanwu_world_shell",
-          "years": 88
+          "years": 8800
         },
         {
           "from": "phoenix_nirvana_field",
           "to": "first_dream_court",
-          "years": 96
+          "years": 9600
         },
         {
           "from": "first_dream_court",
           "to": "self_ancestor_wilds",
-          "years": 155
+          "years": 15500
         },
         {
           "from": "myriad_insect_star_nest",
           "to": "self_ancestor_wilds",
-          "years": 84
+          "years": 8400
+        },
+        {
+          "from": "ancestral_beast_garden",
+          "to": "expanse_nether_1",
+          "years": 1800
+        },
+        {
+          "from": "expanse_nether_1",
+          "to": "expanse_nether_2",
+          "years": 2700
+        },
+        {
+          "from": "expanse_nether_2",
+          "to": "expanse_nether_3",
+          "years": 3600
+        },
+        {
+          "from": "expanse_nether_3",
+          "to": "expanse_nether_4",
+          "years": 4500
+        },
+        {
+          "from": "expanse_nether_4",
+          "to": "expanse_nether_5",
+          "years": 1800
+        },
+        {
+          "from": "expanse_nether_5",
+          "to": "expanse_nether_6",
+          "years": 2700
+        },
+        {
+          "from": "world_tree_crown",
+          "to": "expanse_nether_7",
+          "years": 3600
+        },
+        {
+          "from": "expanse_nether_7",
+          "to": "expanse_nether_8",
+          "years": 4500
+        },
+        {
+          "from": "expanse_nether_8",
+          "to": "expanse_nether_9",
+          "years": 1800
+        },
+        {
+          "from": "expanse_nether_9",
+          "to": "expanse_nether_10",
+          "years": 2700
+        },
+        {
+          "from": "expanse_nether_10",
+          "to": "expanse_nether_11",
+          "years": 3600
+        },
+        {
+          "from": "expanse_nether_11",
+          "to": "expanse_nether_12",
+          "years": 4500
+        },
+        {
+          "from": "primal_chaos_wilds",
+          "to": "expanse_nether_13",
+          "years": 1800
+        },
+        {
+          "from": "expanse_nether_13",
+          "to": "expanse_nether_14",
+          "years": 2700
+        },
+        {
+          "from": "expanse_nether_14",
+          "to": "expanse_nether_15",
+          "years": 3600
+        },
+        {
+          "from": "expanse_nether_15",
+          "to": "expanse_nether_16",
+          "years": 4500
+        },
+        {
+          "from": "expanse_nether_16",
+          "to": "expanse_nether_17",
+          "years": 1800
+        },
+        {
+          "from": "expanse_nether_17",
+          "to": "expanse_nether_18",
+          "years": 2700
         }
       ]
     },
@@ -2152,7 +5821,8 @@
             "demon": 0.8,
             "monster": 0.7,
             "yin": 1.9
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "karma_city",
@@ -2187,7 +5857,8 @@
             "demon": 0.9,
             "monster": 0.6,
             "yin": 2.35
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "other_shore_ferry",
@@ -2221,7 +5892,8 @@
             "demon": 0.65,
             "monster": 0.7,
             "yin": 2.0
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "three_lives_valley",
@@ -2238,7 +5910,8 @@
             "demon": 0.65,
             "monster": 0.7,
             "yin": 1.95
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "forgetting_terrace",
@@ -2255,7 +5928,8 @@
             "demon": 0.65,
             "monster": 0.7,
             "yin": 2.1
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "mirror_lake",
@@ -2309,53 +5983,458 @@
             "yin": 2.85
           },
           "min_realm_index": 11
+        },
+        {
+          "id": "expanse_reincarnation_1",
+          "name": "轮回长河",
+          "description": "轮回长河位于轮回界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.3,
+            "demon": 0.79,
+            "monster": 0.86,
+            "yin": 1.42
+          }
+        },
+        {
+          "id": "expanse_reincarnation_2",
+          "name": "三世照壁",
+          "description": "三世照壁位于轮回界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 0.66,
+            "monster": 0.75,
+            "yin": 2.49
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_3",
+          "name": "前尘古渡",
+          "description": "前尘古渡位于轮回界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.46,
+            "demon": 1.11,
+            "monster": 0.64,
+            "yin": 2.18
+          }
+        },
+        {
+          "id": "expanse_reincarnation_4",
+          "name": "后土神庭",
+          "description": "后土神庭位于轮回界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.4,
+            "demon": 0.98,
+            "monster": 0.52,
+            "yin": 1.88
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_5",
+          "name": "宿命荒原",
+          "description": "宿命荒原位于轮回界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.33,
+            "demon": 0.86,
+            "monster": 0.92,
+            "yin": 1.58
+          }
+        },
+        {
+          "id": "expanse_reincarnation_6",
+          "name": "生死石关",
+          "description": "生死石关位于轮回界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.56,
+            "demon": 0.73,
+            "monster": 0.8,
+            "yin": 2.64
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_7",
+          "name": "因缘花海",
+          "description": "因缘花海位于轮回界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.49,
+            "demon": 0.6,
+            "monster": 0.69,
+            "yin": 2.34
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_8",
+          "name": "无始天渊",
+          "description": "无始天渊位于轮回界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.43,
+            "demon": 1.05,
+            "monster": 0.58,
+            "yin": 2.03
+          }
+        },
+        {
+          "id": "expanse_reincarnation_9",
+          "name": "业火道场",
+          "description": "业火道场位于轮回界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.36,
+            "demon": 0.92,
+            "monster": 0.97,
+            "yin": 1.73
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_10",
+          "name": "六道古城",
+          "description": "六道古城位于轮回界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.3,
+            "demon": 0.79,
+            "monster": 0.86,
+            "yin": 1.42
+          }
+        },
+        {
+          "id": "expanse_reincarnation_11",
+          "name": "归魂天桥",
+          "description": "归魂天桥位于轮回界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.52,
+            "demon": 0.66,
+            "monster": 0.75,
+            "yin": 2.49
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_12",
+          "name": "大愿金台",
+          "description": "大愿金台位于轮回界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.46,
+            "demon": 1.11,
+            "monster": 0.64,
+            "yin": 2.18
+          }
+        },
+        {
+          "id": "expanse_reincarnation_13",
+          "name": "无量劫沙",
+          "description": "无量劫沙位于轮回界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.4,
+            "demon": 0.98,
+            "monster": 0.52,
+            "yin": 1.88
+          }
+        },
+        {
+          "id": "expanse_reincarnation_14",
+          "name": "明心孤岛",
+          "description": "明心孤岛位于轮回界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.33,
+            "demon": 0.86,
+            "monster": 0.92,
+            "yin": 1.58
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_15",
+          "name": "忘川星海",
+          "description": "忘川星海位于轮回界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.56,
+            "demon": 0.73,
+            "monster": 0.8,
+            "yin": 2.64
+          }
+        },
+        {
+          "id": "expanse_reincarnation_16",
+          "name": "转世云谷",
+          "description": "转世云谷位于轮回界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.49,
+            "demon": 0.6,
+            "monster": 0.69,
+            "yin": 2.34
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_reincarnation_17",
+          "name": "恒沙佛国",
+          "description": "恒沙佛国位于轮回界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.43,
+            "demon": 1.05,
+            "monster": 0.58,
+            "yin": 2.03
+          }
+        },
+        {
+          "id": "expanse_reincarnation_18",
+          "name": "归寂仙墟",
+          "description": "归寂仙墟位于轮回界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.36,
+            "demon": 0.92,
+            "monster": 0.97,
+            "yin": 1.73
+          },
+          "teleport_array": true
         }
       ],
       "routes": [
         {
           "from": "reincarnation_well",
           "to": "karma_city",
-          "years": 85
+          "years": 8500
         },
         {
           "from": "karma_city",
           "to": "timeless_grave",
-          "years": 175
+          "years": 17500
         },
         {
           "from": "reincarnation_well",
           "to": "other_shore_ferry",
-          "years": 45
+          "years": 4500
         },
         {
           "from": "karma_city",
           "to": "lotus_lamp_mountain",
-          "years": 65
+          "years": 6500
         },
         {
           "from": "karma_city",
           "to": "three_lives_valley",
-          "years": 75
+          "years": 7500
         },
         {
           "from": "other_shore_ferry",
           "to": "forgetting_terrace",
-          "years": 90
+          "years": 9000
         },
         {
           "from": "three_lives_valley",
           "to": "mirror_lake",
-          "years": 100
+          "years": 10000
         },
         {
           "from": "timeless_grave",
           "to": "six_paths_abyss",
-          "years": 220
+          "years": 22000
         },
         {
           "from": "six_paths_abyss",
           "to": "origin_wheel",
-          "years": 300
+          "years": 30000
+        },
+        {
+          "from": "reincarnation_well",
+          "to": "expanse_reincarnation_1",
+          "years": 1800
+        },
+        {
+          "from": "expanse_reincarnation_1",
+          "to": "expanse_reincarnation_2",
+          "years": 2700
+        },
+        {
+          "from": "expanse_reincarnation_2",
+          "to": "expanse_reincarnation_3",
+          "years": 3600
+        },
+        {
+          "from": "expanse_reincarnation_3",
+          "to": "expanse_reincarnation_4",
+          "years": 4500
+        },
+        {
+          "from": "expanse_reincarnation_4",
+          "to": "expanse_reincarnation_5",
+          "years": 1800
+        },
+        {
+          "from": "expanse_reincarnation_5",
+          "to": "expanse_reincarnation_6",
+          "years": 2700
+        },
+        {
+          "from": "karma_city",
+          "to": "expanse_reincarnation_7",
+          "years": 3600
+        },
+        {
+          "from": "expanse_reincarnation_7",
+          "to": "expanse_reincarnation_8",
+          "years": 4500
+        },
+        {
+          "from": "expanse_reincarnation_8",
+          "to": "expanse_reincarnation_9",
+          "years": 1800
+        },
+        {
+          "from": "expanse_reincarnation_9",
+          "to": "expanse_reincarnation_10",
+          "years": 2700
+        },
+        {
+          "from": "expanse_reincarnation_10",
+          "to": "expanse_reincarnation_11",
+          "years": 3600
+        },
+        {
+          "from": "expanse_reincarnation_11",
+          "to": "expanse_reincarnation_12",
+          "years": 4500
+        },
+        {
+          "from": "timeless_grave",
+          "to": "expanse_reincarnation_13",
+          "years": 1800
+        },
+        {
+          "from": "expanse_reincarnation_13",
+          "to": "expanse_reincarnation_14",
+          "years": 2700
+        },
+        {
+          "from": "expanse_reincarnation_14",
+          "to": "expanse_reincarnation_15",
+          "years": 3600
+        },
+        {
+          "from": "expanse_reincarnation_15",
+          "to": "expanse_reincarnation_16",
+          "years": 4500
+        },
+        {
+          "from": "expanse_reincarnation_16",
+          "to": "expanse_reincarnation_17",
+          "years": 1800
+        },
+        {
+          "from": "expanse_reincarnation_17",
+          "to": "expanse_reincarnation_18",
+          "years": 2700
         }
       ]
     },
@@ -2377,7 +6456,8 @@
             "demon": 0.45,
             "monster": 1.7,
             "yin": 0.55
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "ancestral_mountain",
@@ -2486,7 +6566,8 @@
             "demon": 0.4,
             "monster": 1.95,
             "yin": 1.15
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "ember_plume_volcano",
@@ -2562,7 +6643,8 @@
             "demon": 0.65,
             "monster": 1.9,
             "yin": 0.5
-          }
+          },
+          "teleport_array": true
         },
         {
           "id": "dreamshadow_marsh",
@@ -2656,6 +6738,322 @@
             "demon": 0.32,
             "monster": 2.12,
             "yin": 1.08
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_1",
+          "name": "苍牙山",
+          "description": "苍牙山位于妖界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.6,
+            "demon": 0.45,
+            "monster": 2.09,
+            "yin": 0.41
+          }
+        },
+        {
+          "id": "expanse_monster_realm_2",
+          "name": "白羽泽",
+          "description": "白羽泽位于妖界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.05,
+            "demon": 0.37,
+            "monster": 1.82,
+            "yin": 0.72
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_3",
+          "name": "千藤古林",
+          "description": "千藤古林位于妖界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.92,
+            "demon": 0.63,
+            "monster": 1.55,
+            "yin": 0.63
+          }
+        },
+        {
+          "id": "expanse_monster_realm_4",
+          "name": "狐鸣谷",
+          "description": "狐鸣谷位于妖界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.79,
+            "demon": 0.55,
+            "monster": 1.27,
+            "yin": 0.54
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_5",
+          "name": "龙蜕河",
+          "description": "龙蜕河位于妖界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.66,
+            "demon": 0.48,
+            "monster": 2.23,
+            "yin": 0.46
+          }
+        },
+        {
+          "id": "expanse_monster_realm_6",
+          "name": "灵犀草原",
+          "description": "灵犀草原位于妖界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.11,
+            "demon": 0.41,
+            "monster": 1.95,
+            "yin": 0.76
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_7",
+          "name": "鹤归渡",
+          "description": "鹤归渡位于妖界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.98,
+            "demon": 0.34,
+            "monster": 1.68,
+            "yin": 0.68
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_8",
+          "name": "赤猿岭",
+          "description": "赤猿岭位于妖界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.86,
+            "demon": 0.59,
+            "monster": 1.41,
+            "yin": 0.59
+          }
+        },
+        {
+          "id": "expanse_monster_realm_9",
+          "name": "寒鳞渊",
+          "description": "寒鳞渊位于妖界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.73,
+            "demon": 0.52,
+            "monster": 2.36,
+            "yin": 0.5
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_10",
+          "name": "金鬃古城",
+          "description": "金鬃古城位于妖界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.6,
+            "demon": 0.45,
+            "monster": 2.09,
+            "yin": 0.41
+          }
+        },
+        {
+          "id": "expanse_monster_realm_11",
+          "name": "玉角药谷",
+          "description": "玉角药谷位于妖界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.05,
+            "demon": 0.37,
+            "monster": 1.82,
+            "yin": 0.72
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_12",
+          "name": "奔雷峡",
+          "description": "奔雷峡位于妖界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.92,
+            "demon": 0.63,
+            "monster": 1.55,
+            "yin": 0.63
+          }
+        },
+        {
+          "id": "expanse_monster_realm_13",
+          "name": "百兽石关",
+          "description": "百兽石关位于妖界的东境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.79,
+            "demon": 0.55,
+            "monster": 1.27,
+            "yin": 0.54
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_14",
+          "name": "天鹏悬崖",
+          "description": "天鹏悬崖位于妖界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.66,
+            "demon": 0.48,
+            "monster": 2.23,
+            "yin": 0.46
+          }
+        },
+        {
+          "id": "expanse_monster_realm_15",
+          "name": "蛟珠海",
+          "description": "蛟珠海位于妖界的西境，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1.11,
+            "demon": 0.41,
+            "monster": 1.95,
+            "yin": 0.76
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_16",
+          "name": "狼月荒台",
+          "description": "狼月荒台位于妖界的北境，商旅循古道往来，修士可在驿馆交换见闻。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.98,
+            "demon": 0.34,
+            "monster": 1.68,
+            "yin": 0.68
+          }
+        },
+        {
+          "id": "expanse_monster_realm_17",
+          "name": "万羽高林",
+          "description": "万羽高林位于妖界的腹地，灵脉深入山泽，遗址与药圃散落其间。",
+          "themes": [
+            "遗迹",
+            "灵脉"
+          ],
+          "combat_terrain": "狭窄",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.86,
+            "demon": 0.59,
+            "monster": 1.41,
+            "yin": 0.59
+          },
+          "teleport_array": true
+        },
+        {
+          "id": "expanse_monster_realm_18",
+          "name": "蛮牛古道",
+          "description": "蛮牛古道位于妖界的边陲，险关扼守长路，远行者须谨慎辨认气机。",
+          "themes": [
+            "山川",
+            "险关"
+          ],
+          "combat_terrain": "险要",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 0.73,
+            "demon": 0.52,
+            "monster": 2.36,
+            "yin": 0.5
           }
         }
       ],
@@ -2663,132 +7061,222 @@
         {
           "from": "myriad_beast_city",
           "to": "ancestral_mountain",
-          "years": 18
+          "years": 270
         },
         {
           "from": "myriad_beast_city",
           "to": "azure_scale_sea",
-          "years": 15
+          "years": 225
         },
         {
           "from": "ancestral_mountain",
           "to": "thunder_feather_plateau",
-          "years": 22
+          "years": 330
         },
         {
           "from": "azure_scale_sea",
           "to": "thunder_feather_plateau",
-          "years": 27
+          "years": 405
         },
         {
           "from": "myriad_beast_city",
           "to": "qingqiu_mist_marsh",
-          "years": 12
+          "years": 180
         },
         {
           "from": "myriad_beast_city",
           "to": "starfall_grass_sea",
-          "years": 10
+          "years": 150
         },
         {
           "from": "ancestral_mountain",
           "to": "myriad_insect_cavern",
-          "years": 14
+          "years": 210
         },
         {
           "from": "ancestral_mountain",
           "to": "golden_waste",
-          "years": 20
+          "years": 300
         },
         {
           "from": "azure_scale_sea",
           "to": "black_shell_cold_lake",
-          "years": 13
+          "years": 195
         },
         {
           "from": "thunder_feather_plateau",
           "to": "ember_plume_volcano",
-          "years": 16
+          "years": 240
         },
         {
           "from": "qingqiu_mist_marsh",
           "to": "dreamshadow_marsh",
-          "years": 11
+          "years": 165
         },
         {
           "from": "qingqiu_mist_marsh",
           "to": "worldwood_stair",
-          "years": 19
+          "years": 285
         },
         {
           "from": "myriad_insect_cavern",
           "to": "worldwood_stair",
-          "years": 17
+          "years": 255
         },
         {
           "from": "black_shell_cold_lake",
           "to": "dreamshadow_marsh",
-          "years": 18
+          "years": 270
         },
         {
           "from": "ember_plume_volcano",
           "to": "golden_waste",
-          "years": 15
+          "years": 225
         },
         {
           "from": "starfall_grass_sea",
           "to": "golden_waste",
-          "years": 12
+          "years": 180
         },
         {
           "from": "starfall_grass_sea",
           "to": "dreamshadow_marsh",
-          "years": 14
+          "years": 210
         },
         {
           "from": "worldwood_stair",
           "to": "dreamshadow_marsh",
-          "years": 21
+          "years": 315
         },
         {
           "from": "ancestral_mountain",
           "to": "tiger_roar_cliff",
-          "years": 13
+          "years": 195
         },
         {
           "from": "tiger_roar_cliff",
           "to": "golden_waste",
-          "years": 16
+          "years": 240
         },
         {
           "from": "azure_scale_sea",
           "to": "coiling_dragon_wetland",
-          "years": 9
+          "years": 135
         },
         {
           "from": "coiling_dragon_wetland",
           "to": "black_shell_cold_lake",
-          "years": 12
+          "years": 180
         },
         {
           "from": "myriad_insect_cavern",
           "to": "ant_queen_red_mound",
-          "years": 8
+          "years": 120
         },
         {
           "from": "ant_queen_red_mound",
           "to": "golden_waste",
-          "years": 14
+          "years": 210
         },
         {
           "from": "qingqiu_mist_marsh",
           "to": "moonwell_grove",
-          "years": 10
+          "years": 150
         },
         {
           "from": "moonwell_grove",
           "to": "worldwood_stair",
-          "years": 15
+          "years": 225
+        },
+        {
+          "from": "myriad_beast_city",
+          "to": "expanse_monster_realm_1",
+          "years": 180
+        },
+        {
+          "from": "expanse_monster_realm_1",
+          "to": "expanse_monster_realm_2",
+          "years": 270
+        },
+        {
+          "from": "expanse_monster_realm_2",
+          "to": "expanse_monster_realm_3",
+          "years": 360
+        },
+        {
+          "from": "expanse_monster_realm_3",
+          "to": "expanse_monster_realm_4",
+          "years": 450
+        },
+        {
+          "from": "expanse_monster_realm_4",
+          "to": "expanse_monster_realm_5",
+          "years": 180
+        },
+        {
+          "from": "expanse_monster_realm_5",
+          "to": "expanse_monster_realm_6",
+          "years": 270
+        },
+        {
+          "from": "ancestral_mountain",
+          "to": "expanse_monster_realm_7",
+          "years": 360
+        },
+        {
+          "from": "expanse_monster_realm_7",
+          "to": "expanse_monster_realm_8",
+          "years": 450
+        },
+        {
+          "from": "expanse_monster_realm_8",
+          "to": "expanse_monster_realm_9",
+          "years": 180
+        },
+        {
+          "from": "expanse_monster_realm_9",
+          "to": "expanse_monster_realm_10",
+          "years": 270
+        },
+        {
+          "from": "expanse_monster_realm_10",
+          "to": "expanse_monster_realm_11",
+          "years": 360
+        },
+        {
+          "from": "expanse_monster_realm_11",
+          "to": "expanse_monster_realm_12",
+          "years": 450
+        },
+        {
+          "from": "azure_scale_sea",
+          "to": "expanse_monster_realm_13",
+          "years": 180
+        },
+        {
+          "from": "expanse_monster_realm_13",
+          "to": "expanse_monster_realm_14",
+          "years": 270
+        },
+        {
+          "from": "expanse_monster_realm_14",
+          "to": "expanse_monster_realm_15",
+          "years": 360
+        },
+        {
+          "from": "expanse_monster_realm_15",
+          "to": "expanse_monster_realm_16",
+          "years": 450
+        },
+        {
+          "from": "expanse_monster_realm_16",
+          "to": "expanse_monster_realm_17",
+          "years": 180
+        },
+        {
+          "from": "expanse_monster_realm_17",
+          "to": "expanse_monster_realm_18",
+          "years": 270
         }
       ]
     }

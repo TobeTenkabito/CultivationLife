@@ -17,7 +17,8 @@ def discover(game, key, definition, combat_config, words):
     stage = definition["stages"][index]
     npc = game.notable_npcs.get(npc_id)
     if npc is None:
-        npc = SectNpc(npc_id, name, "", stage["realm"], 1, 10000 + level * 1000, None, world="celestial")
+        realm = max(stage['realm'], 10 if level >= 4 else 9)
+        npc = SectNpc(npc_id, name, "", realm, 1, 10000 + level * 1000, None, world="celestial")
         initialize_native(npc, combat_config, now=game.player.age)
         # They actually possess the manual/commentary mastery they can teach.
         npc.transcendence["doctrine"] = {

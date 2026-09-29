@@ -99,6 +99,7 @@ class Technique:
     ignore_possession_limit: bool = False
     growth_preference: str = "balanced"
     doctrine_id: str | None = None
+    spirit_voisinage_id: str | None = None
     effective_worlds: list[str] = field(default_factory=list)
 
     def active_in(self, world: str) -> bool:
@@ -217,6 +218,9 @@ class SectNpc:
     concealed_layer: int | None = None
     family_traits: dict[str, Any] = field(default_factory=dict)
     family_combat_bonus: float = 0.0
+    body_training: int | None = None
+    immortal_body_level: int = 0
+    divine_sense_rank: int | None = None
     social_profile: dict[str, Any] | None = None
     # Optional, versioned cultivation facts. Voisinage definitions live in content,
     # while coverage, initiative and active fields exist only during a battle.
@@ -361,6 +365,10 @@ class Player:
     immortal_veins: dict[str, int] = field(default_factory=dict)
     immortal_vein_pity: dict[str, int] = field(default_factory=dict)
     immortal_traces: int = 0
+    cultivation_ranks_schema: int = 2
+    immortal_aperture: dict[str, Any] = field(default_factory=dict)
+    spirit_voisinage_manual: str | None = None
+    teleport_permissions: list[str] = field(default_factory=list)
     immortal_trace_rng: int = 0
     immortal_body: dict[str, Any] = field(default_factory=dict)
     transcendence: dict[str, Any] | None = None
@@ -522,6 +530,10 @@ class Player:
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
         data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
         data['immortal_body'] = copy.deepcopy(data.get('immortal_body', {}))
+        if data.get('cultivation_ranks_schema', 1) < 2:
+            from .system.cultivation_ranks import legacy_sense
+            data['divine_sense_rank'] = legacy_sense(int(data.get('divine_sense_rank', 0)))
+            data['cultivation_ranks_schema'] = 2
         data.setdefault('immortal_trace_rng', 0)
         data["gender"] = str(data.get("gender", "male"))
         if data["gender"] not in {"male", "female"}:

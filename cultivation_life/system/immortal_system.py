@@ -7,13 +7,14 @@ from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, vein_cost, training_cost
 from .immortal_cultivation import vein_probability, vein_ready, golden_light
 from .immortal_body_system import ImmortalBodyMixin
+from .immortal_aperture import ImmortalApertureMixin
 
 
 def item_quantity(player, item_id):
     return sum(item.quantity for item in player.inventory if item.id == item_id)
 
 
-class ImmortalCultivationMixin(ImmortalBodyMixin):
+class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
     def _cultivation_game(self, game_id):
         game = self._load(game_id)
         p = game.player
@@ -94,7 +95,7 @@ class ImmortalCultivationMixin(ImmortalBodyMixin):
         major = p.layer >= REALMS[p.realm_index].layers
         ready = vein_ready(p) and (not major or p.realm_index < len(REALMS) - 1)
         requirement = self._major_breakthrough_requirement(p) if major else {"met": True, "reason": "每层三脉贯通后手动冲关。"}
-        return {"opened": opened, "total": rules["veins_per_realm"], "per_layer": rules["veins_per_layer"],
+        return {"phase": rules["vein_phases"][min(3, max(0, p.realm_index - 9))], "names": rules["vein_names"], "opened": opened, "total": rules["veins_per_realm"], "per_layer": rules["veins_per_layer"],
                 "realm": REALMS[p.realm_index].name, "layer": p.layer, "opportunity": p.opportunity,
                 "traces": p.immortal_traces, "converted": p.immortal_power_converted,
                 "next_cost": vein_cost(p.realm_index, opened, rules) if opened < min(rules["veins_per_realm"], p.layer * rules["veins_per_layer"]) else None,

@@ -126,7 +126,12 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         if not npc.alive or npc.world != sect.world:
             continue
         perception = deps._npc_cultivation_perception(game, npc)
+        from ...system.cultivation_ranks import public_ranks
+        ranks = public_ranks(npc)
         public_npc = npc.to_dict()
+        public_npc["cultivation_ranks"] = ranks
+        from ...system.cultivation_ranks import mask_unrevealed
+        mask_unrevealed(public_npc, perception)
         public_npc.pop("social_profile", None)
         public_npc["social_hint"] = social_hint(game, npc)
         public_npc.pop("concealed_realm_index", None)

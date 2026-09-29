@@ -21,7 +21,7 @@ from .merchant_commission_system import MerchantCommissionMixin, PROCUREMENT_KIN
 
 POLICIES = {"economy": "重商兴利", "materials": "积储资材", "cultivation": "尊修育才"}
 KINDS = {"supply": "提交特定物品", "escort": "护送雇主", "bounty": "击杀悬赏修士",
-         "recruit": "招募人手", "formation": "炼制阵法", "weapon": "炼制武器", "intel": "获取情报", "item": "获取道具"}
+         "recruit": "招募人手", "formation": "炼制阵法", "weapon": "炼制武器", "intel": "获取情报", "item": "获取道具", "spirit_manual": "寻访灵域残解"}
 RANKS = ["成员", "使节", "特使"]
 CROSS_ALLIANCES = {
     "xuanji": ("璇玑商盟", "spirit", ["spirit", "true_demon"]),
@@ -134,7 +134,7 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             power = expected_combat_power(target_realm, min(3, REALMS[target_realm].layers))
             definition = materials[min(len(materials) - 1, (stars - 1) * len(materials) // 5)]
             for kind_index, (kind, name) in enumerate(KINDS.items()):
-                if kind == "item":
+                if kind in {"item", "spirit_manual"}:
                     continue  # Item acquisition is a player-issued commission.
                 identifier = f"{alliance['world']}:{alliance['id']}:{alliance['board_epoch']}:{kind}:{stars}"
                 base_years = stars * 2 + kind_index % 3
@@ -443,7 +443,14 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
                     raise ValueError("你不是该商盟成员")
                 influence_key = self._merchant_influence_key(member)
                 influence = state["influence"].get(influence_key, 0)
-                if action == "promote":
+                if action == 'teleport':
+                    destination = str(payload.get('destination', ''))
+                    sites = {alliance['hq'], *(o['location_id'] for o in alliance['offices'])}
+                    if destination not in sites:
+                        raise ValueError('目的地不是本盟总部或分部')
+                    self._instant_arrival(game, destination)
+                    self._merchant_notice(game, f"由本盟内部传送阵抵达{self.maps.location(player.world, destination)['name']}，不增加年龄。")
+                elif action == "promote":
                     if member["world"] != player.world or (member["site"] == "hq" and member["rank"] == 0):
                         raise ValueError("总部直入成员须先调往本界分部，从分部成员开始历练")
                     threshold = [120, 360][min(member["rank"], 1)]
@@ -544,6 +551,10 @@ class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
             row["destinations"] = [{"id": world, "name": WORLD_SYSTEMS["world_names"][world],
                                      "cost": self._merchant_passage_cost(game, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
             row["catalog"] = self._merchant_procurement_catalog(game, alliance) if owned else []
+            from .teleport_system import separated
+            row['teleports'] = [{'id': key, 'name': self.maps.location(game.player.world, key)['name']}
+                for key in [alliance['hq'], *(o['location_id'] for o in alliance['offices'])]
+                if owned and site and separated(self.maps, game.player.world, game.player.location_id, key)]
             visible.append(row)
         orders = copy.deepcopy(state["posted"])
         for order in orders:

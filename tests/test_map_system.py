@@ -21,12 +21,12 @@ class MapCatalogTests(unittest.TestCase):
         self.assertEqual(set(self.catalog.worlds), set(WORLD_SYSTEMS["world_profiles"]))
         human_names = {row["name"] for row in self.catalog.public_map("human", "wudi_plain", 4, "人界")["locations"]}
         self.assertTrue({"无棣原", "穆陵沙漠", "岚疆草原", "风语群岛", "澜沧海"}.issubset(human_names))
-        self.assertEqual(len(human_names), 10)
+        self.assertEqual(len(human_names), 28)
 
     def test_world_map_counts_include_reincarnation_expansion(self):
         expected_counts = {
-            "human":10, "spirit":10, "demon":9, "true_demon":9,
-            "monster_realm":16, "phantom_underworld":16, "hell":12,
+            "human":28, "spirit":28, "demon":27, "true_demon":27,
+            "monster_realm":34, "phantom_underworld":34, "hell":30,
         }
         self.assertEqual(
             {world:len(self.catalog.worlds[world]["locations"]) for world in expected_counts},
@@ -34,7 +34,7 @@ class MapCatalogTests(unittest.TestCase):
         )
         self.assertEqual(
             {world:len(self.catalog.worlds[world]["locations"]) for world in ("celestial", "asura", "nether", "reincarnation")},
-            {"celestial":3, "asura":5, "nether":9, "reincarnation":10},
+            {"celestial":21, "asura":23, "nether":27, "reincarnation":28},
         )
 
     def test_monster_and_ghost_maps_live_in_base_content(self):
@@ -105,9 +105,12 @@ class MapEngineTests(unittest.TestCase):
     def test_create_and_safe_travel_advance_the_shared_world_clock(self):
         created = self.engine.create_game("远客", "supreme_metal", "dao", 2301, preset_id="nascent")
         start_age = created["player"]["age"]
-        result = self.engine.travel_map(created["id"], "lanjiang_steppe")
+        years = self.engine.maps.travel_plan('human', 'wudi_plain', 'lanjiang_steppe', created['player']['realm_index']).years
+        from unittest.mock import patch
+        with patch.object(self.engine, '_advance_guixu_calendar', return_value=False):
+            result = self.engine.travel_map(created["id"], "lanjiang_steppe")
         self.assertEqual(result["player"]["location_id"], "lanjiang_steppe")
-        self.assertEqual(result["player"]["age"], start_age + 2)
+        self.assertEqual(result["player"]["age"], start_age + years)
         self.assertEqual(result["market"]["location_id"], "lanjiang_steppe")
         self.assertTrue(any(row["event_id"] == "SYS_MAP_TRAVEL" for row in result["history"]))
 

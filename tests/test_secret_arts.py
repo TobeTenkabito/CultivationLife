@@ -24,11 +24,11 @@ class SecretArtsTests(unittest.TestCase):
         return shown["id"], self.engine.store.load(shown["id"])
 
     def test_natural_divine_sense_threshold_matches_every_cultivation_layer(self):
-        self.assertEqual(self.engine._cultivation_sense_requirement(1, 1), 1)
-        self.assertEqual(self.engine._cultivation_sense_requirement(2, 1), 14)
-        self.assertEqual(self.engine._cultivation_sense_requirement(3, 1), 23)
-        self.assertEqual(self.engine._cultivation_sense_requirement(4, 1), 32)
-        self.assertEqual(self.engine._cultivation_sense_requirement(4, 9), 40)
+        self.assertEqual(self.engine._cultivation_sense_requirement(1, 1), 4)
+        self.assertEqual(self.engine._cultivation_sense_requirement(2, 1), 17)
+        self.assertEqual(self.engine._cultivation_sense_requirement(3, 1), 29)
+        self.assertEqual(self.engine._cultivation_sense_requirement(4, 1), 41)
+        self.assertEqual(self.engine._cultivation_sense_requirement(4, 9), 51)
 
     def test_concealment_changes_only_outward_realm_and_enemy_anchor(self):
         game_id, before = self._core_game()
@@ -155,14 +155,14 @@ class SecretArtsTests(unittest.TestCase):
         self.assertFalse(hidden["detected"])
         self.assertIsNone(hidden["actual_realm_name"])
 
-        game.player.divine_sense_rank = 14
+        game.player.divine_sense_rank = 17
         detected = self.engine._npc_cultivation_perception(game, npc)
         self.assertTrue(detected["detected"])
         self.assertFalse(detected["revealed"])
         self.assertIn("气机有异", detected["realm_name"])
         self.assertIsNone(detected["actual_realm_name"])
 
-        game.player.divine_sense_rank = 32
+        game.player.divine_sense_rank = 41
         revealed = self.engine._npc_cultivation_perception(game, npc)
         self.assertTrue(revealed["revealed"])
         self.assertIn("真实元婴初期", revealed["realm_name"])

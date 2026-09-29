@@ -46,6 +46,8 @@ def initialize_native(owner: Any, config: Mapping[str, Any], *, now: float | Non
     An explicit state, including {}, overrides the default. A future cultivation
     provider can supply its own state without changing the combat engine.
     """
+    from ..cultivation_ranks import ensure_npc
+    ensure_npc(owner)
     if read(owner, "transcendence") is not None or read(owner, "realm_index", 0) < 9:
         return
     rules = config.get("npc_lifecycle", {})

@@ -19,7 +19,7 @@ from .formation_system import calculate_formation_profile, formation_alpha, make
 
 
 METRICS = {"growth": "生势", "kill": "杀势", "focus": "聚势", "balance": "均势", "cycle": "环势", "change": "变势"}
-PROCUREMENT_KINDS = {"supply", "item", "formation", "weapon"}
+PROCUREMENT_KINDS = {"supply", "item", "formation", "weapon", "spirit_manual"}
 
 
 @lru_cache(maxsize=48)
@@ -124,6 +124,7 @@ class MerchantCommissionMixin:
         return sorted(catalog.values(), key=lambda row: (row["tier"], row["id"]))
 
     def _merchant_procurement_catalog(self, game, alliance):
+        from .spirit_voisinage import secondary, catalog
         result = []
         for world, profile in WORLD_SYSTEMS["world_profiles"].items():
             if not profile.get("enabled", True) or not self._merchant_route_exists(game, alliance, world):
@@ -138,6 +139,7 @@ class MerchantCommissionMixin:
                 "materials": [{"id": row["id"], "name": row["name"], "value": row["base_material_value"], "tier": row["tier"]} for row in crafting],
                 "formation_materials": [{"id": row["id"], "name": row["name"], "value": row["base_value"], "tier": row["tier"]} for row in formation],
                 "items": self._merchant_items(world),
+                "spirit_manuals": [{'id': t.id, 'name': t.name} for t in catalog(game).values()] if secondary(world) else [],
                 "formation_tiers": sorted({int(row["tier"]) for row in formation}),
                 "weapon_tiers": sorted({int(row["tier"]) for row in crafting if "primary" in row.get("roles", [])}),
             })
@@ -250,6 +252,14 @@ class MerchantCommissionMixin:
             definition_id = definition["id"]
             value = int(definition["base_value" if category == "formation" else "base_material_value"]) * quantity * 3
             name = f"收集{definition['name']} ×{quantity}"
+        elif kind == 'spirit_manual':
+            from .spirit_voisinage import secondary, catalog
+            book = catalog(game).get(str(payload.get('definition_id', '')))
+            if not secondary(world) or not book:
+                raise ValueError('只能在二级界面委托寻访灵域残解')
+            definition_id = book.id
+            value = 60000 * quantity
+            name = f'寻访{book.name} ×{quantity}'
         elif kind == "item":
             item = next((row for row in self._merchant_items(world) if row["id"] == payload.get("definition_id")), None)
             if not item:
@@ -297,6 +307,11 @@ class MerchantCommissionMixin:
     def _merchant_deliver_commission(self, game, order):
         kind, world = order["kind"], order["source_world"]
         rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
+        if kind == 'spirit_manual':
+            from .spirit_voisinage import grant
+            for _ in range(order['quantity']):
+                book = grant(game, order['definition_id'])
+            return f"寻得{book.name}玉简 ×{order['quantity']}"
         if kind == "item":
             add_item(game.player, order["definition_id"], order["quantity"])
             return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + self._merchant_procurement_bonus(game, order, rng)

@@ -151,7 +151,14 @@ class EconomySystemMixin(ExchangeSystemMixin):
                 "tier":tier, "tier_name":REALMS[tier].name,
                 "price":max(1, round(int(row["base_price"]) * multiplier)),
             })
-        results.sort(key=lambda row: (row["tier"], row["name"]))
+        from .spirit_voisinage import offers
+        for book in offers(game, 'black_market', state.get('id', game.player.age // 10)):
+            description = '仙家传承的下界改本；合参至 Lv4 可修习灵域，无法通过道门修炼。'
+            if matcher.search(book.name + ' ' + description):
+                results.append(dict(id='black-' + book.id, kind='spirit_manual', content_id=book.id,
+                    name=book.name, description=description, tier=book.grade,
+                    tier_name=REALMS[book.grade].name, price=45000))
+        results.sort(key=lambda row: (row['kind'] != 'spirit_manual', row["tier"], row["name"]))
         state["black_market_results"] = results[:int(self._auction_rules()["black_market_result_limit"])]
         game.updated_at = now_iso()
         self.store.save(game)

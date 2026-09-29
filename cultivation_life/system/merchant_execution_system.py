@@ -100,6 +100,7 @@ class MerchantExecutionMixin:
         duration = max(1, order['finish_age'] - start)
         order['progress'] = min(.99, max(0, (end_age - start) / duration))
         stages = {
+            'spirit_manual': ['已追索下界仙法残卷的流传线索', '正在访求持简者并辨明真伪', '残解已核验，封装玉简返盟'],
             'supply': ['已抵达产地，核对材料线索', '正在搜集并验收材料', '材料已归集，安排护送回盟'],
             'item': ['已查明遗迹及宝物线索', '正在探索并寻找目标道具', '正在核验所得并准备交付'],
             'formation': ['阵材筹备完毕，开始推演九宫', '正在炼制阵材并校验六维', '阵法成型，正在验阵封存'],

@@ -37,7 +37,7 @@
     const enableSubmit=enabled=>{submit.disabled=!enabled;submit.dataset.merchantUnavailable=enabled?'0':'1';};enableSubmit(false);
     const data=()=>({alliance_id:alliance.id,kind:kind.value,source_world:world.value,material_category:category.value,
       definition_id:material.value,target_id:target.value,material_tier:Number(tier.value),mold_id:mold.value,
-      stars:Number(stars.value),quantity:['supply','item'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)])),metric_maxima:Object.fromEntries(Object.entries(maximumInputs).map(([key,input])=>[key,Number(input.value)]))});
+      stars:Number(stars.value),quantity:['supply','item','spirit_manual'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)])),metric_maxima:Object.fromEntries(Object.entries(maximumInputs).map(([key,input])=>[key,Number(input.value)]))});
     const showOverview=result=>{
       overview.replaceChildren();const spec=result.spec;if(!spec)return;
       overview.append(el('h4','预计成品概览'));
@@ -71,7 +71,7 @@
     const show=(input,visible)=>{input.parentElement.hidden=!visible;input.disabled=!visible;input.dataset.merchantUnavailable=visible?'0':'1';};
     const refreshChoices=()=>{
       const source=alliance.catalog.find(row=>row.world===world.value);
-      const list=kind.value==='item'?source?.items:category.value==='formation'?source?.formation_materials:source?.materials;
+      const list=kind.value==='spirit_manual'?source?.spirit_manuals:kind.value==='item'?source?.items:category.value==='formation'?source?.formation_materials:source?.materials;
       options(material,list || []);options(target,(source?.targets || []).map(row=>({id:row.id,name:`${row.name} · ${row.realm} · 战力${number(row.power)}`})));
       options(tier,(kind.value==='formation'?source?.formation_tiers:source?.weapon_tiers || []).map(value=>({id:value,name:`${value}阶`})));Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});Object.values(maximumInputs).forEach(input=>input.value=100);changed();
     };
@@ -79,7 +79,7 @@
       const previous=world.value,procurement=['supply','item','formation','weapon'].includes(kind.value);
       options(world,alliance.catalog.map(row=>({id:row.world,name:row.world_name})));
       if([...world.options].some(row=>row.value===previous))world.value=previous;else world.value=alliance.world;
-      show(category,kind.value==='supply');show(material,['supply','item'].includes(kind.value));show(quantity,['supply','item'].includes(kind.value));
+      show(category,kind.value==='supply');show(material,['supply','item','spirit_manual'].includes(kind.value));show(quantity,['supply','item','spirit_manual'].includes(kind.value));
       show(target,kind.value==='bounty');show(tier,['formation','weapon'].includes(kind.value));show(mold,kind.value==='weapon');
       metrics.hidden=kind.value!=='formation';[...Object.values(metricInputs),...Object.values(maximumInputs)].forEach(input=>{input.disabled=metrics.hidden;input.dataset.merchantUnavailable=metrics.hidden?'1':'0';});refreshChoices();
     };

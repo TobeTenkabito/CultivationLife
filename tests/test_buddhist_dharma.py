@@ -29,6 +29,7 @@ def setup(tmp_path):
     game.pending_event = None
     game.player.realm_index = 1
     game.player.layer = 1
+    game.player.location_id = next(s.location_id for s in game.sects.values() if s.world=='human' and not s.extinct)
     game.player.hp, game.player.mp = max_hp(game.player), max_mp(game.player)
     art = copy.deepcopy(next(row for row in TECHNIQUE_CATALOG.values() if row.path == "buddhist"))
     learn_technique(game.player, art)

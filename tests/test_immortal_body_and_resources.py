@@ -82,6 +82,9 @@ def test_immortal_manual_break_failure_uses_common_chance_and_keeps_surplus(prep
 
 def test_body_visible_before_prerequisite_and_old_body_manual_is_insufficient(prepared):
     engine, game, _ = prepared
+    game.player.immortal_body = {}
+    game.player.body_training = 0
+    engine.store.save(game)
     assert engine.present(game)['doctrines']['immortal_body']['level'] == 0
     with pytest.raises(ValueError, match='100'):
         engine.immortal_action(game.id, 'train_body')
@@ -108,7 +111,7 @@ def test_body_purchase_recipe_failure_pity_switch_and_level20(prepared):
     assert shown['doctrines']['immortal_body']['failures'] == 1
     assert shown['doctrines']['immortal_body']['level'] == 19
     p = engine.store.load(game.id).player
-    assert next(i.quantity for i in p.inventory if i.id == 'immortal_jade_herb') == 1760
+    assert next(i.quantity for i in p.inventory if i.id == 'immortal_jade_herb') == 1880
     engine.immortal_action(game.id, 'buy_body_manual', supply_id='golden_lotus')
     shown = engine.immortal_action(game.id, 'select_body_manual', supply_id='golden_lotus')
     assert shown['doctrines']['immortal_body']['failures'] == 1

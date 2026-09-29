@@ -38,6 +38,8 @@ def setup(tmp_path):
     game.pending_event = None
     game.heavenly_court["open_election"] = None
     game.player.next_tribulation_age = None
+    game.player.known_techniques = [t for t in game.player.known_techniques if not t.doctrine_id]
+    game.doctrine_state['player']['annotations'] = {}
     add_item(game.player, "spirit_stone", 10**8)
     engine.store.save(game)
     return engine, game
@@ -224,7 +226,7 @@ def test_active_voisinage_reaches_player_battle_adapter(setup):
                                 dict(target_name="敌人", target_power=100, target_realm_index=9), WORLD_SYSTEMS["transcendent_combat"])
     caps = binding.battle.units["player"].unit.capabilities
     assert caps.voisinages[0].id == d["stages"][3]["voisinage"]["id"]
-    assert caps.resource_link == "legacy_mp"
+    assert caps.resource_link == "independent"
 
 
 def test_npc_training_is_lazy_shared_and_bounded(setup):

@@ -816,4 +816,5 @@ class DemonicSystemMixin:
 
     @staticmethod
     def _raise_divine_sense_one_level(player: Player) -> None:
-        player.divine_sense_rank = divine_sense_level(player) + 1
+        from .cultivation_ranks import rank_for
+        player.divine_sense_rank = max(divine_sense_level(player) + 1, rank_for(player.realm_index, player.layer))

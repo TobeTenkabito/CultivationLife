@@ -260,8 +260,9 @@ def test_converted_player_uses_existing_mp_without_acquiring_voisinage(engine_ga
     bound = bind_capabilities(game, [BattleUnit("player", "主角", "player", 1000, 9)],
                               dict(target_name="敌人", target_power=1000, target_realm_index=9), config)
     caps = bound.battle.units["player"].unit.capabilities
-    assert caps.resource_link == "legacy_mp"
-    assert caps.current == game.player.mp
+    assert caps.resource_link == "independent"
+    from cultivation_life.system.immortal_aperture import energy_state
+    assert caps.current == energy_state(game.player)["current"]
     assert caps.force_tier == 2 and not caps.voisinages
     assert game.player.transcendence is None
     game.player.immortal_power_converted = False

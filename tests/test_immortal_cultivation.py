@@ -27,6 +27,7 @@ def prepared(tmp_path):
     game.pending_event = None
     game.heavenly_court['open_election'] = None
     game.player.next_tribulation_age = None
+    game.doctrine_state['player']['annotations'] = {}
     game.player.opportunity = 10**10
     add_item(game.player, 'immortal_trace', 10000)
     add_item(game.player, 'spirit_stone', 10**8)
@@ -173,7 +174,11 @@ def test_peer_can_teach_manual_before_doctrine_advances(prepared):
     engine.store.save(game)
     result = engine.doctrine_action(game.id, 'teach_manual', doctrine_id=d['id'], npc_id=npc.id, manual_id=d['manuals'][0]['id'])
     row = result['doctrines']['rows'][0]
-    assert row['manual_level'] == 2 and row['level'] == 0
+    assert row['manual_level'] == 1 and row['level'] == 0
+    from cultivation_life.rules import technique_copy_count, upgrade_known_technique
+    saved = engine.store.load(game.id)
+    assert technique_copy_count(saved.player, d['manuals'][0]['id'], 1) >= 1
+    assert upgrade_known_technique(saved.player, d['manuals'][0]['id']) == 2
 
 
 def test_voisinage_training_switches_one_active_source_and_preserves_growth(prepared):

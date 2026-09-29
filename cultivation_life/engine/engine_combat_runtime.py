@@ -527,6 +527,17 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
 def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: dict[str, Any], rng: random.Random) -> None:
     player = game.player
     emit(game, "cultivator.killed", **victim)
+    from ..system.spirit_voisinage import secondary, offers, grant
+    if secondary(player.world) and int(victim.get('realm_index', 0)) >= 5:
+        identity = str(victim.get('npc_id') or victim.get('id') or victim.get('name', ''))
+        books = offers(game, 'kill', identity)
+        looted = game.doctrine_state.setdefault('spirit_looted', [])
+        if identity and identity not in looted:
+            looted.append(identity)
+            if books and rng.random() < .15:
+                book = grant(game, books[0].id)
+                game.history.append(HistoryRecord('SYS_SPIRIT_MANUAL_LOOT', 1, player.age,
+                    '遗落仙法', identity, 'looted', f'从遗物中寻得《{book.name}》玉简。', {}, ['loot']))
     config = WORLD_SYSTEMS["faction_conflict"]
     fame_config = WORLD_SYSTEMS["fame"]
     player.fame += float(fame_config["kill_gain_base"]) + int(victim["realm_index"]) * float(fame_config["kill_realm_scale"])

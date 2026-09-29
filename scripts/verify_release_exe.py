@@ -170,7 +170,7 @@ def verify(with_dlc):
             save_path.write_text(json.dumps(trial_saved, ensure_ascii=False), encoding='utf-8')
             with urllib.request.urlopen(base + f"/api/games/{buddhist['id']}", timeout=20) as response:
                 upper = json.load(response)
-            assert len(upper['map']['locations']) == 10
+            assert len(upper['map']['locations']) == 28
             assert any(row.get('factions') for row in upper['map']['locations'])
             assert upper['buddhist_system']['available'] == with_dlc
             request = urllib.request.Request(base + '/api/games', method='POST',
@@ -179,6 +179,10 @@ def verify(with_dlc):
             with urllib.request.urlopen(request, timeout=20) as response:
                 immortal = json.load(response)
             assert immortal['player']['time_unit_years'] == 100
+            assert immortal['aperture']['current'] == 300
+            assert immortal['player']['body_training'] == 100
+            assert immortal['map']['teleport']['arrays']
+            assert len(immortal['doctrines']['veins']['names']) == 27
             assert immortal['player']['opportunity_unbounded']
             assert 'immortal_traces' in immortal['player']
             assert set(immortal['player']['intrinsic_resources']) == {'hp','mp'}

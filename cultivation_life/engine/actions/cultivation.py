@@ -21,7 +21,8 @@ def _cultivation_sense_requirement(realm_index: int, layer: int) -> int:
     """Natural divine-sense rank earned by reaching one cultivation layer."""
     bounded_realm = max(0, min(int(realm_index), len(REALMS) - 1))
     bounded_layer = max(1, min(int(layer), REALMS[bounded_realm].layers))
-    return sum(definition.layers for definition in REALMS[:bounded_realm]) + bounded_layer - 1
+    from ...system.cultivation_ranks import rank_for
+    return rank_for(bounded_realm, bounded_layer)
 
 
 def _secret_art_realm_name(deps: CultivationActionDependencies, player: Player, realm_index: int, layer: int = 1) -> str:

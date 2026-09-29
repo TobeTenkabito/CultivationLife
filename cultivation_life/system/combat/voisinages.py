@@ -201,7 +201,7 @@ class VoisinageBattle:
             target = self.units[victim]
             power = definition.effect_power
             if definition.authority is not None:
-                power = min(1, power * definition.authority / 100)
+                power = min(1, power * definition.authority / definition.authority_reference)
                 if target.vitality < .5:
                     power = min(1, power * (1 + next((f["value"] for f in definition.features if f["kind"] == "execution"), 0)))
             if definition.effect == "strike":

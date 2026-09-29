@@ -46,7 +46,7 @@ class AsuraSystemTests(unittest.TestCase):
             ["迦楼罗", "紧那罗", "摩睺罗", "阿修罗"],
         )
         self.assertTrue(WORLD_SYSTEMS["world_profiles"]["asura"]["enabled"])
-        self.assertEqual(len(self.engine.maps.worlds["asura"]["locations"]), 5)
+        self.assertEqual(len(self.engine.maps.worlds["asura"]["locations"]), 23)
         asura_factions = [sect for sect in self.engine._new_sects().values() if sect.world == "asura"]
         self.assertEqual({sect.name for sect in asura_factions}, {"修罗战庭", "血月魔宫", "寂灭海宗"})
         self.assertTrue({

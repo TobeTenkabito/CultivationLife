@@ -79,6 +79,11 @@ class CapabilityBinding:
                 # rounds and stories which normally waive conventional MP loss.
                 owner.mp = update["current"]
                 continue
+            if update['id'] == 'player' and owner.transcendence is None:
+                from ..system.immortal_aperture import available, commit_energy
+                if available(owner):
+                    commit_energy(owner, update['current'])
+                    continue
             state = owner.get("transcendence") if isinstance(owner, dict) else owner.transcendence
             if update["id"] in self.resources:
                 self.resources[update["id"]].commit(update["current"])
@@ -124,6 +129,13 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             if unit.id != "player" and state is not None:
                 resources[unit.id] = prepare(owner, game.player.age, config)
                 state = resources[unit.id].state
+                from ..system.immortal_aperture import lower_world
+                if lower_world(game.player) and sources.get(unit.id):
+                    ledger = owner.get('transcendence') if isinstance(owner, dict) else owner.transcendence
+                    imitation = ledger.setdefault('imitation', dict(capacity=60, current=20, conversion=1,
+                        resource_link='independent', force_tier=1, ward_tier=1, attack_cost=0, ward_cost=0))
+                    resources[unit.id] = NpcResourceBinding(dict(imitation), imitation)
+                    state = resources[unit.id].state
             elif (unit.id == "player" and state is None and game.player.realm_index >= 9
                   and game.player.immortal_power_converted):
                 # Existing conversion is an explicit fact; realm alone grants

@@ -34,7 +34,9 @@ def _price(book):
 
 class DoctrineSystemMixin(ImmortalCultivationMixin):
     def _ensure_doctrines(self, game):
-        return ensure(game)
+        from .immortal_aperture import ensure_aperture
+        changed = ensure(game)
+        return ensure_aperture(game.player) or changed
 
     def _begin_doctrine_action(self, game, action, *, commit=False):
         if action not in {"doctrine_study", "immortal_conversion", "daomen_explore", "immortal_trace_gather"}:
@@ -182,8 +184,7 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                 if not remove_item(game.player, "spirit_stone", config()["cultivation"]["annotation_price"] * (book.level + 1) ** 2):
                     raise ValueError("请教所需灵石不足")
                 add_technique_copy(game.player, book, level=book.level)
-                new_level = upgrade_known_technique(game.player, book.id)
-                summary = f"经{npc.name}指点，《{book.name}》提升至 Lv{new_level}。"
+                summary = f"{npc.name}交付《{book.name}》Lv{book.level} 功法玉简，可在功法面板合参至下一层，尚未直接升级。"
         elif action in {"study", "convert"}:
             if action == "study":
                 record["study_target"] = doctrine_id
@@ -283,8 +284,8 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                     conversion={"stage": stage, "complete": game.player.immortal_power_converted,
                                 "progress": record.get("conversion_progress", 0),
                                 "required": config()["conversion_years"][stage] if stage < 5 else 0,
-                                "capacity": round(max_mp(game.player) * (1 if game.player.immortal_power_converted else stage / 5)),
-                                "current": game.player.mp},
+                                "capacity": game.player.immortal_aperture.get('capacity', 1000),
+                                "current": game.player.immortal_aperture.get('current', 0)},
                     offers=[dict(id=b["id"], name=b["name"], doctrine_name=state["definitions"][b["doctrine_id"]]["name"],
                                  origin=state["definitions"][b["doctrine_id"]].get("manual_origins", {}).get(b["id"], "传承玉简"),
                                  grade_name=REALMS[b["grade"]].name, price=_price(b), owned=b["id"] in known,

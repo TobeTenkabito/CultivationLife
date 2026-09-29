@@ -18,6 +18,7 @@ from ..rules import (
 from ..system.transformation_system import public_transformation_system
 from ..system.monster_bloodline_system import public_monster_bloodline
 from ..system.concubine_system import gender_name
+from ..system.immortal_aperture import public_aperture
 from .dependencies import PresentationDependencies
 
 
@@ -229,6 +230,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "sage_system": deps._public_sage_system(game),
         "guixu_tide": deps._public_guixu(game),
         "tianji_artifacts": deps._public_tianji(game),
+        "aperture": public_aperture(game.player, game),
         "doctrines": deps._public_doctrines(game),
         "family": deps._public_family(game),
         "governance": deps._public_governance(game),

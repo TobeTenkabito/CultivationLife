@@ -34,6 +34,7 @@ class VoisinageDefinition:
     stability: float | None = None
     incursion: float | None = None
     authority: float | None = None
+    authority_reference: float = 100.0
     features: tuple[Mapping[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
@@ -54,6 +55,8 @@ class VoisinageDefinition:
         for key in ("stability", "incursion", "authority"):
             if getattr(self, key) is not None:
                 number(getattr(self, key), key)
+        if number(self.authority_reference, 'authority_reference') <= 0:
+            raise ValueError('Authority reference must be positive')
         if len(self.features) > 3:
             raise ValueError("A voisinage supports at most three operational features")
         seen = set()

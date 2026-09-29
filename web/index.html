@@ -190,6 +190,7 @@
         <article id="market-card" class="paper market-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙坊市">
           <div class="section-title"><div><p class="eyebrow">互通有无</p><h2 id="market-title">修仙坊市</h2></div><div class="market-heading-actions"><strong id="market-wallet"></strong><button id="market-toggle" type="button">关闭</button></div></div>
           <div id="market-content">
+            <section id="immortal-market-content" class="immortal-content hidden"></section>
             <p id="market-description" class="muted"></p>
             <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">丹器功法</p><h3>一般坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="market-offers" class="market-offers"></div></section>
             <section class="market-stock-section material-market-section"><div class="market-stock-heading"><div><p class="eyebrow">阵材器料</p><h3>材料坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="material-market-offers" class="market-offers"></div></section>
@@ -329,6 +330,8 @@
           <div id="natal-artifact-content"></div>
         </article>
         <article id="immortal-veins-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙脉"><div class="section-title"><h2>仙脉</h2><button id="immortal-veins-toggle" type="button">关闭</button></div><div id="immortal-veins-content" class="immortal-content"></div></article>
+<article id="immortal-aperture-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙窍"><div class="section-title"><h2>仙窍</h2><button id="immortal-aperture-toggle" type="button">关闭</button></div><div id="immortal-aperture-content" class="immortal-content"></div></article>
+<article id="spirit-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="灵域"><div class="section-title"><h2>灵域</h2><button id="spirit-voisinage-toggle" type="button">关闭</button></div><div id="spirit-voisinage-content" class="immortal-content"></div></article>
 <article id="immortal-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="真仙之躯"><div class="section-title"><h2>真仙之躯</h2><button id="immortal-body-toggle" type="button">关闭</button></div><div id="immortal-body-content" class="immortal-content"></div></article>
 <article id="voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙域"><div class="section-title"><h2>仙域</h2><button id="voisinage-toggle" type="button">关闭</button></div><div id="voisinage-content" class="immortal-content"></div></article>
 <article id="daomen-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="道门"><div class="section-title"><h2>道门</h2><button id="daomen-toggle" type="button">关闭</button></div><div id="daomen-content" class="immortal-content"></div></article>
@@ -427,6 +430,8 @@
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
         <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
         <button type="button" data-panel-target="immortal-veins" title="仙脉" class="hidden"><span>脉</span><small>仙脉</small></button>
+        <button type="button" data-panel-target="immortal-aperture" title="仙窍" class="hidden"><span>窍</span><small>仙窍</small></button>
+        <button type="button" data-panel-target="spirit-voisinage" title="灵域" class="hidden"><span>域</span><small>灵域</small></button>
         <button type="button" data-panel-target="immortal-body" title="真仙之躯" class="hidden"><span>躯</span><small>仙躯</small></button>
         <button type="button" data-panel-target="voisinage" title="仙域管理与温养" class="hidden"><span>域</span><small>仙域</small></button>
         <button type="button" data-panel-target="buddhist-wish" data-dlc="buddhist" title="愿力 · 清净道心" class="hidden buddhist-dock-button"><span>愿</span><small>愿力</small></button>
@@ -506,6 +511,7 @@
   <script src="/buddhist-wish.js?v=1.45.0"></script>
   <script src="/buddhist-panel.js?v=1.45.0"></script>
   <script src="/doctrine-panel.js?v=1"></script>
+  <script src="/immortal-aperture-panel.js?v=1"></script>
   <script src="/app.js?v=1.45.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

@@ -72,6 +72,15 @@ class ExchangeSystemMixin:
                 "demand_value": quantity * unit_value, "completed": False,
                 "substitution_attempted": False,
             })
+        from .spirit_voisinage import offers as spirit_offers
+        for book in spirit_offers(game, 'exchange', state['id']):
+            wanted = rng.choice(eligible)
+            quantity = max(1, math.ceil(30000 / int(wanted['base_material_value'])))
+            offers.append(dict(id=state['id'] + book.id, npc_alias='藏简客',
+                reward={'name': book.name}, reward_kind='spirit_manual', manual_id=book.id, reward_value=30000,
+                demands=[dict(definition_id=wanted['id'], name=wanted['name'], quantity=quantity,
+                              unit_value=int(wanted['base_material_value']))],
+                demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
         state.update(status="open", remaining=2, offers=offers)
 
     def _advance_exchange_clock(self, game, rng):
@@ -169,7 +178,11 @@ class ExchangeSystemMixin:
                     else:
                         bag = game.player.crafting_materials if material["kind"] == "crafting" else game.player.formation_materials
                         bag[:] = [x for x in bag if x["id"] != key]
-                game.player.crafting_materials.append(copy.deepcopy(offer["reward"]))
+                if offer.get('reward_kind') == 'spirit_manual':
+                    from .spirit_voisinage import grant
+                    grant(game, offer['manual_id'])
+                else:
+                    game.player.crafting_materials.append(copy.deepcopy(offer["reward"]))
                 offer["completed"] = True
             summary = (f"{state['alias']}与{offer['npc_alias']}匿名交换，取得{offer['reward']['name']}。"
                        if success else f"{offer['npc_alias']}拒绝了替代材料；你的材料完整保留。")

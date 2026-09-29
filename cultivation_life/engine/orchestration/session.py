@@ -102,6 +102,9 @@ def create_game(
         player.fame = float(preset.get("fame", 0))
         player.body_training = max(0, int(preset.get("body_training", player.body_training)))
         player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
+        player.immortal_body = copy.deepcopy(preset.get('immortal_body', {}))
+        player.immortal_aperture = copy.deepcopy(preset.get('immortal_aperture', {}))
+        player.immortal_traces = max(0, int(preset.get('immortal_traces', 0)))
         player.divine_sense_rank = max(0, int(preset.get("divine_sense_rank", player.divine_sense_rank)))
         player.divine_sense_experience = max(
             0.0, float(preset.get("divine_sense_experience", player.divine_sense_experience)),
@@ -136,6 +139,7 @@ def create_game(
         for item in preset.get("inventory", []):
             add_item(player, item["id"], int(item["quantity"]))
         player.opportunity = round(opportunity_required(player) * float(preset.get("opportunity_fraction", 0)), 1)
+        player.opportunity = max(player.opportunity, float(preset.get('opportunity_reserve', 0)))
     player.divine_sense_rank = max(
         player.divine_sense_rank,
         deps._cultivation_sense_requirement(player.realm_index, player.layer),
@@ -177,6 +181,11 @@ def create_game(
     deps._ensure_guixu_state(game)
     deps._ensure_tianji_state(game)
     deps._ensure_doctrines(game)
+    if preset and preset.get('doctrine_starter') and game.doctrine_state:
+        key, definition = next(iter(game.doctrine_state['definitions'].items()))
+        from ...models import Technique
+        learn_technique(player, Technique(**copy.deepcopy(definition['manuals'][0])))
+        game.doctrine_state['player'].setdefault('annotations', {})[key] = [1]
     if player.world == "celestial":
         deps._ensure_heavenly_court(game, rng)
     deps._ensure_race_relations(game)
