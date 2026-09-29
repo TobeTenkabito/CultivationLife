@@ -1,6 +1,8 @@
 {
   "schema_version": 1,
   "actions": {
+    "daomen_explore": {"name": "访求道门", "opportunity": [0, 0], "hp": 0, "mp": 0},
+    "immortal_trace_gather": {"name": "感悟仙痕", "opportunity": [2, 4], "hp": 0, "mp": 0},
     "doctrine_study": {"name": "参悟道统", "opportunity": [0, 0], "hp": 0, "mp": 0},
     "immortal_conversion": {"name": "转化仙灵力", "opportunity": [0, 0], "hp": 0, "mp": 0},
     "cultivate": {
@@ -250,7 +252,7 @@
     "transcendent_combat": {
       "version": 1,
       "contest_ratio": 1.25,
-      "domains": [],
+      "voisinages": [],
       "converted_player_state": {
         "version": 1, "resource_link": "legacy_mp", "conversion": 1,
         "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100
@@ -261,7 +263,7 @@
         "native_state": {
           "version": 1, "conversion": 1, "capacity": 1000, "current": 1000,
           "force_tier": 2, "ward_tier": 2, "attack_cost": 10, "ward_cost": 100,
-          "attainments": {}, "domain_ids": []
+          "attainments": {}, "voisinage_ids": []
         },
         "environments": {
           "human": {"recovery_per_year": 0, "available_fraction": 0.02},
@@ -872,13 +874,13 @@
       "6": 20,
       "7": 50,
       "8": 100,
-      "9": 500,
+      "9": 100,
       "10": 500,
       "11": 500,
       "12": 500
     },
     "immortal_power_conversion": {
-      "time_unit_years": 500,
+      "time_unit_years": 100,
       "min_gap_units": 10,
       "base_chance": 0.1,
       "chance_per_unit": 0.02,
@@ -3527,7 +3529,7 @@
     {
       "id": "true_immortal",
       "name": "真仙",
-      "layers": 1,
+      "layers": 9,
       "base_power": 32000000,
       "opportunity_base": 1800000,
       "lifespan": null,
@@ -3536,7 +3538,7 @@
     {
       "id": "golden_immortal",
       "name": "金仙",
-      "layers": 1,
+      "layers": 9,
       "base_power": 180000000,
       "opportunity_base": 9000000,
       "lifespan": null,
@@ -3545,7 +3547,7 @@
     {
       "id": "taiyi",
       "name": "太乙",
-      "layers": 1,
+      "layers": 9,
       "base_power": 1000000000,
       "opportunity_base": 45000000,
       "lifespan": null,
@@ -3554,7 +3556,7 @@
     {
       "id": "daluo",
       "name": "大罗",
-      "layers": 1,
+      "layers": 9,
       "base_power": 6000000000,
       "opportunity_base": 250000000,
       "lifespan": null,

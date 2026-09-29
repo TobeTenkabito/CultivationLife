@@ -53,19 +53,19 @@ def main():
         lambda: ([(npc, 1000) for npc in mortals[:24]], [(npc, 1000) for npc in mortals[24:]], random.Random(1)),
         lambda args: [resolve_npc_engagement(args[0], args[1], config, args[2], now=200) for _ in range(1000)])
     # Deliberately large coverage: 48 actors each cover up to 48 targets.
-    domain_config = copy.deepcopy(config)
-    domain_config["domains"] = [dict(id="bench", name="Bench", attainment="bench", required_level=1,
+    voisinage_config = copy.deepcopy(config)
+    voisinage_config["voisinages"] = [dict(id="bench", name="Bench", attainment="bench", required_level=1,
                                       strength=100, opening_cost=10, upkeep_cost=1, effect="suppress",
                                       effect_cost=1, max_targets=48)]
 
-    def domain_rosters():
+    def voisinage_rosters():
         rows = actors(48)
         for npc in rows:
-            npc.transcendence.update(current=1000, domain_ids=["bench"], attainments={"bench": 1})
+            npc.transcendence.update(current=1000, voisinage_ids=["bench"], attainments={"bench": 1})
         return ([(npc, 1000) for npc in rows[:24]], [(npc, 1000) for npc in rows[24:]], random.Random(1))
 
-    result["48_domain_actors_5_rounds_ms"] = measure(
-        domain_rosters, lambda args: resolve_npc_engagement(args[0], args[1], domain_config, args[2], now=200))
+    result["48_voisinage_actors_5_rounds_ms"] = measure(
+        voisinage_rosters, lambda args: resolve_npc_engagement(args[0], args[1], voisinage_config, args[2], now=200))
     if "--world-step" in sys.argv:
         from cultivation_life.engine import GameEngine
         from cultivation_life.rules import max_hp, max_mp
@@ -90,8 +90,8 @@ def main():
             npc_lifecycle.settle(observer, game.player.age, config)
             game.notable_npcs[observer.id] = observer
             engine.store.save(game)
-            # The checked-in true-immortal unit is currently 500 years. Measure
-            # the requested 100-year case without changing production balance.
+            # Pin the requested 100-year case so future balance changes do not
+            # silently change the diagnostic workload.
             with patch.dict(WORLD_SYSTEMS["time_units"], {"9": 100}), \
                     patch.object(engine, "_advance_guixu_calendar", return_value=False), \
                     patch.object(npc_lifecycle, "settle", wraps=npc_lifecycle.settle) as calls:

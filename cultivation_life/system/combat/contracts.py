@@ -16,7 +16,7 @@ def number(value: Any, name: str, *, minimum: float = 0.0) -> float:
 
 
 @dataclass(frozen=True)
-class DomainDefinition:
+class VoisinageDefinition:
     id: str
     name: str
     attainment: str
@@ -38,48 +38,48 @@ class DomainDefinition:
 
     def __post_init__(self) -> None:
         if not self.id or not self.attainment:
-            raise ValueError("Domain id and attainment are required")
+            raise ValueError("Voisinage id and attainment are required")
         if self.effect not in {"strike", "suppress", "seal"}:
-            raise ValueError("Unknown domain effect")
+            raise ValueError("Unknown voisinage effect")
         for key in ("required_level", "strength", "opening_cost", "upkeep_cost",
                     "effect_cost", "effect_power", "strength_per_level",
                     "max_investment", "extra_target_cost"):
             number(getattr(self, key), key)
         if self.strength <= 0 or self.upkeep_cost <= 0 or self.effect_cost <= 0:
-            raise ValueError("Domains require positive strength, upkeep and effect costs")
+            raise ValueError("Voisinages require positive strength, upkeep and effect costs")
         if type(self.max_targets) is not int or self.max_targets < 1:
-            raise ValueError("Domain max_targets must be a positive integer")
+            raise ValueError("Voisinage max_targets must be a positive integer")
         if self.effect_power > 1:
-            raise ValueError("Domain effect_power must be <= 1")
+            raise ValueError("Voisinage effect_power must be <= 1")
         for key in ("stability", "incursion", "authority"):
             if getattr(self, key) is not None:
                 number(getattr(self, key), key)
         if len(self.features) > 3:
-            raise ValueError("A domain supports at most three operational features")
+            raise ValueError("A voisinage supports at most three operational features")
         seen = set()
         for feature in self.features:
             kind = feature.get("kind")
             if kind not in {"fortify", "opening", "retaliate", "sacrifice", "frugal", "shelter", "execution"} or kind in seen:
-                raise ValueError("Invalid or duplicate domain feature")
+                raise ValueError("Invalid or duplicate voisinage feature")
             seen.add(kind)
             if number(feature.get("value", 0), "feature value") > .5:
-                raise ValueError("Domain feature value must be <= .5")
+                raise ValueError("Voisinage feature value must be <= .5")
 
 
 @dataclass(frozen=True)
 class CapabilitySource:
     """Optional cultivation-provider output. The battle does not know its origin."""
-    domains: tuple[DomainDefinition, ...] = ()
+    voisinages: tuple[VoisinageDefinition, ...] = ()
     attainments: Mapping[str, float] = field(default_factory=dict)
 
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
-    if source and source.domains:
+    if source and source.voisinages:
         state = dict(state or {})
         # A provider's explicit active selection takes precedence over old grants.
-        state["domain_ids"] = [d.id for d in source.domains]
+        state["voisinage_ids"] = [d.id for d in source.voisinages]
         state["attainments"] = {**state.get("attainments", {}), **source.attainments}
-        definitions = {**definitions, **{d.id: d for d in source.domains}}
+        definitions = {**definitions, **{d.id: d for d in source.voisinages}}
     return resolve_capabilities(state, definitions, **kwargs)
 
 
@@ -92,7 +92,7 @@ class CombatCapabilities:
     ward_tier: int = 1
     attack_cost: float = 0.0
     ward_cost: float = 0.0
-    domains: tuple[DomainDefinition, ...] = ()
+    voisinages: tuple[VoisinageDefinition, ...] = ()
     attainments: Mapping[str, float] = field(default_factory=dict)
     stance: str = "press"
     investment: float = 0.0
@@ -118,17 +118,17 @@ class CombatCapabilities:
         if any(type(v) is not int or v < 1 for v in (self.force_tier, self.ward_tier, self.resource_tier)):
             raise ValueError("Power tiers must be positive integers")
         if self.stance not in {"off", "guard", "protect", "press"}:
-            raise ValueError("Unknown domain stance")
+            raise ValueError("Unknown voisinage stance")
         if self.resource_link not in {"independent", "legacy_mp"}:
             raise ValueError("Unknown resource link")
 
 
-def domain_definitions(config: Mapping[str, Any]) -> dict[str, DomainDefinition]:
-    definitions: dict[str, DomainDefinition] = {}
-    for row in config.get("domains", []):
-        definition = DomainDefinition(**row)
+def voisinage_definitions(config: Mapping[str, Any]) -> dict[str, VoisinageDefinition]:
+    definitions: dict[str, VoisinageDefinition] = {}
+    for row in config.get("voisinages", config.get("domains", [])):
+        definition = VoisinageDefinition(**row)
         if definition.id in definitions:
-            raise ValueError(f"Duplicate domain definition: {definition.id}")
+            raise ValueError(f"Duplicate voisinage definition: {definition.id}")
         definitions[definition.id] = definition
     number(config.get("contest_ratio", 1.25), "contest_ratio", minimum=1.0)
     return definitions
@@ -207,12 +207,12 @@ class CombatPhases(Protocol):
 
 def resolve_capabilities(
     state: Mapping[str, Any] | None,
-    definitions: Mapping[str, DomainDefinition],
+    definitions: Mapping[str, VoisinageDefinition],
     *, linked_current: float = 0.0, linked_capacity: float = 0.0,
 ) -> CombatCapabilities:
     """Neutral attainment keys are supplied by future cultivation providers.
 
-    No realm/world automatically grants a domain. Conversion only determines
+    No realm/world automatically grants a voisinage. Conversion only determines
     which resource tier is available; it never implies attainment mastery.
     """
     if state is None:
@@ -228,7 +228,7 @@ def resolve_capabilities(
     capacity = linked_capacity if linked else number(state.get("capacity", 0), "capacity")
     current = linked_current if linked else number(state.get("current", 0), "current")
     attainments = {str(k): number(v, "attainment") for k, v in state.get("attainments", {}).items()}
-    granted = tuple(definitions[key] for key in state.get("domain_ids", []) if key in definitions
+    granted = tuple(definitions[key] for key in state.get("voisinage_ids", state.get("domain_ids", [])) if key in definitions
                     and attainments.get(definitions[key].attainment, 0) >= definitions[key].required_level)
     plan = state.get("plan", {})
     return CombatCapabilities(
@@ -236,7 +236,7 @@ def resolve_capabilities(
         force_tier=state.get("force_tier", 1), ward_tier=state.get("ward_tier", 1),
         attack_cost=number(state.get("attack_cost", 0), "attack_cost"),
         ward_cost=number(state.get("ward_cost", 0), "ward_cost"),
-        domains=granted, attainments=attainments,
+        voisinages=granted, attainments=attainments,
         stance=str(plan.get("stance", "press")), investment=number(plan.get("investment", 0), "investment"),
         protect_ids=tuple(map(str, plan.get("protect_ids", []))),
         target_ids=tuple(map(str, plan.get("target_ids", []))),

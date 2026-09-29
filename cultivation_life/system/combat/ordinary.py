@@ -1,4 +1,4 @@
-"""Shared conventional damage curve; unaware of domains and persistence."""
+"""Shared conventional damage curve; unaware of voisinages and persistence."""
 
 
 def exchange_damage(attack: float, defense: float, breach_ratio: float, wave: float,

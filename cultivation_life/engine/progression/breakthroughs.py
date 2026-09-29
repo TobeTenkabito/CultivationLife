@@ -41,6 +41,11 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
     player = game.player
     if player.cultivation_suppression:
         return
+    if max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9:
+        # Immortal opportunity is a spendable reserve, not an automatic level bar.
+        player.awaiting_major_breakthrough = False
+        player.awaiting_minor_breakthrough = False
+        return
     if player.sealed_cultivation:
         player.opportunity = min(player.opportunity, opportunity_required(player))
         return
@@ -51,12 +56,6 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
     while player.alive and player.opportunity >= opportunity_required(player) and safety < 32:
         safety += 1
         required = opportunity_required(player)
-        # 仙境没有层级与前中后期；后续升级规则尚未开放，不能误走旧突破链。
-        if player.realm_index >= 9:
-            player.opportunity = min(player.opportunity, required)
-            player.awaiting_major_breakthrough = False
-            player.awaiting_minor_breakthrough = False
-            return
         if modifier(player, "ascension_source", player.world == "spirit") and player.realm_index == 8 and player.layer >= REALMS[8].layers:
             player.awaiting_ascension = True
             player.awaiting_major_breakthrough = False
@@ -173,7 +172,7 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
 
 
 def _manual_minor_layers(player: Player) -> set[int]:
-    if player.realm_index < 2:
+    if player.realm_index < 2 or player.realm_index >= 9:
         return set()
     if player.world == "human" and player.realm_index == 5:
         return set()
@@ -184,7 +183,7 @@ def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) ->
     monster_upper_evolution = bool(
         player.path == "monster" and deps.bloodline_content_available()
         and WORLD_SYSTEMS.get("world_profiles", {}).get("nether", {}).get("enabled")
-        and player.layer >= realm(player).layers
+        and player.layer >= (1 if player.world == "nether" and player.realm_index >= 9 else realm(player).layers)
         and (
             (player.realm_index == 8 and player.world in {"monster_realm", "phantom_underworld"})
             or (9 <= player.realm_index < len(REALMS) - 1 and player.world == "nether")

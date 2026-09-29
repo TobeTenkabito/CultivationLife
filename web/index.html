@@ -109,7 +109,7 @@
           <div id="battle-rosters" class="battle-rosters"></div>
           <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
           <div id="battle-key-events" class="battle-key-events"></div>
-          <div id="battle-domain-overview"></div>
+          <div id="battle-voisinage-overview"></div>
           <div id="battle-stat-grid" class="battle-stat-grid"></div>
           <details class="battle-round-details"><summary>展开逐轮演算</summary><div id="battle-round-list"></div></details>
         </article>
@@ -328,6 +328,9 @@
           <div class="section-title"><div><p class="eyebrow">LIFEBOND ARTIFACT</p><h2>本命法宝</h2></div><div class="panel-heading"><span id="natal-artifact-heading"></span><button id="natal-artifact-toggle" type="button">关闭</button></div></div>
           <div id="natal-artifact-content"></div>
         </article>
+        <article id="immortal-veins-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙脉"><div class="section-title"><h2>仙脉</h2><button id="immortal-veins-toggle" type="button">关闭</button></div><div id="immortal-veins-content" class="immortal-content"></div></article>
+<article id="voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙域"><div class="section-title"><h2>仙域</h2><button id="voisinage-toggle" type="button">关闭</button></div><div id="voisinage-content" class="immortal-content"></div></article>
+<article id="daomen-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="道门"><div class="section-title"><h2>道门</h2><button id="daomen-toggle" type="button">关闭</button></div><div id="daomen-content" class="immortal-content"></div></article>
         <article id="doctrine-card" class="paper utility-panel hidden" role="dialog" aria-modal="false" aria-label="仙界道统">
           <div class="section-title"><div><p class="eyebrow">传承有尽 · 大道无涯</p><h2>仙界道统</h2></div><button id="doctrine-toggle" type="button">关闭</button></div>
           <div id="doctrine-content"></div>
@@ -421,6 +424,9 @@
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
+        <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
+        <button type="button" data-panel-target="immortal-veins" title="仙脉" class="hidden"><span>脉</span><small>仙脉</small></button>
+        <button type="button" data-panel-target="voisinage" title="仙域管理与温养" class="hidden"><span>域</span><small>仙域</small></button>
         <button type="button" data-panel-target="buddhist-wish" data-dlc="buddhist" title="愿力 · 清净道心" class="hidden buddhist-dock-button"><span>愿</span><small>愿力</small></button>
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
@@ -438,6 +444,7 @@
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
       <nav id="strategy-dock" class="strategy-dock" aria-label="功能窗口">
+        <button type="button" data-panel-target="daomen" title="道门同道" class="hidden"><span>门</span><small>道门</small></button>
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
         <button type="button" data-panel-target="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
@@ -453,7 +460,6 @@
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
         <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
         <button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button>
-        <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
         <button type="button" data-panel-target="tianji" title="天工神机榜" class="hidden tianji-dock-button"><span>机</span><small>神机</small></button>
         <button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button>
         <button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button>

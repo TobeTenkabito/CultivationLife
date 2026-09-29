@@ -298,7 +298,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         player.hp = max(1.0, player.hp)
     player.mp = max(0.0, player.mp - mp_loss)
     capabilities.commit(resolution.capability_updates, lethal=lethal)
-    if lethal and resolution.domain_lethal:
+    if lethal and resolution.voisinage_lethal:
         player.hp = 0.0
     deps._apply_support_damage(player, resolution.support_updates)
     lead = deps._combat_report_lead(resolution, hp_loss, mp_loss)
@@ -335,10 +335,10 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     if resolution.outcome == "stalemate":
         deps._record_player_combat(game, target, resolution, "stalemate")
         return "stalemate", lead + "交锋尚未分出全局胜负；已记录各单位后果，不额外判定击杀、擒获或撤离成功。"
-    if resolution.domain_controlled:
+    if resolution.voisinage_controlled:
         deps._record_player_combat(game, target, resolution, "controlled")
         return "controlled", lead + "你的仙域庇护失守，被对方仙域镇压，本次战斗目标失败。"
-    if resolution.outcome == "defeat" and resolution.domain_escape_locked and not resolution.domain_lethal:
+    if resolution.outcome == "defeat" and resolution.voisinage_escape_locked and not resolution.voisinage_lethal:
         deps._record_player_combat(game, target, resolution, "defeat_trapped")
         return "defeat_trapped", lead + "你已失去继续抵抗的态势，仍受敌方仙域封锁，不能按普通败退判定脱离。"
 

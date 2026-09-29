@@ -38,14 +38,14 @@ class CelestialSystemTests(unittest.TestCase):
         self.engine.store.save(game)
         return shown["id"]
 
-    def test_realm_framework_has_four_layerless_immortal_realms(self):
+    def test_realm_framework_has_four_nine_layer_immortal_realms(self):
         self.assertEqual([realm.name for realm in REALMS[9:]], ["真仙", "金仙", "太乙", "大罗"])
-        self.assertTrue(all(realm.layers == 1 for realm in REALMS[9:]))
+        self.assertTrue(all(realm.layers == 9 for realm in REALMS[9:]))
         shown = self.engine.create_game("真仙", "otherworld", "dao", 913)
         game = self.engine.store.load(shown["id"])
         game.player.realm_index = 9
         game.player.layer = 1
-        self.assertEqual(stage_name(game.player), "真仙")
+        self.assertEqual(stage_name(game.player), "真仙初期·1层")
 
     def test_nine_stage_ascension_and_five_stage_power_conversion(self):
         game_id = self._prepared_mahayana()
@@ -64,7 +64,7 @@ class CelestialSystemTests(unittest.TestCase):
         self.assertFalse(shown["trial"]["active"])
         self.assertIsNone(shown["pending_event"])
         self.assertEqual(shown["player"]["mp"], 0)
-        self.assertEqual(shown["player"]["time_unit_years"], 500)
+        self.assertEqual(shown["player"]["time_unit_years"], 100)
         with self.assertRaises(ValueError):
             self.engine.advance(game_id, "travel")
 
@@ -75,7 +75,7 @@ class CelestialSystemTests(unittest.TestCase):
 
         for stage in range(1, 6):
             game = self.engine.store.load(game_id)
-            game.player.age += 5000
+            game.player.age += 1000
             self.assertTrue(self.engine._maybe_immortal_conversion_event(game, CertainRng()))
             self.engine.store.save(game)
             choice_id = self.engine.get_game(game_id)["pending_event"]["choices"][0]["id"]
@@ -107,10 +107,10 @@ class CelestialSystemTests(unittest.TestCase):
             def random():
                 return 0.15
 
-        game.player.age += 5000
+        game.player.age += 1000
         self.assertFalse(self.engine._maybe_immortal_conversion_event(game, ThresholdRng()))
         self.assertEqual(game.player.immortal_conversion_checked_units, 10)
-        game.player.age += 1500
+        game.player.age += 300
         self.assertTrue(self.engine._maybe_immortal_conversion_event(game, ThresholdRng()))
         self.assertEqual(game.pending_event["runtime"]["waited_units"], 13)
         self.assertAlmostEqual(game.pending_event["runtime"]["trigger_chance"], 0.16)

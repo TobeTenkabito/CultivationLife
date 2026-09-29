@@ -157,7 +157,10 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "doctrine-action":
                 result = ENGINE.doctrine_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("manual_id"),
-                                                payload.get("confirm_origin", False))
+                                                payload.get("confirm_origin", False), payload.get("npc_id"))
+            elif operation == "immortal-action":
+                result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
+                                                payload.get("doctrine_id"), payload.get("axis"))
             elif operation == "tianji-action":
                 result = ENGINE.tianji_action(
                     game_id, payload.get("action", ""), payload.get("artifact_id", "")

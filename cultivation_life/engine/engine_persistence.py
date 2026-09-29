@@ -210,6 +210,10 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
         game.player.awaiting_body_breakthrough = True
         changed = True
     current_realm = realm(game.player)
+    if game.player.realm_index >= 9 and game.player.world == "celestial":
+        changed = changed or game.player.awaiting_minor_breakthrough or game.player.awaiting_major_breakthrough
+        game.player.awaiting_minor_breakthrough = False
+        game.player.awaiting_major_breakthrough = False
     if (
         game.player.alive and deps._manual_breakthrough_kind(game.player) == "major"
         and game.player.layer >= current_realm.layers

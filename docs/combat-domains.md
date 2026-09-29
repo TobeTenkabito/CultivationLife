@@ -1,7 +1,7 @@
 # 仙域战斗内核
 
 本次实现新增仙域前置阶段，保持已有六维交锋与无能力数据时的旧结算路径。
-静态 `systems.transcendent_combat.domains` 保留给场景能力。仙界随机道统通过
+静态 `systems.transcendent_combat.voisinages` 保留给场景能力。仙界随机道统通过
 `CapabilitySource` 提供领域快照，详见 [道统与转化](doctrines.md)。其他三级界面可以
 实现自己的能力提供方，不必把养成规则写进战斗循环。
 
@@ -10,7 +10,7 @@
 | 模块 | 职责 |
 | --- | --- |
 | `system/combat/contracts.py` | 数据契约、有限能力定义、参数校验、`CombatPhases` 协议；将外部修为事实解析为能力快照 |
-| `system/combat/domains.py` | 单场仙域覆盖、相持/受压/支配、按单位判断至道、有限资源账本 |
+| `system/combat/voisinages.py` | 单场仙域覆盖、相持/受压/支配、按单位判断至道、有限资源账本 |
 | `system/combat/ordinary.py` | 玩家与 NPC 复用的常规伤害曲线，不认识仙域 |
 | `system/combat_system.py` | 原有六维、功法、血脉、阵法等交锋；通过协议调用前置阶段，不读取道统配置 |
 | `engine/combat_capabilities.py` | 从真实人物记录读取状态，绑定战斗单位，战后回写玩家/NPC/偶遇缓存/家族字典 |
@@ -40,7 +40,7 @@
   "attack_cost": 10,
   "ward_cost": 100,
   "attainments": {"example_attainment": 4},
-  "domain_ids": ["example_domain"],
+  "voisinage_ids": ["example_voisinage"],
   "plan": {
     "stance": "press",
     "investment": 0,
@@ -51,7 +51,7 @@
 ```
 
 - `attainments` 是能力提供方填写的中立键值，没有预设道统树、经验公式、转化事件或升级速度。
-- `domain_ids` 表示传承允许访问的能力；达到定义中的修为阈值后才能成为可用能力。
+- `voisinage_ids` 表示传承允许访问的能力；达到定义中的修为阈值后才能成为可用能力。
 - `conversion` 约束可用容量；转化为零时不能调用仙级资源。
 - `force_tier` 与 `ward_tier` 是普通作用和护持的性质，不替代六维数值。
 - `attack_cost` 是发动本轮仙级普通作用所需资源；无法支付时退回凡级作用。
@@ -88,7 +88,7 @@ NPC 沿用一个 `transcendence` 字段，不为每个道统增加人物字段�
   先调用 `settle` 结清原状态对应的时间。
 - 战斗快照按环境限制本场可调用容量，未调用的资源留在长期账本。战后回写
   `保留资源 + 本场剩余资源`，避免下界封存变成资源销毁或战后免费补满。
-  回到上界不丢失 `attainments/domain_ids`。下界是否能展开仙域仍由实际资源和费用决定。
+  回到上界不丢失 `attainments/voisinage_ids`。下界是否能展开仙域仍由实际资源和费用决定。
 - 后台凡人交战在解析仙域定义之前直接返回旧流程，不新增随机抽取。
   玩家战斗对参战 ID 批量定位真实记录，宗门成员至多扫描一遍；不维护容易过期的全局索引。
 
@@ -104,13 +104,13 @@ NPC 沿用一个 `transcendence` 字段，不为每个道统增加人物字段�
 微基准比较 1 万份账本跨 1、100、10000 年，以及 48 名仙域单位交战；运行时间不作为
 不稳定的测试门槛。完整行动样例临时使用 100 年单位，并关闭归墟日历中断、移除定期
 雷劫日程，报告实际经过年数与未参战 NPC 的账本是否保持不变。生产真仙时间单位目前
-仍为 500 年，本次不调整时间倍率。不同机器、存档人口和战争规模会影响整体行动耗时。
+已调整为 100 年。不同机器、存档人口和战争规模会影响整体行动耗时。
 
-能力定义由静态 `systems.transcendent_combat.domains` 或外部 `CapabilitySource` 提供：
+能力定义由静态 `systems.transcendent_combat.voisinages` 或外部 `CapabilitySource` 提供：
 
 ```json
 {
-  "id": "example_domain",
+  "id": "example_voisinage",
   "name": "示例仙域",
   "attainment": "example_attainment",
   "required_level": 4,
@@ -166,7 +166,7 @@ NPC 沿用一个 `transcendence` 字段，不为每个道统增加人物字段�
 - 有仙域/至道资格参与时，禁用只看三倍总战力的快速胜负与狩猎强制结果。
 - 达到轮数上限仍未形成胜负，返回 `stalemate`，不虚构击杀、捕获或撤离。
 - 领域已经完成的击杀不再掷追击概率；已经镇压的擒获目标不再掷普通生擒概率。
-- `capability_updates` 保存资源与单位后果；`domain` 轮次记录保存覆盖、保护者、控制者、
+- `capability_updates` 保存资源与单位后果；`voisinage` 轮次记录保存覆盖、保护者、控制者、
   对抗强度及资源，供战报解释。活动仙域本身不写进人物长期状态。
 - NPC 资源回写真实记录，包括偶遇缓存中的字典，不写向临时构造的 NPC 壳。
 - 后台野战和自动战争共用同一套仙域判定；不能再用独立伤亡抽签杀死仍受保护的单位。
@@ -178,6 +178,6 @@ NPC 沿用一个 `transcendence` 字段，不为每个道统增加人物字段�
 没有改写洛天衡剧情。后续系统通过状态与能力定义接入，
 不应在六维循环中新增 `if 某道统` 或 `if 某世界`。
 
-验证覆盖 `tests/test_domain_combat.py` 的阶段、资格、混编保护、资源、存档及 NPC 后台场景，
+验证覆盖 `tests/test_voisinage_combat.py` 的阶段、资格、混编保护、资源、存档及 NPC 后台场景，
 `tests/test_npc_combat_lifecycle.py` 覆盖生成、按需恢复、跨界、缓存提升与真实人物回写，
 并回归已有战斗、规则引擎、内容校验、战争和依赖边界测试。

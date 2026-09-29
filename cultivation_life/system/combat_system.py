@@ -85,9 +85,9 @@ class CombatResolution:
     enemy_formation_integrity_end: float | None = None
     formation_experience_gain: float = 0.0
     capability_updates: list[dict[str, Any]] = field(default_factory=list)
-    domain_controlled: bool = False
-    domain_lethal: bool = False
-    domain_escape_locked: bool = False
+    voisinage_controlled: bool = False
+    voisinage_lethal: bool = False
+    voisinage_escape_locked: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -474,11 +474,11 @@ class PlayerCombatSystem:
                 body_damage_ratio += phase.primary_loss * 0.46
                 ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
                 if not phase.ordinary or phases.verdict() is not None:
-                    # Domain-only rounds never call ordinary initiative, rules,
+                    # Voisinage-only rounds never call ordinary initiative, rules,
                     # minimum damage, revival, or the conventional power shortcut.
                     key_events.extend(f"第{round_no}轮，{event}" for event in phase.events)
                     rounds.append({
-                        "round": round_no, "initiative": "domain", "events": list(phase.events),
+                        "round": round_no, "initiative": "voisinage", "events": list(phase.events),
                         "player_hp_ratio": round(player_hp, 4), "player_mp_ratio": round(player_mp, 4),
                         "enemy_hp_ratio": round(enemy_hp, 4),
                         "player_combat_state": round(player_power_max * player_hp, 1),
@@ -488,7 +488,7 @@ class PlayerCombatSystem:
                         "player_morale": round(player_morale, 1), "enemy_morale": round(enemy_morale, 1),
                         "formation_integrity": formation_integrity if formation_name else None,
                         "enemy_formation_integrity": enemy_formation_integrity if enemy_formation_name else None,
-                        "domain": phases.report(),
+                        "voisinage": phases.report(),
                     })
                     phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
                     if phases.verdict() is not None:
@@ -1231,7 +1231,7 @@ class PlayerCombatSystem:
                 phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
-                rounds[-1]["domain"] = phases.report()
+                rounds[-1]["voisinage"] = phases.report()
                 rounds[-1]["player_mp_ratio"] = round(player_mp, 4)
                 rounds[-1]["player_hp_ratio"] = round(player_hp, 4)
                 rounds[-1]["enemy_hp_ratio"] = round(enemy_hp, 4)
@@ -1415,9 +1415,9 @@ class PlayerCombatSystem:
                 round(enemy_formation_integrity, 4) if enemy_formation_name else None
             ),
             capability_updates=phases.updates() if phases is not None else [],
-            domain_controlled=phases.primary_suppressed() if phases is not None else False,
-            domain_lethal=phases.primary_dead() if phases is not None else False,
-            domain_escape_locked=(
+            voisinage_controlled=phases.primary_suppressed() if phases is not None else False,
+            voisinage_lethal=phases.primary_dead() if phases is not None else False,
+            voisinage_escape_locked=(
                 phases.report()["relations"].get("player", {}).get("relation") == "dominated"
                 or any(row["id"] == "player" and row["escape_locked"] for row in phases.updates())
             ) if phases is not None else False,

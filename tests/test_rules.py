@@ -66,7 +66,7 @@ class RuleTests(unittest.TestCase):
     def test_qi_has_thirteen_layers_and_later_realms_have_nine(self):
         self.assertEqual(REALMS[1].layers, 13)
         self.assertTrue(all(item.layers == 9 for item in REALMS[2:9]))
-        self.assertTrue(all(item.layers == 1 for item in REALMS[9:]))
+        self.assertTrue(all(item.layers == 9 for item in REALMS[9:]))
 
     def test_combat_power_reacts_to_all_live_resources(self):
         player = Player("测试", "supreme_metal", realm_index=2, layer=3)

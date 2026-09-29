@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 from typing import Any, Mapping
 
-from ..combat.contracts import DomainDefinition, number
+from ..combat.contracts import VoisinageDefinition, number
 
 
 def rng_for(seed: int, version: int, stream: str) -> random.Random:
@@ -13,7 +13,7 @@ def rng_for(seed: int, version: int, stream: str) -> random.Random:
 
 def validate_content(config: Mapping[str, Any]) -> None:
     if (config.get("world") != "celestial" or config.get("count") != 25
-            or config.get("max_level") != 9 or config.get("domain_level") != 4
+            or config.get("max_level") != 9 or config.get("voisinage_level") != 4
             or config.get("origin_level") != 5 or config.get("manual_count") != [3, 8]):
         raise ValueError("道统须配置仙界 25 门、Lv9 上限、Lv4 仙域、Lv5 本源及 3—8 门功法")
     if not 1 <= len(config.get("fixed", [])) <= 2:
@@ -26,7 +26,7 @@ def validate_content(config: Mapping[str, Any]) -> None:
             raise ValueError("每个道统主题须包含六个以上意象及背景描述")
     words = config["words"]
     for key, minimum in {"prefixes": 48, "manual_verbs": 40, "manual_suffixes": 20,
-                         "domain_suffixes": 16, "ability_verbs": 24, "practice_images": 12,
+                         "voisinage_suffixes": 16, "ability_verbs": 24, "practice_images": 12,
                          "practice_endings": 8, "acquisition_places": 12}.items():
         if len(set(words[key])) < minimum:
             raise ValueError(f"道统词库 {key} 过于贫乏")
@@ -37,6 +37,21 @@ def validate_content(config: Mapping[str, Any]) -> None:
             raise ValueError(f"Invalid {key}")
         for value in config[key]:
             number(value, key, minimum=1)
+    rules = config["cultivation"]
+    rates, pity = rules["success_rates"], rules["pity_steps"]
+    if (len(rates) != 9 or any(not 0 < number(x, "success rate") < 1 for x in rates)
+            or any(a <= b for a, b in zip(rates, rates[1:]))
+            or pity != [.05] * 3 + [.04] * 3 + [.02] * 3):
+        raise ValueError("道统成功率须逐层递减，保底增量须为 5%/4%/2%")
+    if rules["veins_per_layer"] != 3 or rules["veins_per_realm"] != 27:
+        raise ValueError("每层三条仙脉，每境二十七条")
+    for key in ("vein_opportunity_base", "vein_opportunity_step", "vein_trace_base", "vein_trace_step",
+                "trace_years", "voisinage_max_training", "voisinage_opportunity_base", "voisinage_trace_base",
+                "annotation_price", "explore_price"):
+        if type(rules[key]) is not int or rules[key] <= 0:
+            raise ValueError(f"Invalid cultivation parameter {key}")
+    if not 0 < number(rules["voisinage_training_gain"], "voisinage training gain") <= .1:
+        raise ValueError("额外邻域温养不能替代道统成就")
 
 
 def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, float]) -> dict[str, Any]:
@@ -76,7 +91,7 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
             stability *= .9
         authority = mechanics.uniform(85, 120)
         effect = mechanics.choice(["strike", "suppress"]) if primary == "execution" else mechanics.choice(["strike", "suppress", "seal"])
-        domain_name = names.choice(words["prefixes"]) + names.choice(theme["images"]) + names.choice(words["domain_suffixes"])
+        voisinage_name = names.choice(words["prefixes"]) + names.choice(theme["images"]) + names.choice(words["voisinage_suffixes"])
         stages = []
         for level in range(1, 10):
             stage_rng = rng_for(local_seed, version, f"{key}:stage:{level}")
@@ -84,9 +99,9 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
             traits = [{"kind": kind, "value": round(.08 + .02 * level, 3)}
                       for kind in evolution[:1 if level < 6 else 2 if level < 8 else 3]] if level >= 4 else []
             feature_descriptions = [config["features"][t["kind"]]["description"] for t in traits]
-            domain = None
+            voisinage = None
             if level >= 4:
-                domain = dict(id=f"{key}:domain", name=domain_name, attainment=key, required_level=4,
+                voisinage = dict(id=f"{key}:voisinage", name=voisinage_name, attainment=key, required_level=4,
                               strength=1, stability=round(stability * growth * stage_rng.uniform(.94, 1.06), 3),
                               incursion=round(incursion * growth * stage_rng.uniform(.94, 1.06), 3),
                               authority=round(authority * 1.12 ** (level - 4) * stage_rng.uniform(.96, 1.04), 3), opening_cost=round(100 + level * 15),
@@ -95,10 +110,10 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
                               extra_target_cost=15, max_investment=80, features=traits)
                 # strength is retained only for old providers; generated fields
                 # compare explicit incursion against explicit stability.
-                DomainDefinition(**domain)
+                VoisinageDefinition(**voisinage)
             title = names.choice(words["stage_titles"][level - 1])
             stages.append(dict(level=level, title=title, years=config["level_years"][level - 1],
-                               realm=config["level_realms"][level - 1], domain=domain,
+                               realm=config["level_realms"][level - 1], voisinage=voisinage,
                                description=(f"{names.choice(words['practice_images'])}，{names.choice(words['practice_endings'])}。"
                                             + ("此层凝成仙域。" if level == 4 else "此层将确定唯一的本源归属。" if level == 5 else "")),
                                ability_name=names.choice(theme["images"]) + names.choice(words["ability_verbs"]),

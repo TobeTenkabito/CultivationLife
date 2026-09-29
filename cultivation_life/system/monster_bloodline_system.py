@@ -376,7 +376,7 @@ def public_monster_bloodline(player: Player) -> dict[str, Any]:
     node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
     adaptations = MONSTER_BLOODLINE_SETTINGS.get("adaptations", {})
     imprints = MONSTER_BLOODLINE_SETTINGS.get("imprints", {})
-    at_major = player.layer >= REALMS[player.realm_index].layers
+    at_major = player.layer >= (1 if player.world == "nether" and player.realm_index >= 9 else REALMS[player.realm_index].layers)
     awaiting = bool(player.awaiting_major_breakthrough and at_major and player.opportunity >= opportunity_required(player))
     custom_config = MONSTER_BLOODLINE_SETTINGS.get("custom_lineage", {})
     current_self_stage = self_lineage_stage(str(player.monster_evolution_id))

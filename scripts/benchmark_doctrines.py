@@ -46,7 +46,7 @@ def main():
             units = list(rows.values())
             return resolve_npc_engagement([(n, powers[12]) for n in units[:24]], [(n, powers[12]) for n in units[24:]],
                                           config, random.Random(1), now=game.player.age, sources=sources)
-        result['48_generated_domain_actors_fight_ms'] = measure(actors, fight)
+        result['48_generated_voisinage_actors_fight_ms'] = measure(actors, fight)
         result['catalog_bytes'] = len(json.dumps(game.doctrine_state, ensure_ascii=False).encode('utf-8'))
     print(json.dumps(result, indent=2))
 
