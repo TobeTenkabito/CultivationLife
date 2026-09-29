@@ -369,6 +369,7 @@ class Player:
     immortal_aperture: dict[str, Any] = field(default_factory=dict)
     spirit_voisinage_manual: str | None = None
     teleport_permissions: list[str] = field(default_factory=list)
+    combat_plan: dict[str, Any] = field(default_factory=dict)
     immortal_trace_rng: int = 0
     immortal_body: dict[str, Any] = field(default_factory=dict)
     transcendence: dict[str, Any] | None = None

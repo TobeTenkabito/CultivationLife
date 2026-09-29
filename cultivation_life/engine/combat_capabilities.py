@@ -6,7 +6,7 @@ record; a temporary SectNpc returned by a presentation helper is never written.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping
 
 from ..models import GameState
@@ -151,7 +151,26 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 linked_current=game.player.mp if unit.id == "player" else 0,
                 linked_capacity=max_mp(game.player) if unit.id == "player" else 0,
             )
-            combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity))
+            from ..system.cultivation_ranks import rank_for
+            from ..system.combat.npc_lifecycle import read
+            if unit.id == 'player':
+                from ..system.immortal_aperture import true_realm, investment_multiplier
+                from ..system.combat_plan import effective_plan
+                plan = effective_plan(game.player)
+                multiplier = investment_multiplier(game.player)
+                rank = rank_for(true_realm(game.player), int((game.player.sealed_cultivation or {}).get('layer', game.player.layer)))
+                if plan['manual']:
+                    capabilities = replace(capabilities, stance=plan['stance'], investment=plan['investment'],
+                        protect_ids=tuple(u.id for u in player_units if u.id != 'player'))
+            else:
+                realm, layer = read(owner, 'realm_index', unit.realm_index), read(owner, 'layer', read(owner, 'target_layer', 1))
+                rank = rank_for(realm, layer)
+                multiplier = 1 + .5 * max(0, (realm - 9) * 3 + (layer - 1) // 3)
+                if game.player.world != 'celestial':
+                    multiplier = 1
+            limit = max((d.max_investment for d in capabilities.voisinages), default=0) * multiplier
+            capabilities = replace(capabilities, investment_limit=limit)
+            combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity, rank))
             if owner is not None:
                 owners[unit.id] = owner
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))

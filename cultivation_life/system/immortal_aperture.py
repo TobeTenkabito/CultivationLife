@@ -9,6 +9,17 @@ def true_realm(player):
     return max(player.realm_index, int((player.sealed_cultivation or {}).get('realm_index', 0)))
 
 
+def cultivation_stage(player):
+    sealed = player.sealed_cultivation or {}
+    realm, layer = max((player.realm_index, player.layer),
+                       (int(sealed.get('realm_index', 0)), int(sealed.get('layer', 1))))
+    return max(0, (realm - 9) * 3 + (max(1, layer) - 1) // 3)
+
+
+def investment_multiplier(player):
+    return 1 if lower_world(player) else 1 + .5 * cultivation_stage(player)
+
+
 def spirit_books(player):
     return [t for t in player.known_techniques if t.spirit_voisinage_id and t.level >= 4 and t.active_in(player.world)]
 
@@ -24,7 +35,7 @@ def available(player):
 def ensure_aperture(player):
     if not available(player):
         return False
-    capacity = 1000 * max(1, true_realm(player) - 8)
+    capacity = 1000 * (1 + cultivation_stage(player))
     if player.immortal_aperture:
         old = player.immortal_aperture['capacity']
         player.immortal_aperture['capacity'] = max(old, capacity)
@@ -77,6 +88,7 @@ def public_aperture(player, game=None):
             field = asdict(source.voisinages[0])
     return {'available': True, 'lower': lower, 'field': field, 'name': '仿仙灵力' if lower else '仙灵力',
             'current': state['current'], 'capacity': state['capacity'],
+            'investment_multiplier': investment_multiplier(player),
             'sealed_reserve': ledger['current'] if lower else 0,
             'conversion': 1 if player.immortal_power_converted else player.immortal_conversion_stage / 5,
             'origin_hp': intrinsic['hp']['current'], 'origin_mp': intrinsic['mp']['current'],

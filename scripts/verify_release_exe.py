@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
+            for asset in ['combat-plan-panel.js', 'doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',

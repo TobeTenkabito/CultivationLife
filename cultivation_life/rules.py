@@ -907,7 +907,8 @@ def public_player(player: Player) -> dict[str, Any]:
             + float(conversion_config.get("chance_per_unit", 0.02)) * (elapsed_conversion_units - conversion_min_gap))
         if elapsed_conversion_units >= conversion_min_gap and not player.immortal_power_converted else 0.0
     )
-    uses_immortal_resource = player.world == "celestial" or player.immortal_power_converted
+    uses_immortal_resource = (WORLD_SYSTEMS['world_profiles'].get(player.world, {}).get('tier', 1) >= 3
+                              and (player.world == 'celestial' or player.immortal_power_converted))
 
     def public_technique(technique: Technique | None, environment_active: bool) -> dict[str, Any] | None:
         if technique is None:

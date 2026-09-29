@@ -233,13 +233,13 @@ def test_npc_resource_writeback_uses_authoritative_owner_and_survives_reload(eng
                   target_realm_index=9, combat_type="cultivator")
     result, _ = engine._combat(game, target, False, random.Random(1))
     assert result == "controlled"
-    assert npc.transcendence["current"] == 620
+    assert npc.transcendence["current"] == 560
     engine.store.save(game)
     restored = engine.store.load(game.id)
-    assert restored.notable_npcs[npc.id].transcendence["current"] == 620
+    assert restored.notable_npcs[npc.id].transcendence["current"] == 560
     # A repeated fight pays a new opening cost, rather than refilling the NPC.
     engine._combat(restored, target, False, random.Random(1))
-    assert restored.notable_npcs[npc.id].transcendence["current"] == 440
+    assert restored.notable_npcs[npc.id].transcendence["current"] == 320
 
 
 def test_cached_npc_resource_writeback_does_not_target_a_temporary_shell(engine_game):
@@ -248,7 +248,7 @@ def test_cached_npc_resource_writeback_does_not_target_a_temporary_shell(engine_
     game.encounter_npc_cache.append({"id": npc.id, "npc": npc.to_dict()})
     engine._combat(game, dict(npc_id=npc.id, target_name=npc.name, target_power=1000,
                              target_realm_index=9, combat_type="cultivator"), False, random.Random(1))
-    assert game.encounter_npc_cache[0]["npc"]["transcendence"]["current"] == 620
+    assert game.encounter_npc_cache[0]["npc"]["transcendence"]["current"] == 560
 
 
 def test_linked_player_resource_is_not_double_debited_or_waived_by_story(engine_game):
@@ -296,9 +296,10 @@ def test_npc_only_engagement_obeys_voisinage_and_persists_consumption():
     result = resolve_npc_engagement([(weak, 1)], [(strong, 1e12)],
                                     {"voisinages": [asdict(voisinage())]}, random.Random(1))
     assert result.outcome == "victory"
-    assert result.suppressed == ("strong",)
-    assert strong.alive
-    assert weak.transcendence["current"] == 620
+    assert result.killed == ("strong",)
+    assert not strong.alive
+    assert len(result.rounds) == 2
+    assert weak.transcendence["current"] == 560
 
 
 def test_npc_legacy_path_does_not_consume_randomness_or_write_state():

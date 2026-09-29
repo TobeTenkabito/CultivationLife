@@ -418,7 +418,7 @@ function render(data) {
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
   meter('hp', p.hp, p.max_hp, p.intrinsic_resources?.hp); meter('mp', p.mp, p.max_mp, p.intrinsic_resources?.mp);
   $('#mp-label').textContent = p.resource_name || 'MP';
-  if(data.aperture?.available && p.immortal_power?.visible){meter('mp',data.aperture.conversion*100,100);$('#mp-label').textContent='仙灵力转化';$('#mp-text').textContent=`${Math.round(data.aperture.conversion*100)}%`;}
+  if(data.aperture?.available && !data.aperture.lower && p.immortal_power?.visible){meter('mp',data.aperture.conversion*100,100);$('#mp-label').textContent='仙灵力转化';$('#mp-text').textContent=`${Math.round(data.aperture.conversion*100)}%`;}
   $('#mp-meter').classList.toggle('blue', p.resource_kind !== 'immortal');
   $('#mp-meter').classList.toggle('purple', p.resource_kind === 'immortal');
   const immortalPower = p.immortal_power || {};
@@ -594,6 +594,7 @@ function render(data) {
   $('#world-news-debug').classList.toggle('active', !!data.debug_world_news);
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
   window.ImmortalAperturePanel?.render(data.aperture || {}, payload=>mutate(`/api/games/${data.id}/aperture-action`,payload),{pending:!!data.pending_event,alive:data.player.alive});
+  window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
@@ -2477,10 +2478,22 @@ function renderMap(map, auction) {
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
   const tp=map.teleport;
-  if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。可用 ${number(tp.bribe)} 灵石买通守阵人单次偷渡。`;box.append(label);
+  if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。先选通行方式，再选择目的地。`;box.append(label);
     const action=(text,payload,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.className='map-teleport';b.dataset.unavailable=disabled?'1':'0';b.disabled=disabled||busy||!!game.pending_event||!game.player.alive;b.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,payload);box.append(b);};
     action(tp.origin.licensed?'已取得许可':'申请通行许可',{action:'request'},tp.origin.licensed||!tp.can_request);
-    for(const dest of tp.destinations)action(`${tp.origin.licensed?'传送':'偷渡'}至${dest.name} · 瞬息`,{action:tp.origin.licensed?'travel':'bribe',destination:dest.id});list.append(box);
+    const choices=document.createElement('div');choices.className='teleport-methods';box.append(choices);
+    const route=document.createElement('div');route.className='teleport-route';box.append(route);
+    const methods=tp.origin.licensed?[['travel','持许可通行']]:[];
+    methods.push(['bribe',`贿赂 · ${number(tp.bribe)} 灵石 · ${Math.round(tp.exposure.bribe*100)}% 暴露`],['assassinate',`暗杀 · ${Math.round(tp.exposure.assassinate*100)}% 暴露`]);
+    for(const [method,title] of methods){const b=document.createElement('button');b.textContent=title;b.type='button';choices.append(b);
+      b.onclick=()=>{route.replaceChildren();choices.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+        const hint=document.createElement('p');hint.className='muted';hint.textContent=method==='travel'?'凭许可瞬息传送，不消耗年龄。':`仅本次偷渡有效。若暴露，威名增加 ${number(tp.fame_penalty)} 并遭执阵势力通缉。`;
+        const select=document.createElement('select');select.setAttribute('aria-label','传送目的地');
+        for(const dest of tp.destinations){const o=document.createElement('option');o.value=dest.id;o.textContent=dest.name;select.append(o);}
+        const go=document.createElement('button');go.textContent='确认传送';go.className='map-teleport';go.dataset.unavailable=tp.destinations.length?'0':'1';go.disabled=!tp.destinations.length||busy||!!game.pending_event||!game.player.alive;
+        go.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,{action:method,destination:select.value});route.append(hint,select,go);
+      };
+    }list.append(box);
   }
   const directoryLinks = window.MapDirectory.render(map, auction, game);
   (map.locations || []).forEach(location => {
@@ -3217,6 +3230,7 @@ function transformationFormCard(form, system, isStored) {
 }
 
 function renderSettings(settings) {
+  $('#setting-manual-combat-plan').value=settings.manual_combat_plan?'manual':'auto';
   const popup = $('#setting-combat-popup');
   const achievementPopup = $('#setting-achievement-popup');
   const guixuPopup = $('#setting-guixu-popup');
@@ -3836,6 +3850,7 @@ function finePercent(value) {
 $('#setting-combat-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'combat_popup', enabled:!event.target.checked,
 });
+$('#setting-manual-combat-plan').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'manual_combat_plan',enabled:event.target.value==='manual'});
 $('#setting-achievement-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'achievement_popup', enabled:!event.target.checked,
 });

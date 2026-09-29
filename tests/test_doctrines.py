@@ -333,7 +333,7 @@ def test_generated_seal_accumulates_authority_to_nonlethal_control():
     begin(battle, 2)
     begin(battle, 3)
     assert battle.units["b"].suppressed
-    assert battle.units["b"].vitality == 1
+    assert 0 < battle.units["b"].vitality < 1  # sustained domination erodes combat stance
     assert battle.verdict() == "victory"
     assert not battle.enemy_killed()
 

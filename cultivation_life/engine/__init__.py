@@ -132,6 +132,13 @@ class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemM
 
     def update_setting(self, game_id: str, setting: str, enabled: bool) -> dict[str, Any]:
         game = self._load(game_id)
+        if setting == 'manual_combat_plan':
+            if game.pending_event or game.active_trial:
+                raise ValueError('请先结束当前事件或试炼，再切换战斗预案')
+            game.player.combat_plan['manual'] = bool(enabled)
+            game.updated_at = now_iso()
+            self.store.save(game)
+            return self.present(game)
         if setting not in {
             "combat_popup", "achievement_popup", "auto_advance_player_wars",
             "guixu_event_popup",
@@ -143,6 +150,19 @@ class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemM
             and str(game.pending_event.get("id", "")) in {"EVT_GUIXU_ANNOUNCE", "EVT_GUIXU_OPEN"}
         ):
             game.pending_event = None
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def update_combat_plan(self, game_id, payload):
+        from ..system.combat_plan import validate_plan
+        game = self._load(game_id)
+        if (not game.player.alive or game.pending_event or game.active_trial
+                or game.player.imprisonment or game.player.ghost_captor):
+            raise ValueError('当前状态不能调整战斗预案')
+        if not game.player.combat_plan.get('manual'):
+            raise ValueError('请在设置中启用手动战斗预案')
+        game.player.combat_plan.update(validate_plan(payload))
         game.updated_at = now_iso()
         self.store.save(game)
         return self.present(game)
