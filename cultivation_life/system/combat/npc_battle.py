@@ -5,7 +5,7 @@ voisinage by adding power, rolling an unrelated casualty or resetting resources.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping
 
 from .contracts import CapabilitySource, Combatant, voisinage_definitions, resolve_source
@@ -40,7 +40,11 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             capabilities = resolve_source(resources[npc.id].state, definitions, (sources or {}).get(npc.id))
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
-            units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities))
+            from ..cultivation_ranks import rank_for
+            multiplier = 1 + .5 * max(0, (npc.realm_index - 9) * 3 + (npc.layer - 1) // 3) if npc.world == 'celestial' else 1
+            capabilities = replace(capabilities, investment_limit=max((d.max_investment for d in capabilities.voisinages), default=0) * multiplier)
+            units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities,
+                                   cultivation_rank=rank_for(npc.realm_index, npc.layer)))
     battle = VoisinageBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
     if not battle.enabled:
         return None  # No combat RNG or combat costs on the conventional path.

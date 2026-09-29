@@ -206,7 +206,7 @@ def test_aperture_capacity_grows_without_refilling(prepared):
     game.player.immortal_aperture['current']=17
     game.player.realm_index=10
     state=energy_state(game.player)
-    assert state['capacity']==2000 and state['current']==17
+    assert state['capacity']==4000 and state['current']==17
 
 
 def test_spirit_authority_is_not_double_discounted_against_unprotected_target(prepared):

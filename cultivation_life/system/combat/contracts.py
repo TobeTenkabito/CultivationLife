@@ -108,12 +108,15 @@ class CombatCapabilities:
     resource_link: str = "independent"
     resource_tier: int = 1
     usable_capacity: float | None = None
+    investment_limit: float | None = None
 
     def __post_init__(self) -> None:
         for key in ("capacity", "current", "attack_cost", "ward_cost", "investment"):
             number(getattr(self, key), key)
         if self.current > self.capacity:
             raise ValueError("Resource current exceeds capacity")
+        if self.investment_limit is not None:
+            number(self.investment_limit, "investment_limit")
         if self.usable_capacity is not None:
             number(self.usable_capacity, "usable_capacity")
             if self.usable_capacity > self.capacity or self.current > self.usable_capacity:
@@ -145,6 +148,7 @@ class Combatant:
     power: float
     capabilities: CombatCapabilities = field(default_factory=CombatCapabilities)
     integrity: float = 1.0
+    cultivation_rank: int = -1
 
     def __post_init__(self) -> None:
         number(self.power, "combatant power")
@@ -163,6 +167,8 @@ class PhaseRound:
     primary_loss: float = 0.0
     events: list[str] = field(default_factory=list)
     relations: dict[str, dict[str, Any]] = field(default_factory=dict)
+    morale_loss: dict[str, float] = field(default_factory=dict)
+    stat_factors: dict[str, dict[str, float]] = field(default_factory=dict)
 
     @property
     def ordinary(self) -> bool:
@@ -206,6 +212,7 @@ class CombatPhases(Protocol):
     def enemy_suppressed(self) -> bool: ...
     def report(self) -> dict[str, Any]: ...
     def updates(self) -> list[dict[str, Any]]: ...
+    def set_objectives(self, player: str, enemy: str) -> None: ...
 
 
 def resolve_capabilities(

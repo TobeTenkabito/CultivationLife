@@ -33,7 +33,8 @@ def main():
                 assert page.locator('[data-panel-target=voisinage]').is_hidden()
                 page.evaluate("UtilityPanels.open('map')")
                 age=page.evaluate('game.player.age');old=page.evaluate('game.player.location_id')
-                page.locator('.teleport-controls button').nth(1).click()
+                page.locator('.teleport-methods button').filter(has_text='贿赂').click()
+                page.get_by_role('button',name='确认传送',exact=True).click()
                 page.wait_for_function('(old)=>game.player.location_id!==old',arg=old)
                 assert page.evaluate('game.player.age')==age
                 page.screenshot(path=str(ROOT/'build/teleport-1470-mobile.png'))

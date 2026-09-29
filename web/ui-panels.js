@@ -1,5 +1,5 @@
 (() => {
-  const panelNames = ['map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'doctrine', 'immortal-veins', 'immortal-body', 'immortal-aperture', 'spirit-voisinage', 'voisinage', 'daomen', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
+  const panelNames = ['combat-plan', 'map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'doctrine', 'immortal-veins', 'immortal-body', 'immortal-aperture', 'spirit-voisinage', 'voisinage', 'daomen', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
 
   function card(name) { return document.querySelector(`#${name}-card`); }
   function dockButton(name) { return document.querySelector(`[data-panel-target="${name}"]`); }

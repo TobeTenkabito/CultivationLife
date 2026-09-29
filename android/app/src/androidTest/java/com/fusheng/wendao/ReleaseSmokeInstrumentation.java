@@ -180,7 +180,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.47.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.47.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             if(phase.equals("save-transfer")) {
@@ -205,7 +205,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     for(int i=count-1;i>=0;i--) {
                         check(Boolean.TRUE.equals(js("AndroidGame.copySaveCode(__segments["+i+"])")),"Native clipboard write failed");
                         tapSelector("#transfer-paste");
-                        check(Boolean.TRUE.equals(js("document.querySelector('#transfer-code').value===__segments["+i+"]")),"Native paste changed text");
+                        waitForJs("document.querySelector('#transfer-code').value===__segments["+i+"]","Native paste changed text");
                         tapSelector("#transfer-preview");
                         waitForJs("!SaveTransfer.isWorking()","Import preview stalled");
                     }
@@ -222,7 +222,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1470.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1471.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
@@ -261,6 +261,32 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("game.doctrines.immortal_body.level===20 && game.player.immortal_traces>0 && !game.player.inventory.some(i=>i.id==='immortal_trace')")),"Immortal save persistence");
                 capture("immortal-golden-light");
                 result.putString("immortal_scope","Six themes, meridian circles, hidden voisinage entry, intrinsic bars, trace counter, actual tap opening three veins without automatic realm promotion, immortal body level20 and persistence");
+            } else if(phase.equals("minor")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'邻域预案验收',preset_id:'true_immortal',seed:1471})});return g.id;})()");
+                python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.layer=4\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.aperture.capacity===2000 && game.aperture.current===300")),"Stage capacity must conserve current");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    async("mutate('/api/games/'+game.id+'/settings',{setting:'manual_combat_plan',enabled:true})");
+                    js("UtilityPanels.open('combat-plan');const n=document.querySelector('[aria-label=每轮追加仙力]');n.value='37';true");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && document.querySelector('#combat-plan-card').scrollWidth<=document.querySelector('#combat-plan-card').clientWidth+1")),"Manual plan layout");
+                    tapSelector("#combat-plan-content button[type=submit]");waitForJs("!busy && game.combat_plan.investment===37","Saved plan");capture("minor-plan-"+theme);
+                    js("UtilityPanels.open('map');true");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('[aria-label=传送目的地]')")),"Destination opened before method choice");
+                    js("Array.from(document.querySelectorAll('.teleport-methods button')).find(b=>b.textContent.includes('暗杀')).click();true");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[aria-label=传送目的地]').options.length>0")),"Missing remote destinations");
+                    capture("minor-teleport-"+theme);
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.world='spirit'\ng.player.location_id=e.maps.default_location('spirit')\ng.player.sealed_cultivation={'realm_index':9,'layer':4}\ng.player.realm_index=8\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.player.resource_kind==='mana' && !document.querySelector('#hud-mp .hud-values strong').textContent.endsWith('%') && document.querySelector('#mp-meter').classList.contains('blue')")),"Lower-world MP");
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.world='celestial'\ng.player.location_id=e.maps.default_location('celestial')\ng.player.realm_index=9\ng.player.sealed_cultivation=None\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#hud-mp .hud-values strong').textContent.endsWith('%') && document.querySelector('#mp-meter').classList.contains('purple')")),"Returned immortal conversion");
+                    async("mutate('/api/games/'+game.id+'/settings',{setting:'manual_combat_plan',enabled:false})");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && game.combat_plan.investment===37")),"Automatic plan visibility/persistence");
+                }
+                result.putString("minor_scope","Six themes: stage reservoir, saved manual plan native tap, lower MP and return conversion, method-first assassination destination selector");
             } else if(phase.equals("npc-social")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'血脉长存档验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'serpent',seed:1440})});return g.id;})()");
                 com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",

@@ -166,10 +166,11 @@ def test_restored_resource_enables_npc_voisinage_in_background_combat(config):
     npc.transcendence.update(voisinage_ids=["test"], attainments={"test": 4})
     settle(npc, 100, config)
     victim = SectNpc("victim", "敌人", "", 8, 1, 100, None)
-    result = resolve_npc_engagement([(npc, 1)], [(victim, 1e12)], config, random.Random(1), now=120)
+    result = resolve_npc_engagement([(npc, 1)], [(victim, 1e12)], config, random.Random(1), now=130)
     assert result.outcome == "victory"
-    assert result.suppressed == (victim.id,)
-    assert npc.transcendence["current"] == 20
+    assert result.killed == (victim.id,)
+    assert len(result.rounds) == 2
+    assert npc.transcendence["current"] == 60
 
 
 def test_faction_relocation_settles_resource_before_changing_world(engine_game, config):

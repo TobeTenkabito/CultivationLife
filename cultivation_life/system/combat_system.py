@@ -176,6 +176,10 @@ class PlayerCombatSystem:
         phases: CombatPhases | None = None,
     ) -> CombatResolution:
         objective = cls._objective(target, lethal)
+        from .combat_plan import effective_plan
+        plan = effective_plan(player)
+        if phases is not None:
+            phases.set_objectives(objective, 'kill' if lethal else 'defeat')
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
         natural = next((tag for tag in normalized if tag in cls.NATURAL_TERRAINS), "开阔")
         artificial = list(dict.fromkeys(tag for tag in normalized if tag in cls.ARTIFICIAL_CONDITIONS))
@@ -215,6 +219,8 @@ class PlayerCombatSystem:
         generated_soul_traits = active_generated_soul_traits(player)
         resolve_bonus = max(0.0, float(soul_effects.get("resolve", 0.0)))
         transformation = active_transformation_profile(player)
+        if not plan['transformations']:
+            transformation = {'forms': [], 'weights': [], 'stat_multipliers': {}, 'traits': []}
         for stat, multiplier in transformation["stat_multipliers"].items():
             player_stats[stat] *= multiplier
         transformation_traits = set(transformation["traits"])
@@ -472,6 +478,8 @@ class PlayerCombatSystem:
                 player_hp = max(0.0, player_hp - phase.player_loss)
                 enemy_hp = max(0.0, enemy_hp - phase.enemy_loss)
                 body_damage_ratio += phase.primary_loss * 0.46
+                player_morale = max(0, player_morale - phase.morale_loss.get('player', 0))
+                enemy_morale = max(0, enemy_morale - phase.morale_loss.get('enemy', 0))
                 ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
                 if not phase.ordinary or phases.verdict() is not None:
                     # Voisinage-only rounds never call ordinary initiative, rules,
@@ -618,6 +626,10 @@ class PlayerCombatSystem:
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"魂性共鸣【{event}】" for event in soul_start["events"])
             sustain_ratio = round_player_stats["sustain"] / max(1.0, player_power)
+            if phase is not None:
+                for side, stats in (('player', round_player_stats), ('enemy', round_enemy_stats)):
+                    for stat, factor in phase.stat_factors.get(side, {}).items():
+                        stats[stat] *= factor
             sustain_state_factor = 0.90 + 0.10 * cls._clamp(0.50, 1.50, sustain_ratio)
             p_state = (0.42 + 0.40 * player_hp + 0.18 * player_mp) * sustain_state_factor
             e_state = 0.48 + 0.52 * enemy_hp
@@ -721,10 +733,15 @@ class PlayerCombatSystem:
                 and (not art.requires_immortal_power or player.immortal_power_converted)
             ]
             burst = bool(
-                usable_combat_techniques and player_mp >= 0.28
+                usable_combat_techniques and plan['burst'] != 'never' and player_mp >= plan['mp_reserve']
                 and (phase is None or phase.ordinary_player)
-                and (round_no == 1 and objective == "kill" or enemy_hp <= 0.58 or player_hp <= 0.48)
+                and (plan['burst'] == 'early' or round_no == 1 and objective == "kill" or enemy_hp <= 0.58 or player_hp <= 0.48)
             )
+            if burst and plan['manual']:
+                art = max(usable_combat_techniques, key=lambda entry: entry.combat_bonus)
+                planned_cost = max(.07 + .008 * max(1, art.grade),
+                    art.immortal_power_cost if art.requires_immortal_power else 0) * mana_cost_multiplier
+                burst = player_mp - planned_cost >= plan['mp_reserve']
             burst_factor = 1.0
             if burst:
                 burst_used = True
@@ -891,7 +908,7 @@ class PlayerCombatSystem:
             received_amount = received * player_power_max
             absorbed_amount, guard_event = (cls._absorb_with_support(
                 player_units, received_amount, support_updates,
-            ) if phases is None else (0.0, ""))
+            ) if phases is None and plan['support_guard'] else (0.0, ""))
             if guard_event:
                 events.append(guard_event)
                 key_events.append(f"第{round_no}轮，{guard_event}")
@@ -1309,6 +1326,9 @@ class PlayerCombatSystem:
         decisive = ratio > 1.12 and (enemy_hp <= 0.46 or enemy_morale <= 22)
         pursuit = speed_edge * 0.55 + sense_edge * 0.30 + max(0, player.realm_index - enemy_realm) * 0.08
         escape_locked = "enemy_escape_lock" in artifact_traits
+        if phases is not None:
+            enemy_updates = [u for u in phases.updates() if u['side'] == 'enemy']
+            escape_locked = escape_locked or bool(enemy_updates and all(u['escape_locked'] for u in enemy_updates))
         kill_pursuit_threshold = cls._clamp(
             0.0, 2.0, float(target.get("kill_pursuit_threshold", 0.82)),
         )
@@ -1325,8 +1345,10 @@ class PlayerCombatSystem:
         )
         if phases is not None:
             kill_ready = kill_ready or (outcome == "victory" and lethal and phases.enemy_killed())
+            if phases.enemy_suppressed():
+                kill_ready = False
             capture_ready = capture_ready or (outcome == "victory" and objective == "capture" and phases.enemy_suppressed())
-        if escape_locked and outcome == "victory":
+        if "enemy_escape_lock" in artifact_traits and outcome == "victory":
             key_events.append("帝江之泪封闭空间退路，敌方无法从败势中遁逃。")
         if outcome == "stalemate":
             grade = "僵持"
@@ -1359,7 +1381,7 @@ class PlayerCombatSystem:
             outcome=outcome,
             result_grade=grade,
             objective=objective,
-            mode="仙域自动战斗" if phases is not None else "快速结算" if quick else "标准自动战斗",
+            mode=("手动预案·" if plan['manual'] else '') + ("邻域战斗" if phases is not None else "快速结算" if quick else "标准自动战斗"),
             rounds=rounds,
             key_events=key_events[:4],
             hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio), 4),

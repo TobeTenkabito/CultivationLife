@@ -1,6 +1,6 @@
 {
-  "base_version": "1.47.0",
-  "exe_sha256": "3a33228c878082de2188993c207959bebc86624f53f11657e85eafebd2ddef0c",
+  "base_version": "1.47.1",
+  "exe_sha256": "1fc1edb284567d72c447d9d054ae224708453b528c6ddb2ef78ef4e54045f396",
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -11,7 +11,8 @@
     "tianji-artifacts": "2.2.0"
   },
   "validation": [
-    "1003 automated regressions passed",
+    "1024 automated regressions passed",
+    "Six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified",
     "Six-theme immortal meridians, manual realm breakthrough, immortal body cultivation and intrinsic resource bars verified",
     "Six-theme live browser: save library, import/export, encryption and chunk roundtrips, Buddhist colours; no JavaScript errors",
     "Packaged EXE starts with and without optional DLC; all seven packages, wish UI assets, base reincarnation content and Buddhist entry verified",

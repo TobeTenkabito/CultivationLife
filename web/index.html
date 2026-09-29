@@ -330,6 +330,7 @@
           <div id="natal-artifact-content"></div>
         </article>
         <article id="immortal-veins-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙脉"><div class="section-title"><h2>仙脉</h2><button id="immortal-veins-toggle" type="button">关闭</button></div><div id="immortal-veins-content" class="immortal-content"></div></article>
+<article id="combat-plan-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="战斗预案"><div class="section-title"><h2>战斗预案</h2><button id="combat-plan-toggle" type="button">关闭</button></div><div id="combat-plan-content" class="immortal-content"></div></article>
 <article id="immortal-aperture-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙窍"><div class="section-title"><h2>仙窍</h2><button id="immortal-aperture-toggle" type="button">关闭</button></div><div id="immortal-aperture-content" class="immortal-content"></div></article>
 <article id="spirit-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="灵域"><div class="section-title"><h2>灵域</h2><button id="spirit-voisinage-toggle" type="button">关闭</button></div><div id="spirit-voisinage-content" class="immortal-content"></div></article>
 <article id="immortal-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="真仙之躯"><div class="section-title"><h2>真仙之躯</h2><button id="immortal-body-toggle" type="button">关闭</button></div><div id="immortal-body-content" class="immortal-content"></div></article>
@@ -418,6 +419,7 @@
           <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
             <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
+            <label class="settings-row"><span><b>战斗预案</b><small>自动沿用既有策略；手动在左侧显示配置入口。</small></span><select id="setting-manual-combat-plan" aria-label="战斗预案模式"><option value="auto">自动</option><option value="manual">手动</option></select></label>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
             <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
@@ -430,6 +432,7 @@
       <nav class="strategy-dock left-dock" aria-label="个人窗口">
         <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
         <button type="button" data-panel-target="immortal-veins" title="仙脉" class="hidden"><span>脉</span><small>仙脉</small></button>
+        <button type="button" data-panel-target="combat-plan" title="战斗预案" class="hidden"><span>策</span><small>预案</small></button>
         <button type="button" data-panel-target="immortal-aperture" title="仙窍" class="hidden"><span>窍</span><small>仙窍</small></button>
         <button type="button" data-panel-target="spirit-voisinage" title="灵域" class="hidden"><span>域</span><small>灵域</small></button>
         <button type="button" data-panel-target="immortal-body" title="真仙之躯" class="hidden"><span>躯</span><small>仙躯</small></button>
@@ -511,7 +514,8 @@
   <script src="/buddhist-wish.js?v=1.45.0"></script>
   <script src="/buddhist-panel.js?v=1.45.0"></script>
   <script src="/doctrine-panel.js?v=1"></script>
-  <script src="/immortal-aperture-panel.js?v=1"></script>
+  <script src="/immortal-aperture-panel.js?v=2"></script>
+  <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/app.js?v=1.45.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

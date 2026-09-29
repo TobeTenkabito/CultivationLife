@@ -34,6 +34,7 @@ def public_teleport(game, maps):
     for row in rows.values():
         row['licensed'] = f"{p.world}:{row['owner_id']}" in p.teleport_permissions or row['owner_id'] == p.faction_id
     return dict(arrays=list(rows.values()), origin=here, bribe=1000 * tier ** 2,
+        exposure={'bribe': .12, 'assassinate': .40}, fame_penalty=500 * tier ** 2,
         required_fame=200 * tier, can_request=bool(here and (effective_fame(p) >= 200 * tier or p.faction_id == here['owner_id'])),
         destinations=[row for key, row in rows.items() if here and separated(maps, p.world, p.location_id, key)
                       and maps.travel_plan(p.world, p.location_id, key, p.realm_index).status == 'ok'])
@@ -71,15 +72,27 @@ class TeleportMixin:
                 raise ValueError(f"须属{here['owner_name']}或声望达到 {info['required_fame']} 方可申请许可")
             p.teleport_permissions.append(permission)
             summary = f"{here['owner_name']}授予传送阵通行许可。"
-        elif action in {'travel', 'bribe'}:
+        elif action in {'travel', 'bribe', 'assassinate'}:
             if destination not in {row['id'] for row in info['destinations']}:
                 raise ValueError('目的地没有可直达的远程传送阵')
             if action == 'travel' and not here['licensed']:
                 raise ValueError('尚未取得执掌此阵的势力许可')
             if action == 'bribe' and not remove_item(p, 'spirit_stone', info['bribe']):
                 raise ValueError('贿赂守阵人的灵石不足')
+            exposure = ''
+            if action != 'travel':
+                rng = decode_rng(game.seed, game.rng_state)
+                if rng.random() < info['exposure'][action]:
+                    p.fame += info['fame_penalty']
+                    key = ('sect:' + here['owner_id']) if here['owner_id'] in game.sects else ('world:' + p.world)
+                    threshold = float(WORLD_SYSTEMS['faction_conflict']['wanted_threshold'])
+                    p.hostility[key] = max(p.hostility.get(key, 0), threshold + 100)
+                    p.milestones['became_wanted_target'] = 1
+                    exposure = f"行迹暴露！威名 +{info['fame_penalty']}，{here['owner_name']}发出通缉。"
+                game.rng_state = encode_rng(rng)
             self._instant_arrival(game, destination)
-            summary = f"{'买通守阵人偷渡，' if action == 'bribe' else ''}瞬息抵达{self.maps.location(p.world, destination)['name']}，不增加年龄。"
+            method = {'travel': '', 'bribe': '买通守阵人偷渡，', 'assassinate': '暗杀守阵人偷渡，'}[action]
+            summary = f"{method}瞬息抵达{self.maps.location(p.world, destination)['name']}，不增加年龄。{exposure}"
         else:
             raise ValueError('未知传送操作')
         game.history.append(HistoryRecord('SYS_TELEPORT', 1, p.age, '挪移虚空', action, 'completed', summary, {}, ['travel']))
