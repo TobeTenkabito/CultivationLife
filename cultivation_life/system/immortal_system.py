@@ -67,6 +67,21 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
             else:
                 p.immortal_vein_pity[key] = p.immortal_vein_pity.get(key, 0) + 1
                 summary = f"开脉失败，本次机缘与仙痕已消耗；下次成功率 {vein_probability(p):.0%}。"
+        elif action == 'advance_voisinage':
+            from .doctrine.voisinage_training import rank, cost, label, BOUNDARIES
+            if record['progress'].get(doctrine_id, {}).get('level', 0) < 4:
+                raise ValueError('须先激发此邻域')
+            training = record.setdefault('voisinage_training', {}).setdefault(doctrine_id, {})
+            current = rank(training)
+            if current >= 13:
+                raise ValueError('此邻域已达至臻')
+            self._spend_cultivation(p, cost(training, rules))
+            if current in BOUNDARIES:
+                self._start_voisinage_backlash(game, doctrine_id)
+                summary = f'冲击{label(current + 1)}引发道统反噬，须以此邻域迎战天域，存活五轮。失败可能被道统同化而亡。'
+            else:
+                training['rank'] = current + 1
+                summary = f'邻域修至{label(current + 1)}。'
         elif action == "train_voisinage":
             level = record["progress"].get(doctrine_id, {}).get("level", 0)
             if level < 4 or axis not in AXES:
@@ -102,6 +117,8 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
                 "can_breakthrough": ready and requirement["met"] and p.immortal_power_converted and p.opportunity >= opportunity_required(p),
                 "ready": ready, "major": major, "requirement": requirement["reason"],
                 "breakthrough_cost": opportunity_required(p),
-                "breakthrough_chance": self._breakthrough_chance(p, major=major)["final"] if ready else None,
+                "trial": {9:'人五衰：独战天道，存活五轮', 10:'天五衰：天道展开天域，存活五轮',
+                          11:'斩三尸：三尸同时出场，无轮数限制，须全部击杀'}.get(p.realm_index) if major else None,
+                "breakthrough_chance": self._breakthrough_chance(p, major=major)["final"] if ready and not major else None,
                 "chance": vein_probability(p), "pity_step": rules["vein_pity_step"],
                 "trace_chance": rules["trace_gain_chance"]}

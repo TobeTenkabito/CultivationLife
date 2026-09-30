@@ -58,5 +58,7 @@ def training_cost(level, rules):
 
 def cultivated_voisinage(definition, training, gain=.03):
     # Training is additive to each base dimension, not a replacement for doctrine.
-    return replace(definition, **{axis: getattr(definition, axis) * (1 + gain * training.get(axis, 0))
-                                  for axis in AXES if getattr(definition, axis) is not None})
+    from .voisinage_training import project
+    tempered = replace(definition, **{axis: getattr(definition, axis) * (1 + gain * training.get(axis, 0))
+                                      for axis in AXES if getattr(definition, axis) is not None})
+    return project(tempered, training)

@@ -603,7 +603,14 @@ class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemM
     def _consume_breakthrough_aids(player: Player, scope: str) -> None:
         return breakthroughs._consume_breakthrough_aids(player, scope)
 
+    def _start_voisinage_backlash(self, game: GameState, doctrine_id: str) -> None:
+        from .progression.immortal_trials import start
+        start(self._dependencies.immortal_trials, game, 'voisinage_backlash', doctrine_id=doctrine_id)
+
     def _start_breakthrough_trial(self, game: GameState, kind: str, source: int, target: int, old_label: str, major: bool, rng: random.Random) -> None:
+        from .progression.immortal_trials import KINDS, start
+        if kind in KINDS:
+            return start(self._dependencies.immortal_trials, game, kind)
         return breakthroughs._start_breakthrough_trial(self._dependencies.breakthroughs, game, kind, source, target, old_label, major, rng)
 
     def _queue_heavenly_demon_battle(self, game: GameState, rng: random.Random, soul: dict[str, Any] | None) -> None:
@@ -619,6 +626,9 @@ class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemM
         return breakthroughs._complete_minor_breakthrough(self._dependencies.breakthroughs, game, rng, old_label)
 
     def _resolve_trial_step(self, game: GameState, step: str, rng: random.Random) -> tuple[str, str]:
+        from .progression.immortal_trials import KINDS, resolve
+        if (game.active_trial or {}).get('kind') in KINDS:
+            return resolve(self._dependencies.immortal_trials, game, step, rng)
         return trials._resolve_trial_step(self._dependencies.trials, game, step, rng)
 
     def _resolve_celestial_ascension_step(self, game: GameState, step: str, rng: random.Random) -> tuple[str, str]:

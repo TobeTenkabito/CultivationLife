@@ -108,6 +108,10 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
             )
     sealed = game.player.sealed_cultivation
     player_data["cultivation_suppressed"] = bool(sealed)
+    from ..system.doctrine.voisinage_training import dao_ancestor
+    player_data['dao_ancestor'] = dao_ancestor(game)
+    if player_data['dao_ancestor']:
+        player_data['realm_name'] += ' · 道祖'
     if sealed:
         true_shell = SectNpc(
             "true-player", game.player.name, "", int(sealed["realm_index"]), int(sealed["layer"]),
@@ -161,7 +165,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "kind": game.active_trial.get("kind") if game.active_trial else None,
         "step": game.active_trial.get("step_index", 0) + 1 if game.active_trial else None,
         "total_steps": len(game.active_trial.get("event_ids", [])) if game.active_trial else None,
-        "allows_recovery_items": bool(game.active_trial),
+        "allows_recovery_items": bool(game.active_trial and not game.active_trial.get('snapshot')),
     }
     if game.active_trial and game.active_trial.get("kind") == "heavenly_demon":
         completed = int(game.active_trial.get("base_rounds_completed", 0))

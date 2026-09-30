@@ -258,7 +258,8 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     else:
         player.awaiting_minor_breakthrough = False
     deps._consume_breakthrough_aids(player, f"{'major' if major else 'minor'}:{player.realm_index}")
-    if rng.random() >= chance["final"]:
+    celestial_trial = major and player.world == 'celestial' and player.realm_index in {9, 10, 11}
+    if not celestial_trial and rng.random() >= chance["final"]:
         player.joint_companion_breakthrough = None
         failure_type = "major" if major else "minor"
         retained = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])
@@ -296,10 +297,9 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
         player.opportunity = max(0.0, player.opportunity - required)
         source = player.realm_index
         if source >= 9 and player.world == 'celestial':
-            # Immortal calamities are a separate extension point; do not reuse
-            # lower-world lightning scripts for an undesigned celestial calamity.
             if major:
-                deps._complete_major_breakthrough(game, rng, old_label)
+                kind = {9: 'human_decline', 10: 'heaven_decline', 11: 'three_corpses'}[source]
+                deps._start_breakthrough_trial(game, kind, source, source + 1, old_label, major=True, rng=rng)
             else:
                 deps._complete_minor_breakthrough(game, rng, old_label)
         elif major:

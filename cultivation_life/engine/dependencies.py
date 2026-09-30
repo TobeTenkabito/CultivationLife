@@ -941,7 +941,20 @@ class NpcClassDependencies:
 
 
 @dataclass(frozen=True, slots=True)
+class ImmortalTrialDependencies:
+    _get_events_by_id: Callable[[], dict[str, dict[str, Any]]]
+    _instantiate_event: Callable[..., dict[str, Any]]
+    _die: Callable[..., None]
+    _complete_major_breakthrough: Callable[..., None]
+
+    @property
+    def events_by_id(self) -> dict[str, dict[str, Any]]:
+        return self._get_events_by_id()
+
+
+@dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    immortal_trials: ImmortalTrialDependencies
     world_runtime: WorldRuntimeDependencies
     event_runtime: EventDependencies
     combat_runtime: CombatDependencies

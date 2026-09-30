@@ -1,7 +1,7 @@
 {
-  "base_version": "1.48.1",
-  "android_version": "1.48.1-android.13",
-  "version_code": 13,
+  "base_version": "1.49.0",
+  "android_version": "1.49.0-android.14",
+  "version_code": 14,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,9 +12,9 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.48.1-Android12.apk",
-  "apk_sha256": "c1bc8eb0c5002bea2db5e256a7c9e02360be16696ec7fb1bd03cc521b229f7df",
-  "apk_bytes": 47766038,
+  "apk": "浮生问道-v1.49.0-Android12.apk",
+  "apk_sha256": "b6ab79d89c522cf6c45a5efbc0e4c341c9e4768b9c5aed19bb5c56c5da0e4225",
+  "apk_bytes": 47838718,
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -37,7 +37,8 @@
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "1049 Python regressions passed",
+    "1110 Python regressions passed",
+    "Android 12 six-theme voisinage stages, backlash and trial persistence verified",
     "Android 12 six-theme live guided controls, deterministic practice/master/sect, persisted progress and native back verified",
     "Android 12 six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified",
     "Immortal meridians, manual realm gate, six themes, intrinsic resource bars and body level20 verified on signed APK",

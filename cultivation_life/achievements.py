@@ -132,6 +132,9 @@ class AchievementSystem:
 
     def _matches(self, condition: dict[str, Any], game: GameState, *, player_rank: int | None, history_index: dict | None = None) -> bool:
         player = game.player
+        if 'dao_ancestor' in condition:
+            from .system.doctrine.voisinage_training import dao_ancestor
+            return dao_ancestor(game) == bool(condition['dao_ancestor'])
         if set(condition) == {"all"}:
             return all(self._matches(child, game, player_rank=player_rank, history_index=history_index) for child in condition["all"])
         if set(condition) == {"any"}:

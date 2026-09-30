@@ -272,8 +272,14 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
             definition = source({**record, "active": row["id"]}, state["definitions"], "celestial",
                                 training_gain=rules["voisinage_training_gain"]).voisinages[0]
             training = record.get("voisinage_training", {}).get(row["id"], {})
+            from .doctrine.voisinage_training import public as public_training
             voisinages.append({"id": row["id"], "name": definition.name, "doctrine": row["name"],
                                "active": row["active"], "level": row["level"],
+                               "cultivation": public_training(training, rules),
+                               "effects": [dict(kind=e.kind, power=e.power, cost=e.cost) for e in definition.actions()],
+                               "opening_cost": definition.opening_cost, "upkeep_cost": definition.upkeep_cost,
+                               "effect_cost": definition.effect_cost, "max_targets": definition.max_targets,
+                               "max_investment": definition.max_investment,
                                "axes": [{"id": axis, "value": getattr(definition, axis), "rank": training.get(axis, 0),
                                          "cost": training_cost(training.get(axis, 0), rules),
                                          "max": rules["voisinage_max_training"]} for axis in AXES]})
