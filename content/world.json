@@ -1569,7 +1569,90 @@
           "name": "辅官制",
           "description": "决议槽位 +1。"
         }
-      ]
+      ],
+      "autonomous_governance": {
+        "authority_recovery": 3,
+        "law_cooldown_units": 3,
+        "agenda": {
+          "sun": {
+            "laws": {
+              "wide_domain": true,
+              "official_system": true,
+              "traveling_palace": false
+            },
+            "decrees": [
+              "levy",
+              "war_readiness"
+            ]
+          },
+          "moon": {
+            "laws": {
+              "universal_protection": true,
+              "martial_gods": false,
+              "assistant_officials": true
+            },
+            "decrees": [
+              "relief",
+              "regulate_market"
+            ]
+          },
+          "jupiter": {
+            "laws": {
+              "immortal_twofold": true,
+              "recommendation_law": true,
+              "direct_appointment_law": false
+            },
+            "decrees": [
+              "recommend_official",
+              "relief"
+            ]
+          },
+          "mars": {
+            "laws": {
+              "martial_gods": true,
+              "immortal_slaughter": true,
+              "universal_protection": false
+            },
+            "decrees": [
+              "war_readiness",
+              "levy"
+            ]
+          },
+          "saturn": {
+            "laws": {
+              "celestial_sects": true,
+              "wide_domain": true,
+              "traveling_palace": false
+            },
+            "decrees": [
+              "regulate_market",
+              "relief"
+            ]
+          },
+          "venus": {
+            "laws": {
+              "direct_appointment_law": true,
+              "official_system": true,
+              "recommendation_law": false
+            },
+            "decrees": [
+              "direct_appointment",
+              "war_readiness"
+            ]
+          },
+          "mercury": {
+            "laws": {
+              "traveling_palace": true,
+              "immortal_twofold": true,
+              "wide_domain": false
+            },
+            "decrees": [
+              "stimulate_demand",
+              "regulate_market"
+            ]
+          }
+        }
+      }
     },
     "breakthrough": {
       "major_base": {
@@ -3559,33 +3642,33 @@
     "yaochi": {
       "location_id": "expanse_celestial_8",
       "faction_id": "yaochi",
-      "stones_per_merit": 1000,
-      "merit_per_court_merit": 100,
-      "support_cost": 250,
+      "stones_per_merit": 250,
+      "merit_per_court_merit": 40,
+      "support_cost": 400,
       "support_gain": 5,
-      "vote_cost": 500,
+      "vote_cost": 800,
       "vote_max": 12,
       "order_fee": 0.25,
       "max_orders": 4,
       "materials": [
         {
           "id": "great_sun_divine_light",
-          "price": 15,
+          "price": 20,
           "quantity": 1
         },
         {
           "id": "heavenly_gang_gold",
-          "price": 50,
+          "price": 90,
           "quantity": 1
         },
         {
           "id": "glazed_pure_heaven_water",
-          "price": 150,
+          "price": 250,
           "quantity": 1
         },
         {
           "id": "samadhi_true_fire",
-          "price": 450,
+          "price": 500,
           "quantity": 1
         }
       ],
@@ -3608,7 +3691,32 @@
           "description": "在瑶池校验商路阵纹，履约中遇事中断可以稍后继续。",
           "reward": 400
         }
-      ]
+      ],
+      "realm_reward_multipliers": [
+        1,
+        3,
+        6,
+        10
+      ],
+      "layer_reward_step": 0.05,
+      "manual_prices": [
+        200,
+        600,
+        1200,
+        2400
+      ],
+      "body_manual_prices": {
+        "jade_marrows": 400,
+        "golden_lotus": 600
+      },
+      "supply_prices": {
+        "immortal_jade_herb": 36,
+        "nine_leaf_immortal_lingzhi": 24,
+        "golden_lotus_elixir": 24
+      },
+      "lock_limit": 3,
+      "lock_rate": 0.1,
+      "lock_minimum": 20
     }
   },
   "realms": [

@@ -80,12 +80,12 @@ def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target
     return deps.present(game)
 
 
-def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: str, npc_id: str, role: str) -> dict[str, Any]:
+def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: str, npc_id: str, role: str, *, known_target=False) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
-    if not player.faction_id:
+    if not player.faction_id and not known_target:
         raise ValueError("只有加入宗门后才能直接向宗门 NPC 提出师徒请求")
     if role not in {"master", "disciple"}:
         raise ValueError("未知师徒关系类型")
@@ -96,7 +96,9 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         (entry for entry in deps._sect_members(game, sect) if entry.id == npc_id and entry.alive),
         None,
     ) if sect and not sect.extinct else None
-    if not npc:
+    if known_target:
+        npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, "师徒之请")
+    if not npc or not npc.alive or npc.world != player.world:
         raise ValueError("该宗门人物不存在或已经陨落")
     attempt_key = f"{role}:{npc_id}"
     if attempt_key in player.relationship_attempts:
@@ -124,7 +126,7 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
     accept_chance = min(0.82, (0.28 + realm_gap * 0.10) if role == "master" else (0.62 + realm_gap * 0.06))
     accepted = rng.random() < accept_chance
     relation = deps._relationship_snapshot(
-        npc.id, npc.name, npc.realm_index, npc.layer, player.faction_id,
+        npc.id, npc.name, npc.realm_index, npc.layer, deps._npc_faction_id(game, npc.id) or "world",
         npc.age, npc.lifespan, npc.alive, npc.death_reason,
         spirit_root=npc.spirit_root, cultivation_progress=npc.cultivation_progress,
         path=npc.path, race=npc.race, world=npc.world,

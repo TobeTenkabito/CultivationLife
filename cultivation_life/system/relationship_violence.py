@@ -7,13 +7,19 @@ from ..runtime import decode_rng, encode_rng, now_iso
 
 
 class RelationshipViolenceMixin:
-    def relationship_violence(self, game_id, kind, target_id):
+    def relationship_violence(self, game_id, kind, target_id, *, capture=False):
         game = self._load(game_id)
         player = game.player
         if not player.alive or game.pending_event or game.active_trial or player.imprisonment:
             raise ValueError("请先结束当前事件或战斗")
         self.assert_buddhist_operation_allowed(game_id, "relationship-violence")
+        if capture and (kind != 'npc' or player.path != 'demonic'):
+            raise ValueError("生擒修士须修习魔道；亲近之人须走关系生擒流程")
+        stranger = None
+        if kind == 'npc':
+            stranger = self._find_npc(game, target_id) or self._promote_cached_npc(game, target_id, '交锋')
         rows = {
+            "npc": [stranger.to_dict()] if stranger else [], "friend": player.dao_friends,
             "captive": player.prisoners, "disciple": player.disciples,
             "concubine": player.concubines, "party": self._public_party(game),
             "master": [player.master] if player.master else [],
@@ -48,11 +54,11 @@ class RelationshipViolenceMixin:
             target = {"target_name": name, "target_power": power, "primary_power": power,
                       "target_realm_index": rank, "target_layer": layer, "combat_type": "cultivator",
                       "npc_id": npc_id, "faction_id": victim["faction_id"], "path": victim["path"],
-                      "race": victim["race"], "world": player.world, "kill_karma": True,
-                      "action": "slay", "non_story_combat": True,
+                      "race": victim["race"], "world": player.world, "kill_karma": not capture,
+                      "action": "capture" if capture else "slay", "capture": capture, "non_story_combat": True,
                       "execution": kind == "disciple", "relationship_kind": kind,
                       "exclude_allied_ids": [str(target_id), npc_id]}
-            result, summary = self._combat(game, target, True, rng)
+            result, summary = self._combat(game, target, not capture, rng)
             # A betrayed survivor no longer supplies allied combat power or affection.
             player.party = [row for row in player.party if str(row.get("id")) not in {npc_id, str(target_id)}]
             if npc and npc.alive:

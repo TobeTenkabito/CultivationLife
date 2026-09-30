@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ...system.path_modifiers import modifier
 from ...system.npc_social import social_hint
+from ...system.npc_contacts import availability, relation_kind
 
 import copy
 from typing import Any
@@ -53,6 +54,9 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             public_npc["layer"] = perception["layer"]
         result.append({
             **public_npc,
+            "contact_source": "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs else "pool",
+            "contact_relation": relation_kind(game.player, npc.id),
+            "contact_actions": availability(game, npc),
             "realm_name": perception["realm_name"] if perception else deps._npc_realm_name(npc),
             "cultivation_concealment": (
                 {

@@ -8,7 +8,10 @@ from ..models import GameState, HistoryRecord
 from ..runtime import decode_rng, encode_rng, now_iso
 
 
-class HeavenlyCourtSystemMixin:
+from .court_governance import CourtGovernanceMixin
+
+
+class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
     """天庭政治层；按仙界时间单位结算，49 席仅保存投票摘要。"""
 
     @staticmethod
@@ -232,6 +235,9 @@ class HeavenlyCourtSystemMixin:
         self._sync_player_court_identity(game)
         court["unit"] = int(court["unit"]) + 1
         unit = int(court["unit"])
+        self._court_retire_unavailable(game)
+        if self._court_holder_ids(court):
+            court['authority'] += self._court_config()['autonomous_governance']['authority_recovery']
         laws = court["laws"]
         court["active_decrees"] = [row for row in court["active_decrees"] if int(row["expires_unit"]) >= unit]
 
@@ -271,7 +277,8 @@ class HeavenlyCourtSystemMixin:
             self._court_open_next_queued_election(game, rng)
         else:
             self._court_open_election(game, office_id, rng)
-        return [f"{game.player.age}岁：天庭第 {unit} 时间单位完成府库结算与七曜轮选。"]
+        messages = self._court_govern(game, rng)
+        return [f"{game.player.age}岁：天庭第 {unit} 时间单位完成府库结算与七曜轮选。", *messages]
 
     def resolve_heavenly_election(self, game_id: str, method: str = "none", pledge_id: str = "") -> dict[str, Any]:
         game = self._load(game_id)
@@ -281,6 +288,7 @@ class HeavenlyCourtSystemMixin:
         success, _ = self._court_resolve_election_round(game, rng, method, pledge_id)
         if success:
             self._court_open_next_queued_election(game, rng)
+            self._court_govern(game, rng)
         game.rng_state = encode_rng(rng)
         game.updated_at = now_iso()
         self.store.save(game)
@@ -346,10 +354,10 @@ class HeavenlyCourtSystemMixin:
         return "failed", f"你未通过本次考核，功德保留（通过率 {chance:.0%}）。"
 
     def _court_enact_decree(
-        self, game: GameState, decree_id: str, target_id: str, rng: Any, influence_spend: int = 0,
+        self, game: GameState, decree_id: str, target_id: str, rng: Any, influence_spend: int = 0, *, actor_id: str = "player",
     ) -> tuple[str, str]:
         court = game.heavenly_court
-        if self._court_player_controls(court) < 1:
+        if actor_id not in self._court_holder_ids(court):
             raise ValueError("只有七曜星君可以推行决议")
         decree = next((row for row in self._court_config()["decrees"] if row["id"] == decree_id), None)
         if not decree:
@@ -365,7 +373,7 @@ class HeavenlyCourtSystemMixin:
         cost = float(decree.get("authority_cost", self._court_config()["decree_authority_cost"]))
         if float(court["authority"]) < cost:
             raise ValueError("天庭权威不足")
-        influence_spend = self._court_spend_influence(game, influence_spend)
+        influence_spend = self._court_spend_influence(game, influence_spend) if actor_id == "player" else 0
         multiplier = (1.5 if laws.get("official_system") else 1.0) * (1.0 + influence_spend / 50)
         treasury_delta = (
             float(decree.get("immediate_treasury", 0)) * multiplier
@@ -385,9 +393,12 @@ class HeavenlyCourtSystemMixin:
         court["authority"] -= cost
         court["treasury"] += treasury_delta
         court["equipment"] += float(decree.get("immediate_equipment", 0)) * multiplier
-        court["player_support"] = max(
-            0.0, min(100.0, float(court["player_support"]) + float(decree.get("support", 0)) * multiplier),
-        )
+        support_delta = float(decree.get('support', 0)) * multiplier
+        if actor_id == 'player':
+            court['player_support'] = max(0.0, min(100.0, court['player_support'] + support_delta))
+        else:
+            actor = court['officials'][actor_id]
+            actor['support'] = max(0.0, min(100.0, actor.get('support',50) + support_delta))
         if decree_id == "direct_appointment" and target_npc:
             official = court["officials"].setdefault(target_npc.id, {
                 "id": target_npc.id, "name": target_npc.name,
@@ -406,47 +417,51 @@ class HeavenlyCourtSystemMixin:
         elif decree_id == "protect":
             court["wanted_ids"].remove(target_id)
         court["active_decrees"].append({
-            "id": decree_id, "name": decree["name"],
+            "id": decree_id, "name": decree["name"], "actor_id": actor_id,
             "expires_unit": int(court["unit"]) + int(self._court_config()["decree_duration_units"]),
             "income_multiplier": decree.get("income_multiplier", 1.0),
         })
-        self._court_honor_pledge(court, "decree", decree_id)
+        if actor_id == "player":
+            self._court_honor_pledge(court, "decree", decree_id)
         return "decree_enacted", f"天庭推行《{decree['name']}》，生效五个时间单位。"
 
     def _court_vote_law(
-        self, game: GameState, law_id: str, enact: bool | None, rng: Any, influence_spend: int = 0,
+        self, game: GameState, law_id: str, enact: bool | None, rng: Any, influence_spend: int = 0, *, actor_id: str = "player",
     ) -> tuple[str, str]:
         court = game.heavenly_court
-        if self._court_player_controls(court) < 1:
+        if actor_id not in self._court_holder_ids(court):
             raise ValueError("只有七曜星君可以发起天条表决")
         law = next((row for row in self._court_config()["laws"] if row["id"] == law_id), None)
         if not law:
             raise ValueError("未知天条")
         desired = not bool(court["laws"].get(law_id)) if enact is None else bool(enact)
         holders = self._court_holder_ids(court)
-        if len(holders) < 7:
-            raise ValueError("七曜尚未全部就位，无法进行天条表决")
+        if not holders:
+            raise ValueError("尚无在任星君，无法进行天条表决")
         operating_cost = float(self._court_config().get("policy_treasury_cost", 0))
         if float(court["treasury"]) < operating_cost:
             raise ValueError("天庭府库不足以召开天条表决")
         court["treasury"] -= operating_cost
-        controlled = self._court_player_controls(court)
-        influence_spend = self._court_spend_influence(game, influence_spend)
+        influence_spend = self._court_spend_influence(game, influence_spend) if actor_id == "player" else 0
         persuasion = min(0.35, influence_spend * 0.02)
-        votes = [
-            holder_id == "player" or rng.random() < 0.48 + float(court["player_support"]) / 500 + persuasion
-            for holder_id in holders
-        ]
-        passed = controlled >= 4 or sum(votes) >= 4
-        court["last_vote"] = {
-            "law_id": law_id, "enact": desired, "yes": sum(votes), "no": 7 - sum(votes), "passed": passed,
-        }
+        if actor_id == 'player':
+            yes = sum(holder_id == 'player' or rng.random() < .48 + court['player_support']/500 + persuasion for holder_id in holders)
+            abstain = 0
+        else:
+            yes, abstain = self._court_autonomous_votes(court, actor_id, law_id, desired, rng)
+        total = len(holders)
+        no = total - yes - abstain
+        passed = yes > total // 2
+        court['last_vote'] = dict(law_id=law_id, enact=desired, yes=yes, no=no,
+                                  abstain=abstain, total=total, passed=passed, actor_id=actor_id)
         if passed:
-            court["laws"][law_id] = desired
-            self._court_honor_pledge(court, "law", law_id)
+            court['laws'][law_id] = desired
+            court.setdefault('law_changed_at', {})[law_id] = int(court['unit'])
+            if actor_id == 'player':
+                self._court_honor_pledge(court, 'law', law_id)
         return (
             "law_passed" if passed else "law_rejected",
-            f"七曜以 {sum(votes)} 票赞成、{7 - sum(votes)} 票反对，"
+            f"在任七曜以 {yes} 票赞成、{no} 票反对、{abstain} 票弃权，"
             f"{'通过' if passed else '否决'}了《{law['name']}》的{'施行' if desired else '废除'}。",
         )
 
@@ -539,6 +554,8 @@ class HeavenlyCourtSystemMixin:
             "wanted_ids": list(court["wanted_ids"]), "target_npcs": target_npcs,
             "election": public_election, "pledges": list(court["pledges"]),
             "last_vote": court.get("last_vote"),
+            "governance": list(court.get("governance_log", []))[-8:],
+            "occupied_seats": len(self._court_holder_ids(court)),
             "decree_slots": int(config["base_decree_slots"]) + int(court["laws"].get("assistant_officials", False)),
             "next_grade_merit": (
                 int(config["grade_merit_thresholds"].get(str(int(court["player_grade"]) - 1), 0))

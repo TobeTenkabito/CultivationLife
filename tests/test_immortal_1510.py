@@ -107,7 +107,7 @@ def test_pool_currency_and_legacy_buy_cannot_bypass_local_merit(prepared):
     e.yaochi_action(g.id,'exchange_court_merit',amount=2)
     saved=e._load(g.id)
     assert saved.heavenly_court['player_merit']==g.heavenly_court['player_merit']+2
-    assert saved.yaochi_state['merit']==100000-book['price']-203
+    assert saved.yaochi_state['merit']==100000-book['price']-83
     with pytest.raises(ValueError):e.yaochi_action(g.id,'stones_to_merit')
 
 
@@ -161,7 +161,7 @@ def test_pool_election_tickets_charge_once_and_control_real_votes(prepared):
     e.yaochi_action(g.id,'buy_vote',ticket)
     with pytest.raises(ValueError):e.yaochi_action(g.id,'buy_vote',ticket)
     saved=e._load(g.id)
-    assert saved.yaochi_state['merit']==99500
+    assert saved.yaochi_state['merit']==99200
     election=saved.heavenly_court['open_election']
     e._court_resolve_election_round(saved,random.Random(1),'none','')
     assert election['votes']['player']==49
