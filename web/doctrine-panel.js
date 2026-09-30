@@ -69,7 +69,7 @@
     if (v.next_cost) veins.append(el('p', `下一脉：机缘 ${fmt(v.next_cost.opportunity)} · 仙痕 ${v.next_cost.traces}`),
       el('p', `本次成功率 ${fmt(v.chance*100)}% · 失败消耗本次资源，保底增加 ${fmt(v.pity_step*100)} 个百分点，成功后重置。`, 'muted'),
       button('尝试开启下一条仙脉', {action:'open_vein'}, !v.converted || v.opportunity < v.next_cost.opportunity || v.traces < v.next_cost.traces, options.immortal));
-    if (v.ready) veins.append(el('p', `${v.requirement} 冲关需机缘 ${fmt(v.breakthrough_cost)}，本次成功率 ${fmt(v.breakthrough_chance*100)}%。`),
+    if (v.ready) veins.append(el('p', `${v.requirement} 冲关需机缘 ${fmt(v.breakthrough_cost)}。${v.trial ? v.trial + '；大境界以劫战结果决定，不再先掷基础成功率。' : `本次成功率 ${fmt(v.breakthrough_chance*100)}%。`}`),
       button(v.major?'手动冲击下一大境界':'手动突破下一层', {action:'breakthrough'}, !v.can_breakthrough, options.immortal));
     veins.append(el('p', `每次实际获得机缘，有 ${fmt(v.trace_chance*100)}% 概率获得一道仙痕。仙痕是独立储量，显示于状态栏。`, 'muted'));
     const b = data.immortal_body;
@@ -128,13 +128,32 @@
       panel.append(chapters); owned.append(panel);
     }
     content.append(owned);
-    voisinage.append(el('p', '每场斗法只采用一个邻域。道统提升基础威能，额外温养分别强化稳固、侵夺与权能，切换不会丢失培养。', 'muted'));
+    voisinage.append(el('p', '每场斗法只采用一个邻域。初成、化境、大成各四层，之后为不分层数的至臻。跨阶段须独自抵抗五轮天域，只结算邻域；冲击至臻可能被道统同化而亡。道统与温养共同影响实际威能，切换保留培养。', 'muted'));
     if (!data.voisinages.length) voisinage.append(el('p', '尚未激发仙域，先将任一道统参悟至 Lv4。'));
     const axisNames = {stability:'稳固',incursion:'侵夺',authority:'权能'};
     for (const field of data.voisinages) {
       const entry = el('section', null, 'doctrine-entry');
       entry.append(el('h3', field.name), el('p', `${field.doctrine} · Lv${field.level}`),
         button(field.active ? '当前出战仙域' : '采用此仙域', {action:'activate',doctrine_id:field.id}, field.active));
+      const growth = field.cultivation;
+      if (growth) {
+        const track = el('div', null, 'voisinage-stages');
+        ['初成','化境','大成','至臻'].forEach((name, index) => {
+          const stage = el('span', name, index === Math.floor((growth.rank-1)/4) ? 'current' : index*4 < growth.rank ? 'completed' : '');
+          if (name === '至臻') stage.title = '至臻不分层数';
+          else stage.append(el('small', index === Math.floor((growth.rank-1)/4) ? `${growth.layer} / 4 层` : '四层'));
+          track.append(stage);
+        });
+        entry.append(track, el('h4', `培养境界 · ${growth.label}`));
+        if (growth.cost) {
+          entry.append(el('p', `下一层：${growth.next_label} · ${fmt(growth.cost.opportunity)} 机缘 / ${fmt(growth.cost.traces)} 仙痕`));
+          if (growth.backlash) entry.append(el('p', growth.rank === 12 ? '至臻之劫：最强道统反噬，失败将被同化而亡。先温养稳固、补足仙灵力，再引劫。' : '跨阶段将引发道统反噬；须存活五轮，失败会陨落。', 'doctrine-note'));
+          entry.append(button(growth.backlash ? `引动反噬 · 冲击${growth.next_label}` : `修炼至${growth.next_label}`,
+            {action:'advance_voisinage',doctrine_id:field.id}, !v.converted || v.opportunity < growth.cost.opportunity || v.traces < growth.cost.traces, options.immortal));
+        } else entry.append(el('p', '至臻已成，不再分层。大罗境兼具任一道统 Lv9，可获本体成就「道祖」。', 'doctrine-note'));
+      }
+      entry.append(el('p', `展开 ${fmt(field.opening_cost)} · 每轮维持 ${fmt(field.upkeep_cost)} · 覆盖目标 ${field.max_targets} · 基础投入上限 ${fmt(field.max_investment)}`, 'muted'),
+        el('p', `邻域能力：${effectNames(field)}`, 'voisinage-abilities'));
       for (const axis of field.axes) {
         entry.append(el('p', `${axisNames[axis.id]} ${fmt(axis.value)} · 温养 ${axis.rank}/${axis.max}`),
           button(axis.rank >= axis.max ? `${axisNames[axis.id]}已温养圆满` : `温养${axisNames[axis.id]} · ${fmt(axis.cost.opportunity)} 机缘 / ${axis.cost.traces} 仙痕`,

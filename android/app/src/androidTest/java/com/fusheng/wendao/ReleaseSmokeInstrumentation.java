@@ -180,13 +180,35 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.48.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.49.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("tutorial")) {
+            if(phase.equals("trials")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'天域培养验收',preset_id:'true_immortal',seed:7429})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nimport copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.opportunity=1e12\ng.player.immortal_traces=100000\ng.player.combat_plan={'manual':True,'stance':'guard','investment':40}\nd=next(iter(g.doctrine_state['definitions'].values()))\nk=d['id']\ng.player.known_techniques.append(Technique(**copy.deepcopy(d['manuals'][0])))\nr=g.doctrine_state['player']\nr['progress'][k]={'level':4,'experience':0}\nr['active']=k\nr['voisinage_training'][k]={'rank':4,'stability':10}\ng.player.immortal_aperture['current']=g.player.immortal_aperture['capacity']\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.open('voisinage');true");Thread.sleep(500);
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.voisinage-stages>span').length===4 && document.querySelector('#voisinage-content').textContent.includes('初成4层') && document.querySelector('#voisinage-card').scrollWidth<=document.querySelector('#voisinage-card').clientWidth+1")),"Trial stage layout: "+theme);
+                    capture("trials-"+theme+"-1490");
+                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+                }
+                js("UtilityPanels.open('voisinage');Array.from(document.querySelectorAll('#voisinage-content button')).find(b=>b.textContent.includes('引动反噬')).setAttribute('data-trial-start','true');true");
+                tapSelector("[data-trial-start]");
+                waitForJs("!busy && game.pending_event?.id==='EVT_IMMORTAL_TRIAL_VOISINAGE_BACKLASH'","Backlash did not start");
+                js("UtilityPanels.close('voisinage');true");
+                async("mutate('/api/games/'+game.id+'/choice',{choice_id:'fight'})");
+                check(Boolean.TRUE.equals(js("game.last_combat_report.result==='victory' && game.last_combat_report.total_rounds===5 && game.doctrines.voisinages.some(f=>f.cultivation.rank===5)")),"Five-round backlash victory");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.last_combat_report.total_rounds===5 && game.doctrines.voisinages.some(f=>f.cultivation.rank===5)")),"Trial persistence");
+                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='immortal-trials' && JSON.stringify(c).includes('没有轮数限制'))")),"Missing trial handbook");
+                capture("trials-victory-1490");
+                result.putString("trials_scope","Six themes; native training tap and back; five-round field-only backlash; real growth and reload persistence; unlimited three-corpses handbook");
+            } else if(phase.equals("tutorial")) {
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
-                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1481,tutorial_enabled:true})});return g.id;})()");
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1490,tutorial_enabled:true})});return g.id;})()");
                     async("loadGame("+JSONObject.quote(id)+")");js("window.__tutorialAge=game.player.age");
                     for(int i=0;i<32;i++) {
                         String step=(String)js("game.tutorial.guide.step");
@@ -198,13 +220,13 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                             tapSelector("#tutorial-start");waitForJs("!busy && game.tutorial.enabled && TutorialGuide.isGuiding()","Resume failed");
                             check(Boolean.TRUE.equals(js("game.tutorial.guide.step==='gain'")),"Resume lost step");
                         }
-                        if(step.equals("practice") || step.equals("join")) capture("guide-"+theme+"-"+step+"-1481");
+                        if(step.equals("practice") || step.equals("join")) capture("guide-"+theme+"-"+step+"-1490");
                         check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.tutorial-coach').getBoundingClientRect();return r.right<=innerWidth+1 && r.bottom<=innerHeight+1;})()")),"Coach outside viewport: "+step);
                         if(Boolean.TRUE.equals(js("!document.querySelector('#guide-next').hidden"))) tapSelector("#guide-next");
                         else {
                             if(step.equals("mentor_choice")) tapSelector("[data-guide-choice=guide_accept]");
                             else {
-                                check(Boolean.TRUE.equals(js("(()=>{document.querySelectorAll('[data-native-guide-target]').forEach(n=>n.removeAttribute('data-native-guide-target'));const target=Array.from(document.querySelectorAll(TutorialSteps[game.tutorial.guide.step].target)).find(n=>{const r=n.getBoundingClientRect();return r.width>0&&r.height>0&&!n.closest('.hidden');});if(!target||target.disabled)return false;target.setAttribute('data-native-guide-target','true');return true;})()")),"Missing live target: "+step);
+                                check(Boolean.TRUE.equals(js("(()=>{document.querySelectorAll('[data-native-guide-target]').forEach(n=>n.removeAttribute('data-native-guide-target'));const target=Array.from(document.querySelectorAll(TutorialSteps[game.tutorial.guide.step].target)).find(n=>{const r=n.getBoundingClientRect();return r.width>0&&r.height>0&&!n.closest('.hidden')&&(game.tutorial.guide.step!=='join'||n.dataset.factionId===document.querySelector('#guide-sect-select').value);});if(!target||target.disabled)return false;target.setAttribute('data-native-guide-target','true');return true;})()")),"Missing live target: "+step);
                                 tapSelector("[data-native-guide-target]");
                             }
                         }
@@ -257,7 +279,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1481.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1490.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
@@ -483,7 +505,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
                 result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML,rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML:null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
-                capture("failure-1481");
+                capture("failure-1490");
             } catch(Exception ignored) { /* Preserve the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString());
             finish(Activity.RESULT_CANCELED,result);

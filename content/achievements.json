@@ -2,6 +2,12 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "cultivation_dao_ancestor", "name": "道祖", "category": "cultivation",
+      "description": "修至大罗，拥有任一至臻邻域，并将任一道统参悟至 Lv9。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"dao_ancestor": true}
+    },
+    {
       "id": "story_virtual_heaven_cauldron",
       "name": "月沉海宫",
       "description": "取得沧海玄鼎",

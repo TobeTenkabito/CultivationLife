@@ -119,6 +119,10 @@ class IntrigueRuntimeMethods:
                     target_id = ""
                     if resolution_type in {"form_alliance", "declare_war"}:
                         possible = [row.id for row in candidates if row.id != sect.id and row.world == sect.world]
+                        if resolution_type == "declare_war":
+                            possible = [target for target in possible if game.diplomacy_unit >= max(
+                                int(self._war_relation(game, "sect", sect.id, target).get("truce_until_unit", 0)),
+                                int(self._war_relation(game, "sect", sect.id, target).get("war_truce_until_unit", 0)))]
                         if not possible:
                             resolution_type = "investment"
                         else:

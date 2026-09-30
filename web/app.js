@@ -3572,13 +3572,13 @@ function renderBattleReport(report) {
     if (battlePlaybackKey === null) battlePlaybackKey = 'none';
     return;
   }
-  const reportKey = `${report.age}:${report.title}:${report.result}:${report.rounds?.length || 0}`;
+  const reportKey = `${report.age}:${report.title}:${report.result}:${report.total_rounds || report.rounds?.length || 0}`;
   const shouldPlay = battlePlaybackKey !== null && battlePlaybackKey !== reportKey;
   battlePlaybackKey = reportKey;
   if (shouldPlay) battleReportOpen = game?.settings?.combat_popup !== false;
   card.classList.toggle('report-closed', !battleReportOpen);
-  const objectiveNames = {kill:'击杀', capture:'生擒', repel:'击退'};
-  const resultNames = {killed:'目标击杀', captured:'目标生擒', victory:'目标达成', victory_escape:'敌方逃脱', defeat:'未达目标', defeat_survived:'涅槃生还', dead:'身死'};
+  const objectiveNames = {kill:'击杀', capture:'生擒', repel:'击退', survive:'存活五轮'};
+  const resultNames = {killed:'目标击杀', captured:'目标生擒', victory:'目标达成', victory_escape:'敌方逃脱', defeat:'未达目标', defeat_survived:'涅槃生还', dead:'身死', ongoing:'交战未歇，继续迎战'};
   $('#battle-report-title').textContent = report.title || '最近战报';
   $('#battle-report-grade').textContent = `${report.result_grade || '结算'} · ${resultNames[report.result] || report.result || ''}`;
   const natural = report.natural_terrain || report.battlefield_tags?.[0] || '开阔';
@@ -3588,7 +3588,7 @@ function renderBattleReport(report) {
     report.formation_profile?.name ? `你方阵法 ${report.formation_profile.name}（终局完整度 ${percent(report.formation_integrity_end || 0)}）` : '',
     report.enemy_formation_profile?.name ? `敌方阵法 ${report.enemy_formation_profile.name}（终局完整度 ${percent(report.enemy_formation_integrity_end || 0)}）` : '',
   ].filter(Boolean).join(' · ');
-  $('#battle-report-summary').textContent = `${report.mode || '标准自动战斗'} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。开战后完全由预案自动执行。`;
+  $('#battle-report-summary').textContent = `${report.mode || '标准自动战斗'} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.total_rounds || report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。${report.total_rounds > report.rounds.length ? '显示最近 72 轮。' : ''}开战后由预案执行。`;
   const rosters = $('#battle-rosters'); rosters.innerHTML = '';
   [
     ['你方参战', report.player_roster || []],

@@ -57,6 +57,8 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         if scope_type == "major" and game.player.realm_index < 6:
             raise ValueError("炼虚以前魂婴尚不能借丹药跨越大境界；达到炼虚期后方可服用当前境界适用的大境界丹药。")
     if game.pending_event:
+        if (game.active_trial or {}).get('snapshot'):
+            raise ValueError('仙境劫战已经开始，不能在续战间隙补充物品；请继续当前交锋')
         if not game.active_trial or (item.trial_restore_hp <= 0 and item.trial_restore_mp <= 0):
             raise ValueError("当前事件中只能使用渡劫恢复道具")
         remove_item(game.player, item_id)

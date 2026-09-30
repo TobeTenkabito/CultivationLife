@@ -68,6 +68,9 @@ def test_every_three_veins_requires_manual_layer_and_body_20_for_major(prepared)
                 saved.player.immortal_body = {'level': 20}
                 engine.store.save(saved)
             shown = engine.immortal_action(game.id, 'breakthrough')
+    assert shown['player']['realm_index'] == 9
+    assert shown['pending_event']['id'] == 'EVT_IMMORTAL_TRIAL_HUMAN_DECLINE'
+    shown = engine.choose(game.id, 'fight')
     assert shown['player']['realm_index'] == 10 and shown['player']['layer'] == 1
     assert 0 < shown['player']['opportunity'] < before
     assert shown['doctrines']['veins']['opened'] == 0

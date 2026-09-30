@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable
 
 from .dependencies import (
     EngineDependencies,
+    ImmortalTrialDependencies,
     NpcClassDependencies,
     WorldRuntimeDependencies,
     EventDependencies,
@@ -42,6 +43,12 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        immortal_trials=ImmortalTrialDependencies(
+            _get_events_by_id=lambda: engine.events_by_id,
+            _instantiate_event=lambda *args, **kwargs: engine._instantiate_event(*args, **kwargs),
+            _die=lambda *args, **kwargs: engine._die(*args, **kwargs),
+            _complete_major_breakthrough=lambda *args, **kwargs: engine._complete_major_breakthrough(*args, **kwargs),
+        ),
         world_runtime=WorldRuntimeDependencies(
             _compact_sect_roster=lambda *args, **kwargs: engine._compact_sect_roster(*args, **kwargs),
             _new_sects=lambda *args, **kwargs: engine._new_sects(*args, **kwargs),

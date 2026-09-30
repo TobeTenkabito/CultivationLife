@@ -84,11 +84,18 @@
     outline.style.cssText=`left:${x}px;top:${y}px;width:${a}px;height:${b}px;display:${r?'block':'none'}`;
     root.querySelector('.tutorial-shade').setAttribute('viewBox',`0 0 ${w} ${h}`);
     root.querySelector('.tutorial-shade path').setAttribute('d',`M0 0H${w}V${h}H0Z M${x} ${y}V${bottom}H${right}V${y}Z`);
-    const cw=Math.min(350,w-24);coach.style.width=cw+'px';const ch=coach.getBoundingClientRect().height;
+    const cw=Math.min(350,w-24);coach.style.width=cw+'px';coach.style.maxHeight=(h-24)+'px';let ch=coach.getBoundingClientRect().height;
     let cx=Math.max(12,Math.min(w-cw-12,x)),cy=bottom+22;
     if(w>780&&right+cw+30<w){cx=right+22;cy=Math.max(12,Math.min(y,h-ch-12));}
     else if(cy+ch>h-12){cy=y-ch-22;if(cy<12)cy=h-ch-12;}
-    cy=Math.max(12,cy);coach.style.left=cx+'px';coach.style.top=cy+'px';
+    cy=Math.max(12,cy);
+    // Narrow WebViews may have room for neither the full coach above nor below.
+    // Keep the live target touchable; the explanation can scroll in its own box.
+    if(r&&cx<right&&cx+cw>x&&cy<bottom&&cy+ch>y){
+      const above=y-34,below=h-bottom-34,room=Math.max(above,below);
+      if(room>=100){coach.style.maxHeight=room+'px';ch=coach.getBoundingClientRect().height;cy=below>=above?bottom+22:y-ch-22;}
+    }
+    coach.style.left=cx+'px';coach.style.top=cy+'px';
     const svg=root.querySelector('.tutorial-arrow');svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
     const tx=Math.min(w-12,Math.max(12,x+a/2)),ty=cy>=bottom?bottom+2:y-2;
     const sx=Math.min(cx+cw-20,Math.max(cx+20,tx)),sy=cy>=bottom?cy-3:cy+ch+3;
