@@ -219,7 +219,7 @@ class FamilySystemMixin:
             summary = f'家族为{npc.name}与{partner.name}安排婚姻；是否育嗣仍按双方较高境界的自然概率结算。'
         elif action == 'send_sect':
             sect = game.sects.get(str(payload.get('sect_id', '')))
-            if not npc or not npc.alive or npc.age < 16 or not sect or sect.kind == 'family' or sect.extinct or sect.world != family.world:
+            if not npc or not npc.alive or npc.age < 16 or not sect or sect.kind != 'sect' or sect.extinct or sect.world != family.world:
                 raise ValueError('须选择成年族人与同界宗门')
             if self._family_relation(game, sect)['status'] not in {'alliance','vassal'}:
                 raise ValueError('家族须与目标宗门结盟或确立依附关系')

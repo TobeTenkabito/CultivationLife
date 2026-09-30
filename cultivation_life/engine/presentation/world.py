@@ -17,7 +17,12 @@ from ..dependencies import WorldViewDependencies
 
 def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
-    world_people = {**game.world_npcs, **game.notable_npcs}
+    institutions = {npc.id: sect for sect in game.sects.values()
+                    if sect.kind == "institution" and sect.world == game.player.world
+                    for npc in sect.npcs}
+    world_people = {**{npc.id: npc for sect in game.sects.values() if sect.kind == "institution"
+                      and sect.world == game.player.world for npc in sect.npcs},
+                    **game.world_npcs, **game.notable_npcs}
     for cached in game.encounter_npc_cache:
         saved = cached.get("npc")
         if isinstance(saved, dict):
@@ -54,7 +59,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             public_npc["layer"] = perception["layer"]
         result.append({
             **public_npc,
-            "contact_source": "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs else "pool",
+            "institution_name": institutions[npc.id].name if npc.id in institutions else None,
+            "contact_source": "institution" if npc.id in institutions else "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs else "pool",
             "contact_relation": relation_kind(game.player, npc.id),
             "contact_actions": availability(game, npc),
             "realm_name": perception["realm_name"] if perception else deps._npc_realm_name(npc),

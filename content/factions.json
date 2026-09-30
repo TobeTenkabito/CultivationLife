@@ -2347,7 +2347,8 @@
           "race": "human",
           "world": "celestial"
         }
-      ]
+      ],
+      "kind": "institution"
     },
     {
       "id": "yaochi",
@@ -2398,7 +2399,8 @@
           "race": "human",
           "world": "celestial"
         }
-      ]
+      ],
+      "kind": "institution"
     }
   ]
 }

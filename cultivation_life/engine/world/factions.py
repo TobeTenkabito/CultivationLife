@@ -60,7 +60,7 @@ def _faction_meta(game: GameState, faction_id: str) -> dict[str, Any]:
 
 def _ensure_sect_relations(game: GameState) -> bool:
     changed = False
-    active = [sect for sect in game.sects.values() if not sect.extinct]
+    active = [sect for sect in game.sects.values() if not sect.extinct and sect.kind != "institution"]
     for index, first in enumerate(active):
         for second in active[index + 1:]:
             if first.world != second.world:
@@ -86,6 +86,8 @@ def _has_race_voice(deps: FactionDependencies, game: GameState) -> bool:
 def _has_sect_voice(deps: FactionDependencies, game: GameState) -> bool:
     player = game.player
     sect = game.sects.get(player.faction_id or "")
+    if not sect or sect.kind != "sect":
+        return False
     if deps._intrigue_enabled():
         return bool(sect and deps._intrigue_has_decision_authority(game, "sect", sect.id))
     realm_index, _ = deps._actual_player_realm(player)
@@ -109,6 +111,8 @@ def _has_family_voice(deps: FactionDependencies, game: GameState) -> bool:
 
 
 def _check_sect_extinction(deps: FactionDependencies, game: GameState, sect: SectState) -> bool:
+    if sect.kind == "institution":
+        return False
     if sect.extinct or any(npc.alive and npc.world == sect.world for npc in deps._sect_members(game, sect)):
         return False
     sect.extinct = True
@@ -251,6 +255,8 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                     {"npc_id": npc.id, "realm": [old_name, new_name]},
                     ["system", "faction", "npc", "world_news", f"world:{sect.world}"],
                 ))
+        if sect.kind == "institution":
+            continue
         if deps._check_sect_extinction(game, sect):
             continue
         deps._compact_sect_roster(game, sect)
@@ -287,6 +293,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         not player.faction_id
         or player.faction_id not in game.sects
         or game.sects[player.faction_id].extinct
+        or game.sects[player.faction_id].kind != "sect"
         or faction_meta.get("world", "human") != player.world
     ):
         return news
@@ -426,7 +433,7 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
 
 
 def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
-    active = [sect for sect in game.sects.values() if not sect.extinct]
+    active = [sect for sect in game.sects.values() if not sect.extinct and sect.kind != "institution"]
     worlds = [world for world in {sect.world for sect in active} if sum(sect.world == world for sect in active) >= 2]
     if not worlds:
         return
@@ -463,7 +470,7 @@ def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng
 def _pressure_weak_npc_powers(deps: FactionDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
     rules = WORLD_SYSTEMS["player_faction"]
     for sect in game.sects.values():
-        if sect.extinct or not sect.founded_by_npc:
+        if sect.extinct or sect.kind == "institution" or not sect.founded_by_npc:
             continue
         threshold = (2 + int(WORLD_SYSTEMS['world_profiles'].get(sect.world,{}).get('tier',1))) if sect.kind == 'family' else deps._governance_threshold(sect.world)
         if any(npc.alive and npc.world == sect.world and npc.realm_index >= threshold for npc in deps._sect_members(game, sect)):

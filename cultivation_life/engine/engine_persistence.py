@@ -33,8 +33,10 @@ from .dependencies import PersistenceDependencies
 
 def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     game = deps.store.load(game_id)
+    from ..system.institutions import migrate_institutions
+    institutions_changed = migrate_institutions(game)
     from ..system.faction_geography import ensure_faction_sites
-    renamed = ensure_faction_sites(game)
+    renamed = ensure_faction_sites(game) or institutions_changed
     from ..system.cultivation_policy import ordinary_upper, bloodline_upper
     p = game.player
     if ordinary_upper(p) and not p.sealed_cultivation and not p.cultivation_suppression:

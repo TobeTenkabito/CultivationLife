@@ -1,7 +1,7 @@
 {
-  "base_version": "1.51.2",
-  "android_version": "1.51.2-android.18",
-  "version_code": 18,
+  "base_version": "1.51.3",
+  "android_version": "1.51.3-android.19",
+  "version_code": 19,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,9 +12,9 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.51.2-Android12.apk",
-  "apk_sha256": "8a819050c63d3a13b6f949b5513a7ef83cdeac5e83520ffdba087f4e217311b1",
-  "apk_bytes": 47905974,
+  "apk": "浮生问道-v1.51.3-Android12.apk",
+  "apk_sha256": "cfc8d2dfc8e4d778aa4f9e7bcb39830bd2d5d8a28758e8a8155e844fac2df4dd",
+  "apk_bytes": 47906434,
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -37,7 +37,8 @@
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "1264 Python regressions passed",
+    "Institution classification, legacy affiliation, six-theme map and institutional contacts verified",
+    "1271 Python regressions passed",
     "Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified",
     "Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; unchanged backlash and capped superego; multi-world calibration documented",
     "Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified",

@@ -42,7 +42,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
                 "support": round(float(npc.affinity or 50), 1), "source": "npc",
             }
 
-        real_sects = [sect for sect in game.sects.values() if sect.world == "celestial" and not sect.extinct]
+        real_sects = [sect for sect in game.sects.values() if sect.kind == "sect" and sect.world == "celestial" and not sect.extinct]
         seats: list[dict[str, Any]] = []
         prefixes = ["玄都", "云海", "青帝", "天河", "万象", "九元", "紫极"]
         suffixes = ["宗", "阁", "宫", "院", "门", "府", "观", "殿", "洞"]
@@ -85,7 +85,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
 
     def _player_court_representative(self, game: GameState) -> bool:
         sect = game.sects.get(game.player.faction_id or "")
-        if not sect or sect.world != "celestial" or sect.extinct:
+        if not sect or sect.kind != "sect" or sect.world != "celestial" or sect.extinct:
             return False
         living = [npc for npc in self._sect_members(game, sect) if npc.alive]
         return bool(

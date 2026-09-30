@@ -579,6 +579,8 @@ def _npc_cultivation_perception(
 
 def _dynamic_sect_title(npc: SectNpc, sect: SectState) -> str:
     """随修为投影宗门职位，同时保留掌门等唯一职衔。"""
+    if sect.kind == 'institution':
+        return npc.title
     if any(marker in npc.title for marker in ("宗主","掌门","台主","住持","方丈","太上","宫主","山主","族长","祭酒","老祖","尊者")):
         return npc.title
     if sect.world == "human":
