@@ -14,6 +14,7 @@ from ..rules import (
     learn_technique,
     max_mp,
     opportunity_required,
+    breakthrough_opportunity_required,
     realm,
     ensure_technique_set,
     divine_sense_level_threshold,
@@ -230,14 +231,14 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     if (
         game.player.alive and deps._manual_breakthrough_kind(game.player) == "major"
         and game.player.layer >= current_realm.layers
-        and game.player.opportunity >= opportunity_required(game.player)
+        and game.player.opportunity >= breakthrough_opportunity_required(game.player)
         and not game.player.awaiting_major_breakthrough
     ):
         game.player.awaiting_major_breakthrough = True
         changed = True
     if (
         game.player.alive and game.player.layer in deps._manual_minor_layers(game.player)
-        and game.player.opportunity >= opportunity_required(game.player)
+        and game.player.opportunity >= breakthrough_opportunity_required(game.player)
         and not game.player.awaiting_minor_breakthrough
     ):
         game.player.awaiting_minor_breakthrough = True

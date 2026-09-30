@@ -82,6 +82,7 @@ class VoisinageBattle(VoisinageEffects):
         self._disrupted: set[str] = set()
         self.primary_ordinary_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
+        self.escape_forbidden_sides: frozenset[str] = frozenset()
 
     def set_objectives(self, player: str, enemy: str) -> None:
         if player not in {'kill', 'capture', 'repel', 'defeat'} or enemy not in {'kill', 'capture', 'repel', 'defeat'}:

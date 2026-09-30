@@ -469,7 +469,7 @@ class InventoryDependencies:
     _buy_formation_material_offer: Callable[..., str]
     _buy_formation_supply_offer: Callable[..., str]
     _load: Callable[..., GameState]
-    _manual_minor_layers: Callable[..., set[int]]
+    _manual_breakthrough_kind: Callable[..., str | None]
     present: Callable[..., dict[str, Any]]
     _get_store: Callable[[], SavePort]
     bloodline_content_available: Callable[[], bool]

@@ -262,6 +262,8 @@ def acquire_technique(player: Player, technique: Technique) -> bool:
 
 
 def upgrade_known_technique(player: Player, technique_id: str) -> int:
+    if technique_id.endswith(':concordance'):
+        raise ValueError('合练功法须在道统界面消耗仙痕参悟，不使用玉简升级')
     known = next((entry for entry in player.known_techniques if entry.id == technique_id), None)
     if known is None:
         raise ValueError("你尚未掌握这部功法")
@@ -425,6 +427,15 @@ def stage_name(player: Player) -> str:
 def opportunity_required(player: Player) -> int:
     current = realm(player)
     return round(current.opportunity_base * (1 + 0.12 * (player.layer - 1)))
+
+
+def breakthrough_opportunity_required(player: Player) -> int:
+    """Quote the actual breakthrough fee without changing proportional rewards."""
+    if player.world == 'celestial' and 9 <= player.realm_index <= 12:
+        from .system.doctrine.cultivation import immortal_breakthrough_cost
+        from .system.immortal_cultivation import rules as immortal_rules
+        return immortal_breakthrough_cost(player.realm_index, player.layer, immortal_rules())
+    return opportunity_required(player)
 
 
 def raw_external_hp_bonus(player: Player) -> float:
@@ -959,9 +970,11 @@ def public_player(player: Player) -> dict[str, Any]:
             ],
             can_upgrade=(
                 technique.level < TECHNIQUE_MAX_LEVEL
+                and not technique.id.endswith(':concordance')
                 and technique_copy_count(player, technique.id, technique.level) > 0
             ),
             effective_karma_multiplier=effective_technique_karma_multiplier(technique),
+            doctrine_fusion=technique.id.endswith(':concordance'),
             source_names=[QI_SOURCE_NAMES[source] for source in technique.sources],
             source_display="、".join(
                 QI_SOURCE_NAMES[source] + (f" {weight:.0%}" if len(technique.sources) > 1 else "")

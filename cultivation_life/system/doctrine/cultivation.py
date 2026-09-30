@@ -56,6 +56,12 @@ def training_cost(level, rules):
             "traces": rules["voisinage_trace_base"] * (level + 1)}
 
 
+def immortal_breakthrough_cost(realm, layer, rules):
+    """A ritual fee after opening veins, independent of the legacy progress bar."""
+    base = rules['breakthrough_opportunity_base'][realm - 9]
+    return round(base * (1 + rules['breakthrough_opportunity_layer_step'] * max(0, min(8, layer - 1))))
+
+
 def cultivated_voisinage(definition, training, gain=.03):
     # Training is additive to each base dimension, not a replacement for doctrine.
     from .voisinage_training import project

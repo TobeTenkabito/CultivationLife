@@ -9,7 +9,7 @@ import pytest
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState, Technique, SectNpc
 from cultivation_life.content_registry import CONTENT_DOCUMENTS, WORLD_SYSTEMS
-from cultivation_life.rules import add_item, learn_technique, opportunity_required
+from cultivation_life.rules import add_item, learn_technique, opportunity_required, breakthrough_opportunity_required
 from cultivation_life.system.immortal_system import item_quantity
 from cultivation_life.system.doctrine.cultivation import attempt, chance, prerequisites, vein_cost
 from cultivation_life.system.doctrine.daomen import discover
@@ -78,10 +78,118 @@ def test_every_three_veins_requires_manual_layer_and_body_20_for_major(prepared)
 
 
 def test_vein_cost_is_linear_across_realm_boundary():
-    costs = [vein_cost(9 + n // 27, n % 27, RULES) for n in range(54)]
+    costs = [vein_cost(9 + n // 27, n % 27, RULES) for n in range(108)]
     for a, b in zip(costs, costs[1:]):
         assert b['opportunity'] - a['opportunity'] == RULES['vein_opportunity_step']
         assert b['traces'] - a['traces'] == RULES['vein_trace_step']
+
+
+@pytest.mark.parametrize('balance,enabled', [(17999, False), (18000, True)])
+def test_immortal_manual_fee_matches_buttons_and_actual_payment(prepared, balance, enabled):
+    engine, game, _ = prepared
+    game.player.immortal_veins['9'] = 3
+    game.player.opportunity = balance
+    engine.store.save(game)
+    shown = engine.get_game(game.id)
+    assert shown['doctrines']['veins']['breakthrough_cost'] == 18000
+    assert shown['doctrines']['veins']['can_breakthrough'] is enabled
+    assert shown['breakthrough']['enabled'] is enabled
+    if not enabled:
+        with pytest.raises(ValueError, match='瓶颈'):
+            engine.immortal_action(game.id, 'breakthrough')
+        assert engine.store.load(game.id).player.opportunity == balance
+        return
+    with patch.object(engine, '_breakthrough_chance', return_value={'final': 1}):
+        shown = engine.immortal_action(game.id, 'breakthrough')
+    assert shown['player']['layer'] == 2
+    assert engine.store.load(game.id).player.opportunity == 0
+
+
+def test_cheaper_manual_fee_still_requires_veins_and_retains_failure_rules(prepared):
+    engine, game, _ = prepared
+    game.player.opportunity = 18000
+    game.player.immortal_veins['9'] = 2
+    engine.store.save(game)
+    with pytest.raises(ValueError, match='仙脉'):
+        engine.immortal_action(game.id, 'breakthrough')
+    # The first layer is an existing pity-eligible minor bottleneck.
+    game.player.immortal_veins['9'] = 3
+    fee = breakthrough_opportunity_required(game.player)
+    game.player.opportunity = fee
+    key = engine._minor_pity_key(game.player)
+    engine.store.save(game)
+    with patch.object(engine, '_breakthrough_chance', return_value={'final': 0}):
+        engine.immortal_action(game.id, 'breakthrough')
+    saved = engine.store.load(game.id).player
+    assert saved.layer == 1 and saved.immortal_veins['9'] == 3
+    assert saved.opportunity == fee * WORLD_SYSTEMS['breakthrough']['minor_failure_retention']
+    assert saved.breakthrough_pity[key] == 1
+
+
+def test_manual_fee_is_separate_from_reward_scale_and_other_worlds(prepared):
+    _, game, _ = prepared
+    p = game.player
+    assert opportunity_required(p) == 1800000
+    for realm, base in zip(range(9, 13), (18000, 90000, 120000, 150000)):
+        p.realm_index = realm
+        for layer in range(1, 10):
+            p.layer = layer
+            assert breakthrough_opportunity_required(p) == round(base * (1 + .12 * (layer - 1)))
+        for world in ('asura', 'nether', 'reincarnation', 'spirit'):
+            p.world = world
+            assert breakthrough_opportunity_required(p) == opportunity_required(p)
+        p.world = 'celestial'
+    p.realm_index = 8
+    assert breakthrough_opportunity_required(p) == opportunity_required(p)
+
+
+def test_major_trial_uses_new_fee_but_preserves_body_gate(prepared):
+    engine, game, _ = prepared
+    game.player.layer = 9
+    game.player.immortal_veins['9'] = 27
+    game.player.immortal_body = {'level': 19}
+    game.player.opportunity = 35280
+    engine.store.save(game)
+    with pytest.raises(ValueError, match='20'):
+        engine.immortal_action(game.id, 'breakthrough')
+    assert engine.store.load(game.id).player.opportunity == 35280
+    game.player.immortal_body['level'] = 20
+    engine.store.save(game)
+    shown = engine.immortal_action(game.id, 'breakthrough')
+    assert shown['player']['realm_index'] == 9
+    assert shown['pending_event']['id'] == 'EVT_IMMORTAL_TRIAL_HUMAN_DECLINE'
+    assert engine.store.load(game.id).player.opportunity == 0
+
+
+def test_vein_opportunity_budget_matches_trace_accumulation(prepared):
+    from scripts.calibrate_immortal_veins import budgets
+    from cultivation_life.content_registry import ACTIONS
+    from cultivation_life.rules import opportunity_multiplier
+    _, game, _ = prepared
+    annual = sum(ACTIONS['cultivate']['opportunity']) / 2 * opportunity_multiplier(game.player)
+    for realm in range(9, 13):
+        budget = budgets(realm, RULES)
+        time_for_traces = budget['traces'] / RULES['trace_gain_chance']
+        # Include every failed attempt. Neither ledger should be an order of
+        # magnitude slower than the other before investing in better techniques.
+        ratio = budget['opportunity'] / annual / time_for_traces
+        assert 0.7 <= ratio <= 1.2
+
+
+def test_repriced_vein_keeps_old_progress_and_failure_pity(prepared):
+    engine, game, _ = prepared
+    game.player.immortal_veins['9'] = 1
+    game.player.immortal_vein_pity['9:2'] = 2
+    game.player.opportunity = 9000
+    game.player.immortal_traces = 8
+    engine.store.save(game)
+    with patch('cultivation_life.system.immortal_system.decode_rng') as rng:
+        rng.return_value = random.Random(2)  # .956 > .85 + .10: fail once.
+        shown = engine.immortal_action(game.id, 'open_vein')
+    saved = engine.store.load(game.id).player
+    assert saved.opportunity == 0 and saved.immortal_traces == 0
+    assert saved.immortal_veins['9'] == 1 and saved.immortal_vein_pity['9:2'] == 3
+    assert shown['doctrines']['veins']['next_cost']['opportunity'] == 9000
 
 
 def test_insufficient_resources_cannot_partially_pay(prepared):

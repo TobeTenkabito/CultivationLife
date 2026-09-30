@@ -18,13 +18,17 @@ for file in [f'yaochi-governance-ui-{release_id}.log', f'immortal-economy-ui-{re
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
 exe = ROOT / 'dist/launcher.exe'
+fusion_log = (ROOT / f'build/fusion-ui-{release_id}.log').read_text(encoding='utf-8', errors='replace')
+assert 'passed' in fusion_log and 'Traceback' not in fusion_log
 digest = hashlib.sha256(exe.read_bytes()).hexdigest()
 manifest = {
     'base_version':version,
     'exe_sha256':digest,
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
-    'validation':['Six-theme categorized NPC contacts, same-world guards, paid stock locks and NPC cabinet verified', 'Six-theme Yaochi merit economy, golden light tempering and temporary passes verified', f'{passed.group(1)} automated regressions passed',
+    'validation':['Six-theme doctrine fusion, paid trace study, true voisinage and grouped manual catalogue verified',
+                  'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; original backlash difficulty and rank-eight superego cap regression verified; multi-world three-corpse calibration documented',
+                  'Six-theme categorized NPC contacts, same-world guards, paid stock locks and NPC cabinet verified', 'Six-theme Yaochi merit economy, golden light tempering and temporary passes verified', f'{passed.group(1)} automated regressions passed',
                   'Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified',
                   'Six-theme voisinage stages, five-round backlash and Dao Ancestor; searchable handbook verified',
                   'Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified',
@@ -43,6 +47,8 @@ shutil.copy2(exe, ROOT/'launcher.exe')
 archive = ROOT / f'dist/浮生问道-v{version}-Windows.zip'
 with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
     for path, name in [(exe,'launcher.exe'),(manifest_path,manifest_path.name),
+                       (ROOT/'docs/three-corpses-1512.md','docs/three-corpses-1512.md'),
+                       (ROOT/'docs/immortal-vein-balance.md','docs/immortal-vein-balance.md'),
                        (ROOT/'docs/yaochi-governance-1511.md','docs/yaochi-governance-1511.md'),
                        (ROOT/'docs/immortal-1510.md','docs/immortal-1510.md'),
                        (ROOT/'docs/upper-worlds-1500.md','docs/upper-worlds-1500.md'),

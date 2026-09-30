@@ -28,6 +28,7 @@
       "hp": 0,
       "mp": 0
     },
+    "doctrine_fusion_study": {"name": "参悟合练功法", "opportunity": [0, 0], "hp": 0, "mp": 0},
     "immortal_conversion": {
       "name": "转化仙灵力",
       "opportunity": [
@@ -3640,6 +3641,80 @@
       }
     ],
     "yaochi": {
+      "breakthrough_pills": [
+        {
+          "id": "true_immortal_breakthrough_1",
+          "price": 100,
+          "quantity": 1,
+          "realm": 9
+        },
+        {
+          "id": "true_immortal_breakthrough_2",
+          "price": 140,
+          "quantity": 1,
+          "realm": 9
+        },
+        {
+          "id": "true_immortal_breakthrough_3",
+          "price": 160,
+          "quantity": 1,
+          "realm": 9
+        },
+        {
+          "id": "golden_immortal_breakthrough_1",
+          "price": 300,
+          "quantity": 1,
+          "realm": 10
+        },
+        {
+          "id": "golden_immortal_breakthrough_2",
+          "price": 420,
+          "quantity": 1,
+          "realm": 10
+        },
+        {
+          "id": "golden_immortal_breakthrough_3",
+          "price": 480,
+          "quantity": 1,
+          "realm": 10
+        },
+        {
+          "id": "taiyi_breakthrough_1",
+          "price": 600,
+          "quantity": 1,
+          "realm": 11
+        },
+        {
+          "id": "taiyi_breakthrough_2",
+          "price": 840,
+          "quantity": 1,
+          "realm": 11
+        },
+        {
+          "id": "taiyi_breakthrough_3",
+          "price": 960,
+          "quantity": 1,
+          "realm": 11
+        },
+        {
+          "id": "daluo_breakthrough_1",
+          "price": 1000,
+          "quantity": 1,
+          "realm": 12
+        },
+        {
+          "id": "daluo_breakthrough_2",
+          "price": 1400,
+          "quantity": 1,
+          "realm": 12
+        },
+        {
+          "id": "daluo_breakthrough_3",
+          "price": 1600,
+          "quantity": 1,
+          "realm": 12
+        }
+      ],
       "location_id": "expanse_celestial_8",
       "faction_id": "yaochi",
       "stones_per_merit": 250,

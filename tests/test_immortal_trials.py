@@ -20,6 +20,32 @@ def test_stages_have_twelve_numbered_layers_then_unlevelled_perfection():
     assert rank({'stability':8}) == 1
 
 
+def test_perfection_reward_does_not_inflate_backlash_or_superego():
+    from cultivation_life.system.doctrine.voisinage_training import project
+    game = fixture('voisinage_backlash', field_rank=12, doctrine_level=8)
+    trial = game.active_trial
+    key = trial['doctrine_id']
+    original = game.doctrine_state['definitions'][key]['stages'][7]['voisinage']
+    target = target_for(game, trial)
+    assert target['voisinages'][0]['stability'] == pytest.approx(original['stability'] * 3.64 * 1.42)
+    definition = chosen_field(game, cap=1)
+    factors = (1, 1.22, 1.44, 1.66, 1.88, 2.10, 2.32, 2.54,
+               2.76, 3.06, 3.36, 3.66, 4.55)
+    for value, factor in enumerate(factors, 1):
+        projected = project(definition, {'rank': value})
+        for axis in ('stability', 'incursion', 'authority'):
+            assert getattr(projected, axis) == pytest.approx(getattr(definition, axis) * factor)
+        assert projected.actions() == definition.actions()
+        assert projected.upkeep_cost == definition.upkeep_cost
+    record = game.doctrine_state['player']
+    record['voisinage_training'][key]['rank'] = 13
+    start(ADAPTER, game, 'three_corpses')
+    copied = game.active_trial['corpse_field']
+    own = chosen_field(game)
+    for axis in ('stability', 'incursion', 'authority'):
+        assert getattr(own, axis) / copied[axis] == pytest.approx(4.55 / 2.54)
+
+
 def test_legacy_tempering_is_preserved_and_projection_matches_ui(prepared):
     engine, game, definition = prepared
     key = definition['id']
@@ -83,17 +109,26 @@ def test_five_rounds_required_even_if_manifestation_is_destroyed_early():
     assert result=='victory' and [r['round'] for r in rows]==list(range(1,6))
 
 
-def test_corpse_roster_and_capped_copy_are_fixed_at_start():
-    game = fixture('three_corpses',field_rank=13,doctrine_level=8)
+@pytest.mark.parametrize('field_index', [0, 1, 2, 13, 24])
+def test_corpse_roster_and_capped_copy_are_fixed_at_start(field_index):
+    game = fixture('three_corpses',field_rank=13,doctrine_level=8,field_index=field_index)
     expected = chosen_field(game,cap=8)
+    # The equipment selection at trial entry is locked for both sides, even
+    # if the saved active selection later changes before the first round.
+    record = game.doctrine_state['player']
+    other = next(key for key in game.doctrine_state['definitions'] if key != record['active'])
+    record['progress'][other] = {'level': 4, 'experience': 0}
+    record['active'] = other
     game.player.dao_friends = [{'id':'cheat','name':'援军','combat_power':1e99,'realm_index':12}]
     game.player.puppets = [{'id':'puppet','alive':True,'combat_power':1e99}]
     battle = initialize(game,game.active_trial)
     assert len(battle.units)==4
-    assert [s.unit.name for k,s in battle.units.items() if k!='player']==['自我尸','本我尸','超我尸']
+    assert [s.unit.name for k,s in battle.units.items() if k!='player']==[f'{game.player.name}·{name}' for name in ('自我尸','本我尸','超我尸')]
+    assert target_for(game, game.active_trial)['target_name'] == f'{game.player.name}的三尸'
     assert not battle.units['enemy-0'].unit.capabilities.voisinages
     assert not battle.units['enemy-1'].unit.capabilities.voisinages
     copied = battle.units['enemy-2'].unit.capabilities.voisinages[0]
+    assert battle.units['player'].unit.capabilities.voisinages[0].id == expected.id
     assert copied.stability == pytest.approx(expected.stability)
     assert copied.stability < battle.units['player'].unit.capabilities.voisinages[0].stability
     old_power = game.active_trial['power']
@@ -130,6 +165,39 @@ def test_three_corpses_has_no_round_limit_and_suppression_is_not_victory():
         assert result=='ongoing'
         battle=load_battle(dump_battle(battle))
     assert state['round']==120 and not battle.enemy_killed()
+
+
+@pytest.mark.parametrize('mode', ['three_corpses', 'human_decline', 'heaven_decline', 'voisinage_backlash'])
+def test_trial_enemies_cannot_escape_even_with_a_special_intervention(mode):
+    from cultivation_life.system.combat.contracts import Intervention, VoisinageEffect
+    from test_voisinage_effects import actor, caster, domain, begin
+    battle = VoisinageBattle([
+        actor('player', 'player', caster(domain(VoisinageEffect('strike', 1, .1)))),
+        actor('enemy', 'enemy', CombatCapabilities(capacity=10, current=10,
+            interventions=(Intervention('escape', ('strike',), cost=5, strength=1000),))),
+    ])
+    ordinary = load_battle(dump_battle(battle))
+    begin(ordinary)
+    assert ordinary.units['enemy'].escaped  # Ordinary encounters keep this ability.
+    assert ordinary.units['enemy'].current == 5
+    state = {'mode':mode, 'round':0, 'mp_ratio':1,
+             'stats':{side:{k:100 for k in ('might','guard','mobility','sense','sustain','breach')}
+                      for side in ('player','enemy')}}
+    result, _ = run_batch(battle, state, random.Random(1), batch_size=1)
+    assert result == 'ongoing'
+    assert not battle.units['enemy'].escaped
+    assert battle.units['enemy'].body < 1
+    assert battle.units['enemy'].current == 10  # No fee for the prohibited response.
+    snapshot = dump_battle(battle)
+    snapshot.pop('escape_forbidden_sides')  # An older unfinished save.
+    snapshot['states']['enemy']['escaped'] = True
+    resumed = load_battle(snapshot)
+    prior_body = resumed.units['enemy'].body
+    result, _ = run_batch(resumed, state, random.Random(1), batch_size=1)
+    assert result == 'ongoing' and not resumed.units['enemy'].escaped
+    if mode == 'three_corpses':
+        assert resumed.units['enemy'].body < prior_body
+    assert load_battle(dump_battle(resumed)).escape_forbidden_sides == {'enemy'}
 
 
 def test_suppressed_zero_vitality_corpse_requires_an_actual_finishing_attack():

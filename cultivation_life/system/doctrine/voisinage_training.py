@@ -15,8 +15,18 @@ def label(value):
     return '至臻' if value == 13 else f'{STAGES[(value - 1) // 4]}{(value - 1) % 4 + 1}层'
 
 
-def multiplier(value):
+def base_multiplier(value):
+    """Cultivation curve used to set the authored backlash difficulty."""
     return 1 + .22 * (max(1, min(MAX_RANK, value)) - 1)
+
+
+def multiplier(value):
+    value = max(1, min(MAX_RANK, value))
+    if value == MAX_RANK:
+        return base_multiplier(value) * 1.25
+    # Widen the three steps inside 大成 without raising the copied 化境 cap
+    # or moving the independently balanced perfection reward.
+    return base_multiplier(value) + (.08 * (value - 9) if value >= 9 else 0)
 
 
 def project(definition, training):
