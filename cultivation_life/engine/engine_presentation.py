@@ -231,6 +231,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "war_system": deps._public_war_system(game),
         "world_route": deps._public_world_route(game),
         "heavenly_court": deps._public_heavenly_court(game),
+        "yaochi": deps._public_yaochi(game),
+        "golden_light": deps._public_golden_light(game),
         "natal_artifact": deps._public_natal_artifact(game),
         "crafting_system": deps._public_crafting_system(game),
         "formation_system": deps._public_formation_system(game),

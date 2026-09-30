@@ -2754,7 +2754,16 @@
     {
       "id": "xuanhuang_immortal_armor",
       "name": "玄黄仙甲",
-      "combat_interventions": [{"kind": "resist", "effects": ["suppress", "restrict"], "strength": 0.3}],
+      "combat_interventions": [
+        {
+          "kind": "resist",
+          "effects": [
+            "suppress",
+            "restrict"
+          ],
+          "strength": 0.3
+        }
+      ],
       "combat_bonus": 46000000,
       "hp_bonus": 520000,
       "description": "以玄黄气叠铸的真仙战甲，稳固仙躯与护体法则，并能抵御威能有限的邻域镇压与禁制。",
@@ -10552,6 +10561,46 @@
         "material",
         "immortal",
         "body_medicine"
+      ]
+    },
+    {
+      "id": "great_sun_divine_light",
+      "name": "太日神光",
+      "description": "用于锤炼护体金光的仙家材料，可在瑶池功勋商店兑换或发布求取委托。",
+      "tags": [
+        "material",
+        "immortal",
+        "golden_light"
+      ]
+    },
+    {
+      "id": "heavenly_gang_gold",
+      "name": "天罡真金",
+      "description": "用于锤炼护体金光的仙家材料，可在瑶池功勋商店兑换或发布求取委托。",
+      "tags": [
+        "material",
+        "immortal",
+        "golden_light"
+      ]
+    },
+    {
+      "id": "glazed_pure_heaven_water",
+      "name": "琉璃净天水",
+      "description": "用于锤炼护体金光的仙家材料，可在瑶池功勋商店兑换或发布求取委托。",
+      "tags": [
+        "material",
+        "immortal",
+        "golden_light"
+      ]
+    },
+    {
+      "id": "samadhi_true_fire",
+      "name": "三味真火",
+      "description": "用于锤炼护体金光的仙家材料，可在瑶池功勋商店兑换或发布求取委托。",
+      "tags": [
+        "material",
+        "immortal",
+        "golden_light"
       ]
     }
   ]

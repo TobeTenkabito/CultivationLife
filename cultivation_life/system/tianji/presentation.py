@@ -37,6 +37,7 @@ class TianjiPresentationMethods:
                 "mold_id": artifact["mold_id"] if level >= 1 else None,
                 "mold_name": self._tianji_config()["mold_nouns"].get(artifact["mold_id"], "未知") if level >= 1 else "???",
                 "base_combat_power": artifact["base_combat_power"] if level >= 2 else None,
+                "damage_type": ('仙' if artifact.get('force_tier', 1) >= 2 else '凡') if level >= 2 else '???',
                 "current_world_combat_power": (
                     round(effective_tianji_combat_power(artifact["base_combat_power"], game.player.world))
                     if level >= 2 else None

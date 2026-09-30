@@ -14,7 +14,7 @@ passed = re.search(r'(\d+) passed in', test_log)
 assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
 exe_log = (ROOT / f'build/exe-{release_id}-verification.log').read_text(encoding='utf-8', errors='replace')
 assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in [f'upper-ui-{release_id}.log', f'immortal-trials-ui-{release_id}.log', f'handbook-ui-{release_id}.log', f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log', f'immortal-expansion-ui-{release_id}.log', f'immortal-minor-ui-{release_id}.log', f'tutorial-ui-{release_id}.log']:
+for file in [f'immortal-economy-ui-{release_id}.log', f'upper-ui-{release_id}.log', f'immortal-trials-ui-{release_id}.log', f'handbook-ui-{release_id}.log', f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log', f'immortal-expansion-ui-{release_id}.log', f'immortal-minor-ui-{release_id}.log', f'tutorial-ui-{release_id}.log']:
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
 exe = ROOT / 'dist/launcher.exe'
@@ -24,7 +24,7 @@ manifest = {
     'exe_sha256':digest,
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
-    'validation':[f'{passed.group(1)} automated regressions passed',
+    'validation':['Six-theme Yaochi merit economy, golden light tempering and temporary passes verified', f'{passed.group(1)} automated regressions passed',
                   'Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified',
                   'Six-theme voisinage stages, five-round backlash and Dao Ancestor; searchable handbook verified',
                   'Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified',
@@ -43,6 +43,7 @@ shutil.copy2(exe, ROOT/'launcher.exe')
 archive = ROOT / f'dist/浮生问道-v{version}-Windows.zip'
 with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
     for path, name in [(exe,'launcher.exe'),(manifest_path,manifest_path.name),
+                       (ROOT/'docs/immortal-1510.md','docs/immortal-1510.md'),
                        (ROOT/'docs/upper-worlds-1500.md','docs/upper-worlds-1500.md'),
                        (ROOT/'docs/immortal-1490.md','docs/immortal-1490.md'),(ROOT/'docs/combat-effects.md','docs/combat-effects.md'),(ROOT/'docs/luo-spirit-calibration.md','docs/luo-spirit-calibration.md'),(ROOT/'README.md','README.md'),(ROOT/'CHANGELOG.md','CHANGELOG.md'),(ROOT/'android/README.md','android/README.md'),(ROOT/'docs/save-code-format.md','docs/save-code-format.md'),(ROOT/'docs/immortal-1470.md','docs/immortal-1470.md'),(ROOT/'docs/immortal-1471.md','docs/immortal-1471.md'),(ROOT/'docs/tutorial-1480.md','docs/tutorial-1480.md'),(ROOT/'docs/tutorial-1481.md','docs/tutorial-1481.md')]:
         package.write(path, name)

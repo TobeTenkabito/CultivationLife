@@ -4337,8 +4337,8 @@
         },
         {
           "id": "expanse_celestial_8",
-          "name": "瑶池药圃",
-          "description": "瑶池药圃位于仙界的南境，灵脉深入山泽，遗址与药圃散落其间。",
+          "name": "瑶池",
+          "description": "仙圃与功勋市集相连，瑶池同道在此承接、发布委托，流转仙家资材。",
           "themes": [
             "遗迹",
             "灵脉"
@@ -4350,7 +4350,8 @@
             "demon": 0.52,
             "monster": 0.58,
             "yin": 0.64
-          }
+          },
+          "teleport_array": false
         },
         {
           "id": "expanse_celestial_9",

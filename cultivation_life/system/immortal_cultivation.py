@@ -10,6 +10,21 @@ def golden_light(player):
     return int(player.immortal_body.get('level', 0)) >= rules()['body']['golden_light_level']
 
 
+def golden_light_rank(player):
+    return max(1, min(5, int(player.immortal_body.get('golden_light_rank', 1)))) if golden_light(player) else 0
+
+
+def golden_light_resistance(player):
+    rank = golden_light_rank(player)
+    return rules()['golden_light']['stages'][rank - 1]['resistance'] if rank else 0.0
+
+
+def vein_intrinsic_bonus(player, resource):
+    cfg = rules()['vein_intrinsic']
+    return sum(max(0, min(27, int(player.immortal_veins.get(str(realm), 0))))
+               * cfg[resource][realm - 9] for realm in range(9, 13))
+
+
 def vein_probability(player):
     cfg = rules()
     opened = player.immortal_veins.get(str(player.realm_index), 0)

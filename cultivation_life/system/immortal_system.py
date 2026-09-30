@@ -5,7 +5,7 @@ from ..rules import remove_item, public_player, opportunity_required
 from ..runtime import now_iso, decode_rng, encode_rng
 from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, vein_cost, training_cost
-from .immortal_cultivation import vein_probability, vein_ready, golden_light
+from .immortal_cultivation import vein_probability, vein_ready, golden_light, vein_intrinsic_bonus
 from .immortal_body_system import ImmortalBodyMixin
 from .immortal_aperture import ImmortalApertureMixin
 
@@ -35,10 +35,14 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
         return self.present(game)
 
     def immortal_action(self, game_id, action, doctrine_id=None, axis=None, supply_id=None):
+        if action in {'buy_body_manual', 'buy_body_supply'}:
+            return self.yaochi_action(game_id, 'buy', supply_id)
         game = self._cultivation_game(game_id)
         p, record, rules = game.player, player_record(game), config()["cultivation"]
         if action == "gather":
             return self.advance(game_id, "cultivate", 1)
+        if action == 'temper_golden_light':
+            return self._temper_golden_light(game)
         if action in {'train_body', 'buy_body_manual', 'select_body_manual', 'buy_body_supply'}:
             return self._immortal_body_action(game, action, supply_id)
         if action == 'breakthrough':
@@ -62,8 +66,11 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
             key = f'{p.realm_index}:{opened + 1}'
             if success:
                 p.immortal_veins[str(p.realm_index)] = opened + 1
+                from .ghost_system import grant_intrinsic_progression_if_new_highwater
+                grant_intrinsic_progression_if_new_highwater(p)
                 p.immortal_vein_pity.pop(key, None)
                 summary = f"开启本境第 {opened + 1}/27 条仙脉（成功率 {probability:.0%}）。境界不自动进阶。"
+                summary += f" 本源气血上限 +{rules['vein_intrinsic']['hp'][p.realm_index - 9]}，本源法力上限 +{rules['vein_intrinsic']['mp'][p.realm_index - 9]}。"
             else:
                 p.immortal_vein_pity[key] = p.immortal_vein_pity.get(key, 0) + 1
                 summary = f"开脉失败，本次机缘与仙痕已消耗；下次成功率 {vein_probability(p):.0%}。"
@@ -113,6 +120,8 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
         return {"phase": rules["vein_phases"][min(3, max(0, p.realm_index - 9))], "names": rules["vein_names"], "opened": opened, "total": rules["veins_per_realm"], "per_layer": rules["veins_per_layer"],
                 "realm": REALMS[p.realm_index].name, "layer": p.layer, "opportunity": p.opportunity,
                 "traces": p.immortal_traces, "converted": p.immortal_power_converted,
+                "intrinsic_total": {r: vein_intrinsic_bonus(p, r) for r in ('hp', 'mp')},
+                "intrinsic_per_vein": {r: rules['vein_intrinsic'][r][max(0, min(3, p.realm_index - 9))] for r in ('hp', 'mp')},
                 "next_cost": vein_cost(p.realm_index, opened, rules) if opened < min(rules["veins_per_realm"], p.layer * rules["veins_per_layer"]) else None,
                 "can_breakthrough": ready and requirement["met"] and p.immortal_power_converted and p.opportunity >= opportunity_required(p),
                 "ready": ready, "major": major, "requirement": requirement["reason"],

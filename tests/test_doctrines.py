@@ -42,6 +42,8 @@ def setup(tmp_path):
     game.player.known_techniques = [t for t in game.player.known_techniques if not t.doctrine_id]
     game.doctrine_state['player']['annotations'] = {}
     add_item(game.player, "spirit_stone", 10**8)
+    game.player.location_id = 'expanse_celestial_8'
+    game.yaochi_state['merit'] = 10000
     engine.store.save(game)
     return engine, game
 

@@ -124,6 +124,8 @@ class PresentationDependencies:
     _public_governance: Callable[..., dict[str, Any]]
     _public_guixu: Callable[..., dict[str, Any]]
     _public_heavenly_court: Callable[..., dict[str, Any]]
+    _public_yaochi: Callable[..., dict[str, Any]]
+    _public_golden_light: Callable[..., dict[str, Any]]
     _public_intrigue_system: Callable[..., dict[str, Any]]
     _public_major_breakthrough: Callable[..., dict[str, Any]]
     _public_map_with_ghost_parade: Callable[..., dict[str, Any]]
@@ -246,6 +248,8 @@ class SessionDependencies:
 @dataclass(frozen=True, slots=True)
 class AdvancementDependencies:
     _begin_doctrine_action: Callable[..., None]
+    _begin_yaochi_action: Callable[..., None]
+    _finish_yaochi_action: Callable[..., None]
     _finish_doctrine_action: Callable[..., None]
     _add_opportunity: Callable[..., float]
     _advance_auction_clock: Callable[..., None]

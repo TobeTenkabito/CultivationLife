@@ -207,7 +207,8 @@ class TianjiStateMethods:
         if expected_equipped != game.player.equipped_crafted_artifact_ids:
             game.player.equipped_crafted_artifact_ids = expected_equipped
             changed = True
-        return changed
+        from cultivation_life.system.tianji.tiers import migrate_tiers
+        return migrate_tiers(game) or changed
 
     @staticmethod
     def _tianji_artifact(state: dict[str, Any], artifact_id: str) -> dict[str, Any]:

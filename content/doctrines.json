@@ -1004,6 +1004,57 @@
         "name": "神脉",
         "color": "#b18a38"
       }
-    ]
+    ],
+    "vein_intrinsic": {
+      "hp": [
+        1200,
+        6000,
+        30000,
+        150000
+      ],
+      "mp": [
+        1000,
+        5000,
+        25000,
+        125000
+      ]
+    },
+    "golden_light": {
+      "stages": [
+        {
+          "name": "微光",
+          "resistance": 0.01,
+          "recipe": {}
+        },
+        {
+          "name": "凝光",
+          "resistance": 0.02,
+          "recipe": {
+            "great_sun_divine_light": 8
+          }
+        },
+        {
+          "name": "固光",
+          "resistance": 0.04,
+          "recipe": {
+            "heavenly_gang_gold": 16
+          }
+        },
+        {
+          "name": "无暇",
+          "resistance": 0.06,
+          "recipe": {
+            "glazed_pure_heaven_water": 24
+          }
+        },
+        {
+          "name": "大圆满",
+          "resistance": 0.1,
+          "recipe": {
+            "samadhi_true_fire": 40
+          }
+        }
+      ]
+    }
   }
 }

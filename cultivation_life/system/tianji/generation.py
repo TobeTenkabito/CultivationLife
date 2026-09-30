@@ -256,6 +256,8 @@ class TianjiGenerationMethods:
         artifacts.sort(key=lambda row: (-int(row["base_combat_power"]), str(row["id"])))
         worlds = [world for world in config["base_worlds"] if world in WORLD_SYSTEMS.get("world_profiles", {})]
         for rank, artifact in enumerate(artifacts, 1):
+            from cultivation_life.system.tianji.tiers import artifact_force_tier
+            artifact['force_tier'] = artifact_force_tier(artifact)
             artifact["rank"] = rank
             # A small universal weight preserves the intended possibility of a
             # high treasure falling into a low world.

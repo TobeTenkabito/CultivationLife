@@ -141,6 +141,7 @@ class CapabilitySource:
     technique_tier: int = 1
     artifact_tier: int = 1
     passive_ward_tier: int | None = None
+    body_voisinage_resistance: float = 0.0
     interventions: tuple[Intervention, ...] = ()
 
 
@@ -155,6 +156,7 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
     if source:
         from dataclasses import replace
         result = replace(result, technique_tier=source.technique_tier, artifact_tier=source.artifact_tier,
+                         body_voisinage_resistance=source.body_voisinage_resistance,
                          ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
                          interventions=source.interventions or result.interventions)
     return result
@@ -186,8 +188,11 @@ class CombatCapabilities:
     technique_tier: int = 1
     artifact_tier: int = 1
     interventions: tuple[Intervention, ...] = ()
+    body_voisinage_resistance: float = 0.0
 
     def __post_init__(self) -> None:
+        if number(self.body_voisinage_resistance, 'body voisinage resistance') > .1:
+            raise ValueError('Body voisinage resistance cannot exceed ten percent')
         for key in ("capacity", "current", "attack_cost", "ward_cost", "investment"):
             number(getattr(self, key), key)
         if self.current > self.capacity:

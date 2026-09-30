@@ -170,6 +170,7 @@ class TianjiForgingMethods:
         instance_id = f"tianji-crafted-{game.id}-{game.player.crafting_sequence}"
         suffix = "真体" if is_true else f"{ratio:.0%}仿品"
         instance = {
+            "force_tier": artifact_def.get('force_tier', 1),
             "id": instance_id, "name": artifact_def["name"] if is_true else f"仿·{artifact_def['name']}",
             "mold_id": artifact_def["mold_id"], "mold_name": self._tianji_config()["mold_nouns"][artifact_def["mold_id"]],
             "quality": "tianji_true" if is_true else "tianji_replica", "quality_name": suffix,

@@ -278,6 +278,15 @@
         "capture": true,
         "kill_karma": false
       }
+    },
+    "yaochi_work": {
+      "name": "履行瑶池委托",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
     }
   },
   "systems": {
@@ -3546,7 +3555,61 @@
         "enabled": true,
         "generic_cross_world": true
       }
-    ]
+    ],
+    "yaochi": {
+      "location_id": "expanse_celestial_8",
+      "faction_id": "yaochi",
+      "stones_per_merit": 1000,
+      "merit_per_court_merit": 100,
+      "support_cost": 250,
+      "support_gain": 5,
+      "vote_cost": 500,
+      "vote_max": 12,
+      "order_fee": 0.25,
+      "max_orders": 4,
+      "materials": [
+        {
+          "id": "great_sun_divine_light",
+          "price": 15,
+          "quantity": 1
+        },
+        {
+          "id": "heavenly_gang_gold",
+          "price": 50,
+          "quantity": 1
+        },
+        {
+          "id": "glazed_pure_heaven_water",
+          "price": 150,
+          "quantity": 1
+        },
+        {
+          "id": "samadhi_true_fire",
+          "price": 450,
+          "quantity": 1
+        }
+      ],
+      "commissions": [
+        {
+          "id": "tend_gardens",
+          "name": "照料瑶池仙圃",
+          "description": "在瑶池履行一个行动单位的仙圃看护，完成后交付领取功勋。",
+          "reward": 400
+        },
+        {
+          "id": "copy_records",
+          "name": "整理天庭仙籍",
+          "description": "在瑶池整理往来仙籍，按实际履约年限推进，不替你消耗仙灵力。",
+          "reward": 400
+        },
+        {
+          "id": "maintain_routes",
+          "name": "校验仙驿阵纹",
+          "description": "在瑶池校验商路阵纹，履约中遇事中断可以稍后继续。",
+          "reward": 400
+        }
+      ]
+    }
   },
   "realms": [
     {

@@ -28,7 +28,8 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
                 page.evaluate('(id)=>loadGame(id)',g.id)
                 assert page.evaluate('game.player.body_training===100 && game.doctrines.immortal_body.level===1')
-                assert page.locator('#immortal-market-content .doctrine-book').count()==5
+                assert page.locator('#immortal-market-content .doctrine-book').count()==0
+                assert page.locator('#yaochi-content .doctrine-book').count()==14
                 assert page.locator('#daomen-content .doctrine-book').count()==0
                 assert page.locator('[data-panel-target=voisinage]').is_hidden()
                 page.evaluate("UtilityPanels.open('map')")
@@ -63,6 +64,8 @@ def main():
                 form=page.locator('.merchant-post').first;form.locator('..').evaluate('(e)=>e.open=true')
                 form.get_by_label('委托类型',exact=True).select_option('spirit_manual')
                 assert form.get_by_label('所需材料或道具',exact=True).locator('option').count()==25
+                page.wait_for_load_state('networkidle')  # finish the debounced quote before editing the isolated save
+                page.evaluate("document.querySelectorAll('.merchant-post').forEach(e=>e.remove())")
                 colours=[]
                 for realm in (9,10,11,12):
                     g=e.store.load(g.id);g.player.world='celestial';g.player.realm_index=realm

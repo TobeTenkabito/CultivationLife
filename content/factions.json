@@ -371,6 +371,14 @@
       },
       "forgetting_sword_hall": {
         "dao": 1.0
+      },
+      "heavenly_court": {
+        "dao": 0.7,
+        "confucian": 0.3
+      },
+      "yaochi": {
+        "dao": 0.8,
+        "buddhist": 0.2
       }
     }
   },
@@ -2287,6 +2295,108 @@
           "path": "dao",
           "race": "human",
           "world": "reincarnation"
+        }
+      ]
+    },
+    {
+      "id": "heavenly_court",
+      "name": "天庭",
+      "world": "celestial",
+      "allegiance_race": "human",
+      "path": "dao",
+      "description": "统理仙界政务与七曜选举。",
+      "color": "#6688a8",
+      "location_id": "jade_capital",
+      "npcs": [
+        {
+          "id": "heavenly_court_official_0",
+          "name": "太玄天官",
+          "title": "天庭天官",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
+        },
+        {
+          "id": "heavenly_court_official_1",
+          "name": "陆星枢",
+          "title": "天庭天官",
+          "realm_index": 10,
+          "layer": 1,
+          "age": 310000,
+          "lifespan": null,
+          "spirit_root": "supreme_metal",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
+        },
+        {
+          "id": "heavenly_court_official_2",
+          "name": "沈玉衡",
+          "title": "天庭天官",
+          "realm_index": 10,
+          "layer": 1,
+          "age": 248000,
+          "lifespan": null,
+          "spirit_root": "mutated_thunder",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
+        }
+      ]
+    },
+    {
+      "id": "yaochi",
+      "name": "瑶池",
+      "world": "celestial",
+      "allegiance_race": "human",
+      "path": "dao",
+      "description": "经营仙家委托与功勋交易的经济势力。",
+      "color": "#6688a8",
+      "location_id": "expanse_celestial_8",
+      "npcs": [
+        {
+          "id": "yaochi_official_0",
+          "name": "云璇仙姥",
+          "title": "瑶池执事",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
+        },
+        {
+          "id": "yaochi_official_1",
+          "name": "顾清漪",
+          "title": "瑶池执事",
+          "realm_index": 10,
+          "layer": 1,
+          "age": 310000,
+          "lifespan": null,
+          "spirit_root": "supreme_metal",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
+        },
+        {
+          "id": "yaochi_official_2",
+          "name": "温素月",
+          "title": "瑶池执事",
+          "realm_index": 10,
+          "layer": 1,
+          "age": 248000,
+          "lifespan": null,
+          "spirit_root": "mutated_thunder",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial"
         }
       ]
     }
