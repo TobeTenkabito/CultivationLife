@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...system.cultivation_policy import ordinary_upper
 from ...system.combat.npc_lifecycle import initialize_native
 
 import random
@@ -59,7 +61,9 @@ def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:
 
 
 def _npc_breakthrough_probability(deps: NpcDependencies, npc: SectNpc) -> float:
-    if npc.realm_index >= 9 or (npc.realm_index == 8 and npc.layer >= REALMS[8].layers):
+    if (npc.realm_index >= 9 and not ordinary_upper(npc)) or (npc.realm_index == 8 and npc.layer >= REALMS[8].layers):
+        return 0.0
+    if npc.realm_index == len(REALMS) - 1 and npc.layer >= REALMS[-1].layers:
         return 0.0
     return npc_breakthrough_chance(
         npc, FACTION_SYSTEMS["npc_cultivation"], deps._npc_root_efficiency(npc.spirit_root)
@@ -349,7 +353,7 @@ def _advance_npc_cultivation(
         return None
     if npc.realm_index >= len(REALMS):
         return None
-    if npc.realm_index >= 9 or (npc.realm_index == 8 and npc.layer >= REALMS[8].layers):
+    if (npc.realm_index >= 9 and not ordinary_upper(npc)) or (npc.realm_index == 8 and npc.layer >= REALMS[8].layers):
         return None
     realm_cap = deps._world_realm_cap(npc.world)
     if npc.realm_index > realm_cap or (
@@ -405,7 +409,7 @@ def _resolve_npc_periodic_tribulation(
     deps: NpcDependencies, game: GameState, npc: SectNpc, rng: random.Random, affiliation: str = "",
 ) -> str | None:
     """Resolve one NPC thunder tribulation; immortal lifespan does not mean immortal NPCs."""
-    if not npc.alive or not deps._world_supports(npc.world, "ranking") or npc.realm_index < 6:
+    if not npc.alive or not (deps._world_supports(npc.world, "ranking") or ordinary_upper(npc)) or npc.realm_index < 6:
         return None
     config = WORLD_SYSTEMS["breakthrough"]["periodic_thunder"]
     if npc.next_tribulation_age is None:
@@ -462,9 +466,11 @@ def _ascension_destination(path: str) -> str:
 def _npc_realm_name(npc: SectNpc) -> str:
     definition = REALMS[npc.realm_index]
     if npc.world == "asura" and npc.realm_index >= 9:
-        return WORLD_SYSTEMS.get("demonic_cultivation", {}).get("realm_names", {}).get(
+        name = WORLD_SYSTEMS.get("demonic_cultivation", {}).get("realm_names", {}).get(
             str(npc.realm_index), definition.name,
         )
+        stage = "初期" if npc.layer <= 3 else "中期" if npc.layer <= 6 else "后期"
+        return f"{name}{stage}"
     if definition.layers == 1:
         return definition.name
     if npc.path == "demonic" and definition.id != "mortal":

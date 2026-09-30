@@ -3608,6 +3608,342 @@
       "content_id": "reincarnation_forgetting_grass_thousand",
       "tier": 9,
       "price": 1600000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_9_MAIN",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_9_COMBAT",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_9_BODY",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_9_SENSE",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_10_MAIN",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_10_COMBAT",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_10_BODY",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_10_SENSE",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_11_MAIN",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_11_COMBAT",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_11_BODY",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_11_SENSE",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_12_MAIN",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_12_COMBAT",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_12_BODY",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_12_SENSE",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_9_MAIN",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_9_COMBAT",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_9_BODY",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_9_SENSE",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_10_MAIN",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_10_COMBAT",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_10_BODY",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_10_SENSE",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_11_MAIN",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_11_COMBAT",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_11_BODY",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_11_SENSE",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_12_MAIN",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_12_COMBAT",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_12_BODY",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_12_SENSE",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_9_MAIN",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_9_COMBAT",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_9_BODY",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_9_SENSE",
+      "tier": 9,
+      "price": 96000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_10_MAIN",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_10_COMBAT",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_10_BODY",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_10_SENSE",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_11_MAIN",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_11_COMBAT",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_11_BODY",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_11_SENSE",
+      "tier": 11,
+      "price": 5040000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_12_MAIN",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_12_COMBAT",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_12_BODY",
+      "tier": 12,
+      "price": 34800000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_12_SENSE",
+      "tier": 12,
+      "price": 34800000000
     }
   ]
 }

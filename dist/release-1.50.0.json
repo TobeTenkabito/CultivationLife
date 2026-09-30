@@ -1,6 +1,6 @@
 {
-  "base_version": "1.49.0",
-  "exe_sha256": "1d1a026cf7c55241e212484b60c971ca477b3ecf327849b2a26e05482bce0f24",
+  "base_version": "1.50.0",
+  "exe_sha256": "d717c623033349d691cedd35e945c923bea57b146c67a9ab4802cdd62e7385f6",
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -11,7 +11,8 @@
     "tianji-artifacts": "2.2.0"
   },
   "validation": [
-    "1110 automated regressions passed",
+    "1169 automated regressions passed",
+    "Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified",
     "Six-theme voisinage stages, five-round backlash and Dao Ancestor; searchable handbook verified",
     "Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified",
     "Six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified",

@@ -1538,7 +1538,7 @@ class ContentRegistry:
                 raise ContentError(f"人界 NPC 境界 {realm_index} 的灵根权重必须为非负且总和为 1")
         cultivation = factions.get("npc_cultivation", {})
         rates = cultivation.get("progress_per_year", {})
-        if set(rates) != {str(index) for index in range(1, 9)} or any(float(value) <= 0 for value in rates.values()):
+        if set(rates) != {str(index) for index in range(1, 13)} or any(float(value) <= 0 for value in rates.values()):
             raise ContentError("NPC 修炼进度配置不完整")
         for field in ("threshold", "base_success", "root_success_scale", "failed_progress_retained", "spirit_breakthrough_chance", "human_ascension_chance"):
             if not isinstance(cultivation.get(field), (int, float)) or float(cultivation[field]) <= 0:

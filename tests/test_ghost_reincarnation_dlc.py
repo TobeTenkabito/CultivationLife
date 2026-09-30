@@ -445,7 +445,9 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             "sentence_years": 1, "hostility_reduction_per_year": 10,
         }
         self.engine.store.save(after_travel)
-        with patch.object(self.engine, "_check_tribulation", return_value=None):
+        with patch.object(self.engine, "_check_tribulation", return_value=None), patch.dict(
+            WORLD_SYSTEMS["faction_conflict"], {"prison_breakthrough_loss_chance": 0},
+        ):
             result = self.engine.prison_action(game.id, "endure")
         saved = self.engine.store.load(game.id).player
         self.assertTrue(saved.alive)

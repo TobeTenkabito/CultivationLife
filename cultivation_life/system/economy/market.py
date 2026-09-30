@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class EconomyMarketMethods:
     @staticmethod
     def _market_tier(player: Player) -> int:
-        if player.world == "celestial":
+        if player.world in {"celestial", "asura", "nether", "reincarnation"}:
             return max(9, min(12, player.realm_index))
-        if player.world in {"spirit", "true_demon"}:
+        if player.world in {"spirit", "true_demon", "monster_realm", "phantom_underworld", "hell"}:
             return max(5, min(8, player.realm_index))
         return min(5, max(1, player.realm_index))
 
@@ -125,7 +125,7 @@ class EconomyMarketMethods:
                 })
                 continue
             else:
-                tier_cap = 5 if player.world == "human" else 12 if player.world == "celestial" else 8
+                tier_cap = 12 if player.world in {"celestial", "asura", "nether", "reincarnation"} else 5 if player.world in {"human", "demon"} else 8
                 rare_next_tier = tier < tier_cap and rng.random() < float(MARKET_SETTINGS["next_tier_chance"])
                 offer_tier = tier + 1 if rare_next_tier else tier
                 pool = [

@@ -173,6 +173,23 @@ def verify(with_dlc):
             assert len(upper['map']['locations']) == 28
             assert any(row.get('factions') for row in upper['map']['locations'])
             assert upper['buddhist_system']['available'] == with_dlc
+            for world, path in [('asura','demonic'), ('nether','monster'), ('reincarnation','ghost')]:
+                saved = json.loads(save_path.read_text(encoding='utf-8'))
+                saved['active_trial'] = None
+                saved['pending_event'] = None
+                saved['player'].update(world=world, path=path, location_id=map_worlds[world]['default'],
+                                       realm_index=9, layer=1, opportunity=1e12)
+                save_path.write_text(json.dumps(saved, ensure_ascii=False), encoding='utf-8')
+                with urllib.request.urlopen(base + f"/api/games/{buddhist['id']}", timeout=20) as response:
+                    upper = json.load(response)
+                assert not upper['player']['opportunity_unbounded']
+                assert upper['player']['opportunity'] == upper['player']['opportunity_required']
+                assert upper['market']['realm_index'] == 9
+                assert upper['breakthrough']['kind'] == ('major' if path=='monster' and with_dlc else 'minor')
+                if path=='ghost':
+                    assert upper['ghost_system']['available'] == with_dlc
+                if path=='monster':
+                    assert ('血脉' in upper['breakthrough']['action_label']) == with_dlc
             request = urllib.request.Request(base + '/api/games', method='POST',
                 data=json.dumps({'name':'仙躯打包验收','preset_id':'true_immortal','seed':1460}).encode(),
                 headers={'Content-Type':'application/json'})

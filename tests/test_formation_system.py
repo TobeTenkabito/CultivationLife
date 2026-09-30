@@ -290,6 +290,7 @@ class FormationIntegrationTests(unittest.TestCase):
             "spirit":range(1, 9), "true_demon":range(1, 9),
             "monster_realm":range(1, 9), "phantom_underworld":range(1, 9),
             "hell":range(1, 9),
+            "asura":range(9, 13), "nether":range(9, 13), "reincarnation":range(9, 13),
         }
         for world, tiers in target_tiers.items():
             for tier in tiers:
@@ -298,7 +299,7 @@ class FormationIntegrationTests(unittest.TestCase):
                     if row["world"] == world and int(row["tier"]) == tier
                 }
                 self.assertEqual(covered, all_natures, f"{world} tier {tier}")
-        self.assertEqual(len(definitions), 728)
+        self.assertEqual(len(definitions), 881)
 
     def test_generated_progression_materials_are_monotone_and_rule_neutral(self):
         generated = [
@@ -319,7 +320,7 @@ class FormationIntegrationTests(unittest.TestCase):
 
     def test_upper_world_formation_catalogs_include_reincarnation_expansion(self):
         definitions = list(formation_material_definitions().values())
-        expected = {"celestial":5, "asura":4, "nether":5, "reincarnation":14}
+        expected = {"celestial":5, "asura":56, "nether":56, "reincarnation":64}
         self.assertEqual(
             {world:sum(row["world"] == world for row in definitions) for world in expected},
             expected,

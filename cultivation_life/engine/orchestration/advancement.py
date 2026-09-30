@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.cultivation_policy import ordinary_upper
+
 import random
 from typing import Any
 from ...content_registry import ACTIONS, MARKET_SETTINGS, REALMS, WORLD_SYSTEMS
@@ -10,6 +12,7 @@ from ...rules import (
     max_hp,
     max_mp,
     opportunity_multiplier,
+    opportunity_required,
     technique_environment_multiplier,
     grant_qi_experience,
     divine_sense_level,
@@ -240,6 +243,8 @@ def _add_opportunity(
 ) -> float:
     before = player.opportunity
     player.opportunity = max(0.0, before + float(amount))
+    if ordinary_upper(player):
+        player.opportunity = min(player.opportunity, opportunity_required(player))
     actual_gain = player.opportunity - before
     if actual_gain > 0:
         from ...system.immortal_cultivation import grant_trace_chance
