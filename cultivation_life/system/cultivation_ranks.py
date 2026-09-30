@@ -80,6 +80,11 @@ def npc_voisinage_limit(npc):
     return 5 if seed % 100 < 12 else 3
 
 
+def npc_golden_light(npc):
+    from .combat.npc_lifecycle import read
+    return body_rank(read(npc, 'body_training', 0) or 0, read(npc, 'immortal_body_level', 0)) >= rank_for(9, 7)
+
+
 def mask_unrevealed(public, perception):
     if perception and not perception.get('revealed'):
         public['cultivation_ranks'] = {

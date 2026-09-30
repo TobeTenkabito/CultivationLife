@@ -243,13 +243,14 @@ def _resolve_story_combat_check(
     deps: EventDependencies, effect: dict[str, Any], game: GameState, pending: dict[str, Any], rng: random.Random,
 ) -> tuple[str, str]:
     power_check = next(check for check in effect["checks"] if check.get("stat") == "combat_power")
-    target_power = float(power_check["value"])
     # The scripted power already expresses the authored threat. Reusing an
     # inferred higher realm would count the same advantage twice through
     # both raw power and realm suppression.
     realm_index, layer = game.player.realm_index, game.player.layer
     event_id = str(pending["id"])
     scenario = copy.deepcopy(STORY_COMBAT_SCENARIOS[event_id])
+    # Recommendations can change without silently increasing the authored enemy.
+    target_power = float(scenario.get("target_power", power_check["value"]))
     members = []
     for member in scenario["enemy_members"]:
         effective_power = target_power * float(member["share"])
@@ -261,6 +262,7 @@ def _resolve_story_combat_check(
             "realm_index": member_realm,
             "path": str(member.get("path", "dao")),
             "kind": str(member.get("kind", "cultivator")),
+            **({"true_realm_index": member["true_realm_index"]} if "true_realm_index" in member else {}),
             **({"transcendence": copy.deepcopy(member["transcendence"])} if "transcendence" in member else {}),
         })
     target = {
@@ -278,6 +280,9 @@ def _resolve_story_combat_check(
         "player_allies": scenario.get("player_allies", []),
         "story_beats": scenario["story_beats"],
         "story_choice_id": pending.get("_choice_id"),
+        "voisinages": scenario.get("voisinages", []),
+        "voisinage_seals": scenario.get("voisinage_seals", []),
+        "player_interventions": scenario.get("player_interventions", []),
         # Epic chains contain several consecutive encounters and their own
         # resource gates. Keep the detailed battle state, but convert only
         # part of it into persistent character injury between scenes.

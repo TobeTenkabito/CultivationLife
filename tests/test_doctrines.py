@@ -1,3 +1,4 @@
+from dataclasses import replace
 import copy
 import json
 import random
@@ -206,7 +207,7 @@ def test_book_stats_and_voisinage_do_not_apply_in_other_worlds(setup):
     assert battle_sources(game, {"player": game.player})["player"].voisinages
     game.player.world = "asura"
     assert engine._public_doctrines(game) == {"available": False}
-    assert battle_sources(game, {"player": game.player}) == {}
+    assert not any(s.voisinages for s in battle_sources(game, {"player": game.player}).values())
     without = copy.deepcopy(game.player)
     without.support_technique = None
     without.combat_techniques = [t for t in without.combat_techniques if not t.doctrine_id]
@@ -305,6 +306,7 @@ def test_mutual_breach_applies_both_powers_without_roster_order_advantage():
 
 def test_sustained_features_reset_when_field_drops():
     battle = voisinage_battle(definition(features=({"kind": "fortify", "value": .2},)), definition())
+    battle.units["b"].unit = replace(battle.units["b"].unit, capabilities=replace(battle.units["b"].unit.capabilities, stance="guard"))
     begin(battle)
     first = battle.fields[0].stability
     begin(battle, 2)

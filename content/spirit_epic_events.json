@@ -217,17 +217,17 @@
       ]
     },
     {
-      "id":"EVT_MA_LIANG_005","version":1,"title":"太虚仙域","body":"洛天衡终于降临天柱原。太虚仙域一开，阵中所有灵气都逆流向他手中的仙炉，修补着残破仙躯；众修每施展一次神通，反而会让他恢复得更快。唯有顶住仙威切开灵域，或越过真仙本体直接打断太虚仙炉。",
+      "id":"EVT_MA_LIANG_005","version":2,"title":"太虚灵域","body":"洛天衡终于降临天柱原。下界没有足够的仙灵力，他便以积攒的仿仙灵力展开太虚灵域，将众修的神识、身法与退路一并封住。云海老人已备好锁仙灯：第一轮须承受封禁，第二轮初燃的灯辉会挡住致命压制，第三轮灯火大盛，彻底封停洛天衡的灵域。此前损失的战意与战斗态势不会恢复。你可以护持灯阵撑过这一劫，也可以待灯火封域后直击太虚仙炉。主动攻炉建议战力 105,000,000，气血法力充盈；法力仅剩七成时，宜准备到 115,000,000 以上。这是借助灯阵与盟友完成破炉的准备建议，并非独力斩仙的保证。",
       "tags":["realm:mahayana","story_chain","ma_liang","manual_only"],"weight":0,
       "choices":[
-        {"id":"body_resist","text":"以法体硬撑仙域（HP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":500000},{"stat":"hp_ratio","op":"gte","value":0.68}],"failure_reason":"太虚仙域压碎你的法体与神魂","success_text":"你在仙域重压下站稳，为同伴争得施法时间。"},{"type":"damage","value":0.16,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_domain_endured"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]},
-        {"id":"spirit_resist","text":"以元神法则切开仙域（MP 至少 560,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":560000},{"stat":"mp_ratio","op":"gte","value":0.68}],"failure_reason":"你的神识被太虚仙域同化","success_text":"仙域被切开一道缝隙，阵中法宝重新转动。"},{"type":"restore_mp","value":-0.18,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_domain_cut"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]},
-        {"id":"attack_bottle","text":"绕过仙躯，直击太虚仙炉（战力 55,000,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":55000000},{"stat":"mp","op":"gte","value":400000}],"failure_reason":"太虚仙炉吞下你的攻势，连同一身寿元炼为炉火","success_text":"仙炉被迫中断，洛天衡再也无法抽取远方灵脉修补仙躯。"},{"type":"set_flag","flag":"ma_liang_bottle_interrupted","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_006","if_result":["check_success"]}]},
+        {"id":"body_resist","text":"以法体护住灯阵（HP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":500000},{"stat":"hp_ratio","op":"gte","value":0.68}],"failure_reason":"你未能撑到锁仙灯燃起，太虚灵域压碎了你的法体与神魂","success_text":"你顶住前两轮重压，借初燃灯辉保住性命；第三轮锁仙灯封停灵域，众修终于得以喘息。"},{"type":"damage","value":0.16,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_domain_endured"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]},
+        {"id":"spirit_resist","text":"以元神稳住灯火（MP 至少 560,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":560000},{"stat":"mp_ratio","op":"gte","value":0.68}],"failure_reason":"灯火未能燃起，你的神识被太虚灵域同化","success_text":"你守住心神，为锁仙灯接续法力；初燃灯辉挡住第二轮的致命压制，第三轮彻底封停灵域。"},{"type":"restore_mp","value":-0.18,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_domain_cut"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]},
+        {"id":"attack_bottle","text":"待锁仙灯封域，直击太虚仙炉（建议战力 105,000,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":105000000},{"stat":"mp","op":"gte","value":400000}],"failure_reason":"太虚仙炉吞下你的攻势，连同一身寿元炼为炉火","success_text":"借锁仙灯封域之机，仙炉被迫中断，洛天衡再也无法抽取远方灵脉修补仙躯。"},{"type":"set_flag","flag":"ma_liang_bottle_interrupted","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_006","if_result":["check_success"]}]},
         {"id":"sacrifice_allies","text":"把邻近阵眼推向灵域中心，借他们脱身","effects":[{"type":"add_karma","value":35},{"type":"add_heart_demon","value":12},{"type":"set_flag","flag":"ma_liang_allies_sacrificed"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]}
       ]
     },
     {
-      "id":"EVT_MA_LIANG_006","version":1,"title":"锁仙灯与九曜阵","body":"云海老人点燃锁仙灯，暂时斩断洛天衡与仙界本体的联系；金犀大圣则率九族强者展开九曜封天阵，将太虚仙域压回天柱原。真仙的力量第一次跌落到灵界可以抗衡的层次，但洛天衡座下三名仙灵已经扑向阵眼。",
+      "id":"EVT_MA_LIANG_006","version":2,"title":"锁仙灯与九曜阵","body":"锁仙灯持续燃烧，洛天衡的灵域仍被封停；金犀大圣率九族强者展开九曜封天阵，将他与仙炉一并困在天柱原。众修总算能正面接战，但洛天衡座下三名仙灵已经扑向阵眼，意图毁灯破阵。",
       "tags":["realm:mahayana","story_chain","ma_liang","manual_only"],"weight":0,
       "choices":[
         {"id":"guard_lamp","text":"守住锁仙灯，不让洛天衡重接仙界（战力 56,500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":56500000}],"failure_reason":"你挡不住真仙一指，连同锁仙灯一同破碎","success_text":"锁仙灯持续燃烧，仙力跌落至灵界能够承受的层次。"},{"type":"set_flag","flag":"ma_liang_lamp_guarded","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_007","if_result":["check_success"]}]},

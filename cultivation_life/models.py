@@ -61,6 +61,8 @@ class Item:
     technique_origin_realm_index: int | None = None
     description: str = ""
     tags: list[str] = field(default_factory=list)
+    force_tier: int = 1
+    combat_interventions: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -101,6 +103,8 @@ class Technique:
     doctrine_id: str | None = None
     spirit_voisinage_id: str | None = None
     effective_worlds: list[str] = field(default_factory=list)
+    force_tier: int = 1
+    combat_interventions: list[dict[str, Any]] = field(default_factory=list)
 
     def active_in(self, world: str) -> bool:
         return not self.effective_worlds or world in self.effective_worlds
@@ -201,6 +205,10 @@ class SectNpc:
     affinity: float | None = None
     treasure_item_id: str | None = None
     treasure_looted: bool = False
+    # Combat loadout is distinct from the valuable treasure/drop slot.
+    main_technique_id: str | None = None
+    main_technique_level: int = 1
+    combat_artifact_id: str | None = None
     combat_factor: float = 1.0
     faction_id: str | None = None
     next_tribulation_age: int | None = None

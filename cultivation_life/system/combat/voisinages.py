@@ -5,10 +5,11 @@ here. Definitions express capabilities, not executable content or callbacks.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from typing import Any
 
-from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, number
+from .effects import VoisinageEffects
+from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
 @dataclass
@@ -23,11 +24,20 @@ class UnitState:
     resisted: bool = False
     seal_progress: float = 0.0
     pressure: float = 0.0
+    body: float = 1.0
+    morale: float = 100.0
+    field_strain: float = 0.0
+    escaped: bool = False
+    controls: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def restrictions(self):
+        return self.controls.keys()
 
     @property
     def fighting(self) -> bool:
         threshold = 0.0 if self.unit.id == "player" else 0.12
-        return self.vitality > threshold and not self.suppressed
+        return self.vitality > threshold and not self.suppressed and not self.escaped
 
 
 @dataclass(frozen=True)
@@ -41,21 +51,26 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle:
+class VoisinageBattle(VoisinageEffects):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
-                 supplies: tuple[ResourceSupply, ...] = ()):
+                 supplies: tuple[ResourceSupply, ...] = (), seals: tuple[VoisinageSeal, ...] = ()):
         self.contest_ratio = number(contest_ratio, "contest_ratio", minimum=1.0)
         if len({u.id for u in units}) != len(units):
             raise ValueError("Combatant ids must be unique")
         if any(u.side not in {"player", "enemy"} for u in units):
             raise ValueError("Unknown combatant side")
-        self.units = {u.id: UnitState(u, u.capabilities.current, u.integrity) for u in units}
+        self.units = {u.id: UnitState(u, u.capabilities.current, u.integrity, body=u.body_integrity) for u in units}
+        self._responders = tuple(sorted(u.id for u in units if u.capabilities.interventions))
         for supply in supplies:
             if supply.owner not in self.units or (supply.source_id is not None and supply.source_id not in self.units):
                 raise ValueError("Supply owner and source must be present in the battle")
         self.supplies = supplies
+        if any(seal.owner not in self.units for seal in seals):
+            raise ValueError("Seal owner must be present in the battle")
+        self.seals = seals
+        self._applied_seals: set[int] = set()
         self.totals = {side: max(1.0, sum(u.power for u in units if u.side == side))
                        for side in ("player", "enemy")}
         self.fields: list[Field] = []
@@ -63,16 +78,21 @@ class VoisinageBattle:
         self._acted: set[str] = set()
         self._dominated: dict[str, str] = {}
         self._blocked_pairs: set[tuple[str, str]] = set()
+        self._released: set[str] = set()
+        self._disrupted: set[str] = set()
         self.primary_ordinary_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
 
     def set_objectives(self, player: str, enemy: str) -> None:
+        if player not in {'kill', 'capture', 'repel', 'defeat'} or enemy not in {'kill', 'capture', 'repel', 'defeat'}:
+            raise ValueError('Unknown battle objective')
         self.objectives = {"player": player, "enemy": enemy}
 
     @property
     def enabled(self) -> bool:
         return any(s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
-                   or s.unit.capabilities.ward_tier > 1 for s in self.units.values())
+                   or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
+                   or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
     def _can_reach(self, owner: UnitState, target: str) -> bool:
         reach = owner.unit.capabilities.reachable_ids
@@ -80,7 +100,7 @@ class VoisinageBattle:
 
     def _field(self, owner: UnitState, condition: float) -> Field | None:
         c = owner.unit.capabilities
-        if not owner.fighting or c.sealed or c.stance == "off" or c.resource_tier < 2:
+        if not owner.fighting or c.sealed or c.stance == "off" or c.resource_tier < 2 or "voisinage" in owner.restrictions:
             owner.active_voisinage = None
             return None
         candidates = sorted((d for d in c.voisinages if c.attainments.get(d.attainment, 0) >= d.required_level), key=lambda d: (
@@ -91,10 +111,10 @@ class VoisinageBattle:
             continued = owner.active_voisinage == definition.id
             rounds = owner.sustained_rounds + 1 if continued else 1
             protects = [owner.unit.id]
-            if c.stance == "protect":
+            if c.stance == "protect" and "support" not in owner.restrictions:
                 protects += [key for key in c.protect_ids if key in self.units and key != owner.unit.id
                              and self.units[key].unit.side == owner.unit.side
-                             and self.units[key].fighting and self._can_reach(owner, key)]
+                             and self.units[key].fighting and "support" not in self.units[key].restrictions and self._can_reach(owner, key)]
             targets = []
             if c.stance == "press":
                 preferred = c.target_ids or tuple(self.units)
@@ -128,7 +148,7 @@ class VoisinageBattle:
             factor /= 1 + 0.25 * (1 - features.get("shelter", 0)) * (len(protects) - 1 + len(targets))
             strength = (base if definition.incursion is None else definition.incursion) * factor
             stability = (base if definition.stability is None else definition.stability) * factor
-            stability *= 1 + features.get("fortify", 0) * min(3, rounds - 1)
+            stability *= (1 + features.get("fortify", 0) * min(3, rounds - 1)) * (1 - owner.field_strain)
             strength *= 1 + (features.get("opening", 0) if rounds == 1 else 0)
             strength *= 1 + (features.get("retaliate", 0) if owner.resisted and continued else 0)
             strength *= 1 + features.get("sacrifice", 0)
@@ -149,6 +169,20 @@ class VoisinageBattle:
                     player_mp: float, enemy_mp: float) -> PhaseRound:
         self.frame = PhaseRound(round_no)
         self._acted.clear()
+        self._released.clear()
+        self._disrupted.clear()
+        # Scripted interventions happen before maintenance, coverage or effects.
+        # Only this battle's immutable snapshot changes, never the saved owner.
+        for index, seal in enumerate(self.seals):
+            if round_no >= seal.first_round and index not in self._applied_seals:
+                state = self.units[seal.owner]
+                state.unit = replace(state.unit, capabilities=replace(state.unit.capabilities, sealed=True))
+                state.active_voisinage = None
+                self._disrupted.add(seal.owner)
+                self._applied_seals.add(index)
+                self.frame.events.append(seal.message)
+        if self._disrupted:
+            self._refresh_relations()
         previous = self._dominated.copy()
         self._dominated.clear()
         self._blocked_pairs.clear()
@@ -160,10 +194,11 @@ class VoisinageBattle:
                 state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
         for supply in self.supplies:
             owner = self.units[supply.owner]
-            if (not owner.fighting or owner.unit.capabilities.resource_tier < 2
+            if (not owner.fighting or "supply" in owner.restrictions or owner.unit.capabilities.resource_tier < 2
                     or round_no < supply.first_round
                     or (supply.last_round is not None and round_no > supply.last_round)
-                    or (supply.source_id is not None and not self.units[supply.source_id].fighting)):
+                    or (supply.source_id is not None and (not self.units[supply.source_id].fighting
+                                                        or "supply" in self.units[supply.source_id].restrictions))):
                 continue
             c = owner.unit.capabilities
             limit = c.capacity if c.usable_capacity is None else c.usable_capacity
@@ -197,67 +232,26 @@ class VoisinageBattle:
                 "defense_strength": round(defense.stability, 4) if defense else 0,
             }
             state.resisted = relation in {"pressed", "contested"}
-        # Mutual breaches execute together; otherwise a dominated caster cannot
-        # act. No effects run during relation construction (roster-order neutral).
-        effects: list[tuple[str, str, VoisinageDefinition]] = []
-        for field in self.fields:
-            owner = self.units[field.owner]
-            victims = [key for key in field.targets if self._dominated.get(key) == field.owner]
-            mutual = self._dominated.get(self._dominated.get(field.owner)) == field.owner
-            if not victims or (field.owner in self._dominated and not mutual) or owner.current < field.definition.effect_cost:
+        # Maintenance pays for dominance itself; it is not contingent on an
+        # additional active effect being affordable.
+        by_owner = {f.owner: f for f in self.fields}
+        for key, owner in self._dominated.items():
+            if previous.get(key) != owner:
                 continue
-            owner.current -= field.definition.effect_cost
-            self._acted.add(field.owner)
-            effects.extend((field.owner, key, field.definition) for key in victims)
-        for owner, victim, definition in effects:
-            target = self.units[victim]
-            source = self.units[owner]
-            field = next(f for f in self.fields if f.owner == owner)
-            target.escape_locked = True
-            consecutive = previous.get(victim) == owner
-            if consecutive:
-                defense = self.frame.relations[victim]['defense_strength']
-                gap = field.strength / max(1.0, defense)
-                erosion = min(.55, .12 + .08 * max(0, gap - self.contest_ratio))
-                target.pressure = min(.85, target.pressure + erosion)
-                primary_before = self.frame.primary_loss
-                self._lose(victim, min(max(0, target.vitality - .13), erosion))
-                self.frame.primary_loss = primary_before  # loss of stance, not bodily injury
-                side = target.unit.side
-                self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) + erosion * 80 * target.unit.power / self.totals[side]
-                self.frame.events.append(f"连续支配侵蚀战意与战斗态势，威能差距 {gap:.2f} 倍。")
-            # Only genuinely higher cultivation versus an unprotected non-caster
-            # qualifies. Resource payment and sustained dominance remain required.
-            crush = (source.unit.cultivation_rank > target.unit.cultivation_rank >= 0
-                     and not target.unit.capabilities.voisinages
-                     and self.frame.relations[victim]['protector'] is None)
-            if crush:
-                if consecutive:
-                    if self.objectives[source.unit.side] == 'kill':
-                        self._lose(victim, target.vitality)
-                    else:
-                        target.suppressed = True
-                    purpose = {'kill': '诛杀', 'capture': '擒获', 'repel': '击退', 'defeat': '制伏'}.get(self.objectives[source.unit.side], '制伏')
-                    self.frame.events.append(f"仙凡悬隔，连续压制第二轮进入终局：{purpose}。")
-                continue
-            power = definition.effect_power
-            if definition.authority is not None:
-                power = min(1, power * field.authority / definition.authority_reference)
-                if target.vitality < .5:
-                    power = min(1, power * (1 + next((f["value"] for f in definition.features if f["kind"] == "execution"), 0)))
-            if definition.effect == "strike":
-                self._lose(victim, power)
-            elif definition.effect == "suppress":
-                self._lose(victim, target.vitality if definition.authority is None else power)
-                target.suppressed = target.vitality <= .12
-            else:
-                target.escape_locked = True
-                if definition.authority is not None:
-                    target.seal_progress = min(1.0, target.seal_progress + power)
-                    target.suppressed = target.seal_progress >= 1.0
-            self.frame.events.append(
-                f"{self.units[owner].unit.name}的【{definition.name}】支配{target.unit.name}："
-                f"{('镇压' if target.suppressed else '镇压侵蚀') if definition.effect == 'suppress' else ('封禁成形' if target.suppressed else '封锁退路') if definition.effect == 'seal' else '仙域杀伤'}。")
+            target = self.units[key]
+            gap = by_owner[owner].strength / max(1.0, self.frame.relations[key]['defense_strength'])
+            erosion = min(.55, .12 + .08 * max(0, gap - self.contest_ratio))
+            target.pressure = min(.85, target.pressure + erosion)
+            self._lose(key, min(max(0, target.vitality - .13), erosion), physical=False)
+            lost = min(target.morale, erosion * 80)
+            target.morale -= lost
+            side = target.unit.side
+            self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) + lost * target.unit.power / self.totals[side]
+            self.frame.events.append(f"连续支配侵蚀战意与战斗态势，威能差距 {gap:.2f} 倍。")
+        for key, relation in self.frame.relations.items():
+            if relation['relation'] in {'pressed', 'dominated'} and self.units[key].active_voisinage:
+                self.units[key].field_strain = min(.5, self.units[key].field_strain + .05)
+        self._resolve_effects(previous)
         for side in ('player', 'enemy'):
             members = [s for s in self.units.values() if s.unit.side == side]
             # Lingering disruption survives loss of the field, within this battle.
@@ -266,22 +260,26 @@ class VoisinageBattle:
             self.frame.stat_factors[side] = {'sense': factor, 'mobility': factor}
         self.frame.ordinary_player = self._has_ordinary("player")
         self.frame.ordinary_enemy = self._has_ordinary("enemy")
+        self.frame.blocked_actions = {key: tuple(s.restrictions) for key, s in self.units.items() if s.controls}
         return self.frame
 
     def _available(self, key: str) -> bool:
-        return self.units[key].fighting and key not in self._dominated and key not in self._acted
+        return (self.units[key].fighting and key not in self._dominated and key not in self._acted
+                and "ordinary" not in self.units[key].restrictions)
 
     def _has_ordinary(self, side: str) -> bool:
         return (any(self._available(key) and s.unit.side == side for key, s in self.units.items())
                 and any(s.fighting and s.unit.side != side and key not in self._dominated
                         for key, s in self.units.items()))
 
-    def _lose(self, key: str, amount: float) -> float:
+    def _lose(self, key: str, amount: float, *, physical=True) -> float:
         state = self.units[key]
         actual = min(state.vitality, max(0.0, amount))
         state.vitality -= actual
-        if key == "player":
-            self.frame.primary_loss += actual
+        if physical:
+            state.body = max(0, state.body - actual * .46)
+            if key == "player":
+                self.frame.primary_loss += actual
         weighted = actual * state.unit.power / self.totals[state.unit.side]
         if state.unit.side == "player":
             self.frame.player_loss += weighted
@@ -302,16 +300,9 @@ class VoisinageBattle:
         for key, state in self.units.items():
             if not self._available(key) or not ordinary_sides[state.unit.side]:
                 continue
-            c = state.unit.capabilities
-            tier = 1
-            if c.resource_tier >= 2 and state.current > 0 and state.current >= c.attack_cost:
-                tier = c.force_tier
-                if tier > 1:
-                    state.current -= c.attack_cost
-            tiers[key] = tier
-        ward_tiers = {key: s.unit.capabilities.ward_tier
-                      if s.unit.capabilities.resource_tier >= 2 and s.current > 0 else 1
-                      for key, s in self.units.items()}
+            tiers[key] = self.attack_tier(state, pay=True)
+        # Golden light belongs to the body; an empty energy pool cannot remove it.
+        ward_tiers = {key: s.unit.capabilities.ward_tier for key, s in self.units.items()}
         for side, damage in (("player", dealt), ("enemy", received)):
             opponents = [s for key, s in self.units.items() if s.unit.side != side
                          and s.fighting and key not in self._dominated]
@@ -335,13 +326,6 @@ class VoisinageBattle:
         primary_before = self.units["player"].vitality if "player" in self.units else 0.0
         for key, amount in amounts.items():
             target = self.units[key]
-            c = target.unit.capabilities
-            # Apply a ward once to the total eligible incoming damage. A low-tier
-            # contributor cannot slip through because another source ran first.
-            if ward_tiers[key] > 1 and c.ward_cost > 0:
-                absorbed = min(amount, target.current / c.ward_cost)
-                target.current -= absorbed * c.ward_cost
-                amount -= absorbed
             self._lose(key, amount)
         self.primary_ordinary_loss = (primary_before - self.units["player"].vitality
                                       if "player" in self.units else 0.0)
@@ -361,7 +345,28 @@ class VoisinageBattle:
                 state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
             if not state.fighting:
                 state.active_voisinage = None
-        self.fields = [f for f in self.fields if self.units[f.owner].fighting]
+        self._refresh_relations()
+
+    def _refresh_relations(self):
+        """Release only field-dependent control; damage/pressure remain real."""
+        self.fields = [f for f in self.fields if self.units[f.owner].fighting
+                       and f.owner not in self._disrupted]
+        live = {f.owner for f in self.fields}
+        for key, state in self.units.items():
+            state.controls = {kind: owner for kind, owner in state.controls.items()
+                              if owner in live and key not in self._released}
+            owner = self._dominated.get(key)
+            if owner not in live or key in self._released:
+                self._dominated.pop(key, None)
+                state.escape_locked = False
+                if key in self.frame.relations and self.frame.relations[key]['relation'] == 'dominated':
+                    self.frame.relations[key] = {**self.frame.relations[key], 'relation': 'uncovered', 'attacker': None}
+            else:
+                state.escape_locked = not state.escaped
+        for relation in self.frame.relations.values():
+            if relation.get('protector') not in live:
+                relation['protector'] = None
+                relation['defense_strength'] = 0
 
     def ordinary_loss(self, side: str) -> float:
         return 1.0 - sum(s.unit.power * s.vitality for s in self.units.values()
@@ -386,11 +391,11 @@ class VoisinageBattle:
 
     def primary_dead(self) -> bool:
         return bool(self.units.get("player") and self.units["player"].vitality <= 0
-                    and not self.units["player"].suppressed)
+                    and not self.units["player"].suppressed and not self.units["player"].escaped)
 
     def enemy_killed(self) -> bool:
         enemies = [s for s in self.units.values() if s.unit.side == "enemy"]
-        return bool(enemies and all(s.vitality <= 0 and not s.suppressed for s in enemies))
+        return bool(enemies and all(s.vitality <= 0 and not s.suppressed and not s.escaped for s in enemies))
 
     def enemy_suppressed(self) -> bool:
         enemies = [s for s in self.units.values() if s.unit.side == "enemy"]
@@ -400,6 +405,8 @@ class VoisinageBattle:
         primary = self.units.get("player")
         if primary and not primary.fighting:
             return "defeat"
+        if not any(s.fighting for s in self.units.values()):
+            return "stalemate"
         if not any(s.fighting for s in self.units.values() if s.unit.side == "enemy"):
             return "victory"
         if not any(s.fighting for s in self.units.values() if s.unit.side == "player"):
@@ -409,10 +416,13 @@ class VoisinageBattle:
     def report(self) -> dict[str, Any]:
         return {
             "relations": self.frame.relations,
+            "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.controls},
+            "morale": {k: s.morale for k, s in self.units.items()},
             "pressure": {key: s.pressure for key, s in self.units.items() if s.pressure},
             "stat_factors": self.frame.stat_factors,
             "fields": [{"owner": f.owner, "voisinage_id": f.definition.id,
                         "name": f.definition.name, "effect": f.definition.effect,
+                        "effects": [e.kind for e in f.definition.actions()],
                         "stability": round(f.stability, 4), "incursion": round(f.strength, 4),
                         "authority": f.authority, "sustained_rounds": self.units[f.owner].sustained_rounds,
                         "strength": round(f.strength, 4), "protects": list(f.protects),
@@ -426,5 +436,6 @@ class VoisinageBattle:
     def updates(self) -> list[dict[str, Any]]:
         return [{"id": key, "side": s.unit.side, "current": max(0.0, s.current), "vitality": s.vitality,
                  "suppressed": s.suppressed, "escape_locked": s.escape_locked,
+                 "escaped": s.escaped, "body": s.body,
                  "resource_link": s.unit.capabilities.resource_link}
                 for key, s in self.units.items()]

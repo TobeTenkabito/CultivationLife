@@ -10,11 +10,11 @@ from dataclasses import dataclass, replace
 from typing import Any, Mapping
 
 from ..models import GameState
-from ..rules import max_mp
-from ..system.combat.contracts import Combatant, ResourceSupply, voisinage_definitions, resolve_source
+from ..rules import max_mp, max_hp
+from ..system.combat.contracts import Combatant, ResourceSupply, VoisinageSeal, voisinage_definitions, resolve_source
 from ..system.doctrine.provider import battle_sources, conversion_state
 from ..system.combat.voisinages import VoisinageBattle
-from ..system.combat.npc_lifecycle import NpcResourceBinding, prepare
+from ..system.combat.npc_lifecycle import NpcResourceBinding, prepare, commit_condition
 from ..system.combat_system import BattleUnit, PlayerCombatSystem
 
 
@@ -91,20 +91,16 @@ class CapabilityBinding:
                 state["current"] = update["current"]
             if update["id"] == "player":
                 continue
-            wounds = min(4, int((1 - update["vitality"]) * 4))
-            if isinstance(owner, dict):
-                owner["wounds"] = max(int(owner.get("wounds", 0)), wounds)
-                if lethal and update["vitality"] <= 0 and not update["suppressed"]:
-                    owner.update(alive=False, death_reason="仙域斗法中陨落")
-            else:
-                owner.wounds = max(owner.wounds, wounds)
-                if lethal and update["vitality"] <= 0 and not update["suppressed"]:
-                    owner.alive, owner.death_reason = False, "仙域斗法中陨落"
+            commit_condition(owner, update, lethal=lethal)
 
 
 def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: dict[str, Any],
                       config: Mapping[str, Any]) -> CapabilityBinding:
     definitions = voisinage_definitions(config)
+    for key, definition in voisinage_definitions({"voisinages": target.get("voisinages", [])}).items():
+        if key in definitions:
+            raise ValueError(f"Duplicate battle voisinage: {key}")
+        definitions[key] = definition
     owners: dict[str, Any] = {}
     resources: dict[str, NpcResourceBinding] = {}
     combatants: list[Combatant] = []
@@ -127,15 +123,10 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             if unit.id != "player" and state and state.get("resource_link") == "legacy_mp":
                 raise ValueError("Only the player currently owns a legacy MP pool")
             if unit.id != "player" and state is not None:
-                resources[unit.id] = prepare(owner, game.player.age, config)
+                source = sources.get(unit.id)
+                imitation = bool(source and any(d.id.startswith('spirit:') for d in source.voisinages))
+                resources[unit.id] = prepare(owner, game.player.age, config, imitation=imitation)
                 state = resources[unit.id].state
-                from ..system.immortal_aperture import lower_world
-                if lower_world(game.player) and sources.get(unit.id):
-                    ledger = owner.get('transcendence') if isinstance(owner, dict) else owner.transcendence
-                    imitation = ledger.setdefault('imitation', dict(capacity=60, current=20, conversion=1,
-                        resource_link='independent', force_tier=1, ward_tier=1, attack_cost=0, ward_cost=0))
-                    resources[unit.id] = NpcResourceBinding(dict(imitation), imitation)
-                    state = resources[unit.id].state
             elif (unit.id == "player" and state is None and game.player.realm_index >= 9
                   and game.player.immortal_power_converted):
                 # Existing conversion is an explicit fact; realm alone grants
@@ -143,14 +134,18 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 state = config.get("converted_player_state")
             if unit.id == "player" and game.player.transcendence is None:
                 state = conversion_state(game.player) or state
-            if unit.id == 'player' and state is not None:
-                from ..system.immortal_cultivation import golden_light
-                state = {**state, 'ward_tier': 2 if golden_light(game.player) else 1}
             capabilities = resolve_source(
                 state, definitions, sources.get(unit.id),
                 linked_current=game.player.mp if unit.id == "player" else 0,
                 linked_capacity=max_mp(game.player) if unit.id == "player" else 0,
             )
+            if unit.id == "player" and target.get("player_interventions"):
+                capabilities = replace(capabilities, interventions=(
+                    *capabilities.interventions, *target["player_interventions"]))
+            from ..system.cultivation_ranks import npc_golden_light
+            from ..system.immortal_cultivation import golden_light
+            ward = golden_light(game.player) if unit.id == 'player' else npc_golden_light(owner)
+            capabilities = replace(capabilities, ward_tier=2 if ward else 1, ward_cost=0)
             from ..system.cultivation_ranks import rank_for
             from ..system.combat.npc_lifecycle import read
             if unit.id == 'player':
@@ -164,15 +159,18 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                         protect_ids=tuple(u.id for u in player_units if u.id != 'player'))
             else:
                 realm, layer = read(owner, 'realm_index', unit.realm_index), read(owner, 'layer', read(owner, 'target_layer', 1))
-                rank = rank_for(realm, layer)
+                rank = rank_for(read(owner, 'true_realm_index', realm), layer)
                 multiplier = 1 + .5 * max(0, (realm - 9) * 3 + (layer - 1) // 3)
                 if game.player.world != 'celestial':
                     multiplier = 1
             limit = max((d.max_investment for d in capabilities.voisinages), default=0) * multiplier
             capabilities = replace(capabilities, investment_limit=limit)
-            combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity, rank))
+            combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity, rank,
+                min(1, max(0, game.player.hp / max(1, max_hp(game.player))))
+                if unit.id == "player" else min(1, max(.01, 1 - .15 * read(owner, "wounds", 0)))))
             if owner is not None:
                 owners[unit.id] = owner
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))
+    seals = tuple(VoisinageSeal(**row) for row in target.get("voisinage_seals", []))
     return CapabilityBinding(VoisinageBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
-                                         supplies=supplies), owners, resources)
+                                         supplies=supplies, seals=seals), owners, resources)

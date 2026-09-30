@@ -1633,6 +1633,8 @@ function renderFaction(faction) {
     if (npc.social_hint?.companion_name) addStatus('道侣', npc.social_hint.companion_name);
     if (npc.social_hint?.concubine_count) addStatus('侍妾', `${npc.social_hint.concubine_count} 人`);
     if (npc.treasure_name) addStatus('重宝', npc.treasure_name);
+    if (npc.main_technique_name) addStatus('主修功法', `${npc.main_technique_name} Lv.${npc.main_technique_level || 1}`);
+    if (npc.combat_artifact_name) addStatus('主战法宝', npc.combat_artifact_name);
     identity.appendChild(status);
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
     if (npc.can_request_master) controls.appendChild(relationshipButton(npc, 'master', '拜师'));

@@ -39,6 +39,11 @@ def ensure(game, *, celestial_context=False) -> bool:
                         equipped.level = max(equipped.level, best.level)
         game.doctrine_state["cultivation_schema"] = 2
         changed = True
+    if game.doctrine_state.get('effects_schema') != 1:
+        from .effects import enrich_effects
+        enrich_effects(game.doctrine_state['definitions'])
+        game.doctrine_state['effects_schema'] = 1
+        changed = True
     return changed
 
 
@@ -111,6 +116,13 @@ def _npc_record(game, npc):
                 if remaining <= 0:
                     break
     record.update(at=now, world=world)
+    # The doctrine record is evidence of an actually learned manual. Do not
+    # populate the independent combat artifact slot from the treasure slot.
+    from ..combat.npc_lifecycle import _write
+    if not read(npc, 'main_technique_id') and record.get('manuals'):
+        _write(npc, 'main_technique_id', record['manuals'][0])
+    if read(npc, 'main_technique_id') in record.get('manuals', ()):
+        _write(npc, 'main_technique_level', record.get('manual_level', 1))
     return record
 
 
@@ -140,6 +152,12 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
                 value = diminished(value)
             if value.voisinages:
                 results[key] = value
+    from ..combat_loadout import project_loadout
+    for key, owner in owners.items():
+        value = project_loadout(game, owner, results.get(key), player=key == 'player')
+        if (value.voisinages or value.technique_tier > 1 or value.artifact_tier > 1
+                or value.passive_ward_tier == 2 or value.interventions):
+            results[key] = value
     return results
 
 

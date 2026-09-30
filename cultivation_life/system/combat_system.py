@@ -88,6 +88,7 @@ class CombatResolution:
     voisinage_controlled: bool = False
     voisinage_lethal: bool = False
     voisinage_escape_locked: bool = False
+    hp_restore_ratio: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -179,7 +180,8 @@ class PlayerCombatSystem:
         from .combat_plan import effective_plan
         plan = effective_plan(player)
         if phases is not None:
-            phases.set_objectives(objective, 'kill' if lethal else 'defeat')
+            enemy_objective = target.get('enemy_objective', 'kill' if lethal else 'defeat')
+            phases.set_objectives(objective, enemy_objective if enemy_objective in {'kill', 'capture', 'repel', 'defeat'} else 'defeat')
         normalized = [cls.TERRAIN_ALIASES.get(str(tag), str(tag)) for tag in battlefield_tags]
         natural = next((tag for tag in normalized if tag in cls.NATURAL_TERRAINS), "开阔")
         artificial = list(dict.fromkeys(tag for tag in normalized if tag in cls.ARTIFICIAL_CONDITIONS))
@@ -359,6 +361,7 @@ class PlayerCombatSystem:
         initial_hp = player_hp
         initial_mp = player_mp
         body_damage_ratio = 0.0
+        body_restored_ratio = 0.0
         core_power = max(1.0, next((unit.power for unit in player_units if unit.kind == "player"), player_power))
         rounds: list[dict[str, Any]] = []
         key_events: list[str] = []
@@ -478,12 +481,16 @@ class PlayerCombatSystem:
                 player_hp = max(0.0, player_hp - phase.player_loss)
                 enemy_hp = max(0.0, enemy_hp - phase.enemy_loss)
                 body_damage_ratio += phase.primary_loss * 0.46
-                player_morale = max(0, player_morale - phase.morale_loss.get('player', 0))
-                enemy_morale = max(0, enemy_morale - phase.morale_loss.get('enemy', 0))
+                body_restored_ratio += phase.primary_restore
+                player_morale = cls._clamp(0, 100, player_morale - phase.morale_loss.get('player', 0))
+                enemy_morale = cls._clamp(0, 100, enemy_morale - phase.morale_loss.get('enemy', 0))
                 ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
                 if not phase.ordinary or phases.verdict() is not None:
                     # Voisinage-only rounds never call ordinary initiative, rules,
                     # minimum damage, revival, or the conventional power shortcut.
+                    story_beats = target.get("story_beats", [])
+                    if round_no <= len(story_beats):
+                        phase.events.append(f"剧情推进：{story_beats[round_no - 1]}")
                     key_events.extend(f"第{round_no}轮，{event}" for event in phase.events)
                     rounds.append({
                         "round": round_no, "initiative": "voisinage", "events": list(phase.events),
@@ -499,6 +506,7 @@ class PlayerCombatSystem:
                         "voisinage": phases.report(),
                     })
                     phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                    rounds[-1]['voisinage'] = phases.report()
                     if phases.verdict() is not None:
                         break
                     continue
@@ -735,6 +743,7 @@ class PlayerCombatSystem:
             burst = bool(
                 usable_combat_techniques and plan['burst'] != 'never' and player_mp >= plan['mp_reserve']
                 and (phase is None or phase.ordinary_player)
+                and (phase is None or 'technique' not in phase.blocked_actions.get('player', ()))
                 and (plan['burst'] == 'early' or round_no == 1 and objective == "kill" or enemy_hp <= 0.58 or player_hp <= 0.48)
             )
             if burst and plan['manual']:
@@ -1348,6 +1357,11 @@ class PlayerCombatSystem:
             if phases.enemy_suppressed():
                 kill_ready = False
             capture_ready = capture_ready or (outcome == "victory" and objective == "capture" and phases.enemy_suppressed())
+            if any(row.get('escaped') for row in phases.updates() if row['side'] == 'enemy'):
+                # Explicit escape has already resolved; ordinary pursuit cannot
+                # turn it back into a kill/capture of the original target.
+                kill_ready = phases.enemy_killed()
+                capture_ready = phases.enemy_suppressed()
         if "enemy_escape_lock" in artifact_traits and outcome == "victory":
             key_events.append("帝江之泪封闭空间退路，敌方无法从败势中遁逃。")
         if outcome == "stalemate":
@@ -1384,7 +1398,8 @@ class PlayerCombatSystem:
             mode=("手动预案·" if plan['manual'] else '') + ("邻域战斗" if phases is not None else "快速结算" if quick else "标准自动战斗"),
             rounds=rounds,
             key_events=key_events[:4],
-            hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio), 4),
+            hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio - body_restored_ratio), 4),
+            hp_restore_ratio=round(cls._clamp(0, max(0, 1 - current_hp_ratio), body_restored_ratio - body_damage_ratio), 4),
             mp_loss_ratio=round(max(0.0, initial_mp - player_mp), 4),
             player_combat_state=round(player_power_max * player_hp, 1),
             player_combat_state_max=round(player_power_max, 1),

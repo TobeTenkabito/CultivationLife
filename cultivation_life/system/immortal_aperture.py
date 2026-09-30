@@ -59,8 +59,8 @@ def energy_state(player):
         capacity=ledger['imitation_capacity'] if lower else ledger['capacity'],
         current=ledger['imitation_current'] if lower else ledger['current'], conversion=1,
         force_tier=2 if converted and true_realm(player) >= 9 else 1,
-        ward_tier=2 if golden_light(player) and converted else 1,
-        attack_cost=1 if lower else 10, ward_cost=3 if lower else 100)
+        ward_tier=2 if golden_light(player) else 1,
+        attack_cost=1 if lower else 10, ward_cost=0)
 
 
 def commit_energy(player, current):

@@ -172,6 +172,9 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         entry["combat_power"] = perception["display_power"] or deps._npc_power(npc)
         entry["breakthrough_chance"] = deps._npc_breakthrough_probability(npc)
         entry["treasure_name"] = ITEM_CATALOG[npc.treasure_item_id].name if npc.treasure_item_id in ITEM_CATALOG else None
+        from ...system.combat_loadout import public_loadout
+        entry.update(public_loadout(game, npc) if perception.get('revealed', True) else
+                     dict(main_technique_name=None, combat_artifact_name=None))
         entry["in_party"] = any(member.get("id") == npc.id for member in player.party)
         entry["can_invite_party"] = bool(
             not entry["in_party"]
