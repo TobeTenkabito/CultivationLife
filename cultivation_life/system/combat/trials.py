@@ -15,7 +15,8 @@ from .ordinary import exchange_damage
 def dump_battle(battle):
     return {'units': [asdict(s.unit) for s in battle.units.values()],
             'states': {key: {k: copy.deepcopy(v) for k, v in vars(s).items() if k != 'unit'}
-                       for key, s in battle.units.items()}, 'dominated': dict(battle._dominated)}
+                       for key, s in battle.units.items()}, 'dominated': dict(battle._dominated),
+            'escape_forbidden_sides': sorted(battle.escape_forbidden_sides)}
 
 
 def load_battle(snapshot):
@@ -30,12 +31,19 @@ def load_battle(snapshot):
         for name, value in values.items():
             setattr(battle.units[key], name, copy.deepcopy(value))
     battle._dominated = dict(snapshot['dominated'])
+    battle.escape_forbidden_sides = frozenset(snapshot.get('escape_forbidden_sides', ()))
     return battle
 
 
 def run_batch(battle, state, rng, *, batch_size=24):
     """Return victory/defeat/ongoing, and at most batch_size real round rows."""
     battle.set_objectives('kill', 'kill')
+    battle.escape_forbidden_sides = battle.escape_forbidden_sides | {'enemy'}
+    # Old snapshots may contain a living manifestation which escaped. Bring
+    # it back without restoring any health or resources; escape is not a kill.
+    for unit in battle.units.values():
+        if unit.unit.side == 'enemy':
+            unit.escaped = False
     rows = []
     endurance = state['mode'] != 'three_corpses'
     only_fields = state['mode'] == 'voisinage_backlash'

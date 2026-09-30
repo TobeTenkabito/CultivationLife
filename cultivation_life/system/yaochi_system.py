@@ -50,6 +50,11 @@ def offers(game, *, commission=False):
     for supply in [*rules()['body']['supplies'], *config()['materials']]:
         price = supply['price'] if supply in config()['materials'] else config()['supply_prices'][supply['id']]
         result.append(dict(id=supply['id'], name=ITEM_CATALOG[supply['id']].name, kind='item', quantity=supply['quantity'], price=price))
+    for pill in config()['breakthrough_pills']:
+        if pill['realm'] == game.player.realm_index:
+            item = ITEM_CATALOG[pill['id']]
+            result.append(dict(id=item.id, name=item.name, kind='item', quantity=pill['quantity'],
+                               price=pill['price'], description=item.description))
     return result
 
 
@@ -187,11 +192,20 @@ class YaochiMixin:
         p=game.player;cfg=config();state=account(game)
         if p.world!='celestial' or p.realm_index<9: return {'available':False}
         election=game.heavenly_court.get('open_election')
+        definitions = game.doctrine_state.get('definitions', {})
+        catalog = []
+        for offer in offers(game, commission=True):
+            book = offer.get('payload') if offer['kind'] == 'doctrine' else None
+            catalog.append(dict(id=offer['id'], name=offer['name'], price=math.ceil(offer['price']*(1+cfg['order_fee'])),
+                doctrine=definitions[book['doctrine_id']]['name'] if book else None,
+                grade=book['grade'] if book else None))
+        total_manuals = sum(len(d['manuals']) for d in definitions.values())
         rows=[]
         for o in offers(game):
             rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
         return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
-                    commission_catalog=[dict(id=o['id'],name=o['name'],price=math.ceil(o['price']*(1+cfg['order_fee']))) for o in offers(game,commission=True)],
+                    commission_catalog=catalog,
+                    manual_catalog_counts={'total':total_manuals, 'eligible':sum(o['doctrine'] is not None for o in catalog)},
                     merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],
                     lock_limit=cfg['lock_limit'], locked_count=len(state.get('locked_offers',{})),
                     job=copy.deepcopy(state.get('job')), orders=[dict(id=o['id'],name=o['offer']['name'],ready_age=o['ready_age'],ready=p.age>=o['ready_age']) for o in state.get('orders',[])],

@@ -67,6 +67,7 @@
       meter(v.opened, v.total, '本境仙脉'), el('p', `机缘 ${fmt(v.opportunity)} / 无尽 · 仙痕 ${fmt(v.traces)}`));
     veins.append(el('p', `仙脉累计增加本源：气血 +${fmt(v.intrinsic_total?.hp)} · 法力 +${fmt(v.intrinsic_total?.mp)}；本境每脉增加气血 ${fmt(v.intrinsic_per_vein?.hp)}、法力 ${fmt(v.intrinsic_per_vein?.mp)}。`, 'doctrine-note'));
     veins.append(meridians(v));
+    if (!v.ready && (v.layer < 9 || v.realm_index !== 12)) veins.append(el('p', `本层三脉贯通后，手动冲关另需机缘 ${fmt(v.breakthrough_cost)}；请与开脉费用分别准备。`, 'doctrine-note'));
     if (v.next_cost) veins.append(el('p', `下一脉：机缘 ${fmt(v.next_cost.opportunity)} · 仙痕 ${v.next_cost.traces}`),
       el('p', `本次成功率 ${fmt(v.chance*100)}% · 失败消耗本次资源，保底增加 ${fmt(v.pity_step*100)} 个百分点，成功后重置。`, 'muted'),
       button('尝试开启下一条仙脉', {action:'open_vein'}, !v.converted || v.opportunity < v.next_cost.opportunity || v.traces < v.next_cost.traces, options.immortal));
@@ -91,7 +92,7 @@
     if (!learned.length) owned.append(el('p', '尚未获得道统功法。前往「瑶池」取得传承，再去「道门」访求同道。', 'muted'));
     for (const row of learned) {
       const panel = el('section', null, 'doctrine-entry'); panel.dataset.doctrineId = row.id;
-      panel.append(el('h4', `${row.name} · Lv${row.level}${row.origin ? ' · 本源归属' : ''}${row.active ? ' · 当前仙域' : ''}`), el('p', row.description));
+      panel.append(el('h4', `${row.name} · Lv${row.level}${row.fusion?.level ? ' · 真传已合' : ''}${row.origin ? ' · 本源归属' : ''}${row.active ? ' · 当前仙域' : ''}`), el('p', row.description));
       panel.append(el('p', `已获功法：${row.manuals.map(book => `《${book.name}》${book.grade_name} · 功法 Lv${book.level}`).join('；')}`, 'muted'));
       const next = row.stages.find(stage => stage.level === row.level + 1);
       if (next) panel.append(el('p', `下一阶段：Lv${next.level}「${next.title}」 · 需要${next.realm_name}`),
@@ -109,6 +110,17 @@
         actions.append(origin);
       }
       panel.append(actions);
+      if(row.fusion){
+        const f=row.fusion, box=el('section',null,'doctrine-chapter');box.dataset.fusionId=row.id;
+        box.append(el('b','合练传承'),el('p',`本门原始功法已集齐 ${f.owned} / ${f.total} 部。原功法保留，合练传承不计入收集数量。`));
+        if(!f.level)box.append(el('p',`集齐并掌握全套、修为达到其中最高品阶后，可以消耗 ${fmt(f.cost)} 仙痕合练。`),button('合练全套传承',{action:'fuse',doctrine_id:row.id},!f.can_fuse));
+        else {
+          box.append(el('p',`《${f.name}》Lv${f.level} · 当前道统加持层级 ${f.effect_level}`),el('p','合练功法在道统内独立参悟，不用玉简与注解；道统升级仍需对应注解。加持随本门特色改善稳固、侵夺、施权、恢复或仙力消耗，以功法和道统中较低层级为限。','muted'));
+          if(f.level<9)box.append(meter(f.experience,f.required,'合练功法参悟'),el('p',`参悟 ${fmt(f.experience)} / ${fmt(f.required)} 年 · 本层待付 ${fmt(f.cost)} 仙痕。中断保留积累，已付仙痕不重复收取。`),button('参悟合练功法',{action:'study_fusion',doctrine_id:row.id},!f.can_study));
+          else box.append(el('p','合练功法已达 Lv9。'));
+        }
+        panel.append(box);
+      }
       const chapters = el('details'); chapters.append(el('summary', '已能参悟的篇章'));
       for (const stage of row.stages) {
         const chapter = el('section', null, 'doctrine-chapter');
@@ -168,14 +180,14 @@
         person.append(el('b', `${peer.name} · 道统 Lv${peer.level}${peer.available ? '' : ' · 当前无法请教'}`));
         if (row.level < 9) person.append(button(row.has_annotation ? `Lv${row.level + 1} 注解已收录` : `求取 Lv${row.level + 1} 注解 · ${fmt(data.annotation_price * (row.level + 1))} 灵石`,
           {action:'annotation',doctrine_id:row.id,npc_id:peer.id}, !peer.available || row.has_annotation || peer.level <= row.level));
-        for (const book of row.manuals.filter(b => b.level < 9 && b.level < peer.level)) person.append(button(`求取《${book.name}》Lv${book.level} 玉简（合参至 Lv${book.level + 1}） · ${fmt(data.annotation_price * (book.level + 1) ** 2)} 灵石`,
+        for (const book of row.manuals.filter(b => !b.fused && b.level < 9 && b.level < peer.level)) person.append(button(`求取《${book.name}》Lv${book.level} 玉简（合参至 Lv${book.level + 1}） · ${fmt(data.annotation_price * (book.level + 1) ** 2)} 灵石`,
           {action:'teach_manual',doctrine_id:row.id,npc_id:peer.id,manual_id:book.id}, !peer.available));
         entry.append(person);
       }
       daomen.append(entry);
     }
     const unknown = el('details'); unknown.append(el('summary', '仙界道统名录'));
-    for (const row of data.rows.filter(row => !row.learned)) unknown.append(el('p', `${row.name}：${row.description}`));
+    for (const row of data.rows) unknown.append(el('p', `${row.name} · ${row.learned ? '已获传承' : '未获传承'}：${row.description}`));
     daomen.append(unknown);
   }
 

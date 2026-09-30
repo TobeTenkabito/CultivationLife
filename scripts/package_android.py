@@ -9,26 +9,27 @@ from pathlib import Path
 from android_css import compile_css
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.51.1'
-ANDROID_VERSION = VERSION + '-android.17'
+VERSION = '1.51.2'
+ANDROID_VERSION = VERSION + '-android.18'
 
 def main():
     def log(name):
         return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
-    tests = log('release-1511-tests.log')
+    tests = log('release-1512-tests.log')
     passed = re.search(r'(\d+) passed in', tests)
     assert passed and 'failed' not in tests
-    for name in ('android-governance-1511.log', 'android-economy-1511.log', 'android-upper-1511.log', 'android-trials-1511.log', 'android-save-transfer-1511.log', 'android-initial-1511.log', 'android-immortal-1511.log', 'android-minor-1511.log', 'android-tutorial-1511.log'):
+    for name in ('android-governance-1512.log', 'android-economy-1512.log', 'android-upper-1512.log', 'android-trials-1512.log', 'android-save-transfer-1512.log', 'android-initial-1512.log', 'android-immortal-1512.log', 'android-minor-1512.log', 'android-tutorial-1512.log'):
         assert 'status=passed' in log(name) and 'status=failed' not in log(name), name
-    assert 'roundtrip passed' in log('save-crossplatform-1511.log')
-    assert 'Verifies' in log('android-signature-1511.log')
-    metadata = log('android-metadata-1511.log')
-    assert "versionCode='17'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
+    assert 'roundtrip passed' in log('save-crossplatform-1512.log')
+    assert 'status=passed' in log('android-fusion-1512.log') and 'status=failed' not in log('android-fusion-1512.log')
+    assert 'Verifies' in log('android-signature-1512.log')
+    metadata = log('android-metadata-1512.log')
+    assert "versionCode='18'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
     assert "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata
     assert (ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.'
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest in log('android-installed-sha256-1511.log').lower()
+    assert digest in log('android-installed-sha256-1512.log').lower()
     with zipfile.ZipFile(source) as apk:
         assert apk.testzip() is None
         for abi in ('arm64-v8a', 'x86_64'):
@@ -55,7 +56,7 @@ def main():
     shutil.copy2(source, target)
     report = ROOT/f'dist/release-{ANDROID_VERSION}.json'
     manifest = {
-        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 17,
+        'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': 18,
         'application_id': 'com.fusheng.wendao', 'min_sdk': 31, 'target_sdk': 31,
         'included_abis': ['arm64-v8a', 'x86_64'], 'tested_android': 'Android 12 / API 31',
         'tested_abi': 'x86_64', 'physical_device_tested': False,
@@ -63,6 +64,8 @@ def main():
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [f'{passed.group(1)} Python regressions passed',
+                       'Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified',
+                       'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; unchanged backlash and capped superego; multi-world calibration documented',
                        'Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified',
                        'Android 12 six-theme Yaochi economy, gold tempering, timed single-use pass and persistence verified',
                        'Android 12 three upper worlds: six themes, DLC routing, finite reserves and native ordinary breakthrough verified',
@@ -79,6 +82,8 @@ def main():
     archive = ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip'
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
         for path, name in [(target,target.name), (report,report.name), (ROOT/'android/README.md','安卓说明.md'),
+                           (ROOT/'docs/three-corpses-1512.md','三尸复测与合练.md'),
+                           (ROOT/'docs/immortal-vein-balance.md','仙脉费用校准.md'),
                            (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
     with zipfile.ZipFile(archive) as package:

@@ -65,11 +65,15 @@ def main():
                 assert page.locator('#hud-opportunity .hud-percent').inner_text() == '无尽'
                 assert page.locator('[data-panel-target=voisinage]').is_hidden()
                 assert page.locator('.left-dock [data-panel-target=immortal-body]').is_visible()
-                assert page.locator('#yaochi-content .doctrine-book').count() == 14
+                assert page.locator('#yaochi-content .doctrine-book').count() == 17
                 page.locator('.doctrine-book button').first.click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.learned)')
                 page.evaluate("UtilityPanels.close('yaochi');UtilityPanels.open('daomen')")
-                assert page.locator('#doctrine-content .doctrine-chapter').count() == 1
+                directory = page.locator('#daomen-content details').filter(has_text='仙界道统名录')
+                assert directory.locator('p').count() == 25
+                assert '已获传承' in directory.text_content()
+                assert '太初归元道统' in directory.text_content()
+                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 1
                 page.get_by_role('button', name='访求同道', exact=False).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.peers.length === 1)')
                 saved = engine.store.load(game.id)
@@ -89,7 +93,7 @@ def main():
                 page.evaluate("UtilityPanels.close('daomen'); UtilityPanels.open('doctrine')")
                 page.get_by_role('button', name='参悟此道统', exact=True).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.level === 1)')
-                assert page.locator('#doctrine-content .doctrine-chapter').count() == 2
+                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 2
                 saved = engine.store.load(game.id)
                 key = next(iter(saved.doctrine_state['player']['progress']))
                 saved.doctrine_state['player']['progress'][key] = {'level': 4, 'experience': 650, 'failures':{'5':20}}
@@ -100,11 +104,11 @@ def main():
                 engine.store.save(saved)
                 page.evaluate('(id) => loadGame(id)', game.id)
                 page.evaluate("UtilityPanels.open('doctrine')")
-                assert page.locator('#doctrine-content .doctrine-chapter').count() == 5
+                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 5
                 page.get_by_role('button', name='确立本源并尝试 Lv5', exact=True).click()
                 page.locator('#game-confirm-accept').click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.level === 5 && r.origin)')
-                assert page.locator('#doctrine-content .doctrine-chapter').count() == 6
+                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 6
                 page.locator('#doctrine-card').evaluate('(e) => { e.scrollTop = 0; }')
                 page.screenshot(path=str(ROOT / 'build/doctrine-desktop.png'))
                 page.set_viewport_size({'width': 412, 'height': 915})
@@ -112,6 +116,8 @@ def main():
                 page.screenshot(path=str(ROOT / 'build/doctrine-mobile.png'))
                 assert page.locator('#doctrine-card').evaluate('(e) => e.scrollWidth <= e.clientWidth + 1')
                 page.evaluate("UtilityPanels.close('doctrine'); UtilityPanels.open('immortal-veins')")
+                assert page.evaluate('game.doctrines.veins.breakthrough_cost') == 18000
+                assert '手动冲关另需机缘' in page.locator('#immortal-veins-card').inner_text()
                 for n in range(1, 4):
                     page.get_by_role('button', name='尝试开启下一条仙脉', exact=True).click()
                     page.wait_for_function('(n) => game.doctrines.veins.opened === n', arg=n)
@@ -156,6 +162,8 @@ def main():
                         page.evaluate("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-veins')")
                         assert page.locator('.meridian-node circle').count()==27
                         assert page.locator('.meridian-node.opened').count()==3
+                        assert page.evaluate('game.doctrines.veins.breakthrough_cost') == 20160
+                        assert '手动冲关另需机缘' in page.locator('#immortal-veins-card').inner_text()
                         assert page.locator('#immortal-veins-card').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
                         page.locator('.meridian-figure').scroll_into_view_if_needed()
                         page.wait_for_timeout(450)

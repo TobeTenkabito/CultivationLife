@@ -6,7 +6,7 @@ from ...models import HistoryRecord, Player, SectNpc
 from ...rules import (
     max_hp,
     max_mp,
-    opportunity_required,
+    breakthrough_opportunity_required,
     public_player,
     realm,
     divine_sense_breakthrough_cost,
@@ -233,7 +233,7 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     ):
         raise ValueError('当前状态无法冲关，请先处理事件或脱离拘束')
     current = realm(player)
-    required = opportunity_required(player)
+    required = breakthrough_opportunity_required(player)
     breakthrough_kind = deps._manual_breakthrough_kind(player)
     if not breakthrough_kind or player.opportunity < required:
         raise ValueError("尚未抵达需要手动突破的境界瓶颈")

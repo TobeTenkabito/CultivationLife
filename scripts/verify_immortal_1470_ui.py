@@ -29,7 +29,7 @@ def main():
                 page.evaluate('(id)=>loadGame(id)',g.id)
                 assert page.evaluate('game.player.body_training===100 && game.doctrines.immortal_body.level===1')
                 assert page.locator('#immortal-market-content .doctrine-book').count()==0
-                assert page.locator('#yaochi-content .doctrine-book').count()==14
+                assert page.locator('#yaochi-content .doctrine-book').count()==17
                 assert page.locator('#daomen-content .doctrine-book').count()==0
                 assert page.locator('[data-panel-target=voisinage]').is_hidden()
                 page.evaluate("UtilityPanels.open('map')")

@@ -13,6 +13,8 @@ from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, prerequisites, attempt, chance, training_cost
 from .doctrine.daomen import discover, mentor, public_peers
 from .immortal_system import ImmortalCultivationMixin, item_quantity
+from .doctrine_fusion_system import DoctrineFusionMixin
+from .doctrine.fusion import manual_id as fusion_manual_id
 
 
 def _known(game, key):
@@ -32,13 +34,16 @@ def _price(book):
     return 15000 * (int(book["grade"]) - 8) ** 2
 
 
-class DoctrineSystemMixin(ImmortalCultivationMixin):
+class DoctrineSystemMixin(DoctrineFusionMixin, ImmortalCultivationMixin):
     def _ensure_doctrines(self, game):
         from .immortal_aperture import ensure_aperture
         changed = ensure(game)
         return ensure_aperture(game.player) or changed
 
     def _begin_doctrine_action(self, game, action, *, commit=False):
+        if action == 'doctrine_fusion_study':
+            self._begin_fusion_study(game, commit=commit)
+            return
         if action not in {"doctrine_study", "immortal_conversion", "daomen_explore", "immortal_trace_gather"}:
             return
         if game.player.world != "celestial" or game.player.realm_index < 9:
@@ -82,6 +87,10 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
             raise ValueError("本源积累已满，请明确选择本源归属后突破")
 
     def _finish_doctrine_action(self, game, action, elapsed):
+        if action == 'doctrine_fusion_study':
+            if elapsed > 0 and game.player.alive and game.player.world == 'celestial':
+                self._finish_fusion_study(game, elapsed)
+            return
         if (action not in {"doctrine_study", "immortal_conversion", "daomen_explore", "immortal_trace_gather"} or elapsed <= 0
                 or not game.player.alive or game.player.world != "celestial"):
             return
@@ -147,6 +156,13 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
         game = self._cultivation_game(game_id)
         record = player_record(game)
         definition = game.doctrine_state["definitions"].get(doctrine_id)
+        if action == 'fuse':
+            return self._fuse_doctrine(game, doctrine_id)
+        if action == 'study_fusion':
+            record['fusion_target'] = doctrine_id
+            self._begin_fusion_study(game)
+            self.store.save(game)
+            return self.advance(game_id, 'doctrine_fusion_study', 1)
         if action == "explore":
             record["explore_target"] = doctrine_id
             self._begin_doctrine_action(game, "daomen_explore")
@@ -170,7 +186,8 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                 summary = f"{npc.name}传授《{definition['name']}》Lv{target} 注解，今后可反复参阅。"
             else:
                 book = next((t for t in game.player.known_techniques if t.id == manual_id and t.doctrine_id == doctrine_id), None)
-                if not book or book.level >= 9 or mastery <= book.level:
+                if (not book or book.level >= 9 or mastery <= book.level
+                        or book.id not in {b['id'] for b in definition['manuals']}):
                     raise ValueError("这位同道不能指导这部功法的下一等级")
                 if not remove_item(game.player, "spirit_stone", config()["cultivation"]["annotation_price"] * (book.level + 1) ** 2):
                     raise ValueError("请教所需灵石不足")
@@ -224,6 +241,9 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
         rows = []
         for key, definition in state["definitions"].items():
             books = [b for b in definition["manuals"] if b["id"] in known]
+            fused = known.get(fusion_manual_id(key))
+            if fused:
+                books.append({'id':fused.id, 'name':fused.name, 'grade':fused.grade})
             progress = record["progress"].get(key, {"level": 0, "experience": 0})
             level = progress["level"]
             visible = definition["stages"][:min(9, level + 1)] if books else []
@@ -231,6 +251,12 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
             for stage in visible:
                 # Explicit whitelist; never send the hidden catalog/seed blueprint.
                 voisinage = stage["voisinage"]
+                if voisinage and record.get('fusion', {}).get(key, {}).get('level', 0):
+                    from dataclasses import asdict
+                    from .combat.contracts import VoisinageDefinition
+                    from .doctrine.fusion import project as project_fusion
+                    voisinage = asdict(project_fusion(VoisinageDefinition(**voisinage),
+                        min(stage['level'], record['fusion'][key]['level'])))
                 stages.append({"level": stage["level"], "title": stage["title"], "years": stage["years"],
                                "realm_name": REALMS[stage["realm"]].name, "description": stage["description"],
                                "features": stage["features"], "ability_name": stage["ability_name"],
@@ -242,6 +268,7 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
             has_annotation = level + 1 in record.get("annotations", {}).get(key, [])
             qualified = manual_level >= level + 1 and has_annotation
             rows.append(dict(id=key, name=definition["name"], description=definition["description"], learned=bool(books),
+                             fusion=self._public_fusion(game, definition),
                              level=level, experience=progress["experience"], stages=stages,
                              manual_level=manual_level, has_annotation=has_annotation,
                              chance=chance(progress, config()["cultivation"]),
@@ -253,7 +280,7 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                                 and not (level == 4 and progress["experience"] >= next_stage["years"] and not record.get("origin"))),
                              can_bind=bool(level == 4 and qualified and not record.get("origin") and progress["experience"] >= definition["stages"][4]["years"]),
                              manuals=[dict(id=b["id"], name=b["name"], grade_name=REALMS[b["grade"]].name,
-                                           level=known[b["id"]].level) for b in books]))
+                                           level=known[b["id"]].level, fused=b['id'] == fusion_manual_id(key)) for b in books]))
         stage = game.player.immortal_conversion_stage
         voisinages = []
         rules = config()["cultivation"]

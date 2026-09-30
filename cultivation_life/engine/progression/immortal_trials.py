@@ -7,7 +7,7 @@ from ...models import HistoryRecord
 from ...rules import combat_power, expected_combat_power, max_hp, max_mp, public_player
 from ...system.doctrine.provider import player_record, config
 from ...system.doctrine.progression import source
-from ...system.doctrine.voisinage_training import rank, label, multiplier
+from ...system.doctrine.voisinage_training import rank, label, base_multiplier
 from ...system.combat.contracts import VoisinageDefinition, VoisinageEffect
 from ...system.combat.trials import dump_battle, load_battle, run_batch
 from ...system.combat_system import PlayerCombatSystem, BattleUnit
@@ -52,7 +52,7 @@ def target_for(game, trial):
         if field:
             field = replace(field, id='trial:superego', attainment='superego', name='超我尸·' + field.name)
             definitions.append(asdict(field))
-        members = [dict(name=name, power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
+        members = [dict(name=f'{p.name}·{name}', power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
                         path=p.path, kind='environment', transcendence=state_for(field if i == 2 else None))
                    for i, (name, ratio) in enumerate(zip(('自我尸', '本我尸', '超我尸'), (.38, .42, .60)))]
     else:
@@ -66,14 +66,16 @@ def target_for(game, trial):
             original = game.doctrine_state['definitions'][trial['doctrine_id']]['stages'][
                 player_record(game)['progress'][trial['doctrine_id']]['level'] - 1]['voisinage']
             factors = {5: 1.12, 9: 1.20, 13: 1.42}
-            strength = original['stability'] * multiplier(trial['target_rank']) * factors[trial['target_rank']]
+            # The attained perfection bonus rewards surviving this trial;
+            # it must not strengthen the trial before that reward is earned.
+            strength = original['stability'] * base_multiplier(trial['target_rank']) * factors[trial['target_rank']]
         if strength:
             field = heaven_field(strength, name='大道同化·天域' if kind == 'voisinage_backlash' else '天五衰·天域')
             definitions.append(asdict(field))
         power = expected_combat_power(p.realm_index, 9) * (1.15 if kind == 'heaven_decline' else 1.0)
         members = [dict(name='天道', power=power, realm_index=p.realm_index, layer=p.layer,
                         kind='environment', path='dao', transcendence=state_for(field))]
-    return dict(target_name=TITLES[kind], target_power=sum(m['power'] for m in members), members=members,
+    return dict(target_name=f'{p.name}的三尸' if kind == 'three_corpses' else TITLES[kind], target_power=sum(m['power'] for m in members), members=members,
                 target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial',
                 objective='kill', enemy_objective='kill', voisinages=definitions)
 
@@ -147,6 +149,10 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
     if not trial or trial.get('kind') not in KINDS or step != 'immortal_battle':
         raise ValueError('当前没有对应的仙境劫战')
     battle = load_battle(trial['snapshot']) if 'snapshot' in trial else initialize(game, trial)
+    if trial['kind'] == 'three_corpses':
+        for state in battle.units.values():
+            if state.unit.side == 'enemy' and state.unit.name in {'自我尸', '本我尸', '超我尸'}:
+                state.unit = replace(state.unit, name=f'{game.player.name}·{state.unit.name}')
     state = trial['battle_state']
     before_body = battle.units['player'].body
     result, rounds = run_batch(battle, state, rng)
@@ -163,7 +169,7 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
         p.transcendence['current'] = own.current
     trial['snapshot'] = dump_battle(battle)
     previous = (game.last_combat_report or {}).get('rounds', []) if state['round'] > len(rounds) else []
-    report = dict(title=TITLES[trial['kind']], target_name=TITLES[trial['kind']], result=result,
+    report = dict(title=TITLES[trial['kind']], target_name=f'{p.name}的三尸' if trial['kind'] == 'three_corpses' else TITLES[trial['kind']], result=result,
         outcome=result, result_grade={'victory':'渡劫成功','defeat':'劫中陨落','ongoing':'交战未歇'}[result],
         objective='kill' if trial['kind'] == 'three_corpses' else 'survive', mode='仙境劫战',
         rounds=(previous + rounds)[-72:], total_rounds=state['round'], key_events=[],

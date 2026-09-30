@@ -44,6 +44,11 @@ def ensure(game, *, celestial_context=False) -> bool:
         enrich_effects(game.doctrine_state['definitions'])
         game.doctrine_state['effects_schema'] = 1
         changed = True
+    if game.doctrine_state.get('offensive_schema') != 1:
+        from .effects import ensure_offensive_doctrine
+        ensure_offensive_doctrine(game.doctrine_state['definitions'], game.seed, game.doctrine_state['version'])
+        game.doctrine_state['offensive_schema'] = 1
+        changed = True
     return changed
 
 

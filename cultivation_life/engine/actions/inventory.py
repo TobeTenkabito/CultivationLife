@@ -21,7 +21,7 @@ from ...rules import (
     acquire_technique,
     max_hp,
     max_mp,
-    opportunity_required,
+    breakthrough_opportunity_required,
     realm,
     remove_item,
     merge_technique_copies,
@@ -143,6 +143,8 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             ["system", "item", "guixu", "spirit_plant"],
         ))
     elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
+        if 'celestial' in item.tags and (game.player.world != 'celestial' or game.player.sealed_cultivation):
+            raise ValueError('仙家破境丹须在仙界、真实修为未受封印时服用')
         if game.player.path == "demonic":
             raise ValueError("魔修不能依靠突破丹药提高自身突破率；可将丹药用于培养傀儡或弟子")
         scope_type, source_text = item.breakthrough_scope.split(":", 1)
@@ -153,11 +155,11 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         if scope_type == "major" and game.player.layer < realm(game.player).layers:
             raise ValueError("尚未抵达大境界瓶颈，不能提前服用此丹")
         if scope_type == "minor" and not (
-            game.player.awaiting_minor_breakthrough
-            and game.player.layer in deps._manual_minor_layers(game.player)
-            and game.player.opportunity >= opportunity_required(game.player)
+            (game.player.awaiting_minor_breakthrough or (game.player.world == 'celestial' and game.player.realm_index >= 9))
+            and deps._manual_breakthrough_kind(game.player) == 'minor'
+            and game.player.opportunity >= breakthrough_opportunity_required(game.player)
         ):
-            raise ValueError("此丹须在初期或中期圆满、停留小境界瓶颈时服用")
+            raise ValueError("此丹须满足本层冲关条件、备足机缘后服用；仙界还须贯通本层三脉")
         if item_id in game.player.active_breakthrough_aids:
             raise ValueError("本次冲关已经服用过同一种丹药")
         remove_item(game.player, item_id)

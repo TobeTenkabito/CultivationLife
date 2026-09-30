@@ -5,7 +5,7 @@ from typing import Any
 from ...content_registry import ITEM_CATALOG, REALMS, RACE_DEFINITIONS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
 from ...models import GameState, Player, SectNpc
 from ...system.npc_system import attitude_label
-from ...rules import opportunity_required
+from ...rules import breakthrough_opportunity_required
 from ...system.cultivation_policy import ordinary_upper, bloodline_upper
 from ...system.concubine_system import gender_name
 from ..dependencies import CharacterViewDependencies
@@ -65,10 +65,11 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
         action_label = "突破瓶颈"
     return {
         "kind": kind,
-        "ready": bool(waiting and at_bottleneck and player.opportunity >= opportunity_required(player)),
+        "opportunity_cost": breakthrough_opportunity_required(player),
+        "ready": bool(waiting and at_bottleneck and player.opportunity >= breakthrough_opportunity_required(player)),
         "enabled": bool(
             player.alive and waiting and at_bottleneck
-            and player.opportunity >= opportunity_required(player) and requirement["met"]
+            and player.opportunity >= breakthrough_opportunity_required(player) and requirement["met"]
         ),
         "target_realm": target_name,
         "action_label": action_label,

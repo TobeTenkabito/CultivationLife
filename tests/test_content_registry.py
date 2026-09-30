@@ -74,6 +74,10 @@ class ContentRegistryTests(unittest.TestCase):
             if item.breakthrough_bonus <= 0:
                 continue
             source = int(item.breakthrough_scope.split(":", 1)[1])
+            if 'celestial' in item.tags:
+                offers = registry.world_systems['yaochi']['breakthrough_pills']
+                self.assertTrue(any(o['id'] == item.id and o['realm'] == source for o in offers), item.name)
+                continue
             if "monster" in item.tags:
                 self.assertIn((item.id, source, "monster_realm"), sold, item.name)
                 self.assertIn((item.id, source, "phantom_underworld"), sold, item.name)

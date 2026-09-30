@@ -2,6 +2,150 @@
   "schema_version": 1,
   "items": [
     {
+      "id": "true_immortal_breakthrough_1",
+      "name": "清虚定元丹",
+      "breakthrough_bonus": 0.1,
+      "breakthrough_scope": "minor:9",
+      "description": "供真仙境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "true_immortal_breakthrough_2",
+      "name": "九转通脉丹",
+      "breakthrough_bonus": 0.14,
+      "breakthrough_scope": "minor:9",
+      "description": "供真仙境内各层冲关使用，成功率增加 14 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "true_immortal_breakthrough_3",
+      "name": "太清破障丹",
+      "breakthrough_bonus": 0.16,
+      "breakthrough_scope": "minor:9",
+      "description": "供真仙境内各层冲关使用，成功率增加 16 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "golden_immortal_breakthrough_1",
+      "name": "金华凝道丹",
+      "breakthrough_bonus": 0.1,
+      "breakthrough_scope": "minor:10",
+      "description": "供金仙境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "golden_immortal_breakthrough_2",
+      "name": "不朽养真丹",
+      "breakthrough_bonus": 0.14,
+      "breakthrough_scope": "minor:10",
+      "description": "供金仙境内各层冲关使用，成功率增加 14 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "golden_immortal_breakthrough_3",
+      "name": "紫霄开玄丹",
+      "breakthrough_bonus": 0.16,
+      "breakthrough_scope": "minor:10",
+      "description": "供金仙境内各层冲关使用，成功率增加 16 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "taiyi_breakthrough_1",
+      "name": "太乙抱一丹",
+      "breakthrough_bonus": 0.1,
+      "breakthrough_scope": "minor:11",
+      "description": "供太乙境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "taiyi_breakthrough_2",
+      "name": "三花蕴道丹",
+      "breakthrough_bonus": 0.14,
+      "breakthrough_scope": "minor:11",
+      "description": "供太乙境内各层冲关使用，成功率增加 14 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "taiyi_breakthrough_3",
+      "name": "五炁归真丹",
+      "breakthrough_bonus": 0.16,
+      "breakthrough_scope": "minor:11",
+      "description": "供太乙境内各层冲关使用，成功率增加 16 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "daluo_breakthrough_1",
+      "name": "大罗无漏丹",
+      "breakthrough_bonus": 0.1,
+      "breakthrough_scope": "minor:12",
+      "description": "供大罗境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "daluo_breakthrough_2",
+      "name": "混元合道丹",
+      "breakthrough_bonus": 0.14,
+      "breakthrough_scope": "minor:12",
+      "description": "供大罗境内各层冲关使用，成功率增加 14 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
+      "id": "daluo_breakthrough_3",
+      "name": "万象通明丹",
+      "breakthrough_bonus": 0.16,
+      "breakthrough_scope": "minor:12",
+      "description": "供大罗境内各层冲关使用，成功率增加 16 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
+      "tags": [
+        "pill",
+        "breakthrough",
+        "celestial"
+      ]
+    },
+    {
       "id": "immortal_trace",
       "name": "仙痕",
       "description": "感悟仙界法则凝成的痕迹，用于开启仙脉与温养邻域。",

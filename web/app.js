@@ -3153,12 +3153,18 @@ function renderKnownTechniques(techniques) {
     });
     const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
     upgrade.textContent = art.level >= art.max_level ? '已满级' : `升级 · 玉简 ×${art.upgrade_copies || 0}`;
+    if(art.doctrine_fusion && art.level < art.max_level)upgrade.textContent='前往道统参悟';
     upgrade.dataset.available = art.can_upgrade ? '1' : '0';
     upgrade.disabled = busy || !art.can_upgrade || !!game.pending_event || !game.player.alive;
     upgrade.title = art.level >= art.max_level
       ? `最高等级 Lv.${art.max_level}`
       : art.upgrade_copies ? `消耗一份《${art.name}》Lv.${art.level} 传承玉简，提升至 Lv.${art.level + 1}` : `包裹中缺少同名 Lv.${art.level} 传承玉简`;
     upgrade.onclick = () => mutate(`/api/games/${game.id}/technique-upgrade`, {technique_id:art.id});
+    if(art.doctrine_fusion && art.level < art.max_level){
+      upgrade.disabled=busy||!!game.pending_event||!game.player.alive||game.player.world!=='celestial';
+      upgrade.title='在道统界面使用仙痕参悟，无需同名玉简';
+      upgrade.onclick=()=>UtilityPanels.open('doctrine');
+    }
     buttons.appendChild(upgrade);
     row.appendChild(buttons); list.appendChild(row);
   });

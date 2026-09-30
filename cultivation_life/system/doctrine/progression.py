@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..combat.contracts import CapabilitySource, VoisinageDefinition
 from .cultivation import cultivated_voisinage
+from .fusion import project as project_fusion
 
 
 def source(record: dict, definitions: dict, world: str, *, training_gain=.03) -> CapabilitySource:
@@ -19,4 +20,5 @@ def source(record: dict, definitions: dict, world: str, *, training_gain=.03) ->
         raise ValueError("道统等级不能超过 Lv9")
     base = VoisinageDefinition(**definition["stages"][level - 1]["voisinage"])
     trained = cultivated_voisinage(base, record.get("voisinage_training", {}).get(key, {}), training_gain)
+    trained = project_fusion(trained, min(level, record.get('fusion', {}).get(key, {}).get('level', 0)))
     return CapabilitySource((trained,), {key: level})

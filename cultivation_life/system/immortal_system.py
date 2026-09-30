@@ -1,7 +1,7 @@
 """Player-only vein and voisinage cultivation actions; no annual NPC hooks."""
 from ..content_registry import REALMS
 from ..models import HistoryRecord
-from ..rules import remove_item, public_player, opportunity_required
+from ..rules import remove_item, public_player, breakthrough_opportunity_required
 from ..runtime import now_iso, decode_rng, encode_rng
 from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, vein_cost, training_cost
@@ -118,14 +118,14 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
         ready = vein_ready(p) and (not major or p.realm_index < len(REALMS) - 1)
         requirement = self._major_breakthrough_requirement(p) if major else {"met": True, "reason": "每层三脉贯通后手动冲关。"}
         return {"phase": rules["vein_phases"][min(3, max(0, p.realm_index - 9))], "names": rules["vein_names"], "opened": opened, "total": rules["veins_per_realm"], "per_layer": rules["veins_per_layer"],
-                "realm": REALMS[p.realm_index].name, "layer": p.layer, "opportunity": p.opportunity,
+                "realm": REALMS[p.realm_index].name, "realm_index": p.realm_index, "layer": p.layer, "opportunity": p.opportunity,
                 "traces": p.immortal_traces, "converted": p.immortal_power_converted,
                 "intrinsic_total": {r: vein_intrinsic_bonus(p, r) for r in ('hp', 'mp')},
                 "intrinsic_per_vein": {r: rules['vein_intrinsic'][r][max(0, min(3, p.realm_index - 9))] for r in ('hp', 'mp')},
                 "next_cost": vein_cost(p.realm_index, opened, rules) if opened < min(rules["veins_per_realm"], p.layer * rules["veins_per_layer"]) else None,
-                "can_breakthrough": ready and requirement["met"] and p.immortal_power_converted and p.opportunity >= opportunity_required(p),
+                "can_breakthrough": ready and requirement["met"] and p.immortal_power_converted and p.opportunity >= breakthrough_opportunity_required(p),
                 "ready": ready, "major": major, "requirement": requirement["reason"],
-                "breakthrough_cost": opportunity_required(p),
+                "breakthrough_cost": breakthrough_opportunity_required(p),
                 "trial": {9:'人五衰：独战天道，存活五轮', 10:'天五衰：天道展开天域，存活五轮',
                           11:'斩三尸：三尸同时出场，无轮数限制，须全部击杀'}.get(p.realm_index) if major else None,
                 "breakthrough_chance": self._breakthrough_chance(p, major=major)["final"] if ready and not major else None,

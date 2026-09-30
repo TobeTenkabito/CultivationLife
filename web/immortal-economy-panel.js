@@ -28,19 +28,26 @@
     else for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id}));
     jobs.append(el('p','接取后须实际履约；游历与等待不计入进度，中途遇事可处理后续做。','muted'));
     const shop=section('功勋商店');
-    shop.append(el('p','道统传承、仙躯功法、淬体仙药与金光资材均以功勋兑换。普通坊市仍经营原有货物。','muted'));
+    shop.append(el('p','道统传承、仙躯功法、淬体仙药、金光资材与本境破境丹均以功勋兑换。三种破境丹搭配可增加 40 个百分点，最终成功率最高 98%；用于本境各层冲关，不代替跨境劫战。','muted'));
     shop.append(el('p',`已锁货 ${pool.locked_count} / ${pool.lock_limit}：一次付费，保留至购买或解锁；占用当期传承名额，常驻资材无需锁货。`,'muted'));
     const grid=el('div',null,'doctrine-book-grid');
     for(const o of pool.shop){
       const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;
       row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`数量 ${fmt(o.quantity)} · ${fmt(o.price)} 功勋`),transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id},o.owned||!o.eligible||pool.merit<o.price));
+      if(o.description)row.append(el('p',o.description,'muted'));
       if(o.can_lock)row.append(transact(o.locked?'解除锁货':`锁货 · ${fmt(o.lock_price)} 功勋`,{action:o.locked?'unlock':'lock',target_id:o.id},!o.locked&&(pool.merit<o.lock_price||pool.locked_count>=pool.lock_limit)));
       grid.append(row);
     }shop.append(grid);
     const orders=section('发布求取委托');
     orders.append(el('p','可求取本境界全部道统功法与仙家资材，不受商店当期传承名额限制。发布时预付功勋，含两成五撮合费；一个行动单位后交付，未领取物品代为保管。','muted'));
+    if(pool.manual_catalog_counts)orders.append(el('p',`本世道统功法共 ${pool.manual_catalog_counts.total} 部，当前境界可求取 ${pool.manual_catalog_counts.eligible} 部；更高品阶将在达到相应境界后列入。`,'muted'));
     const select=el('select');select.setAttribute('aria-label','求取资材');select.style.maxWidth='100%';
-    for(const o of pool.commission_catalog){const op=el('option',`${o.name} · ${fmt(o.price)} 功勋`);op.value=o.id;select.append(op);}orders.append(select);
+    const groups=new Map();
+    for(const o of pool.commission_catalog){
+      const label=o.doctrine||'仙躯功法与资材';
+      if(!groups.has(label)){const group=el('optgroup');group.label=label;groups.set(label,group);select.append(group);}
+      const op=el('option',`${o.name}${o.grade?` · ${['真仙','金仙','太乙','大罗'][o.grade-9]}`:''} · ${fmt(o.price)} 功勋`);op.value=o.id;groups.get(label).append(op);
+    }orders.append(select);
     const publish=transact('发布委托',{action:'publish'});publish.onclick=()=>trade({action:'publish',target_id:select.value});orders.append(publish);
     for(const o of pool.orders)orders.append(el('p',`${o.name} · ${o.ready?'已交付':`世界历 ${fmt(o.ready_age)} 年可领`}`),transact('领取委托物品',{action:'claim_order',target_id:o.id},!o.ready));
     const exchange=section('功勋兑换与天庭往来'), rate=pool.exchange;

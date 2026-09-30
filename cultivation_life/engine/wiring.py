@@ -401,7 +401,7 @@ def bind_dependencies(
             _buy_formation_material_offer=lambda *args, **kwargs: engine._buy_formation_material_offer(*args, **kwargs),
             _buy_formation_supply_offer=lambda *args, **kwargs: engine._buy_formation_supply_offer(*args, **kwargs),
             _load=lambda *args, **kwargs: engine._load(*args, **kwargs),
-            _manual_minor_layers=lambda *args, **kwargs: engine._manual_minor_layers(*args, **kwargs),
+            _manual_breakthrough_kind=lambda *args, **kwargs: engine._manual_breakthrough_kind(*args, **kwargs),
             present=lambda *args, **kwargs: engine.present(*args, **kwargs),
             _get_store=lambda: engine.store,
             bloodline_content_available=bloodline_content_available,

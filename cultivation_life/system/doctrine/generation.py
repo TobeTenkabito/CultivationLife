@@ -45,6 +45,9 @@ def validate_content(config: Mapping[str, Any]) -> None:
         raise ValueError("道统成功率须逐层递减，保底增量须为 5%/4%/2%")
     if rules["veins_per_layer"] != 3 or rules["veins_per_realm"] != 27:
         raise ValueError("每层三条仙脉，每境二十七条")
+    for key in ('creation_traces', 'study_traces_per_level'):
+        if type(rules['fusion'][key]) is not int or rules['fusion'][key] <= 0:
+            raise ValueError('合练与参悟仙痕须为正整数')
     for key in ("vein_opportunity_base", "vein_opportunity_step", "vein_trace_base", "vein_trace_step",
                 "voisinage_max_training", "voisinage_opportunity_base", "voisinage_trace_base",
                 "annotation_price", "explore_price"):
@@ -185,8 +188,9 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
             manual_origins[manuals[-1]["id"]] = names.choice(words["acquisition_places"])
         definitions[key] = dict(id=key, name=name, fixed=fixed, theme=theme["name"],
                                 description=theme["description"], stages=stages, manuals=manuals, manual_origins=manual_origins)
-    from .effects import enrich_effects
+    from .effects import enrich_effects, ensure_offensive_doctrine
     enrich_effects(definitions)
-    return dict(version=version, effects_schema=1, world="celestial", definitions=definitions, player={
+    ensure_offensive_doctrine(definitions, seed, version)
+    return dict(version=version, effects_schema=1, offensive_schema=1, world="celestial", definitions=definitions, player={
         "progress": {}, "origin": None, "active": None, "conversion_progress": 0,
     })

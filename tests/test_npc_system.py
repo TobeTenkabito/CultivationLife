@@ -76,7 +76,7 @@ class NpcSystemTests(unittest.TestCase):
         game.player.awaiting_major_breakthrough = True
         add_item(game.player, "true_origin_pill")
         self.engine.store.save(game)
-        with self.assertRaisesRegex(ValueError, "初期或中期"):
+        with self.assertRaisesRegex(ValueError, "本层冲关"):
             self.engine.use_item(created["id"], "true_origin_pill")
 
     def test_killing_uncontrolled_sect_member_expelled_and_wanted(self):

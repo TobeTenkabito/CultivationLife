@@ -116,7 +116,7 @@ class VoisinageEffects:
                 required = intent.field.strength if response.kind in {'shelter', 'disrupt'} else self._effect_power(intent.field, intent.effect, target)
                 if response.strength < required:
                     continue
-                if response.kind == 'escape' and key != victim:
+                if response.kind == 'escape' and (key != victim or target.unit.side in self.escape_forbidden_sides):
                     continue
                 protector.current -= response.cost
                 responded.add(key)
