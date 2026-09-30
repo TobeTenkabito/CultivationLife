@@ -150,6 +150,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
             elif operation == "choice":
                 result = ENGINE.choose(game_id, payload.get("choice_id", ""))
+            elif operation == "npc-contact":
+                result = ENGINE.contact_action(game_id, payload.get("npc_id", ""), payload.get("action", ""))
             elif operation == "relationship-violence":
                 result = ENGINE.relationship_violence(game_id, **payload)
             elif operation == "buddhist-action":

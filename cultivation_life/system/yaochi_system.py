@@ -33,18 +33,22 @@ def require_market(game):
 
 
 def offers(game, *, commission=False):
-    from .doctrine_system import _offers, _price
+    from .doctrine_system import _offers
     result = []
     books = ([b for d in game.doctrine_state.get('definitions', {}).values() for b in d['manuals']
               if b['grade'] <= game.player.realm_index] if commission else _offers(game))
+    locked = account(game).get('locked_offers', {}) if not commission else {}
+    if not commission:
+        books = [b for b in books if b['id'] not in locked][:max(0, 5-len(locked))]
+        result.extend(copy.deepcopy(list(locked.values())))
     for book in books:
         result.append(dict(id=book['id'], name=book['name'], kind='doctrine', quantity=1,
-                           price=max(1, _price(book)//1000), payload=book))
+                           price=config()['manual_prices'][max(0,min(3,book['grade']-9))], payload=book))
     for manual in rules()['body']['manuals']:
         result.append(dict(id=manual['id'], name=manual['name'], kind='body_manual', quantity=1,
-                           price=max(1,manual['price']//1000)))
+                           price=config()['body_manual_prices'][manual['id']]))
     for supply in [*rules()['body']['supplies'], *config()['materials']]:
-        price = supply['price'] if supply in config()['materials'] else max(1,supply['price']//1000)
+        price = supply['price'] if supply in config()['materials'] else config()['supply_prices'][supply['id']]
         result.append(dict(id=supply['id'], name=ITEM_CATALOG[supply['id']].name, kind='item', quantity=supply['quantity'], price=price))
     return result
 
@@ -64,6 +68,16 @@ def grant(game, offer):
         player_record(game)['progress'].setdefault(technique.doctrine_id, {'level':0,'experience':0})
     else:
         add_item(p, offer['id'], offer['quantity'])
+
+
+def commission_reward(player, job):
+    cfg = config()
+    multiplier = cfg['realm_reward_multipliers'][max(0, min(3, player.realm_index-9))]
+    return round(job['reward'] * multiplier * (1 + cfg['layer_reward_step'] * max(0, min(8, player.layer-1))))
+
+
+def lock_price(offer):
+    return max(config()['lock_minimum'], math.ceil(offer['price'] * config()['lock_rate']))
 
 
 class YaochiMixin:
@@ -89,9 +103,30 @@ class YaochiMixin:
             raise ValueError('数量须为 1 至 1000000 的整数')
         if action == 'work':
             return self.advance(game_id, 'yaochi_work', 1)
-        if action in {'buy','publish'}:
+        if action in {'lock', 'unlock'}:
+            locked = state.setdefault('locked_offers', {})
+            if action == 'unlock':
+                if target_id not in locked:
+                    raise ValueError('此货物尚未锁定')
+                entry = locked.pop(target_id)
+                summary = f"解除《{entry['name']}》的保留，锁货费用不退还。"
+            else:
+                if target_id in locked:
+                    raise ValueError('此货物已经锁定，无须重复付费')
+                if len(locked) >= cfg['lock_limit']:
+                    raise ValueError('锁货名额已满，请先购买或解除保留')
+                entry = next((o for o in offers(game) if o['id'] == target_id), None)
+                if not entry or entry['kind'] != 'doctrine':
+                    raise ValueError('只能锁定当期轮换的道统传承；常驻资材无需锁定')
+                cost = lock_price(entry)
+                spend(game, cost)
+                locked[target_id] = copy.deepcopy(entry)
+                summary = f"花费 {cost} 功勋锁定《{entry['name']}》，货物和兑换价格保留至购买或主动解锁。"
+        elif action in {'buy','publish'}:
             offer = next((o for o in offers(game, commission=action=='publish') if o['id']==target_id), None)
             if not offer: raise ValueError('当前没有这份仙家资材或传承')
+            if offer['kind']=='doctrine' and offer['payload']['grade'] > p.realm_index:
+                raise ValueError('当前修为尚不足以取得此品阶传承')
             if offer['kind']=='body_manual' and (target_id in p.immortal_body.get('manuals', []) or any(o['offer']['id']==target_id for o in state.get('orders', []))):
                 raise ValueError('此仙躯功法已经掌握或已委托求取')
             if action == 'publish' and len(state.get('orders', [])) >= cfg['max_orders']:
@@ -100,6 +135,7 @@ class YaochiMixin:
             spend(game, price)
             if action=='buy':
                 grant(game, offer)
+                state.get('locked_offers', {}).pop(target_id, None)
                 summary = f"以 {price} 功勋兑换《{offer['name']}》×{offer['quantity']}。"
             else:
                 serial=state.get('order_sequence',0)+1;state['order_sequence']=serial
@@ -114,7 +150,7 @@ class YaochiMixin:
             if state.get('job'): raise ValueError('须先交付当前委托')
             job=next((j for j in cfg['commissions'] if j['id']==target_id),None)
             if not job: raise ValueError('未知瑶池委托')
-            state['job']=dict(job,years=unit,progress=0,reward=job['reward']*max(1,p.realm_index-8))
+            state['job']=dict(job,years=unit,progress=0,reward=commission_reward(p, job))
             summary=f"接取【{job['name']}】，须在瑶池实际履约 {unit} 年。中途遇事可稍后继续。"
         elif action=='claim_job':
             job=state.get('job')
@@ -153,10 +189,11 @@ class YaochiMixin:
         election=game.heavenly_court.get('open_election')
         rows=[]
         for o in offers(game):
-            rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee']))})
+            rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
         return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
                     commission_catalog=[dict(id=o['id'],name=o['name'],price=math.ceil(o['price']*(1+cfg['order_fee']))) for o in offers(game,commission=True)],
-                    merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=cfg['commissions'],
+                    merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],
+                    lock_limit=cfg['lock_limit'], locked_count=len(state.get('locked_offers',{})),
                     job=copy.deepcopy(state.get('job')), orders=[dict(id=o['id'],name=o['offer']['name'],ready_age=o['ready_age'],ready=p.age>=o['ready_age']) for o in state.get('orders',[])],
                     exchange={k:cfg[k] for k in ('stones_per_merit','merit_per_court_merit','support_cost','support_gain','vote_cost')},
                     votes=[dict(id=s['id'],name=s['name'],bought=s['id'] in election.get('yaochi_seats',[])) for s in game.heavenly_court['seats']] if election and 'player' in election['candidates'] else [])

@@ -1,6 +1,6 @@
 {
-  "base_version": "1.51.0",
-  "exe_sha256": "322b5ed158468b3b92bbce17c72979c433ed05cd5f83a2e469df2de8f18aa8f9",
+  "base_version": "1.51.1",
+  "exe_sha256": "fa3a41c94e060ad35005d63d0cdd128de618646447627469650eb957d5980fb3",
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -11,8 +11,9 @@
     "tianji-artifacts": "2.2.0"
   },
   "validation": [
+    "Six-theme categorized NPC contacts, same-world guards, paid stock locks and NPC cabinet verified",
     "Six-theme Yaochi merit economy, golden light tempering and temporary passes verified",
-    "1186 automated regressions passed",
+    "1209 automated regressions passed",
     "Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified",
     "Six-theme voisinage stages, five-round backlash and Dao Ancestor; searchable handbook verified",
     "Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified",

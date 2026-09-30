@@ -1,7 +1,7 @@
 {
-  "base_version": "1.51.0",
-  "android_version": "1.51.0-android.16",
-  "version_code": 16,
+  "base_version": "1.51.1",
+  "android_version": "1.51.1-android.17",
+  "version_code": 17,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,9 +12,9 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.51.0-Android12.apk",
-  "apk_sha256": "76109ba386455fd0497ee75904ae8c7045bb4e3d3f94c8cd7e33d568780f69ee",
-  "apk_bytes": 47864794,
+  "apk": "浮生问道-v1.51.1-Android12.apk",
+  "apk_sha256": "53be12cbc90984213a68ebda2877892c63a3d593735de5d9c007b62ca0eda8d8",
+  "apk_bytes": 47886506,
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -37,7 +37,8 @@
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "1186 Python regressions passed",
+    "1209 Python regressions passed",
+    "Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified",
     "Android 12 six-theme Yaochi economy, gold tempering, timed single-use pass and persistence verified",
     "Android 12 three upper worlds: six themes, DLC routing, finite reserves and native ordinary breakthrough verified",
     "Android 12 six-theme voisinage stages, backlash and trial persistence verified",

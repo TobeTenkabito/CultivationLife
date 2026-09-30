@@ -520,6 +520,10 @@ class GameEngine(YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, Bu
     def manage_faction_relationship(self, game_id: str, npc_id: str, role: str) -> dict[str, Any]:
         return relationship_actions.manage_faction_relationship(self._dependencies.relationship_actions, game_id, npc_id, role)
 
+    def contact_action(self, game_id, npc_id, action):
+        from ..system.npc_contacts import act
+        return act(self, game_id, npc_id, action)
+
     def respond_disciple_request(self, game_id: str, request_id: str, accept: bool) -> dict[str, Any]:
         return relationship_actions.respond_disciple_request(self._dependencies.relationship_actions, game_id, request_id, accept)
 

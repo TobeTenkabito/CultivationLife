@@ -25,12 +25,18 @@
     const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);
     const jobs=section('接取委托');
     if(pool.job){const j=pool.job;jobs.append(el('p',`${j.name} · 履约 ${fmt(j.progress)} / ${fmt(j.years)} 年 · 报酬 ${fmt(j.reward)} 功勋`));jobs.append(transact(j.progress>=j.years?'交付并领取功勋':'继续履约',{action:j.progress>=j.years?'claim_job':'work'}));}
-    else for(const j of pool.commissions)jobs.append(transact(j.name,{action:'accept',target_id:j.id}));
+    else for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id}));
     jobs.append(el('p','接取后须实际履约；游历与等待不计入进度，中途遇事可处理后续做。','muted'));
     const shop=section('功勋商店');
     shop.append(el('p','道统传承、仙躯功法、淬体仙药与金光资材均以功勋兑换。普通坊市仍经营原有货物。','muted'));
+    shop.append(el('p',`已锁货 ${pool.locked_count} / ${pool.lock_limit}：一次付费，保留至购买或解锁；占用当期传承名额，常驻资材无需锁货。`,'muted'));
     const grid=el('div',null,'doctrine-book-grid');
-    for(const o of pool.shop){const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;row.append(el('h4',o.name),el('p',`数量 ${fmt(o.quantity)} · ${fmt(o.price)} 功勋`),transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id},o.owned||pool.merit<o.price));grid.append(row);}shop.append(grid);
+    for(const o of pool.shop){
+      const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;
+      row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`数量 ${fmt(o.quantity)} · ${fmt(o.price)} 功勋`),transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id},o.owned||!o.eligible||pool.merit<o.price));
+      if(o.can_lock)row.append(transact(o.locked?'解除锁货':`锁货 · ${fmt(o.lock_price)} 功勋`,{action:o.locked?'unlock':'lock',target_id:o.id},!o.locked&&(pool.merit<o.lock_price||pool.locked_count>=pool.lock_limit)));
+      grid.append(row);
+    }shop.append(grid);
     const orders=section('发布求取委托');
     orders.append(el('p','可求取本境界全部道统功法与仙家资材，不受商店当期传承名额限制。发布时预付功勋，含两成五撮合费；一个行动单位后交付，未领取物品代为保管。','muted'));
     const select=el('select');select.setAttribute('aria-label','求取资材');select.style.maxWidth='100%';

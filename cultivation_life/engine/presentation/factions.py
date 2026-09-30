@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 from ...system.npc_social import social_hint
+from ...system.npc_contacts import availability, relation_kind
 from typing import Any
 from ...content_registry import (
     FACTION_REWARDS,
@@ -159,6 +160,8 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     concubine_ids = {str(entry.get("id")) for entry in player.concubines}
     for entry in roster:
         npc = npc_by_id[entry["id"]]
+        entry.update(contact_actions=availability(game,npc), contact_relation=relation_kind(player,npc.id),
+                     contact_source='sect', perceived_alive=True, status='存活')
         # Relationship permissions always use the NPC's true cultivation;
         # secret arts only affect what the player can see.
         npc_rank = (npc.realm_index, npc.layer)

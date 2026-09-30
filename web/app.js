@@ -1118,6 +1118,10 @@ function renderHeavenlyCourt(court) {
   const target=document.createElement('select'); target.className='court-target'; (court.target_npcs||[]).forEach(npc=>{const option=document.createElement('option');option.value=npc.id;option.textContent=`${npc.name} · ${npc.realm_name}${npc.wanted?' · 通缉中':''}`;target.appendChild(option);});
   const policies=document.createElement('div'), decreeSection=document.createElement('section'), decreeTitle=document.createElement('h3'), active=document.createElement('p'); policies.className='court-policy-grid'; decreeTitle.textContent=`决议（${court.active_decrees.length}/${court.decree_slots}）`; active.className='muted'; active.textContent=court.active_decrees.length?`生效中：${court.active_decrees.map(row=>`${row.name}至第${row.expires_unit}单位`).join('、')}`:'当前没有生效中的临时决议。'; decreeSection.append(decreeTitle,active,influence,target);
   (court.decrees||[]).forEach(decree=>{const button=document.createElement('button');button.className='court-action court-policy';button.textContent=decree.enabled?decree.name:`${decree.name}（${decree.disabled_reason}）`;button.dataset.courtUnavailable=decree.enabled?'0':'1';button.onclick=()=>mutate(`/api/games/${game.id}/heavenly-court`,{action:`decree:${decree.id}`,target_id:target.value,influence_spend:Number(influence.value)||0});decreeSection.appendChild(button);});
+  const governance=document.createElement('section');governance.className='court-governance';
+  const governanceTitle=document.createElement('h3');governanceTitle.textContent='七曜议政';governance.append(governanceTitle);
+  const governanceHint=document.createElement('p');governanceHint.textContent=`在任 ${court.occupied_seats} 席：每个仙界时间单位由在任星君轮值议政，至多一项天条表决与一项政策。天条须获在任席位过半赞成；你的席位在自动议政时弃权，可自行发起表决。`;governance.append(governanceHint);
+  for(const row of court.governance || []){const p=document.createElement('p');p.textContent=`第 ${row.unit} 单位 · ${row.summary}`;governance.append(p);}root.append(governance);
   const lawSection=document.createElement('section'), lawTitle=document.createElement('h3');lawTitle.textContent='天条';lawSection.appendChild(lawTitle);
   (court.laws||[]).forEach(law=>{const row=document.createElement('div'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small'),button=document.createElement('button');row.className=`court-law ${law.active?'active':''}`;name.textContent=`${law.name} · ${law.active?'施行中':'未施行'}`;detail.textContent=law.description;text.append(name,detail);button.className='court-action';button.textContent=law.active?'提请废除':'提请施行';button.dataset.courtUnavailable=court.player_controls<1?'1':'0';button.onclick=()=>mutate(`/api/games/${game.id}/heavenly-court`,{action:`law:${law.id}`,enact:!law.active,influence_spend:Number(influence.value)||0});row.append(text,button);lawSection.appendChild(row);});
   policies.append(decreeSection,lawSection);root.appendChild(policies);
@@ -1913,6 +1917,7 @@ function renderFamily(family, governance) {
 }
 
 function renderWorldNpcs(npcs) {
+  window.NpcContacts?.render(game, payload => mutate(`/api/games/${game.id}/npc-contact`, payload));
   const list = $('#world-npc-list'); list.innerHTML = '';
   npcs.forEach(npc => {
     const row = document.createElement('div'); row.className = `world-npc-row${npc.perceived_alive ? '' : ' absent'}`;
@@ -3776,6 +3781,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.relationship-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event;
+  });
+  document.querySelectorAll('.contact-action').forEach(button => {
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.active_trial || !!game?.imprisonment || button.dataset.available !== '1';
   });
   document.querySelectorAll('.sage-inner-outer-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.available !== '1';
