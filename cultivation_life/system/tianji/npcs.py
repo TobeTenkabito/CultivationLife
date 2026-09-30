@@ -141,6 +141,7 @@ class TianjiNpcMethods:
         game.player.crafting_sequence += 1
         instance_id = f"tianji-loot-{game.id}-{game.player.crafting_sequence}"
         instance = {
+            "force_tier": artifact.get('force_tier', 1),
             "id": instance_id, "name": artifact["name"] if is_true else f"仿·{artifact['name']}",
             "mold_id": artifact["mold_id"], "mold_name": self._tianji_config()["mold_nouns"][artifact["mold_id"]],
             "quality": "tianji_true" if is_true else "tianji_replica",

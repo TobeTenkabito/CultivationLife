@@ -1,7 +1,7 @@
 {
-  "base_version": "1.50.0",
-  "android_version": "1.50.0-android.15",
-  "version_code": 15,
+  "base_version": "1.51.0",
+  "android_version": "1.51.0-android.16",
+  "version_code": 16,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,9 +12,9 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.50.0-Android12.apk",
-  "apk_sha256": "a82c6f729696a8f2b2cc6c8c7174b3a142557da5700c6857c7b3088c4c62e047",
-  "apk_bytes": 47843026,
+  "apk": "浮生问道-v1.51.0-Android12.apk",
+  "apk_sha256": "76109ba386455fd0497ee75904ae8c7045bb4e3d3f94c8cd7e33d568780f69ee",
+  "apk_bytes": 47864794,
   "dlc_versions": {
     "buddhist-dharma": "1.0.0",
     "ghost-reincarnation": "3.8.0",
@@ -37,7 +37,8 @@
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "1169 Python regressions passed",
+    "1186 Python regressions passed",
+    "Android 12 six-theme Yaochi economy, gold tempering, timed single-use pass and persistence verified",
     "Android 12 three upper worlds: six themes, DLC routing, finite reserves and native ordinary breakthrough verified",
     "Android 12 six-theme voisinage stages, backlash and trial persistence verified",
     "Android 12 six-theme live guided controls, deterministic practice/master/sect, persisted progress and native back verified",

@@ -43,6 +43,8 @@ class VoisinageEffects:
             power = min(1, power * field.authority / d.authority_reference)
             if target.vitality < .5 and effect.kind == 'strike':
                 power = min(1, power * (1 + next((f['value'] for f in d.features if f['kind'] == 'execution'), 0)))
+        if effect.target == 'enemy':
+            power *= 1 - target.unit.capabilities.body_voisinage_resistance
         return power
 
     def _select_effect(self, field, previous):
@@ -183,7 +185,8 @@ class VoisinageEffects:
         purpose = self.objectives[self.units[field.owner].unit.side]
         if key in intent.terminal:
             if kind == 'strike' and purpose == 'kill':
-                self._lose(key, target.vitality)
+                amount = target.vitality if intent.ordinary else max(target.vitality, effect.power) * (1 - target.unit.capabilities.body_voisinage_resistance)
+                self._lose(key, amount)
             else:
                 target.suppressed = True
             self.frame.events.append(f'{self.units[field.owner].unit.name}连续支配第二轮，以实际可用手段完成' +
@@ -193,7 +196,7 @@ class VoisinageEffects:
             amount = power if purpose == 'kill' else min(power, max(0, target.vitality - .13))
             self._lose(key, amount)
         elif kind == 'suppress':
-            self._lose(key, target.vitality if field.definition.authority is None else power, physical=False)
+            self._lose(key, target.vitality * (1 - target.unit.capabilities.body_voisinage_resistance) if field.definition.authority is None else power, physical=False)
             target.suppressed = target.vitality <= .12
         elif kind == 'seal':
             if field.definition.authority is not None:

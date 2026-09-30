@@ -55,6 +55,18 @@ def validate_content(config: Mapping[str, Any]) -> None:
     for rate in [*rules['vein_success_rates'], rules['vein_pity_step']]:
         if not 0 < number(rate, 'vein probability') <= 1:
             raise ValueError('仙脉概率无效')
+    stages = rules['golden_light']['stages']
+    if [s['resistance'] for s in stages] != [.01, .02, .04, .06, .10]:
+        raise ValueError('金光五阶抵抗比例须为 1%/2%/4%/6%/10%')
+    if stages[0]['recipe'] or any(not s['recipe'] for s in stages[1:]):
+        raise ValueError('微光随仙躯解锁，其后四阶须有资材配方')
+    for stage in stages:
+        for quantity in stage['recipe'].values():
+            if type(quantity) is not int or quantity <= 0:
+                raise ValueError('金光资材数量须为正整数')
+    for values in rules['vein_intrinsic'].values():
+        if len(values) != 4 or any(type(x) is not int or x <= 0 for x in values):
+            raise ValueError('四境仙脉须分别配置正整数本源成长')
     body = rules['body']
     if body['required_training'] != 100 or body['golden_light_level'] != 20:
         raise ValueError('仙躯须炼体百层起修、二十层激发金光')

@@ -153,8 +153,16 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
             if value.voisinages:
                 results[key] = value
     from ..combat_loadout import project_loadout
+    from ..tianji_system import tianji_content_available
+    held = {}
+    if tianji_content_available():
+        definitions_by_id = {d['id']: d for d in game.tianji_state.get('artifacts', ())}
+        for artifact_id, holder in game.tianji_state.get('holders', {}).items():
+            npc_id = holder.get('npc_id')
+            if npc_id and artifact_id in definitions_by_id:
+                held.setdefault(npc_id, []).append(definitions_by_id[artifact_id])
     for key, owner in owners.items():
-        value = project_loadout(game, owner, results.get(key), player=key == 'player')
+        value = project_loadout(game, owner, results.get(key), player=key == 'player', tianji_artifacts=held.get(read(owner, 'id'), ()))
         if (value.voisinages or value.technique_tier > 1 or value.artifact_tier > 1
                 or value.passive_ward_tier == 2 or value.interventions):
             results[key] = value

@@ -142,21 +142,12 @@ class DoctrineSystemMixin(ImmortalCultivationMixin):
                                          "trained", message, {"levels": completed}, ["system", "doctrine"]))
 
     def doctrine_action(self, game_id, action, doctrine_id=None, manual_id=None, confirm_origin=False, npc_id=None):
+        if action == "buy":
+            return self.yaochi_action(game_id, "buy", manual_id)
         game = self._cultivation_game(game_id)
         record = player_record(game)
         definition = game.doctrine_state["definitions"].get(doctrine_id)
-        if action == "buy":
-            book = next((b for b in _offers(game) if b["id"] == manual_id), None)
-            if not book:
-                raise ValueError("这部传承当前不在仙界书市中")
-            if not remove_item(game.player, "spirit_stone", _price(book)):
-                raise ValueError("灵石不足")
-            technique = Technique(**copy.deepcopy(book))
-            if not learn_technique(game.player, technique):
-                add_technique_copy(game.player, technique)
-            record["progress"].setdefault(book["doctrine_id"], {"level": 0, "experience": 0})
-            summary = f"获得《{book['name']}》，承接《{game.doctrine_state['definitions'][book['doctrine_id']]['name']}》。"
-        elif action == "explore":
+        if action == "explore":
             record["explore_target"] = doctrine_id
             self._begin_doctrine_action(game, "daomen_explore")
             self.store.save(game)

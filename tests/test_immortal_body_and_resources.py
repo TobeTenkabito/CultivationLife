@@ -98,6 +98,8 @@ def test_body_purchase_recipe_failure_pity_switch_and_level20(prepared):
     engine, game, _ = prepared
     game.player.body_training = 100
     game.player.immortal_body = {'level': 19}
+    game.player.location_id = 'expanse_celestial_8'
+    game.yaochi_state['merit'] = 10000
     engine.store.save(game)
     engine.immortal_action(game.id, 'buy_body_manual', supply_id='jade_marrows')
     with pytest.raises(ValueError, match='药'):

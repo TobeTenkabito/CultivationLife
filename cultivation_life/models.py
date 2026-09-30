@@ -377,6 +377,7 @@ class Player:
     immortal_aperture: dict[str, Any] = field(default_factory=dict)
     spirit_voisinage_manual: str | None = None
     teleport_permissions: list[str] = field(default_factory=list)
+    teleport_passes: dict[str, Any] = field(default_factory=dict)
     combat_plan: dict[str, Any] = field(default_factory=dict)
     tutorial_state: dict[str, Any] = field(default_factory=dict)
     immortal_trace_rng: int = 0
@@ -885,6 +886,7 @@ class GameState:
     # unique-body ownership and sparse NPC holders are frozen together here.
     tianji_state: dict[str, Any] = field(default_factory=dict)
     doctrine_state: dict[str, Any] = field(default_factory=dict)
+    yaochi_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -948,6 +950,7 @@ class GameState:
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
             "tianji_state": self.tianji_state,
+            "yaochi_state": self.yaochi_state,
             "doctrine_state": self.doctrine_state,
             "settings": self.settings,
             "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
@@ -1015,6 +1018,7 @@ class GameState:
             if isinstance(value.get("guixu_state", {}), dict) else {},
             tianji_state=copy.deepcopy(value.get("tianji_state", {}))
             if isinstance(value.get("tianji_state", {}), dict) else {},
+            yaochi_state=copy.deepcopy(value.get('yaochi_state', {})) if isinstance(value.get('yaochi_state', {}), dict) else {},
             doctrine_state=copy.deepcopy(value.get("doctrine_state", {}))
             if isinstance(value.get("doctrine_state", {}), dict) else {},
             settings={

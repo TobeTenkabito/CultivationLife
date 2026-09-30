@@ -60,3 +60,9 @@
 .voisinage-stages > .current { opacity: 1; font-weight: bold; background: color-mix(in srgb, var(--pine) 10%, transparent); outline: 2px solid currentColor; outline-offset: -2px; }
 .voisinage-stages small { font-size: .72em; margin-top: .25rem; }
 .voisinage-abilities { overflow-wrap: anywhere; line-height: 1.7; }
+
+#golden-light-content .voisinage-stages { grid-template-columns:repeat(5,minmax(0,1fr)); }
+#yaochi-content select, #yaochi-content input { max-width:100%; min-width:0; }
+#yaochi-content .doctrine-entry > button { margin:.25rem; }
+#yaochi-content .doctrine-book { min-width:0; overflow-wrap:anywhere; }
+@media(max-width:560px){#yaochi-content .doctrine-entry > button { display:block; width:100%; margin:.5rem 0; }#golden-light-content .voisinage-stages { font-size:12px; }}

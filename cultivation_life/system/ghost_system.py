@@ -124,7 +124,7 @@ def ghost_opportunity_multiplier(player: Player) -> float:
     return multiplier
 
 
-from .immortal_cultivation import body_intrinsic_bonus
+from .immortal_cultivation import body_intrinsic_bonus, vein_intrinsic_bonus
 
 
 def canonical_intrinsic_hp(
@@ -138,6 +138,7 @@ def canonical_intrinsic_hp(
         + actual_layer * 8
         + player.body_training * 12
         + body_intrinsic_bonus(player, "hp")
+        + vein_intrinsic_bonus(player, "hp")
         + player.permanent_intrinsic_hp_bonus
     )
 
@@ -153,6 +154,7 @@ def canonical_intrinsic_mp(
         + actual_layer * 11
         + player.body_training * 10
         + body_intrinsic_bonus(player, "mp")
+        + vein_intrinsic_bonus(player, "mp")
         + player.permanent_intrinsic_mp_bonus
     )
 

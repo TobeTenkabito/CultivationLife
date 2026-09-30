@@ -33,16 +33,19 @@ def public_loadout(game, npc):
                 combat_artifact_name=artifact.name if artifact else None)
 
 
-def project_loadout(game, owner, source=None, *, player=False):
+def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=()):
     source = source or CapabilitySource()
     if player:
-        from .immortal_cultivation import golden_light
+        from .immortal_cultivation import golden_light, golden_light_resistance
         techniques = [t for t in [owner.technique, *owner.combat_techniques] if t and t.active_in(owner.world)]
         # Ordinary Item equipment is passive while held under the existing bag
         # model; crafted items must still occupy an equipped crafted slot.
         artifacts = [i for i in owner.inventory if i.quantity > 0 and set(i.tags) & {'artifact', 'equipment'}
                      and (not i.crafted_artifact_id or i.crafted_artifact_id in owner.equipped_crafted_artifact_ids)]
         ward = 2 if golden_light(owner) else 1
+        resistance = golden_light_resistance(owner)
+        from .crafting_system import active_crafted_artifacts
+        artifacts.extend(active_crafted_artifacts(owner))
     else:
         key = read(owner, 'main_technique_id')
         technique = TECHNIQUE_CATALOG.get(key)
@@ -56,7 +59,14 @@ def project_loadout(game, owner, source=None, *, player=False):
         artifact = ITEM_CATALOG.get(read(owner, 'combat_artifact_id'))
         artifacts = [artifact] if artifact else []
         ward = 2 if npc_golden_light(owner) else 1
+        resistance = .01 if ward == 2 else 0.0
+        artifacts.extend(tianji_artifacts)
+    if player:
+        from .tianji_system import tianji_content_available
+        if not tianji_content_available():
+            artifacts = [a for a in artifacts if not read(a, 'tianji')]
     responses = tuple(r for t in techniques for r in _responses(t, 'technique')) + tuple(r for i in artifacts for r in _responses(i, 'artifact'))
     return replace(source, technique_tier=max((_tier(t) for t in techniques), default=1),
                    artifact_tier=max((_tier(i) for i in artifacts), default=1), passive_ward_tier=ward,
+                   body_voisinage_resistance=resistance,
                    interventions=responses[:8])

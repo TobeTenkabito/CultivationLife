@@ -36,6 +36,8 @@ def main():
         game.player.body_training = 0
         game.player.inventory = [i for i in game.player.inventory if i.id not in {'immortal_jade_herb','nine_leaf_immortal_lingzhi'}]
         game.heavenly_court['open_election'] = None
+        game.player.location_id = 'expanse_celestial_8'
+        game.yaochi_state['merit'] = 100000
         add_item(game.player, 'spirit_stone', 10**8)
         add_item(game.player, 'immortal_trace', 1000)
         game.player.opportunity = 10**8
@@ -54,7 +56,7 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData !== null')
                 page.evaluate('(id) => loadGame(id)', game.id)
-                page.evaluate("UtilityPanels.open('market')")
+                page.evaluate("UtilityPanels.open('yaochi')")
                 assert page.locator('.left-dock [data-panel-target="doctrine"]').count() == 1
                 assert page.locator('.left-dock [data-panel-target="immortal-veins"]').count() == 1
                 assert page.locator('.left-dock [data-panel-target="voisinage"]').count() == 1
@@ -63,10 +65,10 @@ def main():
                 assert page.locator('#hud-opportunity .hud-percent').inner_text() == '无尽'
                 assert page.locator('[data-panel-target=voisinage]').is_hidden()
                 assert page.locator('.left-dock [data-panel-target=immortal-body]').is_visible()
-                assert page.locator('.doctrine-book').count() == 5
+                assert page.locator('#yaochi-content .doctrine-book').count() == 14
                 page.locator('.doctrine-book button').first.click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.learned)')
-                page.evaluate("UtilityPanels.close('market');UtilityPanels.open('daomen')")
+                page.evaluate("UtilityPanels.close('yaochi');UtilityPanels.open('daomen')")
                 assert page.locator('#doctrine-content .doctrine-chapter').count() == 1
                 page.get_by_role('button', name='访求同道', exact=False).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.peers.length === 1)')
@@ -133,17 +135,17 @@ def main():
                 saved.player.mp = max_mp(saved.player) * .60
                 engine.store.save(saved)
                 page.evaluate('(id)=>loadGame(id)',game.id)
-                page.evaluate("UtilityPanels.close('voisinage'); UtilityPanels.open('market')")
-                page.get_by_role('button',name='求取传承 · 180,000 灵石',exact=True).click()
+                page.evaluate("UtilityPanels.close('voisinage'); UtilityPanels.open('yaochi')")
+                page.locator('[data-offer-id=jade_marrows] button').click()
                 page.wait_for_function('game.doctrines.immortal_body.manual === "jade_marrows"')
-                for name in ['玉髓仙草','九叶仙芝']:
-                    page.get_by_role('button',name=name,exact=False).click()
+                for name, key in [('玉髓仙草','immortal_jade_herb'),('九叶仙芝','nine_leaf_immortal_lingzhi')]:
+                    page.locator(f'[data-offer-id={key}] button').click()
                     page.wait_for_function('(name)=>game.doctrines.immortal_body.recipe.some(r=>r.name===name && r.owned>0)',arg=name)
                 saved=engine.store.load(game.id)
                 saved.player.immortal_body['failures']=100
                 engine.store.save(saved)
                 page.evaluate('(id)=>loadGame(id)',game.id)
-                page.evaluate("UtilityPanels.close('market');UtilityPanels.open('immortal-body')")
+                page.evaluate("UtilityPanels.close('yaochi');UtilityPanels.open('immortal-body')")
                 page.get_by_role('button',name='以仙药淬炼下一层',exact=True).click()
                 page.wait_for_function('game.doctrines.immortal_body.level===1')
                 for theme in 'abcdef':

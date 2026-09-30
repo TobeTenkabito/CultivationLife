@@ -1,4 +1,4 @@
-"""Immortal-body application boundary. Purchases live in the external Daomen UI.
+"""Immortal-body application boundary. Purchases live in the Yaochi merit economy.
 
 Dedicated manuals cannot be equipped in mortal body-training slots. Progress,
 pity and ownership persist when changing manuals; medicines are ordinary items.
@@ -14,34 +14,44 @@ def quantity(player, key):
 
 
 class ImmortalBodyMixin:
+    def _temper_golden_light(self, game):
+        from .immortal_cultivation import golden_light_rank
+        p, cfg = game.player, rules()['golden_light']
+        rank = golden_light_rank(p)
+        if not rank or rank >= len(cfg['stages']):
+            raise ValueError('须先解锁护体金光，且尚未达到大圆满')
+        if p.sealed_cultivation or p.cultivation_suppression:
+            raise ValueError('修为受压制，不能锤炼护体金光')
+        stage = cfg['stages'][rank]
+        if any(quantity(p, key) < count for key, count in stage['recipe'].items()):
+            raise ValueError('锤炼护体金光的材料不足')
+        for key, count in stage['recipe'].items():
+            remove_item(p, key, count)
+        p.immortal_body['golden_light_rank'] = rank + 1
+        return self._save_cultivation(game, f"护体金光锤炼至{stage['name']}，肉身承受邻域影响减弱 {stage['resistance']:.0%}。")
+
+    @staticmethod
+    def _public_golden_light(game):
+        from .immortal_cultivation import golden_light_rank, golden_light_resistance
+        p, cfg = game.player, rules()['golden_light']
+        rank = golden_light_rank(p)
+        next_stage = cfg['stages'][rank] if 0 < rank < 5 else None
+        recipe = [{'id':key, 'name':ITEM_CATALOG[key].name, 'needed':count, 'owned':quantity(p,key)}
+                  for key,count in (next_stage['recipe'] if next_stage else {}).items()]
+        return dict(available=bool(rank), rank=rank, stages=cfg['stages'], resistance=golden_light_resistance(p),
+                    next_name=next_stage['name'] if next_stage else None, recipe=recipe,
+                    can_train=bool(next_stage and p.world=='celestial' and not p.sealed_cultivation
+                                   and not p.cultivation_suppression and all(r['owned']>=r['needed'] for r in recipe)))
+
     def _immortal_body_action(self, game, action, key):
         p, cfg = game.player, rules()['body']
         state = p.immortal_body
         manuals = {m['id']: m for m in cfg['manuals']}
-        if action == 'buy_body_manual':
-            manual = manuals.get(key)
-            if not manual:
-                raise ValueError('未知仙躯功法')
-            if key in state.get('manuals', []):
-                raise ValueError('已经掌握此仙躯功法')
-            if not remove_item(p, 'spirit_stone', manual['price']):
-                raise ValueError('灵石不足')
-            state.setdefault('manuals', []).append(key)
-            state.setdefault('active_manual', key)
-            summary = f"取得仙躯功法《{manual['name']}》。"
-        elif action == 'select_body_manual':
+        if action == 'select_body_manual':
             if key not in manuals or key not in state.get('manuals', []):
                 raise ValueError('须先取得此仙躯功法')
             state['active_manual'] = key
             summary = f"改修《{manuals[key]['name']}》，仙躯层数与失败保底保留。"
-        elif action == 'buy_body_supply':
-            supply = next((s for s in cfg['supplies'] if s['id'] == key), None)
-            if supply is None:
-                raise ValueError('未知仙药')
-            if not remove_item(p, 'spirit_stone', supply['price']):
-                raise ValueError('灵石不足')
-            add_item(p, key, supply['quantity'])
-            summary = f"取得{ITEM_CATALOG[key].name} ×{supply['quantity']}。"
         elif action == 'train_body':
             if p.body_training < cfg['required_training']:
                 raise ValueError('须先将炼体修至 100 层')

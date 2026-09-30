@@ -140,6 +140,8 @@ def bind_dependencies(
             _public_governance=lambda *args, **kwargs: engine._public_governance(*args, **kwargs),
             _public_guixu=lambda *args, **kwargs: engine._public_guixu(*args, **kwargs),
             _public_heavenly_court=lambda *args, **kwargs: engine._public_heavenly_court(*args, **kwargs),
+            _public_yaochi=lambda *args, **kwargs: engine._public_yaochi(*args, **kwargs),
+            _public_golden_light=lambda *args, **kwargs: engine._public_golden_light(*args, **kwargs),
             _public_intrigue_system=lambda *args, **kwargs: engine._public_intrigue_system(*args, **kwargs),
             _public_major_breakthrough=lambda *args, **kwargs: engine._public_major_breakthrough(*args, **kwargs),
             _public_map_with_ghost_parade=lambda *args, **kwargs: engine._public_map_with_ghost_parade(*args, **kwargs),
@@ -224,6 +226,8 @@ def bind_dependencies(
         ),
         advancement=AdvancementDependencies(
             _begin_doctrine_action=lambda *args, **kwargs: engine._begin_doctrine_action(*args, **kwargs),
+            _begin_yaochi_action=lambda *args, **kwargs: engine._begin_yaochi_action(*args, **kwargs),
+            _finish_yaochi_action=lambda *args, **kwargs: engine._finish_yaochi_action(*args, **kwargs),
             _finish_doctrine_action=lambda *args, **kwargs: engine._finish_doctrine_action(*args, **kwargs),
             _add_opportunity=lambda *args, **kwargs: engine._add_opportunity(*args, **kwargs),
             _advance_auction_clock=lambda *args, **kwargs: engine._advance_auction_clock(*args, **kwargs),

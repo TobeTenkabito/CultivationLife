@@ -608,6 +608,7 @@ function render(data) {
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
   window.ImmortalAperturePanel?.render(data.aperture || {}, payload=>mutate(`/api/games/${data.id}/aperture-action`,payload),{pending:!!data.pending_event,alive:data.player.alive});
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
+  window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
   renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
@@ -667,7 +668,7 @@ function renderTianji(system) {
     const detail = document.createElement('div'); detail.className = 'tianji-rank-detail';
     const lines = [
       `胎模：${artifact.mold_name || '???'}`,
-      `基础战力：${artifact.base_combat_power == null ? '???' : number(artifact.base_combat_power)}`,
+      `伤害类型：${artifact.damage_type || "???"} · 基础战力：${artifact.base_combat_power == null ? '???' : number(artifact.base_combat_power)}`,
       artifact.player_crafted ? '玩家法宝按当前单件战力参与排名' : '神机榜值为原始战力，不随温养、镶嵌或界面压制改变',
       `来源世界：${artifact.origin_world_name || '???'}`,
       `器述：${artifact.description || '???'}`,
@@ -1097,7 +1098,7 @@ function renderHeavenlyCourt(court) {
   if (!visible) { window.UtilityPanels?.close('heavenly-court'); return; }
   const root = $('#heavenly-court-content'); root.innerHTML = '';
   if (!court.initialized) { root.textContent = '天庭正在汇集仙域宗门名册。'; return; }
-  $('#court-heading').textContent = `第 ${court.unit} 单位 · ${court.seat_count} 席（大${court.seat_sizes?.large||0}·中${court.seat_sizes?.medium||0}·小${court.seat_sizes?.small||0}）`;
+  $('#court-heading').textContent = `玉京仙都 · 第 ${court.unit} 单位 · ${court.seat_count} 席（大${court.seat_sizes?.large||0}·中${court.seat_sizes?.medium||0}·小${court.seat_sizes?.small||0}）`;
   const summary = document.createElement('div'); summary.className = 'court-summary';
   [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],['功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
     const row=document.createElement('div'), small=document.createElement('small'), strong=document.createElement('strong'); small.textContent=label; strong.textContent=value; row.append(small,strong); summary.appendChild(row);
@@ -2502,13 +2503,18 @@ function renderMap(map, auction) {
   if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。先选通行方式，再选择目的地。`;box.append(label);
     const action=(text,payload,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.className='map-teleport';b.dataset.unavailable=disabled?'1':'0';b.disabled=disabled||busy||!!game.pending_event||!game.player.alive;b.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,payload);box.append(b);};
     action(tp.origin.licensed?'已取得许可':'申请通行许可',{action:'request'},tp.origin.licensed||!tp.can_request);
+    const permit=tp.temporary || {};
+    const status=document.createElement('p');status.className='muted';status.textContent=permit.status ? `临时通行证：${({pending:'待答复',ready:'可用一次',used:'已使用',expired:'已过期'})[permit.status]} · 世界历 ${number(permit.ready_age)} 年答复，${number(permit.expires_age)} 年失效。` : `临时通行证申请后 ${number(tp.wait_years)} 年答复，再保留 ${number(tp.wait_years)} 年，过时不候。`;box.append(status);
+    action(`申请临时通行证 · ${number(tp.temporary_fee)} 灵石`,{action:'request_temporary'},['pending','ready'].includes(permit.status));
     const choices=document.createElement('div');choices.className='teleport-methods';box.append(choices);
     const route=document.createElement('div');route.className='teleport-route';box.append(route);
     const methods=tp.origin.licensed?[['travel','持许可通行']]:[];
+    if(permit.status==='ready') methods.push(['temporary','持临时通行证']);
+    methods.push(['forge',`伪造通行证 · 制符 ${tp.talisman_level} 级 · ${Math.round(tp.forge_chance*100)}% 成功 · ${number(tp.forge_fee)} 灵石`]);
     methods.push(['bribe',`贿赂 · ${number(tp.bribe)} 灵石 · ${Math.round(tp.exposure.bribe*100)}% 暴露`],['assassinate',`暗杀 · ${Math.round(tp.exposure.assassinate*100)}% 暴露`]);
     for(const [method,title] of methods){const b=document.createElement('button');b.textContent=title;b.type='button';choices.append(b);
       b.onclick=()=>{route.replaceChildren();choices.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-        const hint=document.createElement('p');hint.className='muted';hint.textContent=method==='travel'?'凭许可瞬息传送，不消耗年龄。':`仅本次偷渡有效。若暴露，威名增加 ${number(tp.fame_penalty)} 并遭执阵势力通缉。`;
+        const hint=document.createElement('p');hint.className='muted';hint.textContent=['travel','temporary'].includes(method)?'凭许可瞬息传送，不消耗年龄；临时证使用后作废。':`仅本次偷渡有效。若暴露，威名增加 ${number(tp.fame_penalty)} 并遭执阵势力通缉。`;
         const select=document.createElement('select');select.setAttribute('aria-label','传送目的地');
         for(const dest of tp.destinations){const o=document.createElement('option');o.value=dest.id;o.textContent=dest.name;select.append(o);}
         const go=document.createElement('button');go.textContent='确认传送';go.className='map-teleport';go.dataset.unavailable=tp.destinations.length?'0':'1';go.disabled=!tp.destinations.length||busy||!!game.pending_event||!game.player.alive;

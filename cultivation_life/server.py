@@ -165,6 +165,8 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "immortal-action":
                 result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"))
+            elif operation == 'yaochi-action':
+                result = ENGINE.yaochi_action(game_id, payload.get('action',''), payload.get('target_id',''), payload.get('amount',1))
             elif operation == "tianji-action":
                 result = ENGINE.tianji_action(
                     game_id, payload.get("action", ""), payload.get("artifact_id", "")

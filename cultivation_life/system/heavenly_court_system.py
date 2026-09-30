@@ -183,6 +183,9 @@ class HeavenlyCourtSystemMixin:
 
         votes = {candidate_id: 0 for candidate_id in candidate_ids}
         for seat in court["seats"]:
+            if 'player' in candidate_ids and seat['id'] in election.get('yaochi_seats', ()):
+                votes['player'] += 1
+                continue
             scores = []
             for candidate_id in candidate_ids:
                 official = court["officials"][candidate_id]
@@ -521,6 +524,7 @@ class HeavenlyCourtSystemMixin:
         }
         return {
             "visible": True, "initialized": True, "unit": int(court["unit"]),
+            "location_id": 'jade_capital', "location_name": '玉京仙都',
             "authority": round(float(court["authority"]), 2),
             "treasury": round(float(court["treasury"]), 2),
             "equipment": round(float(court["equipment"]), 2),

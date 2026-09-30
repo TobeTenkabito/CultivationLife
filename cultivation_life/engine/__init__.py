@@ -21,6 +21,7 @@ from ..achievements import AchievementSystem, load_achievement_definitions
 from ..runtime import encode_rng, now_iso
 from ..system.war_system import WarSystemMixin
 from ..system.heavenly_court_system import HeavenlyCourtSystemMixin
+from ..system.yaochi_system import YaochiMixin
 from ..system.natal_artifact_system import NatalArtifactSystemMixin
 from ..system.crafting_system import CraftingSystemMixin
 from ..system.formation_system import FormationSystemMixin
@@ -62,7 +63,7 @@ from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 
 
-class GameEngine(DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")

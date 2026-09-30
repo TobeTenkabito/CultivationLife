@@ -241,6 +241,7 @@ class VoisinageBattle(VoisinageEffects):
             target = self.units[key]
             gap = by_owner[owner].strength / max(1.0, self.frame.relations[key]['defense_strength'])
             erosion = min(.55, .12 + .08 * max(0, gap - self.contest_ratio))
+            erosion *= 1 - target.unit.capabilities.body_voisinage_resistance
             target.pressure = min(.85, target.pressure + erosion)
             self._lose(key, min(max(0, target.vitality - .13), erosion), physical=False)
             lost = min(target.morale, erosion * 80)

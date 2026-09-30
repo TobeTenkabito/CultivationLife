@@ -40,7 +40,7 @@
       document.querySelector(`[data-panel-target="${name}"]`).classList.toggle('hidden', !visible);
       if (!visible) window.UtilityPanels?.close(name);
     }
-    const market = document.querySelector('#immortal-market-content'); market.replaceChildren(); market.classList.toggle('hidden', !data.available);
+    const market = document.querySelector('#immortal-market-content'); market.replaceChildren(); market.classList.add('hidden');
     if (!data.available) return;
     const content = document.querySelector('#doctrine-content'); content.replaceChildren();
     const veins = document.querySelector('#immortal-veins-content'); veins.replaceChildren();
@@ -65,6 +65,7 @@
     const v = data.veins;
     veins.append(el('h3', `${v.realm} · ${v.phase?.name || '仙脉'} · 第 ${v.layer} 层`), el('p', `已开仙脉 ${v.opened} / ${v.total} · 每层须开 ${v.per_layer} 条，再手动突破；第九层需本境 27 脉贯通。`),
       meter(v.opened, v.total, '本境仙脉'), el('p', `机缘 ${fmt(v.opportunity)} / 无尽 · 仙痕 ${fmt(v.traces)}`));
+    veins.append(el('p', `仙脉累计增加本源：气血 +${fmt(v.intrinsic_total?.hp)} · 法力 +${fmt(v.intrinsic_total?.mp)}；本境每脉增加气血 ${fmt(v.intrinsic_per_vein?.hp)}、法力 ${fmt(v.intrinsic_per_vein?.mp)}。`, 'doctrine-note'));
     veins.append(meridians(v));
     if (v.next_cost) veins.append(el('p', `下一脉：机缘 ${fmt(v.next_cost.opportunity)} · 仙痕 ${v.next_cost.traces}`),
       el('p', `本次成功率 ${fmt(v.chance*100)}% · 失败消耗本次资源，保底增加 ${fmt(v.pity_step*100)} 个百分点，成功后重置。`, 'muted'),
@@ -78,20 +79,16 @@
       meter(b.level, b.golden_light ? b.max_level : b.golden_light_level, '仙躯修炼进度'),
       el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。护体金光是仙躯被动防护，不消耗仙灵力，储量耗尽仍然有效。`, 'muted'));
     const manuals = b.manuals.filter(m=>m.owned);
-    if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「坊市」可购置传承与淬体药材；旧炼体功法不能用于仙躯。'));
+    if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「瑶池」可用功勋求取传承与淬体药材；旧炼体功法不能用于仙躯。'));
     for (const manual of manuals) body.append(button(`${b.manual === manual.id ? '当前修习：' : '改修：'}《${manual.name}》`, {action:'select_body_manual',supply_id:manual.id}, b.manual === manual.id, options.immortal));
     if(b.manual) {
       body.append(el('p', `下层配方：${b.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · ')}`),
         el('p', `成功率 ${fmt(b.chance*100)}% · 已失败 ${b.failures} 次 · 每次失败增加 ${fmt(b.pity_step*100)} 个百分点。失败消耗药材，换功法保留保底。`, 'muted'),
         button(b.level >= b.max_level ? '已达当前仙躯上限' : '以仙药淬炼下一层', {action:'train_body'}, !b.can_train, options.immortal));
     }
-    const bodyShop=el('section',null,'doctrine-entry');bodyShop.append(el('h3','仙躯传承与仙药'));
-    for(const manual of b.manuals) bodyShop.append(el('h4',`《${manual.name}》`),el('p',manual.description),button(manual.owned?'已掌握':`求取传承 · ${fmt(manual.price)} 灵石`,{action:'buy_body_manual',supply_id:manual.id},manual.owned,options.immortal));
-    for(const supply of b.supplies) bodyShop.append(button(`${supply.name} ×${supply.quantity} · ${fmt(supply.price)} 灵石（持有 ${fmt(supply.owned)}）`,{action:'buy_body_supply',supply_id:supply.id},false,options.immortal));
-    market.append(bodyShop);
     const owned = el('section'); owned.append(el('h3', '已获传承'));
     const learned = data.rows.filter(row => row.learned);
-    if (!learned.length) owned.append(el('p', '尚未获得道统功法。前往「坊市」取得传承，再去「道门」访求同道。', 'muted'));
+    if (!learned.length) owned.append(el('p', '尚未获得道统功法。前往「瑶池」取得传承，再去「道门」访求同道。', 'muted'));
     for (const row of learned) {
       const panel = el('section', null, 'doctrine-entry'); panel.dataset.doctrineId = row.id;
       panel.append(el('h4', `${row.name} · Lv${row.level}${row.origin ? ' · 本源归属' : ''}${row.active ? ' · 当前仙域' : ''}`), el('p', row.description));
@@ -177,16 +174,6 @@
       }
       daomen.append(entry);
     }
-    const shop = el('section'); shop.append(el('h3', '仙界传承书市'), el('p', '取得任意一门相应功法，即可开始参悟其所属道统。重复购买获得功法玉简，可用于功法合参；道统等级与功法等级分别计算。', 'muted'));
-    const books = el('div', null, 'doctrine-book-grid');
-    for (const book of data.offers) {
-      const entry = el('section', null, 'doctrine-book');
-      entry.append(el('h4', `《${book.name}》`), el('p', `${book.doctrine_name} · ${book.grade_name} · ${book.origin}`),
-        el('small', `机缘 +${fmt(book.stats.opportunity_bonus * 100)}% · 气血 +${fmt(book.stats.hp_bonus * 100)}% · 法力 +${fmt(book.stats.mp_bonus * 100)}% · 战力 +${fmt(book.stats.combat_bonus)}`),
-        button(`${book.owned ? '再购玉简' : '承接传承'} · ${fmt(book.price)} 灵石`, {action: 'buy', manual_id: book.id}));
-      books.append(entry);
-    }
-    shop.append(books); market.append(shop);
     const unknown = el('details'); unknown.append(el('summary', '仙界道统名录'));
     for (const row of data.rows.filter(row => !row.learned)) unknown.append(el('p', `${row.name}：${row.description}`));
     daomen.append(unknown);
