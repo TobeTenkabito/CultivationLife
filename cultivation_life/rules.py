@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .system.cultivation_policy import immortal_reserve
+
 from .system.path_modifiers import projected_resource, modifier
 
 import copy
@@ -399,9 +401,11 @@ def stage_name(player: Player) -> str:
     if current.id == "mortal":
         return current.name
     if player.world == "asura" and player.realm_index >= 9:
-        return WORLD_SYSTEMS.get("demonic_cultivation", {}).get("realm_names", {}).get(
+        name = WORLD_SYSTEMS.get("demonic_cultivation", {}).get("realm_names", {}).get(
             str(player.realm_index), current.name,
         )
+        stage = "初期" if player.layer <= 3 else "中期" if player.layer <= 6 else "后期"
+        return f"{name}{stage}·{player.layer}层"
     if current.layers == 1:
         return current.name
     if player.path == "demonic":
@@ -980,7 +984,7 @@ def public_player(player: Player) -> dict[str, Any]:
         realm_id=realm(player).id,
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),
-        opportunity_unbounded=max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9,
+        opportunity_unbounded=immortal_reserve(player),
         cultivation_ranks=public_ranks(player, player=True),
         intrinsic_resources=intrinsic_resource_breakdown(player),
         max_hp=max_hp(player),

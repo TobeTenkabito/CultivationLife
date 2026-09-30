@@ -419,6 +419,15 @@ function render(data) {
     $('#opportunity-text').textContent = `${number(p.opportunity)} / 无尽`;
     $('#opportunity-bar').style.width = '100%';
   }
+  let progressionNote = $('#upper-progression-note');
+  if (!progressionNote) {
+    progressionNote = document.createElement('p');
+    progressionNote.id = 'upper-progression-note';
+    progressionNote.className = 'rank-triplet';
+    $('#cultivation-ranks').after(progressionNote);
+  }
+  progressionNote.textContent = data.breakthrough?.progression_note || '';
+  progressionNote.classList.toggle('hidden', !progressionNote.textContent);
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
   meter('hp', p.hp, p.max_hp, p.intrinsic_resources?.hp); meter('mp', p.mp, p.max_mp, p.intrinsic_resources?.mp);
   $('#mp-label').textContent = p.resource_name || 'MP';

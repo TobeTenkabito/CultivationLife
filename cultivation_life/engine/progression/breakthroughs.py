@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...system.path_modifiers import modifier
+from ...system.cultivation_policy import ordinary_upper, immortal_reserve, bloodline_upper
 
 import copy
 import random
@@ -41,13 +42,18 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
     player = game.player
     if player.cultivation_suppression:
         return
-    if max(player.realm_index, int((player.sealed_cultivation or {}).get("realm_index", 0))) >= 9:
+    if immortal_reserve(player):
         # Immortal opportunity is a spendable reserve, not an automatic level bar.
         player.awaiting_major_breakthrough = False
         player.awaiting_minor_breakthrough = False
         return
     if player.sealed_cultivation:
         player.opportunity = min(player.opportunity, opportunity_required(player))
+        return
+    if bloodline_upper(player, deps.bloodline_content_available()):
+        player.opportunity = min(player.opportunity, opportunity_required(player))
+        player.awaiting_minor_breakthrough = False
+        player.awaiting_major_breakthrough = player.realm_index < len(REALMS) - 1 and player.opportunity >= opportunity_required(player)
         return
     if player.spirit_root == "none":
         player.opportunity = 0
@@ -118,7 +124,7 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
                 ))
             return
         if player.realm_index == len(REALMS) - 1 and player.layer == REALMS[-1].layers:
-            player.awaiting_ascension = True
+            player.awaiting_ascension = not ordinary_upper(player)
             player.opportunity = min(player.opportunity, required)
             return
         old_realm = realm(player)
@@ -172,7 +178,7 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
 
 
 def _manual_minor_layers(player: Player) -> set[int]:
-    if player.realm_index < 2 or player.realm_index >= 9:
+    if bloodline_upper(player) or player.realm_index < 2 or (player.realm_index >= 9 and not ordinary_upper(player)):
         return set()
     if player.world == "human" and player.realm_index == 5:
         return set()
@@ -184,6 +190,10 @@ def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) ->
         from ...system.immortal_cultivation import vein_ready
         if not player.immortal_power_converted or not vein_ready(player):
             return None
+        if player.layer < realm(player).layers:
+            return 'minor'
+        return 'major' if player.realm_index < len(REALMS) - 1 else None
+    if ordinary_upper(player) and not bloodline_upper(player, deps.bloodline_content_available()):
         if player.layer < realm(player).layers:
             return 'minor'
         return 'major' if player.realm_index < len(REALMS) - 1 else None

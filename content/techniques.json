@@ -3641,6 +3641,1386 @@
       "sources": {
         "yin": 1.0
       }
+    },
+    {
+      "id": "TECH_ASURA_9_MAIN",
+      "name": "血海归元魔典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.8,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_9_COMBAT",
+      "name": "血海破军戮神诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 0.65,
+      "combat_bonus": 35200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_9_BODY",
+      "name": "血海不灭战躯经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 1.7,
+      "mp_bonus": 0.65,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "body_breakthrough_bonus": 0.18,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_ASURA_9_SENSE",
+      "name": "血海照狱观心法",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "divine_sense_bonus": 1.5
+    },
+    {
+      "id": "TECH_ASURA_10_MAIN",
+      "name": "无间归元魔典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 2.25,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_10_COMBAT",
+      "name": "无间破军戮神诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 0.85,
+      "combat_bonus": 198000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_10_BODY",
+      "name": "无间不灭战躯经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 2.1,
+      "mp_bonus": 0.85,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "body_breakthrough_bonus": 0.19999999999999998,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_ASURA_10_SENSE",
+      "name": "无间照狱观心法",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "divine_sense_bonus": 2.0
+    },
+    {
+      "id": "TECH_ASURA_11_MAIN",
+      "name": "焚天归元魔典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.7,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_11_COMBAT",
+      "name": "焚天破军戮神诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 1.05,
+      "combat_bonus": 1100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_11_BODY",
+      "name": "焚天不灭战躯经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 2.5,
+      "mp_bonus": 1.05,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "body_breakthrough_bonus": 0.22,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_ASURA_11_SENSE",
+      "name": "焚天照狱观心法",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.5
+    },
+    {
+      "id": "TECH_ASURA_12_MAIN",
+      "name": "寂灭归元魔典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.15,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_12_COMBAT",
+      "name": "寂灭破军戮神诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 1.25,
+      "combat_bonus": 6600000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_12_BODY",
+      "name": "寂灭不灭战躯经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 2.9,
+      "mp_bonus": 1.25,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "body_breakthrough_bonus": 0.24,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_ASURA_12_SENSE",
+      "name": "寂灭照狱观心法",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "divine_sense_bonus": 3.0
+    },
+    {
+      "id": "TECH_NETHER_9_MAIN",
+      "name": "太荒纳元真经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.8,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_9_COMBAT",
+      "name": "太荒裂穹战诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 0.65,
+      "combat_bonus": 35200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_9_BODY",
+      "name": "太荒镇岳锻骨经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 1.7,
+      "mp_bonus": 0.65,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "body_breakthrough_bonus": 0.18,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_NETHER_9_SENSE",
+      "name": "太荒万象观神法",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "divine_sense_bonus": 1.5
+    },
+    {
+      "id": "TECH_NETHER_10_MAIN",
+      "name": "万灵纳元真经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 2.25,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_10_COMBAT",
+      "name": "万灵裂穹战诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 0.85,
+      "combat_bonus": 198000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_10_BODY",
+      "name": "万灵镇岳锻骨经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 2.1,
+      "mp_bonus": 0.85,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "body_breakthrough_bonus": 0.19999999999999998,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_NETHER_10_SENSE",
+      "name": "万灵万象观神法",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "divine_sense_bonus": 2.0
+    },
+    {
+      "id": "TECH_NETHER_11_MAIN",
+      "name": "混沌纳元真经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.7,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_11_COMBAT",
+      "name": "混沌裂穹战诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 1.05,
+      "combat_bonus": 1100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_11_BODY",
+      "name": "混沌镇岳锻骨经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 2.5,
+      "mp_bonus": 1.05,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "body_breakthrough_bonus": 0.22,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_NETHER_11_SENSE",
+      "name": "混沌万象观神法",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.5
+    },
+    {
+      "id": "TECH_NETHER_12_MAIN",
+      "name": "太初纳元真经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.15,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_12_COMBAT",
+      "name": "太初裂穹战诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 1.25,
+      "combat_bonus": 6600000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_12_BODY",
+      "name": "太初镇岳锻骨经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 2.9,
+      "mp_bonus": 1.25,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "body_breakthrough_bonus": 0.24,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_NETHER_12_SENSE",
+      "name": "太初万象观神法",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "divine_sense_bonus": 3.0
+    },
+    {
+      "id": "TECH_REINCARNATION_9_MAIN",
+      "name": "三生归藏魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.8,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_9_COMBAT",
+      "name": "三生断业斩魂诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 0.65,
+      "combat_bonus": 35200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_9_BODY",
+      "name": "三生凝魄法身经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 1.7,
+      "mp_bonus": 0.65,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "body_breakthrough_bonus": 0.18,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_REINCARNATION_9_SENSE",
+      "name": "三生照见前尘法",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 0.6,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 11200000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      },
+      "divine_sense_bonus": 1.5
+    },
+    {
+      "id": "TECH_REINCARNATION_10_MAIN",
+      "name": "六道归藏魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 2.25,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_10_COMBAT",
+      "name": "六道断业斩魂诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 0.85,
+      "combat_bonus": 198000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 35
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_10_BODY",
+      "name": "六道凝魄法身经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 2.1,
+      "mp_bonus": 0.85,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "body_breakthrough_bonus": 0.19999999999999998,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_REINCARNATION_10_SENSE",
+      "name": "六道照见前尘法",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 35
+        }
+      },
+      "divine_sense_bonus": 2.0
+    },
+    {
+      "id": "TECH_REINCARNATION_11_MAIN",
+      "name": "无生归藏魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.7,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_11_COMBAT",
+      "name": "无生断业斩魂诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 1.05,
+      "combat_bonus": 1100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_11_BODY",
+      "name": "无生凝魄法身经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 2.5,
+      "mp_bonus": 1.05,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "body_breakthrough_bonus": 0.22,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_REINCARNATION_11_SENSE",
+      "name": "无生照见前尘法",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.5
+    },
+    {
+      "id": "TECH_REINCARNATION_12_MAIN",
+      "name": "太始归藏魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.15,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_12_COMBAT",
+      "name": "太始断业斩魂诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 1.25,
+      "combat_bonus": 6600000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_12_BODY",
+      "name": "太始凝魄法身经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 2.9,
+      "mp_bonus": 1.25,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "body_breakthrough_bonus": 0.24,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_REINCARNATION_12_SENSE",
+      "name": "太始照见前尘法",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.05,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 2100000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "divine_sense",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 45
+        }
+      },
+      "divine_sense_bonus": 3.0
     }
   ]
 }

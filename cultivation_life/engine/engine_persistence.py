@@ -34,6 +34,19 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     game = deps.store.load(game_id)
     from ..system.faction_geography import ensure_faction_sites
     renamed = ensure_faction_sites(game)
+    from ..system.cultivation_policy import ordinary_upper, bloodline_upper
+    p = game.player
+    if ordinary_upper(p) and not p.sealed_cultivation and not p.cultivation_suppression:
+        required = opportunity_required(p)
+        old_progress = (p.opportunity, p.awaiting_minor_breakthrough, p.awaiting_major_breakthrough, p.next_tribulation_age, p.awaiting_ascension)
+        p.awaiting_ascension = False
+        p.opportunity = min(p.opportunity, required)
+        ready = p.opportunity >= required and not game.active_trial
+        p.awaiting_minor_breakthrough = ready and p.layer < realm(p).layers and not bloodline_upper(p)
+        p.awaiting_major_breakthrough = ready and (p.layer >= realm(p).layers or bloodline_upper(p)) and p.realm_index < len(REALMS) - 1
+        if p.next_tribulation_age is None:
+            p.next_tribulation_age = p.age + int(WORLD_SYSTEMS['breakthrough']['periodic_thunder']['interval_years'])
+        renamed |= old_progress != (p.opportunity, p.awaiting_minor_breakthrough, p.awaiting_major_breakthrough, p.next_tribulation_age, p.awaiting_ascension)
     for item in game.player.inventory:
         if item.id.startswith(('moque_', 'yaoque_')) and item.id in ITEM_CATALOG:
             template = ITEM_CATALOG[item.id]

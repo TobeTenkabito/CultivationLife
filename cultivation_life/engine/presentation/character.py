@@ -6,6 +6,7 @@ from ...content_registry import ITEM_CATALOG, REALMS, RACE_DEFINITIONS, TECHNIQU
 from ...models import GameState, Player, SectNpc
 from ...system.npc_system import attitude_label
 from ...rules import opportunity_required
+from ...system.cultivation_policy import ordinary_upper, bloodline_upper
 from ...system.concubine_system import gender_name
 from ..dependencies import CharacterViewDependencies
 
@@ -73,6 +74,12 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
         "action_label": action_label,
         "chance": chance,
         "active_aids": active_aids,
+        "progression_note": (
+            ("幽冥上境 · 血脉进化：积满机缘后前往血脉面板择定进化形态。" if deterministic_monster_evolution else
+             "本界修为已至圆满，更高境界暂未开放。" if player.realm_index == 12 and (player.layer == 9 or bloodline_upper(player)) else
+             "上境普通修行：机缘有上限，积满后手动冲关；阶段关隘与大境界沿用普通天劫。")
+            if ordinary_upper(player) else ""
+        ),
         **requirement,
     }
 

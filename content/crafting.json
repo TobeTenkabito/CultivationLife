@@ -4211,6 +4211,786 @@
           "description": "淬火：渡劫减伤 +1.8%，续航提高7%。"
         }
       }
+    },
+    {
+      "id": "asura_upper_alloy_9",
+      "name": "修罗血魄金",
+      "world": "asura",
+      "tier": 9,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.1
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_quench_9",
+      "name": "赤狱魔炎",
+      "world": "asura",
+      "tier": 9,
+      "tags": [
+        "fire",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6400000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.012
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_alloy_10",
+      "name": "无间魔髓玉",
+      "world": "asura",
+      "tier": 10,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 60000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2,
+            "max_hp": 1.12
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_quench_10",
+      "name": "蚀魂玄焰",
+      "world": "asura",
+      "tier": 10,
+      "tags": [
+        "fire",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 48000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.014
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_alloy_11",
+      "name": "焚天劫纹铁",
+      "world": "asura",
+      "tier": 11,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 420000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.22,
+            "max_hp": 1.1400000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_quench_11",
+      "name": "无相劫火",
+      "world": "asura",
+      "tier": 11,
+      "tags": [
+        "fire",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 336000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.016
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_alloy_12",
+      "name": "寂灭道源晶",
+      "world": "asura",
+      "tier": 12,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 2900000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.24,
+            "max_hp": 1.1600000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.07
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "asura_upper_quench_12",
+      "name": "寂灭真焰",
+      "world": "asura",
+      "tier": 12,
+      "tags": [
+        "fire",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 2320000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.018000000000000002
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_alloy_9",
+      "name": "太荒玄骨",
+      "world": "nether",
+      "tier": 9,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.1
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_quench_9",
+      "name": "幽渊地心露",
+      "world": "nether",
+      "tier": 9,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6400000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.012
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_alloy_10",
+      "name": "万灵祖脉晶",
+      "world": "nether",
+      "tier": 10,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 60000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2,
+            "max_hp": 1.12
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_quench_10",
+      "name": "祖庭玉髓液",
+      "world": "nether",
+      "tier": 10,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 48000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.014
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_alloy_11",
+      "name": "混沌天妖金",
+      "world": "nether",
+      "tier": 11,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 420000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.22,
+            "max_hp": 1.1400000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_quench_11",
+      "name": "混沌灵泉",
+      "world": "nether",
+      "tier": 11,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 336000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.016
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_alloy_12",
+      "name": "太初万象玉",
+      "world": "nether",
+      "tier": 12,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 2900000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.24,
+            "max_hp": 1.1600000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.07
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "nether_upper_quench_12",
+      "name": "太初归元露",
+      "world": "nether",
+      "tier": 12,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 2320000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.018000000000000002
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_alloy_9",
+      "name": "三生轮纹石",
+      "world": "reincarnation",
+      "tier": 9,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 8000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.18,
+            "max_hp": 1.1
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_quench_9",
+      "name": "忘川凝魂露",
+      "world": "reincarnation",
+      "tier": 9,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 6400000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.012
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_alloy_10",
+      "name": "六道冥晶",
+      "world": "reincarnation",
+      "tier": 10,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 60000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.2,
+            "max_hp": 1.12
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_quench_10",
+      "name": "六道洗尘泉",
+      "world": "reincarnation",
+      "tier": 10,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 48000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.014
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_alloy_11",
+      "name": "无生定魂玉",
+      "world": "reincarnation",
+      "tier": 11,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 420000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.22,
+            "max_hp": 1.1400000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_quench_11",
+      "name": "无生涤魄液",
+      "world": "reincarnation",
+      "tier": 11,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 336000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.016
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_alloy_12",
+      "name": "太始轮转金",
+      "world": "reincarnation",
+      "tier": 12,
+      "tags": [
+        "metal",
+        "law"
+      ],
+      "roles": [
+        "primary",
+        "secondary"
+      ],
+      "allow_duplicate_type": true,
+      "base_material_value": 2900000000,
+      "role_effects": {
+        "primary": {
+          "design_multipliers": {
+            "combat_power": 1.24,
+            "max_hp": 1.1600000000000001
+          },
+          "description": "稳固器胚，增进攻伐与护身的设计潜力。"
+        },
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.07
+            }
+          },
+          "description": "凝练器纹，增进攻伐威能。"
+        }
+      }
+    },
+    {
+      "id": "reincarnation_upper_quench_12",
+      "name": "太始返照泉",
+      "world": "reincarnation",
+      "tier": 12,
+      "tags": [
+        "water",
+        "law"
+      ],
+      "roles": [
+        "secondary",
+        "quench"
+      ],
+      "allow_duplicate_type": false,
+      "base_material_value": 2320000000,
+      "role_effects": {
+        "secondary": {
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "养护器性，增进续战能力。"
+        },
+        "quench": {
+          "special_stats": {
+            "tribulation_reduction": 0.018000000000000002
+          },
+          "description": "淬去杂质，增强器物抵御天劫的能力。"
+        }
+      }
     }
   ],
   "spirit_plants": [

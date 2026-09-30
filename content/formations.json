@@ -261,6 +261,26 @@
         "label": "八阶",
         "base_value": 900000,
         "formation_value": 7.5
+      },
+      "9": {
+        "label": "九阶",
+        "base_value": 8000000,
+        "formation_value": 8.3
+      },
+      "10": {
+        "label": "十阶",
+        "base_value": 60000000,
+        "formation_value": 9.1
+      },
+      "11": {
+        "label": "十一阶",
+        "base_value": 420000000,
+        "formation_value": 10
+      },
+      "12": {
+        "label": "十二阶",
+        "base_value": 2900000000,
+        "formation_value": 10.9
       }
     },
     "worlds": {
@@ -353,6 +373,36 @@
           6,
           7,
           8
+        ],
+        "value_multiplier": 1.1
+      },
+      "asura": {
+        "prefix": "修罗",
+        "tiers": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "value_multiplier": 1.1
+      },
+      "nether": {
+        "prefix": "幽冥",
+        "tiers": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "value_multiplier": 1.1
+      },
+      "reincarnation": {
+        "prefix": "轮回",
+        "tiers": [
+          9,
+          10,
+          11,
+          12
         ],
         "value_multiplier": 1.1
       }

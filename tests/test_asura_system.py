@@ -64,7 +64,7 @@ class AsuraSystemTests(unittest.TestCase):
         self.assertEqual(shown["player"]["realm_name"], "魔丹初期·1层")
         self.assertEqual(shown["player"]["technique"]["id"], "TECH_WANMO")
 
-    def test_nine_stage_asura_ascension_and_locked_upper_breakthroughs(self):
+    def test_nine_stage_asura_ascension_and_unprepared_upper_breakthroughs(self):
         game_id = self._prepared_demon_lord()
         shown = self.engine.begin_asura_ascension(game_id)
         self.assertEqual(shown["trial"]["kind"], "asura_ascension")
@@ -76,7 +76,7 @@ class AsuraSystemTests(unittest.TestCase):
             choice_id = self.engine.get_game(game_id)["pending_event"]["choices"][0]["id"]
             shown = self.engine.choose(game_id, choice_id)
         self.assertEqual((shown["player"]["world"], shown["player"]["realm_index"]), ("asura", 9))
-        self.assertEqual(shown["player"]["realm_name"], "迦楼罗")
+        self.assertEqual(shown["player"]["realm_name"], "迦楼罗初期·1层")
         self.assertFalse(shown["breakthrough"]["enabled"])
         self.assertIsNone(shown["pending_event"])
         self.assertTrue(shown["market"]["available"])
@@ -87,7 +87,7 @@ class AsuraSystemTests(unittest.TestCase):
         self.assertTrue(descended["world_travel"]["can_return_asura"])
         self.assertFalse(descended["world_travel"]["can_ascend_asura"])
         restored = self.engine.cross_world(game_id, "asura")
-        self.assertEqual(restored["player"]["realm_name"], "迦楼罗")
+        self.assertEqual(restored["player"]["realm_name"], "迦楼罗初期·1层")
 
     def test_asura_random_events_do_not_mix_with_celestial_or_lower_world_events(self):
         game_id = self._prepared_demon_lord()
@@ -105,9 +105,9 @@ class AsuraSystemTests(unittest.TestCase):
         game = self.engine.store.load(game_id)
         game.player.world = "asura"
         game.player.realm_index = 12
-        self.assertEqual(stage_name(game.player), "阿修罗")
+        self.assertEqual(stage_name(game.player), "阿修罗后期·9层")
         names = {
-            self.engine._npc_realm_name(npc)
+            self.engine._npc_realm_name(npc)[:-2]
             for sect in game.sects.values() if sect.world == "asura"
             for npc in sect.npcs
         }
