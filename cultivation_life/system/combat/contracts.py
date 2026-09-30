@@ -15,6 +15,58 @@ def number(value: Any, name: str, *, minimum: float = 0.0) -> float:
     return result
 
 
+EFFECT_KINDS = frozenset({'strike', 'suppress', 'seal', 'restrict', 'isolate',
+                          'restore_body', 'restore_spirit', 'restore_field'})
+RESTRICTIONS = frozenset({'artifact', 'technique', 'supply', 'support', 'communication', 'voisinage', 'ordinary'})
+
+
+@dataclass(frozen=True)
+class VoisinageEffect:
+    """Finite declarative action, never executable content."""
+    kind: str
+    cost: float
+    power: float = .25
+    target: str = 'enemy'
+    restriction: str | None = None
+    defense: str = 'bypass'
+    tier: int = 2
+
+    def __post_init__(self):
+        if self.kind not in EFFECT_KINDS or self.target not in {'enemy', 'self', 'ally'}:
+            raise ValueError('Unknown voisinage effect or target')
+        if self.kind.startswith('restore_') != (self.target != 'enemy'):
+            raise ValueError('Restoration requires a friendly target')
+        if self.defense not in {'bypass', 'ward'} or type(self.tier) is not int or self.tier < 1:
+            raise ValueError('Invalid effect defense')
+        if number(self.cost, 'effect cost') < 0 or number(self.power, 'effect power') > 1:
+            raise ValueError('Invalid effect cost or power')
+        if self.kind in {'restrict', 'isolate'}:
+            if self.restriction not in RESTRICTIONS:
+                raise ValueError('An interdiction requires an explicit restriction')
+        elif self.restriction is not None:
+            raise ValueError('Only interdictions accept restrictions')
+
+
+@dataclass(frozen=True)
+class Intervention:
+    kind: str
+    effects: tuple[str, ...]
+    cost: float = 0
+    strength: float = 1
+    source: str = 'innate'
+
+    def __post_init__(self):
+        object.__setattr__(self, 'effects', tuple(self.effects))
+        if self.kind not in {'resist', 'escape', 'shelter', 'disrupt'}:
+            raise ValueError('Unknown intervention')
+        if not self.effects or set(self.effects) - (EFFECT_KINDS | {'execute'}):
+            raise ValueError('Interventions must name supported effects')
+        if self.source not in {'innate', 'artifact', 'technique'}:
+            raise ValueError('Unknown intervention source')
+        number(self.cost, 'intervention cost')
+        number(self.strength, 'intervention strength')
+
+
 @dataclass(frozen=True)
 class VoisinageDefinition:
     id: str
@@ -36,12 +88,24 @@ class VoisinageDefinition:
     authority: float | None = None
     authority_reference: float = 100.0
     features: tuple[Mapping[str, Any], ...] = ()
+    effects: tuple[VoisinageEffect, ...] = ()
+
+    def actions(self) -> tuple[VoisinageEffect, ...]:
+        return self.effects or (VoisinageEffect(self.effect, self.effect_cost, self.effect_power),)
 
     def __post_init__(self) -> None:
         if not self.id or not self.attainment:
             raise ValueError("Voisinage id and attainment are required")
-        if self.effect not in {"strike", "suppress", "seal"}:
+        if self.effect not in EFFECT_KINDS:
             raise ValueError("Unknown voisinage effect")
+        object.__setattr__(self, 'effects', tuple(e if isinstance(e, VoisinageEffect) else VoisinageEffect(**e)
+                                                for e in self.effects))
+        if len(self.effects) > 8:
+            raise ValueError('At most eight voisinage effects')
+        if any(e.cost <= 0 for e in self.effects):
+            raise ValueError('Active voisinage effects require positive costs')
+        if not self.effects and self.effect not in {'strike', 'suppress', 'seal'}:
+            raise ValueError('New effects require an explicit action definition')
         for key in ("required_level", "strength", "opening_cost", "upkeep_cost",
                     "effect_cost", "effect_power", "strength_per_level",
                     "max_investment", "extra_target_cost"):
@@ -74,6 +138,10 @@ class CapabilitySource:
     """Optional cultivation-provider output. The battle does not know its origin."""
     voisinages: tuple[VoisinageDefinition, ...] = ()
     attainments: Mapping[str, float] = field(default_factory=dict)
+    technique_tier: int = 1
+    artifact_tier: int = 1
+    passive_ward_tier: int | None = None
+    interventions: tuple[Intervention, ...] = ()
 
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
@@ -83,7 +151,13 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
         state["voisinage_ids"] = [d.id for d in source.voisinages]
         state["attainments"] = {**state.get("attainments", {}), **source.attainments}
         definitions = {**definitions, **{d.id: d for d in source.voisinages}}
-    return resolve_capabilities(state, definitions, **kwargs)
+    result = resolve_capabilities(state, definitions, **kwargs)
+    if source:
+        from dataclasses import replace
+        result = replace(result, technique_tier=source.technique_tier, artifact_tier=source.artifact_tier,
+                         ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
+                         interventions=source.interventions or result.interventions)
+    return result
 
 
 @dataclass(frozen=True)
@@ -109,6 +183,9 @@ class CombatCapabilities:
     resource_tier: int = 1
     usable_capacity: float | None = None
     investment_limit: float | None = None
+    technique_tier: int = 1
+    artifact_tier: int = 1
+    interventions: tuple[Intervention, ...] = ()
 
     def __post_init__(self) -> None:
         for key in ("capacity", "current", "attack_cost", "ward_cost", "investment"):
@@ -121,8 +198,14 @@ class CombatCapabilities:
             number(self.usable_capacity, "usable_capacity")
             if self.usable_capacity > self.capacity or self.current > self.usable_capacity:
                 raise ValueError("Resource exceeds usable capacity")
-        if any(type(v) is not int or v < 1 for v in (self.force_tier, self.ward_tier, self.resource_tier)):
+        if any(type(v) is not int or v < 1 for v in (self.force_tier, self.ward_tier, self.resource_tier,
+                                                    self.technique_tier, self.artifact_tier)):
             raise ValueError("Power tiers must be positive integers")
+        object.__setattr__(self, 'interventions', tuple(i if isinstance(i, Intervention) else Intervention(**i)
+                                                      for i in self.interventions))
+        # Up to eight equipment responses plus eight scene-local responses.
+        if len(self.interventions) > 16:
+            raise ValueError('At most sixteen resolved interventions')
         if self.stance not in {"off", "guard", "protect", "press"}:
             raise ValueError("Unknown voisinage stance")
         if self.resource_link not in {"independent", "legacy_mp"}:
@@ -149,10 +232,14 @@ class Combatant:
     capabilities: CombatCapabilities = field(default_factory=CombatCapabilities)
     integrity: float = 1.0
     cultivation_rank: int = -1
+    body_integrity: float = 1.0
 
     def __post_init__(self) -> None:
         number(self.power, "combatant power")
         number(self.integrity, "combatant integrity")
+        number(self.body_integrity, 'body integrity')
+        if self.body_integrity > 1:
+            raise ValueError('Body integrity exceeds maximum')
         if not self.id or self.integrity > 1:
             raise ValueError("Invalid combatant identity or integrity")
 
@@ -169,10 +256,24 @@ class PhaseRound:
     relations: dict[str, dict[str, Any]] = field(default_factory=dict)
     morale_loss: dict[str, float] = field(default_factory=dict)
     stat_factors: dict[str, dict[str, float]] = field(default_factory=dict)
+    primary_restore: float = 0.0
+    blocked_actions: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def ordinary(self) -> bool:
         return self.ordinary_player or self.ordinary_enemy
+
+
+@dataclass(frozen=True)
+class VoisinageSeal:
+    """An explicitly authored, permanent battle-local field cutoff."""
+    owner: str
+    first_round: int
+    message: str
+
+    def __post_init__(self) -> None:
+        if not self.owner or type(self.first_round) is not int or self.first_round < 1 or not self.message:
+            raise ValueError("Invalid voisinage seal schedule")
 
 
 @dataclass(frozen=True)
@@ -255,4 +356,5 @@ def resolve_capabilities(
         resource_link="legacy_mp" if linked else "independent",
         resource_tier=2 if conversion > 0 else 1,
         usable_capacity=capacity * conversion,
+        interventions=tuple(state.get('interventions', ())),
     )

@@ -170,7 +170,7 @@ def test_restored_resource_enables_npc_voisinage_in_background_combat(config):
     assert result.outcome == "victory"
     assert result.killed == (victim.id,)
     assert len(result.rounds) == 2
-    assert npc.transcendence["current"] == 60
+    assert npc.transcendence["current"] == 90
 
 
 def test_faction_relocation_settles_resource_before_changing_world(engine_game, config):

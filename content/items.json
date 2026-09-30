@@ -2754,10 +2754,12 @@
     {
       "id": "xuanhuang_immortal_armor",
       "name": "玄黄仙甲",
+      "combat_interventions": [{"kind": "resist", "effects": ["suppress", "restrict"], "strength": 0.3}],
       "combat_bonus": 46000000,
       "hp_bonus": 520000,
-      "description": "以玄黄气叠铸的真仙战甲，优先稳固仙躯与护体法则。",
+      "description": "以玄黄气叠铸的真仙战甲，稳固仙躯与护体法则，并能抵御威能有限的邻域镇压与禁制。",
       "tags": [
+        "equipment",
         "market",
         "celestial",
         "immortal",
@@ -2767,10 +2769,12 @@
     {
       "id": "heavenly_river_sword_embryo",
       "name": "天河剑胎",
+      "force_tier": 2,
       "combat_bonus": 62000000,
       "mp_bonus": 260000,
       "description": "自法则天河中温养的仙剑胚胎，剑气可借水行法则生生不息。",
       "tags": [
+        "equipment",
         "market",
         "celestial",
         "immortal",

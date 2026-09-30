@@ -1,7 +1,8 @@
 (() => {
   const el = (tag, text, cls) => { const node = document.createElement(tag); if (text != null) node.textContent = text; if (cls) node.className = cls; return node; };
   const fmt = value => Number(value || 0).toLocaleString('zh-CN', {maximumFractionDigits: 1});
-  const effects = {strike: '仙域杀伤', suppress: '镇压', seal: '封禁收束'};
+  const effects = {strike: '仙域杀伤', suppress: '镇压', seal: '封锁退路、传讯与支援', restrict: '禁制力量', isolate: '隔离器物', restore_body: '修复肉身', restore_spirit: '稳定心神', restore_field: '修复邻域稳固'};
+  const effectNames = d => (d.effects?.length ? d.effects.map(e => effects[typeof e === 'string' ? e : e.kind]) : [effects[d.effect]]).join('、');
   function meter(value, maximum, label) {
     const bar = el('progress'); bar.max = Math.max(1, maximum); bar.value = value; bar.setAttribute('aria-label', label); return bar;
   }
@@ -75,7 +76,7 @@
     body.append(el('h3', `真仙之躯 · 第 ${b.level} 层`), el('p', `炼体 ${b.body_training} / ${b.required_training} 层 · ${b.body_training >= b.required_training ? '已具备淬炼根基' : '须先将炼体修至百层'}`),
       el('p', `护体金光：${b.golden_light ? '已解锁' : `第 ${b.golden_light_level} 层解锁`} · 冲击金仙须仙躯达到第 20 层。`, 'doctrine-note'),
       meter(b.level, b.golden_light ? b.max_level : b.golden_light_level, '仙躯修炼进度'),
-      el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。护体金光以仙灵力维持，可抵御低阶攻击。`, 'muted'));
+      el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。护体金光是仙躯被动防护，不消耗仙灵力，储量耗尽仍然有效。`, 'muted'));
     const manuals = b.manuals.filter(m=>m.owned);
     if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「坊市」可购置传承与淬体药材；旧炼体功法不能用于仙躯。'));
     for (const manual of manuals) body.append(button(`${b.manual === manual.id ? '当前修习：' : '改修：'}《${manual.name}》`, {action:'select_body_manual',supply_id:manual.id}, b.manual === manual.id, options.immortal));
@@ -118,7 +119,7 @@
         if (stage.voisinage) {
           const d = stage.voisinage;
           chapter.append(el('p', `权能篇 · ${stage.ability_name}`));
-          chapter.append(el('p', `【${d.name}】稳固 ${fmt(d.stability)} · 侵夺 ${fmt(d.incursion)} · 权能 ${fmt(d.authority)} · ${effects[d.effect]}`),
+          chapter.append(el('p', `【${d.name}】稳固 ${fmt(d.stability)} · 侵夺 ${fmt(d.incursion)} · 权能 ${fmt(d.authority)} · ${effectNames(d)}`),
             el('small', `展开 ${fmt(d.opening_cost)} / 维持 ${fmt(d.upkeep_cost)} / 施权 ${fmt(d.effect_cost)} 仙灵力 · 最多覆盖 ${d.max_targets} 个对象`));
           for (const text of stage.features) chapter.append(el('p', text, 'muted'));
         }
@@ -183,7 +184,8 @@
       box.append(el('b', `${names(field.owner)} · ${field.name || '未知领域'}`),
         el('p', `稳固 ${fmt(field.stability ?? field.strength)} · 侵夺 ${fmt(field.incursion ?? field.strength)} · 权能 ${field.authority == null ? '未明' : fmt(field.authority)}`),
         el('small', `庇护：${field.protects.map(names).join('、')} · 侵夺：${field.targets.map(names).join('、') || '无'}`),
-        el('small', `剩余仙灵力 ${fmt(data.resources[field.owner])} · 持续 ${field.sustained_rounds || 1} 轮`));
+        el('small', `剩余仙灵力 ${fmt(data.resources[field.owner])} · 持续 ${field.sustained_rounds || 1} 轮`),
+        el('small', `权能：${effectNames(field)}`));
       grid.append(box);
     }
     section.append(grid);

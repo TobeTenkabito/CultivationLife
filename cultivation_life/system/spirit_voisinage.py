@@ -62,6 +62,7 @@ def diminished(value):
             authority_reference=field.authority_reference * .04,
             opening_cost=12, upkeep_cost=4, effect_cost=4, max_investment=2,
             extra_target_cost=0, max_targets=1,
+            effects=tuple(replace(effect, cost=4) for effect in field.effects),
             features=tuple({**f, 'value': f.get('value', 0) * .04} for f in field.features)))
     return CapabilitySource(tuple(fields), value.attainments)
 

@@ -290,6 +290,8 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
     mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
     player.hp = max(0.0 if lethal else 1.0, player.hp - hp_loss)
+    if resolution.hp_restore_ratio > 0:
+        player.hp = min(hp_max, player.hp + hp_max * resolution.hp_restore_ratio)
     if lethal and resolution.retreat_impossible and not resolution.death_prevented:
         # Ordinary battle injury is capped, but an overwhelmingly stronger
         # lethal pursuer leaves no valid route for that generic retreat.
@@ -559,6 +561,9 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
             player.dao_companion["alive"] = False
             player.dao_companion["death_reason"] = npc.death_reason
         treasure_id = npc.treasure_item_id
+        if npc.combat_artifact_id in ITEM_CATALOG:
+            add_item(player, npc.combat_artifact_id)
+            npc.combat_artifact_id = None
         if treasure_id in ITEM_CATALOG:
             add_item(player, treasure_id)
             npc.treasure_item_id = None
@@ -566,6 +571,9 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
     elif npc_id:
         cached = next((row for row in game.encounter_npc_cache if row.get("id") == npc_id), None)
         if cached:
+            artifact_id = cached.get('npc', {}).get('combat_artifact_id')
+            if artifact_id in ITEM_CATALOG:
+                add_item(player, artifact_id)
             treasure_id = cached.get("npc", {}).get("treasure_item_id")
             if treasure_id in ITEM_CATALOG:
                 add_item(player, str(treasure_id))

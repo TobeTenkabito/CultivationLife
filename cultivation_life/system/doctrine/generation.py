@@ -173,6 +173,8 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
             manual_origins[manuals[-1]["id"]] = names.choice(words["acquisition_places"])
         definitions[key] = dict(id=key, name=name, fixed=fixed, theme=theme["name"],
                                 description=theme["description"], stages=stages, manuals=manuals, manual_origins=manual_origins)
-    return dict(version=version, world="celestial", definitions=definitions, player={
+    from .effects import enrich_effects
+    enrich_effects(definitions)
+    return dict(version=version, effects_schema=1, world="celestial", definitions=definitions, player={
         "progress": {}, "origin": None, "active": None, "conversion_progress": 0,
     })

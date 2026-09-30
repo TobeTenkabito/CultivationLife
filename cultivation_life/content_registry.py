@@ -303,6 +303,17 @@ class ContentRegistry:
                     {"all": [source_expression, *caps]} if caps else source_expression
                 )
         techniques = cls._index_models(techniques_doc, "techniques", Technique)
+        from .system.combat.contracts import Intervention
+        for entry in (*items.values(), *techniques.values()):
+            if type(entry.force_tier) is not int or entry.force_tier < 1:
+                raise ContentError(f'{entry.id} 的作用等级必须为正整数')
+            if len(entry.combat_interventions) > 8:
+                raise ContentError(f'{entry.id} 的特殊介入能力超过上限')
+            try:
+                for response in entry.combat_interventions:
+                    Intervention(**response)
+            except (TypeError, ValueError) as exc:
+                raise ContentError(f'{entry.id} 的特殊介入能力无效：{exc}') from exc
         transformations = cls._index_models(transformations_doc, "forms", TransformationForm)
         market_goods = tuple(market_doc.get("goods", []))
         realms = tuple(cls._realm(row) for row in world_doc.get("realms", []))
@@ -1010,6 +1021,9 @@ class ContentRegistry:
 
     @staticmethod
     def _build_story_combat_scenarios(document: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        from .system.combat.contracts import (
+            Intervention, VoisinageSeal, number, resolve_capabilities, voisinage_definitions,
+        )
         rows = document.get("scenarios", [])
         if not isinstance(rows, list) or not rows:
             raise ContentError("剧情战斗编队表不得为空")
@@ -1043,6 +1057,30 @@ class ContentRegistry:
                 raise ContentError(f"剧情战斗 {event_id} 的友方编队不完整")
             if not row.get("story_beats") or any(not str(beat).strip() for beat in row["story_beats"]):
                 raise ContentError(f"剧情战斗 {event_id} 至少需要一条逐轮剧情")
+            try:
+                if "target_power" in row:
+                    number(row["target_power"], "story target power", minimum=1)
+                definitions = voisinage_definitions(row)
+                owners = {f"enemy-{i}" for i in range(len(enemies))}
+                for seal in row.get("voisinage_seals", []):
+                    if VoisinageSeal(**seal).owner not in owners:
+                        raise ValueError("Unknown scripted seal owner")
+                if len(row.get("player_interventions", [])) > 8:
+                    raise ValueError("At most eight scripted interventions")
+                for response in row.get("player_interventions", []):
+                    Intervention(**response)
+                for member in [*enemies, *allies]:
+                    if "true_realm_index" in member:
+                        realm = member["true_realm_index"]
+                        if type(realm) is not int or realm < 0:
+                            raise ValueError("Invalid true cultivation realm")
+                    state = member.get("transcendence")
+                    if state is not None:
+                        if any(key not in definitions for key in state.get("voisinage_ids", [])):
+                            raise ValueError("Unknown story voisinage")
+                        resolve_capabilities(state, definitions)
+            except (TypeError, ValueError) as error:
+                raise ContentError(f"剧情战斗 {event_id} 的邻域配置不合法：{error}") from error
             result[event_id] = row
         return result
 

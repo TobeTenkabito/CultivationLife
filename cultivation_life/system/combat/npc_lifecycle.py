@@ -23,6 +23,18 @@ def _write(owner: Any, key: str, value: Any) -> None:
         setattr(owner, key, value)
 
 
+def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool) -> None:
+    """Physical restoration and control have identical meaning in both callers."""
+    if 'body' in update:
+        wounds = min(4, max(0, int((1 - update['body']) / .15 + 1e-8)))
+    else:
+        wounds = max(read(owner, 'wounds', 0), min(4, int((1 - update['vitality']) * 4)))
+    _write(owner, 'wounds', wounds)
+    if lethal and update['vitality'] <= 0 and not update['suppressed'] and not update.get('escaped'):
+        _write(owner, 'alive', False)
+        _write(owner, 'death_reason', '仙域斗法中陨落')
+
+
 def validate_lifecycle(config: Mapping[str, Any]) -> None:
     rules = config.get("npc_lifecycle", {})
     for environment in rules.get("environments", {}).values():
@@ -110,10 +122,15 @@ class NpcResourceBinding:
             self.ledger["current"] = self.reserve + current
 
 
-def prepare(owner: Any, now: float | None, config: Mapping[str, Any]) -> NpcResourceBinding:
+def prepare(owner: Any, now: float | None, config: Mapping[str, Any], *, imitation=False) -> NpcResourceBinding:
     ledger = settle(owner, now, config) if now is not None else read(owner, "transcendence")
     if ledger is None:
         return NpcResourceBinding(None, None)
+    if imitation:
+        pool = ledger.setdefault('imitation', dict(capacity=60, current=20, conversion=1,
+                                 resource_link='independent', force_tier=1, ward_tier=1,
+                                 attack_cost=0, ward_cost=0))
+        return NpcResourceBinding(dict(pool), pool)
     environment = config.get("npc_lifecycle", {}).get("environments", {}).get(read(owner, "world", ""), {})
     fraction = number(environment.get("available_fraction", 1), "available_fraction")
     if fraction > 1:

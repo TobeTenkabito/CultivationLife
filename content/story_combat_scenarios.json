@@ -136,10 +136,13 @@
       "story_beats":["负山神猿背起一座灵山冲向九曜阵，所过之处阵旗尽碎。","左右星阵同时牵引地脉，试图让灵山偏离主阵眼。","离火童子从高空焚烧阵纹，神猿则以护体罡焰硬抗众修法宝。","你方必须击碎神猿肩上的御兽仙环，才有机会让它摆脱洛天衡控制。"]
     },
     {
-      "event_id":"EVT_MA_LIANG_005","target_name":"洛天衡太虚仙域先锋","natural_terrain":"开阔","artificial_conditions":["禁空","禁神识","大阵"],
-      "enemy_members":[{"name":"真仙洛天衡","share":0.62,"path":"dao","full_power_multiplier":2.40},{"name":"太虚仙炉","share":0.18,"path":"dao","kind":"artifact","full_power_multiplier":1.10},{"name":"负山神猿","share":0.12,"path":"monster","full_power_multiplier":1.20},{"name":"幽泉魔影","share":0.08,"path":"ghost","full_power_multiplier":0.92}],
-      "player_allies":[{"name":"云海老人","power_ratio":0.06,"path":"dao"},{"name":"金犀大圣","power_ratio":0.06,"path":"monster"}],
-      "story_beats":["洛天衡展开太虚仙域，阵中法宝与遁光同时迟滞。","太虚仙炉吞吐界源修补他的破碎道基，负山神猿则冲击外阵。","幽泉魔影潜入神识盲区，云海老人与金犀大圣被迫分守两处阵眼。","你绕开真仙之躯，集中斩断仙炉与界脉之间的联系。","仙域骤然收缩，所有参战者被拖入决胜距离。"]
+      "event_id":"EVT_MA_LIANG_005","target_name":"洛天衡与太虚灵域","target_power":55000000,"natural_terrain":"开阔","artificial_conditions":["大阵"],
+      "voisinages":[{"id":"story:taixu_spirit","name":"太虚灵域","attainment":"taixu","required_level":4,"strength":4,"stability":4,"incursion":4,"authority":4,"authority_reference":4,"opening_cost":4,"upkeep_cost":4,"effect":"suppress","effect_cost":4,"effect_power":0.16,"max_targets":32,"extra_target_cost":0}],
+      "voisinage_seals":[{"owner":"enemy-0","first_round":3,"message":"锁仙灯彻底亮起，斩断洛天衡对太虚灵域的掌控；自本轮起不再结算他的灵域，先前的战意与态势损耗仍然保留。"}],
+      "player_interventions":[{"kind":"resist","effects":["execute"],"strength":1,"source":"artifact"}],
+      "enemy_members":[{"name":"真仙洛天衡","share":0.62,"path":"dao","true_realm_index":9,"full_power_multiplier":2.40,"transcendence":{"version":1,"capacity":60,"current":60,"conversion":1,"force_tier":2,"attack_cost":2,"attainments":{"taixu":4},"voisinage_ids":["story:taixu_spirit"]}},{"name":"太虚仙炉","share":0.18,"path":"dao","kind":"artifact","full_power_multiplier":1.10},{"name":"负山神猿","share":0.12,"path":"monster","full_power_multiplier":1.20},{"name":"幽泉魔影","share":0.08,"path":"ghost","full_power_multiplier":0.92}],
+      "player_allies":[{"name":"云海老人","power_ratio":0.06,"path":"dao","transcendence":{"interventions":[{"kind":"resist","effects":["execute"],"strength":1,"source":"artifact"}]}},{"name":"金犀大圣","power_ratio":0.06,"path":"monster","transcendence":{"interventions":[{"kind":"resist","effects":["execute"],"strength":1,"source":"artifact"}]}}],
+      "story_beats":["洛天衡以积攒的仿仙灵力展开太虚灵域，封住阵中众修的神识、身法与退路。","灵域持续压下，众修战意与态势受损；锁仙灯的初燃灯辉护住盟军，挡下即将到来的终结一击。","锁仙灯完全燃起，洛天衡的灵域被封停，众修带着此前的损耗重新接战。","你绕开真仙之躯，集中斩断仙炉与界脉之间的联系。","洛天衡试图挣脱灯阵，所有参战者被拖入决胜距离。"]
     },
     {
       "event_id":"EVT_MA_LIANG_006","target_name":"洛天衡与三大役灵","natural_terrain":"开阔","artificial_conditions":["禁空","禁神识","大阵"],

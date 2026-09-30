@@ -113,14 +113,14 @@ def test_tier_gate_has_no_minimum_damage_and_does_not_drain_ward():
     assert result.outcome == "stalemate"
 
 
-def test_finite_ward_absorption_is_not_also_body_damage():
+def test_passive_ward_does_not_spend_energy_absorbing_qualified_damage():
     defender = capability(current=10, voisinages=(), ward_cost=100)
     attacker = capability(voisinages=())
     battle = VoisinageBattle([unit("player", "player", attacker), unit("enemy", "enemy", defender)])
     begin(battle)
     dealt, _ = battle.ordinary_damage(.25, 0)
-    assert dealt == pytest.approx(.15)
-    assert battle.units["enemy"].current == 0
+    assert dealt == pytest.approx(.25)
+    assert battle.units["enemy"].current == 10
 
 
 def test_mortal_allies_do_not_inherit_immortal_attack_tier():
@@ -233,13 +233,13 @@ def test_npc_resource_writeback_uses_authoritative_owner_and_survives_reload(eng
                   target_realm_index=9, combat_type="cultivator")
     result, _ = engine._combat(game, target, False, random.Random(1))
     assert result == "controlled"
-    assert npc.transcendence["current"] == 560
+    assert npc.transcendence["current"] == 600
     engine.store.save(game)
     restored = engine.store.load(game.id)
-    assert restored.notable_npcs[npc.id].transcendence["current"] == 560
+    assert restored.notable_npcs[npc.id].transcendence["current"] == 600
     # A repeated fight pays a new opening cost, rather than refilling the NPC.
     engine._combat(restored, target, False, random.Random(1))
-    assert restored.notable_npcs[npc.id].transcendence["current"] == 320
+    assert restored.notable_npcs[npc.id].transcendence["current"] == 400
 
 
 def test_cached_npc_resource_writeback_does_not_target_a_temporary_shell(engine_game):
@@ -248,7 +248,7 @@ def test_cached_npc_resource_writeback_does_not_target_a_temporary_shell(engine_
     game.encounter_npc_cache.append({"id": npc.id, "npc": npc.to_dict()})
     engine._combat(game, dict(npc_id=npc.id, target_name=npc.name, target_power=1000,
                              target_realm_index=9, combat_type="cultivator"), False, random.Random(1))
-    assert game.encounter_npc_cache[0]["npc"]["transcendence"]["current"] == 560
+    assert game.encounter_npc_cache[0]["npc"]["transcendence"]["current"] == 600
 
 
 def test_linked_player_resource_is_not_double_debited_or_waived_by_story(engine_game):
@@ -299,7 +299,7 @@ def test_npc_only_engagement_obeys_voisinage_and_persists_consumption():
     assert result.killed == ("strong",)
     assert not strong.alive
     assert len(result.rounds) == 2
-    assert weak.transcendence["current"] == 560
+    assert weak.transcendence["current"] == 600
 
 
 def test_npc_legacy_path_does_not_consume_randomness_or_write_state():

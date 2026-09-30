@@ -34,7 +34,7 @@ def test_true_cultivation_crush_takes_two_rounds_and_respects_purpose(objective,
     assert b.units['enemy'].escape_locked and first.stat_factors['enemy']=={'sense':0,'mobility':0}
     second=begin(b,2)
     assert b.verdict()=='victory' and second.morale_loss['enemy']>0
-    assert b.units['player'].current==560
+    assert b.units['player'].current==600
     assert (b.units['enemy'].vitality==0) == (objective=='kill')
     assert b.units['enemy'].suppressed == (objective!='kill')
 
