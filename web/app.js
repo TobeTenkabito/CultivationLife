@@ -1097,8 +1097,10 @@ function renderHeavenlyCourt(court) {
   panel.classList.toggle('hidden', !visible); dock?.classList.toggle('hidden', !visible);
   if (!visible) { window.UtilityPanels?.close('heavenly-court'); return; }
   const root = $('#heavenly-court-content'); root.innerHTML = '';
-  if (!court.initialized) { root.textContent = '天庭正在汇集仙域宗门名册。'; return; }
-  $('#court-heading').textContent = `玉京仙都 · 第 ${court.unit} 单位 · ${court.seat_count} 席（大${court.seat_sizes?.large||0}·中${court.seat_sizes?.medium||0}·小${court.seat_sizes?.small||0}）`;
+  if (!court.initialized) { root.textContent = '天庭正在汇集仙界势力名册。'; return; }
+  $('#court-heading').textContent = `机构 · 玉京仙都 · 第 ${court.unit} 单位 · ${court.seat_count} 席（大${court.seat_sizes?.large||0}·中${court.seat_sizes?.medium||0}·小${court.seat_sizes?.small||0}）`;
+  const legacy=game.player.institution_affiliations?.heavenly_court;
+  if(legacy){const note=document.createElement('p');note.className='muted';note.textContent=`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，不占用宗门归属。`;root.append(note);}
   const summary = document.createElement('div'); summary.className = 'court-summary';
   [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],['功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
     const row=document.createElement('div'), small=document.createElement('small'), strong=document.createElement('strong'); small.textContent=label; strong.textContent=value; row.append(small,strong); summary.appendChild(row);

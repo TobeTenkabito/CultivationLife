@@ -533,6 +533,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         faction_id = str(effect["faction_id"])
         if faction_id not in FACTION_DEFINITIONS:
             raise ValueError("未知宗门")
+        if FACTION_DEFINITIONS[faction_id].get('kind', 'sect') != 'sect':
+            raise ValueError('此势力是机构等非宗门势力，不能通过拜入山门加入')
         if player.faction_id:
             return None, f"你已是{FACTION_DEFINITIONS[player.faction_id]['name']}门人。"
         if FACTION_DEFINITIONS[faction_id].get("world", "human") != player.world:

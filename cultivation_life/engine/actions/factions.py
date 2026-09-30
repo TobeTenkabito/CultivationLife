@@ -216,7 +216,7 @@ def propose_sect_diplomacy(deps: FactionActionDependencies, game_id: str, target
         raise ValueError("你尚未取得当前宗门的外交话语权")
     own = game.sects[player.faction_id]
     target = game.sects.get(target_faction)
-    if not target or target.extinct or target.id == own.id or target.world != own.world:
+    if not target or target.kind != "sect" or target.extinct or target.id == own.id or target.world != own.world:
         raise ValueError("目标宗门无效")
     if status not in {"war", "alliance", "truce", "neutral", "vassal"}:
         raise ValueError("未知外交决议")

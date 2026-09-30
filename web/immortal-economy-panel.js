@@ -19,7 +19,9 @@
       else light.append(el('p','金光大圆满，肉身邻域抵抗已达上限。','doctrine-note'));
     }
     const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
-    root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池为仙界功勋往来的所在，天庭驻于玉京仙都。功勋与天庭功德分别记载。','muted'));
+    root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
+    const legacy=game.player.institution_affiliations?.yaochi;
+    if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
     if(!pool.local)root.append(el('p','须亲临「瑶池」办理委托和交易。可在地图查看路线与传送阵。','doctrine-note'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));
     const section=title=>{const s=el('section',null,'doctrine-entry');s.append(el('h3',title));root.append(s);return s;};
     const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);

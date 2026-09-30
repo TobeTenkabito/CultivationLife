@@ -1132,6 +1132,9 @@ class ContentRegistry:
         templates: dict[str, list[dict[str, Any]]] = {}
         for row in document.get("factions", []):
             faction_id = row["id"]
+            from .faction_types import FACTION_KIND_NAMES
+            if row.get('kind', 'sect') not in FACTION_KIND_NAMES:
+                raise ContentError(f'{faction_id} 的势力类型无效')
             definitions[faction_id] = {key: value for key, value in row.items() if key not in {"id", "npcs"}}
             templates[faction_id] = list(row.get("npcs", []))
         return definitions, templates

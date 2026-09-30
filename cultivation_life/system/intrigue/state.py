@@ -37,7 +37,8 @@ class IntrigueStateMethods:
 
     def _intrigue_entity(self, game: GameState, kind: str, faction_id: str) -> SectState | None:
         if kind == "sect":
-            return game.sects.get(faction_id)
+            entity = game.sects.get(faction_id)
+            return entity if entity and entity.kind != "institution" else None
         if kind == "family" and game.family and game.family.id == faction_id:
             return game.family
         return None
@@ -51,7 +52,7 @@ class IntrigueStateMethods:
 
     def _intrigue_members(self, game: GameState, kind: str, faction_id: str) -> list[SectNpc]:
         if kind == "sect":
-            entity = game.sects.get(faction_id)
+            entity = self._intrigue_entity(game, kind, faction_id)
             return self._sect_members(game, entity) if entity and not entity.extinct else []
         if kind == "family":
             return list(game.family.npcs) if game.family and game.family.id == faction_id and not game.family.extinct else []
@@ -61,7 +62,8 @@ class IntrigueStateMethods:
 
     def _intrigue_player_faction_id(self, game: GameState, kind: str) -> str | None:
         if kind == "sect":
-            return game.player.faction_id
+            entity = game.sects.get(game.player.faction_id or "")
+            return entity.id if entity and entity.kind == "sect" else None
         if kind == "family":
             return (
                 game.family.id
@@ -112,6 +114,8 @@ class IntrigueStateMethods:
         return str(record["governance_style"])
 
     def _ensure_intrigue_faction(self, game: GameState, kind: str, faction_id: str) -> dict[str, Any]:
+        if kind == "sect" and (entity := game.sects.get(faction_id)) and entity.kind == "institution":
+            raise ValueError("机构不适用宗门职务与弟子治理")
         state = self._intrigue_state(game)
         key = self._intrigue_key(kind, faction_id)
         record = state["factions"].setdefault(key, {

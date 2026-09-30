@@ -213,7 +213,7 @@ class IntrigueResolutionMethods:
         if resolution_type == "disciple_recruitment":
             raise ValueError("扩招徒弟需要先设置筛选条件")
         if resolution_type in {"declare_war", "make_peace", "form_alliance", "break_alliance"}:
-            if kind == "sect" and (target_id not in game.sects or target_id == faction_id):
+            if kind == "sect" and (target_id not in game.sects or game.sects[target_id].kind == "institution" or target_id == faction_id):
                 raise ValueError("目标宗门无效")
             if kind == "race" and (target_id not in RACE_DEFINITIONS or target_id == faction_id):
                 raise ValueError("目标种族无效")

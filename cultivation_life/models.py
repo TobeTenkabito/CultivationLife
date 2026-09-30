@@ -391,6 +391,7 @@ class Player:
     faction_id: str | None = None
     faction_join_age: int | None = None
     faction_contribution: int = 0
+    institution_affiliations: dict[str, dict[str, Any]] = field(default_factory=dict)
     faction_reward_preference: str | None = None
     faction_hp_bonus: int = 0
     faction_mp_bonus: int = 0

@@ -29,6 +29,7 @@ def _new_sects() -> dict[str, SectState]:
             npcs=[SectNpc(**copy.deepcopy(npc)) for npc in templates],
             description=FACTION_DEFINITIONS[sect_id].get("description", ""),
             path=FACTION_DEFINITIONS[sect_id].get("path", "dao"),
+            kind=FACTION_DEFINITIONS[sect_id].get("kind", "sect"),
             allegiance_race=FACTION_DEFINITIONS[sect_id].get("allegiance_race"),
         )
         for sect_id, templates in FACTION_NPC_TEMPLATES.items()

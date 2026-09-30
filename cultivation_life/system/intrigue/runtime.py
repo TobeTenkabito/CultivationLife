@@ -91,7 +91,7 @@ class IntrigueRuntimeMethods:
         if not state.get("pending_guest_invitation") and realm_index >= 4 and rng.random() < .08:
             candidates = []
             for sect in game.sects.values():
-                if sect.extinct or sect.world != game.player.world or sect.id == game.player.faction_id:
+                if sect.kind != "sect" or sect.extinct or sect.world != game.player.world or sect.id == game.player.faction_id:
                     continue
                 strongest = max((npc.realm_index for npc in self._sect_members(game, sect) if npc.alive), default=0)
                 record = self._ensure_intrigue_faction(game, "sect", sect.id)
@@ -103,7 +103,7 @@ class IntrigueRuntimeMethods:
                 news.append(f"{sect.name}看重你的修为，遣使邀你担任客卿长老。")
         # One NPC-led faction may act per three units: O(members), never O(N²).
         if game.diplomacy_unit % 3 == 0:
-            candidates = [sect for sect in game.sects.values() if not sect.extinct and not sect.founded_by_player and sect.id != game.player.faction_id]
+            candidates = [sect for sect in game.sects.values() if sect.kind != "institution" and not sect.extinct and not sect.founded_by_player and sect.id != game.player.faction_id]
             if candidates:
                 state["ai_cursor"] = (int(state.get("ai_cursor", 0)) + 1) % len(candidates)
                 sect = candidates[state["ai_cursor"]]

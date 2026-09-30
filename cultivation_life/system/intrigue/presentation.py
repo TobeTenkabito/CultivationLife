@@ -190,7 +190,7 @@ class IntriguePresentationMethods:
                 "positionless_race": kind == "race",
                 "resolution_targets": (
                     [{"id": row.id, "name": row.name} for row in game.sects.values()
-                     if not row.extinct and row.id != faction_id and row.world == game.player.world]
+                     if row.kind != "institution" and not row.extinct and row.id != faction_id and row.world == game.player.world]
                     if kind == "sect" else
                     [{"id": race_id, "name": definition.get("name", race_id)}
                      for race_id, definition in RACE_DEFINITIONS.items()

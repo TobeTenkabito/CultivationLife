@@ -37,8 +37,8 @@
     });
     places.forEach(place => {
       (place.factions || []).forEach(faction => add(place.id, {
-        kind:'faction', title:faction.name, seal:faction.kind === 'family' ? '家' : faction.kind === 'race' ? '族' : '宗',
-        detail:`${faction.kind === 'family' ? '修仙家族驻地' : faction.kind === 'race' ? '种族聚居地' : '宗门山门'}${faction.owned ? ' · 你所创立' : ''}`,
+        kind:'faction', title:faction.name, seal:faction.kind === 'institution' ? '署' : faction.kind === 'family' ? '家' : faction.kind === 'race' ? '族' : '宗',
+        detail:`${faction.kind === 'institution' ? '机构驻地' : faction.kind === 'family' ? '修仙家族驻地' : faction.kind === 'race' ? '种族聚居地' : '宗门山门'}${faction.owned ? ' · 你所创立' : ''}`,
       }));
       (place.wars || []).forEach(war => add(place.id, {
         kind:'event', theme:'war', title:`${war.attacker} · ${war.defender}`, seal:'战', live:true,
@@ -75,7 +75,7 @@
       directory.append(intro);
       const filters = node('div', null, 'map-directory-filters');
       filters.setAttribute('aria-label', '名录分类');
-      [['all','全部'],['event','时令活动'],['merchant','商盟据点'],['faction','宗族山门']].forEach(([id, title]) => {
+      [['all','全部'],['event','时令活动'],['merchant','商盟据点'],['faction','势力驻地']].forEach(([id, title]) => {
         const filter = button(title, () => { category = id; draw(); });
         filter.setAttribute('aria-pressed', String(category === id)); filters.append(filter);
       });
