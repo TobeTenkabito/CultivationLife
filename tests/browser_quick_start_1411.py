@@ -28,7 +28,7 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     page.add_script_tag(path=str(ROOT/'tests/fixtures/quick_start_regression.js'))
-                    for preset in ('demonic_void','core','void','ghost_void','monster_void','confucian_void','buddhist_void'):
+                    for preset in ('demonic_void','core','void','ghost_void','monster_void','confucian_void','buddhist_void','asura_upper','nether_upper','reincarnation_upper'):
                         result = page.evaluate('preset=>QuickStartProbe.run(preset)', preset)
                         assert engine.get_game(result['id'])['player']['world_age'] == result['age']
                         print(f'{preset}: create, render, advance and reload passed', flush=True)
@@ -36,7 +36,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('Quick-start regression passed: seven presets; demonic void in six themes')
+    print('Quick-start regression passed: ten presets including three native upper starts; demonic void in six themes')
 
 
 if __name__ == '__main__':

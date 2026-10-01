@@ -104,6 +104,7 @@ def create_game(
         player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
         player.immortal_body = copy.deepcopy(preset.get('immortal_body', {}))
         player.immortal_aperture = copy.deepcopy(preset.get('immortal_aperture', {}))
+        player.world_voisinages = copy.deepcopy(preset.get('world_voisinages', {}))
         player.immortal_traces = max(0, int(preset.get('immortal_traces', 0)))
         player.divine_sense_rank = max(0, int(preset.get("divine_sense_rank", player.divine_sense_rank)))
         player.divine_sense_experience = max(
@@ -138,6 +139,9 @@ def create_game(
             assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[technique_id]), "combat")
         for item in preset.get("inventory", []):
             add_item(player, item["id"], int(item["quantity"]))
+        if preset.get('world_voisinages') and player.world == 'nether':
+            from ...system.monster_bloodline_system import seed_upper_bloodline
+            seed_upper_bloodline(player)
         player.opportunity = round(opportunity_required(player) * float(preset.get("opportunity_fraction", 0)), 1)
         player.opportunity = max(player.opportunity, float(preset.get('opportunity_reserve', 0)))
     player.divine_sense_rank = max(
@@ -152,6 +156,8 @@ def create_game(
     player.lineage_race = player.race
     player.allegiance_race = player.race
     player.location_id = deps.maps.default_location(player.world)
+    if preset and preset.get('location_id'):
+        player.location_id = deps.maps.normalize_location(player.world, preset['location_id'])
     ensure_ghost_cultivation_state(player)
     player.lifespan = roll_lifespan(player, rng)
     if ghost_cultivation_active(player):

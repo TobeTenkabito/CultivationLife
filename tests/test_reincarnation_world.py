@@ -27,7 +27,8 @@ def test_base_world_catalog_complete_without_any_dlc(tmp_path):
                 seen.update([route["from"], route["to"]])
     assert seen == set(locations)
     factions = [row for row in content.faction_definitions.values() if row["world"] == "reincarnation"]
-    assert len(factions) == 3
+    assert len(factions) == 4
+    assert content.faction_definitions['reincarnation_hall']['kind']=='institution'
     for row in factions:
         assert not locations[row["location_id"]].get("min_realm_index", 0)
     goods = [row for row in content.market_goods if row["world"] == "reincarnation"]
@@ -61,7 +62,7 @@ def test_base_hell_ascension_available_with_dharma_disabled(setup, path):
         assert saved.player.lifespan is None
         engine._ensure_market(saved, random.Random(3))
         assert saved.market_world == "reincarnation" and saved.market_offers
-        assert len([s for s in saved.sects.values() if s.world == "reincarnation"]) == 3
+        assert len([s for s in saved.sects.values() if s.world == "reincarnation"]) == 4
 
 
 def test_old_save_adds_world_factions_and_keeps_existing_deaths(setup):
@@ -73,7 +74,7 @@ def test_old_save_adds_world_factions_and_keeps_existing_deaths(setup):
     engine.store.save(game)
     migrated = engine._load(game.id)
     new = [s for s in migrated.sects.values() if s.world == "reincarnation"]
-    assert len(new) == 3
+    assert len(new) == 4
     assert all(not faction_site(s).get("min_realm_index", 0) for s in new)
     assert not engine._find_npc(migrated, dead_id).alive
 

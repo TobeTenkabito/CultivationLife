@@ -244,6 +244,19 @@ def ensure_monster_bloodline_state(player: Player) -> bool:
     return changed
 
 
+def seed_upper_bloodline(player: Player) -> None:
+    """Native upper quick starts inherit an attained, condition-free lineage.
+
+    Only creation calls this. Never upgrade an existing player's choices on
+    load, and leave every DLC field untouched when bloodlines are disabled.
+    """
+    if player.path != 'monster' or not bloodline_content_available():
+        return
+    history = _stable_history_for_realm(str(player.monster_species_id), player.realm_index)
+    player.monster_evolution_history = history
+    player.monster_evolution_id = history[-1]
+
+
 def _path_value(player: Player, path: str) -> Any:
     mapping = {
         "player.realm_index": player.realm_index,

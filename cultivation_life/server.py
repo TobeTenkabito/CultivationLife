@@ -164,6 +164,10 @@ class Handler(BaseHTTPRequestHandler):
                                                 payload.get("confirm_origin", False), payload.get("npc_id"))
             elif operation == "aperture-action":
                 result = ENGINE.aperture_action(game_id, str(payload.get("action", "")), payload.get("manual_id"))
+            elif operation == "upper-institution":
+                result = ENGINE.upper_institution_action(game_id, str(payload.get("action", "")), str(payload.get("target_id", "")))
+            elif operation == "upper-voisinage":
+                result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"))
             elif operation == "immortal-action":
                 result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"))

@@ -357,12 +357,13 @@ class ContentRegistry:
             if faction_world not in profiles:
                 raise ContentError(f"宗门 {faction_id} 的世界标签不合法：{faction_world}")
             allegiance_race = faction_definitions[faction_id].get("allegiance_race")
+            institution = faction_definitions[faction_id].get("kind") == "institution"
             if (
-                allegiance_race not in race_definitions
+                not (institution and allegiance_race is None) and (allegiance_race not in race_definitions
                 or (
                     faction_world in race_worlds
                     and faction_world not in race_definitions[allegiance_race].get("worlds", [])
-                )
+                ))
             ):
                 raise ContentError(f"宗门 {faction_id} 的归属种族不属于其所在界面：{allegiance_race}")
             realm_cap = int(profiles[faction_world].get("npc_realm_cap", len(realms) - 1))
@@ -379,7 +380,7 @@ class ContentRegistry:
                 if npc.get("race", "human") not in race_definitions:
                     raise ContentError(f"宗门 {faction_id} 的 NPC 种族不存在：{npc.get('race')}")
                 if (
-                    faction_world in race_worlds
+                    not institution and faction_world in race_worlds
                     and faction_world not in race_definitions[npc.get("race", "human")].get("worlds", [])
                 ):
                     raise ContentError(f"宗门 {faction_id} 的 NPC 种族不属于其所在界面：{npc.get('race')}")
@@ -1687,7 +1688,8 @@ class ContentRegistry:
         distributions_by_world = factions.get("recruitment_distribution_by_world", {})
         required_distribution_worlds = {
             "human", "spirit", "demon", "true_demon", "celestial", "asura",
-            *(str(definition.get("world", "human")) for definition in faction_definitions.values()),
+            *(str(definition.get("world", "human")) for definition in faction_definitions.values()
+              if definition.get("kind") != "institution"),
         }
         if not required_distribution_worlds <= set(distributions_by_world):
             raise ContentError("宗门招募概率必须分别配置人界、魔界、灵界、真魔界、仙界与修罗界")

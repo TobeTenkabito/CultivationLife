@@ -77,6 +77,8 @@ def public_aperture(player, game=None):
     ledger = player.immortal_aperture
     lower = lower_world(player)
     state = energy_state(player)
+    from .upper_voisinage import world_config, available as upper_available
+    upper = world_config(player) if upper_available(player) else None
     from ..rules import intrinsic_resource_breakdown
     intrinsic = intrinsic_resource_breakdown(player)
     field = None
@@ -86,21 +88,27 @@ def public_aperture(player, game=None):
         if source.voisinages:
             from dataclasses import asdict
             field = asdict(source.voisinages[0])
-    return {'available': True, 'lower': lower, 'field': field, 'name': '仿仙灵力' if lower else '仙灵力',
+    return {'available': True, 'lower': lower, 'field': field,
+            'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
+            'title': upper['aperture'] if upper else '仙窍', 'native': bool(upper),
             'current': state['current'], 'capacity': state['capacity'],
             'investment_multiplier': investment_multiplier(player),
             'sealed_reserve': ledger['current'] if lower else 0,
-            'conversion': 1 if player.immortal_power_converted else player.immortal_conversion_stage / 5,
+            'conversion': 1 if upper or player.immortal_power_converted else player.immortal_conversion_stage / 5,
             'origin_hp': intrinsic['hp']['current'], 'origin_mp': intrinsic['mp']['current'],
             'max_hp': intrinsic['hp']['maximum'], 'max_mp': intrinsic['mp']['maximum'],
             'refine_gain': 20 if lower else ledger['capacity'] / 4,
-            'hp_cost': intrinsic['hp']['maximum'] * (.15 if lower else 0),
-            'mp_cost': intrinsic['mp']['maximum'] * (.35 if lower else .2),
+            'hp_cost': intrinsic['hp']['maximum'] * (upper['hp_fraction'] if upper else .15 if lower else 0),
+            'mp_cost': intrinsic['mp']['maximum'] * (upper['mp_fraction'] if upper else .35 if lower else .2),
             'spirit_fields': [{'id': t.id, 'name': t.name, 'level': t.level} for t in spirit_books(player)],
             'active_manual': player.spirit_voisinage_manual}
 
 
 class ImmortalApertureMixin:
+    def upper_voisinage_action(self, game_id, action, voisinage_id):
+        from .upper_voisinage import act
+        return act(self, game_id, action, voisinage_id)
+
     def aperture_action(self, game_id, action, manual_id=None):
         game = self._load(game_id)
         p = game.player
@@ -117,7 +125,7 @@ class ImmortalApertureMixin:
             summary = '已选定斗法所用灵域。'
         elif action == 'refine':
             info = public_aperture(p)
-            if not info['lower'] and not p.immortal_power_converted:
+            if not info['lower'] and not info['native'] and not p.immortal_power_converted:
                 raise ValueError('请先完成仙灵力转化')
             if info['current'] >= info['capacity']:
                 raise ValueError('仙窍已满，无需转化')

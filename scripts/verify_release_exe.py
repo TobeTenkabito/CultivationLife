@@ -46,7 +46,7 @@ def verify(with_dlc):
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
-            for asset in ['immortal-economy-panel.js', 'handbook-content.js', 'tutorial-steps.js', 'tutorial.js', 'tutorial-content.js', 'tutorial.css', 'combat-plan-panel.js', 'doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
+            for asset in ['upper-institution-panel.js', 'upper-voisinage-panel.js', 'immortal-economy-panel.js', 'handbook-content.js', 'tutorial-steps.js', 'tutorial.js', 'tutorial-content.js', 'tutorial.css', 'combat-plan-panel.js', 'doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT / 'web' / asset).read_bytes()
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
@@ -179,6 +179,7 @@ def verify(with_dlc):
                 saved['pending_event'] = None
                 saved['player'].update(world=world, path=path, location_id=map_worlds[world]['default'],
                                        realm_index=9, layer=1, opportunity=1e12)
+                saved['player']['inventory'].append({'id':'spirit_stone','name':'灵石','quantity':1000000})
                 save_path.write_text(json.dumps(saved, ensure_ascii=False), encoding='utf-8')
                 with urllib.request.urlopen(base + f"/api/games/{buddhist['id']}", timeout=20) as response:
                     upper = json.load(response)
@@ -190,6 +191,32 @@ def verify(with_dlc):
                     assert upper['ghost_system']['available'] == with_dlc
                 if path=='monster':
                     assert ('血脉' in upper['breakthrough']['action_label']) == with_dlc
+                assert upper['upper_voisinages']['available']
+                field = upper['upper_voisinages']['rows'][0]
+                request = urllib.request.Request(base + f"/api/games/{buddhist['id']}/upper-voisinage", method='POST',
+                    data=json.dumps({'action':'train','voisinage_id':field['id']}).encode(),
+                    headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(request, timeout=20) as response:
+                    trained = json.load(response)
+                assert trained['upper_voisinages']['rows'][0]['level'] == 1
+                assert trained['upper_voisinages']['rows'][0]['active']
+                request = urllib.request.Request(base + '/api/games', method='POST',
+                    data=json.dumps({'name':'三界本体开局','preset_id':world+'_upper','seed':1522}).encode(),
+                    headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(request,timeout=20) as response:
+                    native=json.load(response)
+                assert native['player']['world']==world and native['player']['path']==path
+                assert native['upper_institution']['local'] and not native['upper_institution']['joined']
+                assert native['upper_voisinages']['rows'][0]['active'] and native['aperture']['current']==600
+                if world=='nether':
+                    assert native['monster_bloodline']['available']==with_dlc
+                    if with_dlc:
+                        assert len(native['monster_bloodline']['history'])>=10
+                request = urllib.request.Request(base + f"/api/games/{native['id']}/upper-institution",method='POST',
+                    data=b'{"action":"join"}',headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(request,timeout=20) as response:
+                    joined=json.load(response)
+                assert joined['upper_institution']['joined'] and joined['upper_institution']['discount']>0
             request = urllib.request.Request(base + '/api/games', method='POST',
                 data=json.dumps({'name':'仙躯打包验收','preset_id':'true_immortal','seed':1460}).encode(),
                 headers={'Content-Type':'application/json'})

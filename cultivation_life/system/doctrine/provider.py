@@ -139,6 +139,11 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     definitions = game.doctrine_state.get("definitions", {})
     results = {}
     for key, owner in owners.items():
+        if key == 'player':
+            from ..upper_voisinage import available, player_source as upper_source
+            if available(game.player):
+                results[key] = upper_source(game.player)
+                continue
         if key == 'player' and lower_world(game.player):
             value = player_source(game)
             if value.voisinages:

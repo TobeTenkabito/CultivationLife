@@ -375,6 +375,7 @@ class Player:
     immortal_traces: int = 0
     cultivation_ranks_schema: int = 2
     immortal_aperture: dict[str, Any] = field(default_factory=dict)
+    world_voisinages: dict[str, Any] = field(default_factory=dict)
     spirit_voisinage_manual: str | None = None
     teleport_permissions: list[str] = field(default_factory=list)
     teleport_passes: dict[str, Any] = field(default_factory=dict)
@@ -542,6 +543,7 @@ class Player:
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
         data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
         data['immortal_body'] = copy.deepcopy(data.get('immortal_body', {}))
+        data['world_voisinages'] = copy.deepcopy(data.get('world_voisinages', {}))
         if data.get('cultivation_ranks_schema', 1) < 2:
             from .system.cultivation_ranks import legacy_sense
             data['divine_sense_rank'] = legacy_sense(int(data.get('divine_sense_rank', 0)))
@@ -864,6 +866,7 @@ class GameState:
     active_trial: dict[str, Any] | None = None
     diplomacy_unit: int = 0
     wars: list[dict[str, Any]] = field(default_factory=list)
+    upper_institutions: dict[str, Any] = field(default_factory=dict)
     heavenly_court: dict[str, Any] = field(default_factory=dict)
     natal_artifact: dict[str, Any] = field(default_factory=dict)
     last_combat_report: dict[str, Any] | None = None
@@ -942,6 +945,7 @@ class GameState:
             "active_trial": self.active_trial,
             "diplomacy_unit": self.diplomacy_unit,
             "wars": self.wars,
+            "upper_institutions": self.upper_institutions,
             "heavenly_court": self.heavenly_court,
             "natal_artifact": self.natal_artifact,
             "last_combat_report": self.last_combat_report,
@@ -1002,6 +1006,7 @@ class GameState:
             active_trial=value.get("active_trial"),
             diplomacy_unit=int(value.get("diplomacy_unit", 0)),
             wars=list(value.get("wars", [])),
+            upper_institutions=copy.deepcopy(value.get("upper_institutions", {})),
             heavenly_court=dict(value.get("heavenly_court", {})),
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),
