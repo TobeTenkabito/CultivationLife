@@ -71,7 +71,7 @@ class TeleportMixin:
         game = self._load(game_id)
         p = game.player
         if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-                or game.heavenly_court.get('open_election') or game.guixu_state.get('player_session')):
+                or game.guixu_state.get('player_session')):
             raise ValueError('当前状态无法使用传送阵')
         info = public_teleport(game, self.maps)
         here = info['origin']

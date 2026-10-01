@@ -20,6 +20,7 @@
     }
     const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
     root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
+    if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));root.append(box);}
     const legacy=game.player.institution_affiliations?.yaochi;
     if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
     if(!pool.local)root.append(el('p','须亲临「瑶池」办理委托和交易。可在地图查看路线与传送阵。','doctrine-note'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));

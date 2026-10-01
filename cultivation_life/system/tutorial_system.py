@@ -16,7 +16,7 @@ def blocked_reason(game):
     p = game.player
     if not p.alive:
         return '此生已经落幕，可阅读指南，在新的一世再结师缘。'
-    if game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor or game.heavenly_court.get('open_election') or (game.guixu_state.get('player_session') or {}).get('trapped'):
+    if game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor or (game.guixu_state.get('player_session') or {}).get('trapped'):
         return '请先处理眼前的事件、试炼或困境，再赴师缘。'
     if has_living_master(p):
         return '你已有在世的师父；本课不会替换现有师承。'

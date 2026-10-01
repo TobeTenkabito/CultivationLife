@@ -180,11 +180,40 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.51.3' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("institutions")) {
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'机构安卓验收',preset_id:'true_immortal',seed:1513})});return g.id;})()");
+            if(phase.equals("experience")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'体验安卓验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nfrom cultivation_life.rules import learn_technique\nimport copy,random\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.location_id='expanse_celestial_8'\ng.heavenly_court['player_grade']=4\ng.yaochi_state['experience']=200\ng.yaochi_state['job']={'name':'验收委托','years':100,'progress':100,'reward':400}\nfor d in g.doctrine_state['definitions'].values():\n learn_technique(g.player,Technique(**copy.deepcopy(d['manuals'][0])))\n g.doctrine_state['player']['progress'][d['id']]={'level':4,'experience':0}\ng.doctrine_state['player']['active']=next(iter(g.doctrine_state['definitions']))\ne._court_open_election(g,'sun',random.Random(1))\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("window.__experienceAge=game.player.age;true");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    for(String panel:new String[]{"doctrine","voisinage","daomen"}) {
+                        js("UtilityPanels.open('"+panel+"');true");
+                        check(Boolean.TRUE.equals(js("document.querySelectorAll('#"+panel+"-content .doctrine-compact').length===25 && document.querySelector('#"+panel+"-card').scrollWidth<=document.querySelector('#"+panel+"-card').clientWidth+1")),"Compact collection "+panel+theme);
+                        tapSelector("#"+panel+"-content .doctrine-compact > summary");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#"+panel+"-content .doctrine-compact').open")),"Native expand "+panel);
+                        tapSelector("#"+panel+"-content .doctrine-compact > summary");
+                    }
+                    capture("experience-"+theme+"-1520");
+                }
+                tapSelector("#daomen-content .doctrine-compact > summary");
+                js("document.querySelector('#daomen-content .doctrine-compact button').dataset.experienceSearch='true';true");
+                tapSelector("[data-experience-search]");waitForJs("!busy && game.doctrines.rows.some(r=>r.peer_preview)","Peer preview");
+                check(Boolean.TRUE.equals(js("game.player.age===__experienceAge && game.doctrines.rows.every(r=>!r.peers.length)")),"Preview time and roster");
+                tapSelector("#daomen-content .peer-preview button");waitForJs("!busy && game.doctrines.rows.some(r=>r.peers.length===1)","Retain peer");
+                check(Boolean.TRUE.equals(js("game.player.age===__experienceAge")),"Retain does not age");
+                js("UtilityPanels.open('yaochi');Array.from(document.querySelectorAll('#yaochi-content button')).find(b=>b.textContent==='交付并领取功勋').dataset.experienceClaim='true';true");
+                tapSelector("[data-experience-claim]");waitForJs("!busy && game.yaochi.experience.level===2 && game.yaochi.experience.multiplier===1.1","Yaochi experience");
+                js("UtilityPanels.open('settings');true");tapSelector("#setting-court-election");
+                waitForJs("!busy && game.settings.court_election_popup===false && !game.heavenly_court.election","Quiet elections");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.settings.court_election_popup===false && game.player.age===__experienceAge && game.yaochi.experience.level===2")),"Experience persistence");
+                result.putString("experience_scope","Six themes, 25 compact collections and native expansion, preview/retain without aging, Yaochi experience claim, election opt-out and persistence");
+            } else if(phase.equals("institutions")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'机构安卓验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.sects['yaochi'].kind='sect'\ng.player.faction_id='yaochi'\ng.player.faction_contribution=231\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.player.faction_id===null && game.player.institution_affiliations.yaochi.legacy_contribution===231 && game.faction.available.every(f=>!['heavenly_court','yaochi'].includes(f.id))")),"Institution migration and sect exclusion");
@@ -194,7 +223,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("['天庭','瑶池'].every(name=>Array.from(document.querySelectorAll('.map-directory-entry')).some(r=>r.querySelector('strong').textContent===name && r.textContent.includes('机构驻地')))")),"Institution map classification "+theme);
                     js("UtilityPanels.open('relationship');Array.from(document.querySelectorAll('.contact-filters button')).find(b=>b.textContent==='机构人物').click();true");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('.contact-person').length===6 && document.querySelector('.contact-detail').textContent.includes('机构往来') && document.querySelector('#relationship-card').scrollWidth<=document.querySelector('#relationship-card').clientWidth+1")),"Institution contacts layout "+theme);
-                    capture("institutions-"+theme+"-1513");
+                    capture("institutions-"+theme+"-1520");
                     js("UtilityPanels.open('yaochi');true");
                     check(Boolean.TRUE.equals(js("document.querySelector('#yaochi-content').textContent.includes('旧制贡献 231')")),"Legacy contribution record");
                 }
@@ -205,10 +234,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("game.world_npcs.some(n=>n.id===__institutionTarget && n.contact_source==='institution' && n.affinity>__institutionAffinity)")),"Institution contact persistence");
                 result.putString("institutions_scope","Six themes, institution map identity and contacts, actual affinity action, migrated contribution and sect exclusion");
             } else if(phase.equals("fusion")) {
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'真传安卓验收',preset_id:'true_immortal',seed:1513})});return g.id;})()");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'真传安卓验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nfrom cultivation_life.rules import learn_technique\nimport copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.realm_index=12\ng.player.immortal_traces=1000\ng.player.next_tribulation_age=None\nd=next(d for d in g.doctrine_state['definitions'].values() if len(d['manuals'])>=6)\nfor b in d['manuals']: learn_technique(g.player,Technique(**copy.deepcopy(b)))\nr=g.doctrine_state['player']\nr['progress'][d['id']]={'level':4,'experience':0}\nr['active']=d['id']\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                js("UtilityPanels.open('doctrine');true");
+                js("UtilityPanels.open('doctrine');document.querySelector('[data-fusion-id]').closest('details').open=true;true");
                 tapSelector("[data-fusion-id] button:not([disabled])");
                 waitForJs("game.doctrines.rows.some(r=>r.fusion && r.fusion.level===1)","Fusion creation");
                 check(Boolean.TRUE.equals(js("game.player.immortal_traces===976 && game.doctrines.voisinages.some(v=>v.name.startsWith('真·'))")),"True voisinage and trace payment");
@@ -220,14 +249,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     js("UtilityPanels.open('doctrine');document.querySelector('[data-fusion-id]').scrollIntoView({block:'center'});true");
                     check(Boolean.TRUE.equals(js("document.querySelector('#doctrine-card').scrollWidth<=document.querySelector('#doctrine-card').clientWidth+1")),"Fusion layout "+theme);
-                    capture("fusion-"+theme+"-1513");
+                    capture("fusion-"+theme+"-1520");
                     js("UtilityPanels.close('doctrine');UtilityPanels.open('yaochi');true");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('#yaochi-content optgroup').length===26 && game.yaochi.shop.filter(o=>o.id.startsWith('daluo_breakthrough_')).length===3")),"Grouped catalog and realm pills");
                     js("UtilityPanels.close('yaochi');true");
                 }
                 result.putString("fusion_scope","Real fusion/study, single trace payment, true voisinage persistence, six themes and grouped catalog");
             } else if(phase.equals("governance")) {
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'故人议政验收',preset_id:'true_immortal',seed:1513})});return g.id;})()");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'故人议政验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("import random\nfrom cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.heavenly_court['player_grade']=9\ng.player.location_id='expanse_celestial_8'\ng.yaochi_state['merit']=100000\ng.player.faction_id=next(s.id for s in g.sects.values() if s.world=='celestial' and not s.extinct and s.npcs)\ne._advance_heavenly_court_unit(g,random.Random(9))\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
@@ -235,7 +264,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     for(String panel:new String[]{"yaochi","heavenly-court","relationship"}) {
                         js("UtilityPanels.open('"+panel+"');true");
                         check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Governance panel overflow: "+theme+panel);
-                        capture("governance-"+panel+"-"+theme+"-1513");
+                        capture("governance-"+panel+"-"+theme+"-1520");
                     }
                 }
                 js("UtilityPanels.open('yaochi');window.__lockedBook=game.yaochi.shop.find(o=>o.can_lock).id;true");
@@ -257,7 +286,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
             } else if(phase.equals("economy")) {
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'瑶池金光验收',preset_id:'true_immortal',seed:1513})});return g.id;})()");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'瑶池金光验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.player.immortal_body['level']=20\ng.yaochi_state['merit']=100000\nadd_item(g.player,'great_sun_divine_light',8)\nadd_item(g.player,'spirit_stone',100000)\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
@@ -265,7 +294,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     for(String panel:new String[]{"golden-light","yaochi"}) {
                         js("UtilityPanels.open('"+panel+"');true");
                         check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden') && e.scrollWidth<=e.clientWidth+1})()")),"New panel overflow: "+theme+panel);
-                        capture("economy-"+panel+"-"+theme+"-1513");
+                        capture("economy-"+panel+"-"+theme+"-1520");
                     }
                 }
                 js("UtilityPanels.open('golden-light');true");tapSelector("#golden-light-content button");
@@ -285,14 +314,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 result.putString("economy_scope","Six themes, real gold tempering and merit shop taps, persistence, forged method and delayed single-use pass");
             } else if(phase.equals("upper")) {
                 for(String world:new String[]{"asura","nether","reincarnation"}) {
-                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界验收',spirit_root:'supreme_metal',path:'dao',seed:1513})});return g.id;})()");
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界验收',spirit_root:'supreme_metal',path:'dao',seed:1520})});return g.id;})()");
                     python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\np.realm_index=9\np.layer=1\np.lifespan=None\np.location_id=e.maps.normalize_location(p.world,None)\np.opportunity=opportunity_required(p)*3\ng.pending_event=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
                     for(String theme:new String[]{"a","b","c","d","e","f"}) {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                         check(Boolean.TRUE.equals(js("!game.player.opportunity_unbounded && !document.querySelector('#opportunity-text').textContent.includes('无尽') && document.querySelector('#upper-progression-note').textContent.includes(game.player.world==='nether'?'血脉进化':'普通修行')")),"Upper progression routing: "+world+theme);
                         check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#upper-progression-note');return e.scrollWidth<=e.clientWidth+1})()")),"Upper progression overflow");
-                        capture("upper-"+world+"-"+theme+"-1513");
+                        capture("upper-"+world+"-"+theme+"-1520");
                     }
                     if(!world.equals("nether")) {
                         tapSelector("#breakthrough-action");waitForJs("!busy && game.player.opportunity<game.player.opportunity_required","Ordinary breakthrough did not resolve");
@@ -309,9 +338,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
-                    js("UtilityPanels.open('voisinage');true");Thread.sleep(500);
+                    js("UtilityPanels.open('voisinage');document.querySelector('#voisinage-content .doctrine-compact').open=true;true");Thread.sleep(500);
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('.voisinage-stages>span').length===4 && document.querySelector('#voisinage-content').textContent.includes('初成4层') && document.querySelector('#voisinage-card').scrollWidth<=document.querySelector('#voisinage-card').clientWidth+1")),"Trial stage layout: "+theme);
-                    capture("trials-"+theme+"-1513");
+                    capture("trials-"+theme+"-1520");
                     sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
                 }
                 js("UtilityPanels.open('voisinage');Array.from(document.querySelectorAll('#voisinage-content button')).find(b=>b.textContent.includes('引动反噬')).setAttribute('data-trial-start','true');true");
@@ -323,12 +352,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.last_combat_report.total_rounds===5 && game.doctrines.voisinages.some(f=>f.cultivation.rank===5)")),"Trial persistence");
                 check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='immortal-trials' && JSON.stringify(c).includes('没有轮数限制'))")),"Missing trial handbook");
-                capture("trials-victory-1513");
+                capture("trials-victory-1520");
                 result.putString("trials_scope","Six themes; native training tap and back; five-round field-only backlash; real growth and reload persistence; unlimited three-corpses handbook");
             } else if(phase.equals("tutorial")) {
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
-                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1513,tutorial_enabled:true})});return g.id;})()");
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1520,tutorial_enabled:true})});return g.id;})()");
                     async("loadGame("+JSONObject.quote(id)+")");js("window.__tutorialAge=game.player.age");
                     for(int i=0;i<32;i++) {
                         String step=(String)js("game.tutorial.guide.step");
@@ -340,7 +369,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                             tapSelector("#tutorial-start");waitForJs("!busy && game.tutorial.enabled && TutorialGuide.isGuiding()","Resume failed");
                             check(Boolean.TRUE.equals(js("game.tutorial.guide.step==='gain'")),"Resume lost step");
                         }
-                        if(step.equals("practice") || step.equals("join")) capture("guide-"+theme+"-"+step+"-1513");
+                        if(step.equals("practice") || step.equals("join")) capture("guide-"+theme+"-"+step+"-1520");
                         check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.tutorial-coach').getBoundingClientRect();return r.right<=innerWidth+1 && r.bottom<=innerHeight+1;})()")),"Coach outside viewport: "+step);
                         if(Boolean.TRUE.equals(js("!document.querySelector('#guide-next').hidden"))) tapSelector("#guide-next");
                         else {
@@ -399,7 +428,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1513.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1520.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
@@ -625,7 +654,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
                 result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML,rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML:null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
-                capture("failure-1513");
+                capture("failure-1520");
             } catch(Exception ignored) { /* Preserve the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString());
             finish(Activity.RESULT_CANCELED,result);

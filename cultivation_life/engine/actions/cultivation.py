@@ -228,7 +228,7 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     if player.cultivation_suppression:
         raise ValueError("当前修为受秘法压制，解除压制后方可突破")
     if player.world == 'celestial' and player.realm_index >= 9 and (
-        game.active_trial or player.ghost_captor or game.heavenly_court.get('open_election')
+        game.active_trial or player.ghost_captor
         or (game.guixu_state.get('player_session') or {}).get('trapped')
     ):
         raise ValueError('当前状态无法冲关，请先处理事件或脱离拘束')

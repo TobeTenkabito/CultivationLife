@@ -32,8 +32,6 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("此生已经结束")
     if game.pending_event:
         raise ValueError("请先处理当前事件")
-    if game.heavenly_court.get("open_election"):
-        raise ValueError("天庭大选正在进行；选举不流逝时间，请先在天庭界面完成投票")
     if player.world == "celestial" and not player.immortal_power_converted and action not in {"cultivate", "rest", "commission", "yaochi_work", "immortal_conversion", "doctrine_study", "daomen_explore", "immortal_trace_gather"}:
         raise ValueError("仙灵力尚未完全转化，当前只能修行、调息或承接坊市、瑶池委托")
     if player.imprisonment:

@@ -4,17 +4,31 @@ from ..combat.npc_lifecycle import initialize_native
 from .generation import rng_for
 
 
-def discover(game, key, definition, combat_config, words):
+def preview(game, key, definition, words):
+    record = game.doctrine_state["player"]
+    serial = record.get("peer_search_serial", 0) + 1
+    record["peer_search_serial"] = serial
+    rng = rng_for(game.seed, game.doctrine_state["version"], f"peer-preview:{key}:{serial}")
+    level = rng.randint(1, 9)
+    candidate = dict(id=f"daomen:{key}:visitor:{serial}", level=level,
+                     name=rng.choice(words["prefixes"]) + rng.choice(words["ability_verbs"]) + "道人")
+    record["peer_preview"] = dict(candidate, doctrine_id=key)
+    return candidate
+
+
+def discover(game, key, definition, combat_config, words, candidate=None):
     record = game.doctrine_state["player"]
     known = record.setdefault("daomen", {}).setdefault(key, [])
     index = len(known)
     if index >= 9:
         raise ValueError("这处道门的九位传承引路人均已结识")
-    level = index + 1
-    npc_id = f"daomen:{key}:{index}"
+    level = candidate["level"] if candidate else index + 1
+    npc_id = candidate["id"] if candidate else f"daomen:{key}:{index}"
     rng = rng_for(game.seed, game.doctrine_state["version"], npc_id)
     name = rng.choice(words["prefixes"]) + rng.choice(words["ability_verbs"]) + "道人"
-    stage = definition["stages"][index]
+    if candidate:
+        name = candidate["name"]
+    stage = definition["stages"][level - 1]
     npc = game.notable_npcs.get(npc_id)
     if npc is None:
         realm = max(stage['realm'], 10 if level >= 4 else 9)

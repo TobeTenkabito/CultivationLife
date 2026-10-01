@@ -21,7 +21,7 @@ class ImmortalCultivationMixin(ImmortalBodyMixin, ImmortalApertureMixin):
         if p.world != "celestial" or p.realm_index < 9:
             raise ValueError("须在仙界达到真仙境界")
         if (not p.alive or game.pending_event or game.active_trial or p.imprisonment
-                or p.ghost_captor or game.heavenly_court.get("open_election")
+                or p.ghost_captor
                 or (game.guixu_state.get("player_session") or {}).get("trapped")):
             raise ValueError("当前状态无法修持，请先处理事件或脱离拘束")
         ensure(game)

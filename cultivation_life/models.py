@@ -893,6 +893,7 @@ class GameState:
         "achievement_popup": True,
         "auto_advance_player_wars": False,
         "guixu_event_popup": True,
+        "court_election_popup": True,
     })
     world_rules_version: int = 9
     created_with_game_version: str = BASE_GAME_VERSION
@@ -1027,6 +1028,7 @@ class GameState:
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),
                 "auto_advance_player_wars": bool(value.get("settings", {}).get("auto_advance_player_wars", False)),
                 "guixu_event_popup": bool(value.get("settings", {}).get("guixu_event_popup", True)),
+                "court_election_popup": bool(value.get("settings", {}).get("court_election_popup", True)),
             },
             world_rules_version=value.get("world_rules_version", 1),
             map_war_last_encounter_unit=int(value.get("map_war_last_encounter_unit", -2)),

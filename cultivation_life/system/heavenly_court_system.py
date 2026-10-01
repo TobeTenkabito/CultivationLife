@@ -24,7 +24,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
 
     def _ensure_heavenly_court(self, game: GameState, rng: Any) -> bool:
         if game.heavenly_court:
-            return False
+            return self._court_normalize(game)
         config = self._court_config()
         officials: dict[str, dict[str, Any]] = {}
         celestial_people = [
@@ -72,7 +72,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
             })
 
         game.heavenly_court = {
-            "unit": 0, "authority": float(config["initial_authority"]),
+            "experience_version": 2, "unit": 0, "authority": float(config["initial_authority"]),
             "treasury": float(config["initial_treasury"]), "equipment": 0.0,
             "player_grade": int(config["player_initial_grade"]), "player_merit": 0,
             "player_support": 50.0,
@@ -132,15 +132,16 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         others = [row for row in eligible if row["id"] != "player"]
         candidate_count = min(rng.randint(4, 7), len(others)) if others else 0
         candidates = rng.sample(others, candidate_count) if candidate_count else []
-        if player_row:
+        if player_row and game.settings.get("court_election_popup", True):
             candidates.append(player_row)
+        rng.shuffle(candidates)
         if not candidates:
             return
         court["open_election"] = {
             "office_id": office_id, "round": 1,
             "candidates": [row["id"] for row in candidates], "opened_unit": int(court["unit"]),
         }
-        if not player_row:
+        if "player" not in court["open_election"]["candidates"]:
             for _ in range(50):
                 success, _ = self._court_resolve_election_round(game, rng, "none", "")
                 if success:
@@ -160,6 +161,10 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
             raise ValueError("当前没有待处理的七曜选举")
         candidate_ids = list(election["candidates"])
         player_bonus = 0.0
+        if method == "abstain":
+            election["candidates"] = [key for key in candidate_ids if key != "player"]
+            election.pop("campaign_pledges", None)
+            return self._court_resolve_election_round(game, rng, "none", "")
         if "player" in candidate_ids:
             if method == "relationship":
                 affinities = [
@@ -178,10 +183,10 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
                 table = "decrees" if method == "promise_decree" else "laws"
                 if pledge_id not in {row["id"] for row in self._court_config()[table]}:
                     raise ValueError("承诺的决议或天条不存在")
-                court["pledges"].append({
-                    "kind": "decree" if method == "promise_decree" else "law",
-                    "id": pledge_id, "deadline_unit": int(court["unit"]) + 2,
-                })
+                promise = {"kind": "decree" if method == "promise_decree" else "law", "id": pledge_id}
+                promises = election.setdefault("campaign_pledges", [])
+                if promise not in promises:
+                    promises.append(promise)
                 player_bonus = 0.62
 
         votes = {candidate_id: 0 for candidate_id in candidate_ids}
@@ -194,7 +199,11 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
                 official = court["officials"][candidate_id]
                 score = 1.0 + float(official.get("support", 50)) / 100
                 if candidate_id == "player":
+                    controls = self._court_player_controls(court)
+                    # Building a first majority is viable; further accumulation
+                    # faces opposition and benefits from Yaochi commitments.
                     score += player_bonus + float(court["player_support"]) / 180
+                    score += 1.8 if controls < 4 else max(-1.1, -0.5 - (controls-4)*0.3)
                     if seat.get("representative_id") == "player":
                         score += 1.3
                 if official.get("faction_id") == seat.get("sect_id"):
@@ -206,7 +215,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         winner_id, winner_votes = max(votes.items(), key=lambda row: (row[1], row[0]))
         threshold = math.ceil(int(self._court_config()["seat_count"]) / 4)
         election["votes"] = votes
-        if winner_votes < threshold:
+        if winner_votes < threshold and int(election.get("round", 1)) < 3:
             election["round"] = int(election.get("round", 1)) + 1
             return False, f"最高得票仅 {winner_votes}，未达 {threshold} 票门槛，立即重新选举。"
         office_id = str(election["office_id"])
@@ -218,10 +227,14 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
             "votes": winner_votes,
         }
         office_name = next(row["name"] for row in self._court_config()["offices"] if row["id"] == office_id)
+        if winner_id == "player":
+            for promise in election.get("campaign_pledges", []):
+                if promise not in [{k:r[k] for k in ("kind", "id")} for r in court["pledges"]]:
+                    court["pledges"].append(dict(promise, office_id=office_id, deadline_unit=int(court["unit"])+7))
         court["open_election"] = None
         game.history.append(HistoryRecord(
             "SYS_COURT_ELECTION", 1, game.player.age, f"{office_name}大选", winner_id, "elected",
-            f"{official['name']}以 {winner_votes}/49 票当选{office_name}，任期为七个仙界时间单位。",
+            f"{official['name']}以 {winner_votes}/49 票当选{office_name}，任期为 {term} 个仙界时间单位。",
             {"office_id": office_id, "winner_id": winner_id, "votes": votes},
             ["system", "celestial", "heavenly_court", "election"],
         ))
@@ -233,6 +246,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         self._ensure_heavenly_court(game, rng)
         court = game.heavenly_court
         self._sync_player_court_identity(game)
+        self._court_finish_unattended(game, rng)
         court["unit"] = int(court["unit"]) + 1
         unit = int(court["unit"])
         self._court_retire_unavailable(game)
@@ -266,19 +280,16 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
             for seat in court["seats"]:
                 seat["influence"] += 5
 
+        court["pledges"] = [row for row in court["pledges"]
+            if (court["offices"].get(row.get("office_id")) or {}).get("holder_id") == "player"]
         broken = [row for row in court["pledges"] if int(row["deadline_unit"]) < unit]
         if broken:
             court["player_support"] = max(0.0, float(court["player_support"]) - 15 * len(broken))
             court["pledges"] = [row for row in court["pledges"] if row not in broken]
 
-        office_id = self._court_config()["offices"][(unit - 1) % 7]["id"]
-        if int(court["player_grade"]) <= 4:
-            court["election_queue"].append(office_id)
-            self._court_open_next_queued_election(game, rng)
-        else:
-            self._court_open_election(game, office_id, rng)
+        self._court_schedule_elections(game, rng)
         messages = self._court_govern(game, rng)
-        return [f"{game.player.age}岁：天庭第 {unit} 时间单位完成府库结算与七曜轮选。", *messages]
+        return [f"{game.player.age}岁：天庭第 {unit} 时间单位完成结算。", self._court_pay_stipend(game), *messages]
 
     def resolve_heavenly_election(self, game_id: str, method: str = "none", pledge_id: str = "") -> dict[str, Any]:
         game = self._load(game_id)
@@ -312,8 +323,6 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         self._ensure_heavenly_court(game, rng)
         court = game.heavenly_court
         self._sync_player_court_identity(game)
-        if court.get("open_election"):
-            raise ValueError("请先完成当前七曜选举")
 
         if action == "examination":
             result, summary = self._court_examination(game, rng)
@@ -435,6 +444,10 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         if not law:
             raise ValueError("未知天条")
         desired = not bool(court["laws"].get(law_id)) if enact is None else bool(enact)
+        conflicts = [key for key in self._court_conflicts(law_id) if court['laws'].get(key)]
+        if desired and conflicts:
+            names = [row['name'] for row in self._court_config()['laws'] if row['id'] in conflicts]
+            raise ValueError('须先废除互斥天条：' + '、'.join(names))
         holders = self._court_holder_ids(court)
         if not holders:
             raise ValueError("尚无在任星君，无法进行天条表决")
@@ -456,8 +469,9 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
                                   abstain=abstain, total=total, passed=passed, actor_id=actor_id)
         if passed:
             court['laws'][law_id] = desired
+            self._court_prune_decrees(court)
             court.setdefault('law_changed_at', {})[law_id] = int(court['unit'])
-            if actor_id == 'player':
+            if actor_id == 'player' and desired:
                 self._court_honor_pledge(court, 'law', law_id)
         return (
             "law_passed" if passed else "law_rejected",
@@ -501,7 +515,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         for office in config["offices"]:
             holder = court["offices"].get(office["id"])
             offices.append({**office, "holder": holder})
-        laws = [dict(row, active=bool(court["laws"].get(row["id"]))) for row in config["laws"]]
+        laws = [dict(row, active=bool(court["laws"].get(row["id"])), conflicts=[key for key in self._court_conflicts(row["id"]) if court["laws"].get(key)]) for row in config["laws"]]
         decrees = []
         for row in config["decrees"]:
             enabled = self._court_player_controls(court) > 0
@@ -539,6 +553,8 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         }
         return {
             "visible": True, "initialized": True, "unit": int(court["unit"]),
+            "term_units": config["term_units"], "stipend": config["grade_stipends"][str(court["player_grade"])],
+            "election_notices": game.settings.get("court_election_popup", True),
             "location_id": 'jade_capital', "location_name": '玉京仙都',
             "authority": round(float(court["authority"]), 2),
             "treasury": round(float(court["treasury"]), 2),

@@ -192,6 +192,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     target["natal_artifact_effects"] = [
         *deps._natal_artifact_combat_effects(game), *crafted_combat_effects(game.player),
     ]
+    from ..system.court_lifecycle import private_combat
     if player.world == "celestial":
         if deps._court_law_active(game, "martial_gods"):
             target["global_damage_multiplier"] = 1.10
@@ -207,7 +208,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             player.karma -= 10
         if (
             deps._court_law_active(game, "universal_protection")
-            and target.get("combat_type") == "cultivator"
+            and private_combat(target, wanted_ids)
             and rng.random() < (0.80 if lethal else 0.25)
             and "player" not in wanted_ids
         ):

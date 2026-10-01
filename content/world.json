@@ -28,7 +28,15 @@
       "hp": 0,
       "mp": 0
     },
-    "doctrine_fusion_study": {"name": "参悟合练功法", "opportunity": [0, 0], "hp": 0, "mp": 0},
+    "doctrine_fusion_study": {
+      "name": "参悟合练功法",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
     "immortal_conversion": {
       "name": "转化仙灵力",
       "opportunity": [
@@ -1390,7 +1398,7 @@
     },
     "heavenly_court": {
       "seat_count": 49,
-      "term_units": 7,
+      "term_units": 14,
       "decree_duration_units": 5,
       "base_treasury_income": 100,
       "initial_treasury": 2800,
@@ -1518,7 +1526,7 @@
         {
           "id": "universal_protection",
           "name": "寰宇庇护法",
-          "description": "禁止修士私自斗法，切磋也可能导致通缉。"
+          "description": "禁止未经许可的修士私斗；天庭公务、官办演武、讨伐通缉者及自卫不在此限。"
         },
         {
           "id": "immortal_slaughter",
@@ -1653,7 +1661,36 @@
             ]
           }
         }
-      }
+      },
+      "grade_stipends": {
+        "1": 60000,
+        "2": 48000,
+        "3": 38000,
+        "4": 30000,
+        "5": 22000,
+        "6": 16000,
+        "7": 10000,
+        "8": 6000,
+        "9": 3000
+      },
+      "law_conflicts": [
+        [
+          "official_system",
+          "assistant_officials"
+        ],
+        [
+          "direct_appointment_law",
+          "recommendation_law"
+        ],
+        [
+          "wide_domain",
+          "traveling_palace"
+        ],
+        [
+          "universal_protection",
+          "immortal_slaughter"
+        ]
+      ]
     },
     "breakthrough": {
       "major_base": {
@@ -3791,7 +3828,12 @@
       },
       "lock_limit": 3,
       "lock_rate": 0.1,
-      "lock_minimum": 20
+      "lock_minimum": 20,
+      "experience": {
+        "per_job": 100,
+        "per_level": 300,
+        "reward_per_level": 0.1
+      }
     }
   },
   "realms": [

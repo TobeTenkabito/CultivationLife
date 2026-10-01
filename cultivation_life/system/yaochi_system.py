@@ -75,9 +75,18 @@ def grant(game, offer):
         add_item(p, offer['id'], offer['quantity'])
 
 
-def commission_reward(player, job):
+def experience(game):
+    cfg = config()['experience']
+    xp = max(0, int(account(game).get('experience', 0)))
+    level = 1 + xp // cfg['per_level']
+    return dict(level=level, total=xp, progress=xp % cfg['per_level'], required=cfg['per_level'],
+                multiplier=1 + (level - 1) * cfg['reward_per_level'], per_job=cfg['per_job'])
+
+
+def commission_reward(player, job, game=None):
     cfg = config()
     multiplier = cfg['realm_reward_multipliers'][max(0, min(3, player.realm_index-9))]
+    multiplier *= experience(game)['multiplier'] if game else 1
     return round(job['reward'] * multiplier * (1 + cfg['layer_reward_step'] * max(0, min(8, player.layer-1))))
 
 
@@ -155,13 +164,15 @@ class YaochiMixin:
             if state.get('job'): raise ValueError('须先交付当前委托')
             job=next((j for j in cfg['commissions'] if j['id']==target_id),None)
             if not job: raise ValueError('未知瑶池委托')
-            state['job']=dict(job,years=unit,progress=0,reward=commission_reward(p, job))
+            state['job']=dict(job,years=unit,progress=0,reward=commission_reward(p, job, game))
             summary=f"接取【{job['name']}】，须在瑶池实际履约 {unit} 年。中途遇事可稍后继续。"
         elif action=='claim_job':
             job=state.get('job')
             if not job or job['progress']<job['years']: raise ValueError('委托履约尚未完成')
             state['merit']=state.get('merit',0)+job['reward'];state['earned']=state.get('earned',0)+job['reward']
-            summary=f"交付【{job['name']}】，获得 {job['reward']} 功勋。";state['job']=None
+            gain = cfg['experience']['per_job']
+            state['experience'] = state.get('experience', 0) + gain
+            summary=f"交付【{job['name']}】，获得 {job['reward']} 功勋、{gain} 瑶池经验。";state['job']=None
         elif action=='exchange_stones':
             spend(game,amount);add_item(p,'spirit_stone',amount*cfg['stones_per_merit'])
             summary=f"以 {amount} 功勋兑换灵石 ×{amount*cfg['stones_per_merit']}。"
@@ -204,9 +215,9 @@ class YaochiMixin:
         for o in offers(game):
             rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
         return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
-                    commission_catalog=catalog,
+                    experience=experience(game), commission_catalog=catalog,
                     manual_catalog_counts={'total':total_manuals, 'eligible':sum(o['doctrine'] is not None for o in catalog)},
-                    merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],
+                    merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j,game),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],
                     lock_limit=cfg['lock_limit'], locked_count=len(state.get('locked_offers',{})),
                     job=copy.deepcopy(state.get('job')), orders=[dict(id=o['id'],name=o['offer']['name'],ready_age=o['ready_age'],ready=p.age>=o['ready_age']) for o in state.get('orders',[])],
                     exchange={k:cfg[k] for k in ('stones_per_merit','merit_per_court_merit','support_cost','support_gain','vote_cost')},

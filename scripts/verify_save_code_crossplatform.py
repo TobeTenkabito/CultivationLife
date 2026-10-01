@@ -18,7 +18,7 @@ class QuietHandler(server.Handler):
 
 def main():
     expected = json.loads((ROOT/'build/transfer-fixtures/from-windows.json').read_bytes())
-    code = (ROOT/'build/from-android-1513.txt').read_text(encoding='utf-8')
+    code = (ROOT/'build/from-android-1520.txt').read_text(encoding='utf-8')
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as folder:
         server.PERSISTENCE_ROOT = Path(folder)
         engine = server.ENGINE = GameEngine(ROOT, Path(folder)/'saves')

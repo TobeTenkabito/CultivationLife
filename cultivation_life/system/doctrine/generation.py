@@ -53,8 +53,8 @@ def validate_content(config: Mapping[str, Any]) -> None:
                 "annotation_price", "explore_price"):
         if type(rules[key]) is not int or rules[key] <= 0:
             raise ValueError(f"Invalid cultivation parameter {key}")
-    if rules['trace_gain_chance'] != .07 or len(rules['vein_success_rates']) != 9:
-        raise ValueError('仙痕判定须为 7%，仙脉须配置九层成功率')
+    if not 0 < rules['trace_gain_chance'] <= 1 or len(rules['vein_success_rates']) != 9:
+        raise ValueError('仙痕概率须介于 0 与 1，仙脉须配置九层成功率')
     for rate in [*rules['vein_success_rates'], rules['vein_pity_step']]:
         if not 0 < number(rate, 'vein probability') <= 1:
             raise ValueError('仙脉概率无效')

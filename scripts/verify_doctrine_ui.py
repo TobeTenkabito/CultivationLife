@@ -73,8 +73,11 @@ def main():
                 assert directory.locator('p').count() == 25
                 assert '已获传承' in directory.text_content()
                 assert '太初归元道统' in directory.text_content()
-                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 1
-                page.get_by_role('button', name='访求同道', exact=False).click()
+                assert page.locator('#doctrine-content details:not(.doctrine-compact) .doctrine-chapter').count() == 1
+                page.locator('#daomen-content .doctrine-compact > summary').first.click()
+                page.get_by_role('button', name='寻找同道', exact=False).click()
+                page.wait_for_function('!busy && game.doctrines.rows.some(r=>r.peer_preview)')
+                page.get_by_role('button', name='结识这位同道', exact=False).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.peers.length === 1)')
                 saved = engine.store.load(game.id)
                 saved.pending_event = None
@@ -91,9 +94,10 @@ def main():
                 engine.store.save(saved)
                 page.evaluate('(id) => loadGame(id)', game.id)
                 page.evaluate("UtilityPanels.close('daomen'); UtilityPanels.open('doctrine')")
+                page.locator('#doctrine-content .doctrine-compact > summary').first.click()
                 page.get_by_role('button', name='参悟此道统', exact=True).click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.level === 1)')
-                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 2
+                assert page.locator('#doctrine-content details:not(.doctrine-compact) .doctrine-chapter').count() == 2
                 saved = engine.store.load(game.id)
                 key = next(iter(saved.doctrine_state['player']['progress']))
                 saved.doctrine_state['player']['progress'][key] = {'level': 4, 'experience': 650, 'failures':{'5':20}}
@@ -104,11 +108,11 @@ def main():
                 engine.store.save(saved)
                 page.evaluate('(id) => loadGame(id)', game.id)
                 page.evaluate("UtilityPanels.open('doctrine')")
-                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 5
+                assert page.locator('#doctrine-content details:not(.doctrine-compact) .doctrine-chapter').count() == 5
                 page.get_by_role('button', name='确立本源并尝试 Lv5', exact=True).click()
                 page.locator('#game-confirm-accept').click()
                 page.wait_for_function('game.doctrines.rows.some(r => r.level === 5 && r.origin)')
-                assert page.locator('#doctrine-content details .doctrine-chapter').count() == 6
+                assert page.locator('#doctrine-content details:not(.doctrine-compact) .doctrine-chapter').count() == 6
                 page.locator('#doctrine-card').evaluate('(e) => { e.scrollTop = 0; }')
                 page.screenshot(path=str(ROOT / 'build/doctrine-desktop.png'))
                 page.set_viewport_size({'width': 412, 'height': 915})
@@ -128,6 +132,7 @@ def main():
                     page.wait_for_function('game.player.layer===2')
                 page.screenshot(path=str(ROOT / 'build/immortal-veins-mobile.png'))
                 page.evaluate("UtilityPanels.close('immortal-veins'); UtilityPanels.open('voisinage')")
+                page.locator('#voisinage-content .doctrine-compact > summary').first.click()
                 page.get_by_role('button', name='温养稳固', exact=False).click()
                 page.wait_for_function('game.doctrines.voisinages[0].axes[0].rank === 1')
                 page.screenshot(path=str(ROOT / 'build/voisinage-mobile.png'))
