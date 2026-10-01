@@ -36,7 +36,26 @@
     const grid=el('div',null,'doctrine-book-grid');
     for(const o of pool.shop){
       const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;
-      row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`数量 ${fmt(o.quantity)} · ${fmt(o.price)} 功勋`),transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id},o.owned||!o.eligible||pool.merit<o.price));
+      row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`每份 ×${fmt(o.quantity)} · ${fmt(o.price)} 功勋`));
+      const purchase=el('div',null,'yaochi-purchase');
+      const label=el('label','兑换份数');
+      const quantity=el('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';
+      quantity.max=String(o.kind==='body_manual'?1:Math.min(1000000,Math.max(1,Math.floor(pool.merit/o.price))));
+      quantity.setAttribute('aria-label',`${o.name}兑换份数`);
+      quantity.disabled=blocked||!pool.local||o.owned||!o.eligible||o.kind==='body_manual';
+      label.append(quantity);
+      const total=el('p',null,'yaochi-purchase-total');total.setAttribute('aria-live','polite');
+      const buy=transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id});
+      const valid=()=>quantity.value!==''&&quantity.checkValidity()&&Number.isInteger(quantity.valueAsNumber);
+      const update=()=>{
+        const amount=quantity.valueAsNumber;
+        total.textContent=valid()?`所得 ×${fmt(o.quantity*amount)} · 合计 ${fmt(o.price*amount)} 功勋`:`请输入 1 至 ${fmt(quantity.max)} 的整数份数`;
+        buy.disabled=blocked||!pool.local||o.owned||!o.eligible||!valid()||pool.merit<o.price*amount;
+      };
+      quantity.addEventListener('input',update);
+      buy.onclick=()=>{update();if(!buy.disabled)trade({action:'buy',target_id:o.id,amount:quantity.valueAsNumber});};
+      purchase.append(label,total,buy);row.append(purchase);update();
+      if(o.kind==='doctrine')row.append(el('p','首次获得时掌握功法，其余份数存为传承玉简。','muted'));
       if(o.description)row.append(el('p',o.description,'muted'));
       if(o.can_lock)row.append(transact(o.locked?'解除锁货':`锁货 · ${fmt(o.lock_price)} 功勋`,{action:o.locked?'unlock':'lock',target_id:o.id},!o.locked&&(pool.merit<o.lock_price||pool.locked_count>=pool.lock_limit)));
       grid.append(row);

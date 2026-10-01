@@ -1,6 +1,7 @@
 """Bounded effect selection and explicit intervention; no content/actor lookup.
 
-One action per established field, one response per protector per round. Effects
+One action per established field, independent of ordinary actions, and one
+response per protector per round. Effects
 and responses never recursively dispatch one another. Resources are reserved
 before simultaneous actions execute; ordinary initiative cannot undo control.
 """
@@ -163,11 +164,13 @@ class VoisinageEffects:
                 if not keys:
                     continue
                 self.attack_tier(owner, pay=True)
+                # A weapon execution spends the ordinary action; a field effect
+                # (including restoration) leaves ordinary combat available.
+                self._ordinary_acted.add(intent.field.owner)
             elif owner.current >= cost:
                 owner.current -= cost
             else:
                 continue
-            self._acted.add(intent.field.owner)
             paid.append((intent, keys))
         # Simultaneous qualified actions survive a mutual breach; no list-order advantage.
         for intent, keys in sorted(paid, key=lambda row: row[0].effect.kind.startswith('restore_')):

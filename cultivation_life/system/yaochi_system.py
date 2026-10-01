@@ -58,7 +58,7 @@ def offers(game, *, commission=False):
     return result
 
 
-def grant(game, offer):
+def grant(game, offer, amount=1):
     p = game.player
     if offer['kind']=='body_manual':
         if offer['id'] in p.immortal_body.get('manuals', []):
@@ -68,11 +68,11 @@ def grant(game, offer):
     elif offer['kind']=='doctrine':
         from .doctrine.provider import player_record
         technique = Technique(**copy.deepcopy(offer['payload']))
-        if not learn_technique(p, technique):
-            add_technique_copy(p, technique)
+        learned = learn_technique(p, technique)
+        add_technique_copy(p, technique, amount - int(learned))
         player_record(game)['progress'].setdefault(technique.doctrine_id, {'level':0,'experience':0})
     else:
-        add_item(p, offer['id'], offer['quantity'])
+        add_item(p, offer['id'], offer['quantity'] * amount)
 
 
 def experience(game):
@@ -137,20 +137,24 @@ class YaochiMixin:
                 locked[target_id] = copy.deepcopy(entry)
                 summary = f"花费 {cost} 功勋锁定《{entry['name']}》，货物和兑换价格保留至购买或主动解锁。"
         elif action in {'buy','publish'}:
+            if action == 'publish' and amount != 1:
+                raise ValueError('求取委托每次发布一份')
             offer = next((o for o in offers(game, commission=action=='publish') if o['id']==target_id), None)
             if not offer: raise ValueError('当前没有这份仙家资材或传承')
+            if offer['kind'] == 'body_manual' and amount != 1:
+                raise ValueError('仙躯功法只能兑换一份')
             if offer['kind']=='doctrine' and offer['payload']['grade'] > p.realm_index:
                 raise ValueError('当前修为尚不足以取得此品阶传承')
             if offer['kind']=='body_manual' and (target_id in p.immortal_body.get('manuals', []) or any(o['offer']['id']==target_id for o in state.get('orders', []))):
                 raise ValueError('此仙躯功法已经掌握或已委托求取')
             if action == 'publish' and len(state.get('orders', [])) >= cfg['max_orders']:
                 raise ValueError('待交付委托已达上限，请先领取')
-            price = math.ceil(offer['price'] * (1 + cfg['order_fee'])) if action=='publish' else offer['price']
+            price = math.ceil(offer['price'] * (1 + cfg['order_fee'])) if action=='publish' else offer['price'] * amount
             spend(game, price)
             if action=='buy':
-                grant(game, offer)
+                grant(game, offer, amount)
                 state.get('locked_offers', {}).pop(target_id, None)
-                summary = f"以 {price} 功勋兑换《{offer['name']}》×{offer['quantity']}。"
+                summary = f"以 {price} 功勋兑换《{offer['name']}》×{offer['quantity'] * amount}。"
             else:
                 serial=state.get('order_sequence',0)+1;state['order_sequence']=serial
                 state.setdefault('orders',[]).append(dict(id=str(serial), offer=copy.deepcopy(offer), price=price, ready_age=p.age+unit))

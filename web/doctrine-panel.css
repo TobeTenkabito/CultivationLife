@@ -65,6 +65,11 @@
 #yaochi-content select, #yaochi-content input { max-width:100%; min-width:0; }
 #yaochi-content .doctrine-entry > button { margin:.25rem; }
 #yaochi-content .doctrine-book { min-width:0; overflow-wrap:anywhere; }
+.yaochi-purchase { display:grid; gap:.4rem; padding:.7rem; border:1px solid var(--line); border-radius:.5rem; background:color-mix(in srgb,var(--pine) 5%,transparent); }
+.yaochi-purchase label { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; }
+.yaochi-purchase input { width:7rem; box-sizing:border-box; padding:.5rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:.35rem; font:inherit; }
+.yaochi-purchase input:focus-visible { outline:2px solid var(--pine); outline-offset:2px; }
+.yaochi-purchase-total { margin:.3rem 0; font-size:.9em; }
 @media(max-width:560px){#yaochi-content .doctrine-entry > button { display:block; width:100%; margin:.5rem 0; }#golden-light-content .voisinage-stages { font-size:12px; }}
 .doctrine-compact > summary { display:flex; align-items:center; gap:.8rem; cursor:pointer; padding:.6rem; min-height:3.5rem; list-style:none; }
 .doctrine-compact > summary::after { content:'展开 ▾'; margin-left:auto; flex-shrink:0; font-size:.8em; opacity:.75; }

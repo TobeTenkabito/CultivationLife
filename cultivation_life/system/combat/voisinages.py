@@ -75,7 +75,7 @@ class VoisinageBattle(VoisinageEffects):
                        for side in ("player", "enemy")}
         self.fields: list[Field] = []
         self.frame = PhaseRound(0)
-        self._acted: set[str] = set()
+        self._ordinary_acted: set[str] = set()
         self._dominated: dict[str, str] = {}
         self._blocked_pairs: set[tuple[str, str]] = set()
         self._released: set[str] = set()
@@ -169,7 +169,7 @@ class VoisinageBattle(VoisinageEffects):
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
                     player_mp: float, enemy_mp: float) -> PhaseRound:
         self.frame = PhaseRound(round_no)
-        self._acted.clear()
+        self._ordinary_acted.clear()
         self._released.clear()
         self._disrupted.clear()
         # Scripted interventions happen before maintenance, coverage or effects.
@@ -266,7 +266,7 @@ class VoisinageBattle(VoisinageEffects):
         return self.frame
 
     def _available(self, key: str) -> bool:
-        return (self.units[key].fighting and key not in self._dominated and key not in self._acted
+        return (self.units[key].fighting and key not in self._dominated and key not in self._ordinary_acted
                 and "ordinary" not in self.units[key].restrictions)
 
     def _has_ordinary(self, side: str) -> bool:
