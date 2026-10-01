@@ -14,7 +14,7 @@ passed = re.search(r'(\d+) passed in', test_log)
 assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
 exe_log = (ROOT / f'build/exe-{release_id}-verification.log').read_text(encoding='utf-8', errors='replace')
 assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in [f'experience-ui-{release_id}.log', f'institution-ui-{release_id}.log', f'yaochi-governance-ui-{release_id}.log', f'immortal-economy-ui-{release_id}.log', f'upper-ui-{release_id}.log', f'immortal-trials-ui-{release_id}.log', f'handbook-ui-{release_id}.log', f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log', f'immortal-expansion-ui-{release_id}.log', f'immortal-minor-ui-{release_id}.log', f'tutorial-ui-{release_id}.log']:
+for file in [f'yaochi-bulk-ui-{release_id}.log', f'experience-ui-{release_id}.log', f'institution-ui-{release_id}.log', f'yaochi-governance-ui-{release_id}.log', f'immortal-economy-ui-{release_id}.log', f'upper-ui-{release_id}.log', f'immortal-trials-ui-{release_id}.log', f'handbook-ui-{release_id}.log', f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log', f'immortal-expansion-ui-{release_id}.log', f'immortal-minor-ui-{release_id}.log', f'tutorial-ui-{release_id}.log']:
     log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
     assert 'passed' in log and 'Traceback' not in log, file
 exe = ROOT / 'dist/launcher.exe'
@@ -26,7 +26,7 @@ manifest = {
     'exe_sha256':digest,
     'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
                     for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
-    'validation':['Nonblocking fourteen-unit court terms, lawful policy governance, peer previews, compact six-theme collections and Yaochi experience verified', 'Institution classification, additive legacy affiliation and six-theme institution directory verified', 'Six-theme doctrine fusion, paid trace study, true voisinage and grouped manual catalogue verified',
+    'validation':['Independent voisinage and ordinary action budgets, paid ordinary execution and six-theme bulk merit purchases verified', 'Nonblocking fourteen-unit court terms, lawful policy governance, peer previews, compact six-theme collections and Yaochi experience verified', 'Institution classification, additive legacy affiliation and six-theme institution directory verified', 'Six-theme doctrine fusion, paid trace study, true voisinage and grouped manual catalogue verified',
                   'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; original backlash difficulty and rank-eight superego cap regression verified; multi-world three-corpse calibration documented',
                   'Six-theme categorized NPC contacts, same-world guards, paid stock locks and NPC cabinet verified', 'Six-theme Yaochi merit economy, golden light tempering and temporary passes verified', f'{passed.group(1)} automated regressions passed',
                   'Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified',

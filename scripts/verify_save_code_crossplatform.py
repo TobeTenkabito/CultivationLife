@@ -1,4 +1,5 @@
 import json
+import runpy
 import sys
 import tempfile
 import threading
@@ -18,7 +19,8 @@ class QuietHandler(server.Handler):
 
 def main():
     expected = json.loads((ROOT/'build/transfer-fixtures/from-windows.json').read_bytes())
-    code = (ROOT/'build/from-android-1520.txt').read_text(encoding='utf-8')
+    version = runpy.run_path(str(ROOT/'cultivation_life/version.py'))['BASE_GAME_VERSION'].replace('.', '')
+    code = (ROOT/f'build/from-android-{version}.txt').read_text(encoding='utf-8')
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as folder:
         server.PERSISTENCE_ROOT = Path(folder)
         engine = server.ENGINE = GameEngine(ROOT, Path(folder)/'saves')

@@ -180,10 +180,29 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.0' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("experience")) {
+            if(phase.equals("bulk")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'批量兑换验收',preset_id:'true_immortal',seed:1521})});return g.id;})()");
+                python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.yaochi_state['merit']=100000\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.open('yaochi');window.__bulkOffer=game.yaochi.shop.find(o=>o.kind==='item'&&o.quantity>1);window.__bulkBalance=game.yaochi.merit;window.__bulkCount=(game.player.inventory.find(i=>i.id===__bulkOffer.id)||{quantity:0}).quantity;document.querySelector('[data-offer-id=\"'+__bulkOffer.id+'\"]').dataset.bulkTest='true';true");
+                    js("(()=>{const q=document.querySelector('[data-bulk-test] input');q.value='0';q.dispatchEvent(new Event('input',{bubbles:true}));})()");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-bulk-test] button').disabled")),"Zero quantity rejected");
+                    js("(()=>{const q=document.querySelector('[data-bulk-test] input');q.value='7';q.dispatchEvent(new Event('input',{bubbles:true}));})()");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('[data-bulk-test] button').disabled && document.querySelector('[data-bulk-test] .yaochi-purchase-total').textContent.includes((__bulkOffer.price*7).toLocaleString('zh-CN'))")),"Bulk cost preview");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#yaochi-card').scrollWidth<=document.querySelector('#yaochi-card').clientWidth+1")),"Bulk panel overflow "+theme);
+                    capture("bulk-"+theme+"-1521");
+                    tapSelector("[data-bulk-test] button");
+                    waitForJs("!busy && game.yaochi.merit===__bulkBalance-__bulkOffer.price*7","Bulk purchase charged");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.player.inventory.find(i=>i.id===__bulkOffer.id).quantity===__bulkCount+__bulkOffer.quantity*7")),"Bulk inventory persisted");
+                }
+                result.putString("bulk_scope","Six themes, quantity validation, total preview, native purchase taps and exact persisted quantities");
+            } else if(phase.equals("experience")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'体验安卓验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nfrom cultivation_life.rules import learn_technique\nimport copy,random\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.location_id='expanse_celestial_8'\ng.heavenly_court['player_grade']=4\ng.yaochi_state['experience']=200\ng.yaochi_state['job']={'name':'验收委托','years':100,'progress':100,'reward':400}\nfor d in g.doctrine_state['definitions'].values():\n learn_technique(g.player,Technique(**copy.deepcopy(d['manuals'][0])))\n g.doctrine_state['player']['progress'][d['id']]={'level':4,'experience':0}\ng.doctrine_state['player']['active']=next(iter(g.doctrine_state['definitions']))\ne._court_open_election(g,'sun',random.Random(1))\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
@@ -268,12 +287,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     }
                 }
                 js("UtilityPanels.open('yaochi');window.__lockedBook=game.yaochi.shop.find(o=>o.can_lock).id;true");
-                tapSelector("#yaochi-content .doctrine-book button:nth-of-type(2)");
+                tapSelector("#yaochi-content .doctrine-book > button");
                 waitForJs("game.yaochi.locked_count===1","Lock rotating stock");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.player.age+=300\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.yaochi.shop.some(o=>o.id===window.__lockedBook&&o.locked)")),"Stock lock reload");
-                tapSelector("#yaochi-content .doctrine-book button:first-of-type");
+                tapSelector("#yaochi-content .doctrine-book .yaochi-purchase button");
                 waitForJs("game.yaochi.locked_count===0","Purchase releases lock");
                 js("UtilityPanels.open('heavenly-court');true");
                 check(Boolean.TRUE.equals(js("document.querySelector('.court-governance').textContent.includes('主持天庭议政')")),"Autonomous government record");
@@ -428,7 +447,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1520.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1521.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {

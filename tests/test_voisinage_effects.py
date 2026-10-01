@@ -39,6 +39,57 @@ def begin(b, n=1):
     return b.begin_round(n, player_condition=1, enemy_condition=1, player_mp=1, enemy_mp=1)
 
 
+@pytest.mark.parametrize('healer', ['player', 'enemy'])
+def test_contested_field_healing_keeps_ordinary_attack_on_both_sides(healer):
+    d = domain(VoisinageEffect('restore_body', 3, .2, target='self'), stability=200)
+    b = VoisinageBattle([actor(key, key, caster(d), integrity=.8 if key == healer else 1,
+                              body_integrity=.8 if key == healer else 1)
+                         for key in ('player', 'enemy')])
+    frame = begin(b)
+    assert frame.ordinary_player and frame.ordinary_enemy
+    assert b.units[healer].body == 1
+    assert b.units[healer].current == 95  # opening + upkeep + healing
+    assert b.ordinary_damage(.1, .1) == pytest.approx((.1, .1))
+
+
+def test_field_strike_and_ordinary_attack_can_hit_different_opponents():
+    strike = domain(VoisinageEffect('strike', 3, .2), stability=200)
+    shelter = domain(VoisinageEffect('seal', 3, .2), stability=200)
+    b = VoisinageBattle([actor('player', 'player', caster(strike, target_ids=('exposed',))),
+                        actor('exposed', 'enemy'), actor('sheltered', 'enemy', caster(shelter))])
+    frame = begin(b)
+    assert b.units['exposed'].vitality == pytest.approx(.8)
+    assert frame.ordinary_player and frame.ordinary_enemy
+    assert b.ordinary_damage(.1, .1) == pytest.approx((.1, .05))
+    assert b.units['exposed'].vitality == pytest.approx(.8)
+    assert b.units['sheltered'].vitality == pytest.approx(.8)
+    assert b.units['player'].current == 95
+
+
+def test_ordinary_execution_does_not_grant_a_second_ordinary_attack():
+    d = domain(VoisinageEffect('seal', 3, .2), stability=200)
+    b = VoisinageBattle([actor('player', 'player', caster(d, target_ids=('exposed',)), 101),
+                        actor('exposed', 'enemy', rank=89),
+                        actor('sheltered', 'enemy', caster(d), 101)])
+    begin(b)
+    frame = begin(b, 2)
+    assert not b.units['exposed'].fighting
+    assert not frame.ordinary_player
+    assert b.ordinary_damage(.1, 0)[0] == 0
+    assert begin(b, 3).ordinary_player  # a fresh ordinary action next round
+
+
+def test_dominated_healer_cannot_take_ordinary_action():
+    healer = domain(VoisinageEffect('restore_body', 3, .2, target='self'), stability=1)
+    controller = domain(VoisinageEffect('seal', 3, .2), incursion=1000, stability=1000)
+    b = VoisinageBattle([actor('player', 'player', caster(healer), integrity=.8),
+                        actor('enemy', 'enemy', caster(controller))])
+    frame = begin(b)
+    assert frame.relations['player']['relation'] == 'dominated'
+    assert not frame.ordinary_player
+    assert b.ordinary_damage(.1, 0)[0] == 0
+
+
 def test_continuous_dominance_without_active_budget_and_no_body_injury():
     b = VoisinageBattle([actor('player', 'player', caster(domain(), current=3)), actor('enemy', 'enemy')])
     begin(b); frame = begin(b, 2)
