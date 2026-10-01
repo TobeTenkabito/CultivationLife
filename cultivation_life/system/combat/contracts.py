@@ -143,6 +143,7 @@ class CapabilitySource:
     passive_ward_tier: int | None = None
     body_voisinage_resistance: float = 0.0
     interventions: tuple[Intervention, ...] = ()
+    semantic_rules: tuple[Mapping[str, Any], ...] = ()
 
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
@@ -158,7 +159,8 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
         result = replace(result, technique_tier=source.technique_tier, artifact_tier=source.artifact_tier,
                          body_voisinage_resistance=source.body_voisinage_resistance,
                          ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
-                         interventions=source.interventions or result.interventions)
+                         interventions=source.interventions or result.interventions,
+                         semantic_rules=source.semantic_rules or result.semantic_rules)
     return result
 
 
@@ -189,8 +191,12 @@ class CombatCapabilities:
     artifact_tier: int = 1
     interventions: tuple[Intervention, ...] = ()
     body_voisinage_resistance: float = 0.0
+    semantic_rules: tuple[Mapping[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
+        if self.semantic_rules:
+            from ...combat_semantics import parse_rules
+            object.__setattr__(self, 'semantic_rules', parse_rules(self.semantic_rules))
         if number(self.body_voisinage_resistance, 'body voisinage resistance') > .1:
             raise ValueError('Body voisinage resistance cannot exceed ten percent')
         for key in ("capacity", "current", "attack_cost", "ward_cost", "investment"):
@@ -304,8 +310,13 @@ class CombatPhases(Protocol):
     def enabled(self) -> bool: ...
 
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
-                    player_mp: float, enemy_mp: float) -> PhaseRound: ...
+                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None) -> PhaseRound: ...
     def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]: ...
+    def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None: ...
+    def semantic_ordinary_start(self) -> dict[str, dict[str, float]]: ...
+    def semantic_initiative(self, player_first: bool) -> dict[str, dict[str, float]]: ...
+    def semantic_environment(self, natural: str, artificial: list[str]) -> None: ...
+    def semantic_context(self, *, player_mp, enemy_mp, player_morale, enemy_morale) -> None: ...
     def mp_ratio(self, side: str, fallback: float) -> float: ...
     def finish_round(self, *, player_mp: float, enemy_mp: float) -> None: ...
     def ordinary_loss(self, side: str) -> float: ...
@@ -362,4 +373,5 @@ def resolve_capabilities(
         resource_tier=2 if conversion > 0 else 1,
         usable_capacity=capacity * conversion,
         interventions=tuple(state.get('interventions', ())),
+        semantic_rules=tuple(state.get('semantic_rules', ())),
     )

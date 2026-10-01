@@ -9,6 +9,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any
 
 from .effects import VoisinageEffects
+from .semantics import CombatSemantics
 from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
@@ -51,7 +52,7 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle(VoisinageEffects):
+class VoisinageBattle(CombatSemantics, VoisinageEffects):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -83,6 +84,7 @@ class VoisinageBattle(VoisinageEffects):
         self.primary_ordinary_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
         self.escape_forbidden_sides: frozenset[str] = frozenset()
+        self._init_semantics()
 
     def set_objectives(self, player: str, enemy: str) -> None:
         if player not in {'kill', 'capture', 'repel', 'defeat'} or enemy not in {'kill', 'capture', 'repel', 'defeat'}:
@@ -91,7 +93,7 @@ class VoisinageBattle(VoisinageEffects):
 
     @property
     def enabled(self) -> bool:
-        return any(s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
+        return self.semantics is not None or any(s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
                    or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
@@ -110,6 +112,10 @@ class VoisinageBattle(VoisinageEffects):
         for definition in candidates:
             features = {row["kind"]: row["value"] for row in definition.features}
             continued = owner.active_voisinage == definition.id
+            semantic = self._semantic_preview(owner.unit.id, 'field_prepare', continued=continued)
+            opening_factor = self._semantic_factor(semantic, 'field.opening_cost')
+            upkeep_factor = self._semantic_factor(semantic, 'field.upkeep_cost')
+            extra_factor = self._semantic_factor(semantic, 'field.extra_target_cost')
             rounds = owner.sustained_rounds + 1 if continued else 1
             protects = [owner.unit.id]
             if c.stance == "protect" and "support" not in owner.restrictions:
@@ -124,12 +130,12 @@ class VoisinageBattle(VoisinageEffects):
                            and self.units[key].fighting and self._can_reach(owner, key)]
             protects = list(dict.fromkeys(protects))[:definition.max_targets]
             targets = list(dict.fromkeys(targets))[:definition.max_targets]
-            opening = definition.opening_cost if owner.active_voisinage != definition.id else 0.0
+            opening = definition.opening_cost * opening_factor if not continued else 0.0
             # Shrink optional coverage before giving up protection of the caster.
             while True:
                 extras = len(protects) - 1 + len(targets)
-                upkeep = definition.upkeep_cost * (1 - features.get("frugal", 0) if rounds > 1 else 1)
-                cost = opening + upkeep + extras * definition.extra_target_cost
+                upkeep = definition.upkeep_cost * upkeep_factor * (1 - features.get("frugal", 0) if rounds > 1 else 1)
+                cost = opening + upkeep + extras * definition.extra_target_cost * extra_factor
                 if cost <= owner.current:
                     break
                 if targets:
@@ -143,6 +149,12 @@ class VoisinageBattle(VoisinageEffects):
             limit = definition.max_investment if c.investment_limit is None else c.investment_limit
             investment = min(c.investment, limit, owner.current - cost)
             owner.current -= cost + investment
+            used = {'field.upkeep_cost'}
+            if not continued:
+                used.add('field.opening_cost')
+            if extras:
+                used.add('field.extra_target_cost')
+            self._semantic_commit(semantic, used)
             base = definition.strength + definition.strength_per_level * max(
                 0.0, c.attainments.get(definition.attainment, 0) - definition.required_level)
             factor = max(0.0, condition) * (1 + investment / max(1.0, definition.max_investment))
@@ -156,6 +168,7 @@ class VoisinageBattle(VoisinageEffects):
             stability *= 1 - features.get("sacrifice", 0)
             owner.active_voisinage = definition.id
             owner.sustained_rounds = rounds
+            self._semantic_event(owner.unit.id, 'field_established', continued=continued, cost=cost + investment)
             self.frame.events.append(f"{owner.unit.name}维持【{definition.name}】，仙灵力消耗 {cost + investment:g}。")
             authority = definition.authority
             if authority is not None:
@@ -167,11 +180,12 @@ class VoisinageBattle(VoisinageEffects):
         return None
 
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
-                    player_mp: float, enemy_mp: float) -> PhaseRound:
+                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None) -> PhaseRound:
         self.frame = PhaseRound(round_no)
         self._ordinary_acted.clear()
         self._released.clear()
         self._disrupted.clear()
+        self._semantic_begin(round_no, player_mp, enemy_mp, player_morale, enemy_morale)
         # Scripted interventions happen before maintenance, coverage or effects.
         # Only this battle's immutable snapshot changes, never the saved owner.
         for index, seal in enumerate(self.seals):
@@ -218,9 +232,17 @@ class VoisinageBattle(VoisinageEffects):
             attack = max(attackers, key=lambda f: (f.strength, f.owner), default=None)
             defense = max(defenders, key=lambda f: (f.stability, f.owner), default=None)
             relation = "uncovered"
+            attack_strength = attack.strength if attack else 0.
+            defense_strength = defense.stability if defense else 0.
             if attack:
-                if defense and attack.strength <= defense.stability * self.contest_ratio:
-                    relation = "pressed" if attack.strength > defense.stability else "contested"
+                attack_plan = self._semantic_preview(attack.owner, 'contest_prepare', key, 'attacker')
+                defense_plan = self._semantic_preview(defense.owner, 'contest_prepare', attack.owner, 'defender') if defense else None
+                attack_strength *= self._semantic_factor(attack_plan, 'field.incursion')
+                defense_strength *= self._semantic_factor(defense_plan, 'field.stability')
+                self._semantic_commit(attack_plan, {'field.incursion'})
+                self._semantic_commit(defense_plan, {'field.stability'})
+                if defense and attack_strength <= defense_strength * self.contest_ratio:
+                    relation = "pressed" if attack_strength > defense_strength else "contested"
                 else:
                     relation = "dominated"
                     self._dominated[key] = attack.owner
@@ -229,27 +251,39 @@ class VoisinageBattle(VoisinageEffects):
             self.frame.relations[key] = {
                 "relation": relation, "attacker": attack.owner if attack else None,
                 "protector": defense.owner if defense else None,
-                "attack_strength": round(attack.strength, 4) if attack else 0,
-                "defense_strength": round(defense.stability, 4) if defense else 0,
+                "attack_strength": round(attack_strength, 4),
+                "defense_strength": round(defense_strength, 4),
             }
             state.resisted = relation in {"pressed", "contested"}
+        # Publish only after every directional contest has settled; newly gained
+        # marks cannot retroactively change this round's contests.
+        for key, relation in self.frame.relations.items():
+            if relation['attacker']:
+                event = dict(relation=relation['relation'], incursion=relation['attack_strength'], stability=relation['defense_strength'])
+                self._semantic_event(relation['attacker'], 'contest_resolved', key, 'attacker', **event)
+                self._semantic_event(key, 'contest_resolved', relation['attacker'], 'defender', **event)
         # Maintenance pays for dominance itself; it is not contingent on an
         # additional active effect being affordable.
-        by_owner = {f.owner: f for f in self.fields}
         for key, owner in self._dominated.items():
             if previous.get(key) != owner:
                 continue
             target = self.units[key]
-            gap = by_owner[owner].strength / max(1.0, self.frame.relations[key]['defense_strength'])
+            gap = self.frame.relations[key]['attack_strength'] / max(1.0, self.frame.relations[key]['defense_strength'])
             erosion = min(.55, .12 + .08 * max(0, gap - self.contest_ratio))
             erosion *= 1 - target.unit.capabilities.body_voisinage_resistance
             target.pressure = min(.85, target.pressure + erosion)
+            before_pressure_loss = target.vitality
             self._lose(key, min(max(0, target.vitality - .13), erosion), physical=False)
             lost = min(target.morale, erosion * 80)
             target.morale -= lost
             side = target.unit.side
             self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) + lost * target.unit.power / self.totals[side]
             self.frame.events.append(f"连续支配侵蚀战意与战斗态势，威能差距 {gap:.2f} 倍。")
+            actual = before_pressure_loss - target.vitality
+            self._semantic_record_loss(owner, key, actual, 'pressure')
+            event = dict(damage_source='pressure', amount=erosion, actual_loss=actual, body_loss=0.)
+            self._semantic_event(owner, 'pressure_resolved', key, 'attacker', **event)
+            self._semantic_event(key, 'pressure_resolved', owner, 'defender', **event)
         for key, relation in self.frame.relations.items():
             if relation['relation'] in {'pressed', 'dominated'} and self.units[key].active_voisinage:
                 self.units[key].field_strain = min(.5, self.units[key].field_strain + .05)
@@ -296,6 +330,7 @@ class VoisinageBattle(VoisinageEffects):
         the existing six-stat exchange. No new minimum-damage floor is applied.
         """
         amounts: dict[str, float] = {}
+        semantic_hits, semantic_caps = [], {}
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
@@ -306,6 +341,8 @@ class VoisinageBattle(VoisinageEffects):
         # Golden light belongs to the body; an empty energy pool cannot remove it.
         ward_tiers = {key: s.unit.capabilities.ward_tier for key, s in self.units.items()}
         for side, damage in (("player", dealt), ("enemy", received)):
+            if damage <= 0:
+                continue
             opponents = [s for key, s in self.units.items() if s.unit.side != side
                          and s.fighting and key not in self._dominated]
             target_total = sum(s.unit.power for s in opponents)
@@ -323,12 +360,37 @@ class VoisinageBattle(VoisinageEffects):
                         self._blocked_pairs.add((key, target_key))
                         continue
                     amount = contribution * self.totals[target.unit.side] / target_total
+                    if self.semantics is not None:
+                        event = dict(amount=amount, damage_source='ordinary')
+                        outgoing = self._semantic_preview(key, 'ordinary_before_damage', target_key, 'attacker', **event)
+                        incoming = self._semantic_preview(target_key, 'ordinary_before_damage', key, 'defender', **event)
+                        amount *= outgoing.factor('ordinary.dealt') * incoming.factor('ordinary.received')
+                        semantic_caps[target_key] = min(semantic_caps.get(target_key, 1.), incoming.cap('ordinary.received_cap'))
+                        self._semantic_commit(outgoing, {'ordinary.dealt'})
+                        self._semantic_commit(incoming, {'ordinary.received', 'ordinary.received_cap'})
+                        semantic_hits.append((key, target_key, amount))
                     amounts[target_key] = amounts.get(target_key, 0.0) + amount
         before_p, before_e = self.frame.player_loss, self.frame.enemy_loss
         primary_before = self.units["player"].vitality if "player" in self.units else 0.0
+        actual_losses, actual_body_losses = {}, {}
         for key, amount in amounts.items():
             target = self.units[key]
-            self._lose(key, amount)
+            before = target.vitality
+            body_before = target.body
+            self._lose(key, min(amount, semantic_caps.get(key, amount)))
+            actual_losses[key] = before - target.vitality
+            actual_body_losses[key] = body_before - target.body
+        # Damage is simultaneous. Post-damage facts contain actual, tier-gated
+        # losses, attributed proportionally rather than duplicated for allies.
+        for source, target, amount in semantic_hits:
+            actual = actual_losses[target] * amount / max(1e-12, amounts[target])
+            self._semantic_record_loss(source, target, actual, 'ordinary')
+        for source, target, amount in semantic_hits:
+            actual = actual_losses[target] * amount / max(1e-12, amounts[target])
+            body_loss = actual_body_losses[target] * amount / max(1e-12, amounts[target])
+            event = dict(damage_source='ordinary', amount=amount, actual_loss=actual, body_loss=body_loss)
+            self._semantic_event(source, 'ordinary_after_damage', target, 'attacker', **event)
+            self._semantic_event(target, 'ordinary_after_damage', source, 'defender', **event)
         self.primary_ordinary_loss = (primary_before - self.units["player"].vitality
                                       if "player" in self.units else 0.0)
         for source, target in sorted(self._blocked_pairs):
@@ -340,13 +402,20 @@ class VoisinageBattle(VoisinageEffects):
                        and s.unit.capabilities.resource_link == "legacy_mp"), None)
         return linked.current / max(1.0, linked.unit.capabilities.capacity) if linked else fallback
 
-    def finish_round(self, *, player_mp: float, enemy_mp: float) -> None:
+    def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None:
+        self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
         for state in self.units.values():
             if state.unit.capabilities.resource_link == "legacy_mp":
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
                 state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
             if not state.fighting:
                 state.active_voisinage = None
+        self._refresh_relations()
+
+    def finish_round(self, *, player_mp: float, enemy_mp: float) -> None:
+        self.sync_resources(player_mp=player_mp, enemy_mp=enemy_mp)
+        self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
+        self._semantic_end()
         self._refresh_relations()
 
     def _refresh_relations(self):
@@ -417,6 +486,7 @@ class VoisinageBattle(VoisinageEffects):
 
     def report(self) -> dict[str, Any]:
         return {
+            **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
             "relations": self.frame.relations,
             "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.controls},
             "morale": {k: s.morale for k, s in self.units.items()},

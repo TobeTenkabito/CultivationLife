@@ -62,15 +62,25 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
         frame = battle.begin_round(round_no, player_condition=p, enemy_condition=e, player_mp=1, enemy_mp=1)
         if frame.ordinary and battle.verdict() is None:
             p_power, e_power = battle.totals["player"], battle.totals["enemy"]
-            dealt = exchange_damage(p_power * p, e_power * (.72 + .28 * e), p_power / e_power,
+            semantic = battle.semantic_ordinary_start()
+            first = p_power * (semantic['player']['mobility'] + semantic['player']['sense']) >= e_power * (semantic['enemy']['mobility'] + semantic['enemy']['sense'])
+            after = battle.semantic_initiative(first)
+            for side in ('player', 'enemy'):
+                for stat in semantic[side]:
+                    semantic[side][stat] *= after[side][stat]
+            ps, es = semantic['player'], semantic['enemy']
+            dealt = exchange_damage(p_power * p * ps['might'] * ps['sustain'], e_power * (.72 + .28 * e) * es['guard'], p_power * ps['breach'] / (e_power * es['guard']),
                                     rng.uniform(.90, 1.10), coefficient=.135, minimum=.045, maximum=.42)
-            received = exchange_damage(e_power * e, p_power * (.72 + .28 * p), e_power / p_power,
+            received = exchange_damage(e_power * e * es['might'] * es['sustain'], p_power * (.72 + .28 * p) * ps['guard'], e_power * es['breach'] / (p_power * ps['guard']),
                                        rng.uniform(.90, 1.10), coefficient=.135, minimum=.045, maximum=.42)
             # Compact equivalent of the player initiative/morale disadvantages.
             morale = {side: sum(s.morale * s.unit.power for s in battle.units.values() if s.unit.side == side)
                             / battle.totals[side] for side in ('player', 'enemy')}
             factors = {side: (.6 + .4 * morale[side] / 100) * (.65 + .35 * frame.stat_factors[side]['sense'])
                        for side in ('player', 'enemy')}
+            if battle.semantics:
+                factors['player'] *= ps['sense'] * (1.05 if first else .97)
+                factors['enemy'] *= es['sense'] * (.97 if first else 1.05)
             battle.ordinary_damage(dealt * factors['player'], received * factors['enemy'])
         battle.finish_round(player_mp=1, enemy_mp=1)
         reports.append({"round": round_no, "voisinage": battle.report(), "events": list(frame.events)})

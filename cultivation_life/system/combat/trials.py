@@ -14,6 +14,8 @@ from .ordinary import exchange_damage
 
 def dump_battle(battle):
     return {'units': [asdict(s.unit) for s in battle.units.values()],
+            **({'semantic_runtime': battle.semantics.dump()} if battle.semantics else {}),
+            **({'semantic_environment': dict(battle._semantic_environment)} if battle.semantics else {}),
             'states': {key: {k: copy.deepcopy(v) for k, v in vars(s).items() if k != 'unit'}
                        for key, s in battle.units.items()}, 'dominated': dict(battle._dominated),
             'escape_forbidden_sides': sorted(battle.escape_forbidden_sides)}
@@ -32,6 +34,15 @@ def load_battle(snapshot):
             setattr(battle.units[key], name, copy.deepcopy(value))
     battle._dominated = dict(snapshot['dominated'])
     battle.escape_forbidden_sides = frozenset(snapshot.get('escape_forbidden_sides', ()))
+    if snapshot.get('semantic_runtime'):
+        if battle.semantics is None:
+            raise ValueError('Semantic snapshot has no rules')
+        battle.semantics.restore(snapshot['semantic_runtime'])
+        battle._semantic_environment = dict(snapshot.get('semantic_environment', {}))
+        from ...combat_semantics import FACTS
+        if any(key not in FACTS or not key.startswith('environment.') or type(value) is not FACTS[key][0]
+               for key, value in battle._semantic_environment.items()):
+            raise ValueError('Invalid semantic environment snapshot')
     return battle
 
 
@@ -76,14 +87,23 @@ def run_batch(battle, state, rng, *, batch_size=24):
                             victim.suppressed = False
                             frame.events.append(f'你以可用的主战手段彻底斩灭{victim.unit.name}。')
             stats = copy.deepcopy(state['stats'])
+            semantic_factors = battle.semantic_ordinary_start()
             for side in ('player', 'enemy'):
                 for stat, factor in frame.stat_factors.get(side, {}).items():
+                    stats[side][stat] *= factor
+                for stat, factor in semantic_factors[side].items():
                     stats[side][stat] *= factor
             p, e = stats['player'], stats['enemy']
             enemy_condition = max(.05, 1 - battle.ordinary_loss('enemy'))
             p_condition = max(.05, player.vitality) * (.65 + .35 * state['mp_ratio'])
+            enemy_condition *= e['sustain'] / max(1., state['stats']['enemy']['sustain'])
+            p_condition *= p['sustain'] / max(1., state['stats']['player']['sustain'])
             p_condition *= .6 + .4 * player.morale / 100
             first = p['mobility'] + p['sense'] >= e['mobility'] + e['sense']
+            semantic_factors = battle.semantic_initiative(first)
+            for side in ('player', 'enemy'):
+                for stat, factor in semantic_factors[side].items():
+                    stats[side][stat] *= factor
             initiative = 'player' if first else 'enemy'
             dealt = exchange_damage(p['might'] * p_condition, e['guard'] * (.72 + .28 * enemy_condition),
                                     p['breach'] / max(1, e['guard']), rng.uniform(.9, 1.1),

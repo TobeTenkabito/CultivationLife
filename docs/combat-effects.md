@@ -1,5 +1,8 @@
 # 邻域效果与主战资格
 
+通用的条件、计数、限时状态及普通／邻域联动规则见 [战斗语义 V3](combat-semantics.md)。
+该层只开放语义与结算接口，不定义具体 DLC buff。
+
 本次扩展保留邻域前置阶段与普通六维交锋。`combat/contracts.py` 定义有限的数据语义，
 `combat/voisinages.py` 管理覆盖、资源与轮次，`combat/effects.py` 选择和执行主动效果。
 这些模块不读取人物存档、物品目录、道统目录或 DLC。

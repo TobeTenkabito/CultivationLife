@@ -436,6 +436,7 @@ class PlayerCombatSystem:
         burst_used = False
         phases = phases if phases is not None and phases.enabled else None
         if phases is not None:
+            phases.semantic_environment(natural, artificial)
             player_hp = max(0.0, 1.0 - phases.ordinary_loss("player"))
             enemy_hp = max(0.0, 1.0 - phases.ordinary_loss("enemy"))
             initial_hp = player_hp
@@ -475,6 +476,7 @@ class PlayerCombatSystem:
                 phase = phases.begin_round(
                     round_no, player_condition=player_hp, enemy_condition=enemy_hp,
                     player_mp=player_mp, enemy_mp=enemy_mp,
+                    player_morale=player_morale, enemy_morale=enemy_morale,
                 )
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
@@ -505,7 +507,18 @@ class PlayerCombatSystem:
                         "enemy_formation_integrity": enemy_formation_integrity if enemy_formation_name else None,
                         "voisinage": phases.report(),
                     })
+                    end_morale = dict(phase.morale_loss)
+                    end_loss, end_restore = phase.primary_loss, phase.primary_restore
                     phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                    player_hp = max(0., 1 - phases.ordinary_loss('player'))
+                    enemy_hp = max(0., 1 - phases.ordinary_loss('enemy'))
+                    body_damage_ratio += (phase.primary_loss - end_loss) * .46
+                    body_restored_ratio += phase.primary_restore - end_restore
+                    player_morale = cls._clamp(0, 100, player_morale - phase.morale_loss.get('player', 0) + end_morale.get('player', 0))
+                    enemy_morale = cls._clamp(0, 100, enemy_morale - phase.morale_loss.get('enemy', 0) + end_morale.get('enemy', 0))
+                    rounds[-1].update(player_hp_ratio=round(player_hp, 4), enemy_hp_ratio=round(enemy_hp, 4),
+                        player_combat_state=round(player_power_max * player_hp, 1), enemy_combat_state=round(enemy_power * enemy_hp, 1),
+                        player_morale=round(player_morale, 1), enemy_morale=round(enemy_morale, 1), events=list(phase.events))
                     rounds[-1]['voisinage'] = phases.report()
                     if phases.verdict() is not None:
                         break
@@ -633,14 +646,23 @@ class PlayerCombatSystem:
             for stat, multiplier in soul_start["enemy_stat_multipliers"].items():
                 round_enemy_stats[stat] *= multiplier
             events.extend(f"魂性共鸣【{event}】" for event in soul_start["events"])
-            sustain_ratio = round_player_stats["sustain"] / max(1.0, player_power)
+            enemy_sustain_factor = 1.
             if phase is not None:
+                phases.semantic_context(player_mp=player_mp, enemy_mp=enemy_mp,
+                                        player_morale=player_morale, enemy_morale=enemy_morale)
+                event_count = len(phase.events)
+                semantic_factors = phases.semantic_ordinary_start()
+                enemy_sustain_factor = .90 + .10 * cls._clamp(.50, 1.50, semantic_factors['enemy']['sustain'])
+                events.extend(phase.events[event_count:])
                 for side, stats in (('player', round_player_stats), ('enemy', round_enemy_stats)):
                     for stat, factor in phase.stat_factors.get(side, {}).items():
                         stats[stat] *= factor
+                    for stat, factor in semantic_factors[side].items():
+                        stats[stat] *= factor
+            sustain_ratio = round_player_stats["sustain"] / max(1.0, player_power)
             sustain_state_factor = 0.90 + 0.10 * cls._clamp(0.50, 1.50, sustain_ratio)
             p_state = (0.42 + 0.40 * player_hp + 0.18 * player_mp) * sustain_state_factor
-            e_state = 0.48 + 0.52 * enemy_hp
+            e_state = (0.48 + 0.52 * enemy_hp) * enemy_sustain_factor
             p_init = round_player_stats["mobility"] * 0.58 + round_player_stats["sense"] * 0.42
             e_init = round_enemy_stats["mobility"] * 0.58 + round_enemy_stats["sense"] * 0.42
             if target.get("ambush") or target.get("preparation") == "ambushed":
@@ -658,6 +680,13 @@ class PlayerCombatSystem:
             if round_no == 1 and target.get("enemy_first_round"):
                 player_first = False
                 events.append("临时队友突然背刺，敌方在第一轮抢先出手。")
+            if phase is not None:
+                event_count = len(phase.events)
+                semantic_factors = phases.semantic_initiative(player_first)
+                events.extend(phase.events[event_count:])
+                for side, stats in (('player', round_player_stats), ('enemy', round_enemy_stats)):
+                    for stat, factor in semantic_factors[side].items():
+                        stats[stat] *= factor
             generated_initiative = evaluate_rules(
                 generated_bloodline_traits, trigger="initiative_resolved", context={
                     "round_no": round_no, "realm_delta": realm_delta,
@@ -907,7 +936,9 @@ class PlayerCombatSystem:
                 events.append(f"{guard_name}生效：第一轮己方战斗态势锁定为最大值。")
 
             if phases is not None:
-                phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                phases.semantic_context(player_mp=player_mp, enemy_mp=enemy_mp,
+                                        player_morale=player_morale, enemy_morale=enemy_morale)
+                phases.sync_resources(player_mp=player_mp, enemy_mp=enemy_mp)
                 event_count = len(phase.events)
                 dealt, received = phases.ordinary_damage(dealt, received)
                 events.extend(phase.events[event_count:])
@@ -1252,9 +1283,23 @@ class PlayerCombatSystem:
             if phases is not None:
                 phases.restore_ordinary("player", player_hp - ordinary_start_player + actual_received)
                 phases.restore_ordinary("enemy", enemy_hp - ordinary_start_enemy + dealt)
+                phases.semantic_context(player_mp=player_mp, enemy_mp=enemy_mp,
+                                        player_morale=player_morale, enemy_morale=enemy_morale)
                 player_hp = max(0.0, 1.0 - phases.ordinary_loss("player"))
                 enemy_hp = max(0.0, 1.0 - phases.ordinary_loss("enemy"))
+                end_morale = dict(phase.morale_loss)
+                end_loss, end_restore = phase.primary_loss, phase.primary_restore
+                event_count = len(phase.events)
                 phases.finish_round(player_mp=player_mp, enemy_mp=enemy_mp)
+                player_hp = max(0., 1 - phases.ordinary_loss('player'))
+                enemy_hp = max(0., 1 - phases.ordinary_loss('enemy'))
+                body_damage_ratio += (phase.primary_loss - end_loss) * .46
+                body_restored_ratio += phase.primary_restore - end_restore
+                player_morale = cls._clamp(0, 100, player_morale - phase.morale_loss.get('player', 0) + end_morale.get('player', 0))
+                enemy_morale = cls._clamp(0, 100, enemy_morale - phase.morale_loss.get('enemy', 0) + end_morale.get('enemy', 0))
+                events.extend(phase.events[event_count:])
+                rounds[-1]['player_morale'] = round(player_morale, 1)
+                rounds[-1]['enemy_morale'] = round(enemy_morale, 1)
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
                 rounds[-1]["voisinage"] = phases.report()
