@@ -19,6 +19,8 @@ from ..system.transformation_system import public_transformation_system
 from ..system.monster_bloodline_system import public_monster_bloodline
 from ..system.concubine_system import gender_name
 from ..system.immortal_aperture import public_aperture
+from ..system.upper_institutions import public_institution
+from ..system.upper_voisinage import public_upper_voisinages
 from ..system.combat_plan import public_plan
 from ..system.tutorial_system import public_tutorial
 from .dependencies import PresentationDependencies
@@ -241,6 +243,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "guixu_tide": deps._public_guixu(game),
         "tianji_artifacts": deps._public_tianji(game),
         "aperture": public_aperture(game.player, game),
+        "upper_voisinages": public_upper_voisinages(game.player, game),
+        "upper_institution": public_institution(game),
         "doctrines": deps._public_doctrines(game),
         "family": deps._public_family(game),
         "governance": deps._public_governance(game),

@@ -150,6 +150,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
     }
 
     private void capture(String name) throws Exception {
+        android.util.Log.i("ReleaseSmoke", "Capture start: " + name);
         if(!Boolean.TRUE.equals(js("!!window.TutorialGuide && TutorialGuide.isGuiding()"))) js("scrollTo(0,0)");
         async("document.fonts.ready");
         CountDownLatch frame=new CountDownLatch(1);
@@ -158,6 +159,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         }));
         check(frame.await(15,TimeUnit.SECONDS),"WebView frame did not settle");
         Thread.sleep(500);
+        android.util.Log.i("ReleaseSmoke", "Capture bitmap: " + name);
         Bitmap bitmap=getUiAutomation().takeScreenshot();
         File root=new File(getTargetContext().getExternalFilesDir(null),"verification");
         check(root.isDirectory() || root.mkdirs(),"Screenshot directory unavailable: "+root);
@@ -165,6 +167,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             bitmap.compress(Bitmap.CompressFormat.PNG,100,out);
         }
         bitmap.recycle();
+        android.util.Log.i("ReleaseSmoke", "Capture complete: " + name);
     }
 
     @Override public void onStart() {
@@ -180,10 +183,43 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.1' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.2' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("bulk")) {
+            if(phase.equals("upper-voisinage")) {
+                for(String world:new String[]{"asura","nether","reincarnation"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界修域验收',preset_id:'"+world+"_upper',seed:1522})});if(!g.upper_institution.local||g.player.realm_index!==9||!g.upper_voisinages.rows[0].active)throw Error('Upper preset mismatch');return g.id;})()");
+                    python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required,max_hp,max_mp,add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\nfrom cultivation_life.system.upper_institutions import definition\np.location_id=definition(g)['location']\np.world_voisinages={}\np.opportunity=opportunity_required(p)\np.hp=max_hp(p)\np.mp=max_mp(p)\np.immortal_aperture['current']=0\nadd_item(p,'spirit_stone',1000000)\ng.pending_event=None\ng.heavenly_court['open_election']=None\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("[data-panel-target=upper-voisinage]");
+                    tapSelector("#upper-voisinage-content details summary");
+                    tapSelector("#upper-voisinage-content details button");
+                    waitForJs("!busy && game.upper_voisinages.rows[0].level===1 && game.upper_voisinages.rows[0].active","Native domain acquisition");
+                    tapSelector("#upper-voisinage-content details button:last-child");
+                    waitForJs("!busy && game.upper_voisinages.rows[0].level===2","Native domain training");
+                    js("UtilityPanels.open('upper-institution');true");
+                    tapSelector("#upper-institution-content [data-section=identity] summary");
+                    tapSelector("#upper-institution-content [data-section=identity] button");
+                    waitForJs("!busy&&game.upper_institution.joined","Native institution enrollment");
+                    tapSelector("#upper-institution-content [data-section=jobs] summary");
+                    tapSelector("#upper-institution-content [data-section=jobs] button");
+                    waitForJs("!busy&&game.upper_institution.job!==null","Native institution commission");
+                    for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                        js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                        for(String panel:new String[]{"upper-voisinage","immortal-aperture","upper-institution"}) {
+                            js("UtilityPanels.open('"+panel+"');true");
+                            check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Upper voisinage panel overflow "+world+theme);
+                        }
+                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1522");
+                    }
+                    js("UtilityPanels.open('immortal-aperture');true");tapSelector("#immortal-aperture-content button");
+                    waitForJs("!busy && game.aperture.current>0","Native energy refinement");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.upper_voisinages.rows[0].level===2&&game.aperture.current>0")),"Upper cultivation persisted");
+                }
+                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='upper-voisinages')")),"Upper domain handbook missing");
+                result.putString("upper_voisinage_scope","Three worlds, six themes, native ninth-realm presets, institution enrollment/commissions, acquisition/training/refinement and persisted domains; handbook available");
+            } else if(phase.equals("bulk")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'批量兑换验收',preset_id:'true_immortal',seed:1521})});return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.yaochi_state['merit']=100000\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
@@ -447,7 +483,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1521.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1522.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {

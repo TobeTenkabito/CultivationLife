@@ -78,6 +78,8 @@ class MapTravelMixin(TeleportMixin):
 
         rng = decode_rng(game.seed, game.rng_state)
         start_age = player.age
+        institution_world = player.world
+        institution_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
         era_news: list[str] = []
         for _ in range(plan.years):
             advance_player_age(player)
@@ -109,6 +111,9 @@ class MapTravelMixin(TeleportMixin):
             ["action", "travel", "map", f"world:{player.world}"],
         ))
         elapsed = player.age - start_age
+        if player.world == institution_world:
+            from .system.upper_institutions import advance_time
+            advance_time(game, elapsed, institution_unit)
         if elapsed:
             time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
             completed_units = max(1, (elapsed + time_unit - 1) // time_unit)

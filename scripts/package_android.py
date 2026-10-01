@@ -24,6 +24,7 @@ def main():
     for name in (f'android-experience-{RELEASE_ID}.log', f'android-institutions-{RELEASE_ID}.log', f'android-governance-{RELEASE_ID}.log', f'android-economy-{RELEASE_ID}.log', f'android-upper-{RELEASE_ID}.log', f'android-trials-{RELEASE_ID}.log', f'android-save-transfer-{RELEASE_ID}.log', f'android-initial-{RELEASE_ID}.log', f'android-immortal-{RELEASE_ID}.log', f'android-minor-{RELEASE_ID}.log', f'android-tutorial-{RELEASE_ID}.log'):
         assert 'status=passed' in log(name) and 'status=failed' not in log(name), name
     assert 'status=passed' in log(f'android-bulk-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-bulk-{RELEASE_ID}.log')
+    assert 'status=passed' in log(f'android-upper-voisinage-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-upper-voisinage-{RELEASE_ID}.log')
     assert 'roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log')
     assert 'status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log')
     assert 'Verifies' in log(f'android-signature-{RELEASE_ID}.log')
@@ -31,6 +32,7 @@ def main():
     assert f"versionCode='{VERSION_CODE}'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata
     assert "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata
     assert (ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.'
+    assert 'Quick-start regression passed' in log(f'quick-start-ui-{RELEASE_ID}.log')
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     assert digest in log(f'android-installed-sha256-{RELEASE_ID}.log').lower()
@@ -43,7 +45,7 @@ def main():
             assert assets.read('web/npc-contacts.js') == (ROOT/'web/npc-contacts.js').read_bytes()
             assert assets.read('web/map-directory.js') == (ROOT/'web/map-directory.js').read_bytes()
             assert assets.read('web/npc-contacts.css') == compile_css((ROOT/'web/npc-contacts.css').read_text(encoding='utf-8')).encode('utf-8')
-            for name in ('web/immortal-economy-panel.js', 'web/ui-panels.js', 'web/handbook-content.js', 'web/doctrine-panel.css', 'web/tutorial.js', 'web/tutorial-steps.js', 'web/tutorial-content.js', 'web/tutorial.css', 'web/index.html', 'web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/crafting.json', 'content/formations.json', 'content/techniques.json', 'content/market.json', 'content/factions.json', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
+            for name in ('web/upper-institution-panel.js', 'web/upper-voisinage-panel.js', 'web/immortal-economy-panel.js', 'web/ui-panels.js', 'web/handbook-content.js', 'web/doctrine-panel.css', 'web/tutorial.js', 'web/tutorial-steps.js', 'web/tutorial-content.js', 'web/tutorial.css', 'web/index.html', 'web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/crafting.json', 'content/formations.json', 'content/techniques.json', 'content/market.json', 'content/factions.json', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
                 expected = (ROOT/name).read_bytes()
                 if name.endswith('.css'):
                     expected = compile_css(expected.decode('utf-8')).encode('utf-8')
@@ -68,7 +70,7 @@ def main():
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
-        'validation': ['Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified', 'Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified', 'Institution classification, legacy affiliation, six-theme map and institutional contacts verified', f'{passed.group(1)} Python regressions passed',
+        'validation': ['Three native ninth-realm starts and three local institution panels: monarchy, unequal-weight oligarchy and theocracy; membership and commissions on signed Android 12 verified', 'Three base upper-world voisinages: native acquisition, nine-level growth, six-theme UI, persisted selection and energy verified', 'Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified', 'Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified', 'Institution classification, legacy affiliation, six-theme map and institutional contacts verified', f'{passed.group(1)} Python regressions passed',
                        'Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified',
                        'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; unchanged backlash and capped superego; multi-world calibration documented',
                        'Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified',
@@ -89,7 +91,7 @@ def main():
         for path, name in [(target,target.name), (report,report.name), (ROOT/'android/README.md','安卓说明.md'),
                            (ROOT/'docs/three-corpses-1512.md','三尸复测与合练.md'),
                            (ROOT/'docs/immortal-vein-balance.md','仙脉费用校准.md'),
-                           (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
+                           (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
     with zipfile.ZipFile(archive) as package:
         assert package.testzip() is None

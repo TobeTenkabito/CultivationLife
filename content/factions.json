@@ -379,6 +379,15 @@
       "yaochi": {
         "dao": 0.8,
         "buddhist": 0.2
+      },
+      "asura_royal_court": {
+        "demonic": 1.0
+      },
+      "myriad_beast_palace": {
+        "monster": 1.0
+      },
+      "reincarnation_hall": {
+        "ghost": 1.0
       }
     }
   },
@@ -2401,6 +2410,188 @@
         }
       ],
       "kind": "institution"
+    },
+    {
+      "id": "asura_royal_court",
+      "name": "修罗王庭",
+      "world": "asura",
+      "path": "demonic",
+      "description": "修罗王独掌王命。臣属立功晋爵、领取俸禄；请命须获王意，未完成王命会失去恩宠。",
+      "color": "#897564",
+      "location_id": "ten_thousand_battle_city",
+      "kind": "institution",
+      "npcs": [
+        {
+          "id": "asura_royal_court_0",
+          "name": "厉无疆",
+          "title": "修罗王",
+          "realm_index": 12,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "demonic",
+          "race": "human",
+          "world": "asura"
+        },
+        {
+          "id": "asura_royal_court_1",
+          "name": "赤衡",
+          "title": "掌令使",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "demonic",
+          "race": "human",
+          "world": "asura"
+        },
+        {
+          "id": "asura_royal_court_2",
+          "name": "烬离",
+          "title": "府库总管",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "demonic",
+          "race": "human",
+          "world": "asura"
+        }
+      ],
+      "allegiance_race": null
+    },
+    {
+      "id": "myriad_beast_palace",
+      "name": "万妖宫",
+      "world": "nether",
+      "path": "monster",
+      "description": "五祖族把持万妖宫，议权依族势分配，并非一族一票。玩家靠功绩与支持取得门阀代言资格，提案须争取过半议权；没有固定任期或普选。",
+      "color": "#897564",
+      "location_id": "ancestral_beast_garden",
+      "kind": "institution",
+      "npcs": [
+        {
+          "id": "myriad_beast_palace_0",
+          "name": "敖玄泽",
+          "title": "鳞祖门阀代言人",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "monster",
+          "race": "monster",
+          "world": "nether"
+        },
+        {
+          "id": "myriad_beast_palace_1",
+          "name": "凤丹霄",
+          "title": "羽祖门阀代言人",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "monster",
+          "race": "monster",
+          "world": "nether"
+        },
+        {
+          "id": "myriad_beast_palace_2",
+          "name": "白岳",
+          "title": "兽祖门阀代言人",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "monster",
+          "race": "monster",
+          "world": "nether"
+        },
+        {
+          "id": "myriad_beast_palace_3",
+          "name": "玄沧",
+          "title": "介祖门阀代言人",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "monster",
+          "race": "monster",
+          "world": "nether"
+        },
+        {
+          "id": "myriad_beast_palace_4",
+          "name": "青扶桑",
+          "title": "灵植门阀代言人",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "monster",
+          "race": "monster",
+          "world": "nether"
+        }
+      ],
+      "allegiance_race": null
+    },
+    {
+      "id": "reincarnation_hall",
+      "name": "轮回殿",
+      "world": "reincarnation",
+      "path": "ghost",
+      "description": "轮回殿奉轮回法旨，以神职主持祭仪与轮回秩序。信众履行誓愿积累信望，高阶神职可奏请法旨，失约会削弱信望。",
+      "color": "#897564",
+      "location_id": "karma_city",
+      "kind": "institution",
+      "npcs": [
+        {
+          "id": "reincarnation_hall_0",
+          "name": "渡尘",
+          "title": "大祭司",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation"
+        },
+        {
+          "id": "reincarnation_hall_1",
+          "name": "照夜",
+          "title": "司命祭司",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation"
+        },
+        {
+          "id": "reincarnation_hall_2",
+          "name": "归舟",
+          "title": "守殿祭司",
+          "realm_index": 11,
+          "layer": 1,
+          "age": 1260000,
+          "lifespan": null,
+          "spirit_root": "law_space",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation"
+        }
+      ],
+      "allegiance_race": null
     }
   ]
 }

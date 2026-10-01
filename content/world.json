@@ -296,6 +296,16 @@
       ],
       "hp": 0,
       "mp": 0
+    },
+    "institution_work": {
+      "name": "机构履约",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0,
+      "description": "亲赴本界机构履行已接委托，积累功勋。"
     }
   },
   "systems": {
@@ -3404,6 +3414,225 @@
         },
         "doctrine_starter": true,
         "opportunity_reserve": 300000
+      },
+      {
+        "id": "asura_upper",
+        "name": "魔修·修罗初境",
+        "description": "本体第九阶一层开局；位于机构驻地，备有本界功法、一级邻域和元力储备。妖修与鬼修扩展开启时沿用对应道途规则。",
+        "category": "三界上境",
+        "variant_label": "本体·第九阶",
+        "enabled": true,
+        "realm_index": 9,
+        "layer": 1,
+        "age": 68000,
+        "world": "asura",
+        "location_id": "ten_thousand_battle_city",
+        "race": "human",
+        "spirit_root": "mutated_yin",
+        "path": "demonic",
+        "additional_roots": [
+          "metal",
+          "wood",
+          "water",
+          "fire",
+          "earth"
+        ],
+        "opportunity_fraction": 0.18,
+        "karma": 20,
+        "sha_qi": 100,
+        "fame": 0,
+        "body_training": 100,
+        "immortal_power_converted": true,
+        "main_technique": "TECH_ASURA_9_MAIN",
+        "support_technique": "TECH_ASURA_WAR_HEAVEN",
+        "body_technique": "TECH_ASURA_9_BODY",
+        "divine_sense_technique": "TECH_ASURA_9_SENSE",
+        "combat_techniques": [
+          "TECH_ASURA_9_COMBAT"
+        ],
+        "inventory": [
+          {
+            "id": "spirit_stone",
+            "quantity": 1000000
+          },
+          {
+            "id": "xuanhuang_immortal_armor",
+            "quantity": 1
+          },
+          {
+            "id": "heavenly_river_sword_embryo",
+            "quantity": 1
+          },
+          {
+            "id": "tribulation_vitality_pill",
+            "quantity": 6
+          },
+          {
+            "id": "tribulation_mana_dew",
+            "quantity": 6
+          }
+        ],
+        "immortal_aperture": {
+          "version": 1,
+          "current": 600,
+          "capacity": 1000,
+          "imitation_current": 0,
+          "imitation_capacity": 60
+        },
+        "world_voisinages": {
+          "asura": {
+            "levels": {
+              "asura:blood_sea": 1
+            },
+            "active": "asura:blood_sea"
+          }
+        }
+      },
+      {
+        "id": "nether_upper",
+        "name": "妖修·幽冥初境",
+        "description": "本体第九阶一层开局；位于机构驻地，备有本界功法、一级邻域和元力储备。妖修与鬼修扩展开启时沿用对应道途规则。",
+        "category": "三界上境",
+        "variant_label": "本体·第九阶",
+        "enabled": true,
+        "realm_index": 9,
+        "layer": 1,
+        "age": 68000,
+        "world": "nether",
+        "location_id": "ancestral_beast_garden",
+        "race": "monster",
+        "spirit_root": "supreme_earth",
+        "path": "monster",
+        "additional_roots": [
+          "metal",
+          "wood",
+          "water",
+          "fire",
+          "earth"
+        ],
+        "opportunity_fraction": 0.18,
+        "karma": 20,
+        "sha_qi": 100,
+        "fame": 0,
+        "body_training": 100,
+        "immortal_power_converted": true,
+        "main_technique": "TECH_NETHER_9_MAIN",
+        "support_technique": "TECH_MONSTER_PRIMORDIAL_BODY",
+        "body_technique": "TECH_NETHER_9_BODY",
+        "divine_sense_technique": "TECH_NETHER_9_SENSE",
+        "combat_techniques": [
+          "TECH_NETHER_9_COMBAT"
+        ],
+        "inventory": [
+          {
+            "id": "spirit_stone",
+            "quantity": 1000000
+          },
+          {
+            "id": "xuanhuang_immortal_armor",
+            "quantity": 1
+          },
+          {
+            "id": "heavenly_river_sword_embryo",
+            "quantity": 1
+          },
+          {
+            "id": "tribulation_vitality_pill",
+            "quantity": 6
+          },
+          {
+            "id": "tribulation_mana_dew",
+            "quantity": 6
+          }
+        ],
+        "immortal_aperture": {
+          "version": 1,
+          "current": 600,
+          "capacity": 1000,
+          "imitation_current": 0,
+          "imitation_capacity": 60
+        },
+        "world_voisinages": {
+          "nether": {
+            "levels": {
+              "nether:nine_abyss": 1
+            },
+            "active": "nether:nine_abyss"
+          }
+        }
+      },
+      {
+        "id": "reincarnation_upper",
+        "name": "鬼修·轮回初境",
+        "description": "本体第九阶一层开局；位于机构驻地，备有本界功法、一级邻域和元力储备。妖修与鬼修扩展开启时沿用对应道途规则。",
+        "category": "三界上境",
+        "variant_label": "本体·第九阶",
+        "enabled": true,
+        "realm_index": 9,
+        "layer": 1,
+        "age": 68000,
+        "world": "reincarnation",
+        "location_id": "karma_city",
+        "race": "human",
+        "spirit_root": "mutated_yin",
+        "path": "ghost",
+        "additional_roots": [
+          "metal",
+          "wood",
+          "water",
+          "fire",
+          "earth"
+        ],
+        "opportunity_fraction": 0.18,
+        "karma": 20,
+        "sha_qi": 100,
+        "fame": 0,
+        "body_training": 100,
+        "immortal_power_converted": true,
+        "main_technique": "TECH_REINCARNATION_9_MAIN",
+        "support_technique": "TECH_REINCARNATION_GATE_CANON",
+        "body_technique": "TECH_REINCARNATION_9_BODY",
+        "divine_sense_technique": "TECH_REINCARNATION_9_SENSE",
+        "combat_techniques": [
+          "TECH_REINCARNATION_9_COMBAT"
+        ],
+        "inventory": [
+          {
+            "id": "spirit_stone",
+            "quantity": 1000000
+          },
+          {
+            "id": "xuanhuang_immortal_armor",
+            "quantity": 1
+          },
+          {
+            "id": "heavenly_river_sword_embryo",
+            "quantity": 1
+          },
+          {
+            "id": "tribulation_vitality_pill",
+            "quantity": 6
+          },
+          {
+            "id": "tribulation_mana_dew",
+            "quantity": 6
+          }
+        ],
+        "immortal_aperture": {
+          "version": 1,
+          "current": 600,
+          "capacity": 1000,
+          "imitation_current": 0,
+          "imitation_capacity": 60
+        },
+        "world_voisinages": {
+          "reincarnation": {
+            "levels": {
+              "reincarnation:six_paths": 1
+            },
+            "active": "reincarnation:six_paths"
+          }
+        }
       }
     ],
     "stage_lifespan_bonus": {
@@ -3834,6 +4063,407 @@
         "per_level": 300,
         "reward_per_level": 0.1
       }
+    },
+    "upper_voisinages": {
+      "realms": [
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        11,
+        11,
+        12
+      ],
+      "strengths": [
+        110,
+        135,
+        165,
+        205,
+        250,
+        300,
+        365,
+        440,
+        530
+      ],
+      "stone_costs": [
+        30000,
+        60000,
+        100000,
+        200000,
+        350000,
+        550000,
+        900000,
+        1500000,
+        2500000
+      ],
+      "opportunity_fractions": [
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05
+      ],
+      "material_counts": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        2,
+        0,
+        3
+      ],
+      "worlds": {
+        "asura": {
+          "name": "修罗界",
+          "title": "魔域",
+          "energy": "煞元",
+          "aperture": "煞元府",
+          "hp_fraction": 0.05,
+          "mp_fraction": 0.2,
+          "material_id": "asura_upper_alloy_9",
+          "description": "以战意炼域。攻伐来势猛烈，亦可修成铁狱，镇压敌手。",
+          "fields": [
+            {
+              "id": "asura:blood_sea",
+              "name": "血海战域",
+              "description": "血海侵夺，杀伤见长；初展时攻势更盛。",
+              "stability": 0.85,
+              "incursion": 1.25,
+              "authority": 1.1,
+              "effects": [
+                "strike",
+                "restore_spirit"
+              ],
+              "feature": {
+                "kind": "opening",
+                "value": 0.15
+              }
+            },
+            {
+              "id": "asura:iron_prison",
+              "name": "铁狱魔域",
+              "description": "以魔狱护身、压迫敌手；偏向擒获与持久交锋。",
+              "stability": 1.25,
+              "incursion": 0.9,
+              "authority": 1,
+              "effects": [
+                "suppress",
+                "restore_body"
+              ],
+              "feature": {
+                "kind": "fortify",
+                "value": 0.08
+              }
+            }
+          ]
+        },
+        "nether": {
+          "name": "幽冥界",
+          "title": "幽域",
+          "energy": "幽元",
+          "aperture": "幽元府",
+          "hp_fraction": 0,
+          "mp_fraction": 0.15,
+          "material_id": "nether_upper_alloy_9",
+          "description": "借幽冥地脉筑域。既能封锁与杀伤，也可温养肉身、稳守阵地。",
+          "fields": [
+            {
+              "id": "nether:nine_abyss",
+              "name": "九幽镇域",
+              "description": "镇锁幽途，封锁退路，以幽冥之力杀伤受制之敌。",
+              "stability": 1.05,
+              "incursion": 1.05,
+              "authority": 1,
+              "effects": [
+                "strike",
+                "seal"
+              ],
+              "feature": {
+                "kind": "frugal",
+                "value": 0.1
+              }
+            },
+            {
+              "id": "nether:yellow_spring",
+              "name": "黄泉回生域",
+              "description": "黄泉生机修复肉身，兼有杀伤，适合长久交锋。",
+              "stability": 1.25,
+              "incursion": 0.85,
+              "authority": 1,
+              "effects": [
+                "strike",
+                "restore_body"
+              ],
+              "feature": {
+                "kind": "fortify",
+                "value": 0.08
+              }
+            }
+          ]
+        },
+        "reincarnation": {
+          "name": "轮回界",
+          "title": "轮域",
+          "energy": "轮回元力",
+          "aperture": "轮回元府",
+          "hp_fraction": 0,
+          "mp_fraction": 0.2,
+          "material_id": "reincarnation_upper_alloy_9",
+          "description": "体悟生灭往复。可断敌术法，亦可稳固自身邻域、伺机反击。",
+          "fields": [
+            {
+              "id": "reincarnation:six_paths",
+              "name": "六道劫域",
+              "description": "以轮转之力杀伤敌手，或禁制敌方功法调用。",
+              "stability": 1,
+              "incursion": 1.15,
+              "authority": 1.05,
+              "effects": [
+                "strike",
+                "restrict"
+              ],
+              "feature": {
+                "kind": "execution",
+                "value": 0.15
+              }
+            },
+            {
+              "id": "reincarnation:returning_wheel",
+              "name": "两仪轮转域",
+              "description": "稳固为先，修复受损邻域；守住后仍可施行杀伤。",
+              "stability": 1.3,
+              "incursion": 0.85,
+              "authority": 1,
+              "effects": [
+                "strike",
+                "restore_field"
+              ],
+              "feature": {
+                "kind": "retaliate",
+                "value": 0.1
+              }
+            }
+          ]
+        }
+      }
+    },
+    "upper_institutions": {
+      "worlds": {
+        "asura": {
+          "id": "asura_royal_court",
+          "name": "修罗王庭",
+          "regime": "君主专制",
+          "location": "ten_thousand_battle_city",
+          "path": "demonic",
+          "description": "修罗王独掌王命。臣属立功晋爵、领取俸禄；请命须获王意，未完成王命会失去恩宠。",
+          "ranks": [
+            "效命者",
+            "战将",
+            "封侯",
+            "战公",
+            "摄政辅臣"
+          ],
+          "people": [
+            "厉无疆",
+            "赤衡",
+            "烬离"
+          ],
+          "titles": [
+            "修罗王",
+            "掌令使",
+            "府库总管"
+          ],
+          "policies": [
+            {
+              "id": "war",
+              "name": "征战令",
+              "description": "履约功勋增加四成。",
+              "income": 1,
+              "service": 1.4,
+              "cultivation_discount": 0
+            },
+            {
+              "id": "study",
+              "name": "养域令",
+              "description": "臣属本界邻域培养的机缘与灵石费用减少一成五。",
+              "income": 1,
+              "service": 1,
+              "cultivation_discount": 0.15
+            },
+            {
+              "id": "prosper",
+              "name": "赐禄令",
+              "description": "臣属每单位俸禄增加五成。",
+              "income": 1.5,
+              "service": 1,
+              "cultivation_discount": 0
+            }
+          ],
+          "preferences": [
+            "war",
+            "study",
+            "prosper"
+          ]
+        },
+        "nether": {
+          "id": "myriad_beast_palace",
+          "name": "万妖宫",
+          "regime": "门阀寡头制",
+          "location": "ancestral_beast_garden",
+          "path": "monster",
+          "description": "五祖族把持万妖宫，议权依族势分配，并非一族一票。玩家靠功绩与支持取得门阀代言资格，提案须争取过半议权；没有固定任期或普选。",
+          "ranks": [
+            "宫外客卿",
+            "门阀代言人"
+          ],
+          "people": [
+            "敖玄泽",
+            "凤丹霄",
+            "白岳",
+            "玄沧",
+            "青扶桑"
+          ],
+          "titles": [
+            "鳞祖门阀",
+            "羽祖门阀",
+            "兽祖门阀",
+            "介祖门阀",
+            "灵植门阀"
+          ],
+          "policies": [
+            {
+              "id": "war",
+              "name": "戍边盟令",
+              "description": "万妖宫履约功勋增加三成。",
+              "income": 1,
+              "service": 1.3,
+              "cultivation_discount": 0
+            },
+            {
+              "id": "study",
+              "name": "祖庭共研",
+              "description": "万妖宫成员本界邻域培养的机缘与灵石费用减少一成五。",
+              "income": 1,
+              "service": 1,
+              "cultivation_discount": 0.15
+            },
+            {
+              "id": "prosper",
+              "name": "门阀互市",
+              "description": "客卿及代言人每单位津贴增加五成。",
+              "income": 1.5,
+              "service": 1,
+              "cultivation_discount": 0
+            }
+          ],
+          "preferences": [
+            "war",
+            "study",
+            "war",
+            "study",
+            "prosper"
+          ],
+          "weights": [
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "seat_merit": [
+            800,
+            600,
+            400,
+            300,
+            200
+          ],
+          "seat_support": [
+            80,
+            75,
+            70,
+            65,
+            60
+          ]
+        },
+        "reincarnation": {
+          "id": "reincarnation_hall",
+          "name": "轮回殿",
+          "regime": "神权制",
+          "location": "karma_city",
+          "path": "ghost",
+          "description": "轮回殿奉轮回法旨，以神职主持祭仪与轮回秩序。信众履行誓愿积累信望，高阶神职可奏请法旨，失约会削弱信望。",
+          "ranks": [
+            "奉愿者",
+            "司祭",
+            "引魂使",
+            "大祭司",
+            "轮回神使"
+          ],
+          "people": [
+            "渡尘",
+            "照夜",
+            "归舟"
+          ],
+          "titles": [
+            "大祭司",
+            "司命祭司",
+            "守殿祭司"
+          ],
+          "policies": [
+            {
+              "id": "war",
+              "name": "护轮法旨",
+              "description": "奉愿者履约功勋增加三成五。",
+              "income": 1,
+              "service": 1.35,
+              "cultivation_discount": 0
+            },
+            {
+              "id": "study",
+              "name": "明域法旨",
+              "description": "奉愿者本界邻域培养的机缘与灵石费用减少两成。",
+              "income": 1,
+              "service": 1,
+              "cultivation_discount": 0.2
+            },
+            {
+              "id": "prosper",
+              "name": "普济法旨",
+              "description": "奉愿者每单位神职供养增加五成。",
+              "income": 1.5,
+              "service": 1,
+              "cultivation_discount": 0
+            }
+          ],
+          "preferences": [
+            "war",
+            "study",
+            "prosper"
+          ]
+        }
+      },
+      "agenda_interval": 4,
+      "initial_treasury": 2000000,
+      "unit_income": 600000,
+      "service_merit": 100,
+      "stones_per_merit": 2500,
+      "material_merit": 600,
+      "policy_cost": 120000,
+      "rank_merit": [
+        0,
+        200,
+        500,
+        1000,
+        1800
+      ]
     }
   },
   "realms": [

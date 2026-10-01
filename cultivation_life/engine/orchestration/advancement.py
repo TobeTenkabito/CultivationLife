@@ -68,6 +68,10 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique.element):
         raise ValueError("灵根属性与五行功法不合，无法修炼")
     units = max(1, min(10, int(years)))
+    from ...system.upper_institutions import begin_work, finish_work, advance_time
+    if action == "institution_work":
+        begin_work(game)
+    institution_world = player.world
     deps._begin_yaochi_action(game, action)
     deps._begin_doctrine_action(game, action, commit=True)
     time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
@@ -143,6 +147,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             break
     deps._finish_doctrine_action(game, action, player.age - start_world_age)
     deps._finish_yaochi_action(game, action, player.age - start_world_age)
+    if player.world == institution_world:
+        finish_work(game, action, player.age - start_world_age)
+        advance_time(game, player.age - start_world_age, time_unit)
     if player.alive:
         action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
         action_summary = (
