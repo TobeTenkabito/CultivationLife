@@ -339,6 +339,8 @@ def evaluate_rules(
 ) -> dict[str, Any]:
     """Evaluate legacy and stateful rules through one public entry point."""
     rows = list(rules)
+    if any(int(row.get('schema_version', 1)) not in (1, 2) for row in rows):
+        raise ValueError('Version-three rules require combat_semantics.SemanticRuntime')
     result = empty_rule_result()
     legacy = [row for row in rows if int(row.get("schema_version", 1)) < RULE_SCHEMA_VERSION]
     if legacy:
