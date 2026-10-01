@@ -23,7 +23,7 @@ def blocked(game):
     p = game.player
     if not p.alive:
         return '此生已结束，可在新角色中体验操作引导。'
-    if game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor or game.heavenly_court.get('open_election') or (game.guixu_state.get('player_session') or {}).get('trapped'):
+    if game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor or (game.guixu_state.get('player_session') or {}).get('trapped'):
         return '请先暂停引导，处理眼前的事件或困境，再从主界面继续。'
     return ''
 

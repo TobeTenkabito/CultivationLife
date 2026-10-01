@@ -66,3 +66,12 @@
 #yaochi-content .doctrine-entry > button { margin:.25rem; }
 #yaochi-content .doctrine-book { min-width:0; overflow-wrap:anywhere; }
 @media(max-width:560px){#yaochi-content .doctrine-entry > button { display:block; width:100%; margin:.5rem 0; }#golden-light-content .voisinage-stages { font-size:12px; }}
+.doctrine-compact > summary { display:flex; align-items:center; gap:.8rem; cursor:pointer; padding:.6rem; min-height:3.5rem; list-style:none; }
+.doctrine-compact > summary::after { content:'展开 ▾'; margin-left:auto; flex-shrink:0; font-size:.8em; opacity:.75; }
+.doctrine-compact[open] > summary::after { content:'收起 ▴'; }
+.doctrine-compact > summary > span:nth-child(2) { min-width:0; display:grid; gap:.35rem; overflow-wrap:anywhere; }
+.doctrine-compact > summary small { opacity:.75; line-height:1.5; }
+.doctrine-seal { display:grid; place-items:center; flex:0 0 2.7rem; height:2.7rem; border:1px solid currentColor; border-radius:50%; opacity:.8; font-size:1.3rem; }
+.doctrine-search { width:100%; min-width:0; box-sizing:border-box; margin:.6rem 0; padding:.7rem; color:inherit; background:transparent; border:1px solid currentColor; border-radius:.5rem; }
+.doctrine-compact[hidden] { display:none !important; }
+@media(max-width:480px) { .doctrine-compact > summary { padding:.3rem; gap:.5rem; } .doctrine-compact > summary::after { font-size:.7em; } }

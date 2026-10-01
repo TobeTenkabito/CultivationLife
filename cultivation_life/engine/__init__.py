@@ -18,7 +18,7 @@ from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
 from ..system.map_system import MapCatalog
 from ..storage import SaveStore
 from ..achievements import AchievementSystem, load_achievement_definitions
-from ..runtime import encode_rng, now_iso
+from ..runtime import decode_rng, encode_rng, now_iso
 from ..system.war_system import WarSystemMixin
 from ..system.heavenly_court_system import HeavenlyCourtSystemMixin
 from ..system.yaochi_system import YaochiMixin
@@ -142,10 +142,14 @@ class GameEngine(YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, Bu
             return self.present(game)
         if setting not in {
             "combat_popup", "achievement_popup", "auto_advance_player_wars",
-            "guixu_event_popup",
+            "guixu_event_popup", "court_election_popup",
         }:
             raise ValueError("未知设置项")
         game.settings[setting] = bool(enabled)
+        if setting == "court_election_popup" and not enabled:
+            rng = decode_rng(game.seed, game.rng_state)
+            self._court_finish_unattended(game, rng)
+            game.rng_state = encode_rng(rng)
         if (
             setting == "guixu_event_popup" and not enabled and game.pending_event
             and str(game.pending_event.get("id", "")) in {"EVT_GUIXU_ANNOUNCE", "EVT_GUIXU_OPEN"}

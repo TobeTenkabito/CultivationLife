@@ -298,6 +298,9 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
         current_choices = {choice.get("id") for choice in event.get("choices", [])} if event else set()
         if event:
             tags = event.get("tags", [])
+            if "court_task" in tags and game.pending_event.get("runtime") and not game.pending_event["runtime"].get("court_authorized"):
+                game.pending_event["runtime"]["court_authorized"] = True
+                changed = True
             if game.player.realm_index >= 4 and "faction" in tags and "duty" in tags and "war" not in tags:
                 current_choices.update({"__delegate_faction_task", "__decline_faction_task"})
         incompatible = not post_battle_possession and (

@@ -43,6 +43,7 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
                 page.evaluate('(id)=>loadGame(id)',game.id)
                 page.evaluate("UtilityPanels.open('voisinage')")
+                page.locator(f'[data-voisinage-id="{key}"] > summary').click()
                 page.get_by_role('button',name='修炼至初成2层',exact=True).click()
                 page.wait_for_function("game.doctrines.voisinages.some(f=>f.cultivation.rank===2)")
                 saved=engine.store.load(game.id); saved.doctrine_state['player']['voisinage_training'][key]['rank']=4

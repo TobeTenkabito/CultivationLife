@@ -204,7 +204,7 @@ def verify(with_dlc):
             assert 'immortal_traces' in immortal['player']
             assert set(immortal['player']['intrinsic_resources']) == {'hp','mp'}
             assert immortal['doctrines']['veins']['total'] == 27
-            assert immortal['doctrines']['veins']['trace_chance'] == .07
+            assert immortal['doctrines']['veins']['trace_chance'] == .15
             assert immortal['doctrines']['immortal_body']['required_training'] == 100
             assert immortal['doctrines']['immortal_body']['golden_light_level'] == 20
             assert len(immortal['doctrines']['immortal_body']['manuals']) >= 1

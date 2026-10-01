@@ -105,7 +105,7 @@ class ImmortalApertureMixin:
         game = self._load(game_id)
         p = game.player
         if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-            or game.heavenly_court.get('open_election') or (game.guixu_state.get('player_session') or {}).get('trapped')):
+            or (game.guixu_state.get('player_session') or {}).get('trapped')):
             raise ValueError('当前状态不能操持仙窍')
         if not available(p):
             raise ValueError('真仙或灵域功法修至四级后方可开启仙窍')

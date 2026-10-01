@@ -39,7 +39,7 @@ def vein_ready(player):
 
 
 def grant_trace_chance(player, gain):
-    """One 7% trial per positive award. O(1); separate persisted PRNG stream.
+    """One configured probability trial per positive award. O(1); separate persisted PRNG stream.
 
     SplitMix64 avoids allocating a Random or disturbing event/NPC random streams.
     No rolls on spending, refunds, loading, presentation or elapsed years alone.

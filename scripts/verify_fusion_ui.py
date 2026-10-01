@@ -38,6 +38,7 @@ def main():
                 page.emulate_media(reduced_motion='reduce');page.on('pageerror',lambda e:errors.append(str(e)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
                 page.evaluate('(id)=>loadGame(id)',g.id);page.evaluate("UtilityPanels.open('doctrine')")
+                page.locator(f'[data-doctrine-id="{key}"] > summary').click()
                 box=page.locator(f'[data-fusion-id="{key}"]')
                 box.get_by_role('button',name='合练全套传承',exact=True).click()
                 page.wait_for_function('(key)=>game.doctrines.rows.find(r=>r.id===key).fusion.level===1',arg=key)

@@ -43,7 +43,7 @@ class HeavenlyCourtSystemTests(unittest.TestCase):
         self.assertGreaterEqual(sum(event.get("category") == "celestial_combat" for event in celestial_events), 5)
         self.assertEqual(sum("faction_join" in event.get("tags", []) for event in celestial_events), 3)
 
-    def test_seven_offices_rotate_once_per_unit_and_last_seven_units(self):
+    def test_seven_offices_fill_vacancies_and_keep_fourteen_unit_terms(self):
         game = self.engine.store.load(self._true_immortal())
         rng = random.Random(9)
         for _ in range(7):
@@ -52,9 +52,9 @@ class HeavenlyCourtSystemTests(unittest.TestCase):
         self.assertEqual(court["unit"], 7)
         self.assertTrue(all(court["offices"].values()))
         self.assertEqual(court["offices"]["sun"]["start_unit"], 1)
-        self.assertEqual(court["offices"]["sun"]["end_unit"], 8)
+        self.assertEqual(court["offices"]["sun"]["end_unit"], 15)
         self.engine._advance_heavenly_court_unit(game, rng)
-        self.assertEqual(court["offices"]["sun"]["start_unit"], 8)
+        self.assertEqual(court["offices"]["sun"]["start_unit"], 1)
 
     def test_player_election_is_interactive_and_does_not_advance_age(self):
         game_id = self._true_immortal()

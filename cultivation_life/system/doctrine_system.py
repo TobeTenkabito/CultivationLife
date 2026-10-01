@@ -11,7 +11,7 @@ from .doctrine.generation import rng_for
 from .doctrine.progression import source
 from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, prerequisites, attempt, chance, training_cost
-from .doctrine.daomen import discover, mentor, public_peers
+from .doctrine.daomen import discover, mentor, public_peers, preview
 from .immortal_system import ImmortalCultivationMixin, item_quantity
 from .doctrine_fusion_system import DoctrineFusionMixin
 from .doctrine.fusion import manual_id as fusion_manual_id
@@ -53,17 +53,7 @@ class DoctrineSystemMixin(DoctrineFusionMixin, ImmortalCultivationMixin):
         if action == "immortal_trace_gather":
             return
         if action == "daomen_explore":
-            key = record.get("explore_target")
-            if not _known(game, key):
-                raise ValueError("先取得功法，才能循其传承访求道门")
-            if len(record.get("daomen", {}).get(key, [])) >= 9:
-                raise ValueError("这处道门的引路人均已结识")
-            price = config()["cultivation"]["explore_price"]
-            if item_quantity(game.player, "spirit_stone") < price:
-                raise ValueError("访求同道所需灵石不足")
-            if commit:
-                remove_item(game.player, "spirit_stone", price)
-            return
+            raise ValueError("道门寻访已改为即时预览，请在道门选择寻找同道并确认结识")
         if action == "immortal_conversion":
             if game.player.immortal_power_converted:
                 raise ValueError("仙灵力已完成转化")
@@ -163,11 +153,28 @@ class DoctrineSystemMixin(DoctrineFusionMixin, ImmortalCultivationMixin):
             self._begin_fusion_study(game)
             self.store.save(game)
             return self.advance(game_id, 'doctrine_fusion_study', 1)
-        if action == "explore":
-            record["explore_target"] = doctrine_id
-            self._begin_doctrine_action(game, "daomen_explore")
-            self.store.save(game)
-            return self.advance(game_id, "daomen_explore", 1)
+        if action in {"explore", "retain_peer", "dismiss_peer"}:
+            if not definition or not _known(game, doctrine_id):
+                raise ValueError("先取得功法，才能循其传承访求道门")
+            if action == 'explore':
+                preview(game, doctrine_id, definition, config()['words'])
+                # A preview is not a historical encounter or a simulated NPC.
+                game.updated_at = now_iso()
+                self.store.save(game)
+                return self.present(game)
+            candidate = record.get('peer_preview')
+            if not candidate or candidate['doctrine_id'] != doctrine_id or candidate['id'] != npc_id:
+                raise ValueError('这位同道已离开，请重新寻访')
+            if action == 'retain_peer':
+                if len(record.get('daomen', {}).get(doctrine_id, [])) >= 9:
+                    raise ValueError('本门已结识九位同道')
+                if not remove_item(game.player, 'spirit_stone', config()['cultivation']['explore_price']):
+                    raise ValueError('结交同道所需灵石不足')
+                npc = discover(game, doctrine_id, definition, WORLD_SYSTEMS['transcendent_combat'], config()['words'], candidate)
+                summary = f"结识{npc.name}，其道统修为为 Lv{candidate['level']}。"
+            else:
+                summary = '与访客辞别，尚未将其列入往来名单。'
+            record.pop('peer_preview', None)
         elif action in {"annotation", "teach_manual"}:
             npc = mentor(game, doctrine_id, npc_id)
             if not definition or not _known(game, doctrine_id):
@@ -274,6 +281,7 @@ class DoctrineSystemMixin(DoctrineFusionMixin, ImmortalCultivationMixin):
                              chance=chance(progress, config()["cultivation"]),
                              pity_step=config()["cultivation"]["pity_steps"][min(8, level)],
                              annotations=record.get("annotations", {}).get(key, []),
+                             peer_preview=copy.deepcopy(record.get("peer_preview")) if (record.get("peer_preview") or {}).get("doctrine_id") == key else None,
                              peers=public_peers(game, key), explore_progress=record.get("explore_progress", {}).get(key, 0),
                              active=record.get("active") == key, origin=record.get("origin") == key,
                              blocked=blocked, can_train=bool(books and qualified and next_stage and not blocked and game.player.realm_index >= next_stage["realm"]

@@ -896,7 +896,7 @@
     "voisinage_trace_base": 8,
     "annotation_price": 3000,
     "explore_price": 1000,
-    "trace_gain_chance": 0.07,
+    "trace_gain_chance": 0.15,
     "vein_success_rates": [
       0.85,
       0.8,

@@ -118,6 +118,7 @@ def _instantiate_event(deps: EventDependencies, event: dict[str, Any], game: Gam
         target = deps._generate_cultivator_target(game.player, combat["target_name"], combat, rng, game=game)
         combat_type = str(combat.get("combat_type", "cultivator"))
         target["player_defending"] = bool(combat.get("player_defending") or "defense" in tags)
+        target["court_authorized"] = "court_task" in tags
         if combat_type != "cultivator":
             target["combat_type"] = combat_type
             target["action"] = str(combat.get("action", "hunt_beast" if combat_type == "beast" else "slay"))

@@ -2,7 +2,10 @@
 from ..models import HistoryRecord
 
 
-class CourtGovernanceMixin:
+from .court_lifecycle import CourtLifecycleMixin
+
+
+class CourtGovernanceMixin(CourtLifecycleMixin):
     def _court_retire_unavailable(self, game):
         court = game.heavenly_court
         for office_id, holder in court['offices'].items():
@@ -10,7 +13,7 @@ class CourtGovernanceMixin:
                 continue
             key = holder['holder_id']
             official = court['officials'].get(key)
-            expired = holder.get('end_unit', court['unit']) < court['unit']
+            expired = holder.get('end_unit', court['unit']) <= court['unit']
             missing = official is None
             if official and official.get('source') == 'npc':
                 npc = self._find_npc(game, key)
@@ -68,6 +71,10 @@ class CourtGovernanceMixin:
                       and unit-court.get('law_changed_at',{}).get(key,-1000) >= cfg['law_cooldown_units']]
         if candidates and court['treasury'] >= self._court_config()['policy_treasury_cost']:
             law_id, desired = candidates[(unit-1) % len(candidates)]
+            if desired:
+                conflict = next((key for key in self._court_conflicts(law_id) if court['laws'].get(key)), None)
+                if conflict:
+                    law_id, desired = conflict, False
             court.setdefault('law_attempted_at',{})[law_id] = unit
             result, summary = self._court_vote_law(game,law_id,desired,rng,actor_id=actor_id)
             record('law', result, summary)

@@ -1564,7 +1564,7 @@ class ContentRegistry:
         law_ids = [row.get("id") for row in court.get("laws", [])]
         if (
             int(court.get("seat_count", 0)) != 49
-            or int(court.get("term_units", 0)) != 7
+            or int(court.get("term_units", 0)) != 14
             or int(court.get("decree_duration_units", 0)) != 5
             or office_ids != ["sun", "moon", "jupiter", "mars", "saturn", "venus", "mercury"]
             or len(decree_ids) != len(set(decree_ids)) or len(law_ids) != len(set(law_ids))

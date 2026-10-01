@@ -20,7 +20,7 @@ def test_trace_probability_stream_is_persisted_and_only_positive_awards_roll():
     assert p.immortal_trace_rng == 1460
     for _ in range(10000):
         grant_trace_chance(p, 1)
-    assert 650 <= p.immortal_traces <= 750
+    assert 1400 <= p.immortal_traces <= 1600
     q = Player.from_dict(p.to_dict())
     for _ in range(50):
         assert grant_trace_chance(p, 100) == grant_trace_chance(q, 100)
