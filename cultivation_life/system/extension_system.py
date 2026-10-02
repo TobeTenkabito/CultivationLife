@@ -260,6 +260,7 @@ def load_extensions(
     active_documents = base_documents(content_root)
     registry = validator(copy.deepcopy(active_documents))
     packages, report = discover_packages(project_root or content_root.parent)
+    kinds = {package.id: package.kind for package in packages}
     enabled_ids = {package.id for package in packages if package.enabled}
     loaded_ids: set[str] = set()
     pending: list[ExtensionPackage] = []

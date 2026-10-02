@@ -11,6 +11,20 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 
 class ExtensionSystemTests(unittest.TestCase):
+    def test_dlc_dependency_kind_and_missing_dependency_are_validated(self):
+        for dependency_kind, expected in [('dlc', 'loaded'), ('mod', 'error'), ('missing', 'error')]:
+            with self.subTest(dependency_kind=dependency_kind), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                documents = {'items.json': {'schema_version': 1, 'items': []}}
+                if dependency_kind != 'missing':
+                    self._package(root, 'dlc' if dependency_kind == 'dlc' else 'mods',
+                                  self._manifest('dependency.base', dependency_kind), documents)
+                self._package(root, 'dlc', self._manifest('dependent.child', 'dlc',
+                                                        requires=['dependency.base']), documents)
+                ContentRegistry.load(SOURCE_ROOT / 'content', root)
+                statuses = {row['id']: row['status'] for row in ContentRegistry.extension_report}
+                self.assertEqual(statuses['dependent.child'], expected)
+
     def _package(self, root: Path, folder: str, manifest: dict, documents: dict[str, dict]) -> None:
         package = root / folder / manifest["id"]
         content = package / "content"

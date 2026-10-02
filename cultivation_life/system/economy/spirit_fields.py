@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import math
     from typing import Any
-    from ...content_registry import GUIXU_EXCLUSIVE_ITEM_IDS, ITEM_CATALOG, MARKET_GOODS, WORLD_SYSTEMS
+    from ...content_registry import ITEM_CATALOG, WORLD_SYSTEMS
     from ...models import HistoryRecord, Item, Player
     from ...runtime import now_iso
     from ...rules import add_item, max_mp, remove_item
@@ -86,7 +86,6 @@ class EconomySpiritFieldMethods:
         rules = self._spirit_field_rules()
         field = player.spirit_field
         reclaimed = min(int(rules["max_qing"]), max(0, int(field.get("reclaimed_qing", 0))))
-        next_qing = reclaimed + 1
         reclaim_cost = max(1, round(float(rules["reclaim_base_stones"]) * float(rules["reclaim_stone_growth"]) ** reclaimed))
         plots = []
         used_slots: set[int] = set()
@@ -116,20 +115,7 @@ class EconomySpiritFieldMethods:
             quantity = next((item.quantity for item in player.inventory if item.id == plant["seed_id"]), 0)
             if quantity:
                 seeds.append({"plant_id":plant_id, "seed_id":plant["seed_id"], "name":plant["name"], "quantity":quantity})
-        alchemy_targets: dict[str, dict[str, Any]] = {}
-        for row in MARKET_GOODS:
-            item = ITEM_CATALOG.get(str(row.get("content_id"))) if row.get("kind") == "item" else None
-            if not item or "pill" not in item.tags or int(row["tier"]) > min(8, player.realm_index + 1):
-                continue
-            current = alchemy_targets.get(item.id)
-            if current is None or int(row["tier"]) < current["tier"]:
-                alchemy_targets[item.id] = {"id":item.id, "name":item.name, "tier":int(row["tier"]), "description":item.description}
-        for item in ITEM_CATALOG.values():
-            if (
-                "pill" in item.tags and item.id not in alchemy_targets
-                and item.id not in GUIXU_EXCLUSIVE_ITEM_IDS
-            ):
-                alchemy_targets[item.id] = {"id":item.id, "name":item.name, "tier":1, "description":item.description}
+        alchemy_targets = self._alchemy_targets(player)
         materials = [
             {"id":item.id, "name":item.name, "quantity":item.quantity,
              "years":item.plant_years, "quality":item.plant_quality or 0.55}
@@ -222,7 +208,7 @@ class EconomySpiritFieldMethods:
         minimum = max(1.0, maximum_mp * float(rules["irrigation_min_mp_ratio"]))
         maximum = max(minimum, maximum_mp * float(rules["irrigation_max_mp_ratio"]))
         cost = float(mp_amount or max(minimum, maximum_mp * float(rules["irrigation_mp_ratio"])))
-        if cost < minimum or cost > maximum:
+        if not math.isfinite(cost) or cost < minimum or cost > maximum:
             raise ValueError(f"单次灌溉须投入 {minimum:.0f} 至 {maximum:.0f} MP")
         if game.player.mp < cost:
             raise ValueError("当前 MP 不足以灌溉灵植")

@@ -1,0 +1,33 @@
+{
+  "base_version": "1.56.0",
+  "platform": "Windows",
+  "exe_sha256": "45697760c9c9014b1377a32e8d89614329aa05060adadcb784a7beacba04ac07",
+  "inputs_sha256": "006954a551be1278af464595b86a98c46aa40c6f3c9505e27aa8883fc5fa9ec2",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.0",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "themes": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "save_schema": 5,
+  "validation": [
+    "1555 automated regression tests passed",
+    "Asura court, Asura, handbook, quick-start and puppet UI success logs checked",
+    "Exact executable hash verified in isolated directories with and without optional DLC",
+    "Release inputs match the fingerprint recorded by EXE verification"
+  ],
+  "android_release": "Not included in this Windows release",
+  "root_launcher_updated": true
+}

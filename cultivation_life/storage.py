@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
+import threading
+from weakref import WeakValueDictionary
 from pathlib import Path
 
 from .models import GameState
@@ -8,9 +12,15 @@ from .version import BASE_GAME_VERSION
 
 
 class SaveStore:
+    _locks = WeakValueDictionary()
+    _registry_lock = threading.Lock()
+
     def __init__(self, directory: Path):
         self.directory = directory
         self.directory.mkdir(parents=True, exist_ok=True)
+        with self._registry_lock:
+            key = os.path.normcase(str(directory.resolve()))
+            self.lock = self._locks.setdefault(key, threading.RLock())
 
     def _path(self, game_id: str) -> Path:
         if not game_id.replace("-", "").isalnum():
@@ -20,9 +30,18 @@ class SaveStore:
     def save(self, game: GameState) -> None:
         game.last_saved_with_game_version = BASE_GAME_VERSION
         path = self._path(game.id)
-        temporary = path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(game.to_dict(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        temporary.replace(path)
+        data = json.dumps(game.to_dict(), ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+        with self.lock:
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=self.directory,
+                                                 prefix=f'{game.id}.', suffix='.tmp', delete=False) as output:
+                    temporary = Path(output.name)
+                    output.write(data)
+                temporary.replace(path)
+            finally:
+                if temporary is not None:
+                    temporary.unlink(missing_ok=True)
 
     def load(self, game_id: str) -> GameState:
         path = self._path(game_id)
@@ -36,10 +55,11 @@ class SaveStore:
     def delete(self, game_id: str) -> None:
         """Delete only the requested save; account achievements remain untouched."""
         path = self._path(game_id)
-        try:
-            path.unlink()
-        except FileNotFoundError:
-            raise KeyError("存档不存在") from None
+        with self.lock:
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                raise KeyError("存档不存在") from None
 
     def list_games(self) -> list[dict]:
         from .content_registry import REALMS, WORLD_SYSTEMS, PATH_NAMES

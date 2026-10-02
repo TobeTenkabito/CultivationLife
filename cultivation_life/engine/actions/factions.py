@@ -19,7 +19,7 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
     clean_name = name.strip()[:18]
     if not clean_name:
         raise ValueError("请为新宗门题名")
-    if game.pending_event or player.imprisonment:
+    if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法开宗立派")
     if player.faction_id:
         raise ValueError("你已有宗门归属，不能同时另立山门")
@@ -77,7 +77,7 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
     clean_name = name.strip()[:18]
     if not clean_name:
         raise ValueError("请为修仙家族题名")
-    if game.pending_event or player.imprisonment:
+    if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法建立家族")
     if game.family and not game.family.extinct:
         raise ValueError("你已经建立修仙家族")

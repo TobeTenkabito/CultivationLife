@@ -82,12 +82,12 @@ def main():
                         assert page.locator('.owned-training').first.evaluate('e=>e.scrollWidth <= e.clientWidth + 1')
                         if width==1440:
                             page.evaluate("UtilityPanels.open('asura-veins')")
-                            assert page.locator('.asura-head').count()==3
-                            assert page.locator('.asura-arm').count()==6
+                            assert page.locator('.asura-meridian-figure .atlas-anatomy image').count()==1
+                            assert page.locator('.asura-meridian-figure .atlas-anatomy image').get_attribute('href')=='/assets/asura-anatomy.png'
                             page.wait_for_function("document.querySelector('#asura-veins-card').getBoundingClientRect().width > 100 && getComputedStyle(document.querySelector('#asura-veins-card')).visibility === 'visible'")
                             page.wait_for_timeout(400)
                             page.locator('#asura-veins-card').evaluate('e=>e.scrollTop=0')
-                            page.screenshot(path=str(ROOT/'build'/f'asura-1550-{theme}.png'))
+                            page.screenshot(path=str(ROOT/'build'/f'asura-1560-{theme}.png'))
                 page.evaluate("UtilityPanels.open('asura-veins')")
                 page.evaluate("UtilityPanels.open('asura-route')")
                 page.locator('.asura-help').click()

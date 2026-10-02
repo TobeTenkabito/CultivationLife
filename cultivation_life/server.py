@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import mimetypes
 import os
 import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from functools import wraps
 from urllib.parse import unquote, urlparse
 
 from .content_registry import (
@@ -41,9 +43,55 @@ WEB_ROOT = (APP_ROOT / "web") if (APP_ROOT / "web").is_dir() else (BUNDLED_ROOT 
 ENGINE = GameEngine(ENGINE_ROOT, PERSISTENCE_ROOT / "data" / "saves")
 
 
+def local_request(command):
+    @wraps(command)
+    def run(handler):
+        try:
+            handler._validate_request()
+            # Guards, migration reads, save import/export and command execution
+            # must share one transaction, including API GETs which can migrate.
+            if urlparse(handler.path).path.startswith('/api/'):
+                with ENGINE.store.lock:
+                    return command(handler)
+            return command(handler)
+        except ConnectionError:
+            # The browser can close or navigate away while a request completes.
+            return
+        except Exception as error:
+            handler._error(error)
+    return run
+
+
+def finite_json_number(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError('请求数值必须为有限数')
+    return number
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = f"CultivationLife/{BASE_GAME_VERSION}"
 
+    def _validate_request(self) -> None:
+        host = self.headers.get('Host', '')
+        port = self.server.server_port
+        allowed_hosts = {f'127.0.0.1:{port}', f'localhost:{port}', f'[::1]:{port}'}
+        bound_host = self.server.server_address[0]
+        if bound_host not in {'0.0.0.0', '::'}:
+            allowed_hosts.add(f'{bound_host}:{port}')
+        if port == 80:
+            allowed_hosts.update(value.removesuffix(':80') for value in tuple(allowed_hosts))
+        if host not in allowed_hosts:
+            raise PermissionError('无权访问本地游戏')
+        origin = self.headers.get('Origin')
+        if (origin is not None and origin != f'http://{host}') or self.headers.get('Sec-Fetch-Site') == 'cross-site':
+            raise PermissionError('不接受跨站游戏请求')
+        # JSON is not a form/simple-request content type. Native clients without
+        # an Origin remain supported, but web forms cannot mutate local saves.
+        if self.command == 'POST' and self.headers.get_content_type() != 'application/json':
+            raise PermissionError('游戏请求须使用 application/json')
+
+    @local_request
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         try:
@@ -85,6 +133,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as error:  # boundary: translate domain errors to JSON
             self._error(error)
 
+    @local_request
     def do_DELETE(self) -> None:  # noqa: N802
         try:
             parts = unquote(urlparse(self.path).path).strip("/").split("/")
@@ -95,6 +144,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as error:
             self._error(error)
 
+    @local_request
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         try:
@@ -563,13 +613,14 @@ class Handler(BaseHTTPRequestHandler):
             raise ValueError("请求体过大")
         if not length:
             return {}
-        data = json.loads(self.rfile.read(length).decode("utf-8"))
+        data = json.loads(self.rfile.read(length).decode("utf-8"),
+                          parse_float=finite_json_number, parse_constant=finite_json_number)
         if not isinstance(data, dict):
             raise ValueError("请求必须为对象")
         return data
 
     def _json(self, data: object, status: HTTPStatus = HTTPStatus.OK) -> None:
-        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        body = json.dumps(data, ensure_ascii=False, allow_nan=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -597,7 +648,8 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _error(self, error: Exception) -> None:
-        status = HTTPStatus.NOT_FOUND if isinstance(error, KeyError) else HTTPStatus.BAD_REQUEST
+        status = (HTTPStatus.FORBIDDEN if isinstance(error, PermissionError) else
+                  HTTPStatus.NOT_FOUND if isinstance(error, KeyError) else HTTPStatus.BAD_REQUEST)
         self._json({"error": str(error).strip("'\"")}, status)
 
     def log_message(self, format: str, *args: object) -> None:

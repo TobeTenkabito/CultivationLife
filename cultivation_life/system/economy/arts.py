@@ -5,13 +5,32 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import math
     from typing import Any
-    from ...content_registry import ITEM_CATALOG, MARKET_GOODS
+    from ...content_registry import ITEM_CATALOG, MARKET_GOODS, restricted_acquisition
     from ...models import HistoryRecord, Item, Player
     from ...runtime import decode_rng, encode_rng, now_iso
     from ...rules import add_item, max_mp, remove_item
 
 
 class EconomyArtMethods:
+    @staticmethod
+    def _alchemy_targets(player: Player) -> dict[str, dict[str, Any]]:
+        """One recipe whitelist for both presentation and command validation."""
+        tiers: dict[str, int] = {}
+        for row in MARKET_GOODS:
+            if row['kind'] == 'item':
+                item_id, tier = str(row['content_id']), int(row['tier'])
+                tiers[item_id] = min(tiers.get(item_id, tier), tier)
+        # This basic recipe predates the market. Special-currency and DLC loot
+        # without a generic recipe must not silently become tier-one recipes.
+        tiers.setdefault('healing_pill', 1)
+        return {
+            item_id: {'id': item_id, 'name': item.name, 'tier': tier, 'description': item.description}
+            for item_id, tier in tiers.items()
+            if (item := ITEM_CATALOG.get(item_id)) and 'pill' in item.tags
+            and not restricted_acquisition('item', item_id)
+            and tier <= min(8, player.realm_index + 1)
+        }
+
     @staticmethod
     def _art_names() -> dict[str, str]:
         return {
@@ -51,6 +70,9 @@ class EconomyArtMethods:
         target = ITEM_CATALOG.get(target_item_id)
         if not target or "pill" not in target.tags:
             raise ValueError("目标必须是一种可炼制丹药")
+        recipe = self._alchemy_targets(player).get(target_item_id)
+        if recipe is None:
+            raise ValueError("当前境界不能炼制此丹药，或该丹药须通过专属途径取得")
         requested: dict[str, int] = {}
         for row in materials or []:
             item_id = str(row.get("item_id", ""))
@@ -68,7 +90,7 @@ class EconomyArtMethods:
         mp_cost = max(1.0, max_mp(player) * 0.15)
         if player.mp < mp_cost:
             raise ValueError("炼丹需要至少 15% 最大 MP")
-        tier = min((int(row["tier"]) for row in MARKET_GOODS if row["kind"] == "item" and row["content_id"] == target_item_id), default=1)
+        tier = recipe['tier']
         total = sum(quantity for _, quantity in selected)
         average_quality = sum(float(item.plant_quality or 0.55) * quantity for item, quantity in selected) / total
         alchemy_level = next(row["level"] for row in self._public_art_skills(player) if row["id"] == "alchemy")

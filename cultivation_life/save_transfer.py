@@ -135,7 +135,7 @@ def preview_snapshot(store, payload, extensions=()):
 def import_snapshot(store, payload, expected_existing_hash):
     _, data = decode_snapshot(payload)
     raw = json.dumps(data, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf-8')
-    with TRANSFER_LOCK:
+    with store.lock, TRANSFER_LOCK:
         path = store._path(data['id'])
         existing = path.read_bytes() if path.exists() else None
         actual_hash = hashlib.sha256(existing).hexdigest() if existing is not None else None

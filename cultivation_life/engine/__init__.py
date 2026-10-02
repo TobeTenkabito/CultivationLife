@@ -62,11 +62,13 @@ from .presentation import character as character_view
 from .presentation import world as world_view
 from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
+from .transactions import serialized_commands
 
 
 from ..system.asura_system import AsuraSystemMixin
 
 
+@serialized_commands
 class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
