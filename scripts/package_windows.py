@@ -1,3 +1,4 @@
+"""Package v1.53 Windows only after tests, six-theme UI and isolated EXE checks."""
 import hashlib
 import json
 import re
@@ -7,67 +8,79 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-version = runpy.run_path(str(ROOT / 'cultivation_life/version.py'))['BASE_GAME_VERSION']
-release_id = version.replace('.', '')
-test_log = (ROOT / f'build/release-{release_id}-tests.log').read_text(encoding='utf-8', errors='replace')
-passed = re.search(r'(\d+) passed in', test_log)
-assert passed and 'failed' not in test_log, 'Wait for successful full regression suite'
-exe_log = (ROOT / f'build/exe-{release_id}-verification.log').read_text(encoding='utf-8', errors='replace')
-assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-for file in [f'upper-voisinage-ui-{release_id}.log', f'yaochi-bulk-ui-{release_id}.log', f'experience-ui-{release_id}.log', f'institution-ui-{release_id}.log', f'yaochi-governance-ui-{release_id}.log', f'immortal-economy-ui-{release_id}.log', f'upper-ui-{release_id}.log', f'immortal-trials-ui-{release_id}.log', f'handbook-ui-{release_id}.log', f'save-transfer-ui-{release_id}.log', f'immortal-ui-{release_id}.log', f'immortal-expansion-ui-{release_id}.log', f'immortal-minor-ui-{release_id}.log', f'tutorial-ui-{release_id}.log']:
-    log = (ROOT / 'build' / file).read_text(encoding='utf-8', errors='replace')
-    assert 'passed' in log and 'Traceback' not in log, file
-quick_log = (ROOT / f'build/quick-start-ui-{release_id}.log').read_text(encoding='utf-8', errors='replace')
-assert 'Quick-start regression passed' in quick_log and 'Traceback' not in quick_log
-exe = ROOT / 'dist/launcher.exe'
-fusion_log = (ROOT / f'build/fusion-ui-{release_id}.log').read_text(encoding='utf-8', errors='replace')
-assert 'passed' in fusion_log and 'Traceback' not in fusion_log
-digest = hashlib.sha256(exe.read_bytes()).hexdigest()
-manifest = {
-    'base_version':version,
-    'exe_sha256':digest,
-    'dlc_versions':{path.parent.name:json.loads(path.read_text(encoding='utf-8-sig'))['version']
-                    for path in sorted((ROOT/'dlc').glob('*/manifest.json'))},
-    'validation':['Three native ninth-realm starts, monarchy, unequal-weight oligarchy and theocracy: local membership, commissions, treasury, policies and six-theme UI verified; base maps audited connected', 'Three base upper-world voisinages: acquisition, nine-level growth, selected source, live energy and cross-world dormancy; six themes and DLC-off EXE verified', 'Independent voisinage and ordinary action budgets, paid ordinary execution and six-theme bulk merit purchases verified', 'Nonblocking fourteen-unit court terms, lawful policy governance, peer previews, compact six-theme collections and Yaochi experience verified', 'Institution classification, additive legacy affiliation and six-theme institution directory verified', 'Six-theme doctrine fusion, paid trace study, true voisinage and grouped manual catalogue verified',
-                  'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; original backlash difficulty and rank-eight superego cap regression verified; multi-world three-corpse calibration documented',
-                  'Six-theme categorized NPC contacts, same-world guards, paid stock locks and NPC cabinet verified', 'Six-theme Yaochi merit economy, golden light tempering and temporary passes verified', f'{passed.group(1)} automated regressions passed',
-                  'Three upper worlds: six-theme finite reserves, DLC routing and ordinary breakthrough verified',
-                  'Six-theme voisinage stages, five-round backlash and Dao Ancestor; searchable handbook verified',
-                  'Six-theme live walkthrough, deterministic cultivation and Core Formation mentor, actual sect admission, settings handbook and persisted reading verified',
-                  'Six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified',
-                  'Six-theme immortal meridians, manual realm breakthrough, immortal body cultivation and intrinsic resource bars verified',
-                  'Six-theme live browser: save library, import/export, encryption and chunk roundtrips, Buddhist colours; no JavaScript errors',
-                  'Packaged EXE starts with and without optional DLC; all seven packages, wish UI assets, base reincarnation content and Buddhist entry verified',
-                  'Android 12 companion release with six-theme save UI adaptation'],
-    'save_schema':5,
-}
-manifest_path = ROOT / f'dist/release-{version}.json'
-manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-named = ROOT / f'dist/浮生问道-v{version}.exe'
-shutil.copy2(exe, named)
-shutil.copy2(exe, ROOT/'launcher.exe')
-archive = ROOT / f'dist/浮生问道-v{version}-Windows.zip'
-with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
-    for path, name in [(exe,'launcher.exe'),(manifest_path,manifest_path.name),
-                       (ROOT/'docs/upper-voisinages-1522.md','docs/upper-voisinages-1522.md'), (ROOT/'docs/experience-1520.md','docs/experience-1520.md'), (ROOT/'docs/institutions-1513.md','docs/institutions-1513.md'),
-                       (ROOT/'docs/three-corpses-1512.md','docs/three-corpses-1512.md'),
-                       (ROOT/'docs/immortal-vein-balance.md','docs/immortal-vein-balance.md'),
-                       (ROOT/'docs/yaochi-governance-1511.md','docs/yaochi-governance-1511.md'),
-                       (ROOT/'docs/immortal-1510.md','docs/immortal-1510.md'),
-                       (ROOT/'docs/upper-worlds-1500.md','docs/upper-worlds-1500.md'),
-                       (ROOT/'docs/immortal-1490.md','docs/immortal-1490.md'),(ROOT/'docs/combat-effects.md','docs/combat-effects.md'),(ROOT/'docs/luo-spirit-calibration.md','docs/luo-spirit-calibration.md'),(ROOT/'README.md','README.md'),(ROOT/'CHANGELOG.md','CHANGELOG.md'),(ROOT/'android/README.md','android/README.md'),(ROOT/'docs/save-code-format.md','docs/save-code-format.md'),(ROOT/'docs/immortal-1470.md','docs/immortal-1470.md'),(ROOT/'docs/immortal-1471.md','docs/immortal-1471.md'),(ROOT/'docs/tutorial-1480.md','docs/tutorial-1480.md'),(ROOT/'docs/tutorial-1481.md','docs/tutorial-1481.md')]:
-        package.write(path, name)
-    package.writestr('game_config.txt', 'Debug=False\n')
-    for directory in ('dlc','mods'):
-        for path in sorted((ROOT/directory).rglob('*')):
-            if path.is_file() and '__pycache__' not in path.parts and path.suffix not in {'.pyc','.pyo'}:
-                package.write(path, path.relative_to(ROOT).as_posix())
-with zipfile.ZipFile(archive) as package:
-    assert package.testzip() is None
-    assert hashlib.sha256(package.read('launcher.exe')).hexdigest() == digest
-    assert package.read('game_config.txt') == b'Debug=False\n'
-    assert not any('data/saves' in name or 'ui_preferences.json' in name for name in package.namelist())
-assert hashlib.sha256((ROOT/'launcher.exe').read_bytes()).hexdigest() == digest
-assert hashlib.sha256(named.read_bytes()).hexdigest() == digest
-print(json.dumps({'version':version,'tests':int(passed.group(1)), 'exe_sha256':digest,
-                  'archive':str(archive), 'bytes':archive.stat().st_size}, ensure_ascii=False))
+VERSION = runpy.run_path(str(ROOT/'cultivation_life/version.py'))['BASE_GAME_VERSION']
+RELEASE_ID = VERSION.replace('.', '')
+
+
+def main():
+    def log(name):
+        return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
+    test_log = log(f'release-{RELEASE_ID}-tests.log')
+    passed = re.search(r'(\d+) passed in', test_log)
+    assert passed and 'failed' not in test_log and 'ERROR' not in test_log, 'Full regression suite must pass'
+    exe_log = log(f'exe-{RELEASE_ID}-verification.log')
+    assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
+    for check in ('asura-court', 'asura', 'handbook', 'quick-start'):
+        result = log(f'{check}-ui-{RELEASE_ID}.log')
+        assert 'passed' in result and 'Traceback' not in result, check
+    exe = ROOT/'dist/launcher.exe'
+    digest = hashlib.sha256(exe.read_bytes()).hexdigest()
+    manifest = {
+        'base_version': VERSION,
+        'platform': 'Windows',
+        'exe_sha256': digest,
+        'dlc_versions': {p.parent.name: json.loads(p.read_text(encoding='utf-8-sig'))['version']
+                         for p in sorted((ROOT/'dlc').glob('*/manifest.json'))},
+        'themes': list('abcdef'),
+        'save_schema': 5,
+        'validation': [
+            f'{passed.group(1)} automated regression tests passed',
+            'Base-game NPC royal seats, adjacent nonlethal blood duels, strength assessments, challenge grace and cooldowns, old-save migration verified',
+            'Royal policies, appointments, wages, works and decrees use real treasury and elapsed-time settlement',
+            'Court browser actions and persistence verified in six themes at desktop, portrait and landscape widths; no JavaScript errors',
+            'Asura DLC soul purification, random semantic power and six-theme mobile UI verified',
+            'Handbook DLC combinations, six themes, search and filters verified without save mutation',
+            'Ten quick starts, real advancement and reload verified, including three native upper worlds and mandatory monster genus',
+            'Exact packaged executable verified in isolated directories with and without all optional DLC, including base court coronation and NPC appointment',
+        ],
+        'android_release': 'Not included in this Windows release',
+    }
+    named = ROOT/f'dist/浮生问道-v{VERSION}.exe'
+    shutil.copy2(exe, named)
+    try:
+        shutil.copy2(exe, ROOT/'launcher.exe')
+        manifest['root_launcher_updated'] = True
+    except PermissionError:
+        # An existing game may still be running. Publish the new package
+        # without terminating the user's process or risking their live save.
+        manifest['root_launcher_updated'] = False
+    manifest_path = ROOT/f'dist/release-{VERSION}.json'
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    archive = ROOT/f'dist/浮生问道-v{VERSION}-Windows.zip'
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
+        package.write(exe, 'launcher.exe')
+        package.write(manifest_path, manifest_path.name)
+        for file in ('README.md', 'CHANGELOG.md'):
+            package.write(ROOT/file, file)
+        for path in sorted((ROOT/'docs').glob('*.md')):
+            package.write(path, path.relative_to(ROOT).as_posix())
+        package.writestr('game_config.txt', 'Debug=False\n')
+        for directory in ('dlc', 'mods'):
+            for path in sorted((ROOT/directory).rglob('*')):
+                if path.is_file() and '__pycache__' not in path.parts and path.suffix not in {'.pyc', '.pyo'}:
+                    package.write(path, path.relative_to(ROOT).as_posix())
+    with zipfile.ZipFile(archive) as package:
+        assert package.testzip() is None
+        assert hashlib.sha256(package.read('launcher.exe')).hexdigest() == digest
+        assert package.read('game_config.txt') == b'Debug=False\n'
+        assert not any('data/saves' in name or 'ui_preferences.json' in name for name in package.namelist())
+        assert 'dlc/asura-manifestation/manifest.json' in package.namelist()
+    assert hashlib.sha256(named.read_bytes()).hexdigest() == digest
+    if manifest['root_launcher_updated']:
+        assert hashlib.sha256((ROOT/'launcher.exe').read_bytes()).hexdigest() == digest
+    print(json.dumps(dict(version=VERSION, tests=int(passed.group(1)), exe_sha256=digest,
+                          archive=str(archive), bytes=archive.stat().st_size), ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

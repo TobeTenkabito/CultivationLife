@@ -258,7 +258,9 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     else:
         player.awaiting_minor_breakthrough = False
     deps._consume_breakthrough_aids(player, f"{'major' if major else 'minor'}:{player.realm_index}")
-    celestial_trial = major and player.world == 'celestial' and player.realm_index in {9, 10, 11}
+    from ...system.asura import active as asura_active
+    asura_trial = major and asura_active(player) and player.realm_index in {9, 10, 11}
+    celestial_trial = asura_trial or (major and player.world == 'celestial' and player.realm_index in {9, 10, 11})
     if not celestial_trial and rng.random() >= chance["final"]:
         player.joint_companion_breakthrough = None
         failure_type = "major" if major else "minor"
@@ -296,7 +298,12 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
         )
         player.opportunity = max(0.0, player.opportunity - required)
         source = player.realm_index
-        if source >= 9 and player.world == 'celestial':
+        if asura_active(player):
+            if major:
+                deps._start_breakthrough_trial(game, 'asura_breakthrough', source, source + 1, old_label, major=True, rng=rng)
+            else:
+                deps._complete_minor_breakthrough(game, rng, old_label)
+        elif source >= 9 and player.world == 'celestial':
             if major:
                 kind = {9: 'human_decline', 10: 'heaven_decline', 11: 'three_corpses'}[source]
                 deps._start_breakthrough_trial(game, kind, source, source + 1, old_label, major=True, rng=rng)

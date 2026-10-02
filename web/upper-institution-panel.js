@@ -9,6 +9,8 @@
     if(owner!==game.id){owner=game.id;opened.clear();}
     card.querySelector('h2').textContent=d.name;card.setAttribute('aria-label',d.name);dock.title=d.name;dock.querySelector('small').textContent=({asura:'王庭',nether:'妖宫',reincarnation:'轮殿'})[d.world];
     const root=document.getElementById('upper-institution-content');root.replaceChildren();
+    root.classList.toggle('asura-court',d.world==='asura');
+    if(d.world==='asura'&&d.court){window.AsuraCourtPanel.render(game,act,root);return;}
     const blocked=!d.local||!!game.pending_event||!!game.active_trial||!game.player.alive||!!game.imprisonment;
     const button=(text,action,target='',disabled=false)=>{const b=el('button',text);b.type='button';b.disabled=blocked||disabled;b.onclick=()=>act({action,target_id:target});return b;};
     const section=(id,title,detail)=>{const c=el('details',null,'doctrine-entry doctrine-compact');c.dataset.section=id;c.open=opened.has(id);c.addEventListener('toggle',()=>{if(c.isConnected){if(c.open)opened.add(id);else opened.delete(id);}});const s=el('summary'),text=el('span');text.append(el('b',title),el('small',detail));s.append(el('span',title[0],'doctrine-seal'),text);c.append(s);root.append(c);return c;};

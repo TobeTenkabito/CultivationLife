@@ -1,0 +1,36 @@
+{
+  "base_version": "1.53.0",
+  "platform": "Windows",
+  "exe_sha256": "f7f7884c81cc19ff9819e8de46d752cd8c713d02b7a8c8a5bdc4fd426797e55f",
+  "dlc_versions": {
+    "asura-manifestation": "1.0.0",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "themes": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "save_schema": 5,
+  "validation": [
+    "1469 automated regression tests passed",
+    "Base-game NPC royal seats, adjacent nonlethal blood duels, strength assessments, challenge grace and cooldowns, old-save migration verified",
+    "Royal policies, appointments, wages, works and decrees use real treasury and elapsed-time settlement",
+    "Court browser actions and persistence verified in six themes at desktop, portrait and landscape widths; no JavaScript errors",
+    "Asura DLC soul purification, random semantic power and six-theme mobile UI verified",
+    "Handbook DLC combinations, six themes, search and filters verified without save mutation",
+    "Ten quick starts, real advancement and reload verified, including three native upper worlds and mandatory monster genus",
+    "Exact packaged executable verified in isolated directories with and without all optional DLC, including base court coronation and NPC appointment"
+  ],
+  "android_release": "Not included in this Windows release",
+  "root_launcher_updated": false
+}

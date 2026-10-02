@@ -19,6 +19,7 @@ from ..system.transformation_system import public_transformation_system
 from ..system.monster_bloodline_system import public_monster_bloodline
 from ..system.concubine_system import gender_name
 from ..system.immortal_aperture import public_aperture
+from ..system.asura import public as public_asura
 from ..system.upper_institutions import public_institution
 from ..system.upper_voisinage import public_upper_voisinages
 from ..system.combat_plan import public_plan
@@ -35,7 +36,9 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 break
     history.reverse()
     deps._ensure_natal_artifact(game)
+    from ..system.monster_identity import identity
     player_data = public_player(game.player)
+    player_data.update(identity(game.player))
     player_data.update(raw_fame=game.player.fame, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
                        fame=effective_fame(game.player), karma=projected_resource(game.player, "karma"), sha_qi=effective_sha_qi(game.player), effective_karma=effective_karma(game.player))
     natal_inventory_item = deps._natal_artifact_inventory_item(game)
@@ -256,6 +259,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "wanted": deps._public_wanted(game),
         "imprisonment": copy.deepcopy(game.player.imprisonment),
         "demonic_system": deps._public_demonic_system(game.player),
+        "asura": public_asura(game),
         "ghost_system": deps._public_ghost_system(game),
         "breakthrough": deps._public_major_breakthrough(game.player),
         "body_cultivation": deps._public_body_cultivation(game.player),

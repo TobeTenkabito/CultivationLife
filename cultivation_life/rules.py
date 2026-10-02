@@ -561,7 +561,8 @@ def combat_power(player: Player) -> float:
     if any(item.plant_id == "golden_thunder_bamboo" and int(item.plant_years or 0) >= 10000 for item in player.inventory):
         total *= 1.01
     total *= 1.0 + max(0.0, float(player.sage_effects.get("combat_multiplier", 0.0)))
-    return round(total, 1)
+    from .system.asura import inherited_power
+    return round(total + inherited_power(player), 1)
 
 
 def standard_combat_power_dlc_bonus() -> float:

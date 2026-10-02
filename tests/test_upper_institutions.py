@@ -1,7 +1,7 @@
 import copy
 import pytest
 
-from test_upper_voisinages import upper, prepared
+from test_upper_voisinages import upper, prepared, base_without_asura_dlc
 from cultivation_life.models import GameState
 from cultivation_life.content_registry import CONTENT_DOCUMENTS
 from cultivation_life.system.upper_institutions import (
@@ -178,7 +178,7 @@ def test_base_upper_map_connectivity_and_nonadjacent_arrays():
 def test_native_upper_quick_starts(upper):
     e,g=upper
     world=g.player.world
-    view=e.create_game('三界开局','supreme_metal','dao',1522,preset_id=world+'_upper')
+    view=e.create_game('三界开局','supreme_metal','dao',1522,preset_id=world+'_upper', monster_species_id='serpent')
     g=e._load(view['id']);p=g.player
     assert p.world==world and p.realm_index==9 and p.layer==1
     assert p.path=={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[world]

@@ -14,7 +14,7 @@
     const dock=document.querySelector('[data-panel-target="immortal-aperture"]');dock.title=title;dock.querySelector('small').textContent=({'煞元府':'煞元','幽元府':'幽元','轮回元府':'轮元'})[title]||title;
     const root=document.getElementById('immortal-aperture-content');root.replaceChildren();
     const figure=el('figure',null,'aperture-reservoir');
-    figure.style.setProperty('--reservoir-fill',`${Math.max(0,Math.min(100,data.current/data.capacity*100))}%`);
+    figure.style.setProperty('--reservoir-fill',`${Math.max(0,Math.min(100,data.current/Math.max(1,data.capacity)*100))}%`);
     const pool=el('div',null,'aperture-orb');pool.setAttribute('role','img');pool.setAttribute('aria-label',`${data.name} ${fmt(data.current)} / ${fmt(data.capacity)}`);
     pool.append(el('div',null,'aperture-water'),el('strong',`${fmt(data.current)} / ${fmt(data.capacity)}`),el('span',data.name));
     figure.append(pool,el('figcaption',`${title} · 邻域所用的独立储量`));root.append(figure);
@@ -24,7 +24,7 @@
       el('p',`每次凝练 ${fmt(data.refine_gain)} ${data.name}，消耗本源气血 ${fmt(data.hp_cost)}、本源法力 ${fmt(data.mp_cost)}。接近满储时按实际凝练量扣除。`));
     const refine=el('button',`凝练${data.name}`);refine.type='button';refine.disabled=options.pending||!options.alive||data.current>=data.capacity||(!data.lower&&data.conversion<1)||data.origin_hp<=data.hp_cost||data.origin_mp<data.mp_cost;
     refine.onclick=()=>act({action:'refine'});root.append(refine);
-    root.append(el('p',data.native?'三界元力可直接凝练，不需仙界的五阶段转化。圆池显示实际储量；跨界不会凭空补充。':`转化完成度 ${fmt(data.conversion*100)}%。仙窍圆池显示可消耗的储量，转化程度不会随战斗消耗降低。`,'muted'));
+    root.append(el('p',data.asura_conversion?`煞元转化完成度 ${fmt(data.conversion*100)}%。请在八部面板完成五重转化，随后可凝练补充；战斗消耗不会倒退转化进度。`:data.native?'三界元力可直接凝练，不需仙界的五阶段转化。圆池显示实际储量；跨界不会凭空补充。':`转化完成度 ${fmt(data.conversion*100)}%。仙窍圆池显示可消耗的储量，转化程度不会随战斗消耗降低。`,'muted'));
     const fields=document.getElementById('spirit-voisinage-content');fields.replaceChildren();
     if(!data.field)return;
     const f=data.field;fields.append(el('h3',f.name),el('p',`稳固 ${fmt(f.stability)} · 侵夺 ${fmt(f.incursion)} · 权能 ${fmt(f.authority)}`),

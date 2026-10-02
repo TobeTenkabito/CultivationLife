@@ -64,7 +64,10 @@ from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 
 
-class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+from ..system.asura_system import AsuraSystemMixin
+
+
+class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -618,6 +621,9 @@ class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, Relati
         start(self._dependencies.immortal_trials, game, 'voisinage_backlash', doctrine_id=doctrine_id)
 
     def _start_breakthrough_trial(self, game: GameState, kind: str, source: int, target: int, old_label: str, major: bool, rng: random.Random) -> None:
+        from .progression import asura_trials
+        if kind in asura_trials.KINDS:
+            return asura_trials.start(self, game, kind)
         from .progression.immortal_trials import KINDS, start
         if kind in KINDS:
             return start(self._dependencies.immortal_trials, game, kind)
@@ -636,6 +642,9 @@ class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, Relati
         return breakthroughs._complete_minor_breakthrough(self._dependencies.breakthroughs, game, rng, old_label)
 
     def _resolve_trial_step(self, game: GameState, step: str, rng: random.Random) -> tuple[str, str]:
+        from .progression import asura_trials
+        if (game.active_trial or {}).get("kind") in asura_trials.KINDS:
+            return asura_trials.resolve(self, game, step, rng)
         from .progression.immortal_trials import KINDS, resolve
         if (game.active_trial or {}).get('kind') in KINDS:
             return resolve(self._dependencies.immortal_trials, game, step, rng)

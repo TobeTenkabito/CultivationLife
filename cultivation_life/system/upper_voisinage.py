@@ -51,6 +51,9 @@ def project(definition, rank):
 
 
 def player_source(player):
+    from .asura import active as asura_active, source as asura_source
+    if asura_active(player):
+        return asura_source(player)
     if not available(player):
         return CapabilitySource()
     key = record(player).get('active')
@@ -84,6 +87,9 @@ def quote(player, rank, game=None):
 
 
 def public_upper_voisinages(player, game=None):
+    from .asura import active as asura_active
+    if asura_active(player):
+        return {'available': False}
     if not available(player):
         return {'available': False}
     world = world_config(player)
@@ -114,6 +120,9 @@ def public_upper_voisinages(player, game=None):
 def act(engine, game_id, action, voisinage_id):
     game = engine._load(game_id)
     p = game.player
+    from .asura import active as asura_active
+    if asura_active(p):
+        raise ValueError('修罗显圣开启时，请从八部本命修习魔域')
     if not available(p):
         raise ValueError('须在修罗、幽冥或轮回界达到第九阶修为')
     if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor

@@ -54,10 +54,13 @@ def energy_state(player):
     ledger = player.immortal_aperture
     lower = lower_world(player)
     from .immortal_cultivation import golden_light
-    converted = player.immortal_power_converted or player.immortal_conversion_stage > 0
+    from .asura import active as asura_active
+    asura_conversion = player.asura_cultivation.get('conversion', 0) if asura_active(player) else 0
+    converted = player.immortal_power_converted or player.immortal_conversion_stage > 0 or asura_conversion > 0
     return dict(version=1, resource_link='independent',
         capacity=ledger['imitation_capacity'] if lower else ledger['capacity'],
-        current=ledger['imitation_current'] if lower else ledger['current'], conversion=1,
+        current=ledger['imitation_current'] if lower else ledger['current'],
+        conversion=asura_conversion / 5 if asura_active(player) else 1,
         force_tier=2 if converted and true_realm(player) >= 9 else 1,
         ward_tier=2 if golden_light(player) else 1,
         attack_cost=1 if lower else 10, ward_cost=0)
@@ -77,6 +80,8 @@ def public_aperture(player, game=None):
     ledger = player.immortal_aperture
     lower = lower_world(player)
     state = energy_state(player)
+    from .asura import active as asura_active
+    asura_conversion = player.asura_cultivation.get('conversion', 0) / 5 if asura_active(player) else None
     from .upper_voisinage import world_config, available as upper_available
     upper = world_config(player) if upper_available(player) else None
     from ..rules import intrinsic_resource_breakdown
@@ -91,10 +96,12 @@ def public_aperture(player, game=None):
     return {'available': True, 'lower': lower, 'field': field,
             'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
             'title': upper['aperture'] if upper else '仙窍', 'native': bool(upper),
-            'current': state['current'], 'capacity': state['capacity'],
+            'asura_conversion': asura_conversion is not None,
+            'current': min(state['current'], state['capacity'] * state['conversion']),
+            'capacity': state['capacity'] * state['conversion'],
             'investment_multiplier': investment_multiplier(player),
             'sealed_reserve': ledger['current'] if lower else 0,
-            'conversion': 1 if upper or player.immortal_power_converted else player.immortal_conversion_stage / 5,
+            'conversion': asura_conversion if asura_conversion is not None else 1 if upper or player.immortal_power_converted else player.immortal_conversion_stage / 5,
             'origin_hp': intrinsic['hp']['current'], 'origin_mp': intrinsic['mp']['current'],
             'max_hp': intrinsic['hp']['maximum'], 'max_mp': intrinsic['mp']['maximum'],
             'refine_gain': 20 if lower else ledger['capacity'] / 4,
@@ -125,6 +132,8 @@ class ImmortalApertureMixin:
             summary = '已选定斗法所用灵域。'
         elif action == 'refine':
             info = public_aperture(p)
+            if info['asura_conversion'] and info['conversion'] < 1:
+                raise ValueError('须先在八部面板完成五重煞元转化')
             if not info['lower'] and not info['native'] and not p.immortal_power_converted:
                 raise ValueError('请先完成仙灵力转化')
             if info['current'] >= info['capacity']:

@@ -65,6 +65,11 @@ def create_game(
         born_rootless=spirit_root == "none",
         world=selected_start_world, immortal_trace_rng=actual_seed,
     )
+    if path == "monster":
+        if monster_species_id not in WORLD_SYSTEMS["monster_species"]:
+            raise ValueError("妖修开局须选择有效种属")
+        player.race = "monster"
+        player.monster_species_id = monster_species_id
     if path == "monster" and deps.bloodline_content_available():
         player.race = "monster"
         initialize_monster_bloodline(player, monster_species_id)
@@ -178,9 +183,13 @@ def create_game(
         player.tribulation_power = float(thunder["base_power"])
     created = now_iso()
     game = GameState(str(uuid.uuid4()), actual_seed, player, created, created)
+    from ...system.asura import ensure as ensure_asura
+    ensure_asura(game)
     game.sects = deps._new_sects()
     game.world_npcs = deps._new_world_npcs()
     deps._ensure_sects(game)
+    from ...system.asura_court import ensure as ensure_asura_court
+    ensure_asura_court(game)
     deps._ensure_world_npcs(game)
     deps._ensure_npc_formations(game)
     deps._ensure_sage_state(game)

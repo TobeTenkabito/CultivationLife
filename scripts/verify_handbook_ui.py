@@ -50,7 +50,7 @@ def verify_matrix(page, config):
     for row in active['extensions']:
         row.update(next_enabled=False)
     page.evaluate('c=>TutorialGuide.configure(c)', active)
-    assert page.locator('[data-chapter^="dlc-"]').count() == 7
+    assert page.locator('[data-chapter^="dlc-"]').count() == len(packages)
     assert '待重启' in page.locator('.handbook-edition').inner_text()
     # An obsolete filter must not hide every chapter when configuration changes.
     page.evaluate("document.querySelectorAll('.handbook-categories button').forEach(b=>{if(b.textContent==='DLC')b.click();})")
@@ -60,7 +60,7 @@ def verify_matrix(page, config):
     page.evaluate('c=>TutorialGuide.configure(c)',mod)
     assert '纯本体规则' not in page.locator('.handbook-edition').inner_text()
     print(f"Chapters: base {len(results[0])}, all DLC {len(results[-1])}",flush=True)
-    print('128 DLC combinations, failed loads and restart preferences passed', flush=True)
+    print(f'{1 << len(packages)} DLC combinations, failed loads and restart preferences passed', flush=True)
     return reports[0], reports[-1]
 
 
@@ -108,7 +108,7 @@ def main():
                         dlc_tab=page.locator('.handbook-categories button',has_text='DLC')
                         if label=='full':
                             dlc_tab.click()
-                            assert page.locator('#tutorial-handbook details:visible').count()==7
+                            assert page.locator('#tutorial-handbook details:visible').count()==page.evaluate('TutorialHandbook.packages.length')
                             page.locator('[data-chapter="dlc-buddhist"] summary').click()
                             assert '不能跨大境界' in page.locator('[data-chapter="dlc-buddhist"]').inner_text()
                         else:

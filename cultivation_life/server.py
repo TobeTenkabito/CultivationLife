@@ -19,7 +19,6 @@ from .content_registry import (
     ROOT_NAMES,
     TECHNIQUE_ELEMENT_NAMES,
     WORLD_SYSTEMS,
-    MONSTER_SPECIES,
 )
 from .engine import GameEngine
 from .system.extension_system import write_extension_preference
@@ -60,7 +59,7 @@ class Handler(BaseHTTPRequestHandler):
                     },
                     "paths": {
                         path_id: name for path_id, name in PATH_NAMES.items()
-                        if path_id != "monster" or MONSTER_SPECIES
+                        if path_id != "monster" or WORLD_SYSTEMS.get("monster_species")
                     },
                     "technique_elements": TECHNIQUE_ELEMENT_NAMES,
                     "factions": FACTION_DEFINITIONS,
@@ -70,7 +69,7 @@ class Handler(BaseHTTPRequestHandler):
                     "qi_sources": QI_SOURCE_NAMES,
                     "quick_starts": WORLD_SYSTEMS.get("quick_start_presets", []),
                     "extensions": EXTENSION_REPORT,
-                    "monster_species": MONSTER_SPECIES,
+                    "monster_species": WORLD_SYSTEMS["monster_species"],
                 })
             elif path == "/api/ui-preferences":
                 self._json(load_ui_preferences(PERSISTENCE_ROOT))
@@ -166,6 +165,9 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.aperture_action(game_id, str(payload.get("action", "")), payload.get("manual_id"))
             elif operation == "upper-institution":
                 result = ENGINE.upper_institution_action(game_id, str(payload.get("action", "")), str(payload.get("target_id", "")))
+            elif operation == "asura":
+                result = ENGINE.asura_action(game_id, str(payload.get("action", "")),
+                    str(payload.get("target_id", "")), payload.get("body_ids"), str(payload.get("name", "")))
             elif operation == "upper-voisinage":
                 result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"))
             elif operation == "immortal-action":

@@ -144,7 +144,8 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                     *capabilities.interventions, *target["player_interventions"]))
             from ..system.cultivation_ranks import npc_golden_light
             from ..system.immortal_cultivation import golden_light
-            ward = golden_light(game.player) if unit.id == 'player' else npc_golden_light(owner)
+            from ..system.asura import active as asura_active
+            ward = (golden_light(game.player) or (asura_active(game.player) and game.player.asura_cultivation.get('body_level', 0) >= 20)) if unit.id == 'player' else npc_golden_light(owner)
             capabilities = replace(capabilities, ward_tier=2 if ward else 1, ward_cost=0)
             from ..system.cultivation_ranks import rank_for
             from ..system.combat.npc_lifecycle import read

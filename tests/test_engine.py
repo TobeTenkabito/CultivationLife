@@ -1320,7 +1320,7 @@ class EngineTests(unittest.TestCase):
             if not preset.get("enabled"):
                 continue
             result = self.engine.create_game(
-                f"速启持剑{index}", "none", "dao", 400 + index, preset_id=preset["id"],
+                f"速启持剑{index}", "none", "dao", 400 + index, preset_id=preset["id"], monster_species_id="serpent",
             )
             self.assertIn(
                 "spirit_sword", {row["id"] for row in result["player"]["inventory"]}, preset["id"],
@@ -1329,13 +1329,13 @@ class EngineTests(unittest.TestCase):
     def test_special_core_quick_starts_use_balanced_dlc_loadouts(self):
         for index, preset_id in enumerate(("monster_core", "ghost_core", "confucian_core")):
             result = self.engine.create_game(
-                f"异道速启{index}", "none", "dao", 460 + index, preset_id=preset_id,
+                f"异道速启{index}", "none", "dao", 460 + index, preset_id=preset_id, monster_species_id="serpent",
             )
             player = result["player"]
             self.assertEqual(player["realm_index"], 3)
             self.assertGreaterEqual(player["combat_power"] / player["expected_combat_power"], 0.9)
             self.assertLessEqual(player["combat_power"] / player["expected_combat_power"], 1.1)
-        monster = self.engine.create_game("妖丹", "none", "dao", 470, preset_id="monster_core")["player"]
+        monster = self.engine.create_game("妖丹", "none", "dao", 470, preset_id="monster_core", monster_species_id="serpent")["player"]
         self.assertIsNotNone(monster["technique_slots"]["body"])
         confucian = self.engine.create_game("鸿儒", "none", "dao", 471, preset_id="confucian_core")["player"]
         self.assertIn("confucian_jade_ruler", {row["id"] for row in confucian["inventory"]})
@@ -1348,7 +1348,7 @@ class EngineTests(unittest.TestCase):
         for index, (path, preset_id) in enumerate(preset_ids.items()):
             with self.subTest(path=path):
                 player = self.engine.create_game(
-                    f"炼虚{path}", "none", "dao", 520 + index, preset_id=preset_id,
+                    f"炼虚{path}", "none", "dao", 520 + index, preset_id=preset_id, monster_species_id="serpent",
                 )["player"]
                 self.assertEqual(player["realm_index"], 6)
                 self.assertEqual(player["path"], path)
@@ -1411,11 +1411,11 @@ class EngineTests(unittest.TestCase):
         for path, native_world in native_worlds.items():
             with self.subTest(path=path, world=native_world):
                 created = self.engine.create_game(
-                    f"{path}本界", "supreme_metal", path, 8000 + len(path), start_world=native_world,
+                    f"{path}本界", "supreme_metal", path, 8000 + len(path), start_world=native_world, monster_species_id="serpent",
                 )
                 self.assertEqual(created["player"]["world"], native_world)
                 self.assertEqual(created["map"]["world"], native_world)
-                human = self.engine.create_game(f"{path}人界", "supreme_metal", path, 9000 + len(path))
+                human = self.engine.create_game(f"{path}人界", "supreme_metal", path, 9000 + len(path), monster_species_id="serpent")
                 self.assertEqual(human["player"]["world"], "human")
 
     def test_start_world_must_belong_to_selected_path(self):
