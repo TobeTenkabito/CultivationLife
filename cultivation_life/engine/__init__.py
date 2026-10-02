@@ -146,7 +146,7 @@ class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineS
             return self.present(game)
         if setting not in {
             "combat_popup", "achievement_popup", "auto_advance_player_wars",
-            "guixu_event_popup", "court_election_popup",
+            "guixu_event_popup", "court_election_popup", "silent_events",
         }:
             raise ValueError("未知设置项")
         game.settings[setting] = bool(enabled)

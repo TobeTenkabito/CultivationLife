@@ -65,23 +65,19 @@ class AsuraSystemMixin:
             s['body_level'] = level + 1
             return f'修罗之躯达到 {level + 1}/20 层。'
         if action == 'open_vein':
-            from .immortal_cultivation import rules
-            from .doctrine.cultivation import vein_cost
-            rules = rules()
+            quote = asura.public_meridians(p)
+            if not quote['can_open']:
+                raise ValueError(quote['reason'])
             veins = s.setdefault('veins', {})
-            opened = veins.get(str(p.realm_index), 0)
-            if opened >= p.layer * 3:
-                raise ValueError('本层三条魔脉已贯通，请先突破')
-            cost = vein_cost(p.realm_index, opened, rules)
-            if p.opportunity < cost['opportunity']:
-                raise ValueError('开辟魔脉的机缘不足')
-            self._spend_asura_souls(s, cost['traces'])
+            opened, cost, probability = quote['opened'], quote['next_cost'], quote['chance']
+            self._spend_asura_souls(s, cost['souls'])
             p.opportunity -= cost['opportunity']
             failures = s.setdefault('vein_pity', {})
             key = f'{p.realm_index}:{opened + 1}'
-            index = min(8, opened // rules["veins_per_layer"])
-            probability = min(1., rules['vein_success_rates'][index] + failures.get(key, 0) * rules['vein_pity_step'])
-            if rng.random() < probability:
+            success = rng.random() < probability
+            s['last_vein_attempt'] = dict(realm=quote['realm'], index=opened+1, success=success,
+                                         chance=probability, opportunity=cost['opportunity'], souls=cost['souls'])
+            if success:
                 veins[str(p.realm_index)] = opened + 1
                 failures.pop(key, None)
                 return f'本境第 {opened + 1}/27 条魔脉贯通。'
@@ -91,12 +87,12 @@ class AsuraSystemMixin:
             if s.get('route') or s.get('body_level', 0) < 20:
                 raise ValueError('须修罗之躯20层且尚未确定本命')
             candidates = p.prisoners + p.puppets
-            body = next((b for b in candidates if b['id'] == target_id), None)
+            body = next((b for b in candidates if b['id'] == target_id and b.get('alive', True)), None)
             if not body:
                 raise ValueError('未找到可凝练的俘虏或傀儡')
             facts = asura.body_facts(body)
             if int(facts['body_training'] or 0) < cfg['minimum_body_training']:
-                raise ValueError('肉身炼体不足60层')
+                raise ValueError('该俘虏或傀儡自身的普通炼体未达60/100层；不以玩家修罗之躯层数替代')
             self._spend_asura_souls(s, 30 + int(facts['body_training'] or 0))
             facts['power'] = asura.body_power(facts)
             s['bodies'].append(facts)

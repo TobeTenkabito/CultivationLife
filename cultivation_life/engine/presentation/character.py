@@ -65,6 +65,12 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
     else:
         target_name = None
         action_label = "突破瓶颈"
+        if is_asura:
+            opened = player.asura_cultivation.get('veins', {}).get(str(player.realm_index), 0)
+            requirement.update(met=False, reason=(
+                '须先完成五重煞元转化，再开辟魔脉。' if player.asura_cultivation.get('conversion', 0) < 5 else
+                f'本层须先贯通 {player.layer * 3} 条魔脉，当前 {opened} 条；请前往八部面板的魔脉页。'
+                if opened < player.layer * 3 else '当前已达摩诃九层圆满。'))
     return {
         "kind": kind,
         "opportunity_cost": breakthrough_opportunity_required(player),

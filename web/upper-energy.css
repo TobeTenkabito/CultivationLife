@@ -1,0 +1,7 @@
+:root{--energy-asura:#b34d35;--energy-nether:#278878;--energy-reincarnation:#6279af;--energy-immortal:#8a67ac;--energy-imitation:#6c9690}
+:root[data-theme=b]{--energy-asura:#ed9878;--energy-nether:#74c6af;--energy-reincarnation:#9eafe7;--energy-immortal:#c1a1dd}
+[data-energy-kind=asura]{--energy-color:var(--energy-asura)}[data-energy-kind=nether]{--energy-color:var(--energy-nether)}[data-energy-kind=reincarnation]{--energy-color:var(--energy-reincarnation)}[data-energy-kind=immortal]{--energy-color:var(--energy-immortal)}[data-energy-kind=imitation]{--energy-color:var(--energy-imitation)}
+.in-game #hud-mp[data-energy-kind]:not([data-energy-kind=mana]){--meter-color:var(--energy-color)}
+#mp-meter[data-energy-kind]:not([data-energy-kind=mana]) i{background:var(--energy-color)}
+#immortal-aperture-card[data-energy-kind] .aperture-orb{border-color:var(--energy-color);box-shadow:inset 0 0 40px color-mix(in srgb,var(--energy-color) 12%,transparent),0 0 0 8px color-mix(in srgb,var(--energy-color) 5%,transparent)}
+#immortal-aperture-card[data-energy-kind] .aperture-water{background:linear-gradient(0deg,color-mix(in srgb,var(--energy-color) 52%,transparent),color-mix(in srgb,var(--energy-color) 25%,transparent));border-top-color:var(--energy-color)}

@@ -400,13 +400,20 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.begin_relationship_capture(
                     game_id, payload.get("kind", ""), payload.get("target_id", "")
                 )
+            elif operation == "owned-training":
+                result = ENGINE.train_owned(game_id, payload.get("target_id", ""), payload.get("kind", ""),
+                                            payload.get("axis", ""), payload.get("batches", 1))
             elif operation == "puppet-action":
                 result = ENGINE.puppet_action(
                     game_id, payload.get("puppet_id", ""), payload.get("action", ""),
                     payload.get("content_id", ""),
                 )
+            elif operation == "puppet-preview":
+                result = ENGINE.preview_puppet(game_id, payload.get("form", ""), payload.get("core", ""),
+                    payload.get("shell", ""), payload.get("energy", ""))
             elif operation == "craft-puppet":
-                result = ENGINE.craft_mechanical_puppet(game_id)
+                result = ENGINE.craft_mechanical_puppet(game_id, payload.get("form", ""), payload.get("core", ""),
+                    payload.get("shell", ""), payload.get("energy", ""))
             elif operation == "refine-souls":
                 result = ENGINE.refine_foreign_souls(game_id)
             elif operation == "secluded-refine-souls":

@@ -20,7 +20,9 @@
   <link rel="stylesheet" href="/doctrine-panel.css?v=1">
   <link rel="stylesheet" href="/tutorial.css?v=2">
   <link rel="stylesheet" href="/npc-contacts.css?v=1.51.1">
-  <link rel="stylesheet" href="/asura-court-panel.css?v=1.53.0">
+  <link rel="stylesheet" href="/asura-court-panel.css?v=1.55.0">
+  <link rel="stylesheet" href="/upper-energy.css?v=1.55.0">
+  <link rel="stylesheet" href="/asura-panel.css?v=1.55.0">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -199,6 +201,7 @@
             <p id="market-description" class="muted"></p>
             <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">丹器功法</p><h3>一般坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="market-offers" class="market-offers"></div></section>
             <section class="market-stock-section material-market-section"><div class="market-stock-heading"><div><p class="eyebrow">阵材器料</p><h3>材料坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="material-market-offers" class="market-offers"></div></section>
+            <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">核心 · 外材 · 能源</p><h3>傀儡材料坊市</h3></div><small>本界当前阶数 · 可锁定一项</small></div><div id="puppet-market-offers" class="market-offers"></div></section>
             <section id="market-plant-sell-section" class="market-plant-sell"><h3>出售灵植</h3><div id="market-plant-sellables" class="auction-sellables"></div></section>
           </div>
         </article>
@@ -318,7 +321,7 @@
         <article id="captive-card" class="paper utility-panel left-panel captive-panel" role="dialog" aria-modal="false" aria-label="俘虏与傀儡">
           <div class="section-title"><div><p class="eyebrow">拘魂御傀</p><h2>俘虏与傀儡</h2></div><div class="panel-heading"><span id="puppet-capacity"></span><button id="captive-toggle" type="button">关闭</button></div></div>
           <section><h3>俘虏</h3><p class="section-note">普通修士可释放或拷打；魔修还可炼尸或种下活傀标记。</p><div id="captive-list"></div></section>
-          <section><h3>傀儡</h3><p id="puppet-time-note" class="section-note"></p><div class="puppet-global-tools"><button id="craft-puppet">合成机关傀儡</button><small>下品灵石 ×25、青锋灵剑 ×1</small></div><div id="puppet-list"></div></section>
+          <section><h3>傀儡</h3><p id="puppet-time-note" class="section-note"></p><div id="puppet-list"></div></section>
           <section><h3>外来元神</h3><div class="puppet-global-tools"><button id="refine-souls">炼化一道元神</button><button id="secluded-refine-souls">闭关炼化</button><small id="devour-bonus"></small></div><div id="foreign-soul-list"></div></section>
         </article>
         <article id="family-card" class="paper faction-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙家族">
@@ -340,7 +343,13 @@
 <article id="immortal-aperture-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙窍"><div class="section-title"><h2>仙窍</h2><button id="immortal-aperture-toggle" type="button">关闭</button></div><div id="immortal-aperture-content" class="immortal-content"></div></article>
 <article id="spirit-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="灵域"><div class="section-title"><h2>灵域</h2><button id="spirit-voisinage-toggle" type="button">关闭</button></div><div id="spirit-voisinage-content" class="immortal-content"></div></article>
 <article id="upper-institution-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="本界机构"><div class="section-title"><h2>本界机构</h2><button id="upper-institution-toggle" type="button">关闭</button></div><div id="upper-institution-content" class="immortal-content"></div></article>
-<article id="asura-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="八部与魔域"><div class="section-title"><h2>八部与魔域</h2><button id="asura-toggle" type="button">关闭</button></div><div id="asura-cultivation" class="immortal-content"></div></article>
+<article id="asura-conversion-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="煞元转化"><div class="section-title"><h2>煞元转化</h2><button id="asura-conversion-toggle" type="button">关闭</button></div><div id="asura-conversion-content" class="immortal-content"></div></article>
+<article id="asura-body-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="修罗之躯"><div class="section-title"><h2>修罗之躯</h2><button id="asura-body-toggle" type="button">关闭</button></div><div id="asura-body-content" class="immortal-content"></div></article>
+<article id="asura-veins-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="魔脉"><div class="section-title"><h2>魔脉</h2><button id="asura-veins-toggle" type="button">关闭</button></div><div id="asura-veins-content" class="immortal-content"></div></article>
+<article id="asura-route-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="八部本命"><div class="section-title"><h2>八部本命</h2><button id="asura-route-toggle" type="button">关闭</button></div><div id="asura-route-content" class="immortal-content"></div></article>
+<article id="asura-domain-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="魔域"><div class="section-title"><h2>魔域</h2><button id="asura-domain-toggle" type="button">关闭</button></div><div id="asura-domain-content" class="immortal-content"></div></article>
+<article id="asura-powers-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="神通"><div class="section-title"><h2>神通</h2><button id="asura-powers-toggle" type="button">关闭</button></div><div id="asura-powers-content" class="immortal-content"></div></article>
+<article id="puppet-workshop-card" class="paper utility-panel immortal-panel" role="dialog" aria-label="傀儡工坊"><div class="section-title"><h2>傀儡工坊</h2><button id="puppet-workshop-toggle" type="button">关闭</button></div><div id="puppet-workshop" class="puppet-workshop"></div></article>
 <article id="upper-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="本界邻域"><div class="section-title"><h2>本界邻域</h2><button id="upper-voisinage-toggle" type="button">关闭</button></div><div id="upper-voisinage-content" class="immortal-content"></div></article>
 <article id="golden-light-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="护体金光"><div class="section-title"><h2>护体金光</h2><button id="golden-light-toggle" type="button">关闭</button></div><div id="golden-light-content" class="immortal-content"></div></article>
 <article id="yaochi-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="瑶池"><div class="section-title"><h2>瑶池 · 功勋司</h2><button id="yaochi-toggle" type="button">关闭</button></div><div id="yaochi-content" class="immortal-content"></div></article>
@@ -432,6 +441,7 @@
             <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
             <label class="settings-row"><span><b>关闭天庭选举提示</b><small>不再参与新选举，由天庭自行选任；已有职位保留至任满。开启时也可继续修行，视为放弃当前选举。</small></span><input id="setting-court-election" type="checkbox"></label>
             <label class="settings-row"><span><b>战斗预案</b><small>自动沿用既有策略；手动在左侧显示配置入口。</small></span><select id="setting-manual-combat-plan" aria-label="战斗预案模式"><option value="auto">自动</option><option value="manual">手动</option></select></label>
+            <label class="settings-row"><span><b>事件静默</b><small>不触发时间推进中的随机遭遇、邀约与自动通知，不替你选择或领取事件收益。主动交互、修行必经节点、天劫与雷劫照常；当前已弹出的事件需先处理。</small></span><input id="setting-silent-events" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
             <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
@@ -448,7 +458,12 @@
         <button type="button" data-panel-target="combat-plan" title="战斗预案" class="hidden"><span>策</span><small>预案</small></button>
         <button type="button" data-panel-target="immortal-aperture" title="仙窍" class="hidden"><span>窍</span><small>仙窍</small></button>
         <button type="button" data-panel-target="spirit-voisinage" title="灵域" class="hidden"><span>域</span><small>灵域</small></button>
-        <button type="button" data-panel-target="asura" title="八部本命、魔域与神通" class="hidden"><span>魔</span><small>八部</small></button>
+        <button type="button" data-panel-target="asura-conversion" data-dlc="asura" title="修罗显圣 · 煞元转化" class="hidden"><span>煞</span><small>煞元</small></button>
+<button type="button" data-panel-target="asura-body" data-dlc="asura" title="修罗显圣 · 修罗之躯" class="hidden"><span>躯</span><small>魔躯</small></button>
+<button type="button" data-panel-target="asura-veins" data-dlc="asura" title="修罗显圣 · 魔脉" class="hidden"><span>脉</span><small>魔脉</small></button>
+<button type="button" data-panel-target="asura-route" data-dlc="asura" title="修罗显圣 · 八部本命" class="hidden"><span>魔</span><small>八部</small></button>
+<button type="button" data-panel-target="asura-domain" data-dlc="asura" title="修罗显圣 · 魔域" class="hidden"><span>域</span><small>魔域</small></button>
+<button type="button" data-panel-target="asura-powers" data-dlc="asura" title="修罗显圣 · 神通" class="hidden"><span>通</span><small>神通</small></button>
         <button type="button" data-panel-target="upper-voisinage" title="本界邻域" class="hidden"><span>域</span><small>修域</small></button>
         <button type="button" data-panel-target="golden-light" title="护体金光" class="hidden"><span>光</span><small>金光</small></button>
         <button type="button" data-panel-target="immortal-body" title="真仙之躯" class="hidden"><span>躯</span><small>仙躯</small></button>
@@ -459,36 +474,37 @@
         <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
-        <button type="button" data-panel-target="bloodline" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
-        <button type="button" data-panel-target="ghost-soul" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
-        <button type="button" data-panel-target="ghost-attachment" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
+        <button type="button" data-panel-target="bloodline" data-dlc="monster" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
+        <button type="button" data-panel-target="ghost-soul" data-dlc="ghost" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
+        <button type="button" data-panel-target="ghost-attachment" data-dlc="ghost" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
+        <button type="button" data-panel-target="puppet-workshop" title="傀儡工坊"><span>造</span><small>造傀</small></button>
         <button type="button" data-panel-target="captive" title="俘虏与傀儡"><span>俘</span><small>御傀</small></button>
         <button type="button" data-panel-target="crafting" title="组合炼器"><span>器</span><small>炼器</small></button>
         <button type="button" data-panel-target="formation" title="九宫阵法"><span>阵</span><small>阵法</small></button>
         <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
-        <button type="button" data-panel-target="sage-inner-outer" title="内圣外王" class="hidden sage-dock-button"><span>圣</span><small>内外</small></button>
+        <button type="button" data-panel-target="sage-inner-outer" data-dlc="sage" title="内圣外王" class="hidden sage-dock-button"><span>圣</span><small>内外</small></button>
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
       <nav id="strategy-dock" class="strategy-dock" aria-label="功能窗口">
         <button type="button" data-panel-target="yaochi" title="瑶池" class="hidden"><span>池</span><small>瑶池</small></button>
         <button type="button" data-panel-target="daomen" title="道门同道" class="hidden"><span>门</span><small>道门</small></button>
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
-        <button type="button" data-panel-target="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
+        <button type="button" data-panel-target="guixu" data-dlc="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
         <button type="button" data-panel-target="merchant" title="商盟"><span>盟</span><small>商盟</small></button>
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
         <button type="button" data-panel-target="exchange" title="匿名交换会" class="hidden"><span>易</span><small>交换会</small></button>
-        <button type="button" data-panel-target="ghost-parade" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
+        <button type="button" data-panel-target="ghost-parade" data-dlc="ghost" title="百鬼夜行" class="hidden ghost-dock-button ghost-parade-dock"><span>夜</span><small>夜行</small></button>
         <button type="button" data-panel-target="faction" title="宗门"><span>宗</span><small>宗门</small></button>
-        <button type="button" data-panel-target="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
+        <button type="button" data-panel-target="intrigue" data-dlc="intrigue" title="势力内政" class="hidden intrigue-dock-button"><span>谋</span><small>内政</small></button>
         <button type="button" data-panel-target="buddhist" data-dlc="buddhist" title="诸法无我 · 弘法人间" class="hidden buddhist-dock-button"><span>佛</span><small>弘法</small></button>
-        <button type="button" data-panel-target="sage" title="圣人教化" class="hidden sage-dock-button"><span>教</span><small>教化</small></button>
+        <button type="button" data-panel-target="sage" data-dlc="sage" title="圣人教化" class="hidden sage-dock-button"><span>教</span><small>教化</small></button>
         <button type="button" data-panel-target="upper-institution" title="本界机构" class="hidden"><span>政</span><small>机构</small></button>
         <button type="button" data-panel-target="heavenly-court" title="天庭政务"><span>庭</span><small>天庭</small></button>
         <button type="button" data-panel-target="war" title="势力战争"><span>战</span><small>征伐</small></button>
         <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
         <button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button>
-        <button type="button" data-panel-target="tianji" title="天工神机榜" class="hidden tianji-dock-button"><span>机</span><small>神机</small></button>
+        <button type="button" data-panel-target="tianji" data-dlc="tianji" title="天工神机榜" class="hidden tianji-dock-button"><span>机</span><small>神机</small></button>
         <button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button>
         <button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button>
         <button type="button" data-panel-target="world-route" title="诸界道途"><span>界</span><small>道途</small></button>
@@ -533,16 +549,20 @@
   <script src="/merchant-commission-panel.js?v=1.45.0"></script>
   <script src="/merchant-panel.js?v=1.45.0"></script>
   <script src="/map-directory.js?v=1.45.0"></script>
-  <script src="/theme-manager.js?v=1.45.0"></script>
-  <script src="/theme-composition.js?v=1.45.0"></script>
+  <script src="/upper-energy.js?v=1.55.0"></script>
+  <script src="/theme-manager.js?v=1.55.0"></script>
+  <script src="/theme-composition.js?v=1.55.0"></script>
   <script src="/family-panel.js?v=1.45.0"></script>
   <script src="/buddhist-wish.js?v=1.45.0"></script>
   <script src="/buddhist-panel.js?v=1.45.0"></script>
   <script src="/doctrine-panel.js?v=1"></script>
   <script src="/immortal-aperture-panel.js?v=2"></script>
   <script src="/upper-voisinage-panel.js?v=1"></script>
-  <script src="/asura-court-panel.js?v=1.53.0"></script>
-  <script src="/upper-institution-panel.js?v=1.53.0"></script>
+  <script src="/asura-court-panel.js?v=1.55.0"></script>
+  <script src="/puppet-workshop.js?v=1.55.0"></script>
+  <script src="/asura-meridians.js?v=1.55.0"></script>
+  <script src="/asura-panel.js?v=1.55.0"></script>
+  <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
   <script src="/handbook-content.js?v=1"></script>

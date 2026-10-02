@@ -109,6 +109,8 @@ class ConcubineSystemMixin:
         ]
 
     def _maybe_relationship_sanction(self, game: GameState, rng: random.Random) -> bool:
+        if game.settings.get("silent_events", False):
+            return False
         if game.pending_event:
             return False
         candidates = self._relationship_sanction_candidates(game)
@@ -568,6 +570,8 @@ class ConcubineSystemMixin:
         return drain
 
     def _maybe_concubine_proposal(self, game: GameState, rng: random.Random) -> bool:
+        if game.settings.get("silent_events", False):
+            return False
         player = game.player
         if (
             player.gender != "female" or player.concubine_status
@@ -655,6 +659,8 @@ class ConcubineSystemMixin:
 
     def _advance_concubine_aftermath(self, game: GameState, rng: random.Random) -> bool:
         """Roll a rejected suitor once per unit, and only for the next two units."""
+        if game.settings.get("silent_events", False):
+            return False
         if game.pending_event or not game.player.concubine_rejection_aftermath:
             return False
         current_unit = game.diplomacy_unit

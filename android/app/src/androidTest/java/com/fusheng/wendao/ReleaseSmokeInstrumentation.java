@@ -175,6 +175,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         try {
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+            if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
             long deadline=System.currentTimeMillis()+60000;
             while(web==null && System.currentTimeMillis()<deadline) {
                 runOnMainSync(()->web=findWeb(activity.findViewById(android.R.id.content)));
@@ -183,12 +184,41 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.52.2' && !configData.debug && configData.extensions.length===7 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.55.0' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
-            if(phase.equals("upper-voisinage")) {
+            // These two legacy phases verify base-game fallback without the optional Asura DLC.
+            if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
+            if(phase.equals("asura")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'魔脉分屏验收',preset_id:'asura_upper',seed:1550})});return g.id;})()");
+                python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.asura_cultivation.update(conversion=5,body_level=20,souls=10000,route='garuda',level=9,domain_rank=8,domain_name='验收翼域',vein_pity={'9:1':100})\ng.player.opportunity=1e12\ng.pending_event=None\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-panel-target=asura-veins]");
+                check(Boolean.TRUE.equals(js("document.querySelectorAll('.asura-head').length===3 && document.querySelectorAll('.asura-arm').length===6 && document.querySelectorAll('.asura-vein-node').length===27 && !document.querySelector('.asura-tabs')")),"Independent Asura figure and panels");
+                tapSelector("#asura-veins-content .asura-action");
+                waitForJs("!busy && game.asura.opened===1","Native magic vein opening");
+                tapSelector("[data-panel-target=asura-powers]");
+                tapSelector("#asura-powers-content .asura-action");
+                waitForJs("!busy && game.asura.powers.length===1","Native supernatural power");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    for(String panel:new String[]{"asura-conversion","asura-body","asura-veins","asura-route","asura-domain","asura-powers","puppet-workshop"}) {
+                        tapSelector("[data-panel-target="+panel+"]");
+                        check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return e.classList.contains('panel-open') && e.scrollWidth<=e.clientWidth+1})()")),"Independent panel overflow "+panel+theme);
+                    }
+                    check(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('[data-panel-target=asura-veins]')).color!==getComputedStyle(document.querySelector('[data-panel-target=captive]')).color")),"DLC/base entrance color distinction");
+                    tapSelector("[data-panel-target=asura-veins]");
+                    js("document.querySelector('#asura-veins-card').scrollTop=0;true");
+                    check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.asura-meridian-figure svg').getBoundingClientRect();return r.width>100&&r.width<innerWidth&&r.height>100})()")),"Magic vein illustration size");
+                    capture("asura-veins-"+arguments.getString("orientation")+"-"+theme+"-1550");
+                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);waitForJs("!document.querySelector('.utility-panel.panel-open')","Native independent panel back");
+                }
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.asura.opened===1 && game.asura.powers.length===1")),"Asura changes persist");
+                result.putString("asura_scope","Six themes, seven independent panels, new 27-node three-head six-arm figure, native opening and power, DLC colors, native back and persistence");
+            } else if(phase.equals("upper-voisinage")) {
                 for(String world:new String[]{"asura","nether","reincarnation"}) {
-                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界修域验收',preset_id:'"+world+"_upper',seed:1522})});if(!g.upper_institution.local||g.player.realm_index!==9||!g.upper_voisinages.rows[0].active)throw Error('Upper preset mismatch');return g.id;})()");
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界修域验收',preset_id:'"+world+"_upper',monster_species_id:'serpent',seed:1550})});if(!g.upper_institution.local||g.player.realm_index!==9||!g.upper_voisinages.rows[0].active)throw Error('Upper preset mismatch');return g.id;})()");
                     python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required,max_hp,max_mp,add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\nfrom cultivation_life.system.upper_institutions import definition\np.location_id=definition(g)['location']\np.world_voisinages={}\np.opportunity=opportunity_required(p)\np.hp=max_hp(p)\np.mp=max_mp(p)\np.immortal_aperture['current']=0\nadd_item(p,'spirit_stone',1000000)\ng.pending_event=None\ng.heavenly_court['open_election']=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
                     tapSelector("[data-panel-target=upper-voisinage]");
@@ -198,11 +228,22 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#upper-voisinage-content details button:last-child");
                     waitForJs("!busy && game.upper_voisinages.rows[0].level===2","Native domain training");
                     js("UtilityPanels.open('upper-institution');true");
-                    tapSelector("#upper-institution-content [data-section=identity] summary");
-                    tapSelector("#upper-institution-content [data-section=identity] button");
+                    if(world.equals("asura")) {
+                        js("Array.from(document.querySelectorAll('#upper-institution-content button')).find(b=>b.textContent==='登记效力').dataset.nativeJoin='true'");
+                        tapSelector("[data-native-join]");
+                    } else {
+                        tapSelector("#upper-institution-content [data-section=identity] summary");
+                        tapSelector("#upper-institution-content [data-section=identity] button");
+                    }
                     waitForJs("!busy&&game.upper_institution.joined","Native institution enrollment");
-                    tapSelector("#upper-institution-content [data-section=jobs] summary");
-                    tapSelector("#upper-institution-content [data-section=jobs] button");
+                    if(world.equals("asura")) {
+                        tapSelector("#upper-institution-content .court-tabs button:nth-child(4)");
+                        js("Array.from(document.querySelectorAll('#upper-institution-content button')).find(b=>b.textContent==='接取委托').dataset.nativeJob='true'");
+                        tapSelector("[data-native-job]");
+                    } else {
+                        tapSelector("#upper-institution-content [data-section=jobs] summary");
+                        tapSelector("#upper-institution-content [data-section=jobs] button");
+                    }
                     waitForJs("!busy&&game.upper_institution.job!==null","Native institution commission");
                     for(String theme:new String[]{"a","b","c","d","e","f"}) {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
@@ -210,7 +251,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                             js("UtilityPanels.open('"+panel+"');true");
                             check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Upper voisinage panel overflow "+world+theme);
                         }
-                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1522");
+                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1550");
                     }
                     js("UtilityPanels.open('immortal-aperture');true");tapSelector("#immortal-aperture-content button");
                     waitForJs("!busy && game.aperture.current>0","Native energy refinement");
@@ -483,7 +524,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1522.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1550.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {

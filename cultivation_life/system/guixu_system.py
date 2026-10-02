@@ -157,7 +157,7 @@ class GuixuSystemMixin:
             ["system", "guixu", "announcement", f"world:{dungeon['world']}"],
         ))
         if (
-            game.settings.get("guixu_event_popup", True)
+            game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False)
             and game.player.world == dungeon["world"] and not game.pending_event
         ):
             event = self._instantiate_event(self.events_by_id["EVT_GUIXU_ANNOUNCE"], game, rng)
@@ -324,7 +324,8 @@ class GuixuSystemMixin:
     ) -> None:
         if cycle["phase"] == "closed":
             self._announce_guixu_cycle(game, dungeon, cycle, rng)
-            game.pending_event = None
+            if game.pending_event and game.pending_event.get("id") == "EVT_GUIXU_ANNOUNCE":
+                game.pending_event = None
         cycle["roster"] = self._generate_guixu_roster(game, dungeon, cycle, rng)
         self._form_guixu_npc_teams(cycle, rng)
         cycle["npc_incidents"] = []
@@ -354,7 +355,7 @@ class GuixuSystemMixin:
             ["system", "guixu", "open", f"world:{dungeon['world']}"],
         ))
         if (
-            game.settings.get("guixu_event_popup", True)
+            game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False)
             and game.player.world == dungeon["world"] and not game.pending_event
             and not (session and session.get("dungeon_id") == dungeon["id"])
         ):

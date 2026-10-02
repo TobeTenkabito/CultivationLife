@@ -396,7 +396,7 @@ function showStart() {
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/games').then(saves => renderSaveList(saves.games)).catch(error => toast(error.message));
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','puppet-workshop','map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -442,8 +442,11 @@ function render(data) {
   progressionNote.classList.toggle('hidden', !progressionNote.textContent);
   renderQiMastery(p.qi_mastery || [], p.qi_gain_efficiencies || {});
   meter('hp', p.hp, p.max_hp, p.intrinsic_resources?.hp); meter('mp', p.mp, p.max_mp, p.intrinsic_resources?.mp);
-  $('#mp-label').textContent = p.resource_name || 'MP';
-  if(data.aperture?.available && !data.aperture.lower && p.immortal_power?.visible){meter('mp',data.aperture.conversion*100,100);$('#mp-label').textContent='仙灵力转化';$('#mp-text').textContent=`${Math.round(data.aperture.conversion*100)}%`;}
+  const energy = window.UpperEnergy.display(data);
+  $('#mp-label').textContent = energy.label;
+  $('#mp-meter').dataset.energyKind = energy.kind;
+  if(energy.mode !== 'mana') meter('mp',energy.current,energy.maximum);
+  if(energy.mode === 'conversion') $('#mp-text').textContent=`${Math.round(energy.current)}%`;
   $('#mp-meter').classList.toggle('blue', p.resource_kind !== 'immortal');
   $('#mp-meter').classList.toggle('purple', p.resource_kind === 'immortal');
   const immortalPower = p.immortal_power || {};
@@ -459,6 +462,11 @@ function render(data) {
     const timing = wait > 0 ? `距下阶段最早触发还需 ${wait} 单位` : `当前触发率 ${chance}%`;
     $('#immortal-power-state').textContent = `转化 ${stage}/${total} · 可用上限 ${ratio}% · ${timing}`;
   }
+  if (data.aperture?.native && !data.aperture.lower) {
+    $('#immortal-power-stat').classList.remove('hidden');
+    $('#immortal-power-stat dt').textContent = data.aperture.name;
+    $('#immortal-power-state').textContent = `${energy.detail} · ${number(energy.current)} / ${number(energy.maximum)} · 本源法力 ${number(p.mp)} / ${number(p.max_mp)}`;
+  } else $('#immortal-power-stat dt').textContent = '仙灵力';
   const ghost = data.ghost_system || {};
   $('#ghost-erosion-stat').classList.toggle('hidden', !ghost.available);
   $('#ghost-wangsheng-stat').classList.toggle('hidden', !ghost.available);
@@ -2594,7 +2602,7 @@ function renderMarket(market) {
   if (!market?.available) return;
   $('#market-title').textContent = market.name;
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
-  $('#market-description').textContent = `一般坊市与材料坊市各有六个货位，每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
+  $('#market-description').textContent = `一般坊市与阵材器料坊市各有六个货位，傀儡材料另设核心、外材、能源货架；每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
   const renderShelf = (selector, offers) => {
     const list = $(selector); list.innerHTML = '';
     offers.forEach(offer => {
@@ -2608,7 +2616,7 @@ function renderMarket(market) {
     const controls = document.createElement('div'); controls.className = 'market-offer-actions';
     const lock = document.createElement('button'); lock.className = `market-lock${offer.locked ? ' active' : ''}`;
     lock.textContent = offer.locked ? '已锁定' : '锁定';
-    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
+    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'puppet' ? '傀儡材料' : offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
     lock.disabled = busy || offer.sold || !!game.pending_event || !game.player.alive;
     lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
     const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : `${offer.price} 灵石`;
@@ -2620,6 +2628,7 @@ function renderMarket(market) {
     if (!list.children.length) list.innerHTML = '<p class="empty">此地暂时没有可交易的货物。</p>';
   };
   renderShelf('#market-offers', market.offers || []);
+  renderShelf('#puppet-market-offers', market.puppet_material_offers || []);
   renderShelf('#material-market-offers', market.material_offers || [
     ...(market.crafting_material_offers || []), ...(market.formation_material_offers || []),
   ]);
@@ -3030,7 +3039,7 @@ function renderDemonicSystem(system) {
       button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
     tools.appendChild(violenceButton("captive", person, "处死"));
-    row.appendChild(tools); captiveList.appendChild(row);
+    row.appendChild(tools); appendTraining(row, person, 'prisoner'); captiveList.appendChild(row);
   });
   if (!captiveList.children.length) captiveList.innerHTML = '<p class="empty">尚未生擒任何修士。</p>';
 
@@ -3038,9 +3047,9 @@ function renderDemonicSystem(system) {
   (system.puppets || []).forEach(puppet => {
     const row = document.createElement('div'); row.className = 'puppet-row';
     const control = puppet.type === 'living' ? ` · 控制度 ${number(puppet.control)}%` : '';
-    row.innerHTML = `<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>培养积累 ${number(puppet.cultivation_progress || 0)} · 下次突破加成 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
+    row.innerHTML = `<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
     const tools = document.createElement('div'); tools.className = 'puppet-tools';
-    if (puppet.type !== 'mechanical') tools.appendChild(puppetButton('灌注气', puppet.id, 'infuse'));
+
     if ((system.pill_options || []).length && puppet.type !== 'mechanical') {
       const select = optionSelect(system.pill_options); tools.append(select, puppetButton('喂丹', puppet.id, 'pill', select));
     }
@@ -3050,7 +3059,8 @@ function renderDemonicSystem(system) {
     if (system.is_demonic && puppet.type === 'living') tools.appendChild(puppetButton(`加固控制（${number(system.control_mp_cost || 0)} MP）`, puppet.id, 'reinforce_control'));
     if (system.is_demonic && puppet.type !== 'mechanical') tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
     tools.appendChild(puppetButton('解除', puppet.id, 'dismiss'));
-    row.appendChild(tools); puppetList.appendChild(row);
+    const dimensions=document.createElement('small');dimensions.textContent=`${puppet.form_name ? puppet.form_name+' · ' : ''}普通炼体 ${puppet.body_training||0}/100层 · 高阶肉身 ${puppet.immortal_body_level||0}层 · 神识 ${puppet.divine_sense_rank||0}阶`;row.append(dimensions);
+    row.appendChild(tools); appendTraining(row, puppet, 'puppet'); puppetList.appendChild(row);
   });
   if (!puppetList.children.length) puppetList.innerHTML = '<p class="empty">尚无受控傀儡。</p>';
 
@@ -3079,13 +3089,32 @@ function renderDemonicSystem(system) {
     archive.append(summary, archiveList); soulList.appendChild(archive);
   }
   if (!souls.length) soulList.innerHTML = '<p class="empty">识海中没有外来元神。</p>';
-  $('#craft-puppet').onclick = () => mutate(`/api/games/${game.id}/craft-puppet`, {});
+  window.PuppetWorkshop.render(game, payload=>api(`/api/games/${game.id}/puppet-preview`, {method:'POST',body:JSON.stringify(payload)}), payload=>mutate(`/api/games/${game.id}/craft-puppet`, payload));
   $('#refine-souls').onclick = () => mutate(`/api/games/${game.id}/refine-souls`, {});
   const secludedRefine = $('#secluded-refine-souls');
   secludedRefine.classList.toggle('hidden', !system.is_demonic);
   secludedRefine.textContent = `闭关炼化（预计 ${number(system.secluded_refine_years || 0)} 年）`;
   secludedRefine.title = `一次炼化全部未净元神，不消耗机缘与 MP；耗时为正常炼化的 ${percent(system.secluded_refine_multiplier || 1.2)}。`;
   secludedRefine.onclick = () => mutate(`/api/games/${game.id}/secluded-refine-souls`, {});
+
+  function appendTraining(parent, target, kind) {
+    const box=document.createElement('details');box.className='owned-training';
+    const heading=document.createElement('summary');heading.textContent='培养 · 修为 / 炼体 / 神识';box.append(heading);
+    const controls=document.createElement('div');controls.className='owned-training-controls';
+    const axis=document.createElement('select');axis.setAttribute('aria-label','培养方向');
+    for(const [value,label] of [['cultivation','培养修为'],['body','培养炼体'],['sense','培养神识']]) { const o=new Option(label,value);axis.add(o); }
+    const batch=document.createElement('select');batch.setAttribute('aria-label','培养轮数');
+    for(const n of [1,5,10])batch.add(new Option(`${n} 轮`,n));
+    const preview=document.createElement('p');const button=document.createElement('button');button.type='button';
+    const refresh=()=>{const q=target.training?.[axis.value]?.find(q=>q.batches===Number(batch.value));
+      if(!q){button.disabled=true;return;}
+      preview.textContent=`${q.before} → ${q.after}。实际 ${q.rounds} 轮，消耗 ${number(q.opportunity)} 机缘 / ${number(q.mp)} 法力；自身战力 ${number(q.power_before)} → ${number(q.power_after)}。${q.reason||'即时培养，不推进年月。'}`;
+      button.textContent=`${q.label} · ${q.rounds}轮`;button.disabled=busy||!q.can_train||!game.player.alive||!!game.pending_event||!!game.trial?.active||!!game.imprisonment||!!game.player.sealed_cultivation;
+    };
+    axis.onchange=batch.onchange=refresh;
+    button.onclick=()=>mutate(`/api/games/${game.id}/owned-training`,{target_id:target.id,kind,axis:axis.value,batches:Number(batch.value)});
+    controls.append(axis,batch,button);box.append(controls,preview);parent.append(box);refresh();
+  }
 
   function optionSelect(options) {
     const select = document.createElement('select');
@@ -3291,6 +3320,7 @@ function transformationFormCard(form, system, isStored) {
 }
 
 function renderSettings(settings) {
+  $("#setting-silent-events").checked=!!settings.silent_events;
   $('#setting-court-election').checked=settings.court_election_popup===false;
   $('#setting-manual-combat-plan').value=settings.manual_combat_plan?'manual':'auto';
   const popup = $('#setting-combat-popup');
@@ -3779,7 +3809,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || game?.faction?.dispatch_used || (game?.faction?.contribution || 0) < (game?.faction?.dispatch_cost || 0);
   });
   document.querySelectorAll('.market-buy').forEach(button => {
-    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
+    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('.market-lock').forEach(button => {
@@ -3894,7 +3924,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1';
   });
   const demonic = game?.demonic_system || {};
-  $('#craft-puppet').disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (demonic.used || 0) >= (demonic.capacity || 0);
+  if ($('#craft-puppet')) $('#craft-puppet').disabled = $('#craft-puppet').dataset.unavailable !== '0' || busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (demonic.used || 0) >= (demonic.capacity || 0);
   $('#refine-souls').disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || !demonic.is_demonic || !(demonic.foreign_souls || []).some(soul => !soul.refined);
   $('#secluded-refine-souls').disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || !demonic.is_demonic || !(demonic.foreign_souls || []).some(soul => !soul.refined);
   $('#world-news-debug').disabled = busy || !game;
@@ -3916,6 +3946,7 @@ function finePercent(value) {
   return `${amount < 1 ? amount.toFixed(2) : amount.toFixed(1)}%`;
 }
 
+$('#setting-silent-events').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'silent_events',enabled:event.target.checked});
 $('#setting-combat-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'combat_popup', enabled:!event.target.checked,
 });
@@ -3986,62 +4017,7 @@ function cultivationIdentity(actor) {
   return [actor.path_name || '道统未明', actor.monster_species_name, actor.asura_route_name].filter(Boolean).join(' · ');
 }
 
-function renderAsura(state) {
-  let panel = document.getElementById('asura-cultivation');
-  if (!panel) {
-    panel = document.createElement('section'); panel.id = 'asura-cultivation'; panel.className = 'panel';
-    document.getElementById('foreign-soul-list').parentElement.append(panel);
-  }
-  document.getElementById('asura-card').classList.toggle('hidden', !state.available);
-  document.querySelector('[data-panel-target=asura]').classList.toggle('hidden', !state.available);
-  if (!state.available) window.UtilityPanels?.close('asura');
-  panel.replaceChildren(); panel.hidden = !state.available;
-  if (!state.available) return;
-  const text = (value, tag = 'p') => { const node = document.createElement(tag); node.textContent = value; panel.append(node); return node; };
-  const button = (label, action, payload = {}, disabled = false) => {
-    const node = document.createElement('button'); node.textContent = label;
-    node.disabled = disabled || !game.player.alive || !!game.pending_event || !!game.trial?.active || !!game.imprisonment;
-    node.onclick = () => mutate(`/api/games/${game.id}/asura`, {action, ...payload}); panel.append(node); return node;
-  };
-  text('修罗显圣：无法无天', 'h3');
-  text(`精魂 ${number(state.souls || 0)} · 煞元转化 ${state.conversion || 0}/5 · 修罗之躯 ${state.body_level || 0}/20层 · 魔脉 ${state.opened || 0}/27`);
-  if (!state.can_cultivate) { text('已炼化元神可以提纯；八部修持须登临修罗界。'); return; }
-  button('煞元转化', 'convert', {}, (state.conversion || 0) >= 5);
-  button('锻炼修罗之躯（机缘）', 'train_body', {}, (state.body_level || 0) >= 20 || game.player.body_training < 100);
-  button('开辟魔脉（机缘＋精魂）', 'open_vein', {}, state.opened >= game.player.layer * 3);
-  if (!state.route) {
-    text('先将修罗之躯修至20层，再凝练外界肉身。单具自动匹配本命；两具合格肉身指向阿修罗。融合后本命永久确定。');
-    (state.routes || []).forEach(route => text(`${route.name}：${route.requirement}；炼体至少60层。`));
-    (state.candidates || []).forEach(body => {
-      text(`${body.name} · 炼体 ${body.body_training || 0} · 肉身战力 ${number(body.body_power)}`);
-      button(`凝练（${30 + (body.body_training || 0)}精魂）`, 'condense', {target_id:body.id}, !body.eligible || (state.body_level || 0) < 20);
-    });
-    const selected = new Set();
-    (state.bodies || []).forEach(body => {
-      const row = text(`${body.name} · 已凝练 · 战力 ${number(body.power)}`, 'label');
-      const box = document.createElement('input'); box.type = 'checkbox';
-      box.onchange = () => box.checked ? selected.add(body.id) : selected.delete(body.id); row.prepend(box);
-    });
-    const fight = button('融合所选肉身（开始生死战）', 'fuse');
-    fight.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'fuse', body_ids:[...selected]});
-    return;
-  }
-  text(`${state.route_name} · ${state.part} ${state.level}/9级 · 永久肉身战力 ${number(state.inherited_power)}`, 'h4');
-  button(`修炼本体（${60 * state.level}精魂）`, 'train_route', {}, state.level >= 9);
-  text(`${state.domain_name} · ${state.domain_label} · 威能滋养 ${state.domain_power || 0}`);
-  const input = document.createElement('input'); input.maxLength = 24; input.value = state.domain_name; input.setAttribute('aria-label', '魔域名称'); panel.append(input);
-  const rename = button('命名魔域', 'rename'); rename.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'rename', name:input.value});
-  button(`提升魔域境界（${50 * ((state.domain_rank || 1) + 1)}精魂）`, 'train_domain', {}, state.domain_rank >= 13);
-  button(`滋养威能（${50 * ((state.domain_power || 0) + 1)}精魂）`, 'nourish_domain', {}, state.domain_power >= 99);
-  (state.branches?.[state.route] || []).forEach(branch => {
-    text(`${branch.name}：${branch.descriptions.join('；')}${state.branch === branch.id ? '（已选择）' : ''}`);
-    if (!state.branch) button('确定此分支（不可更换）', 'choose_branch', {target_id:branch.id}, state.level < 5 || game.player.realm_index < 10);
-  });
-  if (state.branch) button(`修炼分支 ${state.branch_level}/9（${80 * state.branch_level}精魂）`, 'train_branch', {}, state.branch_level >= 9);
-  text(`神通 ${(state.powers || []).length}/${state.slots} · 已生效：${(state.rule_descriptions || []).join('、') || '本体2级开始解锁'}`);
-  button('获取随机神通（100精魂）', 'learn_power', {}, (state.powers || []).length >= state.slots);
-  (state.powers || []).forEach(rule => {
-    text(`${rule.name}：${rule.description}`);
-    button('洗练此神通（100精魂）', 'reroll_power', {target_id:rule.id});
-  });
+function renderAsura() {
+  window.AsuraPanel.render(game, payload => mutate(`/api/games/${game.id}/asura`, payload),
+    () => mutate(`/api/games/${game.id}/breakthrough`, {}));
 }

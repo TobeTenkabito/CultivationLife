@@ -46,7 +46,7 @@ class MapTravelMixin(TeleportMixin):
             return False
         if self._advance_guixu_calendar(game, rng, era_news):
             return False
-        if not encounters:
+        if not encounters or game.settings.get("silent_events", False):
             return True
         return not (
             self._maybe_wanted_encounter(game, rng)

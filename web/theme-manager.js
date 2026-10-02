@@ -138,10 +138,17 @@
     $('#hud-name').textContent=p.name;$('.hud-avatar').textContent=p.name.slice(0,1);
     $('#hud-realm').textContent=p.realm_name;
     $('#hud-age').textContent=`${p.age} 岁 · ${p.lifespan==null?'寿元无尽':`寿元 ${precise(p.lifespan)} 年`} · ${p.world_name} / ${p.location_name}`;
-    $('#hud-power').textContent=`战斗力 ${compact(p.combat_power)} · ${p.path_name} · 仙痕 ${compact(p.immortal_traces || 0)}`;
+    $('#hud-power').textContent=`战斗力 ${compact(p.combat_power)} · ${p.path_name}${p.world==='asura' && data.asura?.available ? ` · 精魂 ${compact(data.asura.souls)}` : p.world==='celestial' ? ` · 仙痕 ${compact(p.immortal_traces || 0)}` : ''}`;
     $('#hud-power').title=`战斗力 ${precise(p.combat_power)} · 组队战力 ${precise(p.battle_power||p.combat_power)}`;
     resource('opportunity',p.opportunity,p.opportunity_required,'机缘',p.opportunity_unbounded);resource('hp',p.hp,p.max_hp,'气血 HP',false,p.intrinsic_resources?.hp);resource('mp',p.mp,p.max_mp,p.resource_name&&p.resource_name!=='MP'?p.resource_name:'法力 MP',false,p.intrinsic_resources?.mp);
-    if(data.aperture?.available&&!data.aperture.lower&&p.immortal_power?.visible){resource('mp',data.aperture.conversion*100,100,'仙灵力转化');$('#hud-mp .hud-values strong').textContent=`${precise(data.aperture.conversion*100)}%`;$('#hud-mp .hud-values small').textContent='转化程度';$('#hud-mp').style.setProperty('--intrinsic-share','0%');}
+    const energy=window.UpperEnergy.display(data);
+    $('#hud-mp').dataset.energyKind=energy.kind;
+    if(energy.mode!=='mana'){
+      resource('mp',energy.current,energy.maximum,energy.label);
+      if(energy.mode==='conversion'){$('#hud-mp .hud-values strong').textContent=`${precise(energy.current)}%`;$('#hud-mp .hud-values small').textContent=energy.detail;}
+      $('#hud-mp').style.setProperty('--intrinsic-share','0%');
+      $('#hud-mp').title=energy.detail;
+    }else $('#hud-mp').title='本源法力';
     hud.classList.toggle('immortal-resource',p.resource_kind==='immortal');
     const notices=[];
     if(Number(p.hp)>0&&Number(p.hp)/Math.max(1,Number(p.max_hp))<.25)notices.push('气血偏低，请留意行动风险');

@@ -179,6 +179,8 @@ def _high_affinity_npcs(deps: RelationshipDependencies, game: GameState, exclude
 
 
 def _maybe_affinity_gift(deps: RelationshipDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     people = deps._high_affinity_npcs(game)
     if not people:
         return False
@@ -195,6 +197,8 @@ def _maybe_affinity_gift(deps: RelationshipDependencies, game: GameState, rng: r
 
 
 def _maybe_personal_revenge(deps: RelationshipDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     rules = WORLD_SYSTEMS["relationship"]
     threshold = float(rules["hostile_affinity_threshold"])
     protected_ids = deps._retaliatory_relationship_ids(game)

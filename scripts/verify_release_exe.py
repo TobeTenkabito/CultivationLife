@@ -41,7 +41,7 @@ def verify(with_dlc):
             assert len(config["worlds"]) == 11
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
-            for asset in ('asura-court-panel.js', 'asura-court-panel.css'):
+            for asset in ('asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abcdef':
@@ -263,6 +263,29 @@ def verify(with_dlc):
             assert immortal['doctrines']['immortal_body']['required_training'] == 100
             assert immortal['doctrines']['immortal_body']['golden_light_level'] == 20
             assert len(immortal['doctrines']['immortal_body']['manuals']) >= 1
+            # Verify the new base crafting path even when all optional DLC are absent.
+            forge_path = folder/'data/saves'/f"{immortal['id']}.json"
+            raw = json.loads(forge_path.read_bytes())
+            parts = ['puppet_celestial_9_core_array','puppet_celestial_9_shell_bird','puppet_celestial_9_energy_crystal']
+            raw['player']['inventory'].extend(dict(id=id_,name=id_,quantity=1) for id_ in parts)
+            raw['player']['opportunity']=1e12
+            raw['player']['divine_sense_rank']=180
+            raw['pending_event']=None
+            forge_path.write_text(json.dumps(raw,ensure_ascii=False),encoding='utf-8')
+            def post_forge(operation,payload):
+                req=urllib.request.Request(base+f"/api/games/{immortal['id']}/"+operation,method='POST',
+                    data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(req,timeout=30) as response:return json.load(response)
+            payload=dict(form='bird',core=parts[0],shell=parts[1],energy=parts[2])
+            predicted=post_forge('puppet-preview',payload)
+            forged=post_forge('craft-puppet',payload)
+            puppet=forged['demonic_system']['puppets'][-1]
+            assert puppet['combat_power']==predicted['combat_power'] and puppet['form']=='bird'
+            trained=post_forge('owned-training',dict(target_id=puppet['id'],kind='puppet',axis='sense',batches=1))
+            assert trained['demonic_system']['puppets'][-1]['divine_sense_rank']>puppet['divine_sense_rank']
+            quiet=post_forge('settings',dict(setting='silent_events',enabled=True))
+            assert quiet['settings']['silent_events']
+            assert len(quiet['market']['puppet_material_offers'])==12
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

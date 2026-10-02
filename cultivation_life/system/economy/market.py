@@ -39,6 +39,8 @@ class EconomyMarketMethods:
 
     @staticmethod
     def _market_offer_group(offer: dict[str, Any]) -> str:
+        if offer.get("kind") == "puppet_material":
+            return "puppet"
         return (
             "material"
             if offer.get("kind") in {"crafting_material", "formation_material", "formation_supply"}
@@ -76,6 +78,9 @@ class EconomyMarketMethods:
                 or len(current_material_offers) == int(MARKET_SETTINGS.get("material_offer_count", 6))
             )
         ):
+            if not any(row.get("kind") == "puppet_material" for row in game.market_offers):
+                from cultivation_life.system.puppet_crafting import market_offers
+                game.market_offers.extend(market_offers(game, tier, "傀儡材料坊市", location_id))
             return len(game.market_offers) != previous_count
         same_market = (
             game.market_realm_index == tier and game.market_world == player.world
@@ -203,6 +208,8 @@ class EconomyMarketMethods:
             )
         offers.extend(material_locked)
         offers.extend(selected_materials[:fresh_material_count])
+        from cultivation_life.system.puppet_crafting import market_offers
+        offers.extend(market_offers(game, tier, market_name, location_id))
         game.market_realm_index = tier
         game.market_world = player.world
         game.market_location_id = location_id
@@ -219,6 +226,7 @@ class EconomyMarketMethods:
         offers = []
         crafting_offers = []
         formation_offers = []
+        puppet_offers = []
         for offer in game.market_offers:
             if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
                 continue
@@ -239,7 +247,9 @@ class EconomyMarketMethods:
                 offer["kind"] != "technique"
                 or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]].element)
             )
-            if offer.get("kind") == "crafting_material":
+            if offer.get("kind") == "puppet_material":
+                puppet_offers.append(shown)
+            elif offer.get("kind") == "crafting_material":
                 crafting_offers.append(shown)
             elif offer.get("kind") in {"formation_material", "formation_supply"}:
                 formation_offers.append(shown)
@@ -252,6 +262,7 @@ class EconomyMarketMethods:
             "location_id":location_id, "location_name":location_name,
             "spirit_stones":stones, "offers":offers, "crafting_material_offers":crafting_offers,
             "formation_material_offers":formation_offers,
+            "puppet_material_offers":puppet_offers,
             "material_offers":[*crafting_offers, *formation_offers],
             "general_offer_limit":int(MARKET_SETTINGS["offer_count"]),
             "material_offer_limit":int(MARKET_SETTINGS.get("material_offer_count", 6)),
@@ -320,6 +331,9 @@ class EconomyMarketMethods:
             for row in MARKET_GOODS
         ):
             return True
+        if kind == "puppet_material":
+            from cultivation_life.puppet_content import definitions
+            return definitions().get(content_id, {}).get("world") == world
         if kind == "crafting_material":
             return any(
                 str(row.get("world")) == world and str(row.get("id")) == content_id

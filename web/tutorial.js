@@ -178,6 +178,8 @@
   document.addEventListener('close',()=>{if(data?.tutorial.guide.active)queueMicrotask(draw);},true);
   addEventListener('resize',schedule);addEventListener('scroll',schedule,true);
   window.TutorialGuide={enabledForNewGame:()=>startEnabled,reset(){data=null;send=null;stop();dialog.close();draw();},
-    configure:renderHandbook,render(value,callback){data=value;send=callback;draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable')};
+    configure:renderHandbook,render(value,callback){data=value;send=callback;draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable'),
+    showChapter(id){resetHandbookFilter();UtilityPanels.open('settings');const row=handbookRows.find(r=>r.chapter.id===id);if(row){row.element.open=true;row.expanded=true;row.element.scrollIntoView({block:'start'});}}
+  };
   draw();
 })();

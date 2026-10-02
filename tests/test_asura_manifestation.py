@@ -258,3 +258,48 @@ def test_long_battle_continues_past_five_and_twenty_four_rounds():
     result, _ = run_batch(resumed, state, random.Random(3), batch_size=1)
     assert result == 'victory'
     assert resumed.units['enemy-0'].body > 0
+
+
+def test_vein_quote_cost_pity_and_per_layer_gate(ready):
+    engine,g=ready
+    p=g.player
+    q=asura.public_meridians(p)
+    assert len(q['nodes'])==27 and q['required']==3 and q['can_open']
+    with patch('cultivation_life.system.asura_system.decode_rng') as decoder:
+        rng=random.Random(0)
+        # A real RNG whose first draw exceeds the initial 85% chance.
+        for seed in range(100):
+            if random.Random(seed).random()>.85:
+                rng=random.Random(seed);break
+        decoder.return_value=rng
+        engine.asura_action(g.id,'open_vein')
+    p=engine.store.load(g.id).player
+    failed=asura.public_meridians(p)
+    assert failed['opened']==0 and failed['failures']==1
+    assert failed['chance']==pytest.approx(q['chance']+q['pity_step'])
+    assert p.opportunity==q['opportunity']-q['next_cost']['opportunity']
+    assert p.asura_cultivation['souls']==q['souls']-q['next_cost']['souls']
+    p.asura_cultivation['veins']={'9':3}
+    assert asura.public_meridians(p)['next_cost'] is None
+    assert asura.public_meridians(p)['ready']
+    p.layer=2
+    assert asura.public_meridians(p)['required']==6
+    assert asura.public_meridians(p)['failures']==0
+
+
+def test_material_body_display_is_independent(ready):
+    _,g=ready
+    b=asura.public_body(dict(id='weak',name='材料',realm_index=11,layer=9,path='demonic',body_training=59,immortal_body_level=0))
+    assert not b['eligible'] and b['body_training']==59
+    assert b['immortal_body_level']==0 and g.player.asura_cultivation['body_level']==20
+
+
+@pytest.mark.parametrize('world,path,label', [('asura','demonic','煞元'),('nether','monster','幽元'),('reincarnation','ghost','轮回元力')])
+def test_native_energy_projection(ready,world,path,label):
+    engine,g=ready
+    g.player.world,g.player.path=world,path
+    g.player.location_id=engine.maps.normalize_location(world,None)
+    shown=engine.present(g)
+    assert shown['player']['resource_name']==label
+    assert shown['aperture']['name']==label
+    assert shown['aperture']['energy_kind']==world
