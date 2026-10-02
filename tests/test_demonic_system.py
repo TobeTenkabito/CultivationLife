@@ -166,28 +166,18 @@ class DemonicSystemTests(unittest.TestCase):
         self.assertGreater(puppet["control"], 50)
         self.assertLess(shown["player"]["mp"], before_mp)
 
-    def test_lower_realm_infusion_always_adds_power_but_same_realm_can_fail(self):
-        class HighRoll:
-            @staticmethod
-            def random():
-                return 0.99
-
-        _, game = self.demonic_game()
-        lower = {
-            "id":"lower", "name":"低阶", "type":"living", "realm_index":3, "layer":1,
-            "combat_power":100, "control":80, "main_technique_id":"TECH_BLOOD_RIVER",
-            "cultivation_progress":0, "last_infusion_age":None, "alive":True,
-        }
-        self.engine._infuse_puppet(game, lower, HighRoll())
-        self.assertGreater(lower["combat_power"], 100)
-        game.player.mp = max_mp(game.player)
-        same = lower | {
-            "id":"same", "name":"同阶", "realm_index":4, "combat_power":100,
-            "cultivation_progress":0, "last_infusion_age":None,
-        }
-        summary = self.engine._infuse_puppet(game, same, HighRoll())
-        self.assertEqual(same["combat_power"], 100)
-        self.assertIn("未转化为战力", summary)
+    def test_legacy_infusion_endpoint_uses_guaranteed_cultivation(self):
+        game_id, game = self.demonic_game()
+        game.player.opportunity = 1000000
+        game.player.puppets = [dict(id='lower', name='低阶', type='living', realm_index=3,
+            layer=1, combat_power=100, control=80, body_training=20, divine_sense_rank=30, alive=True)]
+        self.engine.store.save(game)
+        self.engine.puppet_action(game_id, 'lower', 'infuse')
+        trained = self.engine.store.load(game_id).player.puppets[0]
+        self.assertGreater(trained['combat_power'], 100)
+        self.assertGreater(trained['layer'], 1)
+        self.assertEqual(trained['body_training'], 20)
+        self.engine.puppet_action(game_id, 'lower', 'infuse')  # No old once-per-year gate.
 
     def test_soul_refining_consumes_cultivation_and_releases_remaining_bonus(self):
         game_id, game = self.demonic_game()
@@ -234,12 +224,14 @@ class DemonicSystemTests(unittest.TestCase):
 
     def test_mechanical_puppet_uses_recipe_and_capacity(self):
         game_id, game = self.demonic_game()
-        add_item(game.player, "spirit_stone", 25)
+        ids=['puppet_demon_4_core_array','puppet_demon_4_shell_humanoid','puppet_demon_4_energy_crystal']
+        for id_ in ids: add_item(game.player,id_)
         self.engine.store.save(game)
-        shown = self.engine.craft_mechanical_puppet(game_id)
+        shown = self.engine.craft_mechanical_puppet(game_id,'humanoid',*ids)
         self.assertEqual(shown["demonic_system"]["puppets"][0]["type"], "mechanical")
         inventory = {item["id"]: item["quantity"] for item in shown["player"]["inventory"]}
-        self.assertNotIn("spirit_sword", inventory)
+        self.assertIn("spirit_sword", inventory)
+        self.assertTrue(all(id_ not in inventory for id_ in ids))
 
     def test_breakthrough_directly_raises_divine_sense_level(self):
         _, game = self.demonic_game()

@@ -150,6 +150,8 @@ def _dissolve_player_sect(deps: FactionDependencies, game: GameState, sect: Sect
 
 
 def _maybe_founded_sect_pressure(deps: FactionDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     player = game.player
     sect = game.sects.get(player.faction_id or "")
     if not sect or sect.extinct or not sect.founded_by_player or sect.world != player.world:

@@ -83,7 +83,8 @@
   }
   function updateWorld(){const p=current.player;world.querySelector('b').textContent=`${p.world_name} / ${p.location_name}`;world.querySelector('small').textContent=`第 ${p.world_age??p.age} 年 · ${p.realm_name}`;
     const power=$('#hud-power'),base=power.textContent.split(' · ')[0];
-    power.textContent=([...(['a','b'].includes(root.dataset.theme)?[base,p.spirit_root_display||p.spirit_root_name,p.path_name]:[base]), `仙痕 ${Number(p.immortal_traces||0).toLocaleString('zh-CN')}`]).filter(Boolean).join(' · ');
+    const upperResource=p.world==='asura'&&current.asura?.available?`精魂 ${Number(current.asura.souls||0).toLocaleString('zh-CN')}`:p.world==='celestial'?`仙痕 ${Number(p.immortal_traces||0).toLocaleString('zh-CN')}`:'';
+    power.textContent=([...(['a','b'].includes(root.dataset.theme)?[base,p.spirit_root_display||p.spirit_root_name,p.path_name]:[base]),upperResource]).filter(Boolean).join(' · ');
     $('#hud-age').textContent=`${p.age} 岁 · ${p.lifespan==null?'寿元无尽':`寿元 ${p.lifespan} 年`}`;
     const place=$('.landscape-place'),date=$('.landscape-date');if(place)place.textContent=`${p.location_name}外，远山依旧，万事徐来。`;if(date)date.textContent=world.querySelector('small').textContent;
   }

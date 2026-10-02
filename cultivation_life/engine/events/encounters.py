@@ -217,6 +217,8 @@ def _add_enemy_party(
 
 
 def _maybe_probability_story_event(deps: EncounterDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     for event in deps.events:
         if "probability_gate" not in event.get("tags", []) or event["id"] == "EVT_XIANG_NODE_001":
             continue
@@ -246,6 +248,8 @@ def _maybe_artifact_synthesis(deps: EncounterDependencies, game: GameState, rng:
 
 
 def _maybe_xiang_node_event(deps: EncounterDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     event = deps.events_by_id["EVT_XIANG_NODE_001"]
     if any(record.event_id == event["id"] for record in game.history):
         return False
@@ -270,6 +274,8 @@ def _roll_escalating_event(deps: EncounterDependencies, game: GameState, event: 
 
 
 def _maybe_faction_event(deps: EncounterDependencies, game: GameState, rng: random.Random) -> bool:
+    if game.settings.get("silent_events", False):
+        return False
     faction_id = game.player.faction_id
     if (
         not faction_id

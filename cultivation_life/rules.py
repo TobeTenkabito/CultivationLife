@@ -925,6 +925,7 @@ def public_player(player: Player) -> dict[str, Any]:
     )
     uses_immortal_resource = (WORLD_SYSTEMS['world_profiles'].get(player.world, {}).get('tier', 1) >= 3
                               and (player.world == 'celestial' or player.immortal_power_converted))
+    native_energy = WORLD_SYSTEMS.get('upper_voisinages', {}).get('worlds', {}).get(player.world) if player.realm_index >= 9 else None
 
     def public_technique(technique: Technique | None, environment_active: bool) -> dict[str, Any] | None:
         if technique is None:
@@ -1057,8 +1058,8 @@ def public_player(player: Player) -> dict[str, Any]:
         spirit_root_elements=[AFFINITY_NAMES[element] for element in player_affinities(player)],
         additional_root_names=[AFFINITY_NAMES[element] for element in player.additional_roots],
         world_name=WORLD_SYSTEMS["world_names"].get(player.world, player.world),
-        resource_name="仙灵力" if uses_immortal_resource else "MP",
-        resource_kind="immortal" if uses_immortal_resource else "mana",
+        resource_name=native_energy['energy'] if native_energy else "仙灵力" if uses_immortal_resource else "MP",
+        resource_kind=player.world if native_energy else "immortal" if uses_immortal_resource else "mana",
         immortal_power={
             "visible": player.world == "celestial",
             "converted": player.immortal_power_converted,

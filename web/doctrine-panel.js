@@ -224,14 +224,14 @@
       box.append(el('b', `${names(field.owner)} · ${field.name || '未知领域'}`),
         el('p', `稳固 ${fmt(field.stability ?? field.strength)} · 侵夺 ${fmt(field.incursion ?? field.strength)} · 权能 ${field.authority == null ? '未明' : fmt(field.authority)}`),
         el('small', `庇护：${field.protects.map(names).join('、')} · 侵夺：${field.targets.map(names).join('、') || '无'}`),
-        el('small', `剩余仙灵力 ${fmt(data.resources[field.owner])} · 持续 ${field.sustained_rounds || 1} 轮`),
+        el('small', `剩余元力 ${fmt(data.resources[field.owner])} · 持续 ${field.sustained_rounds || 1} 轮`),
         el('small', `权能：${effectNames(field)}`));
       grid.append(box);
     }
     section.append(grid);
     for (const [id, row] of Object.entries(data.relations || {})) {
       if (!row.attacker) continue;
-      const relation = {dominated: '庇护被突破', contested: '仙域相持', pressed: '承压但仍有庇护'}[row.relation] || '未受侵夺';
+      const relation = {dominated: '庇护被突破', contested: '邻域相持', pressed: '承压但仍有庇护'}[row.relation] || '未受侵夺';
       const line = el('div', null, `voisinage-relation ${row.relation}`);
       line.append(el('span', `${names(row.attacker)} → ${names(id)}：${relation}`));
       const ratio = row.attack_strength / Math.max(1, row.attack_strength + row.defense_strength);

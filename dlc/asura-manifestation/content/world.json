@@ -6,49 +6,49 @@
       "routes": {
         "deva": {
           "name": "天",
-          "requirement": "道修或佛修肉身",
+          "requirement": "道修或佛修肉身，或天人像机关傀儡",
           "part": "天相",
           "effect": "restore_body",
           "preferred": 0
         },
         "naga": {
           "name": "龙",
-          "requirement": "水族妖身或已有龙形的妖修肉身",
+          "requirement": "水族妖身或已有龙形的妖修肉身，或龙形机关傀儡",
           "part": "龙躯",
           "effect": "suppress",
           "preferred": 1
         },
         "yaksha": {
           "name": "夜叉",
-          "requirement": "魔修肉身",
+          "requirement": "魔修肉身，或夜叉形机关傀儡",
           "part": "夜叉战躯",
           "effect": "strike",
           "preferred": 2
         },
         "gandharva": {
           "name": "乾达婆",
-          "requirement": "草木精怪肉身",
+          "requirement": "草木精怪肉身，或灵木形机关傀儡",
           "part": "香音身",
           "effect": "restore_spirit",
           "preferred": 3
         },
         "mahoraga": {
           "name": "摩睺罗",
-          "requirement": "蛇属妖身",
+          "requirement": "蛇属妖身，或蛇形机关傀儡",
           "part": "巨蟒身",
           "effect": "seal",
           "preferred": 4
         },
         "kinnara": {
           "name": "紧那罗",
-          "requirement": "狐属或猿属妖身",
+          "requirement": "狐属或猿属妖身，或乐伎形机关傀儡",
           "part": "合鸣身",
           "effect": "restore_field",
           "preferred": 5
         },
         "garuda": {
           "name": "迦楼罗",
-          "requirement": "羽属妖身或鸟类真灵肉身",
+          "requirement": "羽属妖身或鸟类真灵肉身，或鸟形机关傀儡",
           "part": "双翼",
           "effect": "strike",
           "preferred": 6

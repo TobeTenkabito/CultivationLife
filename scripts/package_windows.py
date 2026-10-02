@@ -20,7 +20,7 @@ def main():
     assert passed and 'failed' not in test_log and 'ERROR' not in test_log, 'Full regression suite must pass'
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     assert exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log
-    for check in ('asura-court', 'asura', 'handbook', 'quick-start'):
+    for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         assert 'passed' in result and 'Traceback' not in result, check
     exe = ROOT/'dist/launcher.exe'
@@ -35,6 +35,9 @@ def main():
         'save_schema': 5,
         'validation': [
             f'{passed.group(1)} automated regression tests passed',
+            'Six independent Asura entrances and base puppet workshop; original three-head six-arm SVG with 27 live meridian nodes; DLC entrance colors and six-theme portrait/landscape layout verified',
+            'Puppet component tiers across eleven worlds, independent cultivation/body/sense, crafting and eightfold shape matching verified',
+            'Silent ambient events retain manual interactions and periodic lightning trials; batch owned training and six-theme controls verified',
             'Base-game NPC royal seats, adjacent nonlethal blood duels, strength assessments, challenge grace and cooldowns, old-save migration verified',
             'Royal policies, appointments, wages, works and decrees use real treasury and elapsed-time settlement',
             'Court browser actions and persistence verified in six themes at desktop, portrait and landscape widths; no JavaScript errors',

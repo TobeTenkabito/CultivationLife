@@ -84,6 +84,9 @@ def public_aperture(player, game=None):
     asura_conversion = player.asura_cultivation.get('conversion', 0) / 5 if asura_active(player) else None
     from .upper_voisinage import world_config, available as upper_available
     upper = world_config(player) if upper_available(player) else None
+    origin_world = (player.sealed_cultivation or {}).get('upper_world',
+        {'demonic':'asura', 'monster':'nether', 'ghost':'reincarnation'}.get(player.path, 'celestial'))
+    origin_energy = WORLD_SYSTEMS['upper_voisinages']['worlds'].get(origin_world, {}).get('energy', '仙灵力')
     from ..rules import intrinsic_resource_breakdown
     intrinsic = intrinsic_resource_breakdown(player)
     field = None
@@ -96,6 +99,8 @@ def public_aperture(player, game=None):
     return {'available': True, 'lower': lower, 'field': field,
             'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
             'title': upper['aperture'] if upper else '仙窍', 'native': bool(upper),
+            'energy_kind': player.world if upper else 'imitation' if lower else 'immortal',
+            'sealed_name': origin_energy,
             'asura_conversion': asura_conversion is not None,
             'current': min(state['current'], state['capacity'] * state['conversion']),
             'capacity': state['capacity'] * state['conversion'],
@@ -121,7 +126,7 @@ class ImmortalApertureMixin:
         p = game.player
         if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
             or (game.guixu_state.get('player_session') or {}).get('trapped')):
-            raise ValueError('当前状态不能操持仙窍')
+            raise ValueError('当前状态不能操持元府')
         if not available(p):
             raise ValueError('真仙或灵域功法修至四级后方可开启仙窍')
         ensure_aperture(p)

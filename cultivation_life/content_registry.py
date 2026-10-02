@@ -266,6 +266,8 @@ class ContentRegistry:
         story_combat_doc = copy.deepcopy(documents["story_combat_scenarios.json"])
         monster_bloodline_doc = copy.deepcopy(documents.get("monster_bloodlines.json", {"schema_version": 1}))
 
+        from .puppet_content import item_definitions
+        items_doc["items"].extend(item_definitions())
         items = cls._index_models(items_doc, "items", Item)
         source_defaults = techniques_doc.get("source_defaults_by_path", {})
         expected_source_paths = {"dao", "demonic", "ghost", "monster", "buddhist", "confucian"}

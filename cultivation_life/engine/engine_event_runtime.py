@@ -31,6 +31,8 @@ def _select_event(deps: EventDependencies, game: GameState, action: str, rng: ra
         and game.player.body_training < 3 and game.player.mortal_aspiration is None
     ):
         return deps.events_by_id["EVT_MORTAL_ASPIRATION_001"]
+    if game.settings.get("silent_events", False):
+        return None
     candidates: list[tuple[dict[str, Any], float]] = []
     for event in sorted(deps.events, key=lambda value: value["id"]):
         tags = event.get("tags", [])

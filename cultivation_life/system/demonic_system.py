@@ -284,6 +284,11 @@ class DemonicSystemMixin:
     def _restore_captive_npc(self, game: GameState, target: dict[str, Any], affinity_gain: float) -> None:
         npc = self._find_npc(game, str(target.get("npc_id", "")))
         if npc:
+            from .owned_training import facts
+            trained = facts(target)
+            for key in ("realm_index", "layer", "body_training", "immortal_body_level", "divine_sense_rank"):
+                if key in trained:
+                    setattr(npc, key, trained[key])
             npc.alive = True
             npc.death_reason = None
             npc.affinity = float(target.get("affinity", 0)) + affinity_gain
@@ -350,35 +355,66 @@ class DemonicSystemMixin:
         else:
             player.prisoners = [entry for entry in player.prisoners if entry is not target]
 
-    def craft_mechanical_puppet(self, game_id: str) -> dict[str, Any]:
+    def preview_puppet(self, game_id, form, core, shell, energy):
+        from .puppet_crafting import preview
+        return preview(self._load(game_id).player, form, core, shell, energy)
+
+    def craft_mechanical_puppet(self, game_id, form='', core='', shell='', energy=''):
+        from .puppet_crafting import preview
         game = self._load(game_id)
         player = game.player
-        if not player.alive or game.pending_event or player.imprisonment:
+        if (not player.alive or game.pending_event or player.imprisonment or game.active_trial
+                or player.sealed_cultivation or player.cultivation_suppression or player.ghost_captor
+                or (game.guixu_state.get('player_session') or {}).get('trapped')):
             raise ValueError("当前状态无法合成机关傀儡")
-        if len(player.puppets) >= puppet_capacity(player):
-            raise ValueError("神识可控傀儡数量已经达到上限")
-        recipe = self._demonic_rules()["mechanical_recipe"]
-        if any(not has_item(player, item_id, int(quantity)) for item_id, quantity in recipe.items()):
-            raise ValueError("机关傀儡需要下品灵石 ×25 与青锋灵剑 ×1")
-        for item_id, quantity in recipe.items():
-            remove_item(player, item_id, int(quantity))
-        power = max(20.0, combat_power(player) * 0.35)
-        player.puppets.append({
-            "id": f"puppet_{uuid.uuid4().hex[:12]}", "name": "玄铁机关傀儡", "type": "mechanical",
-            "body_training": player.body_training, "immortal_body_level": player.asura_cultivation.get("body_level", 0),
-            "type_name": PUPPET_NAMES["mechanical"], "realm_index": max(1, player.realm_index - 1), "layer": 1,
-            "combat_power": round(power, 1), "original_power": round(power, 1), "main_technique_id": None,
-            "control": 100.0, "cultivation_progress": 0.0, "breakthrough_bonus": 0.0,
-            "created_age": player.age, "last_infusion_age": None, "alive": True,
-        })
-        self._grant_art_experience(player, "refining", 20)
-        self._grant_art_experience(player, "formation", 8)
-        self._grant_art_experience(player, "spirit_control", 10)
-        game.history.append(HistoryRecord(
-            "SYS_MECHANICAL_PUPPET", 1, player.age, "机关合傀", None, "created",
-            "你以二十五枚灵石驱动阵心、熔入青锋灵剑，制成一具玄铁机关傀儡。",
-            {"recipe": recipe}, ["system", "puppet", "craft"],
-        ))
+        result = preview(player, form, core, shell, energy)
+        if not result['can_craft']:
+            raise ValueError(result['reason'])
+        # Quote validates ownership and distinct roles before consuming any component.
+        for component in result['components']:
+            remove_item(player, component['id'], 1)
+        puppet = {k:v for k,v in result.items() if k not in {'can_craft','reason'}}
+        puppet.update(id=f"puppet_{uuid.uuid4().hex[:12]}", type='mechanical',type_name='机关傀儡',
+                      main_technique_id=None,control=100.,cultivation_progress=0.,breakthrough_bonus=0.,
+                      created_age=player.age,alive=True,durability=100.,path=player.path)
+        player.puppets.append(puppet)
+        self._grant_art_experience(player, 'refining', 20)
+        self._grant_art_experience(player, 'formation', 8)
+        self._grant_art_experience(player, 'spirit_control', 10)
+        summary=(f"你以{ '、'.join(c['name'] for c in result['components']) }各一份打造{puppet['name']}，"
+                 f"成品战力 {puppet['combat_power']:g}，普通炼体 {puppet['body_training']}/100层，"
+                 f"高阶肉身 {puppet['immortal_body_level']}层，神识 {puppet['divine_sense_rank']}阶。")
+        game.history.append(HistoryRecord('SYS_MECHANICAL_PUPPET',1,player.age,'机关合傀',form,'created',
+            summary,{'components':[c['id'] for c in result['components']]},['system','puppet','craft']))
+        game.updated_at=now_iso()
+        self.store.save(game)
+        return self.present(game)
+
+    def train_owned(self, game_id: str, target_id: str, kind: str, axis: str, batches: int = 1):
+        from .owned_training import quote
+        game = self._load(game_id)
+        p = game.player
+        if (not p.alive or game.pending_event or p.imprisonment or p.sealed_cultivation
+                or p.ghost_captor or p.cultivation_suppression or game.active_trial
+                or (game.guixu_state.get('player_session') or {}).get('trapped')):
+            raise ValueError("当前状态无法培养")
+        if kind not in {"prisoner", "puppet"}:
+            raise ValueError("培养对象类型无效")
+        entries = p.prisoners if kind == "prisoner" else p.puppets
+        target = next((x for x in entries if str(x.get("id")) == target_id and x.get("alive", True)), None)
+        if not target:
+            raise ValueError("培养对象不存在")
+        plan = quote(p, target, axis, batches)
+        if not plan['can_train']:
+            raise ValueError(plan['reason'])
+        p.opportunity -= plan['opportunity']
+        p.mp -= plan['mp']
+        target.update(plan['result'])
+        summary = (f"为{target['name']}{plan['label']} {plan['rounds']}轮：{plan['before']} → {plan['after']}；"
+                   f"机缘 -{plan['opportunity']:g}，法力 -{plan['mp']:g}。")
+        game.history.append(HistoryRecord('SYS_OWNED_TRAINING', 1, p.age, '培养', axis, 'trained',
+                                         summary, {'target_id': target_id, 'rounds': plan['rounds']},
+                                         ['system', 'training', kind]))
         game.updated_at = now_iso()
         self.store.save(game)
         return self.present(game)
@@ -386,6 +422,8 @@ class DemonicSystemMixin:
     def puppet_action(
         self, game_id: str, puppet_id: str, action: str, content_id: str = "",
     ) -> dict[str, Any]:
+        if action == "infuse":
+            return self.train_owned(game_id, puppet_id, "puppet", "cultivation", 1)
         game = self._load(game_id)
         player = game.player
         if not player.alive or game.pending_event or player.imprisonment:
@@ -394,16 +432,13 @@ class DemonicSystemMixin:
         if not puppet:
             raise ValueError("目标傀儡不存在")
         rng = decode_rng(game.seed, game.rng_state)
-        if action == "infuse":
-            summary = self._infuse_puppet(game, puppet, rng)
-            result = "infused"
-        elif action == "pill":
+        if action == "pill":
             item = ITEM_CATALOG.get(content_id)
             if not item or "pill" not in item.tags or not remove_item(player, content_id):
                 raise ValueError("需要选择并持有一枚丹药")
             gain = float(self._demonic_rules()["pill_breakthrough_bonus"])
             puppet["breakthrough_bonus"] = min(0.35, float(puppet.get("breakthrough_bonus", 0)) + gain)
-            result, summary = "pill_fed", f"你赐予{puppet['name']}{item.name}，其下次突破率 +{gain:.0%}。"
+            result, summary = "pill_fed", f"你赐予{puppet['name']}{item.name}，其下次批量培养机缘费用减免 +{gain:.0%}（最多35%）。"
         elif action == "technique":
             if puppet.get("type") != "living":
                 raise ValueError("只有活傀能够更换功法")
@@ -447,63 +482,6 @@ class DemonicSystemMixin:
         game.rng_state = encode_rng(rng)
         self.store.save(game)
         return self.present(game)
-
-    def _infuse_puppet(self, game: GameState, puppet: dict[str, Any], rng: random.Random) -> str:
-        player = game.player
-        if puppet.get("type") == "mechanical":
-            raise ValueError("机关傀儡不能通过灌注气修炼")
-        if puppet.get("last_infusion_age") == player.age:
-            raise ValueError("本行动年份已经为该傀儡灌注过气")
-        mp_cost = max(1.0, max_mp(player) * float(self._demonic_rules()["infusion_mp_ratio"]))
-        if player.mp < mp_cost:
-            raise ValueError("当前 MP 不足以完成灌注")
-        technique = self._puppet_technique(puppet.get("main_technique_id")) or player.technique
-        if not technique:
-            raise ValueError("该傀儡没有可承载灌注的主修功法")
-        regional = self.maps.qi_gain_efficiencies(player.world, player.location_id)
-        source_efficiency = sum(float(weight) * float(regional.get(source, 0)) for source, weight in technique.sources.items())
-        gain = float(self._demonic_rules()["infusion_base"]) * source_efficiency * (1 + technique.grade * 0.08)
-        player.mp -= mp_cost
-        self._grant_art_experience(player, "spirit_control", 6)
-        puppet["last_infusion_age"] = player.age
-        puppet["cultivation_progress"] = float(puppet.get("cultivation_progress", 0)) + gain
-        realm_gap = player.realm_index - int(puppet.get("realm_index", 0))
-        power_chance = 1.0 if realm_gap > 0 else 0.65 if realm_gap == 0 else 0.35
-        power_increased = power_chance >= 1.0 or rng.random() < power_chance
-        if power_increased:
-            puppet["combat_power"] = round(float(puppet["combat_power"]) * (1 + min(0.08, gain / 1200)), 1)
-        breakthrough = self._try_puppet_breakthrough(puppet, rng)
-        power_text = (
-            "境界压制使本次战力稳定增长"
-            if realm_gap > 0 else
-            f"本次战力增长成功（概率 {power_chance:.0%}）"
-            if power_increased else f"本次仅稳固修为，未转化为战力（增长概率 {power_chance:.0%}）"
-        )
-        return f"你按《{technique.name}》的{','.join(technique.sources)}源路灌注，培养进度 +{gain:.1f}，MP -{mp_cost:.0f}；{power_text}。{breakthrough}"
-
-    def _try_puppet_breakthrough(self, puppet: dict[str, Any], rng: random.Random) -> str:
-        kind = str(puppet.get("type"))
-        if kind == "mechanical" or int(puppet.get("realm_index", 0)) >= len(REALMS) - 1:
-            return ""
-        required = REALMS[int(puppet["realm_index"])].opportunity_base * 0.35
-        if float(puppet.get("cultivation_progress", 0)) < required:
-            return ""
-        base = float(self._demonic_rules()["puppet_breakthrough_base"][kind])
-        chance = min(0.90, base + float(puppet.get("breakthrough_bonus", 0)))
-        puppet["breakthrough_bonus"] = 0.0
-        if rng.random() >= chance:
-            puppet["cultivation_progress"] = required * 0.5
-            return f"冲关失败（成功率 {chance:.0%}），保留一半积累。"
-        puppet["cultivation_progress"] = 0.0
-        if int(puppet.get("layer", 1)) >= REALMS[int(puppet["realm_index"])].layers:
-            puppet["realm_index"] = int(puppet["realm_index"]) + 1
-            puppet["layer"] = 1
-        else:
-            puppet["layer"] = int(puppet.get("layer", 1)) + 1
-        puppet["combat_power"] = round(float(puppet["combat_power"]) * 1.18, 1)
-        if kind == "living":
-            puppet["control"] = max(0.0, float(puppet.get("control", 100)) - 8)
-        return f"傀儡冲关成功（成功率 {chance:.0%}）。"
 
     def _devour_puppet(self, game: GameState, puppet: dict[str, Any]) -> tuple[str, str]:
         player = game.player
@@ -710,6 +688,8 @@ class DemonicSystemMixin:
                 self._die(game, "吞噬的外来元神反客为主，撕碎识海", "SYS_SOUL_BACKLASH_DEATH")
 
     def _public_demonic_system(self, player: Player) -> dict[str, Any]:
+        from .owned_training import public as training_public
+        from .puppet_crafting import public as crafting_public
         pill_ids = [item.id for item in player.inventory if "pill" in item.tags and item.quantity > 0]
         techniques = [
             {"id": entry.id, "name": entry.name}
@@ -730,6 +710,7 @@ class DemonicSystemMixin:
             )
             contribution_mode = "队伍战力" if entry.get("type") == "living" else "本体战力"
             puppets.append(copy.deepcopy(entry) | {
+                "training": training_public(player, entry),
                 "type_name": PUPPET_NAMES.get(str(entry.get("type")), str(entry.get("type"))),
                 "realm_name": self._npc_realm_name(SectNpc(
                     "", "", "", int(entry.get("realm_index", 0)), int(entry.get("layer", 1)), 0, 1,
@@ -758,6 +739,7 @@ class DemonicSystemMixin:
             allowed, reason = can_possess(player, entry)
             gender = str(entry.get("gender") or self._stable_gender(str(entry.get("id", ""))))
             prisoners.append(copy.deepcopy(entry) | {
+                "training": training_public(player, entry),
                 "gender": gender, "gender_name": "女" if gender == "female" else "男",
                 "can_possess": allowed, "possession_reason": reason,
                 "can_recruit_concubine": gender == "female",
@@ -771,7 +753,7 @@ class DemonicSystemMixin:
             "breakthrough_bonus": round(player.devouring_breakthrough_bonus, 4),
             "pill_options": [{"id": item_id, "name": ITEM_CATALOG[item_id].name} for item_id in pill_ids],
             "technique_options": techniques,
-            "mechanical_recipe": copy.deepcopy(self._demonic_rules()["mechanical_recipe"]),
+            "puppet_crafting": crafting_public(player),
             "control_mp_cost": round(max_mp(player) * float(self._demonic_rules()["control_reinforce_mp_ratio"]), 1),
             "true_demon_ascension": {
                 "required_demon_qi_level": ascension_required,
@@ -779,7 +761,7 @@ class DemonicSystemMixin:
                 "satisfied": ascension_current >= ascension_required,
                 "available": ascension_available,
             },
-            "time_behavior": "年度机缘、控制衰减与反噬按行动年数逐年结算；普通炼魂为即时操作，闭关炼化则会实际推进所示年月。",
+            "time_behavior": "年度机缘、控制衰减与反噬按行动年数逐年结算；培养按资源即时投入，无每年次数限制；每轮修为提升1—3层、普通炼体10层（高阶肉身2层）、神识8阶，最高不超过玩家对应能力。可选1/5/10轮，到上限自动停止且只收实际轮数费用。闭关炼化会实际推进年月。",
         }
 
     @classmethod

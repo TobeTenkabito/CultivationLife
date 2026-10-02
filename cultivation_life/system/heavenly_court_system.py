@@ -132,7 +132,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         others = [row for row in eligible if row["id"] != "player"]
         candidate_count = min(rng.randint(4, 7), len(others)) if others else 0
         candidates = rng.sample(others, candidate_count) if candidate_count else []
-        if player_row and game.settings.get("court_election_popup", True):
+        if player_row and (game.settings.get("court_election_popup", True) and not game.settings.get("silent_events", False)):
             candidates.append(player_row)
         rng.shuffle(candidates)
         if not candidates:
@@ -554,7 +554,7 @@ class HeavenlyCourtSystemMixin(CourtGovernanceMixin):
         return {
             "visible": True, "initialized": True, "unit": int(court["unit"]),
             "term_units": config["term_units"], "stipend": config["grade_stipends"][str(court["player_grade"])],
-            "election_notices": game.settings.get("court_election_popup", True),
+            "election_notices": (game.settings.get("court_election_popup", True) and not game.settings.get("silent_events", False)),
             "location_id": 'jade_capital', "location_name": '玉京仙都',
             "authority": round(float(court["authority"]), 2),
             "treasury": round(float(court["treasury"]), 2),
