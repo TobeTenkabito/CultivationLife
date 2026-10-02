@@ -87,8 +87,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     era_news: list[str] = []
     start_world_age = player.age
     start_age = current_body_age(player)
-    ledger = ActionUnitLedger(action, years)
     for elapsed_index in range(years):
+        if elapsed_index % time_unit == 0:
+            ledger = ActionUnitLedger(action, time_unit)
         ledger.begin_year()
         advance_player_age(player)
         low, high = ACTIONS[action]["opportunity"]
@@ -144,6 +145,10 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if player.alive:
             deps._advance_soul_erosion_time(game, 1)
         if not continue_world or not player.alive:
+            break
+        if action == 'treasure' and (elapsed_index + 1) % time_unit == 0:
+            # Selecting the reward is a manual event. Stop this batch before
+            # starting another expedition whose reward could be overwritten.
             break
     deps._finish_doctrine_action(game, action, player.age - start_world_age)
     deps._finish_yaochi_action(game, action, player.age - start_world_age)
@@ -229,8 +234,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if elapsed_years >= 5:
             deps._record_era_summary(game, start_world_age, era_news)
 
-        deps._advance_auction_clock(game, rng)
-        deps._advance_exchange_clock(game, rng)
+        for _ in range(completed_units):
+            deps._advance_auction_clock(game, rng)
+            deps._advance_exchange_clock(game, rng)
 
     deps._finish_sage_action(game)
     # 坊市只在一次玩家操作结束时刷新。旧逻辑在大乘一次行动的 1000 个

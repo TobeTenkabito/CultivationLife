@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ActionUnitLedger:
-    """Tracks one click/action unit while the world still advances year by year.
+    """Tracks one action unit while the world still advances year by year.
 
     Benefits are annual, but an action's resource cost and active encounter are
     paid/resolved only once. Keeping that distinction here prevents every new

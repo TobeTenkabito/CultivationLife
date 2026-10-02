@@ -45,6 +45,8 @@ from ..dependencies import InventoryDependencies
 
 def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    if not game.player.alive:
+        raise ValueError("此生已经结束")
     item = ITEM_CATALOG.get(item_id)
     if not item or not has_item(game.player, item_id):
         raise ValueError("物品不存在")

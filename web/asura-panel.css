@@ -27,19 +27,6 @@
 .puppet-result{padding:12px;border-left:2px solid var(--pine);background:var(--surface)}
 @media(max-width:500px){.puppet-component-grid{grid-template-columns:1fr}.puppet-workshop{padding:12px}}
 
-.asura-meridian-figure{margin:0;display:grid;justify-items:center;gap:12px;color:var(--asura-accent)}
-.asura-meridian-figure svg{display:block;width:min(100%,430px);height:auto}
-.asura-meridian-figure figcaption{text-align:center;white-space:pre-line;color:var(--muted);font-size:12px}
-.asura-aureole{fill:color-mix(in srgb,var(--asura-accent) 4%,var(--paper));stroke:var(--asura-accent);stroke-width:1;opacity:.65}
-.asura-anatomy{fill:var(--paper);stroke:var(--asura-accent);stroke-width:1.8;stroke-linejoin:round}
-.asura-engraving{fill:none;stroke:var(--asura-accent);stroke-width:1.4;stroke-linecap:round;opacity:.8}
-.asura-channel{fill:none;stroke:var(--asura-accent);stroke-width:1;stroke-dasharray:3 4;opacity:.55}
-.asura-vein-node circle{fill:var(--paper);stroke:var(--muted);stroke-width:1}
-.asura-vein-node text{fill:var(--muted);font:11px Georgia,serif}
-.asura-vein-node[data-state=open] circle{fill:var(--asura-accent);stroke:var(--asura-accent)}
-.asura-vein-node[data-state=open] text{fill:var(--paper)}
-.asura-vein-node[data-state=next] circle{stroke:var(--asura-accent);stroke-width:3}
-.asura-vein-node[data-state=next] text{fill:var(--asura-accent);font-weight:bold}
 .asura-system-panel progress{display:block;width:100%;height:8px;accent-color:var(--asura-accent)}
 .asura-system-panel progress{appearance:none;-webkit-appearance:none;border:0;border-radius:4px;overflow:hidden;background:var(--line)}
 .asura-system-panel progress::-webkit-progress-bar{background:var(--line)}

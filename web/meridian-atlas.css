@@ -1,0 +1,65 @@
+/* A manuscript plate shared by the two cultivation paths. */
+#immortal-veins-card { width:min(900px,calc(100vw - 140px)); }
+@media(max-width:800px) { #immortal-veins-card { width:calc(100vw - 20px); } }
+.meridian-atlas {
+  --atlas-paper:#f4ecda;
+  --atlas-ink:#5e5142;
+  --atlas-muted:#877963;
+  --atlas-gold:#aa8750;
+  --atlas-accent:#3e6c60;
+  --atlas-faint:#afa28a;
+  width:100%; min-width:0; margin:0; padding:18px 12px 16px; box-sizing:border-box;
+  display:grid; justify-items:center; gap:12px;
+  color:var(--atlas-ink); border:1px solid #cdbfa3; border-radius:3px;
+  background:radial-gradient(ellipse at 45% 34%,#fffaf0a8,transparent 65%),
+    repeating-linear-gradient(3deg,#8b744004 0px,#8b744004 1px,transparent 1px,transparent 5px),var(--atlas-paper);
+  box-shadow:inset 0 0 46px #95713f0b;
+}
+.meridian-atlas[data-kind=asura] { --atlas-accent:#963e34; }
+.meridian-atlas svg { display:block; width:min(100%,560px); height:auto; color:var(--atlas-accent); overflow:visible; }
+.meridian-atlas .atlas-frame { fill:none; stroke:#b4a386; stroke-width:.7; }
+.meridian-atlas .atlas-corners { fill:none; stroke:var(--atlas-gold); stroke-width:1.2; }
+.meridian-atlas .atlas-title { fill:var(--atlas-ink); font:25px 'KaiTi','STKaiti','Noto Serif SC',serif; letter-spacing:3px; }
+.meridian-atlas .atlas-kicker { fill:var(--atlas-muted); font:9px serif; letter-spacing:3px; }
+.meridian-atlas .atlas-marginal { fill:var(--atlas-muted); font:12px 'KaiTi','STKaiti',serif; letter-spacing:4px; }
+.meridian-atlas .atlas-colophon { fill:var(--atlas-muted); font:11px 'KaiTi','STKaiti',serif; letter-spacing:2px; }
+.meridian-atlas .atlas-aureole { fill:none; stroke:var(--atlas-gold); stroke-width:.65; opacity:.3; }
+.meridian-atlas .atlas-cloud { fill:none; stroke:var(--atlas-gold); stroke-width:.8; opacity:.4; }
+.meridian-atlas .atlas-anatomy { opacity:.84; }
+.meridian-atlas .atlas-cloud .atlas-ink { fill:none; stroke:var(--atlas-gold); stroke-width:.8; }
+.meridian-atlas .atlas-channel-ground { fill:none; stroke:var(--atlas-paper); stroke-width:4; opacity:.8; }
+.meridian-atlas .atlas-main-channel { fill:none; stroke:var(--atlas-faint); stroke-width:5; opacity:.65; }
+.meridian-atlas .atlas-channel { fill:none; stroke:var(--atlas-faint); stroke-width:1.2; stroke-linecap:round; }
+.meridian-atlas .atlas-channel-core { stroke:var(--atlas-paper); stroke-width:2.5; }
+.meridian-atlas .atlas-channel.is-open { stroke:var(--atlas-accent); stroke-width:1.8; }
+.meridian-atlas .atlas-cranial-channel { stroke-width:.8; opacity:.5; stroke-dasharray:2 3; }
+.meridian-atlas .atlas-node { cursor:pointer; outline:none; }
+.meridian-atlas .atlas-node .atlas-hit { fill:transparent; stroke:none; }
+.meridian-atlas .atlas-node .atlas-node-disc { fill:var(--atlas-paper); stroke:var(--atlas-muted); stroke-width:1; }
+.meridian-atlas .atlas-node .atlas-outer-ring { fill:none; stroke:var(--atlas-faint); stroke-width:.75; }
+.meridian-atlas .atlas-node .atlas-selection-ring { fill:none; stroke:none; pointer-events:none; }
+.meridian-atlas .atlas-node[aria-pressed=true] .atlas-selection-ring { stroke:var(--atlas-accent); stroke-width:1; stroke-dasharray:2 4; }
+.meridian-atlas .atlas-node text { fill:var(--atlas-ink); font:11px Georgia,serif; }
+.meridian-atlas .atlas-node .atlas-core-seal { fill:var(--atlas-paper); stroke:var(--atlas-gold); stroke-width:.8; }
+.meridian-atlas .atlas-node[data-state=open] .atlas-node-disc { fill:var(--atlas-accent); stroke:var(--atlas-accent); }
+.meridian-atlas .atlas-node[data-state=open] text { fill:#fff7e7; }
+.meridian-atlas .atlas-node[data-state=open] .atlas-outer-ring { stroke:var(--atlas-gold); }
+.meridian-atlas .atlas-node[data-state=open] .atlas-core-seal { stroke:var(--atlas-accent); fill:#aa875018; }
+.meridian-atlas .atlas-node[data-state=next] .atlas-node-disc { stroke:var(--atlas-accent); stroke-width:2; }
+.meridian-atlas .atlas-node[data-state=next] .atlas-outer-ring { stroke:var(--atlas-accent); }
+.meridian-atlas .atlas-node[data-state=next] text { fill:var(--atlas-accent); font-weight:bold; }
+.meridian-atlas .atlas-node.sealed { opacity:1; }
+.meridian-atlas .atlas-node:hover .atlas-node-disc,
+.meridian-atlas .atlas-node:focus-visible .atlas-node-disc { stroke:var(--atlas-accent); stroke-width:2.5; }
+.meridian-atlas .atlas-node:focus-visible .atlas-hit { stroke:var(--atlas-accent); stroke-width:1.2; stroke-dasharray:2 3; }
+.meridian-atlas .atlas-node[aria-pressed=true] .atlas-outer-ring { stroke:var(--atlas-accent); stroke-width:1.5; }
+.meridian-atlas .atlas-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 22px; color:var(--atlas-ink); font-size:12px; }
+.meridian-atlas .atlas-key { display:inline-flex; align-items:center; gap:7px; }
+.meridian-atlas .atlas-key:before { content:''; width:9px; height:9px; border:1px solid var(--atlas-muted); border-radius:50%; }
+.meridian-atlas .atlas-key-open:before { background:var(--atlas-accent); border-color:var(--atlas-accent); }
+.meridian-atlas .atlas-key-next:before { border-color:var(--atlas-accent); outline:1px solid var(--atlas-accent); outline-offset:2px; }
+.meridian-atlas .atlas-detail { width:min(100%,400px); max-width:100%; display:grid; gap:5px; box-sizing:border-box; padding:12px 8px; text-align:center; border-top:1px solid #b8a58670; border-bottom:1px solid #b8a58670; color:var(--atlas-ink); white-space:normal; }
+.meridian-atlas .atlas-selected-name { color:var(--atlas-accent); font:18px 'KaiTi','STKaiti','Noto Serif SC',serif; }
+.meridian-atlas .atlas-selected-state { font-size:11px; letter-spacing:1px; }
+.meridian-atlas .atlas-hint { margin:0; text-align:center; font-size:11px; line-height:1.8; color:var(--atlas-muted); }
+@media(max-width:600px) { .meridian-atlas { padding:10px 0 14px; gap:12px; } }

@@ -4,6 +4,7 @@ import runpy
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.request
@@ -11,6 +12,8 @@ import urllib.error
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.release_evidence import file_digest, inputs_digest, require
 VERSION = runpy.run_path(str(ROOT / "cultivation_life/version.py"))["BASE_GAME_VERSION"]
 
 
@@ -19,6 +22,7 @@ def verify(with_dlc):
         folder = Path(directory).resolve()
         assert folder.is_relative_to((ROOT / "build").resolve())
         shutil.copy2(ROOT / "dist/launcher.exe", folder / "launcher.exe")
+        verified_digest = file_digest(folder / 'launcher.exe')
         if with_dlc:
             shutil.copytree(ROOT / "dlc", folder / "dlc")
         with socket.socket() as sock:
@@ -41,7 +45,7 @@ def verify(with_dlc):
             assert len(config["worlds"]) == 11
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
-            for asset in ('asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js'):
+            for asset in ('asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abcdef':
@@ -287,12 +291,29 @@ def verify(with_dlc):
             assert quiet['settings']['silent_events']
             assert len(quiet['market']['puppet_material_offers'])==12
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
+            return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
+                    'base_version': config['base_game']['version']}
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)
             process.wait(timeout=10)
             time.sleep(.3)
 
 
+def main():
+    require(__debug__, 'EXE verification must run without Python -O')
+    receipt = ROOT / f'build/exe-{VERSION.replace(".", "")}-verification.json'
+    receipt.unlink(missing_ok=True)
+    inputs_before = inputs_digest(ROOT)
+    cases = [verify(False), verify(True)]
+    digest = file_digest(ROOT / 'dist/launcher.exe')
+    require(all(case['exe_sha256'] == digest for case in cases), 'Executable changed during verification')
+    require(inputs_digest(ROOT) == inputs_before, 'Release inputs changed during verification')
+    document = {'schema_version': 1, 'base_version': VERSION, 'exe_sha256': digest,
+                'inputs_sha256': inputs_before, 'cases': cases}
+    temporary = receipt.with_suffix('.tmp')
+    temporary.write_text(json.dumps(document, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    temporary.replace(receipt)
+
+
 if __name__ == "__main__":
-    verify(False)
-    verify(True)
+    main()

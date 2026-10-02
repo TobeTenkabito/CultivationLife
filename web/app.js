@@ -1,4 +1,10 @@
 const $ = (selector) => document.querySelector(selector);
+// Template markup is static; every interpolated value is displayed as text.
+function htmlText(parts, ...values) {
+  const entities = {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'};
+  return parts.reduce((html, part, index) => html + part + (index < values.length
+    ? String(values[index] ?? '').replace(/[&<>"']/g, character => entities[character]) : ''), '');
+}
 let game = null;
 let busy = false;
 let configData = null;
@@ -10,6 +16,7 @@ let achievementToastTimer = null;
 let gameConfirmAction = null;
 let formationDraftProfile = null;
 let formationPreviewTimer = null;
+let formationPreviewSequence = 0;
 const achievementToastQueue = [];
 const historyFilters = new Set(['self', 'companion', 'friend', 'mentor', 'faction', 'race', 'other']);
 
@@ -282,7 +289,7 @@ function renderQuickStarts(presets) {
   groups.forEach((entries, groupName) => {
     const section = document.createElement('section'); section.className = 'quick-start-group';
     const heading = document.createElement('div'); heading.className = 'quick-start-group-heading';
-    heading.innerHTML = `<b>${groupName}</b><small>${entries.length} 项</small>`; section.appendChild(heading);
+    heading.innerHTML = htmlText`<b>${groupName}</b><small>${entries.length} 项</small>`; section.appendChild(heading);
     const grid = document.createElement('div'); grid.className = 'quick-start-group-grid';
     entries.forEach(preset => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'quick-start-button';
@@ -291,7 +298,7 @@ function renderQuickStarts(presets) {
     const worldName = configData?.worlds?.[preset.world] || preset.world;
     const badge = preset.variant_label || (preset.path === 'dao' ? '本体' : '道途配置');
     const detail = preset.description || `${worldName} · ${pathName} · 使用对应境界的默认功法与行囊`;
-    button.innerHTML = `<span class="quick-start-title"><b>${preset.name}</b><i>${badge}</i></span><span class="quick-start-meta">${worldName} · ${pathName} · ${preset.layer || 1}层</span><span>${preset.enabled ? detail : preset.status}</span>`;
+    button.innerHTML = htmlText`<span class="quick-start-title"><b>${preset.name}</b><i>${badge}</i></span><span class="quick-start-meta">${worldName} · ${pathName} · ${preset.layer || 1}层</span><span>${preset.enabled ? detail : preset.status}</span>`;
     if (preset.path === 'monster') {
       const wrapper = document.createElement('div');
       const select = document.createElement('select'); select.setAttribute('aria-label', `${preset.name}种属`);
@@ -390,6 +397,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  invalidateFormationPreview();
   window.TutorialGuide?.reset();
   window.GameThemes?.showStart();
   closeGameConfirm();
@@ -883,6 +891,7 @@ function renderFormation(system) {
   $('#formation-name').value = activeLoadout?.name || '';
   $('#formation-name').oninput = scheduleFormationPreview;
   syncFormationSelects();
+  invalidateFormationPreview();
   formationDraftProfile = system.profile || null;
   renderFormationReading(formationDraftProfile);
 
@@ -989,18 +998,27 @@ function syncFormationSelects() {
   }));
 }
 
-function scheduleFormationPreview() {
+function invalidateFormationPreview() {
+  formationPreviewSequence++;
   clearTimeout(formationPreviewTimer);
+}
+
+function scheduleFormationPreview() {
+  invalidateFormationPreview();
   formationPreviewTimer = setTimeout(() => previewFormation(false), 240);
 }
 
 async function previewFormation(showError = false) {
   if (!game || busy) return;
+  const sequence = ++formationPreviewSequence;
+  const gameId = game.id;
   try {
-    formationDraftProfile = await api(`/api/games/${game.id}/formation-preview`, {method:'POST', body:JSON.stringify(formationPayload(false))});
+    const profile = await api(`/api/games/${gameId}/formation-preview`, {method:'POST', body:JSON.stringify(formationPayload(false))});
+    if (sequence !== formationPreviewSequence || game?.id !== gameId || busy) return;
+    formationDraftProfile = profile;
     renderFormationReading(formationDraftProfile);
   } catch (error) {
-    if (showError) toast(error.message);
+    if (showError && sequence === formationPreviewSequence && game?.id === gameId) toast(error.message);
   }
 }
 
@@ -1417,7 +1435,7 @@ function renderSageSystem(system) {
   const classicList = $('#sage-classic-list'); classicList.innerHTML='';
   (inner.classics || []).forEach(classic => {
     const row=document.createElement('div'); row.className='sage-classic';
-    row.innerHTML=`<b>${classic.name}</b><span>原初 ${classic.origin_realm_name}</span><strong>已参 Lv.${classic.refined_level} / 9</strong><small>${classic.manual_level > classic.refined_level ? `包裹有 Lv.${classic.manual_level} 玉简，可再得 ${number(classic.gain)}` : '暂无更高等级玉简'}</small>`;
+    row.innerHTML=htmlText`<b>${classic.name}</b><span>原初 ${classic.origin_realm_name}</span><strong>已参 Lv.${classic.refined_level} / 9</strong><small>${classic.manual_level > classic.refined_level ? `包裹有 Lv.${classic.manual_level} 玉简，可再得 ${number(classic.gain)}` : '暂无更高等级玉简'}</small>`;
     classicList.appendChild(row);
   });
   if (!classicList.childElementCount) classicList.innerHTML='<p class="empty">尚未炼化任何经典。</p>';
@@ -1451,7 +1469,7 @@ function renderSageSystem(system) {
       const values = system.action_values?.[action] || {};
       const button = document.createElement('button'); button.type = 'button'; button.className = 'sage-action-card';
       const realmScale = Number(numeric.inner_realm_scale_percent || 8) / 100;
-      button.innerHTML = `<b>${values.name || action}</b><span>学说声望 +${Number(values.external || 0).toFixed(1)} · 门内威望 +${Number(values.inner || 0).toFixed(1)}（境界修正 ×${(1 + Number(game.player.realm_index || 0) * realmScale).toFixed(2)}）</span><small>HP -${values.hp_cost_percent || 0}% · MP -${values.mp_cost_percent || 0}%｜${values.description || ''}</small>`;
+      button.innerHTML = htmlText`<b>${values.name || action}</b><span>学说声望 +${Number(values.external || 0).toFixed(1)} · 门内威望 +${Number(values.inner || 0).toFixed(1)}（境界修正 ×${(1 + Number(game.player.realm_index || 0) * realmScale).toFixed(2)}）</span><small>HP -${values.hp_cost_percent || 0}% · MP -${values.mp_cost_percent || 0}%｜${values.description || ''}</small>`;
       button.onclick = () => mutate(`/api/games/${game.id}/advance`, {action, years:1}); actions.appendChild(button);
     });
     const recruit = document.createElement('button'); recruit.type = 'button'; recruit.textContent = system.recruit_enabled ? '停止收徒' : '开启收徒';
@@ -1478,8 +1496,8 @@ function renderSageSystem(system) {
     (doctrine.members || []).forEach(member => {
       const memberRow = document.createElement('div'); memberRow.className = `sage-member-row${member.is_player ? ' player' : ''}`;
       const identity = document.createElement('span'); identity.className = 'sage-member-identity';
-      identity.innerHTML = `<i>${member.rank}</i><span><b>${member.name}${member.is_player ? '（你）' : ''}</b><small>${member.role_name} · ${member.realm_name}</small></span>`;
-      const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = `<b>门内威望 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
+      identity.innerHTML = htmlText`<i>${member.rank}</i><span><b>${member.name}${member.is_player ? '（你）' : ''}</b><small>${member.role_name} · ${member.realm_name}</small></span>`;
+      const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = htmlText`<b>门内威望 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
       memberRow.append(identity, values);
       if (!member.is_player && system.membership_id) {
         const debate = document.createElement('button'); debate.type = 'button'; debate.className = 'sage-debate-button';
@@ -1602,7 +1620,7 @@ function renderFaction(faction) {
     const truce = entry.truce_units_remaining ? ` · 停战期剩 ${entry.truce_units_remaining} 单位` : '';
     const dependency = entry.status === 'vassal' ? ` · ${entry.overlord === faction.id ? '对方依附本宗' : '本宗依附对方'}` : '';
     const leaders = entry.leaders?.length ? entry.leaders.join('、') : '暂无坐镇修士';
-    card.innerHTML = `<b>${entry.target_name} · ${entry.status_name}</b><small>宗门好感 ${number(entry.affinity)} · 在册 ${entry.living_count} 人 · 总战力 ${number(entry.combined_power)}${truce}${dependency}${vote}</small><small>坐镇修士：${leaders}</small>`;
+    card.innerHTML = htmlText`<b>${entry.target_name} · ${entry.status_name}</b><small>宗门好感 ${number(entry.affinity)} · 在册 ${entry.living_count} 人 · 总战力 ${number(entry.combined_power)}${truce}${dependency}${vote}</small><small>坐镇修士：${leaders}</small>`;
     if (entry.recent_events?.length) {
       const news = document.createElement('div'); news.className = 'diplomacy-news';
       entry.recent_events.forEach(event => {
@@ -1636,7 +1654,7 @@ function renderFaction(faction) {
   Object.entries(faction.reward_options).forEach(([id, reward]) => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'reward-choice';
     if (faction.reward_preference === id) button.classList.add('selected');
-    button.innerHTML = `<b>${reward.name}</b><span>${reward.description}</span>`;
+    button.innerHTML = htmlText`<b>${reward.name}</b><span>${reward.description}</span>`;
     button.disabled = !faction.fixed_reward_unlocked || busy || !!game.pending_event || !game.player.alive;
     button.onclick = () => mutate(`/api/games/${game.id}/faction-reward`, {reward_id:id});
     options.appendChild(button);
@@ -1729,7 +1747,7 @@ function renderWars(system) {
     card.open = ['active', 'peace_ready'].includes(war.status);
     const summary = document.createElement('summary');
     const state = war.status === 'ended' ? '已结束' : war.status === 'peace_ready' ? '胜负已定' : war.controller === 'player' ? '由你指挥' : 'AI 演算中';
-    summary.innerHTML = `<b>${war.attacker_name || '未知进攻方'} vs ${war.defender_name || '未知防御方'}</b><span>${state} · 战争分数 ${number(war.war_score || 0)}</span>`;
+    summary.innerHTML = htmlText`<b>${war.attacker_name || '未知进攻方'} vs ${war.defender_name || '未知防御方'}</b><span>${state} · 战争分数 ${number(war.war_score || 0)}</span>`;
     const body = document.createElement('div'); body.className = 'war-body';
     const morale = document.createElement('div'); morale.className = 'war-morale';
     const attackPower = war.power_summary?.attacker || {};
@@ -1739,7 +1757,7 @@ function renderWars(system) {
     const formationLine = formation => formation.active
       ? `${formation.name} · 完整度 ${percent(formation.integrity || 0)} · 战役修正 ${formation.modifier >= 1 ? '+' : ''}${percent((formation.modifier || 1) - 1)}${formation.conditions?.length ? ` · ${formation.conditions.join('、')}` : ''}`
       : '无统御阵势';
-    morale.innerHTML = `<div><b>${war.attacker_name || '未知进攻方'}</b><span>士气 ${number(war.morale.attacker)} · 厌战 ${number(war.exhaustion.attacker)}%</span><small>总战力 ${number(attackPower.total || 0)} · 高阶战力 ${number(attackPower.elite || 0)} · 阵势后 ${number(attackPower.effective_composite || attackPower.composite || 0)}</small><small>${formationLine(attackFormation)}</small><i style="width:${Math.min(100, war.morale.attacker)}%"></i></div><div><b>${war.defender_name || '未知防御方'}（守方战力 +10%）</b><span>士气 ${number(war.morale.defender)} · 厌战 ${number(war.exhaustion.defender)}%</span><small>总战力 ${number(defendPower.total || 0)} · 高阶战力 ${number(defendPower.elite || 0)} · 阵势后 ${number(defendPower.effective_composite || defendPower.composite || 0)}</small><small>${formationLine(defendFormation)}</small><i style="width:${Math.min(100, war.morale.defender)}%"></i></div>`;
+    morale.innerHTML = htmlText`<div><b>${war.attacker_name || '未知进攻方'}</b><span>士气 ${number(war.morale.attacker)} · 厌战 ${number(war.exhaustion.attacker)}%</span><small>总战力 ${number(attackPower.total || 0)} · 高阶战力 ${number(attackPower.elite || 0)} · 阵势后 ${number(attackPower.effective_composite || attackPower.composite || 0)}</small><small>${formationLine(attackFormation)}</small><i style="width:${Math.min(100, war.morale.attacker)}%"></i></div><div><b>${war.defender_name || '未知防御方'}（守方战力 +10%）</b><span>士气 ${number(war.morale.defender)} · 厌战 ${number(war.exhaustion.defender)}%</span><small>总战力 ${number(defendPower.total || 0)} · 高阶战力 ${number(defendPower.elite || 0)} · 阵势后 ${number(defendPower.effective_composite || defendPower.composite || 0)}</small><small>${formationLine(defendFormation)}</small><i style="width:${Math.min(100, war.morale.defender)}%"></i></div>`;
     body.appendChild(morale);
     const coalitions = document.createElement('div'); coalitions.className = 'war-coalitions';
     ['attacker', 'defender'].forEach(side => {
@@ -1935,7 +1953,7 @@ function renderFamily(family, governance) {
   }
   (governance?.bounties || []).forEach(order => {
     const row = document.createElement('div'); row.className = 'family-row';
-    row.innerHTML = `<b>${order.name}</b><small>${order.issuer_name || '麾下势力'} · ${order.status === 'active' ? `追缉中 · 已追索 ${order.attempts} 次` : order.status === 'completed' ? '已伏诛' : order.status === 'suspended' ? '权限中断，暂停追缉' : '已结案'}</small>`;
+    row.innerHTML = htmlText`<b>${order.name}</b><small>${order.issuer_name || '麾下势力'} · ${order.status === 'active' ? `追缉中 · 已追索 ${order.attempts} 次` : order.status === 'completed' ? '已伏诛' : order.status === 'suspended' ? '权限中断，暂停追缉' : '已结案'}</small>`;
     bounty.appendChild(row);
   });
   content.appendChild(bounty);
@@ -1996,7 +2014,7 @@ function renderSpiritRanking(ranking) {
   $('#ranking-player-status').textContent = ranking.on_board ? `你当前位列第 ${ranking.player_rank}` : `你当前未入前二十（总排名 ${ranking.player_rank}）`;
   ranking.entries.forEach(entry => {
     const row = document.createElement('div'); row.className = `ranking-row${entry.is_player ? ' self' : ''}`;
-    row.innerHTML = `<i>${String(entry.rank).padStart(2, '0')}</i><span><b>${entry.name}${entry.is_player ? '（你）' : ''}</b><small>${entry.title || `${ranking.world_name || '上界'}强者`} · ${entry.race_name} · 战力 ${number(entry.combat_power)}</small></span><strong>${entry.realm_name}</strong>`;
+    row.innerHTML = htmlText`<i>${String(entry.rank).padStart(2, '0')}</i><span><b>${entry.name}${entry.is_player ? '（你）' : ''}</b><small>${entry.title || `${ranking.world_name || '上界'}强者`} · ${entry.race_name} · 战力 ${number(entry.combat_power)}</small></span><strong>${entry.realm_name}</strong>`;
     list.appendChild(row);
   });
 }
@@ -2007,7 +2025,7 @@ function renderParty(party) {
   party.forEach(member => {
     const row = document.createElement('div'); row.className = 'party-row';
     const info = document.createElement('div'); info.className = 'party-member-info';
-    info.innerHTML = `<b>${member.name}</b><small>${member.realm_name} · 战力 ${number(member.combat_power)}</small><small>关系：${member.attitude} · 好感 ${number(member.affinity || 0)}</small>`;
+    info.innerHTML = htmlText`<b>${member.name}</b><small>${member.realm_name} · 战力 ${number(member.combat_power)}</small><small>关系：${member.attitude} · 好感 ${number(member.affinity || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'party-tools';
     const interact = document.createElement('button'); interact.className = 'party-action'; interact.textContent = member.can_interact ? '交流心得' : '本期已交流';
     interact.dataset.available = member.can_interact ? '1' : '0';
@@ -2031,7 +2049,7 @@ function renderWanted(entries) {
   if (!entries.length) { list.innerHTML = '<p class="empty">尚未被任何势力通缉。</p>'; return; }
   entries.forEach(entry => {
     const row = document.createElement('div'); row.className = 'wanted-row';
-    row.innerHTML = `<b>${entry.display_name || entry.name}</b><small>敌对值 ${number(entry.hostility)} · 每次时间流逝均可能遭遇追杀</small>`;
+    row.innerHTML = htmlText`<b>${entry.display_name || entry.name}</b><small>敌对值 ${number(entry.hostility)} · 每次时间流逝均可能遭遇追杀</small>`;
     list.appendChild(row);
   });
 }
@@ -2069,25 +2087,25 @@ function renderRaceSystem(system) {
   const showRace = race => {
     const detail = $('#race-detail'); detail.innerHTML = '';
     const heading = document.createElement('div'); heading.className = 'race-detail-heading';
-    heading.innerHTML = `<b>${race.name}</b><span>${race.description || ''}</span>`;
+    heading.innerHTML = htmlText`<b>${race.name}</b><span>${race.description || ''}</span>`;
     const relations = document.createElement('div'); relations.className = 'race-relations';
     (race.relations || []).forEach(relation => {
       const row = document.createElement('div'); row.className = `race-relation ${relation.status}`;
-      row.innerHTML = `<b>${relation.race_name}</b><span>${relation.status_name} · 好感 ${number(relation.affinity)}</span>`;
+      row.innerHTML = htmlText`<b>${relation.race_name}</b><span>${relation.status_name} · 好感 ${number(relation.affinity)}</span>`;
       relations.appendChild(row);
     });
     const factions = document.createElement('div'); factions.className = 'race-factions';
     factions.innerHTML = '<h3>支持该族的宗门</h3>';
     (race.supported_factions || []).forEach(faction => {
       const row = document.createElement('p');
-      row.innerHTML = `<b>${faction.name}${faction.active ? '' : '（预设）'}</b><span>长老：${(faction.elders || []).join('、') || '尚未推举'}</span>`;
+      row.innerHTML = htmlText`<b>${faction.name}${faction.active ? '' : '（预设）'}</b><span>长老：${(faction.elders || []).join('、') || '尚未推举'}</span>`;
       factions.appendChild(row);
     });
     const events = document.createElement('div'); events.className = 'race-events';
     events.innerHTML = '<h3>族群大事</h3>';
     if (!(race.recent_events || []).length) events.innerHTML += '<p class="empty">尚无载入史册的宣战、结盟、停战、依附或断盟。</p>';
     (race.recent_events || []).forEach(event => {
-      const row = document.createElement('p'); row.innerHTML = `<b>${timelineText(event.age)}</b><span>${event.summary}</span>`; events.appendChild(row);
+      const row = document.createElement('p'); row.innerHTML = htmlText`<b>${timelineText(event.age)}</b><span>${event.summary}</span>`; events.appendChild(row);
     });
     detail.append(heading, factions, relations, events);
     if (system.has_diplomatic_voice && race.id !== system.player_race) {
@@ -2115,7 +2133,7 @@ function renderRaceSystem(system) {
     const namesById = Object.fromEntries(raceEntries.map(race => [race.id, race.name]));
     const names = alliance.members.map(id => namesById[id] || id).join('、');
     const relationText = alliance.status === 'vassal' ? '处于依附关系' : '处于结盟状态';
-    row.innerHTML = `<b>${alliance.name}</b><span>${names}${relationText}；主动击杀友好族群成员会使因果大幅增加。</span>`;
+    row.innerHTML = htmlText`<b>${alliance.name}</b><span>${names}${relationText}；主动击杀友好族群成员会使因果大幅增加。</span>`;
     list.appendChild(row);
   });
 }
@@ -2131,7 +2149,7 @@ function renderWorldRoute(route) {
   (route.stages || []).forEach((stage, index) => {
     const row = document.createElement('div');
     row.className = `world-route-stage${stage.current ? ' current' : ''}${stage.enabled ? '' : ' future'}${stage.kind === 'system' ? ' system' : ''}`;
-    row.innerHTML = `<i>${index + 1}</i><span><b>${stage.label}</b><small>${stage.current ? '当前所在界面' : stage.enabled ? '界面已启用' : stage.kind === 'system' ? '未来跨界系统框架' : '未来独立界面'}${stage.description ? ` · ${stage.description}` : ''}</small></span>`;
+    row.innerHTML = htmlText`<i>${index + 1}</i><span><b>${stage.label}</b><small>${stage.current ? '当前所在界面' : stage.enabled ? '界面已启用' : stage.kind === 'system' ? '未来跨界系统框架' : '未来独立界面'}${stage.description ? ` · ${stage.description}` : ''}</small></span>`;
     list.appendChild(row);
   });
 }
@@ -2468,7 +2486,7 @@ function renderGhostPhaseTwo(system) {
       join.onclick = () => mutate(`/api/games/${game.id}/ghost-parade`, {action:'participate'}); paradeList.appendChild(join);
       (parade.souls || []).forEach(soul => {
         const row = document.createElement('div'); row.className = 'captive-row';
-        row.innerHTML = `<b>${soul.name}${soul.defeated ? ' · 已击溃' : ''}</b><small>境界 ${soul.realm_index}/${soul.layer} · 战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}：${soul.soul_trait?.description || ''}</small>`;
+        row.innerHTML = htmlText`<b>${soul.name}${soul.defeated ? ' · 已击溃' : ''}</b><small>境界 ${soul.realm_index}/${soul.layer} · 战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}：${soul.soul_trait?.description || ''}</small>`;
         const tools = document.createElement('div'); tools.className = 'captive-tools';
         [['befriend',soul.befriended?'本次已结交':'结交'],[soul.defeated?'bind':'fight',soul.defeated?'拘魂':'交锋'],['capture','战而拘魂']].forEach(([action,label]) => { const b=document.createElement('button'); b.textContent=label; b.disabled=busy || (action === 'befriend' && soul.befriended); b.onclick=()=>mutate(`/api/games/${game.id}/ghost-parade`,{action,soul_id:soul.id}); tools.appendChild(b); });
         row.appendChild(tools); paradeList.appendChild(row);
@@ -2479,12 +2497,12 @@ function renderGhostPhaseTwo(system) {
   }
   const slotList = $('#ghost-soul-slots'); slotList.innerHTML = '';
   (system.slots || []).forEach(slot => {
-    const row=document.createElement('div'); row.className=`captive-row ${slot.curve === 'unbounded_diminishing' ? 'three-soul' : 'seven-spirit'}`; row.innerHTML=`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · 当前加成 ${percent(slot.effect || 0)} · ${slot.soul.soul_trait?.name || '无性'}：${slot.soul.soul_trait?.description || '无额外规则'}` : '空位'}</small>`;
+    const row=document.createElement('div'); row.className=`captive-row ${slot.curve === 'unbounded_diminishing' ? 'three-soul' : 'seven-spirit'}`; row.innerHTML=htmlText`<b>${slot.id} · ${slot.stat_name}</b><small>${slot.soul ? `${slot.soul.name} · 当前加成 ${percent(slot.effect || 0)} · ${slot.soul.soul_trait?.name || '无性'}：${slot.soul.soul_trait?.description || '无额外规则'}` : '空位'}</small>`;
     if (slot.soul && system.state !== 'possessed') { const b=document.createElement('button'); b.textContent='卸下'; b.disabled=busy; b.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'unequip',soul_id:slot.soul.id,slot:slot.id}); row.appendChild(b); } slotList.appendChild(row);
   });
   const soulList=$('#ghost-bound-souls'); soulList.innerHTML='';
   (system.bound_souls || []).forEach(soul => {
-    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=`<b>${soul.name}</b><small>战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}</small>`;
+    const row=document.createElement('div'); row.className='captive-row'; row.innerHTML=htmlText`<b>${soul.name}</b><small>战力 ${number(soul.combat_power)} · 魂压 ${Number(soul.soul_pressure).toFixed(2)} · ${soul.soul_trait?.name || '无性'}</small>`;
     const tools=document.createElement('div'); tools.className='captive-tools'; const select=document.createElement('select');
     (system.slots || []).forEach(slot=>{const o=document.createElement('option');o.value=slot.id;o.textContent=`${slot.id}·${slot.stat_name}${slot.soul?`（替换${slot.soul.name}）`:''}`;select.appendChild(o);});
     const equip=document.createElement('button');equip.textContent='入魂位';equip.disabled=busy||system.state==='possessed';equip.onclick=()=>mutate(`/api/games/${game.id}/ghost-soul`,{action:'equip',soul_id:soul.id,slot:select.value});
@@ -2743,7 +2761,7 @@ function renderAuction(system) {
       const offers = document.createElement('div'); offers.className = 'private-trade-offers';
       (npc.trade_offers || []).forEach(offer => {
         const offerRow = document.createElement('div'); offerRow.className = 'auction-lot';
-        const text = document.createElement('div'); text.innerHTML = `<b>${offer.name}</b><small>${offer.description}</small>`;
+        const text = document.createElement('div'); text.innerHTML = htmlText`<b>${offer.name}</b><small>${offer.description}</small>`;
         const tools = document.createElement('span'); tools.className = 'private-trade-tools';
         const haggle = document.createElement('button'); haggle.textContent = offer.bargained ? '已还价' : '讨价'; haggle.disabled = offer.bargained || offer.sold;
         haggle.dataset.auctionUnavailable = offer.bargained || offer.sold ? '1' : '0';
@@ -3027,7 +3045,7 @@ function renderDemonicSystem(system) {
   const captiveList = $('#captive-list'); captiveList.innerHTML = '';
   (system.prisoners || []).forEach(person => {
     const row = document.createElement('div'); row.className = 'captive-row';
-    row.innerHTML = `<b>${person.name}</b><small>${person.gender_name || '性别未明'} · ${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
+    row.innerHTML = htmlText`<b>${person.name}</b><small>${person.gender_name || '性别未明'} · ${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'captive-tools';
     const actions = [['release','释放'],['torture','拷打']];
     if (game?.ghost_system?.available && !game?.ghost_system?.suspended) actions.push(['possess','夺舍']);
@@ -3047,7 +3065,7 @@ function renderDemonicSystem(system) {
   (system.puppets || []).forEach(puppet => {
     const row = document.createElement('div'); row.className = 'puppet-row';
     const control = puppet.type === 'living' ? ` · 控制度 ${number(puppet.control)}%` : '';
-    row.innerHTML = `<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
+    row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
     const tools = document.createElement('div'); tools.className = 'puppet-tools';
 
     if ((system.pill_options || []).length && puppet.type !== 'mechanical') {
@@ -3071,8 +3089,8 @@ function renderDemonicSystem(system) {
   const appendSoul = (parent, soul, compact = false) => {
     const row = document.createElement('div'); row.className = 'soul-row';
     row.innerHTML = compact
-      ? `<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 已炼化</small>`
-      : `<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 炼化 ${number(soul.progress)}/${number(soul.required)} · 待释放突破潜力 ${percent(soul.remaining_bonus || 0)}</small>`;
+      ? htmlText`<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 已炼化</small>`
+      : htmlText`<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 炼化 ${number(soul.progress)}/${number(soul.required)} · 待释放突破潜力 ${percent(soul.remaining_bonus || 0)}</small>`;
     if (compact && game.asura?.available) {
       const button = document.createElement('button'); button.textContent = '提纯为精魂';
       button.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'purify', target_id:soul.id});
@@ -3156,7 +3174,7 @@ function renderTechniques(slots) {
   if (!slots.combat.length) addEmpty('战斗');
   function addEmpty(role) {
     const row = document.createElement('div'); row.className = 'technique-row';
-    row.innerHTML = `<b>${role} · 空</b><small>需要通过事件与机缘获得功法</small>`;
+    row.innerHTML = htmlText`<b>${role} · 空</b><small>需要通过事件与机缘获得功法</small>`;
     list.appendChild(row);
   }
 }
@@ -3232,7 +3250,7 @@ function renderTransformationSystem(system) {
   const combined = $('#transformation-combined'); combined.innerHTML = '';
   (system.combined_stats || []).forEach(stat => {
     const row = document.createElement('div'); row.className = 'transformation-stat';
-    row.innerHTML = `<span>${stat.name}</span><b>×${Number(stat.multiplier).toFixed(3)}</b>`;
+    row.innerHTML = htmlText`<span>${stat.name}</span><b>×${Number(stat.multiplier).toFixed(3)}</b>`;
     combined.appendChild(row);
   });
   const materials = $('#transformation-materials'); materials.innerHTML = '';
@@ -3429,7 +3447,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
   }
   const row = document.createElement('div'); row.className = `companion-row${companion.alive ? '' : ' fallen'}`;
   const same = companion.same_cultivation ? ` · 同法同境，突破 +${percent(companion.breakthrough_bonus)}` : '';
-  row.innerHTML = `<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
+  row.innerHTML = htmlText`<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
   if (game?.player?.guaranteed_progeny) {
     const medicine = document.createElement('p'); medicine.className = 'section-note';
     medicine.textContent = '英姿神武药力：下一次有效缠绵100%有后代，必为单灵根或变异灵根，无视境界不育。';
@@ -3502,7 +3520,7 @@ function renderDaoFriends(friends) {
   friends.forEach(friend => {
     const row = document.createElement('div'); row.className = `friend-row${friend.alive ? '' : ' fallen'}`;
     const status = friend.alive ? (friend.world === game.player.world ? '' : ` · 身在${friend.world === 'spirit' ? '灵界' : '人界'}`) : ` · ${friend.death_reason || '已经陨落'}`;
-    row.innerHTML = `<b>${friend.name}${friend.alive ? '' : '（已故）'}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
+    row.innerHTML = htmlText`<b>${friend.name}${friend.alive ? '' : '（已故）'}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
     if (friend.alive && friend.world === game.player.world) {
       const tools = document.createElement('div'); tools.className = 'friend-tools';
       const last = friend.last_interactions || {};
@@ -3574,7 +3592,7 @@ function renderConcubines(system) {
     const bonus = system.status.breakthrough_bonus_active ? ' · 低于对方境界时基础突破 +2%' : '';
     const relation = system.status.dependent ? ' · 已主动依附' : '';
     const anger = system.status.angered ? ' · 正主震怒：本期机缘抽取提高至 3%' : '';
-    status.innerHTML = `<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}${relation}${anger}</small>`;
+    status.innerHTML = htmlText`<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}${relation}${anger}</small>`;
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const statusAction = (label, action, available = true, danger = false) => {
       const button = document.createElement('button'); button.className = `concubine-owner-action${danger ? ' danger' : ''}`;
@@ -3601,7 +3619,7 @@ function renderConcubines(system) {
     const row = document.createElement('div'); row.className = 'concubine-row';
     const life = person.lifespan == null ? '无尽' : person.lifespan;
     const whereabouts = !person.alive ? ` · ${person.death_reason || '已经陨落'}` : person.same_world ? '' : ' · 身处其他界面';
-    row.innerHTML = `<b>${person.name}${person.alive ? '' : '（已故）'}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
+    row.innerHTML = htmlText`<b>${person.name}${person.alive ? '' : '（已故）'}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
     cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});

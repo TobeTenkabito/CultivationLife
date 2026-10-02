@@ -23,31 +23,7 @@
     const bar = el('progress'); bar.max = Math.max(1, maximum); bar.value = value; bar.setAttribute('aria-label', label); return bar;
   }
   function meridians(v) {
-    const ns = 'http://www.w3.org/2000/svg';
-    const svgNode = (tag, attrs = {}) => { const n = document.createElementNS(ns, tag); for(const [k,val] of Object.entries(attrs)) n.setAttribute(k, val); return n; };
-    const figure = el('figure', null, 'meridian-figure');
-    const svg = svgNode('svg', {viewBox:'0 0 360 540', role:'img', 'aria-label':`人体仙脉图：已开 ${v.opened} 条，本层需要 ${v.layer * v.per_layer} 条`});
-    const title = svgNode('title'); title.textContent = '二十七仙脉 · 人体经络示意'; svg.append(title);
-    figure.style.setProperty('--vein-color',v.phase?.color || '#587e72');
-    svg.append(svgNode('ellipse',{class:'meridian-halo',cx:180,cy:235,rx:152,ry:216}),svgNode('circle',{class:'meridian-halo',cx:180,cy: 64,r:52}));
-    svg.append(svgNode('path',{class:'meridian-body',d:'M171 29 Q162 12 180 8 Q198 12 189 29 Q204 33 204 54 Q204 76 190 88 L191 104 Q218 106 236 126 Q246 153 253 180 L306 297 Q292 317 271 304 L234 227 L230 302 Q245 356 252 467 L216 502 L194 490 L180 374 L166 490 L144 502 L108 467 Q115 356 130 302 L126 227 L89 304 Q68 317 54 297 L107 180 Q114 153 124 126 Q142 106 169 104 L170 88 Q156 76 156 54 Q156 33 171 29Z'}));
-    for(const d of ['M160 43 Q180 23 200 43 M167 62 L173 63 M187 63 L193 62 M177 77 Q180 80 184 77','M169 102 L201 151 L181 211 L145 131 M191 103 L160 149','M126 140 Q156 179 141 255 L180 290 L219 255 Q204 179 234 140','M133 295 Q180 315 227 295 M140 323 L122 463 L151 475 M220 323 L238 463 L209 475','M80 474 Q180 522 280 474 M98 492 Q180 531 262 492'])svg.append(svgNode('path',{class:'meridian-robe',d}));
-    const center = [[180,48],[180,78],[180,114],[180,149],[180,184],[180,219],[180,254],[180,288],[180,318]];
-    const left = [[142,126],[123,159],[106,202],[88,251],[72,291],[157,340],[159,395],[157,454],[148,499]];
-    const right = left.map(([x,y])=>[360-x,y]);
-    for(const points of [center,left.slice(0,5),right.slice(0,5),[left[0],[145,205],[150,270],...left.slice(5)],[right[0],[215,205],[210,270],...right.slice(5)]]) svg.append(svgNode('polyline', {class:'meridian-channel',points:points.map(p=>p.join(',')).join(' ')}));
-    center.forEach(([x,y],i)=>{
-      [center[i],left[i],right[i]].forEach(([px,py],side)=>{
-        const n=i*3+side, opened=n<v.opened, next=n===v.opened && n<v.layer*v.per_layer;
-        const group=svgNode('g',{class:`meridian-node ${opened?'opened':next?'next':'sealed'}`,'data-vein':n+1});
-        const label=svgNode('title');label.textContent=`第 ${n+1} ${v.phase?.name || "仙脉"} · ${v.names?.[n] || ""} · ${opened?'已贯通':next?'下一条可开':'未贯通'}`;
-        const circle=svgNode('circle',{cx:px,cy:py,r:13});
-        const text=svgNode('text',{x:px,y:py+3.5,'text-anchor':'middle'});text.textContent=v.names?.[n] || n+1;
-        group.append(label,circle,text);svg.append(group);
-      });
-    });
-    figure.append(svg,el('figcaption','实心圆为已开仙脉，粗环为下一脉，空心圆为未开；每层三脉，开脉后需手动冲关。'));
-    return figure;
+    return window.MeridianAtlas.render(v, 'immortal');
   }
   function render(data, act, options = {}) {
     const currentGame = typeof game !== 'undefined' ? game?.id : null;

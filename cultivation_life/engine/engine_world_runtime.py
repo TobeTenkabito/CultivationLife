@@ -47,14 +47,32 @@ def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
     if game.world_rules_version < 2:
         game.sects = fresh
         game.world_rules_version = 6
+    rosters = [*game.sects.values(), *([game.family] if game.family else [])]
+    locations: dict[str, list[tuple[str | None, SectNpc]]] = {}
+    for roster in rosters:
+        for npc in roster.npcs:
+            locations.setdefault(npc.id, []).append((roster.id, npc))
+    for npc in [*game.world_npcs.values(), *game.notable_npcs.values()]:
+        locations.setdefault(npc.id, []).append((None, npc))
+    known_ids = set(locations)
     for sect_id, new_sect in fresh.items():
         if sect_id not in game.sects:
+            new_sect.npcs = [npc for npc in new_sect.npcs if npc.id not in known_ids]
             game.sects[sect_id] = new_sect
+            known_ids.update(npc.id for npc in new_sect.npcs)
             continue
         game.sects[sect_id].world = new_sect.world
         game.sects[sect_id].allegiance_race = new_sect.allegiance_race
-        known_ids = {npc.id for npc in game.sects[sect_id].npcs}
-        game.sects[sect_id].npcs.extend(npc for npc in new_sect.npcs if npc.id not in known_ids)
+        # Repair template copies produced by older loaders after expulsion or
+        # transfer. The relocated record carries the authoritative mutable state.
+        template_ids = {npc.id for npc in new_sect.npcs}
+        relocated = {npc_id for npc_id in template_ids if any(
+            owner != sect_id and npc.faction_id != sect_id for owner, npc in locations.get(npc_id, [])
+        )}
+        game.sects[sect_id].npcs = [npc for npc in game.sects[sect_id].npcs if npc.id not in relocated]
+        missing = [npc for npc in new_sect.npcs if npc.id not in known_ids]
+        game.sects[sect_id].npcs.extend(missing)
+        known_ids.update(npc.id for npc in missing)
         templates = {npc.id: npc for npc in new_sect.npcs}
         for npc in game.sects[sect_id].npcs:
             if not npc.faction_id:

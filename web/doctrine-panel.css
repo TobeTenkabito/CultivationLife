@@ -29,24 +29,10 @@
 .aperture-water { position:absolute; z-index:-1; bottom:0; width:100%; height:var(--reservoir-fill); background:linear-gradient(0deg,#527e7b80,#83aaa960); border-top:2px solid #86b2a8; transition:height .3s; }
 .aperture-orb strong { font-size:22px; text-shadow:0 1px var(--paper,#fff); }
 .aperture-reservoir figcaption { margin-top:22px; letter-spacing:.12em; }
-.meridian-figure { --vein-color:#587e72; }
-.meridian-figure svg { color:var(--vein-color); }
-.meridian-halo,.meridian-robe { fill:none; stroke:currentColor; stroke-width:1.2; opacity:.45; }
 .rank-triplet { font-size:12px; line-height:1.7; color:var(--muted); }
 .teleport-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:14px; border:1px solid var(--line); margin:12px 0; }
 @media(prefers-reduced-motion:reduce){.aperture-water{transition:none;}}
 
-.meridian-figure { margin:0; display:grid; justify-items:center; gap:12px; }
-.meridian-figure svg { display:block; width:min(100%,390px); height:auto; color:var(--vein-color,var(--pine,#416450)); }
-.meridian-body { fill:var(--paper,#f5f0e3); stroke:var(--muted,#8a8479); stroke-width:1.5; }
-.meridian-channel { fill:none; stroke:currentColor; stroke-width:1.4; opacity:.42; }
-.meridian-node circle { fill:var(--surface,var(--paper,#f5f0e3)); stroke:currentColor; stroke-width:1.4; }
-.meridian-node text { fill:var(--ink,#28342e); font:10px Arial,sans-serif; }
-.meridian-node.opened circle { fill:currentColor; }
-.meridian-node.opened text { fill:var(--surface,#fff); }
-.meridian-node.next circle { stroke-width:3; }
-.meridian-node.sealed { opacity:.62; }
-.meridian-figure figcaption { color:var(--muted); font-size:12px; text-align:center; max-width:440px; }
 .hud-hp .hud-track i, .hud-mp .hud-track i {
   background:linear-gradient(to right,rgba(0,0,0,.25) 0%,rgba(0,0,0,.25) var(--intrinsic-share,0%),transparent var(--intrinsic-share,0%),transparent 100%),var(--meter-color);
 }
