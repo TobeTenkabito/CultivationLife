@@ -1,7 +1,7 @@
 {
-  "base_version": "1.56.0",
-  "android_version": "1.56.0-android.24",
-  "version_code": 24,
+  "base_version": "1.56.1",
+  "android_version": "1.56.1-android.25",
+  "version_code": 25,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,9 +12,9 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.56.0-Android12.apk",
-  "apk_sha256": "63e18a43078e6575c1cb4917397a878a0ef8a9627f95b9a6a4a645342934e946",
-  "apk_bytes": 49860490,
+  "apk": "浮生问道-v1.56.1-Android12.apk",
+  "apk_sha256": "dc65141594bba27e9af1095758bdd427ecd1917dcef965dcbecf07f58c4399bd",
+  "apk_bytes": 49513202,
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",

@@ -1,8 +1,8 @@
 {
-  "base_version": "1.56.0",
+  "base_version": "1.56.1",
   "platform": "Windows",
-  "exe_sha256": "45697760c9c9014b1377a32e8d89614329aa05060adadcb784a7beacba04ac07",
-  "inputs_sha256": "006954a551be1278af464595b86a98c46aa40c6f3c9505e27aa8883fc5fa9ec2",
+  "exe_sha256": "837ca84b1f4576d6bdd2317f1a5ea0991882c5eff5812210f5ad9ee6a015bfc6",
+  "inputs_sha256": "44c2a2a7cf8553ea9256c49e8355e25e2b3f5d2c7af9af2d45e935c7695dee59",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
