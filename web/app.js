@@ -69,6 +69,8 @@ async function boot() {
   fillRootSelect(config);
   fillSelect('#path-select', config.paths);
   fillSelect('#monster-species-select', Object.fromEntries(Object.entries(config.monster_species || {}).map(([id, row]) => [id, row.name])));
+  const speciesPlaceholder = new Option('请选择妖修种属', '', true, true);
+  $('#monster-species-select').prepend(speciesPlaceholder);
   fillStartWorldSelect(config);
   const updateCreationFields = () => {
     fillStartWorldSelect(config);
@@ -290,16 +292,26 @@ function renderQuickStarts(presets) {
     const badge = preset.variant_label || (preset.path === 'dao' ? '本体' : '道途配置');
     const detail = preset.description || `${worldName} · ${pathName} · 使用对应境界的默认功法与行囊`;
     button.innerHTML = `<span class="quick-start-title"><b>${preset.name}</b><i>${badge}</i></span><span class="quick-start-meta">${worldName} · ${pathName} · ${preset.layer || 1}层</span><span>${preset.enabled ? detail : preset.status}</span>`;
-    if (preset.enabled) button.onclick = () => startQuickGame(preset.id);
-    grid.appendChild(button);
+    if (preset.path === 'monster') {
+      const wrapper = document.createElement('div');
+      const select = document.createElement('select'); select.setAttribute('aria-label', `${preset.name}种属`);
+      select.append(new Option('请选择妖修种属', ''));
+      Object.entries(configData?.monster_species || {}).forEach(([id, row]) => select.append(new Option(row.name, id)));
+      button.disabled = true; select.onchange = () => { button.disabled = !preset.enabled || !select.value; };
+      button.onclick = () => startQuickGame(preset.id, select.value);
+      wrapper.append(select, button); grid.append(wrapper);
+    } else {
+      if (preset.enabled) button.onclick = () => startQuickGame(preset.id);
+      grid.appendChild(button);
+    }
     });
     section.appendChild(grid); list.appendChild(section);
   });
 }
 
-async function startQuickGame(presetId) {
+async function startQuickGame(presetId, monsterSpeciesId = null) {
   const form = new FormData($('#new-game-form'));
-  const payload = {name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId};
+  const payload = {name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId, monster_species_id:monsterSpeciesId};
   if (form.get('seed')) payload.seed = Number(form.get('seed'));
   await mutate('/api/games', payload);
 }
@@ -401,7 +413,7 @@ function render(data) {
   transformationDock?.classList.toggle('hidden', !transformationAvailable);
   if (!transformationAvailable) window.UtilityPanels?.close('transformation');
   $('#player-name').textContent = p.name; $('#avatar').textContent = p.name.slice(0,1);
-  $('#player-subtitle').textContent = `${p.spirit_root_display || p.spirit_root_name} · ${p.path_name} · ${p.world_name} · ${p.location_name}`;
+  $('#player-subtitle').textContent = `${p.spirit_root_display || p.spirit_root_name} · ${cultivationIdentity(p)} · ${p.world_name} · ${p.location_name}`;
   $('#slay-action span').textContent = p.path === 'monster'
     ? '猎杀异道不沾因果；击杀道修额外增长煞气'
     : '寻找弱者下手，夺宝但增加因果';
@@ -612,7 +624,7 @@ function render(data) {
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   window.GameThemes?.render(data);
@@ -1634,7 +1646,7 @@ function renderFaction(faction) {
     const cultivation = document.createElement('strong'); cultivation.textContent = npc.cultivation_ranks ? `修为 ${npc.realm_name} · 炼体 ${npc.cultivation_ranks.body.name} · 神识 ${npc.cultivation_ranks.sense.name}` : npc.realm_name;
     heading.append(name, cultivation); identity.appendChild(heading);
     const biography = document.createElement('p'); biography.className = 'roster-biography';
-    biography.textContent = [npc.title, npc.gender_name || '性别未明', npc.race_name || '种族未明', npc.path_name || '道统未明', npc.spirit_root_name || '灵根未明'].filter(Boolean).join(' · ');
+    biography.textContent = [npc.title, npc.gender_name || '性别未明', npc.race_name || '种族未明', cultivationIdentity(npc), npc.spirit_root_name || '灵根未明'].filter(Boolean).join(' · ');
     identity.appendChild(biography);
     const status = document.createElement('dl'); status.className = 'roster-status';
     const addStatus = (label, value, warning = false) => {
@@ -1929,7 +1941,7 @@ function renderWorldNpcs(npcs) {
     const info = document.createElement('div');
     const name = document.createElement('b'); name.textContent = `${npc.name} · ${npc.title}${npc.wounds ? `（负伤${npc.wounds}级）` : ''}`;
     const detail = document.createElement('small');
-    detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${npc.path_name} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}${npc.cultivation_ranks ? ` · 炼体 ${npc.cultivation_ranks.body.name} · 神识 ${npc.cultivation_ranks.sense.name}` : ''}`;
+    detail.textContent = `${npc.gender_name || '性别未明'} · ${npc.realm_name} · ${cultivationIdentity(npc)} · ${npc.race_name} · ${npc.spirit_root_name} · ${npc.age}岁/寿元${npc.lifespan == null ? '无尽' : npc.lifespan}${npc.cultivation_ranks ? ` · 炼体 ${npc.cultivation_ranks.body.name} · 神识 ${npc.cultivation_ranks.sense.name}` : ''}`;
     const combat = npc.combat_power == null ? '' : ` · 战力 ${number(npc.combat_power)} · 好感 ${number(npc.affinity)} / ${npc.attitude}`;
     detail.textContent += combat;
     if (npc.social_hint?.companion_name) detail.textContent += ` · 道侣 ${npc.social_hint.companion_name}`;
@@ -3051,11 +3063,16 @@ function renderDemonicSystem(system) {
     row.innerHTML = compact
       ? `<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 已炼化</small>`
       : `<b>${soul.name}之元神</b><small>强度 ${number(soul.strength)} · 炼化 ${number(soul.progress)}/${number(soul.required)} · 待释放突破潜力 ${percent(soul.remaining_bonus || 0)}</small>`;
+    if (compact && game.asura?.available) {
+      const button = document.createElement('button'); button.textContent = '提纯为精魂';
+      button.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'purify', target_id:soul.id});
+      row.append(button);
+    }
     parent.appendChild(row);
   };
   activeSouls.forEach(soul => appendSoul(soulList, soul));
   if (refinedSouls.length) {
-    const archive = document.createElement('details'); archive.className = 'soul-archive';
+    const archive = document.createElement('details'); archive.className = 'soul-archive'; archive.open = true;
     const summary = document.createElement('summary'); summary.textContent = `已炼化元神 ${refinedSouls.length} 道（展开归档）`;
     const archiveList = document.createElement('div'); archiveList.className = 'soul-archive-list';
     refinedSouls.forEach(soul => appendSoul(archiveList, soul, true));
@@ -3962,4 +3979,69 @@ function violenceButton(kind, person, label) {
     await mutate(`/api/games/${game.id}/relationship-violence`, {kind, target_id:person.id});
   };
   return button;
+}
+
+
+function cultivationIdentity(actor) {
+  return [actor.path_name || '道统未明', actor.monster_species_name, actor.asura_route_name].filter(Boolean).join(' · ');
+}
+
+function renderAsura(state) {
+  let panel = document.getElementById('asura-cultivation');
+  if (!panel) {
+    panel = document.createElement('section'); panel.id = 'asura-cultivation'; panel.className = 'panel';
+    document.getElementById('foreign-soul-list').parentElement.append(panel);
+  }
+  document.getElementById('asura-card').classList.toggle('hidden', !state.available);
+  document.querySelector('[data-panel-target=asura]').classList.toggle('hidden', !state.available);
+  if (!state.available) window.UtilityPanels?.close('asura');
+  panel.replaceChildren(); panel.hidden = !state.available;
+  if (!state.available) return;
+  const text = (value, tag = 'p') => { const node = document.createElement(tag); node.textContent = value; panel.append(node); return node; };
+  const button = (label, action, payload = {}, disabled = false) => {
+    const node = document.createElement('button'); node.textContent = label;
+    node.disabled = disabled || !game.player.alive || !!game.pending_event || !!game.trial?.active || !!game.imprisonment;
+    node.onclick = () => mutate(`/api/games/${game.id}/asura`, {action, ...payload}); panel.append(node); return node;
+  };
+  text('修罗显圣：无法无天', 'h3');
+  text(`精魂 ${number(state.souls || 0)} · 煞元转化 ${state.conversion || 0}/5 · 修罗之躯 ${state.body_level || 0}/20层 · 魔脉 ${state.opened || 0}/27`);
+  if (!state.can_cultivate) { text('已炼化元神可以提纯；八部修持须登临修罗界。'); return; }
+  button('煞元转化', 'convert', {}, (state.conversion || 0) >= 5);
+  button('锻炼修罗之躯（机缘）', 'train_body', {}, (state.body_level || 0) >= 20 || game.player.body_training < 100);
+  button('开辟魔脉（机缘＋精魂）', 'open_vein', {}, state.opened >= game.player.layer * 3);
+  if (!state.route) {
+    text('先将修罗之躯修至20层，再凝练外界肉身。单具自动匹配本命；两具合格肉身指向阿修罗。融合后本命永久确定。');
+    (state.routes || []).forEach(route => text(`${route.name}：${route.requirement}；炼体至少60层。`));
+    (state.candidates || []).forEach(body => {
+      text(`${body.name} · 炼体 ${body.body_training || 0} · 肉身战力 ${number(body.body_power)}`);
+      button(`凝练（${30 + (body.body_training || 0)}精魂）`, 'condense', {target_id:body.id}, !body.eligible || (state.body_level || 0) < 20);
+    });
+    const selected = new Set();
+    (state.bodies || []).forEach(body => {
+      const row = text(`${body.name} · 已凝练 · 战力 ${number(body.power)}`, 'label');
+      const box = document.createElement('input'); box.type = 'checkbox';
+      box.onchange = () => box.checked ? selected.add(body.id) : selected.delete(body.id); row.prepend(box);
+    });
+    const fight = button('融合所选肉身（开始生死战）', 'fuse');
+    fight.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'fuse', body_ids:[...selected]});
+    return;
+  }
+  text(`${state.route_name} · ${state.part} ${state.level}/9级 · 永久肉身战力 ${number(state.inherited_power)}`, 'h4');
+  button(`修炼本体（${60 * state.level}精魂）`, 'train_route', {}, state.level >= 9);
+  text(`${state.domain_name} · ${state.domain_label} · 威能滋养 ${state.domain_power || 0}`);
+  const input = document.createElement('input'); input.maxLength = 24; input.value = state.domain_name; input.setAttribute('aria-label', '魔域名称'); panel.append(input);
+  const rename = button('命名魔域', 'rename'); rename.onclick = () => mutate(`/api/games/${game.id}/asura`, {action:'rename', name:input.value});
+  button(`提升魔域境界（${50 * ((state.domain_rank || 1) + 1)}精魂）`, 'train_domain', {}, state.domain_rank >= 13);
+  button(`滋养威能（${50 * ((state.domain_power || 0) + 1)}精魂）`, 'nourish_domain', {}, state.domain_power >= 99);
+  (state.branches?.[state.route] || []).forEach(branch => {
+    text(`${branch.name}：${branch.descriptions.join('；')}${state.branch === branch.id ? '（已选择）' : ''}`);
+    if (!state.branch) button('确定此分支（不可更换）', 'choose_branch', {target_id:branch.id}, state.level < 5 || game.player.realm_index < 10);
+  });
+  if (state.branch) button(`修炼分支 ${state.branch_level}/9（${80 * state.branch_level}精魂）`, 'train_branch', {}, state.branch_level >= 9);
+  text(`神通 ${(state.powers || []).length}/${state.slots} · 已生效：${(state.rule_descriptions || []).join('、') || '本体2级开始解锁'}`);
+  button('获取随机神通（100精魂）', 'learn_power', {}, (state.powers || []).length >= state.slots);
+  (state.powers || []).forEach(rule => {
+    text(`${rule.name}：${rule.description}`);
+    button('洗练此神通（100精魂）', 'reroll_power', {target_id:rule.id});
+  });
 }

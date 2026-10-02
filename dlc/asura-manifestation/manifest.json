@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.asura-manifestation",
+  "name": "修罗显圣：无法无天",
+  "version": "1.0.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 160,
+  "requires": [],
+  "description": "精魂凝身、八部本命、魔域神通、魔脉与心魔劫。"
+}

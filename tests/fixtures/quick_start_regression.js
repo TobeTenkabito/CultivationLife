@@ -9,7 +9,7 @@ window.QuickStartProbe = (() => {
   async function run(preset) {
     errors.length = 0;
     document.querySelector('#new-game-form [name=seed]').value = '1411';
-    await startQuickGame(preset);
+    await startQuickGame(preset, 'serpent');
     check(!errors.length, preset + ': ' + errors.join('; '));
     const id = game.id, age = game.player.world_age;
     if (preset === 'demonic_void') {

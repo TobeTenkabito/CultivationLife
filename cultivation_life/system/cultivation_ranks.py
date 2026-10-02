@@ -63,6 +63,10 @@ def public_ranks(actor, *, player=False):
     if not player:
         ensure_npc(actor)
     immortal = actor.immortal_body.get('level', 0) if player else read(actor, 'immortal_body_level', 0)
+    if player:
+        from .asura import enabled
+        if enabled() and actor.path == 'demonic':
+            immortal = max(immortal, actor.asura_cultivation.get('body_level', 0))
     return {'cultivation': describe(rank_for(read(actor, 'realm_index', 0), read(actor, 'layer', 1))),
             'body': describe(body_rank(read(actor, 'body_training', 0), immortal)),
             'sense': describe(read(actor, 'divine_sense_rank', 0))}

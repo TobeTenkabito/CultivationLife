@@ -140,6 +140,11 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     results = {}
     for key, owner in owners.items():
         if key == 'player':
+            from ..asura import source as asura_source
+            asura_value = asura_source(game.player)
+            if asura_value.voisinages:
+                results[key] = asura_value
+                continue
             from ..upper_voisinage import available, player_source as upper_source
             if available(game.player):
                 results[key] = upper_source(game.player)

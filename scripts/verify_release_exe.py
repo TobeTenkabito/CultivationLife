@@ -41,6 +41,9 @@ def verify(with_dlc):
             assert len(config["worlds"]) == 11
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
+            for asset in ('asura-court-panel.js', 'asura-court-panel.css'):
+                with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
+                    assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abcdef':
                 with urllib.request.urlopen(base + f'/themes/{theme}.css', timeout=5) as response:
                     assert f'data-theme={theme}'.encode() in response.read()
@@ -161,7 +164,7 @@ def verify(with_dlc):
             request = urllib.request.Request(base + f"/api/games/{buddhist['id']}/celestial-ascension", method='POST',
                                              data=b'{}', headers={'Content-Type':'application/json'})
             with urllib.request.urlopen(request, timeout=20) as response:
-                ascended = json.load(response)
+                json.load(response)
             trial_saved = json.loads(save_path.read_text(encoding='utf-8'))
             assert trial_saved['active_trial']['destination'] == 'reincarnation'
             assert trial_saved['active_trial']['event_ids'][0].startswith('EVT_BUDDHIST_' if with_dlc else 'EVT_REINCARNATION_')
@@ -186,28 +189,35 @@ def verify(with_dlc):
                 assert not upper['player']['opportunity_unbounded']
                 assert upper['player']['opportunity'] == upper['player']['opportunity_required']
                 assert upper['market']['realm_index'] == 9
-                assert upper['breakthrough']['kind'] == ('major' if path=='monster' and with_dlc else 'minor')
+                if not (world == 'asura' and with_dlc):
+                    assert upper['breakthrough']['kind'] == ('major' if path=='monster' and with_dlc else 'minor')
                 if path=='ghost':
                     assert upper['ghost_system']['available'] == with_dlc
                 if path=='monster':
                     assert ('血脉' in upper['breakthrough']['action_label']) == with_dlc
-                assert upper['upper_voisinages']['available']
-                field = upper['upper_voisinages']['rows'][0]
-                request = urllib.request.Request(base + f"/api/games/{buddhist['id']}/upper-voisinage", method='POST',
-                    data=json.dumps({'action':'train','voisinage_id':field['id']}).encode(),
-                    headers={'Content-Type':'application/json'})
-                with urllib.request.urlopen(request, timeout=20) as response:
-                    trained = json.load(response)
-                assert trained['upper_voisinages']['rows'][0]['level'] == 1
-                assert trained['upper_voisinages']['rows'][0]['active']
+                if world == 'asura' and with_dlc:
+                    assert upper['asura']['available'] and not upper['upper_voisinages']['available']
+                else:
+                    assert upper['upper_voisinages']['available']
+                    field = upper['upper_voisinages']['rows'][0]
+                    request = urllib.request.Request(base + f"/api/games/{buddhist['id']}/upper-voisinage", method='POST',
+                        data=json.dumps({'action':'train','voisinage_id':field['id']}).encode(),
+                        headers={'Content-Type':'application/json'})
+                    with urllib.request.urlopen(request, timeout=20) as response:
+                        trained = json.load(response)
+                    assert trained['upper_voisinages']['rows'][0]['level'] == 1
+                    assert trained['upper_voisinages']['rows'][0]['active']
                 request = urllib.request.Request(base + '/api/games', method='POST',
-                    data=json.dumps({'name':'三界本体开局','preset_id':world+'_upper','seed':1522}).encode(),
+                    data=json.dumps({'name':'三界本体开局','preset_id':world+'_upper','seed':1530,'monster_species_id':'serpent'}).encode(),
                     headers={'Content-Type':'application/json'})
                 with urllib.request.urlopen(request,timeout=20) as response:
                     native=json.load(response)
                 assert native['player']['world']==world and native['player']['path']==path
                 assert native['upper_institution']['local'] and not native['upper_institution']['joined']
-                assert native['upper_voisinages']['rows'][0]['active'] and native['aperture']['current']==600
+                if world == 'asura' and with_dlc:
+                    assert native['asura']['available'] and native['asura'].get('conversion', 0) == 0
+                else:
+                    assert native['upper_voisinages']['rows'][0]['active'] and native['aperture']['current']==600
                 if world=='nether':
                     assert native['monster_bloodline']['available']==with_dlc
                     if with_dlc:
@@ -217,6 +227,24 @@ def verify(with_dlc):
                 with urllib.request.urlopen(request,timeout=20) as response:
                     joined=json.load(response)
                 assert joined['upper_institution']['joined'] and joined['upper_institution']['discount']>0
+                if world == 'asura':
+                    assert len(joined['upper_institution']['court']['seats']) == 5
+                    native_path = folder/'data/saves'/f"{native['id']}.json"
+                    raw = json.loads(native_path.read_bytes())
+                    raw['player']['realm_index'] = 12
+                    raw['upper_institutions']['asura'].update(earned=10000, merit=10000, regard=100)
+                    native_path.write_text(json.dumps(raw,ensure_ascii=False),encoding='utf-8')
+                    for _ in range(5):
+                        request = urllib.request.Request(base+f"/api/games/{native['id']}/upper-institution", method='POST',
+                            data=b'{"action":"promote"}', headers={'Content-Type':'application/json'})
+                        with urllib.request.urlopen(request,timeout=20) as response:
+                            crowned = json.load(response)
+                    assert crowned['upper_institution']['court']['king']
+                    request = urllib.request.Request(base+f"/api/games/{native['id']}/upper-institution", method='POST',
+                        data=b'{"action":"appoint","target_id":"treasury:asura_royal_court_1"}', headers={'Content-Type':'application/json'})
+                    with urllib.request.urlopen(request,timeout=20) as response:
+                        appointed = json.load(response)
+                    assert appointed['upper_institution']['court']['offices']['treasury'] == 'asura_royal_court_1'
             request = urllib.request.Request(base + '/api/games', method='POST',
                 data=json.dumps({'name':'仙躯打包验收','preset_id':'true_immortal','seed':1460}).encode(),
                 headers={'Content-Type':'application/json'})

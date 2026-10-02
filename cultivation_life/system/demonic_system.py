@@ -66,7 +66,10 @@ class DemonicSystemMixin:
         prisoner_id = str(npc_id or f"captive_{uuid.uuid4().hex[:12]}")
         captive_age = int(npc.age if npc else victim.get("age", current_body_age(game.player)))
         captive_lifespan = npc.lifespan if npc else victim.get("lifespan")
+        from .asura import body_facts
+        captured_body = body_facts(npc or dict(victim, id=prisoner_id, path=path))
         game.player.prisoners.append({
+            **captured_body,
             "id": prisoner_id, "npc_id": npc_id, "name": str(victim["name"]),
             "realm_index": int(victim["realm_index"]), "layer": int(victim.get("layer", 1)),
             "realm_name": self._npc_realm_name(npc or SectNpc("", "", "", int(victim["realm_index"]), int(victim.get("layer", 1)), 0, 1, path=path)),
@@ -167,7 +170,9 @@ class DemonicSystemMixin:
         if rng.random() >= chance:
             self._break_capture_relationship(game, relation, kind, captured=False)
             return "escaped", f"{name}的元神撕开魔禁并远遁（封魂成功率 {chance:.0%}），从此与你恩断义绝。"
+        from .asura import body_facts
         prisoner = {
+            **body_facts(self._find_npc(game, str(relation["id"])) or relation),
             "id":str(relation["id"]), "npc_id":str(relation["id"]), "name":name,
             "realm_index":int(relation.get("realm_index", 0)), "layer":int(relation.get("layer", 1)),
             "realm_name":str(relation.get("realm_name", "境界未明")),
@@ -314,7 +319,9 @@ class DemonicSystemMixin:
             else target.get("main_technique_id")
         )
         control = 100.0 if kind == "corpse" else max(15.0, min(92.0, 48 + affinity * 0.28 + realm_gap * 6))
+        from .asura import body_facts
         puppet = {
+            **body_facts(target),
             "id": f"puppet_{uuid.uuid4().hex[:12]}", "name": str(target["name"]), "type": kind,
             "type_name": PUPPET_NAMES[kind], "realm_index": int(target.get("realm_index", 0)),
             "layer": int(target.get("layer", 1)), "combat_power": round(target_power * inherited, 1),
@@ -358,6 +365,7 @@ class DemonicSystemMixin:
         power = max(20.0, combat_power(player) * 0.35)
         player.puppets.append({
             "id": f"puppet_{uuid.uuid4().hex[:12]}", "name": "玄铁机关傀儡", "type": "mechanical",
+            "body_training": player.body_training, "immortal_body_level": player.asura_cultivation.get("body_level", 0),
             "type_name": PUPPET_NAMES["mechanical"], "realm_index": max(1, player.realm_index - 1), "layer": 1,
             "combat_power": round(power, 1), "original_power": round(power, 1), "main_technique_id": None,
             "control": 100.0, "cultivation_progress": 0.0, "breakthrough_bonus": 0.0,

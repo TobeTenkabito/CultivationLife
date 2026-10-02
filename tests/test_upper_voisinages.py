@@ -1,3 +1,4 @@
+from unittest.mock import patch
 """Base-world acquisition, growth, resources and neutral combat projection."""
 import copy
 import random
@@ -190,3 +191,9 @@ def test_all_configured_domains_project_and_grow_without_randomness():
                     assert current.authority > previous.authority
                 previous = current
         assert any('strike' in f['effects'] for f in world_config(p)['fields'])
+
+
+@pytest.fixture(autouse=True)
+def base_without_asura_dlc():
+    with patch('cultivation_life.system.asura.enabled', return_value=False):
+        yield

@@ -42,7 +42,13 @@ def cultivation_discount(game):
     if not definition(game):
         return 0
     state = account(game)
-    return policy(game, state)['cultivation_discount'] if state['joined'] else 0
+    if not state['joined']:
+        return 0
+    extra = 0
+    if game.player.world == 'asura' and state.get('court'):
+        from .asura_court import benefits
+        extra = benefits(game, state)['discount']
+    return min(.6, policy(game, state)['cultivation_discount'] + extra)
 
 
 def record(game, state, text):
@@ -54,6 +60,9 @@ def record(game, state, text):
 
 def officials(game):
     cfg = definition(game)
+    if game.player.world == 'asura':
+        from .asura_court import public
+        return public(game, account(game))['seats']
     entity = game.sects.get(cfg['id'])
     people = {n.id:n for n in entity.npcs} if entity else {}
     return [dict(id=f"{cfg['id']}_{i}", name=(people[f"{cfg['id']}_{i}"].name
@@ -89,20 +98,28 @@ def advance_time(game, elapsed, unit_years):
     if not definition(game) or game.player.realm_index < 9 or elapsed <= 0:
         return
     state, cfg = account(game, create=True), definition(game)
+    from . import asura_court
+    if game.player.world == 'asura':
+        asura_court.ensure(game)
     total = state['fraction'] + elapsed / unit_years
     count = floor(total + 1e-9)
     state['fraction'] = max(0.0, total - count)
     for _ in range(count):
         state['unit'] += 1
-        state['treasury'] += config()['unit_income']
+        if game.player.world == 'asura':
+            asura_court.tick(game, state)
+        else:
+            state['treasury'] += config()['unit_income']
         obligation = state['obligation']
         if obligation and state['unit'] > obligation['deadline']:
             state['regard'] = max(0, state['regard'] - 15)
             state['obligation'] = None
             record(game,state,'王命失期，恩宠降低。' if game.player.world=='asura' else '誓愿失期，信望降低。')
-        if state['unit'] >= state['agenda_at']:
+        if state['unit'] >= state['agenda_at'] and not (game.player.world == 'asura' and asura_court.is_king(state)):
             target = cfg['policies'][(state['unit']//config()['agenda_interval']) % 3]['id']
-            if state['treasury'] >= config()['policy_cost'] and any(o['present'] for o in officials(game)):
+            rulers = officials(game)
+            ruler_present = (rulers[0]['present'] if game.player.world == 'asura' else any(o['present'] for o in rulers))
+            if state['treasury'] >= config()['policy_cost'] and ruler_present:
                 if game.player.world == 'nether':
                     tally=votes(game,target)
                     # Player's absent vote is an abstention, never an invented yes.
@@ -123,7 +140,7 @@ def advance_time(game, elapsed, unit_years):
         paid=min(amount,state['treasury'])
         state['treasury']-=paid
         add_item(game.player,'spirit_stone',paid)
-        if state['obligation'] is None and game.player.world=='asura':
+        if state['obligation'] is None and game.player.world=='asura' and not asura_court.is_king(state):
             state['obligation']=dict(name='王命：完成一次王庭委托',deadline=state['unit']+4)
         record(game,state,f"第 {state['unit']} 单位：领取{'神职供养' if game.player.world=='reincarnation' else '俸禄津贴'}，灵石 +{paid}。")
 
@@ -165,6 +182,10 @@ def act(engine, game_id, action, target=''):
     game=engine._load(game_id)
     require_action(game)
     cfg, state, p=definition(game), account(game,create=True),game.player
+    from . import asura_court
+    if p.world == 'asura':
+        asura_court.ensure(game)
+        asura_court.reconcile(game, state)
     if action=='work':
         begin_work(game)
         return engine.advance(game_id,'institution_work',1)
@@ -172,14 +193,25 @@ def act(engine, game_id, action, target=''):
         if state['joined']:
             raise ValueError('已登记，无需重复加入')
         state['joined']=True
+        if p.world == 'asura':
+            # Legacy versions retained a numeric rank after resignation.
+            # Rejoining cannot create a title without its corresponding seat.
+            state['rank'] = 0
+            state['court']['protected_until'] = state['unit'] + 8
         p.institution_affiliations[cfg['id']]={'joined_age':p.age}
         text=f"加入{cfg['name']}，原有宗门身份保留。"
     else:
         if not state['joined']:
             raise ValueError('请先登记机构身份')
-        if action=='leave':
+        if p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree'):
+            text = asura_court.act(engine, game, state, action, target)
+        elif action=='leave':
             if state['job']:
                 raise ValueError('请先交付或放弃委托')
+            if p.world == 'asura':
+                if state['court']['challenge']:
+                    raise ValueError('须先应战或让位，再退出王庭')
+                asura_court.vacate(game, state)
             state['joined']=False
             state['seat_active']=False
             if state['obligation']:
@@ -191,6 +223,8 @@ def act(engine, game_id, action, target=''):
             if state['job']:
                 raise ValueError('已有待完成或待领取的委托')
             factor=policy(game,state)['service']*(1.2 if state['blessing_until']>state['unit'] else 1)
+            if p.world == 'asura':
+                factor *= asura_court.benefits(game, state)['service']
             state['job']=dict(years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)]),progress=0,
                               reward=round(config()['service_merit']*factor))
             text='接取驻地委托；须实际履约一个行动单位，途中中断可继续，正常修行不能代替履约。'
@@ -220,9 +254,15 @@ def act(engine, game_id, action, target=''):
             rank=state['rank']+1
             if rank>=len(cfg['ranks']):
                 raise ValueError('已达最高职阶')
-            if state['earned']<config()['rank_merit'][rank] or p.realm_index<9+rank//2 or state['regard']<rank*20:
+            merits = cfg.get('rank_merit', config()['rank_merit'])
+            if state['earned']<merits[rank] or p.realm_index<9+rank//2 or state['regard']<rank*20:
                 raise ValueError('累计功绩、境界或恩宠信望未达到晋阶要求')
-            state['rank']=rank
+            if p.world == 'asura':
+                if state['court']['challenge']:
+                    raise ValueError('请先回应换位战书')
+                asura_court.change_rank(game, state, rank)
+            else:
+                state['rank']=rank
             text=f"获授{cfg['ranks'][rank]}，后续俸禄随之提高。"
         elif action=='bloc':
             if p.world!='nether' or not target.isdigit() or int(target) not in range(5):
@@ -277,7 +317,13 @@ def act(engine, game_id, action, target=''):
                 raise ValueError('距上次议政不足四单位')
             if state['treasury']<config()['policy_cost']:
                 raise ValueError('机构府库不足')
-            if p.world=='nether':
+            if p.world == 'asura' and asura_court.is_king(state):
+                if state['court']['challenge']:
+                    raise ValueError('须先回应换位战书，再行使王权')
+                state['last_proposal'] = state['unit']
+                enact(game, state, target, p.name + '亲颁王令')
+                text = '王令已颁行，无需请奏或消耗功勋；新政持续至你更替。'
+            elif p.world=='nether':
                 if not state['seat_active']:
                     raise ValueError('只有门阀代言人可提出议案')
                 tally=votes(game,target,player=True)
@@ -295,7 +341,9 @@ def act(engine, game_id, action, target=''):
                     text+='。赞成议权未过半，维持现政；不扣府库。'
             else:
                 threshold=80 if p.world=='asura' else 60
-                if state['rank']<2 or state['regard']<threshold or not any(o['present'] for o in officials(game)):
+                rulers = officials(game)
+                ruler_present = rulers[0]['present'] if p.world == 'asura' else any(o['present'] for o in rulers)
+                if state['rank']<2 or state['regard']<threshold or not ruler_present:
                     raise ValueError(f'须职阶三阶、恩宠或信望至少 {threshold}，且有在世主事者')
                 spend(state,100)
                 state['last_proposal']=state['unit']
@@ -335,12 +383,15 @@ def public_institution(game):
     result.update(available=True,name=cfg['name'],regime=cfg['regime'],description=cfg['description'],
                   location=cfg['location'],local=game.player.location_id==cfg['location'],world=game.player.world,
                   policies=copy.deepcopy(cfg['policies']),ranks=cfg['ranks'],people=officials(game),
-                  rank_merit=config()['rank_merit'],material_merit=config()['material_merit'],
+                  rank_merit=cfg.get('rank_merit', config()['rank_merit']),material_merit=config()['material_merit'],
                   policy_cost=config()['policy_cost'],discount=cultivation_discount(game),
                   current_policy=policy(game,state))
     if game.player.world=='nether':
         result.update(weights=cfg['weights'],seat_merit=cfg['seat_merit'],seat_support=cfg['seat_support'])
         result['tallies']={r['id']:votes(game,r['id'],player=True) for r in cfg['policies']}
+    if game.player.world == 'asura':
+        from .asura_court import public
+        result['court'] = public(game, state)
     return result
 
 

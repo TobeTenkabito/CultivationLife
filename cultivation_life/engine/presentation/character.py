@@ -27,6 +27,8 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
             "met": False, "reason": f"真实道果正受下界压制，返回{WORLD_SYSTEMS['world_names'].get(upper_world, upper_world)}后方可继续修行。",
             "missing_affinities": [],
         }
+    from ...system.asura import active as asura_active
+    is_asura = asura_active(player)
     kind = deps._manual_breakthrough_kind(player)
     at_bottleneck = kind is not None
     major = kind == "major"
@@ -38,7 +40,7 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
         "met": True, "reason": "尚未抵达大境界瓶颈。", "missing_affinities": [],
     }
     chance = (
-        None if deterministic_monster_evolution
+        None if deterministic_monster_evolution or (is_asura and major)
         else deps._breakthrough_chance(player, major=major) if at_bottleneck else None
     )
     active_aids = [
@@ -76,7 +78,8 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
         "chance": chance,
         "active_aids": active_aids,
         "progression_note": (
-            ("幽冥上境 · 血脉进化：积满机缘后前往血脉面板择定进化形态。" if deterministic_monster_evolution else
+            ("每层先贯通三条魔脉；大境界须斩灭心魔与天魔，双方不能逃跑。" if is_asura else
+             "幽冥上境 · 血脉进化：积满机缘后前往血脉面板择定进化形态。" if deterministic_monster_evolution else
              "本界修为已至圆满，更高境界暂未开放。" if player.realm_index == 12 and (player.layer == 9 or bloodline_upper(player)) else
              "上境普通修行：机缘有上限，积满后手动冲关；阶段关隘与大境界沿用普通天劫。")
             if ordinary_upper(player) else ""

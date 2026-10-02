@@ -345,7 +345,7 @@ def _resolve_asura_ascension_step(
     game.pending_event = None
     game.history.append(HistoryRecord(
         "SYS_ASURA_ASCENSION_COMPLETE", 1, player.age, "飞升修罗界", None, "ascended",
-        "你渡过九重修罗天魔劫，自真魔界登临修罗界并成就迦楼罗。四大修罗境界已经确立，但境界突破规则暂未开放。"
+        "你渡过九重修罗天魔劫，自真魔界登临修罗界并成就修罗，可以继续向非天、罗睺与摩诃境修持。"
         + (f" 受天关排斥，{lost_puppets}具傀儡未能同行。" if lost_puppets else "")
         + (" 道侣与你一同登临修罗界。" if companion_kept else "")
         + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")

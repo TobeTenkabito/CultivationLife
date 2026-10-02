@@ -229,12 +229,17 @@ class SectNpc:
     body_training: int | None = None
     immortal_body_level: int = 0
     divine_sense_rank: int | None = None
+    monster_species_id: str | None = None
+    asura_route: str | None = None
     social_profile: dict[str, Any] | None = None
     # Optional, versioned cultivation facts. Voisinage definitions live in content,
     # while coverage, initiative and active fields exist only during a battle.
     transcendence: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
+        if self.path == "monster" and not self.monster_species_id:
+            from .system.monster_identity import stable_species
+            self.monster_species_id = stable_species(self.id or self.name)
         if self.gender not in {"male", "female"}:
             identity = self.id or self.name
             self.gender = "female" if sum(ord(char) for char in identity) % 2 else "male"
@@ -351,6 +356,7 @@ class Player:
     divine_sense_experience: float = 0.0
     prisoners: list[dict[str, Any]] = field(default_factory=list)
     puppets: list[dict[str, Any]] = field(default_factory=list)
+    asura_cultivation: dict[str, Any] = field(default_factory=dict)
     foreign_souls: list[dict[str, Any]] = field(default_factory=list)
     devouring_breakthrough_bonus: float = 0.0
     awaiting_body_breakthrough: bool = False

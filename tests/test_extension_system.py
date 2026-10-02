@@ -32,6 +32,7 @@ class ExtensionSystemTests(unittest.TestCase):
             registry = ContentRegistry.load(SOURCE_ROOT / "content", Path(directory))
             self.assertIn("healing_pill", registry.items)
             self.assertEqual(ContentRegistry.extension_report, [])
+            self.assertEqual(len(registry.world_systems["monster_species"]), 8)
             self.assertEqual(registry.monster_species, {})
             self.assertEqual(registry.monster_evolutions, {})
             monster_start = next(

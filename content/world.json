@@ -1920,10 +1920,10 @@
         "6": "炼魔",
         "7": "真魔",
         "8": "魔尊",
-        "9": "迦楼罗",
-        "10": "紧那罗",
-        "11": "摩睺罗",
-        "12": "阿修罗"
+        "9": "修罗",
+        "10": "非天",
+        "11": "罗睺",
+        "12": "摩诃"
       },
       "natural_cultivation_multiplier": 0.1,
       "kill_opportunity_base": 12,
@@ -4263,23 +4263,32 @@
           "regime": "君主专制",
           "location": "ten_thousand_battle_city",
           "path": "demonic",
-          "description": "修罗王独掌王命。臣属立功晋爵、领取俸禄；请命须获王意，未完成王命会失去恩宠。",
+          "description": "爵位各有其主。凭功勋受封，或以换位血战夺取上一级爵位；登王后亲掌政令、人事与营建。",
           "ranks": [
             "效命者",
             "战将",
             "封侯",
             "战公",
-            "摄政辅臣"
+            "摄政辅臣",
+            "修罗王"
           ],
           "people": [
             "厉无疆",
             "赤衡",
-            "烬离"
+            "烬离",
+            "阎朔",
+            "罗铮",
+            "狄芜",
+            "赤绫"
           ],
           "titles": [
             "修罗王",
-            "掌令使",
-            "府库总管"
+            "摄政辅臣",
+            "战公",
+            "封侯",
+            "战将",
+            "效命者",
+            "效命者"
           ],
           "policies": [
             {
@@ -4305,12 +4314,60 @@
               "income": 1.5,
               "service": 1,
               "cultivation_discount": 0
+            },
+            {
+              "id": "trade",
+              "name": "通商令",
+              "description": "府库单位收入增加三成，民心每单位增加一点；新委托功勋减少一成。",
+              "income": 1,
+              "service": 0.9,
+              "cultivation_discount": 0,
+              "revenue": 1.3,
+              "support": 1
+            },
+            {
+              "id": "rest",
+              "name": "休养令",
+              "description": "民心每单位增加三点，养域费用减少一成；府库单位收入减少两成。",
+              "income": 1,
+              "service": 1,
+              "cultivation_discount": 0.1,
+              "revenue": 0.8,
+              "support": 3
+            },
+            {
+              "id": "tax",
+              "name": "战赋令",
+              "description": "府库单位收入增加六成，民心每单位减少四点。",
+              "income": 1,
+              "service": 1,
+              "cultivation_discount": 0,
+              "revenue": 1.6,
+              "support": -4
+            },
+            {
+              "id": "recruit",
+              "name": "招贤令",
+              "description": "新委托功勋增加两成，养域费用减少一成；俸禄增加两成。",
+              "income": 1.2,
+              "service": 1.2,
+              "cultivation_discount": 0.1,
+              "revenue": 1,
+              "support": 0
             }
           ],
           "preferences": [
             "war",
             "study",
             "prosper"
+          ],
+          "rank_merit": [
+            0,
+            200,
+            500,
+            1000,
+            1800,
+            3000
           ]
         },
         "nether": {
@@ -4464,6 +4521,40 @@
         1000,
         1800
       ]
+    },
+    "monster_species": {
+      "serpent": {
+        "name": "蛇属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "avian": {
+        "name": "羽属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "ape": {
+        "name": "猿属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "fox": {
+        "name": "狐属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "turtle": {
+        "name": "龟甲属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "insect": {
+        "name": "虫属",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "aquatic": {
+        "name": "水族",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      },
+      "flora": {
+        "name": "草木精怪",
+        "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      }
     }
   },
   "realms": [

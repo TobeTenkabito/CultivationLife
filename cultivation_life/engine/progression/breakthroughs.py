@@ -186,6 +186,9 @@ def _manual_minor_layers(player: Player) -> set[int]:
 
 
 def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) -> str | None:
+    from ...system.asura import active as asura_active, vein_ready as asura_vein_ready
+    if asura_active(player) and (player.asura_cultivation.get('conversion', 0) < 5 or not asura_vein_ready(player)):
+        return None
     if player.world == 'celestial' and player.realm_index >= 9:
         from ...system.immortal_cultivation import vein_ready
         if not player.immortal_power_converted or not vein_ready(player):

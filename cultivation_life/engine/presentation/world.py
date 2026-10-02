@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...system.monster_identity import identity
+
 from ...system.path_modifiers import modifier
 from ...system.npc_social import social_hint
 from ...system.npc_contacts import availability, relation_kind
@@ -72,6 +74,7 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             ),
             "gender_name": gender_name(npc.gender),
             "spirit_root_name": deps._npc_root_name(npc.spirit_root),
+            **identity(npc, hide_route=bool(perception and not perception.get('revealed', True))),
             "path_name": PATH_NAMES.get(npc.path, npc.path),
             "race_name": RACE_DEFINITIONS.get(npc.race, {"name": npc.race})["name"],
             "world": npc.world if same_world else None,

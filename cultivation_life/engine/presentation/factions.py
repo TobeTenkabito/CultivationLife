@@ -169,6 +169,9 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         entry["is_master"] = entry["id"] == master_id
         entry["is_disciple"] = entry["id"] in disciple_ids
         entry["is_friend"] = entry["id"] in friend_ids
+        from ...system.monster_identity import identity
+        entry.update(identity(npc, hide_route=bool(entry.get('cultivation_concealment')
+            and not entry['cultivation_concealment'].get('revealed', True))))
         entry["path_name"] = PATH_NAMES.get(entry.get("path", "dao"), entry.get("path", "dao"))
         entry["affinity"] = round(npc.affinity or 0, 1)
         entry["attitude"] = attitude_label(npc.affinity or 0, sect_hostility)

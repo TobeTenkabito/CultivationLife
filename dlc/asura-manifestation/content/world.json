@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "asura_manifestation": {
+      "enabled": true,
+      "routes": {
+        "deva": {
+          "name": "天",
+          "requirement": "道修或佛修肉身",
+          "part": "天相",
+          "effect": "restore_body",
+          "preferred": 0
+        },
+        "naga": {
+          "name": "龙",
+          "requirement": "水族妖身或已有龙形的妖修肉身",
+          "part": "龙躯",
+          "effect": "suppress",
+          "preferred": 1
+        },
+        "yaksha": {
+          "name": "夜叉",
+          "requirement": "魔修肉身",
+          "part": "夜叉战躯",
+          "effect": "strike",
+          "preferred": 2
+        },
+        "gandharva": {
+          "name": "乾达婆",
+          "requirement": "草木精怪肉身",
+          "part": "香音身",
+          "effect": "restore_spirit",
+          "preferred": 3
+        },
+        "mahoraga": {
+          "name": "摩睺罗",
+          "requirement": "蛇属妖身",
+          "part": "巨蟒身",
+          "effect": "seal",
+          "preferred": 4
+        },
+        "kinnara": {
+          "name": "紧那罗",
+          "requirement": "狐属或猿属妖身",
+          "part": "合鸣身",
+          "effect": "restore_field",
+          "preferred": 5
+        },
+        "garuda": {
+          "name": "迦楼罗",
+          "requirement": "羽属妖身或鸟类真灵肉身",
+          "part": "双翼",
+          "effect": "strike",
+          "preferred": 6
+        },
+        "asura": {
+          "name": "阿修罗",
+          "requirement": "任意两具合格肉身（可用机关傀儡）",
+          "part": "三头六臂",
+          "effect": "strike",
+          "preferred": 7
+        }
+      },
+      "semantic_templates": [
+        {
+          "name": "垂危回护",
+          "trigger": "ordinary_before_damage",
+          "when": {
+            "fact": "self.body",
+            "op": "lt",
+            "value": 0.45
+          },
+          "actions": [
+            {
+              "channel": "ordinary.received",
+              "value": -0.2,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "承压增威",
+          "trigger": "effect_before_apply",
+          "when": {
+            "fact": "target.pressure",
+            "op": "ge",
+            "value": 20
+          },
+          "actions": [
+            {
+              "channel": "field.authority",
+              "value": 0.3,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "见伤催杀",
+          "trigger": "ordinary_before_damage",
+          "when": {
+            "fact": "target.body",
+            "op": "lt",
+            "value": 0.6
+          },
+          "actions": [
+            {
+              "channel": "ordinary.dealt",
+              "value": 0.25,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "敛息养域",
+          "trigger": "field_prepare",
+          "when": {
+            "fact": "self.energy_ratio",
+            "op": "lt",
+            "value": 0.5
+          },
+          "actions": [
+            {
+              "channel": "field.upkeep_cost",
+              "value": -0.25,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "久战增威",
+          "trigger": "effect_before_apply",
+          "when": {
+            "fact": "self.sustained_rounds",
+            "op": "ge",
+            "value": 3
+          },
+          "actions": [
+            {
+              "channel": "field.authority",
+              "value": 0.3,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "逆势守域",
+          "trigger": "contest_prepare",
+          "when": {
+            "fact": "self.pressure",
+            "op": "ge",
+            "value": 15
+          },
+          "actions": [
+            {
+              "channel": "field.stability",
+              "value": 0.25,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "先声夺域",
+          "trigger": "contest_prepare",
+          "when": {
+            "fact": "round",
+            "op": "le",
+            "value": 3
+          },
+          "actions": [
+            {
+              "channel": "field.incursion",
+              "value": 0.25,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "血战燃威",
+          "trigger": "effect_before_apply",
+          "when": {
+            "fact": "self.body",
+            "op": "lt",
+            "value": 0.6
+          },
+          "actions": [
+            {
+              "channel": "field.authority",
+              "value": 0.35,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "域开护身",
+          "trigger": "ordinary_before_damage",
+          "when": {
+            "fact": "self.active_field",
+            "op": "eq",
+            "value": true
+          },
+          "actions": [
+            {
+              "channel": "ordinary.received",
+              "value": -0.15,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "持域强攻",
+          "trigger": "ordinary_before_damage",
+          "when": {
+            "fact": "self.sustained_rounds",
+            "op": "ge",
+            "value": 3
+          },
+          "actions": [
+            {
+              "channel": "ordinary.dealt",
+              "value": 0.2,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "低耗施法",
+          "trigger": "effect_prepare",
+          "when": {
+            "fact": "self.energy_ratio",
+            "op": "lt",
+            "value": 0.4
+          },
+          "actions": [
+            {
+              "channel": "field.effect_cost",
+              "value": -0.25,
+              "op": "modify"
+            }
+          ]
+        },
+        {
+          "name": "破阵扬威",
+          "trigger": "effect_before_apply",
+          "when": {
+            "fact": "target.active_field",
+            "op": "eq",
+            "value": true
+          },
+          "actions": [
+            {
+              "channel": "field.authority",
+              "value": 0.2,
+              "op": "modify"
+            }
+          ]
+        }
+      ],
+      "minimum_body_training": 60,
+      "body_max": 20,
+      "route_max": 9,
+      "branch_max": 9,
+      "slots": [
+        1,
+        1,
+        2,
+        2,
+        3,
+        4,
+        4,
+        5,
+        6
+      ],
+      "branch_prefixes": [
+        "赤霄",
+        "幽烬",
+        "无相",
+        "玄冥",
+        "离垢",
+        "破军",
+        "大自在",
+        "寂照",
+        "血海",
+        "焚天",
+        "劫火",
+        "幽昙"
+      ],
+      "branch_suffixes": [
+        "杀道",
+        "守道",
+        "镇道",
+        "幻道",
+        "灭道",
+        "御道",
+        "生道",
+        "寂道"
+      ],
+      "conversion_titles": [
+        "引煞入府",
+        "洗炼魔元",
+        "煞元凝旋",
+        "贯通魔窍",
+        "煞元归一"
+      ]
+    }
+  }
+}

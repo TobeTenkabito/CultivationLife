@@ -15,6 +15,13 @@ ROOT = Path(__file__).resolve().parents[1]
 WORLDS = [('asura', 'demonic'), ('nether', 'monster'), ('reincarnation', 'ghost')]
 
 
+@pytest.fixture(autouse=True)
+def base_without_asura_dlc():
+    # These regressions exercise the base game with optional progression off.
+    with patch('cultivation_life.system.asura.enabled', return_value=False):
+        yield
+
+
 @pytest.fixture
 def prepared(tmp_path):
     engine = GameEngine(ROOT, tmp_path)

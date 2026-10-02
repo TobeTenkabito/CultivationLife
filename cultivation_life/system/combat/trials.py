@@ -48,15 +48,18 @@ def load_battle(snapshot):
 
 def run_batch(battle, state, rng, *, batch_size=24):
     """Return victory/defeat/ongoing, and at most batch_size real round rows."""
-    battle.set_objectives('kill', 'kill')
-    battle.escape_forbidden_sides = battle.escape_forbidden_sides | {'enemy'}
+    battle.set_objectives('capture' if state['mode'] == 'asura_fusion' else 'kill', 'kill')
+    battle.escape_forbidden_sides = battle.escape_forbidden_sides | (
+        {'enemy', 'player'} if state['mode'].startswith('asura_') else {'enemy'})
     # Old snapshots may contain a living manifestation which escaped. Bring
     # it back without restoring any health or resources; escape is not a kill.
     for unit in battle.units.values():
         if unit.unit.side == 'enemy':
             unit.escaped = False
     rows = []
-    endurance = state['mode'] != 'three_corpses'
+    asura_trial = state['mode'] in {'asura_fusion', 'asura_breakthrough'}
+    fusion = state['mode'] == 'asura_fusion'
+    endurance = state['mode'] not in {'three_corpses', 'asura_fusion', 'asura_breakthrough'}
     only_fields = state['mode'] == 'voisinage_backlash'
     player = battle.units['player']
     for _ in range(batch_size):
@@ -131,8 +134,23 @@ def run_batch(battle, state, rng, *, batch_size=24):
                      'player_combat_state_max': player.unit.power,
                      'enemy_combat_state': battle.totals['enemy'] * max(0, 1 - battle.ordinary_loss('enemy')),
                      'enemy_combat_state_max': battle.totals['enemy']})
-        if not player.fighting or player.body <= 0:
+        if asura_trial and player.suppressed and player.body > 0:
+            # Suppression alone is not a lethal victory. An actual opponent
+            # with a sufficient attack tier must execute the immobilized body.
+            for key, attacker in battle.units.items():
+                if attacker.unit.side != 'enemy' or not attacker.fighting:
+                    continue
+                if battle.attack_tier(attacker) >= player.unit.capabilities.ward_tier:
+                    battle.attack_tier(attacker, pay=True)
+                    battle._lose('player', player.vitality)
+                    player.body = 0
+                    rows[-1]['events'].append('劫相击杀了被镇压的肉身。')
+                    rows[-1].update(player_hp_ratio=0, player_combat_state=0, voisinage=battle.report())
+                    break
+        if (not asura_trial and not player.fighting) or player.body <= 0 or player.vitality <= 0:
             return 'defeat', rows
+        if fusion and all(s.vitality <= 0 or s.body <= 0 or s.suppressed for s in battle.units.values() if s.unit.side == 'enemy'):
+            return 'victory', rows
         if endurance and n >= 5:
             return 'victory', rows
         if not endurance and battle.enemy_killed():

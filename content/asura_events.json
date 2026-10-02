@@ -209,7 +209,7 @@
       "id": "EVT_ASURA_ASCENSION_009",
       "version": 1,
       "title": "修罗飞升·三重兵雷",
-      "body": "最后一重兵雷贯穿两界，只有在雷中重塑元神与魔躯，才能真正成为迦楼罗。",
+      "body": "最后一重兵雷贯穿两界，只有在雷中重塑元神与魔躯，才能真正成为修罗。",
       "category": "asura_ascension",
       "tags": [
         "manual_only",
@@ -235,7 +235,7 @@
       "id": "EVT_ASURA_COMMON_GATE_001",
       "version": 1,
       "title": "天关验印",
-      "body": "修罗天关的接引使查验新晋迦楼罗。这里不问出身，只记录你渡劫时留下的战意与魔气印记。",
+      "body": "修罗天关的接引使查验新晋修罗。这里不问出身，只记录你渡劫时留下的战意与魔气印记。",
       "category": "asura_common",
       "tags": [
         "asura_common"
@@ -436,7 +436,7 @@
       "id": "EVT_ASURA_JOIN_WAR_COURT_001",
       "version": 1,
       "title": "战庭开擂",
-      "body": "修罗战庭在万战魔城开设百胜擂，愿接纳敢以战法立身的新晋迦楼罗。",
+      "body": "修罗战庭在万战魔城开设百胜擂，愿接纳敢以战法立身的新晋修罗。",
       "category": "asura_faction",
       "tags": [
         "asura_common",
