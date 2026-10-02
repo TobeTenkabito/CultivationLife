@@ -188,7 +188,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.56.0' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.56.1' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
@@ -219,7 +219,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("[data-panel-target=asura-veins]");
                     js("document.querySelector('#asura-veins-card').scrollTop=0;true");
                     check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.asura-meridian-figure svg').getBoundingClientRect();return r.width>100&&r.width<innerWidth&&r.height>100})()")),"Magic vein illustration size");
-                    capture("asura-veins-"+arguments.getString("orientation")+"-"+theme+"-1560");
+                    capture("asura-veins-"+arguments.getString("orientation")+"-"+theme+"-1561");
                     sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);waitForJs("!document.querySelector('.utility-panel.panel-open')","Native independent panel back");
                 }
                 async("loadGame("+JSONObject.quote(id)+")");
@@ -260,7 +260,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                             js("UtilityPanels.open('"+panel+"');true");
                             check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Upper voisinage panel overflow "+world+theme);
                         }
-                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1560");
+                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1561");
                     }
                     js("UtilityPanels.open('immortal-aperture');true");tapSelector("#immortal-aperture-content button");
                     waitForJs("!busy && game.aperture.current>0","Native energy refinement");
@@ -533,7 +533,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1560.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1561.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
