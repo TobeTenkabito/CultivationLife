@@ -10,6 +10,7 @@ from ..content_registry import REALMS, CONTENT_DOCUMENTS
 from ..models import HistoryRecord
 from ..rules import opportunity_required, remove_item
 from ..runtime import now_iso
+from .cultivation_dependencies import ApertureDependencies
 
 from .upper_voisinage_rules import (
     config as config,
@@ -75,8 +76,8 @@ def public_upper_voisinages(player, game=None):
         description=world['description'], opportunity=player.opportunity, stones=stones, rows=rows)
 
 
-def act(engine, game_id, action, voisinage_id):
-    game = engine._load(game_id)
+def act(deps: ApertureDependencies, game_id, action, voisinage_id):
+    game = deps._load(game_id)
     p = game.player
     from .asura import active as asura_active
     if asura_active(p):
@@ -116,5 +117,5 @@ def act(engine, game_id, action, voisinage_id):
     game.history.append(HistoryRecord('SYS_UPPER_VOISINAGE', 1, p.age, world_config(p)['title'],
                                      action, 'completed', summary, {}, ['cultivation', 'voisinage']))
     game.updated_at = now_iso()
-    engine.store.save(game)
-    return engine.present(game)
+    deps.store.save(game)
+    return deps.present(game)

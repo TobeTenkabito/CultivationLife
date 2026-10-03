@@ -21,7 +21,7 @@
 - `tianji_system.py` 保留 `TianjiSystemMixin`、生成版本、常量和全部模块级辅助函数。
 - `intrigue_system.py` 保留 `IntrigueSystemMixin`、常量、模块级辅助函数，以及默认参数引用 `PLAYER_ID` 的权限判断转发方法。
 
-经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；当前引擎直接基类为 13 个，其余基类的相对顺序保持原样。
+经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；地图／商盟／仙界养成处理后，当前引擎直接基类为 10 个，其余基类的相对顺序保持原样。
 
 ## 归墟与战争的显式依赖
 
@@ -74,6 +74,12 @@ python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.
 
 ## 跨模块依赖边界
 
+商盟原三组 Mixin 已删除：状态、目录、年度结算、交付退款、玩家工作、跨界和展示进入 `merchant/`，命令、委托报价及执行函数保留在原 `merchant_*system.py` 模块。它们接收 `merchant/dependencies.py` 中的窄契约，由 `engine/composition/merchant.py` 连接；交付与退款不再依赖执行模块的继承宿主。商盟共用常量统一定义在 `merchant_definitions.py`，下层实现不得反向导入商盟入口或执行模块。
+
+道统、融合、仙脉、仙体、仙窍也已改为普通函数，契约在 `cultivation_dependencies.py`。共享修持读取／提交位于 `cultivation_session.py`；仙体与融合只通过提交契约使用存档及呈现，不再反向依赖 `immortal_system.py`。元府及上界邻域操作仅获得读取、保存和呈现能力。原元力规则辅助函数仍从 `immortal_aperture.py` 兼容导出同一对象。
+
+地图旅行与传送函数分别保留在 `../map_runtime.py`、`teleport_system.py`，公共年度阶段及旅行后结算由引擎 `orchestration/world_time.py` 负责。原三组共 10 个 Mixin 均已离开引擎继承链；这些类本身不再提供兼容入口，外部使用 `GameEngine` 的既有方法。
+
 - `npc_contacts.act` 接收 `NpcContactDependencies`，师徒操作由 `engine/composition/contacts.py` 注入，不再反向导入引擎动作实现。
 - `system/combat_adapter.py` 为引擎试炼和修罗王庭共用的战斗适配层，位于纯战斗规则目录 `combat/` 之外；旧 `engine/combat_capabilities.py` 仅兼容导出。
 - 存档、地图、成就接口定义在 `cultivation_life/ports.py`，旧 `engine/ports.py` 保留兼容导出。
@@ -81,7 +87,7 @@ python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.
 - `combat_rule_schema.py` 统一定义新版战斗规则常量和校验，战斗执行器与旧血脉规则均依赖它；旧 `combat_rule_engine.validate_rule` 保留同一函数的兼容导出。
 - `tutorial_mentorship.py` 负责师缘条件、状态和操作；教程入口与操作教学共同调用它。师缘操作不再为了判定拜师条件调用完整教学展示。旧教程入口保留 `blocked_reason`、`mentor_action` 与 `MENTOR_STEP` 导出。
 
-新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；读档阶段拆分后，当前 274 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
+新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；本轮三组拆分后，当前 290 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
 
 存档结构转换统一在 `save_schema.py` 登记；当前版本的系统补全接入 `engine/persistence/` 的相应阶段，通过具名契约装配。准备算法不持有存档服务，结构转换不调用玩法或消费随机数；具体规则见引擎目录的“读档与版本迁移”。结构 1–5 已停止支持，现有模型及系统的补全辅助函数不构成旧文件兼容承诺。
 

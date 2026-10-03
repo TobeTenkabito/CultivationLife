@@ -30,6 +30,9 @@ from .persistence.dependencies import (
     EventsPreparationDependencies,
 )
 from .ports import AchievementPort, MapPort, SavePort
+from ..time_dependencies import TimeDependencies
+from ..system.merchant.dependencies import MerchantDependencies
+from ..system.cultivation_dependencies import CultivationDependencies
 
 
 
@@ -977,6 +980,9 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    cultivation: CultivationDependencies
+    merchant: MerchantDependencies
+    time: TimeDependencies
     guixu: GuixuDependencies
     war: WarDependencies
     economy: EconomyDependencies

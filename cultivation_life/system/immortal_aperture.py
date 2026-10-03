@@ -1,9 +1,10 @@
-"""Independent player energy reservoirs; no automatic refill during battle/UI reads."""
+"""Explicit operations for immortal aperture."""
+
+from __future__ import annotations
 from ..content_registry import WORLD_SYSTEMS
 from ..models import HistoryRecord
 from ..rules import max_hp, max_mp
 from ..runtime import now_iso
-
 from .aperture_resources import (
     true_realm as true_realm,
     cultivation_stage as cultivation_stage,
@@ -15,7 +16,7 @@ from .aperture_resources import (
     energy_state as energy_state,
     commit_energy as commit_energy,
 )
-
+from .cultivation_dependencies import ApertureDependencies
 
 def public_aperture(player, game=None):
     if not available(player):
@@ -60,44 +61,44 @@ def public_aperture(player, game=None):
             'active_manual': player.spirit_voisinage_manual}
 
 
-class ImmortalApertureMixin:
-    def upper_voisinage_action(self, game_id, action, voisinage_id):
-        from .upper_voisinage import act
-        return act(self, game_id, action, voisinage_id)
+def upper_voisinage_action(deps: ApertureDependencies, game_id, action, voisinage_id):
+    from .upper_voisinage import act
+    return act(deps, game_id, action, voisinage_id)
 
-    def aperture_action(self, game_id, action, manual_id=None):
-        game = self._load(game_id)
-        p = game.player
-        if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-            or (game.guixu_state.get('player_session') or {}).get('trapped')):
-            raise ValueError('当前状态不能操持元府')
-        if not available(p):
-            raise ValueError('真仙或灵域功法修至四级后方可开启仙窍')
-        ensure_aperture(p)
-        if action == 'select':
-            if manual_id not in {t.id for t in spirit_books(p)}:
-                raise ValueError('灵域功法须至少四级')
-            p.spirit_voisinage_manual = manual_id
-            summary = '已选定斗法所用灵域。'
-        elif action == 'refine':
-            info = public_aperture(p)
-            if info['asura_conversion'] and info['conversion'] < 1:
-                raise ValueError('须先在八部面板完成五重煞元转化')
-            if not info['lower'] and not info['native'] and not p.immortal_power_converted:
-                raise ValueError('请先完成仙灵力转化')
-            if info['current'] >= info['capacity']:
-                raise ValueError('仙窍已满，无需转化')
-            if info['origin_hp'] <= info['hp_cost'] or info['origin_mp'] < info['mp_cost']:
-                raise ValueError('本源气血或法力不足，不能强行凝练')
-            gain = min(info['refine_gain'], info['capacity'] - info['current'])
-            fraction = gain / info['refine_gain']
-            p.hp -= info['hp_cost'] * fraction * max_hp(p) / max(1, info['max_hp'])
-            p.mp -= info['mp_cost'] * fraction * max_mp(p) / max(1, info['max_mp'])
-            commit_energy(p, info['current'] + gain)
-            summary = f"凝练{info['name']} {gain:g}，储量 {info['current'] + gain:g}/{info['capacity']:g}。本源上限不变。"
-        else:
-            raise ValueError('未知仙窍操作')
-        game.history.append(HistoryRecord('SYS_APERTURE', 1, p.age, '仙窍运转', action, 'completed', summary, {}, ['system','cultivation']))
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+
+def aperture_action(deps: ApertureDependencies, game_id, action, manual_id=None):
+    game = deps._load(game_id)
+    p = game.player
+    if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
+        or (game.guixu_state.get('player_session') or {}).get('trapped')):
+        raise ValueError('当前状态不能操持元府')
+    if not available(p):
+        raise ValueError('真仙或灵域功法修至四级后方可开启仙窍')
+    ensure_aperture(p)
+    if action == 'select':
+        if manual_id not in {t.id for t in spirit_books(p)}:
+            raise ValueError('灵域功法须至少四级')
+        p.spirit_voisinage_manual = manual_id
+        summary = '已选定斗法所用灵域。'
+    elif action == 'refine':
+        info = public_aperture(p)
+        if info['asura_conversion'] and info['conversion'] < 1:
+            raise ValueError('须先在八部面板完成五重煞元转化')
+        if not info['lower'] and not info['native'] and not p.immortal_power_converted:
+            raise ValueError('请先完成仙灵力转化')
+        if info['current'] >= info['capacity']:
+            raise ValueError('仙窍已满，无需转化')
+        if info['origin_hp'] <= info['hp_cost'] or info['origin_mp'] < info['mp_cost']:
+            raise ValueError('本源气血或法力不足，不能强行凝练')
+        gain = min(info['refine_gain'], info['capacity'] - info['current'])
+        fraction = gain / info['refine_gain']
+        p.hp -= info['hp_cost'] * fraction * max_hp(p) / max(1, info['max_hp'])
+        p.mp -= info['mp_cost'] * fraction * max_mp(p) / max(1, info['max_mp'])
+        commit_energy(p, info['current'] + gain)
+        summary = f"凝练{info['name']} {gain:g}，储量 {info['current'] + gain:g}/{info['capacity']:g}。本源上限不变。"
+    else:
+        raise ValueError('未知仙窍操作')
+    game.history.append(HistoryRecord('SYS_APERTURE', 1, p.age, '仙窍运转', action, 'completed', summary, {}, ['system','cultivation']))
+    game.updated_at = now_iso()
+    deps.store.save(game)
+    return deps.present(game)
