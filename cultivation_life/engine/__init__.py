@@ -18,14 +18,12 @@ from ..system.map_system import MapCatalog
 from ..storage import SaveStore
 from ..achievements import AchievementSystem, load_achievement_definitions
 from ..runtime import decode_rng, encode_rng, now_iso
-from ..system.war_system import WarSystemMixin
 from ..system.upper_institutions import UpperInstitutionMixin
 from ..system.natal_artifact_system import NatalArtifactSystemMixin
 from ..system.monster_bloodline_system import MonsterBloodlineSystemMixin, bloodline_content_available
 from ..system.ghost_system import GhostSystemMixin
 from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin
-from ..system.guixu_system import GuixuSystemMixin
 from ..system.family_system import FamilySystemMixin
 from ..system.doctrine_system import DoctrineSystemMixin
 from ..system.merchant_system import MerchantSystemMixin
@@ -105,8 +103,27 @@ from ..system.economy import black_market as economy_black_market
 from ..system import economy_system as economy_compat
 
 
+from ..system.guixu import state as guixu_state
+from ..system.guixu import calendar as guixu_calendar
+from ..system.guixu import npcs as guixu_npcs
+from ..system.guixu import rewards as guixu_rewards
+from ..system.guixu import encounters as guixu_encounters
+from ..system.guixu import actions as guixu_actions
+from ..system.guixu import presentation as guixu_presentation
+from ..system import guixu_system as guixu_compat
+from ..system.war import state as war_state
+from ..system.war import diplomacy as war_diplomacy
+from ..system.war import power as war_power
+from ..system.war import combat as war_combat
+from ..system.war import lifecycle as war_lifecycle
+from ..system.war import peace as war_peace
+from ..system.war import actions as war_actions
+from ..system.war import presentation as war_presentation
+from ..system import war_system as war_compat
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, MapTravelMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -368,7 +385,6 @@ class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenc
         if games is not None and game_id in games:
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
-        self._ensure_buddhist_state(game)
         if games is not None:
             games[game_id] = game
         return game
@@ -2256,3 +2272,343 @@ class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenc
     @property
     def _economy_dependencies(self):
         return self._dependencies.economy
+
+
+    def _ensure_guixu_state(self, game: GameState) -> bool:
+        return guixu_state._ensure_guixu_state(self._dependencies.guixu.state, game)
+
+    def _guixu_entry_definition(
+        self, dungeon: dict[str, Any], pool_entry_id: str,
+    ) -> dict[str, Any]:
+        return guixu_state._guixu_entry_definition(self._dependencies.guixu.state, dungeon, pool_entry_id)
+
+    def _guixu_cycle_and_definition(
+        self, game: GameState, dungeon_id: str,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        return guixu_state._guixu_cycle_and_definition(self._dependencies.guixu.state, game, dungeon_id)
+
+    def _enforce_guixu_rank_boundary(self, game: GameState, reason: str) -> str:
+        return guixu_state._enforce_guixu_rank_boundary(self._dependencies.guixu.state, game, reason)
+
+    def assert_guixu_operation_allowed(self, game_id: str, operation: str) -> None:
+        # When the DLC is disabled, let the requested operation reach ``_load``;
+        # its compatibility migration safely returns an active explorer first.
+        return guixu_state.assert_guixu_operation_allowed(self._dependencies.guixu.state, game_id, operation)
+
+    def _announce_guixu_cycle(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any], rng: random.Random,
+    ) -> None:
+        return guixu_calendar._announce_guixu_cycle(self._dependencies.guixu.calendar, game, dungeon, cycle, rng)
+
+    def _open_guixu_cycle(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any], rng: random.Random,
+    ) -> None:
+        return guixu_calendar._open_guixu_cycle(self._dependencies.guixu.calendar, game, dungeon, cycle, rng)
+
+    def _close_guixu_cycle(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any], rng: random.Random,
+    ) -> None:
+        return guixu_calendar._close_guixu_cycle(self._dependencies.guixu.calendar, game, dungeon, cycle, rng)
+
+    def _advance_guixu_calendar(
+        self, game: GameState, rng: random.Random, era_news: list[str],
+    ) -> bool:
+        return guixu_calendar._advance_guixu_calendar(self._dependencies.guixu.calendar, game, rng, era_news)
+
+    def _guixu_elapsed_days(
+        self, dungeon: dict[str, Any], session: dict[str, Any],
+    ) -> int:
+        return guixu_calendar._guixu_elapsed_days(self._dependencies.guixu.calendar, dungeon, session)
+
+    def _consume_guixu_days(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        session: dict[str, Any], days: int, rng: random.Random,
+    ) -> None:
+        return guixu_calendar._consume_guixu_days(self._dependencies.guixu.calendar, game, dungeon, cycle, session, days, rng)
+
+    def _guixu_relation_ids(self, game: GameState) -> set[str]:
+        return guixu_npcs._guixu_relation_ids(self._dependencies.guixu.npcs, game)
+
+    def _generate_guixu_roster(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any], rng: random.Random,
+    ) -> list[dict[str, Any]]:
+        return guixu_npcs._generate_guixu_roster(self._dependencies.guixu.npcs, game, dungeon, cycle, rng)
+
+    def _form_guixu_npc_teams(
+        self, cycle: dict[str, Any], rng: random.Random,
+    ) -> None:
+        return guixu_npcs._form_guixu_npc_teams(self._dependencies.guixu.npcs, cycle, rng)
+
+    def _dissolve_guixu_npc_team(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        team_id: str | None, reason: str,
+    ) -> None:
+        return guixu_npcs._dissolve_guixu_npc_team(self._dependencies.guixu.npcs, game, dungeon, cycle, team_id, reason)
+
+    def _guixu_npc_claim_entry(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        row: dict[str, Any], actor: dict[str, Any], source: str,
+    ) -> None:
+        return guixu_npcs._guixu_npc_claim_entry(self._dependencies.guixu.npcs, game, dungeon, cycle, row, actor, source)
+
+    def _assign_due_guixu_entries(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        elapsed_days: int, rng: random.Random,
+    ) -> None:
+        return guixu_npcs._assign_due_guixu_entries(self._dependencies.guixu.npcs, game, dungeon, cycle, elapsed_days, rng)
+
+    def _simulate_guixu_npc_conflict(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        day: int, rng: random.Random,
+    ) -> None:
+        return guixu_npcs._simulate_guixu_npc_conflict(self._dependencies.guixu.npcs, game, dungeon, cycle, day, rng)
+
+    def _resolve_guixu_npc_kill(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        killer: dict[str, Any], victim: dict[str, Any], day: int,
+    ) -> None:
+        return guixu_npcs._resolve_guixu_npc_kill(self._dependencies.guixu.npcs, game, dungeon, cycle, killer, victim, day)
+
+    def _guixu_grant_entry(
+        self, game: GameState, dungeon: dict[str, Any], row: dict[str, Any], source: str,
+    ) -> str:
+        return guixu_rewards._guixu_grant_entry(self._dependencies.guixu.rewards, game, dungeon, row, source)
+
+    def _guixu_transferable_player_entries(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        session: dict[str, Any],
+    ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        return guixu_rewards._guixu_transferable_player_entries(self._dependencies.guixu.rewards, game, dungeon, cycle, session)
+
+    def _surrender_guixu_treasure(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        session: dict[str, Any], threat: dict[str, Any], actor: dict[str, Any],
+    ) -> str:
+        return guixu_rewards._surrender_guixu_treasure(self._dependencies.guixu.rewards, game, dungeon, cycle, session, threat, actor)
+
+    def _maybe_guixu_npc_threat(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        session: dict[str, Any], rng: random.Random,
+    ) -> None:
+        return guixu_encounters._maybe_guixu_npc_threat(self._dependencies.guixu.encounters, game, dungeon, cycle, session, rng)
+
+    def _guixu_actor(self, cycle: dict[str, Any], actor_id: str) -> dict[str, Any]:
+        return guixu_encounters._guixu_actor(self._dependencies.guixu.encounters, cycle, actor_id)
+
+    def _guixu_relationship_role(self, game: GameState, npc_id: str) -> str | None:
+        return guixu_encounters._guixu_relationship_role(self._dependencies.guixu.encounters, game, npc_id)
+
+    def _break_guixu_relationship(self, game: GameState, npc_id: str, *, player_defending: bool = False) -> None:
+        return guixu_encounters._break_guixu_relationship(self._dependencies.guixu.encounters, game, npc_id, player_defending=player_defending)
+
+    def _guixu_fight(
+        self, game: GameState, dungeon: dict[str, Any], cycle: dict[str, Any],
+        session: dict[str, Any], actor: dict[str, Any], rng: random.Random,
+        *, player_defending: bool = False, enemy_first_round: bool = False,
+    ) -> tuple[str, str]:
+        return guixu_encounters._guixu_fight(self._dependencies.guixu.encounters, game, dungeon, cycle, session, actor, rng, player_defending=player_defending, enemy_first_round=enemy_first_round)
+
+    def _guixu_offer_team(self, game, cycle, session):
+        return guixu_encounters._guixu_offer_team(self._dependencies.guixu.encounters, game, cycle, session)
+
+    def _guixu_team_tick(self, game, dungeon, cycle, session, rng):
+        return guixu_encounters._guixu_team_tick(self._dependencies.guixu.encounters, game, dungeon, cycle, session, rng)
+
+    def guixu_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return guixu_actions.guixu_action(self._dependencies.guixu.actions, game_id, action, payload)
+
+    def _guixu_trapped_training(
+        self, game_id: str, action: str, units: int = 1,
+    ) -> dict[str, Any]:
+        return guixu_actions._guixu_trapped_training(self._dependencies.guixu.actions, game_id, action, units)
+
+    def _public_guixu(self, game: GameState) -> dict[str, Any]:
+        return guixu_presentation._public_guixu(self._dependencies.guixu.presentation, game)
+
+    @staticmethod
+    def _guixu_definitions() -> dict[str, dict[str, Any]]:
+        return guixu_compat._guixu_definitions()
+
+    @staticmethod
+    def _guixu_settings() -> dict[str, Any]:
+        return guixu_compat._guixu_settings()
+
+    @staticmethod
+    def _next_guixu_open(definition: dict[str, Any], age: int) -> int:
+        return guixu_compat._next_guixu_open(definition, age)
+
+    @staticmethod
+    def _guixu_weighted_key(weights: dict[str, Any], rng: random.Random) -> str:
+        return guixu_compat._guixu_weighted_key(weights, rng)
+
+    @staticmethod
+    def _guixu_return_days(layer_id: str) -> int:
+        return guixu_compat._guixu_return_days(layer_id)
+
+    @staticmethod
+    def _guixu_active_team(cycle, actor):
+        return guixu_compat._guixu_active_team(cycle, actor)
+
+    @property
+    def _guixu_dependencies(self):
+        return self._dependencies.guixu
+
+    def _war_player_identity(self, game, war):
+        return war_state._war_player_identity(self._dependencies.war.state, game, war)
+
+    def _war_relation(self, game: GameState, kind: str, first: str, second: str) -> dict[str, Any]:
+        return war_state._war_relation(self._dependencies.war.state, game, kind, first, second)
+
+    def _active_war(self, game: GameState, kind: str, first: str, second: str) -> dict[str, Any] | None:
+        return war_state._active_war(self._dependencies.war.state, game, kind, first, second)
+
+    def _war_world(self, game: GameState, kind: str, side_id: str) -> str:
+        return war_state._war_world(self._dependencies.war.state, game, kind, side_id)
+
+    def _war_side_name(self, game: GameState, kind: str, side_id: str) -> str:
+        return war_state._war_side_name(self._dependencies.war.state, game, kind, side_id)
+
+    def _war_side_members(self, game: GameState, kind: str, side_id: str, world: str) -> list[SectNpc]:
+        return war_state._war_side_members(self._dependencies.war.state, game, kind, side_id, world)
+
+    def _ensure_war_shape(self, game: GameState, war: dict[str, Any]) -> bool:
+        return war_state._ensure_war_shape(self._dependencies.war.state, game, war)
+
+    def _coalition_ids(self, war: dict[str, Any], side: str) -> list[str]:
+        return war_state._coalition_ids(self._dependencies.war.state, war, side)
+
+    def _participant_side(self, war: dict[str, Any], power_id: str | None) -> str | None:
+        return war_state._participant_side(self._dependencies.war.state, war, power_id)
+
+    def _power_exists_in_world(self, game: GameState, kind: str, power_id: str, world: str) -> bool:
+        return war_state._power_exists_in_world(self._dependencies.war.state, game, kind, power_id, world)
+
+    def _append_war_log(self, game: GameState, war: dict[str, Any], title: str, text: str) -> None:
+        return war_state._append_war_log(self._dependencies.war.state, game, war, title, text)
+
+    def _war_npc(self, game: GameState, npc_id: str) -> SectNpc | None:
+        return war_state._war_npc(self._dependencies.war.state, game, npc_id)
+
+    def _available_warriors(self, game: GameState, war: dict[str, Any], side: str, power_id: str = "") -> list[SectNpc]:
+        return war_state._available_warriors(self._dependencies.war.state, game, war, side, power_id)
+
+    def _ensure_wars(self, game: GameState) -> bool:
+        return war_state._ensure_wars(self._dependencies.war.state, game)
+
+    def _allied_powers(self, game: GameState, war: dict[str, Any], side: str) -> list[dict[str, Any]]:
+        return war_diplomacy._allied_powers(self._dependencies.war.diplomacy, game, war, side)
+
+    def _add_war_participant(self, game: GameState, war: dict[str, Any], side: str, power_id: str, caller_id: str) -> None:
+        return war_diplomacy._add_war_participant(self._dependencies.war.diplomacy, game, war, side, power_id, caller_id)
+
+    def _call_war_allies(self, game: GameState, war: dict[str, Any], side: str, rng: random.Random,
+                         *, ally_id: str = "", limit: int | None = None) -> list[str]:
+        return war_diplomacy._call_war_allies(self._dependencies.war.diplomacy, game, war, side, rng, ally_id=ally_id, limit=limit)
+
+    def _player_war_side(self, game: GameState, war: dict[str, Any]) -> str | None:
+        return war_diplomacy._player_war_side(self._dependencies.war.diplomacy, game, war)
+
+    def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
+        return war_diplomacy._player_has_war_voice(self._dependencies.war.diplomacy, game, war)
+
+    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str) -> dict[str, Any]:
+        return war_diplomacy._start_war(self._dependencies.war.diplomacy, game, kind, attacker, defender)
+
+    def _war_total_power(
+        self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
+    ) -> float:
+        return war_power._war_total_power(self._dependencies.war.power, game, war, side, include_player=include_player)
+
+    def _war_side_formation(self, game: GameState, war: dict[str, Any], side: str) -> dict[str, Any]:
+        return war_power._war_side_formation(self._dependencies.war.power, game, war, side)
+
+    def _war_formation_modifier(
+        self, own: dict[str, Any], opponent: dict[str, Any], side: str,
+    ) -> float:
+        return war_power._war_formation_modifier(self._dependencies.war.power, own, opponent, side)
+
+    def _war_formation_contexts(self, game: GameState, war: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        return war_power._war_formation_contexts(self._dependencies.war.power, game, war)
+
+    def _war_power_profile(
+        self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
+    ) -> dict[str, float | int]:
+        return war_power._war_power_profile(self._dependencies.war.power, game, war, side, include_player=include_player)
+
+    def _war_entity_power(self, game: GameState, war: dict[str, Any], side: str, power_id: str) -> float:
+        return war_power._war_entity_power(self._dependencies.war.power, game, war, side, power_id)
+
+    def _resolve_abstract_defeat(self, game: GameState, war: dict[str, Any], loser: str, rng: random.Random) -> str:
+        return war_combat._resolve_abstract_defeat(self._dependencies.war.combat, game, war, loser, rng)
+
+    def _shift_war_morale(self, war: dict[str, Any], loser: str, loss: float, gain: float, *, attacker_kill: bool = False) -> None:
+        return war_combat._shift_war_morale(self._dependencies.war.combat, war, loser, loss, gain, attacker_kill=attacker_kill)
+
+    def _resolve_field_attack(
+        self, game: GameState, war: dict[str, Any], attacking: str, rng: random.Random,
+        formation_contexts: dict[str, dict[str, Any]] | None = None,
+    ) -> str:
+        return war_combat._resolve_field_attack(self._dependencies.war.combat, game, war, attacking, rng, formation_contexts)
+
+    def _resolve_player_war_round(
+        self, game: GameState, war: dict[str, Any], side: str, rng: random.Random,
+    ) -> None:
+        return war_combat._resolve_player_war_round(self._dependencies.war.combat, game, war, side, rng)
+
+    def _resolve_war_vanguard(self, game: GameState, pending: dict[str, Any], mode: str, rng: random.Random) -> tuple[str, str]:
+        return war_combat._resolve_war_vanguard(self._dependencies.war.combat, game, pending, mode, rng)
+
+    def _advance_wars_unit(self, game: GameState, rng: random.Random) -> list[str]:
+        return war_lifecycle._advance_wars_unit(self._dependencies.war.lifecycle, game, rng)
+
+    def _finish_war_by_morale(self, game: GameState, war: dict[str, Any]) -> bool:
+        return war_lifecycle._finish_war_by_morale(self._dependencies.war.lifecycle, game, war)
+
+    def _generate_ai_peace_offer(self, game: GameState, war: dict[str, Any], proposer: str) -> dict[str, Any]:
+        return war_peace._generate_ai_peace_offer(self._dependencies.war.peace, game, war, proposer)
+
+    def _conclude_war_bundle(self, game: GameState, war: dict[str, Any], demands: list[dict[str, Any]],
+                             beneficiary: str, *, automatic: bool = False) -> str:
+        return war_peace._conclude_war_bundle(self._dependencies.war.peace, game, war, demands, beneficiary, automatic=automatic)
+
+    def _conclude_war(self, game: GameState, war: dict[str, Any], term: str, beneficiary: str, *, automatic: bool = False,
+                      target_id: str = "", target_power_id: str = "", third_party_id: str = "",
+                      third_status: str = "neutral", finalize: bool = True) -> str:
+        return war_peace._conclude_war(self._dependencies.war.peace, game, war, term, beneficiary, automatic=automatic, target_id=target_id, target_power_id=target_power_id, third_party_id=third_party_id, third_status=third_status, finalize=finalize)
+
+    def war_peace(self, game_id: str, war_id: str, term: str, *, target_id: str = "", target_power_id: str = "",
+                  third_party_id: str = "", third_status: str = "neutral", concede: bool = False) -> dict[str, Any]:
+        return war_peace.war_peace(self._dependencies.war.peace, game_id, war_id, term, target_id=target_id, target_power_id=target_power_id, third_party_id=third_party_id, third_status=third_status, concede=concede)
+
+    def war_action(self, game_id: str, war_id: str, action: str, *, ally_id: str = "") -> dict[str, Any]:
+        return war_actions.war_action(self._dependencies.war.actions, game_id, war_id, action, ally_id=ally_id)
+
+    def _maybe_map_war_encounter(self, game, rng):
+        return war_actions._maybe_map_war_encounter(self._dependencies.war.actions, game, rng)
+
+    def _public_war_system(self, game: GameState) -> dict[str, Any]:
+        return war_presentation._public_war_system(self._dependencies.war.presentation, game)
+
+    @staticmethod
+    def _war_sect(game, power_id):
+        return war_compat._war_sect(game, power_id)
+
+    @staticmethod
+    def _war_rules() -> dict[str, Any]:
+        return war_compat._war_rules()
+
+    @staticmethod
+    def _war_formation_metric_score(profile: dict[str, Any], side: str) -> float:
+        return war_compat._war_formation_metric_score(profile, side)
+
+    @staticmethod
+    def _war_formation_text(contexts: dict[str, dict[str, Any]]) -> str:
+        return war_compat._war_formation_text(contexts)
+
+    @staticmethod
+    def _war_defeat_probabilities(realm_index: int) -> tuple[float, float]:
+        return war_compat._war_defeat_probabilities(realm_index)
+
+    @property
+    def _war_dependencies(self):
+        return self._dependencies.war

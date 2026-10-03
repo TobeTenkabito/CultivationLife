@@ -10,6 +10,7 @@ from pathlib import Path
 from .models import GameState
 from .errors import NotFoundError
 from .version import BASE_GAME_VERSION
+from .save_schema import SAVE_SCHEMA_VERSION, migrate_document, migration_path, schema_version
 
 
 class SaveStore:
@@ -29,14 +30,20 @@ class SaveStore:
         return self.directory / f"{game_id}.json"
 
     def save(self, game: GameState) -> None:
+        if type(game.version) is not int or game.version != SAVE_SCHEMA_VERSION:
+            raise ValueError('只能保存当前结构版本的游戏状态')
         game.last_saved_with_game_version = BASE_GAME_VERSION
-        path = self._path(game.id)
-        data = json.dumps(game.to_dict(), ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+        self._write_document(game.id, game.to_dict())
+
+    def _write_document(self, game_id: str, document: dict) -> None:
+        """Atomically commit an already validated document, retaining extension fields."""
+        path = self._path(game_id)
+        data = json.dumps(document, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
         with self.lock:
             temporary = None
             try:
                 with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=self.directory,
-                                                 prefix=f'{game.id}.', suffix='.tmp', delete=False) as output:
+                                                 prefix=f'{game_id}.', suffix='.tmp', delete=False) as output:
                     temporary = Path(output.name)
                     output.write(data)
                 temporary.replace(path)
@@ -46,12 +53,18 @@ class SaveStore:
 
     def load(self, game_id: str) -> GameState:
         path = self._path(game_id)
-        if not path.exists():
-            raise NotFoundError("存档不存在")
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("version") not in {2, 3, 4, 5}:
-            raise ValueError("该存档属于旧版大更新前格式，请新建角色")
-        return GameState.from_dict(data)
+        with self.lock:
+            if not path.exists():
+                raise NotFoundError("存档不存在")
+            original = json.loads(path.read_text(encoding="utf-8"))
+            data = migrate_document(original)
+            if data.get('id') != game_id:
+                raise ValueError('存档编号与文件名不一致')
+            game = GameState.from_dict(data)
+            if data is not original:
+                # Commit only after the full migration and model decode succeed.
+                self._write_document(game_id, data)
+            return game
 
     def delete(self, game_id: str) -> None:
         """Delete only the requested save; account achievements remain untouched."""
@@ -68,8 +81,7 @@ class SaveStore:
         for path in sorted(self.directory.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True):
             try:
                 data = json.loads(path.read_text(encoding="utf-8"))
-                if data.get("version") not in {2, 3, 4, 5}:
-                    continue
+                migration_path(schema_version(data))
                 games.append({
                     "id": data["id"],
                     "name": data["player"]["name"],

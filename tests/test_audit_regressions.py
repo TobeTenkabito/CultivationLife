@@ -48,12 +48,11 @@ def test_http_settings_loads_once_and_next_request_reads_fresh_state(local_api, 
         assert second['settings']['achievement_popup'] is False
 
 
-def test_http_old_save_is_migrated_once_before_command(local_api, engine):
+def test_http_current_save_is_prepared_once_before_command(local_api, engine):
     from cultivation_life.engine import engine_persistence
     game = create(engine)
     path = engine.store._path(game.id)
     document = json.loads(path.read_text(encoding='utf-8'))
-    document['version'] = 2
     document['player'].pop('asura_cultivation', None)
     path.write_text(json.dumps(document), encoding='utf-8')
     with patch.object(engine_persistence, '_load', wraps=engine_persistence._load) as migrate:

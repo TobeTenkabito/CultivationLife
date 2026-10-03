@@ -3,6 +3,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable
 
+from ..persistence.dependencies import (
+    FoundationsPreparationDependencies,
+    VitalityPreparationDependencies,
+    CharacterPreparationDependencies,
+    WorldPreparationDependencies,
+    ServicesPreparationDependencies,
+    EventsPreparationDependencies,
+)
+
 from ..dependencies import (
     WorldRuntimeDependencies,
     PersistenceDependencies,
@@ -28,36 +37,49 @@ def bind_world_runtime(engine: GameEngine) -> WorldRuntimeDependencies:
 
 def bind_persistence_runtime(engine: GameEngine, *, bloodline_content_available: Callable[[], bool]) -> PersistenceDependencies:
     return PersistenceDependencies(
-        _body_progress_required=lambda *args, **kwargs: engine._body_progress_required(*args, **kwargs),
-        _clear_market=lambda *args, **kwargs: engine._clear_market(*args, **kwargs),
-        _compact_world_history=lambda *args, **kwargs: engine._compact_world_history(*args, **kwargs),
-        _cultivation_sense_requirement=lambda *args, **kwargs: engine._cultivation_sense_requirement(*args, **kwargs),
-        _die=lambda *args, **kwargs: engine._die(*args, **kwargs),
-        _enforce_world_realm_caps=lambda *args, **kwargs: engine._enforce_world_realm_caps(*args, **kwargs),
-        _ensure_guixu_state=lambda *args, **kwargs: engine._ensure_guixu_state(*args, **kwargs),
-        _ensure_heavenly_court=lambda *args, **kwargs: engine._ensure_heavenly_court(*args, **kwargs),
-        _ensure_market=lambda *args, **kwargs: engine._ensure_market(*args, **kwargs),
-        _ensure_merchant=lambda *args, **kwargs: engine._ensure_merchant(*args, **kwargs),
-        _ensure_natal_artifact=lambda *args, **kwargs: engine._ensure_natal_artifact(*args, **kwargs),
-        _ensure_npc_formations=lambda *args, **kwargs: engine._ensure_npc_formations(*args, **kwargs),
-        _ensure_race_relations=lambda *args, **kwargs: engine._ensure_race_relations(*args, **kwargs),
-        _ensure_sage_state=lambda *args, **kwargs: engine._ensure_sage_state(*args, **kwargs),
-        _ensure_sect_relations=lambda *args, **kwargs: engine._ensure_sect_relations(*args, **kwargs),
-        _ensure_sects=lambda *args, **kwargs: engine._ensure_sects(*args, **kwargs),
-        _ensure_tianji_state=lambda *args, **kwargs: engine._ensure_tianji_state(*args, **kwargs),
-        _ensure_doctrines=lambda *args, **kwargs: engine._ensure_doctrines(*args, **kwargs),
-        _ensure_wars=lambda *args, **kwargs: engine._ensure_wars(*args, **kwargs),
-        _ensure_world_npcs=lambda *args, **kwargs: engine._ensure_world_npcs(*args, **kwargs),
-        _manual_breakthrough_kind=lambda *args, **kwargs: engine._manual_breakthrough_kind(*args, **kwargs),
-        _manual_minor_layers=lambda *args, **kwargs: engine._manual_minor_layers(*args, **kwargs),
-        _migrate_true_demon_races=lambda *args, **kwargs: engine._migrate_true_demon_races(*args, **kwargs),
-        _refresh_sage_effects=lambda *args, **kwargs: engine._refresh_sage_effects(*args, **kwargs),
-        _sync_party_state=lambda *args, **kwargs: engine._sync_party_state(*args, **kwargs),
-        _sync_relationship_records=lambda *args, **kwargs: engine._sync_relationship_records(*args, **kwargs),
-        _get_events_by_id=lambda: engine.events_by_id,
-        _get_maps=lambda: engine.maps,
+        foundations=FoundationsPreparationDependencies(
+            _ensure_merchant=lambda *args, **kwargs: engine._ensure_merchant(*args, **kwargs),
+        ),
+        vitality=VitalityPreparationDependencies(
+            _die=lambda *args, **kwargs: engine._die(*args, **kwargs),
+        ),
+        character=CharacterPreparationDependencies(
+            _body_progress_required=lambda *args, **kwargs: engine._body_progress_required(*args, **kwargs),
+            _clear_market=lambda *args, **kwargs: engine._clear_market(*args, **kwargs),
+            _cultivation_sense_requirement=lambda *args, **kwargs: engine._cultivation_sense_requirement(*args, **kwargs),
+            _manual_breakthrough_kind=lambda *args, **kwargs: engine._manual_breakthrough_kind(*args, **kwargs),
+            _manual_minor_layers=lambda *args, **kwargs: engine._manual_minor_layers(*args, **kwargs),
+            bloodline_content_available=bloodline_content_available,
+            _get_maps=lambda: engine.maps,
+        ),
+        world=WorldPreparationDependencies(
+            _compact_world_history=lambda *args, **kwargs: engine._compact_world_history(*args, **kwargs),
+            _enforce_world_realm_caps=lambda *args, **kwargs: engine._enforce_world_realm_caps(*args, **kwargs),
+            _ensure_doctrines=lambda *args, **kwargs: engine._ensure_doctrines(*args, **kwargs),
+            _ensure_guixu_state=lambda *args, **kwargs: engine._ensure_guixu_state(*args, **kwargs),
+            _ensure_npc_formations=lambda *args, **kwargs: engine._ensure_npc_formations(*args, **kwargs),
+            _ensure_race_relations=lambda *args, **kwargs: engine._ensure_race_relations(*args, **kwargs),
+            _ensure_sage_state=lambda *args, **kwargs: engine._ensure_sage_state(*args, **kwargs),
+            _ensure_sect_relations=lambda *args, **kwargs: engine._ensure_sect_relations(*args, **kwargs),
+            _ensure_sects=lambda *args, **kwargs: engine._ensure_sects(*args, **kwargs),
+            _ensure_tianji_state=lambda *args, **kwargs: engine._ensure_tianji_state(*args, **kwargs),
+            _ensure_wars=lambda *args, **kwargs: engine._ensure_wars(*args, **kwargs),
+            _ensure_world_npcs=lambda *args, **kwargs: engine._ensure_world_npcs(*args, **kwargs),
+            _migrate_true_demon_races=lambda *args, **kwargs: engine._migrate_true_demon_races(*args, **kwargs),
+            _refresh_sage_effects=lambda *args, **kwargs: engine._refresh_sage_effects(*args, **kwargs),
+            _sync_party_state=lambda *args, **kwargs: engine._sync_party_state(*args, **kwargs),
+            _sync_relationship_records=lambda *args, **kwargs: engine._sync_relationship_records(*args, **kwargs),
+        ),
+        services=ServicesPreparationDependencies(
+            _ensure_buddhist_state=lambda *args, **kwargs: engine._ensure_buddhist_state(*args, **kwargs),
+            _ensure_heavenly_court=lambda *args, **kwargs: engine._ensure_heavenly_court(*args, **kwargs),
+            _ensure_market=lambda *args, **kwargs: engine._ensure_market(*args, **kwargs),
+            _ensure_natal_artifact=lambda *args, **kwargs: engine._ensure_natal_artifact(*args, **kwargs),
+        ),
+        events=EventsPreparationDependencies(
+            _get_events_by_id=lambda: engine.events_by_id,
+        ),
         _get_store=lambda: engine.store,
-        bloodline_content_available=bloodline_content_available,
     )
 
 

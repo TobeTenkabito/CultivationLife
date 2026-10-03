@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from .version import BASE_GAME_VERSION
+from .save_schema import SAVE_SCHEMA_VERSION
 
 
 @dataclass(frozen=True)
@@ -908,7 +909,7 @@ class GameState:
     world_rules_version: int = 9
     created_with_game_version: str = BASE_GAME_VERSION
     last_saved_with_game_version: str = BASE_GAME_VERSION
-    version: int = 5
+    version: int = SAVE_SCHEMA_VERSION
     map_war_last_encounter_unit: int = -2
 
     def __post_init__(self):

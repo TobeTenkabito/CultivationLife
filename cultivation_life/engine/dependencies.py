@@ -19,6 +19,16 @@ from ..system.intrigue.dependencies import IntrigueDependencies
 from ..system.economy.dependencies import EconomyDependencies, ExchangeDependencies
 from ..system.crafting.dependencies import CraftingDependencies
 from ..system.formation.dependencies import FormationDependencies
+from ..system.guixu.dependencies import GuixuDependencies
+from ..system.war.dependencies import WarDependencies
+from .persistence.dependencies import (
+    FoundationsPreparationDependencies,
+    VitalityPreparationDependencies,
+    CharacterPreparationDependencies,
+    WorldPreparationDependencies,
+    ServicesPreparationDependencies,
+    EventsPreparationDependencies,
+)
 from .ports import AchievementPort, MapPort, SavePort
 
 
@@ -176,44 +186,13 @@ class PresentationDependencies:
 
 @dataclass(frozen=True, slots=True)
 class PersistenceDependencies:
-    _body_progress_required: Callable[..., float]
-    _clear_market: Callable[..., None]
-    _compact_world_history: Callable[..., bool]
-    _cultivation_sense_requirement: Callable[..., int]
-    _die: Callable[..., None]
-    _enforce_world_realm_caps: Callable[..., bool]
-    _ensure_guixu_state: Callable[..., bool]
-    _ensure_heavenly_court: Callable[..., bool]
-    _ensure_market: Callable[..., bool]
-    _ensure_merchant: Callable[..., bool]
-    _ensure_natal_artifact: Callable[..., bool]
-    _ensure_npc_formations: Callable[..., bool]
-    _ensure_race_relations: Callable[..., bool]
-    _ensure_sage_state: Callable[..., bool]
-    _ensure_sect_relations: Callable[..., bool]
-    _ensure_sects: Callable[..., None]
-    _ensure_tianji_state: Callable[..., bool]
-    _ensure_doctrines: Callable[..., bool]
-    _ensure_wars: Callable[..., bool]
-    _ensure_world_npcs: Callable[..., bool]
-    _manual_breakthrough_kind: Callable[..., str | None]
-    _manual_minor_layers: Callable[..., set[int]]
-    _migrate_true_demon_races: Callable[..., bool]
-    _refresh_sage_effects: Callable[..., None]
-    _sync_party_state: Callable[..., bool]
-    _sync_relationship_records: Callable[..., bool]
-    _get_events_by_id: Callable[[], dict[str, dict[str, Any]]]
-    _get_maps: Callable[[], MapPort]
+    foundations: FoundationsPreparationDependencies
+    vitality: VitalityPreparationDependencies
+    character: CharacterPreparationDependencies
+    world: WorldPreparationDependencies
+    services: ServicesPreparationDependencies
+    events: EventsPreparationDependencies
     _get_store: Callable[[], SavePort]
-    bloodline_content_available: Callable[[], bool]
-
-    @property
-    def events_by_id(self) -> dict[str, dict[str, Any]]:
-        return self._get_events_by_id()
-
-    @property
-    def maps(self) -> MapPort:
-        return self._get_maps()
 
     @property
     def store(self) -> SavePort:
@@ -998,6 +977,8 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    guixu: GuixuDependencies
+    war: WarDependencies
     economy: EconomyDependencies
     exchange: ExchangeDependencies
     crafting: CraftingDependencies

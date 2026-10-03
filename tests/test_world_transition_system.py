@@ -124,8 +124,8 @@ def test_content_rejects_invalid_routes_and_profile_tiers():
         validate_transition_content(profiles, routes, REALMS)
 
 
-def test_only_transition_commit_initialization_and_legacy_repair_write_player_world():
-    allowed = {"system/world_transition_system.py", "engine/orchestration/session.py", "engine/engine_persistence.py"}
+def test_only_transition_commit_initialization_and_session_preparation_write_player_world():
+    allowed = {"system/world_transition_system.py", "engine/orchestration/session.py", "engine/persistence/character.py"}
     violations = []
     for path in (ROOT / "cultivation_life").rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8-sig"))

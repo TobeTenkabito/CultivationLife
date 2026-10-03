@@ -126,12 +126,12 @@ def violations(edges):
         domain_to_facade = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and target == f'cultivation_life.system.{area}_system'
-            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation'))
+            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation', 'guixu', 'war'))
         domain_to_wiring = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and source != f'cultivation_life.system.{area}.wiring'
             and target == f'cultivation_life.system.{area}.wiring'
-            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation'))
+            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation', 'guixu', 'war'))
         shared_definition_cycle = (source, target) in {
             ('cultivation_life.system.economy.exchange', 'cultivation_life.system.exchange_system'),
             ('cultivation_life.system.doctrine.effects', 'cultivation_life.system.doctrine.generation'),
@@ -163,9 +163,15 @@ def violations(edges):
             source.startswith('cultivation_life.system.court.')
             and source != 'cultivation_life.system.court.wiring'
             and target in COURT_FACADES | {'cultivation_life.system.court.wiring'})
+        schema_to_runtime = (source == 'cultivation_life.save_schema'
+                             and target.startswith('cultivation_life.'))
+        preparation_to_storage = (source.startswith('cultivation_life.engine.persistence.')
+                                  and target in {'cultivation_life.storage', 'cultivation_life.save_transfer',
+                                                 'cultivation_life.engine', 'cultivation_life.engine.wiring',
+                                                 'cultivation_life.engine.engine_persistence'})
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
-                or core_reverse_import or court_reverse_import):
+                or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 

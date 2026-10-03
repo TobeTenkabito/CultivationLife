@@ -434,7 +434,7 @@ class EngineTests(unittest.TestCase):
         self.assertNotEqual(after, before)
         self.assertTrue(any(record.event_id == "SYS_FACTION_WELFARE" for record in game.history))
 
-    def test_legacy_save_without_sects_is_migrated_on_load(self):
+    def test_retired_save_without_sects_is_rejected_without_rewriting(self):
         created = self.engine.create_game("旧卷", "supreme_water", "dao", 114)
         save_path = Path(self.temp.name) / "data" / "saves" / f"{created['id']}.json"
         raw = json.loads(save_path.read_text(encoding="utf-8"))
@@ -448,11 +448,10 @@ class EngineTests(unittest.TestCase):
         ):
             raw["player"].pop(field)
         save_path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
-        loaded = self.engine.get_game(created["id"])
-        self.assertFalse(loaded["faction"]["member"])
-        self.assertTrue(all(entry["experience"] == 0 for entry in loaded["player"]["qi_mastery"]))
-        migrated = json.loads(save_path.read_text(encoding="utf-8"))
-        self.assertEqual(set(migrated["sects"]), set(FACTION_DEFINITIONS))
+        before = save_path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "停止支持"):
+            self.engine.get_game(created["id"])
+        self.assertEqual(save_path.read_bytes(), before)
 
     def test_world_npc_template_age_change_preserves_elapsed_years(self):
         created = self.engine.create_game("故人年岁", "supreme_water", "dao", 115)
