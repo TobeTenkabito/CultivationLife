@@ -1,5 +1,5 @@
 """Stable effect enrichment without rerolling names, stats or future stages."""
-from .generation import rng_for
+from .randomness import rng_for
 
 
 def ensure_offensive_doctrine(definitions, seed, version):

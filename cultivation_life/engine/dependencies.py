@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 from ..models import GameState, SectNpc, SectState
 from ..system.combat_system import BattleUnit
+from ..system.npc_contact_dependencies import NpcContactDependencies
 from .ports import AchievementPort, MapPort, SavePort
 
 
@@ -985,6 +986,7 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    npc_contacts: NpcContactDependencies
     asura_actions: AsuraActionDependencies
     asura_trials: AsuraTrialDependencies
     immortal_trials: ImmortalTrialDependencies

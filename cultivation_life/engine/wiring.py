@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from .dependencies import EngineDependencies, NpcClassDependencies
-from .composition import actions, asura, combat, events, lifecycle, presentation, world
+from .composition import actions, asura, combat, contacts, events, lifecycle, presentation, world
 
 if TYPE_CHECKING:
     from . import GameEngine
@@ -15,6 +15,7 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        npc_contacts=contacts.bind_contacts(engine),
         asura_actions=asura.bind_asura_actions(engine),
         asura_trials=asura.bind_asura_trials(engine),
         immortal_trials=combat.bind_immortal_trials(engine),

@@ -224,7 +224,7 @@ class MerchantCommissionMixin:
                 "value": sum(row["material_value"] for row in preview["selected_materials"]), "quality_name": preview["quality_names"][quality]}
 
     def _merchant_quote(self, game, alliance, payload):
-        from .merchant_system import KINDS
+        from .merchant_definitions import KINDS
         kind = str(payload.get("kind", "supply"))
         stars, quantity = int(payload.get("stars", 1)), int(payload.get("quantity", 1))
         if kind not in KINDS or not 1 <= stars <= 5 or not 1 <= quantity <= 99:

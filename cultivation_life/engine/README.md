@@ -23,7 +23,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 ```
 
 - `dependencies.py` 为每个职责模块声明冻结的数据类，所有协作能力都有名称，构造时必须提供。算法只能访问其契约列出的能力，不接收整个引擎对象。
-- `ports.py` 定义存档、地图和成就资源接口，领域实现不依赖这些资源的具体适配器。
+- `cultivation_life/ports.py` 定义共用的存档、地图和成就资源接口；`engine/ports.py` 保留兼容导出，其他系统无需为了接口导入引擎。
 - `wiring.py` 是装配入口，按职责调用 `composition/` 中的具名构建函数。这两个位置是知道 `GameEngine` 的装配边界；每个构建函数逐项连接回调与资源，不使用兜底属性代理，也不把任意属性查找暴露给算法。
 - 没有实例依赖的静态辅助函数直接运行；NPC 类方法使用单独的 `NpcClassDependencies`，保留子类对寿元计算的覆盖能力。
 - 回调在调用时查找引擎方法，资源通过显式 getter 获取。构造引擎后替换方法、存档服务或其他资源，仍按原行为生效；不能随意改为缓存绑定方法或资源快照。
@@ -36,9 +36,9 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | --- | --- |
 | `__init__.py` | 引擎入口、资源初始化与显式转发方法 |
 | `dependencies.py` | 各职责模块所需的命名依赖契约 |
-| `ports.py` | 存档、地图、成就资源接口 |
+| `ports.py` | 共用资源接口的兼容导出，定义位于 `cultivation_life/ports.py` |
 | `wiring.py` | 选择各职责的依赖构建函数，组装完整引擎依赖 |
-| `composition/` | 生命周期、动作、事件、战斗、世界、展示及修罗的显式依赖构建 |
+| `composition/` | 生命周期、动作、事件、战斗、世界、展示、修罗及人物交往的显式依赖构建 |
 | `engine_constants.py` | 引擎共享常量 |
 | `orchestration/session.py` | 创建游戏 |
 | `orchestration/advancement.py` | 行动推进、年度收益、行动单位结算与记录 |
@@ -67,6 +67,14 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `engine_combat_runtime.py` | 战斗、击杀后果与死亡处理 |
 | `engine_presentation.py` | 对外状态汇总 |
 | `engine_persistence.py` | 读取、旧档迁移与状态补全 |
+
+## 系统与引擎之间的依赖
+
+人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济系统通过 `system/economy/dependencies.py` 和 `wiring.py` 声明、连接七组协作能力，保留原入口的转发方法和继承关系。
+
+战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
+
+运行 `python tools/check_module_dependencies.py` 检查已建立的模块边界；检查器会报告现存循环组，但仅对违反明确边界的导入返回失败。剩余核心循环和神机、内政动态装配仍需后续迁移，详见系统目录说明。
 
 ## 为保持游戏性而保留的实现
 
@@ -99,6 +107,8 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 ```powershell
 python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py
+python -m pytest -q tests/test_module_dependencies.py
+python tools/check_module_dependencies.py
 python -m pytest -q
 ```
 

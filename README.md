@@ -171,7 +171,7 @@ Debug=False
 
 当前引擎整理已将装配细节归入 `engine/composition/`，修罗养成与试炼使用显式依赖，修罗 Mixin 已从引擎继承列表移出。其余玩法按模块逐步迁移，现有操作接口及存档格式保持兼容。
 
-`system/` 中的经济、神机和内政已按职责拆分，原 `*_system.py` 模块继续作为兼容入口。这些系统仍使用原有 Mixin 和装配机制，不能套用引擎的新装配方式。读档补全、展示副作用、随机数调用和年度结算顺序也仍有行为兼容约束。
+`system/` 中的经济、神机和内政已按职责拆分，原 `*_system.py` 模块继续作为兼容入口。经济算法已改为七组显式依赖的普通函数；神机、内政仍使用原动态装配。人物交往通过注入操作调用引擎，王庭与引擎共用战斗适配层。读档补全、展示副作用、随机数调用和年度结算顺序仍有行为兼容约束。
 
 修改前请阅读 [引擎架构与保留项](cultivation_life/engine/README.md) 和 [系统目录与兼容边界](cultivation_life/system/README.md)。`docs/v2/` 保留历史设计和迁移记录，但当前源码树没有 `cultivation_life/v2/`；这些文档不代表现行运行架构或已接入的功能。
 
@@ -195,8 +195,11 @@ python -m pytest -q
 修改引擎或已拆分系统时，可先运行相关兼容性测试：
 
 ```powershell
-python -m pytest -q tests/test_engine_dependencies.py tests/test_system_layout.py
+python -m pytest -q tests/test_engine_dependencies.py tests/test_system_layout.py tests/test_module_dependencies.py
+python tools/check_module_dependencies.py
 ```
+
+依赖检查覆盖显式导入及函数内延迟导入，对禁止的反向引用返回失败；可用 `--json dependency-report.json` 导出完整循环组。此次整理将显式导入循环组从六组减至四组，核心模型/规则等剩余循环仍需继续拆解。检查不模拟动态导入及包初始化的隐式执行，不能替代运行时测试。
 
 ### 浏览器烟雾测试
 

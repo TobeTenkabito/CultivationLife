@@ -1,5 +1,6 @@
 """An on-demand directory command adapter; existing relationship services own outcomes."""
 from ..content_registry import WORLD_SYSTEMS
+from .npc_contact_dependencies import NpcContactDependencies
 from ..models import HistoryRecord, SectNpc
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..rules import has_living_master
@@ -46,10 +47,10 @@ def availability(game, npc):
     return actions
 
 
-def act(engine, game_id, npc_id, action):
-    game = engine._load(game_id)
+def act(deps: NpcContactDependencies, game_id, npc_id, action):
+    game = deps._load(game_id)
     # Resolve only existing people. Opening or searching never generates population.
-    npc = engine._find_npc(game, npc_id)
+    npc = deps._find_npc(game, npc_id)
     if not npc:
         raw = next((r.get('npc') for r in game.encounter_npc_cache if (r.get('npc') or {}).get('id') == npc_id), None)
         npc = SectNpc.from_dict(raw) if raw else None
@@ -60,33 +61,32 @@ def act(engine, game_id, npc_id, action):
         raise ValueError('未知交往方式')
     if options[action]:
         raise ValueError(options[action])
-    engine.assert_buddhist_operation_allowed(game_id, 'npc-contact')
+    deps.assert_buddhist_operation_allowed(game_id, 'npc-contact')
     p = game.player
     kind = relation_kind(p, npc_id)
     if action == 'party':
-        return engine.manage_party(game_id, npc_id, 'leave' if any(r.get('id') == npc_id for r in p.party) else 'invite')
-    if action == 'companion': return engine.manage_dao_companion(game_id, 'propose', npc_id=npc_id)
-    if action == 'friend': return engine.manage_dao_friend(game_id, npc_id, 'befriend')
-    if action == 'concubine': return engine.manage_concubine(game_id, npc_id, 'recruit')
+        return deps.manage_party(game_id, npc_id, 'leave' if any(r.get('id') == npc_id for r in p.party) else 'invite')
+    if action == 'companion': return deps.manage_dao_companion(game_id, 'propose', npc_id=npc_id)
+    if action == 'friend': return deps.manage_dao_friend(game_id, npc_id, 'befriend')
+    if action == 'concubine': return deps.manage_concubine(game_id, npc_id, 'recruit')
     if action in {'master','disciple'}:
-        from ..engine.actions.relationships import manage_faction_relationship
-        return manage_faction_relationship(engine._dependencies.relationship_actions, game_id, npc_id, action, known_target=True)
+        return deps.manage_known_relationship(game_id, npc_id, action)
     if action == 'capture' and kind in {'master','companion','friend'}:
-        return engine.begin_relationship_capture(game_id, kind, npc_id)
+        return deps.begin_relationship_capture(game_id, kind, npc_id)
     if action in {'slay','capture'}:
-        return engine.relationship_violence(game_id, kind, npc_id, capture=action=='capture')
-    npc = engine._find_npc(game, npc_id) or engine._promote_cached_npc(game, npc_id, '交往')
+        return deps.relationship_violence(game_id, kind, npc_id, capture=action=='capture')
+    npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, '交往')
     rng = decode_rng(game.seed, game.rng_state)
     low, high = WORLD_SYSTEMS['party'].get('interaction_affinity', [4,8])
     gain = rng.randint(int(low), int(high))
     raw_delta = gain if action == 'improve' else -gain
     # The shared affinity service already applies the player's path modifier.
-    delta = engine._sage_affinity_gain(p, raw_delta)
-    affinity = engine._adjust_person_affinity(game, npc_id, raw_delta)
+    delta = deps._sage_affinity_gain(p, raw_delta)
+    affinity = deps._adjust_person_affinity(game, npc_id, raw_delta)
     game.governance_actions[f'party_interaction:{npc_id}'] = p.age
     summary = f"你与{npc.name}{'畅谈修行，增进了解' if action == 'improve' else '言语相争，渐生嫌隙'}，好感 {delta:+g}，当前为 {affinity:g}。"
     game.history.append(HistoryRecord('SYS_NPC_CONTACT',1,p.age,'故人交往',npc_id,action,summary,{'affinity':delta},['system','relationship']))
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)
-    engine.store.save(game)
-    return engine.present(game)
+    deps.store.save(game)
+    return deps.present(game)

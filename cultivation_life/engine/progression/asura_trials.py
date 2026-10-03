@@ -9,7 +9,7 @@ from ...system.combat.trials import dump_battle, load_battle, run_batch
 from ...system.combat.voisinages import VoisinageBattle
 from ...system.combat_system import BattleUnit, PlayerCombatSystem
 from ...system.immortal_aperture import commit_energy, ensure_aperture
-from ..combat_capabilities import bind_capabilities
+from ...system.combat_adapter import bind_capabilities
 from ..dependencies import AsuraTrialDependencies
 
 KINDS = {'asura_conversion', 'asura_fusion', 'asura_breakthrough'}
