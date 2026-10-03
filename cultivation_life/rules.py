@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .system.cultivation_policy import opportunity_unbounded
+from .system.cultivation_reserves import opportunity_unbounded
 
 from .system.path_modifiers import projected_resource, modifier
 
@@ -10,13 +10,12 @@ import random
 from typing import Any
 
 from .content_registry import (
-    AFFINITY_NAMES, ELEMENT_NAMES, FACTION_DEFINITIONS, FACTION_NPC_TEMPLATES,
-    FACTION_REWARDS, ITEM_CATALOG, KARMA_FACTORS, MUTATED_NAMES, PATH_NAMES,
-    RACE_DEFINITIONS, REALMS, ROOT_DEFINITIONS, ROOT_NAMES, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES,
-    GUIXU_TIDE_CONTENT, WORLD_SYSTEMS,
+    AFFINITY_NAMES, ITEM_CATALOG, KARMA_FACTORS, PATH_NAMES,
+    RACE_DEFINITIONS, REALMS, ROOT_DEFINITIONS, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES,
+    WORLD_SYSTEMS,
 )
 from .models import Item, Player, RealmDef, Technique
-from .system.ghost_system import (
+from .system.ghost_resources import (
     effective_intrinsic_hp, effective_intrinsic_mp, hp_carry_ratio,
     intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
     ghost_external_hp_bonus, ghost_external_mp_bonus,
@@ -26,6 +25,15 @@ from .system.possession_system import current_body_age
 from .system.cultivation_ranks import public_ranks
 from .system.transformation_system import (
     ensure_transformation_state, equip_transformation_technique, transformation_technique_limits,
+)
+
+from .combat_benchmarks import (
+    standard_combat_power_dlc_bonus as standard_combat_power_dlc_bonus,
+    expected_combat_power as expected_combat_power,
+)
+
+from .cultivation_costs import (
+    opportunity_required as opportunity_required,
 )
 
 
@@ -424,23 +432,15 @@ def stage_name(player: Player) -> str:
     return f"{current.name}{stage}·{player.layer}层"
 
 
-def opportunity_required(player: Player) -> int:
-    current = realm(player)
-    return round(current.opportunity_base * (1 + 0.12 * (player.layer - 1)))
-
-
 def breakthrough_opportunity_required(player: Player) -> int:
     """Quote the actual breakthrough fee without changing proportional rewards."""
     from .system.asura import active as asura_active
-    if (player.world == 'celestial' or asura_active(player)) and 9 <= player.realm_index <= 12:
-        from .system.doctrine.cultivation import immortal_breakthrough_cost
-        from .system.immortal_cultivation import rules as immortal_rules
-        return immortal_breakthrough_cost(player.realm_index, player.layer, immortal_rules())
-    return opportunity_required(player)
+    from .cultivation_costs import breakthrough_cost
+    return breakthrough_cost(player, upper_cultivation=(player.world == 'celestial' or asura_active(player)))
 
 
 def raw_external_hp_bonus(player: Player) -> float:
-    from .system.crafting_system import crafted_artifact_bonuses
+    from .system.crafted_artifact_rules import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
     if player.support_technique and player.support_technique.active_in(player.world):
@@ -463,7 +463,7 @@ def max_hp(player: Player) -> int:
 
 
 def raw_external_mp_bonus(player: Player) -> float:
-    from .system.crafting_system import crafted_artifact_bonuses
+    from .system.crafted_artifact_rules import crafted_artifact_bonuses
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
     if player.support_technique and player.support_technique.active_in(player.world):
@@ -535,7 +535,7 @@ def max_mp(player: Player) -> int:
 
 
 def combat_power(player: Player) -> float:
-    from .system.crafting_system import effective_artifact_combat_bonus
+    from .system.crafted_artifact_rules import effective_artifact_combat_bonus
     current = realm(player)
     hp_ratio = max(0.0, min(1.0, player.hp / max_hp(player)))
     mp_ratio = max(0.0, min(1.0, player.mp / max_mp(player)))
@@ -564,34 +564,6 @@ def combat_power(player: Player) -> float:
     total *= 1.0 + max(0.0, float(player.sage_effects.get("combat_multiplier", 0.0)))
     from .system.asura import inherited_power
     return round(total + inherited_power(player), 1)
-
-
-def standard_combat_power_dlc_bonus() -> float:
-    """Add enabled DLC benchmark bonuses before applying one multiplier."""
-    bonuses: list[float] = []
-    tianji = WORLD_SYSTEMS.get("tianji_artifacts", {})
-    if isinstance(tianji, dict) and tianji.get("enabled"):
-        bonuses.append(max(0.0, float(tianji.get("standard_combat_power_bonus", 0.0))))
-    guixu_settings = GUIXU_TIDE_CONTENT.get("settings", {})
-    if GUIXU_TIDE_CONTENT.get("dungeons") and isinstance(guixu_settings, dict):
-        bonuses.append(max(0.0, float(guixu_settings.get("standard_combat_power_bonus", 0.0))))
-    return sum(bonuses)
-
-
-def expected_combat_power(realm_index: int, layer: int) -> float:
-    """返回玩家、NPC 与动态事件共用、含已启用 DLC 加成的境界战力基准。"""
-    definition = REALMS[realm_index]
-    values = WORLD_SYSTEMS["combat_expectations"][definition.id]
-    if definition.id == "mortal":
-        base = float(values["value"])
-    elif definition.id == "qi":
-        base = float(values["base"] + values["layer_step"] * (max(1, layer) - 1))
-    elif "value" in values:
-        base = float(values["value"]) * (1 + .08 * (max(1, min(9, layer)) - 1))
-    else:
-        stage = "early" if layer <= 3 else "middle" if layer <= 6 else "late"
-        base = float(values[stage])
-    return base * (1.0 + standard_combat_power_dlc_bonus())
 
 
 def recommended_combat_power(realm_index: int, layer: int) -> float:
@@ -795,7 +767,7 @@ def opportunity_multiplier(
         player.technique.opportunity_bonus * technique_scale(player.technique, "opportunity_bonus")
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
     )
-    from .system.crafting_system import crafted_artifact_bonuses
+    from .system.crafted_artifact_rules import crafted_artifact_bonuses
     item_bonus = (
         sum(item.opportunity_bonus * item.quantity for item in player.inventory)
         + player.natal_artifact_opportunity_bonus

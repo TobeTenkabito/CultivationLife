@@ -238,7 +238,7 @@ class SectNpc:
 
     def __post_init__(self) -> None:
         if self.path == "monster" and not self.monster_species_id:
-            from .system.monster_identity import stable_species
+            from .ancestry import stable_species
             self.monster_species_id = stable_species(self.id or self.name)
         if self.gender not in {"male", "female"}:
             identity = self.id or self.name
@@ -551,7 +551,7 @@ class Player:
         data['immortal_body'] = copy.deepcopy(data.get('immortal_body', {}))
         data['world_voisinages'] = copy.deepcopy(data.get('world_voisinages', {}))
         if data.get('cultivation_ranks_schema', 1) < 2:
-            from .system.cultivation_ranks import legacy_sense
+            from .cultivation_coordinates import legacy_sense
             data['divine_sense_rank'] = legacy_sense(int(data.get('divine_sense_rank', 0)))
             data['cultivation_ranks_schema'] = 2
         data.setdefault('immortal_trace_rng', 0)

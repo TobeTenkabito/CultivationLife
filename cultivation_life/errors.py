@@ -7,3 +7,7 @@ class NotFoundError(KeyError):
 
 class AccessDeniedError(PermissionError):
     """An explicit request access rejection, rather than a filesystem failure."""
+
+
+class ContentError(ValueError):
+    """内容包格式或跨表引用不合法。"""

@@ -71,8 +71,8 @@ def ensure(game):
 
 def body_power(body):
     """Only the body's independent training coordinate contributes."""
-    from .cultivation_ranks import body_rank, describe, STARTS
-    from ..rules import expected_combat_power
+    from ..cultivation_coordinates import body_rank, describe, STARTS
+    from ..combat_benchmarks import expected_combat_power
     rank = body_rank(int(body.get('body_training') or 0), int(body.get('immortal_body_level') or 0))
     realm = describe(rank)['realm_index']
     width = (STARTS[realm + 1] if realm < 12 else 209) - STARTS[realm]
@@ -81,12 +81,12 @@ def body_power(body):
 
 
 def body_facts(actor):
-    from .cultivation_ranks import ensure_npc
-    from .monster_identity import identity
+    from .npc_cultivation import ensure_npc
+    from ..ancestry import species_identity
     row = copy.deepcopy(actor if isinstance(actor, dict) else actor.to_dict())
     if row.get("body_training") is None:
         ensure_npc(row)
-    row.update(identity(row))
+    row.update(species_identity(row, WORLD_SYSTEMS.get('monster_species', {})))
     return {key: row.get(key) for key in ('id', 'name', 'path', 'race', 'realm_index', 'layer',
         'body_training', 'immortal_body_level', 'divine_sense_rank', 'monster_species_id',
         'monster_evolution_id', 'true_spirit_kind', 'type', 'form')}
@@ -184,7 +184,7 @@ def public_meridians(player):
         return {'available': False}
     from .immortal_cultivation import rules
     from .doctrine.cultivation import vein_cost
-    from ..rules import breakthrough_opportunity_required
+    from ..cultivation_costs import breakthrough_cost
     cfg, state = rules(), player.asura_cultivation
     total, per_layer = cfg['veins_per_realm'], cfg['veins_per_layer']
     opened = min(total, max(0, int(state.get('veins', {}).get(str(player.realm_index), 0))))
@@ -205,7 +205,7 @@ def public_meridians(player):
         next_cost=dict(opportunity=cost['opportunity'], souls=cost['traces']) if cost else None,
         chance=probability, failures=failures, pity_step=cfg['vein_pity_step'],
         can_open=not reason, reason=reason,
-        breakthrough_cost=breakthrough_opportunity_required(player),
+        breakthrough_cost=breakthrough_cost(player, upper_cultivation=(player.world == 'celestial' or active(player))),
         intrinsic_per_vein={key: values[key][player.realm_index-9] for key in ('hp', 'mp')},
         intrinsic_total={key: sum(min(total, max(0, state.get('veins', {}).get(str(r), 0))) * values[key][r-9]
                                  for r in range(9, 13)) for key in ('hp', 'mp')},
@@ -217,7 +217,7 @@ def public_meridians(player):
 
 def public_body(body):
     """Distinguish the material body's training from the player's own body."""
-    from .cultivation_ranks import body_rank, describe, NAMES
+    from ..cultivation_coordinates import body_rank, describe, NAMES
     facts = body_facts(body)
     mortal, higher = int(facts.get('body_training') or 0), int(facts.get('immortal_body_level') or 0)
     rank = describe(body_rank(mortal, higher))

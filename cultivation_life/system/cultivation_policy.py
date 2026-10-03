@@ -1,5 +1,10 @@
 """World-specific progression policy, shared by presentation and cultivation."""
 
+from .cultivation_reserves import (
+    immortal_reserve as immortal_reserve,
+    opportunity_unbounded as opportunity_unbounded,
+)
+
 ORDINARY_UPPER_WORLDS = frozenset({'asura', 'nether', 'reincarnation'})
 
 
@@ -14,19 +19,3 @@ def bloodline_upper(player, available=None):
         from .monster_bloodline_system import bloodline_content_available
         available = bloodline_content_available()
     return bool(available)
-
-
-def immortal_reserve(player):
-    seal = player.sealed_cultivation or {}
-    return (max(player.realm_index, int(seal.get('realm_index', 0))) >= 9
-            and (player.world == 'celestial' or seal.get('upper_world') == 'celestial'))
-
-
-def opportunity_unbounded(player):
-    """Spendable upper-world reserves survive temporary lower-world sealing."""
-    from .asura import enabled
-    seal = player.sealed_cultivation or {}
-    asura_reserve = (enabled() and player.path == 'demonic'
-                     and max(player.realm_index, int(seal.get('realm_index', 0))) >= 9
-                     and (player.world == 'asura' or seal.get('upper_world') == 'asura'))
-    return immortal_reserve(player) or asura_reserve
