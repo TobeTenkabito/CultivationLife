@@ -20,6 +20,7 @@ def bind_governance(
 ) -> IntrigueGovernanceDependencies:
     return IntrigueGovernanceDependencies(
         _get_PLAYER_ID=_get_PLAYER_ID,
+        _intrigue_decision_threshold=lambda *args, **kwargs: host._intrigue_decision_threshold(*args, **kwargs),
         _actual_player_realm=lambda *args, **kwargs: host._actual_player_realm(
             *args, **kwargs
         ),

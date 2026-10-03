@@ -8,11 +8,13 @@
 from cultivation_life.engine import GameEngine, encode_rng
 ```
 
-`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭与瑶池移出继承列表，其余直接基类的相对顺序保持不变。
+`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭、瑶池、神机与内政移出继承列表，其余直接基类的相对顺序保持不变。
 
 当前增量重构的第一阶段将直接基类从 23 个减为 22 个。`actions/asura.py` 接收 `AsuraActionDependencies`，修罗试炼接收 `AsuraTrialDependencies`；两者均不接收整个引擎。旧 `system/asura_system.py` 保留薄适配器供既有调用方使用，引擎不再继承它。
 
 第二阶段将天庭与瑶池的 34 个方法迁入 `system/court/`，直接基类从 22 个减为 20 个。其中 29 个方法使用状态、政务、任期和瑶池四组显式依赖，5 个静态辅助函数无需依赖。`system/court/wiring.py` 连接具名能力，由引擎统一装配；旧四个 Mixin 类仅用于兼容原调用方，不再出现在引擎继承链中。
+
+第三阶段将神机与内政的 74 个方法改为引擎显式转发，直接基类从 20 个减为 18 个。63 个既有算法保持原实现，内政议事权限方法迁入 `system/intrigue/governance.py`，另外 10 个静态辅助实现改为原模块中的普通函数。`composition/systems.py` 连接神机六组、内政七组依赖及原配置钩子，`EngineDependencies` 持有完整契约；两组旧 Mixin 仅兼容独立消费者。引擎保留 `_tianji_dependencies`、`_intrigue_dependencies` 属性供既有代码读取组合后的契约。
 
 ## 依赖如何连接
 
@@ -40,7 +42,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `dependencies.py` | 各职责模块所需的命名依赖契约 |
 | `ports.py` | 共用资源接口的兼容导出，定义位于 `cultivation_life/ports.py` |
 | `wiring.py` | 选择各职责的依赖构建函数，组装完整引擎依赖 |
-| `composition/` | 生命周期、动作、事件、战斗、世界、展示、修罗及人物交往的显式依赖构建 |
+| `composition/` | 生命周期、动作、事件、战斗、世界、展示、修罗、人物交往以及神机／内政的显式依赖构建 |
 | `engine_constants.py` | 引擎共享常量 |
 | `orchestration/session.py` | 创建游戏 |
 | `orchestration/advancement.py` | 行动推进、年度收益、行动单位结算与记录 |
@@ -72,7 +74,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 ## 系统与引擎之间的依赖
 
-人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力，保留原入口的转发方法和继承关系。三个系统均已移除旧式动态装配。
+人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力。三个系统均已移除旧式动态装配；经济仍保留 Mixin 继承，神机与内政通过 `composition/systems.py` 直接接入引擎。配置钩子和具名常量仍从原模块延迟读取，算法不反向导入兼容入口。
 
 战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
 
@@ -94,7 +96,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 继续使用现有 NPC 与关系对象并保持同步顺序。统一关系存储需要模型与存档迁移，超出等价拆分范围。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 仍保留的 20 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成、天庭与瑶池已迁出，其余系统保持相对继承顺序，后续逐个迁移。 |
+| `GameEngine` 仍保留的 18 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成、天庭、瑶池、神机与内政已迁出，其余系统保持相对继承顺序，后续逐个迁移。 |
 | `cultivation_life/map_runtime.py` 的 `MapTravelMixin._advance_world_year` | 位于本轮范围之外，年度系统调用顺序保持原样，通过显式回调接入引擎算法。 |
 | `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与原 JSON 格式，没有引入实体数据库、状态复制或新的存档版本。 |
 
@@ -106,6 +108,9 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 2. 对外保留或新增方法时，在 `GameEngine` 中声明签名明确的转发方法；模块别名不得与方法参数同名。
 3. 不再通过动态安装方法、替换函数全局命名空间或通用引擎属性代理建立依赖。
 4. 移动存档写入、随机数调用、状态补全与结算顺序，属于行为变更，不能混入仅调整架构的重构。
+5. 每组 Mixin 迁移前保存方法接口与固定种子回放基线；迁移后检查方法覆盖、子类 `super()`、配置替换、资源替换及公开命令的存档锁。保留其他基类的相对顺序，避免顺手合并生命周期或展示副作用。
+
+Mixin 迁移改善依赖可见性与独立测试能力，不代表游戏性能必然提升。接口、方法体和回放等价检查能降低玩法回归风险，但无法覆盖所有历史存档、随机分支、外部扩展和设备组合；发行前仍需用当前源码构建安装包，执行相应平台验收。
 
 ## 验证
 
@@ -113,6 +118,7 @@ HTTP 请求体读取和响应网络写入位于存档锁之外；状态读取、
 
 ```powershell
 python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py tests/test_court_dependencies.py tests/test_priority_fixes.py
+python -m pytest -q tests/test_system_composition.py tests/test_system_layout.py
 python -m pytest -q tests/test_module_dependencies.py
 python tools/check_module_dependencies.py
 python -m pytest -q
@@ -125,3 +131,5 @@ python -m pytest -q
 当前第一阶段另行核对了迁移前后 797 个引擎方法签名，以及原有 26 组依赖构造表达式；两者保持一致。三个固定种子的 81 个回放检查点覆盖转化事件、炼体、开脉、凝练、融合战、养成和神通操作，比较完整返回数据、存档、随机数状态与历史记录。独立依赖测试还覆盖无引擎调用、实例资源替换、方法和子类覆盖、旧 Mixin 适配器。
 
 天庭与瑶池阶段核对了 34 个迁移方法体（仅归一化 `self` 到依赖参数的替换）与 797 个方法签名。新增 78 个天庭／瑶池检查点，连同修罗、神机／内政与战斗回放，共 274 个检查点与迁移前一致。全量 1710 项测试及浏览器冒烟通过；依赖图的 225 个模块无显式导入循环。
+
+神机与内政组合阶段核对了既有方法签名、63 个转发方法体、10 个静态辅助实现，以及权限判断迁移前后的语法树；其余基类顺序保持不变。四组 274 个回放检查点与本阶段迁移前一致。新增 16 项回归覆盖玩家／NPC 权限边界、配置延迟替换、资源与方法替换、子类 `super()` 及旧 Mixin 独立消费者。全量 1726 项测试和浏览器冒烟通过，226 个模块无显式导入循环。本阶段未进行新的 Android 安装包验收。

@@ -14,6 +14,8 @@ from typing import Any, Callable
 from ..models import GameState, SectNpc, SectState
 from ..system.combat_system import BattleUnit
 from ..system.npc_contact_dependencies import NpcContactDependencies
+from ..system.tianji.dependencies import TianjiDependencies
+from ..system.intrigue.dependencies import IntrigueDependencies
 from .ports import AchievementPort, MapPort, SavePort
 
 
@@ -993,6 +995,8 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    tianji: TianjiDependencies
+    intrigue: IntrigueDependencies
     court_state: CourtStateDependencies
     court_governance: CourtGovernanceDependencies
     court_lifecycle: CourtLifecycleDependencies

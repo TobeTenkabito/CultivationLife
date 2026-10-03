@@ -64,6 +64,46 @@ def intrigue_content_available() -> bool:
     return bool(intrigue_rules())
 
 
+def _intrigue_player_relation(
+    game: GameState, npc_id: str
+) -> dict[str, Any] | None:
+    relations = [
+        game.player.master,
+        game.player.dao_companion,
+        *game.player.dao_friends,
+        *game.player.disciples,
+    ]
+    return next(
+        (row for row in relations if row and str(row.get("id", "")) == npc_id),
+        None,
+    )
+
+
+def _intrigue_recruitment_config() -> dict[str, Any]:
+    return dict(intrigue_rules().get("disciple_recruitment", {}))
+
+
+def _intrigue_enabled() -> bool:
+    return intrigue_content_available()
+
+
+def _intrigue_state(game: GameState) -> dict[str, Any]:
+    state = game.intrigue_state
+    state.setdefault("schema_version", 1)
+    state.setdefault("npcs", {})
+    state.setdefault("factions", {})
+    state.setdefault("resolutions", [])
+    state.setdefault("npc_prisons", {})
+    state.setdefault("pending_guest_invitation", None)
+    state.setdefault("sequence", 0)
+    state.setdefault("ai_cursor", 0)
+    return state
+
+
+def _intrigue_key(kind: str, faction_id: str) -> str:
+    return f"{kind}:{faction_id}"
+
+
 class IntrigueSystemMixin:
     """Generic runtime hook for 《明争暗斗：合纵连横》.
 
@@ -74,65 +114,31 @@ class IntrigueSystemMixin:
     def _intrigue_has_decision_authority(
         self, game: GameState, kind: str, faction_id: str, member_id: str = PLAYER_ID
     ) -> bool:
-        threshold = self._intrigue_decision_threshold(kind)
-        if member_id == PLAYER_ID:
-            own_id = self._intrigue_player_faction_id(game, kind)
-            realm_index, _ = self._actual_player_realm(game.player)
-            entity = self._intrigue_entity(game, kind, faction_id)
-            same_world = not entity or entity.world == game.player.world
-            return bool(
-                own_id == faction_id
-                and same_world
-                and game.player.alive
-                and realm_index >= threshold
-            )
-        npc = self._intrigue_find_npc(game, member_id)
-        return bool(
-            npc
-            and npc.alive
-            and npc.realm_index >= threshold
-            and not self._intrigue_is_imprisoned(game, npc.id)
+        return intrigue_governance._intrigue_has_decision_authority(
+            self._intrigue_dependencies.governance, game, kind, faction_id, member_id
         )
 
     @staticmethod
     def _intrigue_player_relation(
         game: GameState, npc_id: str
     ) -> dict[str, Any] | None:
-        relations = [
-            game.player.master,
-            game.player.dao_companion,
-            *game.player.dao_friends,
-            *game.player.disciples,
-        ]
-        return next(
-            (row for row in relations if row and str(row.get("id", "")) == npc_id),
-            None,
-        )
+        return _intrigue_player_relation(game, npc_id)
 
     @staticmethod
     def _intrigue_recruitment_config() -> dict[str, Any]:
-        return dict(intrigue_rules().get("disciple_recruitment", {}))
+        return _intrigue_recruitment_config()
 
     @staticmethod
     def _intrigue_enabled() -> bool:
-        return intrigue_content_available()
+        return _intrigue_enabled()
 
     @staticmethod
     def _intrigue_state(game: GameState) -> dict[str, Any]:
-        state = game.intrigue_state
-        state.setdefault("schema_version", 1)
-        state.setdefault("npcs", {})
-        state.setdefault("factions", {})
-        state.setdefault("resolutions", [])
-        state.setdefault("npc_prisons", {})
-        state.setdefault("pending_guest_invitation", None)
-        state.setdefault("sequence", 0)
-        state.setdefault("ai_cursor", 0)
-        return state
+        return _intrigue_state(game)
 
     @staticmethod
     def _intrigue_key(kind: str, faction_id: str) -> str:
-        return f"{kind}:{faction_id}"
+        return _intrigue_key(kind, faction_id)
 
     @cached_property
     def _intrigue_dependencies(self):

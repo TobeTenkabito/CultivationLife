@@ -26,12 +26,10 @@ from ..system.crafting_system import CraftingSystemMixin
 from ..system.formation_system import FormationSystemMixin
 from ..system.monster_bloodline_system import MonsterBloodlineSystemMixin, bloodline_content_available
 from ..system.ghost_system import GhostSystemMixin
-from ..system.intrigue_system import IntrigueSystemMixin
 from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin
 from ..system.guixu_system import GuixuSystemMixin
 from ..system.family_system import FamilySystemMixin
-from ..system.tianji_system import TianjiSystemMixin
 from ..system.doctrine_system import DoctrineSystemMixin
 from ..system.merchant_system import MerchantSystemMixin
 from . import engine_world_runtime as world_runtime
@@ -68,8 +66,25 @@ from ..system.court import lifecycle as court_lifecycle
 from ..system.court import yaochi as court_yaochi
 
 
+from ..system import tianji_system as tianji_compat
+from ..system.tianji import forging as tianji_forging
+from ..system.tianji import generation as tianji_generation
+from ..system.tianji import intelligence as tianji_intelligence
+from ..system.tianji import npcs as tianji_npcs
+from ..system.tianji import presentation as tianji_presentation
+from ..system.tianji import state as tianji_state
+from ..system import intrigue_system as intrigue_compat
+from ..system.intrigue import governance as intrigue_governance
+from ..system.intrigue import guests as intrigue_guests
+from ..system.intrigue import presentation as intrigue_presentation
+from ..system.intrigue import recruitment as intrigue_recruitment
+from ..system.intrigue import resolutions as intrigue_resolutions
+from ..system.intrigue import runtime as intrigue_runtime
+from ..system.intrigue import state as intrigue_state
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -1208,3 +1223,592 @@ class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenc
 
     def _public_yaochi(self, game):
         return court_yaochi._public_yaochi(self._dependencies.court_yaochi, game)
+
+
+    @staticmethod
+    def _tianji_tag_similarity(
+        required: dict[str, float], supplied: dict[str, float]
+    ) -> float:
+        return tianji_compat._tianji_tag_similarity(required, supplied)
+
+    @staticmethod
+    def _tianji_closeness_factor(closeness: float) -> float:
+        return tianji_compat._tianji_closeness_factor(closeness)
+
+    @staticmethod
+    def _tianji_public_effect(effect: dict[str, Any]) -> dict[str, Any]:
+        return tianji_compat._tianji_public_effect(effect)
+
+    @staticmethod
+    def _tianji_config() -> dict[str, Any]:
+        return tianji_compat._tianji_config()
+
+    @staticmethod
+    def _tianji_artifact(state: dict[str, Any], artifact_id: str) -> dict[str, Any]:
+        return tianji_compat._tianji_artifact(state, artifact_id)
+
+    @property
+    def _tianji_dependencies(self):
+        """Compatibility view of the explicitly composed system contracts."""
+        return self._dependencies.tianji
+
+    def _tianji_material_instance(
+        self,
+        game: GameState,
+        definition: dict[str, Any],
+        rng: random.Random,
+        source: str,
+    ) -> dict[str, Any]:
+        return tianji_forging._tianji_material_instance(
+            self._dependencies.tianji.forging, game, definition, rng, source
+        )
+
+    def _append_tianji_market_offers(
+        self,
+        game: GameState,
+        offers: list[dict[str, Any]],
+        *,
+        tier: int,
+        market_name: str,
+        location_id: str,
+    ) -> None:
+        return tianji_forging._append_tianji_market_offers(
+            self._dependencies.tianji.forging,
+            game,
+            offers,
+            tier=tier,
+            market_name=market_name,
+            location_id=location_id,
+        )
+
+    def _tianji_material_bought(
+        self, game: GameState, instance: dict[str, Any]
+    ) -> None:
+        return tianji_forging._tianji_material_bought(
+            self._dependencies.tianji.forging, game, instance
+        )
+
+    def _tianji_target_preview(
+        self, game: GameState, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        return tianji_forging._tianji_target_preview(
+            self._dependencies.tianji.forging, game, payload
+        )
+
+    def preview_tianji_forge(
+        self, game_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        return tianji_forging.preview_tianji_forge(
+            self._dependencies.tianji.forging, game_id, payload
+        )
+
+    def forge_tianji_artifact(
+        self, game_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        return tianji_forging.forge_tianji_artifact(
+            self._dependencies.tianji.forging, game_id, payload
+        )
+
+    def _generate_tianji_materials(self, game: GameState) -> list[dict[str, Any]]:
+        return tianji_generation._generate_tianji_materials(
+            self._dependencies.tianji.generation, game
+        )
+
+    def _next_tianji_name(
+        self,
+        rng: random.Random,
+        theme: dict[str, Any],
+        mold_id: str,
+        used_names: set[str],
+        used_stems: set[str],
+        used_prefixes: set[str],
+        index: int,
+    ) -> tuple[str, str]:
+        return tianji_generation._next_tianji_name(
+            self._dependencies.tianji.generation,
+            rng,
+            theme,
+            mold_id,
+            used_names,
+            used_stems,
+            used_prefixes,
+            index,
+        )
+
+    def _next_tianji_buff_name(
+        self,
+        rng: random.Random,
+        theme: dict[str, Any],
+        core: str,
+        used_names: set[str],
+        index: int,
+    ) -> str:
+        return tianji_generation._next_tianji_buff_name(
+            self._dependencies.tianji.generation, rng, theme, core, used_names, index
+        )
+
+    def _tianji_rule_effects(
+        self, seed: int, artifact_id: str, theme: dict[str, Any]
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        return tianji_generation._tianji_rule_effects(
+            self._dependencies.tianji.generation, seed, artifact_id, theme
+        )
+
+    def _generate_tianji_artifacts(
+        self, game: GameState, materials: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        return tianji_generation._generate_tianji_artifacts(
+            self._dependencies.tianji.generation, game, materials
+        )
+
+    def _tianji_reveal(
+        self, game: GameState, artifact_id: str, level: int, source: str
+    ) -> bool:
+        return tianji_intelligence._tianji_reveal(
+            self._dependencies.tianji.intelligence, game, artifact_id, level, source
+        )
+
+    def _tianji_npc_conversation_clue(
+        self, game: GameState, npc_id: str, rng: random.Random
+    ) -> str:
+        "Occasionally turn an actual NPC conversation into persistent intel."
+        return tianji_intelligence._tianji_npc_conversation_clue(
+            self._dependencies.tianji.intelligence, game, npc_id, rng
+        )
+
+    def _maybe_tianji_intelligence_event(
+        self, game: GameState, rng: random.Random
+    ) -> str | None:
+        "Resolve a rare, non-clickable clue event after a real time action."
+        return tianji_intelligence._maybe_tianji_intelligence_event(
+            self._dependencies.tianji.intelligence, game, rng
+        )
+
+    def tianji_action(
+        self, game_id: str, action: str, artifact_id: str
+    ) -> dict[str, Any]:
+        return tianji_intelligence.tianji_action(
+            self._dependencies.tianji.intelligence, game_id, action, artifact_id
+        )
+
+    def debug_reveal_all_tianji(self, game_id: str) -> dict[str, Any]:
+        return tianji_intelligence.debug_reveal_all_tianji(
+            self._dependencies.tianji.intelligence, game_id
+        )
+
+    def _tianji_persistent_npcs(self, game: GameState, world: str) -> list[Any]:
+        return tianji_npcs._tianji_persistent_npcs(
+            self._dependencies.tianji.npcs, game, world
+        )
+
+    def _assign_tianji_holders_for_world(self, game: GameState, world: str) -> bool:
+        return tianji_npcs._assign_tianji_holders_for_world(
+            self._dependencies.tianji.npcs, game, world
+        )
+
+    def _inject_tianji_npc_artifacts(
+        self, game: GameState, target: dict[str, Any]
+    ) -> None:
+        return tianji_npcs._inject_tianji_npc_artifacts(
+            self._dependencies.tianji.npcs, game, target
+        )
+
+    def _tianji_observe_npc(self, game: GameState, npc_id: str) -> None:
+        return tianji_npcs._tianji_observe_npc(
+            self._dependencies.tianji.npcs, game, npc_id
+        )
+
+    def _tianji_preview_npc_power(
+        self, game: GameState, target: dict[str, Any]
+    ) -> None:
+        return tianji_npcs._tianji_preview_npc_power(
+            self._dependencies.tianji.npcs, game, target
+        )
+
+    def _tianji_handle_npc_kill(self, game: GameState, npc_id: str) -> str:
+        return tianji_npcs._tianji_handle_npc_kill(
+            self._dependencies.tianji.npcs, game, npc_id
+        )
+
+    def _public_tianji(self, game: GameState) -> dict[str, Any]:
+        return tianji_presentation._public_tianji(
+            self._dependencies.tianji.presentation, game
+        )
+
+    def debug_tianji_gameplay(self, game_id: str) -> list[dict[str, Any]]:
+        "Return blueprint diagnostics without mutating the frozen definitions."
+        return tianji_presentation.debug_tianji_gameplay(
+            self._dependencies.tianji.presentation, game_id
+        )
+
+    def _refresh_tianji_artifact_names(self, game: GameState) -> None:
+        "Migrate only generated names while preserving every frozen rule and recipe."
+        return tianji_state._refresh_tianji_artifact_names(
+            self._dependencies.tianji.state, game
+        )
+
+    def _refresh_tianji_buff_names(self, game: GameState) -> None:
+        "Expand old saves' repeated effect labels without changing any rule."
+        return tianji_state._refresh_tianji_buff_names(
+            self._dependencies.tianji.state, game
+        )
+
+    def _ensure_tianji_state(self, game: GameState) -> bool:
+        return tianji_state._ensure_tianji_state(self._dependencies.tianji.state, game)
+
+    def _intrigue_has_decision_authority(
+        self, game: GameState, kind: str, faction_id: str, member_id: str = intrigue_compat.PLAYER_ID
+    ) -> bool:
+        return intrigue_governance._intrigue_has_decision_authority(
+            self._dependencies.intrigue.governance, game, kind, faction_id, member_id
+        )
+
+    @staticmethod
+    def _intrigue_player_relation(
+        game: GameState, npc_id: str
+    ) -> dict[str, Any] | None:
+        return intrigue_compat._intrigue_player_relation(game, npc_id)
+
+    @staticmethod
+    def _intrigue_recruitment_config() -> dict[str, Any]:
+        return intrigue_compat._intrigue_recruitment_config()
+
+    @staticmethod
+    def _intrigue_enabled() -> bool:
+        return intrigue_compat._intrigue_enabled()
+
+    @staticmethod
+    def _intrigue_state(game: GameState) -> dict[str, Any]:
+        return intrigue_compat._intrigue_state(game)
+
+    @staticmethod
+    def _intrigue_key(kind: str, faction_id: str) -> str:
+        return intrigue_compat._intrigue_key(kind, faction_id)
+
+    @property
+    def _intrigue_dependencies(self):
+        """Compatibility view of the explicitly composed system contracts."""
+        return self._dependencies.intrigue
+
+    def _intrigue_auto_appoint_player(
+        self,
+        game: GameState,
+        kind: str,
+        faction_id: str,
+        record: dict[str, Any],
+        members: list[SectNpc],
+    ) -> None:
+        "Let cultivation order, rather than voting rights, drive ordinary offices.\n\n        The controller still occupies the first (leader) office.  Remaining\n        offices follow the faction's cultivation order, while guest offices\n        remain reserved for external retainers.  This makes a powerful member\n        eligible for office even when their realm is below the independent\n        decision-authority threshold.\n"
+        return intrigue_governance._intrigue_auto_appoint_player(
+            self._dependencies.intrigue.governance,
+            game,
+            kind,
+            faction_id,
+            record,
+            members,
+        )
+
+    def _intrigue_is_imprisoned(self, game: GameState, npc_id: str) -> bool:
+        return intrigue_governance._intrigue_is_imprisoned(
+            self._dependencies.intrigue.governance, game, npc_id
+        )
+
+    def _intrigue_decision_threshold(self, kind: str) -> int:
+        return intrigue_governance._intrigue_decision_threshold(
+            self._dependencies.intrigue.governance, kind
+        )
+
+    def _intrigue_has_control(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> bool:
+        return intrigue_governance._intrigue_has_control(
+            self._dependencies.intrigue.governance, game, kind, faction_id
+        )
+
+    def _intrigue_position_specs(self, kind: str) -> dict[str, dict[str, Any]]:
+        return intrigue_governance._intrigue_position_specs(
+            self._dependencies.intrigue.governance, kind
+        )
+
+    def _intrigue_faction_name(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> str:
+        return intrigue_governance._intrigue_faction_name(
+            self._dependencies.intrigue.governance, game, kind, faction_id
+        )
+
+    def intrigue_personnel_action(
+        self,
+        game_id: str,
+        kind: str,
+        action: str,
+        npc_id: str,
+        position_id: str = "",
+        years: int = 1,
+        reason: str = "",
+    ) -> dict[str, Any]:
+        return intrigue_governance.intrigue_personnel_action(
+            self._dependencies.intrigue.governance,
+            game_id,
+            kind,
+            action,
+            npc_id,
+            position_id,
+            years,
+            reason,
+        )
+
+    def _intrigue_pressure_position_occupied(
+        self, game: GameState, faction_id: str
+    ) -> bool:
+        "DLC pressure requires an actually occupied office, never a phantom rival."
+        return intrigue_governance._intrigue_pressure_position_occupied(
+            self._dependencies.intrigue.governance, game, faction_id
+        )
+
+    def _intrigue_can_invite_guest(
+        self, game: GameState, npc_id: str, kind: str = "sect"
+    ) -> bool:
+        return intrigue_guests._intrigue_can_invite_guest(
+            self._dependencies.intrigue.guests, game, npc_id, kind
+        )
+
+    def intrigue_guest_action(
+        self, game_id: str, kind: str, action: str, npc_id: str = ""
+    ) -> dict[str, Any]:
+        return intrigue_guests.intrigue_guest_action(
+            self._dependencies.intrigue.guests, game_id, kind, action, npc_id
+        )
+
+    def _intrigue_guest_npcs(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> list[SectNpc]:
+        return intrigue_guests._intrigue_guest_npcs(
+            self._dependencies.intrigue.guests, game, kind, faction_id
+        )
+
+    def _intrigue_defensive_guest_ids(
+        self, game: GameState, kind: str, faction_id: str, world: str
+    ) -> list[str]:
+        return intrigue_guests._intrigue_defensive_guest_ids(
+            self._dependencies.intrigue.guests, game, kind, faction_id, world
+        )
+
+    def _intrigue_player_guest_side(
+        self, game: GameState, war: dict[str, Any]
+    ) -> str | None:
+        return intrigue_guests._intrigue_player_guest_side(
+            self._dependencies.intrigue.guests, game, war
+        )
+
+    def _intrigue_public_member(
+        self, game: GameState, npc: SectNpc, record: dict[str, Any]
+    ) -> dict[str, Any]:
+        return intrigue_presentation._intrigue_public_member(
+            self._dependencies.intrigue.presentation, game, npc, record
+        )
+
+    def _public_intrigue_recruitment(
+        self, game: GameState, faction_id: str, record: dict[str, Any]
+    ) -> dict[str, Any]:
+        return intrigue_presentation._public_intrigue_recruitment(
+            self._dependencies.intrigue.presentation, game, faction_id, record
+        )
+
+    def _public_guest_invitation(self, game: GameState) -> dict[str, Any] | None:
+        return intrigue_presentation._public_guest_invitation(
+            self._dependencies.intrigue.presentation, game
+        )
+
+    def _public_intrigue_system(self, game: GameState) -> dict[str, Any]:
+        return intrigue_presentation._public_intrigue_system(
+            self._dependencies.intrigue.presentation, game
+        )
+
+    def _intrigue_recruitment_realm_options(self, world: str) -> list[int]:
+        return intrigue_recruitment._intrigue_recruitment_realm_options(
+            self._dependencies.intrigue.recruitment, world
+        )
+
+    def _normalize_intrigue_recruitment_filters(
+        self, game: GameState, filters: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        return intrigue_recruitment._normalize_intrigue_recruitment_filters(
+            self._dependencies.intrigue.recruitment, game, filters
+        )
+
+    def _intrigue_recruitment_filter_summary(self, filters: dict[str, Any]) -> str:
+        return intrigue_recruitment._intrigue_recruitment_filter_summary(
+            self._dependencies.intrigue.recruitment, filters
+        )
+
+    def _generate_intrigue_recruitment_session(
+        self,
+        game: GameState,
+        faction_id: str,
+        filters: dict[str, Any],
+        rng: random.Random,
+    ) -> dict[str, Any]:
+        return intrigue_recruitment._generate_intrigue_recruitment_session(
+            self._dependencies.intrigue.recruitment, game, faction_id, filters, rng
+        )
+
+    def intrigue_recruitment_action(
+        self,
+        game_id: str,
+        action: str,
+        filters: dict[str, Any] | None = None,
+        candidate_ids: list[str] | None = None,
+        player_vote: bool = True,
+    ) -> dict[str, Any]:
+        return intrigue_recruitment.intrigue_recruitment_action(
+            self._dependencies.intrigue.recruitment,
+            game_id,
+            action,
+            filters,
+            candidate_ids,
+            player_vote,
+        )
+
+    def _intrigue_vote_chance(
+        self,
+        game: GameState,
+        npc: SectNpc,
+        resolution_type: str,
+        kind: str,
+        faction_id: str,
+        target_id: str,
+        proposer_id: str,
+    ) -> tuple[float, list[str]]:
+        return intrigue_resolutions._intrigue_vote_chance(
+            self._dependencies.intrigue.resolutions,
+            game,
+            npc,
+            resolution_type,
+            kind,
+            faction_id,
+            target_id,
+            proposer_id,
+        )
+
+    def _intrigue_resolve(
+        self,
+        game: GameState,
+        kind: str,
+        faction_id: str,
+        resolution_type: str,
+        target_id: str,
+        player_vote: bool | None,
+        proposer_id: str,
+        rng: random.Random,
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return intrigue_resolutions._intrigue_resolve(
+            self._dependencies.intrigue.resolutions,
+            game,
+            kind,
+            faction_id,
+            resolution_type,
+            target_id,
+            player_vote,
+            proposer_id,
+            rng,
+            context,
+        )
+
+    def _intrigue_apply_resolution(
+        self,
+        game: GameState,
+        record: dict[str, Any],
+        resolution_type: str,
+        target_id: str,
+        rng: random.Random,
+        *,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        return intrigue_resolutions._intrigue_apply_resolution(
+            self._dependencies.intrigue.resolutions,
+            game,
+            record,
+            resolution_type,
+            target_id,
+            rng,
+            context=context,
+        )
+
+    def intrigue_propose_resolution(
+        self,
+        game_id: str,
+        kind: str,
+        resolution_type: str,
+        target_id: str = "",
+        player_vote: bool = True,
+    ) -> dict[str, Any]:
+        return intrigue_resolutions.intrigue_propose_resolution(
+            self._dependencies.intrigue.resolutions,
+            game_id,
+            kind,
+            resolution_type,
+            target_id,
+            player_vote,
+        )
+
+    def _intrigue_record_player_prison(
+        self, game: GameState, key: str, years: int
+    ) -> None:
+        return intrigue_runtime._intrigue_record_player_prison(
+            self._dependencies.intrigue.runtime, game, key, years
+        )
+
+    def _intrigue_sync_player_prison(self, game: GameState) -> None:
+        return intrigue_runtime._intrigue_sync_player_prison(
+            self._dependencies.intrigue.runtime, game
+        )
+
+    def _advance_intrigue_unit(self, game: GameState, rng: random.Random) -> list[str]:
+        return intrigue_runtime._advance_intrigue_unit(
+            self._dependencies.intrigue.runtime, game, rng
+        )
+
+    def _intrigue_entity(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> SectState | None:
+        return intrigue_state._intrigue_entity(
+            self._dependencies.intrigue.state, game, kind, faction_id
+        )
+
+    def _intrigue_find_npc(self, game: GameState, npc_id: str) -> SectNpc | None:
+        return intrigue_state._intrigue_find_npc(
+            self._dependencies.intrigue.state, game, npc_id
+        )
+
+    def _intrigue_members(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> list[SectNpc]:
+        return intrigue_state._intrigue_members(
+            self._dependencies.intrigue.state, game, kind, faction_id
+        )
+
+    def _intrigue_player_faction_id(self, game: GameState, kind: str) -> str | None:
+        return intrigue_state._intrigue_player_faction_id(
+            self._dependencies.intrigue.state, game, kind
+        )
+
+    def _ensure_intrigue_personality(
+        self, game: GameState, npc: SectNpc
+    ) -> dict[str, Any]:
+        return intrigue_state._ensure_intrigue_personality(
+            self._dependencies.intrigue.state, game, npc
+        )
+
+    def _intrigue_governance_style(self, game: GameState, npc: SectNpc) -> str:
+        return intrigue_state._intrigue_governance_style(
+            self._dependencies.intrigue.state, game, npc
+        )
+
+    def _ensure_intrigue_faction(
+        self, game: GameState, kind: str, faction_id: str
+    ) -> dict[str, Any]:
+        return intrigue_state._ensure_intrigue_faction(
+            self._dependencies.intrigue.state, game, kind, faction_id
+        )
