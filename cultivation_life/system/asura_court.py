@@ -167,7 +167,7 @@ def assessment(game, npc):
     The battle adapter works on a private copy: assessment cannot refill ledgers.
     This runs only once per four elapsed units, never during presentation.
     """
-    from ..engine.combat_capabilities import bind_capabilities, persistent_owners
+    from .combat_adapter import bind_capabilities, persistent_owners
     from .combat_system import BattleUnit
     preview = copy.deepcopy(game)
     p = preview.player

@@ -27,7 +27,7 @@ from ..system.formation_system import (
     formation_battle_experience_gain,
 )
 from .dependencies import CombatDependencies
-from .combat_capabilities import bind_capabilities
+from ..system.combat_adapter import bind_capabilities
 
 
 def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict[str, Any] | None = None) -> list[BattleUnit]:

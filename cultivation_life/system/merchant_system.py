@@ -17,11 +17,10 @@ from .exchange_system import EXCHANGE_VENUES
 from .possession_system import advance_player_age
 from .merchant_execution_system import MerchantExecutionMixin
 from .merchant_commission_system import MerchantCommissionMixin, PROCUREMENT_KINDS, METRICS
+from .merchant_definitions import KINDS as KINDS
 
 
 POLICIES = {"economy": "重商兴利", "materials": "积储资材", "cultivation": "尊修育才"}
-KINDS = {"supply": "提交特定物品", "escort": "护送雇主", "bounty": "击杀悬赏修士",
-         "recruit": "招募人手", "formation": "炼制阵法", "weapon": "炼制武器", "intel": "获取情报", "item": "获取道具", "spirit_manual": "寻访灵域残解"}
 RANKS = ["成员", "使节", "特使"]
 CROSS_ALLIANCES = {
     "xuanji": ("璇玑商盟", "spirit", ["spirit", "true_demon"]),

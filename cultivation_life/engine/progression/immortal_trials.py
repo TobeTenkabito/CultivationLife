@@ -11,7 +11,7 @@ from ...system.doctrine.voisinage_training import rank, label, base_multiplier
 from ...system.combat.contracts import VoisinageDefinition, VoisinageEffect
 from ...system.combat.trials import dump_battle, load_battle, run_batch
 from ...system.combat_system import PlayerCombatSystem, BattleUnit
-from ..combat_capabilities import bind_capabilities
+from ...system.combat_adapter import bind_capabilities
 from ..dependencies import ImmortalTrialDependencies
 
 KINDS = {'human_decline', 'heaven_decline', 'three_corpses', 'voisinage_backlash'}

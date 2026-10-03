@@ -1,14 +1,10 @@
 """Versioned, deterministic content compiler; no game/global registry access."""
 from __future__ import annotations
 
-import random
 from typing import Any, Mapping
 
 from ..combat.contracts import VoisinageDefinition, number
-
-
-def rng_for(seed: int, version: int, stream: str) -> random.Random:
-    return random.Random(f"{seed}:celestial-doctrine:v{version}:{stream}")
+from .randomness import rng_for as rng_for
 
 
 def validate_content(config: Mapping[str, Any]) -> None:
