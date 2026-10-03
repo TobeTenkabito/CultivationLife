@@ -957,7 +957,36 @@ class ImmortalTrialDependencies:
 
 
 @dataclass(frozen=True, slots=True)
+class AsuraActionDependencies:
+    _load: Callable[[str], GameState]
+    present: Callable[[GameState], dict[str, Any]]
+    _asura_cultivate: Callable[..., str]
+    _spend_asura_souls: Callable[[dict[str, Any], float], None]
+    queue_trial: Callable[[GameState], None]
+    start_trial: Callable[..., None]
+    _get_store: Callable[[], SavePort]
+
+    @property
+    def store(self) -> SavePort:
+        return self._get_store()
+
+
+@dataclass(frozen=True, slots=True)
+class AsuraTrialDependencies:
+    _get_events_by_id: Callable[[], dict[str, dict[str, Any]]]
+    _instantiate_event: Callable[..., dict[str, Any]]
+    _die: Callable[..., None]
+    _complete_major_breakthrough: Callable[..., None]
+
+    @property
+    def events_by_id(self) -> dict[str, dict[str, Any]]:
+        return self._get_events_by_id()
+
+
+@dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    asura_actions: AsuraActionDependencies
+    asura_trials: AsuraTrialDependencies
     immortal_trials: ImmortalTrialDependencies
     world_runtime: WorldRuntimeDependencies
     event_runtime: EventDependencies

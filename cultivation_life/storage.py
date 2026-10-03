@@ -8,6 +8,7 @@ from weakref import WeakValueDictionary
 from pathlib import Path
 
 from .models import GameState
+from .errors import NotFoundError
 from .version import BASE_GAME_VERSION
 
 
@@ -46,7 +47,7 @@ class SaveStore:
     def load(self, game_id: str) -> GameState:
         path = self._path(game_id)
         if not path.exists():
-            raise KeyError("存档不存在")
+            raise NotFoundError("存档不存在")
         data = json.loads(path.read_text(encoding="utf-8"))
         if data.get("version") not in {2, 3, 4, 5}:
             raise ValueError("该存档属于旧版大更新前格式，请新建角色")
@@ -59,7 +60,7 @@ class SaveStore:
             try:
                 path.unlink()
             except FileNotFoundError:
-                raise KeyError("存档不存在") from None
+                raise NotFoundError("存档不存在") from None
 
     def list_games(self) -> list[dict]:
         from .content_registry import REALMS, WORLD_SYSTEMS, PATH_NAMES

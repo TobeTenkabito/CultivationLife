@@ -8,21 +8,23 @@
 from cultivation_life.engine import GameEngine, encode_rng
 ```
 
-`GameEngine` 保留原方法签名、默认值、静态方法/类方法性质以及原继承顺序。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。
+`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成移出继承列表，其余直接基类的相对顺序保持不变。
+
+当前增量重构的第一阶段将直接基类从 23 个减为 22 个。`actions/asura.py` 接收 `AsuraActionDependencies`，修罗试炼接收 `AsuraTrialDependencies`；两者均不接收整个引擎。旧 `system/asura_system.py` 保留薄适配器供既有调用方使用，引擎不再继承它。
 
 ## 依赖如何连接
 
 ```text
-GameEngine ── wiring.py ── dependencies.py ── ports.py
-    │                         │
-    └── 普通模块函数(deps, ...) ┘
+GameEngine ── wiring.py ── composition/ ── dependencies.py ── ports.py
+    │                                        │
+    └── 普通模块函数(deps, ...) ────────────────┘
              │
              └── 显式导入模型、配置与规则函数
 ```
 
 - `dependencies.py` 为每个职责模块声明冻结的数据类，所有协作能力都有名称，构造时必须提供。算法只能访问其契约列出的能力，不接收整个引擎对象。
 - `ports.py` 定义存档、地图和成就资源接口，领域实现不依赖这些资源的具体适配器。
-- `wiring.py` 是知道 `GameEngine` 的依赖装配边界。它逐项连接回调与资源，不使用兜底属性代理，也不把任意属性查找暴露给算法。
+- `wiring.py` 是装配入口，按职责调用 `composition/` 中的具名构建函数。这两个位置是知道 `GameEngine` 的装配边界；每个构建函数逐项连接回调与资源，不使用兜底属性代理，也不把任意属性查找暴露给算法。
 - 没有实例依赖的静态辅助函数直接运行；NPC 类方法使用单独的 `NpcClassDependencies`，保留子类对寿元计算的覆盖能力。
 - 回调在调用时查找引擎方法，资源通过显式 getter 获取。构造引擎后替换方法、存档服务或其他资源，仍按原行为生效；不能随意改为缓存绑定方法或资源快照。
 
@@ -35,11 +37,14 @@ GameEngine ── wiring.py ── dependencies.py ── ports.py
 | `__init__.py` | 引擎入口、资源初始化与显式转发方法 |
 | `dependencies.py` | 各职责模块所需的命名依赖契约 |
 | `ports.py` | 存档、地图、成就资源接口 |
-| `wiring.py` | 引擎与依赖契约之间的装配 |
+| `wiring.py` | 选择各职责的依赖构建函数，组装完整引擎依赖 |
+| `composition/` | 生命周期、动作、事件、战斗、世界、展示及修罗的显式依赖构建 |
 | `engine_constants.py` | 引擎共享常量 |
 | `orchestration/session.py` | 创建游戏 |
 | `orchestration/advancement.py` | 行动推进、年度收益、行动单位结算与记录 |
 | `actions/cultivation.py` | 秘术管理及玩家主动突破 |
+| `actions/asura.py` | 修罗养成操作、资源消耗、历史记录与保存 |
+| `progression/asura_trials.py` | 通过明确契约执行修罗转化、融合与破境试炼 |
 | `actions/world_travel.py` | 永久飞升、跨界、随行人员与下界身份清理 |
 | `actions/factions.py` | 势力创建、外交、人员调动、退出与继承 |
 | `actions/encounters.py` | 监禁、悬赏、拦截与主动战斗 |
@@ -77,7 +82,7 @@ GameEngine ── wiring.py ── dependencies.py ── ports.py
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 继续使用现有 NPC 与关系对象并保持同步顺序。统一关系存储需要模型与存档迁移，超出等价拆分范围。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 原有的 16 个直接基类 | `system/` 的玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。保留原 MRO，当前引擎模块通过具名依赖访问这些能力；本轮未继续改造系统内部。 |
+| `GameEngine` 仍保留的 22 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成已迁出，其余系统保持继承顺序，后续逐个迁移。 |
 | `cultivation_life/map_runtime.py` 的 `MapTravelMixin._advance_world_year` | 位于本轮范围之外，年度系统调用顺序保持原样，通过显式回调接入引擎算法。 |
 | `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与原 JSON 格式，没有引入实体数据库、状态复制或新的存档版本。 |
 
@@ -85,7 +90,7 @@ GameEngine ── wiring.py ── dependencies.py ── ports.py
 
 ## 后续维护约定
 
-1. 新增规则调用时，从实际定义模块导入；需要其他引擎能力时，先在依赖契约中声明，再在 `wiring.py` 中显式连接。
+1. 新增规则调用时，从实际定义模块导入；需要其他引擎能力时，先在依赖契约中声明，再在 `composition/` 对应职责中显式连接。新增职责由 `wiring.py` 注册构建函数。
 2. 对外保留或新增方法时，在 `GameEngine` 中声明签名明确的转发方法；模块别名不得与方法参数同名。
 3. 不再通过动态安装方法、替换函数全局命名空间或通用引擎属性代理建立依赖。
 4. 移动存档写入、随机数调用、状态补全与结算顺序，属于行为变更，不能混入仅调整架构的重构。
@@ -93,10 +98,12 @@ GameEngine ── wiring.py ── dependencies.py ── ports.py
 ## 验证
 
 ```powershell
-python -m pytest -q tests/test_engine_dependencies.py
+python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py
 python -m pytest -q
 ```
 
 依赖边界测试检查模块全局引用、依赖声明、转发名称冲突、独立调用、构造后的方法覆盖与资源替换、类方法继承分派及兼容钩子。
 
-本轮还进行了重构前后核对：251 个实现函数在还原依赖参数改名后语法树一致；717 个引擎方法的签名、描述符、文档和原 MRO 一致；固定随机种子的七条修行路线回放、地图死亡、旧档补全及 104 组 NPC 类辅助函数结果一致。回放比较包含完整返回数据、存档、随机数状态与历史记录。`engine/` 之外的原有 Python 源文件保持不变。
+第二轮重构的历史验证包括 251 个实现函数语法树、717 个引擎方法接口、七条路线回放及 NPC 辅助函数核对，不代表后续版本未发生变化。
+
+当前第一阶段另行核对了迁移前后 797 个引擎方法签名，以及原有 26 组依赖构造表达式；两者保持一致。三个固定种子的 81 个回放检查点覆盖转化事件、炼体、开脉、凝练、融合战、养成和神通操作，比较完整返回数据、存档、随机数状态与历史记录。独立依赖测试还覆盖无引擎调用、实例资源替换、方法和子类覆盖、旧 Mixin 适配器。

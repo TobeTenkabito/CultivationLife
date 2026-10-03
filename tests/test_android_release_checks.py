@@ -1,0 +1,88 @@
+"""Release gates must reject bad evidence even under python -O and -OO."""
+import hashlib
+import io
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
+
+import pytest
+
+from scripts import package_android
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def release_inputs(tmp_path):
+    build = tmp_path / 'build'
+    build.mkdir()
+    (tmp_path / 'dist').mkdir()
+    rid = package_android.RELEASE_ID
+    logs = {f'release-{rid}-tests.log': '1574 passed in 268.76s',
+            f'save-crossplatform-{rid}.log': 'roundtrip passed',
+            f'android-signature-{rid}.log': 'Verifies',
+            f'android-metadata-{rid}.log': (
+                f"versionCode='{package_android.VERSION_CODE}' "
+                f"versionName='{package_android.ANDROID_VERSION}' sdkVersion:'31'"),
+            f'quick-start-ui-{rid}.log': 'Quick-start regression passed'}
+    phases = ('experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
+              'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
+              'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape')
+    logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
+    for name, content in logs.items():
+        (build / name).write_text(content, encoding='utf-8')
+    lint = tmp_path / 'android/app/build/reports/lint-results-release.txt'
+    lint.parent.mkdir(parents=True)
+    lint.write_text('No issues found.', encoding='utf-8')
+    apk = tmp_path / 'android/app/build/outputs/apk/release/app-release.apk'
+    apk.parent.mkdir(parents=True)
+    assets = io.BytesIO()
+    with zipfile.ZipFile(assets, 'w') as archive:
+        archive.writestr('web/app.js', b'outdated web content')
+    with zipfile.ZipFile(apk, 'w') as archive:
+        for abi in ('arm64-v8a', 'x86_64'):
+            archive.writestr(f'lib/{abi}/libpython3.13.so', b'test library')
+        archive.writestr('assets/game-assets.zip', assets.getvalue())
+    (build / f'android-installed-sha256-{rid}.log').write_text(
+        hashlib.sha256(apk.read_bytes()).hexdigest(), encoding='utf-8')
+    (tmp_path / 'web').mkdir()
+    (tmp_path / 'web/app.js').write_text('current web content', encoding='utf-8')
+    return tmp_path
+
+
+@pytest.mark.parametrize('optimization', ['', '-O', '-OO'])
+@pytest.mark.parametrize('failure,expected', [
+    ('suite', 'Full regression suite must pass'),
+    ('collection', 'Full regression suite must pass'),
+    ('phase', 'android-experience-'),
+    ('signature', 'Android APK signature must verify'),
+    ('hash', 'APK hash must match'),
+    ('asset', 'Packaged web/app.js differs from source'),
+])
+def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure, expected):
+    root = release_inputs
+    rid = package_android.RELEASE_ID
+    corruptions = {
+        'suite': (f'release-{rid}-tests.log', '1 failed, 1574 passed in 268.76s'),
+        'collection': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nERROR collecting tests'),
+        'phase': (f'android-experience-{rid}.log', 'status=passed\nstatus=failed'),
+        'signature': (f'android-signature-{rid}.log', 'DOES NOT VERIFY'),
+        'hash': (f'android-installed-sha256-{rid}.log', 'wrong binary'),
+    }
+    if failure in corruptions:
+        name, content = corruptions[failure]
+        (root / 'build' / name).write_text(content, encoding='utf-8')
+    script = (
+        'import sys; from pathlib import Path; '
+        'from scripts import package_android; '
+        'package_android.ROOT = Path(sys.argv[1]); package_android.main()'
+    )
+    result = subprocess.run(
+        [sys.executable, *([optimization] if optimization else []), '-c', script, str(root)],
+        cwd=ROOT, capture_output=True, text=True, encoding='utf-8', timeout=20,
+    )
+    assert result.returncode != 0
+    assert f'RuntimeError: {expected}' in result.stderr
+    assert not list((root / 'dist').iterdir())

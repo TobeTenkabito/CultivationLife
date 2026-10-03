@@ -28,12 +28,16 @@ from cultivation_life.storage import SaveStore
 
 def domain_functions():
     for info in pkgutil.walk_packages(engine_module.__path__, engine_module.__name__ + "."):
+        if info.name.startswith(engine_module.__name__ + '.composition.'):
+            continue  # Explicit wiring boundaries receive the engine; domain modules do not.
         if info.ispkg or info.name.rsplit(".", 1)[-1] in {"wiring", "dependencies", "ports"}:
             continue
         module = importlib.import_module(info.name)
         for member in vars(module).values():
             if isinstance(member, FunctionType) and member.__module__ == module.__name__:
-                yield module, member
+                # Standard decorators such as contextmanager have their own wrapper
+                # globals; the domain implementation must still use its own module.
+                yield module, inspect.unwrap(member)
 
 
 def loaded_globals(code: CodeType):

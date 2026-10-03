@@ -11,6 +11,7 @@ import uuid
 import zlib
 
 from .models import GameState
+from .errors import NotFoundError
 from .runtime import decode_rng
 from .version import BASE_GAME_VERSION
 
@@ -77,7 +78,7 @@ def _validate(document):
 def export_snapshot(store, game_id, extensions=()):
     path = store._path(game_id)
     if not path.exists():
-        raise KeyError("存档不存在")
+        raise NotFoundError("存档不存在")
     if path.stat().st_size > MAX_RAW:
         raise ValueError("此存档超过 64 MB 导出上限")
     original = path.read_bytes()

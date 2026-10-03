@@ -1297,7 +1297,7 @@ class GuixuSystemMixin:
         # its compatibility migration safely returns an active explorer first.
         if not guixu_content_available():
             return
-        game = self.store.load(game_id)
+        game = self._load(game_id)
         session = game.guixu_state.get("player_session") if isinstance(game.guixu_state, dict) else None
         if not session:
             return

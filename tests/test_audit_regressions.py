@@ -14,10 +14,150 @@ import pytest
 from cultivation_life import server
 from cultivation_life.content_registry import ITEM_CATALOG, MARKET_GOODS, WORLD_SYSTEMS
 from cultivation_life.engine import GameEngine
+from cultivation_life.engine.transactions import request_scope
 from cultivation_life.rules import add_item
 from cultivation_life.save_transfer import export_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def post_json(base, path, payload):
+    request = Request(base + path, data=json.dumps(payload).encode(),
+                      headers={'Content-Type': 'application/json'})
+    with urlopen(request, timeout=10) as response:
+        return json.load(response)
+
+
+def test_http_settings_loads_once_and_next_request_reads_fresh_state(local_api, engine):
+    game = create(engine)
+    with patch.object(engine.store, 'load', wraps=engine.store.load) as load:
+        first = post_json(local_api, f'/api/games/{game.id}/settings',
+                          {'setting': 'combat_popup', 'enabled': False})
+        assert load.call_count == 1
+        assert first['settings']['combat_popup'] is False
+    saved = engine.store.load(game.id)
+    assert saved.settings['combat_popup'] is False
+    saved.player.name = 'external update'
+    engine.store.save(saved)
+    with patch.object(engine.store, 'load', wraps=engine.store.load) as load:
+        second = post_json(local_api, f'/api/games/{game.id}/settings',
+                           {'setting': 'achievement_popup', 'enabled': False})
+        assert load.call_count == 1
+        assert second['player']['name'] == 'external update'
+        assert second['settings']['combat_popup'] is False
+        assert second['settings']['achievement_popup'] is False
+
+
+def test_http_old_save_is_migrated_once_before_command(local_api, engine):
+    from cultivation_life.engine import engine_persistence
+    game = create(engine)
+    path = engine.store._path(game.id)
+    document = json.loads(path.read_text(encoding='utf-8'))
+    document['version'] = 2
+    document['player'].pop('asura_cultivation', None)
+    path.write_text(json.dumps(document), encoding='utf-8')
+    with patch.object(engine_persistence, '_load', wraps=engine_persistence._load) as migrate:
+        post_json(local_api, f'/api/games/{game.id}/settings',
+                  {'setting': 'combat_popup', 'enabled': False})
+        assert migrate.call_count == 1
+    saved = engine.store.load(game.id)
+    assert saved.player.asura_cultivation['branches']
+    assert saved.rng_state == document['rng_state']
+    assert saved.settings['combat_popup'] is False
+
+
+@pytest.mark.parametrize('guard', ['ghost', 'guixu', 'buddhist'])
+def test_request_guards_check_the_shared_state_without_extra_reads(engine, guard):
+    game = create(engine)
+    before = engine.store._path(game.id).read_bytes()
+    with patch.object(engine.store, 'load', wraps=engine.store.load) as load, request_scope(engine):
+        shared = engine._load(game.id)
+        if guard == 'ghost':
+            shared.player.ghost_captor = {'id': 'captor'}
+        elif guard == 'guixu':
+            shared.guixu_state['player_session'] = {'trapped': False}
+        else:
+            shared.player.path = 'buddhist'
+            shared.buddhist_state['assembly'] = {'world': shared.player.world,
+                                                 'location': shared.player.location_id}
+        with pytest.raises(ValueError):
+            getattr(engine, f'assert_{guard}_operation_allowed')(game.id, 'buy')
+        assert load.call_count == 1
+    assert engine.store._path(game.id).read_bytes() == before
+
+
+@pytest.mark.parametrize('exception', [RuntimeError, TypeError, KeyError, PermissionError])
+def test_internal_error_is_500_logged_and_request_state_is_discarded(
+    local_api, engine, tmp_path, caplog, exception,
+):
+    game = create(engine)
+    before = engine.store._path(game.id).read_bytes()
+
+    def fail(game_id, *_args):
+        engine._load(game_id).player.name = 'unsaved mutation'
+        raise exception('internal diagnostic detail')
+
+    with patch.object(engine, 'update_setting', side_effect=fail):
+        with pytest.raises(HTTPError) as caught:
+            post_json(local_api, f'/api/games/{game.id}/settings',
+                      {'setting': 'combat_popup', 'enabled': False, 'private': 'private-payload-marker'})
+    assert caught.value.code == 500
+    body = json.load(caught.value)
+    assert body['code'] == 'internal_error'
+    assert body['request_id'] in body['error']
+    assert 'internal diagnostic detail' not in body['error']
+    records = [r for r in caplog.records if r.name == 'cultivation_life.server' and r.exc_info]
+    assert len(records) == 1
+    assert body['request_id'] in records[0].getMessage()
+    log = (tmp_path / 'data/logs/server-errors.log').read_text(encoding='utf-8')
+    assert body['request_id'] in log and 'Traceback' in log and 'operation=settings' in log
+    assert 'private-payload-marker' not in log
+    assert engine.store._path(game.id).read_bytes() == before
+    with urlopen(local_api + f'/api/games/{game.id}', timeout=10) as response:
+        assert json.load(response)['player']['name'] == game.player.name
+
+
+@pytest.mark.parametrize('path', ['/api/games/missing', '/missing-file', '/api/games/missing/unknown'])
+def test_missing_resources_remain_404(local_api, path):
+    with pytest.raises(HTTPError) as caught:
+        if path.endswith('/unknown'):
+            post_json(local_api, path, {})
+        else:
+            urlopen(local_api + path, timeout=10)
+    assert caught.value.code == 404
+    assert json.load(caught.value)['code'] == 'not_found'
+
+
+def test_business_rejection_remains_400_without_error_log(local_api, engine, tmp_path):
+    game = create(engine)
+    with pytest.raises(HTTPError) as caught:
+        post_json(local_api, f'/api/games/{game.id}/settings', {'setting': 'unknown'})
+    assert caught.value.code == 400
+    assert json.load(caught.value)['code'] == 'invalid_request'
+    assert not (tmp_path / 'data/logs/server-errors.log').exists()
+
+
+def test_error_log_write_failure_does_not_prevent_500_response(local_api, engine):
+    game = create(engine)
+    with (patch.object(engine, 'update_setting', side_effect=RuntimeError('failure')),
+          patch('cultivation_life.error_reporting.RotatingFileHandler', side_effect=PermissionError('read only'))):
+        with pytest.raises(HTTPError) as caught:
+            post_json(local_api, f'/api/games/{game.id}/settings', {'setting': 'combat_popup'})
+    assert caught.value.code == 500
+    assert json.load(caught.value)['code'] == 'internal_error'
+
+
+def test_concurrent_http_updates_preserve_both_changes(local_api, engine):
+    game = create(engine)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(post_json, local_api, f'/api/games/{game.id}/settings',
+                               {'setting': setting, 'enabled': False})
+                   for setting in ('combat_popup', 'achievement_popup')]
+        for future in futures:
+            future.result(timeout=10)
+    saved = engine.store.load(game.id)
+    assert saved.settings['combat_popup'] is False
+    assert saved.settings['achievement_popup'] is False
 
 
 @pytest.fixture

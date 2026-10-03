@@ -1,6 +1,29 @@
 """Serialize public engine commands for a shared save directory."""
 from functools import wraps
 import inspect
+from contextlib import contextmanager
+from contextvars import ContextVar
+
+
+_request_state = ContextVar('game_request_state', default=None)
+
+
+@contextmanager
+def request_scope(engine):
+    """Share hydrated games only within one locked HTTP request, never across requests."""
+    with engine.store.lock:
+        token = _request_state.set((engine, engine.store, {}))
+        try:
+            yield
+        finally:
+            _request_state.reset(token)
+
+
+def request_games(engine):
+    state = _request_state.get()
+    if state is not None and state[0] is engine and state[1] is engine.store:
+        return state[2]
+    return None
 
 
 def serialized_commands(cls):
