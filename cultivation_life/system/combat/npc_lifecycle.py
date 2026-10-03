@@ -9,18 +9,16 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .contracts import number, resolve_capabilities
+from .contracts import number
 
+from .actor_state import (
+    read as read,
+    _write as _write,
+)
 
-def read(owner: Any, key: str, default=None):
-    return owner.get(key, default) if isinstance(owner, dict) else getattr(owner, key, default)
-
-
-def _write(owner: Any, key: str, value: Any) -> None:
-    if isinstance(owner, dict):
-        owner[key] = value
-    else:
-        setattr(owner, key, value)
+from .lifecycle_schema import (
+    validate_lifecycle as validate_lifecycle,
+)
 
 
 def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool) -> None:
@@ -33,23 +31,6 @@ def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool) -> 
     if lethal and update['vitality'] <= 0 and not update['suppressed'] and not update.get('escaped'):
         _write(owner, 'alive', False)
         _write(owner, 'death_reason', '仙域斗法中陨落')
-
-
-def validate_lifecycle(config: Mapping[str, Any]) -> None:
-    rules = config.get("npc_lifecycle", {})
-    for environment in rules.get("environments", {}).values():
-        number(environment.get("recovery_per_year", 0), "recovery_per_year")
-        if number(environment.get("available_fraction", 1), "available_fraction") > 1:
-            raise ValueError("available_fraction must be <= 1")
-    native = rules.get("native_state")
-    if native is not None:
-        caps = resolve_capabilities(native, {})
-        if caps.resource_link != "independent" or "lifecycle" in native:
-            raise ValueError("Native NPC templates require an independent, unanchored ledger")
-    number(rules.get("native_min_realm", 9), "native_min_realm")
-    player = config.get("converted_player_state")
-    if player is not None and resolve_capabilities(player, {}).resource_link != "legacy_mp":
-        raise ValueError("Converted player compatibility must use the existing MP pool")
 
 
 def initialize_native(owner: Any, config: Mapping[str, Any], *, now: float | None = None) -> None:

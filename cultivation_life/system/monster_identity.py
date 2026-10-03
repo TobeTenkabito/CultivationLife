@@ -1,21 +1,17 @@
 """Base-game ancestry identity, independent of optional bloodline benefits."""
 import hashlib
 
-SPECIES = ('serpent', 'avian', 'ape', 'fox', 'turtle', 'insect', 'aquatic', 'flora')
-
-
-def stable_species(identity):
-    return SPECIES[int.from_bytes(hashlib.sha256(str(identity).encode()).digest()[:4], 'big') % len(SPECIES)]
+from ..ancestry import (
+    SPECIES as SPECIES,
+    species_identity,
+    stable_species as stable_species,
+)
 
 
 def identity(actor, *, hide_route=False):
     from ..content_registry import WORLD_SYSTEMS
     read = actor.get if isinstance(actor, dict) else lambda key, default=None: getattr(actor, key, default)
-    species = read('monster_species_id')
-    if read('path') == 'monster' and not species:
-        species = stable_species(read('id') or read('name'))
-    result = {'monster_species_id': species,
-              'monster_species_name': WORLD_SYSTEMS.get('monster_species', {}).get(species, {}).get('name', '')}
+    result = species_identity(actor, WORLD_SYSTEMS.get('monster_species', {}))
     from .asura import enabled, ROUTE_NAMES
     route = read('asura_route') or read('asura_cultivation', {}).get('route')
     if enabled() and not hide_route and read('path') == 'demonic' and (route or read('realm_index', 0) >= 9):

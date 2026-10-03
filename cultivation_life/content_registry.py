@@ -15,10 +15,7 @@ from .combat_traits import COMBAT_TRAIT_REGISTRY
 from .monster_bloodline_traits import BLOODLINE_TRAIT_REGISTRY
 from .monster_bloodline_rules import validate_rule_catalog
 from .formation_content import expanded_formation_materials
-
-
-class ContentError(ValueError):
-    """内容包格式或跨表引用不合法。"""
+from .errors import ContentError as ContentError
 
 
 def validate_guixu_catalog(
@@ -215,7 +212,7 @@ class ContentRegistry:
         def validate(documents: dict[str, dict[str, Any]]) -> "ContentRegistry":
             registry = cls._from_documents(documents)
             if "achievements.json" in documents:
-                from .achievements import load_achievement_definitions
+                from .achievement_definitions import load_achievement_definitions
 
                 load_achievement_definitions(documents["achievements.json"])
             event_documents = [
@@ -223,9 +220,9 @@ class ContentRegistry:
                 if name == "events.json" or name.endswith("_events.json")
             ]
             if event_documents:
-                from .event_repository import EventRepository
+                from .event_catalog import EventCatalog
 
-                EventRepository.from_documents(
+                EventCatalog.from_documents(
                     event_documents, allow_overrides=True,
                     catalogs={
                         "items":registry.items, "techniques":registry.techniques,
@@ -478,9 +475,9 @@ class ContentRegistry:
             monster_evolutions=monster_evolutions,
             monster_bloodline_settings=monster_bloodline_settings,
         )
-        from .system.world_transition_system import validate_transition_content
+        from .system.world_transition_schema import validate_transition_content
         from .system.combat.contracts import voisinage_definitions
-        from .system.combat.npc_lifecycle import validate_lifecycle
+        from .system.combat.lifecycle_schema import validate_lifecycle
         try:
             voisinage_definitions(registry.world_systems.get("transcendent_combat", {}))
             validate_lifecycle(registry.world_systems.get("transcendent_combat", {}))
@@ -492,9 +489,9 @@ class ContentRegistry:
         except (ValueError, KeyError, TypeError) as error:
             raise ContentError(f"跨界配置不合法：{error}") from error
         if "maps.json" in documents:
-            from .system.map_system import MapCatalog
+            from .system.map_definition import MapDefinition
 
-            MapCatalog(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
+            MapDefinition(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
         return registry
 
     @staticmethod

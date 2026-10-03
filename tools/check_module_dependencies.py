@@ -24,6 +24,25 @@ BATTLE_SHARED = frozenset(f'cultivation_life.system.{name}' for name in (
 ))
 BATTLE_DEPENDENCY_MODULES = BATTLE_FACADES | BATTLE_PROJECTIONS | BATTLE_SHARED
 
+# Content validation must be usable before the global registry is initialized.
+CONTENT_VALIDATORS = frozenset(f'cultivation_life.{name}' for name in (
+    'achievement_definitions', 'event_catalog', 'system.map_definition',
+    'system.world_transition_schema', 'system.combat.lifecycle_schema',
+))
+CORE_FACADES = frozenset(f'cultivation_life.{name}' for name in (
+    'rules', 'achievements', 'event_repository', 'system.map_system',
+    'system.world_transition_system', 'system.combat.npc_lifecycle',
+    'system.crafting_system', 'system.ghost_system', 'system.cultivation_policy',
+    'system.cultivation_ranks', 'system.monster_identity',
+))
+CORE_SHARED = frozenset(f'cultivation_life.{name}' for name in (
+    'combat_benchmarks', 'cultivation_costs', 'system.crafted_artifact_rules',
+    'system.ghost_resources', 'system.npc_cultivation', 'system.cultivation_reserves',
+))
+MODEL_FOUNDATIONS = frozenset(f'cultivation_life.{name}' for name in (
+    'models', 'ancestry', 'cultivation_coordinates', 'system.combat.migration',
+))
+
 
 def import_edges(root: Path):
     modules = {}
@@ -128,8 +147,17 @@ def violations(edges):
                 ('cultivation_life.system.asura_court', 'cultivation_life.system.upper_institutions'),
                 ('cultivation_life.system.spirit_voisinage', 'cultivation_life.system.doctrine.provider'),
             })
+        core_reverse_import = (
+            source in CONTENT_VALIDATORS
+            and target in CORE_FACADES | {'cultivation_life.content_registry'}
+            or source in CORE_SHARED and target in CORE_FACADES
+            or source == 'cultivation_life.content_registry' and target in CORE_FACADES
+            or source in MODEL_FOUNDATIONS
+            and (target.startswith('cultivation_life.system.') and target not in MODEL_FOUNDATIONS
+                 or target in {'cultivation_life.content_registry', 'cultivation_life.rules'}))
         if (system_to_engine or domain_to_facade or domain_to_wiring
-                or shared_definition_cycle or shared_to_consumer or battle_reverse_import):
+                or shared_definition_cycle or shared_to_consumer or battle_reverse_import
+                or core_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 
@@ -149,7 +177,7 @@ def main():
     if args.json:
         args.json.write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
     print(json.dumps({**result, 'cycles': [len(group) for group in result['cycles']]}, ensure_ascii=False))
-    return bool(result['violations'])
+    return bool(result['violations'] or result['cycles'])
 
 
 if __name__ == '__main__':

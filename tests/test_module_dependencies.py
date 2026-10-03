@@ -20,7 +20,7 @@ from cultivation_life.system.economy import market
 from cultivation_life.system.economy.dependencies import MarketDependencies
 from cultivation_life.system.economy_system import EconomySystemMixin
 from cultivation_life.system.npc_contact_dependencies import NpcContactDependencies
-from tools.check_module_dependencies import BATTLE_DEPENDENCY_MODULES, import_edges, report, violations
+from tools.check_module_dependencies import import_edges, report, violations
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,16 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_project_respects_migrated_module_boundaries():
     result = report(ROOT)
     assert not result['violations']
-    for group in result['cycles']:
-        assert not set(group) & BATTLE_DEPENDENCY_MODULES
-        assert not {'cultivation_life.system.doctrine.effects',
-                    'cultivation_life.system.doctrine.generation'} <= set(group)
-        assert not {'cultivation_life.system.merchant_system',
-                    'cultivation_life.system.merchant_commission_system'} <= set(group)
-        assert not {'cultivation_life.combat_rule_engine',
-                    'cultivation_life.monster_bloodline_rules'} <= set(group)
-        assert not {'cultivation_life.system.tutorial_system',
-                    'cultivation_life.system.tutorial_walkthrough'} <= set(group)
+    assert not result['cycles']
 
 
 def test_import_checker_sees_deferred_imports_but_ignores_type_only_imports(tmp_path):
