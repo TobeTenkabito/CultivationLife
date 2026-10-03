@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .system.cultivation_policy import immortal_reserve
+from .system.cultivation_policy import opportunity_unbounded
 
 from .system.path_modifiers import projected_resource, modifier
 
@@ -431,7 +431,8 @@ def opportunity_required(player: Player) -> int:
 
 def breakthrough_opportunity_required(player: Player) -> int:
     """Quote the actual breakthrough fee without changing proportional rewards."""
-    if player.world == 'celestial' and 9 <= player.realm_index <= 12:
+    from .system.asura import active as asura_active
+    if (player.world == 'celestial' or asura_active(player)) and 9 <= player.realm_index <= 12:
         from .system.doctrine.cultivation import immortal_breakthrough_cost
         from .system.immortal_cultivation import rules as immortal_rules
         return immortal_breakthrough_cost(player.realm_index, player.layer, immortal_rules())
@@ -999,7 +1000,7 @@ def public_player(player: Player) -> dict[str, Any]:
         realm_id=realm(player).id,
         realm_name=stage_name(player),
         opportunity_required=opportunity_required(player),
-        opportunity_unbounded=immortal_reserve(player),
+        opportunity_unbounded=opportunity_unbounded(player),
         cultivation_ranks=public_ranks(player, player=True),
         intrinsic_resources=intrinsic_resource_breakdown(player),
         max_hp=max_hp(player),

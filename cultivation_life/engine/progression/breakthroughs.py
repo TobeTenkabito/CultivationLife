@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ...system.path_modifiers import modifier
-from ...system.cultivation_policy import ordinary_upper, immortal_reserve, bloodline_upper
+from ...system.cultivation_policy import ordinary_upper, opportunity_unbounded, bloodline_upper
 
 import copy
 import random
@@ -42,8 +42,8 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
     player = game.player
     if player.cultivation_suppression:
         return
-    if immortal_reserve(player):
-        # Immortal opportunity is a spendable reserve, not an automatic level bar.
+    if opportunity_unbounded(player):
+        # Upper-world reserves fund manual cultivation and never auto-advance.
         player.awaiting_major_breakthrough = False
         player.awaiting_minor_breakthrough = False
         return

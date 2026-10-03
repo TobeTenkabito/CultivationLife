@@ -27,7 +27,7 @@ def verify_matrix(page, config):
                            status='loaded' if mask & (1 << i) else 'disabled')
                       for i, (key, id_, name, *_) in enumerate(packages)]
         reports.append(dict(**config, extensions=extensions))
-    results = page.evaluate('(configs)=>configs.map(c=>TutorialHandbook.build(c))', reports)
+    results = page.evaluate('(configs)=>configs.map(c=>TutorialHandbook.build(c,{player:{realm_index:9,world:"asura"},asura:{available:true}}))', reports)
     for mask, chapters in enumerate(results):
         by_id = {c['id']: c for c in chapters}
         assert len(by_id) == len(chapters)
@@ -50,7 +50,7 @@ def verify_matrix(page, config):
     for row in active['extensions']:
         row.update(next_enabled=False)
     page.evaluate('c=>TutorialGuide.configure(c)', active)
-    assert page.locator('[data-chapter^="dlc-"]').count() == len(packages)
+    assert page.locator('[data-chapter^="dlc-"]').count() == len(packages)-1
     assert '待重启' in page.locator('.handbook-edition').inner_text()
     # An obsolete filter must not hide every chapter when configuration changes.
     page.evaluate("document.querySelectorAll('.handbook-categories button').forEach(b=>{if(b.textContent==='DLC')b.click();})")
@@ -80,7 +80,7 @@ def main():
                 page.wait_for_function('configData && window.TutorialGuide')
                 config = page.evaluate('({base_game:configData.base_game})')
                 pure, full = verify_matrix(page, config)
-                page.evaluate("async()=>{let g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'百科验收',spirit_root:'supreme_wood',path:'dao',seed:1481})});await loadGame(g.id);}")
+                page.evaluate("async()=>{let g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'百科验收',spirit_root:'supreme_wood',path:'demonic',preset_id:'asura_upper',seed:1481})});await loadGame(g.id);}")
                 page.wait_for_function('game && !busy')
                 key = page.evaluate('game.id')
                 before = engine.store._path(key).read_bytes()

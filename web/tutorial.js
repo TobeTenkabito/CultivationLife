@@ -12,7 +12,8 @@
   const categories=node('div',null,'handbook-categories');categories.setAttribute('role','group');categories.setAttribute('aria-label','百科章节分类');
   const matches=node('p',null,'handbook-matches');matches.setAttribute('role','status');
   handbookTools.append(edition,searchLabel,search,categories,matches);handbook.before(handbookTools);
-  let handbookCategory='全部',handbookRows=[];
+  let handbookCategory='全部',handbookRows=[],handbookConfig={},handbookScope='';
+  const currentHandbookScope=()=>JSON.stringify([data?.id,data?.asura?.available,data?.player?.realm_index,data?.player?.world]);
   function filterHandbook(){
     const words=search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
     let count=0;
@@ -26,8 +27,9 @@
   }
   function resetHandbookFilter(){search.value='';handbookCategory='全部';filterHandbook();}
   function renderHandbook(config){
+    handbookConfig=config;handbookScope=currentHandbookScope();
     const opened=new Set(handbookRows.filter(r=>r.expanded).map(r=>r.chapter.id));
-    const chapters=TutorialHandbook.build(config);
+    const chapters=TutorialHandbook.build(config,data);
     if(handbookCategory!=='全部'&&!chapters.some(c=>c.category===handbookCategory))handbookCategory='全部';
     handbook.replaceChildren();categories.replaceChildren();handbookRows=[];
     const loaded=(config.extensions||[]).filter(e=>e.status==='loaded'&&e.kind==='dlc');
@@ -35,7 +37,7 @@
     edition.textContent=`本体 v${config.base_game?.version||'—'} · ${loaded.length?`已加载 ${loaded.length} 个 DLC`:hasMods?'未加载 DLC，另有 MOD':'纯本体规则'}。`+
       (loaded.length?`当前：${loaded.map(e=>e.name).join('、')}。`:'')+
       ((config.extensions||[]).some(e=>e.next_enabled!=null)?' 开关有待重启改动，本百科仍按当前已加载内容显示。':'')+
-      ' 先读入门；卡关时按问题查，不必一口气读完。';
+      ' 可按分类或关键词检索；高阶修行章节随当前角色进境开放。';
     for(const category of ['全部',...new Set(chapters.map(c=>c.category))]){
       const b=node('button',category);b.type='button';b.onclick=()=>{handbookCategory=category;filterHandbook();};categories.append(b);
     }
@@ -177,8 +179,8 @@
   document.addEventListener('cancel',e=>{if(!root.hidden){e.preventDefault();act('disable');}},true);
   document.addEventListener('close',()=>{if(data?.tutorial.guide.active)queueMicrotask(draw);},true);
   addEventListener('resize',schedule);addEventListener('scroll',schedule,true);
-  window.TutorialGuide={enabledForNewGame:()=>startEnabled,reset(){data=null;send=null;stop();dialog.close();draw();},
-    configure:renderHandbook,render(value,callback){data=value;send=callback;draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable'),
+  window.TutorialGuide={enabledForNewGame:()=>startEnabled,reset(){data=null;send=null;stop();dialog.close();renderHandbook(handbookConfig);draw();},
+    configure:renderHandbook,render(value,callback){data=value;send=callback;if(currentHandbookScope()!==handbookScope)renderHandbook(handbookConfig);draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable'),
     showChapter(id){resetHandbookFilter();UtilityPanels.open('settings');const row=handbookRows.find(r=>r.chapter.id===id);if(row){row.element.open=true;row.expanded=true;row.element.scrollIntoView({block:'start'});}}
   };
   draw();

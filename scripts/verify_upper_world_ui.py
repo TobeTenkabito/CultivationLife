@@ -52,7 +52,7 @@ def main():
                         saved=engine.store.load(game.id)
                         assert saved.player.opportunity < opportunity_required(saved.player)
                         assert saved.player.layer in (1,2)
-                chapters=page.evaluate('TutorialHandbook.build(configData)')
+                chapters=page.evaluate('TutorialHandbook.build(configData,game)')
                 assert {'roots','upper-worlds'} <= {c['id'] for c in chapters}
                 assert not errors, errors
                 browser.close()

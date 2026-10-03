@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ...system.cultivation_policy import ordinary_upper
+from ...system.cultivation_policy import ordinary_upper, opportunity_unbounded
 
 import random
 from typing import Any
@@ -256,7 +256,7 @@ def _add_opportunity(
 ) -> float:
     before = player.opportunity
     player.opportunity = max(0.0, before + float(amount))
-    if ordinary_upper(player):
+    if ordinary_upper(player) and not opportunity_unbounded(player):
         player.opportunity = min(player.opportunity, opportunity_required(player))
     actual_gain = player.opportunity - before
     if actual_gain > 0:

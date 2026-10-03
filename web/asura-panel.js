@@ -18,7 +18,7 @@
     root.classList.add('asura-workbench');
     const blocked=!p.alive||!!game.pending_event||!!game.trial?.active||!!game.imprisonment||!!p.sealed_cultivation||!!p.cultivation_suppression||!s.can_cultivate;
     const converted=(s.conversion||0)>=5;
-    const button=(label,action,payload={},disabled=false)=>{const b=el('button',label,'asura-action');b.type='button';b.disabled=blocked||disabled;b.onclick=()=>act({action,...payload});return b;};
+    const button=(label,action,payload={},disabled=false)=>{const b=el('button',label,'asura-action');b.type='button';b.dataset.asuraAction=action;b.disabled=blocked||disabled;b.onclick=()=>act({action,...payload});return b;};
     const note=text=>el('p',text,'asura-note');
     const section=(title,description)=>{const box=el('section',null,'asura-section');box.append(el('h3',title));if(description)box.append(el('p',description,'asura-description'));return box;};
     const metric=(label,value)=>{const box=el('div');box.append(el('small',label),el('strong',value));return box;};
@@ -94,7 +94,20 @@
     }
     if(tab==='powers'){
       if(!s.route)content.append(note('先完成肉身融合，确定本命后开放神通槽位。'));
-      else{const powers=section(`神通 ${(s.powers||[]).length}/${s.slots}`,'每次获取或洗练消耗100精魂。槽位随本命本体等级增加，最高六个。');powers.append(button('获取随机神通（100精魂）','learn_power',{},!converted||(s.powers||[]).length>=s.slots||s.souls<100));for(const rule of s.powers||[]){const row=section(rule.name,rule.description);row.append(button('洗练此神通（100精魂）','reroll_power',{target_id:rule.id},!converted||s.souls<100));powers.append(row);}content.append(powers);}
+      else{
+        const quote=s.power_reroll,locked=new Set(quote.locked_ids);
+        const powers=section(`神通属性 ${(s.powers||[]).length}/${s.slots}`,'洗练一次重置所有未锁定属性，锁定属性完整保留。基础费用100精魂，每锁定一条费用翻倍；不随洗练次数上涨。');
+        powers.append(button('获取随机神通（100精魂）','learn_power',{},!converted||(s.powers||[]).length>=s.slots||s.souls<100));
+        for(const rule of s.powers||[]){
+          const row=section(rule.name,rule.description),isLocked=locked.has(rule.id);
+          row.dataset.powerId=rule.id;
+          const toggle=button(isLocked?'已锁定 · 点击解锁':'锁定此属性','lock_power',{target_id:rule.id},!converted);
+          toggle.setAttribute('aria-pressed',String(isLocked));row.append(toggle);powers.append(row);
+        }
+        powers.append(el('p',`已锁定 ${locked.size} 条 · 本次洗练 ${quote.unlocked} 条 · 费用 ${fmt(quote.cost)} 精魂`),button(`洗练全部未锁定属性（${fmt(quote.cost)}精魂）`,'reroll_power',{},!converted||!quote.unlocked||s.souls<quote.cost));
+        if(!quote.unlocked)powers.append(note((s.powers||[]).length?'全部属性均已锁定，请先解除部分锁定。':'请先获取神通。'));
+        content.append(powers);
+      }
     }
   }
   window.AsuraPanel={render};

@@ -190,8 +190,12 @@ def verify(with_dlc):
                 save_path.write_text(json.dumps(saved, ensure_ascii=False), encoding='utf-8')
                 with urllib.request.urlopen(base + f"/api/games/{buddhist['id']}", timeout=20) as response:
                     upper = json.load(response)
-                assert not upper['player']['opportunity_unbounded']
-                assert upper['player']['opportunity'] == upper['player']['opportunity_required']
+                if world == 'asura' and with_dlc:
+                    assert upper['player']['opportunity_unbounded']
+                    assert upper['player']['opportunity'] == 1e12
+                else:
+                    assert not upper['player']['opportunity_unbounded']
+                    assert upper['player']['opportunity'] == upper['player']['opportunity_required']
                 assert upper['market']['realm_index'] == 9
                 if not (world == 'asura' and with_dlc):
                     assert upper['breakthrough']['kind'] == ('major' if path=='monster' and with_dlc else 'minor')

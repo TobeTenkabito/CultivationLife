@@ -44,6 +44,11 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData !== null')
                 assert page.locator('[aria-label$="种属"]').count() >= 1
+                novice=engine.create_game('人界魔修', 'supreme_metal', 'demonic', 1562)
+                page.evaluate('(id)=>loadGame(id)', novice['id'])
+                assert page.locator('[data-panel-target^="asura-"]:visible').count()==0
+                assert page.locator('[data-chapter="dlc-asura"]').count()==0
+                assert page.locator('[data-chapter="immortal-trials"]').count()==0
                 page.evaluate('(id)=>loadGame(id)', game.id)
                 # Open whichever shared utility panel owns the soul list.
                 page.evaluate("UtilityPanels.open('captive')")
@@ -64,6 +69,23 @@ def main():
                 page.locator('#asura-powers-content').get_by_role('button', name='获取随机神通（100精魂）').click()
                 page.wait_for_function('game.asura.powers?.length === 1')
                 assert '当' in page.locator('#asura-powers-content').inner_text()
+                for total in (2,3):
+                    page.locator('[data-asura-action=learn_power]').click()
+                    page.wait_for_function('(n)=>!busy&&game.asura.powers.length===n', arg=total)
+                old=page.evaluate('JSON.parse(JSON.stringify(game.asura.powers))')
+                page.locator('[data-asura-action=lock_power]').first.click()
+                page.wait_for_function('!busy&&game.asura.power_reroll.locked_ids.length===1')
+                before=page.evaluate('game.asura.souls')
+                assert page.locator('[data-asura-action=reroll_power]').count()==1
+                page.locator('[data-asura-action=reroll_power]').click()
+                page.wait_for_function('(n)=>!busy&&game.asura.souls===n-200', arg=before)
+                after=page.evaluate('game.asura.powers')
+                assert old[0]==after[0] and all(a!=b for a,b in zip(old[1:],after[1:]))
+                page.evaluate('(id)=>loadGame(id)',game.id)
+                page.evaluate("UtilityPanels.open('asura-powers')")
+                assert page.locator('[data-asura-action=lock_power]').first.get_attribute('aria-pressed')=='true'
+                assert '无尽' in page.locator('#opportunity-text').inner_text()
+
                 for theme in 'abcdef':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
                     for width in (1440, 412, 932):
@@ -93,6 +115,10 @@ def main():
                 page.locator('.asura-help').click()
                 assert page.locator('[data-chapter=dlc-asura]').evaluate('e=>e.open')
                 page.wait_for_function("document.querySelector('[data-chapter=dlc-asura]').innerText.includes('阿修罗')")
+                page.evaluate('(id)=>loadGame(id)',novice['id'])
+                assert page.locator('[data-panel-target^="asura-"]:visible').count()==0
+                assert page.locator('[data-chapter="dlc-asura"]').count()==0
+                assert page.locator('[id^="asura-"][id$="-card"].panel-open').count()==0
                 assert not errors, errors
                 browser.close()
         finally:

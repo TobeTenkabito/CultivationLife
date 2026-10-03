@@ -34,7 +34,7 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
     major = kind == "major"
     deterministic_monster_evolution = bool(major and player.path == "monster" and deps.bloodline_content_available())
     waiting = player.awaiting_major_breakthrough if major else player.awaiting_minor_breakthrough
-    if player.world == 'celestial' and player.realm_index >= 9:
+    if (player.world == 'celestial' and player.realm_index >= 9) or is_asura:
         waiting = at_bottleneck
     requirement = deps._major_breakthrough_requirement(player) if major else {
         "met": True, "reason": "尚未抵达大境界瓶颈。", "missing_affinities": [],
@@ -69,7 +69,7 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
             opened = player.asura_cultivation.get('veins', {}).get(str(player.realm_index), 0)
             requirement.update(met=False, reason=(
                 '须先完成五重煞元转化，再开辟魔脉。' if player.asura_cultivation.get('conversion', 0) < 5 else
-                f'本层须先贯通 {player.layer * 3} 条魔脉，当前 {opened} 条；请前往八部面板的魔脉页。'
+                f'本层须先贯通 {player.layer * 3} 条魔脉，当前 {opened} 条；请前往魔脉面板。'
                 if opened < player.layer * 3 else '当前已达摩诃九层圆满。'))
     return {
         "kind": kind,
@@ -84,7 +84,7 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
         "chance": chance,
         "active_aids": active_aids,
         "progression_note": (
-            ("每层先贯通三条魔脉；大境界须斩灭心魔与天魔，双方不能逃跑。" if is_asura else
+            ("修罗机缘无上限；每层先贯通三条魔脉再手动冲关，大境界须完成专属劫战。" if is_asura else
              "幽冥上境 · 血脉进化：积满机缘后前往血脉面板择定进化形态。" if deterministic_monster_evolution else
              "本界修为已至圆满，更高境界暂未开放。" if player.realm_index == 12 and (player.layer == 9 or bloodline_upper(player)) else
              "上境普通修行：机缘有上限，积满后手动冲关；阶段关隘与大境界沿用普通天劫。")

@@ -3,7 +3,6 @@ import copy
 
 from ..models import HistoryRecord
 from ..runtime import decode_rng, encode_rng, now_iso
-from ..rules import opportunity_required
 from . import asura
 
 
@@ -13,6 +12,8 @@ class AsuraSystemMixin:
         p = game.player
         if not asura.enabled() or p.path != 'demonic':
             raise ValueError('须开启修罗显圣 DLC 并主修魔道')
+        if not asura.active(p):
+            raise ValueError('须在修罗界达到修罗境')
         if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
                 or (game.guixu_state.get('player_session') or {}).get('trapped')
                 or p.sealed_cultivation or p.cultivation_suppression):
@@ -58,7 +59,7 @@ class AsuraSystemMixin:
             level = s.get('body_level', 0)
             if level >= 20 or p.body_training < 100:
                 raise ValueError('须凡躯炼体达到100层，修罗之躯上限20层')
-            cost = opportunity_required(p) * .04 * (level + 1)
+            cost = asura.body_cost(p)
             if p.opportunity < cost:
                 raise ValueError('锻炼修罗之躯的机缘不足')
             p.opportunity -= cost
@@ -152,23 +153,42 @@ class AsuraSystemMixin:
             self._spend_asura_souls(s, 50 * (value + 1))
             s[key] = value + 1
             return '精魂融入魔域，境界或威能提升。'
-        if action in {'learn_power', 'reroll_power'}:
+        if action == 'lock_power':
+            powers = s.get('powers', [])
+            if target_id not in {r['id'] for r in powers}:
+                raise ValueError('须选择已有神通属性')
+            locked = set(asura.power_reroll_quote(s)['locked_ids'])
+            if target_id in locked:
+                locked.remove(target_id)
+                summary = '已解除神通属性锁定。'
+            else:
+                locked.add(target_id)
+                summary = '已锁定神通属性，洗练时保留。'
+            s['locked_power_ids'] = sorted(locked)
+            return summary
+        if action == 'reroll_power':
+            if target_id:
+                raise ValueError('洗练须同时重置全部未锁定神通属性')
+            quote = asura.power_reroll_quote(s)
+            if not quote['unlocked']:
+                raise ValueError('没有可洗练的未锁定神通属性')
+            if s.get('souls', 0) < quote['cost']:
+                raise ValueError(f"精魂不足，需要 {quote['cost']}")
+            locked = set(quote['locked_ids'])
+            replacement = [row if row['id'] in locked else asura.generate_rule(rng, row['id'])
+                           for row in s['powers']]
+            self._spend_asura_souls(s, quote['cost'])
+            s['powers'] = replacement
+            return f"洗练 {quote['unlocked']} 条神通属性，保留 {len(locked)} 条锁定属性，消耗 {quote['cost']} 精魂。"
+        if action == 'learn_power':
             powers = s.setdefault('powers', [])
             slots = cfg['slots'][s['level'] - 1]
-            if action == 'learn_power':
-                if len(powers) >= slots:
-                    raise ValueError('神通槽位已满')
-                index = len(powers)
-            else:
-                index = next((i for i, row in enumerate(powers) if row['id'] == target_id), -1)
-                if index < 0:
-                    raise ValueError('须选择已有神通洗练')
+            if len(powers) >= slots:
+                raise ValueError('神通槽位已满')
+            index = len(powers)
             self._spend_asura_souls(s, 100)
             rule = asura.generate_rule(rng, f'asura:power:{index}')
-            if index == len(powers):
-                powers.append(rule)
-            else:
-                powers[index] = rule
+            powers.append(rule)
             return f'精魂化生神通：{rule["name"]}。'
         raise ValueError('未知修罗修持操作')
 
