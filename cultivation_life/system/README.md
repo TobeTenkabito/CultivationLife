@@ -14,6 +14,10 @@
 | `formation/` | `market.py` 阵材与维护资源交易；`loadouts.py` 材料候选、预设、启阵、收阵与失败回滚；`ground.py` 镇地阵部署、权限、维护与战争磨损；`npcs.py` NPC 阵法生成与投影；`presentation.py` 展示 |
 | `guixu/` | `state.py` 周期与会话补全、境界边界、操作权限；`calendar.py` 预告、开放、关闭与天数消耗；`npcs.py` 参赛者、队伍与后台争夺；`rewards.py` 宝物发放与转移；`encounters.py` 威胁、临时同行与战斗；`actions.py` 探索操作与被困修炼；`presentation.py` 展示 |
 | `war/` | `state.py` 战争状态、阵营与参战名单；`diplomacy.py` 宣战、盟友与指挥权限；`power.py` 阵势和战力；`combat.py` 交战、先锋与伤亡；`lifecycle.py` 行动单位推进与士气胜负；`peace.py` 条款、和约及结算；`actions.py` 指令与地图遭遇；`presentation.py` 展示 |
+| `ghost/` | `identity.py` 拘魂与夺舍；`calendar.py` 夜行与魂仆年度流程；`erosion.py` 侵蚀判死；`reincarnation.py` 轮回操作；`progression.py` 共用成长和魂基规则 |
+| `demonic/` | `refinement.py` 闭关推进；`annual.py` 活傀失控、外魂反噬及死亡衔接 |
+| `relationships/` | `captivity.py` 生擒、释放、夺舍及傀儡转换；`concubines.py` 纳入、遣散和转化；`dependents.py` 易主、追索与脱身；`sanctions.py` 关系制裁；`violence.py` 战斗／处决与名册清理 |
+| `buddhist/` | `actions.py` 佛门操作；`assembly.py` 法会的时间、事件与奖励流程；`rules.py` 账本及修正规则 |
 
 ## 原模块继续负责兼容
 
@@ -21,7 +25,11 @@
 - `tianji_system.py` 保留 `TianjiSystemMixin`、生成版本、常量和全部模块级辅助函数。
 - `intrigue_system.py` 保留 `IntrigueSystemMixin`、常量、模块级辅助函数，以及默认参数引用 `PLAYER_ID` 的权限判断转发方法。
 
-经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；地图／商盟／仙界养成处理后，当前引擎直接基类为 10 个，其余基类的相对顺序保持原样。
+经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；Step 2 处理后，当前引擎直接基类为 9 个，其余基类的相对顺序保持原样。
+
+五系统关键流程直接由 `GameEngine` 转发到上述新模块，依赖契约在各目录的 `dependencies.py`，装配位于 `engine/composition/`。`RelationshipViolenceMixin` 已删除；另外四个 Mixin 仅保留本轮范围外的局部规则、培养操作和查询。不要从旧类调用已迁出的流程；使用原有引擎入口，或显式构造契约后调用新函数。原 `ghost_system.py` 的成长／侵蚀规则、`buddhist_system.py` 的账本／修正规则继续兼容导出同一函数对象。
+
+稳定性别和境界比较位于 `relationship_rules.py`，傀儡类型名称位于 `demonic_definitions.py`。流程不得反向导入这五个旧入口；共用规则不得导回流程。下层规则或依赖契约也不能运行时导入引擎。`tools/check_module_dependencies.py` 和 `tests/test_key_flow_dependencies.py` 约束这些边界。
 
 ## 归墟与战争的显式依赖
 
@@ -87,7 +95,7 @@ python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.
 - `combat_rule_schema.py` 统一定义新版战斗规则常量和校验，战斗执行器与旧血脉规则均依赖它；旧 `combat_rule_engine.validate_rule` 保留同一函数的兼容导出。
 - `tutorial_mentorship.py` 负责师缘条件、状态和操作；教程入口与操作教学共同调用它。师缘操作不再为了判定拜师条件调用完整教学展示。旧教程入口保留 `blocked_reason`、`mentor_action` 与 `MENTOR_STEP` 导出。
 
-新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；本轮三组拆分后，当前 290 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
+新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；五系统关键流程拆分后，当前 319 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
 
 存档结构转换统一在 `save_schema.py` 登记；当前版本的系统补全接入 `engine/persistence/` 的相应阶段，通过具名契约装配。准备算法不持有存档服务，结构转换不调用玩法或消费随机数；具体规则见引擎目录的“读档与版本迁移”。结构 1–5 已停止支持，现有模型及系统的补全辅助函数不构成旧文件兼容承诺。
 

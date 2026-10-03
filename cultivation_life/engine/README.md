@@ -8,7 +8,7 @@
 from cultivation_life.engine import GameEngine, encode_rng
 ```
 
-`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭、瑶池、神机、内政、经济／交换会、炼器、阵法、归墟、战争、地图／传送、商盟及道统／仙界养成移出继承列表，其余直接基类的相对顺序保持不变。
+`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭、瑶池、神机、内政、经济／交换会、炼器、阵法、归墟、战争、地图／传送、商盟、道统／仙界养成及关系处置移出继承列表。鬼道、魔道、侍妾和佛门的关键流程也已迁出，其余直接基类的相对顺序保持不变。
 
 当前增量重构的第一阶段将直接基类从 23 个减为 22 个。`actions/asura.py` 接收 `AsuraActionDependencies`，修罗试炼接收 `AsuraTrialDependencies`；两者均不接收整个引擎。旧 `system/asura_system.py` 保留薄适配器供既有调用方使用，引擎不再继承它。
 
@@ -22,7 +22,31 @@ from cultivation_life.engine import GameEngine, encode_rng
 
 ## 依赖如何连接
 
-本轮地图／时间、商盟、道统／仙界养成将直接基类从 13 个减为 10 个，连同间接基类共移除 10 个 Mixin。原 61 个方法成为普通函数，新增 `_finish_travel_time` 承接从旅行中抽出的行动单位结算。原有引擎方法签名不变；这三组的旧 Mixin 类不再保留，调用入口是 `GameEngine` 或带明确依赖参数的模块函数。
+Step 2 提取五个系统的关键流程，共 44 个原方法（含两个人物辅助方法）。`RelationshipViolenceMixin` 删除，直接基类从 10 个减为 9 个；鬼道、魔道、侍妾与佛门保留局部规则、培养操作和查询，不以清空 Mixin 为目标。迁出的入口均由 `GameEngine` 显式转发，原四个 Mixin 不再承载这些方法。
+
+| 依赖组 | 装配位置 | 关键流程 |
+| --- | --- | --- |
+| `ghost_flows` | `composition/ghost_flows.py` | `system/ghost/identity.py` 战陨夺舍、拘魂等待／反抗、离舍；`calendar.py` 年度夜行与魂仆易主；`erosion.py` 侵蚀与判死；`reincarnation.py` 轮回准备和提交 |
+| `demonic_flows` | `composition/demonic_flows.py` | `system/demonic/refinement.py` 耗时闭关；`annual.py` 活傀失控、外魂反噬和死亡衔接 |
+| `relationships` | `composition/relationships.py` | `system/relationships/captivity.py` 生擒、释放、夺舍与傀儡转换；`concubines.py` 纳入／遣散／转炼尸；`dependents.py` 依附转移、年度解除、提议、追索与脱身；`sanctions.py` 关系制裁；`violence.py` 战斗／处决与关系清理 |
+| `buddhist_flows` | `composition/buddhist_flows.py` | `system/buddhist/actions.py` 操作入口；`assembly.py` 法会推进、事件恢复、战斗评分和奖励；涅槃仅接受突破完成与历史记录两个回调 |
+
+四组聚合契约下共有 14 个叶级契约，均为冻结数据类。流程接受明确的存档、事件、时间、战斗和死亡能力，不接收整个引擎；调用时仍解析最新资源与方法。耗时活动通过上一轮建立的 `_advance_world_year` 进入公共年度流程，保留各玩法已有的进度提交和中断位置：例如闭关在年度结算返回中断后不增加炼魂进度，法会先记该年耗时，存活时再结算魂蚀。
+
+`system/relationship_rules.py` 承担稳定性别和境界比较，其他玩法不再为了这两个工具依赖侍妾 Mixin。鬼道 11 个成长／侵蚀规则函数及佛门 8 个账本／修正规则函数分别位于 `ghost/progression.py` 与 `buddhist/rules.py`，原模块继续导出同一函数对象。佛门修正器仍在原入口注册一次，不在流程模块重复注册。
+
+本次不统一或改变 NPC 的既有 `alive` 标记含义：俘虏退出自由 NPC 名册、夺舍销毁原魂、转傀儡和释放的写入顺序均保留。关系清理范围、随机数消费、扣费、保存与事件恢复也保持原行为。将这些状态进一步统一为新模型属于另一项改动，需要单独设计存档及结算规则。
+
+`tests/test_key_flow_dependencies.py` 验证独立调用、死亡／中断顺序、身份名册清理、失败分支、单次提交、法会恢复、资源替换和禁止反向引用。五系统回放覆盖三个种子的 90 个完整结果／存档检查点：
+
+```powershell
+python tools/replay_key_flows.py --output build/key-flows-before.json
+python tools/replay_key_flows.py --output build/key-flows-after.json --compare build/key-flows-before.json
+```
+
+Step 2 验证：新增 63 项独立执行与边界检查，全量 1911 项测试按完整模块分为八批通过。五系统 90 个、地图／商盟／道统 57 个、归墟／战争 85 个回放检查点，共 232 个完整结果与存档摘要同修改前一致。44 个原方法体经依赖参数与导入路径归一化后保持一致，798 个引擎方法签名不变。当前 319 个模块、1755 条显式导入边无循环或边界违规，浏览器冒烟通过。本阶段没有调整游戏数值、结算顺序或存档结构，也未重新打包。
+
+上一阶段地图／时间、商盟、道统／仙界养成将直接基类从 13 个减为 10 个，连同间接基类共移除 10 个 Mixin。原 61 个方法成为普通函数，新增 `_finish_travel_time` 承接从旅行中抽出的行动单位结算。原有引擎方法签名不变；这三组的旧 Mixin 类不再保留，调用入口是 `GameEngine` 或带明确依赖参数的模块函数。
 
 | 依赖组 | 装配位置 | 实现边界 |
 | --- | --- | --- |
@@ -43,7 +67,7 @@ python tools/replay_three_groups.py --output build/three-groups-before.json
 python tools/replay_three_groups.py --output build/three-groups-after.json --compare build/three-groups-before.json
 ```
 
-本轮验证：全量 1848 项测试按完整模块分为八批通过，新增 45 项独立执行与边界检查；浏览器烟雾测试通过。生产 78 个、归墟／战争 85 个及本轮三组 57 个检查点，共 220 个完整状态摘要与修改前一致。61 个原方法体经依赖参数、相对导入和旅行阶段抽取归一化后语法树一致，原引擎方法签名未变。当前 290 个模块、1624 条显式导入边无循环或边界违规。本轮未重新打包或执行 Android 安装包验收。
+三组拆分阶段验证：全量 1848 项测试按完整模块分为八批通过，新增 45 项独立执行与边界检查；浏览器烟雾测试通过。生产 78 个、归墟／战争 85 个及本轮三组 57 个检查点，共 220 个完整状态摘要与修改前一致。61 个原方法体经依赖参数、相对导入和旅行阶段抽取归一化后语法树一致，原引擎方法签名未变。当时 290 个模块、1624 条显式导入边无循环或边界违规。本轮未重新打包或执行 Android 安装包验收。
 
 ```text
 GameEngine ── wiring.py ── composition/ ── dependencies.py ── ports.py
@@ -154,7 +178,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 继续使用现有 NPC 与关系对象并保持同步顺序。统一关系存储需要模型与存档迁移，超出等价拆分范围。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 仍保留的 10 个直接基类 | 上界机构、关系处置、佛门、家族、儒道、侍妾、鬼道、妖族血脉、本命法宝和魔道仍使用 Mixin；维持相对继承顺序，按实际跨系统职责决定后续拆分范围。 |
+| `GameEngine` 仍保留的 9 个直接基类 | 上界机构、佛门、家族、儒道、侍妾、鬼道、妖族血脉、本命法宝和魔道仍使用 Mixin；其中鬼道、魔道、侍妾、佛门的关键跨系统流程已移出，其他局部规则、培养和查询继续保留。 |
 | `orchestration/world_time.py` 的 `_advance_world_year` | 已从地图 Mixin 移出，通过明确的年度契约调用各系统；阶段顺序与中断语义保持原样，不等于已统一所有活动的计时规则。 |
 | `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与 JSON 存储；结构版本已升为 6，旧结构不再支持，没有引入实体数据库。 |
 

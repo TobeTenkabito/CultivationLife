@@ -30,6 +30,10 @@ from .persistence.dependencies import (
     EventsPreparationDependencies,
 )
 from .ports import AchievementPort, MapPort, SavePort
+from ..system.ghost.dependencies import GhostFlowDependencies
+from ..system.demonic.dependencies import DemonicFlowDependencies
+from ..system.relationships.dependencies import RelationshipFlowDependencies
+from ..system.buddhist.dependencies import BuddhistFlowDependencies
 from ..time_dependencies import TimeDependencies
 from ..system.merchant.dependencies import MerchantDependencies
 from ..system.cultivation_dependencies import CultivationDependencies
@@ -980,6 +984,10 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    ghost_flows: GhostFlowDependencies
+    demonic_flows: DemonicFlowDependencies
+    relationships: RelationshipFlowDependencies
+    buddhist_flows: BuddhistFlowDependencies
     cultivation: CultivationDependencies
     merchant: MerchantDependencies
     time: TimeDependencies
