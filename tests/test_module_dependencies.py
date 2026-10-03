@@ -1,4 +1,4 @@
-"""Import boundaries and independently executable economy/contact contracts."""
+"""Import boundaries and independently executable system contracts."""
 import ast
 import builtins
 import dis
@@ -9,6 +9,8 @@ from pathlib import Path
 from types import CodeType, SimpleNamespace
 from typing import get_type_hints
 from unittest.mock import Mock
+
+import pytest
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState, Player, SectNpc
@@ -32,6 +34,10 @@ def test_project_respects_migrated_module_boundaries():
                     'cultivation_life.system.doctrine.generation'} <= set(group)
         assert not {'cultivation_life.system.merchant_system',
                     'cultivation_life.system.merchant_commission_system'} <= set(group)
+        assert not {'cultivation_life.combat_rule_engine',
+                    'cultivation_life.monster_bloodline_rules'} <= set(group)
+        assert not {'cultivation_life.system.tutorial_system',
+                    'cultivation_life.system.tutorial_walkthrough'} <= set(group)
 
 
 def test_import_checker_sees_deferred_imports_but_ignores_type_only_imports(tmp_path):
@@ -66,17 +72,18 @@ def global_names(code):
             yield from global_names(child)
 
 
-def test_economy_algorithms_use_real_module_globals_and_declared_collaborators():
+@pytest.mark.parametrize('area', ['economy', 'tianji', 'intrigue'])
+def test_system_algorithms_use_real_module_globals_and_declared_collaborators(area):
     checked = []
-    for path in (ROOT / 'cultivation_life/system/economy').glob('*.py'):
-        if path.stem in {'__init__', 'dependencies', 'wiring'}:
+    for path in (ROOT / 'cultivation_life/system' / area).glob('*.py'):
+        if path.stem in {'__init__', 'dependencies', 'wiring', 'tiers'}:
             continue
-        module = importlib.import_module('cultivation_life.system.economy.' + path.stem)
+        module = importlib.import_module(f'cultivation_life.system.{area}.' + path.stem)
         for name, function in inspect.getmembers(module, inspect.isfunction):
             if function.__module__ != module.__name__:
                 continue
             assert function.__globals__ is vars(module)
-            assert not {'GameEngine', 'EconomySystemMixin'} & vars(module).keys()
+            assert not {'GameEngine', 'EconomySystemMixin', 'TianjiSystemMixin', 'IntrigueSystemMixin'} & vars(module).keys()
             for symbol in global_names(function.__code__):
                 assert symbol in vars(module) or hasattr(builtins, symbol), (name, symbol)
             contract = get_type_hints(function)['deps']
@@ -141,3 +148,90 @@ def test_shared_battle_adapter_and_resource_ports_keep_compatibility_exports():
     assert combat_capabilities.bind_capabilities is combat_adapter.bind_capabilities
     assert combat_capabilities.CapabilityBinding is combat_adapter.CapabilityBinding
     assert old_ports.SavePort is ports.SavePort
+
+
+@pytest.mark.parametrize('area', ['tianji', 'intrigue'])
+def test_import_checker_rejects_new_system_back_references(area):
+    module = f'cultivation_life.system.{area}.state'
+    for target in (f'cultivation_life.system.{area}_system',
+                   f'cultivation_life.system.{area}.wiring'):
+        assert violations([(module, target, 5)]) == [dict(source=module, target=target, line=5)]
+
+
+def test_no_system_rebuilds_functions_with_a_foreign_global_namespace():
+    assert not (ROOT / 'cultivation_life/system/_assembly.py').exists()
+    for path in (ROOT / 'cultivation_life/system').rglob('*.py'):
+        for node in ast.walk(ast.parse(path.read_text(encoding='utf-8-sig'))):
+            if isinstance(node, ast.ImportFrom) and node.module == 'types':
+                assert not any(alias.name == 'FunctionType' for alias in node.names), path
+            if isinstance(node, ast.Attribute):
+                assert node.attr != 'FunctionType', path
+
+
+def test_tianji_reveal_runs_without_engine_and_preserves_discovery_history():
+    from cultivation_life.system.tianji.dependencies import TianjiIntelligenceDependencies
+    from cultivation_life.system.tianji.intelligence import _tianji_reveal
+
+    unrelated = Mock(side_effect=AssertionError('Unrelated capability requested'))
+    arguments = {f.name: unrelated for f in fields(TianjiIntelligenceDependencies)}
+    arguments['_tianji_artifact'] = lambda state, key: {'name': 'Test artifact'}
+    deps = TianjiIntelligenceDependencies(**arguments)
+    game = GameState('reveal', 42, Player('Player', 'supreme_metal'), '', '')
+    game.tianji_state = {'knowledge': {'artifact': 2}, 'discovery_log': []}
+    assert _tianji_reveal(deps, game, 'artifact', 9, 'conversation')
+    assert game.tianji_state['knowledge']['artifact'] == 5
+    assert game.tianji_state['discovery_log'] == [dict(
+        artifact_id='artifact', name='Test artifact', source='conversation',
+        age=game.player.age, **{'from': 2, 'to': 5})]
+    assert not _tianji_reveal(deps, game, 'artifact', 3, 'repeat')
+    assert len(game.tianji_state['discovery_log']) == 1
+    unrelated.assert_not_called()
+
+
+def test_intrigue_permission_threshold_accepts_an_independent_rule_provider():
+    from cultivation_life.system.intrigue.dependencies import IntrigueGovernanceDependencies
+    from cultivation_life.system.intrigue.governance import _intrigue_decision_threshold
+
+    unrelated = Mock(side_effect=AssertionError('Unrelated capability requested'))
+    arguments = {f.name: unrelated for f in fields(IntrigueGovernanceDependencies)}
+    arguments['intrigue_rules'] = lambda: {'decision_thresholds': {'sect': 7}}
+    deps = IntrigueGovernanceDependencies(**arguments)
+    assert _intrigue_decision_threshold(deps, 'sect') == 7
+    assert _intrigue_decision_threshold(deps, 'family') == 3
+    assert _intrigue_decision_threshold(deps, 'unknown') == 99
+    unrelated.assert_not_called()
+
+
+@pytest.mark.parametrize('area,component', [('tianji', 'intelligence'), ('intrigue', 'governance')])
+def test_system_contracts_follow_late_resource_method_and_config_replacement(tmp_path, monkeypatch, area, component):
+    module = importlib.import_module(f'cultivation_life.system.{area}_system')
+    host = getattr(module, area.title() + 'SystemMixin')()
+    host.store = SaveStore(tmp_path / 'original')
+    deps = getattr(getattr(host, f'_{area}_dependencies'), component)
+    replacement = SaveStore(tmp_path / 'replacement')
+    monkeypatch.setattr(host, 'store', replacement)
+    monkeypatch.setattr(host, '_load', lambda key: 'replacement', raising=False)
+    assert deps.store is replacement
+    assert deps._load('save') == 'replacement'
+    if area == 'tianji':
+        monkeypatch.setattr(module, 'tianji_content_available', lambda: False)
+        assert deps.tianji_content_available() is False
+        monkeypatch.setattr(module, 'tianji_content_available', lambda: True)
+        assert deps.tianji_content_available() is True
+    else:
+        rules = {'decision_thresholds': {'sect': 9}}
+        monkeypatch.setattr(module, 'intrigue_rules', lambda: rules)
+        assert deps.intrigue_rules() is rules
+        assert host._intrigue_decision_threshold('sect') == 9
+
+
+def test_shared_rule_schema_and_mentorship_preserve_compatibility_exports():
+    from cultivation_life import combat_rule_engine, combat_rule_schema, monster_bloodline_rules
+    from cultivation_life.system import tutorial_system, tutorial_mentorship
+
+    assert combat_rule_engine.validate_rule is combat_rule_schema.validate_rule
+    assert combat_rule_engine.RULE_TRIGGERS is combat_rule_schema.RULE_TRIGGERS
+    malformed_v2 = {'schema_version': 2, 'trigger': 'unknown', 'conditions': ['unknown']}
+    assert monster_bloodline_rules.validate_generated_trait(malformed_v2) == combat_rule_schema.validate_rule(malformed_v2)
+    assert tutorial_system.mentor_action is tutorial_mentorship.mentor_action
+    assert tutorial_system.blocked_reason is tutorial_mentorship.blocked_reason

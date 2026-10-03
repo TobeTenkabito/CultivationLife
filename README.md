@@ -167,11 +167,11 @@ Debug=False
 
 ### 引擎与系统边界
 
-外部继续通过 `from cultivation_life.engine import GameEngine` 使用引擎。第二轮重构后，`engine/` 的实现采用普通模块函数：`dependencies.py` 声明协作能力，`ports.py` 定义资源接口，`wiring.py` 显式连接依赖，入口类保留签名明确的转发方法。该目录不再依赖动态方法安装或入口全局命名空间重绑定。
+外部继续通过 `from cultivation_life.engine import GameEngine` 使用引擎。第二轮重构后，`engine/` 的实现采用普通模块函数：`dependencies.py` 声明协作能力，`ports.py` 兼容导出共用资源接口，`wiring.py` 显式连接依赖，入口类保留签名明确的转发方法。算法不再依赖动态方法安装或入口全局命名空间重绑定；公开操作仍由事务包装器统一加锁。
 
 当前引擎整理已将装配细节归入 `engine/composition/`，修罗养成与试炼使用显式依赖，修罗 Mixin 已从引擎继承列表移出。其余玩法按模块逐步迁移，现有操作接口及存档格式保持兼容。
 
-`system/` 中的经济、神机和内政已按职责拆分，原 `*_system.py` 模块继续作为兼容入口。经济算法已改为七组显式依赖的普通函数；神机、内政仍使用原动态装配。人物交往通过注入操作调用引擎，王庭与引擎共用战斗适配层。读档补全、展示副作用、随机数调用和年度结算顺序仍有行为兼容约束。
+`system/` 中的经济、神机和内政均已改为显式依赖的普通函数，原 `*_system.py` 模块保留签名明确的转发方法与静态辅助方法，旧动态装配工具已删除。人物交往通过注入操作调用引擎，王庭与引擎共用战斗适配层。读档补全、展示副作用、随机数调用和年度结算顺序仍有行为兼容约束。
 
 修改前请阅读 [引擎架构与保留项](cultivation_life/engine/README.md) 和 [系统目录与兼容边界](cultivation_life/system/README.md)。`docs/v2/` 保留历史设计和迁移记录，但当前源码树没有 `cultivation_life/v2/`；这些文档不代表现行运行架构或已接入的功能。
 
@@ -199,7 +199,7 @@ python -m pytest -q tests/test_engine_dependencies.py tests/test_system_layout.p
 python tools/check_module_dependencies.py
 ```
 
-依赖检查覆盖显式导入及函数内延迟导入，对禁止的反向引用返回失败；可用 `--json dependency-report.json` 导出完整循环组。此次整理将显式导入循环组从六组减至四组，核心模型/规则等剩余循环仍需继续拆解。检查不模拟动态导入及包初始化的隐式执行，不能替代运行时测试。
+依赖检查覆盖显式导入及函数内延迟导入，对禁止的反向引用返回失败；可用 `--json dependency-report.json` 导出完整循环组。两轮整理将显式导入循环组从六组减至两组：战斗规则与血脉共用独立的规则校验模块，教程入口与操作教学共用师缘模块；核心模型/规则和战斗适配两组大循环仍需继续拆解。检查不模拟动态导入及包初始化的隐式执行，不能替代运行时测试。
 
 ### 浏览器烟雾测试
 

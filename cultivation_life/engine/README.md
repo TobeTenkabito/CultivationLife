@@ -1,6 +1,6 @@
 # 引擎架构与行为兼容说明
 
-第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。`engine/` 已移除 `FunctionType` 全局命名空间重绑定和运行时方法安装。游戏规则、结算顺序、随机数调用顺序和存档格式保持原样。
+第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。算法不再通过 `FunctionType` 重绑定全局命名空间或动态安装到入口类；`transactions.serialized_commands` 仍为公开操作统一包装存档锁。游戏规则、结算顺序、随机数调用顺序和存档格式保持原样。
 
 外部入口保持不变：
 
@@ -70,11 +70,11 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 ## 系统与引擎之间的依赖
 
-人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济系统通过 `system/economy/dependencies.py` 和 `wiring.py` 声明、连接七组协作能力，保留原入口的转发方法和继承关系。
+人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力，保留原入口的转发方法和继承关系。三个系统均已移除旧式动态装配。
 
 战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
 
-运行 `python tools/check_module_dependencies.py` 检查已建立的模块边界；检查器会报告现存循环组，但仅对违反明确边界的导入返回失败。剩余核心循环和神机、内政动态装配仍需后续迁移，详见系统目录说明。
+运行 `python tools/check_module_dependencies.py` 检查已建立的模块边界；检查器会报告现存循环组，但仅对违反明确边界的导入返回失败。战斗规则校验和教程师缘已提取为共用模块，两组小循环已拆开；剩余核心模型和战斗适配两组大循环仍需后续迁移，详见系统目录说明。
 
 ## 为保持游戏性而保留的实现
 
