@@ -1,568 +1,122 @@
+"""Explicit operations for merchant system."""
+
 from __future__ import annotations
-
-from .path_modifiers import commission_duration
-
 import copy
-import math
-import random
-from typing import Any
-
-from ..content_registry import REALMS, WORLD_SYSTEMS
-from ..models import HistoryRecord, SectNpc
-from ..rules import add_item, remove_item, has_item, expected_combat_power, combat_power, max_hp, max_mp
+from ..content_registry import REALMS
+from ..rules import remove_item, has_item, expected_combat_power, combat_power
 from ..runtime import decode_rng, encode_rng, now_iso
-from .crafting_system import make_crafting_material_instance, store_crafted_artifact
-from .formation_system import make_formation_material_instance
-from .exchange_system import EXCHANGE_VENUES
-from .possession_system import advance_player_age
-from .merchant_execution_system import MerchantExecutionMixin
-from .merchant_commission_system import MerchantCommissionMixin, PROCUREMENT_KINDS, METRICS
-from .merchant_definitions import KINDS as KINDS
+from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
+from .merchant.dependencies import MerchantActionDependencies
 
-
-POLICIES = {"economy": "重商兴利", "materials": "积储资材", "cultivation": "尊修育才"}
-RANKS = ["成员", "使节", "特使"]
-CROSS_ALLIANCES = {
-    "xuanji": ("璇玑商盟", "spirit", ["spirit", "true_demon"]),
-    "jiukun": ("九坤商盟", "phantom_underworld", ["phantom_underworld", "true_demon", "hell"]),
-    "taiyuan": ("太元商盟", "celestial", ["celestial", "asura", "nether"]),
-}
-
-
-class MerchantSystemMixin(MerchantCommissionMixin, MerchantExecutionMixin):
-    """World-local offices, persistent commissions and independently held membership."""
-
-    @staticmethod
-    def _merchant_realm_cap(world):
-        profile = WORLD_SYSTEMS["world_profiles"][world]
-        return int(profile.get("npc_realm_cap", {1: 5, 2: 8, 3: 12}[int(profile["tier"])]))
-
-    def _ensure_merchant(self, game) -> bool:
-        if game.merchant_state.get("version") == 2:
-            return False
-        if game.merchant_state.get("version") == 1:
-            return self._migrate_merchant_routes(game)
-        state = game.merchant_state = {
-            "version": 2, "worlds": {}, "membership": None, "influence": {},
-            "posted": [], "active": None, "completed": [], "notices": [],
-            "last_age": game.player.age, "sequence": 0,
-        }
-        for world, geography in self.maps.worlds.items():
-            profile = WORLD_SYSTEMS["world_profiles"][world]
-            safe = [row["id"] for row in geography["locations"] if not row.get("min_realm_index")]
-            headquarters = EXCHANGE_VENUES[world]
-            sites = [place for place in safe if place != headquarters]
-            ids = [key for key, (_, _, worlds) in CROSS_ALLIANCES.items() if world in worlds]
-            ids += [f"{world}-{index}" for index in range(3 - len(ids))]
-            alliances = []
-            for index, alliance_id in enumerate(ids):
-                rng = random.Random(f"merchant:{game.seed}:{world}:{alliance_id}")
-                cross = CROSS_ALLIANCES.get(alliance_id)
-                name = cross[0] if cross else WORLD_SYSTEMS["world_names"][world] + ["通宝商盟", "万珍商盟", "聚贤商盟"][index]
-                realm_index = self._merchant_realm_cap(world)
-                leader = SectNpc(f"merchant-{world}-{alliance_id}-leader", rng.choice(["沈", "陆", "宁", "虞"]) + rng.choice(["望舒", "玄衡", "听澜", "怀璧"]),
-                                 "分盟主" if cross and world != cross[1] else "盟主", realm_index,
-                                 REALMS[realm_index].layers, 100, None, world=world)
-                locations = sites[index::3] or sites[:1]
-                locations = locations[:3]
-                chief_realm = 8 if alliance_id in {"xuanji", "jiukun"} else realm_index
-                chief_power = expected_combat_power(chief_realm, REALMS[chief_realm].layers) * 35
-                offices = []
-                for site in locations:
-                    deputy = copy.deepcopy(leader)
-                    deputy.id += f"-{site}"
-                    deputy.name = rng.choice(["许", "苏", "秦"]) + rng.choice(["青川", "知微", "照月"])
-                    deputy.title = "分部主事"
-                    deputy.realm_index = max(1, realm_index - 1)
-                    deputy.layer = REALMS[deputy.realm_index].layers
-                    offices.append({"location_id": site, "leader": deputy.to_dict()})
-                alliances.append({
-                    "id": alliance_id, "name": name, "world": world, "hq": headquarters,
-                    "home_world": cross[1] if cross else world, "linked_worlds": cross[2] if cross else [world],
-                    "cross_world": bool(cross), "leader": leader.to_dict(), "offices": offices,
-                    "chief_name": {"xuanji": "璇玑子", "jiukun": "九坤上人", "taiyuan": "太元道君"}.get(alliance_id, leader.name),
-                    "chief_realm": chief_realm, "chief_power": chief_power if cross else 0,
-                    "reserves": (250000 if cross else 8000) * int(profile["tier"]),
-                    "policy": list(POLICIES)[index], "next_policy_age": game.player.age + 12 + index * 3,
-                    "relation": "互通有无", "board_epoch": 0,
-                })
-            state["worlds"][world] = alliances
-        return True
-
-    def _merchant_alliance(self, game, world, alliance_id):
-        return next((row for row in game.merchant_state["worlds"].get(world, []) if row["id"] == alliance_id), None)
-
-    def _merchant_site(self, game, alliance):
-        if game.player.world != alliance["world"]:
-            return None
-        location = game.player.location_id
-        if location == alliance["hq"]:
-            return "hq"
-        if any(row["location_id"] == location for row in alliance["offices"]):
-            return location
-        return None
-
-    @staticmethod
-    def _merchant_influence_key(member):
-        return f"{member['world']}:{member['alliance_id']}:{'hq' if member['site'] == 'hq' else 'offices'}"
-
-    def _merchant_power(self, alliance):
-        leader = alliance["leader"]
-        power = expected_combat_power(leader["realm_index"], leader["layer"])
-        power += sum(expected_combat_power(row["leader"]["realm_index"], row["leader"]["layer"]) for row in alliance["offices"])
-        return round(power + alliance["chief_power"] + len(alliance["offices"]) * 5000 + alliance["reserves"] * 2)
-
-    def _merchant_notice(self, game, message):
-        notices = game.merchant_state["notices"]
-        notices.append({"age": game.player.age, "message": message})
-        del notices[:-30]
-        game.history.append(HistoryRecord("SYS_MERCHANT", 1, game.player.age, "商盟传讯", None, "notice", message, {}, ["system", "merchant", "world:global"]))
-
-    def _merchant_materials(self, world):
-        return sorted((row for row in self._crafting_material_defs().values() if row.get("world") == world),
-                      key=lambda row: (int(row.get("tier", 1)), row["id"]))
-
-    def _merchant_board(self, game, alliance):
-        materials = self._merchant_materials(alliance["world"])
-        if not materials:
-            return []
-        cap = self._merchant_realm_cap(alliance["world"])
-        board = []
-        for stars in range(1, 6):
-            target_realm = max(0, cap - 5 + stars)
-            power = expected_combat_power(target_realm, min(3, REALMS[target_realm].layers))
-            definition = materials[min(len(materials) - 1, (stars - 1) * len(materials) // 5)]
-            for kind_index, (kind, name) in enumerate(KINDS.items()):
-                if kind in {"item", "spirit_manual"}:
-                    continue  # Item acquisition is a player-issued commission.
-                identifier = f"{alliance['world']}:{alliance['id']}:{alliance['board_epoch']}:{kind}:{stars}"
-                base_years = stars * 2 + kind_index % 3
-                # Exact year durations, accelerated by realm without rounding to action units.
-                years = max(1, math.ceil(base_years / (1 + max(0, game.player.realm_index - target_realm) * .7)))
-                years = commission_duration(game, years)
-                material_cost = int(definition["base_material_value"]) * stars
-                value = max(100 * stars ** 2, int(power * .1), material_cost * 2)
-                scale = 1 + min(.5, math.log10(max(1, self._merchant_power(alliance))) / 20)
-                reward = {
-                    "stones": round(value * scale * (1.8 if alliance["policy"] == "economy" else 1)),
-                    "materials": stars * (2 if alliance["policy"] == "materials" else 1),
-                    "opportunity": round((5 * stars + power ** .35) * (2 if alliance["policy"] == "cultivation" else 1), 1),
-                    "karma": stars * 3, "influence": stars * 12,
-                }
-                board.append({"id": identifier, "kind": kind, "name": name, "stars": stars,
-                              "realm": target_realm, "power": round(power), "years": years,
-                              "definition_id": definition["id"], "material_name": definition["name"],
-                              "quantity": stars, "reward": reward, "policy": alliance["policy"],
-                              "world": alliance["world"], "alliance_id": alliance["id"]})
-        formation = sorted((row for row in self._formation_material_defs().values() if row.get("world") == alliance["world"]), key=lambda row: (row["tier"], row["id"]))
-        for original in list(board):
-            if original["kind"] != "supply":
-                continue
-            original["material_category"] = "crafting"
-            if formation:
-                task = copy.deepcopy(original)
-                definition = formation[min(len(formation) - 1, (task["stars"] - 1) * len(formation) // 5)]
-                task.update(id=task["id"] + ":formation", material_category="formation",
-                            reward_definition_id=task["definition_id"], definition_id=definition["id"], material_name=definition["name"])
-                task["reward"]["stones"] = max(task["reward"]["stones"], math.ceil(definition["base_value"] * task["quantity"] * 1.2))
-                board.append(task)
-        return [row for row in board if row["id"] not in game.merchant_state["completed"]]
-
-    def _advance_merchant_year(self, game):
-        self._ensure_merchant(game)
-        state = game.merchant_state
-        if game.player.age <= state["last_age"]:
-            return
-        state["last_age"] = game.player.age
-        for world, alliances in state["worlds"].items():
-            for alliance in alliances:
-                if game.player.age < alliance["next_policy_age"]:
-                    continue
-                rng = random.Random(f"merchant-policy:{game.seed}:{world}:{alliance['id']}:{alliance['next_policy_age']}")
-                policies = [key for key in POLICIES if key != alliance["policy"]]
-                weights = [1.0] * len(policies)
-                if self._intrigue_enabled():
-                    npc = SectNpc.from_dict(alliance["leader"])
-                    personality = self._ensure_intrigue_personality(game, npc)["primary"]
-                    preferred = "economy" if personality in {"greedy", "smooth", "open"} else "materials" if personality in {"suspicious", "conservative", "paranoid"} else "cultivation"
-                    weights = [4.0 if key == preferred else 1.0 for key in policies]
-                alliance["policy"] = rng.choices(policies, weights)[0]
-                alliance["next_policy_age"] = game.player.age + rng.randint(12, 24)
-                alliance["board_epoch"] += 1
-                occupied = {alliance["hq"], *(row["location_id"] for row in alliance["offices"])}
-                expansion = [row["id"] for row in self.maps.worlds[world]["locations"]
-                             if not row.get("min_realm_index") and row["id"] not in occupied]
-                if expansion and len(alliance["offices"]) < 4 and alliance["reserves"] >= 20000 and rng.random() < .2:
-                    location = rng.choice(expansion)
-                    deputy = copy.deepcopy(alliance["offices"][0]["leader"])
-                    deputy.update(id=f"merchant-{world}-{alliance['id']}-{location}", name=rng.choice(["叶知秋", "方清和", "江行远"]))
-                    alliance["offices"].append({"location_id": location, "leader": deputy})
-                    alliance["reserves"] -= 10000
-                elif len(alliance["offices"]) > 1 and alliance["reserves"] < 3000:
-                    member = state["membership"] or {}
-                    removable = [office for office in alliance["offices"] if not (
-                        member.get("world") == world and member.get("alliance_id") == alliance["id"]
-                        and member.get("site") == office["location_id"])]
-                    if removable:
-                        alliance["offices"].remove(removable[-1])
-                        alliance["reserves"] += 2000
-                rival = rng.choice([row for row in alliances if row is not alliance])
-                if rng.random() < .5:
-                    gain = max(50, min(alliance["reserves"], rival["reserves"]) // 40)
-                    alliance["reserves"] += gain
-                    rival["reserves"] += gain
-                    alliance["relation"] = f"与{rival['name']}合作通商"
-                else:
-                    transfer = min(rival["reserves"] // 20, max(30, alliance["reserves"] // 100))
-                    alliance["reserves"] += transfer
-                    rival["reserves"] -= transfer
-                    alliance["relation"] = f"与{rival['name']}竞争商路"
-        for order in state["posted"]:
-            if order["status"] not in {"open", "working"}:
-                continue
-            alliance = self._merchant_alliance(game, order["world"], order["alliance_id"])
-            if not self._merchant_route_exists(game, alliance, order["source_world"]):
-                self._merchant_refund(game, order, "cancelled", "目标界面未设本盟总部，商路不可用", order["fee"])
-                continue
-            if not self._merchant_commission_available(order):
-                self._merchant_refund(game, order, "cancelled", "所需内容当前不可用")
-                continue
-            if order.get("target_id"):
-                target = self._find_npc(game, order["target_id"])
-                if not target or not target.alive:
-                    self._merchant_refund(game, order, "cancelled", "悬赏目标已失效")
-                    continue
-            if order["status"] == "open":
-                if game.player.age >= order["deadline"]:
-                    self._merchant_refund(game, order, "cancelled", "长期无人接取，已逾期")
-                    continue
-                if game.player.age >= order["check_age"]:
-                    rng = random.Random(f"merchant-order:{game.seed}:{order['id']}:{order['check_age']}")
-                    order["check_age"] = game.player.age + max(1, order["years"] // 3)
-                    if rng.random() < order["accept_chance"]:
-                        self._merchant_start_order(game, order, rng)
-            if order["status"] == "working":
-                self._merchant_tick_order(game, order)
-
-    def _merchant_deliver_order(self, game, order):
-        if order.get("commission_version", 1) >= 2 and order["kind"] in PROCUREMENT_KINDS:
-            order["delivery"] = self._merchant_deliver_commission(game, order)
-            return
-        rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
-        kind, stars = order["kind"], order["stars"]
-        if kind == "supply":
-            definition = self._crafting_material_defs()[order["definition_id"]]
-            for _ in range(order["quantity"]):
-                game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=order["source_world"]))
-            order["delivery"] = f"获得{definition['name']} ×{order['quantity']}"
-        elif kind == "weapon":
-            power = order["principal"] * .08
-            artifact = {"id": f"merchant-weapon-{game.id}-{order['id']}", "name": f"商盟订制灵刃·{stars}星",
-                        "mold_id": "merchant_blade", "mold_name": "商盟灵刃", "quality": "normal", "quality_name": "合格",
-                        "creator_name": order["worker"], "created_year": game.player.age,
-                        "actual_stats": {"combat_power": power}, "designed_stats": {"combat_power": power},
-                        "anchor_value": round(order["principal"] * .5), "materials": [], "combat_effects": [], "is_natal": False}
-            store_crafted_artifact(game.player, artifact)
-            order["delivery"] = f"获得订制灵刃，基础战力 {power:,.0f}"
-        elif kind == "formation":
-            definitions = [row for row in self._formation_material_defs().values() if row.get("world") == order["source_world"]]
-            definition = sorted(definitions, key=lambda row: row.get("base_value", 1))[min(len(definitions) - 1, stars - 1)]
-            for _ in range(stars + 1):
-                game.player.formation_materials.append(make_formation_material_instance(definition, source="商盟炼阵委托", origin_world=order["source_world"]))
-            game.player.formation_sequence += 1
-            game.player.formation_loadouts.append({"id": f"formation-{game.id}-{game.player.formation_sequence}",
-                "name": f"商盟{stars}星护行阵", "slots": [definition["id"]] * (stars + 1) + [None] * (8 - stars),
-                "created_year": game.player.age})
-            order["delivery"] = f"获得{stars}星护行阵预设及{definition['name']}阵材套组 ×{stars + 1}，可在阵法面板启用"
-        elif kind == "recruit":
-            game.merchant_state.setdefault("hired_hands", 0)
-            game.merchant_state["hired_hands"] += stars
-            order["delivery"] = f"招得 {stars} 名商路人手，可协助后续护送、招募和情报任务"
+def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=None):
+    game = deps._load(game_id)
+    deps._ensure_merchant(game)
+    payload = payload or {}
+    player, state = game.player, game.merchant_state
+    if not player.alive or game.pending_event or player.imprisonment or player.ghost_captor or game.active_trial or game.guixu_state.get("player_session"):
+        raise ValueError("当前状态无法处理商盟事务")
+    rng = decode_rng(game.seed, game.rng_state)
+    member = state["membership"]
+    alliance_id = str(payload.get("alliance_id") or (member or {}).get("alliance_id", ""))
+    alliance = deps._merchant_alliance(game, player.world, alliance_id)
+    if action == "dismiss_notices":
+        state["notices"] = []
+    elif action == "leave":
+        if state["active"]:
+            raise ValueError("请先完成或放弃已接委托")
+        state["membership"] = None
+    else:
+        if not alliance or not deps._merchant_site(game, alliance):
+            raise ValueError("请前往该商盟在本界的总部或分部地图")
+        site = deps._merchant_site(game, alliance)
+        if action == "join":
+            if member:
+                raise ValueError("已加入商盟，请先退出原商盟")
+            state["membership"] = {"alliance_id": alliance_id, "world": player.world, "site": site, "rank": 0}
+            deps._merchant_notice(game, f"你已加入{alliance['name']}，成为{'总部' if site == 'hq' else deps.maps.location(player.world, site)['name'] + '分部'}成员。宗门、家族和种族身份不受影响。")
         else:
-            if kind == "bounty":
-                target = self._find_npc(game, order["target_id"])
-                self._apply_cultivator_kill(game, {"actor": "commission", "npc_id": target.id, "name": target.name,
-                    "realm_index": target.realm_index, "faction_id": target.faction_id, "race": target.race}, rng)
-                target.death_reason = f"被{order['worker']}依商盟悬赏击杀"
-                self._tianji_handle_npc_kill(game, target.id)
-            self._add_opportunity(game.player, stars * 20)
-            game.player.karma = max(0, game.player.karma - stars * 3)
-            if kind == "intel":
-                order["delivery"] = self._merchant_intelligence(game, order["source_world"], stars, rng)
-            else:
-                order["delivery"] = f"{KINDS[kind]}完成，机缘 +{stars * 20}，因果 -{stars * 3}"
-
-    def _merchant_task_ready(self, game, task):
-        player = game.player
-        if task["kind"] == "supply":
-            bag = player.formation_materials if task.get("material_category") == "formation" else player.crafting_materials
-            rows = [row for row in bag if row["material_id"] == task["definition_id"]]
-            if len(rows) < task["quantity"]:
-                raise ValueError(f"需准备 {task['material_name']} ×{task['quantity']}（对应分类的闲置材料）")
-            return rows[:task["quantity"]]
-        if task["kind"] == "weapon":
-            rows = [row for row in player.crafted_artifacts if not row.get("is_natal") and not row.get("tianji")
-                    and row.get("creator_id") == game.id and row["id"] not in task["existing_artifacts"]
-                    and float(row.get("actual_stats", {}).get("combat_power", 0)) >= task["power"] * .1]
-            if not rows:
-                raise ValueError(f"需在接取后亲自炼制一件基础战力至少 {task['power'] * .1:,.0f} 的普通法宝，再提交委托")
-            return rows[:1]
-        if task["kind"] == "formation":
-            rows = sorted(player.formation_materials, key=lambda row: row.get("base_value", 1), reverse=True)
-            rows = [row for row in rows if row.get("acquired_tier", 1) >= max(1, task["realm"] - 1)]
-            if len(rows) < task["stars"] + 1:
-                raise ValueError(f"炼阵需 {task['stars'] + 1} 件至少 {max(1, task['realm'] - 1)} 阶闲置阵材，在商盟工坊炼制后交付雇主")
-            return rows[:task["stars"] + 1]
-        return []
-
-    def _merchant_work(self, game, rng):
-        state = game.merchant_state
-        task = state["active"]
-        if not task:
-            raise ValueError("没有待完成的商盟任务")
-        if game.player.world != task["world"]:
-            raise ValueError("请返回任务所在界面")
-        materials = self._merchant_task_ready(game, task)
-        news = []
-        while task["worked"] < task["years"]:
-            advance_player_age(game.player)
-            task["worked"] += 1
-            continue_world = self._advance_world_year(game, rng, news, encounters=False)
-            if game.player.alive:
-                self._advance_soul_erosion_time(game, 1)
-            if not continue_world or not game.player.alive or game.pending_event:
-                self._merchant_notice(game, "商盟任务进度已保留，处理当前状况后可继续。")
-                return
-        kind = task["kind"]
-        succeeded = True
-        detail = ""
-        if kind in {"bounty", "escort"}:
-            target = {"target_name": "悬赏恶修" if kind == "bounty" else "劫道修士", "target_power": task["power"],
-                      "target_realm_index": task["realm"], "target_layer": 3, "combat_type": "cultivator",
-                      "kill_karma": False, "player_defending": kind == "escort"}
-            outcome, detail = self._combat(game, target, kind == "bounty", rng)
-            succeeded = outcome == "killed" if kind == "bounty" else outcome in {"victory", "victory_escape", "killed"}
-        elif kind in {"recruit", "intel"}:
-            hands = state.get("hired_hands", 0)
-            chance = min(.98, .65 + (game.player.realm_index - task["realm"]) * .06 + hands * .03)
-            succeeded = rng.random() < max(.15, chance)
-            if hands:
-                state["hired_hands"] -= 1
-        if not succeeded:
-            state["active"] = None
-            self._merchant_notice(game, f"{task['stars']}星「{task['name']}」失败，未获得报酬。{detail}")
-            return
-        if kind == "intel":
-            detail = self._merchant_intelligence(game, task["world"], task["stars"], rng)
-        if kind == "supply":
-            for row in materials:
-                (game.player.formation_materials if task.get("material_category") == "formation" else game.player.crafting_materials).remove(row)
-        elif kind == "weapon":
-            artifact = materials[0]
-            remove_item(game.player, artifact["id"])
-            game.player.crafted_artifacts.remove(artifact)
-        elif kind == "formation":
-            for row in materials:
-                game.player.formation_materials.remove(row)
-            self._grant_art_experience(game.player, "formation", task["stars"] * 20)
-        reward = task["reward"]
-        add_item(game.player, "spirit_stone", reward["stones"])
-        self._add_opportunity(game.player, reward["opportunity"])
-        game.player.karma = max(0, game.player.karma - reward["karma"])
-        definition = self._crafting_material_defs()[task.get("reward_definition_id", task["definition_id"])]
-        for _ in range(reward["materials"]):
-            game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟报酬", origin_world=task["world"]))
-        key = task["influence_key"]
-        state["influence"][key] = state["influence"].get(key, 0) + reward["influence"]
-        alliance = self._merchant_alliance(game, task["world"], task["alliance_id"])
-        alliance["reserves"] += max(20, reward["stones"] // 5)
-        state["completed"].append(task["id"])
-        state["completed"] = state["completed"][-350:]
-        state["active"] = None
-        self._merchant_notice(game, f"完成{task['stars']}星「{task['name']}」，灵石 +{reward['stones']:,}，材料 +{reward['materials']}，机缘 +{reward['opportunity']}，因果 -{reward['karma']}，商盟影响力 +{reward['influence']}。{detail}")
-
-    def _merchant_passage(self, game, alliance, destination):
-        member = game.merchant_state["membership"]
-        if member["site"] != "hq" or member["rank"] < 1 or self._merchant_site(game, alliance) != "hq":
-            raise ValueError("只有在任总部或分总部使节、特使，可从总部启用逆灵通道")
-        if not alliance["cross_world"] or not self._merchant_route_exists(game, alliance, destination) or destination == game.player.world:
-            raise ValueError("商盟没有通往该界面的逆灵通道")
-        if not WORLD_SYSTEMS["world_profiles"][destination].get("enabled", True):
-            raise ValueError("该界面尚未开放")
-        if game.player.cultivation_suppression:
-            raise ValueError("请先解除秘法压制")
-        price = self._merchant_passage_cost(game, destination)
-        if not has_item(game.player, "spirit_stone", price):
-            raise ValueError(f"逆灵通道需支付 {price:,} 灵石")
-        target_alliance = self._merchant_alliance(game, destination, alliance["id"])
-        player = game.player
-        plan = self._plan_world_transition(game, destination, "passage",
-                                           arrival_location=target_alliance["hq"], reason="商盟逆灵通道")
-        self._apply_world_transition(game, plan)
-        remove_item(player, "spirit_stone", price)
-        # Credentials remain issued by the original regional HQ. Reciprocal
-        # offices recognise the rank, but do not silently transfer local influence.
-        self._merchant_notice(game, f"支付 {price:,} 灵石，乘{alliance['name']}逆灵通道抵达{WORLD_SYSTEMS['world_names'][destination]}。" + ("修为已按当地界面法则压制。" if player.sealed_cultivation else ""))
-
-    @staticmethod
-    def _merchant_passage_cost(game, destination):
-        tier = WORLD_SYSTEMS["world_profiles"][destination]["tier"]
-        original = game.player.sealed_cultivation or {}
-        realm = int(original.get("realm_index", game.player.realm_index))
-        return max(1000000, round(expected_combat_power(realm, int(original.get("layer", game.player.layer))) * 20)) * int(tier)
-
-    def merchant_action(self, game_id, action, payload=None):
-        game = self._load(game_id)
-        self._ensure_merchant(game)
-        payload = payload or {}
-        player, state = game.player, game.merchant_state
-        if not player.alive or game.pending_event or player.imprisonment or player.ghost_captor or game.active_trial or game.guixu_state.get("player_session"):
-            raise ValueError("当前状态无法处理商盟事务")
-        rng = decode_rng(game.seed, game.rng_state)
-        member = state["membership"]
-        alliance_id = str(payload.get("alliance_id") or (member or {}).get("alliance_id", ""))
-        alliance = self._merchant_alliance(game, player.world, alliance_id)
-        if action == "dismiss_notices":
-            state["notices"] = []
-        elif action == "leave":
-            if state["active"]:
-                raise ValueError("请先完成或放弃已接委托")
-            state["membership"] = None
-        else:
-            if not alliance or not self._merchant_site(game, alliance):
-                raise ValueError("请前往该商盟在本界的总部或分部地图")
-            site = self._merchant_site(game, alliance)
-            if action == "join":
-                if member:
-                    raise ValueError("已加入商盟，请先退出原商盟")
-                state["membership"] = {"alliance_id": alliance_id, "world": player.world, "site": site, "rank": 0}
-                self._merchant_notice(game, f"你已加入{alliance['name']}，成为{'总部' if site == 'hq' else self.maps.location(player.world, site)['name'] + '分部'}成员。宗门、家族和种族身份不受影响。")
-            else:
-                if not member or member["alliance_id"] != alliance_id or (member["world"] != player.world and not alliance["cross_world"]):
-                    raise ValueError("你不是该商盟成员")
-                influence_key = self._merchant_influence_key(member)
-                influence = state["influence"].get(influence_key, 0)
-                if action == 'teleport':
-                    destination = str(payload.get('destination', ''))
-                    sites = {alliance['hq'], *(o['location_id'] for o in alliance['offices'])}
-                    if destination not in sites:
-                        raise ValueError('目的地不是本盟总部或分部')
-                    self._instant_arrival(game, destination)
-                    self._merchant_notice(game, f"由本盟内部传送阵抵达{self.maps.location(player.world, destination)['name']}，不增加年龄。")
-                elif action == "promote":
-                    if member["world"] != player.world or (member["site"] == "hq" and member["rank"] == 0):
-                        raise ValueError("总部直入成员须先调往本界分部，从分部成员开始历练")
-                    threshold = [120, 360][min(member["rank"], 1)]
-                    if member["rank"] >= 2 or influence < threshold:
-                        raise ValueError(f"晋升所需本部影响力：{threshold}")
-                    member["rank"] += 1
-                    self._merchant_notice(game, f"盟内考绩通过，晋升为{RANKS[member['rank']]}。")
-                elif action == "transfer_branch":
-                    if state["active"] or member["world"] != player.world or site == "hq":
-                        raise ValueError("请完成当前委托并前往入盟界面的分部申请历练")
-                    if member["site"] == "hq":
-                        member.update(site=site, rank=0)
-                        state["influence"][f"{player.world}:{alliance_id}:offices"] = 0
-                    else:
-                        member["site"] = site
-                    self._merchant_notice(game, "调任分部；同界分部之间共用影响力，总部调出从成员重新历练。")
-                elif action == "hq_exam":
-                    if state["active"] or member["world"] != player.world or site != "hq" or member["site"] == "hq" or member["rank"] != 2 or influence < 600:
-                        raise ValueError("分部特使须累积600影响力、完成当前委托，前往本界总部参加调任考核")
-                    required = max(1, self._merchant_realm_cap(player.world) - 3)
-                    if player.realm_index < required or combat_power(player) < expected_combat_power(required, 1):
-                        raise ValueError(f"考核需至少{REALMS[required].name}修为与相应基础实战能力")
-                    state["influence"][influence_key] -= 600
-                    member.update(site="hq", rank=1)
-                    self._merchant_notice(game, "总部实战资历考核通过，调任总部使节；跨界商盟使节可启用逆灵通道。")
-                elif action == "accept":
-                    if state["active"]:
-                        raise ValueError("一次只能接取一个商盟委托")
-                    task = next((row for row in self._merchant_board(game, alliance) if row["id"] == payload.get("task_id")), None)
-                    if not task:
-                        raise ValueError("委托已刷新或已完成")
-                    task.update(worked=0, influence_key=influence_key, existing_artifacts=[row["id"] for row in player.crafted_artifacts])
-                    state["active"] = task
-                elif action == "work":
-                    self._merchant_work(game, rng)
-                elif action == "abandon":
-                    state["active"] = None
-                elif action == "post":
-                    self._merchant_post(game, alliance, payload)
-                elif action == "passage":
-                    if state["active"]:
-                        raise ValueError("请先完成或放弃当前商盟任务")
-                    self._merchant_passage(game, alliance, str(payload.get("destination", "")))
-                    self._ensure_market(game, rng)
+            if not member or member["alliance_id"] != alliance_id or (member["world"] != player.world and not alliance["cross_world"]):
+                raise ValueError("你不是该商盟成员")
+            influence_key = deps._merchant_influence_key(member)
+            influence = state["influence"].get(influence_key, 0)
+            if action == 'teleport':
+                destination = str(payload.get('destination', ''))
+                sites = {alliance['hq'], *(o['location_id'] for o in alliance['offices'])}
+                if destination not in sites:
+                    raise ValueError('目的地不是本盟总部或分部')
+                deps._instant_arrival(game, destination)
+                deps._merchant_notice(game, f"由本盟内部传送阵抵达{deps.maps.location(player.world, destination)['name']}，不增加年龄。")
+            elif action == "promote":
+                if member["world"] != player.world or (member["site"] == "hq" and member["rank"] == 0):
+                    raise ValueError("总部直入成员须先调往本界分部，从分部成员开始历练")
+                threshold = [120, 360][min(member["rank"], 1)]
+                if member["rank"] >= 2 or influence < threshold:
+                    raise ValueError(f"晋升所需本部影响力：{threshold}")
+                member["rank"] += 1
+                deps._merchant_notice(game, f"盟内考绩通过，晋升为{RANKS[member['rank']]}。")
+            elif action == "transfer_branch":
+                if state["active"] or member["world"] != player.world or site == "hq":
+                    raise ValueError("请完成当前委托并前往入盟界面的分部申请历练")
+                if member["site"] == "hq":
+                    member.update(site=site, rank=0)
+                    state["influence"][f"{player.world}:{alliance_id}:offices"] = 0
                 else:
-                    raise ValueError("未知商盟操作")
-        game.rng_state = encode_rng(rng)
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+                    member["site"] = site
+                deps._merchant_notice(game, "调任分部；同界分部之间共用影响力，总部调出从成员重新历练。")
+            elif action == "hq_exam":
+                if state["active"] or member["world"] != player.world or site != "hq" or member["site"] == "hq" or member["rank"] != 2 or influence < 600:
+                    raise ValueError("分部特使须累积600影响力、完成当前委托，前往本界总部参加调任考核")
+                required = max(1, deps._merchant_realm_cap(player.world) - 3)
+                if player.realm_index < required or combat_power(player) < expected_combat_power(required, 1):
+                    raise ValueError(f"考核需至少{REALMS[required].name}修为与相应基础实战能力")
+                state["influence"][influence_key] -= 600
+                member.update(site="hq", rank=1)
+                deps._merchant_notice(game, "总部实战资历考核通过，调任总部使节；跨界商盟使节可启用逆灵通道。")
+            elif action == "accept":
+                if state["active"]:
+                    raise ValueError("一次只能接取一个商盟委托")
+                task = next((row for row in deps._merchant_board(game, alliance) if row["id"] == payload.get("task_id")), None)
+                if not task:
+                    raise ValueError("委托已刷新或已完成")
+                task.update(worked=0, influence_key=influence_key, existing_artifacts=[row["id"] for row in player.crafted_artifacts])
+                state["active"] = task
+            elif action == "work":
+                deps._merchant_work(game, rng)
+            elif action == "abandon":
+                state["active"] = None
+            elif action == "post":
+                deps._merchant_post(game, alliance, payload)
+            elif action == "passage":
+                if state["active"]:
+                    raise ValueError("请先完成或放弃当前商盟任务")
+                deps._merchant_passage(game, alliance, str(payload.get("destination", "")))
+                deps._ensure_market(game, rng)
+            else:
+                raise ValueError("未知商盟操作")
+    game.rng_state = encode_rng(rng)
+    game.updated_at = now_iso()
+    deps.store.save(game)
+    return deps.present(game)
 
-    def _merchant_post(self, game, alliance, payload):
-        state = game.merchant_state
-        if sum(row["status"] in {"open", "working"} for row in state["posted"]) >= 12:
-            raise ValueError("最多同时发布12个委托")
-        quote = self._merchant_quote(game, alliance, payload)
-        if payload.get("preview_token") and payload["preview_token"] != quote["preview_token"]:
-            raise ValueError("委托条件或报价已变化，请重新预览")
-        if not has_item(game.player, "spirit_stone", quote["total"]):
-            raise ValueError(f"发布需悬赏本金 {quote['principal']:,} + 手续费 {quote['fee']:,} 灵石")
-        remove_item(game.player, "spirit_stone", quote["total"])
-        state["sequence"] += 1
-        years = quote["years"]
-        state["posted"].append(copy.deepcopy(quote) | {
-            "id": state["sequence"], "world": game.player.world, "alliance_id": alliance["id"],
-            "posted_age": game.player.age, "check_age": game.player.age + max(1, years // 3),
-            "deadline": game.player.age + years * 4, "status": "open",
-            "accept_chance": min(.85, .3 + .15 * quote["principal"] / quote["minimum"]),
-        })
-        terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"}]
-        for old in terminal[:-30]:
-            state["posted"].remove(old)
 
-    def _public_merchant(self, game):
-        self._ensure_merchant(game)
-        state = game.merchant_state
-        member = state["membership"]
-        membership = None
-        if member:
-            home = self._merchant_alliance(game, member["world"], member["alliance_id"])
-            world_name = WORLD_SYSTEMS["world_names"][member["world"]]
-            office_name = ("总部" if home["home_world"] == member["world"] else "分总部") if member["site"] == "hq" else self.maps.location(member["world"], member["site"])["name"] + "分部"
-            membership = copy.deepcopy(member) | {"title": f"{home['name']} {world_name}{office_name} {RANKS[member['rank']]}",
-                        "influence": state["influence"].get(self._merchant_influence_key(member), 0)}
-        visible = []
-        for alliance in state["worlds"][game.player.world]:
-            owned = bool(member and member["alliance_id"] == alliance["id"] and (member["world"] == game.player.world or alliance["cross_world"]))
-            site = self._merchant_site(game, alliance)
-            row = {key: copy.deepcopy(alliance[key]) for key in ("id", "name", "world", "hq", "home_world", "cross_world", "linked_worlds", "reserves", "relation", "policy", "next_policy_age")}
-            row.update(policy_name=POLICIES[alliance["policy"]], power=self._merchant_power(alliance),
-                       hq_name=self.maps.location(game.player.world, alliance["hq"])["name"],
-                       leader_name=alliance["leader"]["name"], leader_realm=REALMS[alliance["leader"]["realm_index"]].name,
-                       chief_name=alliance["chief_name"], chief_realm=REALMS[alliance["chief_realm"]].name,
-                       chief_power=round(alliance["chief_power"]), local_site=site, member=owned,
-                       offices=[{"location_id": office["location_id"], "name": self.maps.location(game.player.world, office["location_id"])["name"],
-                                 "leader": office["leader"]["name"], "realm": REALMS[office["leader"]["realm_index"]].name} for office in alliance["offices"]],
-                       tasks=self._merchant_board(game, alliance) if owned else [])
-            row["destinations"] = [{"id": world, "name": WORLD_SYSTEMS["world_names"][world],
-                                     "cost": self._merchant_passage_cost(game, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
-            row["catalog"] = self._merchant_procurement_catalog(game, alliance) if owned else []
-            from .teleport_system import separated
-            row['teleports'] = [{'id': key, 'name': self.maps.location(game.player.world, key)['name']}
-                for key in [alliance['hq'], *(o['location_id'] for o in alliance['offices'])]
-                if owned and site and separated(self.maps, game.player.world, game.player.location_id, key)]
-            visible.append(row)
-        orders = copy.deepcopy(state["posted"])
-        for order in orders:
-            order.pop("will_finish", None)
-            order.pop("failure_age", None)
-            order.pop("accept_chance", None)
-            order["progress"] = min(.99, max(0, (game.player.age - order.get("started_age", game.player.age)) / order["years"])) if order["status"] == "working" else 1 if order["status"] == "completed" else order.get("progress", 0)
-        return {"alliances": visible, "membership": membership, "active": copy.deepcopy(state["active"]),
-                "posted": orders, "notices": copy.deepcopy(state["notices"]), "kinds": KINDS,
-                "hired_hands": state.get("hired_hands", 0), "year": game.player.age,
-                "molds": [{"id": row["id"], "name": row["name"], "description": row["rule"].get("description", "")} for row in self._crafting_molds().values()],
-                "metric_names": METRICS}
+def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):
+    state = game.merchant_state
+    if sum(row["status"] in {"open", "working"} for row in state["posted"]) >= 12:
+        raise ValueError("最多同时发布12个委托")
+    quote = deps._merchant_quote(game, alliance, payload)
+    if payload.get("preview_token") and payload["preview_token"] != quote["preview_token"]:
+        raise ValueError("委托条件或报价已变化，请重新预览")
+    if not has_item(game.player, "spirit_stone", quote["total"]):
+        raise ValueError(f"发布需悬赏本金 {quote['principal']:,} + 手续费 {quote['fee']:,} 灵石")
+    remove_item(game.player, "spirit_stone", quote["total"])
+    state["sequence"] += 1
+    years = quote["years"]
+    state["posted"].append(copy.deepcopy(quote) | {
+        "id": state["sequence"], "world": game.player.world, "alliance_id": alliance["id"],
+        "posted_age": game.player.age, "check_age": game.player.age + max(1, years // 3),
+        "deadline": game.player.age + years * 4, "status": "open",
+        "accept_chance": min(.85, .3 + .15 * quote["principal"] / quote["minimum"]),
+    })
+    terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"}]
+    for old in terminal[:-30]:
+        state["posted"].remove(old)

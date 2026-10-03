@@ -12,7 +12,6 @@ from ..content_registry import WORLD_SYSTEMS, STORY_COMBAT_SCENARIOS, CONTENT_DO
 from ..system.combat_system import BattleUnit
 from ..event_repository import EventRepository
 from ..system.demonic_system import DemonicSystemMixin
-from ..map_runtime import MapTravelMixin
 from ..models import GameState, HistoryRecord, Item, Player, SectNpc, SectState
 from ..system.map_system import MapCatalog
 from ..storage import SaveStore
@@ -25,8 +24,6 @@ from ..system.ghost_system import GhostSystemMixin
 from ..system.sage_system import SageSystemMixin
 from ..system.concubine_system import ConcubineSystemMixin
 from ..system.family_system import FamilySystemMixin
-from ..system.doctrine_system import DoctrineSystemMixin
-from ..system.merchant_system import MerchantSystemMixin
 from . import engine_world_runtime as world_runtime
 from . import engine_event_runtime as event_runtime
 from . import engine_combat_runtime as combat_runtime
@@ -122,8 +119,29 @@ from ..system.war import presentation as war_presentation
 from ..system import war_system as war_compat
 
 
+from .orchestration import world_time as world_time
+from .. import map_runtime as map_travel
+from ..system import teleport_system as teleport_actions
+from ..system.merchant import state as merchant_state
+from ..system.merchant import catalog as merchant_catalog
+from ..system.merchant import calendar as merchant_calendar
+from ..system.merchant import settlement as merchant_settlement
+from ..system.merchant import work as merchant_work
+from ..system.merchant import passage as merchant_passage
+from ..system import merchant_system as merchant_actions
+from ..system.merchant import presentation as merchant_view
+from ..system import merchant_commission_system as merchant_commissions
+from ..system import merchant_execution_system as merchant_execution
+from ..system import doctrine_system as doctrine_actions
+from ..system import doctrine_fusion_system as doctrine_fusion
+from ..system import cultivation_session as cultivation_session
+from ..system import immortal_system as immortal_actions
+from ..system import immortal_body_system as immortal_body
+from ..system import immortal_aperture as immortal_aperture
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, MapTravelMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -156,6 +174,200 @@ class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenc
         self._dependencies = bind_dependencies(
             self, bloodline_content_available=lambda: bloodline_content_available(),
         )
+
+    def _advance_world_year(self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool=True) -> bool:
+        return world_time._advance_world_year(self._dependencies.time.world_year, game, rng, era_news, encounters=encounters)
+
+    def travel_map(self, game_id: str, destination: str) -> dict[str, Any]:
+        return map_travel.travel_map(self._dependencies.time.travel, game_id, destination)
+
+    def _instant_arrival(self, game, destination):
+        return teleport_actions._instant_arrival(self._dependencies.time.teleport, game, destination)
+
+    def teleport_action(self, game_id, action, destination=None):
+        return teleport_actions.teleport_action(self._dependencies.time.teleport, game_id, action, destination)
+
+    @staticmethod
+    def _merchant_realm_cap(world):
+        return merchant_state._merchant_realm_cap(world)
+
+    def _ensure_merchant(self, game) -> bool:
+        return merchant_state._ensure_merchant(self._dependencies.merchant.state, game)
+
+    def _merchant_alliance(self, game, world, alliance_id):
+        return merchant_state._merchant_alliance(game, world, alliance_id)
+
+    def _merchant_site(self, game, alliance):
+        return merchant_state._merchant_site(game, alliance)
+
+    @staticmethod
+    def _merchant_influence_key(member):
+        return merchant_state._merchant_influence_key(member)
+
+    def _merchant_power(self, alliance):
+        return merchant_state._merchant_power(alliance)
+
+    def _merchant_notice(self, game, message):
+        return merchant_state._merchant_notice(game, message)
+
+    def _merchant_materials(self, world):
+        return merchant_state._merchant_materials(self._dependencies.merchant.state, world)
+
+    def _merchant_board(self, game, alliance):
+        return merchant_catalog._merchant_board(self._dependencies.merchant.catalog, game, alliance)
+
+    def _advance_merchant_year(self, game):
+        return merchant_calendar._advance_merchant_year(self._dependencies.merchant.calendar, game)
+
+    def _merchant_deliver_order(self, game, order):
+        return merchant_settlement._merchant_deliver_order(self._dependencies.merchant.settlement, game, order)
+
+    def _merchant_task_ready(self, game, task):
+        return merchant_work._merchant_task_ready(game, task)
+
+    def _merchant_work(self, game, rng):
+        return merchant_work._merchant_work(self._dependencies.merchant.work, game, rng)
+
+    def _merchant_passage(self, game, alliance, destination):
+        return merchant_passage._merchant_passage(self._dependencies.merchant.passage, game, alliance, destination)
+
+    @staticmethod
+    def _merchant_passage_cost(game, destination):
+        return merchant_passage._merchant_passage_cost(game, destination)
+
+    def merchant_action(self, game_id, action, payload=None):
+        return merchant_actions.merchant_action(self._dependencies.merchant.actions, game_id, action, payload)
+
+    def _merchant_post(self, game, alliance, payload):
+        return merchant_actions._merchant_post(self._dependencies.merchant.actions, game, alliance, payload)
+
+    def _public_merchant(self, game):
+        return merchant_view._public_merchant(self._dependencies.merchant.view, game)
+
+    def _merchant_intelligence(self, game, world, stars, rng):
+        return merchant_settlement._merchant_intelligence(self._dependencies.merchant.settlement, game, world, stars, rng)
+
+    def _merchant_commission_available(self, order):
+        return merchant_commissions._merchant_commission_available(self._dependencies.merchant.commissions, order)
+
+    def _merchant_items(self, world):
+        return merchant_commissions._merchant_items(world)
+
+    def _merchant_procurement_catalog(self, game, alliance):
+        return merchant_commissions._merchant_procurement_catalog(self._dependencies.merchant.commissions, game, alliance)
+
+    def _merchant_formation_spec(self, game, world, payload):
+        return merchant_commissions._merchant_formation_spec(self._dependencies.merchant.commissions, game, world, payload)
+
+    def _merchant_weapon_spec(self, world, payload):
+        return merchant_commissions._merchant_weapon_spec(self._dependencies.merchant.commissions, world, payload)
+
+    def _merchant_quote(self, game, alliance, payload):
+        return merchant_commissions._merchant_quote(self._dependencies.merchant.commissions, game, alliance, payload)
+
+    def preview_merchant_commission(self, game_id, payload):
+        return merchant_commissions.preview_merchant_commission(self._dependencies.merchant.commissions, game_id, payload)
+
+    def _merchant_deliver_commission(self, game, order):
+        return merchant_settlement._merchant_deliver_commission(self._dependencies.merchant.settlement, game, order)
+
+    def _merchant_procurement_bonus(self, game, order, rng):
+        return merchant_settlement._merchant_procurement_bonus(self._dependencies.merchant.settlement, game, order, rng)
+
+    def debug_merchant_hq(self, game_id, alliance_id):
+        return merchant_commissions.debug_merchant_hq(self._dependencies.merchant.commissions, game_id, alliance_id)
+
+    def _merchant_route_exists(self, game, alliance, world):
+        return merchant_execution._merchant_route_exists(self._dependencies.merchant.execution, game, alliance, world)
+
+    def _migrate_merchant_routes(self, game):
+        return merchant_execution._migrate_merchant_routes(self._dependencies.merchant.execution, game)
+
+    @staticmethod
+    def _merchant_log(order, age, message):
+        return merchant_settlement._merchant_log(order, age, message)
+
+    def _merchant_refund(self, game, order, status, reason, fee_refund=0):
+        return merchant_settlement._merchant_refund(self._dependencies.merchant.settlement, game, order, status, reason, fee_refund)
+
+    @staticmethod
+    def _merchant_failure_chance(stars, worker_realm, required_realm):
+        return merchant_execution._merchant_failure_chance(stars, worker_realm, required_realm)
+
+    def _merchant_start_order(self, game, order, rng):
+        return merchant_execution._merchant_start_order(self._dependencies.merchant.execution, game, order, rng)
+
+    def _merchant_tick_order(self, game, order):
+        return merchant_execution._merchant_tick_order(self._dependencies.merchant.execution, game, order)
+
+    def _ensure_doctrines(self, game):
+        return doctrine_actions._ensure_doctrines(game)
+
+    def _begin_doctrine_action(self, game, action, *, commit=False):
+        return doctrine_actions._begin_doctrine_action(self._dependencies.cultivation.study, game, action, commit=commit)
+
+    def _finish_doctrine_action(self, game, action, elapsed):
+        return doctrine_actions._finish_doctrine_action(self._dependencies.cultivation.study, game, action, elapsed)
+
+    def doctrine_action(self, game_id, action, doctrine_id=None, manual_id=None, confirm_origin=False, npc_id=None):
+        return doctrine_actions.doctrine_action(self._dependencies.cultivation.actions, game_id, action, doctrine_id, manual_id, confirm_origin, npc_id)
+
+    def _public_doctrines(self, game):
+        return doctrine_actions._public_doctrines(self._dependencies.cultivation.view, game)
+
+    def _fusion_requirements(self, game, key, *, study=False):
+        return doctrine_fusion._fusion_requirements(game, key, study=study)
+
+    def _fuse_doctrine(self, game, key):
+        return doctrine_fusion._fuse_doctrine(self._dependencies.cultivation.fusion, game, key)
+
+    def _begin_fusion_study(self, game, *, commit=False):
+        return doctrine_fusion._begin_fusion_study(self._dependencies.cultivation.fusion, game, commit=commit)
+
+    def _finish_fusion_study(self, game, elapsed):
+        return doctrine_fusion._finish_fusion_study(game, elapsed)
+
+    def _public_fusion(self, game, definition):
+        return doctrine_fusion._public_fusion(game, definition)
+
+    def _cultivation_game(self, game_id):
+        return cultivation_session._cultivation_game(self._dependencies.cultivation.session, game_id)
+
+    def _save_cultivation(self, game, summary):
+        return cultivation_session._save_cultivation(self._dependencies.cultivation.commit, game, summary)
+
+    def immortal_action(self, game_id, action, doctrine_id=None, axis=None, supply_id=None):
+        return immortal_actions.immortal_action(self._dependencies.cultivation.immortal_actions, game_id, action, doctrine_id, axis, supply_id)
+
+    @staticmethod
+    def _spend_cultivation(player, cost):
+        return immortal_actions._spend_cultivation(player, cost)
+
+    def _public_immortal(self, game):
+        return immortal_actions._public_immortal(self._dependencies.cultivation.immortal_view, game)
+
+    def _temper_golden_light(self, game):
+        return immortal_body._temper_golden_light(self._dependencies.cultivation.body, game)
+
+    @staticmethod
+    def _public_golden_light(game):
+        return immortal_body._public_golden_light(game)
+
+    def _immortal_body_action(self, game, action, key):
+        return immortal_body._immortal_body_action(self._dependencies.cultivation.body, game, action, key)
+
+    @staticmethod
+    def _public_immortal_body(game):
+        return immortal_body._public_immortal_body(game)
+
+    def upper_voisinage_action(self, game_id, action, voisinage_id):
+        return immortal_aperture.upper_voisinage_action(self._dependencies.cultivation.aperture, game_id, action, voisinage_id)
+
+    def aperture_action(self, game_id, action, manual_id=None):
+        return immortal_aperture.aperture_action(self._dependencies.cultivation.aperture, game_id, action, manual_id)
+
+    def _finish_travel_time(self, game, start_age, institution_world, institution_unit, era_news, rng):
+        return world_time._finish_travel_time(self._dependencies.time.elapsed_travel, game, start_age, institution_world, institution_unit, era_news, rng)
 
     def asura_action(self, game_id, action, target_id='', body_ids=None, name=''):
         return asura_actions.asura_action(self._dependencies.asura_actions, game_id, action, target_id, body_ids, name)

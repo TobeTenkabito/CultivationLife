@@ -126,7 +126,7 @@ def violations(edges):
         domain_to_facade = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and target == f'cultivation_life.system.{area}_system'
-            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation', 'guixu', 'war'))
+            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation', 'guixu', 'war', 'merchant'))
         domain_to_wiring = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and source != f'cultivation_life.system.{area}.wiring'
@@ -169,9 +169,28 @@ def violations(edges):
                                   and target in {'cultivation_life.storage', 'cultivation_life.save_transfer',
                                                  'cultivation_life.engine', 'cultivation_life.engine.wiring',
                                                  'cultivation_life.engine.engine_persistence'})
+        # Shared time and commit flows must not depend back on their callers.
+        three_group_reverse_import = (
+            source == 'cultivation_life.engine.orchestration.world_time'
+            and target == 'cultivation_life.map_runtime'
+            or source.startswith('cultivation_life.system.merchant.')
+            and target in {'cultivation_life.system.merchant_system',
+                           'cultivation_life.system.merchant_commission_system',
+                           'cultivation_life.system.merchant_execution_system'}
+            or source in {'cultivation_life.system.cultivation_session',
+                          'cultivation_life.system.immortal_body_system',
+                          'cultivation_life.system.doctrine_fusion_system'}
+            and target in {'cultivation_life.system.immortal_system',
+                           'cultivation_life.system.doctrine_system'}
+            or source in {'cultivation_life.time_dependencies',
+                          'cultivation_life.system.cultivation_dependencies',
+                          'cultivation_life.system.merchant.dependencies'}
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.models', 'cultivation_life.ports'})
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
-                or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage):
+                or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
+                or three_group_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 
