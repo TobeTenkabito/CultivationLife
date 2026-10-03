@@ -8,6 +8,7 @@ from ..rules import public_player
 from .path_modifiers import register_provider
 from .semantic_events import subscribe
 from .world_transition_system import cultivation_ceiling
+from .buddhist.dependencies import NirvanaDependencies
 
 
 def active(subject):
@@ -109,9 +110,9 @@ def nirvana_target(engine, game):
     return layer, ""
 
 
-def nirvana(engine, game, rng):
+def nirvana(deps: NirvanaDependencies, game, rng):
     state = ensure_wish(game)
-    layer, reason = nirvana_target(engine, game)
+    layer, reason = nirvana_target(None, game)
     if reason:
         raise ValueError(reason)
     if game.pending_event or game.active_trial or game.buddhist_state.get("assembly"):
@@ -122,11 +123,11 @@ def nirvana(engine, game, rng):
     change(game, -100, "涅槃")
     # The existing completion routine grants lifespan and progression exactly once.
     game.player.layer = layer - 1
-    engine._complete_minor_breakthrough(game, rng, old_label)
+    deps._complete_minor_breakthrough(game, rng, old_label)
     game.player.awaiting_major_breakthrough = False
     game.player.opportunity = 0
     state["nirvana_units"] = 3.0
-    engine._buddhist_record(game, "涅槃突破一个小境界，免除此关天劫；三个时间单位内机缘获取效率额外 +100%。")
+    deps._buddhist_record(game, "涅槃突破一个小境界，免除此关天劫；三个时间单位内机缘获取效率额外 +100%。")
 
 
 subscribe("buddhist.wish", on_event)

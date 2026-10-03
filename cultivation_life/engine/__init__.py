@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from ..system import realm_ascension  # register base-world route defaults first
 from ..system.buddhist_system import BuddhistSystemMixin
-from ..system.relationship_violence import RelationshipViolenceMixin
 from ..system.path_modifiers import modifier
 
 import random
@@ -140,8 +139,24 @@ from ..system import immortal_body_system as immortal_body
 from ..system import immortal_aperture as immortal_aperture
 
 
+from ..system.ghost import identity as ghost_identity
+from ..system.ghost import calendar as ghost_calendar
+from ..system.ghost import erosion as ghost_erosion
+from ..system.ghost import reincarnation as ghost_reincarnation
+from ..system.relationships import captivity as relationships_captivity
+from ..system.demonic import refinement as demonic_refinement
+from ..system.demonic import annual as demonic_annual
+from ..system import relationship_rules
+from ..system.relationships import sanctions as relationships_sanctions
+from ..system.relationships import dependents as relationships_dependents
+from ..system.relationships import concubines as relationships_concubines
+from ..system.relationships import violence as relationships_violence
+from ..system.buddhist import actions as buddhist_actions
+from ..system.buddhist import assembly as buddhist_assembly
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -368,6 +383,143 @@ class GameEngine(UpperInstitutionMixin, RelationshipViolenceMixin, BuddhistSyste
 
     def _finish_travel_time(self, game, start_age, institution_world, institution_unit, era_news, rng):
         return world_time._finish_travel_time(self._dependencies.time.elapsed_travel, game, start_age, institution_world, institution_unit, era_news, rng)
+
+    @staticmethod
+    def _post_battle_possession_candidates(game: GameState) -> list[dict[str, Any]]:
+        return ghost_identity._post_battle_possession_candidates(game)
+
+    def _prepare_post_battle_possession(self, game: GameState, source_event: str) -> bool:
+        return ghost_identity._prepare_post_battle_possession(self._dependencies.ghost_flows.identity, game, source_event)
+
+    def post_battle_possess(self, game_id: str, target_id: str) -> dict[str, Any]:
+        return ghost_identity.post_battle_possess(self._dependencies.ghost_flows.identity, game_id, target_id)
+
+    def _advance_ghost_phase_two_year(self, game: GameState, rng: random.Random) -> None:
+        return ghost_calendar._advance_ghost_phase_two_year(self._dependencies.ghost_flows.calendar, game, rng)
+
+    def ghost_constraint_action(self, game_id: str, action: str) -> dict[str, Any]:
+        return ghost_identity.ghost_constraint_action(self._dependencies.ghost_flows.identity, game_id, action)
+
+    def _capture_defeated_ghost(self, game: GameState, target: dict[str, Any], rng: random.Random) -> bool:
+        return ghost_identity._capture_defeated_ghost(game, target, rng)
+
+    def leave_possessed_body(self, game_id: str) -> dict[str, Any]:
+        return ghost_identity.leave_possessed_body(self._dependencies.ghost_flows.identity, game_id)
+
+    def _advance_soul_erosion_time(self, game: GameState, elapsed_years: int=1) -> bool:
+        return ghost_erosion._advance_soul_erosion_time(self._dependencies.ghost_flows.erosion, game, elapsed_years)
+
+    def _apply_soul_erosion_units(self, game: GameState, units: int=1) -> bool:
+        return ghost_erosion._apply_soul_erosion_units(self._dependencies.ghost_flows.erosion, game, units)
+
+    def spend_wangsheng(self, game_id: str, spend_all: bool=False) -> dict[str, Any]:
+        return ghost_erosion.spend_wangsheng(self._dependencies.ghost_flows.erosion, game_id, spend_all)
+
+    def prepare_ghost_reincarnation(self, game_id: str) -> dict[str, Any]:
+        return ghost_reincarnation.prepare_ghost_reincarnation(self._dependencies.ghost_flows.reincarnation, game_id)
+
+    def _complete_ghost_reincarnation(self, game: GameState, *, record_history: bool) -> dict[str, Any]:
+        return ghost_reincarnation._complete_ghost_reincarnation(game, record_history=record_history)
+
+    def reincarnate_ghost(self, game_id: str) -> dict[str, Any]:
+        return ghost_reincarnation.reincarnate_ghost(self._dependencies.ghost_flows.reincarnation, game_id)
+
+    def _capture_cultivator(self, game: GameState, target: dict[str, Any], own_power: float, rng: random.Random) -> tuple[str, str]:
+        return relationships_captivity._capture_cultivator(self._dependencies.relationships.captivity, game, target, own_power, rng)
+
+    def begin_relationship_capture(self, game_id: str, kind: str, target_id: str='') -> dict[str, Any]:
+        return relationships_captivity.begin_relationship_capture(self._dependencies.relationships.captivity, game_id, kind, target_id)
+
+    def _relationship_capture_step(self, game: GameState, pending: dict[str, Any], stage: str, method: str, rng: random.Random) -> tuple[str, str]:
+        return relationships_captivity._relationship_capture_step(self._dependencies.relationships.captivity, game, pending, stage, method, rng)
+
+    def _break_capture_relationship(self, game: GameState, relation: dict[str, Any], kind: str, captured: bool) -> None:
+        return relationships_captivity._break_capture_relationship(self._dependencies.relationships.captivity, game, relation, kind, captured)
+
+    def captive_action(self, game_id: str, target_id: str, action: str) -> dict[str, Any]:
+        return relationships_captivity.captive_action(self._dependencies.relationships.captivity, game_id, target_id, action)
+
+    def _restore_captive_npc(self, game: GameState, target: dict[str, Any], affinity_gain: float) -> None:
+        return relationships_captivity._restore_captive_npc(self._dependencies.relationships.captivity, game, target, affinity_gain)
+
+    def _convert_to_puppet(self, game: GameState, target: dict[str, Any], kind: str, rng: random.Random, disciple: bool) -> tuple[str, str]:
+        return relationships_captivity._convert_to_puppet(self._dependencies.relationships.captivity, game, target, kind, rng, disciple)
+
+    @staticmethod
+    def _remove_conversion_target(player: Player, target: dict[str, Any], disciple: bool) -> None:
+        return relationships_captivity._remove_conversion_target(player, target, disciple)
+
+    def secluded_refine_foreign_souls(self, game_id: str) -> dict[str, Any]:
+        return demonic_refinement.secluded_refine_foreign_souls(self._dependencies.demonic_flows.refinement, game_id)
+
+    def _annual_demonic_update(self, game: GameState, rng: random.Random) -> None:
+        return demonic_annual._annual_demonic_update(self._dependencies.demonic_flows.annual, game, rng)
+
+    @staticmethod
+    def _rank(value: Player | SectNpc | dict[str, Any]) -> tuple[int, int]:
+        return relationship_rules._rank(value)
+
+    @staticmethod
+    def _stable_gender(identity: str, name: str='') -> str:
+        return relationship_rules._stable_gender(identity, name)
+
+    def _maybe_relationship_sanction(self, game: GameState, rng: random.Random) -> bool:
+        return relationships_sanctions._maybe_relationship_sanction(self._dependencies.relationships.sanctions, game, rng)
+
+    def _end_sanctioned_relationship(self, game: GameState, role: str, name: str) -> tuple[str, str]:
+        return relationships_sanctions._end_sanctioned_relationship(self._dependencies.relationships.sanctions, game, role, name)
+
+    def _resolve_relationship_sanction(self, game: GameState, pending: dict[str, Any], role: str, mode: str, rng: random.Random) -> tuple[str, str]:
+        return relationships_sanctions._resolve_relationship_sanction(self._dependencies.relationships.sanctions, game, pending, role, mode, rng)
+
+    def _maybe_transfer_player_dependency(self, game: GameState, loser: SectNpc, winner: SectNpc, rng: random.Random, *, context: str) -> str:
+        return relationships_dependents._maybe_transfer_player_dependency(self._dependencies.relationships.dependents, game, loser, winner, rng, context=context)
+
+    def manage_concubine(self, game_id: str, target_id: str, action: str) -> dict[str, Any]:
+        return relationships_concubines.manage_concubine(self._dependencies.relationships.concubines, game_id, target_id, action)
+
+    def _maybe_concubine_proposal(self, game: GameState, rng: random.Random) -> bool:
+        return relationships_dependents._maybe_concubine_proposal(self._dependencies.relationships.dependents, game, rng)
+
+    def _resolve_concubine_proposal(self, game: GameState, pending: dict[str, Any], accept: bool) -> tuple[str, str]:
+        return relationships_dependents._resolve_concubine_proposal(self._dependencies.relationships.dependents, game, pending, accept)
+
+    def _advance_concubine_aftermath(self, game: GameState, rng: random.Random) -> bool:
+        return relationships_dependents._advance_concubine_aftermath(self._dependencies.relationships.dependents, game, rng)
+
+    @staticmethod
+    def _runtime_from_status(status: dict[str, Any]) -> dict[str, Any]:
+        return relationships_dependents._runtime_from_status(status)
+
+    def _set_concubine_status(self, game: GameState, runtime: dict[str, Any], *, forced: bool=False) -> None:
+        return relationships_dependents._set_concubine_status(self._dependencies.relationships.dependents, game, runtime, forced=forced)
+
+    def _resolve_concubine_revenge(self, game: GameState, pending: dict[str, Any], method: str, rng: random.Random) -> tuple[str, str]:
+        return relationships_dependents._resolve_concubine_revenge(self._dependencies.relationships.dependents, game, pending, method, rng)
+
+    def _resolve_concubine_escape(self, game: GameState, pending: dict[str, Any], method: str, rng: random.Random) -> tuple[str, str]:
+        return relationships_dependents._resolve_concubine_escape(self._dependencies.relationships.dependents, game, pending, method, rng)
+
+    def manage_concubine_status(self, game_id: str, action: str) -> dict[str, Any]:
+        return relationships_dependents.manage_concubine_status(self._dependencies.relationships.dependents, game_id, action)
+
+    def relationship_violence(self, game_id, kind, target_id, *, capture=False):
+        return relationships_violence.relationship_violence(self._dependencies.relationships.violence, game_id, kind, target_id, capture=capture)
+
+    def buddhist_action(self, game_id, action, **payload):
+        return buddhist_actions.buddhist_action(self._dependencies.buddhist_flows.actions, game_id, action, **payload)
+
+    def _continue_buddhist_assembly(self, game, rng):
+        return buddhist_assembly._continue_buddhist_assembly(self._dependencies.buddhist_flows.assembly, game, rng)
+
+    def _resolve_buddhist_assembly(self, effect, game, pending, rng):
+        return buddhist_assembly._resolve_buddhist_assembly(self._dependencies.buddhist_flows.assembly, effect, game, pending, rng)
+
+    def _finish_buddhist_assembly(self, game, rng=None, forced_failure=False):
+        return buddhist_assembly._finish_buddhist_assembly(self._dependencies.buddhist_flows.assembly, game, rng, forced_failure)
+
+    def _advance_concubine_status(self, game: GameState, units: int = 1) -> float:
+        return relationships_dependents._advance_concubine_status(self._dependencies.relationships.dependents, game, units)
 
     def asura_action(self, game_id, action, target_id='', body_ids=None, name=''):
         return asura_actions.asura_action(self._dependencies.asura_actions, game_id, action, target_id, body_ids, name)

@@ -187,10 +187,27 @@ def violations(edges):
                           'cultivation_life.system.merchant.dependencies'}
             and target.startswith('cultivation_life.')
             and target not in {'cultivation_life.models', 'cultivation_life.ports'})
+        workflow_packages = tuple(f'cultivation_life.system.{area}.' for area in
+                                  ('ghost', 'demonic', 'relationships', 'buddhist'))
+        workflow_facades = {f'cultivation_life.system.{name}' for name in
+                            ('ghost_system', 'demonic_system', 'concubine_system',
+                             'relationship_violence', 'buddhist_system')}
+        key_flow_reverse_import = (
+            source.startswith(workflow_packages) and target in workflow_facades
+            or source in {'cultivation_life.system.relationship_rules',
+                          'cultivation_life.system.demonic_definitions'}
+            and (target in workflow_facades or target.startswith(workflow_packages))
+            or source in {prefix + 'dependencies' for prefix in workflow_packages}
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.models', 'cultivation_life.ports'}
+            or source == 'cultivation_life.system.ghost.progression'
+            and target.startswith('cultivation_life.system.ghost.')
+            or source == 'cultivation_life.system.buddhist.rules'
+            and target.startswith('cultivation_life.system.buddhist.'))
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
-                or three_group_reverse_import):
+                or three_group_reverse_import or key_flow_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 
