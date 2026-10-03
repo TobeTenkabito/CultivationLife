@@ -4,14 +4,14 @@ from __future__ import annotations
 import copy
 
 SINGLE_RELATIONS = ('master', 'dao_companion')
-LIST_RELATIONS = ('disciples', 'dao_friends', 'disciple_requests', 'concubines')
+LIST_RELATIONS = ('disciples', 'dao_friends', 'disciple_requests', 'concubines', 'prisoners')
 PERSON_FIELDS = frozenset('''name realm_index layer age lifespan spirit_root cultivation_progress
 path race world alive death_reason affinity gender main_technique_id main_technique_level
 combat_artifact_id combat_factor next_tribulation_age tribulation_count tribulation_power
 concealed_realm_index concealed_layer transcendence body_training immortal_body_level
 divine_sense_rank monster_species_id asura_route faction_id departed_age departure_reason
 wounds treasure_item_id treasure_looted family_traits family_combat_bonus notorious notoriety
-encountered_player social_profile'''.split())
+encountered_player social_profile roster_state custody roster_origin'''.split())
 LABEL_FIELDS = frozenset(('realm_name', 'spirit_root_name', 'path_name', 'race_name', 'gender_name'))
 
 
@@ -26,8 +26,7 @@ def relationship_rows(player):
 
 
 def independent_captive(field, row):
-    # Here alive=False on the original NPC means absent from the free roster,
-    # not dead. Keep this separate lifecycle until captivity has its own state.
+    # Schema 6 -> 7 preserves captive snapshots for the explicit 7 -> 8 migration.
     return field == 'concubines' and row.get('source') == 'captive'
 
 
@@ -42,13 +41,14 @@ def person_seed(row, world='human'):
     }
 
 
-def normalize_relationship_document(document):
+def normalize_relationship_document(document, *, legacy=False):
     """Replace snapshots with references; existing NPC facts always win."""
     player = document.get('player', {})
     registry = document.setdefault('relationship_npcs', {})
     # Preserve the established lookup priority. These containers retain their
     # simulation schedules; relationships no longer duplicate their facts.
     persons = {}
+    persons.update(document.get('inactive_npcs', {}))
     family = document.get('family')
     if family and not family.get('extinct'):
         for npc in family.get('npcs', []):
@@ -69,7 +69,7 @@ def normalize_relationship_document(document):
             persons[str(identity)] = npc
     aliases = {}
     for field, row in relationship_rows(player):
-        if independent_captive(field, row):
+        if legacy and (independent_captive(field, row) or field == 'prisoners'):
             continue
         identity = str(row.get('npc_id') or row.get('id') or '')
         if row.get('id'):
@@ -91,4 +91,4 @@ def normalize_relationship_document(document):
 
 
 def migrate_relationships_v6(document):
-    normalize_relationship_document(document)
+    normalize_relationship_document(document, legacy=True)

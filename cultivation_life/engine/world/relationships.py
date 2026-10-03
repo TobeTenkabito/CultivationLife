@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from ...npc_custody import is_free, kill_person
+from ...relationship_records import find_person
+
 import copy
 import random
 import uuid
@@ -43,7 +46,7 @@ def _party_crossing_candidate(deps: RelationshipDependencies, game: GameState, n
     npc = deps._find_npc(game, npc_id)
     relation = next((entry for entry in [player.dao_companion, *player.dao_friends] if entry and str(entry.get("id")) == npc_id), None)
     source = npc.to_dict() if npc else relation
-    if not source or not source.get("alive", True) or source.get("world") != player.world:
+    if not source or not is_free(source) or source.get("world") != player.world:
         return None
     requirements = {
         "human": (5, lambda layer: layer <= 3),
@@ -64,7 +67,9 @@ def _party_crossing_candidate(deps: RelationshipDependencies, game: GameState, n
 
 def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, relation: dict[str, Any], reason: str) -> SectNpc:
     from ...system.npc_social import instantiate_social
-    existing = deps._find_npc(game, str(relation.get("id", "")))
+    existing = find_person(game, str(relation.get("id", "")))
+    if existing and existing.roster_state != "active":
+        raise ValueError("受控或离册人物不能加入自由活动名册")
     if existing:
         if existing.id in game.relationship_npcs:
             game.notable_npcs[existing.id] = game.relationship_npcs.pop(existing.id)
@@ -81,7 +86,7 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
         spirit_root=str(relation.get("spirit_root", "none")),
         cultivation_progress=float(relation.get("cultivation_progress", 0)),
         path=str(relation.get("path", "dao")), race=str(relation.get("race", "human")),
-        world=str(relation.get("world", game.player.world)), alive=bool(relation.get("alive", True)),
+        world=str(relation.get("world", game.player.world)), alive=bool(is_free(relation)),
         death_reason=relation.get("death_reason"), affinity=float(relation.get("affinity", 0)),
         gender=str(relation.get("gender", "")),
         treasure_item_id=next(iter(relation.get("items", {})), None),
@@ -102,8 +107,8 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
 
 def _adjust_person_affinity(deps: RelationshipDependencies, game: GameState, npc_id: str, delta: float) -> float:
     from ...system.npc_social import instantiate_social
-    npc = deps._find_npc(game, npc_id)
-    if npc and npc_id not in game.relationship_npcs:
+    npc = find_person(game, npc_id)
+    if npc and is_free(npc) and npc_id not in game.relationship_npcs:
         instantiate_social(game, npc)
     relation = next((entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
     base = float(npc.affinity or 0) if npc else float(relation.get("affinity", 0)) if relation else 0.0
@@ -119,7 +124,7 @@ def _adjust_person_affinity(deps: RelationshipDependencies, game: GameState, npc
 def _set_person_affinity(deps: RelationshipDependencies, game: GameState, npc_id: str, value: float) -> float:
     """Set, rather than add, affinity on both the persistent NPC and relation snapshot."""
     affinity = max(-100.0, min(100.0, float(value)))
-    npc = deps._find_npc(game, npc_id)
+    npc = find_person(game, npc_id)
     if npc:
         npc.affinity = affinity
     for relation in [
@@ -180,7 +185,7 @@ def _high_affinity_npcs(deps: RelationshipDependencies, game: GameState, exclude
     for relation in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples]:
         if not relation or str(relation.get("id")) in known or str(relation.get("id")) == exclude_id:
             continue
-        if relation.get("alive", True) and relation.get("world") == game.player.world and float(relation.get("affinity", 0)) >= threshold:
+        if is_free(relation) and relation.get("world") == game.player.world and float(relation.get("affinity", 0)) >= threshold:
             people.append(deps._persist_relationship_npc(game, relation, "交好修士"))
     return people
 
@@ -263,7 +268,7 @@ def _maybe_personal_revenge(deps: RelationshipDependencies, game: GameState, rng
 def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: random.Random) -> str:
     player = game.player
     companion = player.dao_companion
-    if not companion or not companion.get("alive", True):
+    if not companion or not is_free(companion):
         return ""
     player_realm, _ = deps._actual_player_realm(player)
     # 生育难度取双方较高的生命层次；任一方达到化神，概率即归零。
@@ -342,11 +347,13 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
     player = game.player
     family_ids = {npc.id for npc in game.family.npcs} if game.family and not game.family.extinct else set()
     independent = {npc.id:npc for sect in game.sects.values() for npc in sect.npcs}
+    independent.update(game.notable_npcs)
+    independent.update(game.inactive_npcs)
     for child in player.offspring:
-        if not child.get("alive", True) or child.get("id") in family_ids:
-            continue
         if child.get("id") in independent:
             child.update(independent[child["id"]].to_dict())
+            continue
+        if not child.get("alive", True) or child.get("id") in family_ids:
             continue
         child["age"] = int(child.get("age", 0)) + 1
         if child.get("lifespan") is not None and child["age"] >= int(child["lifespan"]):
@@ -599,9 +606,11 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     rng = rng or random.Random(f"relationships:{game.seed}:{player.age}")
     event_relations = [
         entry for entry in [player.master, player.dao_companion, *player.dao_friends, *player.concubines, *player.disciples, *player.disciple_requests]
-        if entry and ((entry in player.concubines and entry.get("source") == "captive")
-                      or str(entry.get("npc_id") or entry.get("id", "")) in game.relationship_npcs
-                      or not deps._find_npc(game, str(entry.get("npc_id") or entry.get("id", ""))))
+        if entry and ((entry in player.concubines and entry.get("source") == "captive"
+                       and entry.get("roster_state") == "held")
+                      or (is_free(entry) and (
+                          str(entry.get("npc_id") or entry.get("id", "")) in game.relationship_npcs
+                          or not deps._find_npc(game, str(entry.get("npc_id") or entry.get("id", ""))))))
     ]
     seen = set()
     for relation in event_relations:
@@ -615,6 +624,7 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
         if lifespan is not None and relation["age"] >= lifespan:
             relation["alive"] = False
             relation["death_reason"] = "寿元耗尽，坐化尘世"
+            kill_person(game, relation["id"], relation["death_reason"])
             is_companion = relation is player.dao_companion
             is_friend = relation in player.dao_friends
             is_concubine = relation in player.concubines
@@ -639,6 +649,7 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
         tribulation = deps._resolve_npc_periodic_tribulation(game, shell, rng, "道侣" if relation is player.dao_companion else "")
         if tribulation and not shell.alive:
             relation.update(alive=False, death_reason=shell.death_reason)
+            kill_person(game, relation["id"], shell.death_reason)
             continue
         breakthrough = deps._advance_npc_cultivation(
             shell, rng, allow_spirit_crossing=True,
@@ -679,7 +690,7 @@ def _sync_party_state(deps: RelationshipDependencies, game: GameState) -> bool:
         npc_id = str(reference.get("id", ""))
         companion = game.player.dao_companion
         if companion and companion.get("id") == npc_id:
-            if npc_id and npc_id not in seen and companion.get("alive", True) and companion.get("world") == game.player.world:
+            if npc_id and npc_id not in seen and is_free(companion) and companion.get("world") == game.player.world:
                 seen.add(npc_id)
                 valid.append({"id": npc_id})
             continue
@@ -687,7 +698,7 @@ def _sync_party_state(deps: RelationshipDependencies, game: GameState) -> bool:
         relation = next((entry for entry in [game.player.master, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
         available = bool(
             npc.alive and npc.world == game.player.world if npc else
-            relation and relation.get("alive", True) and relation.get("world") == game.player.world
+            relation and is_free(relation) and relation.get("world") == game.player.world
         )
         if not npc_id or npc_id in seen or not available:
             continue

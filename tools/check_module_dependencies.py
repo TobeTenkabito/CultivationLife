@@ -165,7 +165,7 @@ def violations(edges):
             and target in COURT_FACADES | {'cultivation_life.system.court.wiring'})
         schema_to_runtime = (source == 'cultivation_life.save_schema'
                              and target.startswith('cultivation_life.')
-                             and target != 'cultivation_life.relationship_schema')
+                             and target not in {'cultivation_life.relationship_schema', 'cultivation_life.npc_custody_schema'})
         preparation_to_storage = (source.startswith('cultivation_life.engine.persistence.')
                                   and target in {'cultivation_life.storage', 'cultivation_life.save_transfer',
                                                  'cultivation_life.engine', 'cultivation_life.engine.wiring',
@@ -214,7 +214,12 @@ def violations(edges):
             and target.startswith('cultivation_life.')
             or source == 'cultivation_life.relationship_records'
             and target.startswith('cultivation_life.')
-            and target != 'cultivation_life.relationship_schema')
+            and target != 'cultivation_life.relationship_schema'
+            or source == 'cultivation_life.npc_custody_schema'
+            and target.startswith('cultivation_life.') and target != 'cultivation_life.relationship_schema'
+            or source == 'cultivation_life.npc_custody'
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.relationship_schema', 'cultivation_life.relationship_records'})
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage

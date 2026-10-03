@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...npc_custody import is_free
+
 import copy
 from typing import Any
 from ...content_registry import ITEM_CATALOG, REALMS, RACE_DEFINITIONS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
@@ -124,7 +126,7 @@ def _public_dao_companion(deps: CharacterViewDependencies, game: GameState) -> d
     result["gender"] = str(result.get("gender") or deps._stable_gender(str(result.get("id", ""))))
     result["gender_name"] = gender_name(result["gender"])
     result["can_recruit_concubine"] = bool(
-        result["gender"] == "female" and deps._rank(result) <= deps._rank(game.player)
+        is_free(result) and result["gender"] == "female" and deps._rank(result) <= deps._rank(game.player)
         and not any(str(row.get("id")) == str(result.get("id")) for row in game.player.concubines)
     )
     technique_id = result.get("main_technique_id")
@@ -139,7 +141,7 @@ def _public_dao_companion(deps: CharacterViewDependencies, game: GameState) -> d
     result["combat_power"] = deps._relationship_combat_power(companion)
     result["in_party"] = any(entry.get("id") == companion.get("id") for entry in game.player.party)
     result["can_invite_party"] = bool(
-        companion.get("alive", True) and companion.get("world") == game.player.world
+        is_free(companion) and companion.get("world") == game.player.world
         and not result["in_party"]
         and len(game.player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
     )
@@ -157,7 +159,7 @@ def _public_dao_friends(deps: CharacterViewDependencies, game: GameState) -> lis
         row["gender"] = str(row.get("gender") or deps._stable_gender(str(row.get("id", ""))))
         row["gender_name"] = gender_name(row["gender"])
         row["can_recruit_concubine"] = bool(
-            row["gender"] == "female" and deps._rank(row) <= deps._rank(game.player)
+            is_free(row) and row["gender"] == "female" and deps._rank(row) <= deps._rank(game.player)
             and not any(str(entry.get("id")) == str(row.get("id")) for entry in game.player.concubines)
         )
         technique_id = str(row.get("main_technique_id", ""))
@@ -167,7 +169,7 @@ def _public_dao_friends(deps: CharacterViewDependencies, game: GameState) -> lis
         row["combat_power"] = deps._relationship_combat_power(friend)
         row["in_party"] = any(entry.get("id") == row.get("id") for entry in game.player.party)
         row["can_invite_party"] = bool(
-            row.get("alive", True) and row.get("world") == game.player.world and not row["in_party"]
+            is_free(row) and row.get("world") == game.player.world and not row["in_party"]
             and len(game.player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
         )
         row["can_invite_faction"] = deps._relationship_can_join_faction(game, friend)
@@ -182,7 +184,7 @@ def _relationship_can_join_faction(deps: CharacterViewDependencies, game: GameSt
     sect = game.sects.get(game.player.faction_id or "")
     return bool(
         sect and not sect.extinct and sect.world == game.player.world
-        and relation.get("alive", True) and relation.get("world") == game.player.world
+        and is_free(relation) and relation.get("world") == game.player.world
         and not deps._npc_faction_id(game, str(relation.get("id", "")))
     )
 
@@ -199,7 +201,7 @@ def _public_personal_relations(deps: CharacterViewDependencies, game: GameState)
         ("道友", game.player.dao_friends), ("弟子", game.player.disciples),
     ):
         for relation in entries:
-            if relation and relation.get("alive", True) and relation.get("world") == game.player.world:
+            if relation and is_free(relation) and relation.get("world") == game.player.world:
                 relationship_labels[str(relation.get("id"))] = label
                 if str(relation.get("id")) not in people:
                     people[str(relation.get("id"))] = SectNpc(
@@ -252,7 +254,7 @@ def _public_party(deps: CharacterViewDependencies, game: GameState) -> list[dict
     for reference in game.player.party:
         companion = game.player.dao_companion
         if companion and companion.get("id") == reference.get("id"):
-            if companion.get("alive", True) and companion.get("world") == game.player.world:
+            if is_free(companion) and companion.get("world") == game.player.world:
                 perception = deps._relationship_cultivation_perception(game, companion, "道侣")
                 result.append({
                     "id": companion["id"], "name": companion["name"],
@@ -290,7 +292,7 @@ def _public_party(deps: CharacterViewDependencies, game: GameState) -> list[dict
                 } if perception["concealed"] else None,
                 "affinity": round(npc.affinity or 0, 1), "attitude": attitude_label(npc.affinity or 0, 0),
             }
-        elif relation and relation.get("alive", True) and relation.get("world") == game.player.world:
+        elif relation and is_free(relation) and relation.get("world") == game.player.world:
             perception = deps._relationship_cultivation_perception(game, relation)
             row = {
                 "id":str(relation["id"]), "name":str(relation["name"]),

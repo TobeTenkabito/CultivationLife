@@ -103,6 +103,8 @@ def possession_limit(player: Player) -> int | None:
 
 
 def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
+    if not target.get("alive", True):
+        return False, "目标已经陨落，无法夺舍"
     if not has_ghost_core(player) or is_possessed(player):
         return False, "只有未寄身的鬼修可以夺舍"
     if str(target.get("race", "human")) not in {"human", "demon", "immortal"}:
@@ -161,7 +163,8 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         )
     player.opportunity = float(target.get("opportunity", 0.0))
     player.qi_experience = {"spirit": 0.0, "demon": 0.0, "monster": 0.0, "yin": 0.0}
-    player.body_training = max(0, int(target.get("body_training", realm_index * 2)))
+    body_training = target.get("body_training")
+    player.body_training = max(0, int(realm_index * 2 if body_training is None else body_training))
     player.body_progress = 0.0
     player.technique = target_technique
     player.support_technique = None

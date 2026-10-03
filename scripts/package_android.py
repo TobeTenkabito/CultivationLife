@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.android_css import compile_css
 from scripts.release_evidence import require
 from scripts.android_provenance import validate_apk_inputs
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 VERSION = runpy.run_path(str(ROOT / 'cultivation_life/version.py'))['BASE_GAME_VERSION']
 RELEASE_ID = VERSION.replace('.', '')
 VERSION_CODE = int(re.search(r'versionCode (\d+)', (ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
@@ -77,7 +78,7 @@ def main():
         'tested_abi': 'x86_64', 'physical_device_tested': False,
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
         'inputs_sha256': hashlib.sha256(json.dumps(provenance['inputs'], sort_keys=True).encode()).hexdigest(),
-        'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
+        'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': SAVE_SCHEMA_VERSION,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': ['Six-theme portrait and landscape: independent Asura panels and puppet workshop, perspective contour illustrations, 27 live meridian nodes, DLC colors, native vein opening and power acquisition, back and persistence verified', 'Base upper-world voisinages without Asura DLC: native acquisition, nine-level growth, six-theme UI, persisted selection and energy verified', 'Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified', 'Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified', 'Institution classification, legacy affiliation, six-theme map and institutional contacts verified', f'{passed.group(1)} Python regressions passed',
                        'Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified',

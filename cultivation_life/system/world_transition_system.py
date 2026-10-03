@@ -5,6 +5,7 @@ costs/trials. Direction describes geography, never permission or cleanup.
 """
 from __future__ import annotations
 from ..relationship_records import RelationshipRecord, find_person
+from ..npc_custody import sync_offspring
 
 import copy
 from dataclasses import dataclass
@@ -170,6 +171,13 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
     player.world = plan.destination
     player.location_id = plan.arrival_location
     if plan.mode != TransitionMode.PROGRESSION:
+        for npc in game.inactive_npcs.values():
+            if npc.alive and npc.roster_state == "held" and (npc.custody or {}).get("holder_id") == game.id:
+                if ports.move_npc:
+                    ports.move_npc(npc, plan.destination, player.age)
+                else:
+                    npc.world = plan.destination
+                sync_offspring(game, npc)
         player.party = []
         player.awaiting_major_breakthrough = False
         player.awaiting_minor_breakthrough = False

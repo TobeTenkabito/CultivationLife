@@ -1,6 +1,8 @@
 """Explicit relationships captivity operations; callers own composition."""
 from __future__ import annotations
 
+from ...npc_custody import is_free, kill_person, release_person
+
 import copy
 import math
 import random
@@ -54,7 +56,7 @@ def _capture_cultivator(
     captive_lifespan = npc.lifespan if npc else victim.get("lifespan")
     from ..asura import body_facts
     captured_body = body_facts(npc or dict(victim, id=prisoner_id, path=path))
-    game.player.prisoners.append({
+    captive = {
         **captured_body,
         "id": prisoner_id, "npc_id": npc_id, "name": str(victim["name"]),
         "realm_index": int(victim["realm_index"]), "layer": int(victim.get("layer", 1)),
@@ -65,10 +67,10 @@ def _capture_cultivator(
         "age": captive_age, "lifespan": captive_lifespan,
         "gender": npc.gender if npc else str(victim.get("gender") or deps._stable_gender(prisoner_id)),
         "captured_age": game.player.age, "source": "combat",
-    })
-    if npc:
-        npc.alive = False
-        npc.death_reason = f"被{game.player.name}生擒"
+    }
+    record = game.detain_person(captive)
+    record["affinity"] = affinity - 12
+    game.player.prisoners.append(record)
     if npc_id:
         game.encounter_npc_cache = [row for row in game.encounter_npc_cache if row.get("id") != npc_id]
     return "captured", f"你封住{victim['name']}的修为，将其生擒并收入俘虏名册（生擒率 {chance:.0%}）。"
@@ -87,7 +89,7 @@ def begin_relationship_capture(deps: CaptivityDependencies, game_id: str, kind: 
         next((row for row in player.dao_friends if str(row.get("id")) == target_id), None)
         if kind == "friend" else None
     )
-    if not relation or not relation.get("alive", True) or relation.get("world", player.world) != player.world:
+    if not relation or not is_free(relation) or relation.get("world", player.world) != player.world:
         raise ValueError("目标关系人物当前不在身边")
     if relation.setdefault("last_interactions", {}).get("capture_attempt") == player.age:
         raise ValueError("本行动年份已经尝试生擒过此人")
@@ -172,7 +174,9 @@ def _relationship_capture_step(
         "gender":str(relation.get("gender") or deps._stable_gender(str(relation.get("id", "")))),
         "captured_age":player.age, "source":f"relationship:{kind}",
     }
-    player.prisoners.append(prisoner)
+    record = game.detain_person(prisoner)
+    record["affinity"] = -100.0
+    player.prisoners.append(record)
     deps._break_capture_relationship(game, relation, kind, captured=True)
     relation_name = {"master":"师父", "companion":"道侣", "friend":"道友"}.get(kind, "故人")
     return "captured", f"你彻底封住{name}的元神，将昔日{relation_name}收入俘虏名册（封魂成功率 {chance:.0%}）。"
@@ -191,12 +195,8 @@ def _break_capture_relationship(
     else:
         player.dao_companion = None
     npc = deps._find_npc(game, target_id)
-    if npc:
-        if captured:
-            npc.alive = False
-            npc.death_reason = f"被{player.name}背叛并生擒"
-        else:
-            npc.affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
+    if npc and not captured:
+        npc.affinity = float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0))
 
 
 def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, action: str) -> dict[str, Any]:
@@ -207,9 +207,11 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
     if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法处置俘虏")
     prisoner = next((entry for entry in player.prisoners if str(entry.get("id")) == target_id), None)
-    disciple = next((entry for entry in player.disciples if str(entry.get("id")) == target_id and entry.get("alive", True)), None)
+    disciple = None if prisoner else next(
+        (entry for entry in player.disciples if str(entry.get("id")) == target_id and is_free(entry)), None,
+    )
     target = prisoner or disciple
-    if not target:
+    if not target or not target.get("alive", True):
         raise ValueError("目标俘虏或弟子不存在")
     if action not in {"release", "torture", "corpse", "living", "possess"}:
         raise ValueError("未知俘虏处置方式")
@@ -233,10 +235,8 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
         if rng.random() < chance:
             player.prisoners.remove(target)
             host = enter_host_body(player, target)
-            npc = deps._find_npc(game, str(target.get("npc_id") or target.get("id", "")))
-            if npc:
-                npc.alive = False
-                npc.death_reason = f"被{player.name}夺舍，原神魂不复存在"
+            kill_person(game, target.get("npc_id") or target["id"],
+                        f"被{player.name}夺舍，原神魂不复存在")
             game.encounter_npc_cache = [
                 row for row in game.encounter_npc_cache
                 if str(row.get("id")) != str(target.get("npc_id") or target.get("id", ""))
@@ -248,8 +248,8 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
     elif action == "release":
         if disciple:
             raise ValueError("弟子不能通过俘虏释放")
-        player.prisoners.remove(target)
         deps._restore_captive_npc(game, target, affinity_gain=10)
+        player.prisoners.remove(target)
         emit(game, "captive.released", target_id=target_id)
         result, summary = "released", f"你解开禁制释放{name}，其好感有所回升。"
     elif action == "torture":
@@ -273,16 +273,8 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
 
 
 def _restore_captive_npc(deps: CaptivityDependencies, game: GameState, target: dict[str, Any], affinity_gain: float) -> None:
-    npc = deps._find_npc(game, str(target.get("npc_id", "")))
-    if npc:
-        from ..owned_training import facts
-        trained = facts(target)
-        for key in ("realm_index", "layer", "body_training", "immortal_body_level", "divine_sense_rank"):
-            if key in trained:
-                setattr(npc, key, trained[key])
-        npc.alive = True
-        npc.death_reason = None
-        npc.affinity = float(target.get("affinity", 0)) + affinity_gain
+    release_person(game, target.get("npc_id") or target["id"],
+                   affinity=float(target.get("affinity", 0)) + affinity_gain)
 
 
 def _convert_to_puppet(
@@ -302,10 +294,8 @@ def _convert_to_puppet(
     if rng.random() >= chance:
         target["affinity"] = affinity - 15
         if kind == "corpse":
-            npc = deps._find_npc(game, str(target.get("npc_id") or target.get("id", "")))
-            if npc:
-                npc.alive = False
-                npc.death_reason = f"被{player.name}炼尸失败，形神俱灭"
+            kill_person(game, target.get("npc_id") or target["id"],
+                        f"被{player.name}炼尸失败，形神俱灭")
             deps._remove_conversion_target(player, target, disciple)
             return "destroyed", f"你炼制{target['name']}失败，其形神俱灭（成功率 {chance:.0%}）。"
         return "resisted", f"{target['name']}挣脱了活傀标记，好感 -15（成功率 {chance:.0%}）。"
@@ -326,6 +316,7 @@ def _convert_to_puppet(
         "control": round(control, 1), "cultivation_progress": 0.0, "breakthrough_bonus": 0.0,
         "created_age": player.age, "last_infusion_age": None, "alive": True,
         "source": str(target.get("source", "combat")),
+        "source_npc_id": str(target.get("npc_id") or target["id"]),
     }
     player.puppets.append(puppet)
     source = str(target.get("source", ""))
@@ -333,10 +324,11 @@ def _convert_to_puppet(
         player.milestones["companion_turned_corpse"] = 1
     elif kind == "corpse" and source == "relationship:master":
         player.milestones["master_turned_corpse"] = 1
-    npc = deps._find_npc(game, str(target.get("npc_id") or target.get("id", "")))
-    if npc:
-        npc.alive = False
-        npc.death_reason = f"被{player.name}炼为{PUPPET_NAMES[kind]}"
+    if kind == "living":
+        game.detain_person(target, kind="living_puppet")
+    else:
+        kill_person(game, target.get("npc_id") or target["id"],
+                    f"被{player.name}炼为{PUPPET_NAMES[kind]}")
     deps._remove_conversion_target(player, target, disciple)
     return "created", f"{target['name']}已被炼成{PUPPET_NAMES[kind]}，继承 {inherited:.0%} 战力（成功率 {chance:.0%}）。"
 

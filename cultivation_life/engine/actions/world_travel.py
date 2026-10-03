@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...npc_custody import is_free, retire_owned_people
 from ...relationship_records import RelationshipRecord
 from ...system.combat.npc_lifecycle import move_world
 
@@ -69,6 +71,7 @@ def _prepare_permanent_world_transition(
         "concubines": len(player.concubines),
     }
     player.puppets = []
+    retire_owned_people(game)
     player.prisoners = []
     player.concubines = []
     player.concubine_status = None
@@ -199,7 +202,7 @@ def begin_spirit_crossing(deps: WorldTravelDependencies, game_id: str) -> dict[s
     player.spirit_realm_attempted = True
     companion = player.dao_companion
     can_cross_together = bool(
-        companion and companion.get("alive", True)
+        companion and is_free(companion)
         and companion.get("world", player.world) == "human"
         and int(companion.get("realm_index", -1)) == 5
         and int(companion.get("layer", 99)) <= 3

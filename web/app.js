@@ -602,7 +602,7 @@ function render(data) {
   const companionCanCross = canNormalCross && data.dao_companion?.alive && data.dao_companion.world === 'human'
     && data.dao_companion.realm_index === 5 && data.dao_companion.layer <= 3;
   const crossingFriends = canNormalCross ? (data.dao_friends || []).filter(friend =>
-    friend.alive && friend.world === 'human' && friend.realm_index === p.realm_index
+    isFreeRelationship(friend) && friend.world === 'human' && friend.realm_index === p.realm_index
   ) : [];
   crossing.classList.toggle('hidden', !canCross);
   crossing.dataset.operation = canCelestialCross ? 'celestial-ascension' : canAsuraCross ? 'asura-ascension' : 'spirit-crossing';
@@ -3353,17 +3353,28 @@ function renderSettings(settings) {
   if (autoWar) autoWar.checked = !!settings.auto_advance_player_wars;
 }
 
+function isFreeRelationship(person) {
+  return person?.alive !== false && (person?.roster_state || 'active') === 'active';
+}
+
+function relationshipStateLabel(person) {
+  if (person.alive === false) return '（已故）';
+  if (person.roster_state === 'held') return '（受控）';
+  if (person.roster_state === 'retired') return '（已离册）';
+  return '';
+}
+
 function renderRelationships(master, disciples, requests, inventory, techniques) {
   const list = $('#relationship-list'); list.innerHTML = '';
   const append = (role, person) => {
     const row = document.createElement('div'); row.className = 'relationship-row';
     if (!person.alive) row.classList.add('fallen');
-    const name = document.createElement('b'); name.textContent = `${role} · ${person.name}${person.alive ? '' : '（已故）'}`;
+    const name = document.createElement('b'); name.textContent = `${role} · ${person.name}${relationshipStateLabel(person)}`;
     const detail = document.createElement('small');
     detail.textContent = `${person.gender_name || '性别未明'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan == null ? '无尽' : person.lifespan} · ${person.source === 'event' ? '游历结缘' : '宗门结缘'}`;
     row.append(name, detail);
-    if (role === '师父' && person.alive) row.appendChild(masterActions(person));
-    if (role === '弟子' && person.alive) row.appendChild(discipleActions(person));
+    if (role === '师父' && isFreeRelationship(person)) row.appendChild(masterActions(person));
+    if (role === '弟子' && isFreeRelationship(person)) row.appendChild(discipleActions(person));
     list.appendChild(row);
   };
   if (master) append('师父', master);
@@ -3374,7 +3385,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const detail = document.createElement('small'); detail.textContent = `${person.realm_name} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan}`;
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     actions.append(
-      interactionButton('收入门下', '1', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
+      interactionButton('收入门下', isFreeRelationship(person) ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
       interactionButton('婉拒', '1', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:false})),
     );
     row.append(name, detail, actions); list.appendChild(row);
@@ -3447,7 +3458,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
   }
   const row = document.createElement('div'); row.className = `companion-row${companion.alive ? '' : ' fallen'}`;
   const same = companion.same_cultivation ? ` · 同法同境，突破 +${percent(companion.breakthrough_bonus)}` : '';
-  row.innerHTML = htmlText`<b>${companion.name}${companion.alive ? '' : '（已故）'}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
+  row.innerHTML = htmlText`<b>${companion.name}${relationshipStateLabel(companion)}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
   if (game?.player?.guaranteed_progeny) {
     const medicine = document.createElement('p'); medicine.className = 'section-note';
     medicine.textContent = '英姿神武药力：下一次有效缠绵100%有后代，必为单灵根或变异灵根，无视境界不育。';
@@ -3458,7 +3469,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
     medicine.textContent = `孕育药力：下一次缠绵的后代概率 +${percent(conceptionBonus)}`;
     row.appendChild(medicine);
   }
-  if (companion.alive && companion.world === game.player.world) {
+  if (isFreeRelationship(companion) && companion.world === game.player.world) {
     const actions = document.createElement('div'); actions.className = 'companion-tools';
     const last = companion.last_interactions || {};
     actions.append(
@@ -3520,8 +3531,8 @@ function renderDaoFriends(friends) {
   friends.forEach(friend => {
     const row = document.createElement('div'); row.className = `friend-row${friend.alive ? '' : ' fallen'}`;
     const status = friend.alive ? (friend.world === game.player.world ? '' : ` · 身在${friend.world === 'spirit' ? '灵界' : '人界'}`) : ` · ${friend.death_reason || '已经陨落'}`;
-    row.innerHTML = htmlText`<b>${friend.name}${friend.alive ? '' : '（已故）'}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
-    if (friend.alive && friend.world === game.player.world) {
+    row.innerHTML = htmlText`<b>${friend.name}${relationshipStateLabel(friend)}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
+    if (isFreeRelationship(friend) && friend.world === game.player.world) {
       const tools = document.createElement('div'); tools.className = 'friend-tools';
       const last = friend.last_interactions || {};
       const add = (label, action, available = true) => {
@@ -3619,7 +3630,7 @@ function renderConcubines(system) {
     const row = document.createElement('div'); row.className = 'concubine-row';
     const life = person.lifespan == null ? '无尽' : person.lifespan;
     const whereabouts = !person.alive ? ` · ${person.death_reason || '已经陨落'}` : person.same_world ? '' : ' · 身处其他界面';
-    row.innerHTML = htmlText`<b>${person.name}${person.alive ? '' : '（已故）'}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
+    row.innerHTML = htmlText`<b>${person.name}${relationshipStateLabel(person)}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
     cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});

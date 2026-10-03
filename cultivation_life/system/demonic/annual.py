@@ -1,6 +1,8 @@
 """Explicit demonic annual operations; callers own composition."""
 from __future__ import annotations
 
+from ...npc_custody import settle_puppet_person
+
 import random
 
 from ...models import GameState, HistoryRecord
@@ -13,11 +15,11 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
     rules = deps._demonic_rules()
     for puppet in player.puppets:
         kind = str(puppet.get("type"))
-        if kind in {"corpse", "living"}:
+        if puppet.get("alive", True) and kind in {"corpse", "living"}:
             contribution = max(0.1, int(puppet.get("realm_index", 0)) * (0.16 if kind == "corpse" else 0.34))
             deps._add_opportunity(player, contribution)
     for puppet in list(player.puppets):
-        if puppet.get("type") != "living":
+        if not puppet.get("alive", True) or puppet.get("type") != "living":
             continue
         growth = 1 + int(puppet.get("realm_index", 0)) * 0.12
         puppet["control"] = max(0.0, float(puppet.get("control", 100)) - float(rules["living_control_loss_per_year"]) * growth)
@@ -26,6 +28,7 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
         chance = (25 - puppet["control"]) / 100 * 0.18
         if rng.random() >= chance:
             continue
+        settle_puppet_person(game, puppet, outcome="released")
         player.puppets.remove(puppet)
         ratio = float(puppet.get("combat_power", 0)) / max(1.0, combat_power(player))
         if ratio > 1.15 and rng.random() < min(0.85, 0.35 + (ratio - 1) * 0.25):

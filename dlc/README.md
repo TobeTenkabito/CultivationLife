@@ -1,5 +1,7 @@
 # DLC 内容包
 
+> 源码维护基线：本体 v1.56.2，2026-10-04；存档结构 7 支持 6→7，结构 1–5 不再加载。扩展版本以各包目录的 manifest.json 为准；旧档字段补全不扩大本体兼容范围。
+
 自本体 v1.34.0 起，官方 DLC 不再提供界面或地域地图；全部地理内容位于本体 `content/world.json` 与 `content/maps.json`。专属副本、剧情、道途与特色功能仍由各 DLC 独立提供。
 
 自本体 v1.38.0 起，通用功法、装备、法宝、丹药、药材、炼器及阵法材料、补灵根书卷及其常规交易来源也由本体提供。官方 DLC 负责专属功能与特殊剧情；剧情信物、鬼修魂器、夺舍专法、神机专材等特色系统必需品可留在包内。归墟副本宝池仍由 DLC 配置，但通用奖品引用本体定义，并可从本体市场获取；其条目归属为 `exclusive_source=base`。
@@ -49,3 +51,18 @@ dlc/
 扩展包的 `manifest.json` 不会被改写，更新或替换内容包时也不会丢失玩家选择。
 
 诸法无我：众生为镜 v1.0.0 在本体 v1.43.0 接入愿力、清净持守、涅槃与高阶弘法威慑。轮回界地图、宗门、商货和通用飞升入口属于本体，关闭 DLC 后仍然存在。
+
+## 当前官方包
+
+八个包的默认启用状态、加载次序和版本以清单为准。
+
+| 包 | 版本 | ID |
+| --- | --- | --- |
+| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.2.0 | `official.asura-manifestation` |
+| [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.0.0 | `official.buddhist-dharma` |
+| [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.8.0 | `official.ghost-reincarnation` |
+| [归墟之潮：九死一生](guixu-tide/README.md) | 2.6.0 | `official.guixu-tide` |
+| [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.3.0 | `official.intrigue-coalitions` |
+| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.14.0 | `official.monster-bloodlines` |
+| [圣人之道：内圣外王](sage-way/README.md) | 1.4.0 | `official.sage-way` |
+| [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.0 | `official.tianji-artifacts` |

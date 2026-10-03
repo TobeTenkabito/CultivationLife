@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...npc_custody import is_free
 from copy import deepcopy
 from ...system.combat.npc_lifecycle import initialize_native
 
@@ -83,10 +85,11 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
         raise ValueError("你已经建立修仙家族")
     independent = {npc.id:npc for sect in game.sects.values() for npc in sect.npcs}
     independent.update(game.notable_npcs)
+    independent.update(game.inactive_npcs)
     for child in player.offspring:
         if child.get('id') in independent:
             child.update(independent[child['id']].to_dict())
-    heirs = [child for child in player.offspring if child.get("alive", True) and child.get("cultivation_started")
+    heirs = [child for child in player.offspring if is_free(child) and child.get("cultivation_started")
              and child.get("world") == player.world and not child.get("family_traits", {}).get("expelled")]
     if not heirs:
         raise ValueError("至少要有一名拥有灵根并已经踏入仙途的后代，才能建立修仙家族")

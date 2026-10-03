@@ -1,5 +1,7 @@
 # 系统目录与兼容边界
 
+> 维护基线：本体 v1.56.2 开发源码，2026-10-04。当前结构 7 支持 6→7；文中各阶段测试数量为历史记录，最新执行结果见 [项目诊断](../../docs/project-diagnosis.md)。
+
 经济、交换会、神机、内政、炼器、阵法、归墟、战争及天庭／瑶池采用显式依赖的普通函数，原动态装配工具 `_assembly.py` 已删除。外部仍通过原来的 `*_system.py` 模块导入兼容类及模块级辅助函数。
 
 ## 已拆分的系统
@@ -21,7 +23,7 @@
 
 ## 关系人物的存储边界
 
-普通关系使用 `GameState.link_relationship` 关联 NPC，个人事实通过 `RelationshipRecord` 按 ID 读取和写回，显示名称只作为投影。事件生成人物在 `relationship_npcs` 中有权威记录，但保持原来的关系年度时序；正式加入自由名册时转移同一对象，不能重复推进。新存档结构为 7，纯文档的 6→7 迁移位于 `relationship_schema.py`。俘虏来源侍妾等特殊身份保留原生命周期，详细边界与验证见 `engine/README.md` 第 8 项。
+普通关系使用 `GameState.link_relationship` 关联 NPC，个人事实通过 `RelationshipRecord` 按 ID 读取和写回，显示名称只作为投影。事件生成人物在 `relationship_npcs` 中有权威记录，但保持原来的关系年度时序；正式加入自由名册时转移同一对象，不能重复推进。当前存档结构为 8，6→7 与 7→8 的纯迁移分别位于 `relationship_schema.py` 和 `npc_custody_schema.py`。俘虏与俘虏来源侍妾也按 NPC ID 关联 `inactive_npcs` 中的权威人物，转换由 `npc_custody.py` 管理；年度养成仍按原专用流程执行。详细边界见 [人物拘禁契约](../../docs/npc-custody.md)。
 
 ## 原模块继续负责兼容
 
@@ -92,7 +94,7 @@ python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.
 
 道统、融合、仙脉、仙体、仙窍也已改为普通函数，契约在 `cultivation_dependencies.py`。共享修持读取／提交位于 `cultivation_session.py`；仙体与融合只通过提交契约使用存档及呈现，不再反向依赖 `immortal_system.py`。元府及上界邻域操作仅获得读取、保存和呈现能力。原元力规则辅助函数仍从 `immortal_aperture.py` 兼容导出同一对象。
 
-地图旅行与传送函数分别保留在 `../map_runtime.py`、`teleport_system.py`，公共年度阶段及旅行后结算由引擎 `orchestration/world_time.py` 负责。原三组共 10 个 Mixin 均已离开引擎继承链；这些类本身不再提供兼容入口，外部使用 `GameEngine` 的既有方法。
+地图旅行与传送函数分别保留在 `../map_runtime.py`、`teleport_system.py`，公共年度阶段由引擎 `orchestration/world_time.py` 负责，年度收尾与旅行后单位结算复用根目录 `time_flow.py`。原三组共 10 个 Mixin 均已离开引擎继承链；这些类本身不再提供兼容入口，外部使用 `GameEngine` 的既有方法。
 
 - `npc_contacts.act` 接收 `NpcContactDependencies`，师徒操作由 `engine/composition/contacts.py` 注入，不再反向导入引擎动作实现。
 - `system/combat_adapter.py` 为引擎试炼和修罗王庭共用的战斗适配层，位于纯战斗规则目录 `combat/` 之外；旧 `engine/combat_capabilities.py` 仅兼容导出。

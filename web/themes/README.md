@@ -1,6 +1,6 @@
 # 六主题维护
 
-A（松烟书院）仅是后续新增功能的优先适配主题，其余主题可以暂缓新增适配；绝不能因此将 B–F 改造成 A 的视觉变体。六套主界面以 `design/main-ui-concepts-20260927-r3` 中各自的 SVG 为视觉基准。`common.css` 定义共享控件、侧栏与对话框，`composition.css` 定义六套原稿共用的文字层级和操作语义，`theme-composition.js` 为各主题独立排列已有节点；`a.css` 至 `f.css` 各自维护配色、主布局、装饰和动效。
+六套主题共享玩法并各自维护布局。新增公共交互应验证六主题及窄屏；不能将 B–F 改造成 A 的换色模板。六套主界面的原始设计来源是本机 `design/main-ui-concepts-20260927-r3`；该目录被 Git 忽略，干净检出不保证带有原稿，对照脚本需要自行具备该资源。`common.css` 定义共享控件、侧栏与对话框，`composition.css` 定义六套原稿共用的文字层级和操作语义，`theme-composition.js` 为各主题独立排列已有节点；`a.css` 至 `f.css` 各自维护配色、主布局、装饰和动效。
 
 新增功能窗口应使用 `--surface`、`--ink`、`--muted`、`--line`、`--pine`、`--on-accent` 等语义颜色；风险使用 `--cinnabar`，法力使用 `--info`。不要直接写白底、黑字或假定所有主题的强调色均为深色。DLC 侧栏使用 `data-dlc` 对应色相并保留标识。
 

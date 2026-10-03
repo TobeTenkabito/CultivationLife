@@ -13,12 +13,13 @@ from .relationship_schema import (
     LIST_RELATIONS,
     PERSON_FIELDS,
     SINGLE_RELATIONS,
-    independent_captive,
     person_seed,
 )
 
 
 def find_person(game, identity, *, include_inactive=False):
+    if identity in game.inactive_npcs:
+        return game.inactive_npcs[identity]
     if game.family and not game.family.extinct:
         npc = next((npc for npc in game.family.npcs if npc.id == identity), None)
         if npc is not None:
@@ -173,7 +174,7 @@ def bind_relationships(game, npc_type, *, labels=None):
     for field in LIST_RELATIONS:
         rows = getattr(game.player, field)
         for index, row in enumerate(rows):
-            if row and not independent_captive(field, row):
+            if row:
                 linked = bind_relationship(game, row, npc_type, labels=labels)
                 changed = changed or linked is not row
                 rows[index] = linked

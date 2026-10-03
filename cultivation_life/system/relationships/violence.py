@@ -1,6 +1,9 @@
 """Explicit relationships violence operations; callers own composition."""
 from __future__ import annotations
 
+from ...npc_custody import is_free
+from ...relationship_records import find_person
+
 from ...models import HistoryRecord
 from ...rules import expected_combat_power
 from ...runtime import decode_rng, encode_rng, now_iso
@@ -31,10 +34,12 @@ def relationship_violence(deps: RelationshipViolenceDependencies, game_id, kind,
     if not person or not person.get("alive", True) or person.get("world", player.world) != player.world:
         raise ValueError("此人不在身边或已经陨落")
     npc_id = str(person.get("npc_id") or person["id"])
-    npc = deps._find_npc(game, npc_id)
+    npc = find_person(game, npc_id)
     # Captivity removes an NPC from the free population, but does not kill them.
     bound = kind == "captive" or (kind == "concubine" and person.get("source") == "captive")
-    if npc and (npc.world != player.world or (not npc.alive and not bound)):
+    if not bound and not is_free(person):
+        raise ValueError("此人已退出自由活动名册")
+    if npc and (npc.world != player.world or not npc.alive):
         raise ValueError("此人不在当前界面或已经陨落")
     rng = decode_rng(game.seed, game.rng_state)
     rank = npc.realm_index if npc and not bound else int(person.get("realm_index", 1))

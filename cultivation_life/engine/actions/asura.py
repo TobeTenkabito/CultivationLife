@@ -1,5 +1,6 @@
 """Asura commands with explicit dependencies and unchanged save/RNG ordering."""
 import copy
+from ...npc_custody import kill_person, settle_puppet_person
 
 from ...models import HistoryRecord
 from ...runtime import decode_rng, encode_rng, now_iso
@@ -98,8 +99,10 @@ def _asura_cultivate(deps: AsuraActionDependencies, game, action, target_id, bod
         facts['power'] = asura.body_power(facts)
         s['bodies'].append(facts)
         if body in p.prisoners:
+            kill_person(game, body.get("npc_id") or body["id"], "被凝练为修罗肉身")
             p.prisoners.remove(body)
         else:
+            settle_puppet_person(game, body, outcome="dead", reason="被凝练为修罗肉身")
             p.puppets.remove(body)
         return f'{facts["name"]}凝练完成，肉身战力 {facts["power"]:.0f}，等待融合。'
     if action == 'fuse':
