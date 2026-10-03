@@ -56,13 +56,20 @@ def copyGamePython = tasks.register('copyGamePython', Sync) {
     into layout.buildDirectory.dir('generated/gamePython')
 }
 def prepareGameAssets = tasks.register('prepareGameAssets', Exec) {
+    dependsOn copyGamePython
     inputs.files(fileTree(new File(gameRoot, 'web')), fileTree(new File(gameRoot, 'content')),
                  fileTree(new File(gameRoot, 'dlc')), fileTree('src/main/mobile'),
-                 new File(gameRoot, 'scripts/prepare_android_assets.py'), new File(gameRoot, 'scripts/android_css.py'))
+                 fileTree(new File(gameRoot, 'cultivation_life')) { exclude '**/__pycache__/**', '**/*.pyc', '**/*.pyo' },
+                 fileTree('src/main') { exclude '**/__pycache__/**', '**/*.pyc', '**/*.pyo' },
+                 buildFile, rootProject.buildFile, new File(rootProject.projectDir, 'settings.gradle'),
+                 new File(rootProject.projectDir, 'gradle.properties'),
+                 new File(gameRoot, 'scripts/prepare_android_assets.py'), new File(gameRoot, 'scripts/android_css.py'),
+                 new File(gameRoot, 'scripts/android_provenance.py'))
     outputs.dir layout.buildDirectory.dir('generated/gameAssets')
     commandLine(System.getenv('CULTIVATION_BUILD_PYTHON') ?: 'python',
                 new File(gameRoot, 'scripts/prepare_android_assets.py'),
-                layout.buildDirectory.dir('generated/gameAssets').get().asFile)
+                layout.buildDirectory.dir('generated/gameAssets').get().asFile,
+                layout.buildDirectory.dir('generated/gamePython').get().asFile)
 }
 tasks.configureEach {
     if (name.startsWith('merge') && name.endsWith('PythonSources')) dependsOn copyGamePython

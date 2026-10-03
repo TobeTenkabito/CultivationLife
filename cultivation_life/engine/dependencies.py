@@ -1,6 +1,13 @@
 """Explicit, narrow dependency contracts for engine domain functions."""
 from __future__ import annotations
 
+from ..system.court.dependencies import (
+    CourtStateDependencies,
+    CourtGovernanceDependencies,
+    CourtLifecycleDependencies,
+    YaochiDependencies,
+)
+
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -986,6 +993,10 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    court_state: CourtStateDependencies
+    court_governance: CourtGovernanceDependencies
+    court_lifecycle: CourtLifecycleDependencies
+    court_yaochi: YaochiDependencies
     npc_contacts: NpcContactDependencies
     asura_actions: AsuraActionDependencies
     asura_trials: AsuraTrialDependencies

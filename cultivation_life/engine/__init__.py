@@ -21,8 +21,6 @@ from ..achievements import AchievementSystem, load_achievement_definitions
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..system.war_system import WarSystemMixin
 from ..system.upper_institutions import UpperInstitutionMixin
-from ..system.heavenly_court_system import HeavenlyCourtSystemMixin
-from ..system.yaochi_system import YaochiMixin
 from ..system.natal_artifact_system import NatalArtifactSystemMixin
 from ..system.crafting_system import CraftingSystemMixin
 from ..system.formation_system import FormationSystemMixin
@@ -64,10 +62,14 @@ from .presentation import world as world_view
 from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 from .transactions import serialized_commands
+from ..system.court import state as court_state
+from ..system.court import governance as court_governance
+from ..system.court import lifecycle as court_lifecycle
+from ..system.court import yaochi as court_yaochi
 
 
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -1090,3 +1092,119 @@ class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, Relati
 
     def _vassal_transfer_candidates(self, game: GameState, kind: str, own_id: str, target_id: str, relation: dict[str, Any]) -> list[dict[str, Any]]:
         return faction_view._vassal_transfer_candidates(self._dependencies.faction_view, game, kind, own_id, target_id, relation)
+
+    @staticmethod
+    def _court_config() -> dict[str, Any]:
+        return court_state._court_config()
+
+    @staticmethod
+    def _court_grade_for_realm(realm_index: int) -> int:
+        return court_state._court_grade_for_realm(realm_index)
+
+    def _ensure_heavenly_court(self, game: GameState, rng: Any) -> bool:
+        return court_state._ensure_heavenly_court(self._dependencies.court_state, game, rng)
+
+    def _player_court_representative(self, game: GameState) -> bool:
+        return court_state._player_court_representative(self._dependencies.court_state, game)
+
+    def _sync_player_court_identity(self, game: GameState) -> None:
+        return court_state._sync_player_court_identity(self._dependencies.court_state, game)
+
+    @staticmethod
+    def _court_holder_ids(court: dict[str, Any]) -> list[str]:
+        return court_state._court_holder_ids(court)
+
+    @staticmethod
+    def _court_player_controls(court: dict[str, Any]) -> int:
+        return court_state._court_player_controls(court)
+
+    def _court_open_election(self, game: GameState, office_id: str, rng: Any) -> None:
+        return court_state._court_open_election(self._dependencies.court_state, game, office_id, rng)
+
+    def _court_open_next_queued_election(self, game: GameState, rng: Any) -> None:
+        return court_state._court_open_next_queued_election(self._dependencies.court_state, game, rng)
+
+    def _court_resolve_election_round(
+        self, game: GameState, rng: Any, method: str, pledge_id: str,
+    ) -> tuple[bool, str]:
+        return court_state._court_resolve_election_round(self._dependencies.court_state, game, rng, method, pledge_id)
+
+    def _advance_heavenly_court_unit(self, game: GameState, rng: Any) -> list[str]:
+        return court_state._advance_heavenly_court_unit(self._dependencies.court_state, game, rng)
+
+    def resolve_heavenly_election(self, game_id: str, method: str = "none", pledge_id: str = "") -> dict[str, Any]:
+        return court_state.resolve_heavenly_election(self._dependencies.court_state, game_id, method, pledge_id)
+
+    @staticmethod
+    def _court_honor_pledge(court: dict[str, Any], kind: str, policy_id: str) -> None:
+        return court_state._court_honor_pledge(court, kind, policy_id)
+
+    def heavenly_court_action(
+        self, game_id: str, action: str, target_id: str = "", enact: bool | None = None,
+        influence_spend: int = 0,
+    ) -> dict[str, Any]:
+        return court_state.heavenly_court_action(self._dependencies.court_state, game_id, action, target_id, enact, influence_spend)
+
+    def _court_examination(self, game: GameState, rng: Any) -> tuple[str, str]:
+        return court_state._court_examination(self._dependencies.court_state, game, rng)
+
+    def _court_enact_decree(
+        self, game: GameState, decree_id: str, target_id: str, rng: Any, influence_spend: int = 0, *, actor_id: str = "player",
+    ) -> tuple[str, str]:
+        return court_state._court_enact_decree(self._dependencies.court_state, game, decree_id, target_id, rng, influence_spend, actor_id=actor_id)
+
+    def _court_vote_law(
+        self, game: GameState, law_id: str, enact: bool | None, rng: Any, influence_spend: int = 0, *, actor_id: str = "player",
+    ) -> tuple[str, str]:
+        return court_state._court_vote_law(self._dependencies.court_state, game, law_id, enact, rng, influence_spend, actor_id=actor_id)
+
+    def _court_spend_influence(self, game: GameState, requested: int) -> int:
+        return court_state._court_spend_influence(self._dependencies.court_state, game, requested)
+
+    def _add_court_merit(self, game: GameState, amount: int) -> str:
+        return court_state._add_court_merit(self._dependencies.court_state, game, amount)
+
+    def _public_heavenly_court(self, game: GameState) -> dict[str, Any]:
+        return court_state._public_heavenly_court(self._dependencies.court_state, game)
+
+    def _court_law_active(self, game: GameState, law_id: str) -> bool:
+        return court_state._court_law_active(self._dependencies.court_state, game, law_id)
+
+    def _court_retire_unavailable(self, game):
+        return court_governance._court_retire_unavailable(self._dependencies.court_governance, game)
+
+    def _court_autonomous_votes(self, court, actor_id, law_id, desired, rng):
+        return court_governance._court_autonomous_votes(self._dependencies.court_governance, court, actor_id, law_id, desired, rng)
+
+    def _court_govern(self, game, rng):
+        return court_governance._court_govern(self._dependencies.court_governance, game, rng)
+
+    def _court_conflicts(self, law_id):
+        return court_lifecycle._court_conflicts(self._dependencies.court_lifecycle, law_id)
+
+    def _court_normalize(self, game):
+        return court_lifecycle._court_normalize(self._dependencies.court_lifecycle, game)
+
+    def _court_prune_decrees(self, court):
+        return court_lifecycle._court_prune_decrees(self._dependencies.court_lifecycle, court)
+
+    def _court_finish_unattended(self, game, rng):
+        return court_lifecycle._court_finish_unattended(self._dependencies.court_lifecycle, game, rng)
+
+    def _court_schedule_elections(self, game, rng):
+        return court_lifecycle._court_schedule_elections(self._dependencies.court_lifecycle, game, rng)
+
+    def _court_pay_stipend(self, game):
+        return court_lifecycle._court_pay_stipend(self._dependencies.court_lifecycle, game)
+
+    def _begin_yaochi_action(self, game, action):
+        return court_yaochi._begin_yaochi_action(self._dependencies.court_yaochi, game, action)
+
+    def _finish_yaochi_action(self, game, action, elapsed):
+        return court_yaochi._finish_yaochi_action(self._dependencies.court_yaochi, game, action, elapsed)
+
+    def yaochi_action(self, game_id, action, target_id='', amount=1):
+        return court_yaochi.yaochi_action(self._dependencies.court_yaochi, game_id, action, target_id, amount)
+
+    def _public_yaochi(self, game):
+        return court_yaochi._public_yaochi(self._dependencies.court_yaochi, game)

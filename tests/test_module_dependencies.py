@@ -64,7 +64,7 @@ def global_names(code):
             yield from global_names(child)
 
 
-@pytest.mark.parametrize('area', ['economy', 'tianji', 'intrigue'])
+@pytest.mark.parametrize('area', ['economy', 'tianji', 'intrigue', 'court'])
 def test_system_algorithms_use_real_module_globals_and_declared_collaborators(area):
     checked = []
     for path in (ROOT / 'cultivation_life/system' / area).glob('*.py'):
@@ -78,6 +78,8 @@ def test_system_algorithms_use_real_module_globals_and_declared_collaborators(ar
             assert not {'GameEngine', 'EconomySystemMixin', 'TianjiSystemMixin', 'IntrigueSystemMixin'} & vars(module).keys()
             for symbol in global_names(function.__code__):
                 assert symbol in vars(module) or hasattr(builtins, symbol), (name, symbol)
+            if 'deps' not in inspect.signature(function).parameters:
+                continue  # Pure court helpers take data rather than collaborators.
             contract = get_type_hints(function)['deps']
             declared = {f.name for f in fields(contract)}
             declared.update(k for k, v in vars(contract).items() if isinstance(v, property))

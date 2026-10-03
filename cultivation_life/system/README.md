@@ -9,6 +9,7 @@
 | `economy/` | `market.py` 坊市与通用价格；`spirit_fields.py` 灵田；`arts.py` 技艺经验与炼丹；`auctions.py` 拍卖；`private_trade.py` 私下交易；`black_market.py` 黑市购买与出售；`treasure.py` 探宝 |
 | `tianji/` | `generation.py` 神机生成；`state.py` 状态补全与名称迁移；`intelligence.py` 情报与交互；`forging.py` 材料、货架与炼制；`npcs.py` NPC 持有与掉落；`presentation.py` 展示与调试信息 |
 | `intrigue/` | `state.py` 内政状态与人物性格；`governance.py` 职位、权限与人事；`guests.py` 客卿；`recruitment.py` 招募；`resolutions.py` 议案；`runtime.py` 监禁同步与周期更新；`presentation.py` 展示 |
+| `court/` | `state.py` 天庭状态与操作；`governance.py` 政务；`lifecycle.py` 任期与俸禄；`yaochi.py` 瑶池操作；四组依赖契约与显式装配 |
 
 ## 原模块继续负责兼容
 
@@ -16,7 +17,15 @@
 - `tianji_system.py` 保留 `TianjiSystemMixin`、生成版本、常量和全部模块级辅助函数。
 - `intrigue_system.py` 保留 `IntrigueSystemMixin`、常量、模块级辅助函数，以及默认参数引用 `PLAYER_ID` 的权限判断方法。
 
-没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。其他玩法的继承关系保持原样。
+经济、神机与内政阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续天庭与瑶池阶段移除两个直接基类，其余基类的相对顺序保持原样。
+
+## 天庭与瑶池的组合式接入
+
+`court/` 将原有 34 个方法改为普通函数，29 个通过四组冻结依赖契约调用协作能力，5 个静态辅助函数直接调用。算法不接收整个引擎，也不反向导入装配模块或旧 Mixin 入口。引擎显式声明转发方法，保留原签名、默认值及静态方法性质。
+
+`heavenly_court_system.py`、`court_governance.py`、`court_lifecycle.py` 与 `yaochi_system.py` 保留薄兼容类，支持原有独立消费者；引擎不再继承这些类。瑶池模块级规则移到 `yaochi_rules.py`，旧路径导出同一函数对象。回调和存档 getter 在调用时查找当前实例，构造后替换方法或资源继续生效。其他规则符号应在实际定义或使用模块维护。
+
+`tests/test_court_dependencies.py` 覆盖独立依赖调用、方法与资源替换、旧瑶池消费者以及禁止反向导入；`tests/test_module_dependencies.py` 检查算法全局引用和契约完整性。天庭与瑶池新增 78 个固定种子回放检查点，覆盖锁货、购买、兑换、俸禄和任期推进；迁移前后返回数据、存档及随机数状态一致。
 
 ## 经济系统的显式依赖
 
@@ -43,7 +52,7 @@
 - `combat_rule_schema.py` 统一定义新版战斗规则常量和校验，战斗执行器与旧血脉规则均依赖它；旧 `combat_rule_engine.validate_rule` 保留同一函数的兼容导出。
 - `tutorial_mentorship.py` 负责师缘条件、状态和操作；教程入口与操作教学共同调用它。师缘操作不再为了判定拜师条件调用完整教学展示。旧教程入口保留 `blocked_reason`、`mentor_action` 与 `MENTOR_STEP` 导出。
 
-新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；当前 217 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
+新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；当前 225 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
 
 ## 战斗共用规则与状态
 

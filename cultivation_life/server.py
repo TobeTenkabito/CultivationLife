@@ -51,14 +51,26 @@ def local_request(command):
     @wraps(command)
     def run(handler):
         handler.request_id = uuid.uuid4().hex
+        handler._pending_json = None
+        handler._defer_json = False
         try:
             handler._validate_request()
+            if handler.command == 'POST':
+                handler._request_payload = handler._body()
             # Guards, migration reads, save import/export and command execution
             # must share one transaction, including API GETs which can migrate.
             if urlparse(handler.path).path.startswith('/api/'):
-                with request_scope(ENGINE):
-                    return command(handler)
-            return command(handler)
+                handler._defer_json = True
+                try:
+                    with request_scope(ENGINE):
+                        command(handler)
+                finally:
+                    handler._defer_json = False
+                if handler._pending_json is not None:
+                    body, status = handler._pending_json
+                    handler._send_json(body, status)
+            else:
+                return command(handler)
         except ConnectionError:
             # The browser can close or navigate away while a request completes.
             return
@@ -76,6 +88,7 @@ def finite_json_number(value: str) -> float:
 
 class Handler(BaseHTTPRequestHandler):
     server_version = f"CultivationLife/{BASE_GAME_VERSION}"
+    timeout = 15
 
     def _validate_request(self) -> None:
         host = self.headers.get('Host', '')
@@ -153,7 +166,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         try:
-            payload = self._body()
+            payload = self._request_payload
             if path.startswith("/api/save-transfer/"):
                 operation = path.rsplit('/', 1)[-1]
                 if operation == 'export':
@@ -618,7 +631,10 @@ class Handler(BaseHTTPRequestHandler):
             raise ValueError("请求体过大")
         if not length:
             return {}
-        data = json.loads(self.rfile.read(length).decode("utf-8"),
+        raw = self.rfile.read(length)
+        if len(raw) != length:
+            raise ValueError("请求体不完整")
+        data = json.loads(raw.decode("utf-8"),
                           parse_float=finite_json_number, parse_constant=finite_json_number)
         if not isinstance(data, dict):
             raise ValueError("请求必须为对象")
@@ -626,6 +642,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def _json(self, data: object, status: HTTPStatus = HTTPStatus.OK) -> None:
         body = json.dumps(data, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        if getattr(self, '_defer_json', False):
+            self._pending_json = (body, status)
+            return
+        self._send_json(body, status)
+
+    def _send_json(self, body: bytes, status: HTTPStatus) -> None:
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -660,6 +682,9 @@ class Handler(BaseHTTPRequestHandler):
             status, code = HTTPStatus.FORBIDDEN, 'forbidden'
         elif isinstance(error, NotFoundError):
             status, code = HTTPStatus.NOT_FOUND, 'not_found'
+        elif isinstance(error, TimeoutError):
+            self.close_connection = True
+            status, code = HTTPStatus.REQUEST_TIMEOUT, 'request_timeout'
         elif isinstance(error, ValueError):
             status, code = HTTPStatus.BAD_REQUEST, 'invalid_request'
         else:

@@ -4,7 +4,6 @@ import io
 import json
 import re
 import runpy
-import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -13,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.android_css import compile_css
 from scripts.release_evidence import require
+from scripts.android_provenance import validate_apk_inputs
 VERSION = runpy.run_path(str(ROOT / 'cultivation_life/version.py'))['BASE_GAME_VERSION']
 RELEASE_ID = VERSION.replace('.', '')
 VERSION_CODE = int(re.search(r'versionCode (\d+)', (ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
@@ -40,9 +40,10 @@ def main():
     require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.', 'Android release lint must pass')
     require('Quick-start regression passed' in log(f'quick-start-ui-{RELEASE_ID}.log'), 'Quick-start UI checks must pass')
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
-    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    apk_bytes = source.read_bytes()
+    digest = hashlib.sha256(apk_bytes).hexdigest()
     require(digest in log(f'android-installed-sha256-{RELEASE_ID}.log').lower(), 'APK hash must match the installed and tested APK')
-    with zipfile.ZipFile(source) as apk:
+    with zipfile.ZipFile(io.BytesIO(apk_bytes)) as apk:
         require(apk.testzip() is None, 'APK ZIP integrity check failed')
         for abi in ('arm64-v8a', 'x86_64'):
             require(f'lib/{abi}/libpython3.13.so' in apk.namelist(), f'Missing Python library for {abi}')
@@ -65,8 +66,9 @@ def main():
             require(len(manifests) == len(list((ROOT/'dlc').glob('*/manifest.json'))), 'Packaged DLC manifest count differs from source')
             dlcs = {n.split('/')[1]: json.loads(assets.read(n))['version'] for n in manifests}
             require(not any(n.startswith('data/') for n in assets.namelist()), 'Player data must not be included in the APK')
+        provenance = validate_apk_inputs(ROOT, apk)
     target = ROOT/f'dist/浮生问道-v{VERSION}-Android12.apk'
-    shutil.copy2(source, target)
+    target.write_bytes(apk_bytes)
     report = ROOT/f'dist/release-{ANDROID_VERSION}.json'
     manifest = {
         'base_version': VERSION, 'android_version': ANDROID_VERSION, 'version_code': VERSION_CODE,
@@ -74,6 +76,7 @@ def main():
         'included_abis': ['arm64-v8a', 'x86_64'], 'tested_android': 'Android 12 / API 31',
         'tested_abi': 'x86_64', 'physical_device_tested': False,
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
+        'inputs_sha256': hashlib.sha256(json.dumps(provenance['inputs'], sort_keys=True).encode()).hexdigest(),
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': 5,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': ['Six-theme portrait and landscape: independent Asura panels and puppet workshop, perspective contour illustrations, 27 live meridian nodes, DLC colors, native vein opening and power acquisition, back and persistence verified', 'Base upper-world voisinages without Asura DLC: native acquisition, nine-level growth, six-theme UI, persisted selection and energy verified', 'Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified', 'Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified', 'Institution classification, legacy affiliation, six-theme map and institutional contacts verified', f'{passed.group(1)} Python regressions passed',
