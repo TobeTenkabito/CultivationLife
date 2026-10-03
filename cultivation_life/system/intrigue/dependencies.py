@@ -9,6 +9,7 @@ from ...ports import SavePort
 @dataclass(frozen=True, slots=True)
 class IntrigueGovernanceDependencies:
     _get_PLAYER_ID: Callable[[], Any]
+    _intrigue_decision_threshold: Callable[..., Any]
     _actual_player_realm: Callable[..., Any]
     _ensure_intrigue_faction: Callable[..., Any]
     _intrigue_enabled: Callable[..., Any]

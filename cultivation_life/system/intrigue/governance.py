@@ -215,3 +215,28 @@ def _intrigue_pressure_position_occupied(deps: IntrigueGovernanceDependencies, g
     specs = deps._intrigue_position_specs("sect")
     relevant = [pid for pid, spec in specs.items() if pid not in {"leader", "guest_elder"} and game.player.realm_index >= int(spec.get("minimum_realm", 0))]
     return any(record.get("positions", {}).get(pid) for pid in relevant)
+
+
+def _intrigue_has_decision_authority(
+    deps: IntrigueGovernanceDependencies, game: GameState, kind: str,
+    faction_id: str, member_id: str,
+) -> bool:
+    threshold = deps._intrigue_decision_threshold(kind)
+    if member_id == deps.PLAYER_ID:
+        own_id = deps._intrigue_player_faction_id(game, kind)
+        realm_index, _ = deps._actual_player_realm(game.player)
+        entity = deps._intrigue_entity(game, kind, faction_id)
+        same_world = not entity or entity.world == game.player.world
+        return bool(
+            own_id == faction_id
+            and same_world
+            and game.player.alive
+            and realm_index >= threshold
+        )
+    npc = deps._intrigue_find_npc(game, member_id)
+    return bool(
+        npc
+        and npc.alive
+        and npc.realm_index >= threshold
+        and not deps._intrigue_is_imprisoned(game, npc.id)
+    )

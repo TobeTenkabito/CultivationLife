@@ -222,61 +222,83 @@ def _tianji_effect_description(effect: dict[str, Any]) -> str:
     return f"{prefix}{body}。"
 
 
+def _tianji_tag_similarity(
+    required: dict[str, float], supplied: dict[str, float]
+) -> float:
+    if not required or not supplied:
+        return 0.0
+    shared = set(required).intersection(supplied)
+    if not shared:
+        return 0.0
+    numerator = sum(
+        min(float(required[key]), float(supplied[key])) for key in shared
+    )
+    denominator = max(1e-9, sum(float(value) for value in required.values()))
+    return min(1.0, numerator / denominator)
+
+
+def _tianji_closeness_factor(closeness: float) -> float:
+    points = (
+        (0.0, 0.15),
+        (0.2, 0.30),
+        (0.4, 0.55),
+        (0.6, 0.80),
+        (0.8, 1.0),
+        (1.0, 1.20),
+    )
+    value = max(0.0, min(1.0, closeness))
+    for (left_x, left_y), (right_x, right_y) in zip(points, points[1:]):
+        if value <= right_x:
+            progress = (value - left_x) / max(0.0001, right_x - left_x)
+            return left_y + (right_y - left_y) * progress
+    return 1.20
+
+
+def _tianji_public_effect(effect: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": str(effect["name"]),
+        "description": _tianji_effect_description(effect),
+        "trigger": str(effect.get("trigger", "combat_start")),
+        "replica_scaling": str(effect.get("replica_scaling", "numeric")),
+    }
+
+
+def _tianji_config() -> dict[str, Any]:
+    return tianji_config()
+
+
+def _tianji_artifact(state: dict[str, Any], artifact_id: str) -> dict[str, Any]:
+    artifact = next(
+        (row for row in state.get("artifacts", []) if row.get("id") == artifact_id),
+        None,
+    )
+    if not artifact:
+        raise ValueError("天工神机榜中没有这件法宝")
+    return artifact
+
+
 class TianjiSystemMixin:
     @staticmethod
     def _tianji_tag_similarity(
         required: dict[str, float], supplied: dict[str, float]
     ) -> float:
-        if not required or not supplied:
-            return 0.0
-        shared = set(required).intersection(supplied)
-        if not shared:
-            return 0.0
-        numerator = sum(
-            min(float(required[key]), float(supplied[key])) for key in shared
-        )
-        denominator = max(1e-9, sum(float(value) for value in required.values()))
-        return min(1.0, numerator / denominator)
+        return _tianji_tag_similarity(required, supplied)
 
     @staticmethod
     def _tianji_closeness_factor(closeness: float) -> float:
-        points = (
-            (0.0, 0.15),
-            (0.2, 0.30),
-            (0.4, 0.55),
-            (0.6, 0.80),
-            (0.8, 1.0),
-            (1.0, 1.20),
-        )
-        value = max(0.0, min(1.0, closeness))
-        for (left_x, left_y), (right_x, right_y) in zip(points, points[1:]):
-            if value <= right_x:
-                progress = (value - left_x) / max(0.0001, right_x - left_x)
-                return left_y + (right_y - left_y) * progress
-        return 1.20
+        return _tianji_closeness_factor(closeness)
 
     @staticmethod
     def _tianji_public_effect(effect: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "name": str(effect["name"]),
-            "description": _tianji_effect_description(effect),
-            "trigger": str(effect.get("trigger", "combat_start")),
-            "replica_scaling": str(effect.get("replica_scaling", "numeric")),
-        }
+        return _tianji_public_effect(effect)
 
     @staticmethod
     def _tianji_config() -> dict[str, Any]:
-        return tianji_config()
+        return _tianji_config()
 
     @staticmethod
     def _tianji_artifact(state: dict[str, Any], artifact_id: str) -> dict[str, Any]:
-        artifact = next(
-            (row for row in state.get("artifacts", []) if row.get("id") == artifact_id),
-            None,
-        )
-        if not artifact:
-            raise ValueError("天工神机榜中没有这件法宝")
-        return artifact
+        return _tianji_artifact(state, artifact_id)
 
     @cached_property
     def _tianji_dependencies(self):

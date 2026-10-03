@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Callable
 
 from .dependencies import EngineDependencies, NpcClassDependencies
 from ..system.court import wiring as court_wiring
-from .composition import actions, asura, combat, contacts, events, lifecycle, presentation, world
+from .composition import actions, asura, combat, contacts, events, lifecycle, presentation, systems, world
 
 if TYPE_CHECKING:
     from . import GameEngine
@@ -16,6 +16,8 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        tianji=systems.bind_tianji_dependencies(engine),
+        intrigue=systems.bind_intrigue_dependencies(engine),
         court_state=court_wiring.bind_state(engine),
         court_governance=court_wiring.bind_governance(engine),
         court_lifecycle=court_wiring.bind_lifecycle(engine),
