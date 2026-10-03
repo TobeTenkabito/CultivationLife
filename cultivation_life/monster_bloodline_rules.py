@@ -313,7 +313,7 @@ def validate_generated_trait(rule: Any) -> list[str]:
         # Schema-v2 is the shared combat-rule language used by theme-first
         # systems.  Keep this compatibility entry point for callers and mods
         # that historically validated every generated rule here.
-        from .combat_rule_engine import validate_rule
+        from .combat_rule_schema import validate_rule
         return validate_rule(rule)
     reasons: list[str] = []
     if not isinstance(rule, dict):

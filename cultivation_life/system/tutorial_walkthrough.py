@@ -70,7 +70,7 @@ def public_guide(game):
     # No catalog scans or NPC traversal when the guide is off.
     art = lesson_art(game) if active and STEPS[index] in {'treasure', 'equip', 'art_result'} else None
     reason = blocked(game) if active else ''
-    from .tutorial_system import blocked_reason
+    from .tutorial_mentorship import blocked_reason
     mentor_reason = blocked_reason(game) if active and STEPS[index] in {'meet', 'mentor_choice'} else ''
     if state.get('mentor_result'):
         mentor_reason = '你已结算过这份师缘，这次只回顾师徒关系。'
@@ -136,7 +136,7 @@ def perform_guide(engine, game, action, expected, target_id=None):
             raise ValueError('当前尚未到师缘这一步')
         if info['mentor_reason']:
             raise ValueError(info['mentor_reason'])
-        from .tutorial_system import mentor_action
+        from .tutorial_mentorship import mentor_action
         state['step'] = 6
         mentor_action(engine, game, {'guide_meet':'offer_mentor','guide_accept':'accept_mentor','guide_decline':'decline_mentor'}[action])
         summary = '你遇到结丹后期的沈照尘，请在事件中亲自作出选择。' if action == 'guide_meet' else ('沈照尘已收你为徒。' if action == 'guide_accept' else '你谢过师缘，日后仍可另寻师承。')

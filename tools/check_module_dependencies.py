@@ -88,16 +88,27 @@ def violations(edges):
         system_to_engine = (source.startswith('cultivation_life.system.')
                             and source != 'cultivation_life.system.asura_system'
                             and (target == 'cultivation_life.engine' or target.startswith('cultivation_life.engine.')))
-        economy_to_facade = (source.startswith('cultivation_life.system.economy.')
-                             and target == 'cultivation_life.system.economy_system')
-        domain_to_wiring = (source.startswith('cultivation_life.system.economy.')
-                            and source != 'cultivation_life.system.economy.wiring'
-                            and target == 'cultivation_life.system.economy.wiring')
+        domain_to_facade = any(
+            source.startswith(f'cultivation_life.system.{area}.')
+            and target == f'cultivation_life.system.{area}_system'
+            for area in ('economy', 'tianji', 'intrigue'))
+        domain_to_wiring = any(
+            source.startswith(f'cultivation_life.system.{area}.')
+            and source != f'cultivation_life.system.{area}.wiring'
+            and target == f'cultivation_life.system.{area}.wiring'
+            for area in ('economy', 'tianji', 'intrigue'))
         shared_definition_cycle = (source, target) in {
             ('cultivation_life.system.doctrine.effects', 'cultivation_life.system.doctrine.generation'),
             ('cultivation_life.system.merchant_commission_system', 'cultivation_life.system.merchant_system'),
+            ('cultivation_life.monster_bloodline_rules', 'cultivation_life.combat_rule_engine'),
+            ('cultivation_life.system.tutorial_walkthrough', 'cultivation_life.system.tutorial_system'),
         }
-        if system_to_engine or economy_to_facade or domain_to_wiring or shared_definition_cycle:
+        shared_to_consumer = (
+            source == 'cultivation_life.combat_rule_schema'
+            and target in {'cultivation_life.combat_rule_engine', 'cultivation_life.monster_bloodline_rules'}
+            or source == 'cultivation_life.system.tutorial_mentorship'
+            and target in {'cultivation_life.system.tutorial_system', 'cultivation_life.system.tutorial_walkthrough'})
+        if system_to_engine or domain_to_facade or domain_to_wiring or shared_definition_cycle or shared_to_consumer:
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 
