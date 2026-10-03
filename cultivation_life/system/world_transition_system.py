@@ -4,6 +4,7 @@ No DLC, merchant or engine imports. Business entry points authorize their own
 costs/trials. Direction describes geography, never permission or cleanup.
 """
 from __future__ import annotations
+from ..relationship_records import RelationshipRecord, find_person
 
 import copy
 from dataclasses import dataclass
@@ -209,28 +210,32 @@ class EntourageManifest:
 
     def commit(self, game, destination, *, move_npc=None):
         player = game.player
-        people = [*game.world_npcs.values(), *game.notable_npcs.values(),
-                  *(npc for sect in game.sects.values() for npc in sect.npcs),
-                  *(game.family.npcs if game.family else [])]
         records = [*player.dao_friends, *([player.dao_companion] if player.dao_companion else [])]
+        settled = set()
         for npc_id, alive, reason in self.snapshots:
+            if npc_id in settled:
+                continue
+            settled.add(npc_id)
+            # Bound relationship views already write to the NPC. Only legacy
+            # temporary dictionaries need their own update alongside the person.
             for row in records:
-                if str(row.get("id")) == npc_id:
-                    if alive:
-                        if move_npc:
-                            move_npc(row, destination, player.age)
-                        else:
-                            row["world"] = destination
+                if str(row.get("id")) != npc_id or isinstance(row, RelationshipRecord):
+                    continue
+                if alive:
+                    if move_npc:
+                        move_npc(row, destination, player.age)
                     else:
-                        row.update(alive=False, death_reason=reason)
-            for npc in people:
-                if npc.id == npc_id:
-                    if alive:
-                        if move_npc:
-                            move_npc(npc, destination, player.age)
-                        else:
-                            npc.world = destination
-                        npc.departed_age, npc.departure_reason = npc.age, reason
+                        row["world"] = destination
+                else:
+                    row.update(alive=False, death_reason=reason)
+            npc = find_person(game, npc_id, include_inactive=True)
+            if npc is not None:
+                if alive:
+                    if move_npc:
+                        move_npc(npc, destination, player.age)
                     else:
-                        npc.alive, npc.death_reason = False, reason
+                        npc.world = destination
+                    npc.departed_age, npc.departure_reason = npc.age, reason
+                else:
+                    npc.alive, npc.death_reason = False, reason
         return self.companion_kept, set(self.survivor_ids)

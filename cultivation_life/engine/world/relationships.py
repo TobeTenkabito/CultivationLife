@@ -1,20 +1,22 @@
 from __future__ import annotations
-from ...system.combat.npc_lifecycle import initialize_native
 
 import copy
 import random
 import uuid
 from typing import Any
+
 from ...content_registry import (
-    PATH_NAMES,
-    ROOT_DEFINITIONS,
-    REALMS,
-    RACE_DEFINITIONS,
-    WORLD_SYSTEMS,
     MONSTER_BLOODLINE_SETTINGS,
     MONSTER_SPECIES,
+    PATH_NAMES,
+    RACE_DEFINITIONS,
+    REALMS,
+    ROOT_DEFINITIONS,
+    WORLD_SYSTEMS,
 )
-from ...models import GameState, HistoryRecord, Player, SectNpc, SectState
+from ...models import GameState, HistoryRecord, Player, SectNpc
+from ...relationship_records import bind_relationships
+from ...system.combat.npc_lifecycle import initialize_native
 from ...system.concubine_system import gender_name
 from ..dependencies import RelationshipDependencies
 
@@ -40,7 +42,7 @@ def _party_crossing_candidate(deps: RelationshipDependencies, game: GameState, n
     player = game.player
     npc = deps._find_npc(game, npc_id)
     relation = next((entry for entry in [player.dao_companion, *player.dao_friends] if entry and str(entry.get("id")) == npc_id), None)
-    source = relation or (npc.to_dict() if npc else None)
+    source = npc.to_dict() if npc else relation
     if not source or not source.get("alive", True) or source.get("world") != player.world:
         return None
     requirements = {
@@ -64,6 +66,11 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
     from ...system.npc_social import instantiate_social
     existing = deps._find_npc(game, str(relation.get("id", "")))
     if existing:
+        if existing.id in game.relationship_npcs:
+            game.notable_npcs[existing.id] = game.relationship_npcs.pop(existing.id)
+            existing.title = reason
+            existing.treasure_item_id = next(iter(relation.get('items', {})), None)
+            relation['source'] = 'world'
         instantiate_social(game, existing)
         return existing
     npc = SectNpc(
@@ -96,10 +103,10 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
 def _adjust_person_affinity(deps: RelationshipDependencies, game: GameState, npc_id: str, delta: float) -> float:
     from ...system.npc_social import instantiate_social
     npc = deps._find_npc(game, npc_id)
-    if npc:
+    if npc and npc_id not in game.relationship_npcs:
         instantiate_social(game, npc)
     relation = next((entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
-    base = float(relation.get("affinity", 0)) if relation else float(npc.affinity or 0) if npc else 0.0
+    base = float(npc.affinity or 0) if npc else float(relation.get("affinity", 0)) if relation else 0.0
     value = base + deps._sage_affinity_gain(game.player, delta)
     if npc:
         npc.affinity = value
@@ -564,67 +571,25 @@ def _generated_relationship(deps: RelationshipDependencies, player: Player, role
 
 
 def _sync_relationship_records(deps: RelationshipDependencies, game: GameState) -> bool:
-    """补齐旧存档字段，并让宗门师徒信息跟随真实 NPC。"""
-    changed = False
-    relations = [entry for entry in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.concubines, *game.player.disciples, *game.player.disciple_requests] if entry]
-    for relation in relations:
-        if relation in game.player.concubines and relation.get("source") == "captive":
+    """Bind identity references and defaults; never copy NPC facts into records."""
+    def labels(npc):
+        return {
+            'realm_name': deps._npc_realm_name(npc),
+            'spirit_root_name': deps._npc_root_name(npc.spirit_root),
+            'path_name': PATH_NAMES.get(npc.path, npc.path),
+            'race_name': RACE_DEFINITIONS.get(npc.race, {'name': npc.race})['name'],
+            'gender_name': gender_name(npc.gender),
+        }
+    changed = bind_relationships(game, SectNpc, labels=labels)
+    for row in [game.player.master, game.player.dao_companion, *game.player.dao_friends,
+                *game.player.concubines, *game.player.disciples, *game.player.disciple_requests]:
+        if not row:
             continue
-        before = copy.deepcopy(relation)
-        source = relation.get("source", "event")
-        npc = deps._find_npc(game, str(relation.get("npc_id") or relation.get("id")))
-        if not npc and source not in {"world", "event", "captive", "relationship"}:
-            npc = next((entry for entry in game.sects.get(source, SectState(source, "")).npcs if entry.id == relation.get("id")), None)
-        if npc:
-            relation.update(
-                realm_index=npc.realm_index, layer=npc.layer, realm_name=deps._npc_realm_name(npc),
-                age=npc.age, lifespan=npc.lifespan, alive=npc.alive, death_reason=npc.death_reason,
-                spirit_root=npc.spirit_root, spirit_root_name=deps._npc_root_name(npc.spirit_root),
-                cultivation_progress=npc.cultivation_progress,
-                path=npc.path, path_name=PATH_NAMES.get(npc.path, npc.path), race=npc.race,
-                race_name=RACE_DEFINITIONS.get(npc.race, {"name": npc.race})["name"], world=npc.world,
-                affinity=npc.affinity if npc.affinity is not None else relation.get("affinity", 20.0),
-                next_tribulation_age=npc.next_tribulation_age,
-                tribulation_count=npc.tribulation_count,
-                tribulation_power=npc.tribulation_power,
-            )
-        else:
-            realm_index = int(relation.get("realm_index", 0))
-            age = int(relation.get("age", {0: 30, 1: 50, 2: 120, 3: 300, 4: 800, 5: 1800}.get(realm_index, 30)))
-            span = REALMS[realm_index].lifespan
-            relation.setdefault("age", age)
-            relation.setdefault("lifespan", max(age + 1, span[1]) if span else None)
-            relation.setdefault("alive", True)
-            relation.setdefault("death_reason", None)
-            relation.setdefault(
-                "spirit_root",
-                deps._random_npc_root(realm_index, random.Random(f"relation:{relation.get('id', '')}"))
-                if realm_index > 0 else "none",
-            )
-            relation.setdefault("cultivation_progress", 0.0)
-            relation.setdefault("path", "dao")
-            relation.setdefault("race", "human")
-            relation.setdefault("world", "human")
-            shell = SectNpc(
-                str(relation.get("id", "relation")), str(relation.get("name", "无名")), "",
-                realm_index, int(relation.get("layer", 1)), age, int(relation.get("lifespan") or age + 1),
-                path=str(relation.get("path", "dao")),
-            )
-            relation["realm_name"] = deps._npc_realm_name(shell)
-            relation["spirit_root_name"] = deps._npc_root_name(relation["spirit_root"])
-            relation["path_name"] = PATH_NAMES.get(relation["path"], relation["path"])
-            relation["race_name"] = RACE_DEFINITIONS.get(relation["race"], {"name": relation["race"]})["name"]
-        relation.setdefault("items", {})
-        relation.setdefault("techniques", [])
-        relation.setdefault("last_requests", {})
-        relation.setdefault("last_interactions", {})
-        relation.setdefault("affinity", 20.0)
-        relation.setdefault("main_technique_id", None)
-        relation.setdefault("breakthrough_bonus", 0.0)
-        relation.setdefault("next_tribulation_age", None)
-        relation.setdefault("tribulation_count", 0)
-        relation.setdefault("tribulation_power", None)
-        changed = changed or relation != before
+        for key, value in {'items': {}, 'techniques': [], 'last_requests': {},
+                           'last_interactions': {}, 'breakthrough_bonus': 0.0}.items():
+            if key not in row:
+                row[key] = value
+                changed = True
     return changed
 
 
@@ -635,9 +600,14 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     event_relations = [
         entry for entry in [player.master, player.dao_companion, *player.dao_friends, *player.concubines, *player.disciples, *player.disciple_requests]
         if entry and ((entry in player.concubines and entry.get("source") == "captive")
+                      or str(entry.get("npc_id") or entry.get("id", "")) in game.relationship_npcs
                       or not deps._find_npc(game, str(entry.get("npc_id") or entry.get("id", ""))))
     ]
+    seen = set()
     for relation in event_relations:
+        if relation["id"] in seen:
+            continue
+        seen.add(relation["id"])
         if not relation.get("alive", True):
             continue
         relation["age"] = int(relation.get("age", 0)) + 1
@@ -702,6 +672,7 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
 
 def _sync_party_state(deps: RelationshipDependencies, game: GameState) -> bool:
     """Discard references that can no longer represent an active companion."""
+    relationships_changed = deps._sync_relationship_records(game)
     valid: list[dict[str, Any]] = []
     seen: set[str] = set()
     for reference in game.player.party:
@@ -715,14 +686,14 @@ def _sync_party_state(deps: RelationshipDependencies, game: GameState) -> bool:
         npc = deps._find_npc(game, npc_id)
         relation = next((entry for entry in [game.player.master, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == npc_id), None)
         available = bool(
-            (npc and npc.alive and npc.world == game.player.world)
-            or (relation and relation.get("alive", True) and relation.get("world") == game.player.world)
+            npc.alive and npc.world == game.player.world if npc else
+            relation and relation.get("alive", True) and relation.get("world") == game.player.world
         )
         if not npc_id or npc_id in seen or not available:
             continue
         seen.add(npc_id)
         valid.append({"id": npc_id})
     if valid == game.player.party:
-        return False
+        return relationships_changed
     game.player.party = valid
     return True

@@ -6,6 +6,8 @@ from typing import Any
 
 from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION
+from .relationship_schema import normalize_relationship_document
+from .relationship_records import bind_relationship, bind_relationships
 
 
 @dataclass(frozen=True)
@@ -851,6 +853,7 @@ class GameState:
     world_npcs: dict[str, SectNpc] = field(default_factory=dict)
     world_npc_template_ages: dict[str, int] = field(default_factory=dict)
     notable_npcs: dict[str, SectNpc] = field(default_factory=dict)
+    relationship_npcs: dict[str, SectNpc] = field(default_factory=dict)
     encounter_npc_cache: list[dict[str, Any]] = field(default_factory=list)
     race_relations: dict[str, dict[str, Any]] = field(default_factory=dict)
     sect_relations: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -915,9 +918,13 @@ class GameState:
     def __post_init__(self):
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
+        bind_relationships(self, SectNpc)
+
+    def link_relationship(self, seed):
+        return bind_relationship(self, seed, SectNpc)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        document = {
             "id": self.id,
             "seed": self.seed,
             "voisinage_schema": 1,
@@ -931,6 +938,7 @@ class GameState:
             "world_npcs": {npc_id: npc.to_dict() for npc_id, npc in self.world_npcs.items()},
             "world_npc_template_ages": self.world_npc_template_ages,
             "notable_npcs": {npc_id: npc.to_dict() for npc_id, npc in self.notable_npcs.items()},
+            "relationship_npcs": {key: npc.to_dict() for key, npc in self.relationship_npcs.items()},
             "encounter_npc_cache": self.encounter_npc_cache,
             "race_relations": self.race_relations,
             "sect_relations": self.sect_relations,
@@ -974,6 +982,18 @@ class GameState:
             "version": self.version,
         }
 
+        normalize_relationship_document(document)
+        return document
+
+    def __deepcopy__(self, memo):
+        # Preview clones must not run document decoding or session preparation.
+        clone = object.__new__(type(self))
+        memo[id(self)] = clone
+        for key, value in self.__dict__.items():
+            setattr(clone, key, copy.deepcopy(value, memo))
+        bind_relationships(clone, SectNpc, labels=getattr(self, '_relationship_labels', None))
+        return clone
+
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
         if not value.get("voisinage_schema"):
@@ -992,6 +1012,7 @@ class GameState:
             world_npcs={npc_id: SectNpc.from_dict(npc) for npc_id, npc in value.get("world_npcs", {}).items()},
             world_npc_template_ages={str(npc_id): int(age) for npc_id, age in value.get("world_npc_template_ages", {}).items()},
             notable_npcs={npc_id: SectNpc.from_dict(npc) for npc_id, npc in value.get("notable_npcs", {}).items()},
+            relationship_npcs={key: SectNpc.from_dict(npc) for key, npc in value.get("relationship_npcs", {}).items()},
             encounter_npc_cache=list(value.get("encounter_npc_cache", [])),
             race_relations=dict(value.get("race_relations", {})),
             sect_relations=dict(value.get("sect_relations", {})),

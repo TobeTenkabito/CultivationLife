@@ -164,7 +164,8 @@ def violations(edges):
             and source != 'cultivation_life.system.court.wiring'
             and target in COURT_FACADES | {'cultivation_life.system.court.wiring'})
         schema_to_runtime = (source == 'cultivation_life.save_schema'
-                             and target.startswith('cultivation_life.'))
+                             and target.startswith('cultivation_life.')
+                             and target != 'cultivation_life.relationship_schema')
         preparation_to_storage = (source.startswith('cultivation_life.engine.persistence.')
                                   and target in {'cultivation_life.storage', 'cultivation_life.save_transfer',
                                                  'cultivation_life.engine', 'cultivation_life.engine.wiring',
@@ -204,10 +205,21 @@ def violations(edges):
             and target.startswith('cultivation_life.system.ghost.')
             or source == 'cultivation_life.system.buddhist.rules'
             and target.startswith('cultivation_life.system.buddhist.'))
+        time_flow_reverse_import = (
+            source == 'cultivation_life.time_flow'
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.models', 'cultivation_life.time_dependencies'})
+        relationship_storage_reverse_import = (
+            source == 'cultivation_life.relationship_schema'
+            and target.startswith('cultivation_life.')
+            or source == 'cultivation_life.relationship_records'
+            and target.startswith('cultivation_life.')
+            and target != 'cultivation_life.relationship_schema')
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
-                or three_group_reverse_import or key_flow_reverse_import):
+                or three_group_reverse_import or key_flow_reverse_import or time_flow_reverse_import
+                or relationship_storage_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 

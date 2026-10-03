@@ -8,6 +8,7 @@ from ...models import GameState
 from ...system.possession_system import current_body_age
 from ...system.semantic_events import emit
 from ...time_dependencies import ElapsedTravelDependencies, WorldYearDependencies
+from ...time_flow import TRAVEL_TIME, completed_action_units, settle_elapsed_time
 
 
 def _advance_world_year(
@@ -58,20 +59,8 @@ def _finish_travel_time(deps: ElapsedTravelDependencies, game, start_age, instit
         advance_time(game, elapsed, institution_unit)
     if elapsed:
         time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
-        completed_units = max(1, (elapsed + time_unit - 1) // time_unit)
-        for _ in range(completed_units):
-            era_news.extend(deps._advance_diplomacy_unit(game, rng))
-            deps._advance_concubine_aftermath(game, rng)
-            era_news.extend(deps._advance_heavenly_court_unit(game, rng))
-            era_news.extend(deps._advance_intrigue_unit(game, rng))
-        artifact_news = deps._advance_natal_artifact(game, "travel", completed_units)
-        if artifact_news:
-            era_news.append(artifact_news)
-        deps._advance_concubine_status(game, completed_units)
-        deps._advance_player_bounties(game, rng)
-        if elapsed >= 5:
-            deps._record_era_summary(game, start_age, era_news)
-        if player.alive:
-            deps._advance_auction_clock(game, rng)
-            deps._advance_exchange_clock(game, rng)
-
+        settle_elapsed_time(
+            deps, game, rng, era_news, action="travel",
+            units=completed_action_units(elapsed, time_unit), start_age=start_age,
+            policy=TRAVEL_TIME, elapsed_years=elapsed,
+        )

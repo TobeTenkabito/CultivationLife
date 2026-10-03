@@ -275,7 +275,9 @@ def _public_party(deps: CharacterViewDependencies, game: GameState) -> list[dict
             continue
         npc = deps._find_npc(game, str(reference.get("id", "")))
         relation = next((entry for entry in [game.player.master, *game.player.dao_friends, *game.player.disciples] if entry and str(entry.get("id")) == str(reference.get("id"))), None)
-        if npc and npc.alive and npc.world == game.player.world:
+        if npc and (not npc.alive or npc.world != game.player.world):
+            continue
+        if npc and npc.id not in game.relationship_npcs:
             perception = deps._npc_cultivation_perception(game, npc)
             row = {
                 "id": npc.id, "name": npc.name,

@@ -132,11 +132,11 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         path=npc.path, race=npc.race, world=npc.world,
     )
     if accepted and role == "master":
-        player.master = relation
+        player.master = game.link_relationship(relation)
         summary = f"{npc.name}认可了你的心性与根基，正式收你为徒。"
         result = "master_accepted"
     elif accepted:
-        player.disciples.append(relation)
+        player.disciples.append(game.link_relationship(relation))
         emit(game, "disciple.recruited", target_id=relation["id"])
         summary = f"{npc.name}愿执弟子礼，正式拜入你的门下。"
         result = "disciple_accepted"
@@ -169,7 +169,7 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
         raise ValueError(f"当前最多记录{max_disciples}名弟子")
     player.disciple_requests.remove(request)
     if accept:
-        player.disciples.append(request)
+        player.disciples.append(game.link_relationship(request))
         emit(game, "disciple.recruited", target_id=request["id"])
         result = "disciple_accepted"
         summary = f"你亲自收下{request['name']}的拜师帖，正式将其收入门下。"
@@ -347,6 +347,7 @@ def manage_dao_companion(
                 npc.path, npc.race, npc.world,
                 main_technique_id=deps._default_npc_main_technique(npc), affinity=npc.affinity,
             )
+            player.dao_companion = game.link_relationship(player.dao_companion)
             result, summary = "companion_joined", f"{npc.name}应下誓约，与你结为道侣（同意率 {chance:.0%}）。"
     else:
         if not companion:
@@ -483,7 +484,7 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
                 npc.alive,npc.death_reason,npc.spirit_root,npc.cultivation_progress,
                 npc.path,npc.race,npc.world,main_technique_id=deps._default_npc_main_technique(npc),affinity=npc.affinity or 0,
             )
-            player.dao_friends.append(friend)
+            player.dao_friends.append(game.link_relationship(friend))
             result, summary = "friend_joined", f"{npc.name}与你交换信符，自此以道友相称。"
     else:
         if not friend or not friend.get("alive", True) or friend.get("world") != player.world:

@@ -19,6 +19,7 @@ from ...rules import (
     technique_scale,
 )
 from ...simulation import ActionUnitLedger
+from ...time_flow import ACTION_TIME, advance_elapsed_year, completed_action_units, settle_elapsed_time
 from ...runtime import decode_rng, encode_rng, now_iso
 from ...system.crafting_system import crafted_artifact_bonuses
 from ...system.possession_system import advance_player_age, current_body_age
@@ -141,10 +142,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
                 total_fame_reduction += reduction
             if action == "rest" and player.heart_demon > 0:
                 player.heart_demon = max(0.0, player.heart_demon - 0.5)
-        continue_world = deps._advance_world_year(game, rng, era_news)
-        if player.alive:
-            deps._advance_soul_erosion_time(game, 1)
-        if not continue_world or not player.alive:
+        if not advance_elapsed_year(deps.year, game, rng, era_news):
             break
         if action == 'treasure' and (elapsed_index + 1) % time_unit == 0:
             # Selecting the reward is a manual event. Stop this batch before
@@ -190,53 +188,12 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         ))
         if action == "treasure":
             deps._queue_followup_event(game, deps._prepare_treasure_reward_event(game, rng))
-        completed_years = max(1, player.age - start_world_age)
-        completed_units = max(1, (completed_years + time_unit - 1) // time_unit)
-        artifact_news = deps._advance_natal_artifact(game, action, completed_units)
-        if artifact_news:
-            era_news.append(artifact_news)
-        for _ in range(completed_units):
-            era_news.extend(deps._advance_diplomacy_unit(game, rng))
-            deps._advance_concubine_aftermath(game, rng)
-            era_news.extend(deps._advance_heavenly_court_unit(game, rng))
-            era_news.extend(deps._advance_intrigue_unit(game, rng))
-            tianji_news = deps._maybe_tianji_intelligence_event(game, rng)
-            if tianji_news:
-                era_news.append(tianji_news)
-        drained = deps._advance_concubine_status(game, completed_units)
-        if drained:
-            era_news.append(f"{player.age}岁：侍妾名分被抽走机缘 {drained:.1f}")
-        deps._advance_player_bounties(game, rng)
-        if game.pending_event is None and player.ghost_captor:
-            deps._maybe_relationship_sanction(game, rng)
-        elif game.pending_event is None:
-            if deps._maybe_relationship_sanction(game, rng):
-                pass
-            elif deps._maybe_immortal_conversion_event(game, rng):
-                pass
-            elif deps._maybe_concubine_proposal(game, rng):
-                pass
-            elif deps._maybe_personal_revenge(game, rng):
-                pass
-            elif deps._maybe_probability_story_event(game, rng):
-                pass
-            elif deps._maybe_xiang_node_event(game, rng):
-                pass
-            elif deps._maybe_founded_sect_pressure(game, rng):
-                pass
-            elif deps._maybe_affinity_gift(game, rng):
-                pass
-            elif not deps._maybe_faction_event(game, rng):
-                event = deps._select_event(game, action, rng)
-                if event:
-                    game.pending_event = deps._instantiate_event(event, game, rng)
-        elapsed_years = player.age - start_world_age
-        if elapsed_years >= 5:
-            deps._record_era_summary(game, start_world_age, era_news)
-
-        for _ in range(completed_units):
-            deps._advance_auction_clock(game, rng)
-            deps._advance_exchange_clock(game, rng)
+        settle_elapsed_time(
+            deps.settlement, game, rng, era_news, action=action,
+            units=completed_action_units(max(1, player.age - start_world_age), time_unit),
+            start_age=start_world_age, policy=ACTION_TIME,
+            after_units=lambda: _finish_action_events(deps, game, action, rng),
+        )
 
     deps._finish_sage_action(game)
     # 坊市只在一次玩家操作结束时刷新。旧逻辑在大乘一次行动的 1000 个
@@ -248,6 +205,34 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     game.rng_state = encode_rng(rng)
     deps.store.save(game)
     return deps.present(game)
+
+
+def _finish_action_events(deps: AdvancementDependencies, game: GameState, action: str, rng: random.Random) -> None:
+    """Keep action-only event priority after unit settlement and before market clocks."""
+    player = game.player
+    if game.pending_event is None and player.ghost_captor:
+        deps._maybe_relationship_sanction(game, rng)
+    elif game.pending_event is None:
+        if deps._maybe_relationship_sanction(game, rng):
+            pass
+        elif deps._maybe_immortal_conversion_event(game, rng):
+            pass
+        elif deps._maybe_concubine_proposal(game, rng):
+            pass
+        elif deps._maybe_personal_revenge(game, rng):
+            pass
+        elif deps._maybe_probability_story_event(game, rng):
+            pass
+        elif deps._maybe_xiang_node_event(game, rng):
+            pass
+        elif deps._maybe_founded_sect_pressure(game, rng):
+            pass
+        elif deps._maybe_affinity_gift(game, rng):
+            pass
+        elif not deps._maybe_faction_event(game, rng):
+            event = deps._select_event(game, action, rng)
+            if event:
+                game.pending_event = deps._instantiate_event(event, game, rng)
 
 
 def _add_opportunity(

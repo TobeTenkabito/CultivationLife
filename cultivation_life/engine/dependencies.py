@@ -34,7 +34,7 @@ from ..system.ghost.dependencies import GhostFlowDependencies
 from ..system.demonic.dependencies import DemonicFlowDependencies
 from ..system.relationships.dependencies import RelationshipFlowDependencies
 from ..system.buddhist.dependencies import BuddhistFlowDependencies
-from ..time_dependencies import TimeDependencies
+from ..time_dependencies import ElapsedYearDependencies, TimeSettlementDependencies, TimeDependencies
 from ..system.merchant.dependencies import MerchantDependencies
 from ..system.cultivation_dependencies import CultivationDependencies
 
@@ -246,22 +246,13 @@ class SessionDependencies:
 
 @dataclass(frozen=True, slots=True)
 class AdvancementDependencies:
+    year: ElapsedYearDependencies
+    settlement: TimeSettlementDependencies
     _begin_doctrine_action: Callable[..., None]
     _begin_yaochi_action: Callable[..., None]
     _finish_yaochi_action: Callable[..., None]
     _finish_doctrine_action: Callable[..., None]
     _add_opportunity: Callable[..., float]
-    _advance_auction_clock: Callable[..., None]
-    _advance_concubine_aftermath: Callable[..., bool]
-    _advance_concubine_status: Callable[..., float]
-    _advance_diplomacy_unit: Callable[..., list[str]]
-    _advance_exchange_clock: Callable[..., Any]
-    _advance_heavenly_court_unit: Callable[..., list[str]]
-    _advance_intrigue_unit: Callable[..., list[str]]
-    _advance_natal_artifact: Callable[..., str | None]
-    _advance_player_bounties: Callable[..., None]
-    _advance_soul_erosion_time: Callable[..., bool]
-    _advance_world_year: Callable[..., bool]
     _apply_action_resources: Callable[..., None]
     _body_progress_required: Callable[..., float]
     _body_training_step: Callable[..., float]
@@ -283,13 +274,11 @@ class AdvancementDependencies:
     _maybe_personal_revenge: Callable[..., bool]
     _maybe_probability_story_event: Callable[..., bool]
     _maybe_relationship_sanction: Callable[..., bool]
-    _maybe_tianji_intelligence_event: Callable[..., str | None]
     _maybe_xiang_node_event: Callable[..., bool]
     _personal_combat_step: Callable[..., str]
     _prepare_sage_action: Callable[..., None]
     _prepare_treasure_reward_event: Callable[..., dict[str, Any]]
     _queue_followup_event: Callable[..., None]
-    _record_era_summary: Callable[..., None]
     _select_event: Callable[..., dict[str, Any] | None]
     _sense_training_step: Callable[..., float]
     _treasure_step: Callable[..., str]

@@ -1,9 +1,11 @@
 """Composition of time operations through explicit, late-bound ports."""
 from ...time_dependencies import (
     ElapsedTravelDependencies,
+    ElapsedYearDependencies,
     MapTravelDependencies,
     TeleportDependencies,
     TimeDependencies,
+    TimeSettlementDependencies,
     WorldYearDependencies,
 )
 
@@ -32,8 +34,7 @@ def bind_world_year(host) -> WorldYearDependencies:
 
 def bind_map_travel(host) -> MapTravelDependencies:
     return MapTravelDependencies(
-        _advance_soul_erosion_time=lambda *args, **kwargs: host._advance_soul_erosion_time(*args, **kwargs),
-        _advance_world_year=lambda *args, **kwargs: host._advance_world_year(*args, **kwargs),
+        year=bind_elapsed_year(host),
         _clear_market=lambda *args, **kwargs: host._clear_market(*args, **kwargs),
         _compact_world_history=lambda *args, **kwargs: host._compact_world_history(*args, **kwargs),
         _die=lambda *args, **kwargs: host._die(*args, **kwargs),
@@ -59,8 +60,18 @@ def bind_teleport(host) -> TeleportDependencies:
     )
 
 
-def bind_elapsed_travel(host) -> ElapsedTravelDependencies:
-    return ElapsedTravelDependencies(
+def bind_elapsed_year(host) -> ElapsedYearDependencies:
+    return ElapsedYearDependencies(
+        _advance_world_year=lambda *args, **kwargs: host._advance_world_year(*args, **kwargs),
+        _advance_soul_erosion_time=lambda *args, **kwargs: host._advance_soul_erosion_time(*args, **kwargs),
+    )
+
+
+def bind_settlement(host, *, travel: bool = False) -> TimeSettlementDependencies:
+    contract = ElapsedTravelDependencies if travel else TimeSettlementDependencies
+    return contract(
+        _maybe_tianji_intelligence_event=(None if travel else
+            lambda *args, **kwargs: host._maybe_tianji_intelligence_event(*args, **kwargs)),
         _advance_auction_clock=lambda *args, **kwargs: host._advance_auction_clock(*args, **kwargs),
         _advance_concubine_aftermath=lambda *args, **kwargs: host._advance_concubine_aftermath(*args, **kwargs),
         _advance_concubine_status=lambda *args, **kwargs: host._advance_concubine_status(*args, **kwargs),
@@ -72,6 +83,10 @@ def bind_elapsed_travel(host) -> ElapsedTravelDependencies:
         _advance_player_bounties=lambda *args, **kwargs: host._advance_player_bounties(*args, **kwargs),
         _record_era_summary=lambda *args, **kwargs: host._record_era_summary(*args, **kwargs),
     )
+
+
+def bind_elapsed_travel(host) -> ElapsedTravelDependencies:
+    return bind_settlement(host, travel=True)
 
 
 def bind_time(host) -> TimeDependencies:

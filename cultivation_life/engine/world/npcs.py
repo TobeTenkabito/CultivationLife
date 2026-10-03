@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...relationship_records import find_person
 
 from ...system.cultivation_policy import ordinary_upper
 from ...system.combat.npc_lifecycle import initialize_native
@@ -93,13 +94,8 @@ def _sect_members(deps: NpcDependencies, game: GameState, sect: SectState) -> li
 
 
 def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | None:
-    if game.family and not game.family.extinct:
-        member = next((npc for npc in game.family.npcs if npc.id == npc_id), None)
-        if member:
-            return member
-    existing = game.world_npcs.get(npc_id) or game.notable_npcs.get(npc_id) or next(
-        (npc for sect in game.sects.values() for npc in sect.npcs if npc.id == npc_id), None)
-    if existing:
+    existing = find_person(game, npc_id)
+    if existing is not None:
         return existing
     child = next((row for row in game.player.offspring if row.get("id") == npc_id), None)
     if child:

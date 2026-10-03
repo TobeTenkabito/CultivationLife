@@ -48,6 +48,7 @@ def test_every_reversible_route_preserves_resources_ties_and_canonical_seal(setu
     player.immortal_power_converted = True
     player.hp, player.mp = max_hp(player) * .41, max_mp(player) * .63
     player.dao_friends = [{"id": "friend", "world": player.world, "alive": True}]
+    original_friends = copy.deepcopy(player.dao_friends)
     before = copy.deepcopy(game.to_dict())
     plan = engine._plan_world_transition(game, route["destination"], "sealed_descent")
     assert game.to_dict() == before, "Planning must be pure"
@@ -57,7 +58,9 @@ def test_every_reversible_route_preserves_resources_ties_and_canonical_seal(setu
     assert (player.realm_index, player.layer) == (ceiling["realm_index"], ceiling["layer"])
     assert player.hp / max_hp(player) == pytest.approx(.41)
     assert player.mp / max_mp(player) == pytest.approx(.63)
-    assert player.dao_friends == before["player"]["dao_friends"]
+    assert player.dao_friends == original_friends
+    assert game.to_dict()["player"]["dao_friends"] == before["player"]["dao_friends"]
+    assert game.to_dict()["relationship_npcs"] == before["relationship_npcs"]
     player.age += 10
     player.hp, player.mp = max_hp(player) * .22, max_mp(player) * .19
     plan = engine._plan_world_transition(game, route["source"], "sealed_return")
@@ -66,7 +69,8 @@ def test_every_reversible_route_preserves_resources_ties_and_canonical_seal(setu
     assert player.lifespan == 98765 and player.next_tribulation_age == player.age + 47
     assert player.hp / max_hp(player) == pytest.approx(.22)
     assert player.mp / max_mp(player) == pytest.approx(.19)
-    assert player.dao_friends == before["player"]["dao_friends"]
+    assert player.dao_friends == original_friends
+    assert game.to_dict()["player"]["dao_friends"] == before["player"]["dao_friends"]
 
 
 def test_oldest_seal_returns_to_spirit_not_unrelated_hell(setup):

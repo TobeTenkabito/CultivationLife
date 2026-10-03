@@ -5,7 +5,7 @@ from ..rules import effective_fame, effective_sha_qi, effective_karma
 
 import copy
 from typing import Any
-from ..content_registry import ACTIONS, FACTION_DEFINITIONS, KARMA_FACTORS, REALMS, WORLD_SYSTEMS
+from ..content_registry import PATH_NAMES, RACE_DEFINITIONS, ROOT_DEFINITIONS, ACTIONS, FACTION_DEFINITIONS, KARMA_FACTORS, REALMS, WORLD_SYSTEMS
 from ..models import GameState, HistoryRecord, SectNpc
 from ..rules import (
     combat_power_assessment_value,
@@ -25,9 +25,23 @@ from ..system.upper_voisinage import public_upper_voisinages
 from ..system.combat_plan import public_plan
 from ..system.tutorial_system import public_tutorial
 from .dependencies import PresentationDependencies
+from ..relationship_records import RelationshipRecord
 
 
 def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
+    def relationship_labels(npc):
+        return {
+            'realm_name': deps._npc_realm_name(npc),
+            'spirit_root_name': ROOT_DEFINITIONS.get(npc.spirit_root, {'name': '灵根未明'})['name'],
+            'path_name': PATH_NAMES.get(npc.path, npc.path),
+            'race_name': RACE_DEFINITIONS.get(npc.race, {'name': npc.race})['name'],
+            'gender_name': gender_name(npc.gender),
+        }
+    game._relationship_labels = relationship_labels
+    for row in [game.player.master, game.player.dao_companion, *game.player.disciples,
+                *game.player.dao_friends, *game.player.concubines, *game.player.disciple_requests]:
+        if isinstance(row, RelationshipRecord):
+            row._labels = relationship_labels
     history = []
     for entry in reversed(game.history):
         if deps._history_visible_in_world(entry, game):

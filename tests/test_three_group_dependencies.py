@@ -221,7 +221,7 @@ def test_grouped_ports_remain_late_bound_and_cannot_gain_hidden_attributes(tmp_p
     assert cultivation.session._load('replacement') == 'replacement'
     assert cultivation.body.commit.store is cultivation.fusion.commit.store is replacement
     monkeypatch.setattr(engine, '_advance_world_year', lambda *args, **kwargs: 'replaced')
-    assert time.travel._advance_world_year(None) == merchant.work._advance_world_year(None) == 'replaced'
+    assert time.travel.year._advance_world_year(None) == merchant.work._advance_world_year(None) == 'replaced'
     with pytest.raises((FrozenInstanceError, TypeError, AttributeError)):
         cultivation.body.engine = engine
 

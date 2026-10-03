@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...relationship_records import RelationshipRecord
 from ...system.combat.npc_lifecycle import move_world
 
 from ...system.path_modifiers import modifier
@@ -117,7 +118,8 @@ def _resolve_selected_ascension_entourage(
         move_world(companion, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
         npc = deps._find_npc(game, str(companion.get("id", "")))
         if npc:
-            move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+            if not isinstance(companion, RelationshipRecord):
+                move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
             npc.departed_age = npc.age
             npc.departure_reason = f"与{player.name}共同飞升{WORLD_SYSTEMS['world_names'][destination]}"
     survivors: set[str] = set()
@@ -138,7 +140,8 @@ def _resolve_selected_ascension_entourage(
             survivors.add(npc_id)
             survivor_names.append(str(friend.get("name", candidate["name"])))
             if npc:
-                move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+                if not isinstance(friend, RelationshipRecord):
+                    move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                 npc.departed_age = npc.age
                 npc.departure_reason = f"与{player.name}共同飞升{WORLD_SYSTEMS['world_names'][destination]}"
         else:
