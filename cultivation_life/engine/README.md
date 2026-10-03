@@ -74,7 +74,9 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
 
-运行 `python tools/check_module_dependencies.py` 检查已建立的模块边界；检查器会报告现存循环组，但仅对违反明确边界的导入返回失败。战斗规则校验和教程师缘已提取为共用模块，两组小循环已拆开；剩余核心模型和战斗适配两组大循环仍需后续迁移，详见系统目录说明。
+战斗适配、预案和能力提供者使用 `system/aperture_resources.py` 查询、提交元力；灵域与道统共用 `system/doctrine/state.py`，本界战斗能力由 `system/upper_voisinage_rules.py` 提供。王庭使用 `system/institution_state.py` 维护账本和政策，避免战斗能力读取沿政务调用链返回王庭评估。原展示和操作入口保留兼容导出，战斗结算、资源归属与提交顺序保持原样。
+
+运行 `python tools/check_module_dependencies.py` 检查已建立的模块边界；检查器会报告现存循环组，但仅对违反明确边界的导入返回失败。战斗规则校验、教程师缘两组小循环及九模块战斗适配循环均已拆开，目前仅剩核心模型相关的一组循环，详见系统目录说明。
 
 ## 为保持游戏性而保留的实现
 

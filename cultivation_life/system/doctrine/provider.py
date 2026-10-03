@@ -1,60 +1,16 @@
 """Save-state adapter for celestial doctrine sources, shared by both battle callers."""
 from __future__ import annotations
 
-from ...content_registry import CONTENT_DOCUMENTS
 from ..combat.contracts import CapabilitySource
 from ..combat.npc_lifecycle import read
-from .generation import generate, rng_for
+from .generation import rng_for
 from .progression import source
 
-
-def config():
-    return CONTENT_DOCUMENTS.get("doctrines.json", {})
-
-
-def ensure(game, *, celestial_context=False) -> bool:
-    if not config():
-        return False
-    changed = False
-    if not game.doctrine_state:
-        if game.player.world != "celestial" and not celestial_context:
-            return False
-        from ...rules import expected_combat_power
-        game.doctrine_state = generate(game.seed, config(), {r: expected_combat_power(r, 1) for r in range(9, 13)})
-        changed = True
-    if game.doctrine_state.get("cultivation_schema") != 2:
-        record = game.doctrine_state["player"]
-        record.setdefault("annotations", {})
-        record.setdefault("daomen", {})
-        record.setdefault("voisinage_training", {})
-        for key, progress in record["progress"].items():
-            level = progress["level"]
-            record["annotations"][key] = list(range(1, level + 1))
-            books = [t for t in game.player.known_techniques if t.doctrine_id == key]
-            if books:
-                best = max(books, key=lambda t: t.level)
-                best.level = max(best.level, level)
-                for equipped in [game.player.technique, game.player.support_technique, *game.player.combat_techniques]:
-                    if equipped and equipped.id == best.id:
-                        equipped.level = max(equipped.level, best.level)
-        game.doctrine_state["cultivation_schema"] = 2
-        changed = True
-    if game.doctrine_state.get('effects_schema') != 1:
-        from .effects import enrich_effects
-        enrich_effects(game.doctrine_state['definitions'])
-        game.doctrine_state['effects_schema'] = 1
-        changed = True
-    if game.doctrine_state.get('offensive_schema') != 1:
-        from .effects import ensure_offensive_doctrine
-        ensure_offensive_doctrine(game.doctrine_state['definitions'], game.seed, game.doctrine_state['version'])
-        game.doctrine_state['offensive_schema'] = 1
-        changed = True
-    return changed
-
-
-def player_record(game):
-    ensure(game)
-    return game.doctrine_state.get("player", {})
+from .state import (
+    config as config,
+    ensure as ensure,
+    player_record as player_record,
+)
 
 
 def _npc_record(game, npc):
@@ -135,7 +91,7 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     # Do not generate a celestial catalog for unrelated lower-world battles.
     ensure(game, celestial_context=any(read(owner, "world") == "celestial" and read(owner, "transcendence") for owner in owners.values()))
     from ..spirit_voisinage import player_source, npc_source, diminished
-    from ..immortal_aperture import lower_world
+    from ..aperture_resources import lower_world
     definitions = game.doctrine_state.get("definitions", {})
     results = {}
     for key, owner in owners.items():
@@ -145,7 +101,7 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
             if asura_value.voisinages:
                 results[key] = asura_value
                 continue
-            from ..upper_voisinage import available, player_source as upper_source
+            from ..upper_voisinage_rules import available, player_source as upper_source
             if available(game.player):
                 results[key] = upper_source(game.player)
                 continue
@@ -185,5 +141,5 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
 
 
 def conversion_state(player):
-    from ..immortal_aperture import energy_state
+    from ..aperture_resources import energy_state
     return energy_state(player)

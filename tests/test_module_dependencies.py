@@ -20,7 +20,7 @@ from cultivation_life.system.economy import market
 from cultivation_life.system.economy.dependencies import MarketDependencies
 from cultivation_life.system.economy_system import EconomySystemMixin
 from cultivation_life.system.npc_contact_dependencies import NpcContactDependencies
-from tools.check_module_dependencies import import_edges, report, violations
+from tools.check_module_dependencies import BATTLE_DEPENDENCY_MODULES, import_edges, report, violations
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +30,7 @@ def test_project_respects_migrated_module_boundaries():
     result = report(ROOT)
     assert not result['violations']
     for group in result['cycles']:
+        assert not set(group) & BATTLE_DEPENDENCY_MODULES
         assert not {'cultivation_life.system.doctrine.effects',
                     'cultivation_life.system.doctrine.generation'} <= set(group)
         assert not {'cultivation_life.system.merchant_system',
@@ -235,3 +236,73 @@ def test_shared_rule_schema_and_mentorship_preserve_compatibility_exports():
     assert monster_bloodline_rules.validate_generated_trait(malformed_v2) == combat_rule_schema.validate_rule(malformed_v2)
     assert tutorial_system.mentor_action is tutorial_mentorship.mentor_action
     assert tutorial_system.blocked_reason is tutorial_mentorship.blocked_reason
+
+
+@pytest.mark.parametrize('source,target', [
+    ('combat_adapter', 'immortal_aperture'),
+    ('combat_plan', 'immortal_aperture'),
+    ('doctrine.provider', 'upper_voisinage'),
+    ('spirit_voisinage', 'doctrine.provider'),
+    ('asura_court', 'upper_institutions'),
+    ('institution_state', 'asura_court'),
+    ('aperture_resources', 'combat_adapter'),
+    ('upper_voisinage_rules', 'upper_institutions'),
+    ('doctrine.state', 'doctrine.provider'),
+])
+def test_import_checker_rejects_combat_back_references(source, target):
+    source, target = (f'cultivation_life.system.{name}' for name in (source, target))
+    assert violations([(source, target, 7)]) == [dict(source=source, target=target, line=7)]
+
+
+@pytest.mark.parametrize('facade,shared,names', [
+    ('immortal_aperture', 'aperture_resources',
+     'true_realm cultivation_stage investment_multiplier spirit_books lower_world available ensure_aperture energy_state commit_energy'),
+    ('doctrine.provider', 'doctrine.state', 'config ensure player_record'),
+    ('upper_voisinage', 'upper_voisinage_rules', 'config world_config available record level project player_source'),
+    ('upper_institutions', 'institution_state', 'config definition fresh account policy record'),
+])
+def test_combat_shared_functions_keep_original_import_paths(facade, shared, names):
+    original = importlib.import_module(f'cultivation_life.system.{facade}')
+    implementation = importlib.import_module(f'cultivation_life.system.{shared}')
+    for name in names.split():
+        function = getattr(implementation, name)
+        assert getattr(original, name) is function
+        assert function.__globals__ is vars(implementation)
+
+
+def test_shared_energy_ledger_preserves_sealed_reserves_without_an_engine():
+    from cultivation_life.system.aperture_resources import commit_energy, energy_state
+
+    player = Player('Lower realm', 'supreme_metal', realm_index=8, world='spirit')
+    player.sealed_cultivation = {'realm_index': 9, 'layer': 1}
+    player.immortal_aperture = dict(version=1, capacity=1200, current=731,
+                                   imitation_current=45, imitation_capacity=60)
+    state = energy_state(player)
+    assert (state['capacity'], state['current']) == (60, 45)
+    commit_energy(player, 12)
+    assert player.immortal_aperture['current'] == 731
+    assert energy_state(player)['current'] == 12
+    player.world = 'celestial'
+    assert energy_state(player)['current'] == 731
+    commit_energy(player, 500)
+    assert player.immortal_aperture['imitation_current'] == 12
+    assert energy_state(player)['current'] == 500
+
+
+def test_shared_institution_reads_do_not_create_accounts_or_repair_state():
+    import copy
+    from cultivation_life.system.institution_state import account, policy, record
+
+    game = GameState('institution', 42, Player('Player', 'supreme_metal', world='nether'), '', '')
+    before = copy.deepcopy(game.to_dict())
+    fresh = account(game)
+    policy(game, fresh)
+    assert game.to_dict() == before
+    fresh['log'].append({'text': 'temporary'})
+    assert not account(game)['log']
+    state = account(game, create=True)
+    state['unit'] = 3
+    record(game, state, 'policy applied')
+    assert game.upper_institutions['nether'] is state
+    assert state['log'] == [dict(unit=3, text='policy applied')]
+    assert game.history[-1].event_id == 'SYS_UPPER_INSTITUTION'
