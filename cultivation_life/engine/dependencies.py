@@ -16,6 +16,9 @@ from ..system.combat_system import BattleUnit
 from ..system.npc_contact_dependencies import NpcContactDependencies
 from ..system.tianji.dependencies import TianjiDependencies
 from ..system.intrigue.dependencies import IntrigueDependencies
+from ..system.economy.dependencies import EconomyDependencies, ExchangeDependencies
+from ..system.crafting.dependencies import CraftingDependencies
+from ..system.formation.dependencies import FormationDependencies
 from .ports import AchievementPort, MapPort, SavePort
 
 
@@ -995,6 +998,10 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    economy: EconomyDependencies
+    exchange: ExchangeDependencies
+    crafting: CraftingDependencies
+    formation: FormationDependencies
     tianji: TianjiDependencies
     intrigue: IntrigueDependencies
     court_state: CourtStateDependencies

@@ -9,6 +9,9 @@ from ...rules import acquire_technique, add_item, remove_item
 from .dependencies import AuctionsDependencies
 
 
+import copy
+
+
 def _auction_location_matches(deps: AuctionsDependencies, game: GameState) -> bool:
     state = game.auction_state
     return bool(
@@ -426,4 +429,27 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         "listing_fee_rate":float(deps._auction_rules()["consignment_listing_fee_ratio"]),
         "max_rounds":int(deps._auction_rules()["auction_rounds"]),
         "black_market_buy_multiplier":float(deps._auction_rules()["black_market_buy_multiplier"]),
+    }
+
+
+
+
+def _cancel_auction_for_world_change(deps: AuctionsDependencies, game: GameState) -> None:
+    state = game.auction_state
+    if not state or state.get("status") == "cooldown":
+        return
+    # Only an unfinished auction has frozen bids or unsold consignments. Once the
+    # black market opens, lots have already been delivered and sellers paid.
+    if state.get("status") in {"scheduled", "open"}:
+        for lot in state.get("lots", []):
+            if lot.get("current_bidder") == "player":
+                add_item(game.player, "spirit_stone", int(lot.get("current_bid", 0)))
+        for consignment in state.get("consignments", []):
+            if consignment.get("kind") == "crafted_artifact" and isinstance(consignment.get("artifact"), dict):
+                from ..crafting_system import store_crafted_artifact
+                store_crafted_artifact(game.player, copy.deepcopy(consignment["artifact"]))
+            else:
+                add_item(game.player, str(consignment["content_id"]))
+    game.auction_state = {
+        "status":"cooldown", "actions_remaining":int(deps._auction_rules()["cooldown_actions"]),
     }

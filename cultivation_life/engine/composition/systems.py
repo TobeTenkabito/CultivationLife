@@ -9,6 +9,28 @@ from ...system.tianji.wiring import bind_tianji
 from ...system.intrigue.wiring import bind_intrigue
 from ...system.tianji.dependencies import TianjiDependencies
 from ...system.intrigue.dependencies import IntrigueDependencies
+from ...system.economy.wiring import bind_economy
+from ...system.economy.dependencies import EconomyDependencies
+from ...system import exchange_system, crafting_system, formation_system
+from ...system.economy.dependencies import ExchangeDependencies
+from ...system.crafting.dependencies import CraftingDependencies
+from ...system.formation.dependencies import FormationDependencies
+
+
+def bind_economy_dependencies(host) -> EconomyDependencies:
+    return bind_economy(host)
+
+
+def bind_exchange_dependencies(host) -> ExchangeDependencies:
+    return exchange_system.bind_exchange_compatibility(host)
+
+
+def bind_crafting_dependencies(host) -> CraftingDependencies:
+    return crafting_system.bind_crafting_compatibility(host)
+
+
+def bind_formation_dependencies(host) -> FormationDependencies:
+    return formation_system.bind_formation_compatibility(host)
 
 
 def bind_tianji_dependencies(host) -> TianjiDependencies:

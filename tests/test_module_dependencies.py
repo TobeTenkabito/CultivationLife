@@ -64,7 +64,7 @@ def global_names(code):
             yield from global_names(child)
 
 
-@pytest.mark.parametrize('area', ['economy', 'tianji', 'intrigue', 'court'])
+@pytest.mark.parametrize('area', ['economy', 'tianji', 'intrigue', 'court', 'crafting', 'formation'])
 def test_system_algorithms_use_real_module_globals_and_declared_collaborators(area):
     checked = []
     for path in (ROOT / 'cultivation_life/system' / area).glob('*.py'):
@@ -75,7 +75,8 @@ def test_system_algorithms_use_real_module_globals_and_declared_collaborators(ar
             if function.__module__ != module.__name__:
                 continue
             assert function.__globals__ is vars(module)
-            assert not {'GameEngine', 'EconomySystemMixin', 'TianjiSystemMixin', 'IntrigueSystemMixin'} & vars(module).keys()
+            assert not {'GameEngine', 'EconomySystemMixin', 'TianjiSystemMixin', 'IntrigueSystemMixin',
+                        'CraftingSystemMixin', 'FormationSystemMixin', 'ExchangeSystemMixin'} & vars(module).keys()
             for symbol in global_names(function.__code__):
                 assert symbol in vars(module) or hasattr(builtins, symbol), (name, symbol)
             if 'deps' not in inspect.signature(function).parameters:

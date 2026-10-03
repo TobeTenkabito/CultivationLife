@@ -11,6 +11,10 @@ from .dependencies import (
 )
 
 
+from .dependencies import ExchangeDependencies
+from typing import Any, Callable
+
+
 def bind_arts(host) -> ArtsDependencies:
     return ArtsDependencies(
         _alchemy_targets=lambda *args, **kwargs: host._alchemy_targets(*args, **kwargs),
@@ -61,6 +65,10 @@ def bind_auctions(host) -> AuctionsDependencies:
 
 def bind_black_market(host) -> BlackMarketDependencies:
     return BlackMarketDependencies(
+        _auction_content=lambda *args, **kwargs: host._auction_content(*args, **kwargs),
+        _crafting_material_defs=lambda *args, **kwargs: host._crafting_material_defs(*args, **kwargs),
+        _formation_maintenance_defs=lambda *args, **kwargs: host._formation_maintenance_defs(*args, **kwargs),
+        _formation_material_defs=lambda *args, **kwargs: host._formation_material_defs(*args, **kwargs),
         _auction_rules=lambda *args, **kwargs: host._auction_rules(*args, **kwargs),
         _catalog_price=lambda *args, **kwargs: host._catalog_price(*args, **kwargs),
         _grant_auction_content=lambda *args, **kwargs: host._grant_auction_content(*args, **kwargs),
@@ -149,4 +157,24 @@ def bind_economy(host) -> EconomyDependencies:
         private_trade=bind_private_trade(host),
         spirit_fields=bind_spirit_fields(host),
         treasure=bind_treasure(host),
+    )
+
+
+
+def bind_exchange(host, *, decode_rng: Callable[..., Any], _get_EXCHANGE_ALIASES: Callable[..., Any], _get_EXCHANGE_VENUES: Callable[..., Any]) -> ExchangeDependencies:
+    return ExchangeDependencies(
+        decode_rng=decode_rng,
+        _crafting_material_candidates=lambda *args, **kwargs: host._crafting_material_candidates(*args, **kwargs),
+        _crafting_material_defs=lambda *args, **kwargs: host._crafting_material_defs(*args, **kwargs),
+        _exchange_location=lambda *args, **kwargs: host._exchange_location(*args, **kwargs),
+        _exchange_materials=lambda *args, **kwargs: host._exchange_materials(*args, **kwargs),
+        _formation_material_defs=lambda *args, **kwargs: host._formation_material_defs(*args, **kwargs),
+        _load=lambda *args, **kwargs: host._load(*args, **kwargs),
+        _open_exchange=lambda *args, **kwargs: host._open_exchange(*args, **kwargs),
+        _schedule_exchange=lambda *args, **kwargs: host._schedule_exchange(*args, **kwargs),
+        _get_maps=lambda: host.maps,
+        present=lambda *args, **kwargs: host.present(*args, **kwargs),
+        _get_store=lambda: host.store,
+        _get_EXCHANGE_ALIASES=_get_EXCHANGE_ALIASES,
+        _get_EXCHANGE_VENUES=_get_EXCHANGE_VENUES,
     )

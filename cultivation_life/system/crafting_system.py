@@ -1,4 +1,12 @@
 from __future__ import annotations
+from functools import cached_property
+from .crafting.wiring import bind_crafting
+from .crafting import presentation as crafting_presentation
+from .crafting import materials as crafting_materials
+from .crafting import market as crafting_market
+from .crafting import forging as crafting_forging
+from .crafting import preview as crafting_preview
+from .crafting import artifacts as crafting_artifacts
 
 import copy
 import hashlib
@@ -108,22 +116,103 @@ def make_crafting_material_instance(
     }
 
 
+def _crafting_rules() -> dict[str, Any]:
+    return crafting_config().get("settings", {})
+
+
+def _crafting_molds() -> dict[str, dict[str, Any]]:
+    return {str(row["id"]): row for row in crafting_config().get("molds", [])}
+
+
+def _crafting_material_defs() -> dict[str, dict[str, Any]]:
+    return crafting_material_definitions()
+
+
+def _crafting_plant_defs() -> dict[str, dict[str, Any]]:
+    return {str(row["plant_id"]): row for row in crafting_config().get("spirit_plants", [])}
+
+
+def _quality_probabilities(refining_level: int, average_quality: float) -> dict[str, float]:
+    tiers = ("damaged", "rough", "normal", "excellent", "refined", "epic", "legendary")
+    base = (8.0, 20.0, 50.0, 14.0, 6.0, 1.7, .3)
+    shift = min(12.0, max(-4.0, refining_level * .75 + (average_quality - 1.0) * 10.0))
+    weights = [weight * math.exp(shift * (index - 2) * .16) for index, weight in enumerate(base)]
+    total = sum(weights)
+    return {tier: round(weight / total, 6) for tier, weight in zip(tiers, weights)}
+
+
+def _weighted_choice(rng: random.Random, probabilities: dict[str, float]) -> str:
+    roll = rng.random()
+    elapsed = 0.0
+    for key, probability in probabilities.items():
+        elapsed += probability
+        if roll <= elapsed:
+            return key
+    return next(reversed(probabilities))
+
+
+def _resolve_mold_rule(
+    player: Player, mold: dict[str, Any], selected: list[tuple[str, dict[str, Any]]],
+) -> dict[str, Any]:
+    """Freeze the generic mold's one random base stat for this recipe.
+
+    Preview and forging may be called separately, so this cannot consume the
+    save RNG.  The next crafting sequence and the four concrete material
+    instances form a stable roll; changing any material legitimately rerolls
+    the unshaped mold.
+    """
+    resolved = copy.deepcopy(mold)
+    rule = resolved.get("rule", {})
+    candidates = list(map(str, rule.get("random_base_stats", [])))
+    if not candidates:
+        return resolved
+    key = ":".join([
+        player.name, str(player.crafting_sequence + 1),
+        *(str(material.get("id", "")) for _, material in selected),
+    ])
+    digest = hashlib.sha256(key.encode("utf-8")).digest()
+    stat = candidates[int.from_bytes(digest[:4], "big") % len(candidates)]
+    multiplier = float(rule.get("random_multiplier", 1.08))
+    stat_name = MOLD_COMBAT_STAT_NAMES.get(stat, stat)
+    rule["name"] = f"无定器相·{stat_name}"
+    rule["description"] = f"此炉器机定形为{stat_name}，战斗开始时{stat_name}提高 {(multiplier - 1):.0%}。"
+    rule["combat_effect"] = {"player_stat_multipliers": {stat: multiplier}}
+    rule["resolved_random_stat"] = stat
+    return resolved
+
+
+def bind_crafting_compatibility(host):
+    return bind_crafting(
+        host,
+        artifact_summary=lambda *args, **kwargs: artifact_summary(*args, **kwargs),
+        crafting_config=lambda *args, **kwargs: crafting_config(*args, **kwargs),
+        make_crafting_material_instance=lambda *args, **kwargs: make_crafting_material_instance(*args, **kwargs),
+        name_or_artifact=lambda *args, **kwargs: name_or_artifact(*args, **kwargs),
+        remove_crafted_artifact=lambda *args, **kwargs: remove_crafted_artifact(*args, **kwargs),
+        store_crafted_artifact=lambda *args, **kwargs: store_crafted_artifact(*args, **kwargs),
+    )
+
+
 class CraftingSystemMixin:
+    @cached_property
+    def _crafting_dependencies(self):
+        return bind_crafting_compatibility(self)
+
     @staticmethod
     def _crafting_rules() -> dict[str, Any]:
-        return crafting_config().get("settings", {})
+        return _crafting_rules()
 
     @staticmethod
     def _crafting_molds() -> dict[str, dict[str, Any]]:
-        return {str(row["id"]): row for row in crafting_config().get("molds", [])}
+        return _crafting_molds()
 
     @staticmethod
     def _crafting_material_defs() -> dict[str, dict[str, Any]]:
-        return crafting_material_definitions()
+        return _crafting_material_defs()
 
     @staticmethod
     def _crafting_plant_defs() -> dict[str, dict[str, Any]]:
-        return {str(row["plant_id"]): row for row in crafting_config().get("spirit_plants", [])}
+        return _crafting_plant_defs()
 
     def _append_crafting_market_offers(
         self, game: GameState, rng: random.Random, offers: list[dict[str, Any]], *,
@@ -131,523 +220,54 @@ class CraftingSystemMixin:
     ) -> None:
         # New crafting stock must not move the story/combat RNG stream.  Its
         # condition remains deterministic for the same save, place and year.
-        rng = random.Random(
-            f"{game.seed}:crafting-market:{game.player.world}:{location_id}:{game.player.age}:{tier}"
-        )
-        definitions = [
-            row for row in self._crafting_material_defs().values()
-            if str(row.get("world")) == game.player.world
-            and int(row.get("tier", 1)) <= max(tier, game.player.realm_index) + 1
-        ]
-        if not definitions:
-            append_tianji = getattr(self, "_append_tianji_market_offers", None)
-            if append_tianji:
-                append_tianji(
-                    game, offers, tier=tier, market_name=market_name, location_id=location_id,
-                )
-            return
-        count = min(int(self._crafting_rules().get("market_material_offers", 3)), len(definitions))
-        selected = rng.sample(definitions, count)
-        for index, definition in enumerate(selected):
-            # Keep the public market tier contract (current or rare +1) even in
-            # route worlds whose legacy market tier helper still reports five.
-            offer_tier = tier + 1 if int(definition.get("tier", tier)) > tier else tier
-            instance = make_crafting_material_instance(
-                definition, rng, source=f"{market_name}购得", origin_world=game.player.world,
-            )
-            base_price = int(definition["base_material_value"])
-            price = max(1, round(base_price * instance["quality"] * rng.uniform(.9, 1.1)))
-            offers.append({
-                "id": f"{game.player.world}-{location_id}-{game.player.age}-{tier}-craft-{index}-{definition['id']}",
-                "kind": "crafting_material", "content_id": str(definition["id"]),
-                "name": str(definition["name"]),
-                "description": f"炼器材料 · {instance['state']} · 材料价值 {instance['material_value']:,}；可用位置：" + "、".join(
-                    {"primary":"主材", "secondary":"辅材", "quench":"淬火"}[role]
-                    for role in definition.get("roles", [])
-                ),
-                "price": price, "tier": offer_tier,
-                "tier_name": REALMS[max(0, min(len(REALMS) - 1, offer_tier))].name,
-                "market_name": market_name, "world": game.player.world, "location_id": location_id,
-                "rare_next_tier": offer_tier > tier, "sold": False,
-                "material_instance": instance,
-            })
-        append_tianji = getattr(self, "_append_tianji_market_offers", None)
-        if append_tianji:
-            append_tianji(
-                game, offers, tier=tier, market_name=market_name, location_id=location_id,
-            )
+        return crafting_market._append_crafting_market_offers(self._crafting_dependencies.market, game, rng, offers, tier=tier, market_name=market_name, location_id=location_id)
 
     def _buy_crafting_material_offer(self, game: GameState, offer: dict[str, Any], price: int) -> str:
-        instance = copy.deepcopy(offer.get("material_instance"))
-        if not isinstance(instance, dict):
-            definition = self._crafting_material_defs().get(str(offer.get("content_id", "")))
-            if not definition:
-                raise ValueError("这份炼器材料已经失去灵性")
-            rng = decode_rng(game.seed, game.rng_state)
-            instance = make_crafting_material_instance(
-                definition, rng, source=f"{offer.get('market_name', '坊市')}购得", origin_world=game.player.world,
-            )
-            game.rng_state = encode_rng(rng)
-        game.player.crafting_materials.append(instance)
-        bought_hook = getattr(self, "_tianji_material_bought", None)
-        if bought_hook:
-            bought_hook(game, instance)
-        return f"你在{offer['market_name']}支付 {price} 枚灵石，购得{instance['state']}的{instance['name']}。"
+        return crafting_market._buy_crafting_material_offer(self._crafting_dependencies.market, game, offer, price)
 
     def _crafting_material_candidates(self, player: Player) -> list[dict[str, Any]]:
-        material_defs = self._crafting_material_defs()
-        candidates: list[dict[str, Any]] = []
-        for instance in player.crafting_materials:
-            embedded = instance.get("dynamic_definition")
-            definition = (
-                copy.deepcopy(embedded) if isinstance(embedded, dict)
-                else material_defs.get(str(instance.get("material_id", "")))
-            )
-            if not definition:
-                continue
-            candidates.append(copy.deepcopy(instance) | {
-                "definition_id": str(definition["id"]), "roles": list(definition.get("roles", [])),
-                "tags": list(definition.get("tags", [])),
-                "allow_duplicate_type": bool(definition.get("allow_duplicate_type", False)),
-                "role_effects": copy.deepcopy(definition.get("role_effects", {})),
-                "tianji_tags": copy.deepcopy(definition.get("tianji_tags", {})),
-                "dynamic_definition": copy.deepcopy(definition) if isinstance(embedded, dict) else None,
-                "source_kind": "material",
-            })
-        plant_defs = self._crafting_plant_defs()
-        for item in player.inventory:
-            definition = plant_defs.get(str(item.plant_id or ""))
-            if not definition or item.quantity <= 0:
-                continue
-            candidates.append({
-                "id": f"plant:{item.id}", "definition_id": f"plant:{item.plant_id}",
-                "name": item.name, "quality": float(item.plant_quality or .5),
-                "state": f"实生 {int(item.plant_years or 0):,} 年", "source": "洞府灵田采收",
-                "origin_world": player.world, "material_value": int(item.plant_value or 1),
-                "roles": list(definition.get("roles", [])), "tags": ["spirit_plant", str(item.plant_id)],
-                "allow_duplicate_type": bool(definition.get("allow_duplicate_type", False)),
-                "role_effects": copy.deepcopy(definition.get("role_effects", {})),
-                "source_kind": "plant", "inventory_item_id": item.id, "quantity": item.quantity,
-            })
-        for item in player.inventory:
-            tags = set(item.tags)
-            if item.quantity <= 0 or "guixu_tide" not in tags or not tags.intersection({"crafting_material", "spirit_plant"}):
-                continue
-            potency = max(0.02, min(0.30, math.log10(max(10.0, float(item.plant_value or item.combat_bonus or 10))) * .035))
-            roles = ["primary", "secondary", "quench"]
-            role_effects = {
-                "primary": {
-                    "design_multipliers": {"combat_power": 1.0 + potency},
-                    "description": f"主材：归墟灵性令战力设计值提高 {potency:.0%}。",
-                },
-                "secondary": {
-                    "design_multipliers": {"max_hp": 1.0 + potency / 2, "max_mp": 1.0 + potency / 2},
-                    "description": f"辅材：HP 与 MP 设计值各提高 {potency / 2:.0%}。",
-                },
-                "quench": {
-                    "combat_effect": {"player_stat_multipliers": {"breach": 1.0 + potency / 3}},
-                    "description": f"淬火：破法提高 {potency / 3:.0%}。",
-                },
-            }
-            material_value = max(1, int(item.plant_value or max(10, item.combat_bonus)))
-            for index in range(int(item.quantity)):
-                candidates.append({
-                    "id": f"guixu:{item.id}:{index}", "definition_id": item.id,
-                    "name": item.name, "quality": float(item.plant_quality or 1.0),
-                    "state": "归墟天成", "source": "归墟之潮",
-                    "origin_world": player.world, "material_value": material_value,
-                    "roles": roles, "tags": list(tags), "allow_duplicate_type": True,
-                    "role_effects": role_effects, "source_kind": "inventory",
-                    "inventory_item_id": item.id, "quantity": item.quantity,
-                })
-        return candidates
+        return crafting_materials._crafting_material_candidates(self._crafting_dependencies.materials, player)
 
     @staticmethod
     def _quality_probabilities(refining_level: int, average_quality: float) -> dict[str, float]:
-        tiers = ("damaged", "rough", "normal", "excellent", "refined", "epic", "legendary")
-        base = (8.0, 20.0, 50.0, 14.0, 6.0, 1.7, .3)
-        shift = min(12.0, max(-4.0, refining_level * .75 + (average_quality - 1.0) * 10.0))
-        weights = [weight * math.exp(shift * (index - 2) * .16) for index, weight in enumerate(base)]
-        total = sum(weights)
-        return {tier: round(weight / total, 6) for tier, weight in zip(tiers, weights)}
+        return _quality_probabilities(refining_level, average_quality)
 
     @staticmethod
     def _weighted_choice(rng: random.Random, probabilities: dict[str, float]) -> str:
-        roll = rng.random()
-        elapsed = 0.0
-        for key, probability in probabilities.items():
-            elapsed += probability
-            if roll <= elapsed:
-                return key
-        return next(reversed(probabilities))
+        return _weighted_choice(rng, probabilities)
 
     def _resolve_crafting_selection(self, player: Player, payload: dict[str, Any]) -> tuple[dict[str, Any], list[tuple[str, dict[str, Any]]]]:
-        mold = self._crafting_molds().get(str(payload.get("mold_id", "")))
-        if not mold:
-            raise ValueError("请选择一种合法胎模")
-        candidate_map = {str(row["id"]): row for row in self._crafting_material_candidates(player)}
-        selected_ids = [
-            str(payload.get("primary_id", "")), str(payload.get("secondary_a_id", "")),
-            str(payload.get("secondary_b_id", "")), str(payload.get("quench_id", "")),
-        ]
-        if any(not value for value in selected_ids) or len(set(selected_ids)) != 4:
-            raise ValueError("主材、两份辅材与淬火材料必须各选择一个不同实例")
-        roles = ("primary", "secondary", "secondary", "quench")
-        selected: list[tuple[str, dict[str, Any]]] = []
-        for role, instance_id in zip(roles, selected_ids):
-            candidate = candidate_map.get(instance_id)
-            if not candidate or role not in candidate.get("roles", []):
-                raise ValueError("材料不存在，或不能用于所选炼器位置")
-            selected.append((role, candidate))
-        secondary_defs = [selected[1][1]["definition_id"], selected[2][1]["definition_id"]]
-        if secondary_defs[0] == secondary_defs[1] and not all(
-            bool(selected[index][1].get("allow_duplicate_type")) for index in (1, 2)
-        ):
-            raise ValueError("这种材料不允许同时占用两个辅材位")
-        return mold, selected
+        return crafting_materials._resolve_crafting_selection(self._crafting_dependencies.materials, player, payload)
 
     @staticmethod
     def _resolve_mold_rule(
         player: Player, mold: dict[str, Any], selected: list[tuple[str, dict[str, Any]]],
     ) -> dict[str, Any]:
-        """Freeze the generic mold's one random base stat for this recipe.
-
-        Preview and forging may be called separately, so this cannot consume the
-        save RNG.  The next crafting sequence and the four concrete material
-        instances form a stable roll; changing any material legitimately rerolls
-        the unshaped mold.
-        """
-        resolved = copy.deepcopy(mold)
-        rule = resolved.get("rule", {})
-        candidates = list(map(str, rule.get("random_base_stats", [])))
-        if not candidates:
-            return resolved
-        key = ":".join([
-            player.name, str(player.crafting_sequence + 1),
-            *(str(material.get("id", "")) for _, material in selected),
-        ])
-        digest = hashlib.sha256(key.encode("utf-8")).digest()
-        stat = candidates[int.from_bytes(digest[:4], "big") % len(candidates)]
-        multiplier = float(rule.get("random_multiplier", 1.08))
-        stat_name = MOLD_COMBAT_STAT_NAMES.get(stat, stat)
-        rule["name"] = f"无定器相·{stat_name}"
-        rule["description"] = f"此炉器机定形为{stat_name}，战斗开始时{stat_name}提高 {(multiplier - 1):.0%}。"
-        rule["combat_effect"] = {"player_stat_multipliers": {stat: multiplier}}
-        rule["resolved_random_stat"] = stat
-        return resolved
+        return _resolve_mold_rule(player, mold, selected)
 
     def _crafting_preview(self, player: Player, payload: dict[str, Any]) -> dict[str, Any]:
-        rules = self._crafting_rules()
-        mold, selected = self._resolve_crafting_selection(player, payload)
-        mold = self._resolve_mold_rule(player, mold, selected)
-        budget = int(rules["budget_by_realm"][max(0, min(12, player.realm_index))])
-        raw_allocations = payload.get("allocations", {}) if isinstance(payload.get("allocations"), dict) else {}
-        allocations = {key: max(0, int(raw_allocations.get(key, 0) or 0)) for key in STAT_NAMES}
-        used = sum(allocations[key] * float(rules["stat_costs"][key]) for key in allocations)
-        if used <= 0:
-            raise ValueError("至少为法宝分配一项属性")
-        if used > budget + 1e-9:
-            raise ValueError(f"属性预算超出上限：已用 {used:.1f} / {budget}")
-        primary_tier = int(selected[0][1].get("acquired_tier", player.realm_index))
-        scaling_realm_index = max(0, min(player.realm_index, primary_tier, len(REALMS) - 1))
-        scaling_layer = (
-            player.layer if scaling_realm_index == player.realm_index
-            else max(1, REALMS[scaling_realm_index].layers)
-        )
-        # Anchor absolute output to the recipe's main-material stage, not a
-        # flat +1 and not the wearer's already-equipped bonuses.  This keeps
-        # Qi artifacts legible while making immortal artifacts scale against
-        # immortal combat numbers without recursive forge-to-forge inflation.
-        benchmark = Player(
-            "炼器境界基准", player.spirit_root,
-            realm_index=scaling_realm_index, layer=scaling_layer, path=player.path,
-        )
-        expected = expected_combat_power(scaling_realm_index, scaling_layer)
-        stat_bases = {
-            "combat_power": expected, "max_hp": max_hp(benchmark), "max_mp": max_mp(benchmark),
-            "opportunity_efficiency": 1.0, "body_training_efficiency": 1.0,
-            "divine_sense_efficiency": 1.0, "tribulation_reduction": 1.0,
-            "breakthrough_bonus": 1.0,
-        }
-        designed = {
-            key: stat_bases[key] * float(rules["stat_caps"][key])
-            * allocations[key] * float(rules["stat_costs"][key]) / max(1, budget)
-            for key in STAT_NAMES
-        }
-        special_stats = {key: 0.0 for key in STAT_NAMES}
-        combat_effects = [copy.deepcopy(mold["rule"].get("combat_effect", {})) | {"source": mold["rule"]["name"]}]
-        material_effects = []
-        for role, material in selected:
-            effect = copy.deepcopy(material.get("role_effects", {}).get(role, {}))
-            for key, multiplier in effect.get("design_multipliers", {}).items():
-                if key in designed:
-                    designed[key] *= max(0.0, float(multiplier))
-            potency = min(1.25, max(.65, math.sqrt(max(1.0, float(material["material_value"])) / max(1.0, float(material["material_value"]) / max(.01, float(material["quality"])) ))))
-            for key, value in effect.get("special_stats", {}).items():
-                if key in special_stats:
-                    special_stats[key] += float(value) * potency
-            if effect.get("combat_effect"):
-                combat_effects.append(copy.deepcopy(effect["combat_effect"]) | {
-                    "source": f"{material['name']}·{role}",
-                })
-            material_effects.append({
-                "role": role, "material_id": material["definition_id"], "instance_id": material["id"],
-                "name": material["name"], "description": str(effect.get("description", "")),
-            })
-        average_quality = sum(float(row[1]["quality"]) for row in selected) / 4
-        refining_exp = max(0.0, float(player.art_experience.get("refining", 0.0)))
-        refining_level = int(math.sqrt(refining_exp / float(rules.get("refining_experience_base", 100))))
-        probabilities = self._quality_probabilities(refining_level, average_quality)
-        caps = rules["stat_caps"]
-        theoretical = {}
-        for quality, multiplier in rules["quality_multipliers"].items():
-            stats = {}
-            for key in STAT_NAMES:
-                value = designed[key] * float(multiplier) + special_stats[key]
-                if key == "breakthrough_bonus":
-                    value = min(float(caps[key]), value)
-                elif key == "tribulation_reduction":
-                    value = min(.50, value)
-                stats[key] = round(value, 4 if key not in {"combat_power", "max_hp", "max_mp"} else 1)
-            theoretical[quality] = stats
-        anchor = max(1, round(sum(int(row[1]["material_value"]) for row in selected) * float(rules["anchor_multiplier"])))
-        return {
-            "mold": copy.deepcopy(mold), "selected_materials": [copy.deepcopy(row) for _, row in selected],
-            "material_effects": material_effects, "allocations": allocations,
-            "budget": budget, "budget_used": round(used, 2), "designed_stats": {key: round(value, 4) for key, value in designed.items()},
-            "scaling_realm_index": scaling_realm_index,
-            "scaling_realm_name": REALMS[scaling_realm_index].name,
-            "scaling_benchmarks": {
-                "combat_power": round(expected, 1),
-                "max_hp": max_hp(benchmark), "max_mp": max_mp(benchmark),
-            },
-            "special_stats": {key: round(value, 4) for key, value in special_stats.items()},
-            "quality_probabilities": probabilities, "quality_names": copy.deepcopy(rules["quality_names"]),
-            "quality_multipliers": copy.deepcopy(rules["quality_multipliers"]),
-            "theoretical_stats": theoretical, "combat_effects": combat_effects,
-            "anchor_value": anchor, "refining_level": refining_level,
-        }
+        return crafting_preview._crafting_preview(self._crafting_dependencies.preview, player, payload)
 
     def preview_crafting(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
-        game = self._load(game_id)
-        if game.pending_event or not game.player.alive or game.player.imprisonment:
-            raise ValueError("当前状态无法开炉炼器")
-        return self._crafting_preview(game.player, payload)
+        return crafting_preview.preview_crafting(self._crafting_dependencies.preview, game_id, payload)
 
     def forge_crafted_artifact(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
-        game = self._load(game_id)
-        player = game.player
-        if game.pending_event or not player.alive or player.imprisonment:
-            raise ValueError("当前状态无法开炉炼器")
-        preview = self._crafting_preview(player, payload)
-        # Preview has fully validated all four instance IDs. Consume only after every check passes.
-        for material in preview["selected_materials"]:
-            if material.get("source_kind") in {"plant", "inventory"}:
-                if not remove_item(player, str(material["inventory_item_id"])):
-                    raise ValueError("行囊材料数量发生变化，请重新确认配方")
-            else:
-                stored = next((row for row in player.crafting_materials if str(row.get("id")) == str(material["id"])), None)
-                if not stored:
-                    raise ValueError("炼器材料数量发生变化，请重新确认配方")
-                player.crafting_materials.remove(stored)
-        rng = decode_rng(game.seed, game.rng_state)
-        quality = self._weighted_choice(rng, preview["quality_probabilities"])
-        game.rng_state = encode_rng(rng)
-        name = str(payload.get("name", "")).strip()[:20] or str(preview["mold"]["default_name"])
-        player.crafting_sequence += 1
-        artifact_id = f"crafted-{game.id}-{player.crafting_sequence}"
-        artifact = {
-            "id": artifact_id, "name": name, "mold_id": preview["mold"]["id"],
-            "mold_name": preview["mold"]["name"], "quality": quality,
-            "quality_name": preview["quality_names"][quality],
-            "quality_multiplier": float(preview["quality_multipliers"][quality]),
-            "creator_name": player.name, "creator_id": game.id, "created_year": player.age,
-            "scaling_realm_index": preview["scaling_realm_index"],
-            "scaling_realm_name": preview["scaling_realm_name"],
-            "scaling_benchmarks": preview["scaling_benchmarks"],
-            "materials": [{key: row.get(key) for key in (
-                "id", "definition_id", "name", "quality", "state", "source", "origin_world", "material_value"
-            )} for row in preview["selected_materials"]],
-            "material_effects": preview["material_effects"], "allocations": preview["allocations"],
-            "designed_stats": preview["designed_stats"],
-            "actual_stats": preview["theoretical_stats"][quality],
-            "combat_effects": preview["combat_effects"], "anchor_value": preview["anchor_value"],
-            "mold_rule_description": str(preview["mold"]["rule"].get("description", "")),
-            "is_natal": False,
-        }
-        store_crafted_artifact(player, artifact)
-        self._grant_art_experience(player, "refining", float(self._crafting_rules().get("refining_experience_per_craft", 30)))
-        game.history.append(HistoryRecord(
-            "SYS_ARTIFACT_FORGE", 1, player.age, "组合炼器", artifact_id, "forged",
-            f"你以{preview['mold']['name']}定形，炼成{artifact['quality_name']}法宝“{name}”；炼制不会失败，材料锚定价值为 {artifact['anchor_value']:,} 灵石。",
-            {"artifact_id":artifact_id, "quality":quality, "anchor_value":artifact["anchor_value"]},
-            ["system", "crafting", "art:refining"],
-        ))
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+        return crafting_forging.forge_crafted_artifact(self._crafting_dependencies.forging, game_id, payload)
 
     def save_crafting_blueprint(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
-        game = self._load(game_id)
-        preview = self._crafting_preview(game.player, payload)
-        blueprint = {
-            "id": f"blueprint-{uuid.uuid4().hex}",
-            "name": (str(payload.get("blueprint_name", "")).strip()[:20] or f"{preview['mold']['default_name']}图谱"),
-            "mold_id": preview["mold"]["id"],
-            "material_types": [row["definition_id"] for row in preview["selected_materials"]],
-            "allocations": preview["allocations"], "created_year": game.player.age,
-        }
-        game.player.crafting_blueprints.append(blueprint)
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+        return crafting_forging.save_crafting_blueprint(self._crafting_dependencies.forging, game_id, payload)
 
     def crafted_artifact_action(self, game_id: str, artifact_id: str, action: str, start_price: int = 0) -> dict[str, Any]:
-        game = self._load(game_id)
-        player = game.player
-        artifact = next((row for row in player.crafted_artifacts if str(row.get("id")) == artifact_id), None)
-        if not artifact:
-            raise ValueError("这件炼器法宝不存在")
-        if action == "equip":
-            if artifact.get("tianji"):
-                tianji_ids = {
-                    str(row.get("id")) for row in player.crafted_artifacts if row.get("tianji")
-                }
-                player.equipped_crafted_artifact_ids = [
-                    value for value in player.equipped_crafted_artifact_ids if value not in tianji_ids
-                ] + [artifact_id]
-                game.tianji_state["activated_artifact_id"] = artifact_id
-            else:
-                raise ValueError("炼器法宝收入包裹后自动生效，无需另行装备")
-        elif action == "unequip":
-            if artifact.get("tianji"):
-                player.equipped_crafted_artifact_ids = [
-                    value for value in player.equipped_crafted_artifact_ids if value != artifact_id
-                ]
-                if game.tianji_state.get("activated_artifact_id") == artifact_id:
-                    game.tianji_state["activated_artifact_id"] = None
-            else:
-                raise ValueError("炼器法宝与普通装备相同，留在包裹中即自动生效")
-        elif action == "natal":
-            if artifact.get("tianji"):
-                tianji_ids = {
-                    str(row.get("id")) for row in player.crafted_artifacts if row.get("tianji")
-                }
-                player.equipped_crafted_artifact_ids = [
-                    value for value in player.equipped_crafted_artifact_ids if value not in tianji_ids
-                ] + [artifact_id]
-                game.tianji_state["activated_artifact_id"] = artifact_id
-            self._bind_crafted_natal_artifact(game, artifact)
-        elif action == "unbind_natal":
-            self._unbind_crafted_natal_artifact(game, artifact_id)
-        elif action == "sell":
-            if artifact.get("tianji"):
-                raise ValueError("神机法宝不能按普通成品出售")
-            if artifact.get("is_natal"):
-                raise ValueError("已设为本命的法宝不能出售")
-            price = max(1, round(int(artifact["anchor_value"]) * float(self._crafting_rules()["ordinary_sell_ratio"])))
-            remove_crafted_artifact(player, artifact)
-            add_item(player, "spirit_stone", price)
-            game.history.append(HistoryRecord(
-                "SYS_ARTIFACT_SELL", 1, player.age, "坊市出售法宝", artifact_id, "sold",
-                f"你将{name_or_artifact(artifact)}出售，获得 {price:,} 枚灵石；成品实例已离开存档，不会进入全局回收池。",
-                {"spirit_stone":price}, ["system", "crafting", "market"],
-            ))
-        elif action == "consign":
-            if artifact.get("tianji"):
-                raise ValueError("神机法宝不能进入普通拍卖寄售")
-            self._consign_crafted_artifact(game, artifact, int(start_price or 0))
-        else:
-            raise ValueError("未知炼器法宝操作")
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+        return crafting_artifacts.crafted_artifact_action(self._crafting_dependencies.artifacts, game_id, artifact_id, action, start_price)
 
     def _consign_crafted_artifact(self, game: GameState, artifact: dict[str, Any], start_price: int) -> None:
-        state = self._require_auction_access(game, {"scheduled", "open"})
-        artifact_id = str(artifact["id"])
-        if artifact.get("is_natal"):
-            raise ValueError("已设为本命的法宝不能送拍")
-        base_price = max(1, int(artifact["anchor_value"]))
-        minimum = max(1, math.ceil(base_price * float(self._auction_rules()["consignment_min_price_ratio"])))
-        maximum = max(minimum, math.floor(base_price * float(self._auction_rules()["consignment_max_price_ratio"])))
-        start_price = int(start_price or round(base_price * .8))
-        if not minimum <= start_price <= maximum:
-            raise ValueError(f"起拍价须在 {minimum:,}—{maximum:,} 灵石之间")
-        fee = max(1, math.ceil(base_price * float(self._auction_rules()["consignment_listing_fee_ratio"])))
-        if not remove_item(game.player, "spirit_stone", fee):
-            raise ValueError(f"上拍前须支付 {fee:,} 枚灵石占位费")
-        snapshot = copy.deepcopy(artifact)
-        remove_crafted_artifact(game.player, artifact)
-        consignment = {
-            "kind":"crafted_artifact", "content_id":artifact_id, "artifact":snapshot,
-            "start_price":start_price, "tier":game.player.realm_index,
-            "rated_price":base_price, "listing_fee":fee,
-        }
-        state.setdefault("consignments", []).append(consignment)
-        if state["status"] == "open":
-            rng = self._auction_rng(game, "crafted-consignment")
-            state["lots"].append(self._make_crafted_auction_lot(
-                game, rng, consignment, f"player-{len(state['consignments']) - 1}",
-            ))
-        game.history.append(HistoryRecord(
-            "SYS_ARTIFACT_CONSIGN", 1, game.player.age, "法宝寄拍", artifact_id, "consigned",
-            f"你支付 {fee:,} 枚占位费，将{name_or_artifact(snapshot)}以 {start_price:,} 灵石起拍。",
-            {"listing_fee":-fee, "start_price":start_price}, ["system", "crafting", "auction"],
-        ))
+        return crafting_artifacts._consign_crafted_artifact(self._crafting_dependencies.artifacts, game, artifact, start_price)
 
     def _make_crafted_auction_lot(self, game: GameState, rng: random.Random, consignment: dict[str, Any], suffix: str) -> dict[str, Any]:
-        artifact = consignment["artifact"]
-        rated = int(consignment["rated_price"])
-        start = int(consignment["start_price"])
-        return {
-            "id":f"{game.auction_state['id']}-{suffix}", "kind":"crafted_artifact",
-            "content_id":str(artifact["id"]), "artifact":copy.deepcopy(artifact),
-            "name":str(artifact["name"]),
-            "description":f"{artifact['quality_name']} · {artifact['mold_name']} · {artifact_summary(artifact)}",
-            "tier":int(consignment.get("tier", 1)), "tier_name":REALMS[max(0, min(12, int(consignment.get("tier", 1))))].name,
-            "start_price":start, "current_bid":start, "rated_price":rated,
-            "maximum_bid":max(1, math.floor(rated * float(self._auction_rules()["consignment_max_price_ratio"]))),
-            "current_bidder":"npc", "current_bidder_name":rng.choice(self._auction_rules()["bidder_aliases"]),
-            "seller":"player", "closed":False,
-        }
+        return crafting_artifacts._make_crafted_auction_lot(self._crafting_dependencies.artifacts, game, rng, consignment, suffix)
 
     def _public_crafting_system(self, game: GameState) -> dict[str, Any]:
-        player = game.player
-        rules = self._crafting_rules()
-        candidates = self._crafting_material_candidates(player)
-        active_ids = {str(active.get("id")) for active in active_crafted_artifacts(player)}
-        world_combat_cap = tianji_world_combat_power_cap(player.world)
-        artifacts = []
-        for row in player.crafted_artifacts:
-            if not any(item.crafted_artifact_id == str(row.get("id")) and item.quantity > 0 for item in player.inventory):
-                continue
-            public = copy.deepcopy(row)
-            public["equipped"] = str(row.get("id")) in active_ids
-            if row.get("tianji"):
-                raw_power = max(0.0, float(row.get("actual_stats", {}).get("combat_power", 0.0)))
-                if row.get("is_natal"):
-                    raw_power += max(0.0, float(player.natal_artifact_combat_bonus))
-                public["raw_combat_power"] = round(raw_power, 1)
-                public["effective_combat_power"] = round(
-                    effective_tianji_combat_power(raw_power, player.world), 1,
-                )
-                public["world_combat_power_cap"] = (
-                    round(world_combat_cap) if world_combat_cap is not None else None
-                )
-            artifacts.append(public)
-        return {
-            "visible": bool(crafting_config()) and player.realm_index >= int(rules.get("minimum_realm", 1)),
-            "molds": list(copy.deepcopy(self._crafting_molds()).values()),
-            "materials": candidates, "artifacts":artifacts,
-            "blueprints": copy.deepcopy(player.crafting_blueprints),
-            "active_count": len(active_crafted_artifacts(player)),
-            "budget": int(rules.get("budget_by_realm", [40] * 13)[max(0, min(12, player.realm_index))]),
-            "stat_costs": copy.deepcopy(rules.get("stat_costs", {})),
-            "stat_names": STAT_NAMES, "quality_names": copy.deepcopy(rules.get("quality_names", {})),
-            "bonuses": crafted_artifact_bonuses(player),
-            "auction_available": bool(game.auction_state.get("status") in {"scheduled", "open"} and self._auction_location_matches(game)),
-        }
+        return crafting_presentation._public_crafting_system(self._crafting_dependencies.presentation, game)
 
 
 def artifact_summary(artifact: dict[str, Any]) -> str:
