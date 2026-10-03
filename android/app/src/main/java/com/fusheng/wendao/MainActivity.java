@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private String origin;
     private boolean destroyed;
+    private static final int DEBUG_EXPORT = 5701, DEBUG_IMPORT = 5702;
+    private String pendingDebugExport;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -44,6 +46,13 @@ public class MainActivity extends Activity {
                     while ((n = in.read(chunk)) != -1) data.write(chunk, 0, n);
                     digest = new String(data.toByteArray(), StandardCharsets.UTF_8).trim();
                 }
+                String buildRecord;
+                try (InputStream in = getAssets().open("game-build.json")) {
+                    ByteArrayOutputStream data = new ByteArrayOutputStream();
+                    byte[] chunk = new byte[4096]; int n;
+                    while ((n = in.read(chunk)) != -1) data.write(chunk, 0, n);
+                    buildRecord = new String(data.toByteArray(), StandardCharsets.UTF_8);
+                }
                 // Copy into the app's sandbox; this requires no storage permission.
                 try (InputStream in = getAssets().open("game-assets.zip");
                      FileOutputStream out = new FileOutputStream(bundle)) {
@@ -54,7 +63,7 @@ public class MainActivity extends Activity {
                     if (!Python.isStarted()) Python.start(new AndroidPlatform(getApplicationContext()));
                 }
                 String session = Python.getInstance().getModule("android_runtime")
-                        .callAttr("start", getFilesDir().getAbsolutePath(), bundle.getAbsolutePath(), digest).toString();
+                        .callAttr("start", getFilesDir().getAbsolutePath(), bundle.getAbsolutePath(), digest, buildRecord).toString();
                 String[] parts = session.split("\\|", 2);
                 runOnUiThread(() -> { if (!destroyed) openGame(parts[0], parts[1]); });
             } catch (Exception error) {
@@ -112,6 +121,42 @@ public class MainActivity extends Activity {
     }
 
     public class Bridge {
+        @JavascriptInterface public void requestDebugMode() {
+            runOnUiThread(() -> {
+                if (destroyed) return;
+                boolean enabled = Python.getInstance().getModule("android_runtime")
+                        .callAttr("debug_mode_enabled").toBoolean();
+                new AlertDialog.Builder(MainActivity.this).setTitle("开发者模式")
+                    .setMessage(enabled ? "关闭开发者模式？调试副本会保留，正常角色不受影响。"
+                        : "开启开发者控制台？修改仅作用于独立调试副本；不会开启 WebView 远程调试。")
+                    .setNegativeButton("取消", null)
+                    .setPositiveButton(enabled ? "关闭" : "开启", (dialog, which) -> {
+                        Python.getInstance().getModule("android_runtime").callAttr("set_debug_mode", !enabled);
+                        web.evaluateJavascript("sessionStorage.removeItem('cultivation-debug-session'); location.reload()", null);
+                    }).show();
+            });
+        }
+        @JavascriptInterface public void exportDebugBundle(String text) {
+            if (text == null || text.length() > 64 * 1024 * 1024) return;
+            if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
+            runOnUiThread(() -> {
+                if (destroyed || pendingDebugExport != null) return;
+                pendingDebugExport = text;
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.setType("application/json"); intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.putExtra(Intent.EXTRA_TITLE, "CultivationLife-repro.json");
+                startActivityForResult(intent, DEBUG_EXPORT);
+            });
+        }
+        @JavascriptInterface public void importDebugBundle() {
+            if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
+            runOnUiThread(() -> {
+                if (destroyed) return;
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.setType("application/json"); intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, DEBUG_IMPORT);
+            });
+        }
         @JavascriptInterface public boolean copySaveCode(String text) {
             if (text == null || text.length() > 120000 || !(text.startsWith("FSWD1.") || text.startsWith("FSWDP1."))) return false;
             try {
@@ -149,6 +194,55 @@ public class MainActivity extends Activity {
                 finishAndRemoveTask();
             });
         }
+    }
+
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request != DEBUG_EXPORT && request != DEBUG_IMPORT) return;
+        String exporting = pendingDebugExport;
+        pendingDebugExport = null;
+        if (result != RESULT_OK || data == null || data.getData() == null) return;
+        new Thread(() -> {
+            try {
+                if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
+                if (request == DEBUG_EXPORT) {
+                    try (java.io.OutputStream out = getContentResolver().openOutputStream(data.getData())) {
+                        if (out == null || exporting == null) throw new java.io.IOException("无法写入复现包");
+                        out.write(exporting.getBytes(StandardCharsets.UTF_8));
+                    }
+                    runOnUiThread(() -> { if (!destroyed) web.evaluateJavascript("window.DebugConsole?.notify('复现包已保存。')", null); });
+                } else {
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                    try (InputStream in = getContentResolver().openInputStream(data.getData())) {
+                        if (in == null) throw new java.io.IOException("无法读取复现包");
+                        byte[] buffer = new byte[32768]; int n;
+                        while ((n = in.read(buffer)) != -1) {
+                            if (bytes.size() + n > 64 * 1024 * 1024) throw new java.io.IOException("复现包超过 64 MiB");
+                            bytes.write(buffer, 0, n);
+                        }
+                    }
+                    String text = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+                    runOnUiThread(() -> { if (!destroyed) {
+                        web.evaluateJavascript("window.DebugConsole?.beginNativeImport()", ignored -> deliverDebugImport(text, 0));
+                    }});
+                }
+            } catch (Exception error) {
+                runOnUiThread(() -> { if (!destroyed) web.evaluateJavascript(
+                    "window.DebugConsole?.notify(" + org.json.JSONObject.quote("复现包操作失败：" + error.getMessage()) + ")", null); });
+            }
+        }, "debug-document").start();
+    }
+
+    private void deliverDebugImport(String text, int offset) {
+        if (destroyed) return;
+        if (offset == text.length()) {
+            web.evaluateJavascript("window.DebugConsole?.finishNativeImport()", null);
+            return;
+        }
+        int end = Math.min(offset + 48 * 1024, text.length());
+        String chunk = org.json.JSONObject.quote(text.substring(offset, end));
+        web.evaluateJavascript("window.DebugConsole?.appendNativeImport(" + chunk + ")",
+                ignored -> deliverDebugImport(text, end));
     }
 
     @Override public void onBackPressed() {

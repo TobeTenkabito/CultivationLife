@@ -149,8 +149,9 @@ def test_preview_is_readonly_stable_and_stale_token_is_rejected(setup):
         engine._merchant_post(game,alliance,payload | {'mold_id':'umbrella','preview_token':quote['preview_token']})
 
 
-def test_debug_endpoint_requires_runtime_switch(setup):
+def test_debug_endpoint_requires_runtime_switch(setup, tmp_path):
     from cultivation_life import server as server_module
+    from cultivation_life.debug.runtime import Runtime
     engine,game,alliance=setup
     httpd=ThreadingHTTPServer(('127.0.0.1',0),server_module.Handler)
     threading.Thread(target=httpd.serve_forever,daemon=True).start()
@@ -162,12 +163,19 @@ def test_debug_endpoint_requires_runtime_switch(setup):
                 urllib.request.urlopen(request)
             assert error.value.code==404
             assert engine._load(game.id).merchant_state['membership']['rank']==0
-        with patch.object(server_module,'ENGINE',engine),patch.object(server_module,'load_runtime_config',return_value={'debug':True}):
+        with patch.object(server_module,'ENGINE',engine),patch.object(server_module,'load_runtime_config',return_value={'debug':True}), patch.object(server_module, 'PERSISTENCE_ROOT', tmp_path):
+            with pytest.raises(urllib.error.HTTPError) as error:
+                urllib.request.urlopen(request)
+            assert error.value.code == 404
+            source = (engine.store.directory / f'{game.id}.json').read_bytes()
+            session = Runtime(engine.root, tmp_path / 'data/debug', engine.store).start(game.id)
+            request.add_header('X-Cultivation-Debug', session['session_id'])
             with urllib.request.urlopen(request) as response:
                 shown=json.load(response)
             assert shown['merchant_system']['membership']['rank']==2
             assert shown['merchant_system']['membership']['site']=='hq'
             assert shown['player']['faction_id']==engine.present(game)['player']['faction_id']
+            assert (engine.store.directory / f'{game.id}.json').read_bytes() == source
     finally:
         httpd.shutdown()
         httpd.server_close()

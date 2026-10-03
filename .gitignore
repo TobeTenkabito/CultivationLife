@@ -10,6 +10,7 @@ dist/game_config.txt
 data/ui_preferences.json
 data/.ui-preferences-*.tmp
 data/logs/
+data/debug/
 design/
 android/.gradle/
 android/**/build/

@@ -14,7 +14,30 @@ _token = None
 _lock = threading.RLock()
 
 
-def start(files_dir, bundle_path, bundle_hash):
+def debug_mode_enabled():
+    from cultivation_life.runtime_config import load_runtime_config
+    return bool(load_runtime_config(Path(os.environ['CULTIVATION_APP_ROOT']))['debug'])
+
+
+def set_debug_mode(enabled):
+    """Native settings only: no remotely callable API can enable developer mode."""
+    import tempfile
+    if type(enabled) is not bool:
+        raise ValueError('enabled must be boolean')
+    root = Path(os.environ['CULTIVATION_APP_ROOT'])
+    temporary = None
+    with _lock:
+        try:
+            with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=root, delete=False) as out:
+                temporary = Path(out.name)
+                out.write('Debug=True\n' if enabled else 'Debug=False\n')
+            temporary.replace(root / 'game_config.txt')
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+
+
+def start(files_dir, bundle_path, bundle_hash, build_record=None):
     global _httpd, _token
     with _lock:
         if _httpd is not None:
@@ -46,6 +69,8 @@ def start(files_dir, bundle_path, bundle_hash):
             shutil.rmtree(stage)
             marker.write_text(str(bundle_hash))
         os.environ['CULTIVATION_APP_ROOT'] = str(root)
+        if build_record is not None:
+            os.environ['CULTIVATION_BUILD_FINGERPRINT'] = hashlib.sha256(str(build_record).encode()).hexdigest()
         from cultivation_life import server
         _token = secrets.token_urlsafe(32)
 

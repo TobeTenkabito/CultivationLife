@@ -1,0 +1,18 @@
+#debug-tools{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:sticky;top:0;z-index:110;margin-bottom:12px;padding:6px;background:#171c24;border-radius:8px;flex-wrap:wrap}
+#debug-console-open,#debug-session-banner{padding:9px 14px;border:1px solid #b88a44;background:#241e17;color:#ffe2a8;border-radius:8px;cursor:pointer}
+#debug-session-banner{flex:1;font-size:12px;white-space:normal}
+#debug-console{box-sizing:border-box;width:min(920px,96vw);height:min(740px,92dvh);max-height:92dvh;border:1px solid #a88755;border-radius:12px;padding:16px;background:#171c24;color:#ecf1f8;overflow:auto;z-index:10020}
+#debug-console::backdrop{background:#0009}
+#debug-console header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#debug-console h2{font-size:20px;margin:0}
+#debug-console p{font-size:13px;color:#c6d3e1}
+#debug-console button,#debug-console a{padding:8px 10px;border:1px solid #62758c;border-radius:5px;background:#283545;color:#edf4ff;cursor:pointer;font-size:13px}
+#debug-console .debug-actions{display:flex;flex-wrap:wrap;gap:6px}
+#debug-console-output{height:45dvh;min-height:140px;overflow:auto;background:#10151d;border:1px solid #45576e;margin:12px 0;padding:8px;user-select:text}
+#debug-console-output pre{font:12px/1.6 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;border-bottom:1px solid #344253;padding-bottom:8px;color:#dce9f8}
+#debug-console-output .debug-error{color:#ffafad}
+#debug-console-output>div{display:flex;flex-wrap:wrap;gap:8px}
+#debug-console form{display:flex;align-items:center;gap:8px}
+#debug-console-input{min-width:0;flex:1;background:#10151d;color:#edf4ff;padding:10px;border:1px solid #8295ae;font:14px Consolas,monospace}
+#debug-console [hidden],#debug-console-open[hidden],#debug-session-banner[hidden]{display:none!important}
+@media(max-width:500px){#debug-console{padding:10px}#debug-console form label{display:none}#debug-console-output{height:38dvh}#debug-console-open{font-size:12px}}

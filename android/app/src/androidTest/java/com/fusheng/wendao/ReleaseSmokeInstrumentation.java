@@ -194,7 +194,58 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("custody")) {
+            if(phase.equals("debug-console")) {
+                check(Boolean.TRUE.equals(js("!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Debug off and native capabilities");
+                python("from android_runtime import set_debug_mode\nset_debug_mode(True)");
+                js("location.reload();true"); Thread.sleep(800);
+                waitForJs("typeof configData!=='undefined' && configData?.debug===true && !!document.querySelector('#debug-console-open')", "Debug console enabled");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'Debug Console Verification',preset_id:'core',seed:5701})});await loadGame(g.id);return g.id;})()");
+                python("from cultivation_life import server\nfrom pathlib import Path\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nserver._console_source_bytes=p.read_bytes()");
+                tapSelector("#debug-console-open"); waitForJs("!busy", "Help loaded");
+                for(String command:new String[]{"debug start","player set spirit_stones 1234567","player set breakthrough_chance 1","snapshot create baseline","player set realm_index 4","player set layer 7","snapshot restore baseline"}) {
+                    js("document.querySelector('#debug-console-input').value="+JSONObject.quote(command)+";document.querySelector('#debug-console form').requestSubmit();true");
+                    waitForJs("!busy && !document.querySelector('#debug-console-input').disabled", "Command completed: "+command);
+                    check(Boolean.TRUE.equals(js("!document.querySelector('#debug-console-output pre:last-child')?.classList.contains('debug-error')")), "Command result: "+command);
+                }
+                check(Boolean.TRUE.equals(js("game.player.inventory.find(x=>x.id==='spirit_stone').quantity===1234567 && !!sessionStorage.getItem('cultivation-debug-session')")), "Isolated resource mutation");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-choice="+theme+"]').click();true");
+                    check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#debug-console').getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+1 && !!document.querySelector('#debug-session-banner').textContent;})()")), "Console geometry theme "+theme);
+                }
+                // Exercise the real SAF result handlers with a deterministic test URI.
+                File debugFile=new File(getTargetContext().getExternalFilesDir(null),"verification/debug-export.json");
+                debugFile.getParentFile().mkdirs();
+                if(debugFile.exists()) check(debugFile.delete(),"Clear previous debug export fixture");
+                Intent debugDocument=new Intent().setData(android.net.Uri.fromFile(debugFile));
+                android.content.IntentFilter exportFilter=new android.content.IntentFilter(Intent.ACTION_CREATE_DOCUMENT);
+                exportFilter.addCategory(Intent.CATEGORY_OPENABLE);exportFilter.addDataType("application/json");
+                ActivityMonitor exportMonitor=addMonitor(exportFilter,new ActivityResult(Activity.RESULT_OK,debugDocument),true);
+                async("(async()=>{const r=await fetch('/api/debug/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:'repro export',session_id:sessionStorage.getItem('cultivation-debug-session')})});const v=await r.json();window.__debugExportText=v.data.download.content;AndroidGame.exportDebugBundle(__debugExportText);return true;})()");
+                long exportDeadline=System.currentTimeMillis()+30000;
+                while((!debugFile.isFile() || debugFile.length()==0) && System.currentTimeMillis()<exportDeadline) Thread.sleep(100);
+                removeMonitor(exportMonitor);
+                check(debugFile.isFile() && debugFile.length()>0,"Native debug document export");
+                waitForJs("document.querySelector('#debug-console-output').textContent.includes('复现包已保存')", "Native debug export completed");
+                JSONObject debugBundle=new JSONObject(new String(java.nio.file.Files.readAllBytes(debugFile.toPath()),StandardCharsets.UTF_8));
+                check(debugBundle.getString("format").equals("CultivationLife.debug.v1"),"Native exported bundle format");
+                check(!debugBundle.getJSONObject("export_environment").isNull("build_sha256"),"Android source-build fingerprint");
+                String oldSession=(String)js("sessionStorage.getItem('cultivation-debug-session')");
+                android.content.IntentFilter importFilter=new android.content.IntentFilter(Intent.ACTION_OPEN_DOCUMENT);
+                importFilter.addCategory(Intent.CATEGORY_OPENABLE);importFilter.addDataType("application/json");
+                ActivityMonitor importMonitor=addMonitor(importFilter,new ActivityResult(Activity.RESULT_OK,debugDocument),true);
+                js("AndroidGame.importDebugBundle();true");
+                waitForJs("!busy && sessionStorage.getItem('cultivation-debug-session')!=="+JSONObject.quote(oldSession),"Native debug import creates a new isolated session");
+                removeMonitor(importMonitor);
+                capture("debug-console");
+                runOnMainSync(()->activity.onBackPressed());
+                waitForJs("!document.querySelector('#debug-console').open", "Native back closes console");
+                async("mutate(`/api/games/${game.id}/advance`,{action:'rest',years:1})");
+                python("from cultivation_life import server\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nassert p.read_bytes()==server._console_source_bytes");
+                python("from android_runtime import set_debug_mode\nset_debug_mode(False)");
+                check(((Number)async("fetch(`/api/games/${game.id}`,{headers:DebugConsole.headers(`/api/games/${game.id}`)}).then(r=>r.status)")).intValue()==404, "Disabled stale session rejects gameplay");
+                js("sessionStorage.removeItem('cultivation-debug-session');true");
+                result.putString("debug_scope","Isolated source and achievements, resource and probability commands, snapshots, six themes, native document callbacks, source fingerprint, native back and fail-closed session");
+            } else if(phase.equals("custody")) {
                 python(assetText("npc_custody_release.py"));
             } else if(phase.equals("asura")) {
                 String novice=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'人界门槛验收',spirit_root:'supreme_metal',path:'demonic',seed:1562})});await loadGame(g.id);return g.id;})()");
@@ -771,7 +822,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("release-action");
             }
             result.putString("status","passed");result.putString("phase",phase);
-            result.putString("scope","Signed release APK, Android 12, offline upgrade preservation and six themes");
+            result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : "Signed release APK, Android 12, offline upgrade preservation and six themes");
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);

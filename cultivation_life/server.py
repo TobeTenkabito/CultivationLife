@@ -11,6 +11,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from functools import wraps
+from contextlib import nullcontext
 from urllib.parse import unquote, urlparse
 
 from .content_registry import (
@@ -53,8 +54,13 @@ def local_request(command):
         handler.request_id = uuid.uuid4().hex
         handler._pending_json = None
         handler._defer_json = False
+        handler.request_engine = ENGINE
         try:
             handler._validate_request()
+            debug_request = (urlparse(handler.path).path.startswith('/api/debug/')
+                             or bool(handler.headers.get('X-Cultivation-Debug')))
+            if debug_request and not load_runtime_config(APP_ROOT)['debug']:
+                raise NotFoundError('接口不存在')
             if handler.command == 'POST':
                 handler._request_payload = handler._body()
             # Guards, migration reads, save import/export and command execution
@@ -62,8 +68,15 @@ def local_request(command):
             if urlparse(handler.path).path.startswith('/api/'):
                 handler._defer_json = True
                 try:
-                    with request_scope(ENGINE):
-                        command(handler)
+                    context = nullcontext(ENGINE)
+                    if handler.headers.get('X-Cultivation-Debug'):
+                        from .debug.gateway import request_engine
+                        context = request_engine(handler, ENGINE, ENGINE_ROOT, PERSISTENCE_ROOT)
+                    with context as engine:
+                        handler.request_engine = engine
+                        scope = nullcontext() if urlparse(handler.path).path == '/api/debug/command' else request_scope(engine)
+                        with scope:
+                            command(handler)
                 finally:
                     handler._defer_json = False
                 if handler._pending_json is not None:
@@ -111,6 +124,7 @@ class Handler(BaseHTTPRequestHandler):
 
     @local_request
     def do_GET(self) -> None:  # noqa: N802
+        ENGINE = self.request_engine
         path = urlparse(self.path).path
         try:
             if path == "/api/config":
@@ -153,6 +167,7 @@ class Handler(BaseHTTPRequestHandler):
 
     @local_request
     def do_DELETE(self) -> None:  # noqa: N802
+        ENGINE = self.request_engine
         try:
             parts = unquote(urlparse(self.path).path).strip("/").split("/")
             if len(parts) != 3 or parts[:2] != ["api", "games"]:
@@ -164,9 +179,14 @@ class Handler(BaseHTTPRequestHandler):
 
     @local_request
     def do_POST(self) -> None:  # noqa: N802
+        ENGINE = self.request_engine
         path = urlparse(self.path).path
         try:
             payload = self._request_payload
+            if path == '/api/debug/command':
+                from .debug.gateway import execute
+                self._json(execute(payload, ENGINE, ENGINE_ROOT, PERSISTENCE_ROOT))
+                return
             if path.startswith("/api/save-transfer/"):
                 operation = path.rsplit('/', 1)[-1]
                 if operation == 'export':
@@ -210,6 +230,8 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
                 raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
+            if operation in {'tianji-debug-reveal-all', 'merchant-debug-hq'} and not self.headers.get('X-Cultivation-Debug'):
+                raise NotFoundError('请先通过开发者控制台进入独立调试副本')
             ENGINE.assert_ghost_operation_allowed(game_id, operation)
             ENGINE.assert_guixu_operation_allowed(game_id, operation)
             ENGINE.assert_buddhist_operation_allowed(game_id, operation)
@@ -626,7 +648,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def _body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
-        limit = 17 * 1024 * 1024 if urlparse(self.path).path in {'/api/save-transfer/preview', '/api/save-transfer/import'} else 1_000_000
+        path = urlparse(self.path).path
+        limit = (64 * 1024 * 1024 if path == '/api/debug/command' else
+                 17 * 1024 * 1024 if path in {'/api/save-transfer/preview', '/api/save-transfer/import'} else 1_000_000)
         if length < 0 or length > limit:
             raise ValueError("请求体过大")
         if not length:
@@ -675,6 +699,10 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _error(self, error: Exception) -> None:
+        if self.headers.get('X-Cultivation-Debug'):
+            import traceback
+            self._debug_failure = {'type': type(error).__name__, 'message': str(error),
+                                   'traceback': traceback.format_exc()}
         if isinstance(error, ConnectionError):
             return
         request_id = self.request_id

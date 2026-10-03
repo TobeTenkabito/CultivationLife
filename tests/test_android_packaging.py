@@ -49,7 +49,7 @@ from pathlib import Path
 sys.path.insert(0, sys.argv[1]);sys.path.insert(0, sys.argv[2])
 import android_runtime
 root, assets=Path(sys.argv[3]),Path(sys.argv[4])
-session=android_runtime.start(root,assets/'game-assets.zip',(assets/'game-assets.sha256').read_text())
+session=android_runtime.start(root,assets/'game-assets.zip',(assets/'game-assets.sha256').read_text(), '{"source":"fixture"}')
 base,token=session.split('|')
 try:
  urllib.request.urlopen(base+'/api/config')
@@ -58,6 +58,20 @@ except urllib.error.HTTPError as e: assert e.code==403
 headers={'Cookie':'cultivation_session='+token}
 config=json.load(urllib.request.urlopen(urllib.request.Request(base+'/api/config',headers=headers)))
 assert config['debug'] is False
+assert android_runtime.debug_mode_enabled() is False
+android_runtime.set_debug_mode(True)
+assert android_runtime.debug_mode_enabled() is True
+command=urllib.request.Request(base+'/api/debug/command',data=b'{"command":"help"}',headers={**headers,'Content-Type':'application/json'})
+assert json.load(urllib.request.urlopen(command))['ok']
+android_runtime.set_debug_mode(False)
+try:
+ urllib.request.urlopen(command)
+ raise AssertionError('Debug API remained enabled')
+except urllib.error.HTTPError as e: assert e.code==404
+from cultivation_life.debug.runtime import Runtime
+from cultivation_life import server
+import hashlib
+assert Runtime(server.ENGINE_ROOT, root/'game/data/debug', server.ENGINE.store).identity()['build_sha256'] == hashlib.sha256(b'{"source":"fixture"}').hexdigest()
 assert len(config['extensions'])==len(list((Path(sys.argv[1])/'dlc').glob('*/manifest.json')))
 from cultivation_life.version import BASE_GAME_VERSION
 assert config['base_game']['version']==BASE_GAME_VERSION
