@@ -66,7 +66,9 @@ Android 15 起部分设备使用 [16 KB 内存页](https://developer.android.com
 
 Gradle 自动从仓库复制 Python 源码、打包 content / web / dlc，不维护第二套游戏规则。Android 专用呈现在 `app/src/main/mobile`，打包时注入，不改变 Windows 主题。CSS sRGB 混色在打包时转换为通道运算，兼容 Android 12 最初的 WebView 91；各主题、DLC 和资源条的颜色变量继续独立生效。
 
-本地服务只监听随机的 127.0.0.1 端口，使用每次进程启动生成的随机会话令牌，并检查 Host / Origin。WebView 限制在该源，不申请存储权限。游戏请求串行结算，资源更新不触碰 data 目录。发布包关闭 WebView 调试。
+`prepareGameAssets` 依赖 `copyGamePython`，先核对实际暂存的 Python 源码，再生成随 APK 携带的 `assets/game-build.json`。该记录覆盖后端、内容、网页、DLC、Android 主源码和相关构建脚本的哈希。发布脚本核对当前输入及 APK 内的 Python 模块清单；缺少记录或源码已经变化的旧 APK 会被拒绝，必须重新构建并提供对应 APK 的验收证据。单独生成测试资源包不会生成构建证明。
+
+本地服务只监听随机的 127.0.0.1 端口，使用每次进程启动生成的随机会话令牌，并检查 Host / Origin。WebView 限制在该源，不申请存储权限。游戏请求串行结算；读取请求体与发送响应在存档锁之外执行，连接读写超时为 15 秒，慢连接不再占用全局存档锁。资源更新不触碰 data 目录。发布包关闭 WebView 调试。
 
 ## 验收
 

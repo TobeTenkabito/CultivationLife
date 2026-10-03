@@ -42,6 +42,9 @@ CORE_SHARED = frozenset(f'cultivation_life.{name}' for name in (
 MODEL_FOUNDATIONS = frozenset(f'cultivation_life.{name}' for name in (
     'models', 'ancestry', 'cultivation_coordinates', 'system.combat.migration',
 ))
+COURT_FACADES = frozenset(f'cultivation_life.system.{name}' for name in (
+    'heavenly_court_system', 'court_governance', 'court_lifecycle', 'yaochi_system',
+))
 
 
 def import_edges(root: Path):
@@ -155,9 +158,13 @@ def violations(edges):
             or source in MODEL_FOUNDATIONS
             and (target.startswith('cultivation_life.system.') and target not in MODEL_FOUNDATIONS
                  or target in {'cultivation_life.content_registry', 'cultivation_life.rules'}))
+        court_reverse_import = (
+            source.startswith('cultivation_life.system.court.')
+            and source != 'cultivation_life.system.court.wiring'
+            and target in COURT_FACADES | {'cultivation_life.system.court.wiring'})
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
-                or core_reverse_import):
+                or core_reverse_import or court_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 

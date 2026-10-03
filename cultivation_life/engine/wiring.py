@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from .dependencies import EngineDependencies, NpcClassDependencies
+from ..system.court import wiring as court_wiring
 from .composition import actions, asura, combat, contacts, events, lifecycle, presentation, world
 
 if TYPE_CHECKING:
@@ -15,6 +16,10 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        court_state=court_wiring.bind_state(engine),
+        court_governance=court_wiring.bind_governance(engine),
+        court_lifecycle=court_wiring.bind_lifecycle(engine),
+        court_yaochi=court_wiring.bind_yaochi(engine),
         npc_contacts=contacts.bind_contacts(engine),
         asura_actions=asura.bind_asura_actions(engine),
         asura_trials=asura.bind_asura_trials(engine),

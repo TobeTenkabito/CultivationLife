@@ -67,21 +67,15 @@ def start(files_dir, bundle_path, bundle_hash):
 
             def do_GET(self):
                 if self._allowed():
-                    if self.path.startswith('/api/'):
-                        with _lock:
-                            super().do_GET()
-                    else:
-                        super().do_GET()
+                    super().do_GET()
 
             def do_POST(self):
                 if self._allowed():
-                    with _lock:
-                        super().do_POST()
+                    super().do_POST()
 
             def do_DELETE(self):
                 if self._allowed():
-                    with _lock:
-                        super().do_DELETE()
+                    super().do_DELETE()
 
             def log_message(self, *_args):
                 pass

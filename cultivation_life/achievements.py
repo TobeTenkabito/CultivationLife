@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import GameState
+from .errors import MetadataReadError
 from .runtime import now_iso
 
 from .achievement_definitions import (
@@ -34,19 +35,25 @@ class GlobalMetadataStore:
 
     def ensure_exists(self) -> None:
         with self._lock:
-            if not self.path.exists():
+            try:
+                self.path.stat()
+            except FileNotFoundError:
                 self._write(self._empty())
+            except OSError as error:
+                raise MetadataReadError("无法检查成就记录，原文件已保留") from error
 
     def read(self) -> dict[str, Any]:
         with self._lock:
-            if not self.path.exists():
-                return self._empty()
             try:
                 data = json.loads(self.path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
+            except FileNotFoundError:
                 return self._empty()
-            if data.get("schema_version") != 1 or not isinstance(data.get("achievements"), dict):
-                return self._empty()
+            except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                raise MetadataReadError("成就记录无法读取，原文件已保留，请检查文件后重试") from error
+            if (not isinstance(data, dict) or data.get("schema_version") != 1
+                    or not isinstance(data.get("achievements"), dict)
+                    or any(not isinstance(record, dict) for record in data['achievements'].values())):
+                raise MetadataReadError("成就记录结构损坏，原文件已保留")
             return data
 
     def unlock(self, definitions: list[dict[str, Any]], game: GameState) -> list[dict[str, Any]]:

@@ -1,14 +1,17 @@
 """Package the desktop resources unchanged, with Android-only presentation additions."""
 import hashlib
+import json
 from pathlib import Path
 import sys
 import zipfile
 from android_css import compile_css
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.android_provenance import build_record
 
 
-def main(destination):
+def main(destination, staged_python=None):
     destination.mkdir(parents=True, exist_ok=True)
     mobile = ROOT / 'android/app/src/main/mobile'
     archive = destination / 'game-assets.zip'
@@ -29,8 +32,14 @@ def main(destination):
             if source.is_file():
                 bundle.write(source, 'web/android/' + source.relative_to(mobile).as_posix())
     (destination / 'game-assets.sha256').write_text(hashlib.sha256(archive.read_bytes()).hexdigest(), encoding='ascii')
+    if staged_python is not None:
+        record = build_record(ROOT, staged_python)
+        (destination / 'game-build.json').write_text(json.dumps(record, sort_keys=True), encoding='utf-8')
+    else:
+        # Standalone UI fixture bundles are not evidence of an APK build.
+        (destination / 'game-build.json').unlink(missing_ok=True)
     print(f'Android game bundle: {archive.stat().st_size:,} bytes; six themes and all installed DLC')
 
 
 if __name__ == '__main__':
-    main(Path(sys.argv[1]))
+    main(Path(sys.argv[1]), Path(sys.argv[2]) if len(sys.argv) > 2 else None)

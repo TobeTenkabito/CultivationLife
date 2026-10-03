@@ -8,9 +8,11 @@
 from cultivation_life.engine import GameEngine, encode_rng
 ```
 
-`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成移出继承列表，其余直接基类的相对顺序保持不变。
+`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭与瑶池移出继承列表，其余直接基类的相对顺序保持不变。
 
 当前增量重构的第一阶段将直接基类从 23 个减为 22 个。`actions/asura.py` 接收 `AsuraActionDependencies`，修罗试炼接收 `AsuraTrialDependencies`；两者均不接收整个引擎。旧 `system/asura_system.py` 保留薄适配器供既有调用方使用，引擎不再继承它。
+
+第二阶段将天庭与瑶池的 34 个方法迁入 `system/court/`，直接基类从 22 个减为 20 个。其中 29 个方法使用状态、政务、任期和瑶池四组显式依赖，5 个静态辅助函数无需依赖。`system/court/wiring.py` 连接具名能力，由引擎统一装配；旧四个 Mixin 类仅用于兼容原调用方，不再出现在引擎继承链中。
 
 ## 依赖如何连接
 
@@ -92,7 +94,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 继续使用现有 NPC 与关系对象并保持同步顺序。统一关系存储需要模型与存档迁移，超出等价拆分范围。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 仍保留的 22 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成已迁出，其余系统保持继承顺序，后续逐个迁移。 |
+| `GameEngine` 仍保留的 20 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成、天庭与瑶池已迁出，其余系统保持相对继承顺序，后续逐个迁移。 |
 | `cultivation_life/map_runtime.py` 的 `MapTravelMixin._advance_world_year` | 位于本轮范围之外，年度系统调用顺序保持原样，通过显式回调接入引擎算法。 |
 | `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与原 JSON 格式，没有引入实体数据库、状态复制或新的存档版本。 |
 
@@ -107,8 +109,10 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 ## 验证
 
+HTTP 请求体读取和响应网络写入位于存档锁之外；状态读取、补全、操作与响应数据序列化仍在请求作用域内完成。桌面与 Android 共用这条边界，慢连接不再持有全局存档锁。成就元数据仅在文件不存在时初始化；读取失败或结构损坏会报错并保留原文件，禁止将失败当作空记录覆盖。
+
 ```powershell
-python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py
+python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py tests/test_court_dependencies.py tests/test_priority_fixes.py
 python -m pytest -q tests/test_module_dependencies.py
 python tools/check_module_dependencies.py
 python -m pytest -q
@@ -119,3 +123,5 @@ python -m pytest -q
 第二轮重构的历史验证包括 251 个实现函数语法树、717 个引擎方法接口、七条路线回放及 NPC 辅助函数核对，不代表后续版本未发生变化。
 
 当前第一阶段另行核对了迁移前后 797 个引擎方法签名，以及原有 26 组依赖构造表达式；两者保持一致。三个固定种子的 81 个回放检查点覆盖转化事件、炼体、开脉、凝练、融合战、养成和神通操作，比较完整返回数据、存档、随机数状态与历史记录。独立依赖测试还覆盖无引擎调用、实例资源替换、方法和子类覆盖、旧 Mixin 适配器。
+
+天庭与瑶池阶段核对了 34 个迁移方法体（仅归一化 `self` 到依赖参数的替换）与 797 个方法签名。新增 78 个天庭／瑶池检查点，连同修罗、神机／内政与战斗回放，共 274 个检查点与迁移前一致。全量 1710 项测试及浏览器冒烟通过；依赖图的 225 个模块无显式导入循环。
