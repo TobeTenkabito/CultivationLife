@@ -6,6 +6,7 @@ import math
 import mimetypes
 import os
 import sys
+import uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -23,6 +24,9 @@ from .content_registry import (
     WORLD_SYSTEMS,
 )
 from .engine import GameEngine
+from .engine.transactions import request_scope
+from .errors import AccessDeniedError, NotFoundError
+from .error_reporting import report_internal_error
 from .system.extension_system import write_extension_preference
 from .rules import QI_SOURCE_NAMES
 from .runtime import persistence_root
@@ -46,12 +50,13 @@ ENGINE = GameEngine(ENGINE_ROOT, PERSISTENCE_ROOT / "data" / "saves")
 def local_request(command):
     @wraps(command)
     def run(handler):
+        handler.request_id = uuid.uuid4().hex
         try:
             handler._validate_request()
             # Guards, migration reads, save import/export and command execution
             # must share one transaction, including API GETs which can migrate.
             if urlparse(handler.path).path.startswith('/api/'):
-                with ENGINE.store.lock:
+                with request_scope(ENGINE):
                     return command(handler)
             return command(handler)
         except ConnectionError:
@@ -82,14 +87,14 @@ class Handler(BaseHTTPRequestHandler):
         if port == 80:
             allowed_hosts.update(value.removesuffix(':80') for value in tuple(allowed_hosts))
         if host not in allowed_hosts:
-            raise PermissionError('无权访问本地游戏')
+            raise AccessDeniedError('无权访问本地游戏')
         origin = self.headers.get('Origin')
         if (origin is not None and origin != f'http://{host}') or self.headers.get('Sec-Fetch-Site') == 'cross-site':
-            raise PermissionError('不接受跨站游戏请求')
+            raise AccessDeniedError('不接受跨站游戏请求')
         # JSON is not a form/simple-request content type. Native clients without
         # an Origin remain supported, but web forms cannot mutate local saves.
         if self.command == 'POST' and self.headers.get_content_type() != 'application/json':
-            raise PermissionError('游戏请求须使用 application/json')
+            raise AccessDeniedError('游戏请求须使用 application/json')
 
     @local_request
     def do_GET(self) -> None:  # noqa: N802
@@ -138,7 +143,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             parts = unquote(urlparse(self.path).path).strip("/").split("/")
             if len(parts) != 3 or parts[:2] != ["api", "games"]:
-                raise KeyError("接口不存在")
+                raise NotFoundError("接口不存在")
             ENGINE.delete_game(parts[2])
             self._json({"deleted": parts[2]})
         except Exception as error:
@@ -160,7 +165,7 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError('请先预览存档')
                     result = import_snapshot(ENGINE.store, payload.get('payload', ''), payload['existing_hash'])
                 else:
-                    raise KeyError('接口不存在')
+                    raise NotFoundError('接口不存在')
                 self._json(result)
                 return
             if path == "/api/ui-preferences":
@@ -190,7 +195,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             parts = path.strip("/").split("/")
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
-                raise KeyError("接口不存在")
+                raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
             ENGINE.assert_ghost_operation_allowed(game_id, operation)
             ENGINE.assert_guixu_operation_allowed(game_id, operation)
@@ -235,7 +240,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.forge_tianji_artifact(game_id, payload)
             elif operation == "tianji-debug-reveal-all":
                 if not load_runtime_config(APP_ROOT)["debug"]:
-                    raise KeyError("接口不存在")
+                    raise NotFoundError("接口不存在")
                 result = ENGINE.debug_reveal_all_tianji(game_id)
             elif operation == "use-item":
                 result = ENGINE.use_item(game_id, payload.get("item_id", ""))
@@ -269,7 +274,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.preview_merchant_commission(game_id, payload)
             elif operation == "merchant-debug-hq":
                 if not load_runtime_config(APP_ROOT)["debug"]:
-                    raise KeyError("接口不存在")
+                    raise NotFoundError("接口不存在")
                 result = ENGINE.debug_merchant_hq(game_id, str(payload.get("alliance_id", "")))
             elif operation == "auction-private-buy":
                 result = ENGINE.buy_private_trade_item(
@@ -601,7 +606,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "debug-world-news":
                 result = ENGINE.set_world_news_debug(game_id, bool(payload.get("enabled", False)))
             else:
-                raise KeyError("接口不存在")
+                raise NotFoundError("接口不存在")
             self._json(result)
         except Exception as error:
             self._error(error)
@@ -632,9 +637,9 @@ class Handler(BaseHTTPRequestHandler):
         relative = "index.html" if path == "/" else unquote(path.lstrip("/"))
         target = (WEB_ROOT / relative).resolve()
         if WEB_ROOT.resolve() not in target.parents and target != WEB_ROOT.resolve():
-            raise KeyError("文件不存在")
+            raise NotFoundError("文件不存在")
         if not target.is_file():
-            raise KeyError("文件不存在")
+            raise NotFoundError("文件不存在")
         body = target.read_bytes()
         content_type = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
         if content_type.startswith("text/") or content_type in {"application/javascript", "application/json"}:
@@ -648,9 +653,26 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _error(self, error: Exception) -> None:
-        status = (HTTPStatus.FORBIDDEN if isinstance(error, PermissionError) else
-                  HTTPStatus.NOT_FOUND if isinstance(error, KeyError) else HTTPStatus.BAD_REQUEST)
-        self._json({"error": str(error).strip("'\"")}, status)
+        if isinstance(error, ConnectionError):
+            return
+        request_id = self.request_id
+        if isinstance(error, AccessDeniedError):
+            status, code = HTTPStatus.FORBIDDEN, 'forbidden'
+        elif isinstance(error, NotFoundError):
+            status, code = HTTPStatus.NOT_FOUND, 'not_found'
+        elif isinstance(error, ValueError):
+            status, code = HTTPStatus.BAD_REQUEST, 'invalid_request'
+        else:
+            parts = urlparse(self.path).path.strip('/').split('/')
+            if parts[:2] == ['api', 'games']:
+                operation = parts[3] if len(parts) == 4 else 'game'
+            else:
+                operation = '/'.join(parts[:2])
+            report_internal_error(PERSISTENCE_ROOT, request_id, self.command, operation, error)
+            self._json({'error': f'服务器内部错误，请求编号：{request_id}。详情见本地错误日志。',
+                        'code': 'internal_error', 'request_id': request_id}, HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+        self._json({'error': str(error).strip("'\""), 'code': code, 'request_id': request_id}, status)
 
     def log_message(self, format: str, *args: object) -> None:
         if sys.stdout is not None:

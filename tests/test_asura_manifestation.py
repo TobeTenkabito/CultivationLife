@@ -115,7 +115,7 @@ def test_copies_power_and_actual_domain_capped_at_eight(ready, realm, ratios, fi
     game.player.realm_index = realm
     route(game.player, level=9, rank=rank)
     power = combat_power(game.player)
-    asura_trials.start(engine, game, 'asura_breakthrough')
+    asura_trials.start(engine._dependencies.asura_trials, game, 'asura_breakthrough')
     battle = load_battle(game.active_trial['snapshot'])
     assert battle.escape_forbidden_sides == {'player', 'enemy'}
     for i, (ratio, field) in enumerate(zip(ratios, fields)):
@@ -179,7 +179,7 @@ def test_branch_slots_and_dlc_disabled_projection(ready):
 def test_trial_snapshot_resume_preserves_state(ready):
     engine, game = ready
     route(game.player, level=9)
-    asura_trials.start(engine, game, 'asura_breakthrough')
+    asura_trials.start(engine._dependencies.asura_trials, game, 'asura_breakthrough')
     trial = game.active_trial
     battle = load_battle(trial['snapshot'])
     state = trial['battle_state']
@@ -265,7 +265,7 @@ def test_vein_quote_cost_pity_and_per_layer_gate(ready):
     p=g.player
     q=asura.public_meridians(p)
     assert len(q['nodes'])==27 and q['required']==3 and q['can_open']
-    with patch('cultivation_life.system.asura_system.decode_rng') as decoder:
+    with patch('cultivation_life.engine.actions.asura.decode_rng') as decoder:
         rng=random.Random(0)
         # A real RNG whose first draw exceeds the initial 85% chance.
         for seed in range(100):

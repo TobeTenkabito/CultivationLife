@@ -49,6 +49,7 @@ from .actions import factions as faction_actions
 from .actions import encounters as encounter_actions
 from .actions import inventory as inventory_actions
 from .actions import relationships as relationship_actions
+from .actions import asura as asura_actions
 from .events import choices as choices
 from .progression import breakthroughs as breakthroughs
 from .progression import trials as trials
@@ -65,11 +66,8 @@ from .wiring import bind_dependencies, bind_npc_class_dependencies
 from .transactions import serialized_commands
 
 
-from ..system.asura_system import AsuraSystemMixin
-
-
 @serialized_commands
-class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, YaochiMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, TianjiSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, IntrigueSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, HeavenlyCourtSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -102,6 +100,16 @@ class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineS
         self._dependencies = bind_dependencies(
             self, bloodline_content_available=lambda: bloodline_content_available(),
         )
+
+    def asura_action(self, game_id, action, target_id='', body_ids=None, name=''):
+        return asura_actions.asura_action(self._dependencies.asura_actions, game_id, action, target_id, body_ids, name)
+
+    def _asura_cultivate(self, game, action, target_id, body_ids, name, rng):
+        return asura_actions._asura_cultivate(self._dependencies.asura_actions, game, action, target_id, body_ids, name, rng)
+
+    @staticmethod
+    def _spend_asura_souls(state, cost):
+        return asura_actions._spend_asura_souls(state, cost)
 
     def _plan_world_transition(self, game, destination, mode="progression", *, route_id=None, arrival_location=None, reason=""):
         from ..system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
@@ -316,8 +324,14 @@ class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineS
         return presentation_runtime._history_visible_in_world(record, game)
 
     def _load(self, game_id: str) -> GameState:
+        from .transactions import request_games
+        games = request_games(self)
+        if games is not None and game_id in games:
+            return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
         self._ensure_buddhist_state(game)
+        if games is not None:
+            games[game_id] = game
         return game
 
     def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male') -> dict[str, Any]:
@@ -625,7 +639,7 @@ class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineS
     def _start_breakthrough_trial(self, game: GameState, kind: str, source: int, target: int, old_label: str, major: bool, rng: random.Random) -> None:
         from .progression import asura_trials
         if kind in asura_trials.KINDS:
-            return asura_trials.start(self, game, kind)
+            return asura_trials.start(self._dependencies.asura_trials, game, kind)
         from .progression.immortal_trials import KINDS, start
         if kind in KINDS:
             return start(self._dependencies.immortal_trials, game, kind)
@@ -646,7 +660,7 @@ class GameEngine(AsuraSystemMixin, UpperInstitutionMixin, YaochiMixin, DoctrineS
     def _resolve_trial_step(self, game: GameState, step: str, rng: random.Random) -> tuple[str, str]:
         from .progression import asura_trials
         if (game.active_trial or {}).get("kind") in asura_trials.KINDS:
-            return asura_trials.resolve(self, game, step, rng)
+            return asura_trials.resolve(self._dependencies.asura_trials, game, step, rng)
         from .progression.immortal_trials import KINDS, resolve
         if (game.active_trial or {}).get('kind') in KINDS:
             return resolve(self._dependencies.immortal_trials, game, step, rng)

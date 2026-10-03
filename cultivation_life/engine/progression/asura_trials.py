@@ -10,20 +10,21 @@ from ...system.combat.voisinages import VoisinageBattle
 from ...system.combat_system import BattleUnit, PlayerCombatSystem
 from ...system.immortal_aperture import commit_energy, ensure_aperture
 from ..combat_capabilities import bind_capabilities
+from ..dependencies import AsuraTrialDependencies
 
 KINDS = {'asura_conversion', 'asura_fusion', 'asura_breakthrough'}
 
 
-def queue(engine, game):
+def queue(deps: AsuraTrialDependencies, game):
     trial = game.active_trial
     event_id = trial['event_ids'][0]
-    event = copy.deepcopy(engine.events_by_id[event_id])
+    event = copy.deepcopy(deps.events_by_id[event_id])
     if trial.get('battle_state'):
         event['body'] += f' 已交战 {trial["battle_state"]["round"]} 轮，双方损耗与控制均已保存。'
-    game.pending_event = engine._instantiate_event(event, game, None)
+    game.pending_event = deps._instantiate_event(event, game, None)
 
 
-def start(engine, game, kind, *, bodies=None, route=None):
+def start(deps: AsuraTrialDependencies, game, kind, *, bodies=None, route=None):
     if not asura.active(game.player) or kind not in KINDS - {'asura_conversion'}:
         raise ValueError('当前不能引发修罗劫战')
     p = game.player
@@ -32,7 +33,7 @@ def start(engine, game, kind, *, bodies=None, route=None):
         power=combat_power(p), bodies=bodies or [], route=route)
     p.joint_companion_breakthrough = None
     initialize(game)
-    queue(engine, game)
+    queue(deps, game)
 
 
 def initialize(game):
@@ -87,7 +88,7 @@ def initialize(game):
     trial['target'] = target
 
 
-def resolve(engine, game, step, rng):
+def resolve(deps: AsuraTrialDependencies, game, step, rng):
     trial, p = game.active_trial, game.player
     if not trial or trial.get('kind') not in KINDS or not asura.enabled():
         raise ValueError('当前没有修罗劫战')
@@ -132,11 +133,11 @@ def resolve(engine, game, step, rng):
         player_morale=own.morale, enemy_morale=100, enemy_hp_ratio=1-battle.ordinary_loss('enemy'),
         assessment='双方禁止逃跑，无轮数上限', capability_updates=battle.updates())
     if result == 'ongoing':
-        queue(engine, game)
+        queue(deps, game)
         return 'trial_step_success', f'已连续交战 {state["round"]} 轮，战斗尚未结束。'
     game.active_trial = None
     if result == 'defeat':
-        engine._die(game, '陨落于修罗劫战', 'SYS_ASURA_TRIAL_FAILED')
+        deps._die(game, '陨落于修罗劫战', 'SYS_ASURA_TRIAL_FAILED')
         return 'dead', '未能镇压劫相，身死道消。'
     if trial['kind'] == 'asura_fusion':
         route = trial['route']
@@ -146,5 +147,5 @@ def resolve(engine, game, step, rng):
                  domain_name=rng.choice(asura.config()['branch_prefixes']) + asura.ROUTE_NAMES[route] + '魔域',
                  inherited_power=sum(b['power'] for b in trial['bodies']))
         return 'trial_completed', f'凝身入{asura.ROUTE_NAMES[route]}部，永久继承肉身战力 {s["inherited_power"]:.0f}。'
-    engine._complete_major_breakthrough(game, rng, trial['old_label'])
+    deps._complete_major_breakthrough(game, rng, trial['old_label'])
     return 'trial_completed', '心魔与天魔尽灭，破境成功。'

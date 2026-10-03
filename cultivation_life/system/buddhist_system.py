@@ -202,7 +202,7 @@ class BuddhistSystemMixin:
                 "route": "人界 → 灵界 → 仙界" if buddhist_modifier(player, "ascension_destination") != "hell" and player.world not in {"hell", "reincarnation"} else "人界 → 地狱界 → 轮回界"}
 
     def assert_buddhist_operation_allowed(self, game_id, operation):
-        game = self.store.load(game_id)
+        game = self._load(game_id)
         session = game.buddhist_state.get("assembly")
         # A disabled DLC may have allowed travel; returning must remain possible after re-enabling.
         at_assembly = session and (session["world"], session["location"]) == (game.player.world, game.player.location_id)
