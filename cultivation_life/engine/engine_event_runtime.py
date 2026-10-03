@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..npc_custody import is_free
+
 from ..system.path_modifiers import projected_resource
 
 import copy
@@ -197,7 +199,7 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
         "player.monster.history": game.player.monster_evolution_history,
         "player.has_master": has_living_master(game.player),
         "player.master_available": bool(
-            game.player.master and game.player.master.get("alive", True)
+            game.player.master and is_free(game.player.master)
             and game.player.master.get("world", game.player.world) == game.player.world
         ),
         "player.has_companion": bool(
@@ -207,7 +209,7 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
         "player.disciple_count": len(game.player.disciples),
         "player.disciple_total": len(game.player.disciples) + len(game.player.disciple_requests),
         "player.living_disciple_count": sum(
-            entry.get("alive", True) and entry.get("world", game.player.world) == game.player.world
+            is_free(entry) and entry.get("world", game.player.world) == game.player.world
             for entry in game.player.disciples
         ),
         "player.sha_qi": projected_resource(game.player, "sha_qi"),

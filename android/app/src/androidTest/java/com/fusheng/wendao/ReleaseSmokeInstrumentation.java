@@ -188,12 +188,15 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.56.2' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            String baseVersion=BuildConfig.VERSION_NAME.split("-android")[0];
+            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("asura")) {
+            if(phase.equals("custody")) {
+                python(assetText("npc_custody_release.py"));
+            } else if(phase.equals("asura")) {
                 String novice=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'人界门槛验收',spirit_root:'supreme_metal',path:'demonic',seed:1562})});await loadGame(g.id);return g.id;})()");
                 check(Boolean.TRUE.equals(js("!game.asura.available && Array.from(document.querySelectorAll('[data-panel-target^=asura-]')).every(n=>n.classList.contains('hidden')) && !document.querySelector('[data-chapter=dlc-asura]')")),"Asura content hidden before upper realm");
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'魔脉分屏验收',preset_id:'asura_upper',seed:1560})});return g.id;})()");
@@ -547,7 +550,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1562.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-"+baseVersion.replace(".", "")+".txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {

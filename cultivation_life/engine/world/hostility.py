@@ -267,7 +267,7 @@ def _resolve_wanted_settlement(
         amount = max(200, int(max(1.0, float(runtime.get("power", 1))) ** 0.5) * 35)
         add_item(game.player, "spirit_stone", amount)
         if target:
-            game.player.prisoners.append({
+            game.player.prisoners.append(game.detain_person({
                 "id":target.id, "npc_id":target.id, "name":target.name,
                 "realm_index":target.realm_index, "layer":target.layer,
                 "realm_name":deps._npc_realm_name(target), "path":target.path,
@@ -275,9 +275,8 @@ def _resolve_wanted_settlement(
                 "affinity":-80.0, "combat_power":round(deps._npc_power(target), 1),
                 "main_technique_id":deps._default_npc_main_technique(target),
                 "captured_age":game.player.age, "source":f"settlement:{kind}",
-            })
-            target.alive = False
-            target.death_reason = f"被{game.player.name}扣作议和人质"
+            }))
+            target.affinity = -80.0
             return "hostages", f"{name}交出灵石 ×{amount}，并将最强者{target.name}交给你作为人质。"
         return "hostages", f"{name}已无强者可交，只得献上灵石 ×{amount}并永远撤销追杀。"
     raise ValueError("未知议和条件")

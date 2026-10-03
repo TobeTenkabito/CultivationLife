@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...npc_custody import is_free
+
 from ...system.path_modifiers import modifier
 from ...system.cultivation_policy import ordinary_upper, opportunity_unbounded, bloodline_upper
 
@@ -385,7 +387,7 @@ def _breakthrough_chance(deps: BreakthroughDependencies, player: Player, major: 
 
 def _joint_companion_eligible(player: Player) -> dict[str, Any] | None:
     companion = player.dao_companion
-    if not companion or not companion.get("alive", True) or companion.get("world", player.world) != player.world:
+    if not companion or not is_free(companion) or companion.get("world", player.world) != player.world:
         return None
     if not player.technique or companion.get("main_technique_id") != player.technique.id:
         return None
@@ -400,7 +402,7 @@ def _complete_joint_companion_breakthrough(deps: BreakthroughDependencies, game:
     if not joint:
         return
     game.player.joint_companion_breakthrough = None
-    if not companion or companion.get("id") != joint.get("id") or not companion.get("alive", True):
+    if not companion or companion.get("id") != joint.get("id") or not is_free(companion):
         return
     old_label = str(companion.get("realm_name", "原境界"))
     companion["realm_index"] = game.player.realm_index

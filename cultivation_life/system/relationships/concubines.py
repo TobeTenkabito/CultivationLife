@@ -1,6 +1,9 @@
 """Explicit relationships concubines operations; callers own composition."""
 from __future__ import annotations
 
+from ...npc_custody import release_person
+from ...relationship_records import find_person
+
 import copy
 from typing import Any
 
@@ -47,7 +50,8 @@ def manage_concubine(
             summary = f"{normalized['name']}拒绝了侍妾之请（同意率 {chance:.0%}）。"
         else:
             normalized["joined_age"] = player.age
-            player.concubines.append(normalized if source == "captive" else game.link_relationship(normalized))
+            player.concubines.append(game.detain_person(normalized, kind="concubine")
+                                     if source == "captive" else game.link_relationship(normalized))
             emit(game, "concubine.recruited", target_id=normalized["id"])
             if source == "captive":
                 player.prisoners = [row for row in player.prisoners if row is not target]
@@ -64,7 +68,7 @@ def manage_concubine(
         if not existing:
             raise ValueError("侍妾名册中没有此人")
         name = str(existing.get("name", "无名修士"))
-        npc = deps._find_npc(game, str(existing.get("npc_id", target_id)))
+        npc = find_person(game, str(existing.get("npc_id", target_id)))
         alive = bool(npc.alive) if npc and existing.get("source") != "captive" else bool(existing.get("alive", True))
         world = str(npc.world) if npc else str(existing.get("world", ""))
         if action in {"cauldron", "corpse"} and (not alive or world != player.world):
@@ -102,13 +106,9 @@ def manage_concubine(
             result, summary = deps._convert_to_puppet(game, captive, "corpse", rng, False)
         elif action == "dismiss":
             player.concubines = [row for row in player.concubines if row is not existing]
-            npc = deps._find_npc(game, str(existing.get("npc_id", target_id)))
-            if npc and existing.get("source") == "captive":
-                for field in ("age", "lifespan", "realm_index", "layer", "cultivation_progress"):
-                    if field in existing:
-                        setattr(npc, field, existing[field])
-                npc.alive = bool(existing.get("alive", True))
-                npc.death_reason = None if npc.alive else existing.get("death_reason", npc.death_reason)
+            npc = find_person(game, str(existing.get("npc_id", target_id)))
+            if npc and npc.alive and existing.get("source") == "captive":
+                release_person(game, npc.id)
             deps._set_person_affinity(
                 game, str(existing.get("npc_id", target_id)),
                 float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),

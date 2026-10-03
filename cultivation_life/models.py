@@ -8,6 +8,7 @@ from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION
 from .relationship_schema import normalize_relationship_document
 from .relationship_records import bind_relationship, bind_relationships
+from .npc_custody import bind_custody, detain_person
 
 
 @dataclass(frozen=True)
@@ -238,8 +239,14 @@ class SectNpc:
     # Optional, versioned cultivation facts. Voisinage definitions live in content,
     # while coverage, initiative and active fields exist only during a battle.
     transcendence: dict[str, Any] | None = None
+    # Life is independent of free simulation membership and player custody.
+    roster_state: str = 'active'
+    custody: dict[str, Any] | None = None
+    roster_origin: list[dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if self.roster_state not in {'active', 'held', 'retired'}:
+            raise ValueError('无效人物名册状态')
         if self.path == "monster" and not self.monster_species_id:
             from .ancestry import stable_species
             self.monster_species_id = stable_species(self.id or self.name)
@@ -854,6 +861,7 @@ class GameState:
     world_npc_template_ages: dict[str, int] = field(default_factory=dict)
     notable_npcs: dict[str, SectNpc] = field(default_factory=dict)
     relationship_npcs: dict[str, SectNpc] = field(default_factory=dict)
+    inactive_npcs: dict[str, SectNpc] = field(default_factory=dict)
     encounter_npc_cache: list[dict[str, Any]] = field(default_factory=list)
     race_relations: dict[str, dict[str, Any]] = field(default_factory=dict)
     sect_relations: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -918,10 +926,14 @@ class GameState:
     def __post_init__(self):
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
+        bind_custody(self, SectNpc)
         bind_relationships(self, SectNpc)
 
     def link_relationship(self, seed):
         return bind_relationship(self, seed, SectNpc)
+
+    def detain_person(self, seed, *, kind='prisoner'):
+        return detain_person(self, seed, SectNpc, kind=kind)
 
     def to_dict(self) -> dict[str, Any]:
         document = {
@@ -939,6 +951,7 @@ class GameState:
             "world_npc_template_ages": self.world_npc_template_ages,
             "notable_npcs": {npc_id: npc.to_dict() for npc_id, npc in self.notable_npcs.items()},
             "relationship_npcs": {key: npc.to_dict() for key, npc in self.relationship_npcs.items()},
+            "inactive_npcs": {key: npc.to_dict() for key, npc in self.inactive_npcs.items()},
             "encounter_npc_cache": self.encounter_npc_cache,
             "race_relations": self.race_relations,
             "sect_relations": self.sect_relations,
@@ -1013,6 +1026,7 @@ class GameState:
             world_npc_template_ages={str(npc_id): int(age) for npc_id, age in value.get("world_npc_template_ages", {}).items()},
             notable_npcs={npc_id: SectNpc.from_dict(npc) for npc_id, npc in value.get("notable_npcs", {}).items()},
             relationship_npcs={key: SectNpc.from_dict(npc) for key, npc in value.get("relationship_npcs", {}).items()},
+            inactive_npcs={key: SectNpc.from_dict(npc) for key, npc in value.get("inactive_npcs", {}).items()},
             encounter_npc_cache=list(value.get("encounter_npc_cache", [])),
             race_relations=dict(value.get("race_relations", {})),
             sect_relations=dict(value.get("sect_relations", {})),

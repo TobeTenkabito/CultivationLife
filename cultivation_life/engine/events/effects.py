@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...npc_custody import is_free
 from ...relationship_records import RelationshipRecord
 from ...system.combat.npc_lifecycle import move_world
 
@@ -358,7 +360,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         joint_crossing = player.joint_spirit_crossing
         companion = player.dao_companion
         crossed_together = bool(
-            joint_crossing and companion and companion.get("alive", True)
+            joint_crossing and companion and is_free(companion)
             and companion.get("id") == joint_crossing.get("id")
         )
         if crossed_together:
@@ -379,7 +381,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         for candidate in crossing_friends:
             friend = next((row for row in player.dao_friends if row.get("id") == candidate.get("id")), None)
             npc = deps._find_npc(game, str(candidate.get("id", "")))
-            if friend and not friend.get("alive", True):
+            if friend and not is_free(friend):
                 continue
             if not friend and (not npc or not npc.alive):
                 continue

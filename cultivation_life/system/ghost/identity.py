@@ -1,6 +1,8 @@
 """Explicit ghost identity operations; callers own composition."""
 from __future__ import annotations
 
+from ...npc_custody import kill_person
+
 import copy
 import random
 from typing import Any
@@ -83,6 +85,7 @@ def post_battle_possess(deps: GhostIdentityDependencies, game_id: str, target_id
     player.death_reason = None
     player.prisoners.remove(target)
     host = enter_host_body(player, target)
+    kill_person(game, target.get("npc_id") or target["id"], "被夺舍，原神魂不复存在")
     game.pending_event = None
     game.history.append(HistoryRecord(
         "SYS_POST_BATTLE_POSSESSION", 1, player.age, "借尸还魂", target_id, "possessed",

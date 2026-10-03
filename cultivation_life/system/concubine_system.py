@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..npc_custody import is_free
+
 
 from .semantic_events import emit
 
@@ -57,7 +59,7 @@ class ConcubineSystemMixin:
             if not relation:
                 continue
             npc = self._find_npc(game, str(relation.get("id", "")))
-            alive = npc.alive if npc else bool(relation.get("alive", True))
+            alive = is_free(npc) if npc else is_free(relation)
             world = npc.world if npc else str(relation.get("world", player.world))
             if not alive or world != player.world:
                 continue
@@ -115,7 +117,7 @@ class ConcubineSystemMixin:
             if not identity or identity == enemy.id:
                 return
             npc = self._find_npc(game, identity)
-            alive = npc.alive if npc else bool(relation.get("alive", True))
+            alive = is_free(npc) if npc else is_free(relation)
             world = npc.world if npc else str(
                 relation.get("world", relation.get("owner_world", player.world))
             )
@@ -195,6 +197,8 @@ class ConcubineSystemMixin:
             (row for row in game.player.prisoners if str(row.get("id")) == target_id), None,
         )
         if prisoner:
+            if not prisoner.get("alive", True) or prisoner.get("world", game.player.world) != game.player.world:
+                return None, ""
             return prisoner, "captive"
         npc = self._find_npc(game, target_id) or self._promote_cached_npc(game, target_id, "侍妾之请")
         if npc and npc.alive and npc.world == game.player.world:
@@ -206,7 +210,7 @@ class ConcubineSystemMixin:
                 "npc_id": npc.id,
             }, "world"
         relation = self._relation_by_id(game.player, target_id)
-        if relation and relation.get("alive", True) and relation.get("world", game.player.world) == game.player.world:
+        if relation and is_free(relation) and relation.get("world", game.player.world) == game.player.world:
             return relation, "relationship"
         return None, ""
 

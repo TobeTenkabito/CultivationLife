@@ -161,6 +161,8 @@ def _would_enter_spirit_ranking(deps: EncounterDependencies, game: GameState, np
 
 def _promote_cached_npc(deps: EncounterDependencies, game: GameState, npc_id: str, reason: str) -> SectNpc | None:
     from ...system.npc_social import instantiate_social
+    if npc_id in game.inactive_npcs:
+        return None
     entry = next((row for row in game.encounter_npc_cache if row.get("id") == npc_id), None)
     if not entry:
         npc = game.notable_npcs.get(npc_id)

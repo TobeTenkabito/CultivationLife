@@ -5,6 +5,7 @@ import pytest
 
 from scripts import package_windows, verify_release_exe
 from scripts.release_evidence import file_digest, inputs_digest, validate_evidence
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 
 
 @pytest.fixture
@@ -76,6 +77,7 @@ def test_packaging_uses_the_verified_binary(release, monkeypatch):
         manifest = json.loads(bundle.read(f'release-{package_windows.VERSION}.json'))
         assert manifest['exe_sha256'] == receipt['exe_sha256']
         assert manifest['inputs_sha256'] == receipt['inputs_sha256']
+        assert manifest['save_schema'] == SAVE_SCHEMA_VERSION
 
 
 def test_verifier_writes_receipt_only_after_both_cases_pass(release, monkeypatch):

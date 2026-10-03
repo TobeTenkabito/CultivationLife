@@ -34,7 +34,7 @@ def saved(tmp_path):
     return store, game
 
 
-@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 8, 999])
+@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, SAVE_SCHEMA_VERSION + 1, 999])
 def test_unsupported_versions_never_decode_or_rewrite(saved, monkeypatch, version):
     store, game = saved
     path = store._path(game.id)

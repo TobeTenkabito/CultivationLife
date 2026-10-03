@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..npc_custody import settle_puppet_person
+
 from .demonic_definitions import PUPPET_NAMES as PUPPET_NAMES
 
 from .semantic_events import emit
@@ -151,6 +153,7 @@ class DemonicSystemMixin:
                 raise ValueError("只有魔修能够吞噬炼尸或活傀")
             result, summary = self._devour_puppet(game, puppet)
         elif action == "dismiss":
+            settle_puppet_person(game, puppet, outcome="released")
             player.puppets.remove(puppet)
             result, summary = "dismissed", f"你解除了对{puppet['name']}的控制。"
         else:
@@ -184,6 +187,7 @@ class DemonicSystemMixin:
             "progress": 0.0, "required": 100.0, "remaining_bonus": round(potential - immediate, 4),
             "refined": False, "last_refine_age": None,
         })
+        settle_puppet_person(game, puppet, outcome="dead", reason="被吞噬元神")
         player.puppets.remove(puppet)
         return "devoured", f"你吞噬{puppet['name']}，突破率暂增 {immediate:.1%}；其外来元神仍须炼化。"
 

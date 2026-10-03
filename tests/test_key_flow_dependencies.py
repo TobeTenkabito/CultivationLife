@@ -160,6 +160,7 @@ def test_soul_backlash_records_consequence_before_dispatching_death():
 def test_puppet_conversion_preserves_failure_and_identity_cleanup(kind, roll, result, disciple):
     game = game_state()
     npc = SectNpc('target', 'Target', '', 1, 1, 30, 120)
+    game.notable_npcs[npc.id] = npc
     target = {'id': npc.id, 'npc_id': npc.id, 'name': npc.name, 'realm_index': 1, 'layer': 1,
               'combat_power': 10, 'affinity': 20, 'source': 'relationship:master'}
     roster = game.player.disciples if disciple else game.player.prisoners
@@ -170,7 +171,10 @@ def test_puppet_conversion_preserves_failure_and_identity_cleanup(kind, roll, re
     assert outcome == result
     remaining = game.player.disciples if disciple else game.player.prisoners
     assert (target in remaining) is (result == 'resisted')
-    assert npc.alive is (result == 'resisted')
+    assert npc.alive is (kind == 'living')
+    if kind == 'living' and result == 'created':
+        assert npc.custody['kind'] == 'living_puppet'
+        assert game.player.puppets[0]['source_npc_id'] == npc.id
     assert len(game.player.puppets) == int(result == 'created')
     if result == 'resisted':
         assert target['affinity'] == 5
@@ -229,14 +233,17 @@ def test_bound_execution_uses_kill_service_and_cleans_joint_crossings_once():
     target = dict(id='captive', npc_id='npc', name='Target', world='human', alive=True, realm_index=1, layer=1)
     game.player.prisoners = [target]
     game.player.joint_friend_crossing = [{'id': 'npc'}, {'id': 'keep'}]
-    game.player.joint_spirit_crossing = {'id': 'captive'}
-    npc = SectNpc('npc', 'Target', '', 1, 1, 30, 120, alive=False)
+    game.player.joint_spirit_crossing = {'id': 'npc'}
+    npc = SectNpc('npc', 'Target', '', 1, 1, 30, 120)
+    game.notable_npcs[npc.id] = npc
+    target = game.detain_person(target)
+    game.player.prisoners = [target]
     guard, kill = Mock(), Mock()
     deps, unexpected = contract(RelationshipViolenceDependencies,
         _load=lambda _: game, assert_buddhist_operation_allowed=guard, _public_party=lambda _: [],
         _find_npc=lambda *args: npc, _apply_cultivator_kill=kill,
         _get_store=lambda: store, present=lambda game: game.history[-1].result)
-    assert relationship_violence(deps, game.id, 'captive', 'captive') == 'killed'
+    assert relationship_violence(deps, game.id, 'captive', npc.id) == 'killed'
     guard.assert_called_once_with(game.id, 'relationship-violence')
     kill.assert_called_once()
     assert not game.player.prisoners and game.player.joint_spirit_crossing is None

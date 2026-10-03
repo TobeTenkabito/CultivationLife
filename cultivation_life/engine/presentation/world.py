@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...npc_custody import is_free
+
 from ...system.monster_identity import identity
 
 from ...system.path_modifiers import modifier
@@ -153,7 +155,7 @@ def _public_spirit_ranking(deps: WorldViewDependencies, game: GameState) -> dict
             "combat_power": deps._npc_power(npc), "is_player": False,
         })
     companion = game.player.dao_companion
-    if companion and companion.get("alive", True) and companion.get("world") == ranking_world and companion.get("id") not in seen_ids:
+    if companion and is_free(companion) and companion.get("world") == ranking_world and companion.get("id") not in seen_ids:
         rows.append({
             "id": companion["id"], "name": companion["name"], "title": "玩家道侣",
             "realm_index": int(companion["realm_index"]), "layer": int(companion["layer"]),
@@ -163,7 +165,7 @@ def _public_spirit_ranking(deps: WorldViewDependencies, game: GameState) -> dict
         })
         seen_ids.add(str(companion["id"]))
     for friend in game.player.dao_friends:
-        if not friend.get("alive", True) or friend.get("world") != ranking_world or friend.get("id") in seen_ids:
+        if not is_free(friend) or friend.get("world") != ranking_world or friend.get("id") in seen_ids:
             continue
         seen_ids.add(str(friend["id"]))
         shell = SectNpc(

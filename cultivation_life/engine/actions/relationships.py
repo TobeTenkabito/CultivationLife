@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...npc_custody import is_free
+
 from ...system.semantic_events import emit
 from ...system.npc_social import instantiate_social
 
@@ -162,7 +164,7 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
     request = next((entry for entry in player.disciple_requests if entry.get("id") == request_id), None)
     if not request:
         raise ValueError("这份拜师帖已经不存在")
-    if accept and not request.get("alive", True):
+    if accept and not is_free(request):
         raise ValueError("求道者已经陨落，无法再收入门下")
     max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
     if accept and len(player.disciples) >= max_disciples:
@@ -193,7 +195,7 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
     master = player.master
     if not master:
         raise ValueError("你尚无师承")
-    if not master.get("alive", True):
+    if not is_free(master):
         raise ValueError("师父已经陨落，无法回应请求")
     if kind not in {"item", "technique", "consult"}:
         raise ValueError("未知索取类型")
@@ -275,7 +277,7 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
     disciple = next((entry for entry in player.disciples if entry.get("id") == disciple_id), None)
     if not disciple:
         raise ValueError("此人并非你的弟子")
-    if not disciple.get("alive", True):
+    if not is_free(disciple):
         raise ValueError("弟子已经陨落，无法接受赠予")
     if kind == "item":
         if content_id not in ITEM_CATALOG or not remove_item(player, content_id):
@@ -352,7 +354,7 @@ def manage_dao_companion(
     else:
         if not companion:
             raise ValueError("你尚无道侣")
-        if not companion.get("alive", True) or companion.get("world", player.world) != player.world:
+        if not is_free(companion) or companion.get("world", player.world) != player.world:
             raise ValueError("道侣当前无法回应")
         last = companion.setdefault("last_interactions", {})
         cooldown = int(WORLD_SYSTEMS["relationship"]["companion_interaction_cooldown_years"])
@@ -487,7 +489,7 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
             player.dao_friends.append(game.link_relationship(friend))
             result, summary = "friend_joined", f"{npc.name}与你交换信符，自此以道友相称。"
     else:
-        if not friend or not friend.get("alive", True) or friend.get("world") != player.world:
+        if not friend or not is_free(friend) or friend.get("world") != player.world:
             raise ValueError("这位道友当前无法回应")
         last = friend.setdefault("last_interactions", {})
         cooldown = int(WORLD_SYSTEMS["relationship"]["friend_interaction_cooldown_years"])
@@ -530,7 +532,7 @@ def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id
         raise ValueError("你当前没有可以引荐他人的宗门")
     relations = [entry for entry in [player.master, player.dao_companion, *player.dao_friends] if entry]
     relation = next((entry for entry in relations if str(entry.get("id")) == npc_id), None)
-    if not relation or not relation.get("alive", True) or relation.get("world") != player.world:
+    if not relation or not is_free(relation) or relation.get("world") != player.world:
         raise ValueError("只能邀请当前界面中存活的师父、道侣或道友")
     existing = deps._npc_faction_id(game, npc_id)
     if existing:
@@ -670,7 +672,7 @@ def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str
             raise ValueError("此人已经在队伍中")
         companion = player.dao_companion
         if companion and companion.get("id") == npc_id:
-            if not companion.get("alive", True) or companion.get("world") != player.world:
+            if not is_free(companion) or companion.get("world") != player.world:
                 raise ValueError("道侣当前无法同行")
             player.party.append({"id": npc_id, "name": companion.get("name", "道侣")})
             result, summary = "joined", f"{companion.get('name', '道侣')}与你心意相通，加入了队伍。"
@@ -683,7 +685,7 @@ def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str
             return deps.present(game)
         friend = next((row for row in player.dao_friends if row.get("id") == npc_id), None)
         if friend:
-            if not friend.get("alive", True) or friend.get("world") != player.world:
+            if not is_free(friend) or friend.get("world") != player.world:
                 raise ValueError("道友当前无法同行")
             player.party.append({"id":npc_id,"name":friend.get("name","道友")})
             result, summary = "joined", f"道友{friend.get('name','无名')}应邀加入队伍。"

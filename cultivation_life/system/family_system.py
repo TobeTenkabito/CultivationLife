@@ -1,6 +1,9 @@
 """Base-game descendants and family decisions; financial privileges require Intrigue."""
 from __future__ import annotations
 
+from ..npc_custody import is_free
+from ..relationship_records import find_person
+
 import copy
 import math
 from dataclasses import fields
@@ -46,7 +49,7 @@ class FamilySystemMixin:
         family.kind = 'family'
         known = {n.id for n in family.npcs}
         for child in game.player.offspring:
-            if (child.get('alive', True) and child.get('cultivation_started')
+            if (is_free(child) and child.get('cultivation_started')
                     and child.get('world') == family.world and child['id'] not in known
                     and not child.get('family_traits', {}).get('expelled') and can_enter_faction(family, child)):
                 member = self._family_child_npc(child)
@@ -87,7 +90,7 @@ class FamilySystemMixin:
         rank = (npc.realm_index, npc.layer)
         target = (npc.realm_index, npc.layer + 1) if npc.layer < REALMS[npc.realm_index].layers else (npc.realm_index + 1, 1)
         cost = max(30, int((npc.realm_index + 1) ** 3 * 25 * (1 + npc.layer / 3)))
-        allowed = (npc.alive and npc.age >= 16 and npc.spirit_root != 'none' and npc.world == game.player.world
+        allowed = (is_free(npc) and npc.age >= 16 and npc.spirit_root != 'none' and npc.world == game.player.world
                    and rank < self._actual_player_realm(game.player) and target <= (cap, REALMS[cap].layers)
                    and game.player.opportunity >= cost)
         return {'cap_realm':cap, 'cap_name':f'{REALMS[cap].name}后期', 'cost':cost, 'allowed':bool(allowed), 'target':target}
@@ -125,6 +128,9 @@ class FamilySystemMixin:
         self._family_register_children(game)
         rng = decode_rng(game.seed, game.rng_state)
         child = next((c for c in player.offspring if c.get('id') == payload.get('npc_id')), None)
+        authority = find_person(game, str(payload.get('npc_id', '')))
+        if authority and authority.roster_state != 'active':
+            raise ValueError('受控或离册人物不能参与家族事务')
         npc = next((n for n in family.npcs if n.id == payload.get('npc_id')), None) if family and not family.extinct else None
         if not npc and child:
             npc = self._family_child_npc(child)
@@ -399,7 +405,7 @@ class FamilySystemMixin:
             protection_realm=REALMS[2+self._family_world_tier(family.world if family else game.player.world)].name,
             total_power=self._family_total_power(game,family) if family and not family.extinct else 0)
         result['can_manage'] = bool(family and not family.extinct and family.world==game.player.world and (family.founded_by_player or self._has_family_voice(game)))
-        result['can_found'] = bool((not family or family.extinct) and any(c.get('alive',True) and c.get('cultivation_started') and c.get('world')==game.player.world for c in game.player.offspring))
+        result['can_found'] = bool((not family or family.extinct) and any(is_free(c) and c.get('cultivation_started') and c.get('world')==game.player.world for c in game.player.offspring))
         known_techniques = [t for t in game.player.known_techniques if t.combat_bonus>0]
         result['teaching_options'] = [{'id':t.id,'name':t.name,'power':t.combat_bonus} for t in known_techniques]
         result['equipment_options'] = [{'id':i.id,'name':i.name,'power':equipment[0],'quantity':i.quantity} for i in game.player.inventory
@@ -408,12 +414,12 @@ class FamilySystemMixin:
         for row in [*result.get('offspring',[]),*result.get('roster',[])]:
             npc = self._find_npc(game,str(row.get('id')))
             if not npc:continue
-            row['can_interact'] = bool(npc.alive and npc.age>=16 and npc.spirit_root!='none' and npc.world==game.player.world
+            row['can_interact'] = bool(is_free(npc) and npc.age>=16 and npc.spirit_root!='none' and npc.world==game.player.world
                                        and (self._family_is_kin(game,npc) or row in result.get('offspring',[])))
             row['combat_power'] = self._npc_power(npc) if npc.alive else 0
             row['infusion'] = self._family_infusion(game,npc)
             row['spouse_name'] = next((n.name for n in family.npcs if n.id==npc.family_traits.get('spouse_id')),None) if family else None
-            row['can_marry'] = bool(npc.alive and npc.age>=16 and self._family_is_kin(game,npc) and not npc.family_traits.get('spouse_id'))
+            row['can_marry'] = bool(is_free(npc) and npc.age>=16 and self._family_is_kin(game,npc) and not npc.family_traits.get('spouse_id'))
             row['member_type'] = '本家' if self._family_is_kin(game,npc) else '外姓门人'
             row['sect_name'] = game.sects[npc.faction_id].name if npc.faction_id in game.sects else None
             row['in_party'] = any(m.get('id')==npc.id for m in game.player.party)

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from ..npc_custody import kill_person, settle_puppet_person
+from ..relationship_records import find_person
+
 from ..system.semantic_events import emit, relationship_roles
 
 from ..system.path_modifiers import modifier
@@ -304,6 +307,9 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     if lethal and resolution.voisinage_lethal:
         player.hp = 0.0
     deps._apply_support_damage(player, resolution.support_updates)
+    for puppet in player.puppets:
+        if not puppet.get("alive", True):
+            settle_puppet_person(game, puppet, outcome="dead", reason="活傀在战斗中被摧毁")
     lead = deps._combat_report_lead(resolution, hp_loss, mp_loss)
 
     resolved_kills = []
@@ -553,10 +559,9 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
                 relation["alive"] = False
                 relation["death_reason"] = f"被{player.name}击杀"
         player.party = [row for row in player.party if str(row.get("id")) != str(npc_id)]
-    npc = deps._find_npc(game, str(npc_id)) if npc_id else None
+    npc = find_person(game, str(npc_id)) if npc_id else None
     if npc:
-        npc.alive = False
-        npc.death_reason = f"被{player.name}击杀夺宝"
+        kill_person(game, npc.id, f"被{player.name}击杀夺宝")
         player.party = [entry for entry in player.party if entry.get("id") != npc.id]
         if player.dao_companion and player.dao_companion.get("id") == npc.id:
             player.dao_companion["alive"] = False

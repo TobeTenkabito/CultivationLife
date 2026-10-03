@@ -247,20 +247,19 @@ def test_captured_named_npc_concubine_remains_alive_until_execution(setup):
     engine, game, _ = setup
     npc = next(n for n in game.world_npcs.values() if n.world == "human")
     npc.realm_index = 1; npc.layer = 1; npc.gender = "female"
-    npc.alive = False; npc.death_reason = "被玩家生擒"
     game.player.realm_index = 4
-    game.player.prisoners = [{"id":"held_named", "npc_id":npc.id,"name":npc.name,"gender":"female",
+    game.player.prisoners = [game.detain_person({"id":npc.id, "npc_id":npc.id,"name":npc.name,"gender":"female",
                              "world":"human","realm_index":1,"layer":1,"path":"dao","race":"human",
-                             "spirit_root":"supreme_water","age":20,"lifespan":100,"combat_power":5}]
+                             "spirit_root":"supreme_water","age":20,"lifespan":100,"combat_power":5})]
     ensure_wish(game)["value"] = 50
     engine.store.save(game)
-    shown = engine.manage_concubine(game.id, "held_named", "recruit")
+    shown = engine.manage_concubine(game.id, npc.id, "recruit")
     assert shown["concubine_system"]["concubines"][0]["alive"]
     held = engine._load(game.id)
     engine._sync_relationship_records(held)
     assert held.player.concubines[0]["alive"]
-    result = engine.relationship_violence(game.id, "concubine", "held_named")
+    result = engine.relationship_violence(game.id, "concubine", npc.id)
     assert not result["concubine_system"]["concubines"][0]["alive"]
     assert engine._load(game.id).buddhist_state["wish"]["value"] == 45
-    engine.manage_concubine(game.id, "held_named", "dismiss")
-    assert not engine._find_npc(engine._load(game.id), npc.id).alive
+    engine.manage_concubine(game.id, npc.id, "dismiss")
+    assert not engine._load(game.id).inactive_npcs[npc.id].alive

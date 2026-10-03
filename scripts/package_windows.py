@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.release_evidence import require, validate_evidence
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 VERSION = runpy.run_path(str(ROOT/'cultivation_life/version.py'))['BASE_GAME_VERSION']
 RELEASE_ID = VERSION.replace('.', '')
 
@@ -41,7 +42,7 @@ def main():
         'dlc_versions': {p.parent.name: json.loads(p.read_text(encoding='utf-8-sig'))['version']
                          for p in sorted((ROOT/'dlc').glob('*/manifest.json'))},
         'themes': list('abcdef'),
-        'save_schema': 5,
+        'save_schema': SAVE_SCHEMA_VERSION,
         'validation': [
             f'{passed.group(1)} automated regression tests passed',
             'Asura court, Asura, handbook, quick-start and puppet UI success logs checked',

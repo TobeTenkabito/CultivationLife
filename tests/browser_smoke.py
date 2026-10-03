@@ -576,6 +576,16 @@ def main() -> None:
                 page.locator("[data-panel-target='relationship']").click()
                 page.locator("#dao-companion-list .companion-row").wait_for()
                 assert page.locator("#dao-companion-list .companion-row").count() == 1
+                # A living captive must not display death or ordinary social actions.
+                page.evaluate("""() => {
+                    const companion = game.dao_companion || game.player.dao_companion;
+                    window.custodySmokeCompanion = companion;
+                    renderDaoCompanion({...companion, alive:true, roster_state:'held'}, [], []);
+                }""")
+                assert '（受控）' in page.locator('#dao-companion-list').inner_text()
+                assert '（已故）' not in page.locator('#dao-companion-list').inner_text()
+                assert page.locator('#dao-companion-list').get_by_role('button', name='亲密交谈').count() == 0
+                page.evaluate("renderDaoCompanion(window.custodySmokeCompanion, game.player.inventory || [], game.player.known_techniques || []); delete window.custodySmokeCompanion")
                 assert page.get_by_role("button", name="亲密交谈").is_enabled()
                 assert page.get_by_role("button", name="脱离师门").is_enabled()
                 assert page.get_by_role("button", name="解除道侣").is_enabled()

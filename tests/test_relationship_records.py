@@ -11,7 +11,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState, Player, SectNpc, SectState
 from cultivation_life.relationship_records import bind_relationships
 from cultivation_life.relationship_schema import LABEL_FIELDS, PERSON_FIELDS
-from cultivation_life.save_schema import migrate_document
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION, migrate_document
 from cultivation_life.storage import SaveStore
 from tools.check_module_dependencies import violations
 
@@ -131,7 +131,7 @@ def test_v6_migration_keeps_npc_authority_and_is_pure_and_idempotent():
     original = copy.deepcopy(document)
     migrated = migrate_document(document)
     assert document == original
-    assert migrated['version'] == 7
+    assert migrated['version'] == SAVE_SCHEMA_VERSION
     assert migrate_document(migrated) is migrated
     assert migrated['relationship_npcs']['event']['age'] == 80
     restored = GameState.from_dict(migrated)
@@ -155,19 +155,16 @@ def test_v6_save_migrates_once_and_keeps_opaque_extensions(tmp_path, monkeypatch
     assert store._path(game.id).read_bytes() == saved
 
 
-def test_captive_concubine_keeps_separate_lifecycle_without_reviving_original_npc():
+def test_captive_concubine_uses_authoritative_life_and_separate_roster():
     game, npc = state()
-    npc.alive = False
-    npc.death_reason = '被生擒'
     game.player.dao_companion = None
-    captive = {'id': npc.id, 'npc_id': npc.id, 'name': npc.name, 'source': 'captive',
-               'alive': True, 'age': 50, 'realm_index': 2, 'world': 'human'}
-    game.player.concubines = [captive]
-    bind_relationships(game, SectNpc)
-    assert game.player.concubines[0] is captive
+    captive = dict(id=npc.id, npc_id=npc.id, source='captive')
+    game.player.concubines = [game.detain_person(captive, kind='concubine')]
     restored = GameState.from_dict(game.to_dict())
+    assert restored.player.concubines[0].person is restored.inactive_npcs[npc.id]
     assert restored.player.concubines[0]['alive']
-    assert not restored.sects['old'].npcs[0].alive
+    assert not restored.sects['old'].npcs
+    assert restored.inactive_npcs[npc.id].roster_state == 'held'
 
 
 def test_party_cannot_use_stale_snapshot_to_resurrect_or_relocate_npc(tmp_path):

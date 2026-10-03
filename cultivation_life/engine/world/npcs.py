@@ -96,7 +96,8 @@ def _sect_members(deps: NpcDependencies, game: GameState, sect: SectState) -> li
 def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | None:
     existing = find_person(game, npc_id)
     if existing is not None:
-        return existing
+        # Free-world operations cannot target somebody held in another roster.
+        return existing if existing.roster_state == 'active' else None
     child = next((row for row in game.player.offspring if row.get("id") == npc_id), None)
     if child:
         return SectNpc(**{key:value for key,value in child.items() if key in SectNpc.__dataclass_fields__} |
