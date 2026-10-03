@@ -126,13 +126,14 @@ def violations(edges):
         domain_to_facade = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and target == f'cultivation_life.system.{area}_system'
-            for area in ('economy', 'tianji', 'intrigue'))
+            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation'))
         domain_to_wiring = any(
             source.startswith(f'cultivation_life.system.{area}.')
             and source != f'cultivation_life.system.{area}.wiring'
             and target == f'cultivation_life.system.{area}.wiring'
-            for area in ('economy', 'tianji', 'intrigue'))
+            for area in ('economy', 'tianji', 'intrigue', 'crafting', 'formation'))
         shared_definition_cycle = (source, target) in {
+            ('cultivation_life.system.economy.exchange', 'cultivation_life.system.exchange_system'),
             ('cultivation_life.system.doctrine.effects', 'cultivation_life.system.doctrine.generation'),
             ('cultivation_life.system.merchant_commission_system', 'cultivation_life.system.merchant_system'),
             ('cultivation_life.monster_bloodline_rules', 'cultivation_life.combat_rule_engine'),

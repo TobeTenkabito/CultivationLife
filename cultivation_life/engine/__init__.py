@@ -11,10 +11,9 @@ from typing import Any
 from ..content_registry import WORLD_SYSTEMS, STORY_COMBAT_SCENARIOS, CONTENT_DOCUMENTS, ContentError
 from ..system.combat_system import BattleUnit
 from ..event_repository import EventRepository
-from ..system.economy_system import EconomySystemMixin
 from ..system.demonic_system import DemonicSystemMixin
 from ..map_runtime import MapTravelMixin
-from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
+from ..models import GameState, HistoryRecord, Item, Player, SectNpc, SectState
 from ..system.map_system import MapCatalog
 from ..storage import SaveStore
 from ..achievements import AchievementSystem, load_achievement_definitions
@@ -22,8 +21,6 @@ from ..runtime import decode_rng, encode_rng, now_iso
 from ..system.war_system import WarSystemMixin
 from ..system.upper_institutions import UpperInstitutionMixin
 from ..system.natal_artifact_system import NatalArtifactSystemMixin
-from ..system.crafting_system import CraftingSystemMixin
-from ..system.formation_system import FormationSystemMixin
 from ..system.monster_bloodline_system import MonsterBloodlineSystemMixin, bloodline_content_available
 from ..system.ghost_system import GhostSystemMixin
 from ..system.sage_system import SageSystemMixin
@@ -83,8 +80,33 @@ from ..system.intrigue import runtime as intrigue_runtime
 from ..system.intrigue import state as intrigue_state
 
 
+from ..system.economy import exchange as economy_exchange
+from ..system.economy import arts as economy_arts
+from ..system.economy import market as economy_market
+from ..system.economy import private_trade as economy_private_trade
+from ..system.economy import spirit_fields as economy_spirit_fields
+from ..system.economy import treasure as economy_treasure
+from ..system import exchange_system as exchange_compat
+from ..system.crafting import market as crafting_market
+from ..system.crafting import materials as crafting_materials
+from ..system.crafting import forging as crafting_forging
+from ..system.crafting import preview as crafting_preview
+from ..system.crafting import artifacts as crafting_artifacts
+from ..system.crafting import presentation as crafting_presentation
+from ..system import crafting_system as crafting_compat
+from ..system.formation import market as formation_market
+from ..system.formation import loadouts as formation_loadouts
+from ..system.formation import ground as formation_ground
+from ..system.formation import npcs as formation_npcs
+from ..system.formation import presentation as formation_presentation
+from ..system import formation_system as formation_compat
+from ..system.economy import auctions as economy_auctions
+from ..system.economy import black_market as economy_black_market
+from ..system import economy_system as economy_compat
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, FormationSystemMixin, CraftingSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, EconomySystemMixin, DemonicSystemMixin):
+class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenceMixin, BuddhistSystemMixin, FamilySystemMixin, MerchantSystemMixin, GuixuSystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, WarSystemMixin, MapTravelMixin, DemonicSystemMixin):
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -1812,3 +1834,425 @@ class GameEngine(UpperInstitutionMixin, DoctrineSystemMixin, RelationshipViolenc
         return intrigue_state._ensure_intrigue_faction(
             self._dependencies.intrigue.state, game, kind, faction_id
         )
+
+
+    def _exchange_location(self, world):
+        return economy_exchange._exchange_location(self._dependencies.exchange, world)
+
+    def _schedule_exchange(self, game, rng):
+        return economy_exchange._schedule_exchange(self._dependencies.exchange, game, rng)
+
+    def _open_exchange(self, game, rng):
+        return economy_exchange._open_exchange(self._dependencies.exchange, game, rng)
+
+    def _advance_exchange_clock(self, game, rng):
+        return economy_exchange._advance_exchange_clock(self._dependencies.exchange, game, rng)
+
+    def _exchange_materials(self, game):
+        return economy_exchange._exchange_materials(self._dependencies.exchange, game)
+
+    def exchange_action(self, game_id: str, action: str, payload: dict[str, Any]):
+        return economy_exchange.exchange_action(self._dependencies.exchange, game_id, action, payload)
+
+    def _public_exchange(self, game):
+        return economy_exchange._public_exchange(self._dependencies.exchange, game)
+
+    @property
+    def _exchange_dependencies(self):
+        return self._dependencies.exchange
+
+    def _append_crafting_market_offers(
+        self, game: GameState, rng: random.Random, offers: list[dict[str, Any]], *,
+        tier: int, market_name: str, location_id: str,
+    ) -> None:
+        # New crafting stock must not move the story/combat RNG stream.  Its
+        # condition remains deterministic for the same save, place and year.
+        return crafting_market._append_crafting_market_offers(self._dependencies.crafting.market, game, rng, offers, tier=tier, market_name=market_name, location_id=location_id)
+
+    def _buy_crafting_material_offer(self, game: GameState, offer: dict[str, Any], price: int) -> str:
+        return crafting_market._buy_crafting_material_offer(self._dependencies.crafting.market, game, offer, price)
+
+    def _crafting_material_candidates(self, player: Player) -> list[dict[str, Any]]:
+        return crafting_materials._crafting_material_candidates(self._dependencies.crafting.materials, player)
+
+    def _resolve_crafting_selection(self, player: Player, payload: dict[str, Any]) -> tuple[dict[str, Any], list[tuple[str, dict[str, Any]]]]:
+        return crafting_materials._resolve_crafting_selection(self._dependencies.crafting.materials, player, payload)
+
+    def _crafting_preview(self, player: Player, payload: dict[str, Any]) -> dict[str, Any]:
+        return crafting_preview._crafting_preview(self._dependencies.crafting.preview, player, payload)
+
+    def preview_crafting(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return crafting_preview.preview_crafting(self._dependencies.crafting.preview, game_id, payload)
+
+    def forge_crafted_artifact(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return crafting_forging.forge_crafted_artifact(self._dependencies.crafting.forging, game_id, payload)
+
+    def save_crafting_blueprint(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return crafting_forging.save_crafting_blueprint(self._dependencies.crafting.forging, game_id, payload)
+
+    def crafted_artifact_action(self, game_id: str, artifact_id: str, action: str, start_price: int = 0) -> dict[str, Any]:
+        return crafting_artifacts.crafted_artifact_action(self._dependencies.crafting.artifacts, game_id, artifact_id, action, start_price)
+
+    def _consign_crafted_artifact(self, game: GameState, artifact: dict[str, Any], start_price: int) -> None:
+        return crafting_artifacts._consign_crafted_artifact(self._dependencies.crafting.artifacts, game, artifact, start_price)
+
+    def _make_crafted_auction_lot(self, game: GameState, rng: random.Random, consignment: dict[str, Any], suffix: str) -> dict[str, Any]:
+        return crafting_artifacts._make_crafted_auction_lot(self._dependencies.crafting.artifacts, game, rng, consignment, suffix)
+
+    def _public_crafting_system(self, game: GameState) -> dict[str, Any]:
+        return crafting_presentation._public_crafting_system(self._dependencies.crafting.presentation, game)
+
+    @staticmethod
+    def _crafting_rules() -> dict[str, Any]:
+        return crafting_compat._crafting_rules()
+
+    @staticmethod
+    def _crafting_molds() -> dict[str, dict[str, Any]]:
+        return crafting_compat._crafting_molds()
+
+    @staticmethod
+    def _crafting_material_defs() -> dict[str, dict[str, Any]]:
+        return crafting_compat._crafting_material_defs()
+
+    @staticmethod
+    def _crafting_plant_defs() -> dict[str, dict[str, Any]]:
+        return crafting_compat._crafting_plant_defs()
+
+    @staticmethod
+    def _quality_probabilities(refining_level: int, average_quality: float) -> dict[str, float]:
+        return crafting_compat._quality_probabilities(refining_level, average_quality)
+
+    @staticmethod
+    def _weighted_choice(rng: random.Random, probabilities: dict[str, float]) -> str:
+        return crafting_compat._weighted_choice(rng, probabilities)
+
+    @staticmethod
+    def _resolve_mold_rule(
+        player: Player, mold: dict[str, Any], selected: list[tuple[str, dict[str, Any]]],
+    ) -> dict[str, Any]:
+        return crafting_compat._resolve_mold_rule(player, mold, selected)
+
+    @property
+    def _crafting_dependencies(self):
+        return self._dependencies.crafting
+
+    def _append_formation_market_offers(
+        self, game: GameState, rng: random.Random, offers: list[dict[str, Any]], *,
+        tier: int, market_name: str, location_id: str,
+    ) -> None:
+        return formation_market._append_formation_market_offers(self._dependencies.formation.market, game, rng, offers, tier=tier, market_name=market_name, location_id=location_id)
+
+    def _buy_formation_material_offer(self, game: GameState, offer: dict[str, Any], price: int) -> str:
+        return formation_market._buy_formation_material_offer(self._dependencies.formation.market, game, offer, price)
+
+    def _buy_formation_supply_offer(self, game: GameState, offer: dict[str, Any], price: int) -> str:
+        return formation_market._buy_formation_supply_offer(self._dependencies.formation.market, game, offer, price)
+
+    def _formation_candidates(
+        self, player: Player, *, include_active: bool = True, include_ground: bool = True,
+    ) -> list[dict[str, Any]]:
+        return formation_loadouts._formation_candidates(self._dependencies.formation.loadouts, player, include_active=include_active, include_ground=include_ground)
+
+    def _nodes_from_candidate_ids(self, player: Player, slot_ids: list[Any]) -> tuple[list[dict[str, Any] | None], list[str | None]]:
+        return formation_loadouts._nodes_from_candidate_ids(self._dependencies.formation.loadouts, player, slot_ids)
+
+    def preview_formation(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return formation_loadouts.preview_formation(self._dependencies.formation.loadouts, game_id, payload)
+
+    def save_formation(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return formation_loadouts.save_formation(self._dependencies.formation.loadouts, game_id, payload)
+
+    def activate_formation(self, game_id: str, loadout_id: str) -> dict[str, Any]:
+        return formation_loadouts.activate_formation(self._dependencies.formation.loadouts, game_id, loadout_id)
+
+    def deactivate_formation(self, game_id: str) -> dict[str, Any]:
+        return formation_loadouts.deactivate_formation(self._dependencies.formation.loadouts, game_id)
+
+    def delete_formation(self, game_id: str, loadout_id: str) -> dict[str, Any]:
+        return formation_loadouts.delete_formation(self._dependencies.formation.loadouts, game_id, loadout_id)
+
+    def _activate_loadout(self, player: Player, loadout: dict[str, Any]) -> None:
+        # First build a virtual pool containing the currently occupied material.
+        # This makes switching presets atomic and permits reusing the same rare
+        # instance without ever cloning it.
+        return formation_loadouts._activate_loadout(self._dependencies.formation.loadouts, player, loadout)
+
+    def _ground_array_public(self, player: Player, array: dict[str, Any]) -> dict[str, Any]:
+        return formation_ground._ground_array_public(self._dependencies.formation.ground, player, array)
+
+    def deploy_ground_formation(self, game_id: str, owner_kind: str = "player") -> dict[str, Any]:
+        return formation_ground.deploy_ground_formation(self._dependencies.formation.ground, game_id, owner_kind)
+
+    def _require_ground_array_access(self, game: GameState, ground_id: str) -> dict[str, Any]:
+        return formation_ground._require_ground_array_access(self._dependencies.formation.ground, game, ground_id)
+
+    def withdraw_ground_formation(self, game_id: str, ground_id: str) -> dict[str, Any]:
+        return formation_ground.withdraw_ground_formation(self._dependencies.formation.ground, game_id, ground_id)
+
+    def repair_ground_formation(self, game_id: str, ground_id: str, supply_id: str, quantity: int = 1) -> dict[str, Any]:
+        return formation_ground.repair_ground_formation(self._dependencies.formation.ground, game_id, ground_id, supply_id, quantity)
+
+    def _local_ground_formation(self, game: GameState) -> dict[str, Any] | None:
+        return formation_ground._local_ground_formation(self._dependencies.formation.ground, game)
+
+    def _sect_guard_array(self, game: GameState, sect_id: str) -> dict[str, Any] | None:
+        return formation_ground._sect_guard_array(self._dependencies.formation.ground, game, sect_id)
+
+    def _sect_guard_power(self, game: GameState, sect_id: str) -> float:
+        return formation_ground._sect_guard_power(self._dependencies.formation.ground, game, sect_id)
+
+    def _wear_war_guard_arrays(self, game: GameState, war: dict[str, Any], amount: float | None = None) -> None:
+        return formation_ground._wear_war_guard_arrays(self._dependencies.formation.ground, game, war, amount)
+
+    def _npc_formation_profile(
+        self, game: GameState, npc_id: str, *, detailed_spectrum: bool = False,
+    ) -> dict[str, Any]:
+        return formation_npcs._npc_formation_profile(self._dependencies.formation.npcs, game, npc_id, detailed_spectrum=detailed_spectrum)
+
+    def _npc_formation_power_multiplier(self, game: GameState, npc_id: str) -> float:
+        return formation_npcs._npc_formation_power_multiplier(self._dependencies.formation.npcs, game, npc_id)
+
+    def _ensure_npc_formations(self, game: GameState) -> bool:
+        return formation_npcs._ensure_npc_formations(self._dependencies.formation.npcs, game)
+
+    def _public_formation_system(self, game: GameState) -> dict[str, Any]:
+        return formation_presentation._public_formation_system(self._dependencies.formation.presentation, game)
+
+    @staticmethod
+    def _formation_rules() -> dict[str, Any]:
+        return formation_compat._formation_rules()
+
+    @staticmethod
+    def _formation_material_defs() -> dict[str, dict[str, Any]]:
+        return formation_compat._formation_material_defs()
+
+    @staticmethod
+    def _formation_maintenance_defs() -> dict[str, dict[str, Any]]:
+        return formation_compat._formation_maintenance_defs()
+
+    @staticmethod
+    def _formation_candidate(source: dict[str, Any], definition: dict[str, Any], source_kind: str, candidate_id: str) -> dict[str, Any]:
+        return formation_compat._formation_candidate(source, definition, source_kind, candidate_id)
+
+    @staticmethod
+    def _extract_candidate(player: Player, candidate: dict[str, Any]) -> dict[str, Any]:
+        return formation_compat._extract_candidate(player, candidate)
+
+    @staticmethod
+    def _release_active_formation(player: Player) -> None:
+        return formation_compat._release_active_formation(player)
+
+    @staticmethod
+    def _release_bindings(player: Player, bindings: list[dict[str, Any] | None]) -> None:
+        return formation_compat._release_bindings(player, bindings)
+
+    @staticmethod
+    def _ground_profile(player: Player, array: dict[str, Any]) -> dict[str, Any]:
+        return formation_compat._ground_profile(player, array)
+
+    @property
+    def _formation_dependencies(self):
+        return self._dependencies.formation
+
+    def _cancel_auction_for_world_change(self, game: GameState) -> None:
+        return economy_auctions._cancel_auction_for_world_change(self._dependencies.economy.auctions, game)
+
+    def search_black_market(self, game_id: str, pattern: str) -> dict[str, Any]:
+        return economy_black_market.search_black_market(self._dependencies.economy.black_market, game_id, pattern)
+
+    @staticmethod
+    def _alchemy_targets(player: Player) -> dict[str, dict[str, Any]]:
+        return economy_compat._alchemy_targets(player)
+
+    @staticmethod
+    def _art_names() -> dict[str, str]:
+        return economy_compat._art_names()
+
+    def _grant_art_experience(self, player: Player, art_id: str, amount: float) -> None:
+        return economy_arts._grant_art_experience(self._dependencies.economy.arts, player, art_id, amount)
+
+    def _public_art_skills(self, player: Player) -> list[dict[str, Any]]:
+        return economy_arts._public_art_skills(self._dependencies.economy.arts, player)
+
+    def refine_pill(self, game_id: str, target_item_id: str, materials: list[dict[str, Any]]) -> dict[str, Any]:
+        return economy_arts.refine_pill(self._dependencies.economy.arts, game_id, target_item_id, materials)
+
+    @staticmethod
+    def _auction_rules() -> dict[str, Any]:
+        return economy_compat._auction_rules()
+
+    @staticmethod
+    def _auction_rng(game: GameState, purpose: str) -> random.Random:
+        return economy_compat._auction_rng(game, purpose)
+
+    @staticmethod
+    def _auction_content(kind: str, content_id: str) -> tuple[str, str]:
+        return economy_compat._auction_content(kind, content_id)
+
+    def _auction_location_matches(self, game: GameState) -> bool:
+        return economy_auctions._auction_location_matches(self._dependencies.economy.auctions, game)
+
+    def _require_auction_access(self, game: GameState, statuses: set[str]) -> dict[str, Any]:
+        return economy_auctions._require_auction_access(self._dependencies.economy.auctions, game, statuses)
+
+    def _schedule_auction(self, game: GameState, rng: Any) -> None:
+        return economy_auctions._schedule_auction(self._dependencies.economy.auctions, game, rng)
+
+    def _auction_goods_pool(self, world: str) -> list[dict[str, Any]]:
+        return economy_auctions._auction_goods_pool(self._dependencies.economy.auctions, world)
+
+    def _auction_good_weight(self, world: str, tier: int) -> float:
+        return economy_auctions._auction_good_weight(self._dependencies.economy.auctions, world, tier)
+
+    def _make_auction_lot(self, game: GameState, rng: Any, *, kind: str, content_id: str, tier: int, start_price: int, seller: str='npc', suffix: str, rated_price: int | None=None) -> dict[str, Any]:
+        return economy_auctions._make_auction_lot(self._dependencies.economy.auctions, game, rng, kind=kind, content_id=content_id, tier=tier, start_price=start_price, seller=seller, suffix=suffix, rated_price=rated_price)
+
+    def _open_auction(self, game: GameState, rng: Any) -> None:
+        return economy_auctions._open_auction(self._dependencies.economy.auctions, game, rng)
+
+    def _advance_auction_clock(self, game: GameState, rng: Any) -> None:
+        return economy_auctions._advance_auction_clock(self._dependencies.economy.auctions, game, rng)
+
+    def _auction_increment(self, lot: dict[str, Any]) -> int:
+        return economy_auctions._auction_increment(self._dependencies.economy.auctions, lot)
+
+    def _auction_bid_ceiling(self, lot: dict[str, Any]) -> int:
+        return economy_auctions._auction_bid_ceiling(self._dependencies.economy.auctions, lot)
+
+    def consign_auction_item(self, game_id: str, item_id: str, start_price: int=0) -> dict[str, Any]:
+        return economy_auctions.consign_auction_item(self._dependencies.economy.auctions, game_id, item_id, start_price)
+
+    def place_auction_bid(self, game_id: str, lot_id: str) -> dict[str, Any]:
+        return economy_auctions.place_auction_bid(self._dependencies.economy.auctions, game_id, lot_id)
+
+    def advance_auction_round(self, game_id: str) -> dict[str, Any]:
+        return economy_auctions.advance_auction_round(self._dependencies.economy.auctions, game_id)
+
+    def _grant_auction_content(self, player: Player, kind: str, content_id: str) -> None:
+        return economy_auctions._grant_auction_content(self._dependencies.economy.auctions, player, kind, content_id)
+
+    def _finish_auction(self, game: GameState, rng: Any, reason: str='') -> None:
+        return economy_auctions._finish_auction(self._dependencies.economy.auctions, game, rng, reason)
+
+    def negotiate_at_auction(self, game_id: str, npc_id: str) -> dict[str, Any]:
+        return economy_auctions.negotiate_at_auction(self._dependencies.economy.auctions, game_id, npc_id)
+
+    def choose_auction_identity(self, game_id: str, alias: str) -> dict[str, Any]:
+        return economy_auctions.choose_auction_identity(self._dependencies.economy.auctions, game_id, alias)
+
+    def _public_auction(self, game: GameState) -> dict[str, Any]:
+        return economy_auctions._public_auction(self._dependencies.economy.auctions, game)
+
+    def buy_black_market_item(self, game_id: str, result_id: str, quantity: int=1) -> dict[str, Any]:
+        return economy_black_market.buy_black_market_item(self._dependencies.economy.black_market, game_id, result_id, quantity)
+
+    def sell_black_market_asset(self, game_id: str, kind: str, asset_id: str) -> dict[str, Any]:
+        return economy_black_market.sell_black_market_asset(self._dependencies.economy.black_market, game_id, kind, asset_id)
+
+    def leave_black_market(self, game_id: str) -> dict[str, Any]:
+        return economy_black_market.leave_black_market(self._dependencies.economy.black_market, game_id)
+
+    @staticmethod
+    def _market_tier(player: Player) -> int:
+        return economy_compat._market_tier(player)
+
+    @staticmethod
+    def _clear_market(game: GameState) -> None:
+        return economy_compat._clear_market(game)
+
+    @staticmethod
+    def _market_offer_group(offer: dict[str, Any]) -> str:
+        return economy_compat._market_offer_group(offer)
+
+    def _ensure_market(self, game: GameState, rng: Any) -> bool:
+        return economy_market._ensure_market(self._dependencies.economy.market, game, rng)
+
+    def _refresh_world_market(self, game: GameState, rng: Any) -> bool:
+        return economy_market._refresh_world_market(self._dependencies.economy.market, game, rng)
+
+    def _public_market(self, game: GameState) -> dict[str, Any]:
+        return economy_market._public_market(self._dependencies.economy.market, game)
+
+    def toggle_market_offer_lock(self, game_id: str, offer_id: str) -> dict[str, Any]:
+        return economy_market.toggle_market_offer_lock(self._dependencies.economy.market, game_id, offer_id)
+
+    @staticmethod
+    def _spirit_stones(player: Player) -> int:
+        return economy_compat._spirit_stones(player)
+
+    @staticmethod
+    def _catalog_price(kind: str, content_id: str) -> int:
+        return economy_compat._catalog_price(kind, content_id)
+
+    def _is_world_market_good(self, world: str, kind: str, content_id: str) -> bool:
+        return economy_market._is_world_market_good(self._dependencies.economy.market, world, kind, content_id)
+
+    def _private_trade_attendee(self, game: GameState, npc_id: str) -> dict[str, Any]:
+        return economy_private_trade._private_trade_attendee(self._dependencies.economy.private_trade, game, npc_id)
+
+    def buy_private_trade_item(self, game_id: str, npc_id: str, offer_id: str) -> dict[str, Any]:
+        return economy_private_trade.buy_private_trade_item(self._dependencies.economy.private_trade, game_id, npc_id, offer_id)
+
+    def sell_private_trade_item(self, game_id: str, npc_id: str, item_id: str) -> dict[str, Any]:
+        return economy_private_trade.sell_private_trade_item(self._dependencies.economy.private_trade, game_id, npc_id, item_id)
+
+    def bargain_private_trade(self, game_id: str, npc_id: str, side: str, asset_id: str) -> dict[str, Any]:
+        return economy_private_trade.bargain_private_trade(self._dependencies.economy.private_trade, game_id, npc_id, side, asset_id)
+
+    @staticmethod
+    def _spirit_field_rules() -> dict[str, Any]:
+        return economy_compat._spirit_field_rules()
+
+    @staticmethod
+    def _rounded_plant_years(years: float) -> int:
+        return economy_compat._rounded_plant_years(years)
+
+    @staticmethod
+    def _plant_quality(years: int, optimal_years: int) -> float:
+        return economy_compat._plant_quality(years, optimal_years)
+
+    def _plant_item_value(self, item_or_id: Item | str) -> int | None:
+        return economy_spirit_fields._plant_item_value(self._dependencies.economy.spirit_fields, item_or_id)
+
+    def _add_harvested_plant(self, player: Player, plant_id: str, actual_years: float) -> Item:
+        return economy_spirit_fields._add_harvested_plant(self._dependencies.economy.spirit_fields, player, plant_id, actual_years)
+
+    def _annual_spirit_field_update(self, player: Player) -> None:
+        return economy_spirit_fields._annual_spirit_field_update(self._dependencies.economy.spirit_fields, player)
+
+    def _public_spirit_field(self, player: Player) -> dict[str, Any]:
+        return economy_spirit_fields._public_spirit_field(self._dependencies.economy.spirit_fields, player)
+
+    def reclaim_spirit_field(self, game_id: str) -> dict[str, Any]:
+        return economy_spirit_fields.reclaim_spirit_field(self._dependencies.economy.spirit_fields, game_id)
+
+    def plant_spirit_crop(self, game_id: str, plant_id: str, slot: int | None=None) -> dict[str, Any]:
+        return economy_spirit_fields.plant_spirit_crop(self._dependencies.economy.spirit_fields, game_id, plant_id, slot)
+
+    def irrigate_spirit_crop(self, game_id: str, plot_id: str, mp_amount: float=0, booster_id: str='') -> dict[str, Any]:
+        return economy_spirit_fields.irrigate_spirit_crop(self._dependencies.economy.spirit_fields, game_id, plot_id, mp_amount, booster_id)
+
+    def harvest_spirit_crop(self, game_id: str, plot_id: str) -> dict[str, Any]:
+        return economy_spirit_fields.harvest_spirit_crop(self._dependencies.economy.spirit_fields, game_id, plot_id)
+
+    def use_harvested_plant(self, game_id: str, item_id: str) -> dict[str, Any]:
+        return economy_spirit_fields.use_harvested_plant(self._dependencies.economy.spirit_fields, game_id, item_id)
+
+    def sell_spirit_plant(self, game_id: str, item_id: str, *, black_market: bool=False) -> dict[str, Any]:
+        return economy_spirit_fields.sell_spirit_plant(self._dependencies.economy.spirit_fields, game_id, item_id, black_market=black_market)
+
+    def _treasure_reward_pool(self, game: GameState, category: str) -> list[dict[str, Any]]:
+        return economy_treasure._treasure_reward_pool(self._dependencies.economy.treasure, game, category)
+
+    def _treasure_step(self, game: GameState, rng: Any) -> str:
+        return economy_treasure._treasure_step(self._dependencies.economy.treasure, game, rng)
+
+    def _prepare_treasure_reward_event(self, game: GameState, rng: Any) -> dict[str, Any]:
+        return economy_treasure._prepare_treasure_reward_event(self._dependencies.economy.treasure, game, rng)
+
+    def _claim_treasure_reward(self, game: GameState, pending: dict[str, Any], category: str) -> tuple[str, str]:
+        return economy_treasure._claim_treasure_reward(self._dependencies.economy.treasure, game, pending, category)
+
+    @property
+    def _economy_dependencies(self):
+        return self._dependencies.economy

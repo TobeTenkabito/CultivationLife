@@ -62,6 +62,10 @@ class AuctionsDependencies:
 
 @dataclass(frozen=True, slots=True)
 class BlackMarketDependencies:
+    _auction_content: Callable[..., Any]
+    _crafting_material_defs: Callable[..., Any]
+    _formation_maintenance_defs: Callable[..., Any]
+    _formation_material_defs: Callable[..., Any]
     _auction_rules: Callable[..., Any]
     _catalog_price: Callable[..., Any]
     _grant_auction_content: Callable[..., Any]
@@ -168,3 +172,37 @@ class EconomyDependencies:
     private_trade: PrivateTradeDependencies
     spirit_fields: SpiritFieldsDependencies
     treasure: TreasureDependencies
+
+
+@dataclass(frozen=True, slots=True)
+class ExchangeDependencies:
+    decode_rng: Callable[..., Any]
+    _crafting_material_candidates: Callable[..., Any]
+    _crafting_material_defs: Callable[..., Any]
+    _exchange_location: Callable[..., Any]
+    _exchange_materials: Callable[..., Any]
+    _formation_material_defs: Callable[..., Any]
+    _load: Callable[..., Any]
+    _open_exchange: Callable[..., Any]
+    _schedule_exchange: Callable[..., Any]
+    _get_maps: Callable[[], MapPort]
+    present: Callable[..., Any]
+    _get_store: Callable[[], SavePort]
+    _get_EXCHANGE_ALIASES: Callable[[], Any]
+    _get_EXCHANGE_VENUES: Callable[[], Any]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
+
+    @property
+    def store(self) -> SavePort:
+        return self._get_store()
+
+    @property
+    def EXCHANGE_ALIASES(self) -> Any:
+        return self._get_EXCHANGE_ALIASES()
+
+    @property
+    def EXCHANGE_VENUES(self) -> Any:
+        return self._get_EXCHANGE_VENUES()

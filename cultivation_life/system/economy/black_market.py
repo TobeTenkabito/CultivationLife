@@ -8,6 +8,12 @@ from ...rules import add_item, remove_item
 from .dependencies import BlackMarketDependencies
 
 
+from ...content_registry import MARKET_GOODS
+from ...content_registry import REALMS
+import random
+import re
+
+
 def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id: str, quantity: int = 1) -> dict[str, Any]:
     if isinstance(quantity, bool) or not isinstance(quantity, int) or not 1 <= quantity <= 999:
         raise ValueError("购买数量必须为 1–999 的整数")
@@ -111,6 +117,104 @@ def leave_black_market(deps: BlackMarketDependencies, game_id: str) -> dict[str,
     game = deps._load(game_id)
     deps._require_auction_access(game, {"black_market"})
     game.auction_state = {"status":"cooldown", "actions_remaining":int(deps._auction_rules()["cooldown_actions"])}
+    game.updated_at = now_iso()
+    deps.store.save(game)
+    return deps.present(game)
+
+
+
+
+def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: str) -> dict[str, Any]:
+    game = deps._load(game_id)
+    state = deps._require_auction_access(game, {"black_market"})
+    pattern = str(pattern).strip()
+    if not pattern or len(pattern) > 40:
+        raise ValueError("请输入1至40个字符的检索表达式")
+    try:
+        matcher = re.compile(pattern, re.IGNORECASE)
+    except re.error as error:
+        raise ValueError(f"正则表达式无效：{error}") from error
+    unique: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in MARKET_GOODS:
+        if row.get("world", "human") == game.player.world:
+            unique[(str(row["kind"]), str(row["content_id"]))] = dict(row)
+    # Material stalls are generated outside MARKET_GOODS because each
+    # crafting/formation piece is a real unique instance. Black-market
+    # search still exposes the complete world-local catalog and freezes
+    # the generated instance in the saved search result until purchase.
+    material_rng = random.Random(
+        f"{game.seed}:black-market-material:{state.get('id', '')}:{pattern}"
+    )
+    material_rows: list[dict[str, Any]] = []
+    for definition in deps._crafting_material_defs().values():
+        if str(definition.get("world")) != game.player.world:
+            continue
+        from ..crafting_system import make_crafting_material_instance
+        instance = make_crafting_material_instance(
+            definition, material_rng, source="黑市购得", origin_world=game.player.world,
+        )
+        material_rows.append({
+            "kind":"crafting_material", "content_id":str(definition["id"]),
+            "name":str(definition["name"]),
+            "description":f"炼器材料 · {instance['state']} · 材料价值 {int(instance['material_value']):,}",
+            "tier":int(definition.get("tier", 1)),
+            "base_price":int(instance["material_value"]), "material_instance":instance,
+        })
+    for definition in deps._formation_material_defs().values():
+        if str(definition.get("world")) != game.player.world:
+            continue
+        from ..formation_system import NATURE_NAMES, make_formation_material_instance
+        instance = make_formation_material_instance(
+            definition, source="黑市购得", origin_world=game.player.world,
+        )
+        material_rows.append({
+            "kind":"formation_material", "content_id":str(definition["id"]),
+            "name":str(definition["name"]),
+            "description":f"阵法材料 · {NATURE_NAMES.get(str(definition.get('nature')), definition.get('nature'))}性 · 固有阵值 {float(definition.get('formation_value', 0)):g}",
+            "tier":int(definition.get("tier", 1)),
+            "base_price":int(definition.get("base_value", 1)), "formation_material_instance":instance,
+        })
+    for definition in deps._formation_maintenance_defs().values():
+        if str(definition.get("world")) != game.player.world:
+            continue
+        material_rows.append({
+            "kind":"formation_supply", "content_id":str(definition["id"]),
+            "name":str(definition["name"]),
+            "description":f"修阵材料 · 恢复 {float(definition.get('repair_value', 0)):g}% 镇地阵完整度",
+            "tier":int(definition.get("tier", 1)),
+            "base_price":int(definition.get("base_value", 1)),
+        })
+    results = []
+    multiplier = float(deps._auction_rules()["black_market_buy_multiplier"])
+    for (kind, content_id), row in unique.items():
+        name, description = deps._auction_content(kind, content_id)
+        if not matcher.search(f"{name} {description}"):
+            continue
+        results.append({
+            "id":f"black-{kind}-{content_id}", "kind":kind, "content_id":content_id,
+            "name":name, "description":description, "tier":int(row["tier"]),
+            "tier_name":REALMS[int(row["tier"])].name,
+            "price":max(1, round(deps._catalog_price(kind, content_id) * multiplier)),
+        })
+    for row in material_rows:
+        if not matcher.search(f"{row['name']} {row['description']}"):
+            continue
+        tier = max(0, min(len(REALMS) - 1, int(row["tier"])))
+        results.append({
+            **row,
+            "id":f"black-{row['kind']}-{row['content_id']}",
+            "tier":tier, "tier_name":REALMS[tier].name,
+            "price":max(1, round(int(row["base_price"]) * multiplier)),
+        })
+    from ..spirit_voisinage import offers
+    for book in offers(game, 'black_market', state.get('id', game.player.age // 10)):
+        description = '仙家传承的下界改本；合参至 Lv4 可修习灵域，无法通过道门修炼。'
+        if matcher.search(book.name + ' ' + description):
+            results.append(dict(id='black-' + book.id, kind='spirit_manual', content_id=book.id,
+                name=book.name, description=description, tier=book.grade,
+                tier_name=REALMS[book.grade].name, price=45000))
+    results.sort(key=lambda row: (row['kind'] != 'spirit_manual', row["tier"], row["name"]))
+    state["black_market_results"] = results[:int(deps._auction_rules()["black_market_result_limit"])]
     game.updated_at = now_iso()
     deps.store.save(game)
     return deps.present(game)

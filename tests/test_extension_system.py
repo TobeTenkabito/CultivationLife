@@ -11,6 +11,12 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 
 class ExtensionSystemTests(unittest.TestCase):
+    def setUp(self):
+        # Loading a fixture updates class-level reports. Restore the original
+        # registry bindings so later game tests do not inherit fixture DLCs.
+        for name in ('loaded_documents', 'extension_report'):
+            self.addCleanup(setattr, ContentRegistry, name, getattr(ContentRegistry, name))
+
     def test_dlc_dependency_kind_and_missing_dependency_are_validated(self):
         for dependency_kind, expected in [('dlc', 'loaded'), ('mod', 'error'), ('missing', 'error')]:
             with self.subTest(dependency_kind=dependency_kind), tempfile.TemporaryDirectory() as directory:
