@@ -120,6 +120,8 @@ def cycles(modules, edges):
 def violations(edges):
     invalid = []
     for source, target, line in edges:
+        debug_reverse_import = (target.startswith('cultivation_life.debug')
+            and not source.startswith('cultivation_life.debug') and source != 'cultivation_life.server')
         system_to_engine = (source.startswith('cultivation_life.system.')
                             and source != 'cultivation_life.system.asura_system'
                             and (target == 'cultivation_life.engine' or target.startswith('cultivation_life.engine.')))
@@ -224,7 +226,7 @@ def violations(edges):
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
                 or three_group_reverse_import or key_flow_reverse_import or time_flow_reverse_import
-                or relationship_storage_reverse_import):
+                or relationship_storage_reverse_import or debug_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 

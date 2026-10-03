@@ -27,7 +27,8 @@ const timelineText = value => (
 );
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {headers: {'Content-Type': 'application/json'}, ...options});
+  const response = await fetch(path, {...options, headers: {'Content-Type': 'application/json',
+    ...options.headers, ...window.DebugConsole?.headers(path)}});
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || '天机紊乱，请稍后再试');
   return data;
@@ -63,8 +64,20 @@ $('#game-confirm-backdrop').addEventListener('click', event => {
 });
 
 async function boot() {
-  const [config, saves, achievements] = await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
+  // A stale debug token must not prevent access to the explicit disconnect UI.
+  const activeDebug = window.DebugConsole?.active();
+  const initial = activeDebug ? [await api('/api/config')] :
+    await Promise.all([api('/api/config'), api('/api/games'), api('/api/achievements')]);
+  const config = initial[0];
   configData = config;
+  window.DebugConsole?.configure(config, {
+    gameId: () => game?.id, busy: () => busy,
+    lock: value => { busy = value; document.body.classList.toggle('busy', value); renderButtons(); },
+    refresh: async id => render(await api(`/api/games/${id}`)), reset: showStart,
+    leave: () => location.reload(),
+  });
+  const [saves, achievements] = activeDebug ?
+    await Promise.all([api('/api/games'), api('/api/achievements')]) : initial.slice(1);
   window.TutorialGuide?.configure(config);
   const baseGame = config.base_game || {};
   const versionLabel = baseGame.version_label || `本体 v${baseGame.version || '?'}`;
@@ -640,7 +653,7 @@ function render(data) {
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
-  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true, debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
+  renderInventory(p.inventory); renderArtSkills(data.art_skills || []); renderSpiritField(data.spirit_field || {}); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); renderMap(data.map, data.auction_system); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:configData?.debug === true && !!window.DebugConsole?.active(), debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent();
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   window.GameThemes?.render(data);
@@ -684,7 +697,7 @@ function craftingPayload() {
 function renderTianji(system) {
   const panel = $('#tianji-card'), dock = document.querySelector('[data-panel-target="tianji"]');
   panel?.classList.toggle('hidden', !system.available); dock?.classList.toggle('hidden', !system.available);
-  $('#tianji-debug-lv5')?.classList.toggle('hidden', configData?.debug !== true || !system.available);
+  $('#tianji-debug-lv5')?.classList.toggle('hidden', configData?.debug !== true || !window.DebugConsole?.active() || !system.available);
   if (!system.available) { window.UtilityPanels?.close('tianji'); return; }
   $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version} · ${system.world_name || '当前界面'}单件战力${system.world_combat_power_cap == null ? '完全解放' : `上限 ${number(system.world_combat_power_cap)}`}`;
   const root = $('#tianji-ranking'); root.innerHTML = '';

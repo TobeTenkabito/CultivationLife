@@ -8,7 +8,7 @@
 
 当前源码已完成显式依赖拆分、关键时间流程统一，以及普通关系按 NPC ID 关联权威人物。俘虏、侍妾与活傀已经区分生存、拘禁和名册状态；九个局部 Mixin 仍有明确保留边界。玩法包含六套主题、十一界、八个可选官方 DLC；修罗专属 UI 按境界开放，神通整组洗练可锁属性。
 
-完整资料入口：[文档索引](docs/README.md)、[项目诊断](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)。旧版功能变更及当时发行范围保留在 [更新日志](CHANGELOG.md)。
+完整资料入口：[文档索引](docs/README.md)、[项目诊断](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)、[Debug 开发规范与控制台](docs/debug-development.md)。旧版功能变更及当时发行范围保留在 [更新日志](CHANGELOG.md)。
 
 ## 开始游戏
 
@@ -73,7 +73,7 @@ python -m cultivation_life.server --port 8001
 Debug=False
 ```
 
-未提供配置时默认关闭。改为 `Debug=True` 可启用受此开关控制的调试入口，例如商盟的一键总部特使；刷新页面后读取当前配置。DLC/MOD 的开关另行保存，需要**停止并重新启动游戏服务**才生效，仅刷新网页不会重新加载内容包。
+未提供配置时默认关闭。当前开发源码新增隔离控制台：改为 `Debug=True` 并刷新后，在角色中执行 `debug start` 创建独立调试副本，再修改玩家数据或进行测试。神机、商盟的旧调试操作也仅允许在副本中执行。使用方法与后续开发规范见 [Debug 文档](docs/debug-development.md)；已经发布的 1.57.0 安装包不包含这次未发布变更。DLC/MOD 的开关另行保存，需要**停止并重新启动游戏服务**才生效，仅刷新网页不会重新加载内容包。
 
 ## DLC 与 MOD
 
