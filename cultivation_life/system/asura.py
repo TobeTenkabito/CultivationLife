@@ -23,6 +23,20 @@ def active(player):
     return enabled() and player.path == 'demonic' and player.world == 'asura' and player.realm_index >= 9
 
 
+def body_cost(player):
+    """Use the immortal meridian's base resource scale, not the legacy realm bar."""
+    from .immortal_cultivation import rules
+    level = player.asura_cultivation.get('body_level', 0)
+    return rules()['vein_opportunity_base'] * (level + 1) if level < 20 else 0
+
+
+def power_reroll_quote(state):
+    powers = state.get('powers', [])
+    locked = set(state.get('locked_power_ids', [])) & {r['id'] for r in powers}
+    return dict(locked_ids=sorted(locked), unlocked=len(powers) - len(locked),
+                cost=100 * 2 ** len(locked))
+
+
 def generate_rule(rng, key, preferred=None):
     templates = config()['semantic_templates']
     index = preferred if preferred is not None and rng.random() < .65 else rng.randrange(len(templates))
@@ -238,9 +252,8 @@ def describe_rule(rule):
 
 
 def public(game):
-    from ..rules import opportunity_required
     p, s = game.player, game.player.asura_cultivation
-    if not enabled() or p.path != 'demonic':
+    if not active(p):
         return {'available': False}
     route = config()['routes'].get(s.get('route'), {})
     bodies = [dict(public_body(b), source=kind) for kind, rows in (('prisoner', p.prisoners), ('puppet', p.puppets))
@@ -257,7 +270,7 @@ def public(game):
         route_name=route.get('name', ''), part=route.get('part', ''),
         routes=[dict(id=k, **v) for k, v in config()['routes'].items()],
         candidates=bodies, meridians=public_meridians(p),
-        body_cost=opportunity_required(p) * .04 * (s.get('body_level', 0) + 1),
+        body_cost=body_cost(p), power_reroll=power_reroll_quote(s),
         minimum_body_training=config()['minimum_body_training'],
         domain_stats={key:getattr(field,key) for key in ('stability','incursion','authority')} if field else {},
         domain_label=label(s.get('domain_rank', 1)),

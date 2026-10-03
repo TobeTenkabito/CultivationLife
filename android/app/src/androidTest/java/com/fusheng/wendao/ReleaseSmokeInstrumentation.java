@@ -188,12 +188,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.56.1' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            check(Boolean.TRUE.equals(js("configData.base_game.version==='1.56.2' && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
             if(phase.equals("asura")) {
+                String novice=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'人界门槛验收',spirit_root:'supreme_metal',path:'demonic',seed:1562})});await loadGame(g.id);return g.id;})()");
+                check(Boolean.TRUE.equals(js("!game.asura.available && Array.from(document.querySelectorAll('[data-panel-target^=asura-]')).every(n=>n.classList.contains('hidden')) && !document.querySelector('[data-chapter=dlc-asura]')")),"Asura content hidden before upper realm");
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'魔脉分屏验收',preset_id:'asura_upper',seed:1560})});return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.asura_cultivation.update(conversion=5,body_level=20,souls=10000,route='garuda',level=9,domain_rank=8,domain_name='验收翼域',vein_pity={'9:1':100})\ng.player.opportunity=1e12\ng.pending_event=None\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
@@ -208,6 +210,18 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("document.querySelector('#asura-powers-card').classList.contains('panel-open')","Native powers panel opening");
                 tapSelector("#asura-powers-content .asura-action");
                 waitForJs("!busy && game.asura.powers.length===1","Native supernatural power");
+                for(int count=2;count<=3;count++) {
+                    tapSelector("[data-asura-action=learn_power]");
+                    waitForJs("!busy && game.asura.powers.length==="+count,"Learn additional power");
+                }
+                js("window.__oldAsuraPowers=JSON.stringify(game.asura.powers);window.__oldAsuraSouls=game.asura.souls;true");
+                tapSelector("[data-asura-action=lock_power]");
+                waitForJs("!busy && game.asura.power_reroll.locked_ids.length===1","Native attribute lock");
+                tapSelector("[data-asura-action=reroll_power]");
+                waitForJs("!busy && game.asura.souls===__oldAsuraSouls-200","Whole-set reroll fee");
+                check(Boolean.TRUE.equals(js("(()=>{const old=JSON.parse(__oldAsuraPowers);return game.asura.powers.every((r,i)=>(JSON.stringify(r)===JSON.stringify(old[i]))===(i===0));})()")),"Locked attribute preserved; all other attributes rerolled");
+                check(Boolean.TRUE.equals(js("game.player.opportunity_unbounded && game.player.opportunity>game.player.opportunity_required && game.asura.meridians.breakthrough_cost===18000")),"Asura reserve and immortal-scale fee");
+
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     for(String panel:new String[]{"asura-conversion","asura-body","asura-veins","asura-route","asura-domain","asura-powers","puppet-workshop"}) {
@@ -219,11 +233,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("[data-panel-target=asura-veins]");
                     js("document.querySelector('#asura-veins-card').scrollTop=0;true");
                     check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.asura-meridian-figure svg').getBoundingClientRect();return r.width>100&&r.width<innerWidth&&r.height>100})()")),"Magic vein illustration size");
-                    capture("asura-veins-"+arguments.getString("orientation")+"-"+theme+"-1561");
+                    capture("asura-veins-"+arguments.getString("orientation")+"-"+theme+"-1562");
                     sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);waitForJs("!document.querySelector('.utility-panel.panel-open')","Native independent panel back");
                 }
                 async("loadGame("+JSONObject.quote(id)+")");
-                check(Boolean.TRUE.equals(js("game.asura.opened===1 && game.asura.powers.length===1")),"Asura changes persist");
+                check(Boolean.TRUE.equals(js("game.asura.opened===1 && game.asura.powers.length===3 && game.asura.power_reroll.locked_ids.length===1")),"Asura changes persist");
                 result.putString("asura_scope","Six themes, seven independent panels, new 27-node three-head six-arm figure, native opening and power, DLC colors, native back and persistence");
             } else if(phase.equals("upper-voisinage")) {
                 for(String world:new String[]{"asura","nether","reincarnation"}) {
@@ -260,14 +274,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                             js("UtilityPanels.open('"+panel+"');true");
                             check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Upper voisinage panel overflow "+world+theme);
                         }
-                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1561");
+                        js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1562");
                     }
                     js("UtilityPanels.open('immortal-aperture');true");tapSelector("#immortal-aperture-content button");
                     waitForJs("!busy && game.aperture.current>0","Native energy refinement");
                     async("loadGame("+JSONObject.quote(id)+")");
                     check(Boolean.TRUE.equals(js("game.upper_voisinages.rows[0].level===2&&game.aperture.current>0")),"Upper cultivation persisted");
                 }
-                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='upper-voisinages')")),"Upper domain handbook missing");
+                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='upper-voisinages')")),"Upper domain handbook missing");
                 result.putString("upper_voisinage_scope","Three worlds, six themes, native ninth-realm presets, institution enrollment/commissions, acquisition/training/refinement and persisted domains; handbook available");
             } else if(phase.equals("bulk")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'批量兑换验收',preset_id:'true_immortal',seed:1521})});return g.id;})()");
@@ -434,7 +448,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         check(Boolean.TRUE.equals(js("game.player.layer<=2 && game.player.realm_index===9")),"Ordinary breakthrough persistence");
                     }
                 }
-                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='roots') && TutorialHandbook.build(configData).some(c=>c.id==='upper-worlds')")),"Missing upper/root handbook");
+                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='roots') && TutorialHandbook.build(configData,game).some(c=>c.id==='upper-worlds')")),"Missing upper/root handbook");
                 result.putString("upper_scope","Three worlds, six themes, finite opportunity, DLC routing, native breakthrough and persistence, root handbook");
             } else if(phase.equals("trials")) {
                 python("from cultivation_life.system.doctrine.voisinage_training import multiplier,base_multiplier\nassert [round(multiplier(n),2) for n in (8,9,10,11,12,13)]==[2.54,2.76,3.06,3.36,3.66,4.55]\nassert round(base_multiplier(13),2)==3.64");
@@ -456,7 +470,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("game.last_combat_report.result==='victory' && game.last_combat_report.total_rounds===5 && game.doctrines.voisinages.some(f=>f.cultivation.rank===5)")),"Five-round backlash victory");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.last_combat_report.total_rounds===5 && game.doctrines.voisinages.some(f=>f.cultivation.rank===5)")),"Trial persistence");
-                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData).some(c=>c.id==='immortal-trials' && JSON.stringify(c).includes('没有轮数限制'))")),"Missing trial handbook");
+                check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='immortal-trials' && JSON.stringify(c).includes('战前准备') && !JSON.stringify(c).includes('复制'))")),"Missing trial handbook");
                 capture("trials-victory-1520");
                 result.putString("trials_scope","Six themes; native training tap and back; five-round field-only backlash; real growth and reload persistence; unlimited three-corpses handbook");
             } else if(phase.equals("tutorial")) {
@@ -533,7 +547,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 js("window.__windowsCode="+JSONObject.quote(incoming));
                 String imported=(String)async("(async()=>{const payload=await SaveCode.decode(__windowsCode);const p=await api('/api/save-transfer/preview',{method:'POST',body:JSON.stringify({payload})});const r=await api('/api/save-transfer/import',{method:'POST',body:JSON.stringify({payload,existing_hash:p.existing_hash})});return r.id;})()");
                 String outgoing=(String)async("(async()=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id:"+JSONObject.quote(imported)+"})});return SaveCode.encode(r.payload);})()");
-                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1561.txt");
+                File output=new File(getTargetContext().getExternalFilesDir(null),"verification/from-android-1562.txt");
                 try(FileOutputStream stream=new FileOutputStream(output)) { stream.write(outgoing.getBytes(StandardCharsets.UTF_8)); }
                 result.putString("transfer_scope","Six themes; native clipboard; >10MB JSON; reversed chunks; confirmed replacement; Windows to Android import and return export");
             } else if(phase.equals("immortal")) {
@@ -761,7 +775,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             try {
                 result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML,rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML:null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
                 capture("failure-1520");
-            } catch(Exception ignored) { /* Preserve the original failure. */ }
+            } catch(Throwable ignored) { /* Screenshot assertions must not mask the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString());
             finish(Activity.RESULT_CANCELED,result);
         }

@@ -135,7 +135,7 @@ def main():
                     page.evaluate('(id)=>loadGame(id)', g.id)
                     page.wait_for_function('(w)=>!busy&&game.player.world===w&&game.upper_voisinages.available',arg=world)
                     assert page.evaluate('game.upper_voisinages.rows[0].level===2&&game.upper_voisinages.rows[1].active')
-                chapters = page.evaluate('TutorialHandbook.build(configData)')
+                chapters = page.evaluate('TutorialHandbook.build(configData,game)')
                 assert 'upper-voisinages' in {c['id'] for c in chapters}
                 assert 'upper-institutions' in {c['id'] for c in chapters}
                 assert not errors, errors

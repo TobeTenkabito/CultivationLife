@@ -40,12 +40,12 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     institutions_changed |= ensure_asura_court(game)
     from ..system.faction_geography import ensure_faction_sites
     renamed = ensure_faction_sites(game) or institutions_changed
-    from ..system.cultivation_policy import ordinary_upper, bloodline_upper
+    from ..system.cultivation_policy import ordinary_upper, bloodline_upper, opportunity_unbounded
     p = game.player
     if p.path == "monster" and not p.monster_species_id:
         p.monster_species_id = str(MONSTER_BLOODLINE_SETTINGS.get('default_species_id') or 'serpent')
         renamed = True
-    if ordinary_upper(p) and not p.sealed_cultivation and not p.cultivation_suppression:
+    if ordinary_upper(p) and not opportunity_unbounded(p) and not p.sealed_cultivation and not p.cultivation_suppression:
         required = opportunity_required(p)
         old_progress = (p.opportunity, p.awaiting_minor_breakthrough, p.awaiting_major_breakthrough, p.next_tribulation_age, p.awaiting_ascension)
         p.awaiting_ascension = False
