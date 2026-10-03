@@ -7,6 +7,7 @@ from pathlib import Path
 import cultivation_life
 from cultivation_life.engine import GameEngine
 from cultivation_life.storage import SaveStore
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 from cultivation_life.version import (
     BASE_GAME_ID,
     BASE_GAME_NAME,
@@ -41,7 +42,7 @@ class BaseGameVersionTests(unittest.TestCase):
             self.assertEqual(raw["last_saved_with_game_version"], BASE_GAME_VERSION)
             self.assertEqual(engine.store.list_games()[0]["game_version"], BASE_GAME_VERSION)
 
-    def test_legacy_saves_load_without_confusing_save_schema_and_release_version(self):
+    def test_release_metadata_is_independent_of_current_save_schema(self):
         with tempfile.TemporaryDirectory() as directory:
             save_root = Path(directory) / "saves"
             engine = GameEngine(SOURCE_ROOT, save_root)
@@ -54,7 +55,7 @@ class BaseGameVersionTests(unittest.TestCase):
 
             store = SaveStore(save_root)
             loaded = store.load(created["id"])
-            self.assertEqual(loaded.version, 5)
+            self.assertEqual(loaded.version, SAVE_SCHEMA_VERSION)
             self.assertEqual(loaded.created_with_game_version, "pre-1.0.0")
             self.assertEqual(loaded.last_saved_with_game_version, "pre-1.0.0")
             store.save(loaded)

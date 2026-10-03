@@ -1,6 +1,6 @@
 # 系统目录与兼容边界
 
-经济、交换会、神机、内政、炼器、阵法及天庭／瑶池采用显式依赖的普通函数，原动态装配工具 `_assembly.py` 已删除。外部仍通过原来的 `*_system.py` 模块导入兼容类及模块级辅助函数。
+经济、交换会、神机、内政、炼器、阵法、归墟、战争及天庭／瑶池采用显式依赖的普通函数，原动态装配工具 `_assembly.py` 已删除。外部仍通过原来的 `*_system.py` 模块导入兼容类及模块级辅助函数。
 
 ## 已拆分的系统
 
@@ -12,6 +12,8 @@
 | `court/` | `state.py` 天庭状态与操作；`governance.py` 政务；`lifecycle.py` 任期与俸禄；`yaochi.py` 瑶池操作；四组依赖契约与显式装配 |
 | `crafting/` | `market.py` 炼器材料货架与购入；`materials.py` 材料候选与选材校验；`preview.py` 品质概率、预算与数值预览；`forging.py` 实际炼制与图谱保存；`artifacts.py` 器物处置、出售与寄拍；`presentation.py` 展示 |
 | `formation/` | `market.py` 阵材与维护资源交易；`loadouts.py` 材料候选、预设、启阵、收阵与失败回滚；`ground.py` 镇地阵部署、权限、维护与战争磨损；`npcs.py` NPC 阵法生成与投影；`presentation.py` 展示 |
+| `guixu/` | `state.py` 周期与会话补全、境界边界、操作权限；`calendar.py` 预告、开放、关闭与天数消耗；`npcs.py` 参赛者、队伍与后台争夺；`rewards.py` 宝物发放与转移；`encounters.py` 威胁、临时同行与战斗；`actions.py` 探索操作与被困修炼；`presentation.py` 展示 |
+| `war/` | `state.py` 战争状态、阵营与参战名单；`diplomacy.py` 宣战、盟友与指挥权限；`power.py` 阵势和战力；`combat.py` 交战、先锋与伤亡；`lifecycle.py` 行动单位推进与士气胜负；`peace.py` 条款、和约及结算；`actions.py` 指令与地图遭遇；`presentation.py` 展示 |
 
 ## 原模块继续负责兼容
 
@@ -19,7 +21,24 @@
 - `tianji_system.py` 保留 `TianjiSystemMixin`、生成版本、常量和全部模块级辅助函数。
 - `intrigue_system.py` 保留 `IntrigueSystemMixin`、常量、模块级辅助函数，以及默认参数引用 `PLAYER_ID` 的权限判断转发方法。
 
-经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；当前引擎直接基类为 15 个，其余基类的相对顺序保持原样。
+经济、神机与内政最初拆分阶段没有修改 `GameEngine` 的继承顺序，也没有为拆出的文件增加 Mixin 基类。后续分组移除继承；当前引擎直接基类为 13 个，其余基类的相对顺序保持原样。
+
+## 归墟与战争的显式依赖
+
+归墟的 32 个实例方法和战争的 40 个实例方法分别使用七组、八组冻结契约，通过 `engine/composition/systems.py` 接入引擎。11 个静态辅助实现留在原入口，旧 Mixin 和引擎均显式转发。旧类支持独立消费者，首次使用时缓存依赖；方法、存档、地图与事件目录在实际调用时读取，保留子类覆盖和运行时替换。
+
+归墟开关、移动天数、战争条款和原入口 `decode_rng` 钩子由具名回调或 getter 注入。算法不得反向导入本系统入口或装配模块，也不接收整个引擎。其他直接导入的规则符号应在实际定义或使用模块维护。
+
+本阶段只调整职责边界。`guixu_action` 的操作分支与 `_conclude_war` 的条款结算仍保留原顺序；归墟关闭前分配到期宝物、临时队伍与归属维护、战争伤亡、阵法磨损、盟友名单、组合和约的资源结算和最终停战保持原行为。展示与读档中的状态补全仍有副作用。
+
+`tests/test_expedition_dependencies.py` 验证无引擎调用的潮期截止、士气判负、和约预算与结算顺序，以及资源替换、旧适配器、子类 `super()` 和禁止反向导入。`tools/replay_expeditions.py` 固定时间、UUID 和 Python 哈希种子，三个游戏种子共 85 个检查点比较完整返回值与存档摘要，覆盖组队、搜索、归返、被困养成、DLC 关闭清理、先锋战、战争推进、盟友、AI 和约和停战。可用 `--trace-directory` 输出完整状态排查差异。
+
+```powershell
+python tools/replay_expeditions.py --output build/expeditions-before.json
+# 完成待验证的改动后运行：
+python tools/replay_expeditions.py --output build/expeditions-after.json --compare build/expeditions-before.json
+python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.py tests/test_guixu_companions.py tests/test_war_performance_update.py
+```
 
 ## 天庭与瑶池的组合式接入
 
@@ -62,7 +81,9 @@
 - `combat_rule_schema.py` 统一定义新版战斗规则常量和校验，战斗执行器与旧血脉规则均依赖它；旧 `combat_rule_engine.validate_rule` 保留同一函数的兼容导出。
 - `tutorial_mentorship.py` 负责师缘条件、状态和操作；教程入口与操作教学共同调用它。师缘操作不再为了判定拜师条件调用完整教学展示。旧教程入口保留 `blocked_reason`、`mentor_action` 与 `MENTOR_STEP` 导出。
 
-新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；当前 244 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
+新增系统代码不得运行时导入 `engine/`；旧修罗适配器 `asura_system.py` 是保留的兼容例外。依赖检查包含函数内延迟导入，忽略仅供类型检查的导入，不模拟动态导入或 Python 隐式执行的包初始化。此前的战斗循环及最后一组 22 个核心模块循环均已拆开；读档阶段拆分后，当前 274 个 Python 模块的显式导入图无循环。检查器对任何新循环或已声明边界违规返回失败；这不等于共享可变状态、Mixin 协作和展示副作用已全部解耦。
+
+存档结构转换统一在 `save_schema.py` 登记；当前版本的系统补全接入 `engine/persistence/` 的相应阶段，通过具名契约装配。准备算法不持有存档服务，结构转换不调用玩法或消费随机数；具体规则见引擎目录的“读档与版本迁移”。结构 1–5 已停止支持，现有模型及系统的补全辅助函数不构成旧文件兼容承诺。
 
 ## 战斗共用规则与状态
 

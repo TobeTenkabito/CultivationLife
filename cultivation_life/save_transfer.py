@@ -14,6 +14,7 @@ from .models import GameState
 from .errors import NotFoundError
 from .runtime import decode_rng
 from .version import BASE_GAME_VERSION
+from .save_schema import migrate_document
 
 MAX_RAW = 64 * 1024 * 1024
 MAX_PACKED = 12 * 1024 * 1024
@@ -44,8 +45,7 @@ def _validate(document):
     if tuple(map(int, version.split('.'))) > tuple(map(int, BASE_GAME_VERSION.split('.'))):
         raise ValueError("此存档来自更高版本，请先更新游戏")
     data = document.get("save")
-    if not isinstance(data, dict) or data.get("version") not in {2, 3, 4, 5}:
-        raise ValueError("不支持的存档结构")
+    data = migrate_document(data)
     if not isinstance(data.get("id"), str) or not re.fullmatch(r"[A-Za-z0-9-]{1,80}", data['id']):
         raise ValueError("存档编号无效")
     try:
@@ -86,7 +86,7 @@ def export_snapshot(store, game_id, extensions=()):
     document = {"format": "fusheng-save", "format_version": 1, "game_version": BASE_GAME_VERSION,
                 "extensions": [{"id": row.get('id'), "version": row.get('version')}
                                for row in extensions if row.get('status') == 'loaded'], "save": data}
-    _validate(document)
+    document['save'] = _validate(document)
     raw = json.dumps(document, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf-8')
     if len(raw) > MAX_RAW:
         raise ValueError("此存档超过 64 MB 导出上限")
@@ -112,6 +112,7 @@ def decode_snapshot(payload):
         raise ValueError(f"存档解压失败：{error}") from error
     document = _json(raw)
     data = _validate(document)
+    document['save'] = data
     return document, data
 
 

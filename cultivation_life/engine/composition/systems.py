@@ -15,6 +15,17 @@ from ...system import exchange_system, crafting_system, formation_system
 from ...system.economy.dependencies import ExchangeDependencies
 from ...system.crafting.dependencies import CraftingDependencies
 from ...system.formation.dependencies import FormationDependencies
+from ...system import guixu_system, war_system
+from ...system.guixu.dependencies import GuixuDependencies
+from ...system.war.dependencies import WarDependencies
+
+
+def bind_guixu_dependencies(host) -> GuixuDependencies:
+    return guixu_system.bind_guixu_compatibility(host)
+
+
+def bind_war_dependencies(host) -> WarDependencies:
+    return war_system.bind_war_compatibility(host)
 
 
 def bind_economy_dependencies(host) -> EconomyDependencies:

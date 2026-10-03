@@ -1,6 +1,6 @@
 # 引擎架构与行为兼容说明
 
-第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。算法不再通过 `FunctionType` 重绑定全局命名空间或动态安装到入口类；`transactions.serialized_commands` 仍为公开操作统一包装存档锁。游戏规则、结算顺序、随机数调用顺序和存档格式保持原样。
+第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。算法不再通过 `FunctionType` 重绑定全局命名空间或动态安装到入口类；`transactions.serialized_commands` 仍为公开操作统一包装存档锁。此前各组 Mixin 迁移保持游戏规则、结算顺序、随机数调用顺序和存档格式；后续读档阶段按新的兼容要求启用结构版本 6，详见下文。
 
 外部入口保持不变：
 
@@ -74,11 +74,42 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `engine_event_runtime.py` | 事件选择与执行协作 |
 | `engine_combat_runtime.py` | 战斗、击杀后果与死亡处理 |
 | `engine_presentation.py` | 对外状态汇总 |
-| `engine_persistence.py` | 读取、旧档迁移与状态补全 |
+| `engine_persistence.py` | 读取、按顺序调用会话准备阶段、统一提交 |
+| `persistence/` | 内容基础、魂基结算、角色、世界、服务和事件六组准备算法及窄依赖契约 |
+| `../save_schema.py` | 与游戏运行时隔离的结构版本政策及逐级迁移 |
+
+## 读档与版本迁移
+
+结构版本由 `save_schema.SAVE_SCHEMA_VERSION` 定义，当前为 6，与本体发行版本、内容版本及 DLC 版本独立。结构 1–5 不提供迁移路径；读取与存档码导入均明确拒绝，原文件保持不动，不会把旧版本号直接改为新版本。存档列表仅列出有完整支持路径的文件。
+
+处理分为三个边界：
+
+1. `SaveStore.load` 在锁内读 JSON，先执行结构版本检查及已登记迁移，再构造 `GameState`。当前结构直接解码，不写文件、不调用会话准备；存档编号必须与请求的文件名一致。
+2. `engine_persistence._load` 按固定顺序运行六组准备阶段。它仍是有副作用的会话入口，可能补全 DLC 状态、消耗市场随机数或执行魂基判死，不能作为纯查询接口。
+3. 准备阶段不持有存档服务；有变化时由协调器统一保存一次。HTTP 请求仍缓存本次准备好的对象，请求结束即释放。
+
+| 阶段 | 职责与副作用 |
+| --- | --- |
+| `foundations.py` | 当前内容中的机构、地点、修罗与商人基础状态；上境突破标记及固定人物关系一致性 |
+| `vitality.py` | 夺舍时间线、鬼修魂基与成长水位；低于魂基生存界限时调用死亡结算 |
+| `character.py` | 界面与地域、功法、血脉、寿元和修炼标记；不再换算旧结构的累计神识经验 |
+| `world.py` | 宗门与 NPC、境界限制、阵法、DLC 子系统、阵营、战争、队伍与关系同步 |
+| `services.py` | 本命法宝、天庭与市场；在原位置提交消费后的 RNG，检测佛修补全是否需要保存 |
+| `events.py` | 当前内容与境界下的事件有效性，以及失去对应事件的试炼清理 |
+
+部分系统辅助函数沿用 `migrate_*` 名称，但仍承担当前内容下的初始化或一致性维护，例如 DLC 重启切换、机构身份和夺舍时间线。它们属于会话准备，不代表支持结构 1–5。模型解码中的默认值与字段规范化也仍保留，不能据此绕过存档版本入口。
+
+以后修改持久化结构时，提高 `SAVE_SCHEMA_VERSION`，在 `SAVE_MIGRATIONS` 登记从 N 到 N+1 的纯文档变换。执行器先检查完整路径，再复制文档逐步转换；版本号由执行器推进，步骤不得改存档编号、调用玩法、抽随机数或写文件。全部转换及模型解码成功后才原子提交，保留模型未识别的扩展字段；任一步失败都不覆盖原文件。迁移以新的结构版本为基线运行一次，不进入每次 `_load` 的业务分支。
+
+当前没有为 1–5 登记兼容转换，也不预先编造未来版本迁移。测试使用临时的 6→7→8 转换验证顺序、缺步拒绝、失败隔离及重复读取；实际支持范围仍只有结构 6。存档码使用同一迁移入口，在副本上校验，预览不写入，导入仍保留原有确认与备份流程。
+
+新增系统应把运行时补全放进对应阶段并显式声明能力；结构字段转换则放入版本迁移。不得让准备算法直接读写存档，也不得让结构迁移依赖模型、内容注册或引擎。边界检查与 `tests/test_persistence_pipeline.py` 持续约束这些规则。
+
+本阶段新增 40 项测试，覆盖旧版及畸形版本拒绝、只读解码、逐级迁移、失败时原文件保留、扩展字段保留、编号一致性、准备顺序、一次提交，以及五条道途的新建与重复读取。全量八批次首次为 1802 通过、1 失败；失败项是世界归属写入位置的架构检查仍指向旧文件，更新到角色准备模块后，该模块 19 项测试全部通过，合计 1803 项已通过验证。浏览器冒烟完整通过。六组 437 个回放检查点在仅归一化顶层游戏结构版本 5→6 后一致，实际存档始终写入结构 6；没有过滤玩法、随机数或历史差异。另修正了神识初始功法补全的变化标记，以及佛修补全在提交之后运行导致未持久化的问题。本阶段未重新打包。
 
 ## 系统与引擎之间的依赖
 
-人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政、炼器和阵法分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力，并由 `composition/systems.py` 直接接入引擎。配置钩子和具名常量仍从原模块延迟读取，各系统算法不反向导入自身的兼容入口。
+人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政、炼器、阵法、归墟和战争分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力，并由 `composition/systems.py` 直接接入引擎。配置钩子和具名常量仍从原模块延迟读取，各系统算法不反向导入自身的兼容入口。
 
 战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
 
@@ -92,7 +123,7 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 | 代码或函数 | 保留原因与后续修改边界 |
 | --- | --- |
-| `engine_persistence._load` | 读取会迁移旧档、补全商人/鬼修/夺舍/种族/NPC/关系/市场等状态，并可能消耗随机数、多次保存、记录历史或结算死亡。改成纯读取或合并保存会改变触发时机，需另行设计迁移协议。 |
+| `engine_persistence._load` | 已拆分版本入口和六组准备阶段；会话准备仍可能消耗随机数、记录历史及结算死亡。有变化时统一保存，不是纯读接口；进一步迁移到行动生命周期需要单独验证触发时机。 |
 | `engine_presentation.present`、`presentation.world._public_race_system` 及其调用链 | 展示链仍会补全本命法宝、种族关系和成就元数据。移到其他生命周期可能改变首次查询结果和状态，故保留调用顺序与副作用。 |
 | `orchestration.advancement.advance` | 年度推进与行动单位结算有不同粒度，包含中断、市场刷新、随机数状态保存。没有改用新的调度器，也没有重排年度处理。 |
 | `events.effects._effect` | 保留效果分支顺序、提前返回和共享状态写入。改成异步事件总线可能改变同次行动内的可见状态。 |
@@ -100,9 +131,9 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 继续使用现有 NPC 与关系对象并保持同步顺序。统一关系存储需要模型与存档迁移，超出等价拆分范围。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 仍保留的 15 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成、天庭、瑶池、神机、内政、经济／交换会、炼器与阵法已迁出，其余系统保持相对继承顺序，后续逐个迁移。 |
+| `GameEngine` 仍保留的 13 个直接基类 | `system/` 的其余玩法 Mixin 与 `MapTravelMixin` 内部仍通过 `self` 调用引擎能力。修罗养成、天庭、瑶池、神机、内政、经济／交换会、炼器、阵法、归墟与战争已迁出，其余系统保持相对继承顺序，后续逐个迁移。 |
 | `cultivation_life/map_runtime.py` 的 `MapTravelMixin._advance_world_year` | 位于本轮范围之外，年度系统调用顺序保持原样，通过显式回调接入引擎算法。 |
-| `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与原 JSON 格式，没有引入实体数据库、状态复制或新的存档版本。 |
+| `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与 JSON 存储；结构版本已升为 6，旧结构不再支持，没有引入实体数据库。 |
 
 本轮解决的是 `engine/` 实现对入口全局变量和未声明引擎能力的隐式依赖。外部玩法 Mixin 的内部耦合，以及上表中的共享状态和副作用，仍是兼容边界；不能据此认为整个项目已完成解耦。
 
@@ -124,7 +155,9 @@ HTTP 请求体读取和响应网络写入位于存档锁之外；状态读取、
 python -m pytest -q tests/test_engine_dependencies.py tests/test_asura_dependencies.py tests/test_court_dependencies.py tests/test_priority_fixes.py
 python -m pytest -q tests/test_system_composition.py tests/test_system_layout.py
 python -m pytest -q tests/test_production_dependencies.py tests/test_crafting_system.py tests/test_formation_system.py tests/test_auction_update.py
+python -m pytest -q tests/test_expedition_dependencies.py tests/test_guixu_tide.py tests/test_guixu_companions.py tests/test_war_performance_update.py
 python -m pytest -q tests/test_module_dependencies.py
+python -m pytest -q tests/test_persistence_pipeline.py tests/test_save_transfer.py tests/test_audit_regressions.py
 python tools/check_module_dependencies.py
 python -m pytest -q
 ```
@@ -140,3 +173,7 @@ python -m pytest -q
 神机与内政组合阶段核对了既有方法签名、63 个转发方法体、10 个静态辅助实现，以及权限判断迁移前后的语法树；其余基类顺序保持不变。四组 274 个回放检查点与本阶段迁移前一致。新增 16 项回归覆盖玩家／NPC 权限边界、配置延迟替换、资源与方法替换、子类 `super()` 及旧 Mixin 独立消费者。全量 1726 项测试和浏览器冒烟通过，226 个模块无显式导入循环。本阶段未进行新的 Android 安装包验收。
 
 经济／交换会、炼器与阵法阶段保持原有 800 个非双下划线可调用成员的签名，45 个迁移算法仅替换依赖访问及相对导入，28 个静态辅助函数保持原实现（比较时归一化文档字符串缩进）。新增 78 个经济与生产回放检查点，连同原四组共 352 个检查点与迁移前一致。新增 17 项依赖与行为检查，全量 1743 项测试和浏览器冒烟通过，244 个模块无显式导入循环。扩展加载测试恢复其修改的全局报告，消除批次顺序造成的污染；交换会旧随机数替换钩子继续生效。本阶段没有重新打包或进行新的 Android 安装包验收。
+
+归墟与战争阶段保留 800 个可调用成员签名，核对了 72 个迁移算法与 11 个静态辅助实现，引擎直接基类从 15 个减为 13 个，其余顺序不变。新增 18 项行为与依赖检查，并将两组算法纳入模块契约检查；全量 1763 项测试按完整模块分为八个隔离批次通过。新增 85 个归墟／战争回放点，加上既有五组共 437 个检查点与迁移前一致。归墟回放中炼器材料标签来自集合，首轮发现跨进程顺序差异；工具固定 Python 哈希种子后，用保留的迁移前源码和当前实现对照一致，没有改动游戏输出。依赖图包含 265 个模块、1489 条显式边，未发现循环或边界违规。
+
+本阶段浏览器冒烟首次在鬼修轮回事件卡显示处超时；增加响应与页面异常日志后完整复测通过，两次轮回响应均包含正确事件，未记录页面脚本异常。超时原因未复现，不能据此归因为本次迁移或认定已修复前端问题。此次没有重新打包或执行 Android 安装包验收。

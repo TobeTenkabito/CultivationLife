@@ -261,7 +261,7 @@ class DemonicSystemTests(unittest.TestCase):
         self.assertEqual(shown["player"]["divine_sense"]["level"], old_level + 1)
         self.assertEqual(shown["player"]["divine_sense"]["experience"], 7)
 
-    def test_legacy_cumulative_sense_experience_migrates_to_rank_and_remainder(self):
+    def test_retired_cumulative_sense_save_is_rejected_without_rewriting(self):
         game_id, game = self.demonic_game()
         self.engine.store.save(game)
         save_path = self.engine.store._path(game_id)
@@ -270,9 +270,10 @@ class DemonicSystemTests(unittest.TestCase):
         raw["player"].pop("divine_sense_rank", None)
         raw["player"]["divine_sense_experience"] = 87
         save_path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
-        shown = self.engine.get_game(game_id)
-        self.assertEqual(shown["player"]["divine_sense"]["level"], 41)
-        self.assertEqual(shown["player"]["divine_sense"]["experience"], 7)
+        before = save_path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "停止支持"):
+            self.engine.get_game(game_id)
+        self.assertEqual(save_path.read_bytes(), before)
 
     def test_demonic_ascension_to_true_demon_clears_puppets(self):
         game_id, game = self.demonic_game()

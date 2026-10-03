@@ -16,6 +16,8 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        guixu=systems.bind_guixu_dependencies(engine),
+        war=systems.bind_war_dependencies(engine),
         economy=systems.bind_economy_dependencies(engine),
         exchange=systems.bind_exchange_dependencies(engine),
         crafting=systems.bind_crafting_dependencies(engine),
