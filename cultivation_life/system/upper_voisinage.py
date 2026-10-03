@@ -6,62 +6,20 @@ there are no annual/NPC hooks and no dependency on celestial doctrine generation
 from dataclasses import asdict
 from math import ceil
 
-from ..content_registry import WORLD_SYSTEMS, REALMS, CONTENT_DOCUMENTS
+from ..content_registry import REALMS, CONTENT_DOCUMENTS
 from ..models import HistoryRecord
 from ..rules import opportunity_required, remove_item
 from ..runtime import now_iso
-from .combat.contracts import CapabilitySource, VoisinageDefinition, VoisinageEffect
 
-
-def config():
-    return WORLD_SYSTEMS.get('upper_voisinages', {})
-
-
-def world_config(player):
-    return config().get('worlds', {}).get(player.world)
-
-
-def available(player):
-    return bool(world_config(player)) and player.realm_index >= 9
-
-
-def record(player):
-    return player.world_voisinages.get(player.world, {})
-
-
-def level(player, key):
-    return max(0, min(9, int(record(player).get('levels', {}).get(key, 0))))
-
-
-def project(definition, rank):
-    strength = config()['strengths'][rank - 1]
-    cost = 20 + 4 * rank
-    effects = tuple(VoisinageEffect(kind, cost, .2 if kind == 'strike' else .15,
-        target='self' if kind.startswith('restore_') else 'enemy',
-        restriction='technique' if kind == 'restrict' else None) for kind in definition['effects'])
-    return VoisinageDefinition(id=definition['id'], name=definition['name'],
-        attainment=definition['id'], required_level=1, strength=strength,
-        stability=round(strength * definition['stability'], 2),
-        incursion=round(strength * definition['incursion'], 2),
-        authority=round(strength * definition['authority'], 2),
-        opening_cost=45 + 5 * rank, upkeep_cost=15 + 2 * rank,
-        effect=effects[0].kind, effect_cost=cost, effect_power=effects[0].power,
-        max_investment=120, extra_target_cost=5, max_targets=3,
-        effects=effects, features=(definition['feature'],))
-
-
-def player_source(player):
-    from .asura import active as asura_active, source as asura_source
-    if asura_active(player):
-        return asura_source(player)
-    if not available(player):
-        return CapabilitySource()
-    key = record(player).get('active')
-    definition = next((d for d in world_config(player)['fields'] if d['id'] == key), None)
-    rank = level(player, key)
-    if not definition or not rank:
-        return CapabilitySource()
-    return CapabilitySource((project(definition, rank),), {key: rank})
+from .upper_voisinage_rules import (
+    config as config,
+    world_config as world_config,
+    available as available,
+    record as record,
+    level as level,
+    project as project,
+    player_source as player_source,
+)
 
 
 def material_stock(player):

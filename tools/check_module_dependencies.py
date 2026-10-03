@@ -12,6 +12,19 @@ import json
 from pathlib import Path
 
 
+# Combat projection consumes shared state/rules, never action or presentation facades.
+BATTLE_FACADES = frozenset(f'cultivation_life.system.{name}' for name in (
+    'immortal_aperture', 'upper_voisinage', 'upper_institutions', 'asura_court',
+))
+BATTLE_PROJECTIONS = frozenset(f'cultivation_life.system.{name}' for name in (
+    'combat_adapter', 'combat_system', 'combat_plan', 'doctrine.provider', 'spirit_voisinage',
+))
+BATTLE_SHARED = frozenset(f'cultivation_life.system.{name}' for name in (
+    'aperture_resources', 'upper_voisinage_rules', 'doctrine.state', 'institution_state',
+))
+BATTLE_DEPENDENCY_MODULES = BATTLE_FACADES | BATTLE_PROJECTIONS | BATTLE_SHARED
+
+
 def import_edges(root: Path):
     modules = {}
     for path in (root / 'cultivation_life').rglob('*.py'):
@@ -108,7 +121,15 @@ def violations(edges):
             and target in {'cultivation_life.combat_rule_engine', 'cultivation_life.monster_bloodline_rules'}
             or source == 'cultivation_life.system.tutorial_mentorship'
             and target in {'cultivation_life.system.tutorial_system', 'cultivation_life.system.tutorial_walkthrough'})
-        if system_to_engine or domain_to_facade or domain_to_wiring or shared_definition_cycle or shared_to_consumer:
+        battle_reverse_import = (
+            source in BATTLE_PROJECTIONS and target in BATTLE_FACADES
+            or source in BATTLE_SHARED and target in BATTLE_FACADES | BATTLE_PROJECTIONS
+            or (source, target) in {
+                ('cultivation_life.system.asura_court', 'cultivation_life.system.upper_institutions'),
+                ('cultivation_life.system.spirit_voisinage', 'cultivation_life.system.doctrine.provider'),
+            })
+        if (system_to_engine or domain_to_facade or domain_to_wiring
+                or shared_definition_cycle or shared_to_consumer or battle_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 

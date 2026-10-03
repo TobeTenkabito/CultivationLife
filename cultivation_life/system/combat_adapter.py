@@ -80,7 +80,7 @@ class CapabilityBinding:
                 owner.mp = update["current"]
                 continue
             if update['id'] == 'player' and owner.transcendence is None:
-                from .immortal_aperture import available, commit_energy
+                from .aperture_resources import available, commit_energy
                 if available(owner):
                     commit_energy(owner, update['current'])
                     continue
@@ -150,7 +150,7 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             from .cultivation_ranks import rank_for
             from .combat.npc_lifecycle import read
             if unit.id == 'player':
-                from .immortal_aperture import true_realm, investment_multiplier
+                from .aperture_resources import true_realm, investment_multiplier
                 from .combat_plan import effective_plan
                 plan = effective_plan(game.player)
                 multiplier = investment_multiplier(game.player)

@@ -13,7 +13,7 @@ def secondary(world):
 
 
 def catalog(game):
-    from .doctrine.provider import ensure
+    from .doctrine.state import ensure
     ensure(game, celestial_context=True)
     worlds = [w for w in WORLD_SYSTEMS['world_profiles'] if secondary(w)]
     result = {}
@@ -68,7 +68,7 @@ def diminished(value):
 
 
 def player_source(game):
-    from .immortal_aperture import lower_world, spirit_books, true_realm
+    from .aperture_resources import lower_world, spirit_books, true_realm
     from .doctrine.progression import source
     if not lower_world(game.player):
         return CapabilitySource()

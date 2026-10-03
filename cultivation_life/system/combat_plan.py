@@ -11,7 +11,7 @@ def effective_plan(player):
 
 
 def public_plan(player):
-    from .immortal_aperture import investment_multiplier
+    from .aperture_resources import investment_multiplier
     return {**DEFAULTS, **player.combat_plan, 'investment_multiplier': investment_multiplier(player)}
 
 

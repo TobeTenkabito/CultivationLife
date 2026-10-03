@@ -52,7 +52,7 @@ def initial(state):
 
 def ensure(game):
     """One-time additive migration; never recreate dead people or reset ranks."""
-    from .upper_institutions import fresh
+    from .institution_state import fresh
     state = game.upper_institutions.get('asura')
     if state is None and not (game.player.world == 'asura' and game.player.realm_index >= 9):
         return False
@@ -204,7 +204,7 @@ def assessment(game, npc):
 
 
 def tick(game, state):
-    from .upper_institutions import record, policy
+    from .institution_state import record, policy
     reconcile(game, state)
     court, unit = state['court'], state['unit']
     current = policy(game, state)
