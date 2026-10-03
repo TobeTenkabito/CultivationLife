@@ -30,9 +30,14 @@ class WorldYearDependencies:
 
 
 @dataclass(frozen=True, slots=True)
+class ElapsedYearDependencies:
+    _advance_world_year: Callable[..., bool]
+    _advance_soul_erosion_time: Callable[..., bool]
+
+
+@dataclass(frozen=True, slots=True)
 class MapTravelDependencies:
-    _advance_soul_erosion_time: Callable[..., Any]
-    _advance_world_year: Callable[..., Any]
+    year: ElapsedYearDependencies
     _clear_market: Callable[..., Any]
     _compact_world_history: Callable[..., Any]
     _die: Callable[..., Any]
@@ -73,7 +78,7 @@ class TeleportDependencies:
 
 
 @dataclass(frozen=True, slots=True)
-class ElapsedTravelDependencies:
+class TimeSettlementDependencies:
     _advance_auction_clock: Callable[..., Any]
     _advance_concubine_aftermath: Callable[..., Any]
     _advance_concubine_status: Callable[..., Any]
@@ -84,6 +89,12 @@ class ElapsedTravelDependencies:
     _advance_natal_artifact: Callable[..., Any]
     _advance_player_bounties: Callable[..., Any]
     _record_era_summary: Callable[..., Any]
+    _maybe_tianji_intelligence_event: Callable[..., str | None] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ElapsedTravelDependencies(TimeSettlementDependencies):
+    """Existing travel settlement contract, now backed by common phases."""
 
 
 @dataclass(frozen=True, slots=True)

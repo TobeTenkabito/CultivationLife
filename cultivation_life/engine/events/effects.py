@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...relationship_records import RelationshipRecord
 from ...system.combat.npc_lifecycle import move_world
 
 import copy
@@ -364,7 +365,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             move_world(companion, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
             npc = deps._find_npc(game, str(companion.get("id", "")))
             if npc:
-                move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+                if not isinstance(companion, RelationshipRecord):
+                    move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                 npc.departed_age = npc.age
                 npc.departure_reason = f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}"
         else:
@@ -388,7 +390,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                 friend_survivors.append(name)
                 friend_survivor_ids.add(str(candidate.get("id", "")))
                 if npc:
-                    move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+                    if not isinstance(friend, RelationshipRecord):
+                        move_world(npc, destination, player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
                     npc.departed_age = npc.age
                     npc.departure_reason = f"与{player.name}共同偷渡{WORLD_SYSTEMS['world_names'][destination]}"
             else:
@@ -460,20 +463,20 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         relation = deps._generated_relationship(player, "master", rng)
         if rng.random() >= float(effect.get("accept_chance", 0.55)):
             return "rejected", f"{relation['name']}认为缘分未至，婉拒了你的拜师请求。"
-        player.master = relation
+        player.master = game.link_relationship(relation)
         return "master_accepted", f"{relation['name']}收你为徒，你自此有了师承。"
     if kind == "gain_generated_companion":
         if player.dao_companion and player.dao_companion.get("alive", True):
             return "already_has_companion", "你已有道侣，没有另结新缘。"
         relation = deps._generated_relationship(player, "companion", rng)
-        player.dao_companion = relation
+        player.dao_companion = game.link_relationship(relation)
         return "companion_joined", f"你与{relation['name']}立下同道誓约，自此结为道侣。"
     if kind == "gain_generated_disciple":
         max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
         if len(player.disciples) + len(player.disciple_requests) >= max_disciples:
             return "disciple_limit", "你暂时无意再扩大师门。"
         relation = deps._generated_relationship(player, "disciple", rng)
-        player.disciple_requests.append(relation)
+        player.disciple_requests.append(game.link_relationship(relation))
         return "disciple_requested", f"{relation['name']}呈上拜师帖；是否收入门下，仍须由你亲自决定。"
     if kind == "body_training":
         if player.body_technique is None:

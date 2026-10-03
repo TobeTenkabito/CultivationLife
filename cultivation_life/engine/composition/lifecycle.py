@@ -12,6 +12,8 @@ from ..persistence.dependencies import (
     EventsPreparationDependencies,
 )
 
+from .travel import bind_elapsed_year, bind_settlement
+
 from ..dependencies import (
     WorldRuntimeDependencies,
     PersistenceDependencies,
@@ -112,22 +114,13 @@ def bind_session(engine: GameEngine, *, bloodline_content_available: Callable[[]
 
 def bind_advancement(engine: GameEngine) -> AdvancementDependencies:
     return AdvancementDependencies(
+        year=bind_elapsed_year(engine),
+        settlement=bind_settlement(engine),
         _begin_doctrine_action=lambda *args, **kwargs: engine._begin_doctrine_action(*args, **kwargs),
         _begin_yaochi_action=lambda *args, **kwargs: engine._begin_yaochi_action(*args, **kwargs),
         _finish_yaochi_action=lambda *args, **kwargs: engine._finish_yaochi_action(*args, **kwargs),
         _finish_doctrine_action=lambda *args, **kwargs: engine._finish_doctrine_action(*args, **kwargs),
         _add_opportunity=lambda *args, **kwargs: engine._add_opportunity(*args, **kwargs),
-        _advance_auction_clock=lambda *args, **kwargs: engine._advance_auction_clock(*args, **kwargs),
-        _advance_concubine_aftermath=lambda *args, **kwargs: engine._advance_concubine_aftermath(*args, **kwargs),
-        _advance_concubine_status=lambda *args, **kwargs: engine._advance_concubine_status(*args, **kwargs),
-        _advance_diplomacy_unit=lambda *args, **kwargs: engine._advance_diplomacy_unit(*args, **kwargs),
-        _advance_exchange_clock=lambda *args, **kwargs: engine._advance_exchange_clock(*args, **kwargs),
-        _advance_heavenly_court_unit=lambda *args, **kwargs: engine._advance_heavenly_court_unit(*args, **kwargs),
-        _advance_intrigue_unit=lambda *args, **kwargs: engine._advance_intrigue_unit(*args, **kwargs),
-        _advance_natal_artifact=lambda *args, **kwargs: engine._advance_natal_artifact(*args, **kwargs),
-        _advance_player_bounties=lambda *args, **kwargs: engine._advance_player_bounties(*args, **kwargs),
-        _advance_soul_erosion_time=lambda *args, **kwargs: engine._advance_soul_erosion_time(*args, **kwargs),
-        _advance_world_year=lambda *args, **kwargs: engine._advance_world_year(*args, **kwargs),
         _apply_action_resources=lambda *args, **kwargs: engine._apply_action_resources(*args, **kwargs),
         _body_progress_required=lambda *args, **kwargs: engine._body_progress_required(*args, **kwargs),
         _body_training_step=lambda *args, **kwargs: engine._body_training_step(*args, **kwargs),
@@ -149,13 +142,11 @@ def bind_advancement(engine: GameEngine) -> AdvancementDependencies:
         _maybe_personal_revenge=lambda *args, **kwargs: engine._maybe_personal_revenge(*args, **kwargs),
         _maybe_probability_story_event=lambda *args, **kwargs: engine._maybe_probability_story_event(*args, **kwargs),
         _maybe_relationship_sanction=lambda *args, **kwargs: engine._maybe_relationship_sanction(*args, **kwargs),
-        _maybe_tianji_intelligence_event=lambda *args, **kwargs: engine._maybe_tianji_intelligence_event(*args, **kwargs),
         _maybe_xiang_node_event=lambda *args, **kwargs: engine._maybe_xiang_node_event(*args, **kwargs),
         _personal_combat_step=lambda *args, **kwargs: engine._personal_combat_step(*args, **kwargs),
         _prepare_sage_action=lambda *args, **kwargs: engine._prepare_sage_action(*args, **kwargs),
         _prepare_treasure_reward_event=lambda *args, **kwargs: engine._prepare_treasure_reward_event(*args, **kwargs),
         _queue_followup_event=lambda *args, **kwargs: engine._queue_followup_event(*args, **kwargs),
-        _record_era_summary=lambda *args, **kwargs: engine._record_era_summary(*args, **kwargs),
         _select_event=lambda *args, **kwargs: engine._select_event(*args, **kwargs),
         _sense_training_step=lambda *args, **kwargs: engine._sense_training_step(*args, **kwargs),
         _treasure_step=lambda *args, **kwargs: engine._treasure_step(*args, **kwargs),

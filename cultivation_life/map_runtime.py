@@ -8,6 +8,7 @@ from .models import HistoryRecord
 from .runtime import decode_rng, encode_rng, now_iso
 from .system.possession_system import advance_player_age
 from .time_dependencies import MapTravelDependencies
+from .time_flow import advance_elapsed_year
 
 def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> dict[str, Any]:
     game = deps._load(game_id)
@@ -37,10 +38,7 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
     era_news: list[str] = []
     for _ in range(plan.years):
         advance_player_age(player)
-        continue_world = deps._advance_world_year(game, rng, era_news, encounters=False)
-        if player.alive:
-            deps._advance_soul_erosion_time(game, 1)
-        if not continue_world or not player.alive:
+        if not advance_elapsed_year(deps.year, game, rng, era_news, encounters=False):
             break
     completed = player.alive and game.pending_event is None and player.age - start_age == plan.years
     if completed:

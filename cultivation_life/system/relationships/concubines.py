@@ -47,7 +47,7 @@ def manage_concubine(
             summary = f"{normalized['name']}拒绝了侍妾之请（同意率 {chance:.0%}）。"
         else:
             normalized["joined_age"] = player.age
-            player.concubines.append(normalized)
+            player.concubines.append(normalized if source == "captive" else game.link_relationship(normalized))
             emit(game, "concubine.recruited", target_id=normalized["id"])
             if source == "captive":
                 player.prisoners = [row for row in player.prisoners if row is not target]

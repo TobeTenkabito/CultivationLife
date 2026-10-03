@@ -34,7 +34,7 @@ def saved(tmp_path):
     return store, game
 
 
-@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 7, 999])
+@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 8, 999])
 def test_unsupported_versions_never_decode_or_rewrite(saved, monkeypatch, version):
     store, game = saved
     path = store._path(game.id)
@@ -104,6 +104,7 @@ def test_migration_commit_preserves_opaque_extensions_and_is_not_repeated(saved,
     store, game = saved
     path = store._path(game.id)
     document = json.loads(path.read_bytes())
+    document['version'] = 6
     document['opaque_mod_state'] = {'value': [1, 2]}
     path.write_text(json.dumps(document), encoding='utf-8')
     step = Mock(side_effect=lambda data: data.update(new_schema_field=True))
@@ -120,6 +121,9 @@ def test_migration_commit_preserves_opaque_extensions_and_is_not_repeated(saved,
 def test_failed_migration_load_keeps_original_file(saved, monkeypatch, failure):
     store, game = saved
     path = store._path(game.id)
+    document = json.loads(path.read_bytes())
+    document['version'] = 6
+    path.write_text(json.dumps(document), encoding='utf-8')
     original = path.read_bytes()
     def step(data):
         data['player']['name'] = 'Migrated'

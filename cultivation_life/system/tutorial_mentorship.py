@@ -73,6 +73,7 @@ def mentor_action(engine, game, action):
             p.master = engine._relationship_snapshot(npc.id, npc.name, npc.realm_index, npc.layer,
                 'world', npc.age, npc.lifespan, spirit_root=npc.spirit_root,
                 path=npc.path, race=npc.race, world=npc.world, affinity=35, gender=npc.gender)
+            p.master = game.link_relationship(p.master)
             result = 'accepted'
             summary = '你执弟子礼，沈照尘欣然收徒。自此可在关系窗口查看师承、请益修行；师父也有自己的修行与际遇。'
         else:
