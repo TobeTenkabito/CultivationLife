@@ -28,6 +28,7 @@ from .engine_adapter import SessionEngine
 from .registry import CommandError, Context, Services
 from .state import digest, differences, validate, read_pointer
 from .capabilities import BY_OPERATION
+from .dlc import available
 
 
 FORMAT = 'CultivationLife.debug.v1'
@@ -352,6 +353,10 @@ class Runtime:
 
     @staticmethod
     def guard(engine, game_id, operation):
+        capability = BY_OPERATION.get(operation)
+        if capability and capability.dlc:
+            if not available(capability.dlc):
+                raise CommandError(f'Required DLC is not enabled: {capability.dlc}.')
         engine.assert_ghost_operation_allowed(game_id, operation)
         engine.assert_guixu_operation_allowed(game_id, operation)
         engine.assert_buddhist_operation_allowed(game_id, operation)

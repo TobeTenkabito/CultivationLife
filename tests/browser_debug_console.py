@@ -61,6 +61,9 @@ def main():
                     command('snapshot restore baseline')
                     assert page.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone').quantity") == 7654321
                     command('game view /market')
+                    command('tianji reveal all')
+                    command('game view /tianji_artifacts')
+                    command('capability list')
                     command('setting set combat_popup false')
                     assert page.evaluate('game.settings.combat_popup') is False
                     command("formation preview '[]'")

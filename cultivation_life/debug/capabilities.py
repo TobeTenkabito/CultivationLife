@@ -65,6 +65,15 @@ FAMILY_ARGS = (S('action'), S('npc_id', required=False), S('technique_id', requi
 COMBAT_ARGS = (S('stance', required=False, choices=('press', 'guard', 'protect', 'off')),
     N('investment', 0, 1000000), S('burst', required=False, choices=('auto', 'early', 'never')),
     N('mp_reserve', 0, 1), B('transformations'), B('support_guard'))
+TIANJI_ARGS = (S('target_artifact_id'), *CRAFTING_ARGS[:5],
+               S('forge_kind', required=False, choices=('replica', 'true_body')))
+LINEAGE_RULE = {
+    'type': 'object',
+    'properties': {**{key: STRING for key in ('phase', 'schedule', 'condition', 'target', 'effect')},
+                   'value': {'type': 'number'}},
+    'required': ['phase', 'schedule', 'condition', 'target', 'effect', 'value'],
+    'additionalProperties': False,
+}
 
 
 @dataclass(frozen=True)
@@ -74,6 +83,8 @@ class Capability:
     arguments: tuple[Argument, ...]
     invoke: Callable
     preview: bool = False
+    dlc: str = ''
+    shortcut: bool = False
 
 
 CAPABILITIES = (
@@ -314,6 +325,55 @@ CAPABILITIES = (
         lambda e, g, p: e.breakthrough(g)),
     Capability('world news set', 'debug-world-news', (B('enabled'),),
         lambda e, g, p: e.set_world_news_debug(g, bool(p.get('enabled', False)))),
+    Capability('buddhist action', 'buddhist-action',
+        (S('action', choices=('nirvana', 'blessing', 'temple', 'permission', 'start', 'continue', 'cancel')),
+         S('blessing', required=False), S('authority', required=False), S('technique', required=False)),
+        lambda e, g, p: e.buddhist_action(g, **p), dlc='official.buddhist-dharma'),
+    Capability('guixu action', 'guixu-action',
+        (S('action', choices=('enter', 'team_accept', 'team_decline', 'gift_treasure', 'threat_surrender',
+            'threat_resist', 'move', 'search', 'return', 'rest', 'fight', 'flee', 'recruit', 'negotiate', 'trapped_cultivate')),
+         S('dungeon_id', required=False), S('target_layer_id', required=False), S('actor_id', required=False),
+         S('pool_entry_id', required=False), B('confirm_betrayal'), I('offer_stones', 0, 10**15)),
+        lambda e, g, p: e.guixu_action(g, p['action'], p), dlc='official.guixu-tide'),
+    Capability('asura action', 'asura',
+        (S('action', choices=('purify', 'convert', 'train_body', 'open_vein', 'condense', 'fuse', 'rename',
+            'train_route', 'choose_branch', 'train_branch', 'train_domain', 'nourish_domain',
+            'lock_power', 'reroll_power', 'learn_power')),
+         S('target_id', required=False), A('body_ids', STRING, 2), S('name', required=False)),
+        lambda e, g, p: e.asura_action(g, p['action'], p.get('target_id', ''), p.get('body_ids'), p.get('name', '')),
+        dlc='official.asura-manifestation'),
+    Capability('tianji action', 'tianji-action', (S('action', choices=('activate', 'deactivate')), S('artifact_id')),
+        lambda e, g, p: e.tianji_action(g, p['action'], p['artifact_id']), dlc='official.tianji-artifacts'),
+    Capability('tianji preview', 'tianji-preview', TIANJI_ARGS,
+        lambda e, g, p: e.preview_tianji_forge(g, p), preview=True, dlc='official.tianji-artifacts'),
+    Capability('tianji forge', 'tianji-forge', TIANJI_ARGS,
+        lambda e, g, p: e.forge_tianji_artifact(g, p), dlc='official.tianji-artifacts'),
+    Capability('tianji reveal all', 'tianji-debug-reveal-all', (),
+        lambda e, g, p: e.debug_reveal_all_tianji(g), dlc='official.tianji-artifacts', shortcut=True),
+    Capability('sage doctrine', 'sage-doctrine',
+        (S('action', choices=('join', 'leave', 'found')), S('doctrine_id', required=False),
+         O('combo', {key: STRING for key in ('classic', 'philosophy', 'practice', 'script')}), S('name', required=False)),
+        lambda e, g, p: e.sage_doctrine_action(g, p['action'], p), dlc='official.sage-way'),
+    Capability('sage recruitment', 'sage-recruitment', (B('enabled'),),
+        lambda e, g, p: e.sage_toggle_recruitment(g, p.get('enabled', True)), dlc='official.sage-way'),
+    Capability('sage worship', 'sage-worship', (S('sage_id'),),
+        lambda e, g, p: e.sage_choose_sage(g, p['sage_id']), dlc='official.sage-way'),
+    Capability('sage debate', 'sage-debate', (S('doctrine_id'), S('member_id')),
+        lambda e, g, p: e.sage_debate(g, p['doctrine_id'], p['member_id']), dlc='official.sage-way'),
+    Capability('sage refine manual', 'sage-refine-manual', (S('item_id'),),
+        lambda e, g, p: e.sage_refine_manual(g, p['item_id']), dlc='official.sage-way'),
+    Capability('sage outer king', 'sage-outer-king',
+        (S('action', choices=('advance', 'combat', 'spirit_stone', 'opportunity')),),
+        lambda e, g, p: e.sage_outer_king(g, p['action']), dlc='official.sage-way'),
+    Capability('monster evolve', 'monster-evolve', (S('evolution_id'),),
+        lambda e, g, p: e.evolve_monster(g, p['evolution_id']), dlc='official.monster-bloodlines'),
+    Capability('custom lineage prepare', 'custom-lineage-prepare', (S('evolution_id'),),
+        lambda e, g, p: e.prepare_custom_lineage(g, p['evolution_id']), preview=True, dlc='official.monster-bloodlines'),
+    Capability('custom lineage confirm', 'custom-lineage-confirm',
+        (S('evolution_id'), S('name'), A('rules', LINEAGE_RULE, required=True)),
+        lambda e, g, p: e.confirm_custom_lineage(g, p['evolution_id'], p['name'], p['rules']), dlc='official.monster-bloodlines'),
+    Capability('merchant debug hq', 'merchant-debug-hq', (S('alliance_id'),),
+        lambda e, g, p: e.debug_merchant_hq(g, p['alliance_id']), shortcut=True),
 )
 BY_OPERATION = {cap.operation: cap for cap in CAPABILITIES}
 
@@ -328,7 +388,11 @@ def register(registry):
             return execute(ctx.session, capability.operation, payload)
         description = ('Compute in a disposable copy without committing preparation or RNG.' if capability.preview
                        else 'Execute ordinary game rules in the isolated session; costs, eligibility and event gates apply.')
+        if capability.shortcut:
+            description = 'Debug shortcut in the isolated session only; bypasses ordinary acquisition requirements.'
+        if capability.dlc:
+            description += f' Requires enabled DLC {capability.dlc}.'
         registry.register(Command(capability.name, 'preview' if capability.preview else 'simulation',
             description + ' Discover current IDs and options with game view.', invoke, capability.arguments))
 
-EXCLUDED_OPERATIONS = {'buddhist-action': 'Buddhist DLC specialized actions', 'guixu-action': 'Guixu DLC dungeon actions', 'asura': 'Asura DLC specialized cultivation', 'tianji-action': 'Tianji DLC specialized forging', 'tianji-preview': 'Tianji DLC specialized forging', 'tianji-forge': 'Tianji DLC specialized forging', 'tianji-debug-reveal-all': 'Tianji DLC specialized forging', 'sage-doctrine': 'Sage DLC specialized doctrine', 'sage-recruitment': 'Sage DLC specialized doctrine', 'sage-worship': 'Sage DLC specialized doctrine', 'sage-debate': 'Sage DLC specialized doctrine', 'sage-refine-manual': 'Sage DLC specialized doctrine', 'sage-outer-king': 'Sage DLC specialized doctrine', 'monster-evolve': 'Monster bloodline DLC specialized rules', 'custom-lineage-prepare': 'Monster bloodline DLC specialized rules', 'custom-lineage-confirm': 'Monster bloodline DLC specialized rules', 'merchant-debug-hq': 'Legacy debug headquarters shortcut; use ordinary merchant actions'}
+EXCLUDED_OPERATIONS = {}
