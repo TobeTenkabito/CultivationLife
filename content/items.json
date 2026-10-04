@@ -10746,6 +10746,24 @@
         "immortal",
         "golden_light"
       ]
+    },
+    {
+      "id": "talisman_paper",
+      "name": "灵纹符纸",
+      "tags": [
+        "material",
+        "talisman_material"
+      ],
+      "description": "制符时消耗的基础符材。"
+    },
+    {
+      "id": "talisman_cinnabar",
+      "name": "蕴灵朱砂",
+      "tags": [
+        "material",
+        "talisman_material"
+      ],
+      "description": "制符时消耗的基础符材。"
     }
   ]
 }

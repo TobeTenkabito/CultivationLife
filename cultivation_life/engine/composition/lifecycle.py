@@ -114,6 +114,7 @@ def bind_session(engine: GameEngine, *, bloodline_content_available: Callable[[]
 
 def bind_advancement(engine: GameEngine) -> AdvancementDependencies:
     return AdvancementDependencies(
+        _spatial_training=lambda *args, **kwargs: engine._spatial_training(*args, **kwargs),
         year=bind_elapsed_year(engine),
         settlement=bind_settlement(engine),
         _begin_doctrine_action=lambda *args, **kwargs: engine._begin_doctrine_action(*args, **kwargs),

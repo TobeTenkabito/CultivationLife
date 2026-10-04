@@ -82,7 +82,7 @@ def test_gift_transfers_equipment_and_party_survives_reload(engine):
     ('human','heavenly_metal_wood',3),('spirit','heavenly_metal_wood',4),('celestial','heavenly_metal_wood',5)])
 def test_infusion_caps_and_exact_cost(engine,world,root,cap):
     g=family_game(engine,world,root);npc=g.family.npcs[0];npc.realm_index=cap;npc.layer=REALMS[cap].layers-1
-    g.player.realm_index=8;engine.store.save(g)
+    g.player.realm_index=5 if world=='human' else 8;engine.store.save(g)
     expected=engine._family_infusion(g,npc);assert expected['cap_realm']==cap
     engine.family_action(g.id,'infuse',{'npc_id':npc.id})
     g=engine.store.load(g.id);assert g.family.npcs[0].layer==REALMS[cap].layers

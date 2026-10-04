@@ -176,7 +176,7 @@ def test_http_structured_validation_and_disable(environment, api_environment):
     assert request('/api/debug/command', dict(payload, arguments=None))[0] == 400
     assert request('/api/debug/command', {'command': 'debug status', 'arguments': {}, 'session_id': 0})[0] == 400
     config.write_text('Debug=False')
-    assert request('/api/debug/command', payload)[0] == 404
+    assert request('/api/debug/command', payload)[0] == 200
 
 
 def initialized_server(client):
@@ -194,9 +194,7 @@ def test_real_client_cli_and_mcp_tools(environment, api_environment):
     httpd = next(cell.cell_contents for cell in request.__closure__ if hasattr(cell.cell_contents, 'server_port'))
     url = f'http://127.0.0.1:{httpd.server_port}'
     client = DebugClient(url)
-    with pytest.raises(ToolError) as error:
-        client.tools()
-    assert error.value.status == 404
+    assert client.tools()  # The console is available independently of Debug=True.
     config.write_text('Debug=True')
     tools = client.tools()
     assert any(t['name'] == 'cultivation_action_advance' for t in tools)
@@ -228,7 +226,7 @@ def test_real_client_cli_and_mcp_tools(environment, api_environment):
     assert process.returncode == 0 and len(responses) == 2
     assert responses[-1]['result']['tools'][0]['inputSchema']['additionalProperties'] is False
     config.write_text('Debug=False')
-    assert server.handle(payload)['result']['isError']
+    assert not server.handle(payload)['result']['isError']
 
 
 def test_mcp_protocol_errors_no_stdout_noise_and_no_game_imports():

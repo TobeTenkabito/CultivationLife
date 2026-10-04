@@ -6,6 +6,11 @@ from contextvars import ContextVar
 
 
 _request_state = ContextVar('game_request_state', default=None)
+_active_command = ContextVar('game_active_command', default=None)
+
+
+def active_command():
+    return _active_command.get()
 
 
 @contextmanager
@@ -38,7 +43,11 @@ def serialized_commands(cls):
             @wraps(command)
             def run(self, *args, **kwargs):
                 with self.store.lock:
-                    return command(self, *args, **kwargs)
+                    token = _active_command.set(command.__name__)
+                    try:
+                        return command(self, *args, **kwargs)
+                    finally:
+                        _active_command.reset(token)
             return run
 
         setattr(cls, name, wrap(method))

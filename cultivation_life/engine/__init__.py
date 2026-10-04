@@ -191,6 +191,10 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         )
 
     def _advance_world_year(self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool=True) -> bool:
+        from ..system import spatial
+        spatial.tick(game, rng, self.maps)
+        if game.player.world in spatial.SPECIAL_WORLDS:
+            return world_time.advance_spatial_year(self._dependencies.time.world_year, game, rng)
         return world_time._advance_world_year(self._dependencies.time.world_year, game, rng, era_news, encounters=encounters)
 
     def travel_map(self, game_id: str, destination: str) -> dict[str, Any]:
@@ -735,8 +739,20 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return combat_runtime._diff(before, after)
 
     def present(self, game: GameState) -> dict[str, Any]:
+        from .actions.exploration import reconcile_boundary
+        from ..system import spatial, talismans
+        if reconcile_boundary(self._exploration_dependencies(), game):
+            self.store.save(game)
         result = presentation_runtime.present(self._dependencies.presentation_runtime, game)
         result["buddhist_system"] = self._public_buddhist(game)
+        result['spatial'] = spatial.public(game)
+        result['talismans'] = talismans.public(game)
+        if spatial.current(game):
+            scene = spatial.current(game)
+            result['player']['world_name'] = scene['name']
+            result['player']['location_name'] = next(r['name'] for r in scene['locations'] if r['id']==scene['location_id'])
+            result['world_npcs'] = []
+            result['market'] = []
         return result
 
     @staticmethod
@@ -744,11 +760,16 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return presentation_runtime._history_visible_in_world(record, game)
 
     def _load(self, game_id: str) -> GameState:
-        from .transactions import request_games
+        from .transactions import request_games, active_command
+        from ..system.spatial import guard
         games = request_games(self)
         if games is not None and game_id in games:
+            if active_command():
+                guard(games[game_id], active_command())
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
+        if active_command():
+            guard(game, active_command())
         if games is not None:
             games[game_id] = game
         return game
@@ -758,6 +779,25 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
 
     def advance(self, game_id: str, action: str, years: int=1) -> dict[str, Any]:
         return advancement.advance(self._dependencies.advancement, game_id, action, years)
+
+    def _spatial_training(self, game, action, units):
+        from .actions.exploration import train
+        return train(self._exploration_dependencies(), game, action, units)
+
+    def _exploration_dependencies(self):
+        from .actions.exploration import ExplorationDependencies
+        return ExplorationDependencies(self._load, self.store.save, self.present, self.maps,
+            self._plan_world_transition, self._apply_world_transition, self._ensure_market,
+            self._die, self._advance_world_year,
+            self._body_training_step, self._body_progress_required, self._sense_training_step, self._advance_soul_erosion_time)
+
+    def spatial_action(self, game_id, action, payload=None):
+        from .actions.exploration import spatial_action
+        return spatial_action(self._exploration_dependencies(), game_id, action, payload or {})
+
+    def talisman_action(self, game_id, action, payload=None):
+        from .actions.exploration import talisman_action
+        return talisman_action(self._exploration_dependencies(), game_id, action, payload or {})
 
     def _add_opportunity(self, player: Player, amount: float, regional_efficiencies: dict[str, float] | None=None) -> float:
         return advancement._add_opportunity(self._dependencies.advancement, player, amount, regional_efficiencies)
@@ -1000,6 +1040,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return choices._queue_followup_event(game, event)
 
     def _resolve_breakthroughs(self, game: GameState, rng: random.Random) -> None:
+        from .actions.exploration import reconcile_boundary
+        reconcile_boundary(self._exploration_dependencies(), game, rng)
         return breakthroughs._resolve_breakthroughs(self._dependencies.breakthroughs, game, rng)
 
     @staticmethod

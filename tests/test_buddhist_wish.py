@@ -156,7 +156,7 @@ def test_high_cultivation_deterrence_does_not_create_license(setup):
 @pytest.mark.parametrize("kind", ["disciple", "party", "master", "companion"])
 def test_live_combat_relationship_penalties(setup, kind):
     engine, game, _ = setup
-    game.player.realm_index = 8; game.player.layer = 9
+    game.player.realm_index = 5; game.player.layer = 3
     game.player.hp = max_hp(game.player); game.player.mp = max_mp(game.player)
     person = {"id":"betrayed", "name":"同行者", "world":"human", "alive":True,
               "realm_index":1,"layer":1,"combat_power":1,"path":"dao","age":20,"lifespan":100}
@@ -215,7 +215,7 @@ def test_base_execution_without_dlc_does_not_create_wish_state(setup):
 
 def test_real_defensive_kill_resets_quiet_without_spending_wish(setup):
     engine, game, _ = setup
-    game.player.realm_index = 8; game.player.layer = 9
+    game.player.realm_index = 5; game.player.layer = 3
     game.player.hp = max_hp(game.player); game.player.mp = max_mp(game.player)
     wish = ensure_wish(game); wish["value"] = 50; wish["quiet"]["kill"] = 7
     target = {"target_name":"来犯者","target_power":1,"primary_power":1,"combat_type":"cultivator",

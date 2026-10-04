@@ -126,7 +126,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 and not any(str(row.get("id")) == str(relation.get("id")) for row in game.player.concubines)
             )
     sealed = game.player.sealed_cultivation
-    player_data["cultivation_suppressed"] = bool(sealed)
+    player_data["cultivation_suppressed"] = bool(sealed or game.player.cultivation_suppression)
     from ..system.doctrine.voisinage_training import dao_ancestor
     player_data['dao_ancestor'] = dao_ancestor(game)
     if player_data['dao_ancestor']:
@@ -284,7 +284,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 and game.player.layer == REALMS[8].layers
                 and game.player.opportunity >= opportunity_required(game.player)
                 and (game.player.world == "hell" or game.player.path in {"dao", "buddhist", "confucian"})
-                and not game.player.sealed_cultivation and not game.pending_event
+                and not game.player.sealed_cultivation and not game.player.cultivation_suppression and not game.pending_event
                 and not game.active_trial and game.player.alive
             ),
             "can_ascend_asura": bool(
@@ -292,7 +292,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 and game.player.layer == REALMS[8].layers
                 and game.player.opportunity >= opportunity_required(game.player)
                 and game.player.path == "demonic"
-                and not game.player.sealed_cultivation and not game.pending_event
+                and not game.player.sealed_cultivation and not game.player.cultivation_suppression and not game.pending_event
                 and not game.active_trial and game.player.alive
             ),
             "routes": travel_routes,
@@ -304,7 +304,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                 "can_descend_phantom": "phantom_underworld", "can_descend_monster": "monster_realm",
                 "can_return_nether": "nether",
             }.items()},
-            "suppressed": bool(game.player.sealed_cultivation),
+            "suppressed": bool(game.player.sealed_cultivation or game.player.cultivation_suppression),
         },
         "trial": trial_data,
         "tribulation": {

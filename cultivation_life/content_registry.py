@@ -1627,7 +1627,7 @@ class ContentRegistry:
         if (
             not required_worlds <= set(profiles)
             or not set(profiles) <= set(world.get("world_names", {}))
-            or any(profile.get("kind") != "world" for profile in profiles.values())
+            or any(profile.get("kind") not in {"world", "spatial"} for profile in profiles.values())
         ):
             raise ContentError("所有真实界面都必须具有独立的界面配置")
         if any(
@@ -1734,6 +1734,8 @@ TRANSFORMATION_CATALOG = CONTENT.transformations
 
 def restricted_acquisition(kind: str, content_id: str) -> bool:
     """Definitions may live in the base game without becoming generic loot."""
+    if content_id.startswith('SPATIAL_'):
+        return True
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
     return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "heroic_progeny_elixir"

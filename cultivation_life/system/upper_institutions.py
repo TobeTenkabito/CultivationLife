@@ -178,7 +178,7 @@ def act(engine, game_id, action, target=''):
     else:
         if not state['joined']:
             raise ValueError('请先登记机构身份')
-        if p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree'):
+        if p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree', 'faction_decree', 'royal_tribute'):
             text = asura_court.act(engine, game, state, action, target)
         elif action=='leave':
             if state['job']:

@@ -7280,6 +7280,102 @@
           "years": 270
         }
       ]
+    },
+    "rift": {
+      "default": "rift_arrival",
+      "locations": [
+        {
+          "id": "rift_arrival",
+          "name": "不世秘境",
+          "description": "空间实例的入口。当前地点、人物与产物按存档中的独立空间记录展示。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 6,
+            "demon": 6,
+            "monster": 6,
+            "yin": 6
+          },
+          "teleport_array": false
+        },
+        {
+          "id": "rift_interior",
+          "name": "空间深处",
+          "description": "空间实例的入口。当前地点、人物与产物按存档中的独立空间记录展示。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 6,
+            "demon": 6,
+            "monster": 6,
+            "yin": 6
+          },
+          "teleport_array": false
+        }
+      ],
+      "routes": [
+        {
+          "from": "rift_arrival",
+          "to": "rift_interior",
+          "years": 1
+        }
+      ]
+    },
+    "lost": {
+      "default": "lost_arrival",
+      "locations": [
+        {
+          "id": "lost_arrival",
+          "name": "失落界面",
+          "description": "空间实例的入口。当前地点、人物与产物按存档中的独立空间记录展示。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1,
+            "demon": 1,
+            "monster": 1,
+            "yin": 1
+          },
+          "teleport_array": false
+        },
+        {
+          "id": "lost_interior",
+          "name": "空间深处",
+          "description": "空间实例的入口。当前地点、人物与产物按存档中的独立空间记录展示。",
+          "themes": [
+            "通商",
+            "平原"
+          ],
+          "combat_terrain": "开阔",
+          "combat_conditions": [],
+          "qi_gain_efficiencies": {
+            "spirit": 1,
+            "demon": 1,
+            "monster": 1,
+            "yin": 1
+          },
+          "teleport_array": false
+        }
+      ],
+      "routes": [
+        {
+          "from": "lost_arrival",
+          "to": "lost_interior",
+          "years": 1
+        }
+      ]
     }
   }
 }

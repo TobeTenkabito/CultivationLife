@@ -84,10 +84,11 @@ class AsuraSystemTests(unittest.TestCase):
         self.assertEqual(shown["map"]["world_name"], "修罗界")
         self.assertEqual(len(shown["faction"]["available"]), 3)
 
+        self.engine.manage_secret_art(game_id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game_id, "true_demon")
-        self.assertTrue(descended["world_travel"]["can_return_asura"])
+        self.assertFalse(descended["world_travel"]["can_return_asura"])
         self.assertFalse(descended["world_travel"]["can_ascend_asura"])
-        restored = self.engine.cross_world(game_id, "asura")
+        restored = self.engine.manage_secret_art(game_id, "suppress", "cancel")
         self.assertEqual(restored["player"]["realm_name"], "修罗初期·1层")
 
     def test_asura_random_events_do_not_mix_with_celestial_or_lower_world_events(self):

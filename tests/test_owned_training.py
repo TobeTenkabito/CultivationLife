@@ -12,6 +12,8 @@ def ready(tmp_path):
     engine = GameEngine(Path(__file__).resolve().parents[1], tmp_path)
     game = engine.store.load(engine.create_game('培养', 'supreme_metal', 'demonic', 631)['id'])
     p = game.player
+    p.world = 'true_demon'
+    p.location_id = engine.maps.default_location(p.world)
     p.realm_index, p.layer, p.body_training, p.divine_sense_rank = 8, 9, 100, 110
     p.opportunity, p.mp = 1e12, max_mp(p)
     game.pending_event = None

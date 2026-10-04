@@ -2003,7 +2003,9 @@
       "asura": "修罗界",
       "nether": "幽冥界",
       "reincarnation": "轮回界",
-      "monster_realm": "妖界"
+      "monster_realm": "妖界",
+      "rift": "不世秘境",
+      "lost": "失落界面"
     },
     "world_profiles": {
       "human": {
@@ -2025,7 +2027,7 @@
         },
         "cultivation_ceiling": {
           "realm_index": 5,
-          "layer": 3
+          "layer": 9
         }
       },
       "demon": {
@@ -2047,7 +2049,7 @@
         },
         "cultivation_ceiling": {
           "realm_index": 5,
-          "layer": 3
+          "layer": 9
         }
       },
       "spirit": {
@@ -2241,6 +2243,39 @@
         },
         "passage_ceiling": {
           "realm_index": 7,
+          "layer": 9
+        }
+      },
+      "rift": {
+        "tier": -1,
+        "npc_realm_cap": 8,
+        "tribulation_base_power_cap": 32000,
+        "enabled": true,
+        "kind": "spatial",
+        "supports": [],
+        "qi_concentrations": {
+          "spirit": 8,
+          "demon": 8,
+          "monster": 8,
+          "yin": 8
+        },
+        "cultivation_ceiling": null
+      },
+      "lost": {
+        "tier": 0,
+        "npc_realm_cap": 8,
+        "tribulation_base_power_cap": 32000,
+        "enabled": true,
+        "kind": "world",
+        "supports": [],
+        "qi_concentrations": {
+          "spirit": 1,
+          "demon": 1,
+          "monster": 1,
+          "yin": 1
+        },
+        "cultivation_ceiling": {
+          "realm_index": 8,
           "layer": 9
         }
       }
@@ -4554,6 +4589,75 @@
       "flora": {
         "name": "草木精怪",
         "description": "本源种属；血脉增益须开启万妖归宗 DLC。"
+      }
+    },
+    "talismans": {
+      "elements": [
+        "metal",
+        "wood",
+        "water",
+        "fire",
+        "earth",
+        "wind",
+        "thunder",
+        "yin",
+        "yang"
+      ],
+      "materials": [
+        {
+          "id": "talisman_paper",
+          "name": "灵纹符纸",
+          "quality": 1
+        },
+        {
+          "id": "talisman_cinnabar",
+          "name": "蕴灵朱砂",
+          "quality": 1.4
+        }
+      ],
+      "methods": [
+        {
+          "id": "ward",
+          "name": "护身符",
+          "power": 0,
+          "protection": 35,
+          "assistance": 0,
+          "uses": 8,
+          "cost": 100
+        },
+        {
+          "id": "strike",
+          "name": "破敌符",
+          "power": 35,
+          "protection": 0,
+          "assistance": 0,
+          "uses": 8,
+          "cost": 100
+        },
+        {
+          "id": "balance",
+          "name": "三元符",
+          "power": 15,
+          "protection": 15,
+          "assistance": 15,
+          "uses": 15,
+          "cost": 300
+        }
+      ]
+    },
+    "spatial_rifts": {
+      "lifetime_years": 800,
+      "spawn_interval": 120,
+      "spawn_chance": 0.55,
+      "protection_weight": 0.65,
+      "growth_weight": 0.35,
+      "secluded_multiplier": 6,
+      "reopen_interval": 160,
+      "reopen_chance": 0.35,
+      "outcome_weights": {
+        "secluded": 25,
+        "passage": 30,
+        "local": 45
       }
     }
   },

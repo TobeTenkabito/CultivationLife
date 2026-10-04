@@ -24,14 +24,14 @@ def setup_game(tmp_path):
 
 def test_all_worlds_are_base_and_all_extensions_load():
     maps = json.loads((ROOT / "content/maps.json").read_text(encoding="utf8"))
-    assert len(maps["worlds"]) == 11
+    assert len(maps["worlds"]) == 13
     assert all(row["status"] == "loaded" for row in CONTENT.extension_report)
-    assert {d["world"] for d in GUIXU_TIDE_CONTENT["dungeons"]} == set(maps["worlds"])
+    assert {d["world"] for d in GUIXU_TIDE_CONTENT["dungeons"]} == set(maps["worlds"]) - {"rift", "lost"}
 
 
 def test_all_exchange_venues_are_accessible_and_clock_is_two_units(setup_game):
     engine, game = setup_game
-    for world in engine.maps.worlds:
+    for world in set(engine.maps.worlds) - {"rift", "lost"}:
         assert not engine._exchange_location(world).get("min_realm_index", 0)
     engine._schedule_exchange(game, random.Random(1))
     location = game.exchange_state["location_id"]
@@ -163,7 +163,7 @@ def test_player_artifact_enters_ranking_without_mutating_divine_definitions(setu
     assert len(public["artifacts"]) == 100
     assert len(public["targets"]) == 100  # Displaced divine recipes remain usable.
     assert game.tianji_state["artifacts"] == original
-    assert {m["world"] for m in game.tianji_state["materials"]} == set(engine.maps.worlds)
+    assert {m["world"] for m in game.tianji_state["materials"]} == set(engine.maps.worlds) - {"rift", "lost"}
 
 
 def test_defensive_beast_rewards_have_no_sha_but_active_hunting_does(setup_game):

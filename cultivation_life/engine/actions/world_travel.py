@@ -186,7 +186,7 @@ def begin_spirit_crossing(deps: WorldTravelDependencies, game_id: str) -> dict[s
         raise ValueError("此生已经结束")
     if game.pending_event:
         raise ValueError("请先处理当前事件")
-    if player.sealed_cultivation:
+    if player.sealed_cultivation or player.cultivation_suppression:
         raise ValueError("当前身处下界且真实道果处于封印中，只能重返原上界")
     if player.path == "demonic":
         if player.imprisonment:
@@ -256,7 +256,7 @@ def begin_celestial_ascension(deps: WorldTravelDependencies, game_id: str) -> di
         raise ValueError("请先处理当前事件")
     if player.imprisonment:
         raise ValueError("身陷牢狱时无法渡劫飞升")
-    if player.sealed_cultivation:
+    if player.sealed_cultivation or player.cultivation_suppression:
         raise ValueError("真实道果正受下界压制，不能在封印状态下飞升")
     if player.world != "hell" and player.path not in {"dao", "buddhist", "confucian"}:
         raise ValueError("当前道统尚未开放飞升仙界路线")
@@ -295,7 +295,7 @@ def begin_asura_ascension(deps: WorldTravelDependencies, game_id: str) -> dict[s
         raise ValueError("请先处理当前事件")
     if player.imprisonment:
         raise ValueError("身陷牢狱时无法渡劫飞升")
-    if player.sealed_cultivation:
+    if player.sealed_cultivation or player.cultivation_suppression:
         raise ValueError("真实道果正受下界压制，不能在封印状态下飞升")
     if player.path != "demonic":
         raise ValueError("只有魔修可以飞升修罗界")
@@ -384,12 +384,16 @@ def plan_public_crossing(game, destination, maps):
                   and row["destination"] == destination), None)
     descending = route is not None
     if descending:
+        from ...system.world_boundary import can_descend, descent_rank
+        target_tier = WORLD_SYSTEMS['world_profiles'][destination]['tier']
+        if not can_descend(player, target_tier):
+            raise ValueError('下界前须使用压制秘法，将显露修为降至目标界面的容纳范围；收敛气机不能代替压制')
         if player.world == "celestial" and not player.immortal_power_converted:
             raise ValueError("仙灵力尚未完全转化，无法承受逆行界壁的消耗")
         profile = WORLD_SYSTEMS["world_profiles"][player.world]
         rules = WORLD_SYSTEMS["world_travel"]
         required = int(rules["celestial_required_realm"] if profile["tier"] >= 3 else rules["required_realm"])
-        if player.realm_index < required:
+        if descent_rank(player)[0] < required:
             raise ValueError(f"只有达到{REALMS[required].name}境的修士才能重返对应下界")
     from ...system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
     mode = TransitionMode.SEALED_DESCENT if descending else TransitionMode.SEALED_RETURN
@@ -405,7 +409,7 @@ def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -
     descending = plan.mode.value == "sealed_descent"
     deps._apply_world_transition(game, plan)
     world_name = WORLD_SYSTEMS['world_names'][destination]
-    summary = (f"你逆穿界壁重返{world_name}。天地法则将修为压至{REALMS[player.realm_index].name}{player.layer}层，真实道果仍在。"
+    summary = (f"你凭秘法压制修为，逆穿界壁重返{world_name}，显露{REALMS[player.realm_index].name}{player.layer}层；解除秘法后按真实道果重新判断界面排斥。"
                if descending else f"你再入{world_name}，界面压制尽去，被封存的道果与法力层次完全复原。")
     result = f"returned_{destination}"
     game.history.append(HistoryRecord(

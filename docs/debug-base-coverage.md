@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **1.58.0**，存档结构 **8**。当前共有 **178 个命令/工具**，其中 **135 个现有角色操作入口**已具名接入。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
+维护基线：本体 **1.58.0**，存档结构 **8**。当前共有 **180 个命令/工具**，其中 **137 个现有角色操作入口**已具名接入。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
 
 ## 如何理解覆盖范围
 
@@ -165,6 +165,8 @@
 | `monster evolve <evolution_id>` | `monster-evolve` | simulation |
 | `custom lineage prepare <evolution_id>` | `custom-lineage-prepare` | preview |
 | `custom lineage confirm <evolution_id> <name> <rules>` | `custom-lineage-confirm` | simulation |
+| `spatial action <action> [target_id]` | `spatial-action` | simulation |
+| `talisman action <action> [method_id] [material1] [material2] [element] [npc_id] [talisman_id]` | `talisman-action` | simulation |
 | `merchant debug hq <alliance_id>` | `merchant-debug-hq` | simulation |
 
 当前全部角色操作入口均已接入，`EXCLUDED_OPERATIONS` 为空。两条调试捷径在帮助和能力清单中显式标记；完整参数语义、DLC 门禁、预览约定和示例见 [DLC 指令清单](debug-dlc-coverage.md)。

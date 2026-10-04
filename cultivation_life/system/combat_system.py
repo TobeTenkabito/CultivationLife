@@ -215,6 +215,16 @@ class PlayerCombatSystem:
         ratio = player_power / enemy_power
         assessment = cls._assessment(ratio)
         player_stats = cls._aggregate_stats(player_units, player=player, terrain_tags=tags, player_stat_multiplier=player_stat_multiplier)
+        # Each dimension is consulted exactly once at battle start. Reusing the
+        # resulting stats during rounds does not consult the talisman again.
+        from .talismans import consume
+        talisman_power = min(.08, consume(player, 'power') / 1000)
+        talisman_protection = min(.08, consume(player, 'protection') / 1000)
+        talisman_assistance = min(.08, consume(player, 'assistance') / 1000)
+        for stat, bonus in {'might': talisman_power, 'guard': talisman_protection,
+                            'mobility': talisman_assistance, 'sustain': talisman_assistance}.items():
+            if stat in player_stats:
+                player_stats[stat] *= 1 + bonus
         enemy_stats = cls._aggregate_stats(enemy_units, terrain_tags=tags)
         soul_effects = ghost_soul_effects(player)
         soul_traits = active_soul_traits(player)

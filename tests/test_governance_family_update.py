@@ -40,10 +40,11 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         game.player.mp = max_mp(game.player) * 0.41
         self.engine.store.save(game)
 
+        self.engine.manage_secret_art(created["id"], "suppress", "activate", 5, 9)
         human = self.engine.cross_world(created["id"], "human")
-        self.assertEqual((human["player"]["world"], human["player"]["realm_index"], human["player"]["layer"]), ("human", 5, 3))
+        self.assertEqual((human["player"]["world"], human["player"]["realm_index"], human["player"]["layer"]), ("human", 5, 9))
         self.assertTrue(human["player"]["cultivation_suppressed"])
-        spirit = self.engine.cross_world(created["id"], "spirit")
+        spirit = self.engine.manage_secret_art(created["id"], "suppress", "cancel")
         self.assertEqual((spirit["player"]["world"], spirit["player"]["realm_index"], spirit["player"]["layer"]), ("spirit", 8, original_layer))
         self.assertFalse(spirit["player"]["cultivation_suppressed"])
         self.assertAlmostEqual(spirit["player"]["hp"] / spirit["player"]["max_hp"], 0.63, places=2)

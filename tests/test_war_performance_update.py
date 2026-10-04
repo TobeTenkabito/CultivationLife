@@ -336,10 +336,11 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         self.engine.store.save(game)
         shown = self.engine.use_item(made["id"], "moque_metal")
         self.assertIn("metal", shown["player"]["additional_roots"])
+        self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "demon")
         self.assertEqual(shown["player"]["world"], "demon")
-        self.assertTrue(shown["world_travel"]["can_return_true_demon"])
-        shown = self.engine.cross_world(made["id"], "true_demon")
+        self.assertFalse(shown["world_travel"]["can_return_true_demon"])
+        shown = self.engine.manage_secret_art(made["id"], "suppress", "cancel")
         self.assertEqual(shown["player"]["realm_index"], 8)
 
     def test_devouring_total_breakthrough_potential_gains_five_percentage_points(self):

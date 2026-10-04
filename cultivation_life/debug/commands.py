@@ -75,9 +75,9 @@ def player_set(ctx, field, text):
         player['joint_companion_breakthrough'] = None
     player[field] = value
     if field in {'realm_index', 'layer'}:
-        ceiling = WORLD_SYSTEMS.get('world_profiles', {}).get(player['world'], {}).get('cultivation_ceiling')
-        if ceiling and (player['realm_index'], player['layer']) > (ceiling['realm_index'], ceiling['layer']):
-            raise CommandError('Realm exceeds the current world ceiling; use a suitable quick-start world first.')
+        # Use the same world rejection and cleanup contract as ordinary play,
+        # inside the already isolated session and its rollback transaction.
+        ctx.services.simulate(ctx.session, 'view', {})
     return {field: value}
 
 

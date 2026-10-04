@@ -55,7 +55,7 @@ class GuixuTideTests(unittest.TestCase):
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
-            set(WORLD_SYSTEMS["world_profiles"]),
+            set(WORLD_SYSTEMS["world_profiles"]) - {"rift", "lost"},
         )
         self.assertEqual(
             {row["name"] for row in dungeons},

@@ -38,8 +38,9 @@ class AuctionUpdateTests(unittest.TestCase):
 
     def test_lower_realm_return_hides_and_blocks_normal_ascension(self):
         made = self.engine.create_game("归界不误触", "none", "dao", 11001, preset_id="mahayana")
+        self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "human")
-        self.assertTrue(shown["world_travel"]["can_return_spirit"])
+        self.assertFalse(shown["world_travel"]["can_return_spirit"])
         self.assertFalse(shown["demonic_system"]["true_demon_ascension"]["available"])
         with self.assertRaisesRegex(ValueError, "只能重返原上界"):
             self.engine.begin_spirit_crossing(made["id"])
@@ -50,8 +51,9 @@ class AuctionUpdateTests(unittest.TestCase):
         game.player.path = "demonic"
         game.player.world = "true_demon"
         self.engine.store.save(game)
+        self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "demon")
-        self.assertTrue(shown["world_travel"]["can_return_true_demon"])
+        self.assertFalse(shown["world_travel"]["can_return_true_demon"])
         self.assertFalse(shown["demonic_system"]["true_demon_ascension"]["available"])
         with self.assertRaisesRegex(ValueError, "只能重返原上界"):
             self.engine.begin_spirit_crossing(made["id"])
@@ -266,6 +268,7 @@ class AuctionUpdateTests(unittest.TestCase):
             (item.quantity for item in game.player.inventory if item.id == "mahayana_spirit_pill"), 0
         )
         self.engine.store.save(game)
+        self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         self.engine.cross_world(made["id"], "human")
         crossed = self.engine.store.load(made["id"])
         self.assertEqual(self.engine._spirit_stones(crossed.player), stones_after_settlement)

@@ -100,7 +100,8 @@ def test_world_information_isolation_and_crossworld_catalog(setup):
 def test_supply_exact_years_and_one_time_rewards(setup):
     engine, game = setup
     game, alliance = join(engine, game)
-    game.player.realm_index = 8
+    game.player.cultivation_suppression = {'realm_index':9,'layer':1}
+    game.player.realm_index = 5
     game.player.layer = 1
     game.player.lifespan = 100000
     game.player.karma = 100

@@ -246,6 +246,7 @@ class SessionDependencies:
 
 @dataclass(frozen=True, slots=True)
 class AdvancementDependencies:
+    _spatial_training: Callable[..., dict[str, Any]]
     year: ElapsedYearDependencies
     settlement: TimeSettlementDependencies
     _begin_doctrine_action: Callable[..., None]

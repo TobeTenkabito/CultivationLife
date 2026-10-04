@@ -670,14 +670,15 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
 
                 ascended = self.engine.evolve_monster(game.id, "FOX_NETHER_TRUE_1")
                 self.assertEqual((ascended["player"]["world"], ascended["player"]["realm_index"]), ("nether", 9))
-                self.assertTrue(ascended["world_travel"]["can_descend_monster"])
-                self.assertTrue(ascended["world_travel"]["can_descend_phantom"])
+                self.assertFalse(ascended["world_travel"]["can_descend_monster"])
+                self.assertFalse(ascended["world_travel"]["can_descend_phantom"])
+                self.engine.manage_secret_art(game.id, "suppress", "activate", 8, 9)
                 descended = self.engine.cross_world(game.id, lower_world)
                 self.assertEqual((descended["player"]["world"], descended["player"]["realm_index"]), (lower_world, 8))
-                self.assertTrue(descended["world_travel"]["can_return_nether"])
-                with self.assertRaisesRegex(ValueError, "封印状态"):
+                self.assertFalse(descended["world_travel"]["can_return_nether"])
+                with self.assertRaisesRegex(ValueError, "秘法压制"):
                     self.engine.breakthrough(game.id)
-                restored = self.engine.cross_world(game.id, "nether")
+                restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
                 self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("nether", 9))
                 self.assertFalse(restored["world_travel"]["suppressed"])
 
@@ -722,9 +723,10 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         self.assertTrue(lineage["id"].startswith("custom-lineage-"))
         self.assertNotIn("青丘自在脉", lineage["id"])
         self.assertIn("primordial_true_spirit_hall", self.engine.store.load(game.id).sects)
+        self.engine.manage_secret_art(game.id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game.id, "phantom_underworld")
         self.assertEqual((descended["player"]["world"], descended["player"]["realm_index"]), ("phantom_underworld", 8))
-        restored = self.engine.cross_world(game.id, "nether")
+        restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
         self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("nether", 9))
 
         game = self.engine.store.load(game.id)

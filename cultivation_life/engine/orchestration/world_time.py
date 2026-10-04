@@ -11,6 +11,22 @@ from ...time_dependencies import ElapsedTravelDependencies, WorldYearDependencie
 from ...time_flow import TRAVEL_TIME, completed_action_units, settle_elapsed_time
 
 
+def advance_spatial_year(deps: WorldYearDependencies, game, rng):
+    """Isolated year: same personal breakthrough, thunder and lifespan order."""
+    p = game.player
+    emit(game, 'time.elapsed', years=1, unit_years=WORLD_SYSTEMS['time_units'][str(p.realm_index)])
+    deps._resolve_breakthroughs(game, rng)
+    if not p.alive or game.pending_event:
+        return False
+    deps._check_tribulation(game, rng)
+    if not p.alive or game.pending_event:
+        return False
+    if p.lifespan is not None and current_body_age(p) >= p.lifespan:
+        deps._die(game, '寿元已尽', 'SYS_LIFESPAN')
+        return False
+    return True
+
+
 def _advance_world_year(
     deps: WorldYearDependencies, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
 ) -> bool:
