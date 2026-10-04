@@ -244,7 +244,7 @@ def test_http_new_scene_preview_and_structured_boolean(environment, api_environm
     assert status == 200, result
     assert request('/api/debug/command', {'command': 'formation preview', 'arguments': {'slots': []}, 'session_id': sid})[0] == 200
     config.write_text('Debug=False')
-    assert request('/api/debug/command', {'command': 'game view', 'session_id': sid})[0] == 404
+    assert request('/api/debug/command', {'command': 'game view', 'session_id': sid})[0] == 200
 
 
 def test_base_only_install_can_discover_and_execute_tools(tmp_path):

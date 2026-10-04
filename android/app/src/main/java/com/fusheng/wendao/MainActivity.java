@@ -124,21 +124,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void requestDebugMode() {
             runOnUiThread(() -> {
                 if (destroyed) return;
-                boolean enabled = Python.getInstance().getModule("android_runtime")
-                        .callAttr("debug_mode_enabled").toBoolean();
-                new AlertDialog.Builder(MainActivity.this).setTitle("开发者模式")
-                    .setMessage(enabled ? "关闭开发者模式？调试副本会保留，正常角色不受影响。"
-                        : "开启开发者控制台？修改仅作用于独立调试副本；不会开启 WebView 远程调试。")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton(enabled ? "关闭" : "开启", (dialog, which) -> {
-                        Python.getInstance().getModule("android_runtime").callAttr("set_debug_mode", !enabled);
-                        web.evaluateJavascript("sessionStorage.removeItem('cultivation-debug-session'); location.reload()", null);
-                    }).show();
+                web.evaluateJavascript("window.DebugConsole?.open()", null);
             });
         }
         @JavascriptInterface public void exportDebugBundle(String text) {
             if (text == null || text.length() > 64 * 1024 * 1024) return;
-            if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
             runOnUiThread(() -> {
                 if (destroyed || pendingDebugExport != null) return;
                 pendingDebugExport = text;
@@ -149,7 +139,6 @@ public class MainActivity extends Activity {
             });
         }
         @JavascriptInterface public void importDebugBundle() {
-            if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
             runOnUiThread(() -> {
                 if (destroyed) return;
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -204,7 +193,6 @@ public class MainActivity extends Activity {
         if (result != RESULT_OK || data == null || data.getData() == null) return;
         new Thread(() -> {
             try {
-                if (!Python.getInstance().getModule("android_runtime").callAttr("debug_mode_enabled").toBoolean()) return;
                 if (request == DEBUG_EXPORT) {
                     try (java.io.OutputStream out = getContentResolver().openOutputStream(data.getData())) {
                         if (out == null || exporting == null) throw new java.io.IOException("无法写入复现包");

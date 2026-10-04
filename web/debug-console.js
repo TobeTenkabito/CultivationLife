@@ -23,6 +23,7 @@
     badge.hidden = !sessionId;
     badge.textContent = sessionId ? `DEBUG · 独立副本 ${sessionId.slice(0, 8)} · 点击返回控制台` : '';
     entry.hidden = !enabled && !sessionId;
+    document.getElementById('debug-tools').hidden = !sessionId;
   }
   function setSession(value) {
     sessionId = value || '';
@@ -122,7 +123,7 @@
       const button = node('button', label); button.type = 'button'; button.onclick = () => execute(command); actions.append(button);
     }
     const detach = node('button', '断开会话'); detach.type = 'button';
-    detach.title = '调试被关闭或会话损坏时，仅清除本标签页的会话连接，返回标题页。';
+    detach.title = '仅清除本标签页的会话连接并返回标题页，保留本地调试副本。';
     detach.onclick = () => { if (!hooks.busy()) { setSession(''); panel.close(); hooks.leave(); } };
     actions.append(detach);
     importInput = node('input'); importInput.type = 'file'; importInput.accept = '.json,application/json'; importInput.hidden = true;
@@ -169,15 +170,17 @@
     if (brand) brand.after(tools); else document.body.prepend(tools);
     document.body.append(panel);
     document.addEventListener('keydown', event => {
-      if (event.ctrlKey && event.code === 'Backquote') { event.preventDefault(); if (panel.open) panel.close(); else open(); }
+      if (event.code !== 'Backquote' || event.repeat || event.isComposing || event.altKey || event.metaKey) return;
+      if (!panel.open && event.target.closest('input, textarea, [contenteditable=true]')) return;
+      event.preventDefault(); if (panel.open) panel.close(); else open();
     });
   }
   window.DebugConsole = {
     configure(config, callbacks) {
-      hooks = callbacks; enabled = config.debug === true;
+      hooks = callbacks; enabled = config.console_available === true || config.debug === true;
       if (window.AndroidGame?.requestDebugMode && !document.getElementById('debug-native-mode')) {
-        const toggle = node('button', '开发者模式设置', 'debug-native-mode'); toggle.type = 'button';
-        toggle.onclick = () => { if (!hooks.busy()) window.AndroidGame.requestDebugMode(); };
+        const toggle = node('button', '开发者控制台', 'debug-native-mode'); toggle.type = 'button';
+        toggle.onclick = () => { if (!hooks.busy()) open(); };
         document.getElementById('settings-card')?.append(toggle);
       }
       if (!enabled && !sessionId) return;
@@ -188,6 +191,7 @@
         ? {'X-Cultivation-Debug': sessionId} : {};
     },
     active: () => !!sessionId,
+    open,
     closeIfOpen() { if (panel?.open) { panel.close(); return true; } return false; },
     notify(message) { if (output) print(message); },
     async importText(text) {

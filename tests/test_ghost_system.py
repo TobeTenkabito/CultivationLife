@@ -103,10 +103,11 @@ class GhostSystemTests(unittest.TestCase):
         game.player.mp = max_mp(game.player)
         self.engine.store.save(game)
 
+        self.engine.manage_secret_art(game.id, "suppress", "activate", 5, 9)
         descended = self.engine.cross_world(game.id, "human")
         self.assertEqual(descended["player"]["world"], "human")
-        self.assertTrue(descended["world_travel"]["can_return_hell"])
-        restored = self.engine.cross_world(game.id, "hell")
+        self.assertFalse(descended["world_travel"]["can_return_hell"])
+        restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
         self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("hell", 8))
         self.assertFalse(restored["world_travel"]["suppressed"])
 

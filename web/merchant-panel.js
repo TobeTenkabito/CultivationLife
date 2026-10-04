@@ -10,6 +10,13 @@
   };
   function render(system, act, capabilities = {}) {
     const root = document.querySelector('#merchant-content');
+    if (system.available === false) {
+      document.querySelector('#merchant-card').classList.add('hidden');
+      document.querySelector('[data-panel-target="merchant"]').classList.add('hidden');
+      window.UtilityPanels?.close('merchant');
+      return;
+    }
+    document.querySelector('[data-panel-target="merchant"]').classList.remove('hidden');
     document.querySelector('#merchant-card').classList.remove('hidden');
     root.replaceChildren();
     const button = (label, action, payload = {}, disabled = false) => {

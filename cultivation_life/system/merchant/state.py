@@ -30,6 +30,8 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
     }
     for world, geography in deps.maps.worlds.items():
         profile = WORLD_SYSTEMS["world_profiles"][world]
+        if profile['tier'] <= 0:
+            continue
         safe = [row["id"] for row in geography["locations"] if not row.get("min_realm_index")]
         headquarters = EXCHANGE_VENUES[world]
         sites = [place for place in safe if place != headquarters]

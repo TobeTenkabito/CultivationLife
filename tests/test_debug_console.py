@@ -221,10 +221,10 @@ def api_environment(environment, tmp_path, monkeypatch):
         httpd.shutdown(); httpd.server_close(); thread.join(timeout=5)
 
 
-def test_api_disabled_and_unknown_tokens_fail_closed(environment, api_environment):
+def test_console_available_without_config_and_unknown_tokens_fail_closed(environment, api_environment):
     request, config = api_environment
-    assert request('/api/debug/command', {'command': 'help'})[0] == 404
-    assert request('/api/games/' + environment[3], session_id=environment[2])[0] == 404
+    assert request('/api/debug/command', {'command': 'help'})[0] == 200
+    assert request('/api/games/' + environment[3], session_id=environment[2])[0] == 404  # This token belongs to a different Runtime store.
     config.write_text('Debug=True')
     assert request('/api/debug/command', {'command': 'help'})[0] == 200
     assert request('/api/games/' + environment[3], session_id='a' * 32)[0] == 404
@@ -254,8 +254,10 @@ def test_api_console_gameplay_and_two_tabs_are_isolated(environment, api_environ
     status, normal = request('/api/games/' + gid)
     assert status == 200
     assert sum(i['quantity'] for i in normal['player']['inventory'] if i['id'] == 'spirit_stone') != 88888
+    original = source_path.read_bytes()  # Normal read preparation above may save its own state.
     config.write_text('Debug=False')
-    assert request('/api/games/' + gid + '/advance', {'action': 'rest', 'years': 1}, session_id=sid)[0] == 404
+    assert request('/api/games/' + gid, session_id=sid)[0] == 200
+    assert source_path.read_bytes() == original
 
 
 def test_api_internal_errors_are_not_reported_as_input_errors(environment, api_environment, monkeypatch):

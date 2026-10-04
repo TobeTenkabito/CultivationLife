@@ -104,7 +104,7 @@ def nirvana_target(engine, game):
     layer = player.layer + 1
     if layer > REALMS[player.realm_index].layers:
         return None, "已达本境后期，涅槃不能跨越大境界"
-    cap = cultivation_ceiling(WORLD_SYSTEMS, player.world)
+    cap = (5, 3) if player.world == "human" else cultivation_ceiling(WORLD_SYSTEMS, player.world)
     if cap and (player.realm_index, layer) > cap:
         return None, "已达当前界面修为上限"
     return layer, ""

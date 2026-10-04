@@ -180,6 +180,8 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
 
 
 def _manual_minor_layers(player: Player) -> set[int]:
+    if player.world in {'rift', 'lost'} and player.realm_index >= 2:
+        return set(range(1, realm(player).layers))
     if bloodline_upper(player) or player.realm_index < 2 or (player.realm_index >= 9 and not ordinary_upper(player)):
         return set()
     if player.world == "human" and player.realm_index == 5:
@@ -188,6 +190,8 @@ def _manual_minor_layers(player: Player) -> set[int]:
 
 
 def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) -> str | None:
+    if player.world in {'rift', 'lost'}:
+        return 'minor' if player.layer < realm(player).layers else 'major' if player.realm_index < len(REALMS)-1 else None
     from ...system.asura import active as asura_active, vein_ready as asura_vein_ready
     if asura_active(player) and (player.asura_cultivation.get('conversion', 0) < 5 or not asura_vein_ready(player)):
         return None

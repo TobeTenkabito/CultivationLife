@@ -1,0 +1,7 @@
+.exploration-section{margin-top:1rem;padding-top:1rem;border-top:1px solid currentColor;overflow-wrap:anywhere}
+.exploration-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:.5rem;margin:.8rem 0}
+.exploration-grid select,.exploration-grid button{min-width:0;width:100%;max-width:100%}
+.exploration-row{padding:.6rem 0;border-bottom:1px solid var(--line)}
+.exploration-section button{margin:.25rem;max-width:100%;white-space:normal}
+#map-locations[hidden]{display:none}
+.spatial-unavailable{display:none!important}

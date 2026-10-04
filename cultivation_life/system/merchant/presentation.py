@@ -11,6 +11,8 @@ from .dependencies import MerchantViewDependencies
 
 
 def _public_merchant(deps: MerchantViewDependencies, game):
+    if WORLD_SYSTEMS['world_profiles'][game.player.world]['tier'] <= 0:
+        return {'available': False}
     deps._ensure_merchant(game)
     state = game.merchant_state
     member = state["membership"]

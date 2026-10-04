@@ -546,6 +546,9 @@ class Player:
     outer_king_advance_uses: int = 0
     outer_king_combat_uses: int = 0
     outer_king_fixed_combat_power: float = 0.0
+    talismans: list[dict[str, Any]] = field(default_factory=list)
+    talisman_methods: list[str] = field(default_factory=list)
+    talisman_sequence: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -885,6 +888,7 @@ class GameState:
     diplomacy_unit: int = 0
     wars: list[dict[str, Any]] = field(default_factory=list)
     upper_institutions: dict[str, Any] = field(default_factory=dict)
+    spatial_state: dict[str, Any] = field(default_factory=dict)
     heavenly_court: dict[str, Any] = field(default_factory=dict)
     natal_artifact: dict[str, Any] = field(default_factory=dict)
     last_combat_report: dict[str, Any] | None = None
@@ -975,6 +979,7 @@ class GameState:
             "diplomacy_unit": self.diplomacy_unit,
             "wars": self.wars,
             "upper_institutions": self.upper_institutions,
+            "spatial_state": self.spatial_state,
             "heavenly_court": self.heavenly_court,
             "natal_artifact": self.natal_artifact,
             "last_combat_report": self.last_combat_report,
@@ -1050,6 +1055,7 @@ class GameState:
             diplomacy_unit=int(value.get("diplomacy_unit", 0)),
             wars=list(value.get("wars", [])),
             upper_institutions=copy.deepcopy(value.get("upper_institutions", {})),
+            spatial_state=copy.deepcopy(value.get("spatial_state", {})),
             heavenly_court=dict(value.get("heavenly_court", {})),
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),

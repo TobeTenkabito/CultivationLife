@@ -101,20 +101,23 @@ def plan_world_transition(game, request, systems, maps):
         if (not seal or player.world != seal["suppressed_world"] or request.destination != seal["return_world"]
                 or request.route_id != "sealed_return" or seal.get("merchant_passage")):
             raise ValueError("你没有可在目标上界复原的封存道果")
+    elif mode in {TransitionMode.RIFT, TransitionMode.EXPULSION}:
+        if request.route_id != f'{mode.value}:{player.world}:{request.destination}':
+            raise ValueError('空间路线授权不匹配')
     else:
         route = next((row for row in systems["world_transition_routes"] if row["id"] == request.route_id), None)
         if (not route or not route["enabled"] or route["source"] != player.world
                 or route["destination"] != request.destination or route["mode"] != mode.value):
             raise ValueError("此玩法没有获准的跨界路线")
     recovery = bool(route and route.get("seal_recovery"))
-    if seal and mode not in {TransitionMode.SEALED_RETURN, TransitionMode.PASSAGE} and not recovery:
+    if seal and mode not in {TransitionMode.SEALED_RETURN, TransitionMode.PASSAGE, TransitionMode.RIFT, TransitionMode.EXPULSION} and not recovery:
         raise ValueError("请先返回原界解除现有封印，不能叠加跨界封印")
     if seal and mode == TransitionMode.PASSAGE and not seal.get("merchant_passage"):
         raise ValueError("普通下界封印须循原路返界解除")
     current = (player.realm_index, player.layer)
     actual = (int(seal["realm_index"]), int(seal["layer"])) if seal else current
     target, action = current, "none"
-    if mode == TransitionMode.SEALED_RETURN or recovery:
+    if mode == TransitionMode.SEALED_RETURN or recovery or (seal and mode in {TransitionMode.RIFT, TransitionMode.EXPULSION}):
         if not seal:
             raise ValueError("没有需要恢复的道果")
         target, action = actual, "restore"
@@ -126,7 +129,7 @@ def plan_world_transition(game, request, systems, maps):
             target, action = actual, "restore"
     location = request.arrival_location or maps.default_location(request.destination)
     site = maps.location(request.destination, location)
-    if target[0] < int(site.get("min_realm_index", 0)):
+    if mode != TransitionMode.RIFT and target[0] < int(site.get("min_realm_index", 0)):
         raise ValueError("跨界落点的境界要求高于你抵达后的修为")
     return WorldTransitionPlan(player.world, request.destination, direction, mode, request.route_id,
                                request.reason, location, current, target, action, copy.deepcopy(player.sealed_cultivation))
@@ -145,7 +148,7 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
         raise ValueError("跨界计划已失效，请重新规划")
     hp, mp = player.hp / max(1, max_hp(player)), player.mp / max(1, max_mp(player))
     ports.cancel_auction(game)
-    if plan.mode == TransitionMode.PROGRESSION:
+    if plan.mode in {TransitionMode.PROGRESSION, TransitionMode.EXPULSION}:
         keep_companion, keep_ids = False, set()
         if entourage:
             keep_companion, keep_ids = entourage.commit(game, plan.destination, move_npc=ports.move_npc)

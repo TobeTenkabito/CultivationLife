@@ -14,6 +14,8 @@ class TransitionMode(str, Enum):
     SEALED_RETURN = "sealed_return"
     PASSAGE = "passage"
     STORY = "story"
+    RIFT = "rift"
+    EXPULSION = "expulsion"
 
 
 def classify_transition(profiles, source, destination):
@@ -25,8 +27,9 @@ def classify_transition(profiles, source, destination):
 
 def validate_transition_content(profiles, routes, realms):
     for world, profile in profiles.items():
-        if (profile.get("kind") != "world" or type(profile.get("tier")) is not int
-                or profile["tier"] < 1 or type(profile.get("enabled")) is not bool):
+        if (profile.get("kind") not in {"world", "spatial"} or type(profile.get("tier")) is not int
+                or profile["tier"] < (-1 if profile.get('kind') == 'spatial' else 0)
+                or type(profile.get("enabled")) is not bool):
             raise ValueError(f"界面 {world} 的类型、等级或开关不合法")
         for field in ("cultivation_ceiling", "passage_ceiling"):
             ceiling = profile.get(field)

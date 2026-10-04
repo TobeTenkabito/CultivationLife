@@ -195,13 +195,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
             if(phase.equals("debug-console")) {
-                check(Boolean.TRUE.equals(js("!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Debug off and native capabilities");
-                python("from android_runtime import set_debug_mode\nset_debug_mode(True)");
+                check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);
-                waitForJs("typeof configData!=='undefined' && configData?.debug===true && !!document.querySelector('#debug-console-open')", "Debug console enabled");
+                waitForJs("typeof configData!=='undefined' && configData?.console_available===true && !!document.querySelector('#debug-console-open')", "Debug console enabled");
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'Debug Console Verification',preset_id:'core',seed:5701})});await loadGame(g.id);return g.id;})()");
                 python("from cultivation_life import server\nfrom pathlib import Path\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nserver._console_source_bytes=p.read_bytes()");
-                tapSelector("#debug-console-open"); waitForJs("!busy", "Help loaded");
+                js("AndroidGame.requestDebugMode();true"); waitForJs("!busy && document.querySelector('#debug-console').open", "Native console opening and help loaded");
                 for(String command:new String[]{"debug start","player set spirit_stones 1234567","player set breakthrough_chance 1","snapshot create baseline","player set realm_index 4","player set layer 7","snapshot restore baseline","tianji reveal all","game view /tianji_artifacts","capability list"}) {
                     js("document.querySelector('#debug-console-input').value="+JSONObject.quote(command)+";document.querySelector('#debug-console form').requestSubmit();true");
                     waitForJs("!busy && !document.querySelector('#debug-console-input').disabled", "Command completed: "+command);
@@ -242,9 +241,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("mutate(`/api/games/${game.id}/advance`,{action:'rest',years:1})");
                 python("from cultivation_life import server\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nassert p.read_bytes()==server._console_source_bytes");
                 python("from android_runtime import set_debug_mode\nset_debug_mode(False)");
-                check(((Number)async("fetch(`/api/games/${game.id}`,{headers:DebugConsole.headers(`/api/games/${game.id}`)}).then(r=>r.status)")).intValue()==404, "Disabled stale session rejects gameplay");
+                check(((Number)async("fetch(`/api/games/${game.id}`,{headers:DebugConsole.headers(`/api/games/${game.id}`)}).then(r=>r.status)")).intValue()==200, "Legacy config does not disconnect isolated session");
                 js("sessionStorage.removeItem('cultivation-debug-session');true");
-                result.putString("debug_scope","Isolated source and achievements, resource and probability commands, snapshots, six themes, native document callbacks, source fingerprint, native back and fail-closed session");
+                result.putString("debug_scope","Isolated source and achievements, resource and probability commands, snapshots, six themes, native document callbacks, source fingerprint, native back and config-independent isolated session");
             } else if(phase.equals("custody")) {
                 python(assetText("npc_custody_release.py"));
             } else if(phase.equals("asura")) {

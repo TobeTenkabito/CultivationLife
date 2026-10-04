@@ -23,7 +23,7 @@
     [['府库灵石', fmt(d.treasury)], ['可用功勋', fmt(d.merit)], ['民心', `${c.public_support}/100`], ['王庭政历', `${d.unit} 单位`]].forEach(([label, value]) => { const m = node('div'); m.append(node('small', label), node('strong', value)); metrics.append(m); });
     root.append(metrics);
     if (!d.local) root.append(note('前往万战魔城办理王庭事务；离界后保留爵位和进度。'));
-    if (!d.joined) root.append(button('登记效力', 'join'), note('加入王庭保留原有宗门身份，所有王庭玩法均属于本体。'));
+    if (!d.joined) root.append(button('登记效力', 'join'), note('加入王庭保留原有宗门身份；派系与贡赋须开启修罗界 DLC。'));
     if (c.challenge) {
       const alert = box(`${c.challenge.name}向你发起换位血战`, `最迟第 ${c.challenge.deadline} 单位回王庭回应；逾期按主动让位处理。双方负伤换位，保留性命。`);
       alert.classList.add('court-challenge'); alert.append(button('接受血战', 'answer_duel', c.challenge.npc_id), button('承认挑战并让位', 'yield_duel', c.challenge.npc_id)); root.append(alert);
@@ -55,12 +55,23 @@
     if (selected === 'policies') {
       body.append(note(c.king ? '你可亲颁王令，无需消耗功勋。新政持续生效，直至你主动更替。' : '封侯以上、恩宠八十可奏请政令，每次消耗一百功勋；NPC 修罗王每四单位议政。'));
       body.append(note(`同一时刻实行一道王令，施行费用 ${fmt(d.policy_cost)} 府库灵石，更替间隔四单位。`));
-      const cards = grid();
-      d.policies.forEach(p => {
+      (c.policy_categories || [{id:'political', name:'政治'}]).forEach(category => {
+      const section = box(category.name), cards = grid();
+      const policies = d.policies.filter(p => (c.policy_categories_by_id?.[p.id] || 'political') === category.id);
+      policies.forEach(p => {
         const active = p.id === d.policy, row = box(p.name, p.description);
         if (active) row.classList.add('is-active');
         row.append(button(active ? '现行王令' : c.king ? '颁行王令' : '奏请施行', 'policy', p.id, active || !d.joined || !!c.challenge || d.unit - d.last_proposal < 4 || d.treasury < d.policy_cost || (!c.king && (d.rank < 2 || d.regard < 80 || d.merit < 100)))); cards.append(row);
-      }); body.append(cards);
+      }); section.append(cards); if (!policies.length) section.append(note('暂无政令。')); body.append(section);
+      });
+      if (c.factions) {
+        body.append(note('派系共用百点影响力，单派上限七十。影响力达到四十八或忠诚低于二十持续四单位，会推举代表挑战王位。贡赋会降低派系忠诚。'));
+        c.factions.rows.forEach(f => {
+          const row = box(f.name, `影响力 ${f.external.toFixed(1)} · 忠诚 ${f.loyalty.toFixed(1)}`);
+          c.factions.decrees.forEach(p => row.append(button(`${p.name}（${c.policy_categories.find(x=>x.id===p.category).name}）`, 'faction_decree', `${p.id}:${f.id}`, !c.king || !!c.challenge || d.unit-c.factions.target_at<4 || d.treasury<100000)));
+          body.append(row);
+        });
+      }
     }
     if (selected === 'domestic') {
       if (!c.king) body.append(note('登上修罗王位后，可以任免廷臣、营建王庭并颁布内政决策。'));
@@ -84,6 +95,17 @@
       const works = grid(); c.works.forEach(w => { const row = box(`${w.name} · ${w.level}/3`, w.description); row.append(button(w.level === 3 ? '已满级' : `营建 · ${fmt(w.cost)}`, 'build', w.id, locked || !!c.project || w.level >= 3 || d.treasury < w.cost)); works.append(row); }); construction.append(works); body.append(construction);
       const decrees = box('内政决策', '决策共享四单位冷却。征税与安抚会改变民心，影响后续府库收入。'), decisions = grid();
       c.decrees.forEach(p => { const row = box(p.name, p.description); row.append(button('执行决策', 'decree', p.id, locked || d.unit - c.decree_at < 4 || d.treasury < p.cost || (p.id === 'levy' && c.public_support < 40))); decisions.append(row); }); decrees.append(decisions); body.append(decrees);
+      if (c.factions && c.king) {
+        const tribute = box('王权贡赋', '可征调本界资材，或要求修士贡献自身机缘、押献弱于自身的修士。同一项贡赋间隔四单位，每次使对应派系忠诚降低六点。');
+        [['material', '索取资材', c.factions.materials], ['opportunity', '索取机缘', c.tribute_candidates], ['prisoner', '索取俘虏', c.tribute_candidates]].forEach(([kind,label,rows]) => {
+          const select = node('select'); select.setAttribute('aria-label', label);
+          rows.forEach(row=>select.append(new Option(row.name,row.id)));
+          const demand = button(label,'royal_tribute','',locked || !rows.length);
+          demand.onclick=()=>act({action:'royal_tribute',target_id:`${kind}:${select.value}`});
+          tribute.append(select,demand);
+        });
+        body.append(tribute);
+      }
     }
     if (selected === 'merit') {
       const job = box('王庭委托', '驻地履约一个行动单位，基本报酬一百功勋；按接取时的政令、官员和武院效果确定奖励。消费功勋不会减少累计功绩。');

@@ -48,6 +48,18 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
     if not game.player.alive:
         raise ValueError("此生已经结束")
     item = ITEM_CATALOG.get(item_id)
+    if item is None and item_id.startswith('SPATIAL_'):
+        item = next((i for i in game.player.inventory if i.id==item_id and 'spatial_exclusive' in i.tags), None)
+        if item is not None:
+            if game.pending_event or game.active_trial:
+                raise ValueError('请先处理当前事件或劫战')
+            from ...rules import opportunity_required
+            remove_item(game.player,item_id)
+            game.player.opportunity += opportunity_required(game.player)*.1
+            game.history.append(HistoryRecord('SYS_SPATIAL_CONSUME',1,game.player.age,'炼化空间资材',item_id,'consumed',
+                f'炼化{item.name}，获得当前境界一成机缘。',{},['spatial','item']))
+            deps.store.save(game)
+            return deps.present(game)
     if not item or not has_item(game.player, item_id):
         raise ValueError("物品不存在")
     if game.player.cultivation_suppression and item.breakthrough_bonus > 0:

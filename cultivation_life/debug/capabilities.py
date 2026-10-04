@@ -88,6 +88,14 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('spatial action', 'spatial-action',
+        (S('action', choices=('open','enter','descend','explore','move','join','talk')), S('target_id', required=False)),
+        lambda e,g,p: e.spatial_action(g,p['action'],p)),
+    Capability('talisman action', 'talisman-action',
+        (S('action', choices=('learn','craft','toggle','discard')), S('method_id',required=False),
+         S('material1',required=False), S('material2',required=False), S('element',required=False),
+         S('npc_id',required=False), S('talisman_id',required=False)),
+        lambda e,g,p: e.talisman_action(g,p['action'],p)),
     Capability('action advance', 'advance', (S('action', required=False), I('years', 0, 10)),
         lambda e, g, p: e.advance(g, p.get('action', 'cultivate'), p.get('years', 1))),
     Capability('event choose', 'choice', (S('choice_id'),),

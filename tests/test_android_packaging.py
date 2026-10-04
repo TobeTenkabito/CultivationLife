@@ -64,10 +64,8 @@ assert android_runtime.debug_mode_enabled() is True
 command=urllib.request.Request(base+'/api/debug/command',data=b'{"command":"help"}',headers={**headers,'Content-Type':'application/json'})
 assert json.load(urllib.request.urlopen(command))['ok']
 android_runtime.set_debug_mode(False)
-try:
- urllib.request.urlopen(command)
- raise AssertionError('Debug API remained enabled')
-except urllib.error.HTTPError as e: assert e.code==404
+assert json.load(urllib.request.urlopen(command))['ok']
+assert config['console_available'] is True
 from cultivation_life.debug.runtime import Runtime
 from cultivation_life import server
 import hashlib

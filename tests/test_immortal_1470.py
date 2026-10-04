@@ -84,6 +84,9 @@ def test_aperture_combat_is_independent_and_reload_never_refills(prepared):
 def test_lower_domain_costs_intrinsic_and_does_not_consume_sealed_reserve(prepared):
     engine, game, d = prepared
     p = game.player
+    # Retain the historical sealed-visitor contract for already sealed saves.
+    p.sealed_cultivation = dict(realm_index=p.realm_index, layer=p.layer, upper_world='celestial', lower_world='spirit')
+    p.realm_index, p.layer = 8, 9
     p.world='spirit'; p.location_id=engine.maps.default_location('spirit')
     game.doctrine_state['player']['progress'][d['id']]['level']=4
     game.doctrine_state['player']['active']=d['id']
@@ -122,6 +125,8 @@ def test_spirit_manual_only_restricted_sources_and_level4(prepared):
 def test_all_maps_expanded_and_no_adjacent_array_nodes(prepared):
     engine,game,_=prepared
     for world, geography in engine.maps.worlds.items():
+        if world in {'rift','lost'}:
+            continue  # Instance maps are generated lazily and tested separately.
         assert len(geography['locations']) >= 21
         nodes={r['id'] for r in geography['locations'] if r.get('teleport_array')}
         assert len(nodes)>=4
@@ -165,7 +170,7 @@ def test_merchant_internal_array_needs_membership_but_not_map_fixture(prepared):
 
 def test_black_market_spirit_manual_purchase_and_merge(prepared):
     engine,game,_=prepared
-    game.player.world='spirit';game.player.location_id=engine.maps.default_location('spirit')
+    game.player.world='spirit';game.player.realm_index=8;game.player.layer=9;game.player.location_id=engine.maps.default_location('spirit')
     opening=next(str(i) for i in range(30) if offers(game,'black_market',str(i)))
     game.auction_state=dict(id=opening,status='black_market',world='spirit',location_id=game.player.location_id)
     engine.store.save(game)

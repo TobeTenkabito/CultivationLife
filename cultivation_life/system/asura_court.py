@@ -6,6 +6,7 @@ from ..content_registry import FACTION_NPC_TEMPLATES, ITEM_CATALOG, ROOT_DEFINIT
 from ..models import SectNpc
 from ..rules import combat_power, expected_combat_power, max_hp, max_mp
 from .npc_system import npc_combat_power
+from . import asura_factions
 
 COURT = 'asura_royal_court'
 KING = 5
@@ -58,6 +59,7 @@ def ensure(game):
         return False
     state = game.upper_institutions.setdefault('asura', fresh())
     if 'court' in state:
+        asura_factions.ensure(state)
         return False
     entity = game.sects.get(COURT)
     if entity:
@@ -70,6 +72,7 @@ def ensure(game):
                 initialize_native(npc, WORLD_SYSTEMS['transcendent_combat'], now=game.player.age)
                 entity.npcs.append(npc)
     state['court'] = initial(state)
+    asura_factions.ensure(state)
     sync_titles(game, state)
     return True
 
@@ -136,7 +139,11 @@ def reconcile(game, state):
 def change_rank(game, state, rank, *, opponent=None):
     """Exchange adjacent seats; rank zero is an unseated pool of retainers."""
     court, old = state['court'], state['rank']
-    holder = court['holders'].get(str(rank)) if rank else opponent
+    holder = opponent if opponent is not None else court['holders'].get(str(rank))
+    if opponent is not None and rank:
+        previous = next((key for key, value in court['holders'].items() if value == opponent), None)
+        if previous and previous not in {str(old), str(rank)}:
+            court['holders'][previous] = court['holders'].get(str(rank))
     if old:
         court['holders'][str(old)] = holder
     if rank:
@@ -220,8 +227,10 @@ def tick(game, state):
     challenge = court['challenge']
     if challenge and unit > challenge['deadline']:
         npc = people(game)[challenge['npc_id']]
+        asura_factions.settle_duel(state, challenge, False)
         change_rank(game, state, state['rank'] - 1, opponent=npc.id)
         record(game, state, f'血战战书逾期未应，依王庭律让位于{npc.name}。')
+    asura_factions.tick(game, state, people(game))
     if (not state['joined'] or state['rank'] <= 0 or not game.player.alive or court['challenge']
             or unit < court['protected_until'] or unit - court['last_challenge'] < 12
             or unit - court['reviewed_at'] < 4):
@@ -281,6 +290,7 @@ def act(engine, game, state, action, target):
             court['last_duel'] = state['unit']
             return f"上一级爵位空缺，你接任{cfg()['ranks'][rank]}。"
         if action == 'yield_duel':
+            asura_factions.settle_duel(state, challenge, False)
             change_rank(game, state, rank, opponent=identity)
             return f"你承认{npc.name}的挑战，让出爵位，降为{cfg()['ranks'][rank]}。"
         if game.player.hp < max_hp(game.player) * .25:
@@ -315,6 +325,7 @@ def act(engine, game, state, action, target):
         if result in ('stalemate', 'technique_blocked'):
             return '血战未分胜负，爵位与战书保留。' + summary
         won = result == 'victory'
+        asura_factions.settle_duel(state, challenge, won)
         court['challenge'] = None
         court['protected_until'] = state['unit'] + 8
         if won:
@@ -329,6 +340,10 @@ def act(engine, game, state, action, target):
         raise ValueError('只有在位修罗王可以办理此项内政')
     if court['challenge']:
         raise ValueError('须先回应换位战书，再行使王权')
+    if action in {'faction_decree', 'royal_tribute'}:
+        roster = {**game.world_npcs, **game.notable_npcs,
+                  **{n.id: n for sect in game.sects.values() for n in sect.npcs}}
+        return asura_factions.act(game, state, action, target, roster)
     if action == 'appoint':
         office, separator, identity = target.partition(':')
         if not separator or office not in OFFICES:
@@ -403,8 +418,14 @@ def public(game, state):
             challenge['name'] = npc.name
         else:
             challenge = None
-    return dict(**{k:v for k,v in court.items() if k != 'challenge'}, challenge=challenge,
+    return dict(**{k:v for k,v in court.items() if k not in {'challenge', 'factions'}}, challenge=challenge,
         king=is_king(view_state), seats=rows, effects=benefits(game, view_state),
+        factions=asura_factions.public(game, view_state),
+        policy_categories=[dict(id=k, name=v) for k,v in asura_factions.CATEGORIES.items()],
+        policy_categories_by_id=asura_factions.POLICY_CATEGORIES,
+        tribute_candidates=[dict(id=n.id, name=n.name) for n in
+            {**game.world_npcs, **game.notable_npcs, **{n.id:n for s in game.sects.values() for n in s.npcs}}.values()
+            if n.alive and n.roster_state == 'active' and n.world == 'asura'],
         candidates=[dict(id=n.id, name=n.name, title=n.title, loyalty=court['loyalty'].get(n.id, 50),
                         skills={key:talent(n,key) for key in OFFICES}) for n in roster.values() if present(n)],
         office_definitions=[dict(id=key, name=value[0], description=value[1]) for key,value in OFFICES.items()],

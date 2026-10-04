@@ -296,7 +296,7 @@ class DemonicSystemMixin:
         ascension_required = int(self._demonic_rules()["true_demon_ascension_demon_qi_level"])
         ascension_current = qi_level(player.qi_experience.get("demon", 0.0))
         ascension_available = bool(
-            player.path == "demonic" and player.alive and not player.sealed_cultivation and (
+            player.path == "demonic" and player.alive and not player.sealed_cultivation and not player.cultivation_suppression and (
                 (player.world == "human" and player.realm_index == 5 and player.layer >= 3)
                 or (player.world == "demon" and player.realm_index == 5 and player.layer >= 1)
             )

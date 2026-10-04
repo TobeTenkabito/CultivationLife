@@ -189,6 +189,8 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
 
 
 def _public_exchange(deps: ExchangeDependencies, game):
+    if game.player.world not in deps.EXCHANGE_VENUES:
+        return {'available': False, 'venue': '', 'location_id': None}
     state = game.exchange_state
     visible = state.get("status") in {"scheduled", "open"} and state.get("world") == game.player.world
     location = deps._exchange_location(game.player.world)

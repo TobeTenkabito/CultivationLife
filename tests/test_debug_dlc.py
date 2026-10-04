@@ -279,7 +279,7 @@ def test_monster_evolution_and_merchant_shortcut(isolated):
     assert member['alliance_id'] == alliance_id and member['site'] == 'hq' and member['rank'] == 2
 
 
-def test_dlc_tools_available_via_http_only_when_debug_enabled(environment, api_environment):
+def test_dlc_tools_available_without_config_in_isolated_sessions(environment, api_environment):
     request, config = api_environment
     from cultivation_life.debug.client import DebugClient
     from http.server import ThreadingHTTPServer
@@ -296,6 +296,6 @@ def test_dlc_tools_available_via_http_only_when_debug_enabled(environment, api_e
     state = client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=sid)['data']
     assert state and all(level == 5 for level in state.values())
     config.write_text('Debug=False')
-    assert request('/api/debug/command', {'command': 'tianji reveal all', **args})[0] == 404
+    assert request('/api/debug/command', {'command': 'tianji reveal all', **args})[0] == 200
     config.write_text('Debug=True')
     assert client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=sid)['data'] == state

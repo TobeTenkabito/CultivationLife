@@ -29,6 +29,8 @@ from ..dependencies import AdvancementDependencies
 def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int = 1) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
+    if player.world in {'rift', 'lost'}:
+        return deps._spatial_training(game, action, years)
     if not player.alive:
         raise ValueError("此生已经结束")
     if game.pending_event:

@@ -57,10 +57,6 @@ def local_request(command):
         handler.request_engine = ENGINE
         try:
             handler._validate_request()
-            debug_request = (urlparse(handler.path).path.startswith('/api/debug/')
-                             or bool(handler.headers.get('X-Cultivation-Debug')))
-            if debug_request and not load_runtime_config(APP_ROOT)['debug']:
-                raise NotFoundError('接口不存在')
             if handler.command == 'POST':
                 handler._request_payload = handler._body()
             # Guards, migration reads, save import/export and command execution
@@ -131,6 +127,7 @@ class Handler(BaseHTTPRequestHandler):
                 runtime = load_runtime_config(APP_ROOT)
                 self._json({
                     "debug": bool(runtime["debug"]),
+                    "console_available": True,
                     "runtime_mode": runtime["mode"],
                     "base_game": base_game_metadata(),
                     "spirit_roots": ROOT_NAMES,
@@ -237,6 +234,10 @@ class Handler(BaseHTTPRequestHandler):
             ENGINE.assert_buddhist_operation_allowed(game_id, operation)
             if operation == "advance":
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
+            elif operation == 'spatial-action':
+                result = ENGINE.spatial_action(game_id, str(payload.get('action', '')), payload)
+            elif operation == 'talisman-action':
+                result = ENGINE.talisman_action(game_id, str(payload.get('action', '')), payload)
             elif operation == "choice":
                 result = ENGINE.choose(game_id, payload.get("choice_id", ""))
             elif operation == "npc-contact":
@@ -274,8 +275,6 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "tianji-forge":
                 result = ENGINE.forge_tianji_artifact(game_id, payload)
             elif operation == "tianji-debug-reveal-all":
-                if not load_runtime_config(APP_ROOT)["debug"]:
-                    raise NotFoundError("接口不存在")
                 result = ENGINE.debug_reveal_all_tianji(game_id)
             elif operation == "use-item":
                 result = ENGINE.use_item(game_id, payload.get("item_id", ""))
@@ -308,8 +307,6 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "merchant-preview":
                 result = ENGINE.preview_merchant_commission(game_id, payload)
             elif operation == "merchant-debug-hq":
-                if not load_runtime_config(APP_ROOT)["debug"]:
-                    raise NotFoundError("接口不存在")
                 result = ENGINE.debug_merchant_hq(game_id, str(payload.get("alliance_id", "")))
             elif operation == "auction-private-buy":
                 result = ENGINE.buy_private_trade_item(

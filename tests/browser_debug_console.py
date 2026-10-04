@@ -22,7 +22,7 @@ def main():
         made = engine.create_game('Console Browser', 'heavenly', 'dao', seed=557, preset_id='core')
         saved = engine.store.load(made['id']); saved.pending_event = None; engine.store.save(saved)
         config = root / 'game_config.txt'
-        config.write_text('Debug=True')
+        config.write_text('Debug=False')
         class QuietHandler(server.Handler):
             def log_message(self, *_args):
                 pass
@@ -41,7 +41,7 @@ def main():
                     page.wait_for_function('configData !== null')
                     page.evaluate('async id => loadGame(id)', made['id'])
                     original = (engine.store.directory / f'{made["id"]}.json').read_bytes()
-                    page.locator('#debug-console-open').click()
+                    page.keyboard.press('Backquote')
                     page.wait_for_function('!busy')
                     def command(text):
                         page.locator('#debug-console-input').fill(text)
@@ -115,7 +115,7 @@ def main():
                     normal.evaluate('async id => loadGame(id)', made['id'])
                     assert normal.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone')?.quantity || 0") != 7654321
                     normal.close()
-                    # Disabling debug must not silently route stale session actions to production.
+                    # Changing legacy Debug configuration never changes session routing.
                     config.write_text('Debug=False')
                     current = (engine.store.directory / f'{made["id"]}.json').read_bytes()
                     page.evaluate('async () => mutate(`/api/games/${game.id}/advance`, {action:"rest",years:1})')
@@ -123,12 +123,14 @@ def main():
                     page.locator('#debug-console-open').click()
                     page.get_by_role('button', name='断开会话', exact=True).click()
                     page.wait_for_function('typeof configData !== "undefined" && configData !== null && !DebugConsole.active()')
-                    assert page.locator('#debug-console-open').count() == 0
+                    assert page.locator('#debug-console-open').is_hidden()
+                    page.keyboard.press('Backquote')
+                    assert page.locator('#debug-console-input').is_visible()
                     assert not errors, errors
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close(); thread.join(timeout=5)
-    print('Debug console: six themes, three viewports, items, action simulation, snapshots, completion, export, two-tab isolation and disabled-mode recovery passed.')
+    print('Debug console: six themes, three viewports, items, action simulation, snapshots, completion, export, two-tab isolation and config-independent keyboard access passed.')
 
 
 if __name__ == '__main__':

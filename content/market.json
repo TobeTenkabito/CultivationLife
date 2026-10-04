@@ -3944,6 +3944,160 @@
       "content_id": "TECH_REINCARNATION_12_SENSE",
       "tier": 12,
       "price": 34800000000
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "talisman_paper",
+      "tier": 1,
+      "price": 10
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "talisman_cinnabar",
+      "tier": 1,
+      "price": 10
     }
   ]
 }
