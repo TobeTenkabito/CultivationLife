@@ -202,7 +202,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'Debug Console Verification',preset_id:'core',seed:5701})});await loadGame(g.id);return g.id;})()");
                 python("from cultivation_life import server\nfrom pathlib import Path\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nserver._console_source_bytes=p.read_bytes()");
                 tapSelector("#debug-console-open"); waitForJs("!busy", "Help loaded");
-                for(String command:new String[]{"debug start","player set spirit_stones 1234567","player set breakthrough_chance 1","snapshot create baseline","player set realm_index 4","player set layer 7","snapshot restore baseline"}) {
+                for(String command:new String[]{"debug start","player set spirit_stones 1234567","player set breakthrough_chance 1","snapshot create baseline","player set realm_index 4","player set layer 7","snapshot restore baseline","tianji reveal all","game view /tianji_artifacts","capability list"}) {
                     js("document.querySelector('#debug-console-input').value="+JSONObject.quote(command)+";document.querySelector('#debug-console form').requestSubmit();true");
                     waitForJs("!busy && !document.querySelector('#debug-console-input').disabled", "Command completed: "+command);
                     check(Boolean.TRUE.equals(js("!document.querySelector('#debug-console-output pre:last-child')?.classList.contains('debug-error')")), "Command result: "+command);

@@ -8,7 +8,7 @@ def file_digest(path: Path) -> str:
 
 
 def inputs_digest(root: Path) -> str:
-    paths = [root / 'launcher.py', root / 'build/launcher.spec']
+    paths = [root / 'launcher.py', root / 'build/launcher.spec', root / 'scripts/debug_agent.py']
     for directory in ('cultivation_life', 'content', 'web', 'dlc', 'mods'):
         paths.extend(path for path in (root / directory).rglob('*') if path.is_file()
                      and '__pycache__' not in path.parts and path.suffix not in {'.pyc', '.pyo'})

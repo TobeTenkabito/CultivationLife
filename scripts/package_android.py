@@ -34,6 +34,8 @@ def main():
     for orientation in ('portrait', 'landscape'):
         result = log(f'android-asura-{orientation}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android Asura {orientation} checks must pass')
+        result = log(f'android-debug-console-{orientation}-{RELEASE_ID}.log')
+        require('status=passed' in result and 'status=failed' not in result, f'Android Debug console {orientation} checks must pass')
     require('Verifies' in log(f'android-signature-{RELEASE_ID}.log'), 'Android APK signature must verify')
     metadata = log(f'android-metadata-{RELEASE_ID}.log')
     require(f"versionCode='{VERSION_CODE}'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata, 'Android version metadata must match the release')
@@ -93,6 +95,7 @@ def main():
                        'Signed Android 12 APK: six themes, native clipboard, >10MB save, reversed segments, confirmation and lossless restore',
                        'Windows to signed Android 12 to Windows: all JSON fields preserved',
                        'Six themes, real action, native back; signature and metadata verified',
+                       'Signed APK debug console: six themes, portrait and landscape, isolated writes, DLC commands, native file callbacks and disabled-mode recovery verified',
                        'Android release lint: no issues found'],
     }
     report.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
@@ -103,6 +106,8 @@ def main():
                            (ROOT/'docs/immortal-vein-balance.md','仙脉费用校准.md'),
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
+        for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md'):
+            package.write(ROOT/'docs'/name, 'docs/'+name)
     with zipfile.ZipFile(archive) as package:
         require(package.testzip() is None, 'Release ZIP integrity check failed')
     print(json.dumps({'apk':str(target), 'bytes':target.stat().st_size, 'sha256':digest,

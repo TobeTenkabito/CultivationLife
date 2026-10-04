@@ -1,8 +1,8 @@
 {
-  "base_version": "1.57.0",
+  "base_version": "1.58.0",
   "platform": "Windows",
-  "exe_sha256": "58aae52c6cce70a678312dee2bc57f1250a62fd0695c9ddde76e33309ce68224",
-  "inputs_sha256": "8cd70ea2a902ba101d4ba2d1ba0566b3adf7664acb1d2e29be64ce549d4e1465",
+  "exe_sha256": "d2ecc92aa7b3355af5c825ffc254d8a9d4f82126b50e120b259c0e02c9398bf8",
+  "inputs_sha256": "c11aeccee6bb36f075673e33e095ddf212b24d6271790001196de7f4b5360d96",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -23,7 +23,7 @@
   ],
   "save_schema": 8,
   "validation": [
-    "2031 automated regression tests passed",
+    "2266 automated regression tests passed",
     "Asura court, Asura, handbook, quick-start and puppet UI success logs checked",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"

@@ -126,8 +126,22 @@ def verify(with_dlc):
             except urllib.error.HTTPError as error:
                 assert error.code == 404
             (folder / "game_config.txt").write_text("Debug=True\n", encoding="utf-8")
-            debug = post("merchant-debug-hq", {"alliance_id": local["id"]})
-            assert debug["merchant_system"]["membership"]["rank"] == 2
+            from cultivation_life.debug.client import DebugClient
+            client = DebugClient(base)
+            source_before = snapshot_file.read_bytes()
+            session = client.call('debug start', game_id=game['id'])['data']['session_id']
+            result = client.call('merchant debug hq', {'alliance_id': local['id']},
+                session_id=session, expected_revision=0, request_key='release-hq')
+            assert client.call('state get', {'pointer': '/merchant_state/membership/rank'}, session_id=session)['data'] == 2
+            tools = {row['name']: row for row in client.tools()}
+            assert len(tools) == 178 and 'cultivation_custom_lineage_prepare' in tools
+            if with_dlc:
+                client.call('tianji reveal all', session_id=session,
+                    expected_revision=result['revision'], request_key='release-tianji')
+                knowledge = client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=session)['data']
+                assert knowledge and all(value == 5 for value in knowledge.values())
+            assert snapshot_file.read_bytes() == source_before
+            (folder / 'game_config.txt').write_text('Debug=False\n', encoding='utf-8')
             with urllib.request.urlopen(base + "/merchant-commission-panel.js", timeout=5) as response:
                 assert b"MerchantCommissionForm" in response.read()
             with urllib.request.urlopen(base + "/merchant-panel.js", timeout=5) as response:

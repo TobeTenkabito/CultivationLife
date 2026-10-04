@@ -13,6 +13,9 @@ from scripts.release_evidence import require, validate_evidence
 from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 VERSION = runpy.run_path(str(ROOT/'cultivation_life/version.py'))['BASE_GAME_VERSION']
 RELEASE_ID = VERSION.replace('.', '')
+AGENT_FILES = ('scripts/debug_agent.py', 'cultivation_life/__init__.py', 'cultivation_life/version.py',
+               'cultivation_life/debug/__init__.py', 'cultivation_life/debug/agent.py',
+               'cultivation_life/debug/client.py')
 
 
 def main():
@@ -68,6 +71,8 @@ def main():
         package.write(manifest_path, manifest_path.name)
         for file in ('README.md', 'CHANGELOG.md'):
             package.write(ROOT/file, file)
+        for file in AGENT_FILES:
+            package.write(ROOT/file, file)
         for path in sorted((ROOT/'docs').glob('*.md')):
             package.write(path, path.relative_to(ROOT).as_posix())
         package.writestr('game_config.txt', 'Debug=False\n')
@@ -79,6 +84,8 @@ def main():
         require(package.testzip() is None, 'Archive integrity check failed')
         require(hashlib.sha256(package.read('launcher.exe')).hexdigest() == digest, 'Packaged EXE hash mismatch')
         require(package.read('game_config.txt') == b'Debug=False\n', 'Release must disable debug mode')
+        for file in AGENT_FILES:
+            require(package.read(file) == (ROOT/file).read_bytes(), f'Agent client differs from source: {file}')
         require(not any('data/saves' in name or 'ui_preferences.json' in name for name in package.namelist()),
                 'Player data must not be packaged')
         require('dlc/asura-manifestation/manifest.json' in package.namelist(), 'Missing Asura DLC')

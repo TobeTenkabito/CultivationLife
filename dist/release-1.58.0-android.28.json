@@ -1,7 +1,7 @@
 {
-  "base_version": "1.57.0",
-  "android_version": "1.57.0-android.27",
-  "version_code": 27,
+  "base_version": "1.58.0",
+  "android_version": "1.58.0-android.28",
+  "version_code": 28,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,10 +12,10 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.57.0-Android12.apk",
-  "apk_sha256": "3fce7ad5df9af7ff2b708f751b90dae682e846f58b45f2c51066d190e4b6d879",
-  "apk_bytes": 49853182,
-  "inputs_sha256": "b798d198140b953e2a08d40165065d465cf8243fd6566b094cc3f28938d30b7e",
+  "apk": "浮生问道-v1.58.0-Android12.apk",
+  "apk_sha256": "6efb990f1d165604b493459231468f2868808b8fd5f2173fddebb772a48936aa",
+  "apk_bytes": 49940838,
+  "inputs_sha256": "57c3c841dfe947e79a25bded54f96d83f2e6a2c13f42661ccf37dae140eac798",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -44,7 +44,7 @@
     "Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified",
     "Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified",
     "Institution classification, legacy affiliation, six-theme map and institutional contacts verified",
-    "2031 Python regressions passed",
+    "2266 Python regressions passed",
     "Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified",
     "Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; unchanged backlash and capped superego; multi-world calibration documented",
     "Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified",
@@ -57,6 +57,7 @@
     "Signed Android 12 APK: six themes, native clipboard, >10MB save, reversed segments, confirmation and lossless restore",
     "Windows to signed Android 12 to Windows: all JSON fields preserved",
     "Six themes, real action, native back; signature and metadata verified",
+    "Signed APK debug console: six themes, portrait and landscape, isolated writes, DLC commands, native file callbacks and disabled-mode recovery verified",
     "Android release lint: no issues found"
   ]
 }
