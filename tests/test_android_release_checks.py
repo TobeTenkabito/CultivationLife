@@ -29,7 +29,8 @@ def release_inputs(tmp_path):
             f'quick-start-ui-{rid}.log': 'Quick-start regression passed'}
     phases = ('experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
-              'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape')
+              'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
+              'debug-console-portrait', 'debug-console-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -57,6 +58,7 @@ def release_inputs(tmp_path):
     ('suite', 'Full regression suite must pass'),
     ('collection', 'Full regression suite must pass'),
     ('phase', 'android-experience-'),
+    ('debug-console', 'Android Debug console portrait checks must pass'),
     ('signature', 'Android APK signature must verify'),
     ('hash', 'APK hash must match'),
     ('asset', 'Packaged web/app.js differs from source'),
@@ -68,6 +70,7 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
         'suite': (f'release-{rid}-tests.log', '1 failed, 1574 passed in 268.76s'),
         'collection': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nERROR collecting tests'),
         'phase': (f'android-experience-{rid}.log', 'status=passed\nstatus=failed'),
+        'debug-console': (f'android-debug-console-portrait-{rid}.log', 'status=failed'),
         'signature': (f'android-signature-{rid}.log', 'DOES NOT VERIFY'),
         'hash': (f'android-installed-sha256-{rid}.log', 'wrong binary'),
     }

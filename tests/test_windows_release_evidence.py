@@ -1,5 +1,7 @@
 import json
 import zipfile
+import subprocess
+import sys
 
 import pytest
 
@@ -14,6 +16,10 @@ def release(tmp_path):
         (tmp_path / directory).mkdir(parents=True)
     for name in ('launcher.py', 'build/launcher.spec', 'web/app.js', 'README.md', 'CHANGELOG.md'):
         (tmp_path / name).write_text('release fixture', encoding='utf-8')
+    for name in package_windows.AGENT_FILES:
+        target = tmp_path / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((package_windows.ROOT / name).read_bytes())
     (tmp_path / 'dlc/asura-manifestation/manifest.json').write_text('{"version":"1.0.0"}')
     (tmp_path / 'dist/launcher.exe').write_bytes(b'verified executable fixture')
     version = package_windows.VERSION
@@ -78,6 +84,12 @@ def test_packaging_uses_the_verified_binary(release, monkeypatch):
         assert manifest['exe_sha256'] == receipt['exe_sha256']
         assert manifest['inputs_sha256'] == receipt['inputs_sha256']
         assert manifest['save_schema'] == SAVE_SCHEMA_VERSION
+        target = root / 'extracted'
+        bundle.extractall(target)
+    result = subprocess.run([sys.executable, str(target/'scripts/debug_agent.py'), '--help'],
+                            cwd=target, capture_output=True, timeout=20)
+    assert result.returncode == 0, result.stderr
+    assert not (target/'cultivation_life/engine').exists()
 
 
 def test_verifier_writes_receipt_only_after_both_cases_pass(release, monkeypatch):

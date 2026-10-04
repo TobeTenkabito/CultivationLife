@@ -2,19 +2,19 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v1.57.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v1.58.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
 
-当前开发源码使用存档结构 **8**，支持结构 **6 → 8**（依次经过 6→7→8） 的纯数据迁移；结构 1–5 不再加载或导入，需要新建角色。本轮发行标识为 v1.57.0。此前 v1.56.2 正式安装包使用结构 5，其角色进度不在本轮兼容范围内；更新程序不会自动将结构 5 转成可用的新存档。
+当前开发源码使用存档结构 **8**，支持结构 **6 → 8**（依次经过 6→7→8） 的纯数据迁移；结构 1–5 不再加载或导入，需要新建角色。结构 1–5 不受支持；更新程序不会自动将不受支持的旧角色转换成新存档。
 
 当前源码已完成显式依赖拆分、关键时间流程统一，以及普通关系按 NPC ID 关联权威人物。俘虏、侍妾与活傀已经区分生存、拘禁和名册状态；九个局部 Mixin 仍有明确保留边界。玩法包含六套主题、十一界、八个可选官方 DLC；修罗专属 UI 按境界开放，神通整组洗练可锁属性。
 
-完整资料入口：[文档索引](docs/README.md)、[项目诊断](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)、[Debug 开发规范与控制台](docs/debug-development.md)。旧版功能变更及当时发行范围保留在 [更新日志](CHANGELOG.md)。
+完整资料入口：[文档索引](docs/README.md)、[项目诊断](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)、[Debug 开发规范与控制台](docs/debug-development.md)。当前发行说明见 [更新日志](CHANGELOG.md)。
 
 ## 开始游戏
 
 ### Android 12
 
-当前安卓发行版本为 1.57.0-android.27，携带六套独立主题与八个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；最近发行的设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。本轮 Windows 与 Android 构建和验收均已完成，结果见更新日志。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓发行版本为 1.58.0-android.28，携带六套独立主题与八个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；最近发行的设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包及验收范围以 `dist/` 内当前发行清单为准。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 
@@ -73,11 +73,13 @@ python -m cultivation_life.server --port 8001
 Debug=False
 ```
 
-未提供配置时默认关闭。当前开发源码新增隔离控制台：改为 `Debug=True` 并刷新后，在角色中执行 `debug start` 创建独立调试副本，再修改玩家数据或进行测试。神机、商盟的旧调试操作也仅允许在副本中执行。使用方法与后续开发规范见 [Debug 文档](docs/debug-development.md)；已经发布的 1.57.0 安装包不包含这次未发布变更。DLC/MOD 的开关另行保存，需要**停止并重新启动游戏服务**才生效，仅刷新网页不会重新加载内容包。
+未提供配置时默认关闭。隔离控制台的开启方式：改为 `Debug=True` 并刷新后，在角色中执行 `debug start` 创建独立调试副本，再修改玩家数据或进行测试。神机、商盟的旧调试操作也仅允许在副本中执行。使用方法与后续开发规范见 [Debug 文档](docs/debug-development.md)。DLC/MOD 的开关另行保存，需要**停止并重新启动游戏服务**才生效，仅刷新网页不会重新加载内容包。
 
 开发自动化可复用项目自带的 CLI、Python 客户端和 stdio MCP 工具。启动服务后执行 `python scripts/debug_agent.py tools` 查看命令及参数 Schema；`python scripts/debug_agent.py mcp` 启动 Agent 桥。工具沿用独立副本、版本校验和请求去重，接入配置及完整示例见 [Agent 使用规范](docs/debug-development.md#9-agent-工具与结构化调用)。
 
 当前控制台共 178 个命令，覆盖本体与当前全部 DLC 的 135 个角色操作入口。`scenario create` 可直接新建隔离测试角色；`game view` 提供与界面同源的选项和 ID，市场、功法、生产、关系、组织、战争及跨界操作均沿用正式规则。完整映射见 [角色入口清单](docs/debug-base-coverage.md)，专属玩法、调试捷径和示例见 [DLC 指令清单](docs/debug-dlc-coverage.md)。
+
+Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／MCP 桥需要另备 Python 3.13；正常双击游戏启动器无需安装 Python。使用工具前须启动游戏服务并在配置中开启 Debug。
 
 ## DLC 与 MOD
 
@@ -194,4 +196,4 @@ python scripts/verify_release_exe.py
 
 Windows 和 Android 共用 Python、JSON 与网页源码；Android 另有移动端桥接和资源准备。六主题保留独立布局，新交互应验证桌面及窄屏，发布时按目标平台分别构建并验收。源码回归不等于发行二进制验收。
 
-当前规则写入对应专题，发行历史只追加至 CHANGELOG。文档文件名中的 1470、1512 等数字保留用于稳定链接，不再代表适用版本；历史采样表须注明采样版本和边界。发布前运行文档一致性检查，并同步本体版本、DLC 清单及存档结构说明。
+当前规则写入对应专题，CHANGELOG 只保留当前发行说明。文档文件名中的 1470、1512 等数字保留用于稳定链接，不再代表适用版本；历史采样表须注明采样版本和边界。发布前运行文档一致性检查，并同步本体版本、DLC 清单及存档结构说明。
