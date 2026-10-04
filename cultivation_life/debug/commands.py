@@ -12,6 +12,7 @@ from ..version import BASE_GAME_VERSION
 from .registry import Argument, Command, CommandError, Registry
 from .state import digest, differences, npc_rows, validate, read_pointer
 from .capabilities import CAPABILITIES, EXCLUDED_OPERATIONS, register as register_capabilities
+from .dlc import available
 
 
 # Exact authoritative field names. Values are (type, minimum, maximum).
@@ -304,9 +305,11 @@ def build_registry():
         'never creates a normal save. Seed does not fix runtime clock or UUIDs.',
         lambda ctx, *values: ctx.services.create_scene({a.name: v for a, v in zip(scene_args, values) if v is not None}),
         scene_args, False)
-    add('capability list', 'query', 'List covered ordinary operations and explicitly excluded specialized routes.',
+    add('capability list', 'query', 'List covered operations, DLC availability, debug shortcuts and excluded routes.',
         lambda ctx: {'covered': [{'command': c.name, 'operation': c.operation,
-                                  'type': 'preview' if c.preview else 'simulation'} for c in CAPABILITIES],
+                                  'type': 'preview' if c.preview else 'simulation',
+                                  'dlc': c.dlc or None, 'content_available': available(c.dlc),
+                                  'shortcut': c.shortcut} for c in CAPABILITIES],
                      'excluded': EXCLUDED_OPERATIONS}, requires_session=False)
     register_capabilities(registry)
     return registry

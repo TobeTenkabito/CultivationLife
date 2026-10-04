@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **1.57.0 开发源码**，存档结构 **8**。当前共有 **161 个命令/工具**，其中 **118 个现有角色操作入口**已具名接入。它们覆盖本体通用玩法，并包含部分可选扩展的操作。本文和 [开发规范](debug-development.md) 描述未发布源码功能；现有安装包不因此发生变化。
+维护基线：本体 **1.57.0 开发源码**，存档结构 **8**。当前共有 **178 个命令/工具**，其中 **135 个现有角色操作入口**已具名接入。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。本文和 [开发规范](debug-development.md) 描述未发布源码功能；现有安装包不因此发生变化。
 
 ## 如何理解覆盖范围
 
@@ -19,7 +19,7 @@
 | 上界通用玩法 | 仙界养成、天庭、瑶池、三界机构及本体 voisinage | `game view /doctrines`、`game view /aperture`、`game view /upper_voisinages`、`game view /upper_institution` |
 | 教程、展示、战斗设置 | 教程操作、消息设置、世界纪事开关、手动战斗预案 | `game view /tutorial`、`game view /settings`、`game view /combat_plan` |
 
-`game view` 会像游戏界面一样整理并提交副本状态，属于写入操作。用于查看原始保存数据的 `state get` 是纯查询。四类制作/委托预览标为 `preview`，只在一次性临时存储内计算，不修改会话文件。
+`game view` 会像游戏界面一样整理并提交副本状态，属于写入操作。用于查看原始保存数据的 `state get` 是纯查询。六类制作/委托/立祖预览标为 `preview`，只在一次性临时存储内计算，不修改会话文件。
 
 正文中的 `<参数>` 为必填，`[参数]` 为可选，均以运行时 `help` / JSON Schema 为准。文本模式按顺序提供参数；省略末尾可选参数，中间使用 `null` 占位。结构化调用可直接按字段名提供。参数名称保持正式 API/模型语义，完整 JSON 对象字段、数值范围和枚举由 `tools/list` 返回。
 
@@ -149,36 +149,31 @@
 | `intrigue recruitment <action> [filters] [candidate_ids] [player_vote]` | `intrigue-recruitment` | simulation |
 | `breakthrough attempt` | `breakthrough` | simulation |
 | `world news set [enabled]` | `debug-world-news` | simulation |
+| `buddhist action <action> [blessing] [authority] [technique]` | `buddhist-action` | simulation |
+| `guixu action <action> [dungeon_id] [target_layer_id] [actor_id] [pool_entry_id] [confirm_betrayal] [offer_stones]` | `guixu-action` | simulation |
+| `asura action <action> [target_id] [body_ids] [name]` | `asura` | simulation |
+| `tianji action <action> <artifact_id>` | `tianji-action` | simulation |
+| `tianji preview <target_artifact_id> <mold_id> <primary_id> <secondary_a_id> <secondary_b_id> <quench_id> [forge_kind]` | `tianji-preview` | preview |
+| `tianji forge <target_artifact_id> <mold_id> <primary_id> <secondary_a_id> <secondary_b_id> <quench_id> [forge_kind]` | `tianji-forge` | simulation |
+| `tianji reveal all` | `tianji-debug-reveal-all` | simulation |
+| `sage doctrine <action> [doctrine_id] [combo] [name]` | `sage-doctrine` | simulation |
+| `sage recruitment [enabled]` | `sage-recruitment` | simulation |
+| `sage worship <sage_id>` | `sage-worship` | simulation |
+| `sage debate <doctrine_id> <member_id>` | `sage-debate` | simulation |
+| `sage refine manual <item_id>` | `sage-refine-manual` | simulation |
+| `sage outer king <action>` | `sage-outer-king` | simulation |
+| `monster evolve <evolution_id>` | `monster-evolve` | simulation |
+| `custom lineage prepare <evolution_id>` | `custom-lineage-prepare` | preview |
+| `custom lineage confirm <evolution_id> <name> <rules>` | `custom-lineage-confirm` | simulation |
+| `merchant debug hq <alliance_id>` | `merchant-debug-hq` | simulation |
 
-## 本轮未开放的专属或旧调试入口
-
-| 入口 | 原因 |
-| --- | --- |
-| `buddhist-action` | 佛修 DLC 专属愿力与弘法操作 |
-| `guixu-action` | 归墟 DLC 副本操作 |
-| `asura` | 修罗 DLC 八部专属养成 |
-| `tianji-action` | 神机 DLC 专属制作和旧调试操作 |
-| `tianji-preview` | 神机 DLC 专属制作和旧调试操作 |
-| `tianji-forge` | 神机 DLC 专属制作和旧调试操作 |
-| `tianji-debug-reveal-all` | 神机 DLC 专属制作和旧调试操作 |
-| `sage-doctrine` | 圣道 DLC 专属学说操作 |
-| `sage-recruitment` | 圣道 DLC 专属学说操作 |
-| `sage-worship` | 圣道 DLC 专属学说操作 |
-| `sage-debate` | 圣道 DLC 专属学说操作 |
-| `sage-refine-manual` | 圣道 DLC 专属学说操作 |
-| `sage-outer-king` | 圣道 DLC 专属学说操作 |
-| `monster-evolve` | 族血 DLC 进化及自定义血脉规则 |
-| `custom-lineage-prepare` | 族血 DLC 进化及自定义血脉规则 |
-| `custom-lineage-confirm` | 族血 DLC 进化及自定义血脉规则 |
-| `merchant-debug-hq` | 旧商盟调试捷径；通用商盟实际流程已接入 |
-
-这些入口保留在游戏界面原有流程中。工具中的可选 DLC 操作仍要求对应内容已启用；控制台不会帮用户启用内容包，也不会凭空创建 DLC 配置。
+此前暂未开放的 17 个专属及旧调试入口现已接入，`EXCLUDED_OPERATIONS` 为空。两条调试捷径在帮助和能力清单中显式标记；完整参数语义、DLC 门禁、预览约定和示例见 [DLC 指令清单](debug-dlc-coverage.md)。
 
 ## 验证与实际边界
 
 自动检查对照全部角色操作分支，拒绝漏记的入口；逐项绑定实际引擎方法签名及参数类型。另有真实工作流、失败回滚、纯本体安装、HTTP/Agent 和浏览器检查。入口级覆盖不替代每个 DLC 与所有玩法分支的专项测试。
 
-本轮实际结果：
+本体覆盖阶段历史验证结果（2,220 项，不含后续 DLC 新增用例）；DLC 补齐阶段见 [新增验证记录](debug-dlc-coverage.md)：
 
 - 完整 Python 回归分八个独立批次执行：**2,220 通过，0 失败、0 跳过，218.43 秒**。证据为 `build/debug-base-tests.log`、`debug-base-part-*.xml`。
 - 最后调整三个操作的可选参数后，通用能力专项再次 **134 通过，27.77 秒**；此前 Debug/Agent/通用能力合并检查为 186 项，随后新增三个真实流程用例。证据为 `build/debug-base-capabilities-final.log`。这些计数包含重叠用例，不相加。

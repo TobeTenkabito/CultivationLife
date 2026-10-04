@@ -266,6 +266,21 @@ runtime.execute('setting set combat_popup false', session_id=sid)
 runtime.execute('action advance rest 1', session_id=sid)
 runtime.execute('game view /map', session_id=sid)
 runtime.execute("formation preview '[]'", session_id=sid)
+from cultivation_life.debug.dlc import available
+from cultivation_life.debug.registry import CommandError
+for cap in BY_OPERATION.values():
+    if not cap.dlc:
+        continue
+    assert not available(cap.dlc)
+    session = runtime.load(sid)
+    before = runtime._path(sid).read_bytes()
+    try:
+        (runtime.preview if cap.preview else runtime.simulate)(session, cap.operation, {})
+    except CommandError as error:
+        assert 'Required DLC is not enabled' in str(error)
+    else:
+        raise AssertionError(cap.operation)
+    assert runtime._path(sid).read_bytes() == before
 assert not list((root/'normal').glob('*.json'))
 print('base-only operations passed')
 '''
