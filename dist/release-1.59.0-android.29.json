@@ -1,0 +1,51 @@
+{
+  "base_version": "1.59.0",
+  "android_version": "1.59.0-android.29",
+  "version_code": 29,
+  "application_id": "com.fusheng.wendao",
+  "min_sdk": 31,
+  "target_sdk": 31,
+  "included_abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "tested_android": "Android 12 / API 31",
+  "tested_abi": "x86_64",
+  "physical_device_tested": false,
+  "apk": "浮生问道-v1.59.0-Android12.apk",
+  "apk_sha256": "425d0c29317ba0b7f4ee2986ff39ca3d8e7056bd2a843f4f06002c88b82579a6",
+  "apk_bytes": 49997402,
+  "inputs_sha256": "67fcebd0160de154a7f0f8b44df9b05f4f5756911ec09d6aa501f6c88c82e1a7",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.0",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "themes": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "save_schema": 8,
+  "save_import_export": true,
+  "offline": true,
+  "release_debuggable": false,
+  "validation": [
+    "2305 Python regressions passed",
+    "Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape",
+    "Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians",
+    "Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence",
+    "Live tutorial actions, native back and persisted progress",
+    "Save transfer: six themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip",
+    "Debug console portrait and landscape: isolated writes, snapshots, DLC commands, native document callbacks and configuration-independent opening",
+    "Signature, version metadata, installed APK hash, source provenance, archive integrity and release lint verified"
+  ]
+}

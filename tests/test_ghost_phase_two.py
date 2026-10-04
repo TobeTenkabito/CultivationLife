@@ -20,7 +20,6 @@ from cultivation_life.system.possession_system import (
     leave_host_body, migrate_possession_timeline, possession_limit,
 )
 from cultivation_life.rules import combat_power
-from cultivation_life.version import BASE_GAME_VERSION
 
 
 class GhostPhaseTwoTests(unittest.TestCase):
@@ -45,8 +44,7 @@ class GhostPhaseTwoTests(unittest.TestCase):
             "soul_trait": {"name": "宿慧", "description": "前尘未泯", "stat": "opportunity"},
         }
 
-    def test_release_versions_and_phase_two_config(self):
-        self.assertEqual(BASE_GAME_VERSION, "1.58.0")
+    def test_phase_two_dlc_version(self):
         manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
         self.assertIn('"version": "3.8.0"', manifest)
 

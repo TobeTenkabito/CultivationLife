@@ -42,7 +42,8 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
-            assert len(config["worlds"]) == 11
+            world_doc = json.loads((ROOT / 'content/world.json').read_text(encoding='utf-8'))
+            assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
             for asset in ('asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
@@ -134,7 +135,8 @@ def verify(with_dlc):
                 session_id=session, expected_revision=0, request_key='release-hq')
             assert client.call('state get', {'pointer': '/merchant_state/membership/rank'}, session_id=session)['data'] == 2
             tools = {row['name']: row for row in client.tools()}
-            assert len(tools) == 178 and 'cultivation_custom_lineage_prepare' in tools
+            assert len(tools) == 180 and 'cultivation_custom_lineage_prepare' in tools
+            assert 'cultivation_spatial_action' in tools and 'cultivation_talisman_action' in tools
             if with_dlc:
                 client.call('tianji reveal all', session_id=session,
                     expected_revision=result['revision'], request_key='release-tianji')
@@ -308,7 +310,7 @@ def verify(with_dlc):
             quiet=post_forge('settings',dict(setting='silent_events',enabled=True))
             assert quiet['settings']['silent_events']
             assert len(quiet['market']['puppet_material_offers'])==12
-            print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds=11")
+            print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}")
             return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
                     'base_version': config['base_game']['version']}
         finally:

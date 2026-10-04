@@ -123,20 +123,32 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     private void tapSelector(String selector) throws Exception {
         String quoted=JSONObject.quote(selector);
-        js("document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
+        // Observe before tutorial capture handlers intercept the intended click.
+        js("window.__releaseNativeTap=false;window.addEventListener('click',event=>{const target=document.querySelector("+quoted+");window.__releaseNativeTap=!!target&&target.contains(event.target);},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
         Thread.sleep(300);
-        JSONObject point=new JSONObject((String)js("JSON.stringify((()=>{const r=document.querySelector("+quoted+").getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,width:innerWidth}})())"));
+        // Center within the panel's usable content, below its sticky heading.
+        // Window centering can put controls underneath that heading in landscape.
+        js("(()=>{const target=document.querySelector("+quoted+"),panel=target.closest('.utility-panel.panel-open');if(!panel)return;const box=panel.getBoundingClientRect(),heading=panel.querySelector(':scope > .section-title')?.getBoundingClientRect(),r=target.getBoundingClientRect(),top=Math.max(box.top,heading?.bottom||box.top)+8,bottom=Math.min(box.bottom,innerHeight)-8;if(bottom>top+20)panel.scrollTop+=(r.top+r.bottom)/2-(top+bottom)/2;})();true");
+        Thread.sleep(150);
+        String locate="(()=>{const target=document.querySelector("+quoted+");if(!target)return {ready:false};const r=target.getBoundingClientRect();for(const [fx,fy] of [[.5,.5],[.25,.25],[.75,.25],[.25,.75],[.75,.75]]){const x=r.left+r.width*fx,y=r.top+r.height*fy,hit=document.elementFromPoint(x,y);if(!target.disabled&&hit&&target.contains(hit))return {ready:true,x,y,width:innerWidth};}return {ready:false,rect:r.toJSON(),panel:target.closest('.utility-panel')?.className,hit:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML};})()";
+        waitForJs("("+locate+").ready===true", "Native target not clickable: "+selector+": "+js("JSON.stringify("+locate+")"));
+        JSONObject point=new JSONObject((String)js("JSON.stringify("+locate+")"));
         int[] origin=new int[2];runOnMainSync(()->web.getLocationOnScreen(origin));
         float scale=web.getWidth()/(float)point.getDouble("width");
         float x=origin[0]+(float)point.getDouble("x")*scale,y=origin[1]+(float)point.getDouble("y")*scale;
         long now=android.os.SystemClock.uptimeMillis();
         for(int action:new int[]{android.view.MotionEvent.ACTION_DOWN,android.view.MotionEvent.ACTION_UP}) {
             android.view.MotionEvent event=android.view.MotionEvent.obtain(now,android.os.SystemClock.uptimeMillis(),action,x,y,0);
-            sendPointerSync(event);event.recycle();
+            try {
+                event.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);
+                check(getUiAutomation().injectInputEvent(event,false), "Native input injection failed: "+selector);
+            } finally { event.recycle(); }
         }
         // Android input injection returns before WebView dispatches the DOM click.
         // Let it arrive before a following tap scrolls a still-hidden panel.
-        waitForIdleSync();
+        // Animated WebViews may never become idle. Wait for the actual click
+        // with a deadline instead of blocking the instrumentation indefinitely.
+        waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector);
         Thread.sleep(250);
     }
 
@@ -194,7 +206,28 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("debug-console")) {
+            if(phase.equals("start-layout")) {
+                js("document.querySelector('#new-game-button').click();true");
+                waitForJs("!document.querySelector('#start-screen').classList.contains('hidden')", "Start screen visible");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();true");
+                    async("GameThemes.saved"); Thread.sleep(400);
+                    check(Boolean.TRUE.equals(js("document.documentElement.scrollWidth<=innerWidth+1 && document.querySelector('#start-screen [data-tutorial-open] svg')!==null")), "Start layout theme "+theme);
+                    tapSelector("#start-screen [data-tutorial-open]");
+                    waitForJs("document.querySelector('#tutorial-dialog').open", "Start tutorial opens");
+                    runOnMainSync(()->activity.onBackPressed());
+                    waitForJs("!document.querySelector('#tutorial-dialog').open", "Native back closes start tutorial");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.quick-start-button').length===configData.quick_starts.length && Array.from(document.querySelectorAll('.quick-start-group')).every(e=>e.tagName==='DETAILS')")), "Compact groups retain all presets");
+                    tapSelector(".quick-start-group:nth-child(3)>summary");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.quick-start-group')[2].open && document.querySelector('[data-preset-id=buddhist_void]').textContent.includes('佛修 DLC')")), "Expand group and Buddhist DLC badge");
+                    tapSelector(".quick-start-group:nth-child(3)>summary");
+                }
+                js("document.querySelector('[data-preset-id=buddhist_void]').closest('details').open=true;true");
+                tapSelector("[data-preset-id=buddhist_void]");
+                waitForJs("!busy && game?.player.path==='buddhist' && !document.querySelector('#game-screen').classList.contains('hidden')", "Native Buddhist quick start");
+                check(Boolean.TRUE.equals(js("document.querySelector('#action-card [data-tutorial-open] svg')!==null")), "Tutorial icon survives game rendering");
+                capture("start-layout");
+            } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);
                 waitForJs("typeof configData!=='undefined' && configData?.console_available===true && !!document.querySelector('#debug-console-open')", "Debug console enabled");
@@ -648,9 +681,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     async("mutate('/api/games/'+game.id+'/settings',{setting:'manual_combat_plan',enabled:true})");
-                    js("UtilityPanels.open('combat-plan');const n=document.querySelector('[aria-label=每轮追加仙力]');n.value='37';true");
+                    int investment=37+"abcdef".indexOf(theme);
+                    js("(()=>{UtilityPanels.open('combat-plan');const n=document.querySelector('[aria-label=每轮追加仙力]');n.value='"+investment+"';return true;})()");
                     check(Boolean.TRUE.equals(js("!document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && document.querySelector('#combat-plan-card').scrollWidth<=document.querySelector('#combat-plan-card').clientWidth+1")),"Manual plan layout");
-                    tapSelector("#combat-plan-content button[type=submit]");waitForJs("!busy && game.combat_plan.investment===37","Saved plan");capture("minor-plan-"+theme);
+                    tapSelector("#combat-plan-content button[type=submit]");waitForJs("!busy && game.combat_plan.investment==="+investment,"Saved plan");capture("minor-plan-"+theme);
                     js("UtilityPanels.open('map');true");
                     check(Boolean.TRUE.equals(js("!document.querySelector('[aria-label=传送目的地]')")),"Destination opened before method choice");
                     js("Array.from(document.querySelectorAll('.teleport-methods button')).find(b=>b.textContent.includes('暗杀')).click();true");
@@ -663,7 +697,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     async("loadGame("+JSONObject.quote(id)+")");
                     check(Boolean.TRUE.equals(js("document.querySelector('#hud-mp .hud-values strong').textContent.endsWith('%') && document.querySelector('#mp-meter').classList.contains('purple')")),"Returned immortal conversion");
                     async("mutate('/api/games/'+game.id+'/settings',{setting:'manual_combat_plan',enabled:false})");
-                    check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && game.combat_plan.investment===37")),"Automatic plan visibility/persistence");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && game.combat_plan.investment==="+investment)),"Automatic plan visibility/persistence");
                 }
                 result.putString("minor_scope","Six themes: stage reservoir, saved manual plan native tap, lower MP and return conversion, method-first assassination destination selector");
             } else if(phase.equals("npc-social")) {

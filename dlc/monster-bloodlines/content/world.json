@@ -3,6 +3,11 @@
   "systems": {
     "quick_start_presets": [
       {
+        "id": "nether_upper",
+        "variant_label": "妖修 DLC",
+        "description": "妖修上界开局：从幽冥界起步，接入第九阶修行、血脉与炼体体系。"
+      },
+      {
         "id": "monster_core",
         "name": "妖修·血丹初期",
         "description": "妖修 DLC 开局：生成本源血脉，配置妖丹烘炉法、搬山妖身与结丹期妖族资粮。",
