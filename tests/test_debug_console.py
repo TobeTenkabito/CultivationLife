@@ -74,7 +74,9 @@ def test_all_query_commands_are_pure(environment):
     queries = ['help', 'help player', 'version', 'debug status', 'debug sessions', 'player',
                'player get realm_index', 'player fields', 'realm list', 'npc list',
                f'npc inspect {npc_id}', 'rng state', 'save validate', 'snapshot list',
-               'snapshot diff before', 'extensions']
+               'snapshot diff before', 'extensions', 'save list', 'state get /player/realm_index',
+               'state summary', 'journal list', 'npc find "" 0', 'item list "" 0', 'inventory',
+               'action list', 'event inspect']
     assert {manager.registry.parse(q)[0].name for q in queries} == {
         command.name for command in manager.registry.commands.values() if command.kind == 'query'}
     before, mtime = path.read_bytes(), path.stat().st_mtime_ns

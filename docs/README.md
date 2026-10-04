@@ -12,7 +12,7 @@
 | [完整诊断](project-diagnosis.md) | 本轮检查、修复及仍保留的风险 |
 | [产品与系统规格](修仙人生模拟游戏_GDD_V1.0.md) | 已实现系统、世界、时间、数据归属 |
 | [引擎架构](../cultivation_life/engine/README.md) | 显式依赖、关系、时间与读档阶段 |
-| [Debug 开发规范与控制台](debug-development.md) | 开发范式、隔离会话、命令、快照与复现包 |
+| [Debug 开发规范与控制台](debug-development.md) | 开发范式、隔离会话、CLI/MCP Agent 工具、指令、快照与复现包 |
 | [系统边界](../cultivation_life/system/README.md) | 各算法目录、兼容入口与反向依赖约束 |
 | [Android](../android/README.md) | 构建、签名、设备和发布证明 |
 | [主题维护](../web/themes/README.md) | 六主题与共享控件 |
