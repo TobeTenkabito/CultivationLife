@@ -26,7 +26,7 @@ def local_materials(game):
         for identity, name, quality in [("talisman_paper", "一阶灵纹符纸", 1.), ("talisman_cinnabar", "一阶灵砂朱砂", 1.4)]:
             if has_item(game.player, identity):
                 definitions[identity] = dict(id=identity, name=name, quality=quality, tier=1,
-                                             world="human", base_value=round(24 * quality))
+                                             world="human", base_value=round(6 * quality))
     return definitions
 
 def skill(player):
@@ -54,9 +54,14 @@ def economic_value(row):
     if row["uses"] <= 0:
         return 0
     factor = QUALITIES.get(row.get("quality"), QUALITIES["normal"])[1]
-    material_value = row.get("material_value", 100 * max(1, row.get("tier", 1)))
+    tier = max(1, row.get("tier", 1))
+    material_value = row.get("material_value", 12 * 3.2 ** (tier - 1))
+    if row.get('pricing_version', 1) < 2 and 'material_value' in row:
+        material_value *= round(6 * 3.2 ** (tier - 1)) / round(24 * 4.3 ** (tier - 1))
+    # Labour remains valuable after the larger reduction in raw material cost.
+    labour = 24 * 4.0 ** (tier - 1)
     dimensions = sum(max(0., row[d]) for d in DIMENSIONS)
-    return max(1, round(material_value * factor * (1 + dimensions / 100)
+    return max(1, round((material_value + labour) * .85 * factor * (1 + dimensions / 100)
                         * row["uses"] / max(1, row.get("max_uses", row["uses"]))))
 
 
@@ -73,6 +78,7 @@ def product(method, materials, quality, element="metal"):
     material_quality = sum(m["quality"] for m in materials) / 2
     uses = max(1, round(method["uses"] * (.8 + factor * .2)))
     return dict(name=method["name"], method_id=method["id"], tier=method["tier"],
+                pricing_version=2,
                 origin_world=method["world"], quality=quality, element=element,
                 material_value=sum(m["base_value"] for m in materials),
                 enabled=False, uses=uses, max_uses=uses,
@@ -96,11 +102,14 @@ def market_offers(game, tier, market_name, location_id):
     retained = [copy.deepcopy(r) for r in game.market_offers
                 if r.get("kind") == "talisman_material" and r.get("locked") and not r.get("sold")
                 and r.get("world") == game.player.world and r.get("location_id") == location_id][:1]
+    for row in retained:
+        if row.get('pricing_version', 1) < 2 and row['content_id'] in definitions:
+            row.update(price=definitions[row['content_id']]['base_value'], pricing_version=2)
     return retained + [dict(id=f"{location_id}-{game.player.age}-{m['id']}", kind="talisman_material",
                  content_id=m["id"], name=m["name"], description=m["description"],
                  price=m["base_value"], tier=m["tier"], tier_name=f"{m['tier']}阶",
                  world=game.player.world, location_id=location_id, market_name=market_name,
-                 sold=False, locked=False, rare_next_tier=False)
+                 sold=False, locked=False, rare_next_tier=False, pricing_version=2)
             for m in definitions.values() if m["tier"] == available[-1]
             and m["id"] not in {r["content_id"] for r in retained}]
 
@@ -144,20 +153,9 @@ def craft(game, payload):
     costs = Counter(ids)
     helper_id = payload.get("npc_id", "")
     helper = find_person(game, helper_id) if helper_id else None
-    if game.player.world in {"rift", "lost"}:
-        from ..models import SectNpc
-
-        raw = next(
-            (
-                n
-                for n in game.spatial_state.get("instances", {})
-                .get(game.spatial_state.get("current"), {})
-                .get("npcs", [])
-                if n["id"] == helper_id
-            ),
-            None,
-        )
-        helper = SectNpc.from_dict(raw) if raw else None
+    from ..spatial_people import accessible
+    if helper and not accessible(game, helper):
+        helper = None
     needs_help = element not in player_affinities(p)
     if needs_help:
         if (
@@ -251,14 +249,8 @@ def public(game):
         **{n.id: n for sect in game.sects.values() for n in sect.npcs},
     }
     if p.world in {"rift", "lost"}:
-        from ..models import SectNpc
-
-        people = {
-            n["id"]: SectNpc.from_dict(n)
-            for n in game.spatial_state.get("instances", {})
-            .get(game.spatial_state.get("current"), {})
-            .get("npcs", [])
-        }
+        from ..spatial_people import people as local_people
+        people = {n.id: n for n in local_people(game)}
     return dict(
         skill=skill(p),
         rows=[dict(copy.deepcopy(r), tier=r.get("tier", 1), value=economic_value(r),

@@ -15,6 +15,8 @@ from . import talismans
 from .formation_system import active_formation_profile
 from .spatial_population import generation_profile, initial_rank
 from ..npc_names import person_name
+from ..spatial_people import people, bind as bind_people
+from .spatial_capabilities import PERSONAL_COMMANDS, LOCAL_SOCIETY_COMMANDS, panels
 
 SPECIAL_WORLDS = frozenset({"rift", "lost"})
 LOCAL_COMMANDS = frozenset(
@@ -100,7 +102,10 @@ def public_map(game):
 
 
 def guard(game, command):
-    if game.player.world in SPECIAL_WORLDS and command not in LOCAL_COMMANDS:
+    allowed = LOCAL_COMMANDS | PERSONAL_COMMANDS
+    if game.player.world == 'lost':
+        allowed |= LOCAL_SOCIETY_COMMANDS
+    if game.player.world in SPECIAL_WORLDS and command not in allowed:
         raise ValueError("独立空间与外界隔绝；请使用空间内的修炼、探索和人物入口")
 
 
@@ -158,7 +163,8 @@ def tick(game, rng, maps):
                 scene["next_open_age"] = p.age + cfg()["reopen_interval"]
         # Only the occupied instance ages, and all persons live in its own
         # authoritative table. They never enter an outside NPC spawn pool.
-        for npc in scene["npcs"]:
+        for person in people(game, scene):
+            npc = person.__dict__
             if not npc["alive"]:
                 continue
             npc["age"] += 1
@@ -278,6 +284,7 @@ def create_instance(game, rng, kind):
             world="lost",
             faction_id=sects[i % 3]["id"],
             affinity=0,
+            gender=generator.choice(['male', 'female']),
             next_tribulation_age=game.player.age + 3000,
             tribulation_count=0,
         )
@@ -308,6 +315,7 @@ def create_instance(game, rng, kind):
                               if kind == "lost" and resource_ceiling < 8 else "修炼资源可支持至大乘后期。" if kind == "lost" else "灵气充沛的独立秘境。"),
     )
     state["instances"][identity] = scene
+    bind_people(game, SectNpc)
     return scene
 
 
@@ -382,7 +390,8 @@ def local_action(game, action, target):
         scene["joined_sect"] = target
         return f"加入{sect['name']}，本界身份仅在此失落界面生效。"
     if action == "talk":
-        npc = next((r for r in scene["npcs"] if r["id"] == target and r["alive"]), None)
+        person = next((r for r in people(game, scene) if r.id == target and r.alive), None)
+        npc = person.__dict__ if person else None
         if not npc:
             raise ValueError("此人不在当前空间或已经陨落")
         npc["affinity"] = min(100, (npc.get("affinity") or 0) + 1)
@@ -417,8 +426,10 @@ def public(game):
     scene = copy.deepcopy(current(game))
     if scene:
         scene["locations"] = public_map(game)["locations"]
+        scene['npcs'] = [npc.to_dict() for npc in people(game)]
     return dict(
         inside=p.world in SPECIAL_WORLDS,
+        panels=panels(game),
         visible=visible(game),
         scene=copy.deepcopy(scene),
         rifts=[

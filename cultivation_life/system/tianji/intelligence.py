@@ -26,6 +26,8 @@ def _tianji_npc_conversation_clue(
     deps: TianjiIntelligenceDependencies, game: GameState, npc_id: str, rng: random.Random,
 ) -> str:
     """Occasionally turn an actual NPC conversation into persistent intel."""
+    if game.player.world in {'lost', 'rift'}:
+        return ''
     if not deps.tianji_content_available():
         return ""
     deps._ensure_tianji_state(game)

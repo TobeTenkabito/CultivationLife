@@ -756,7 +756,6 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             result['player']['location_name'] = next(r['name'] for r in scene['locations'] if r['id']==scene['location_id'])
             result['player']['qi_gain_efficiencies'] = spatial.current_qi(game)
             result['map'] = spatial.public_map(game)
-            result['world_npcs'] = []
             result['market'] = []
         return result
 
@@ -794,7 +793,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return ExplorationDependencies(self._load, self.store.save, self.present, self.maps,
             self._plan_world_transition, self._apply_world_transition, self._ensure_market,
             self._die, self._advance_world_year,
-            self._body_training_step, self._body_progress_required, self._sense_training_step, self._advance_soul_erosion_time)
+            self._body_training_step, self._body_progress_required, self._sense_training_step, self._advance_soul_erosion_time,
+            self._prepare_sage_action, self._finish_sage_action, self._advance_natal_artifact)
 
     def spatial_action(self, game_id, action, payload=None):
         from .actions.exploration import spatial_action

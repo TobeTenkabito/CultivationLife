@@ -1,5 +1,6 @@
 """Explicit buddhist assembly operations; callers own composition."""
 from __future__ import annotations
+from ..spatial_capabilities import scope_key, site_key
 
 import copy
 
@@ -12,7 +13,7 @@ from .rules import buddhist_active, buddhist_config, set_dharma_karma, site_stat
 
 def _continue_buddhist_assembly(deps: BuddhistAssemblyDependencies, game, rng):
     session = game.buddhist_state["assembly"]
-    if not session or (session["world"], session["location"]) != (game.player.world, game.player.location_id):
+    if not session or (session["world"], session["location"]) != (scope_key(game), site_key(game)):
         raise ValueError("请回到开坛地点继续法会")
     if session.get("pending"):
         # DLC disable/enable can remove a pending event; restore the exact saved instance.

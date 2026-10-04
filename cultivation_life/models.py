@@ -930,6 +930,8 @@ class GameState:
     def __post_init__(self):
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
+        from .spatial_people import bind as bind_spatial_people
+        bind_spatial_people(self, SectNpc)
         bind_custody(self, SectNpc)
         bind_relationships(self, SectNpc)
 

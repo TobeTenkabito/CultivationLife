@@ -24,6 +24,8 @@ def manage_concubine(
         raise ValueError("当前状态无法处理侍妾事务")
     rng = decode_rng(game.seed, game.rng_state)
     existing = next((row for row in player.concubines if str(row.get("id")) == target_id), None)
+    from ...spatial_people import require_access
+    require_access(game, existing or find_person(game, target_id))
 
     if action == "recruit":
         if existing:

@@ -26,6 +26,9 @@ class ExplorationDependencies:
     body_required: Callable
     sense_step: Callable
     _advance_soul_erosion_time: Callable
+    prepare_sage: Callable
+    finish_sage: Callable
+    advance_natal: Callable
 
 
 def move_world(
@@ -242,7 +245,10 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
 
 def train(deps: ExplorationDependencies, game, action, units):
     require_free(game)
-    if action not in {"cultivate", "rest", "body_train", "sense_train"}:
+    local_actions = {"cultivate", "rest", "body_train", "sense_train"}
+    if game.player.world == 'lost':
+        local_actions |= {'sage_preach', 'sage_teach', 'sage_answer'}
+    if action not in local_actions:
         raise ValueError("独立空间仅可修炼、炼体、锻炼神识、调息或使用空间内入口")
     p = game.player
     if action == "cultivate" and spatial.cultivation_block_reason(game):
@@ -271,9 +277,9 @@ def train(deps: ExplorationDependencies, game, action, units):
     ):
         raise ValueError("灵根与主修功法不合")
     rng = decode_rng(game.seed, game.rng_state)
-    years = max(1, min(10, int(units))) * int(
-        WORLD_SYSTEMS["time_units"][str(p.realm_index)]
-    )
+    deps.prepare_sage(game, action)
+    time_unit = int(WORLD_SYSTEMS["time_units"][str(p.realm_index)])
+    years = max(1, min(10, int(units))) * time_unit
     origin = p.world
     elapsed = 0
     for _ in range(years):
@@ -306,7 +312,7 @@ def train(deps: ExplorationDependencies, game, action, units):
             p.awaiting_body_breakthrough = p.body_progress >= deps.body_required(p)
         elif action == "sense_train":
             p.divine_sense_experience += deps.sense_step(p)
-        else:
+        elif action == 'rest':
             p.hp = min(max_hp(p), p.hp + max_hp(p) * 0.05)
             p.mp = min(max_mp(p), p.mp + max_mp(p) * 0.05)
         if (
@@ -317,4 +323,8 @@ def train(deps: ExplorationDependencies, game, action, units):
         ):
             break
     spatial.journal(game, f"独立空间内{ACTIONS[action]['name']}，经过 {elapsed} 年。")
+    deps.finish_sage(game)
+    if elapsed and p.alive:
+        from ...time_flow import completed_action_units
+        deps.advance_natal(game, action, completed_action_units(elapsed, time_unit))
     return commit(deps, game, rng)

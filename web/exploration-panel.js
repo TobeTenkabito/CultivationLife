@@ -49,7 +49,7 @@
     }
     const s=game.spatial; if(!s)return;
     document.querySelectorAll('[data-panel-target]').forEach(dock=>{
-      const local=['map','inventory','talisman','settings','secret-art','formation','combat-plan','bloodline'];
+      const local=s.panels || [];
       dock.classList.toggle('spatial-unavailable',s.inside && !local.includes(dock.dataset.panelTarget));
       if(s.inside && !local.includes(dock.dataset.panelTarget)) window.UtilityPanels?.close(dock.dataset.panelTarget);
     });

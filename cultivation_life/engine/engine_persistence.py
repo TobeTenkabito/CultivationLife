@@ -16,8 +16,14 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
     if game.player.world in SPECIAL_WORLDS:
         if current(game) is None:
             raise ValueError('独立空间存档缺少当前实例')
-        # Ordinary preparation can dispatch outside markets, contact updates and
-        # events. A fully persisted spatial session has its own annual boundary.
+        # Prepare personal state while keeping external calendars and markets out.
+        character.prepare_character(deps.character, game)
+        deps.world._sync_relationship_records(game)
+        deps.world._ensure_sage_state(game)
+        deps.world._refresh_sage_effects(game)
+        deps.services._ensure_buddhist_state(game)
+        deps.services._ensure_natal_artifact(game)
+        vitality.prepare_vitality(deps.vitality, game)
         return game
     changed = foundations.prepare_foundations(deps.foundations, game)
     changed = vitality.prepare_vitality(deps.vitality, game) or changed

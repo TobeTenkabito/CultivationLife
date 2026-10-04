@@ -1,5 +1,6 @@
 """Shared state rules without action or engine dependencies."""
 from __future__ import annotations
+from ..spatial_capabilities import scope_key
 
 import math
 
@@ -27,13 +28,13 @@ def followers(state, world):
 def selected_blessings(game):
     if not buddhist_active(game) or game.buddhist_state.get("dharma_karma", 0) <= 0:
         return []
-    return game.buddhist_state.get("worlds", {}).get(game.player.world, {}).get("blessings", [])
+    return game.buddhist_state.get("worlds", {}).get(scope_key(game), {}).get("blessings", [])
 
 
 def upkeep(game, blessing):
     config = buddhist_config()
     base = float(config["blessings"][blessing]["upkeep"])
-    reduction = 1 / (1 + math.log1p(followers(game.buddhist_state, game.player.world)) / config["upkeep_follower_scale"])
+    reduction = 1 / (1 + math.log1p(followers(game.buddhist_state, scope_key(game))) / config["upkeep_follower_scale"])
     return base * max(config["upkeep_floor"], reduction)
 
 

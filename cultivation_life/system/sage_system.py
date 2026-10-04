@@ -10,11 +10,16 @@ from ..content_registry import CONTENT_DOCUMENTS, TECHNIQUE_CATALOG
 from ..models import GameState, HistoryRecord
 from ..rules import REALMS, add_item, expected_combat_power, remove_item, stage_name
 from ..runtime import decode_rng, encode_rng, now_iso
+from .spatial_capabilities import scope_key
 
 
 def sage_config() -> dict[str, Any]:
     document = CONTENT_DOCUMENTS.get("sage_way.json", {})
     return document.get("settings", {}) if isinstance(document, dict) else {}
+
+
+def teaching_world(game):
+    return game.player.world in sage_config().get("worlds", []) or game.player.world == 'lost'
 
 
 def sage_content_available() -> bool:
@@ -161,6 +166,8 @@ class SageSystemMixin:
             game.player.sage_effects = {}
             return False
         cfg = sage_config()
+        if game.player.world == 'lost':
+            game.sage_state.setdefault('worlds', {}).setdefault(scope_key(game), {'doctrines': [], 'ai_found_cooldown_until': 0})
         version = int(game.sage_state.get("version", 0) or 0)
         if version in {1, 2}:
             for world_state in game.sage_state.get("worlds", {}).values():
@@ -171,7 +178,7 @@ class SageSystemMixin:
             if version == 1:
                 self._refresh_sage_effects(game)
             return False
-        worlds: dict[str, Any] = {}
+        worlds: dict[str, Any] = {scope_key(game): {"doctrines": [], "ai_found_cooldown_until": 0}} if game.player.world == "lost" else {}
         for world in cfg.get("worlds", ["human", "spirit"]):
             presets = copy.deepcopy(cfg.get("initial_doctrines", {}).get(world, []))
             for row in presets:
@@ -189,10 +196,10 @@ class SageSystemMixin:
 
     def _sage_world(self, game: GameState, world: str | None = None) -> dict[str, Any] | None:
         self._ensure_sage_state(game)
-        return game.sage_state.get("worlds", {}).get(world or game.player.world)
+        return game.sage_state.get("worlds", {}).get(world or scope_key(game))
 
     def _player_doctrine(self, game: GameState, world: str | None = None) -> dict[str, Any] | None:
-        target_world = world or game.player.world
+        target_world = world or scope_key(game)
         state = self._sage_world(game, target_world)
         doctrine_id = game.sage_state.get("memberships", {}).get(target_world)
         return next((row for row in (state or {}).get("doctrines", []) if row.get("id") == doctrine_id), None)
@@ -212,8 +219,8 @@ class SageSystemMixin:
             return
         effects = haoran_passive_effects(player.haoran_exp)
         doctrine = (
-            self._player_doctrine(game, player.world)
-            if game.sage_state.get("version") == 2 and player.world in sage_config().get("worlds", [])
+            self._player_doctrine(game, scope_key(game))
+            if game.sage_state.get("version") == 2 and teaching_world(game)
             else None
         )
         if doctrine:
@@ -236,7 +243,7 @@ class SageSystemMixin:
     def _prepare_sage_action(self, game: GameState, action: str) -> None:
         if action not in {"sage_preach", "sage_teach", "sage_answer"}:
             return
-        if not sage_content_available() or game.player.path != "confucian" or game.player.world not in sage_config().get("worlds", []):
+        if not sage_content_available() or game.player.path != "confucian" or not teaching_world(game):
             raise ValueError("只有人界或灵界的儒修可以进行圣人教化")
         if not self._player_doctrine(game):
             raise ValueError("请先加入或创立一个学说")
@@ -256,10 +263,12 @@ class SageSystemMixin:
         cfg = sage_config()
         news: list[str] = []
         for world, world_state in game.sage_state["worlds"].items():
+            if (game.player.world in {'lost', 'rift'} and world != scope_key(game)) or (world in game.spatial_state.get('instances', {}) and world != scope_key(game)):
+                continue
             doctrines = world_state.get("doctrines", [])
             for doctrine in doctrines:
                 for member in doctrine.get("members", []):
-                    if member.get("is_player") and world != game.player.world:
+                    if member.get("is_player") and world != scope_key(game):
                         member["frozen"] = True
                         continue
                     member.pop("frozen", None)
@@ -415,7 +424,7 @@ class SageSystemMixin:
         game = self._load(game_id)
         self._ensure_sage_state(game)
         player = game.player
-        if not sage_content_available() or player.path != "confucian" or player.world not in sage_config().get("worlds", []):
+        if not sage_content_available() or player.path != "confucian" or not teaching_world(game):
             raise ValueError("当前无法参与圣人教化")
         state = self._sage_world(game)
         cfg = sage_config()
@@ -426,14 +435,14 @@ class SageSystemMixin:
             doctrine = next((row for row in state["doctrines"] if row["id"] == payload.get("doctrine_id")), None)
             if not doctrine:
                 raise ValueError("学说不存在")
-            if player.age < int(game.sage_state.get("quit_cooldown_until", {}).get(player.world, 0)):
+            if player.age < int(game.sage_state.get("quit_cooldown_until", {}).get(scope_key(game), 0)):
                 raise ValueError("退出学说后的十年冷静期尚未结束")
             doctrine.setdefault("members", []).append({
                 "id": "player", "name": player.name, "inner": 5.0,
                 "realm_index": player.realm_index, "layer": player.layer,
                 "path": "confucian", "combat_factor": 1.0, "is_player": True,
             })
-            game.sage_state["memberships"][player.world] = doctrine["id"]
+            game.sage_state["memberships"][scope_key(game)] = doctrine["id"]
             summary = f"你加入了{doctrine['name']}。"
         elif action == "leave":
             if not current:
@@ -441,15 +450,15 @@ class SageSystemMixin:
             current["members"] = [row for row in current.get("members", []) if not row.get("is_player")]
             if current.get("controller_id") == "player" and current["members"]:
                 current["controller_id"] = self._rank_members(current)[0]["id"]
-            game.sage_state["memberships"].pop(player.world, None)
-            game.sage_state["quit_cooldown_until"][player.world] = player.age + int(cfg.get("quit_cooldown_years", 10))
+            game.sage_state["memberships"].pop(scope_key(game), None)
+            game.sage_state["quit_cooldown_until"][scope_key(game)] = player.age + int(cfg.get("quit_cooldown_years", 10))
             summary = f"你退出了{current['name']}，门内威望归零。"
         elif action == "found":
             if current:
                 raise ValueError("请先退出当前学说")
             if player.realm_index < 3:
                 raise ValueError("至少达到结丹期方可开宗立说")
-            if player.age < int(game.sage_state.get("quit_cooldown_until", {}).get(player.world, 0)):
+            if player.age < int(game.sage_state.get("quit_cooldown_until", {}).get(scope_key(game), 0)):
                 raise ValueError("退出学说后的十年冷静期尚未结束")
             combo = payload.get("combo", {})
             choices = cfg.get("combination_choices", {})
@@ -481,7 +490,7 @@ class SageSystemMixin:
                 state["doctrines"], doctrine["id"],
                 float(cfg.get("founding_influence", 5.0)) - float(cfg.get("influence_floor", 0.1)), cfg,
             )
-            game.sage_state["memberships"][player.world] = doctrine["id"]
+            game.sage_state["memberships"][scope_key(game)] = doctrine["id"]
             game.history.append(HistoryRecord(
                 "SYS_SAGE_DOCTRINE_FOUNDED", 1, player.age, "开宗立说", None, "founded",
                 f"你在人间立下{name}，四层宗旨自成一家。", {"doctrine_id": doctrine["id"]}, ["sage", "milestone"],
@@ -550,7 +559,7 @@ class SageSystemMixin:
         player = game.player
         if (
             not sage_content_available() or player.path != "confucian"
-            or player.world not in sage_config().get("worlds", [])
+            or not teaching_world(game)
         ):
             raise ValueError("只有当前界面的儒修可以论道")
         own_doctrine = self._player_doctrine(game)
@@ -572,7 +581,7 @@ class SageSystemMixin:
         cfg = sage_config()
         debate_cfg = cfg.get("debate", {})
         cooldowns = game.sage_state.setdefault("debate_cooldowns", {})
-        cooldown_key = f"{player.world}:{doctrine_id}:{member_id}"
+        cooldown_key = f"{scope_key(game)}:{doctrine_id}:{member_id}"
         next_age = int(cooldowns.get(cooldown_key, 0))
         if player.age < next_age:
             raise ValueError(f"与此人的论道需到 {next_age} 岁后方可再次进行")
@@ -689,6 +698,9 @@ class SageSystemMixin:
 
     def _outer_advance_block_reason(self, game: GameState) -> str:
         player = game.player
+        from .spatial import cultivation_block_reason
+        if cultivation_block_reason(game):
+            return cultivation_block_reason(game)
         target = self._outer_target(player)
         if target is None:
             return "大乘圆满后的飞升必须另渡九重天劫"
@@ -897,7 +909,7 @@ class SageSystemMixin:
         if enabled:
             self._ensure_sage_state(game)
         available = enabled and game.player.path == "confucian"
-        teaching_available = available and game.player.world in sage_config().get("worlds", [])
+        teaching_available = available and teaching_world(game)
         state = self._sage_world(game) if teaching_available else None
         current = self._player_doctrine(game) if teaching_available else None
         cfg = sage_config()
@@ -930,7 +942,7 @@ class SageSystemMixin:
             for rank, member in enumerate(ranks, 1):
                 realm_index = max(0, min(len(REALMS) - 1, int(member.get("realm_index", 0))))
                 layer = max(1, min(REALMS[realm_index].layers, int(member.get("layer", 1))))
-                cooldown_key = f"{game.player.world}:{row.get('id')}:{member.get('id')}"
+                cooldown_key = f"{scope_key(game)}:{row.get('id')}:{member.get('id')}"
                 public_members.append({
                     **copy.deepcopy(member), "rank": rank,
                     "realm_name": f"{REALMS[realm_index].name}{'' if REALMS[realm_index].layers == 1 else f'·{layer}层'}",

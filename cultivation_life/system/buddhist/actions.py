@@ -1,5 +1,6 @@
 """Explicit buddhist actions operations; callers own composition."""
 from __future__ import annotations
+from ..spatial_capabilities import scope_key, site_key, local_names
 
 from ...content_registry import WORLD_SYSTEMS
 from ...rules import remove_item
@@ -18,11 +19,11 @@ def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload
     if game.pending_event:
         raise ValueError("请先处理当前事件")
     rng = decode_rng(game.seed, game.rng_state)
-    site = site_state(state, player.world, player.location_id)
+    site = site_state(state, scope_key(game), site_key(game))
     if action == "nirvana":
         nirvana(deps.nirvana, game, rng)
     elif action == "blessing":
-        chosen = state["worlds"][player.world]["blessings"]
+        chosen = state["worlds"][scope_key(game)]["blessings"]
         identity = str(payload.get("blessing", ""))
         if identity not in config["blessings"]:
             raise ValueError("未知加持")
@@ -41,7 +42,7 @@ def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload
             raise ValueError(f"需要 {cost} 灵石")
         site["temple"] += 1
         site["followers"] = max(site["followers"], config["temples"][site["temple"]]["floor"])
-        deps._buddhist_record(game, f"在{deps.maps.location(player.world, player.location_id)['name']}修建了{site['temple']}级寺庙。")
+        deps._buddhist_record(game, f"在{local_names(game, deps.maps, scope_key(game), site_key(game))[1]}修建了{site['temple']}级寺庙。")
     elif action == "permission":
         row = next((row for row in deps._buddhist_permissions(game) if row["id"] == payload.get("authority")), None)
         if not row or row["permitted"]:
@@ -57,7 +58,7 @@ def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload
         if not art:
             raise ValueError("请选择已学功法")
         view = deps._public_buddhist(game)
-        state["assembly"] = {"world": player.world, "location": player.location_id,
+        state["assembly"] = {"world": scope_key(game), "location": site_key(game),
             "technique": art.id, "technique_name": art.name, "level": art.level,
             "started_age": player.age, "stage": 0, "stage_years": 0,
             "unit_years": int(WORLD_SYSTEMS["time_units"][str(player.realm_index)]),

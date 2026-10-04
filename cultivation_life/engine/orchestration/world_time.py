@@ -15,6 +15,13 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     """Isolated year: same personal breakthrough, thunder and lifespan order."""
     p = game.player
     emit(game, 'time.elapsed', years=1, unit_years=WORLD_SYSTEMS['time_units'][str(p.realm_index)])
+    deps._advance_buddhist_year(game)
+    deps._advance_sage_year(game, rng)
+    deps._advance_monster_bloodline_year(game)
+    deps._annual_demonic_update(game, rng)
+    deps._annual_spirit_field_update(p)
+    if not p.alive or game.pending_event:
+        return False
     deps._resolve_breakthroughs(game, rng)
     if not p.alive or game.pending_event:
         return False
