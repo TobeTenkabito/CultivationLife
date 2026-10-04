@@ -227,6 +227,46 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("!busy && game?.player.path==='buddhist' && !document.querySelector('#game-screen').classList.contains('hidden')", "Native Buddhist quick start");
                 check(Boolean.TRUE.equals(js("document.querySelector('#action-card [data-tutorial-open] svg')!==null")), "Tutorial icon survives game rendering");
                 capture("start-layout");
+                js("document.querySelector('#new-game-button').click();document.querySelector('[data-preset-id=lost_world]').closest('details').open=true;true");
+                check(Boolean.TRUE.equals(js("document.querySelector('[data-preset-id=lost_world]').disabled")), "Lost start requires path");
+                js("(()=>{const p=document.querySelector('[data-quick-path]');p.value='monster';p.dispatchEvent(new Event('change'));})()");
+                check(Boolean.TRUE.equals(js("document.querySelector('[data-preset-id=lost_world]').disabled && !document.querySelector('[data-quick-species]').hidden")), "Lost monster start requires species");
+                js("(()=>{const s=document.querySelector('[data-quick-species]');s.value='serpent';s.dispatchEvent(new Event('change'));})()");
+                tapSelector("[data-preset-id=lost_world]");
+                waitForJs("!busy && game?.player.world==='lost' && game.player.path==='monster'", "Native lost monster start");
+                tapSelector("[data-panel-target=map]");
+                check(Boolean.TRUE.equals(js("game.map.locations.length===4 && game.map.locations.every(l=>Object.values(l.qi_concentrations).every(v=>Number.isFinite(v)&&v>0)) && document.querySelectorAll('#map-locations .map-location').length===4")), "Generated lost maps and finite qi");
+                capture("lost-quick-start");
+            } else if(phase.equals("spatial-talisman")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'符道地图验收',spirit_root:'supreme_metal',path:'dao',preset_id:'core',seed:1591})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.rules import add_item,max_mp\nfrom cultivation_life.system import spatial\nfrom cultivation_life.runtime import encode_rng\nimport random\ng=server.ENGINE._load("+JSONObject.quote(id)+")\ng.pending_event=g.active_trial=None\nadd_item(g.player,'spirit_stone',10**12)\nadd_item(g.player,'talisman_human_1_paper',10)\nadd_item(g.player,'talisman_human_1_ink',10)\ng.player.mp=max_mp(g.player)\nfor i in range(3): spatial.new_rift(g,random.Random(i),server.ENGINE.maps,controlled=True)\ng.rng_state=encode_rng(random.Random(1))\nserver.ENGINE.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.spatial.rifts.length===0 && !document.querySelector('.spatial-rift')")),"Rifts hidden before Nascent Soul");
+                python("from cultivation_life import server\ng=server.ENGINE._load("+JSONObject.quote(id)+")\ng.player.realm_index=4\nserver.ENGINE.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-panel-target=talisman]");
+                js("(()=>{const s=document.querySelector('#talisman-content [aria-label=符箓阶数]');s.value='1';s.dispatchEvent(new Event('change'));})()");
+                tapSelector("#talisman-content details button");
+                waitForJs("!busy && game.talismans.methods[0].learned","Native learn recipe");
+                tapSelector("#talisman-content .exploration-grid > button");
+                waitForJs("!busy && game.talismans.rows.length===1","Native talisman crafting");
+                check(Boolean.TRUE.equals(js("game.talismans.rows[0].tier===1 && !!game.talismans.rows[0].quality && game.talismans.skill.experience>0")),"Tier, quality and experience");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('[data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=map]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#map-locations .map-location .spatial-rift').length===3 && !document.querySelector('#map-card > #spatial-panel')")),"Rifts inside map locations");
+                    tapSelector("[data-panel-target=talisman]");
+                    check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#talisman-card').getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+1 && !document.querySelector('#inventory-card #talisman-content')})()")),"Native talisman layout "+theme);
+                }
+                tapSelector("[data-panel-target=market]");
+                tapSelector("#talisman-market-offers .market-buy:not([disabled])");
+                waitForJs("!busy && game.market.talisman_material_offers.some(r=>r.sold)","Native material purchase");
+                tapSelector("#market-talisman-sellables button");
+                waitForJs("!busy && game.talismans.rows.length===0","Native talisman sale");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.talismans.rows.length===0 && game.talismans.skill.experience>0")),"Talisman persistence");
+                capture("spatial-talisman");
+                result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, tier/quality/experience, six-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
             } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);

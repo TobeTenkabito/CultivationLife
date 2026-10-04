@@ -2,13 +2,107 @@
 
 from collections import Counter
 import copy
+import math
 
 from ..content_registry import WORLD_SYSTEMS, ROOT_DEFINITIONS
 from ..relationship_records import find_person
 from ..npc_custody import is_free
-from ..rules import has_item, remove_item, player_affinities, root_elements
+from ..rules import has_item, remove_item, player_affinities, root_elements, add_item
+from ..runtime import decode_rng, encode_rng
+from ..talisman_content import DIMENSIONS, QUALITIES, local_catalog
 
-DIMENSIONS = ("power", "protection", "assistance")
+LEGACY_METHODS = {"ward": "talisman_human_1_protection", "strike": "talisman_human_1_power",
+                  "balance": "talisman_human_1_power_protection_assistance"}
+
+
+def learned(player, method):
+    return method["id"] in player.talisman_methods or any(
+        old in player.talisman_methods and target == method["id"] for old, target in LEGACY_METHODS.items())
+
+
+def local_materials(game):
+    definitions = dict(local_catalog(game)[0])
+    if game.player.world == "human":
+        for identity, name, quality in [("talisman_paper", "一阶灵纹符纸", 1.), ("talisman_cinnabar", "一阶灵砂朱砂", 1.4)]:
+            if has_item(game.player, identity):
+                definitions[identity] = dict(id=identity, name=name, quality=quality, tier=1,
+                                             world="human", base_value=round(24 * quality))
+    return definitions
+
+def skill(player):
+    experience = max(0., float(player.art_experience.get("talisman", 0)))
+    base = float(WORLD_SYSTEMS["spirit_field"]["art_experience_base"])
+    level = math.isqrt(int(experience / base))
+    progress = (experience - base * level ** 2) / (base * (2 * level + 1))
+    return dict(level=level, experience=experience, progress=progress)
+
+
+def success_chance(player, tier):
+    practice = skill(player)
+    return round(min(.98, max(.1, .65 + .045 * practice["level"]
+                              + .04 * practice["progress"] - .045 * (tier - 1))), 4)
+
+
+def grant_experience(player, tier, success):
+    amount = tier * (12 if success else 5)
+    amount *= 1 + max(0., float(player.sage_effects.get("art_experience_multiplier", 0)))
+    player.art_experience["talisman"] = player.art_experience.get("talisman", 0) + amount
+
+
+def economic_value(row):
+    """Remaining charges, all three effects, quality and paid materials matter."""
+    if row["uses"] <= 0:
+        return 0
+    factor = QUALITIES.get(row.get("quality"), QUALITIES["normal"])[1]
+    material_value = row.get("material_value", 100 * max(1, row.get("tier", 1)))
+    dimensions = sum(max(0., row[d]) for d in DIMENSIONS)
+    return max(1, round(material_value * factor * (1 + dimensions / 100)
+                        * row["uses"] / max(1, row.get("max_uses", row["uses"]))))
+
+
+def sale_rows(player, ratio=.55):
+    return [dict(id=r["id"], name=r["name"], tier=r.get("tier", 1),
+                 quality_name=QUALITIES.get(r.get("quality"), QUALITIES["normal"])[0],
+                 uses=r["uses"], value=economic_value(r),
+                 price=max(1, round(economic_value(r) * ratio)))
+            for r in player.talismans if r["uses"] > 0]
+
+
+def product(method, materials, quality, element="metal"):
+    factor = QUALITIES[quality][1]
+    material_quality = sum(m["quality"] for m in materials) / 2
+    uses = max(1, round(method["uses"] * (.8 + factor * .2)))
+    return dict(name=method["name"], method_id=method["id"], tier=method["tier"],
+                origin_world=method["world"], quality=quality, element=element,
+                material_value=sum(m["base_value"] for m in materials),
+                enabled=False, uses=uses, max_uses=uses,
+                **{d: round(method[d] * material_quality * factor, 3) for d in DIMENSIONS})
+
+
+def receive(player, row):
+    player.talisman_sequence += 1
+    owned = copy.deepcopy(row)
+    owned["id"] = f"talisman_{player.talisman_sequence}"
+    player.talismans.append(owned)
+    return owned
+
+
+def market_offers(game, tier, market_name, location_id):
+    definitions = local_catalog(game)[0]
+    available = sorted({r["tier"] for r in definitions.values() if r["tier"] <= tier})
+    if not available:
+        return []
+    # Follow the same current-tier shelf rule as other crafting materials.
+    retained = [copy.deepcopy(r) for r in game.market_offers
+                if r.get("kind") == "talisman_material" and r.get("locked") and not r.get("sold")
+                and r.get("world") == game.player.world and r.get("location_id") == location_id][:1]
+    return retained + [dict(id=f"{location_id}-{game.player.age}-{m['id']}", kind="talisman_material",
+                 content_id=m["id"], name=m["name"], description=m["description"],
+                 price=m["base_value"], tier=m["tier"], tier_name=f"{m['tier']}阶",
+                 world=game.player.world, location_id=location_id, market_name=market_name,
+                 sold=False, locked=False, rare_next_tier=False)
+            for m in definitions.values() if m["tier"] == available[-1]
+            and m["id"] not in {r["content_id"] for r in retained}]
 
 
 def config():
@@ -34,18 +128,19 @@ def consume(player, dimension):
 
 def craft(game, payload):
     p = game.player
-    method = next(
-        (m for m in config()["methods"] if m["id"] == payload.get("method_id")), None
-    )
-    if not method or method["id"] not in p.talisman_methods:
+    definitions, methods = local_materials(game), local_catalog(game)[1]
+    identity = payload.get("method_id")
+    method = methods.get(LEGACY_METHODS.get(identity, identity))
+    if not method or not learned(p, method):
         raise ValueError("须先学习对应制符法")
+    if p.realm_index < method["tier"]:
+        raise ValueError("修为不足以炼制此阶符箓")
     element = payload.get("element")
     if element not in config()["elements"]:
         raise ValueError("请选择对应法术灵力属性")
     ids = [payload.get("material1"), payload.get("material2")]
-    definitions = {r["id"]: r for r in config()["materials"]}
-    if any(key not in definitions for key in ids):
-        raise ValueError("制符必须使用两份符材")
+    if any(key not in definitions or definitions[key]["tier"] != method["tier"] for key in ids):
+        raise ValueError("制符必须使用当前界面、与制符法同阶的两份符材，不能跨界炼制")
     costs = Counter(ids)
     helper_id = payload.get("npc_id", "")
     helper = find_person(game, helper_id) if helper_id else None
@@ -84,22 +179,22 @@ def craft(game, payload):
     mana = 10 * max(1, p.realm_index)
     if not needs_help and p.mp < mana:
         raise ValueError("注灵法力不足")
-    quality = sum(definitions[key]["quality"] for key in ids) / 2
+    chance = success_chance(p, method["tier"])
+    rng = decode_rng(game.seed, game.rng_state)
     for key, quantity in costs.items():
         remove_item(p, key, quantity)
     if not needs_help:
         p.mp -= mana
-    p.talisman_sequence += 1
-    row = dict(
-        id=f"talisman_{p.talisman_sequence}",
-        name=method["name"],
-        element=element,
-        enabled=False,
-        uses=int(method["uses"]),
-        **{dim: round(method[dim] * quality, 3) for dim in DIMENSIONS},
-    )
-    p.talismans.append(row)
-    return f"制成{row['name']}，可调用 {row['uses']} 次；默认未启用。"
+    succeeded = rng.random() < chance
+    quality_score = rng.random() + min(.5, skill(p)["level"] * .025)
+    quality = "perfect" if quality_score >= .95 else "fine" if quality_score >= .65 else "normal" if quality_score >= .2 else "poor"
+    grant_experience(p, method["tier"], succeeded)
+    game.rng_state = encode_rng(rng)
+    if not succeeded:
+        return "符纹失稳，炼制失败；符材与注灵消耗已扣除，获得制符经验。"
+    row = receive(p, product(method, [definitions[key] for key in ids], quality, element))
+    row["creator_id"] = game.id
+    return f"制成{QUALITIES[quality][0]}{row['name']}，可调用 {row['uses']} 次；默认未启用。"
 
 
 def act(game, action, payload):
@@ -115,12 +210,10 @@ def act(game, action, payload):
     if action == "craft":
         return craft(game, payload)
     if action == "learn":
-        method = next(
-            (m for m in config()["methods"] if m["id"] == payload.get("method_id")),
-            None,
-        )
-        if not method or method["id"] in p.talisman_methods or p.realm_index < 1:
-            raise ValueError("制符法无效、已学会或尚未入道")
+        identity = payload.get("method_id")
+        method = local_catalog(game)[1].get(LEGACY_METHODS.get(identity, identity))
+        if not method or learned(p, method) or p.realm_index < method["tier"]:
+            raise ValueError("制符法不属于当前界面、已学会或修为未达对应阶数")
         if not remove_item(p, "spirit_stone", method["cost"]):
             raise ValueError("学习制符法的灵石不足")
         p.talisman_methods.append(method["id"])
@@ -128,6 +221,15 @@ def act(game, action, payload):
     row = next((t for t in p.talismans if t["id"] == payload.get("talisman_id")), None)
     if row is None:
         raise ValueError("符箓不存在")
+    if action == "sell":
+        if p.world in {"rift", "lost"} or p.realm_index < 1 or game.guixu_state.get("player_session"):
+            raise ValueError("此处无法与外界坊市交易")
+        quote = next((r for r in sale_rows(p) if r["id"] == row["id"]), None)
+        if not quote:
+            raise ValueError("符箓次数耗尽，无法出售")
+        p.talismans.remove(row)
+        add_item(p, "spirit_stone", quote["price"])
+        return f"在坊市售出{row['name']}，获得 {quote['price']} 灵石。"
     if action == "toggle":
         if row["uses"] <= 0:
             raise ValueError("此符箓次数已耗尽")
@@ -141,6 +243,7 @@ def act(game, action, payload):
 
 def public(game):
     p = game.player
+    definitions, methods = local_materials(game), local_catalog(game)[1]
     people = {
         **game.world_npcs,
         **game.notable_npcs,
@@ -157,9 +260,12 @@ def public(game):
             .get("npcs", [])
         }
     return dict(
-        rows=copy.deepcopy(p.talismans),
+        skill=skill(p),
+        rows=[dict(copy.deepcopy(r), tier=r.get("tier", 1), value=economic_value(r),
+                   quality_name=QUALITIES.get(r.get("quality"), QUALITIES["normal"])[0]) for r in p.talismans],
         methods=[
-            dict(m, learned=m["id"] in p.talisman_methods) for m in config()["methods"]
+            dict(m, learned=learned(p, m), available=p.realm_index >= m["tier"],
+                 success_chance=success_chance(p, m["tier"])) for m in methods.values()
         ],
         elements=config()["elements"],
         materials=[
@@ -167,7 +273,7 @@ def public(game):
                 m,
                 quantity=next((i.quantity for i in p.inventory if i.id == m["id"]), 0),
             )
-            for m in config()["materials"]
+            for m in definitions.values()
         ],
         helpers=[
             dict(id=n.id, name=n.name, elements=root_elements(n.spirit_root))

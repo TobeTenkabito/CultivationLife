@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...npc_names import person_name
 
 from ...npc_custody import is_free, kill_person
 from ...relationship_records import find_person
@@ -540,9 +541,7 @@ def _relationship_snapshot(
 
 
 def _generated_relationship(deps: RelationshipDependencies, player: Player, role: str, rng: random.Random) -> dict[str, Any]:
-    surnames = ["顾", "叶", "陆", "楚", "白", "谢", "云", "林"]
-    given = ["玄真", "清微", "问岳", "照霜", "长离", "守一", "青崖", "明河"]
-    name = rng.choice(surnames) + rng.choice(given)
+    name = person_name(rng)
     if role == "master":
         realm_index = min(5, player.realm_index + 1)
         layer = rng.randint(1, 3)

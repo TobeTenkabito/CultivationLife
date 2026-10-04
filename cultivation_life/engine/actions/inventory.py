@@ -253,7 +253,7 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
         summary = deps._buy_formation_material_offer(game, offer, price)
     elif offer["kind"] == "formation_supply":
         summary = deps._buy_formation_supply_offer(game, offer, price)
-    elif offer["kind"] in {"item", "puppet_material"}:
+    elif offer["kind"] in {"item", "puppet_material", "talisman_material"}:
         add_item(game.player, offer["content_id"])
         summary = f"你在{offer['market_name']}支付 {price} 枚灵石，购得{offer['name']}。"
     else:

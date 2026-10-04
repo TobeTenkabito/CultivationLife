@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...npc_names import person_name
 from ...content_registry import WORLD_SYSTEMS
 from ..faction_geography import require_faction_admission
 import copy
@@ -84,8 +85,6 @@ def _generate_intrigue_recruitment_session(
     state = deps._intrigue_state(game)
     state["recruitment_sequence"] = int(state.get("recruitment_sequence", 0)) + 1
     sequence = int(state["recruitment_sequence"])
-    surnames = ["顾", "叶", "陆", "楚", "白", "谢", "云", "林", "江", "闻", "苏", "沈"]
-    given = ["玄", "宁", "川", "微", "岳", "霜", "澄", "昭", "离", "砚", "青", "禾"]
     candidates: list[dict[str, Any]] = []
     for attempt in range(applicant_count):
         if rng.random() >= appearance_chance:
@@ -111,7 +110,7 @@ def _generate_intrigue_recruitment_session(
         age, lifespan = deps._roll_recruit_age_lifespan(realm_index, path, rng, young=True)
         npc = SectNpc(
             id=f"{sect.id}_disciple_{sequence}_{attempt}",
-            name=rng.choice(surnames) + rng.choice(given), title="候选弟子",
+            name=person_name(rng), title="候选弟子",
             realm_index=realm_index, layer=layer, age=age, lifespan=lifespan,
             spirit_root=spirit_root, path=path,
             race=sect.allegiance_race or game.player.race, world=sect.world,

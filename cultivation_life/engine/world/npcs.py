@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...npc_names import person_name
 from ...relationship_records import find_person
 
 from ...system.cultivation_policy import ordinary_upper
@@ -315,8 +316,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     )
     kind = rng.choice(["sect", "family"])
     serial = sum(sect.founded_by_npc for sect in game.sects.values()) + 1
-    surname = rng.choice(["顾", "叶", "陆", "楚", "白", "谢", "云", "林"])
-    founder_name = surname + rng.choice(["玄岳", "长风", "照夜", "问天", "清河"])
+    founder_name = person_name(rng)
     power_name = (founder_name[0] + "氏仙族") if kind == "family" else rng.choice(["玄岳门", "长风谷", "照夜宫", "问天盟"]) + str(serial)
     sect_id = f"npc_{kind}_{game.diplomacy_unit}_{serial}"
     layer = rng.randint(1, REALMS[realm_index].layers)
@@ -636,9 +636,7 @@ def _roll_recruit_age_lifespan(
 
 def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rng: random.Random) -> SectNpc:
     realm_index = deps._recruit_realm_index(rng.random(), sect.world)
-    surnames = ["顾", "叶", "陆", "楚", "白", "谢", "云", "林", "江", "闻"]
-    given = ["玄", "宁", "川", "微", "岳", "霜", "澄", "昭", "离", "砚"]
-    name = rng.choice(surnames) + rng.choice(given)
+    name = person_name(rng, [n.name for n in sect.npcs])
     layer = rng.randint(1, REALMS[realm_index].layers)
     title = "仙宫供奉" if realm_index >= 9 else "跨域客卿" if realm_index >= 5 else "加盟客卿" if realm_index >= 3 else "新晋内门" if realm_index == 2 else "新入门弟子"
     path = deps._random_npc_path(sect.id, rng)

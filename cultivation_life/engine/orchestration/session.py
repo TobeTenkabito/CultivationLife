@@ -44,6 +44,13 @@ def create_game(
         raise ValueError("未知快速开局预设")
     if preset and not preset.get("enabled"):
         raise ValueError(preset.get("status", "该快速开局尚未开放"))
+    if preset and preset.get("select_path"):
+        variant_id = preset.get("path_presets", {}).get(path)
+        if not variant_id:
+            raise ValueError("失落界面开局须选择有效道途")
+        variant = next(row for row in WORLD_SYSTEMS["quick_start_presets"] if row["id"] == variant_id)
+        preset = dict(copy.deepcopy(variant), **copy.deepcopy(preset.get("path_overrides", {}).get(path, {})),
+                      id=preset["id"], name=preset["name"], world="lost", path=path)
     if preset:
         spirit_root = str(preset["spirit_root"])
         path = str(preset["path"])
@@ -183,6 +190,11 @@ def create_game(
         player.tribulation_power = float(thunder["base_power"])
     created = now_iso()
     game = GameState(str(uuid.uuid4()), actual_seed, player, created, created)
+    if preset and preset["world"] == "lost":
+        from ...system import spatial
+        scene = spatial.create_instance(game, rng, "lost")
+        spatial.ensure(game)["current"] = scene["id"]
+        scene["visits"] = 1
     from ...system.asura import ensure as ensure_asura
     ensure_asura(game)
     game.sects = deps._new_sects()

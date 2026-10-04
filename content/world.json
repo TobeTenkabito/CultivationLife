@@ -1775,6 +1775,15 @@
         },
         "11": {
           "default": 0.15
+        },
+        "8": {
+          "acquired": 0.01,
+          "pseudo": 0.02,
+          "heavenly": 0.03,
+          "supreme": 0.04,
+          "mutated": 0.04,
+          "law": 0.05,
+          "otherworld": 0.06
         }
       },
       "minor_base": {
@@ -3666,6 +3675,65 @@
               "reincarnation:six_paths": 1
             },
             "active": "reincarnation:six_paths"
+          }
+        }
+      },
+      {
+        "id": "lost_world",
+        "name": "失落界面",
+        "enabled": true,
+        "realm_index": 3,
+        "layer": 1,
+        "age": 260,
+        "world": "lost",
+        "race": "human",
+        "spirit_root": "supreme_metal",
+        "path": "dao",
+        "opportunity_fraction": 0.25,
+        "karma": 8,
+        "sha_qi": 6,
+        "story_flags": [
+          "wind_wings_completed"
+        ],
+        "main_technique": "TECH_COMMON_CORE",
+        "support_technique": "TECH_COMMON_FOUNDATION",
+        "combat_techniques": [
+          "TECH_COMMON_CORE",
+          "TECH_COMMON_LUO",
+          "TECH_TIANJIAN"
+        ],
+        "inventory": [
+          {
+            "id": "spirit_stone",
+            "quantity": 120
+          },
+          {
+            "id": "starfall_blade",
+            "quantity": 1
+          },
+          {
+            "id": "wind_thunder_wings",
+            "quantity": 1
+          }
+        ],
+        "category": "奇遇开局",
+        "select_path": true,
+        "description": "选择道途与妖修种属，以结丹初期进入随机失落界面；与外界隔绝，元婴起可感知空间裂缝。",
+        "path_presets": {
+          "dao": "core",
+          "demonic": "demonic_core",
+          "ghost": "ghost_core",
+          "monster": "monster_core",
+          "confucian": "confucian_core",
+          "buddhist": "core"
+        },
+        "path_overrides": {
+          "buddhist": {
+            "main_technique": "TECH_PUTI",
+            "support_technique": "TECH_KARMA_MIRROR",
+            "combat_techniques": [
+              "TECH_PUTI"
+            ]
           }
         }
       }

@@ -17,6 +17,10 @@ def _ensure_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
 
 def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
     player = game.player
+    if player.world in {"lost", "rift"}:
+        changed = bool(game.market_offers or game.market_world)
+        deps._clear_market(game)
+        return changed
     # Drop stale/locked offers from saves made before source restrictions.
     previous_count = len(game.market_offers)
     game.market_offers[:] = [row for row in game.market_offers if not restricted_acquisition(
@@ -45,6 +49,9 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
         if not any(row.get("kind") == "puppet_material" for row in game.market_offers):
             from cultivation_life.system.puppet_crafting import market_offers
             game.market_offers.extend(market_offers(game, tier, "傀儡材料坊市", location_id))
+        if not any(row.get("kind") == "talisman_material" for row in game.market_offers):
+            from ..talismans import market_offers as talisman_offers
+            game.market_offers.extend(talisman_offers(game, tier, "符材坊市", location_id))
         return len(game.market_offers) != previous_count
     same_market = (
         game.market_realm_index == tier and game.market_world == player.world
@@ -174,6 +181,8 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     offers.extend(selected_materials[:fresh_material_count])
     from cultivation_life.system.puppet_crafting import market_offers
     offers.extend(market_offers(game, tier, market_name, location_id))
+    from ..talismans import market_offers as talisman_offers
+    offers.extend(talisman_offers(game, tier, market_name, location_id))
     game.market_realm_index = tier
     game.market_world = player.world
     game.market_location_id = location_id
@@ -192,6 +201,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
     crafting_offers = []
     formation_offers = []
     puppet_offers = []
+    talisman_offers = []
     for offer in game.market_offers:
         if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
             continue
@@ -212,7 +222,9 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
             offer["kind"] != "technique"
             or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]].element)
         )
-        if offer.get("kind") == "puppet_material":
+        if offer.get("kind") == "talisman_material":
+            talisman_offers.append(shown)
+        elif offer.get("kind") == "puppet_material":
             puppet_offers.append(shown)
         elif offer.get("kind") == "crafting_material":
             crafting_offers.append(shown)
@@ -221,6 +233,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
         else:
             offers.append(shown)
     location_name = deps.maps.location(player.world, location_id)["name"]
+    from ..talismans import sale_rows
     return {
         "available":True, "name":f"{location_name}·{REALMS[deps._market_tier(player)].name}坊市",
         "realm_index":deps._market_tier(player), "world":player.world,
@@ -228,6 +241,8 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
         "spirit_stones":stones, "offers":offers, "crafting_material_offers":crafting_offers,
         "formation_material_offers":formation_offers,
         "puppet_material_offers":puppet_offers,
+        "talisman_material_offers":talisman_offers,
+        "sellable_talismans":sale_rows(player),
         "material_offers":[*crafting_offers, *formation_offers],
         "general_offer_limit":int(MARKET_SETTINGS["offer_count"]),
         "material_offer_limit":int(MARKET_SETTINGS.get("material_offer_count", 6)),
@@ -276,6 +291,9 @@ def _is_world_market_good(deps: MarketDependencies, world: str, kind: str, conte
     if kind == "puppet_material":
         from cultivation_life.puppet_content import definitions
         return definitions().get(content_id, {}).get("world") == world
+    if kind == "talisman_material":
+        from ...talisman_content import catalog
+        return catalog()[0].get(content_id, {}).get("world") == world
     if kind == "crafting_material":
         return any(
             str(row.get("world")) == world and str(row.get("id")) == content_id

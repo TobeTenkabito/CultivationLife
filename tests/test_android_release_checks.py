@@ -32,7 +32,7 @@ def release_inputs(tmp_path):
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
               'debug-console-portrait', 'debug-console-landscape',
-              'start-layout-portrait', 'start-layout-landscape')
+              'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -63,6 +63,7 @@ def release_inputs(tmp_path):
     ('debug-console', 'Android Debug console portrait checks must pass'),
     ('start-layout', 'Android start layout portrait checks must pass'),
     ('start-browser', 'Start layout UI checks must pass'),
+    ('spatial-talisman', 'Android spatial talisman portrait checks must pass'),
     ('signature', 'Android APK signature must verify'),
     ('hash', 'APK hash must match'),
     ('asset', 'Packaged web/app.js differs from source'),
@@ -77,6 +78,7 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
         'debug-console': (f'android-debug-console-portrait-{rid}.log', 'status=failed'),
         'start-layout': (f'android-start-layout-portrait-{rid}.log', 'status=failed'),
         'start-browser': (f'start-layout-ui-{rid}.log', 'Traceback: failed'),
+        'spatial-talisman': (f'android-spatial-talisman-portrait-{rid}.log', 'status=failed'),
         'signature': (f'android-signature-{rid}.log', 'DOES NOT VERIFY'),
         'hash': (f'android-installed-sha256-{rid}.log', 'wrong binary'),
     }

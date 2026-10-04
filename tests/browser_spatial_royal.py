@@ -16,6 +16,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.engine.actions.exploration import enter_scene
 from cultivation_life.rules import add_item, max_mp
+from cultivation_life.runtime import encode_rng
 from cultivation_life.system import spatial, asura_court
 from cultivation_life.system.upper_institutions import account
 
@@ -29,11 +30,13 @@ def main():
         )["id"]
         g = engine._load(gid)
         g.pending_event = None
+        g.player.realm_index = 4
         add_item(g.player, "spirit_stone", 10000)
-        add_item(g.player, "talisman_paper", 10)
-        add_item(g.player, "talisman_cinnabar", 10)
+        add_item(g.player, "talisman_human_1_paper", 10)
+        add_item(g.player, "talisman_human_1_ink", 10)
         g.player.mp = max_mp(g.player)
-        spatial.new_rift(g, random.Random(1), engine.maps, controlled=True)
+        spatial.new_rift(g, random.Random(1), engine.maps, controlled=True)["kind"] = "rift"
+        g.rng_state = encode_rng(random.Random(1))
         engine.store.save(g)
         king_id = engine.create_game(
             "王庭验收", "supreme_metal", "demonic", 1557, preset_id="asura_upper"
@@ -66,22 +69,28 @@ def main():
                     page.goto(f"http://127.0.0.1:{httpd.server_port}")
                     page.wait_for_function("!!configData")
                     page.evaluate("id => loadGame(id)", gid)
-                    page.locator("[data-panel-target=inventory]").first.click()
-                    panel = page.locator("#talisman-panel")
-                    panel.get_by_role("button", name="学习护身符", exact=False).click()
+                    page.locator("[data-panel-target=talisman]").first.click()
+                    panel = page.locator("#talisman-content")
+                    panel.get_by_label("符箓阶数", exact=True).select_option("1")
+                    panel.get_by_role("button", name="学习 一阶灵破军符", exact=False).click()
                     page.wait_for_function("!busy && game.talismans.methods[0].learned")
-                    panel.get_by_role("button", name="合成符箓", exact=True).click()
+                    panel.get_by_role("button", name="炼制符箓", exact=True).click()
                     page.wait_for_function("!busy && game.talismans.rows.length===1")
                     panel.get_by_role("button", name="启用", exact=True).click()
                     page.wait_for_function("!busy && game.talismans.rows[0].enabled")
+                    page.locator('[data-panel-target=market]').click()
+                    page.locator('#talisman-market-offers .market-buy:not([disabled])').first.click()
+                    page.wait_for_function('!busy && game.market.talisman_material_offers.some(r=>r.sold)')
+                    page.locator('#market-talisman-sellables button').click()
+                    page.wait_for_function('!busy && game.talismans.rows.length===0')
                     page.evaluate("UtilityPanels.open('map')")
                     with patch.dict(
                         spatial.cfg()["outcome_weights"],
                         {"secluded": 1, "passage": 0, "local": 0},
                         clear=True,
                     ):
-                        page.locator("#spatial-panel").get_by_role(
-                            "button", name="进入裂缝", exact=True
+                        page.locator("#map-locations .map-location .spatial-rift").get_by_role(
+                            "button", name="进入空间裂缝", exact=True
                         ).click()
                         page.wait_for_function("!busy && game.spatial.inside")
                     page.evaluate("render(game)")
@@ -92,7 +101,8 @@ def main():
                         "button", name="探索 · 一年", exact=True
                     ).click()
                     page.wait_for_function("!busy && game.spatial.scene.explored===1")
-                    assert page.locator("#map-locations").is_hidden()
+                    assert page.locator("#map-locations").is_visible()
+                    assert page.locator("#map-locations .map-location").count() == 4
                     for width, height in [(1440, 1000), (412, 915), (915, 412)]:
                         page.set_viewport_size({"width": width, "height": height})
                         for theme in "abcdef":

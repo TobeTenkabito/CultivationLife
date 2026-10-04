@@ -29,6 +29,8 @@ def ready(tmp_path):
 def occupy(e, g, kind="secluded"):
     rng = decode_rng(g.seed, g.rng_state)
     scene = spatial.create_instance(g, rng, kind)
+    if kind == "lost":
+        scene["power_ceiling"] = 8  # These tests exercise the full-capacity variant.
     enter_scene(e._exploration_dependencies(), g, scene, rng)
     g.rng_state = encode_rng(rng)
     e.store.save(g)
@@ -67,6 +69,7 @@ def test_rift_calendar_covers_longest_unit_and_queries_do_not_roll(ready):
 
 def test_rift_failure_kills_and_spends_protection_once(ready):
     e, g = ready
+    g.player.realm_index = 4
     g.player.talismans = [
         dict(
             id="a",
@@ -89,7 +92,9 @@ def test_rift_failure_kills_and_spends_protection_once(ready):
 
 def test_local_rift_ignores_map_lethal_gate(ready, monkeypatch):
     e, g = ready
+    g.player.realm_index = 4
     r = spatial.new_rift(g, random.Random(3), e.maps, controlled=True)
+    r["kind"] = "rift"
     e.store.save(g)
     monkeypatch.setitem(spatial.cfg(), "outcome_weights", {"local": 1})
     monkeypatch.setattr(
@@ -256,23 +261,24 @@ def test_lost_descend_revisit_requires_actual_suppression(ready):
     assert second["visits"] == 2 and second["npcs"] == first["npcs"]
 
 
-def test_talisman_duplicate_material_cost_validation_and_npc_roots(ready):
+def test_talisman_duplicate_material_cost_validation_and_npc_roots(ready, monkeypatch):
+    monkeypatch.setattr(talismans, "success_chance", lambda *_: 1.)
     e, g = ready
     p = g.player
     add_item(p, "spirit_stone", 10000)
-    add_item(p, "talisman_paper", 1)
-    talismans.act(g, "learn", {"method_id": "ward"})
+    add_item(p, "talisman_human_1_paper", 1)
+    talismans.act(g, "learn", {"method_id": "talisman_human_1_protection"})
     payload = dict(
-        method_id="ward",
-        material1="talisman_paper",
-        material2="talisman_paper",
+        method_id="talisman_human_1_protection",
+        material1="talisman_human_1_paper",
+        material2="talisman_human_1_paper",
         element="metal",
     )
     before = copy.deepcopy(p.to_dict())
     with pytest.raises(ValueError, match="符材"):
         talismans.craft(g, payload)
     assert p.to_dict() == before
-    add_item(p, "talisman_paper", 3)
+    add_item(p, "talisman_human_1_paper", 3)
     p.mp = max_mp(p)
     talismans.craft(g, payload)
     assert len(p.talismans) == 1 and not p.talismans[0]["enabled"]
@@ -394,8 +400,8 @@ def test_lost_rifts_track_instance_map_and_npc_thunder(ready):
     scene["location_id"] = scene["locations"][2]["id"]
     rift = spatial.new_rift(g, random.Random(2), e.maps, controlled=True)
     assert rift["location_id"] == scene["location_id"]
-    high = next(n for n in scene["npcs"] if n["realm_index"] >= 6)
-    assert high["lifespan"] is None
+    high = scene["npcs"][0]
+    high.update(realm_index=6, lifespan=None)
     high["next_tribulation_age"] = g.player.age
     spatial.tick(g, random.Random(2), e.maps)
     assert high["tribulation_count"] == 1

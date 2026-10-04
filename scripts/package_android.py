@@ -32,6 +32,8 @@ def main():
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
     for orientation in ('portrait', 'landscape'):
+        result = log(f'android-spatial-talisman-{orientation}-{RELEASE_ID}.log')
+        require('status=passed' in result and 'status=failed' not in result, f'Android spatial talisman {orientation} checks must pass')
         result = log(f'android-start-layout-{orientation}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android start layout {orientation} checks must pass')
         result = log(f'android-asura-{orientation}-{RELEASE_ID}.log')
@@ -89,6 +91,7 @@ def main():
             f'{passed.group(1)} Python regressions passed',
             'Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
             'Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians',
+            'Talisman portrait and landscape: native tiered crafting, materials, sales, experience, left panel and multiple realm-gated map rifts',
             'Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence',
             'Live tutorial actions, native back and persisted progress',
             'Save transfer: six themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip',

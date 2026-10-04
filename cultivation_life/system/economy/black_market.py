@@ -40,6 +40,8 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
     if spirit:
         for _ in range(quantity):
             grant(game, result['content_id'])
+    elif kind == "talisman_material":
+        add_item(game.player, str(result["content_id"]), quantity)
     elif kind == "crafting_material":
         instance = copy.deepcopy(result.get("material_instance"))
         if not isinstance(instance, dict):
@@ -93,6 +95,14 @@ def sell_black_market_asset(deps: BlackMarketDependencies, game_id: str, kind: s
                 if plant_value is not None else ratio
             )
         ))
+    elif kind == "talisman":
+        from ..talismans import sale_rows
+        quote = next((r for r in sale_rows(game.player, ratio) if r["id"] == asset_id), None)
+        if not quote:
+            raise ValueError("符箓不存在或次数已耗尽")
+        row = next(r for r in game.player.talismans if r["id"] == asset_id)
+        game.player.talismans.remove(row)
+        name, price = quote["name"], quote["price"]
     elif kind == "puppet":
         puppet = next((row for row in game.player.puppets if str(row.get("id")) == asset_id), None)
         if not puppet or puppet.get("type") == "living":
@@ -146,6 +156,10 @@ def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: st
         f"{game.seed}:black-market-material:{state.get('id', '')}:{pattern}"
     )
     material_rows: list[dict[str, Any]] = []
+    from ...talisman_content import catalog
+    material_rows.extend(dict(kind="talisman_material", content_id=r["id"], name=r["name"],
+        description=r["description"], tier=r["tier"], base_price=r["base_value"])
+        for r in catalog()[0].values() if r["world"] == game.player.world)
     for definition in deps._crafting_material_defs().values():
         if str(definition.get("world")) != game.player.world:
             continue

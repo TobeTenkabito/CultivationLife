@@ -216,6 +216,9 @@ def _public_secret_arts(deps: CultivationActionDependencies, player: Player) -> 
 
 def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...system.spatial import cultivation_block_reason
+    if cultivation_block_reason(game):
+        raise ValueError(cultivation_block_reason(game))
     player = game.player
     if not player.alive:
         raise ValueError("此生已经结束")

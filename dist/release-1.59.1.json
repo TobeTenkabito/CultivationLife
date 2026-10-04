@@ -1,8 +1,8 @@
 {
-  "base_version": "1.59.0",
+  "base_version": "1.59.1",
   "platform": "Windows",
-  "exe_sha256": "dbe80c20b5718526541e933a0f8307b0084f5c1157cc98dc788b6456b683e10a",
-  "inputs_sha256": "9e925737764dcbe81f2c38d003652654b19db653a9d8f19428530acb9f0a24cb",
+  "exe_sha256": "6668abed2eb432c9398a20d82969479cacc4e7785e7f5e24d1d5cc282e04c23b",
+  "inputs_sha256": "f196e3327cd448068a52d51deaf3a3c08b629c1ebf7659acd448da548ffdfb4b",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -23,7 +23,7 @@
   ],
   "save_schema": 8,
   "validation": [
-    "2305 automated regression tests passed",
+    "2330 automated regression tests passed",
     "Six-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"

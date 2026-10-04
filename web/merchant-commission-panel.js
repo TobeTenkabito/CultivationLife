@@ -9,7 +9,7 @@
     const options=(select,rows) => { select.replaceChildren(); rows.forEach(row=>{const option=el('option',row.name);option.value=row.id;select.append(option);}); };
     const kind=field('委托类型',el('select')); options(kind,Object.entries(system.kinds).map(([id,name])=>({id,name})));
     const world=field('目标界面',el('select'));
-    const category=field('材料分类',el('select')); options(category,[{id:'crafting',name:'炼器材料'},{id:'formation',name:'阵法材料'}]);
+    const category=field('材料分类',el('select')); options(category,[{id:'crafting',name:'炼器材料'},{id:'formation',name:'阵法材料'},{id:'talisman',name:'符箓材料'}]);
     const material=field('所需材料或道具',el('select'));
     const target=field('悬赏目标',el('select'));
     const tier=field('原材料等级',el('select'));
@@ -37,7 +37,7 @@
     const enableSubmit=enabled=>{submit.disabled=!enabled;submit.dataset.merchantUnavailable=enabled?'0':'1';};enableSubmit(false);
     const data=()=>({alliance_id:alliance.id,kind:kind.value,source_world:world.value,material_category:category.value,
       definition_id:material.value,target_id:target.value,material_tier:Number(tier.value),mold_id:mold.value,
-      stars:Number(stars.value),quantity:['supply','item','spirit_manual'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)])),metric_maxima:Object.fromEntries(Object.entries(maximumInputs).map(([key,input])=>[key,Number(input.value)]))});
+      stars:Number(stars.value),quantity:['supply','item','spirit_manual','talisman'].includes(kind.value)?Number(quantity.value):1,metrics:Object.fromEntries(Object.entries(metricInputs).map(([key,input])=>[key,Number(input.value)])),metric_maxima:Object.fromEntries(Object.entries(maximumInputs).map(([key,input])=>[key,Number(input.value)]))});
     const showOverview=result=>{
       overview.replaceChildren();const spec=result.spec;if(!spec)return;
       overview.append(el('h4','预计成品概览'));
@@ -47,6 +47,8 @@
         Object.entries(system.metric_names).forEach(([key,name])=>{const row=el('tr');[name,`${number(spec.requirements[key])}–${number(spec.maxima?.[key] ?? 100)}`,number(spec.profile.metrics[key]),number(spec.limits[key])].forEach(text=>row.append(el('td',text)));table.append(row);});overview.append(table);
         overview.append(el('p',spec.profile.effects.join('；')));overview.append(el('p',`另附 ${spec.spare_material_count || 0}份同阶备用阵材。`));
         overview.append(el('p',`使用阵材：${spec.materials.map(row=>row.name).join('、')}。交付阵法预设与每个阵位所需的独立材料；实际启用效果随阵法造诣变化。`));
+      }else if(result.kind==='talisman'){
+        const r=spec.product;overview.append(el('p',`${spec.quality_name}${r.name} · 威力 ${r.power} / 防护 ${r.protection} / 辅助 ${r.assistance} / 次数 ${r.uses}`));overview.append(el('p',`本界工坊使用同阶符材：${spec.materials.map(m=>m.name).join('、')}。`));
       }else{
         overview.append(el('p',`${spec.material_tier}阶主材 · ${spec.mold.name} · ${spec.quality_name}验收标准`));
         overview.append(el('p',Object.entries(spec.stats).filter(([,value])=>value).map(([key,value])=>`${statNames[key] || key} +${['combat_power','max_hp','max_mp'].includes(key)?number(value):number(value*100)+'%'}`).join('；')));
@@ -71,15 +73,15 @@
     const show=(input,visible)=>{input.parentElement.hidden=!visible;input.disabled=!visible;input.dataset.merchantUnavailable=visible?'0':'1';};
     const refreshChoices=()=>{
       const source=alliance.catalog.find(row=>row.world===world.value);
-      const list=kind.value==='spirit_manual'?source?.spirit_manuals:kind.value==='item'?source?.items:category.value==='formation'?source?.formation_materials:source?.materials;
+      const list=kind.value==='talisman'?source?.talismans:kind.value==='spirit_manual'?source?.spirit_manuals:kind.value==='item'?source?.items:category.value==='talisman'?source?.talisman_materials:category.value==='formation'?source?.formation_materials:source?.materials;
       options(material,list || []);options(target,(source?.targets || []).map(row=>({id:row.id,name:`${row.name} · ${row.realm} · 战力${number(row.power)}`})));
       options(tier,(kind.value==='formation'?source?.formation_tiers:source?.weapon_tiers || []).map(value=>({id:value,name:`${value}阶`})));Object.values(metricInputs).forEach(input=>{input.value=0;input.max=100;});Object.values(maximumInputs).forEach(input=>input.value=100);changed();
     };
     const refreshKind=()=>{
       const previous=world.value,procurement=['supply','item','formation','weapon'].includes(kind.value);
-      options(world,alliance.catalog.map(row=>({id:row.world,name:row.world_name})));
+      options(world,alliance.catalog.filter(row=>kind.value!=='talisman'||row.world===alliance.world).map(row=>({id:row.world,name:row.world_name})));
       if([...world.options].some(row=>row.value===previous))world.value=previous;else world.value=alliance.world;
-      show(category,kind.value==='supply');show(material,['supply','item','spirit_manual'].includes(kind.value));show(quantity,['supply','item','spirit_manual'].includes(kind.value));
+      show(category,kind.value==='supply');show(material,['supply','item','spirit_manual','talisman'].includes(kind.value));show(quantity,['supply','item','spirit_manual','talisman'].includes(kind.value));
       show(target,kind.value==='bounty');show(tier,['formation','weapon'].includes(kind.value));show(mold,kind.value==='weapon');
       metrics.hidden=kind.value!=='formation';[...Object.values(metricInputs),...Object.values(maximumInputs)].forEach(input=>{input.disabled=metrics.hidden;input.dataset.merchantUnavailable=metrics.hidden?'1':'0';});refreshChoices();
     };
