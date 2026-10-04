@@ -265,6 +265,8 @@ class ContentRegistry:
 
         from .puppet_content import item_definitions
         items_doc["items"].extend(item_definitions())
+        from .talisman_content import item_definitions as talisman_items
+        items_doc["items"].extend(talisman_items())
         items = cls._index_models(items_doc, "items", Item)
         source_defaults = techniques_doc.get("source_defaults_by_path", {})
         expected_source_paths = {"dao", "demonic", "ghost", "monster", "buddhist", "confucian"}
@@ -1179,13 +1181,24 @@ class ContentRegistry:
         if not all(bool(entry.get("enabled")) for entry in presets):
             raise ContentError("九项快速开局预设均应处于开放状态")
         for entry in presets:
+            if entry.get("select_path"):
+                variants = entry.get("path_presets", {})
+                if set(variants) != set(paths) or any(
+                    target == entry["id"] or target not in {row["id"] for row in presets}
+                    for target in variants.values()
+                ):
+                    raise ContentError("可选道途开局必须引用所有道途的有效基础预设")
+                for override in entry.get("path_overrides", {}).values():
+                    ids = [override.get("main_technique"), override.get("support_technique"), *override.get("combat_techniques", [])]
+                    if any(key is not None and key not in techniques for key in ids):
+                        raise ContentError("可选道途开局功法不存在")
             if not entry.get("enabled"):
                 continue
             if entry.get("spirit_root") not in roots or entry.get("path") not in paths:
                 raise ContentError(f"快速开局 {entry['id']} 的灵根或道路不存在")
             if entry.get("race") not in races or entry.get("world") not in {
                 "human", "demon", "spirit", "true_demon", "hell", "celestial", "asura",
-                "monster_realm", "phantom_underworld", "nether", "reincarnation",
+                "monster_realm", "phantom_underworld", "nether", "reincarnation", "lost",
             }:
                 raise ContentError(f"快速开局 {entry['id']} 的种族或世界不存在")
             if not 1 <= int(entry.get("layer", 0)) <= realms[int(entry["realm_index"])].layers:
@@ -1605,8 +1618,8 @@ class ContentRegistry:
             if set(combat_effect.get("traits", [])) - combat_traits:
                 raise ContentError("本命法宝材料引用了未知战斗特质")
         breakthrough = world.get("breakthrough", {})
-        if set(breakthrough.get("major_base", {})) != {str(index) for index in (*range(1, 8), 9, 10, 11)}:
-            raise ContentError("大境界基础突破概率须覆盖练气至合体、真仙至太乙")
+        if set(breakthrough.get("major_base", {})) != {str(index) for index in range(1, 12)}:
+            raise ContentError("大境界基础突破概率须覆盖练气至太乙，包含独立空间中的大乘瓶颈")
         if set(breakthrough.get("minor_base", {})) != {str(index) for index in range(2, 13)}:
             raise ContentError("小境界基础突破概率须覆盖筑基至大罗")
         all_chances = [

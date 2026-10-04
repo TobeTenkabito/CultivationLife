@@ -3,7 +3,7 @@
 from ..content_registry import WORLD_SYSTEMS
 
 
-def destination(player):
+def destination(player, *, realm_ceiling=None):
     profile = WORLD_SYSTEMS["world_profiles"][player.world]
     tier = profile["tier"]
     rank = (player.realm_index, player.layer)
@@ -15,7 +15,8 @@ def destination(player):
     exceeds = (
         tier == 1
         and (rank > (5, 9) or rank >= (5, 7) and not suppressed)
-        or tier in {0, 2}
+        or tier == 0 and rank > (realm_ceiling if realm_ceiling is not None else 8, 9)
+        or tier == 2
         and rank >= (9, 1)
     )
     if not exceeds:

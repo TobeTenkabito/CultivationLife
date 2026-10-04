@@ -62,6 +62,12 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
         return
     safety = 0
     while player.alive and player.opportunity >= opportunity_required(player) and safety < 32:
+        from ...system.spatial import cultivation_block_reason
+        if cultivation_block_reason(game):
+            player.opportunity = min(player.opportunity, opportunity_required(player))
+            player.awaiting_major_breakthrough = False
+            player.awaiting_minor_breakthrough = False
+            return
         safety += 1
         required = opportunity_required(player)
         if modifier(player, "ascension_source", player.world == "spirit") and player.realm_index == 8 and player.layer >= REALMS[8].layers:

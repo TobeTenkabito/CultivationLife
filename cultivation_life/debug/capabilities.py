@@ -92,7 +92,7 @@ CAPABILITIES = (
         (S('action', choices=('open','enter','descend','explore','move','join','talk')), S('target_id', required=False)),
         lambda e,g,p: e.spatial_action(g,p['action'],p)),
     Capability('talisman action', 'talisman-action',
-        (S('action', choices=('learn','craft','toggle','discard')), S('method_id',required=False),
+        (S('action', choices=('learn','craft','toggle','discard','sell')), S('method_id',required=False),
          S('material1',required=False), S('material2',required=False), S('element',required=False),
          S('npc_id',required=False), S('talisman_id',required=False)),
         lambda e,g,p: e.talisman_action(g,p['action'],p)),

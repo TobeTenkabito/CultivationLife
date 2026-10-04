@@ -45,7 +45,7 @@
       const active = element('section', null, 'merchant-active');
       active.append(element('h3', `待完成 · ${'★'.repeat(task.stars)} ${task.name}`));
       active.append(element('p', `已投入 ${task.worked}/${task.years} 年；报酬：${money(task.reward.stones)} 灵石、材料 ${task.reward.materials} 件、机缘 ${task.reward.opportunity}、因果 -${task.reward.karma}、影响力 +${task.reward.influence}`));
-      const requirements = {supply:`需交付 ${task.material_name} ×${task.quantity}`, weapon:`需在接取后亲自炼成基础战力至少 ${money(task.power * .1)} 的普通法宝（本命及神机不可交付）`, formation:`需 ${task.stars + 1} 件至少 ${Math.max(1, task.realm - 1)} 阶闲置阵材，交商盟工坊炼制`, bounty:`追捕目标战力 ${money(task.power)}，须成功击杀`, escort:`劫道者战力 ${money(task.power)}，你为防御方`, recruit:'招募结果受修为与已雇人手影响', intel:'情报搜集结果受修为与已雇人手影响'};
+      const requirements = {talisman:`需接单后亲自炼制 ${task.material_name}，完整次数并停用后交付`,supply:`需交付 ${task.material_name} ×${task.quantity}`, weapon:`需在接取后亲自炼成基础战力至少 ${money(task.power * .1)} 的普通法宝（本命及神机不可交付）`, formation:`需 ${task.stars + 1} 件至少 ${Math.max(1, task.realm - 1)} 阶闲置阵材，交商盟工坊炼制`, bounty:`追捕目标战力 ${money(task.power)}，须成功击杀`, escort:`劫道者战力 ${money(task.power)}，你为防御方`, recruit:'招募结果受修为与已雇人手影响', intel:'情报搜集结果受修为与已雇人手影响'};
       active.append(element('p', requirements[task.kind]));
       const available = system.alliances.some(row => row.id === task.alliance_id && row.member && row.local_site);
       active.append(button('执行 / 继续任务', 'work', {alliance_id:task.alliance_id}, !available));
@@ -73,7 +73,7 @@
         for (let i = 1; i <= 5; i++) { const option = element('option', '★'.repeat(i)); option.value = i; option.selected = i === taskStars; stars.append(option); }
         const rows = element('div', null, 'merchant-task-list');
         const materialCategory=element('select'); materialCategory.setAttribute('aria-label','提交任务材料分类');
-        [{id:'crafting',name:'炼器材料'},{id:'formation',name:'阵法材料'}].forEach(row=>{const option=element('option',row.name);option.value=row.id;option.selected=row.id===taskCategory;materialCategory.append(option);});
+        [{id:'crafting',name:'炼器材料'},{id:'formation',name:'阵法材料'},{id:'talisman',name:'符箓材料'}].forEach(row=>{const option=element('option',row.name);option.value=row.id;option.selected=row.id===taskCategory;materialCategory.append(option);});
         const draw = () => {
           rows.replaceChildren();
           alliance.tasks.filter(task => task.stars === taskStars && (task.kind!=='supply' || (task.material_category || 'crafting')===taskCategory)).forEach(task => {

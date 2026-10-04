@@ -468,6 +468,9 @@ class MonsterBloodlineSystemMixin:
         return multiplier if required_themes & (set(origin.get("themes", [])) | set(target.get("themes", []))) else 1.0
 
     def _validate_monster_evolution(self, game: GameState, evolution_id: str) -> dict[str, Any]:
+        from .spatial import cultivation_block_reason
+        if cultivation_block_reason(game):
+            raise ValueError(cultivation_block_reason(game))
         player = game.player
         if player.path != "monster" or not bloodline_content_available():
             raise ValueError("当前角色没有可用的妖修血脉体系")

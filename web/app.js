@@ -315,7 +315,19 @@ function renderQuickStarts(presets) {
     button.title = preset.enabled ? detail : preset.status || '当前不可用';
     button.innerHTML = htmlText`<span class="quick-start-title"><b>${preset.name}</b></span><span class="quick-start-meta"><span>${worldName} · ${preset.layer || 1}层</span><i>${badge}</i></span>`;
     button.setAttribute('aria-label', `${preset.name}，${pathName}，${worldName}，${preset.layer || 1}层，${badge}。${button.title}`);
-    if (preset.path === 'monster') {
+    if (preset.select_path) {
+      const wrapper = document.createElement('div'); wrapper.className = 'quick-start-species';
+      const path = document.createElement('select'); path.dataset.quickPath = '1'; path.setAttribute('aria-label', '失落界面道途');
+      path.append(new Option('请选择道途', ''));
+      Object.keys(preset.path_presets).forEach(id => path.append(new Option(configData.paths[id], id)));
+      const species = document.createElement('select'); species.dataset.quickSpecies = '1'; species.setAttribute('aria-label', '失落界面妖修种属');
+      species.append(new Option('请选择妖修种属', ''));
+      Object.entries(configData.monster_species || {}).forEach(([id, row]) => species.append(new Option(row.name, id)));
+      const update = () => { species.hidden = path.value !== 'monster'; button.disabled = busy || !preset.enabled || !path.value || (path.value === 'monster' && !species.value); };
+      path.onchange = species.onchange = update; update();
+      button.onclick = () => startQuickGame(preset.id, path.value === 'monster' ? species.value : null, path.value);
+      wrapper.append(path, species, button); grid.append(wrapper);
+    } else if (preset.path === 'monster') {
       const wrapper = document.createElement('div'); wrapper.className = 'quick-start-species';
       const select = document.createElement('select'); select.setAttribute('aria-label', `${preset.name}种属`);
       select.append(new Option('请选择妖修种属', ''));
@@ -333,9 +345,10 @@ function renderQuickStarts(presets) {
   });
 }
 
-async function startQuickGame(presetId, monsterSpeciesId = null) {
+async function startQuickGame(presetId, monsterSpeciesId = null, path = null) {
   const form = new FormData($('#new-game-form'));
   const payload = {name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId, monster_species_id:monsterSpeciesId};
+  if (path) payload.path = path;
   if (form.get('seed')) payload.seed = Number(form.get('seed'));
   await mutate('/api/games', payload);
 }
@@ -421,7 +434,7 @@ function showStart() {
   game = null; $('#start-screen').classList.remove('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.add('hidden'); $('#new-game-button').classList.add('hidden');
   api('/api/games').then(saves => renderSaveList(saves.games)).catch(error => toast(error.message));
   api('/api/achievements').then(catalog => { achievementCatalog = catalog; updateAchievementEntry(); }).catch(() => {});
-  ['asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','puppet-workshop','map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
+  ['asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','talisman', 'puppet-workshop','map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
   renderButtons();
@@ -2651,7 +2664,7 @@ function renderMarket(market) {
     const controls = document.createElement('div'); controls.className = 'market-offer-actions';
     const lock = document.createElement('button'); lock.className = `market-lock${offer.locked ? ' active' : ''}`;
     lock.textContent = offer.locked ? '已锁定' : '锁定';
-    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'puppet' ? '傀儡材料' : offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
+    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'talisman' ? '符箓材料' : offer.market_group === 'puppet' ? '傀儡材料' : offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
     lock.disabled = busy || offer.sold || !!game.pending_event || !game.player.alive;
     lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
     const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : `${offer.price} 灵石`;
@@ -2664,6 +2677,9 @@ function renderMarket(market) {
   };
   renderShelf('#market-offers', market.offers || []);
   renderShelf('#puppet-market-offers', market.puppet_material_offers || []);
+  renderShelf('#talisman-market-offers', market.talisman_material_offers || []);
+  const talismanSales=$('#market-talisman-sellables');talismanSales.replaceChildren();
+  (market.sellable_talismans || []).forEach(row=>{const b=document.createElement('button');b.className='exploration-action';b.textContent=`出售${row.quality_name}${row.name} · ${row.uses}次 · ${number(row.price)}灵石`;b.onclick=()=>mutate(`/api/games/${game.id}/talisman-action`,{action:'sell',talisman_id:row.id});talismanSales.append(b);});
   renderShelf('#material-market-offers', market.material_offers || [
     ...(market.crafting_material_offers || []), ...(market.formation_material_offers || []),
   ]);
@@ -2834,7 +2850,7 @@ function renderAuction(system) {
     row.append(info, quantity, buy); results.appendChild(row);
   });
   const sellables = $('#black-market-sellables'); sellables.innerHTML = '';
-  [...(system.black_market_sellable_items || []).map(item => ({...item, kind:'item'})), ...(system.black_market_sellable_puppets || []).map(item => ({...item, kind:'puppet'}))].forEach(asset => {
+  [...(system.black_market_sellable_items || []).map(item => ({...item, kind:'item'})), ...(system.black_market_sellable_puppets || []).map(item => ({...item, kind:'puppet'})), ...(system.black_market_sellable_talismans || []).map(item=>({...item,kind:'talisman',black_market_price:item.price}))].forEach(asset => {
     const button = document.createElement('button');
     button.textContent = `出手${asset.name}${asset.quantity ? ` ×1/${asset.quantity}` : ''}${asset.black_market_price ? ` · ${number(asset.black_market_price)}灵石` : ''}`;
     button.onclick = () => mutate(`/api/games/${game.id}/black-market-sell`, {kind:asset.kind, asset_id:asset.id});
@@ -3829,6 +3845,7 @@ function renderEvent() {
 }
 
 function renderButtons() {
+  document.querySelectorAll('.exploration-action').forEach(b=>b.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||b.dataset.unavailable==='1');
   document.querySelectorAll('[data-action]').forEach(button => {
     const guixuSession = game?.guixu_tide?.session;
     const trappedInGuixu = !!guixuSession?.trapped;
@@ -3856,7 +3873,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || game?.faction?.dispatch_used || (game?.faction?.contribution || 0) < (game?.faction?.dispatch_cost || 0);
   });
   document.querySelectorAll('.market-buy').forEach(button => {
-    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
+    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || []), ...(game?.market?.talisman_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('.market-lock').forEach(button => {
@@ -3981,7 +3998,9 @@ function renderButtons() {
   document.querySelectorAll('#new-game-form button, #save-list button, .quick-start-button').forEach(button => {
     const preset = configData?.quick_starts?.find(entry => entry.id === button.dataset.presetId);
     const speciesMissing = preset?.path === 'monster' && !button.parentElement.querySelector('select')?.value;
-    button.disabled = busy || (preset ? !preset.enabled || speciesMissing : false);
+    const selectedPath = button.parentElement.querySelector('[data-quick-path]')?.value;
+    const choiceMissing = preset?.select_path && (!selectedPath || (selectedPath === 'monster' && !button.parentElement.querySelector('[data-quick-species]')?.value));
+    button.disabled = busy || (preset ? !preset.enabled || speciesMissing || choiceMissing : false);
   });
 }
 

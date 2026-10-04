@@ -85,12 +85,35 @@ def main():
                     assert entry.locator('svg').count() == 1
                     entry.click()
                     assert page.locator('#tutorial-dialog').evaluate('e=>e.open')
+                    page.locator('#tutorial-close').click()
+                    for path in ('dao', 'monster'):
+                        page.locator('#new-game-button').click()
+                        lost = page.locator('[data-preset-id=lost_world]')
+                        lost.locator('xpath=ancestor::details').evaluate('e=>e.open=true')
+                        page.select_option('[data-quick-path]', '')
+                        page.evaluate('renderButtons()')
+                        assert lost.is_disabled()
+                        page.select_option('[data-quick-path]', path)
+                        if path == 'monster':
+                            assert lost.is_disabled()
+                            page.select_option('[data-quick-species]', 'serpent')
+                        else:
+                            assert page.locator('[data-quick-species]').is_hidden()
+                        assert lost.is_enabled()
+                        lost.click()
+                        page.wait_for_function('game?.player.world==="lost" && !busy')
+                        assert page.evaluate('game.player.path') == path
+                        page.locator('[data-panel-target=map]').click()
+                        assert page.locator('#map-locations .map-location').count() == 4
+                        assert 'null' not in page.locator('#map-locations').inner_text()
+                        assert page.locator('#map-locations').get_by_text('气经验：', exact=False).count() == 4
+                        assert page.evaluate('game.map.locations.every(l=>Object.keys(l.qi_concentrations).length===4)')
                     assert not errors, errors
                     browser.close()
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Start layout passed: six themes, desktop and two phone widths; folding, tutorial, DLC labels and real Buddhist start.')
+    print('Start layout passed: six themes, desktop and two phone widths; folding, tutorial, DLC labels, Buddhist and lost-world starts, mandatory path/species and generated maps.')
 
 
 if __name__ == '__main__':

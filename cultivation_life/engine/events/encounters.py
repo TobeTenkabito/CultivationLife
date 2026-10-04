@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...npc_names import person_name
 
 import random
 import uuid
@@ -80,9 +81,7 @@ def _generate_cultivator_target(
 
 
 def _encounter_person_name(race_id: str, rng: random.Random) -> str:
-    surnames = ["顾", "叶", "陆", "楚", "白", "谢", "云", "林", "闻", "景", "苍", "月"]
-    given = ["玄", "宁", "川", "微", "岳", "霜", "澄", "昭", "离", "砚", "烬", "渊"]
-    base = rng.choice(surnames) + rng.choice(given)
+    base = person_name(rng)
     return base if race_id == "human" else f"{RACE_DEFINITIONS.get(race_id, {'name': race_id})['name']}·{base}"
 
 

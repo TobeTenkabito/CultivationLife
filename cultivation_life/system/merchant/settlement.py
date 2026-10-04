@@ -114,6 +114,11 @@ def _merchant_intelligence(deps: MerchantSettlementDependencies, game, world, st
 def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, order):
     kind, world = order["kind"], order["source_world"]
     rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
+    if kind == "talisman":
+        from ..talismans import receive
+        for _ in range(order["quantity"]):
+            receive(game.player, order["spec"]["product"])
+        return f"获得{order['spec']['quality_name']}{order['spec']['product']['name']} ×{order['quantity']}，四维符合验收概览"
     if kind == 'spirit_manual':
         from ..spirit_voisinage import grant
         for _ in range(order['quantity']):
@@ -124,6 +129,9 @@ def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, ord
         return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng)
     if kind == "supply":
         category = order["material_category"]
+        if category == "talisman":
+            add_item(game.player, order["definition_id"], order["quantity"])
+            return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng)
         definition = (deps._formation_material_defs() if category == "formation" else deps._crafting_material_defs())[order["definition_id"]]
         for _ in range(order["quantity"]):
             if category == "formation":
@@ -159,8 +167,10 @@ def _merchant_procurement_bonus(deps: MerchantSettlementDependencies, game, orde
     if order.get('commission_version', 1) < 3 or order['stars'] <= 1:
         return ''
     formation = order['kind'] == 'supply' and order['material_category'] == 'formation'
-    definitions = deps._formation_material_defs().values() if formation else deps._crafting_material_defs().values()
-    value_key = 'base_value' if formation else 'base_material_value'
+    talisman = order['kind'] == 'supply' and order['material_category'] == 'talisman'
+    from ...talisman_content import catalog
+    definitions = catalog()[0].values() if talisman else deps._formation_material_defs().values() if formation else deps._crafting_material_defs().values()
+    value_key = 'base_value' if formation or talisman else 'base_material_value'
     budget = max(1, order['minimum'] * .08 / (order['stars'] - 1))
     candidates = [row for row in definitions if row['world'] == order['source_world']
                   and row['id'] != order['definition_id'] and row[value_key] <= budget]
@@ -169,7 +179,9 @@ def _merchant_procurement_bonus(deps: MerchantSettlementDependencies, game, orde
     rewards = []
     for _ in range(order['stars'] - 1):
         row = rng.choice(candidates)
-        if formation:
+        if talisman:
+            add_item(game.player, row['id'])
+        elif formation:
             game.player.formation_materials.append(make_formation_material_instance(row, source='商盟星级附赠', origin_world=order['source_world']))
         else:
             game.player.crafting_materials.append(make_crafting_material_instance(row, rng, source='商盟星级附赠', origin_world=order['source_world']))

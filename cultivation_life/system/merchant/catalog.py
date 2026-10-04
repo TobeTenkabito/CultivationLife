@@ -10,6 +10,7 @@ from ...rules import expected_combat_power
 from ..merchant_definitions import KINDS as KINDS
 from ..path_modifiers import commission_duration
 from .dependencies import MerchantCatalogDependencies
+from ...talisman_content import catalog as talisman_catalog
 
 
 def _merchant_board(deps: MerchantCatalogDependencies, game, alliance):
@@ -44,11 +45,26 @@ def _merchant_board(deps: MerchantCatalogDependencies, game, alliance):
                           "definition_id": definition["id"], "material_name": definition["name"],
                           "quantity": stars, "reward": reward, "policy": alliance["policy"],
                           "world": alliance["world"], "alliance_id": alliance["id"]})
+            if kind == "talisman":
+                methods = [r for r in talisman_catalog()[1].values() if r["world"] == alliance["world"]]
+                method = min(methods, key=lambda r: (abs(r["tier"] - max(1, target_realm)), r["id"]))
+                board[-1].update(method_id=method["id"], material_name=method["name"],
+                                 talisman_tier=method["tier"], quantity=1,
+                                 name=f"炼制{method['name']}（接单后亲制）")
+                board[-1]["reward"]["stones"] = max(reward["stones"], method["cost"] * 2)
     formation = sorted((row for row in deps._formation_material_defs().values() if row.get("world") == alliance["world"]), key=lambda row: (row["tier"], row["id"]))
     for original in list(board):
         if original["kind"] != "supply":
             continue
         original["material_category"] = "crafting"
+        talisman_materials = [r for r in talisman_catalog()[0].values() if r["world"] == alliance["world"]]
+        if talisman_materials:
+            task = copy.deepcopy(original)
+            definition = talisman_materials[min(len(talisman_materials) - 1, (task["stars"] - 1) * len(talisman_materials) // 5)]
+            task.update(id=task["id"] + ":talisman", material_category="talisman", name="提交符箓材料",
+                        reward_definition_id=task["definition_id"], definition_id=definition["id"], material_name=definition["name"])
+            task["reward"]["stones"] = max(task["reward"]["stones"], math.ceil(definition["base_value"] * task["quantity"] * 1.2))
+            board.append(task)
         if formation:
             task = copy.deepcopy(original)
             definition = formation[min(len(formation) - 1, (task["stars"] - 1) * len(formation) // 5)]

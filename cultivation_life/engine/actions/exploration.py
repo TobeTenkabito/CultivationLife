@@ -62,7 +62,9 @@ def move_world(
 def reconcile_boundary(deps: ExplorationDependencies, game, rng=None):
     if not game.player.alive or game.active_trial or game.pending_event:
         return False
-    destination = world_boundary.destination(game.player)
+    scene = spatial.current(game)
+    ceiling = scene.get("power_ceiling", 8) if scene and scene["kind"] == "lost" else None
+    destination = world_boundary.destination(game.player, realm_ceiling=ceiling)
     if not destination or destination == game.player.world:
         return False
     rng = rng if rng is not None else decode_rng(game.seed, game.rng_state)
@@ -147,6 +149,8 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
         spatial.new_rift(game, rng, deps.maps, controlled=True)
         spatial.journal(game, "以神通开辟可控裂缝。通往何处仍不可预知。")
     elif action == "enter":
+        if not spatial.visible(game):
+            raise ValueError("须达到元婴初期，方可感知并进入空间裂缝")
         rift = next(
             (
                 r
@@ -163,14 +167,15 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
             raise ValueError("此裂缝已经消失或不在当前地图")
         score = spatial.protection(game, consume=True)
         state["rifts"].remove(rift)
-        if score["score"] < rift["requirement"]:
+        requirement = spatial.rift_requirement(rift, p.age)
+        if score["score"] < requirement:
             deps.die(
                 game,
-                f"空间裂缝撕裂护持：防护判定 {score['score']:.1f} / {rift['requirement']}，身死道消。",
+                f"空间裂缝撕裂护持：防护判定 {score['score']:.1f} / {requirement}，身死道消。",
                 "SYS_RIFT_DEATH",
             )
             return commit(deps, game, rng)
-        weights = spatial.cfg()["outcome_weights"]
+        weights = spatial.outcome_weights(rift)
         outcome = rng.choices(list(weights), weights=list(weights.values()))[0]
         origin = p.world
         if outcome == "secluded":
@@ -240,6 +245,8 @@ def train(deps: ExplorationDependencies, game, action, units):
     if action not in {"cultivate", "rest", "body_train", "sense_train"}:
         raise ValueError("独立空间仅可修炼、炼体、锻炼神识、调息或使用空间内入口")
     p = game.player
+    if action == "cultivate" and spatial.cultivation_block_reason(game):
+        raise ValueError(spatial.cultivation_block_reason(game))
     if p.cultivation_suppression and action == "cultivate":
         raise ValueError("请先解除压制秘法，再修炼主修功法")
     if (
@@ -283,12 +290,14 @@ def train(deps: ExplorationDependencies, game, action, units):
                 gain *= WORLD_SYSTEMS["demonic_cultivation"][
                     "natural_cultivation_multiplier"
                 ]
+            if p.world == "lost":
+                gain *= (spatial.current(game).get("population_rules") or {}).get("cultivation_multiplier", 1.)
             if p.technique and p.spirit_root != "none":
                 p.opportunity += gain
                 grant_qi_experience(
                     p,
                     gain,
-                    WORLD_SYSTEMS["world_profiles"][p.world]["qi_concentrations"],
+                    spatial.current_qi(game),
                 )
         elif action == "body_train":
             p.body_progress = min(
@@ -304,6 +313,7 @@ def train(deps: ExplorationDependencies, game, action, units):
             not advance_elapsed_year(deps, game, rng, [], encounters=False)
             or p.world != origin
             or (action == "body_train" and p.awaiting_body_breakthrough)
+            or (action == "cultivate" and spatial.cultivation_block_reason(game))
         ):
             break
     spatial.journal(game, f"独立空间内{ACTIONS[action]['name']}，经过 {elapsed} 年。")

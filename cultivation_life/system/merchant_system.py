@@ -79,6 +79,7 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
                 if not task:
                     raise ValueError("委托已刷新或已完成")
                 task.update(worked=0, influence_key=influence_key, existing_artifacts=[row["id"] for row in player.crafted_artifacts])
+                task["existing_talismans"] = [row["id"] for row in player.talismans]
                 state["active"] = task
             elif action == "work":
                 deps._merchant_work(game, rng)

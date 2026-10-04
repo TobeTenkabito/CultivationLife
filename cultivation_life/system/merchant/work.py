@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ...rules import add_item, remove_item
+from ...rules import add_item, remove_item, has_item
 from ..crafting_system import make_crafting_material_instance
 from ..possession_system import advance_player_age
 from .dependencies import MerchantWorkDependencies
@@ -10,7 +10,18 @@ from .dependencies import MerchantWorkDependencies
 
 def _merchant_task_ready(game, task):
     player = game.player
+    if task["kind"] == "talisman":
+        rows = [r for r in player.talismans if r.get("method_id") == task["method_id"]
+                and r.get("creator_id") == game.id and r["id"] not in task.get("existing_talismans", [])
+                and r["uses"] == r.get("max_uses") and not r["enabled"]]
+        if not rows:
+            raise ValueError(f"请在接单后亲自炼制{task['material_name']}，保留完整次数并停用后交付")
+        return rows[:1]
     if task["kind"] == "supply":
+        if task.get("material_category") == "talisman":
+            if not has_item(player, task["definition_id"], task["quantity"]):
+                raise ValueError(f"需准备 {task['material_name']} ×{task['quantity']}")
+            return []
         bag = player.formation_materials if task.get("material_category") == "formation" else player.crafting_materials
         rows = [row for row in bag if row["material_id"] == task["definition_id"]]
         if len(rows) < task["quantity"]:
@@ -72,8 +83,13 @@ def _merchant_work(deps: MerchantWorkDependencies, game, rng):
     if kind == "intel":
         detail = deps._merchant_intelligence(game, task["world"], task["stars"], rng)
     if kind == "supply":
-        for row in materials:
-            (game.player.formation_materials if task.get("material_category") == "formation" else game.player.crafting_materials).remove(row)
+        if task.get("material_category") == "talisman":
+            remove_item(game.player, task["definition_id"], task["quantity"])
+        else:
+            for row in materials:
+                (game.player.formation_materials if task.get("material_category") == "formation" else game.player.crafting_materials).remove(row)
+    elif kind == "talisman":
+        game.player.talismans.remove(materials[0])
     elif kind == "weapon":
         artifact = materials[0]
         remove_item(game.player, artifact["id"])

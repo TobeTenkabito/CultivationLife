@@ -14,6 +14,7 @@ from ..runtime import now_iso
 from .formation_system import calculate_formation_profile, formation_alpha, formation_config
 from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
 from .merchant.dependencies import MerchantCommissionDependencies
+from ..talisman_content import catalog as talisman_catalog
 
 @lru_cache(maxsize=48)
 def _formation_designs(serialized, config_json, alpha):
@@ -45,8 +46,10 @@ def _merchant_commission_available(deps: MerchantCommissionDependencies, order):
     if order["kind"] == "item":
         return order["definition_id"] in ITEM_CATALOG
     if order["kind"] == "supply":
-        definitions = deps._formation_material_defs() if order["material_category"] == "formation" else deps._crafting_material_defs()
+        definitions = talisman_catalog()[0] if order["material_category"] == "talisman" else deps._formation_material_defs() if order["material_category"] == "formation" else deps._crafting_material_defs()
         return order["definition_id"] in definitions
+    if order["kind"] == "talisman":
+        return talisman_catalog()[1].get(order["definition_id"], {}).get("world") == order["source_world"]
     if order["kind"] == "formation":
         return all(key in deps._formation_material_defs() for key in order["spec"]["slots"] if key)
     return True
@@ -85,6 +88,8 @@ def _merchant_procurement_catalog(deps: MerchantCommissionDependencies, game, al
                         if npc.alive and npc.world == world][:60] if linked else [],
             "materials": [{"id": row["id"], "name": row["name"], "value": row["base_material_value"], "tier": row["tier"]} for row in crafting],
             "formation_materials": [{"id": row["id"], "name": row["name"], "value": row["base_value"], "tier": row["tier"]} for row in formation],
+            "talisman_materials": [dict(row) for row in talisman_catalog()[0].values() if row["world"] == world],
+            "talismans": [dict(row) for row in talisman_catalog()[1].values() if row["world"] == world],
             "items": deps._merchant_items(world),
             "spirit_manuals": [{'id': t.id, 'name': t.name} for t in catalog(game).values()] if secondary(world) else [],
             "formation_tiers": sorted({int(row["tier"]) for row in formation}),
@@ -190,18 +195,32 @@ def _merchant_quote(deps: MerchantCommissionDependencies, game, alliance, payloa
     time_factor = 15 if cross else 1
     spec, definition_id, target_id = None, "", None
     category = str(payload.get("material_category", "crafting"))
-    if category not in {"crafting", "formation"}:
-        raise ValueError("请选择阵法材料或炼器材料")
+    if category not in {"crafting", "formation", "talisman"}:
+        raise ValueError("请选择阵法材料、炼器材料或符箓材料")
     value = 2000 * stars ** 3
     name = KINDS[kind]
     if kind == "supply":
-        definitions = deps._formation_material_defs() if category == "formation" else deps._crafting_material_defs()
+        definitions = talisman_catalog()[0] if category == "talisman" else deps._formation_material_defs() if category == "formation" else deps._crafting_material_defs()
         definition = definitions.get(str(payload.get("definition_id", "")))
         if not definition or definition.get("world") != world:
             raise ValueError("请选择该界面及材料分类下的具体材料")
         definition_id = definition["id"]
-        value = int(definition["base_value" if category == "formation" else "base_material_value"]) * quantity * 3
+        value = int(definition["base_value" if category in {"formation", "talisman"} else "base_material_value"]) * quantity * 3
         name = f"收集{definition['name']} ×{quantity}"
+    elif kind == "talisman":
+        from .talismans import product, economic_value
+        method = talisman_catalog()[1].get(str(payload.get("definition_id", "")))
+        if cross or not method or method["world"] != world:
+            raise ValueError("符箓只能委托本界工坊，须选择本界制符法")
+        definitions = [r for r in talisman_catalog()[0].values() if r["world"] == world and r["tier"] == method["tier"]][:2]
+        quality = ["normal", "normal", "fine", "fine", "perfect"][stars - 1]
+        row = product(method, definitions, quality)
+        from ..talisman_content import QUALITIES
+        spec = dict(product=row, material_tier=method["tier"], materials=definitions,
+                    quality_name=QUALITIES[quality][0])
+        definition_id = method["id"]
+        value = max(economic_value(row), row["material_value"]) * quantity * 3
+        name = f"炼制{spec['quality_name']}{method['name']} ×{quantity}"
     elif kind == 'spirit_manual':
         from .spirit_voisinage import secondary, catalog
         book = catalog(game).get(str(payload.get('definition_id', '')))
@@ -240,6 +259,7 @@ def _merchant_quote(deps: MerchantCommissionDependencies, game, alliance, payloa
              "service_description": f"{stars}星：更倾向高境界修士承接；" + (
                  f"附赠{stars - 1}份同界其他材料" if kind in {'item','supply'} else
                  f"{spec['quality_name']}品质验收" if kind == 'weapon' else
+                 f"{spec['quality_name']}符箓验收，四维与概览一致" if kind == 'talisman' else
                  f"范围内优选稳定阵型，附赠{stars - 1}份同阶备用阵材" if kind == 'formation' else
                  "打听修士关系；神机开启时有机会获得本界榜单的多条情报" if kind == 'intel' else '按星级提供商路服务'),
              "route_description": "跨界商路：时间×15、基础费用×4" if cross else "本界商路"}

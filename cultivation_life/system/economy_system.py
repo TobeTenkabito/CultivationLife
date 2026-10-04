@@ -91,6 +91,8 @@ def _clear_market(game: GameState) -> None:
 
 
 def _market_offer_group(offer: dict[str, Any]) -> str:
+    if offer.get("kind") == "talisman_material":
+        return "talisman"
     if offer.get("kind") == "puppet_material":
         return "puppet"
     return (
@@ -105,6 +107,11 @@ def _spirit_stones(player: Player) -> int:
 
 
 def _catalog_price(kind: str, content_id: str) -> int:
+    if kind in {"item", "talisman_material"} and content_id.startswith("talisman_"):
+        from ..talisman_content import catalog
+        material = catalog()[0].get(content_id)
+        if material:
+            return material["base_value"]
     if content_id == "heroic_progeny_elixir":
         return 985
     prices = sorted(

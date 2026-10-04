@@ -417,6 +417,7 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
          "type":str(row.get("type")), "combat_power":round(float(row.get("combat_power", 0)), 1)}
         for row in game.player.puppets if row.get("type") in {"mechanical", "corpse"}
     ]
+    from ..talismans import sale_rows
     return {
         **state, "available":True, "at_location":at_location,
         "black_market_results": [{**row, "base_price": row["price"], "price": adjusted_cost(game, row["price"], "black_market")} for row in state.get("black_market_results", [])],
@@ -425,6 +426,7 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         "private_sellable_items":inventory,
         "player_aliases":list(deps._auction_rules()["player_aliases"]),
         "black_market_sellable_puppets":sellable_puppets,
+        "black_market_sellable_talismans":sale_rows(game.player, float(deps._auction_rules()["black_market_sell_ratio"])),
         "commission_rate":float(deps._auction_rules()["commission_rate"]),
         "listing_fee_rate":float(deps._auction_rules()["consignment_listing_fee_ratio"]),
         "max_rounds":int(deps._auction_rules()["auction_rounds"]),

@@ -88,6 +88,7 @@ def _merchant_tick_order(deps: MerchantExecutionDependencies, game, order):
     duration = max(1, order['finish_age'] - start)
     order['progress'] = min(.99, max(0, (end_age - start) / duration))
     stages = {
+        'talisman': ['本界同阶符材已备齐', '制符师正在注灵绘符', '正在核验品级、三项属性与次数'],
         'spirit_manual': ['已追索下界仙法残卷的流传线索', '正在访求持简者并辨明真伪', '残解已核验，封装玉简返盟'],
         'supply': ['已抵达产地，核对材料线索', '正在搜集并验收材料', '材料已归集，安排护送回盟'],
         'item': ['已查明遗迹及宝物线索', '正在探索并寻找目标道具', '正在核验所得并准备交付'],

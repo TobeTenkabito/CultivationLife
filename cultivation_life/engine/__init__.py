@@ -747,10 +747,15 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         result["buddhist_system"] = self._public_buddhist(game)
         result['spatial'] = spatial.public(game)
         result['talismans'] = talismans.public(game)
+        spatial_limit = spatial.cultivation_block_reason(game)
+        if spatial_limit:
+            result['breakthrough'].update(ready=False, enabled=False, met=False, reason=spatial_limit)
         if spatial.current(game):
             scene = spatial.current(game)
             result['player']['world_name'] = scene['name']
             result['player']['location_name'] = next(r['name'] for r in scene['locations'] if r['id']==scene['location_id'])
+            result['player']['qi_gain_efficiencies'] = spatial.current_qi(game)
+            result['map'] = spatial.public_map(game)
             result['world_npcs'] = []
             result['market'] = []
         return result
