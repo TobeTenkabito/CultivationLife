@@ -26,7 +26,8 @@ from ..version import BASE_GAME_VERSION
 from .commands import build_registry, snapshot_name
 from .engine_adapter import SessionEngine
 from .registry import CommandError, Context, Services
-from .state import digest, differences, validate
+from .state import digest, differences, validate, read_pointer
+from .capabilities import BY_OPERATION
 
 
 FORMAT = 'CultivationLife.debug.v1'
@@ -156,6 +157,19 @@ class Runtime:
                     rows.append({'file': path.name, 'error': 'unreadable source'})
         return rows
 
+    def create_scene(self, options):
+        with tempfile.TemporaryDirectory(prefix='cultivation-debug-scene-') as directory:
+            engine = SessionEngine(self.project_root, Path(directory), {})
+            game = engine.create_game(**options)
+            current = self.staged_result(Path(directory), {'game': game, 'overrides': {}})
+        session = {'format': FORMAT, 'id': uuid.uuid4().hex, 'source_game_id': game['id'],
+                   'source_kind': 'generated', 'source_sha256': digest(current['game']),
+                   'created_at': now_iso(), 'environment': self.identity(),
+                   'current': current, 'initial': copy.deepcopy(current), 'last_before': None,
+                   'snapshots': {}, 'journal': [], 'revision': 0, 'receipts': {}}
+        atomic_json(self._path(session['id']), session)
+        return {'session_id': session['id'], 'game_id': game['id'], 'isolated': True, 'revision': 0}
+
     def sessions(self):
         return [{'session_id': row['id'], 'game_id': row['current']['game']['id'],
                  'name': row['current']['game']['player']['name'], 'created_at': row['created_at']}
@@ -208,7 +222,8 @@ class Runtime:
         session = {key: copy.deepcopy(bundle[key]) for key in (
             'format', 'source_game_id', 'source_sha256', 'environment', 'current', 'initial',
             'last_before', 'snapshots', 'journal')}
-        session.update(id=uuid.uuid4().hex, created_at=now_iso(), revision=0, receipts={})
+        session.update(id=uuid.uuid4().hex, created_at=now_iso(), revision=0, receipts={},
+                       source_kind='generated' if bundle.get('source_kind') == 'generated' else 'save')
         atomic_json(self._path(session['id']), session)
         identity = self.identity()
         return {'session_id': session['id'], 'game_id': game_id, 'isolated': True, 'revision': 0,
@@ -255,11 +270,11 @@ class Runtime:
             original = copy.deepcopy(session)
             ctx = Context(session, Services(start=lambda: self.start(game_id), resume=self.resume,
                 sessions=self.sessions, export=self.export, import_bundle=lambda: self.import_bundle(bundle),
-                sources=self.sources, simulate=self.simulate))
+                sources=self.sources, simulate=self.simulate, preview=self.preview, create_scene=self.create_scene))
             operation = {'command': command.name, 'arguments': dict(zip((a.name for a in command.arguments), values))}
             try:
                 data = command.handler(ctx, *values)
-                if command.kind == 'query' and session != original:
+                if command.kind in {'query', 'preview'} and session != original:
                     raise RuntimeError('Query command modified the detached session.')
                 diff = {'changes': [], 'total': 0, 'truncated': False}
                 if writes:
@@ -277,7 +292,7 @@ class Runtime:
                     atomic_json(self._path(session['id']), session)
                 return {**result, 'catalog': self.registry.catalog()}
             except Exception as error:
-                if original is not None and command.kind != 'query':
+                if original is not None and command.kind not in {'query', 'preview'}:
                     self.record(original, original['current'], operation,
                                 {'type': type(error).__name__, 'message': str(error),
                                  'traceback': traceback.format_exc()}, request_id=request_key)
@@ -306,7 +321,7 @@ class Runtime:
 
     def simulate(self, session, operation, payload):
         before = session['current']
-        if not before['game']['player']['alive']:
+        if operation in {'advance', 'choice'} and not before['game']['player']['alive']:
             raise CommandError('The player is dead; ordinary actions are unavailable.')
         pending = before['game'].get('pending_event')
         if operation == 'advance' and pending:
@@ -317,20 +332,38 @@ class Runtime:
             raise CommandError('Unknown choice_id; inspect the pending event first.')
         with self.staged(before) as (engine, store), request_scope(engine):
             game_id = before['game']['id']
-            engine.assert_ghost_operation_allowed(game_id, operation)
-            engine.assert_guixu_operation_allowed(game_id, operation)
-            engine.assert_buddhist_operation_allowed(game_id, operation)
-            if operation == 'advance':
-                engine.advance(game_id, payload['action'], payload['years'])
-            elif operation == 'choice':
-                engine.choose(game_id, payload['choice_id'])
+            if operation == 'view':
+                view = engine.get_game(game_id)
+                pointer = payload.get('pointer')
+                result = {'sections': sorted(view)} if not pointer else read_pointer(view, pointer)
             else:
-                raise RuntimeError('Unregistered simulation capability.')
+                capability = BY_OPERATION.get(operation)
+                if capability is None or capability.preview:
+                    raise RuntimeError('Unregistered simulation capability.')
+                self.guard(engine, game_id, operation)
+                capability.invoke(engine, game_id, payload)
             session['current'] = self.staged_result(store, before)
+        if operation == 'view':
+            return {'view': result, 'pointer': payload.get('pointer'), 'prepared': True}
         game = session['current']['game']
         return {'operation': operation, 'player_alive': game['player']['alive'],
                 'age': game['player']['age'], 'pending_event': copy.deepcopy(game.get('pending_event')),
                 'active_trial': copy.deepcopy(game.get('active_trial'))}
+
+    @staticmethod
+    def guard(engine, game_id, operation):
+        engine.assert_ghost_operation_allowed(game_id, operation)
+        engine.assert_guixu_operation_allowed(game_id, operation)
+        engine.assert_buddhist_operation_allowed(game_id, operation)
+
+    def preview(self, session, operation, payload):
+        capability = BY_OPERATION.get(operation)
+        if capability is None or not capability.preview:
+            raise RuntimeError('Unregistered preview capability.')
+        with self.staged(session['current']) as (engine, _store), request_scope(engine):
+            game_id = session['current']['game']['id']
+            self.guard(engine, game_id, operation)
+            return capability.invoke(engine, game_id, payload)
 
     @contextmanager
     def gameplay(self, session_id, operation, request_id):

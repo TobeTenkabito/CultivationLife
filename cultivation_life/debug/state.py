@@ -3,12 +3,30 @@ import copy
 import hashlib
 import json
 import math
+import re
 
 from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..models import GameState
 from ..runtime import decode_rng
 from ..save_schema import SAVE_SCHEMA_VERSION
 from .registry import CommandError
+
+
+def read_pointer(document, pointer):
+    if not isinstance(pointer, str) or not pointer.startswith('/') or len(pointer) > 256:
+        raise CommandError('Expected a JSON Pointer beginning with /, up to 256 characters.')
+    value = document
+    for part in pointer[1:].split('/'):
+        if re.search(r'~(?![01])', part):
+            raise CommandError('Invalid JSON Pointer escape.')
+        key = part.replace('~1', '/').replace('~0', '~')
+        if isinstance(value, dict) and key in value:
+            value = value[key]
+        elif isinstance(value, list) and re.fullmatch(r'0|[1-9][0-9]*', key) and int(key) < len(value):
+            value = value[int(key)]
+        else:
+            raise CommandError(f'Unknown state pointer: {pointer}')
+    return copy.deepcopy(value)
 
 
 def digest(value):

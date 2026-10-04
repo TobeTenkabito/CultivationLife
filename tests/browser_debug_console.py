@@ -60,6 +60,17 @@ def main():
                     command('give spirit_stone 100')
                     command('snapshot restore baseline')
                     assert page.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone').quantity") == 7654321
+                    command('game view /market')
+                    command('setting set combat_popup false')
+                    assert page.evaluate('game.settings.combat_popup') is False
+                    command("formation preview '[]'")
+                    command('scenario create "Console Scene" supreme_metal dao 42 core')
+                    assert page.evaluate('game.player.name') == 'Console Scene'
+                    assert page.evaluate('game.id') != made['id']
+                    assert len(list(engine.store.directory.glob('*.json'))) == 2  # Original save and achievements.
+                    command('debug stop')
+                    assert page.evaluate('game === null && !DebugConsole.active()')
+                    command('debug resume ' + sid)
                     command('help player')
                     field = page.locator('#debug-console-input')
                     field.fill('player set spirit_'); field.press('Tab')

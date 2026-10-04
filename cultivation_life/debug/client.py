@@ -78,7 +78,7 @@ class DebugClient:
                           'description': command['description'],
                           'inputSchema': {'type': 'object', 'properties': properties,
                                           'required': required, 'additionalProperties': False},
-                          'annotations': {'readOnlyHint': command['type'] in {'query', 'export'},
+                          'annotations': {'readOnlyHint': command['type'] in {'query', 'preview', 'export'},
                                           'destructiveHint': writes, 'openWorldHint': False},
                           '_command': command['name']})
         return tools

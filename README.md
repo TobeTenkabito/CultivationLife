@@ -77,6 +77,8 @@ Debug=False
 
 开发自动化可复用项目自带的 CLI、Python 客户端和 stdio MCP 工具。启动服务后执行 `python scripts/debug_agent.py tools` 查看命令及参数 Schema；`python scripts/debug_agent.py mcp` 启动 Agent 桥。工具沿用独立副本、版本校验和请求去重，接入配置及完整示例见 [Agent 使用规范](docs/debug-development.md#9-agent-工具与结构化调用)。
 
+当前控制台共 161 个命令，覆盖本体通用角色操作。`scenario create` 可直接新建隔离测试角色；`game view` 提供与界面同源的选项和 ID，市场、功法、生产、关系、组织、战争及跨界操作均沿用正式规则。完整映射和专属玩法边界见 [本体覆盖清单](docs/debug-base-coverage.md)。
+
 ## DLC 与 MOD
 
 启动时按 **本体 → DLC → MOD** 加载内容。同类扩展按 `load_order` 和 ID 排序。每个包放在 `dlc/` 或 `mods/` 下的独立目录，包含 `manifest.json` 与 `content/`；扩展只提供 JSON 数据，不执行其中的 Python 或 JavaScript。

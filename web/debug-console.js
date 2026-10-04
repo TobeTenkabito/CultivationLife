@@ -52,8 +52,9 @@
       if (data?.download) offerDownload(data.download);
       else print(data);
       if (result.diff?.total) print(result.diff);
+      if (data?.return_to_title) hooks.reset();
       // Query commands must remain pure: do not follow them with a gameplay GET.
-      if ((result.changed || result.type === 'session') && (data?.game_id || hooks.gameId())) {
+      if (!data?.return_to_title && (result.changed || result.type === 'session') && (data?.game_id || hooks.gameId())) {
         await hooks.refresh(data?.game_id || hooks.gameId());
       }
     } catch (error) {
@@ -115,9 +116,9 @@
     panel = node('dialog', '', 'debug-console'); panel.setAttribute('aria-labelledby', 'debug-console-title');
     const heading = node('header'); heading.append(node('h2', 'Developer Console', 'debug-console-title'));
     const close = node('button', '关闭'); close.type = 'button'; close.onclick = () => panel.close(); heading.append(close);
-    const description = node('p', '先选择角色，再执行 debug start。所有修改仅作用于独立副本。Ctrl + ` 打开，Tab 补全。');
+    const description = node('p', 'debug start 复制当前角色；scenario list 查看测试开局。game view 获取操作选项，state get 只读存档。所有修改仅作用于独立副本。');
     const actions = node('div'); actions.className = 'debug-actions';
-    for (const [label, command] of [['创建调试副本', 'debug start'], ['返回原角色', 'debug stop'], ['帮助', 'help'], ['导出复现包', 'repro export']]) {
+    for (const [label, command] of [['创建调试副本', 'debug start'], ['退出调试副本', 'debug stop'], ['帮助', 'help'], ['功能清单', 'capability list'], ['开局预设', 'scenario list'], ['导出复现包', 'repro export']]) {
       const button = node('button', label); button.type = 'button'; button.onclick = () => execute(command); actions.append(button);
     }
     const detach = node('button', '断开会话'); detach.type = 'button';
