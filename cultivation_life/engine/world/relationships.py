@@ -613,6 +613,9 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     ]
     seen = set()
     for relation in event_relations:
+        from ...spatial_people import instance_of
+        if instance_of(game, relation['id']):
+            continue
         if relation["id"] in seen:
             continue
         seen.add(relation["id"])

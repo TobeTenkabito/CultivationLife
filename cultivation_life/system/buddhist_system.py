@@ -1,5 +1,6 @@
 """World-local Dharma networks. No stored resource conversion or combat caches."""
 from __future__ import annotations
+from .spatial_capabilities import scope_key, site_key, local_names
 
 from .buddhist.rules import (
     buddhist_config as buddhist_config,
@@ -40,7 +41,7 @@ class BuddhistSystemMixin:
         state.setdefault("grace_units", None)
         state.setdefault("assembly", None)
         state.setdefault("history", [])
-        site_state(state, game.player.world, game.player.location_id)
+        site_state(state, scope_key(game), site_key(game))
 
     def _advance_buddhist_year(self, game):
         if not buddhist_active(game):
@@ -48,13 +49,15 @@ class BuddhistSystemMixin:
         self._ensure_buddhist_state(game)
         state, config, player = game.buddhist_state, buddhist_config(), game.player
         grace_before = state.get("grace_units")
-        for world in state["worlds"].values():
+        for identity, world in state["worlds"].items():
+            if (player.world in {'lost', 'rift'} and identity != scope_key(game)) or (identity in game.spatial_state.get('instances', {}) and identity != scope_key(game)):
+                continue
             for site in world["sites"].values():
                 temple = config["temples"][int(site["temple"])]
                 site["followers"] = max(temple["floor"], site["followers"] * (1 - temple["decay"]))
-        total = followers(state, player.world)
+        total = followers(state, scope_key(game))
         income = min(config["annual_karma_cap"], math.log1p(total / config["follower_income_scale"]) * config["follower_income_coefficient"])
-        income += sum(config["temple_karma"] for site in state["worlds"][player.world]["sites"].values() if site["temple"] == 3)
+        income += sum(config["temple_karma"] for site in state["worlds"][scope_key(game)]["sites"].values() if site["temple"] == 3)
         set_dharma_karma(game, state["dharma_karma"] + income)
         chosen = list(selected_blessings(game))
         expense = sum(upkeep(game, blessing) for blessing in chosen)
@@ -79,7 +82,7 @@ class BuddhistSystemMixin:
 
     def _buddhist_permissions(self, game):
         player, config = game.player, buddhist_config()
-        site = site_state(game.buddhist_state, player.world, player.location_id)
+        site = site_state(game.buddhist_state, scope_key(game), site_key(game))
         return [{"id": row.id, "name": row.name,
                  "exempt": authority_permission_exempt(game, row),
                  "intimidated": player.realm_index >= {1: 4, 2: 7, 3: 10}.get(int(WORLD_SYSTEMS["world_profiles"][player.world]["tier"]), 10),
@@ -97,7 +100,7 @@ class BuddhistSystemMixin:
             return {"available": False}
         self._ensure_buddhist_state(game)
         state, player, config = game.buddhist_state, game.player, buddhist_config()
-        site = site_state(state, player.world, player.location_id)
+        site = site_state(state, scope_key(game), site_key(game))
         burden = self._buddhist_burden(game)
         chosen = selected_blessings(game)
         from ..rules import effective_fame
@@ -105,19 +108,19 @@ class BuddhistSystemMixin:
         sites = []
         for world, network in state["worlds"].items():
             for location, row in network["sites"].items():
-                if not row["followers"] and not row["temple"] and world != player.world:
+                if not row["followers"] and not row["temple"] and world != scope_key(game):
                     continue
-                sites.append({"world": world, "world_name": WORLD_SYSTEMS["world_names"][world],
-                              "location": location, "name": self.maps.location(world, location)["name"],
-                              "active": world == player.world, **copy.deepcopy(row),
+                sites.append({"world": world, "world_name": local_names(game, self.maps, world, location)[0],
+                              "location": location, "name": local_names(game, self.maps, world, location)[1],
+                              "active": world == scope_key(game), **copy.deepcopy(row),
                               **config["temples"][row["temple"]]})
         level = site["temple"]
         tier = int(WORLD_SYSTEMS["world_profiles"][player.world]["tier"])
         return {"available": True, "karma": state["dharma_karma"], "grace_units": state["grace_units"],
                 "wish": {**copy.deepcopy(state["wish"]), "blocked": nirvana_target(self, game)[1]},
                 "raw_karma": player.karma, "raw_sha": player.sha_qi, "effective_fame": effective_fame(player),
-                "followers": round(followers(state, player.world)), "sites": sites,
-                "site": copy.deepcopy(site), "temple_cost": config["temples"][level + 1]["cost"] * config["temple_tier_scale"] ** (tier - 1) if level < 3 else None,
+                "followers": round(followers(state, scope_key(game))), "sites": sites,
+                "site": copy.deepcopy(site), "temple_cost": config["temples"][level + 1]["cost"] * config["temple_tier_scale"] ** (max(1, tier) - 1) if level < 3 else None,
                 "blessings": [{"id": key, **spec, "selected": key in chosen, "annual_cost": round(upkeep(game, key), 3)} for key, spec in config["blessings"].items()],
                 "upkeep": round(sum(upkeep(game, key) for key in chosen), 3), "permissions": self._buddhist_permissions(game),
                 "techniques": [{"id": row.id, "name": row.name, "level": row.level} for row in player.known_techniques],
@@ -130,7 +133,7 @@ class BuddhistSystemMixin:
         game = self._load(game_id)
         session = game.buddhist_state.get("assembly")
         # A disabled DLC may have allowed travel; returning must remain possible after re-enabling.
-        at_assembly = session and (session["world"], session["location"]) == (game.player.world, game.player.location_id)
+        at_assembly = session and (session["world"], session["location"]) == (scope_key(game), site_key(game))
         if buddhist_active(game) and at_assembly and operation not in {
             "buddhist-action", "choice", "use-item", "settings", "setting", "world-news-debug", "merchant-preview"}:
             raise ValueError("法会尚未结束，请先继续法会或散会")

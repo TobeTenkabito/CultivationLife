@@ -23,6 +23,15 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
         return changed
     # Drop stale/locked offers from saves made before source restrictions.
     previous_count = len(game.market_offers)
+    repriced = False
+    from ...talisman_content import local_catalog
+    definitions = local_catalog(game)[0]
+    for offer in game.market_offers:
+        if offer.get('kind') == 'talisman_material' and offer.get('pricing_version', 1) < 2:
+            material = definitions.get(offer.get('content_id'))
+            if material:
+                offer.update(price=material['base_value'], pricing_version=2)
+                repriced = True
     game.market_offers[:] = [row for row in game.market_offers if not restricted_acquisition(
         str(row.get("kind", "")), str(row.get("content_id", "")))]
     if player.realm_index == 0:
@@ -52,7 +61,7 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
         if not any(row.get("kind") == "talisman_material" for row in game.market_offers):
             from ..talismans import market_offers as talisman_offers
             game.market_offers.extend(talisman_offers(game, tier, "符材坊市", location_id))
-        return len(game.market_offers) != previous_count
+        return repriced or len(game.market_offers) != previous_count
     same_market = (
         game.market_realm_index == tier and game.market_world == player.world
         and game.market_location_id == location_id
@@ -291,9 +300,9 @@ def _is_world_market_good(deps: MarketDependencies, world: str, kind: str, conte
     if kind == "puppet_material":
         from cultivation_life.puppet_content import definitions
         return definitions().get(content_id, {}).get("world") == world
-    if kind == "talisman_material":
+    if kind in {"talisman_material", "talisman"}:
         from ...talisman_content import catalog
-        return catalog()[0].get(content_id, {}).get("world") == world
+        return catalog()[0 if kind == 'talisman_material' else 1].get(content_id, {}).get("world") == world
     if kind == "crafting_material":
         return any(
             str(row.get("world")) == world and str(row.get("id")) == content_id

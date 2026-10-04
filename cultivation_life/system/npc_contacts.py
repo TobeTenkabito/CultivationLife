@@ -16,8 +16,10 @@ def relation_kind(player, npc_id):
 
 
 def availability(game, npc):
+    from ..spatial_people import accessible
+    from ..npc_custody import is_free
     p = game.player
-    blocked = ('此人不在当前界面或已经陨落' if not npc.alive or npc.world != p.world else
+    blocked = ('此人不在当前界面或空间，或不在自由名册' if not is_free(npc) or not accessible(game, npc) else
                '请先结束当前事件、战斗或拘禁' if not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
                or (game.guixu_state.get('player_session') or {}).get('trapped') else '')
     actions = dict.fromkeys(['party','companion','friend','master','disciple','concubine','slay','improve','worsen','capture'], blocked)

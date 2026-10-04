@@ -89,6 +89,8 @@ def begin_relationship_capture(deps: CaptivityDependencies, game_id: str, kind: 
         next((row for row in player.dao_friends if str(row.get("id")) == target_id), None)
         if kind == "friend" else None
     )
+    from ...spatial_people import require_access
+    require_access(game, relation)
     if not relation or not is_free(relation) or relation.get("world", player.world) != player.world:
         raise ValueError("目标关系人物当前不在身边")
     if relation.setdefault("last_interactions", {}).get("capture_attempt") == player.age:

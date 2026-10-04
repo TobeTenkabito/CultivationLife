@@ -42,6 +42,8 @@ def _treasure_pools(goods_identity: int, items_identity: int) -> tuple:
 
 
 def _select_npc_treasure(npc: SectNpc, rng: random.Random) -> str | None:
+    if npc.world in {'lost', 'rift'}:
+        return None
     tier = max(1, min(8, npc.realm_index))
     market_worlds, pools = _treasure_pools(id(MARKET_GOODS), id(ITEM_CATALOG))
     world = npc.world if npc.world in market_worlds else ("spirit" if npc.realm_index >= 6 else "human")
@@ -97,6 +99,9 @@ def _sect_members(deps: NpcDependencies, game: GameState, sect: SectState) -> li
 def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | None:
     existing = find_person(game, npc_id)
     if existing is not None:
+        from ...spatial_people import accessible, instance_of
+        if (game.player.world in {'lost', 'rift'} or instance_of(game, npc_id)) and not accessible(game, existing):
+            return None
         # Free-world operations cannot target somebody held in another roster.
         return existing if existing.roster_state == 'active' else None
     child = next((row for row in game.player.offspring if row.get("id") == npc_id), None)
@@ -187,6 +192,9 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
     )
     simulated_npcs = [*game.world_npcs.values(), *game.notable_npcs.values()]
     for npc in simulated_npcs:
+        from ...spatial_people import instance_of
+        if instance_of(game, npc.id):
+            continue
         if not npc.alive:
             continue
         npc.age += 1
@@ -279,7 +287,11 @@ def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: ra
 
 
 def _all_world_npcs(game: GameState) -> list[SectNpc]:
-    return [*game.world_npcs.values(), *game.notable_npcs.values(), *(npc for sect in game.sects.values() for npc in sect.npcs)]
+    from ...spatial_people import people, instance_of
+    if game.player.world in {'lost', 'rift'}:
+        return people(game)
+    return [npc for npc in [*game.world_npcs.values(), *game.notable_npcs.values(), *(npc for sect in game.sects.values() for npc in sect.npcs)]
+            if not instance_of(game, npc.id)]
 
 
 def _npc_lethal_chance(world: str, realm_index: int, context: str) -> float:

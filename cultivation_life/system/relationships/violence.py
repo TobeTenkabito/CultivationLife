@@ -31,6 +31,8 @@ def relationship_violence(deps: RelationshipViolenceDependencies, game_id, kind,
     if kind not in rows:
         raise ValueError("未知处置对象")
     person = next((row for row in rows[kind] if str(row.get("id")) == str(target_id)), None)
+    from ...spatial_people import require_access
+    require_access(game, person)
     if not person or not person.get("alive", True) or person.get("world", player.world) != player.world:
         raise ValueError("此人不在身边或已经陨落")
     npc_id = str(person.get("npc_id") or person["id"])

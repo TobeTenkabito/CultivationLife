@@ -1,3 +1,4 @@
+from cultivation_life.spatial_people import people
 import copy
 import random
 from pathlib import Path
@@ -211,7 +212,7 @@ def test_lost_resource_ceiling_lazy_stable_and_enforced(ready):
     scenes = [spatial.create_instance(g, random.Random(i), 'lost') for i in range(100)]
     assert {s['resource_ceiling'] for s in scenes} == {5, 6, 7, 8}
     scene = next(s for s in scenes if s['resource_ceiling'] == 5 and s['power_ceiling'] == 8)
-    assert all(n['realm_index'] <= 5 for n in scene['npcs'])
+    assert all(n['realm_index'] <= 5 for n in [n.to_dict() for n in people(g, scene)])
     rng = random.Random(8)
     enter_scene(e._exploration_dependencies(), g, scene, rng)
     g.player.realm_index, g.player.layer = 5, 9
@@ -236,9 +237,9 @@ def test_population_ceiling_is_independent_and_names_are_unique(ready):
         scene = spatial.create_instance(g, random.Random(seed), 'lost')
         rules = scene['population_rules']
         assert rules['npc_realm_ceiling'] <= scene['resource_ceiling'] <= scene['power_ceiling']
-        assert max((n['realm_index'], n['layer']) for n in scene['npcs']) == (rules['npc_realm_ceiling'], 9)
-        assert len({n['name'] for n in scene['npcs']}) == len(scene['npcs'])
-        assert not any(char.isdigit() for n in scene['npcs'] for char in n['name'])
+        assert max((n['realm_index'], n['layer']) for n in [n.to_dict() for n in people(g, scene)]) == (rules['npc_realm_ceiling'], 9)
+        assert len({n['name'] for n in [n.to_dict() for n in people(g, scene)]}) == len([n.to_dict() for n in people(g, scene)])
+        assert not any(char.isdigit() for n in [n.to_dict() for n in people(g, scene)] for char in n['name'])
         if scene['resource_ceiling'] == 8 and rules['abundance'] == 'barren':
             barren = scene
     assert barren and barren['population_rules']['npc_realm_ceiling'] < 8

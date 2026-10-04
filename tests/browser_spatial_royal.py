@@ -134,6 +134,26 @@ def main():
                     engine.store.save(scene_game)
                     page.evaluate("id => loadGame(id)", gid)
                     assert page.locator("#spatial-panel button").count() >= 10
+                    page.set_viewport_size({"width": 1440, "height": 1000})
+                    page.locator('[data-panel-target=relationship]').click()
+                    page.locator('#npc-contacts .contact-directory button').first.click()
+                    page.locator('[data-contact-action=improve]').click()
+                    page.wait_for_function('!busy && game.world_npcs.some(n=>n.affinity>0)')
+                    assert page.locator('#npc-contacts').is_visible()
+                    market_game = engine.store.load(gid)
+                    market_game.player.world = 'human'
+                    market_game.spatial_state['current'] = None
+                    market_game.player.location_id = engine.maps.default_location('human')
+                    market_game.auction_state = dict(status='black_market', world='human',
+                        location_id=market_game.player.location_id, lots=[], attendees=[])
+                    engine.store.save(market_game)
+                    page.evaluate('id=>loadGame(id)', gid)
+                    page.evaluate("UtilityPanels.open('auction')")
+                    page.locator('#black-market-pattern').fill('符')
+                    page.locator('#black-market-search-form button').click()
+                    page.wait_for_function("!busy && game.auction_system.black_market_results.some(r=>r.kind==='talisman')")
+                    page.locator('#black-market-results > *').filter(has_text='成品符箓').first.get_by_role('button').click()
+                    page.wait_for_function('!busy && game.talismans.rows.length===1')
                     page.evaluate("id => loadGame(id)", king_id)
                     page.evaluate("UtilityPanels.open('upper-institution')")
                     court = page.locator("#upper-institution-content")

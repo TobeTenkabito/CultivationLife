@@ -140,6 +140,7 @@ def test_secluded_refinement_stops_before_progress_without_spending_resources(de
 
 def test_soul_backlash_records_consequence_before_dispatching_death():
     game = game_state()
+    game.player.realm_index = 1  # Qi condensation has no safe soul slots.
     game.player.hp = 1
     game.player.foreign_souls = [{'id': 's', 'strength': 20, 'refined': False}]
     def die(actual, reason, event):

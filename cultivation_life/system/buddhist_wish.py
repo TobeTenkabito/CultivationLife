@@ -97,6 +97,9 @@ def wish_modifier(subject, key, **context):
 
 
 def nirvana_target(engine, game):
+    from .spatial import cultivation_block_reason
+    if cultivation_block_reason(game):
+        return None, cultivation_block_reason(game)
     player = game.player
     if (player.realm_index < 1 or player.realm_index >= 9 or player.spirit_root == "none"
             or player.sealed_cultivation or player.cultivation_suppression):

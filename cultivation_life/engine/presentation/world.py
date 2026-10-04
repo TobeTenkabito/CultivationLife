@@ -32,6 +32,11 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         if isinstance(saved, dict):
             npc = SectNpc.from_dict(saved)
             world_people.setdefault(npc.id, npc)
+    from ...spatial_people import people, instance_of
+    if game.player.world in {'lost', 'rift'}:
+        world_people = {npc.id: npc for npc in people(game)}
+    else:
+        world_people = {key: npc for key, npc in world_people.items() if not instance_of(game, key)}
     for npc in sorted(world_people.values(), key=lambda value: (-value.realm_index, -value.layer, value.name)):
         same_world = npc.world == game.player.world
         if not same_world and npc.departed_age is None:

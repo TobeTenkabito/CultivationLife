@@ -1,3 +1,4 @@
+from cultivation_life.spatial_people import people
 import copy
 import random
 from pathlib import Path
@@ -41,8 +42,8 @@ def test_lazy_persisted_independent_instances(ready):
     e, g = ready
     assert not g.spatial_state.get("instances")
     first = occupy(e, g, "lost")
-    assert len(first["npcs"]) == 9 and len(first["sects"]) == 3
-    assert all(n["realm_index"] <= 8 for n in first["npcs"])
+    assert len(people(g, first)) == 9 and len(first["sects"]) == 3
+    assert all(n.realm_index <= 8 for n in people(g, first))
     assert e.get_game(g.id)["spatial"]["scene"]["id"] == first["id"]
     g = e._load(g.id)
     before = copy.deepcopy(g.spatial_state["instances"][first["id"]])
@@ -400,7 +401,7 @@ def test_lost_rifts_track_instance_map_and_npc_thunder(ready):
     scene["location_id"] = scene["locations"][2]["id"]
     rift = spatial.new_rift(g, random.Random(2), e.maps, controlled=True)
     assert rift["location_id"] == scene["location_id"]
-    high = scene["npcs"][0]
+    high = people(g, scene)[0].__dict__
     high.update(realm_index=6, lifespan=None)
     high["next_tribulation_age"] = g.player.age
     spatial.tick(g, random.Random(2), e.maps)

@@ -256,6 +256,7 @@ class DemonicSystemMixin:
 
 
     def _public_demonic_system(self, player: Player) -> dict[str, Any]:
+        from .demonic.soul_risk import refinement_risk
         from .owned_training import public as training_public
         from .puppet_crafting import public as crafting_public
         pill_ids = [item.id for item in player.inventory if "pill" in item.tags and item.quantity > 0]
@@ -316,6 +317,7 @@ class DemonicSystemMixin:
             "is_demonic": player.path == "demonic", "capacity": puppet_capacity(player),
             "used": len(player.puppets), "prisoners": prisoners, "puppets": puppets,
             "foreign_souls": copy.deepcopy(player.foreign_souls),
+            "soul_refinement_risk": refinement_risk(player, self._demonic_rules()),
             "secluded_refine_years": self._secluded_refining_years(player),
             "secluded_refine_multiplier": float(self._demonic_rules().get("soul_seclusion_time_multiplier", 1.2)),
             "breakthrough_bonus": round(player.devouring_breakthrough_bonus, 4),

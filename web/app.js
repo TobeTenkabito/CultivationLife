@@ -3140,6 +3140,11 @@ function renderDemonicSystem(system) {
     archive.append(summary, archiveList); soulList.appendChild(archive);
   }
   if (!souls.length) soulList.innerHTML = '<p class="empty">识海中没有外来元神。</p>';
+  if (system.is_demonic && system.soul_refinement_risk) {
+    const risk=system.soul_refinement_risk, hint=document.createElement('p');hint.id='soul-refinement-risk';
+    hint.textContent=`安全炼化名额 ${risk.safe_capacity} · 未炼化 ${risk.pending} · 超额 ${risk.excess} · 每年反噬概率 ${precisePercent(risk.annual_chance)}。已炼化元神不占名额；超额部分按指数增加风险。`;
+    soulList.prepend(hint);
+  }
   window.PuppetWorkshop.render(game, payload=>api(`/api/games/${game.id}/puppet-preview`, {method:'POST',body:JSON.stringify(payload)}), payload=>mutate(`/api/games/${game.id}/craft-puppet`, payload));
   $('#refine-souls').onclick = () => mutate(`/api/games/${game.id}/refine-souls`, {});
   const secludedRefine = $('#secluded-refine-souls');
@@ -3851,7 +3856,8 @@ function renderButtons() {
     const trappedInGuixu = !!guixuSession?.trapped;
     const trappedTraining = ['cultivate', 'body_train', 'sense_train', 'rest'].includes(button.dataset.action);
     const blockedByGuixu = !!guixuSession && !(trappedInGuixu && trappedTraining);
-      const blockedBySpatial = !!game?.spatial?.inside && !trappedTraining;
+      const localSage = game?.player.world==='lost' && ['sage_preach','sage_teach','sage_answer'].includes(button.dataset.action);
+      const blockedBySpatial = !!game?.spatial?.inside && !trappedTraining && !localSage;
     const mortalCommission = button.dataset.action === 'commission' && game?.player?.realm_index === 0;
     const mortalCombat = ['hunt_beast', 'spar', 'slay', 'capture'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;

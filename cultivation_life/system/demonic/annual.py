@@ -8,6 +8,7 @@ import random
 from ...models import GameState, HistoryRecord
 from ...rules import combat_power, max_hp
 from .dependencies import DemonicAnnualDependencies
+from .soul_risk import refinement_risk
 
 
 def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng: random.Random) -> None:
@@ -49,8 +50,10 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
     unrefined = [entry for entry in player.foreign_souls if not entry.get("refined")]
     if not unrefined:
         return
-    burden = sum(float(entry.get("strength", 1)) for entry in unrefined)
-    chance = min(0.65, float(rules["soul_backlash_base"]) * burden)
+    risk = refinement_risk(player, rules)
+    burden, chance = risk['burden'], risk['annual_chance']
+    if chance <= 0:
+        return
     if rng.random() < chance:
         damage = max_hp(player) * min(0.6, 0.06 + burden * 0.018)
         player.hp = max(0.0, player.hp - damage)
@@ -60,7 +63,7 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
         game.history.append(HistoryRecord(
             "SYS_SOUL_BACKLASH", 1, player.age, "元神反噬", None, "backlash",
             f"{len(unrefined)}道未炼化元神同时反扑，HP -{damage:.0f}，心魔 +{burden * 0.5:.1f}。",
-            {"souls": len(unrefined), "burden": burden}, ["system", "demonic", "soul", "negative"],
+            {"souls": len(unrefined), "burden": burden, **risk}, ["system", "demonic", "soul", "negative"],
         ))
         if player.hp <= 0:
             deps._die(game, "吞噬的外来元神反客为主，撕碎识海", "SYS_SOUL_BACKLASH_DEATH")

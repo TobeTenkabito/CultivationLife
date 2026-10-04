@@ -24,9 +24,16 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
         raise ValueError("请先检索并选择一件黑市商品")
     from cultivation_life.system.spirit_voisinage import secondary, catalog, grant
     spirit = result.get('kind') == 'spirit_manual'
+    talisman = result.get('kind') == 'talisman'
     if spirit and (not secondary(game.player.world) or result.get('content_id') not in catalog(game)):
         raise ValueError('当前界面没有这份灵域传承')
-    if not spirit and not deps._is_world_market_good(
+    if talisman:
+        from ...talisman_content import local_catalog
+        recipe = local_catalog(game)[1].get(result.get('content_id'))
+        product = result.get('talisman_instance')
+        if not recipe or not isinstance(product, dict) or product.get('origin_world') != game.player.world or product.get('method_id') != recipe['id']:
+            raise ValueError('这件符箓不属于当前界面的流通范围')
+    if not spirit and not talisman and not deps._is_world_market_good(
         game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
     ):
         raise ValueError("这件货物不属于当前世界的流通范围")
@@ -40,6 +47,10 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
     if spirit:
         for _ in range(quantity):
             grant(game, result['content_id'])
+    elif talisman:
+        from ..talismans import receive
+        for _ in range(quantity):
+            receive(game.player, result['talisman_instance'])
     elif kind == "talisman_material":
         add_item(game.player, str(result["content_id"]), quantity)
     elif kind == "crafting_material":
@@ -160,6 +171,20 @@ def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: st
     material_rows.extend(dict(kind="talisman_material", content_id=r["id"], name=r["name"],
         description=r["description"], tier=r["tier"], base_price=r["base_value"])
         for r in catalog()[0].values() if r["world"] == game.player.world)
+    from ..talismans import product, economic_value
+    materials, methods = catalog()
+    for recipe in methods.values():
+        if recipe['world'] != game.player.world:
+            continue
+        ingredients = [m for m in materials.values() if m['world'] == recipe['world'] and m['tier'] == recipe['tier']][:2]
+        # A saved, reproducible offer has exactly the same stats when purchased.
+        quality = material_rng.choices(['poor', 'normal', 'fine', 'perfect'], weights=[15, 60, 22, 3])[0]
+        instance = product(recipe, ingredients, quality)
+        from ...talisman_content import QUALITIES
+        material_rows.append(dict(kind='talisman', content_id=recipe['id'],
+            name=f"{QUALITIES[quality][0]}{instance['name']}", tier=recipe['tier'],
+            description=f"成品符箓 · 威力 {instance['power']:g} · 防护 {instance['protection']:g} · 辅助 {instance['assistance']:g} · {instance['uses']} 次",
+            base_price=economic_value(instance), talisman_instance=instance))
     for definition in deps._crafting_material_defs().values():
         if str(definition.get("world")) != game.player.world:
             continue

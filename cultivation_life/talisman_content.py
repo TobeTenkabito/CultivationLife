@@ -30,7 +30,7 @@ def generate(world, prefix, tiers):
     materials, methods = {}, {}
     for tier in tiers:
         label = TIER_NAMES[tier] + "阶"
-        value = round(24 * 4.3 ** (tier - 1))
+        value = round(6 * 3.2 ** (tier - 1))
         for suffix, name, quality in (("paper", "符纸", 1.), ("ink", "朱砂", 1.2),
                                       ("jade", "符玉", 1.4)):
             identity = f"talisman_{world}_{tier}_{suffix}"

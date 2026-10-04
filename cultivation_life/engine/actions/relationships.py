@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...npc_custody import is_free
+from ...spatial_people import require_access, accessible
 
 from ...system.semantic_events import emit
 from ...system.npc_social import instantiate_social
@@ -164,6 +165,8 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
     request = next((entry for entry in player.disciple_requests if entry.get("id") == request_id), None)
     if not request:
         raise ValueError("这份拜师帖已经不存在")
+    if accept:
+        require_access(game, request)
     if accept and not is_free(request):
         raise ValueError("求道者已经陨落，无法再收入门下")
     max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
@@ -193,6 +196,7 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
     if game.pending_event:
         raise ValueError("请先处理当前事件")
     master = player.master
+    require_access(game, master)
     if not master:
         raise ValueError("你尚无师承")
     if not is_free(master):
@@ -223,6 +227,11 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
         return deps.present(game)
 
     master_realm = int(master["realm_index"])
+    from ...system.spatial import current
+    from ...models import Item, Technique
+    scene = current(game)
+    items = {r['id']: Item(**r) for r in scene['materials']} if scene else ITEM_CATALOG
+    techniques = {r['id']: Technique(**r) for r in scene['techniques']} if scene else TECHNIQUE_CATALOG
     if kind == "item":
         candidates = list(dict.fromkeys(
             entry["content_id"] for entry in MARKET_GOODS
@@ -237,6 +246,12 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
             and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]].element)
             and all(known.id != entry["content_id"] for known in player.known_techniques)
         ))
+    if scene:
+        candidates = list(items) if kind == 'item' else [
+            key for key, art in techniques.items()
+            if can_player_practice_technique(player, art.element)
+            and all(known.id != key for known in player.known_techniques)
+        ]
     if not candidates:
         raise ValueError("师父手中已无适合你的新物品或功法")
 
@@ -250,14 +265,21 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
         summary = f"{master['name']}认为你不该过度依赖师门，拒绝了这次{'赐物' if kind == 'item' else '传功'}请求。"
     elif kind == "item":
         content_id = rng.choice(candidates)
-        add_item(player, content_id)
+        if scene:
+            owned = next((row for row in player.inventory if row.id == content_id), None)
+            if owned:
+                owned.quantity += 1
+            else:
+                player.inventory.append(items[content_id])
+        else:
+            add_item(player, content_id)
         result = "master_gave_item"
-        summary = f"{master['name']}应允所求，赐下{ITEM_CATALOG[content_id].name}一件。"
+        summary = f"{master['name']}应允所求，赐下{items[content_id].name}一件。"
     else:
         content_id = rng.choice(candidates)
-        learn_technique(player, TECHNIQUE_CATALOG[content_id])
+        learn_technique(player, techniques[content_id])
         result = "master_taught_technique"
-        summary = f"{master['name']}为你讲授《{TECHNIQUE_CATALOG[content_id].name}》，功法已收入已悟列表。"
+        summary = f"{master['name']}为你讲授《{techniques[content_id].name}》，功法已收入已悟列表。"
     game.history.append(HistoryRecord(
         "SYS_MASTER_REQUEST", 1, player.age, "求取师门恩赐", kind, result, summary,
         {"kind": kind, "accept_chance": chance, "content_id": content_id},
@@ -277,6 +299,7 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
     disciple = next((entry for entry in player.disciples if entry.get("id") == disciple_id), None)
     if not disciple:
         raise ValueError("此人并非你的弟子")
+    require_access(game, disciple)
     if not is_free(disciple):
         raise ValueError("弟子已经陨落，无法接受赠予")
     if kind == "item":
@@ -354,7 +377,7 @@ def manage_dao_companion(
     else:
         if not companion:
             raise ValueError("你尚无道侣")
-        if not is_free(companion) or companion.get("world", player.world) != player.world:
+        if not is_free(companion) or not accessible(game, companion):
             raise ValueError("道侣当前无法回应")
         last = companion.setdefault("last_interactions", {})
         cooldown = int(WORLD_SYSTEMS["relationship"]["companion_interaction_cooldown_years"])
@@ -489,7 +512,7 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
             player.dao_friends.append(game.link_relationship(friend))
             result, summary = "friend_joined", f"{npc.name}与你交换信符，自此以道友相称。"
     else:
-        if not friend or not is_free(friend) or friend.get("world") != player.world:
+        if not friend or not is_free(friend) or not accessible(game, friend):
             raise ValueError("这位道友当前无法回应")
         last = friend.setdefault("last_interactions", {})
         cooldown = int(WORLD_SYSTEMS["relationship"]["friend_interaction_cooldown_years"])
@@ -614,6 +637,9 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
 
 def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...relationship_records import find_person
+    if action != 'leave':
+        require_access(game, find_person(game, npc_id))
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法调整队伍")
@@ -672,7 +698,7 @@ def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str
             raise ValueError("此人已经在队伍中")
         companion = player.dao_companion
         if companion and companion.get("id") == npc_id:
-            if not is_free(companion) or companion.get("world") != player.world:
+            if not is_free(companion) or not accessible(game, companion):
                 raise ValueError("道侣当前无法同行")
             player.party.append({"id": npc_id, "name": companion.get("name", "道侣")})
             result, summary = "joined", f"{companion.get('name', '道侣')}与你心意相通，加入了队伍。"
@@ -685,7 +711,7 @@ def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str
             return deps.present(game)
         friend = next((row for row in player.dao_friends if row.get("id") == npc_id), None)
         if friend:
-            if not is_free(friend) or friend.get("world") != player.world:
+            if not is_free(friend) or not accessible(game, friend):
                 raise ValueError("道友当前无法同行")
             player.party.append({"id":npc_id,"name":friend.get("name","道友")})
             result, summary = "joined", f"道友{friend.get('name','无名')}应邀加入队伍。"

@@ -265,8 +265,23 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("!busy && game.talismans.rows.length===0","Native talisman sale");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.talismans.rows.length===0 && game.talismans.skill.experience>0")),"Talisman persistence");
+                python("from cultivation_life import server\ng=server.ENGINE._load("+JSONObject.quote(id)+")\ng.auction_state=dict(status='black_market',world=g.player.world,location_id=g.player.location_id,lots=[],attendees=[])\nserver.ENGINE.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("UtilityPanels.open('auction');document.querySelector('#black-market-pattern').value='符';true");
+                tapSelector("#black-market-search-form button");
+                waitForJs("!busy && game.auction_system.black_market_results.some(r=>r.kind==='talisman')","Native finished talisman search");
+                js("(()=>{const r=Array.from(document.querySelectorAll('#black-market-results .auction-lot')).find(r=>r.textContent.includes('成品符箓'));r.querySelector('button').id='native-finished-talisman-buy';})()");
+                tapSelector("#native-finished-talisman-buy");
+                waitForJs("!busy && game.talismans.rows.length===1","Native finished talisman purchase");
+                String lostId=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本地交往验收',spirit_root:'supreme_metal',path:'demonic',preset_id:'lost_world',seed:1592})});return g.id;})()");
+                async("loadGame("+JSONObject.quote(lostId)+")");
+                tapSelector("[data-panel-target=relationship]");
+                tapSelector("#npc-contacts .contact-directory button");
+                tapSelector("[data-contact-action=improve]");
+                waitForJs("!busy && game.world_npcs.some(n=>n.affinity>0)","Native local NPC interaction");
+                check(Boolean.TRUE.equals(js("game.demonic_system.soul_refinement_risk.safe_capacity===2 && game.spatial.panels.includes('relationship')")),"Native soul capacity and isolated capabilities");
                 capture("spatial-talisman");
-                result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, tier/quality/experience, six-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
+                result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, black-market finished purchase, lost local NPC interaction and soul capacity, tier/quality/experience, six-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
             } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);
