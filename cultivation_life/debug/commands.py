@@ -4,7 +4,9 @@ import math
 import random
 import re
 
-from ..content_registry import REALMS, EXTENSION_REPORT, ITEM_CATALOG, WORLD_SYSTEMS
+from ..content_registry import ACTIONS, REALMS, EXTENSION_REPORT, ITEM_CATALOG, WORLD_SYSTEMS
+from ..models import Player
+from ..rules import add_item, remove_item
 from ..runtime import encode_rng
 from ..version import BASE_GAME_VERSION
 from .registry import Argument, Command, CommandError, Registry
@@ -26,11 +28,13 @@ RESOURCES = ('spirit_stone', 'opportunity')
 
 def number(field, text):
     kind, minimum, maximum = FIELDS[field]
+    if kind is int and isinstance(text, float) and not text.is_integer():
+        raise CommandError(f'{field} expects int.')
     try:
         value = kind(text)
     except (TypeError, ValueError, OverflowError) as error:
         raise CommandError(f'{field} expects {kind.__name__}.') from error
-    if not math.isfinite(value) or not minimum <= value <= maximum:
+    if not minimum <= value <= maximum or type(value) is float and not math.isfinite(value):
         raise CommandError(f'{field} must be within [{minimum}, {maximum}].')
     return value
 
@@ -78,7 +82,7 @@ def player_set(ctx, field, text):
 def resource_change(ctx, field, text, sign):
     field = 'spirit_stones' if field == 'spirit_stone' else field
     amount = number(field, text)
-    return player_set(ctx, field, str(player_get(ctx, field)[field] + sign * amount))
+    return player_set(ctx, field, player_get(ctx, field)[field] + sign * amount)
 
 
 def snapshot_name(name):
@@ -143,6 +147,48 @@ def rng_seed(ctx, seed):
     return {'seed': value, 'note': 'Resets future RNG draws; does not regenerate the existing world.'}
 
 
+def state_get(ctx, pointer):
+    """Read JSON Pointer paths only; never evaluate attributes or synthesize aliases."""
+    if not pointer.startswith('/') or len(pointer) > 256:
+        raise CommandError('Expected a JSON Pointer beginning with /, up to 256 characters.')
+    value = ctx.document
+    for part in pointer[1:].split('/'):
+        if re.search(r'~(?![01])', part):
+            raise CommandError('Invalid JSON Pointer escape.')
+        key = part.replace('~1', '/').replace('~0', '~')
+        if isinstance(value, dict) and key in value:
+            value = value[key]
+        elif isinstance(value, list) and re.fullmatch(r'0|[1-9][0-9]*', key) and int(key) < len(value):
+            value = value[int(key)]
+        else:
+            raise CommandError(f'Unknown state pointer: {pointer}')
+    return copy.deepcopy(value)
+
+
+def page(rows, offset):
+    return {'total': len(rows), 'offset': offset, 'next_offset': offset + 50 if offset + 50 < len(rows) else None,
+            'rows': rows[offset:offset + 50]}
+
+
+def item_change(ctx, item_id, quantity, remove=False):
+    if item_id not in ITEM_CATALOG:
+        raise CommandError('Unknown item_id; use item list to discover catalog IDs.')
+    if item_id == 'immortal_trace':
+        raise CommandError('immortal_trace is a dedicated progression resource, not a normal inventory item.')
+    player = Player.from_dict(copy.deepcopy(ctx.document['player']))
+    if remove:
+        if not remove_item(player, item_id, quantity):
+            raise CommandError('Insufficient item quantity.')
+    else:
+        held = sum(item.quantity for item in player.inventory if item.id == item_id)
+        if held + quantity > 10**15:
+            raise CommandError('Item quantity would exceed 1000000000000000.')
+        add_item(player, item_id, quantity)
+    # Copy only the authoritative inventory; decoding must not normalize other fields.
+    ctx.document['player']['inventory'] = [item.to_dict() for item in player.inventory]
+    return {'item_id': item_id, 'quantity': sum(i.quantity for i in player.inventory if i.id == item_id)}
+
+
 def build_registry():
     registry = Registry()
     def add(name, kind, description, handler, arguments=(), requires_session=True):
@@ -153,6 +199,7 @@ def build_registry():
         lambda ctx: {'base_game': BASE_GAME_VERSION}, requires_session=False)
     add('debug status', 'query', 'Show isolated session and active overrides.',
         lambda ctx: {'session_id': ctx.session['id'] if ctx.session else None,
+                     'revision': ctx.session.get('revision', 0) if ctx.session else None,
                      'overrides': ctx.session['current']['overrides'] if ctx.session else {}},
         requires_session=False)
     add('debug start', 'session', 'Clone the selected save into an isolated debug session.',
@@ -161,6 +208,8 @@ def build_registry():
         lambda ctx: {'session_id': None, 'game_id': ctx.session['source_game_id']})
     add('debug sessions', 'query', 'List saved debug sessions.',
         lambda ctx: ctx.services.sessions(), requires_session=False)
+    add('save list', 'query', 'List source save IDs without loading or modifying them.',
+        lambda ctx: ctx.services.sources(), requires_session=False)
     add('debug resume', 'session', 'Resume an isolated session.',
         lambda ctx, session_id: ctx.services.resume(session_id),
         (Argument('session_id'),), False)
@@ -172,15 +221,15 @@ def build_registry():
         lambda ctx: {key: {'type': value[0].__name__, 'min': value[1], 'max': value[2]}
                      for key, value in FIELDS.items()}, requires_session=False)
     add('player set', 'mutation', 'Set a supported field. Realm changes reset layer and pending flags.',
-        player_set, (Argument('field', tuple(FIELDS)), Argument('value')))
+        player_set, (Argument('field', tuple(FIELDS)), Argument('value', type='number')))
     add('player reset breakthrough_chance', 'mutation', 'Remove the session probability override.',
         lambda ctx: {'removed': ctx.session['current']['overrides'].pop('breakthrough_chance', None)})
     add('give', 'mutation', 'Add a supported resource.',
         lambda ctx, resource, amount: resource_change(ctx, resource, amount, 1),
-        (Argument('resource', RESOURCES), Argument('amount')))
+        (Argument('resource', RESOURCES), Argument('amount', type='number', minimum=0, maximum=10**15)))
     add('remove', 'mutation', 'Remove a supported resource without going below zero.',
         lambda ctx, resource, amount: resource_change(ctx, resource, amount, -1),
-        (Argument('resource', RESOURCES), Argument('amount')))
+        (Argument('resource', RESOURCES), Argument('amount', type='number', minimum=0, maximum=10**15)))
     add('realm list', 'query', 'List authoritative realm IDs, indexes and layer counts.',
         lambda ctx: [{'realm_index': i, 'id': realm.id, 'name': realm.name, 'layers': realm.layers}
                      for i, realm in enumerate(REALMS)], requires_session=False)
@@ -193,7 +242,45 @@ def build_registry():
         npc_inspect, (Argument('npc_id'),))
     add('rng state', 'query', 'Show stored seed and complete RNG state without drawing.',
         lambda ctx: {key: ctx.document[key] for key in ('seed', 'rng_state')})
-    add('rng seed', 'mutation', 'Reset RNG in the isolated copy only.', rng_seed, (Argument('seed'),))
+    add('rng seed', 'mutation', 'Reset RNG in the isolated copy only.', rng_seed,
+        (Argument('seed', type='integer', minimum=0, maximum=2**53 - 1),))
+    add('state get', 'query', 'Read a saved JSON Pointer using exact field names; no preparation or RNG.',
+        state_get, (Argument('pointer'),))
+    add('state summary', 'query', 'Inspect scene, blockers and current state fingerprint.',
+        lambda ctx: {'sha256': digest(ctx.session['current']),
+                     'player': {key: ctx.document['player'].get(key) for key in
+                         ('name', 'alive', 'age', 'world', 'realm_index', 'layer', 'hp', 'mp')},
+                     'pending_event': copy.deepcopy(ctx.document.get('pending_event')),
+                     'active_trial': copy.deepcopy(ctx.document.get('active_trial'))})
+    add('journal list', 'query', 'Read the latest bounded action records and failures.',
+        lambda ctx: copy.deepcopy(ctx.session['journal']))
+    add('npc find', 'query', 'Find NPC records by exact ID/name substring; use an empty query to page all.',
+        lambda ctx, query, offset: page([{'source': source, 'id': npc.get('id'), 'name': npc.get('name'),
+            'alive': npc.get('alive'), 'custody': npc.get('custody'), 'roster_state': npc.get('roster_state')}
+            for source, npc in npc_rows(ctx.document)
+            if query in str(npc.get('id', '')) or query in str(npc.get('name', ''))], offset),
+        (Argument('query'), Argument('offset', type='integer', minimum=0, maximum=10**9)))
+    add('item list', 'query', 'Find catalog items by ID/name substring; page size 50, empty query lists all.',
+        lambda ctx, query, offset: page([item.to_dict() for key, item in sorted(ITEM_CATALOG.items())
+                                       if query in key or query in item.name], offset),
+        (Argument('query'), Argument('offset', type='integer', minimum=0, maximum=10**9)), False)
+    add('inventory', 'query', 'Read the isolated inventory.',
+        lambda ctx: copy.deepcopy(ctx.document['player']['inventory']))
+    item_args = (Argument('item_id'),
+                 Argument('quantity', type='integer', minimum=1, maximum=10**9))
+    add('item give', 'mutation', 'Add a catalog inventory item using ordinary inventory rules.', item_change, item_args)
+    add('item remove', 'mutation', 'Remove an inventory item; reject insufficient quantities.',
+        lambda ctx, item_id, quantity: item_change(ctx, item_id, quantity, True), item_args)
+    add('action list', 'query', 'List action IDs and settings; availability still follows ordinary rules.',
+        lambda ctx: copy.deepcopy(ACTIONS), requires_session=False)
+    add('event inspect', 'query', 'Read the saved pending event and choice IDs; enabled flags reflect stored state.',
+        lambda ctx: copy.deepcopy(ctx.document.get('pending_event')))
+    add('action advance', 'simulation', 'Perform 1–10 action units through ordinary rules; events can interrupt.',
+        lambda ctx, action, units: ctx.services.simulate(ctx.session, 'advance', {'action': action, 'years': units}),
+        (Argument('action', tuple(ACTIONS)), Argument('units', type='integer', minimum=1, maximum=10)))
+    add('event choose', 'simulation', 'Resolve a pending event choice through ordinary rules.',
+        lambda ctx, choice_id: ctx.services.simulate(ctx.session, 'choice', {'choice_id': choice_id}),
+        (Argument('choice_id'),))
     add('save validate', 'query', 'Run lightweight, non-mutating validation.', lambda ctx: validate(ctx.document))
     add('snapshot create', 'snapshot', 'Save game, overrides and isolated achievements.',
         snapshot_create, (Argument('name'),))

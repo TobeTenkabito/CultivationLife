@@ -42,6 +42,14 @@ def request_engine(handler, source_engine, project_root, persistence_root):
 
 
 def execute(payload, source_engine, project_root, persistence_root):
+    allowed = {'command', 'game_id', 'session_id', 'bundle', 'arguments', 'expected_revision', 'request_key'}
+    if set(payload) - allowed or 'arguments' in payload and not isinstance(payload['arguments'], dict):
+        raise CommandError('Unknown request field or invalid structured arguments.')
+    if (any(payload.get(key) is not None and not isinstance(payload[key], str) for key in ('game_id', 'session_id'))
+            or payload.get('bundle') is not None and not isinstance(payload['bundle'], dict)):
+        raise CommandError('Expected string IDs and an object bundle.')
     manager = runtime(project_root, persistence_root, source_engine)
     return manager.execute(payload.get('command'), payload.get('game_id'),
-                           payload.get('session_id'), payload.get('bundle'))
+                           payload.get('session_id'), payload.get('bundle'),
+                           arguments=payload.get('arguments'), expected_revision=payload.get('expected_revision'),
+                           request_key=payload.get('request_key'))

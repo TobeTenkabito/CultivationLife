@@ -66,6 +66,15 @@ def main():
                     assert field.input_value() == 'player set spirit_stones '
                     field.press('ArrowUp'); assert field.input_value() == 'help player'
                     field.press('Control+l'); assert page.locator('#debug-console-output').inner_text() == ''
+                    command('state get /player/realm_index')
+                    command('item list "spirit_stone" 0')
+                    command('item give spirit_stone 12')
+                    assert page.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone').quantity") == 7654333
+                    command('item remove spirit_stone 12')
+                    command('action advance rest 1')
+                    command('event inspect')
+                    command('snapshot restore baseline')
+                    assert page.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone').quantity") == 7654321
                     for width, height in ((1440, 1000), (412, 915), (915, 412)):
                         page.set_viewport_size({'width': width, 'height': height})
                         for theme in 'abcdef':
@@ -105,7 +114,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close(); thread.join(timeout=5)
-    print('Debug console: six themes, three viewports, mutations, snapshots, completion, export, two-tab isolation and disabled-mode recovery passed.')
+    print('Debug console: six themes, three viewports, items, action simulation, snapshots, completion, export, two-tab isolation and disabled-mode recovery passed.')
 
 
 if __name__ == '__main__':

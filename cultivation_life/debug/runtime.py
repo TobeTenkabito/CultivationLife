@@ -19,6 +19,7 @@ import uuid
 
 from ..content_registry import CONTENT_DOCUMENTS, EXTENSION_REPORT
 from ..errors import NotFoundError
+from ..engine.transactions import request_scope
 from ..runtime import now_iso
 from ..save_schema import migrate_document
 from ..version import BASE_GAME_VERSION
@@ -136,9 +137,24 @@ class Runtime:
         session = {'format': FORMAT, 'id': uuid.uuid4().hex, 'source_game_id': game_id,
                    'source_sha256': digest(source), 'created_at': now_iso(), 'environment': self.identity(),
                    'current': current, 'initial': copy.deepcopy(current), 'last_before': None,
-                   'snapshots': {}, 'journal': []}
+                   'snapshots': {}, 'journal': [], 'revision': 0, 'receipts': {}}
         atomic_json(self._path(session['id']), session)
-        return {'session_id': session['id'], 'game_id': game_id, 'isolated': True}
+        return {'session_id': session['id'], 'game_id': game_id, 'isolated': True, 'revision': 0}
+
+    def sources(self):
+        rows = []
+        with self.source_store.lock:
+            for path in sorted(self.source_store.directory.glob('*.json')):
+                if path.name == 'global_metadata.json':
+                    continue
+                try:
+                    document = read_json(path)
+                    if isinstance(document, dict) and isinstance(document.get('player'), dict) and document.get('id') == path.stem:
+                        rows.append({'game_id': document['id'], 'name': document['player'].get('name'),
+                                     'save_schema': document.get('version')})
+                except (OSError, ValueError):
+                    rows.append({'file': path.name, 'error': 'unreadable source'})
+        return rows
 
     def sessions(self):
         return [{'session_id': row['id'], 'game_id': row['current']['game']['id'],
@@ -147,7 +163,8 @@ class Runtime:
 
     def resume(self, session_id):
         session = self.load(session_id)
-        return {'session_id': session_id, 'game_id': session['current']['game']['id'], 'isolated': True}
+        return {'session_id': session_id, 'game_id': session['current']['game']['id'], 'isolated': True,
+                'revision': session.get('revision', 0)}
 
     def export(self, session):
         bundle = copy.deepcopy(session)
@@ -191,50 +208,129 @@ class Runtime:
         session = {key: copy.deepcopy(bundle[key]) for key in (
             'format', 'source_game_id', 'source_sha256', 'environment', 'current', 'initial',
             'last_before', 'snapshots', 'journal')}
-        session.update(id=uuid.uuid4().hex, created_at=now_iso())
+        session.update(id=uuid.uuid4().hex, created_at=now_iso(), revision=0, receipts={})
         atomic_json(self._path(session['id']), session)
         identity = self.identity()
-        return {'session_id': session['id'], 'game_id': game_id, 'isolated': True,
+        return {'session_id': session['id'], 'game_id': game_id, 'isolated': True, 'revision': 0,
                 'environment_matches': all(session['environment'].get(key) == identity[key]
                     for key in ('base_game_version', 'code_sha256', 'content_sha256'))}
 
     def record(self, session, before, operation, error=None, request_id=None):
+        session['revision'] = session.get('revision', 0) + 1
         session['last_before'] = copy.deepcopy(before)
         session['journal'].append({'at': now_iso(), 'operation': operation, 'request_id': request_id,
             'before_sha256': digest(before), 'after_sha256': digest(session['current']),
             'diff': differences(before, session['current']), 'error': error})
         session['journal'] = session['journal'][-100:]
 
-    def execute(self, text, game_id=None, session_id=None, bundle=None):
+    def execute(self, text, game_id=None, session_id=None, bundle=None, *, arguments=None,
+                expected_revision=None, request_key=None):
         with self.lock:
-            command, arguments = self.registry.parse(text)
+            command, values = (self.registry.parse(text) if arguments is None
+                               else self.registry.structured(text, arguments))
             session = self.load(session_id) if session_id else None
             if command.requires_session and session is None:
                 raise CommandError('Start an isolated copy first: debug start')
+            writes = command.kind in {'mutation', 'snapshot', 'simulation'}
+            if expected_revision is not None and (type(expected_revision) is not int or expected_revision < 0):
+                raise CommandError('expected_revision must be a nonnegative integer.')
+            if request_key is not None and (not isinstance(request_key, str)
+                    or not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', request_key)):
+                raise CommandError('request_key must contain 1–64 letters, digits, _ or -.')
+            if request_key is not None and not writes:
+                raise CommandError('request_key is supported only for mutation, snapshot and simulation commands.')
+            if request_key is not None and expected_revision is None:
+                raise CommandError('request_key requires expected_revision, including text commands.')
+            if arguments is not None and writes and (expected_revision is None or request_key is None):
+                raise CommandError('Structured writes require expected_revision and request_key.')
+            fingerprint = digest({'command': command.name, 'arguments': values,
+                                  'expected_revision': expected_revision})
+            receipt = session.get('receipts', {}).get(request_key) if session and request_key else None
+            if receipt:
+                if receipt['fingerprint'] != fingerprint:
+                    raise CommandError('request_key was already used for a different request.')
+                return {**receipt['result'], 'replayed': True, 'catalog': self.registry.catalog()}
+            if expected_revision is not None and (session is None or session.get('revision', 0) != expected_revision):
+                raise CommandError('Session revision conflict; inspect debug status before issuing a new request.')
             original = copy.deepcopy(session)
             ctx = Context(session, Services(start=lambda: self.start(game_id), resume=self.resume,
-                sessions=self.sessions, export=self.export, import_bundle=lambda: self.import_bundle(bundle)))
+                sessions=self.sessions, export=self.export, import_bundle=lambda: self.import_bundle(bundle),
+                sources=self.sources, simulate=self.simulate))
+            operation = {'command': command.name, 'arguments': dict(zip((a.name for a in command.arguments), values))}
             try:
-                data = command.handler(ctx, *arguments)
+                data = command.handler(ctx, *values)
                 if command.kind == 'query' and session != original:
                     raise RuntimeError('Query command modified the detached session.')
                 diff = {'changes': [], 'total': 0, 'truncated': False}
-                if command.kind in {'mutation', 'snapshot', 'simulation'}:
+                if writes:
                     validate_current(session['current'])
                     diff = differences(original['current'], session['current'])
-                    self.record(session, original['current'], {'command': text})
+                    self.record(session, original['current'], operation, request_id=request_key)
+                result = {'ok': True, 'type': command.kind, 'command': command.name, 'data': data,
+                          'revision': session.get('revision', 0) if session else None,
+                          'changed': bool(diff['total']), 'diff': diff}
+                if writes:
+                    if request_key:
+                        receipts = session.setdefault('receipts', {})
+                        receipts[request_key] = {'fingerprint': fingerprint, 'result': copy.deepcopy(result)}
+                        session['receipts'] = dict(list(receipts.items())[-64:])
                     atomic_json(self._path(session['id']), session)
-                return {'ok': True, 'type': command.kind, 'command': command.name, 'data': data,
-                        'changed': bool(diff['total']), 'diff': diff, 'catalog': self.registry.catalog()}
+                return {**result, 'catalog': self.registry.catalog()}
             except Exception as error:
                 if original is not None and command.kind != 'query':
-                    self.record(original, original['current'], {'command': text},
+                    self.record(original, original['current'], operation,
                                 {'type': type(error).__name__, 'message': str(error),
-                                 'traceback': traceback.format_exc()})
+                                 'traceback': traceback.format_exc()}, request_id=request_key)
                     atomic_json(self._path(original['id']), original)
                 if isinstance(error, (CommandError, NotFoundError)):
                     raise
                 raise RuntimeError(f'Debug command failed: {command.name}') from error
+
+    @contextmanager
+    def staged(self, current):
+        """One storage boundary shared by UI gameplay and tool simulations."""
+        with tempfile.TemporaryDirectory(prefix='cultivation-debug-') as directory:
+            store = Path(directory)
+            game_id = current['game']['id']
+            atomic_json(store / f'{game_id}.json', current['game'])
+            atomic_json(store / 'global_metadata.json', current['achievements'])
+            engine = SessionEngine(self.project_root, store, current['overrides'])
+            yield engine, store
+
+    def staged_result(self, store, before):
+        current = {'game': read_json(store / f'{before["game"]["id"]}.json'),
+                   'achievements': read_json(store / 'global_metadata.json'),
+                   'overrides': copy.deepcopy(before['overrides'])}
+        validate_current(current)
+        return current
+
+    def simulate(self, session, operation, payload):
+        before = session['current']
+        if not before['game']['player']['alive']:
+            raise CommandError('The player is dead; ordinary actions are unavailable.')
+        pending = before['game'].get('pending_event')
+        if operation == 'advance' and pending:
+            raise CommandError('Resolve pending_event first with event choose.')
+        if operation == 'choice' and not pending:
+            raise CommandError('No pending_event to resolve.')
+        if operation == 'choice' and payload['choice_id'] not in {c['id'] for c in pending.get('choices', [])}:
+            raise CommandError('Unknown choice_id; inspect the pending event first.')
+        with self.staged(before) as (engine, store), request_scope(engine):
+            game_id = before['game']['id']
+            engine.assert_ghost_operation_allowed(game_id, operation)
+            engine.assert_guixu_operation_allowed(game_id, operation)
+            engine.assert_buddhist_operation_allowed(game_id, operation)
+            if operation == 'advance':
+                engine.advance(game_id, payload['action'], payload['years'])
+            elif operation == 'choice':
+                engine.choose(game_id, payload['choice_id'])
+            else:
+                raise RuntimeError('Unregistered simulation capability.')
+            session['current'] = self.staged_result(store, before)
+        game = session['current']['game']
+        return {'operation': operation, 'player_alive': game['player']['alive'],
+                'age': game['player']['age'], 'pending_event': copy.deepcopy(game.get('pending_event')),
+                'active_trial': copy.deepcopy(game.get('active_trial'))}
 
     @contextmanager
     def gameplay(self, session_id, operation, request_id):
@@ -242,21 +338,12 @@ class Runtime:
         with self.lock:
             session = self.load(session_id)
             before = copy.deepcopy(session['current'])
-            with tempfile.TemporaryDirectory(prefix='cultivation-debug-') as directory:
-                store = Path(directory)
-                game_id = before['game']['id']
-                atomic_json(store / f'{game_id}.json', before['game'])
-                atomic_json(store / 'global_metadata.json', before['achievements'])
-                engine = SessionEngine(self.project_root, store, before['overrides'])
+            with self.staged(before) as (engine, store):
                 outcome = {'ok': False, 'error': None}
                 try:
                     yield engine, outcome
                     if outcome['ok']:
-                        current = {'game': read_json(store / f'{game_id}.json'),
-                                   'achievements': read_json(store / 'global_metadata.json'),
-                                   'overrides': before['overrides']}
-                        validate_current(current)
-                        session['current'] = current
+                        session['current'] = self.staged_result(store, before)
                 except Exception as error:
                     outcome['error'] = {'type': type(error).__name__, 'message': str(error),
                                         'traceback': traceback.format_exc()}

@@ -75,6 +75,8 @@ Debug=False
 
 未提供配置时默认关闭。当前开发源码新增隔离控制台：改为 `Debug=True` 并刷新后，在角色中执行 `debug start` 创建独立调试副本，再修改玩家数据或进行测试。神机、商盟的旧调试操作也仅允许在副本中执行。使用方法与后续开发规范见 [Debug 文档](docs/debug-development.md)；已经发布的 1.57.0 安装包不包含这次未发布变更。DLC/MOD 的开关另行保存，需要**停止并重新启动游戏服务**才生效，仅刷新网页不会重新加载内容包。
 
+开发自动化可复用项目自带的 CLI、Python 客户端和 stdio MCP 工具。启动服务后执行 `python scripts/debug_agent.py tools` 查看命令及参数 Schema；`python scripts/debug_agent.py mcp` 启动 Agent 桥。工具沿用独立副本、版本校验和请求去重，接入配置及完整示例见 [Agent 使用规范](docs/debug-development.md#9-agent-工具与结构化调用)。
+
 ## DLC 与 MOD
 
 启动时按 **本体 → DLC → MOD** 加载内容。同类扩展按 `load_order` 和 ID 排序。每个包放在 `dlc/` 或 `mods/` 下的独立目录，包含 `manifest.json` 与 `content/`；扩展只提供 JSON 数据，不执行其中的 Python 或 JavaScript。

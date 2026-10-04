@@ -8,10 +8,10 @@ Debug 是应用边界装配的开发工具。正式玩法不得为了控制台�
 
 1. **先确定权威状态与转换契约。** 找到数据真实来源，列清必须一起更新的字段。NPC 的生死、拘禁、名册不能用单一开关代替；灵石来源是背包 `spirit_stone`，不是新增一个计数器。
 2. **正式系统保持单向依赖。** `server → debug → engine / rules / models`；正式引擎、系统、模型和规则不得反向导入 `debug`。`tools/check_module_dependencies.py` 会拒绝这类反向依赖。不增加 Mixin，不进行全局 monkey patch。
-3. **先登记命令，再接界面。** 命令名称、参数、枚举、类别、帮助说明只有 Registry 一份来源。新增命令不能新增 HTTP 分支或另写前端解析器。按钮与文本输入都调用 `POST /api/debug/command`。
+3. **先登记命令，再接界面。** 命令名称、参数类型、范围、枚举、类别、帮助和 JSON Schema 只有 Registry 一份来源。控制台、结构化 HTTP、CLI 和 MCP 从同一注册表发现能力。新增命令不能新增 HTTP 分支或另写前端解析器。所有执行调用 `POST /api/debug/command`。
 4. **只读查询从独立文档取值。** 不调用引擎 `_load`、`get_game`、自动补全、迁移写回或 RNG。当前普通游戏 GET 可能准备并写回状态，不能当成纯查询服务。
 5. **修改在脱离权威状态的副本上完成。** 先保存执行前状态，执行、校验，再原子提交。多字段修改一旦失败，游戏、RNG、概率覆盖和成就都不提交。输入错误用 `CommandError`；程序错误保留堆栈并返回内部错误，不能伪装成输入错误。
-6. **模拟调用正式规则。** 不复制一套年度、战斗、突破算法。首版普通游戏界面已经能驱动调试副本；新增 `simulation` 命令前必须接入具名能力、完成事务和差异检查，不能只增加注册表项后直接写引擎存档。
+6. **模拟调用正式规则。** 不复制一套年度、战斗、突破算法。`action advance`、`event choose` 与界面共用 `Runtime.staged` 存储边界；执行正式操作的三组权限守卫，并使用 `request_scope`。新增模拟必须接入具名能力、事务和差异检查，不能直接写原存档，也不能把任意引擎方法名交给调用者。
 7. **覆盖只放在调试会话中。** 当前唯一规则覆盖是普通修为突破概率，由 `engine_adapter.SessionEngine` 的单实例适配完成。正式 `GameEngine` 与玩家存档均不新增 Debug 字段。不能因开发需求修改全球规则常量。
 8. **命令与自然变量同义同名。** 玩家字段使用 `realm_index`、`layer`、`opportunity`；物品使用真实 ID `spirit_stone`。邻域未来命令必须使用 `voisinage`，禁止 `linyu`、`neighborhood` 等拼音或近义别名。英文空格表达动作：`player set ...`、`snapshot restore ...`；不支持自然语言猜测或模糊纠错。
 9. **展示投影不得冒充玩家字段。** `spirit_stones` 是已有灵石总量语义的显式操作，映射到背包条目；`breakthrough_chance` 是已有概率计算语义的会话覆盖。新增类似字段必须说明其真实归属、作用范围与撤销方式。
@@ -19,7 +19,7 @@ Debug 是应用边界装配的开发工具。正式玩法不得为了控制台�
 
 正式系统未来新增数据库、文件或其他持久化副作用时，先提供可替换的存储能力，再明确如何进入 Debug 事务和快照。首版事务明确覆盖角色存档与全局成就，不会自动捕获任意新文件；未适配的新副作用不能直接开放给调试会话。
 
-不支持 `eval`、`exec`、Python REPL、任意属性路径和任意文件路径命令。DLC 的未来调试注册应在 Debug 装配边界按已加载内容注册，不让 DLC 玩法加载过程依赖 Debug。首版未开放第三方可执行注册脚本。
+不支持 `eval`、`exec`、Python REPL、任意属性写入和任意文件路径命令。`state get` 仅能读取会话游戏文档中的 JSON Pointer，不能访问 Python 对象、文件或修改字段。DLC 的未来调试注册应在 Debug 装配边界按已加载内容注册，不让 DLC 玩法加载过程依赖 Debug。当前未开放第三方可执行注册脚本。
 
 ## 2. 代码职责与扩展流程
 
@@ -31,17 +31,19 @@ Debug 是应用边界装配的开发工具。正式玩法不得为了控制台�
 | `cultivation_life/debug/runtime.py` | 会话、原子提交、执行前现场、操作记录、复现包 |
 | `cultivation_life/debug/engine_adapter.py` | 唯一引擎适配位置；普通修为概率覆盖 |
 | `cultivation_life/debug/gateway.py` | HTTP 与隔离引擎的装配；拒绝逃逸到正式角色的操作 |
+| `cultivation_life/debug/client.py` | 标准库客户端、实时工具发现；只访问本机 Debug HTTP 入口 |
+| `cultivation_life/debug/agent.py`、`scripts/debug_agent.py` | CLI、MCP stdio 协议与可从任意工作目录启动的入口 |
 | `web/debug-console.js`、`.css` | 控制台、会话标识、命令历史、元数据补全 |
 
 新增一个查询或简单修改命令的流程：
 
 1. 确认真实字段、单位、范围和权威来源；复杂玩法先明确系统契约。
 2. 在所属命令模块定义处理函数，接收 `Context` 和显式参数。禁止把完整引擎传给所有处理函数。
-3. 登记 `Command(name, kind, description, handler, arguments, requires_session)`。名称重复立即报错；补全、帮助自动从登记信息生成。
+3. 登记 `Command(name, kind, description, handler, arguments, requires_session)`；通过 `Argument` 声明 string/integer/number、枚举和范围。名称重复立即报错；补全、帮助和工具 JSON Schema 自动生成。参数必须使用真实语义名称；结构化输入严格拒绝未知键、数值字符串、布尔数值及非有限数。
 4. 在 `tests/test_debug_console.py` 或对应专题测试中验证语义和隔离。新 Query 必须加入查询纯度覆盖；新规则适配必须验证真实消费入口。
 5. 同步本文示例；完整可执行命令以运行时 `help` 为准。
 
-支持的类别为 `query`、`mutation`、`session`、`snapshot`、`export`；`simulation` 保留扩展登记类别，首版没有模拟专用命令。会话和快照管理不属于游戏玩法推进。
+支持的类别为 `query`、`mutation`、`session`、`snapshot`、`export`、`simulation`。会话和快照管理不属于游戏玩法推进。Agent 客户端不能导入引擎或读取存档；新增能力必须在服务端注册，不能让 AI 临时编写内部状态修改脚本。
 
 ## 3. 开启和关闭
 
@@ -180,7 +182,7 @@ repro export
 ## 8. 测试与发布边界
 
 ```powershell
-python -m pytest tests/test_debug_console.py tests/test_audit_regressions.py tests/test_runtime_config.py -q
+python -m pytest tests/test_debug_console.py tests/test_debug_agent.py tests/test_audit_regressions.py tests/test_runtime_config.py -q
 python tests/browser_debug_console.py
 python tools/check_module_dependencies.py
 python tools/check_documentation.py
@@ -188,12 +190,161 @@ python tools/check_documentation.py
 
 Android 的 `debug-console` instrumentation 阶段验证原生 WebView 控制台、六主题、正常操作写入副本、原角色隔离、原生返回和关闭后拒绝旧会话。APK 编译和 Lint 不能替代这些行为检查。正式包必须继续保持默认 `Debug=False` 及原有发布验收，不得将开发测试 APK 当成新正式发行。
 
-首版暂未实现：NPC 生命周期修改、强制跨界、任意事件触发、时间专用命令、RNG trace、批量战斗/概率模拟、自动回放和第三方 DLC 可执行调试插件。这些功能在明确状态转换契约和验证范围后逐项扩展，不通过任意字段写入绕过。
+当前暂未实现：NPC 生命周期修改、强制跨界、任意事件触发、跳过结算的时间设置、RNG trace、批量战斗/概率模拟、自动回放和第三方 DLC 可执行调试插件。`action advance` 已支持正式行动推进，不提供跳年或跳过事件的捷径。这些功能在明确状态转换契约和验证范围后逐项扩展，不通过任意字段写入绕过。
 
-### 本轮验证记录（2026-10-04）
+### 首版验证记录（2026-10-04，Agent 扩展之前）
 
 - 完整 Python 回归分八个独立批次执行，**2,071 项通过，0 失败、0 跳过**，其中新增 Debug 专项 40 项；证据为 `build/debug-development-tests.log` 与八份 JUnit XML。
 - `tests/browser_debug_console.py` 通过六主题、桌面/手机竖屏/手机横屏、命令补全、资源修改、快照、导出、双标签页隔离和关闭后的恢复；原有 `tests/browser_smoke.py` 也通过。
 - Android Debug APK 构建通过，Lint 无问题；专用 Android 12 / API 31 x86_64 模拟器的竖屏和横屏验证通过。覆盖原生 WebView、资源和概率覆盖、快照、原始文件不变、原生返回、关闭后拒绝旧会话，以及通过 instrumentation 注入确定 URI 的实际文件导入导出回调。未验证实体 ARM 手机，也未将系统文件选择器的人工浏览流程作为自动化验收内容。
 - Python 静态未定义名称检查通过；显式依赖图 **331 个模块、1,824 条边，0 循环、0 边界违规**；50 份 Markdown 的索引、链接和关键版本检查通过。
 - 本轮未升级版本或替换 `dist/` 正式安装包。用于安卓验证的是独立包名的 Debug APK，不能作为原正式 APK 的覆盖更新。
+
+## 9. Agent 工具与结构化调用
+
+这一层由项目维护，AI 只负责发现并调用工具，不需要生成存档修改程序。服务进程仍是唯一玩法执行者。客户端使用 Python 标准库，不依赖模型 SDK；它不会加载游戏内容或引擎，也不会自行开启 Debug。
+
+### 9.1 启动与工具发现
+
+先开启 Debug 并启动游戏服务。默认地址为 `http://127.0.0.1:8000`；若启动器实际使用其他端口，以实际地址替换。工具只接受本机 HTTP origin，不接受远程主机、路径、凭证、代理或跳转。退出游戏或关闭 Debug 后工具不能继续执行，更不会回退到正式角色。
+
+```powershell
+python scripts/debug_agent.py tools
+python scripts/debug_agent.py call "save list"
+python scripts/debug_agent.py call "debug start" --game-id <game_id>
+python scripts/debug_agent.py call "debug status" --session-id <session_id>
+python scripts/debug_agent.py call "action list"
+```
+
+`tools` 输出当前服务的工具名与 JSON Schema。可在项目根目录使用等价入口 `python -m cultivation_life.debug.agent`；独立脚本支持任意工作目录。CLI 成功输出 UTF-8 JSON 并返回 0，失败写 stderr 并返回 1，不自动重试。
+
+支持 stdio MCP 的 Agent 可注册以下服务器（按实际 Python 和项目位置调整）：
+
+```json
+{
+  "mcpServers": {
+    "cultivation-life-debug": {
+      "command": "G:\\Anaconda3\\python.exe",
+      "args": [
+        "F:\\CultivationLife\\scripts\\debug_agent.py",
+        "--url", "http://127.0.0.1:8000",
+        "mcp"
+      ]
+    }
+  }
+}
+```
+
+MCP 桥固定支持 **2025-11-25 / 2025-06-18** 的 initialize 握手与 stdio tools 子集，不声称支持后续协议版本。实现 `initialize`、初始化通知、`ping`、`tools/list`、`tools/call`；不提供资源、提示模板、订阅、HTTP MCP 或后台任务。每行一条 UTF-8 JSON-RPC，stdout 只输出协议消息。规范依据：[stdio 传输](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)、[生命周期](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle)、[Tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)。
+
+工具名称使用 `cultivation_` 前缀及命令名的下划线形式，例如 `cultivation_player_set`、`cultivation_action_advance`。完整工具清单实时取自服务端；命令内部的字段和内容 ID 不翻译、不增加近义别名。`tools/list` 不需要提前选角色；涉及会话的工具显式要求 `session_id`，不维护 Agent 隐式当前角色。
+
+### 9.2 推荐调用顺序
+
+1. `cultivation_save_list` → 从只读结果取得 `game_id`。
+2. `cultivation_debug_start` → 以该 `game_id` 建立独立副本，保存返回的 `session_id`。
+3. `cultivation_state_summary` / `cultivation_debug_status` → 检查场景与 `revision`。
+4. `cultivation_snapshot_create` → 保存命名基线。
+5. 使用数据或模拟工具；需要写入时传最新 `expected_revision` 和新的 `request_key`。
+6. 查询差异、检查事件及日志。失败后导出 `cultivation_repro_export`，或从命名快照恢复再试。
+
+MCP 的一次写入参数示例（假设当前 revision 为 0）：
+
+```json
+{
+  "name": "cultivation_player_set",
+  "arguments": {
+    "session_id": "由 debug start 返回的 32 位会话 ID",
+    "expected_revision": 0,
+    "request_key": "prepare_stones_001",
+    "arguments": {"field": "spirit_stones", "value": 100000}
+  }
+}
+```
+
+这里外层 `arguments` 是 MCP 参数；内层 `arguments` 是注册命令参数。命令查询可使用 `{"arguments": {}, "session_id": "..."}`；无会话查询只需要 `{"arguments": {}}`。MCP 返回 `structuredContent` 和兼容文本内容；执行错误设置 `isError=true`。复现导入通过 `bundle` 对象传完整 JSON，不把服务端文件路径交给 Agent。
+
+无需 MCP 的自动化程序可直接复用内置客户端：
+
+```python
+from cultivation_life.debug.client import DebugClient
+
+client = DebugClient("http://127.0.0.1:8000")
+sources = client.call("save list")["data"]
+session = client.call("debug start", game_id=sources[0]["game_id"])["data"]
+sid = session["session_id"]
+status = client.call("debug status", session_id=sid)
+result = client.call(
+    "player set", {"field": "breakthrough_chance", "value": 1},
+    session_id=sid, expected_revision=status["revision"], request_key="chance_001",
+)
+print(result["data"], result["revision"])
+```
+
+### 9.3 HTTP、并发与重试契约
+
+仍使用 `POST /api/debug/command`。旧控制台的 `command` 文本保持兼容；当存在 `arguments` 对象时，`command` 必须为精确注册名称，参数按 Schema 类型提供。顶层允许 `command`、`arguments`、`game_id`、`session_id`、`bundle`、`expected_revision`、`request_key`，未知键拒绝。接口不接受任意方法名、Shell 命令或任意属性写入。
+
+```json
+{
+  "command": "action advance",
+  "arguments": {"action": "rest", "units": 1},
+  "session_id": "由 debug start 返回的 32 位会话 ID",
+  "expected_revision": 3,
+  "request_key": "rest_001"
+}
+```
+
+- `mutation`、`snapshot`、`simulation` 的结构化调用必须带版本和请求键；只读查询不要求这两项。文本控制台仍按串行事务执行。
+- `revision` 是单调递增的会话执行版本，包含命令、界面操作与失败记录，不是存档结构版本。纯查询不增加版本；界面 GET 如果准备并改变副本，也会增加版本。新会话或导入新会话从 0 开始。
+- 成功写入和回执在同一 JSON 原子提交；相同会话中同一 `request_key`、命令、参数及预期版本重试，返回首次结果和 `replayed=true`，不再次执行。回执保留最近 64 个；过期请求仍会因旧版本冲突而拒绝，不会重复扣费。返回的 revision 属于首次执行结果，重放后应重新读取当前状态。
+- 请求键只用于上述三类写入，必须为 1–64 位字母、数字、`_` 或 `-`。使用同一键执行不同内容会报错。版本冲突返回输入错误；先查询当前状态，确认意图，再使用新键及新版本发起新操作。
+- `debug start`、`repro import` 属于会话创建，不支持去重键；它们可能重复创建隔离副本，不修改源存档。不对未知结果的会话创建盲目重试，先检查 `debug sessions`。
+- 已进入命令处理函数的失败不提交游戏/RNG/成就变化，但保留失败现场、结构化参数和请求键，并推进执行版本；此时先读取日志和状态。语法、参数类型、去重键与版本校验在执行前拒绝，不写日志或增加版本。不将内部 `ValueError` 直接当作可忽略的输入错误。超时不等于操作未提交：客户端不自动重试写入，调用者只能用原键和原参数查询重试结果。
+- 快照恢复只恢复游戏、覆盖与成就，不倒退版本、日志和去重回执；导入复现包生成新会话并重置版本/回执，不信任包中附带的传输状态。
+
+## 10. 本轮新增指令
+
+以下命令在游戏控制台、结构化 HTTP、CLI 和 MCP 共用实现。英文名称及变量 ID 精确匹配：
+
+| 指令 | 用途与限制 |
+| --- | --- |
+| `save list` | 发现源存档 ID，不调用正式读档补全、不写回 |
+| `state summary` | 玩家场景、事件/试炼阻塞项及当前状态指纹 |
+| `state get /player/realm_index` | 只读 JSON Pointer；数组使用 `/player/inventory/0`，不支持属性执行 |
+| `inventory` | 查看副本完整背包 |
+| `item list "" 0` | 按真实 ID/显示名子串检索；空查询查看全部，offset 从 0 起，每页 50 项 |
+| `item give spirit_stone 10` | 使用正式 `add_item`；数量整数 1–10^9，总量不超过 10^15 |
+| `item remove spirit_stone 10` | 使用正式 `remove_item`；数量不足整体拒绝 |
+| `npc find "" 0` | 按 ID/显示名子串检索来源记录，每页 50 条，返回 next_offset |
+| `action list` | 发现真实行动 ID 和配置，不承诺当前角色都可执行 |
+| `action advance rest 1` | 正式规则推进 1–10 个行动单位；单位对应年份按境界决定，事件可中断 |
+| `event inspect` | 查看已保存待处理事件及 choice_id；enabled 为保存时状态，执行时重新检查 |
+| `event choose <choice_id>` | 正式事件选择；遵守条件、消费、随机与后续事件，不强制成功 |
+| `journal list` | 查看最近 100 条记录、请求编号、状态差异与失败堆栈 |
+
+物品命令只用于普通背包条目；`immortal_trace` 在正式规则中映射到独立养成资源，当前明确拒绝，避免与背包数量混用。不会通过新增通用属性写入去绕开专属养成契约。
+
+```text
+snapshot create before_action
+state summary
+item list "pill" 0
+inventory
+action list
+action advance rest 1
+event inspect
+journal list
+snapshot diff before_action
+```
+
+有待处理事件时先查看 `event inspect` 并按其真实 ID 执行 `event choose`。不存在的选项直接拒绝；其他玩法门槛仍由正式规则判断，出错整体回滚并保留日志。没有自动循环刷行动、自动选择事件、强制跨界或复活操作；遇到试炼等当前未开放工具的流程，可以在同一调试副本的游戏界面继续操作。
+
+### Agent 扩展验证记录
+
+当前注册 **41 个命令/工具**，其中本轮新增 13 个命令。验证结果：
+
+- 完整 Python 套件分八个独立批次执行，**2,086 通过、0 失败、0 跳过**，179.19 秒。证据：`build/debug-agent-tests.log`、`debug-agent-part-*.xml`。
+- 最后补充失败请求的结构化参数/请求键记录、顶层 ID 类型校验及 Agent 依赖边界后，Debug 专项 **55 通过**。覆盖真实 HTTP/CLI/MCP 子进程、严格参数校验、并发重复执行、旧版本拒绝、原角色与成就隔离、查询纯度、普通行动一致性及失败回滚。证据：`build/debug-agent-focused.log`。
+- 扩展浏览器测试通过六主题、桌面/竖屏/横屏、新增物品操作与行动推进、快照、补全、导出、双标签隔离和关闭恢复。首次与完整回归并行执行时出现一次 `Failed to fetch`，独立复测未复现；未据此修改正常玩法或声称已定位网络原因。通过记录：`build/debug-agent-browser.log`。
+- 显式依赖 **333 个模块、1,828 条边，0 循环、0 边界违规**；静态未定义名称、50 份 Markdown 一致性及差异空白检查通过。依赖检查同时禁止 Agent 客户端直接导入游戏/存储实现。
+- 本轮未升级版本、未重打 PC/APK 包、未重跑 Android 设备验收；上述 Android 验证属于首版。源码功能可供本机 Agent 使用，已发布安装包仍不包含这些变更。
