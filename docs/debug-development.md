@@ -27,6 +27,8 @@ Debug 是应用边界装配的开发工具。正式玩法不得为了控制台�
 | --- | --- |
 | `cultivation_life/debug/registry.py` | 固定语法、类型元数据、注册、纯查询标记、帮助与补全 |
 | `cultivation_life/debug/commands.py` | 首版命令、字段白名单、资源映射、快照操作 |
+| `cultivation_life/debug/capabilities.py` | 本体通用操作白名单、具名引擎调用与复杂参数 Schema |
+| `cultivation_life/debug/schema.py` | 布尔值、可选参数、数组和对象的严格校验，与工具发现使用同一 Schema |
 | `cultivation_life/debug/state.py` | 纯查询、轻量校验、摘要、带上限的状态差异 |
 | `cultivation_life/debug/runtime.py` | 会话、原子提交、执行前现场、操作记录、复现包 |
 | `cultivation_life/debug/engine_adapter.py` | 唯一引擎适配位置；普通修为概率覆盖 |
@@ -39,11 +41,11 @@ Debug 是应用边界装配的开发工具。正式玩法不得为了控制台�
 
 1. 确认真实字段、单位、范围和权威来源；复杂玩法先明确系统契约。
 2. 在所属命令模块定义处理函数，接收 `Context` 和显式参数。禁止把完整引擎传给所有处理函数。
-3. 登记 `Command(name, kind, description, handler, arguments, requires_session)`；通过 `Argument` 声明 string/integer/number、枚举和范围。名称重复立即报错；补全、帮助和工具 JSON Schema 自动生成。参数必须使用真实语义名称；结构化输入严格拒绝未知键、数值字符串、布尔数值及非有限数。
+3. 登记 `Command(name, kind, description, handler, arguments, requires_session)`；通过 `Argument` 声明 string/integer/number/boolean/object/array、枚举、范围及可选参数。名称重复立即报错；补全、帮助和工具 JSON Schema 自动生成。参数必须使用真实语义名称；结构化输入严格拒绝未知键、数值字符串、布尔数值及非有限数。嵌套对象也必须声明字段，不开放任意载荷。
 4. 在 `tests/test_debug_console.py` 或对应专题测试中验证语义和隔离。新 Query 必须加入查询纯度覆盖；新规则适配必须验证真实消费入口。
 5. 同步本文示例；完整可执行命令以运行时 `help` 为准。
 
-支持的类别为 `query`、`mutation`、`session`、`snapshot`、`export`、`simulation`。会话和快照管理不属于游戏玩法推进。Agent 客户端不能导入引擎或读取存档；新增能力必须在服务端注册，不能让 AI 临时编写内部状态修改脚本。
+支持的类别为 `query`、`mutation`、`session`、`snapshot`、`export`、`simulation`、`preview`。`query` 只读保存文档；`preview` 可调用正式预览，但其读档整理、RNG 和成就副作用全部留在临时存储并丢弃，成功失败均不改会话。`game view` 则明确属于 `simulation`，像界面一样提交状态整理以提供后续可操作的实际 ID。会话和快照管理不属于游戏玩法推进。Agent 客户端不能导入引擎或读取存档；新增能力必须在服务端注册，不能让 AI 临时编写内部状态修改脚本。
 
 ## 3. 开启和关闭
 
@@ -85,7 +87,7 @@ snapshot create before_test
 
 `debug start` 在 `data/debug/` 建立独立副本，角色 ID 保持不变，通过随机会话 ID 和独立存储区区分。顶部持续显示 **DEBUG · 独立副本**。关闭控制台后可用正常游戏按钮修炼、交互和战斗，操作与成就都只提交到副本。另一个没有会话的标签页继续使用原角色。
 
-按 Enter 执行；上下方向键查看最近 100 条命令；Tab 使用注册表补全命令和枚举参数；Ctrl+L 清空屏幕输出。命令按大小写精确匹配。文本参数支持引号，不支持 Shell 运算符、管道或复合脚本。
+按 Enter 执行；上下方向键查看最近 100 条命令；Tab 使用注册表补全命令和枚举参数；Ctrl+L 清空屏幕输出。命令按大小写精确匹配。文本命令上限 32,768 字符，字符串参数通常不超过 2,048 字符。文本参数支持引号，不支持 Shell 运算符、管道或复合脚本。布尔参数使用 `true` / `false`；数组、对象使用单引号包裹 JSON；末尾可选参数可省略，中间可选参数用 `null` 占位。结构化 API 使用原生 JSON 类型，无需再给对象套字符串。
 
 ```text
 debug status
@@ -299,7 +301,7 @@ print(result["data"], result["revision"])
 - `revision` 是单调递增的会话执行版本，包含命令、界面操作与失败记录，不是存档结构版本。纯查询不增加版本；界面 GET 如果准备并改变副本，也会增加版本。新会话或导入新会话从 0 开始。
 - 成功写入和回执在同一 JSON 原子提交；相同会话中同一 `request_key`、命令、参数及预期版本重试，返回首次结果和 `replayed=true`，不再次执行。回执保留最近 64 个；过期请求仍会因旧版本冲突而拒绝，不会重复扣费。返回的 revision 属于首次执行结果，重放后应重新读取当前状态。
 - 请求键只用于上述三类写入，必须为 1–64 位字母、数字、`_` 或 `-`。使用同一键执行不同内容会报错。版本冲突返回输入错误；先查询当前状态，确认意图，再使用新键及新版本发起新操作。
-- `debug start`、`repro import` 属于会话创建，不支持去重键；它们可能重复创建隔离副本，不修改源存档。不对未知结果的会话创建盲目重试，先检查 `debug sessions`。
+- `debug start`、`scenario create`、`repro import` 属于会话创建，不支持去重键；它们可能重复创建隔离副本，不修改源存档。不对未知结果的会话创建盲目重试，先检查 `debug sessions`。
 - 已进入命令处理函数的失败不提交游戏/RNG/成就变化，但保留失败现场、结构化参数和请求键，并推进执行版本；此时先读取日志和状态。语法、参数类型、去重键与版本校验在执行前拒绝，不写日志或增加版本。不将内部 `ValueError` 直接当作可忽略的输入错误。超时不等于操作未提交：客户端不自动重试写入，调用者只能用原键和原参数查询重试结果。
 - 快照恢复只恢复游戏、覆盖与成就，不倒退版本、日志和去重回执；导入复现包生成新会话并重置版本/回执，不信任包中附带的传输状态。
 
@@ -339,12 +341,94 @@ snapshot diff before_action
 
 有待处理事件时先查看 `event inspect` 并按其真实 ID 执行 `event choose`。不存在的选项直接拒绝；其他玩法门槛仍由正式规则判断，出错整体回滚并保留日志。没有自动循环刷行动、自动选择事件、强制跨界或复活操作；遇到试炼等当前未开放工具的流程，可以在同一调试副本的游戏界面继续操作。
 
-### Agent 扩展验证记录
+### 上一轮 Agent 扩展验证记录（本体通用覆盖扩展之前）
 
-当前注册 **41 个命令/工具**，其中本轮新增 13 个命令。验证结果：
+当时注册 **41 个命令/工具**，该轮新增 13 个命令。验证结果：
 
 - 完整 Python 套件分八个独立批次执行，**2,086 通过、0 失败、0 跳过**，179.19 秒。证据：`build/debug-agent-tests.log`、`debug-agent-part-*.xml`。
 - 最后补充失败请求的结构化参数/请求键记录、顶层 ID 类型校验及 Agent 依赖边界后，Debug 专项 **55 通过**。覆盖真实 HTTP/CLI/MCP 子进程、严格参数校验、并发重复执行、旧版本拒绝、原角色与成就隔离、查询纯度、普通行动一致性及失败回滚。证据：`build/debug-agent-focused.log`。
 - 扩展浏览器测试通过六主题、桌面/竖屏/横屏、新增物品操作与行动推进、快照、补全、导出、双标签隔离和关闭恢复。首次与完整回归并行执行时出现一次 `Failed to fetch`，独立复测未复现；未据此修改正常玩法或声称已定位网络原因。通过记录：`build/debug-agent-browser.log`。
 - 显式依赖 **333 个模块、1,828 条边，0 循环、0 边界违规**；静态未定义名称、50 份 Markdown 一致性及差异空白检查通过。依赖检查同时禁止 Agent 客户端直接导入游戏/存储实现。
 - 本轮未升级版本、未重打 PC/APK 包、未重跑 Android 设备验收；上述 Android 验证属于首版。源码功能可供本机 Agent 使用，已发布安装包仍不包含这些变更。
+
+## 11. 本体通用功能覆盖
+
+当前注册 **161 个命令/工具**，通过固定白名单覆盖 **118 个现有角色操作入口**，包含本体通用功能及部分已接入的 DLC 操作。普通操作直接调用正式引擎方法，保持三组守卫、消费、关系转换、跨界和时间结算，不做 HTTP 转发或任意方法反射。每条入口的完整映射、未开放的 17 条专属/旧调试入口见 [本体覆盖清单](debug-base-coverage.md)。这表示可通过工具执行这些入口，不表示所有 DLC、分支组合或游戏状态已经穷举测试。
+
+### 从空白开始复现
+
+无需先创建一个正式角色：
+
+```text
+scenario list
+scenario create "Repro Test" supreme_metal dao 42 core
+snapshot create baseline
+game view
+game view /market
+game view /map
+game view /player/known_techniques
+game view /crafting_system
+```
+
+`scenario list` 返回真实灵根、道途、开局世界及快速开局配置。预设会按正式建角规则覆盖对应角色参数；没有 DLC 或未解锁预设时仍按正式规则拒绝。`scenario create` 在临时引擎建立角色，再保存为 Debug 会话，正式角色目录不会出现新角色或成就文件。退出此类会话返回标题页；导出再导入仍保留这一行为。旧 `debug start` 复制原角色的流程保持不变。
+
+`game view` 不带路径时返回面板名；带路径时返回与界面同源的数据，包含市场货架、地图目的地、已学功法、制作材料实例、组织、外交等可操作 ID。其读取准备可能生成货架、整理 NPC、结算读档状态并消耗 RNG，因此提交到副本、记录版本和执行前快照。Agent 必须带 `expected_revision`、`request_key`。成功返回的 ID 来自已提交的副本；后续操作仍需遵守事件中断或状态变化后的新门槛。纯查询继续使用 `state get`，不把原始文档和展示字段混用。
+
+### 通用操作示例
+
+```text
+player set spirit_stones 1000000
+item give healing_pill 2
+item use healing_pill
+market buy <offer_id>
+market lock <offer_id>
+technique equip <technique_id> main
+breakthrough attempt
+body breakthrough
+sense breakthrough
+map travel <destination>
+teleport action <action> <destination>
+npc contact <npc_id> improve
+party <npc_id> invite
+setting set manual_combat_plan true
+combat plan guard 10 never 0.4 false true
+spirit field reclaim
+formation preview '[null,null,null]'
+formation save '["material-id",null,null]' "Test Array"
+alchemy refine healing_pill '[{"item_id":"harvested-herb-id","quantity":1}]'
+upper voisinage train <voisinage_id>
+snapshot diff baseline
+```
+
+这些示例展示调用方式，`<...>` 须替换为本会话真实 ID；突破、传送、组队、生产和上界邻域均需要满足原有资格，示例不保证当前角色即可执行。`formation preview`、`crafting preview`、`merchant preview`、`puppet preview` 不提交临时状态，不需要写入版本或去重键，也不触发界面随后的游戏刷新。预览结果不是绕过条件的许可；实际制作仍重新检查库存与规则。
+
+### Agent 调用示例
+
+例如已经取得会话及最新 revision 后，调整战斗预案：
+
+```json
+{
+  "name": "cultivation_combat_plan",
+  "arguments": {
+    "session_id": "替换为真实会话 ID",
+    "expected_revision": 8,
+    "request_key": "combat_plan_001",
+    "arguments": {
+      "stance": "guard",
+      "mp_reserve": 0.4,
+      "transformations": false
+    }
+  }
+}
+```
+
+省略的可选字段保留正式入口默认行为；不会把未提供的配置字段强制写成默认值。可通过 `help <命令组>`、`capability list` 和 MCP `tools/list` 获取准确参数。`voisinage` 保留真实拼写，既不解析拼音，也不替换为 `neighborhood`。材料清单中的 `item_id`、交换材料的 `id`、阵法材料实例 ID 各自沿用正式接口含义。
+
+### 维护与验证
+
+- 新增角色 POST 入口时，同步 `capabilities.py`，或在 `EXCLUDED_OPERATIONS` 写明专属玩法/不可开放的理由。`test_all_game_post_routes_are_explicitly_classified` 会拒绝遗漏的入口，不能靠添加任意操作转发接口完成覆盖。
+- 新增已有入口的子操作、字段或复杂结构时，同步其 `Argument` 和嵌套 Schema，并增加真实调用测试。入口清单测试不能自动证明所有子分支的参数都正确。
+- `preview` 不得提交临时状态；需要准备后可操作 ID 的读取使用 `game view`。修改日志、版本或去重状态的逻辑继续统一放在 Runtime，玩法模块不反向引用 Debug。
+- 当前专项验证包含入口分类、118 个具名引擎调用的签名与参数类型、字符串/布尔/数组/对象及可选参数、真实制作和互动流程、规则拒绝与回滚、关闭 Debug 后拒绝调用，以及没有任何 DLC 目录的纯本体子进程。
+
+本轮最终回归及浏览器结果记录见覆盖清单末尾；本轮仍是未发布源码功能，不替换现有 PC/APK 安装包。

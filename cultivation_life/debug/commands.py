@@ -4,13 +4,14 @@ import math
 import random
 import re
 
-from ..content_registry import ACTIONS, REALMS, EXTENSION_REPORT, ITEM_CATALOG, WORLD_SYSTEMS
+from ..content_registry import ACTIONS, REALMS, EXTENSION_REPORT, ITEM_CATALOG, WORLD_SYSTEMS, ROOT_NAMES, PATH_NAMES
 from ..models import Player
 from ..rules import add_item, remove_item
 from ..runtime import encode_rng
 from ..version import BASE_GAME_VERSION
 from .registry import Argument, Command, CommandError, Registry
-from .state import digest, differences, npc_rows, validate
+from .state import digest, differences, npc_rows, validate, read_pointer
+from .capabilities import CAPABILITIES, EXCLUDED_OPERATIONS, register as register_capabilities
 
 
 # Exact authoritative field names. Values are (type, minimum, maximum).
@@ -149,20 +150,7 @@ def rng_seed(ctx, seed):
 
 def state_get(ctx, pointer):
     """Read JSON Pointer paths only; never evaluate attributes or synthesize aliases."""
-    if not pointer.startswith('/') or len(pointer) > 256:
-        raise CommandError('Expected a JSON Pointer beginning with /, up to 256 characters.')
-    value = ctx.document
-    for part in pointer[1:].split('/'):
-        if re.search(r'~(?![01])', part):
-            raise CommandError('Invalid JSON Pointer escape.')
-        key = part.replace('~1', '/').replace('~0', '~')
-        if isinstance(value, dict) and key in value:
-            value = value[key]
-        elif isinstance(value, list) and re.fullmatch(r'0|[1-9][0-9]*', key) and int(key) < len(value):
-            value = value[int(key)]
-        else:
-            raise CommandError(f'Unknown state pointer: {pointer}')
-    return copy.deepcopy(value)
+    return read_pointer(ctx.document, pointer)
 
 
 def page(rows, offset):
@@ -205,7 +193,9 @@ def build_registry():
     add('debug start', 'session', 'Clone the selected save into an isolated debug session.',
         lambda ctx: ctx.services.start(), requires_session=False)
     add('debug stop', 'session', 'Return to the original game; retain the debug session on disk.',
-        lambda ctx: {'session_id': None, 'game_id': ctx.session['source_game_id']})
+        lambda ctx: {'session_id': None,
+                     'game_id': None if ctx.session.get('source_kind') == 'generated' else ctx.session['source_game_id'],
+                     'return_to_title': ctx.session.get('source_kind') == 'generated'})
     add('debug sessions', 'query', 'List saved debug sessions.',
         lambda ctx: ctx.services.sessions(), requires_session=False)
     add('save list', 'query', 'List source save IDs without loading or modifying them.',
@@ -297,4 +287,26 @@ def build_registry():
         lambda ctx: ctx.services.export(ctx.session))
     add('repro import', 'session', 'Import an attached reproduction bundle into a new isolated session.',
         lambda ctx: ctx.services.import_bundle(), requires_session=False)
+    add('game view', 'simulation', 'Prepare and commit the isolated game as the UI does, then read a public JSON Pointer. '
+        'Omit pointer to list sections. This may settle state or consume RNG; use state get for pure saved data.',
+        lambda ctx, pointer=None: ctx.services.simulate(ctx.session, 'view', {'pointer': pointer}),
+        (Argument('pointer', required=False),))
+    add('scenario list', 'query', 'List real quick-start presets, spirit roots, paths and allowed starting worlds.',
+        lambda ctx: {'presets': copy.deepcopy(WORLD_SYSTEMS.get('quick_start_presets', [])),
+                     'spirit_roots': ROOT_NAMES, 'paths': PATH_NAMES,
+                     'start_worlds': copy.deepcopy(WORLD_SYSTEMS.get('start_worlds', {}))}, requires_session=False)
+    scene_args = (Argument('name'), Argument('spirit_root', tuple(ROOT_NAMES)), Argument('path', tuple(PATH_NAMES)),
+                  Argument('seed', type='integer', minimum=0, maximum=2**53-1),
+                  Argument('preset_id', required=False), Argument('start_world', required=False),
+                  Argument('gender', ('male', 'female'), required=False),
+                  Argument('technique_element', required=False), Argument('monster_species_id', required=False))
+    add('scenario create', 'session', 'Create a new isolated test character using ordinary creation and quick-start rules; '
+        'never creates a normal save. Seed does not fix runtime clock or UUIDs.',
+        lambda ctx, *values: ctx.services.create_scene({a.name: v for a, v in zip(scene_args, values) if v is not None}),
+        scene_args, False)
+    add('capability list', 'query', 'List covered ordinary operations and explicitly excluded specialized routes.',
+        lambda ctx: {'covered': [{'command': c.name, 'operation': c.operation,
+                                  'type': 'preview' if c.preview else 'simulation'} for c in CAPABILITIES],
+                     'excluded': EXCLUDED_OPERATIONS}, requires_session=False)
+    register_capabilities(registry)
     return registry
