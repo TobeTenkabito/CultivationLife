@@ -1,6 +1,13 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id": "asura_upper",
+        "variant_label": "修罗 DLC",
+        "description": "修罗界开局：从修罗境初期起步，接入炼体、魔脉、神通与王庭体系。"
+      }
+    ],
     "asura_manifestation": {
       "enabled": true,
       "routes": {

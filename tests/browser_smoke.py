@@ -106,6 +106,7 @@ def main() -> None:
                 assert page.locator(".quick-start-button[disabled]").count() == len(monster_ids)
                 for preset_id in monster_ids:
                     button = page.locator(f'.quick-start-button[data-preset-id="{preset_id}"]')
+                    button.locator('xpath=ancestor::details').evaluate('e=>e.open=true')
                     assert button.is_disabled()
                     selector = button.locator('..').locator('select')
                     selector.select_option('serpent')
@@ -116,6 +117,7 @@ def main() -> None:
                 assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_core']").text_content()
                 assert "妖修 DLC" in page.locator(".quick-start-button[data-preset-id='monster_void']").text_content()
                 assert page.locator(".quick-start-button[data-preset-id='buddhist_void']").count() == 1
+                page.locator(".quick-start-button[data-preset-id='confucian_core']").locator('xpath=ancestor::details').evaluate('e=>e.open=true')
                 page.locator(".quick-start-button[data-preset-id='confucian_core']").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 confucian_game_id = page.evaluate("game.id")

@@ -123,7 +123,11 @@
     $('#tutorial-heading').textContent='新手操作教程';
     $('#tutorial-start').textContent=data?.tutorial.guide.completed?'引导已完成':'开始／继续操作引导';
     $('#tutorial-start').disabled=working||!!data?.tutorial.guide.completed;$('#tutorial-handbook-open').disabled=!data;
-    document.querySelectorAll('[data-tutorial-open]').forEach(b=>b.textContent=`新手教程${data?(data.tutorial.guide.completed?'：已完成':enabled?'：引导中':'：已暂停'):''}`);
+    document.querySelectorAll('[data-tutorial-open]').forEach(b=>{
+      const status=data?(data.tutorial.guide.completed?'已完成':enabled?'引导中':'已暂停'):'跟随引导，亲手问道';
+      b.querySelector('.tutorial-entry-status').textContent=status;
+      b.setAttribute('aria-label',`新手教程：${status}`);
+    });
     const g=data?.tutorial.guide;if(!g?.active||dialog.open){stop();return;}
     const step=steps[g.step];if(!step){stop();return;}
     const key=data.id+':'+g.step,changed=currentKey!==key;

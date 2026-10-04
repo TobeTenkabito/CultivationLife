@@ -3,6 +3,11 @@
   "systems": {
     "quick_start_presets": [
       {
+        "id": "reincarnation_upper",
+        "variant_label": "鬼修 DLC",
+        "description": "鬼修上界开局：从轮回界起步，接入第九阶修行、炼魂与轮回体系。"
+      },
+      {
         "id":"ghost_core",
         "name":"鬼修·魂丹初期",
         "description":"鬼修 DLC 开局：以夜行炼魂录稳固魂体，并携养魂容器进入魂蚀、拘魂与轮回体系。",

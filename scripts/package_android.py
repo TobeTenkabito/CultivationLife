@@ -32,6 +32,8 @@ def main():
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
     for orientation in ('portrait', 'landscape'):
+        result = log(f'android-start-layout-{orientation}-{RELEASE_ID}.log')
+        require('status=passed' in result and 'status=failed' not in result, f'Android start layout {orientation} checks must pass')
         result = log(f'android-asura-{orientation}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android Asura {orientation} checks must pass')
         result = log(f'android-debug-console-{orientation}-{RELEASE_ID}.log')
@@ -42,6 +44,7 @@ def main():
     require("sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata, 'Android APK must target the expected minimum SDK and be non-debuggable')
     require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.', 'Android release lint must pass')
     require('Quick-start regression passed' in log(f'quick-start-ui-{RELEASE_ID}.log'), 'Quick-start UI checks must pass')
+    require('Start layout passed' in log(f'start-layout-ui-{RELEASE_ID}.log'), 'Start layout UI checks must pass')
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     apk_bytes = source.read_bytes()
     digest = hashlib.sha256(apk_bytes).hexdigest()
@@ -82,21 +85,16 @@ def main():
         'inputs_sha256': hashlib.sha256(json.dumps(provenance['inputs'], sort_keys=True).encode()).hexdigest(),
         'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': SAVE_SCHEMA_VERSION,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
-        'validation': ['Six-theme portrait and landscape: independent Asura panels and puppet workshop, perspective contour illustrations, 27 live meridian nodes, DLC colors, native vein opening and power acquisition, back and persistence verified', 'Base upper-world voisinages without Asura DLC: native acquisition, nine-level growth, six-theme UI, persisted selection and energy verified', 'Independent voisinage and ordinary action budgets, paid ordinary execution and bulk merit purchases verified; six-theme Android bulk controls and persisted quantities verified', 'Fourteen-unit nonblocking elections, exclusive laws, salary, preview-only peers, expandable six-theme collections and unbounded Yaochi experience verified', 'Institution classification, legacy affiliation, six-theme map and institutional contacts verified', f'{passed.group(1)} Python regressions passed',
-                       'Signed Android 12 six-theme doctrine fusion, trace study and true voisinage verified',
-                       'Per-seed offensive tradition guarantee and migration; trial enemy escape forbidden; great-attainment layers two to four widened; perfected axes +25%; unchanged backlash and capped superego; multi-world calibration documented',
-                       'Android 12 six-theme categorized sect contacts, saved interaction, stock lock across refresh and autonomous NPC cabinet verified',
-                       'Android 12 six-theme Yaochi economy, gold tempering, timed single-use pass and persistence verified',
-                       'Android 12 three upper worlds: six themes, DLC routing, finite reserves and native ordinary breakthrough verified',
-                       'Android 12 six-theme voisinage stages, backlash and trial persistence verified',
-                       'Android 12 six-theme live guided controls, deterministic practice/master/sect, persisted progress and native back verified',
-                       'Android 12 six-theme manual battle plans, lower-world MP and return conversion, method-first teleport verified',
-                       'Immortal meridians, manual realm gate, six themes, intrinsic resource bars and body level20 verified on signed APK',
-                       'Signed Android 12 APK: six themes, native clipboard, >10MB save, reversed segments, confirmation and lossless restore',
-                       'Windows to signed Android 12 to Windows: all JSON fields preserved',
-                       'Six themes, real action, native back; signature and metadata verified',
-                       'Signed APK debug console: six themes, portrait and landscape, isolated writes, DLC commands, native file callbacks and disabled-mode recovery verified',
-                       'Android release lint: no issues found'],
+        'validation': [
+            f'{passed.group(1)} Python regressions passed',
+            'Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
+            'Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians',
+            'Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence',
+            'Live tutorial actions, native back and persisted progress',
+            'Save transfer: six themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip',
+            'Debug console portrait and landscape: isolated writes, snapshots, DLC commands, native document callbacks and configuration-independent opening',
+            'Signature, version metadata, installed APK hash, source provenance, archive integrity and release lint verified',
+        ],
     }
     report.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     archive = ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip'
@@ -106,7 +104,8 @@ def main():
                            (ROOT/'docs/immortal-vein-balance.md','仙脉费用校准.md'),
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
-        for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md'):
+        for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
+                     'spatial-talismans.md', 'asura-court-1530.md'):
             package.write(ROOT/'docs'/name, 'docs/'+name)
     with zipfile.ZipFile(archive) as package:
         require(package.testzip() is None, 'Release ZIP integrity check failed')

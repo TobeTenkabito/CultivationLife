@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <script src="/theme-boot.js?v=1.45.0"></script>
-  <link rel="stylesheet" href="/style.css?v=1.45.0">
+  <link rel="stylesheet" href="/style.css?v=1.59.0">
   <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/common.css?v=1.45.0">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=2">
-  <link rel="stylesheet" href="/tutorial.css?v=2">
+  <link rel="stylesheet" href="/tutorial.css?v=1.59.0">
   <link rel="stylesheet" href="/npc-contacts.css?v=1.51.1">
   <link rel="stylesheet" href="/asura-court-panel.css?v=1.55.0">
   <link rel="stylesheet" href="/upper-energy.css?v=1.55.0">
@@ -40,13 +40,12 @@
       <div class="theme-choices" data-theme-picker="start"></div>
     </section>
     <section id="start-screen" class="paper start-card">
-      <button type="button" data-tutorial-open class="tutorial-entry">新手教程</button>
       <details id="start-extension-manager" class="start-extension-manager">
         <summary>DLC / MOD</summary>
         <p>独立开关 · 下次启动生效</p>
         <div id="start-extension-list"></div>
       </details>
-      <div class="start-introduction"><div class="start-theme-art" aria-hidden="true"></div><p class="theme-motto">一念为因，百年成果。</p><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，主修决定因果如何回响。随机种子可以复现同一条时间线。</p><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取成就中……</small></button></div>
+      <div class="start-introduction"><div class="start-theme-art" aria-hidden="true"></div><p class="theme-motto">一念为因，百年成果。</p><p class="eyebrow">命格初定</p><h2>此身从何而来</h2><p class="muted">灵根影响成长，主修决定因果如何回响。随机种子可以复现同一条时间线。</p><div class="start-guide-actions"><button type="button" data-tutorial-open class="tutorial-entry" aria-haspopup="dialog" aria-controls="tutorial-dialog"><svg class="tutorial-entry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v14h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3z"/><path d="M6 8h3m-3 4h3m6-4h3m-3 4h3"/></svg><span class="tutorial-entry-copy"><strong>新手教程</strong><small class="tutorial-entry-status">跟随引导，亲手问道</small></span></button><button id="achievement-open" class="achievement-entry" type="button"><span>功业录</span><small id="achievement-entry-progress">读取成就中……</small></button></div></div>
       <form id="new-game-form">
         <label>道号<input name="name" maxlength="16" placeholder="无名散修"></label>
         <label>性别<select name="gender" id="gender-select"><option value="male">男</option><option value="female">女</option></select></label>
@@ -58,7 +57,7 @@
         <button class="primary" type="submit">叩问长生</button>
       </form>
       <section class="save-library" aria-labelledby="save-library-title"><div class="save-library-heading"><div><p class="eyebrow">前尘有迹 · 道途可续</p><h3 id="save-library-title">我的修行卷</h3><p id="save-count" class="muted"></p></div><button type="button" data-save-import>导入存档</button></div><p class="save-library-note">行止皆自动落笔。续接旧旅程，或将存档码带往另一台设备。</p><div id="save-list" class="save-list"></div></section>
-      <div class="quick-start"><div><p class="eyebrow">快速开始</p><h3>承接一段既有道途</h3><p class="muted">按道途分组展示预设。妖修、鬼修与儒修会读取当前启用的 DLC 配置；未启用对应 DLC 时采用本体兼容数值。</p></div><div id="quick-start-list" class="quick-start-list"></div></div>
+      <div class="quick-start"><div><p class="eyebrow">快速开始</p><h3>选择起点，即刻启程</h3><p class="muted">展开境界分组，选择预设；标识随本次启用的 DLC 更新。</p></div><div id="quick-start-list" class="quick-start-list"></div></div>
     </section>
 
     <section id="achievement-screen" class="paper achievement-screen hidden" aria-label="成就">
@@ -121,7 +120,7 @@
           <details class="battle-round-details"><summary>展开逐轮演算</summary><div id="battle-round-list"></div></details>
         </article>
         <article id="action-card" class="paper action-card">
-          <button type="button" data-tutorial-open class="tutorial-entry">新手教程：已关闭</button>
+          <button type="button" data-tutorial-open class="tutorial-entry" aria-haspopup="dialog" aria-controls="tutorial-dialog"><svg class="tutorial-entry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v14h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3z"/><path d="M6 8h3m-3 4h3m6-4h3m-3 4h3"/></svg><span class="tutorial-entry-copy"><strong>新手教程</strong><small class="tutorial-entry-status">跟随引导，亲手问道</small></span></button>
           <p class="eyebrow">岁月流转</p><h2 id="action-heading">这一年，你将如何度过？</h2><p id="time-unit-hint" class="muted"></p>
           <div id="breakthrough-panel" class="breakthrough-panel hidden">
             <div><b id="breakthrough-title">大境界瓶颈</b><span id="breakthrough-reason"></span></div>
@@ -569,13 +568,13 @@
   <script src="/tutorial-content.js?v=1"></script>
   <script src="/handbook-content.js?v=1.56.2"></script>
   <script src="/tutorial-steps.js?v=1"></script>
-  <script src="/tutorial.js?v=1.56.2"></script>
+  <script src="/tutorial.js?v=1.59.0"></script>
   <script src="/immortal-economy-panel.js?v=1"></script>
   <script src="/npc-contacts.js?v=1.51.1"></script>
   <link rel="stylesheet" href="/exploration-panel.css?v=1">
   <script src="/exploration-panel.js?v=1"></script>
   <script src="/debug-console.js?v=2"></script>
-  <script src="/app.js?v=1.58.0-spatial"></script>
+  <script src="/app.js?v=1.59.0"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

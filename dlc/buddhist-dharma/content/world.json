@@ -1,6 +1,13 @@
 {
   "schema_version": 1,
   "systems": {
+    "quick_start_presets": [
+      {
+        "id": "buddhist_void",
+        "variant_label": "佛修 DLC",
+        "description": "诸法无我开局：在灵界以菩提无相经护持心性，接入弘法、香火、愿力与涅槃体系。"
+      }
+    ],
     "world_transition_routes": [
       {
         "id": "progression:human:hell",

@@ -26,7 +26,8 @@ def main():
     require(bool(passed) and 'failed' not in test_log and 'ERROR' not in test_log, 'Full regression suite must pass')
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
-    for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet'):
+    for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
+                  'start-layout', 'tutorial', 'spatial', 'debug-console'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')
     evidence_file = ROOT / f'build/exe-{RELEASE_ID}-verification.json'
@@ -48,7 +49,7 @@ def main():
         'save_schema': SAVE_SCHEMA_VERSION,
         'validation': [
             f'{passed.group(1)} automated regression tests passed',
-            'Asura court, Asura, handbook, quick-start and puppet UI success logs checked',
+            'Six-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',
             'Exact executable hash verified in isolated directories with and without optional DLC',
             'Release inputs match the fingerprint recorded by EXE verification',
         ],

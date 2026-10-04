@@ -300,8 +300,9 @@ function renderQuickStarts(presets) {
     groups.get(group).push(preset);
   });
   groups.forEach((entries, groupName) => {
-    const section = document.createElement('section'); section.className = 'quick-start-group';
-    const heading = document.createElement('div'); heading.className = 'quick-start-group-heading';
+    const section = document.createElement('details'); section.className = 'quick-start-group';
+    section.open = list.childElementCount === 0;
+    const heading = document.createElement('summary'); heading.className = 'quick-start-group-heading';
     heading.innerHTML = htmlText`<b>${groupName}</b><small>${entries.length} 项</small>`; section.appendChild(heading);
     const grid = document.createElement('div'); grid.className = 'quick-start-group-grid';
     entries.forEach(preset => {
@@ -309,15 +310,18 @@ function renderQuickStarts(presets) {
     button.dataset.presetId = preset.id; button.disabled = !preset.enabled;
     const pathName = configData?.paths?.[preset.path] || preset.path;
     const worldName = configData?.worlds?.[preset.world] || preset.world;
-    const badge = preset.variant_label || (preset.path === 'dao' ? '本体' : '道途配置');
+    const badge = preset.variant_label || '本体';
     const detail = preset.description || `${worldName} · ${pathName} · 使用对应境界的默认功法与行囊`;
-    button.innerHTML = htmlText`<span class="quick-start-title"><b>${preset.name}</b><i>${badge}</i></span><span class="quick-start-meta">${worldName} · ${pathName} · ${preset.layer || 1}层</span><span>${preset.enabled ? detail : preset.status}</span>`;
+    button.title = preset.enabled ? detail : preset.status || '当前不可用';
+    button.innerHTML = htmlText`<span class="quick-start-title"><b>${preset.name}</b></span><span class="quick-start-meta"><span>${worldName} · ${preset.layer || 1}层</span><i>${badge}</i></span>`;
+    button.setAttribute('aria-label', `${preset.name}，${pathName}，${worldName}，${preset.layer || 1}层，${badge}。${button.title}`);
     if (preset.path === 'monster') {
-      const wrapper = document.createElement('div');
+      const wrapper = document.createElement('div'); wrapper.className = 'quick-start-species';
       const select = document.createElement('select'); select.setAttribute('aria-label', `${preset.name}种属`);
       select.append(new Option('请选择妖修种属', ''));
       Object.entries(configData?.monster_species || {}).forEach(([id, row]) => select.append(new Option(row.name, id)));
-      button.disabled = true; select.onchange = () => { button.disabled = !preset.enabled || !select.value; };
+      select.disabled = !preset.enabled;
+      button.disabled = true; select.onchange = () => { button.disabled = busy || !preset.enabled || !select.value; };
       button.onclick = () => startQuickGame(preset.id, select.value);
       wrapper.append(select, button); grid.append(wrapper);
     } else {
@@ -3976,7 +3980,8 @@ function renderButtons() {
   document.querySelectorAll('.post-battle-possession-choice').forEach(button => button.disabled = busy);
   document.querySelectorAll('#new-game-form button, #save-list button, .quick-start-button').forEach(button => {
     const preset = configData?.quick_starts?.find(entry => entry.id === button.dataset.presetId);
-    button.disabled = busy || (preset ? !preset.enabled : false);
+    const speciesMissing = preset?.path === 'monster' && !button.parentElement.querySelector('select')?.value;
+    button.disabled = busy || (preset ? !preset.enabled || speciesMissing : false);
   });
 }
 
