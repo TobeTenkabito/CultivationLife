@@ -2,6 +2,7 @@
 from ...rules import max_mp, can_player_practice_technique
 from ...system import spatial
 from ...system.heavens.definitions import RUINS_ID
+from ...system.heavens import survey
 from ...system.formation_system import make_formation_material_instance
 from ..actions.exploration import move_world
 
@@ -41,7 +42,7 @@ def bind_ruins(engine):
         reward['id'] = f'{scene_id}-material-0'
         return reward
 
-    def enter(game, ruins, rng):
+    def prepare(game, ruins):
         state = spatial.ensure(game)
         scene = state['instances'].get(ruins['scene_id'])
         if scene is None:
@@ -53,9 +54,17 @@ def bind_ruins(engine):
                 visits=0, explored=0, power_ceiling=None, resource_ceiling=None,
                 power_description='有限机关遗址。', resource_description='抄本、阵材和唯一阵芯均有固定归属。')
             state['instances'][scene['id']] = scene
+        return scene
+
+    def enter(game, ruins, rng):
+        state = spatial.ensure(game)
+        scene = prepare(game, ruins)
         state['current'] = scene['id']
         scene['visits'] += 1
         move_world(engine._exploration_dependencies(), game, 'rift', rng)
+        if 'player_known' in ruins:
+            ruins['player_known'] = True
+        survey.reveal(engine._dependencies.heavens, game)
 
     def leave(game, ruins, rng):
         spatial.ensure(game)['current'] = None
@@ -76,4 +85,4 @@ def bind_ruins(engine):
         wounds = max(guardian['wounds'], member.get('wounds', 0), min(4, int((1-report.get('enemy_hp_ratio', 1))*4)))
         return result, summary, wounds
 
-    return dict(read_ruins_facts=facts, ruins_material=material, enter_ruins=enter, leave_ruins=leave, fight_ruins=fight)
+    return dict(read_ruins_facts=facts, ruins_material=material, enter_ruins=enter, leave_ruins=leave, fight_ruins=fight, prepare_ruins=prepare)

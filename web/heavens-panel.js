@@ -308,6 +308,7 @@
   function renderSurvey(host,r) {
     const s=r.survey;if(!s)return;
     host.dataset.survey=s.status;
+    if(s.status==='unmet'){empty(host,'尚未遇到同行者','可继续亲自调查，在遗址中留意真实来访者。');return;}
     if(s.status==='unavailable'){
       title(host,'结伴同勘','邀一位相熟居民自行观察、抄录，归来后当面交流。');
       host.append(node('p','先亲自踏勘遗址，再返回无棣原邀约。可选择人界自由、无其他职责、交情至少 20 的四至五阶居民；每座遗址安排一次。'));
@@ -316,8 +317,12 @@
       host.append(route);
       if(!s.candidates.length)host.append(node('small','目前没有符合条件的相熟居民。'));
     }else{
-      title(host,s.name,({active:'正在勘察',completed:'已返回无棣原',cancelled:'邀约已撤销',failed:'勘察已终止'})[s.status]);
-      const phase=({outbound:'赴约',studying:'观察与抄录',returning:'原路退出'})[s.phase];
+      title(host,s.name,({active:'正在勘察',completed:'已返回无棣原',cancelled:s.autonomous?'自行结束探访':'邀约已撤销',failed:'勘察已终止'})[s.status]);
+      if(s.autonomous)host.append(node('p',`自行探访 · 交情 ${s.affinity??0}`),node('small','对方自行发现旧路并出发。交换笔记或商请返程须当面相谈且交情至少 20，可前往交往页增进了解。'));
+      if(s.autonomous&&(current.world_npcs||[]).some(n=>n.id===s.person_id&&n.perceived_alive))host.append(button('前往交往页交流',()=>{
+        if(window.NpcContacts?.open(s.person_id))window.UtilityPanels?.open('relationship');
+      }));
+      const phase=({outbound:s.autonomous?'寻访旧路':'赴约',studying:'观察与抄录',returning:'原路退出'})[s.phase];
       host.append(node('p',`${phase} · ${s.progress} / ${s.duration} 年`));
       const progress=node('progress');progress.max=s.duration;progress.value=s.progress;progress.setAttribute('aria-label','勘察阶段进度');host.append(progress);
       host.append(node('p',s.shared?'已当面交换笔记，亲自读取缩短为 3 年。':s.learned?'本人已有完整笔记，可在遗址内或无棣原当面交换。':s.observed?'本人已看懂阵纹，正在抄录。':'本人尚未完成观察。'));

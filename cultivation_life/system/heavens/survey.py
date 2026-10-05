@@ -10,6 +10,33 @@ def get(game):
     return game.heavens_state.get('runtime', {}).get('ruins', {}).get('survey')
 
 
+def assignment(npc, year):
+    return dict(person_id=npc.id, origin_location=npc.location_id,
+                status='active', phase='outbound', progress=0, elapsed=0,
+                observed=False, learned=False, shared=False, started_at=year, last_year=year)
+
+
+def known(row):
+    return not row.get('autonomous') or row['introduced']
+
+
+def reveal(deps, game, *, year=None):
+    row = get(game)
+    if not row or known(row) or deps.read_ruins_facts(game)['blocked_reason']:
+        return
+    facts = deps.read_survey_facts(game)
+    if not facts['blocked_reason'] and facts['together']:
+        row['introduced'] = True
+        game.heavens_state['runtime']['ruins']['player_known'] = True
+        npc = deps.resolve_person(game, row['person_id'])
+        record(game, f'你实际遇到自行探访遗址的{npc.name}。对方正沿旧路求证；所见笔记须当面商谈，不能隔空指挥。', year=year)
+
+
+def record_known(game, text, *, year):
+    if known(get(game)):
+        record(game, text, year=year)
+
+
 def handles(runtime, action, target):
     task = active_task(runtime) if runtime else None
     return action in SURVEY_ACTIONS or (action in {'resume', 'cancel'} and task and task['id'] == target and task['action'] == 'survey_wait')
@@ -34,6 +61,8 @@ def quote(deps, game, action, target, options):
     reason = actor_reason(deps, game)
     if reason or task:
         raise ValueError(reason or '请先完成或取消当前亲自任务')
+    if row and not known(row):
+        raise ValueError('尚未实际接触可商谈的勘察人物，请在遗址中留意来访者')
     if action == 'survey_wait':
         if not row or row['status'] != 'active':
             raise ValueError('暂无进行中的勘察')
@@ -58,6 +87,12 @@ def quote(deps, game, action, target, options):
     facts = deps.read_survey_facts(game)
     if facts['blocked_reason'] and not (action == 'survey_recall' and row['status'] == 'active' and row['phase'] == 'outbound'):
         raise ValueError(facts['blocked_reason'])
+    if row.get('autonomous') and action in {'survey_share', 'survey_recall'}:
+        npc = deps.resolve_person(game, row['person_id'])
+        if not facts['together']:
+            raise ValueError('对方自行探访，须与本人实际会面后商谈')
+        if (npc.affinity or 0) < 20:
+            raise ValueError('对方自行探访，交换笔记或商请返程须交情至少 20；可在人际关系页当面交流')
     if action == 'survey_share':
         if not row['learned'] or row['shared']:
             raise ValueError('尚无新的完整笔记可交换')
@@ -88,9 +123,7 @@ def execute(deps, game, action, target, options, *, run_task, cancel_task, task_
         return task_result(task)
     if action == 'survey_start':
         npc = deps.resolve_person(game, options['person_id'])
-        runtime['ruins']['survey'] = dict(person_id=npc.id, origin_location=npc.location_id,
-            status='active', phase='outbound', progress=0, elapsed=0, observed=False, learned=False, shared=False,
-            started_at=runtime['processed_years'], last_year=runtime['processed_years'])
+        runtime['ruins']['survey'] = assignment(npc, runtime['processed_years'])
         record(game, f'{npc.name}接受遗址勘察邀约，开始由人界赴约；不取用阵芯与预留阵材。')
     elif action == 'survey_share':
         row['shared'] = True
@@ -106,10 +139,11 @@ def execute(deps, game, action, target, options, *, run_task, cancel_task, task_
 
 def year_step(deps, game, *, outside):
     row = get(game)
+    year = game.heavens_state.get('runtime', {}).get('processed_years', 0)+int(outside)
+    reveal(deps, game, year=year)
     if not row or row['status'] != 'active' or (row['phase'] == 'outbound') != outside:
         return
     runtime = game.heavens_state['runtime']
-    year = runtime['processed_years']+int(outside)
     if row['last_year'] >= year:
         return
     if not outside and not deps.read_ruins_facts(game)['inside']:
@@ -118,9 +152,12 @@ def year_step(deps, game, *, outside):
     facts = deps.read_survey_facts(game)
     if not facts['alive']:
         row['status'] = 'failed'
-        record(game, '勘察人物已经陨落，邀约终止；不复活或生成替代人物。', year=year)
+        record_known(game, '勘察人物已经陨落，勘察终止；不复活或生成替代人物。', year=year)
         return
     if facts['blocked_reason']:
+        if row.get('autonomous') and row['phase'] == 'outbound' and facts['departure_lost']:
+            row['status'] = 'cancelled'
+            record_known(game, '探访者的原出发位置或人界修为资格已改变，本人结束旧路探访；保留实际所在，解除行程占用。', year=year)
         return
     row['progress'] += 1
     row['elapsed'] += 1
@@ -128,27 +165,33 @@ def year_step(deps, game, *, outside):
         row['observed'] = row['progress'] >= 2
         if row['progress'] == 8:
             row.update(learned=True, phase='returning', progress=0)
-            record(game, '勘察人物完成自己的抄录，准备原路退出；玩家尚未自动获得这些笔记。', year=year)
+            record_known(game, '勘察人物完成自己的抄录，准备原路退出；玩家尚未自动获得这些笔记。', year=year)
     elif row['progress'] == DURATIONS[row['phase']]:
         deps.move_surveyor(game, row['phase'])
         if outside:
             row.update(phase='studying', progress=0)
-            record(game, '原居民已经赴约并进入同一因果遗址，后续研究只由该空间年度推进。', year=year)
+            record_known(game, '原居民已经抵达并进入同一因果遗址，后续研究只由该空间年度推进。', year=year)
         else:
             row['status'] = 'completed'
-            record(game, '勘察人物已沿稳定入口退出到人界无棣原，所学与本人经历保留。', year=year)
+            record_known(game, '勘察人物已沿稳定入口退出到人界无棣原，所学与本人经历保留。', year=year)
 
 
 def project(deps, game):
     row = get(game)
+    scene = game.heavens_state.get('runtime', {}).get('ruins')
+    if not scene or not scene.get('player_known', True) or row and not known(row):
+        return dict(status='unmet', actions=[], candidates=[])
     result = dict(status=row['status'] if row else 'unavailable', actions=[], candidates=[])
     if row:
         npc = deps.resolve_person(game, row['person_id'])
         result.update(row, name=npc.name if npc else '原勘察人物', duration=DURATIONS[row['phase']],
-                      blocked_reason=deps.read_survey_facts(game)['blocked_reason'])
+                      blocked_reason=deps.read_survey_facts(game)['blocked_reason'],
+                      affinity=npc.affinity if npc else None)
     elif not deps.read_ruins_facts(game)['entry_reason']:
         result['candidates'] = deps.survey_candidates(game)
     for action, label in LABELS.items():
+        if row and row.get('autonomous') and action == 'survey_recall':
+            label = '商请结束勘察'
         options = {'person_id': result['candidates'][0]['id']} if action == 'survey_start' and result['candidates'] else {}
         item = dict(action=action, target_id=RUINS_ID, label=label, options=options)
         try:

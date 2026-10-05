@@ -124,8 +124,12 @@ def validate_runtime(runtime):
     keys = {'epoch_age', 'processed_years', 'last_year_key', 'last_discovery_window',
             'rng_counter', 'next_task_seq', 'unit_credit', 'sea_echo', 'tasks',
             'history', 'notifications', 'pause_requested', 'pause_on_opportunity'}
-    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins', 'omens'} != keys:
+    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins', 'omens', 'survey_discovery_window'} != keys:
         raise ValueError('诸天日历字段无效')
+    if 'survey_discovery_window' in runtime:
+        require_counter(runtime['survey_discovery_window'], '自主探访窗口')
+        if not 1 <= runtime['survey_discovery_window'] <= runtime['processed_years'] // 100:
+            raise ValueError('自主探访窗口不在实际年月内')
     extra = runtime.get('contacts', {})
     if type(extra) is not dict or set(extra) - (SITE_IDS - {'sea_echo'}):
         raise ValueError('诸天联系目录无效')
@@ -154,6 +158,9 @@ def validate_runtime(runtime):
         validate_mirror(runtime['mirror'], runtime['processed_years'])
     if 'ruins' in runtime:
         validate_ruins(runtime['ruins'], runtime['processed_years'])
+        survey = runtime['ruins'].get('survey', {})
+        if survey.get('autonomous') and runtime.get('survey_discovery_window', 0) != survey['started_at'] // 100:
+            raise ValueError('自主探访缺少对应实际窗口')
     if 'omens' in runtime:
         validate_omens(runtime['omens'], runtime['processed_years'])
     if runtime['last_year_key'] != runtime['processed_years'] or runtime['next_task_seq'] < 1:
@@ -580,10 +587,14 @@ def validate_omens(rows, year):
 
 def validate_survey(row, year):
     fields = {'person_id', 'origin_location', 'status', 'phase', 'progress', 'elapsed', 'observed', 'learned', 'shared', 'started_at', 'last_year'}
-    if (type(row) is not dict or set(row) != fields or not isinstance(row['person_id'], str) or not row['person_id']
+    if (type(row) is not dict or set(row) - {'autonomous', 'introduced'} != fields or not isinstance(row['person_id'], str) or not row['person_id']
             or row['origin_location'] is not None and (not isinstance(row['origin_location'], str) or not row['origin_location'])
             or row['status'] not in {'active', 'completed', 'cancelled', 'failed'} or row['phase'] not in {'outbound', 'studying', 'returning'}):
         raise ValueError('勘察字段或人物无效')
+    if ('autonomous' in row or 'introduced' in row) and (row.get('autonomous') is not True
+            or type(row.get('introduced')) is not bool or row['started_at'] < 100
+            or row['shared'] and not row['introduced']):
+        raise ValueError('自主探访来源或接触事实无效')
     for key in ('progress', 'elapsed', 'started_at', 'last_year'):
         require_counter(row[key], '勘察'+key)
     if (any(type(row[key]) is not bool for key in ('observed', 'learned', 'shared'))
@@ -605,10 +616,15 @@ def validate_survey(row, year):
 def validate_ruins(ruins, year):
     fields = {'id', 'scene_id', 'definition', 'created_year', 'observed', 'verified', 'record_acquired', 'contact_known',
               'reward', 'core', 'ward', 'guardian', 'local_traces', 'guardian_records', 'sent_records'}
-    if type(ruins) is not dict or set(ruins) - {'survey'} != fields or ruins['id'] != RUINS_ID:
+    if type(ruins) is not dict or set(ruins) - {'survey', 'player_known'} != fields or ruins['id'] != RUINS_ID:
         raise ValueError('因果遗址实例字段无效')
     if 'survey' in ruins:
         validate_survey(ruins['survey'], year)
+    if 'player_known' in ruins:
+        row = ruins.get('survey', {})
+        if (type(ruins['player_known']) is not bool or not row.get('autonomous')
+                or not ruins['player_known'] and (row['introduced'] or any(ruins[key] for key in ('observed', 'verified', 'record_acquired', 'contact_known')))):
+            raise ValueError('遗址可见事实缺少实际接触来源')
     validate_ruins_definition(ruins['definition'])
     identity = ruins['scene_id']
     if not isinstance(identity, str) or not re.fullmatch(r'heavens-ruins-[0-9a-f]{20}', identity):

@@ -79,5 +79,10 @@ window.NpcContacts = (() => {
     }
     search.oninput=()=>{query=search.value;page=0;list();};list();if(focused)search.focus();
   }
-  return {render};
+  function open(identity) {
+    const person=people.find(n=>n.id===identity);if(!data||!person)return false;
+    selected=identity;query=person.name;filter=person.perceived_alive?'all':'absent';page=0;
+    render(data,send);return true;
+  }
+  return {render,open};
 })();
