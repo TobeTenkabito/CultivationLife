@@ -27,3 +27,4 @@ class HeavensDependencies:
     opportunity_base: Callable | None = None
     grant_progress: Callable | None = None
     reconcile_tasks: Callable | None = None
+    grant_stones: Callable | None = None

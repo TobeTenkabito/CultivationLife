@@ -105,9 +105,11 @@ def _compact_sect_roster(deps: WorldRuntimeDependencies, game: GameState, sect: 
     if len(sect.npcs) <= cap:
         return False
     protected = {str(npc.get("id")) for npc in FACTION_NPC_TEMPLATES.get(sect.id, [])}
-    echo = game.heavens_state.get('runtime', {}).get('sea_echo')
+    heavens = game.heavens_state.get('runtime', {})
+    echo = heavens.get('sea_echo')
     if echo:
         protected.add(echo['visitor_id'])
+    protected.update(row['visitor_id'] for row in heavens.get('contacts', {}).values())
     protected.update(str(row.get("id")) for row in [
         game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples,
     ] if row and row.get("id"))

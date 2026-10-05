@@ -8,7 +8,8 @@ from ...relationship_records import find_person
 from ...spatial_people import instance_of
 from ...rules import max_mp, add_item, remove_item, can_player_practice_technique
 from ...system.aperture_resources import true_realm
-from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition
+from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition, ContactSite, CONTACT_SITES
+from ...system.heavens.state import current_site, site_for, contacts, echo_site
 from ...system.heavens.dependencies import HeavensDependencies
 from ...system.heavens import tasks
 from ...system.combat.npc_lifecycle import initialize_native
@@ -21,10 +22,12 @@ def bind_heavens(engine) -> HeavensDependencies:
     def get_definitions():
         config = WORLD_SYSTEMS['heavens_framework']
         return HeavensDefinitions(generation_available=config['enabled'],
-                                  sea_echo=SeaEchoDefinition(**config.get('sea_echo', {})))
+            sea_echo=SeaEchoDefinition(**config.get('sea_echo', {})),
+            contact_sites=tuple(ContactSite(**row) for row in config['contact_sites']) if 'contact_sites' in config else CONTACT_SITES)
 
-    def read_actor_facts(game):
+    def read_actor_facts(game, target_id=None):
         p = game.player
+        site = site_for(ports, game, target_id) if target_id else current_site(ports, game)
         assembly = game.buddhist_state.get('assembly')
         reason = None
         if not p.alive:
@@ -32,8 +35,10 @@ def bind_heavens(engine) -> HeavensDependencies:
         elif (p.imprisonment or p.ghost_captor or game.active_trial or game.guixu_state.get('player_session')
               or assembly and assembly.get('world') == p.world and assembly.get('location') == p.location_id):
             reason = '当前受控状态或专属活动尚未结束'
-        elif p.world != 'celestial' or p.location_id != 'law_sea':
-            reason = '须在仙界法则天海亲自参与'
+        elif site is None:
+            reason = '须在仙界、修罗界、幽冥界或轮回界的诸天联系地点参与'
+        elif p.world != site.world or p.location_id != site.location_id:
+            reason = f'须在{site.name.split(" · ")[0]}亲自参与'
         elif p.realm_index < 9 or p.cultivation_suppression:
             reason = '须具备未压制的九阶以上修为'
         physical_reason = reason
@@ -41,35 +46,40 @@ def bind_heavens(engine) -> HeavensDependencies:
             reason = '请先处理当前事件'
         return dict(alive=p.alive, blocked_reason=reason, physical_reason=physical_reason,
             can_discover=physical_reason is None and true_realm(p) >= 9,
-            can_apply=physical_reason is None and p.immortal_power_converted and p.technique is not None
+            can_apply=physical_reason is None and (p.world != 'celestial' or p.immortal_power_converted) and p.technique is not None
                 and can_player_practice_technique(p, p.technique.element),
             true_realm=true_realm(p), stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
             mp=p.mp, max_mp=max_mp(p))
 
-    def create_visitor(game, identity):
+    def create_visitor(game, identity, site):
         if find_person(game, identity, include_inactive=True) is not None:
             raise ValueError('合作人物身份已存在，不能重建或复活')
-        npc = SectNpc(identity, '观澜散人', '法则天海访学者',
-            9, 1, 3000, None, spirit_root='supreme_water', world='celestial',
-            affinity=0, location_id='law_sea', encountered_player=True)
+        npc = SectNpc(identity, site.visitor_name, '诸天访学者',
+            9, 1, 3000, None, spirit_root=site.spirit_root, world=site.world, path=site.visitor_path,
+            affinity=0, location_id=site.location_id, encountered_player=True)
         initialize_native(npc, WORLD_SYSTEMS.get('transcendent_combat', {}), now=game.player.age)
         game.world_npcs[identity] = npc
 
     def person_available(game, identity):
         npc = find_person(game, identity, include_inactive=True)
-        if (npc is None or not is_free(npc) or npc.world != 'celestial' or npc.location_id != 'law_sea'
+        site = next((echo_site(echo) for echo in contacts(game.heavens_state.get('runtime')) if echo['visitor_id'] == identity), None)
+        if (site is None or npc is None or not is_free(npc) or npc.world != site.world or npc.location_id != site.location_id
+                or game.player.world != site.world or game.player.location_id != site.location_id
                 or npc.faction_id or identity in {row.get('id') if isinstance(row, dict) else row for row in game.player.party}
                 or instance_of(game, identity) or engine._intrigue_is_imprisoned(game, identity)):
             return False
         return not any(identity in ids for war in game.wars if war.get('status') in {'active', 'peace_ready'}
                        for ids in war.get('roster', {}).values())
 
-    def quote_materials(game):
+    def quote_materials(game, target_id=None):
         definitions = engine._formation_material_defs()
+        site = site_for(ports, game, target_id) if target_id else current_site(ports, game)
+        if site is None:
+            return []
         return [copy.deepcopy(row) for row in game.player.formation_materials
                 if row.get('id') and not row.get('dynamic_definition')
                 and definitions.get(row.get('material_id'), {}).get('tier') == 9
-                and definitions.get(row.get('material_id'), {}).get('world') == 'celestial'
+                and definitions.get(row.get('material_id'), {}).get('world') == site.world
                 and row.get('acquired_tier', 9) == 9]
 
     def reserve_resources(game, stones, material_id, mp):
@@ -129,5 +139,6 @@ def bind_heavens(engine) -> HeavensDependencies:
         opportunity_base=lambda game: float(REALMS[game.player.realm_index].opportunity_base),
         grant_progress=lambda player, gain: engine._add_opportunity(player, gain),
         reconcile_tasks=lambda game: tasks.reconcile(ports, game),
+        grant_stones=lambda game, amount: add_item(game.player, 'spirit_stone', amount),
     )
     return ports

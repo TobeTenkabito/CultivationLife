@@ -1,15 +1,15 @@
 """Merge a bounded local application into a single existing cultivation grant."""
-from .state import phase
+from .state import phase, contacts
 
 
 def activity_gain(deps, game, base_gain, action):
     runtime = game.heavens_state.get('runtime')
-    echo = runtime and runtime['sea_echo']
+    echo = next((row for row in contacts(runtime) if row['application']), None)
     application = echo and echo['application']
     extra = 0.0
     if application and action == 'cultivate':
         _cycle, offset, cutoff = phase(runtime, echo)
-        facts = deps.read_actor_facts(game)
+        facts = deps.read_actor_facts(game, echo['id'])
         if facts['can_apply'] and offset < cutoff:
             fraction, cap = (.15, .03) if echo['exchanged'] else (.10, .02)
             extra = min(max(0, base_gain) * fraction, max(0, echo['reward_base'] * cap - echo['reward_claimed']))
