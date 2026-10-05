@@ -10,7 +10,7 @@ import re
 import math
 from typing import Any
 from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition, OMEN_IDS, validate_omen_definition
-from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS
+from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS, SURVEY_ACTIONS
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -93,7 +93,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -201,7 +201,7 @@ def validate_runtime(runtime):
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
+        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) | {'survey_wait'} if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
         if task['action'] not in actions:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
@@ -218,8 +218,11 @@ def validate_runtime(runtime):
                     or task['status'] == 'completed' and (not echo['studied'] or task['progress'] != task['duration'])):
                 raise ValueError('征兆任务与对照事实不一致')
         if is_ruins:
+            durations = {1} if task['action'] == 'survey_wait' else {echo['definition'][task['action'].removeprefix('ruins_')+'_years']}
+            if task['action'] == 'ruins_read' and echo.get('survey', {}).get('shared'):
+                durations.add(3)
             if (task['cycle'] != 0 or 'chamber' in task or task['person_id'] is not None
-                    or task['duration'] != echo['definition'][task['action'].removeprefix('ruins_')+'_years']
+                    or task['duration'] not in durations
                     or task['status'] == 'completed' and task['progress'] != task['duration']):
                 raise ValueError('因果遗址任务引用或时长无效')
             completed_flag = {'ruins_observe': 'observed', 'ruins_verify': 'verified', 'ruins_read': 'record_acquired', 'ruins_contact': 'contact_known'}.get(task['action'])
@@ -274,6 +277,8 @@ def validate_runtime(runtime):
             expected_cost = echo['definition'].get(task['action'].removeprefix('ruins_')+'_stones', 0)
             if escrow['material'] is not None or escrow['total'] != expected_cost or escrow['spent'] != expected_cost * task['progress'] // task['duration']:
                 raise ValueError('因果遗址投入账目无效')
+            if task['action'] == 'survey_wait' and (not echo.get('survey') or escrow != dict(total=0, spent=0, refunded=0, material=None, mp_paid=0)):
+                raise ValueError('勘察等候任务无效')
         if task['action'] in VISIT_ACTIONS:
             visit = echo.get('visit')
             years = 4 if task['action'] == 'visit_study' else 2
@@ -573,11 +578,37 @@ def validate_omens(rows, year):
             raise ValueError('诸天征兆必须源自真实百年窗口')
 
 
+def validate_survey(row, year):
+    fields = {'person_id', 'origin_location', 'status', 'phase', 'progress', 'elapsed', 'observed', 'learned', 'shared', 'started_at', 'last_year'}
+    if (type(row) is not dict or set(row) != fields or not isinstance(row['person_id'], str) or not row['person_id']
+            or row['origin_location'] is not None and (not isinstance(row['origin_location'], str) or not row['origin_location'])
+            or row['status'] not in {'active', 'completed', 'cancelled', 'failed'} or row['phase'] not in {'outbound', 'studying', 'returning'}):
+        raise ValueError('勘察字段或人物无效')
+    for key in ('progress', 'elapsed', 'started_at', 'last_year'):
+        require_counter(row[key], '勘察'+key)
+    if (any(type(row[key]) is not bool for key in ('observed', 'learned', 'shared'))
+            or not 0 <= row['started_at'] <= row['last_year'] <= year
+            or row['elapsed'] > row['last_year'] - row['started_at']
+            or row['shared'] and not row['learned']):
+        raise ValueError('勘察时间或笔记来源无效')
+    progress, elapsed, phase = row['progress'], row['elapsed'], row['phase']
+    studied = 0 if phase == 'outbound' else progress if phase == 'studying' else elapsed - 2 - progress
+    if (phase == 'outbound' and (progress >= 2 or elapsed != progress)
+            or phase == 'studying' and (progress >= 8 or elapsed != progress + 2)
+            or phase == 'returning' and (progress > 1 or not 0 <= studied <= 8)
+            or row['observed'] != (studied >= 2) or row['learned'] != (studied == 8)
+            or row['status'] == 'cancelled' and phase != 'outbound'
+            or (row['status'] == 'completed') != (phase == 'returning' and progress == 1)):
+        raise ValueError('勘察进度与实际经历不一致')
+
+
 def validate_ruins(ruins, year):
     fields = {'id', 'scene_id', 'definition', 'created_year', 'observed', 'verified', 'record_acquired', 'contact_known',
               'reward', 'core', 'ward', 'guardian', 'local_traces', 'guardian_records', 'sent_records'}
-    if type(ruins) is not dict or set(ruins) != fields or ruins['id'] != RUINS_ID:
+    if type(ruins) is not dict or set(ruins) - {'survey'} != fields or ruins['id'] != RUINS_ID:
         raise ValueError('因果遗址实例字段无效')
+    if 'survey' in ruins:
+        validate_survey(ruins['survey'], year)
     validate_ruins_definition(ruins['definition'])
     identity = ruins['scene_id']
     if not isinstance(identity, str) or not re.fullmatch(r'heavens-ruins-[0-9a-f]{20}', identity):
@@ -684,8 +715,17 @@ def validate_references(game):
         if (not scene or len(ruins_scenes) != 1 or scene.get('id') != ruins['scene_id']
                 or scene.get('heavens_target') != RUINS_ID or scene.get('kind') != 'heavens'
                 or scene.get('location_id') != 'causal_hall' or len(scene.get('locations', [])) != 1
-                or scene['locations'][0].get('id') != 'causal_hall' or any(scene.get(key) != [] for key in ('npc_ids', 'materials', 'techniques', 'sects'))):
+                or scene['locations'][0].get('id') != 'causal_hall' or any(scene.get(key) != [] for key in ('materials', 'techniques', 'sects'))):
             raise ValueError('因果遗址空间引用已损坏，保留原档')
+        survey = ruins.get('survey')
+        if survey and survey['person_id'] not in people:
+            raise ValueError('勘察人物缺少权威引用')
+        members = scene.get('npc_ids')
+        allowed = [survey['person_id']] if survey and survey['phase'] != 'outbound' and survey['status'] in {'active', 'failed'} else []
+        if type(members) is not list or members != allowed:
+            raise ValueError('因果遗址含无来源或重复人物')
+        if survey and sum(survey['person_id'] in s.get('npc_ids', []) for s in game.spatial_state.get('instances', {}).values()) != len(allowed):
+            raise ValueError('勘察人物空间归属不唯一')
         owned = [row['id'] for row in game.player.formation_materials]
         if len(owned) != len(set(owned)) or not ruins['record_acquired'] and ruins['reward']['id'] in inventory.union(held):
             raise ValueError('因果遗址阵材出现重复所有权')

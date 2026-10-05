@@ -10,8 +10,8 @@ from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
 from . import tasks, mirror, ruins, omens, visits
-from . import missions, freight, migration
-from .definitions import MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS
+from . import missions, freight, migration, survey
+from .definitions import MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS, SURVEY_ACTIONS
 
 
 def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict:
@@ -45,6 +45,8 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
             result['target_id'] = MIRROR_ID
     if deps and deps.read_ruins_facts:
         result['ruins'] = ruins.project(deps, game)
+        if deps.read_survey_facts:
+            result['ruins']['survey'] = survey.project(deps, game)
         if requested_target == RUINS_ID or result['ruins']['inside']:
             result['target_id'] = RUINS_ID
     result['omens'] = omens.project(deps, game) if deps and deps.read_omen_facts else []
@@ -132,6 +134,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
         allowed.update({key: set() for key in MISSION_ACTIONS})
         allowed.update({key: {'material_id'} if key == 'freight_start' else set() for key in FREIGHT_ACTIONS})
         allowed.update({key: {'person_id'} if key == 'migration_start' else set() for key in MIGRATION_ACTIONS})
+        allowed.update({key: {'person_id'} if key == 'survey_start' else set() for key in SURVEY_ACTIONS})
         if action not in allowed or not isinstance(target_id, str) or not target_id:
             raise ValueError('诸天动作或目标无效')
         if type(options) is not dict or set(options) != allowed[action] or any(not isinstance(v,str) or not v for v in options.values()):

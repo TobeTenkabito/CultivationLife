@@ -105,8 +105,8 @@
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
-      if(row.action==='migration_start'&&people.length){
-        const select=node('select');select.setAttribute('aria-label','迁居居民');
+      if(['migration_start','survey_start'].includes(row.action)&&people.length){
+        const select=node('select');select.setAttribute('aria-label',row.action==='survey_start'?'勘察居民':'迁居居民');
         for(const person of people){const option=node('option',`${person.name} · 交情 ${person.affinity}`);option.value=person.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.person_id=select.value;};info.append(select);
       }
@@ -261,7 +261,12 @@
     const leave=selected.actions.find(row=>row.action.endsWith('_leave'));if(leave){const b=button(leave.label,()=>propose(leave.action,leave.target_id),!leave.enabled||Boolean(pending));b.className='heavens-exit';heading.append(b);}
     box.append(node('p',`${selected.entry} · ${selected.inside?'身处其中':selected.known?'可重访':'元婴起可进入'}`,'heavens-lead'));
     if(leave&&!leave.enabled)box.append(node('small',leave.reason));
-    if(!selected.inside){box.append(node('p',selected.description));renderActions(box,selected.actions.filter(row=>row.action.endsWith('_enter')));return;}
+    if(!selected.inside){
+      const entry=body=>{body.append(node('p',selected.description));renderActions(body,selected.actions.filter(row=>row.action.endsWith('_enter')));};
+      if(selected.id==='causal_ruins'&&selected.known&&selected.survey)subview(box,[['entrance','入口'],['survey','同勘']],'entrance',(body,section)=>section==='survey'?renderSurvey(body,selected):entry(body));
+      else entry(box);
+      return;
+    }
     if(selected.id==='mirror_field')renderMirror(box,selected);else renderRuins(box,selected);
   }
   function renderMirror(host,m) {
@@ -279,11 +284,13 @@
   function renderRuins(host,r) {
     const status=node('div',null,`heavens-link-state${r.ward_active?'':' interrupted'}`);
     status.append(node('span','遗址机关'),node('span',r.ward_active?'⇄':'×'),node('span',r.contact?'赤髓城阵眼':'异界阵眼'));status.setAttribute('aria-label',r.ward_active?'两端回响连通':'阵眼失效，回响通信中断');host.append(status);
-    subview(host,[['investigate','调查'],['core','阵芯'],['traces','痕迹']],'investigate',(body,section)=>{
+    subview(host,[['investigate','调查'],['core','阵芯'],['traces','痕迹'],['survey','同勘']],'investigate',(body,section)=>{
+      if(section==='survey'){renderSurvey(body,r);return;}
       let actions;
       if(section==='investigate'){
         body.append(node('p',r.verified?'两端关联已查明。':r.observed?'已观察阵纹，可以继续查证。':'阵芯与异界阵纹同步明灭，尚未查证其来历。'));
         if(r.record_acquired)body.append(node('p','已取得回潮阵纹合法抄本与一件四阶阵材。'));
+        else if(r.survey?.shared)body.append(node('p','已交换勘察笔记，亲自读取缩短为 3 年。'));
         if(r.contact)body.append(node('blockquote',`接触线索：${r.contact}`,'heavens-finding'));
         actions=[!r.observed&&'ruins_observe',!r.verified&&'ruins_verify',!r.record_acquired&&'ruins_read',!r.contact&&'ruins_contact'].filter(Boolean);
       } else if(section==='core'){
@@ -297,6 +304,27 @@
       }
       renderActions(body,r.actions.filter(row=>actions.includes(row.action)),r.materials);
     });
+  }
+  function renderSurvey(host,r) {
+    const s=r.survey;if(!s)return;
+    host.dataset.survey=s.status;
+    if(s.status==='unavailable'){
+      title(host,'结伴同勘','邀一位相熟居民自行观察、抄录，归来后当面交流。');
+      host.append(node('p','先亲自踏勘遗址，再返回无棣原邀约。可选择人界自由、无其他职责、交情至少 20 的四至五阶居民；每座遗址安排一次。'));
+      const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','勘察安排');
+      for(const text of ['赴约 · 外界 2 年','观察与抄录 · 空间 8 年','原路退出 · 空间 1 年'])route.append(node('li',text));
+      host.append(route);
+      if(!s.candidates.length)host.append(node('small','目前没有符合条件的相熟居民。'));
+    }else{
+      title(host,s.name,({active:'正在勘察',completed:'已返回无棣原',cancelled:'邀约已撤销',failed:'勘察已终止'})[s.status]);
+      const phase=({outbound:'赴约',studying:'观察与抄录',returning:'原路退出'})[s.phase];
+      host.append(node('p',`${phase} · ${s.progress} / ${s.duration} 年`));
+      const progress=node('progress');progress.max=s.duration;progress.value=s.progress;progress.setAttribute('aria-label','勘察阶段进度');host.append(progress);
+      host.append(node('p',s.shared?'已当面交换笔记，亲自读取缩短为 3 年。':s.learned?'本人已有完整笔记，可在遗址内或无棣原当面交换。':s.observed?'本人已看懂阵纹，正在抄录。':'本人尚未完成观察。'));
+      if(s.blocked_reason)host.append(node('p',s.blocked_reason,'heavens-visit-finding'));
+    }
+    host.append(node('small','入场后只随同一遗址的空间年度行动；你离开时内部冻结，外界年月不补算。本人会真实衰老，抄录不会自动交给你。'));
+    renderActions(host,s.actions.filter(a=>s.status==='unavailable'?a.action==='survey_start':a.action==='survey_share'&&s.learned&&!s.shared||s.status==='active'&&(a.action==='survey_wait'||a.action==='survey_recall'&&s.phase!=='returning')),[],s.candidates);
   }
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
   function renderMigration(host,h) {
@@ -354,6 +382,8 @@
         const pager=node('div',null,'heavens-inline');pager.append(button('上一页',()=>{ui.historyPage--;render(current,ctx);},ui.historyPage===0),node('small',`${ui.historyPage+1} / ${pages}`),button('下一页',()=>{ui.historyPage++;render(current,ctx);},ui.historyPage===pages-1));body.append(pager);return;
       }
       const task=activeTask(h);
+      const survey=h.ruins?.survey;
+      if(survey?.status==='active'){const row=node('article',null,'heavens-task');row.append(node('h4',`${survey.name} · 遗址同勘`),node('p',survey.phase==='outbound'?'正在赴约入场。':'本人留在遗址中，只随该空间年度行动。'),button('查看同勘',()=>{openTarget('causal_ruins');ui.section='survey';render(current,ctx);}));body.append(row);}
       const away=(h.visits||[]).filter(v=>v.status==='visiting');
       for(const v of away){const row=node('article',null,'heavens-task');row.append(node('h4',`访学 · ${v.destination_name}`),node('p',v.studied?'现场研读已完成，可循约返程。':'已抵达，可研读或提前返程。'),button('查看访学与返程',()=>{openTarget(v.target_id);ui.section='visit';render(current,ctx);}));body.append(row);}
       if(task){
@@ -362,7 +392,7 @@
         const controls=node('div',null,'heavens-inline');controls.append(button('继续任务',()=>propose('resume',task.id),Boolean(pending)),button('取消任务',()=>propose('cancel',task.id),Boolean(pending)),button('查看对象',()=>openTarget(task.target_id)));row.append(controls,node('small','取消前会显示可退还的未耗投入，已付法力与已耗材料不退。'));body.append(row);
       }
       if(h.registered_application)renderApplication(body,h.registered_application);
-      if(!task&&!h.registered_application&&!away.length)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
+      if(!task&&!h.registered_application&&!away.length&&survey?.status!=='active')empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
     });
   }
   function renderSettings(host,h) {

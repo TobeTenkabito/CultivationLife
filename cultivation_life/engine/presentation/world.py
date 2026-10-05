@@ -53,7 +53,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         from ...person_assignments import research_assignment
         assignment = research_assignment(game, npc.id)
         if same_world and npc.alive and assignment:
-            status = (('正在当地安置' if assignment['phase'] == 'settling' else '迁居途中，暂不可交往') if 'person_id' in assignment else
+            status = (('正在遗址勘察' if assignment['phase'] == 'studying' else '勘察途中，暂不可交往') if 'origin_location' in assignment else
+                      ('正在当地安置' if assignment['phase'] == 'settling' else '迁居途中，暂不可交往') if 'person_id' in assignment else
                       '运材途中，暂不可交往' if 'cargo_owner' in assignment else
                       '正在当地访学' if assignment['phase'] == 'studying' else '访学途中，暂不可交往')
         from ...system.cultivation_ranks import public_ranks

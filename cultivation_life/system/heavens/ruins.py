@@ -134,7 +134,8 @@ def quote(deps, game, action, target_id, options):
                '安装后移交唯一阵芯，恢复对应阵眼；已送出的记录不撤回，不能再次领取阵芯。' if key == 'return' else
                '只能清除完成时仍未读到的残留；施工期间仍可能被读到，已留档或送出的证据不撤回。' if key == 'erase' else
                '遗址机关在残留形成后扫描留档，关联阵眼完好时继续送出；不会因此获得你的来源坐标。')
-    return dict(years=definition[key+'_years'], costs=dict(stones=stones, mp=mp, material_id=options.get('material_id')),
+    years = 3 if key == 'read' and ruins.get('survey', {}).get('shared') else definition[key+'_years']
+    return dict(years=years, costs=dict(stones=stones, mp=mp, material_id=options.get('material_id')),
                 refundable={}, deadline=None, material_consumed=key == 'replace', warning=warning)
 
 
