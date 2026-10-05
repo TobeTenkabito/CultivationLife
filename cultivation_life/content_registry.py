@@ -501,6 +501,13 @@ class ContentRegistry:
             from .system.map_definition import MapDefinition
 
             MapDefinition(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
+            for site in registry.world_systems.get('heavens_framework', {}).get('contact_sites', []):
+                profile = registry.world_systems['world_profiles'][site['world']]
+                locations = documents['maps.json']['worlds'][site['world']]['locations']
+                if profile.get('tier') != 3 or not any(row['id'] == site['location_id'] for row in locations):
+                    raise ContentError('诸天联系必须位于第三层最高界面的实际地点')
+                if site['spirit_root'] not in registry.root_definitions:
+                    raise ContentError('诸天合作人物灵根不存在')
         return registry
 
     @staticmethod

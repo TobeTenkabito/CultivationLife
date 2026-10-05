@@ -9,6 +9,7 @@ import copy
 import re
 import math
 from typing import Any
+from .definitions import SITE_IDS, default_site, validate_site
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -52,11 +53,13 @@ def validate_state(state: Any) -> None:
         raise ValueError('诸天设置必须为布尔值')
     if state['generation_enabled'] and 'runtime' not in state:
         raise ValueError('诸天启用状态缺少日历')
-    if type(state['definition_versions']) is not dict or state['definition_versions'] not in ({}, {'sea_echo': 1}):
+    if (type(state['definition_versions']) is not dict
+            or any(key not in SITE_IDS or type(value) is not int or value != 1
+                   for key, value in state['definition_versions'].items())):
         raise ValueError('诸天生成定义版本无效')
     if 'runtime' in state:
         validate_runtime(state['runtime'])
-        expected_versions = {'sea_echo': 1} if state['runtime']['sea_echo'] else {}
+        expected_versions = {echo['id']: 1 for echo in runtime_contacts(state['runtime'])}
         if state['definition_versions'] != expected_versions:
             raise ValueError('诸天实例与生成定义版本不一致')
     receipts = state['receipts']
@@ -83,7 +86,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'resume', 'cancel'}
+                'configure', 'watch', 'dismiss', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -106,12 +109,31 @@ def finite_tree(value):
             finite_tree(child)
 
 
+def runtime_contacts(runtime):
+    return ([runtime['sea_echo']] if runtime['sea_echo'] else []) + list(runtime.get('contacts', {}).values())
+
+
 def validate_runtime(runtime):
     keys = {'epoch_age', 'processed_years', 'last_year_key', 'last_discovery_window',
             'rng_counter', 'next_task_seq', 'unit_credit', 'sea_echo', 'tasks',
             'history', 'notifications', 'pause_requested', 'pause_on_opportunity'}
-    if type(runtime) is not dict or set(runtime) != keys:
+    if type(runtime) is not dict or set(runtime) - {'contacts'} != keys:
         raise ValueError('诸天日历字段无效')
+    extra = runtime.get('contacts', {})
+    if type(extra) is not dict or set(extra) - (SITE_IDS - {'sea_echo'}):
+        raise ValueError('诸天联系目录无效')
+    for target_id, echo in extra.items():
+        if type(echo) is not dict or echo.get('id') != target_id:
+            raise ValueError('诸天联系身份不一致')
+    if runtime['sea_echo'] is not None and (type(runtime['sea_echo']) is not dict or runtime['sea_echo'].get('id') != 'sea_echo'):
+        raise ValueError('法则天海联系身份不一致')
+    echoes = runtime_contacts(runtime)
+    by_id = {}
+    for echo in echoes:
+        validate_echo(echo)
+        by_id[echo['id']] = echo
+    if sum(echo['application'] is not None for echo in echoes) > 1:
+        raise ValueError('只能同时登记一项诸天参悟')
     finite_tree(runtime)
     for key in ('epoch_age', 'processed_years', 'last_year_key', 'rng_counter', 'next_task_seq'):
         require_counter(runtime[key], key)
@@ -138,12 +160,10 @@ def validate_runtime(runtime):
         require_counter(row['year'], '纪要时间')
     for row in runtime['notifications']:
         if (type(row) is not dict or set(row) != {'id', 'text', 'expires_at'}
-                or row['id'] != 'sea_echo' or not isinstance(row['text'], str)):
+                or row['id'] not in by_id or not isinstance(row['text'], str)):
             raise ValueError('诸天通知无效')
         require_counter(row['expires_at'], '通知期限')
-    echo = runtime['sea_echo']
-    if echo is not None:
-        validate_echo(echo)
+    for echo in echoes:
         if echo['origin_year'] > runtime['processed_years']:
             raise ValueError('诸天现象起点在未来')
         if echo['cycle'] != (runtime['processed_years']-echo['origin_year']) // echo['definition']['period_years']:
@@ -151,12 +171,16 @@ def validate_runtime(runtime):
     active = 0
     ids = set()
     for task in runtime['tasks']:
-        if type(task) is not dict or set(task) != {'id', 'action', 'status', 'cycle', 'progress', 'duration', 'escrow', 'person_id'}:
+        if type(task) is not dict or set(task) - {'target_id', 'project_reward'} != {'id', 'action', 'status', 'cycle', 'progress', 'duration', 'escrow', 'person_id'}:
             raise ValueError('诸天任务字段无效')
+        target_id = task.get('target_id', 'sea_echo')
+        if not isinstance(target_id, str):
+            raise ValueError('诸天任务目标无效')
+        echo = by_id.get(target_id)
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        if task['action'] not in {'observe', 'check_history', 'exchange', 'maintain'}:
+        if task['action'] not in {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
             raise ValueError('诸天任务阶段无效')
@@ -166,6 +190,19 @@ def validate_runtime(runtime):
             raise ValueError('诸天任务进度无效')
         if task['person_id'] not in (None, echo['visitor_id']):
             raise ValueError('诸天任务人物引用无效')
+        reward = task.get('project_reward', 0)
+        require_counter(reward, '校订托管')
+        is_active = task['status'] in {'reserved', 'running', 'paused'}
+        if task['action'] == 'correspond':
+            site = echo.get('site') or vars_site(echo['id'])
+            if (task['person_id'] != echo['visitor_id'] or not echo['exchanged']
+                    or task['duration'] != site['correspondence_years']
+                    or reward != (site['correspondence_stones'] if is_active else 0)
+                    or is_active and echo.get('correspondence_completed', False)
+                    or task['status'] == 'completed' and not echo.get('correspondence_completed', False)):
+                raise ValueError('诸天校订履约账目无效')
+        elif reward:
+            raise ValueError('非校订任务不能托管项目酬劳')
         escrow = task['escrow']
         if type(escrow) is not dict or set(escrow) != {'total', 'spent', 'refunded', 'material', 'mp_paid'}:
             raise ValueError('诸天托管字段无效')
@@ -185,12 +222,21 @@ def validate_echo(echo):
         'cycle', 'observed_cycle', 'history_checked', 'exchanged', 'maintained',
         'maintenance_started', 'applications_used', 'reward_base', 'reward_claimed',
         'application', 'project_stones'}
-    if type(echo) is not dict or set(echo) != keys or echo['id'] != 'sea_echo':
-        raise ValueError('法则天海实例字段无效')
+    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed'} != keys or echo['id'] not in SITE_IDS:
+        raise ValueError('诸天实例字段无效')
+    if 'site' in echo:
+        validate_site(echo['site'])
+        if echo['site']['id'] != echo['id']:
+            raise ValueError('诸天地点与实例身份不一致')
+    elif echo['id'] != 'sea_echo':
+        raise ValueError('诸天实例缺少地点快照')
+    if (type(echo.get('correspondence_completed', False)) is not bool
+            or echo.get('correspondence_completed', False) and not echo['exchanged']):
+        raise ValueError('诸天校订事实无效')
     # Pure definition validation, independent of the runtime content registry.
     from .definitions import validate_echo_definition
     validate_echo_definition(echo['definition'])
-    if not isinstance(echo['visitor_id'], str) or not echo['visitor_id'] or echo['record_id'] != 'karma_city_old_copy':
+    if not isinstance(echo['visitor_id'], str) or not echo['visitor_id'] or echo['record_id'] != default_site(echo['id']).record_id:
         raise ValueError('法则天海人物或记录引用无效')
     for key in ('origin_year', 'arrived_at', 'cycle', 'applications_used', 'project_stones'):
         require_counter(echo[key], key)
@@ -220,17 +266,23 @@ def validate_echo(echo):
             raise ValueError('法则天海应用期限无效')
 
 
+def vars_site(target_id):
+    from dataclasses import asdict
+    return asdict(default_site(target_id))
+
+
 def validate_references(game):
     runtime = game.heavens_state.get('runtime')
-    if not runtime or not runtime['sea_echo']:
+    if not runtime:
         return
     people = set(game.world_npcs) | set(game.notable_npcs) | set(game.inactive_npcs) | set(game.relationship_npcs)
     for sect in game.sects.values():
         people.update(npc.id for npc in sect.npcs)
     if game.family:
         people.update(npc.id for npc in game.family.npcs)
-    if runtime['sea_echo']['visitor_id'] not in people:
-        raise ValueError('法则天海合作人物引用已损坏，保留原档')
+    visitors = [echo['visitor_id'] for echo in runtime_contacts(runtime)]
+    if len(set(visitors)) != len(visitors) or any(identity not in people for identity in visitors):
+        raise ValueError('诸天合作人物引用已损坏，保留原档')
     held = [task['escrow']['material']['id'] for task in runtime['tasks'] if task['escrow']['material']]
     inventory = {row['id'] for row in game.player.formation_materials}
     if len(set(held)) != len(held) or inventory.intersection(held):

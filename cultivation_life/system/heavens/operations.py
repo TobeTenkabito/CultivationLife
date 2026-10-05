@@ -8,7 +8,7 @@ import json
 from .definitions import ACTIONS, VIEWS, HeavensDefinitions
 from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
-from .state import initialize, phase
+from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
 from . import tasks
 
 
@@ -16,16 +16,24 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     if not isinstance(view, str) or view not in VIEWS:
         raise ValueError('未知诸天视图')
     runtime = game.heavens_state.get('runtime')
-    echo = runtime and runtime['sea_echo']
-    if target_id is not None and (target_id != 'sea_echo' or not echo):
-        raise ValueError('诸天对象不可见或不存在')
     validate_state(game.heavens_state)
+    site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
+    if target_id is not None and site is None:
+        raise ValueError('诸天对象不可见或不存在')
+    target_id = site.id if site else None
+    echo = get_echo(runtime, target_id)
     state = game.heavens_state or initial_state()
     # Never expose internal receipts, future objective facts or random states.
     result = dict(view=view, records=[], revision=state['revision'],
                 next_command_seq=state['command_seq'] + 1,
                 generation_enabled=state['generation_enabled'], watch=state['watch'],
-                available_actions=['configure'], reason='启用后，可在仙界法则天海求证潮汐回响。')
+                available_actions=['configure'], target_id=target_id,
+                reason=f'可在{site.name.split(" · ")[0]}体察并登记此地诸天联系。' if site else '诸天联系开放于仙界、修罗界、幽冥界和轮回界的观测地点。')
+    world_names = {'celestial': '仙界', 'asura': '修罗界', 'nether': '幽冥界', 'reincarnation': '轮回界'}
+    result['sites'] = [dict(id=row.id, world=row.world, world_name=world_names[row.world], name=row.name,
+                          location_id=row.location_id, known=bool(get_echo(runtime, row.id)),
+                          current=row.world == game.player.world)
+                       for row in ([site_for(deps, game, item.id) for item in deps.get_definitions().contact_sites] if deps else ())]
     result['generation_available'] = bool(deps and deps.get_definitions().generation_available)
     result['pause_on_opportunity'] = bool(runtime and runtime['pause_on_opportunity'])
     if not runtime:
@@ -33,40 +41,48 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     result.update(year=runtime['processed_years'], tasks=copy.deepcopy(runtime['tasks']),
                   notifications=copy.deepcopy(runtime['notifications']) if state['watch'] else [],
                   history=copy.deepcopy(runtime['history']), unit_credit=copy.deepcopy(runtime['unit_credit']))
-    if echo:
+    def echo_view(echo):
+        site = echo_site(echo)
         cycle, offset, cutoff = phase(runtime, echo)
         person = deps.resolve_person(game, echo['visitor_id']) if deps else None
-        result['echo'] = dict(id='sea_echo', name='法则天海 · 潮汐回响', cycle=cycle,
+        return dict(id=echo['id'], name=site.name, world=site.world, location_id=site.location_id, cycle=cycle,
             origin_year=echo['origin_year'], remaining=max(0, cutoff-offset),
             next_cycle_in=echo['definition']['period_years']-offset,
             inscriptions=[echo['origin_year']-4000, echo['origin_year']-2000] if echo['history_checked'] else [],
-            evidence=[label for label, acquired in [('E1 潮汐体察', echo['observed_cycle']==cycle),
-                ('E2 接引碑旧记', echo['history_checked']), ('E3 因果天城合法抄录', echo['exchanged'])] if acquired],
-            visitor=dict(id=echo['visitor_id'], name=person.name if person else '观澜散人',
+            evidence=[f'E{index+1} {label}' for index, (label, acquired) in enumerate(zip(site.evidence,
+                      (echo['observed_cycle']==cycle, echo['history_checked'], echo['exchanged']))) if acquired],
+            visitor=dict(id=echo['visitor_id'], name=person.name if person else site.visitor_name,
                          available=bool(deps and deps.person_available(game, echo['visitor_id']))),
             application=copy.deepcopy(echo['application']), maintained=echo['maintained'],
             reward_claimed=echo['reward_claimed'], reward_base=echo['reward_base'],
-            project_stones=echo['project_stones'])
+            project_stones=echo['project_stones'], correspondence_completed=echo.get('correspondence_completed', False))
+    known = [echo_view(row) for row in contacts(runtime)]
+    if echo:
+        result['echo'] = next(row for row in known if row['id'] == echo['id'])
+    result['registered_application'] = next((dict(target_id=row['id'], name=row['name'], **row['application'])
+                                           for row in known if row['application']), None)
     result['actions'] = []
-    if deps:
-        result['materials'] = deps.quote_materials(game)
-        for action in ('observe', 'check_history', 'exchange', 'attune', 'maintain'):
-            options = ({'person_id': echo['visitor_id']} if action=='exchange' and echo else
+    if deps and target_id:
+        result['materials'] = deps.quote_materials(game, target_id)
+        for action in ('observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond'):
+            options = ({'person_id': echo['visitor_id']} if action in {'exchange', 'correspond'} and echo else
                        {'material_id': result['materials'][0]['id']} if action=='maintain' and result['materials'] else {})
-            row = dict(action=action, label=tasks.LABELS[action], options=options)
+            row = dict(action=action, target_id=target_id, label=tasks.LABELS[action], options=options)
+            if action == 'observe':
+                row['label'] = '体察潮汐' if target_id == 'sea_echo' else f'体察{site.evidence[0]}'
             try:
-                row.update(tasks.quote(deps, game, action, 'sea_echo', options), enabled=True)
+                row.update(tasks.quote(deps, game, action, target_id, options), enabled=True)
             except ValueError as exc:
                 row.update(enabled=False, reason=str(exc))
             result['actions'].append(row)
         result['available_actions'].extend(row['action'] for row in result['actions'] if row['enabled'])
-        if tasks.active_task(runtime):
-            result['available_actions'].extend(['resume', 'cancel'])
-        elif echo and echo['application']:
-            result['available_actions'].append('cancel')
-        if runtime['notifications']:
-            result['available_actions'].append('dismiss')
-    result['records'] = ([result['echo']] if echo else []) if view in {'known','opportunities'} else result[view]
+    if tasks.active_task(runtime):
+        result['available_actions'].extend(['resume', 'cancel'])
+    elif result['registered_application']:
+        result['available_actions'].append('cancel')
+    if runtime['notifications']:
+        result['available_actions'].append('dismiss')
+    result['records'] = known if view in {'known','opportunities'} else result[view]
     return result
 
 
@@ -74,7 +90,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
     if not isinstance(action, str) or action not in ACTIONS:
         raise ValueError('未知诸天动作')
     if action != 'configure':
-        allowed = {'observe': set(), 'check_history': set(), 'exchange': {'person_id'},
+        allowed = {'observe': set(), 'check_history': set(), 'exchange': {'person_id'}, 'correspond': {'person_id'},
                    'attune': set(), 'maintain': {'material_id'}, 'resume': set(), 'cancel': set(), 'dismiss': set()}
         if action not in allowed or not isinstance(target_id, str) or not target_id:
             raise ValueError('诸天动作或目标无效')

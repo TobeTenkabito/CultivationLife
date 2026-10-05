@@ -2,14 +2,14 @@
 from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
-from .state import active_task, create_echo, phase, record
+from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
 
-LABELS = {'observe': '体察潮汐', 'check_history': '查证旧碑', 'exchange': '对照抄录',
-          'attune': '登记本地参悟', 'maintain': '维护观测节点', 'resume': '继续任务', 'cancel': '取消任务'}
+LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
+          'attune': '登记本地参悟', 'maintain': '维护观测节点', 'correspond': '协作校订旧录', 'resume': '继续任务', 'cancel': '取消任务'}
 
 
-def local_reason(deps, game):
-    facts = deps.read_actor_facts(game)
+def local_reason(deps, game, target_id=None):
+    facts = deps.read_actor_facts(game, target_id)
     return facts['blocked_reason']
 
 
@@ -17,12 +17,12 @@ def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
     if not runtime:
         raise ValueError('请先启用诸天联系')
-    echo = runtime['sea_echo']
+    echo = get_echo(runtime, target_id)
     task = active_task(runtime)
     if action in {'resume', 'cancel'}:
         if not task or target_id != task['id']:
             # Cancelling a registered, unused application is also explicit.
-            if action == 'cancel' and target_id == 'sea_echo' and echo and echo['application']:
+            if action == 'cancel' and echo and echo['application']:
                 return dict(action=action, target_id=target_id, years=0, costs={}, refundable={})
             raise ValueError('诸天任务不可见或已结束')
         if action == 'cancel':
@@ -30,21 +30,22 @@ def quote(deps, game, action, target_id, options):
             return dict(action=action, target_id=target_id, years=0, costs={},
                         refundable={'stones': escrow['total'] - escrow['spent'] - escrow['refunded'],
                                     'material_id': (escrow['material'] or {}).get('id')})
+        echo = get_echo(runtime, task.get('target_id', 'sea_echo'))
         reason = task_reason(deps, game, task)
         if reason:
             raise ValueError(reason)
         return dict(action=action, target_id=target_id, years=task['duration'] - task['progress'],
                     costs={}, refundable={}, deadline=deadline(runtime, echo))
-    if target_id != 'sea_echo':
+    if site_for(deps, game, target_id) is None:
         raise ValueError('诸天对象不可见或不存在')
-    reason = local_reason(deps, game)
+    reason = local_reason(deps, game, target_id)
     if reason:
         raise ValueError(reason)
     if task:
         raise ValueError('请先继续或取消当前诸天任务')
     if not echo:
         if not game.heavens_state['generation_enabled'] or not deps.get_definitions().generation_available or action != 'observe':
-            raise ValueError('尚未登记法则天海联系；可先在当地体察')
+            raise ValueError('尚未登记此地诸天联系；可先在当地体察')
         definition = deps.get_definitions().sea_echo
         return dict(action=action, target_id=target_id, years=definition.observe_years,
                     costs={'stones': 0, 'mp': 0}, refundable={}, deadline=runtime['processed_years'] + definition.window_years)
@@ -66,9 +67,24 @@ def quote(deps, game, action, target_id, options):
         if options.get('person_id') != echo['visitor_id'] or not deps.person_available(game, echo['visitor_id']):
             raise ValueError('合作人物不在场、已受控或正被其他事务占用')
     if action == 'attune':
+        if any(row['application'] for row in contacts(runtime)):
+            raise ValueError('请先完成或取消已经登记的参悟安排')
         if echo['application'] or echo['applications_used'] >= (2 if echo['maintained'] else 1):
             raise ValueError('本周期可登记的参悟次数已用完')
         return dict(action=action, target_id=target_id, years=0, costs={}, refundable={}, deadline=deadline(runtime, echo))
+    if action == 'correspond':
+        site = echo_site(echo)
+        if not echo['exchanged'] or echo.get('correspondence_completed', False):
+            raise ValueError('须先取得合作抄录；每份旧录仅校订履约一次')
+        if options.get('person_id') != echo['visitor_id'] or not deps.person_available(game, echo['visitor_id']):
+            raise ValueError('合作人物不在场、已受控或正被其他事务占用')
+        if echo['project_stones'] < site.correspondence_stones:
+            raise ValueError('合作项目实有资金不足，不能凭空支付酬劳')
+        if site.correspondence_years > cutoff-offset:
+            raise ValueError('窗口余量不足以完成校订')
+        return dict(action=action, target_id=target_id, years=site.correspondence_years,
+                    costs={'stones': 0, 'mp': 0}, refundable={},
+                    reward_stones=site.correspondence_stones, deadline=deadline(runtime, echo))
     if action == 'maintain' and echo['maintenance_started']:
         raise ValueError('本周期维护机会已使用')
     durations = {'observe': 'observe_years', 'check_history': 'history_years', 'exchange': 'exchange_years', 'maintain': 'maintain_years'}
@@ -77,13 +93,13 @@ def quote(deps, game, action, target_id, options):
     years = definition[durations[action]]
     if years > cutoff - offset:
         raise ValueError('窗口余量不足以完成此项任务，可等待下一周期或退出')
-    facts = deps.read_actor_facts(game)
+    facts = deps.read_actor_facts(game, target_id)
     if facts['stones'] < costs[action]:
         raise ValueError('灵石不足')
     mp = facts['max_mp'] * .05 if action == 'maintain' else 0
     if mp > facts['mp']:
         raise ValueError('维护所需法力不足')
-    if action == 'maintain' and options.get('material_id') not in {row['id'] for row in deps.quote_materials(game)}:
+    if action == 'maintain' and options.get('material_id') not in {row['id'] for row in deps.quote_materials(game, target_id)}:
         raise ValueError('请选择一件闲置的本体九阶普通阵材')
     return dict(action=action, target_id=target_id, years=years,
                 costs={'stones': costs[action], 'mp': mp, 'material_id': options.get('material_id')},
@@ -97,11 +113,11 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
-    reason = local_reason(deps, game)
+    reason = local_reason(deps, game, task.get('target_id', 'sea_echo'))
     if reason:
         return reason
     runtime = game.heavens_state['runtime']
-    echo = runtime['sea_echo']
+    echo = get_echo(runtime, task.get('target_id', 'sea_echo'))
     cycle, offset, cutoff = phase(runtime, echo)
     if task['cycle'] != cycle or offset + task['duration'] - task['progress'] > cutoff:
         return '任务错过当前观测窗口'
@@ -112,6 +128,9 @@ def task_reason(deps, game, task):
 
 def cancel(deps, game, task, *, failed=False, reason='主动取消'):
     deps.refund_resources(game, task['escrow'])
+    if task.get('project_reward', 0):
+        get_echo(game.heavens_state['runtime'], task.get('target_id', 'sea_echo'))['project_stones'] += task['project_reward']
+        task['project_reward'] = 0
     task['status'] = 'failed' if failed else 'cancelled'
     record(game, f'{LABELS[task["action"]]}结束：{reason}。保留已耗时间与投入，退还未耗托管。')
 
@@ -123,10 +142,11 @@ def reconcile(deps, game):
     task = active_task(runtime)
     if task:
         # Pending events pause a task; they do not cancel its escrow.
-        facts = deps.read_actor_facts(game)
+        echo = get_echo(runtime, task.get('target_id', 'sea_echo'))
+        facts = deps.read_actor_facts(game, echo['id'])
         if not facts['alive']:
             cancel(deps, game, task, failed=True, reason='此生已结束')
-        elif task['cycle'] != runtime['sea_echo']['cycle'] or runtime['processed_years'] > deadline(runtime, runtime['sea_echo']):
+        elif task['cycle'] != echo['cycle'] or runtime['processed_years'] > deadline(runtime, echo):
             cancel(deps, game, task, failed=True, reason='窗口已结束')
         elif task['person_id'] and not deps.person_available(game, task['person_id']):
             cancel(deps, game, task, failed=True, reason='合作人物无法继续履约')
@@ -136,8 +156,8 @@ def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
     if action == 'cancel':
         task = active_task(runtime)
-        if target_id == 'sea_echo':
-            echo = runtime['sea_echo']
+        echo = get_echo(runtime, target_id)
+        if echo:
             application = echo['application']
             if application['remaining'] == application['unit_years']:
                 echo['applications_used'] -= 1
@@ -146,7 +166,10 @@ def execute(deps, game, action, target_id, options, proposal):
             return {'message': '已取消参悟安排'}
         cancel(deps, game, task)
         return result(task)
-    echo = runtime['sea_echo'] or create_echo(deps, game)
+    if action == 'resume':
+        echo = get_echo(runtime, active_task(runtime).get('target_id', 'sea_echo'))
+    else:
+        echo = get_echo(runtime, target_id) or create_echo(deps, game, target_id)
     if action == 'attune':
         if echo['reward_base'] is None:
             echo['reward_base'] = deps.opportunity_base(game)
@@ -158,11 +181,14 @@ def execute(deps, game, action, target_id, options, proposal):
     if action == 'resume':
         task = active_task(runtime)
     else:
-        task = dict(id=f'heavens-task-{runtime["next_task_seq"]}', action=action, status='reserved',
+        task = dict(id=f'heavens-task-{runtime["next_task_seq"]}', action=action, status='reserved', target_id=target_id,
             cycle=echo['cycle'], progress=0, duration=proposal['years'],
             escrow=deps.reserve_resources(game, proposal['costs']['stones'],
                 options.get('material_id'), proposal['costs'].get('mp', 0)),
-            person_id=echo['visitor_id'] if action == 'exchange' else None)
+            person_id=echo['visitor_id'] if action in {'exchange', 'correspond'} else None)
+        if action == 'correspond':
+            task['project_reward'] = proposal['reward_stones']
+            echo['project_stones'] -= task['project_reward']
         runtime['next_task_seq'] += 1
         runtime['tasks'] = runtime['tasks'][-3:] + [task]
         if action == 'maintain':
@@ -178,7 +204,7 @@ def result(task):
 def run_segment(deps, game, task):
     from ..possession_system import advance_player_age
     runtime = game.heavens_state['runtime']
-    echo = runtime['sea_echo']
+    echo = get_echo(runtime, task.get('target_id', 'sea_echo'))
     unit = deps.unit_years(game)
     rng = decode_rng(game.seed, game.rng_state)
     start_age, elapsed, news = game.player.age, 0, []
@@ -209,32 +235,39 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
-    physical_reason = deps.read_actor_facts(game)['physical_reason']
+    physical_reason = deps.read_actor_facts(game, echo['id'])['physical_reason']
     if task['status'] != 'failed' and physical_reason and task['progress'] == task['duration']:
         cancel(deps, game, task, failed=True, reason=physical_reason)
     if task['status'] != 'failed' and task['progress'] == task['duration'] and game.player.alive:
-        complete(game, task)
+        complete(game, task, deps)
     elif task['status'] == 'running':
         task['status'] = 'paused'
     game.rng_state = encode_rng(rng)
     game.updated_at = now_iso()
 
 
-def complete(game, task):
-    echo = game.heavens_state['runtime']['sea_echo']
+def complete(game, task, deps):
+    echo = get_echo(game.heavens_state['runtime'], task.get('target_id', 'sea_echo'))
+    site = echo_site(echo)
     action = task['action']
     task['status'] = 'completed'
     if action == 'observe':
         echo['observed_cycle'] = echo['cycle']
-        text = '取得 E1：潮汐回响有稳定相位差，尚不能仅凭本地阵法解释。'
+        text = f'取得 E1：{site.findings[0]}'
     elif action == 'check_history':
         echo['history_checked'] = True
-        text = '取得 E2：接引碑的两段旧记修正了“全部由本地阵法造成”的解释，可在本地应用。'
+        text = f'取得 E2：{site.findings[1]}'
     elif action == 'exchange':
         echo['exchanged'] = True
-        text = '取得 E3：合法抄录支持因果天城旧节点与本地潮汐的联系；个人合作履约一次。'
+        text = f'取得 E3：{site.findings[2]}'
+    elif action == 'correspond':
+        amount = task['project_reward']
+        deps.grant_stones(game, amount)
+        task['project_reward'] = 0
+        echo['correspondence_completed'] = True
+        text = f'已与{site.visitor_name}完成旧录校订，合法副本留给本地研究；从合作项目实有资金支付{amount}灵石，一次履约。'
     else:
         echo['maintained'] = True
         task['escrow']['material'] = None
-        text = '维护完成，九阶阵材已消耗。本周期本地余韵延续至原截止后 600 年，原客观潮汐周期不变。'
-    record(game, text)
+        text = f'维护完成，九阶阵材已消耗。本周期本地余韵延续至原截止后 {echo["definition"]["extension_years"]} 年，原客观周期不变。'
+    record(game, f'{site.name}：{text}')

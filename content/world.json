@@ -2366,7 +2366,7 @@
           {
             "system": "heavens",
             "label": "诸天系统",
-            "enabled": false
+            "enabled": true
           }
         ]
       },
@@ -2399,7 +2399,7 @@
           {
             "system": "heavens",
             "label": "诸天系统",
-            "enabled": false
+            "enabled": true
           }
         ]
       },
@@ -2432,7 +2432,7 @@
           {
             "system": "heavens",
             "label": "诸天系统",
-            "enabled": false
+            "enabled": true
           }
         ]
       },
@@ -2460,7 +2460,7 @@
           {
             "system": "heavens",
             "label": "诸天系统",
-            "enabled": false
+            "enabled": true
           }
         ]
       }
@@ -2489,6 +2489,96 @@
         "asura",
         "nether",
         "reincarnation"
+      ],
+      "contact_sites": [
+        {
+          "id": "sea_echo",
+          "world": "celestial",
+          "location_id": "law_sea",
+          "name": "法则天海 · 潮汐回响",
+          "visitor_name": "观澜散人",
+          "visitor_path": "dao",
+          "spirit_root": "supreme_water",
+          "record_id": "karma_city_old_copy",
+          "evidence": [
+            "潮汐体察",
+            "接引碑旧记",
+            "因果天城合法抄录"
+          ],
+          "findings": [
+            "潮汐回响有稳定相位差，尚不能仅凭本地阵法解释。",
+            "接引碑的两段旧记修正了“全部由本地阵法造成”的解释，可在本地应用。",
+            "合法抄录支持因果天城旧节点与本地潮汐的联系；个人合作履约一次。"
+          ],
+          "correspondence_years": 10,
+          "correspondence_stones": 2500
+        },
+        {
+          "id": "asura_echo",
+          "world": "asura",
+          "location_id": "destruction_sea",
+          "name": "寂灭海 · 战律余响",
+          "visitor_name": "止戈客",
+          "visitor_path": "demonic",
+          "spirit_root": "mutated_thunder",
+          "record_id": "celestial_seal_copy",
+          "evidence": [
+            "战律余响",
+            "古战阵铭",
+            "仙界封阵抄录"
+          ],
+          "findings": [
+            "寂灭海的战律在无战事时仍有回响，不能把每次震动都解释为敌军来袭。",
+            "古战阵铭中的两期静战记录说明，余响存在独立于兵力变化的周期。",
+            "合法封阵抄录支持两界旧阵的响应联系；这份认识不授予军事通道或军队指挥权。"
+          ],
+          "correspondence_years": 10,
+          "correspondence_stones": 2500
+        },
+        {
+          "id": "nether_echo",
+          "world": "nether",
+          "location_id": "world_tree_crown",
+          "name": "界树天冠 · 万灵年轮",
+          "visitor_name": "听木叟",
+          "visitor_path": "monster",
+          "spirit_root": "supreme_wood",
+          "record_id": "asura_growth_copy",
+          "evidence": [
+            "万灵年轮",
+            "树冠旧痕",
+            "修罗古木抄录"
+          ],
+          "findings": [
+            "世界树年轮在灵潮平稳时仍出现共振，尚不能归因于血脉晋升。",
+            "树冠旧痕保留两期异地响应，不同族类也能观察同一规律。",
+            "合法古木抄录支持修罗界旧阵与年轮共振的联系；所得用于普通领悟，不增加血脉专属成果。"
+          ],
+          "correspondence_years": 10,
+          "correspondence_stones": 2500
+        },
+        {
+          "id": "reincarnation_echo",
+          "world": "reincarnation",
+          "location_id": "karma_city",
+          "name": "因果天城 · 三生回照",
+          "visitor_name": "照尘居士",
+          "visitor_path": "ghost",
+          "spirit_root": "supreme_water",
+          "record_id": "nether_ring_copy",
+          "evidence": [
+            "三生回照",
+            "因果碑旧记",
+            "幽冥年轮抄录"
+          ],
+          "findings": [
+            "回照留下不同年代的痕迹，却没有改变已经发生的生死。",
+            "因果碑的两期旧记表明，所见是旧痕响应，不是时光倒流。",
+            "合法年轮抄录支持幽冥旧节点与回照的联系；不会撤销死亡、复制人物或返还旧消耗。"
+          ],
+          "correspondence_years": 10,
+          "correspondence_stones": 2500
+        }
       ]
     },
     "quick_start_presets": [
