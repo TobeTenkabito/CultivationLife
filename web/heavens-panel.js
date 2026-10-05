@@ -32,11 +32,12 @@
       const costs=quote.costs||{},refund=quote.refundable||{};
       const text=[`耗时 ${quote.years||0} 年；不会获得普通修炼机缘。`,
         costs.stones?`托管 ${costs.stones.toLocaleString()} 灵石，按实际进度支出。`:'',
-        costs.material_id?'托管所选阵材，完成时消耗；取消退还未耗阵材。':'',
+        costs.material_id?(quote.material_consumed?'开始施工即消耗所选阵材，取消不退还。':'托管所选阵材，完成时消耗；取消退还未耗阵材。'):'',
         costs.mp?`立即消耗 ${costs.mp.toLocaleString()} 法力，不退还。`:'',
         refund.stones!=null?`可退还 ${refund.stones.toLocaleString()} 灵石。`:'',
         quote.reward_stones?`完成后获 ${quote.reward_stones.toLocaleString()} 灵石；从合作项目现有资金预留，取消或失败退回项目。每份旧录仅履约一次。`:'',
         action==='attune'?'登记后，下一次普通修炼在原奖励上获得有限增益；登记本身不发放奖励。':'',
+        quote.warning||'',
         '遇到事件会暂停；已耗时间和投入不会返还。'].filter(Boolean).join('\n');
       ctx.confirm({title:'确认诸天行动',body:text,onConfirm:()=>{if(current.id===id)send(payload);}});
     } catch(error) {ctx.toast(error.message);}
@@ -63,11 +64,12 @@
       row.append(input,node('span',label));settings.append(row);
     }
     host.append(settings);
+    if(h.mirror && (h.mirror.inside || data.player.world==='human' || h.mirror.known))renderMirror(host,h.mirror);
     if(h.sites?.length) {
       const group=node('div',null,'heavens-group'),select=node('select');select.setAttribute('aria-label','诸天联系地点');
       const placeholder=node('option','选择最高界面的联系地点');placeholder.value='';placeholder.disabled=true;select.append(placeholder);
       for(const site of h.sites){const option=node('option',`${site.world_name} · ${site.name}${site.known?' · 已登记':''}`);option.value=site.id;select.append(option);}
-      select.value=h.target_id||'';select.disabled=Boolean(pending);select.onchange=()=>selectSite(select.value);
+      select.value=h.sites.some(s=>s.id===h.target_id)?h.target_id:'';select.disabled=Boolean(pending);select.onchange=()=>selectSite(select.value);
       group.append(node('h3','四界诸天联系'),select,node('small','可查阅四界联系；亲自参与须抵达相应地点，并具备未压制的九阶以上修为。'));host.append(group);
     }
     for(const notice of h.notifications||[]) {const box=node('div',null,'heavens-group');box.append(node('p',notice.text),button('忽略此通知',()=>propose('dismiss',notice.id)));host.append(box);}
@@ -82,7 +84,7 @@
     } else host.append(node('p',h.reason));
     if(h.registered_application){const app=h.registered_application,box=node('div',null,'heavens-group');box.append(node('p',`${app.name}：参悟已登记，剩余 ${app.remaining} 个实际修炼年。`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(box);}
     const active=(h.tasks||[]).find(t=>['reserved','running','paused'].includes(t.status));
-    if(active){const box=node('div',null,'heavens-group');box.append(node('p',`当前任务：${active.progress} / ${active.duration} 年`),button('继续任务',()=>propose('resume',active.id)),button('取消并退还未耗托管',()=>propose('cancel',active.id)));host.append(box);}
+    if(active){const box=node('div',null,'heavens-group');box.append(node('p',`当前任务：${active.progress} / ${active.duration} 年`),button('继续任务',()=>propose('resume',active.id)),button(active.target_id==='mirror_field'?'取消任务（已付消耗不退）':'取消并退还未耗托管',()=>propose('cancel',active.id)));host.append(box);}
     const actions=node('div',null,'heavens-actions');
     for(const row of h.actions||[]) {
       const box=node('div',null,'heavens-group'),options={...row.options};
@@ -94,6 +96,21 @@
     for(const item of [...(h.history||[])].reverse())history.append(node('p',`登记后 ${item.year} 年：${item.text}`));
     host.append(history);
     if(pending)host.querySelectorAll('input,select').forEach(el=>{el.disabled=true;});
+  }
+  function renderMirror(host,m) {
+    const box=node('section',null,'heavens-group');box.dataset.mirror='field';
+    box.append(node('h3',m.name),node('p',`${m.entry} · ${m.inside?'身处场域':m.known?'可重访':'元婴起可亲自进入'}`),node('small',m.description));
+    if(m.probed)box.append(node('p',`收集规律已查明 · 当前镜储 ${m.stored_mana.toFixed(1)}；累计收集 ${m.collected_mana.toFixed(1)} / ${m.mana_capacity.toFixed(1)}。`),node('small','登记施术实付法力的 25% 被收集；普通修炼和其他战斗不计入。隔断停止对应联系，守护强度最多增加 15%。'));
+    if(m.record_acquired)box.append(node('p','已取得镜律规律记录。'));
+    const actionRow=(row,parent)=>{
+      const group=node('div',null,'heavens-group'),options={...row.options};
+      if(row.action==='mirror_isolate'&&m.materials.length){const select=node('select');select.setAttribute('aria-label',`第 ${Number(options.chamber)+1} 处隔断阵材`);for(const material of m.materials){const option=node('option',material.name||material.material_id);option.value=material.id;select.append(option);}select.onchange=()=>{options.material_id=select.value;};group.append(select);}
+      group.append(button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending)),node('small',row.enabled?`${row.years} 年${row.costs?.mp?' · 实付 '+row.costs.mp.toLocaleString()+' 法力':''}${row.material_consumed?' · 消耗一件四阶阵材':''}`:row.reason));parent.append(group);
+    };
+    for(const row of m.actions.filter(a=>a.options.chamber==null))actionRow(row,box);
+    for(const chamber of m.chambers||[]){const card=node('div',null,'heavens-group');card.dataset.mirrorChamber=String(chamber.index);card.append(node('h4',`第 ${chamber.index+1} 处机关 · ${chamber.opened?'已解开':chamber.isolated?'联系已隔断':'尚未解开'}`));if(chamber.reward)card.append(node('small',`已领取：${chamber.reward}`));if(chamber.guardian)card.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守护强度已锁定，损伤保留。`));const actions=node('div',null,'heavens-actions');for(const row of m.actions.filter(a=>a.options.chamber===String(chamber.index)))actionRow(row,actions);card.append(actions);box.append(card);}
+    if(m.traces?.length)box.append(node('small',`已保留 ${m.traces.length} 条施术或施工痕迹，退出不会抹除。`));
+    host.append(box);
   }
   window.HeavensPanel={render};
 })();

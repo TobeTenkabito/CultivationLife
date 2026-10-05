@@ -508,6 +508,9 @@ class ContentRegistry:
                     raise ContentError('诸天联系必须位于第三层最高界面的实际地点')
                 if site['spirit_root'] not in registry.root_definitions:
                     raise ContentError('诸天合作人物灵根不存在')
+            mirror = registry.world_systems.get('heavens_framework', {}).get('mirror')
+            if mirror and not any(row['id'] == mirror['location_id'] for row in documents['maps.json']['worlds'][mirror['world']]['locations']):
+                raise ContentError('镜律场域入口必须引用实际本体地点')
         return registry
 
     @staticmethod

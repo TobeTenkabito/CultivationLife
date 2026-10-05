@@ -66,6 +66,11 @@
       document.getElementById('map-current').textContent=`当前：${game.player.location_name}`;
       document.getElementById('map-description').textContent='独立空间内移动、探索及人物交流各消耗一年；外界入口暂不可用。';
     }
+    if(s.scene?.heavens_target){
+      document.getElementById('map-description').textContent='镜律场域保留三处机关与稳定返程入口。';
+      root.append(node('h3','三镜回廊'),node('p','请在诸天面板试探、破解、隔断或强攻，也可沿原路退出。普通修炼使用正常倍率，场域不刷新随机所得。'));
+      const open=node('button','查看诸天机关与返程');open.type='button';open.onclick=()=>document.querySelector('[data-panel-target="heavens"]')?.click();root.append(open);return;
+    }
     if(s.visible){
       root.append(node('p',`护持评分 ${s.protection.score.toFixed(1)} = 符箓防护 × ${s.weights.protection} + 阵法生势 × ${s.weights.growth}。裂缝越接近崩溃，护持要求越高；不足则身死道消。`));
       if(s.can_open)root.append(button('消耗四分之一法力开辟裂缝','spatial','open'));

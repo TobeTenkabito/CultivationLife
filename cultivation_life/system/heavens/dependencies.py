@@ -28,3 +28,8 @@ class HeavensDependencies:
     grant_progress: Callable | None = None
     reconcile_tasks: Callable | None = None
     grant_stones: Callable | None = None
+    read_mirror_facts: Callable | None = None
+    mirror_materials: Callable | None = None
+    enter_mirror: Callable | None = None
+    leave_mirror: Callable | None = None
+    fight_mirror: Callable | None = None
