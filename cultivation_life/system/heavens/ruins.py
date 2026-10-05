@@ -21,11 +21,11 @@ def handles(runtime, action, target_id):
             and task is not None and target_id == task['id'] and task.get('target_id') == RUINS_ID)
 
 
-def create(deps, game):
+def create(deps, game, *, known=True, year=None):
     runtime = game.heavens_state['runtime']
     identity = 'heavens-ruins-' + sha256(f'{game.id}:{game.seed}:ruins:v1'.encode()).hexdigest()[:20]
     definition = asdict(deps.get_definitions().ruins)
-    ruins = dict(id=RUINS_ID, scene_id=identity, definition=definition, created_year=runtime['processed_years'],
+    ruins = dict(id=RUINS_ID, scene_id=identity, definition=definition, created_year=runtime['processed_years'] if year is None else year,
                  observed=False, verified=False, record_acquired=False, contact_known=False,
                  reward=deps.ruins_material(game, identity),
                  core=dict(id=identity+'-core', definition_id='returning_tide_core', name='回潮阵芯', owner='ward', acquisition=None),
@@ -33,7 +33,10 @@ def create(deps, game):
                  guardian=dict(wounds=0, encounters=0, result=None), local_traces={}, guardian_records={}, sent_records={})
     runtime['ruins'] = ruins
     game.heavens_state['definition_versions'][RUINS_ID] = definition['revision']
-    record(game, '无棣原旧阵通往因果遗址：阵芯与异界回响一同明灭，擅取可能切断另一端机关；入口可原路返回。')
+    if known:
+        record(game, '无棣原旧阵通往因果遗址：阵芯与异界回响一同明灭，擅取可能切断另一端机关；入口可原路返回。')
+    else:
+        ruins['player_known'] = False
     return ruins
 
 
@@ -218,11 +221,12 @@ def complete(deps, game, task, rng):
 
 def project(deps, game):
     ruins, facts = get(game), deps.read_ruins_facts(game)
-    value = dict(id=RUINS_ID, name='因果遗址', entry='人界 · 无棣原', known=bool(ruins), inside=facts['inside'],
+    known = bool(ruins and ruins.get('player_known', True))
+    value = dict(id=RUINS_ID, name='因果遗址', entry='人界 · 无棣原', known=known, inside=facts['inside'],
                  description='唯一阵芯与异界阵纹同步明灭。可调查、读取、替换、取芯或原路退出；所得不刷新。',
                  materials=deps.quote_materials(game, RUINS_ID), actions=[])
     candidates = [('ruins_leave' if facts['inside'] else 'ruins_enter', {})]
-    if ruins:
+    if known:
         value.update(observed=ruins['observed'], verified=ruins['verified'], record_acquired=ruins['record_acquired'],
                      contact='魔界 · 赤髓城旧阵传讯节点（无通行或施工坐标）' if ruins['contact_known'] else None,
                      core=copy.deepcopy(ruins['core']), ward_active=ruins['ward']['component'] is not None,

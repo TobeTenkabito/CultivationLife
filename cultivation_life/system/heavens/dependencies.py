@@ -50,3 +50,4 @@ class HeavensDependencies:
     survey_candidates: Callable | None = None
     move_surveyor: Callable | None = None
     advance_survey: Callable | None = None
+    prepare_ruins: Callable | None = None

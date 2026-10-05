@@ -42,14 +42,18 @@ def bind_survey(engine, ports):
         together = bool(npc and scene and npc.world == game.player.world and npc.location_id == location
                         and (npc.world == 'human' and npc.location_id == scene['definition']['location_id']
                              or npc.world == 'rift' and instance_of(game, npc.id) == game.spatial_state.get('current') == scene['scene_id']))
-        return dict(alive=bool(npc and npc.alive), blocked_reason=reason, together=together)
+        departure_lost = bool(row and row['phase'] == 'outbound' and npc and
+                              (npc.world != 'human' or not 4 <= npc.realm_index <= 5
+                               or npc.location_id != row['origin_location']))
+        return dict(alive=bool(npc and npc.alive), blocked_reason=reason, together=together,
+                    departure_lost=departure_lost)
 
-    def candidates(game):
-        if survey.get(game) or ports().read_ruins_facts(game)['entry_reason']:
+    def candidates(game, *, autonomous=False):
+        if survey.get(game) or not autonomous and ports().read_ruins_facts(game)['entry_reason']:
             return []
         return [dict(id=npc.id, name=npc.name, affinity=npc.affinity)
                 for npc in sorted(game.world_npcs.values(), key=lambda p:p.id)
-                if (npc.affinity or 0) >= 20 and not research_assignment(game, npc.id)
+                if (autonomous or (npc.affinity or 0) >= 20) and not research_assignment(game, npc.id)
                 and not facts(game, npc.id)['blocked_reason']]
 
     def move(game, phase):
