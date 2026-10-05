@@ -47,9 +47,9 @@ def initialize(game, *, enabled=True):
     return state
 
 
-def record(game, text):
+def record(game, text, *, year=None):
     runtime = game.heavens_state['runtime']
-    runtime['history'].append({'year': runtime['processed_years'], 'text': text})
+    runtime['history'].append({'year': runtime['processed_years'] if year is None else year, 'text': text})
     runtime['history'] = runtime['history'][-128:]
 
 

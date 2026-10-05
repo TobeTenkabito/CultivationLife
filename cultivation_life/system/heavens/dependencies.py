@@ -39,3 +39,8 @@ class HeavensDependencies:
     leave_ruins: Callable | None = None
     fight_ruins: Callable | None = None
     read_omen_facts: Callable | None = None
+    read_visit_facts: Callable | None = None
+    move_visit: Callable | None = None
+    read_mission_facts: Callable | None = None
+    move_researcher: Callable | None = None
+    advance_researchers: Callable | None = None

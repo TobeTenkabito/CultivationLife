@@ -40,6 +40,8 @@
         costs.mp?`立即消耗 ${costs.mp.toLocaleString()} 法力，不退还。`:'',
         refund.stones!=null?`可退还 ${refund.stones.toLocaleString()} 灵石。`:'',
         quote.reward_stones?`完成后获 ${quote.reward_stones.toLocaleString()} 灵石；从合作项目现有资金预留，取消或失败退回项目。每份旧录仅履约一次。`:'',
+        quote.return_fare?`其中 ${quote.return_fare.toLocaleString()} 灵石专用于返程，抵达后继续保留。申请机会仅有一次，取消启程也会结束本次许可。`:'',
+        quote.message||'',
         action==='attune'?'登记后，下一次普通修炼在原奖励上获得有限增益；登记本身不发放奖励。':'',
         quote.warning||'',
         '遇到事件会暂停；已耗时间和投入不会返还。'].filter(Boolean).join('\n');
@@ -161,15 +163,35 @@
       for(const site of h.sites)tile(list,{name:site.name,description:site.world_name,status:site.current?'当前界面':site.known?'已有档案':'尚未登记',glyph:({celestial:'仙',asura:'修',nether:'幽',reincarnation:'轮'})[site.world],onClick:()=>openTarget(site.id)});
       host.append(list);return;
     }
-    back(host,'返回诸界','worlds');title(host,selected.name,`${selected.world_name} · 亲自参与需抵达当地，并具备未压制的九阶以上修为。`);
+    back(host,'返回诸界','worlds');title(host,selected.name,ui.section==='mission'?'同道回访 · 本人出行，循约返乡':ui.section==='visit'?'个人访学 · 往返许可与现场对照':`${selected.world_name} · 亲自参与需抵达当地，并具备未压制的九阶以上修为。`);
     if(h.target_id!==selected.id){
       if(loadError){host.append(node('p',loadError),button('重新读取档案',()=>{loadError=null;selectSite(selected.id);render(current,ctx);}));}
       else {const p=node('p','正在读取联系档案…');p.setAttribute('role','status');host.append(p);if(!loadingKey)selectSite(selected.id);}
       return;
     }
     const e=h.echo;
-    if(e){const facts=node('div',null,'heavens-facts');facts.append(badge(e.remaining?`第 ${e.cycle+1} 周期 · 余 ${e.remaining} 年`:`下周期尚需 ${e.next_cycle_in} 年`),badge(`${e.evidence.length} 份求证记录`));host.append(facts);}
-    subview(host,[['research','求证'],['cooperate','往来'],['practice','参悟']],'research',(body,section)=>{
+    if(e&&!['visit','mission'].includes(ui.section)){const facts=node('div',null,'heavens-facts');facts.append(badge(e.remaining?`第 ${e.cycle+1} 周期 · 余 ${e.remaining} 年`:`下周期尚需 ${e.next_cycle_in} 年`),badge(`${e.evidence.length} 份求证记录`));host.append(facts);}
+    subview(host,[['research','求证'],['cooperate','往来'],['visit','访学'],['mission','同道'],['practice','参悟']],'research',(body,section)=>{
+      if(section==='mission'){renderMission(body,h.mission);return;}
+      if(section==='visit'){
+        const v=h.visit;
+        if(!v){empty(body,'尚无访学路线','先在当地登记诸天联系。');return;}
+        const labels={unavailable:'等待申请',preparing:'启程途中',visiting:'异界访学',returned:'已经返乡',cancelled:'申请已结束',failed:'行程已结束'};
+        body.append(node('h4',v.destination_name),node('p','完成旧录校订后，可申请一次个人访学。通道仅容本人，同行队伍和俘虏须事先安置。'));
+        const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','访学行程');
+        for(const text of ['启程 · 2 年','实地研读 · 4 年','返程 · 2 年'])route.append(node('li',text));
+        body.append(route,badge(labels[v.status]),node('p',`往返共 4,000 灵石；研读不另收费。${v.return_fare?`返程已预留 ${amount(v.return_fare)} 灵石。`:''}`));
+        if(v.finding)body.append(node('p',v.finding,'heavens-visit-finding'));
+        if(v.status==='visiting')body.append(node('small','可提前返程。若离开接待地点，须自行回到该处续办；行程不会自动传送角色。'));
+        const task=activeTask(h);
+        if(task&&task.target_id===selected.id&&task.action.startsWith('visit_')){
+          body.append(node('p',`当前步骤 ${task.progress} / ${task.duration} 年`),button('继续访学行程',()=>go('journey')));
+        }else{
+          const allowed=v.status==='visiting'?['visit_study','visit_return']:v.status==='unavailable'?['visit_depart']:[];
+          renderActions(body,(h.actions||[]).filter(row=>allowed.includes(row.action)&&!(row.action==='visit_study'&&v.studied)));
+        }
+        return;
+      }
       if(section==='research'){
         if(e?.evidence.length){const list=node('ol',null,'heavens-evidence');for(const line of e.evidence)list.append(node('li',line.replace(/^E\d\s/,'')));body.append(list);}
         if(e?.inscriptions.length)body.append(node('small',`旧碑两段记录早于首次登记 ${e.origin_year-e.inscriptions[0]} 年、${e.origin_year-e.inscriptions[1]} 年。`));
@@ -183,6 +205,22 @@
       renderActions(body,(h.actions||[]).filter(row=>allowed.includes(row.action)),h.materials||[]);
       if(section==='practice'&&h.registered_application?.target_id===selected.id)renderApplication(body,h.registered_application);
     });
+  }
+  function renderMission(host,m) {
+    if(!m){empty(host,'尚无回访约定','先与当地人物建立合作。');return;}
+    const status={unavailable:'待约请',active:'行程中',completed:'已经返乡',cancelled:'行程已撤销',failed:'行程已终止'},phase={outbound:'去程',studying:'当地研读',returning:'返乡'};
+    host.append(node('h4',m.name),node('p',`回访地点：${m.destination_name}`),badge(status[m.status]));
+    if(m.status==='unavailable')host.append(node('p','亲自研读后，可约请原合作人物回访。项目预留 6,000 灵石，承担去程 2 年、研读 4 年和返程 2 年的开销。'));
+    else {
+      host.append(node('p',`${phase[m.phase]} · ${m.progress} / ${m.duration} 年`));
+      if(m.status==='active'){const progress=node('progress');progress.max=m.duration;progress.value=m.progress;progress.setAttribute('aria-label','同道行程进度');host.append(progress);}
+      host.append(node('small',`项目已支 ${amount(m.spent)} · 尚存 ${amount(m.remaining)} · 退回 ${amount(m.refunded)} 灵石`));
+      if(m.blocked_reason)host.append(node('p',m.blocked_reason,'heavens-visit-finding'));
+      if(m.studied)host.append(node('p','本人已取得现场对照记录；已有认识与人物经历继续保留。'));
+      if(m.status==='active'&&m.phase==='studying')host.append(node('small','可在接待地点通过人物名册交往。研读结束后会自行返程。'));
+    }
+    if(m.status==='active')host.append(node('small','世界年度会推进行程，也可逐年等候；身处独立空间时，外界行程暂停。'));
+    renderActions(host,m.actions.filter(row=>m.status==='unavailable'?row.action==='mission_start':m.status==='active'&&row.action!=='mission_start'));
   }
   function renderAnomalies(host,h) {
     const entries=[h.mirror,h.ruins].filter(Boolean),selected=entries.find(row=>row.id===ui.target);
@@ -238,7 +276,14 @@
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
   function renderJourney(host,h) {
     title(host,'行程与纪要','查看亲自参与的事务，回顾已有认识。');
-    subview(host,[['active','进行中'],['history','纪要']],'active',(body,section)=>{
+    subview(host,[['active','进行中'],['people','同道'],['history','纪要']],'active',(body,section)=>{
+      if(section==='people'){
+        const rows=h.missions||[];
+        if(!rows.length){empty(body,'尚无同道行程','亲自完成一次跨界研读后，可在原联系的“同道”页约请回访。');return;}
+        const list=node('div',null,'heavens-directory');
+        for(const m of rows)tile(list,{name:m.name,description:m.destination_name,status:({active:'行程中',completed:'已返乡',cancelled:'已撤销',failed:'已终止'})[m.status],glyph:'访',onClick:()=>{openTarget(m.target_id);ui.section='mission';render(current,ctx);}});
+        body.append(list);return;
+      }
       if(section==='history'){
         const rows=[...(h.history||[])].reverse(),size=12,pages=Math.max(1,Math.ceil(rows.length/size));ui.historyPage=Math.min(ui.historyPage,pages-1);
         if(!rows.length){empty(body,'尚无纪要','亲历的征兆、求证与履约会记在这里。');return;}
@@ -246,13 +291,15 @@
         const pager=node('div',null,'heavens-inline');pager.append(button('上一页',()=>{ui.historyPage--;render(current,ctx);},ui.historyPage===0),node('small',`${ui.historyPage+1} / ${pages}`),button('下一页',()=>{ui.historyPage++;render(current,ctx);},ui.historyPage===pages-1));body.append(pager);return;
       }
       const task=activeTask(h);
+      const away=(h.visits||[]).filter(v=>v.status==='visiting');
+      for(const v of away){const row=node('article',null,'heavens-task');row.append(node('h4',`访学 · ${v.destination_name}`),node('p',v.studied?'现场研读已完成，可循约返程。':'已抵达，可研读或提前返程。'),button('查看访学与返程',()=>{openTarget(v.target_id);ui.section='visit';render(current,ctx);}));body.append(row);}
       if(task){
         const names={mirror_field:'镜律场域',causal_ruins:'因果遗址',sand_glimmer:'沙中重影',stone_resonance:'旧石回声'},name=h.sites.find(s=>s.id===task.target_id)?.name||names[task.target_id]||'诸天研究';
         const row=node('article',null,'heavens-task');row.append(node('h4',name),node('p',`当前任务：${task.progress} / ${task.duration} 年`));const progress=node('progress');progress.max=task.duration;progress.value=task.progress;progress.setAttribute('aria-label','任务进度');row.append(progress);
         const controls=node('div',null,'heavens-inline');controls.append(button('继续任务',()=>propose('resume',task.id),Boolean(pending)),button('取消任务',()=>propose('cancel',task.id),Boolean(pending)),button('查看对象',()=>openTarget(task.target_id)));row.append(controls,node('small','取消前会显示可退还的未耗投入，已付法力与已耗材料不退。'));body.append(row);
       }
       if(h.registered_application)renderApplication(body,h.registered_application);
-      if(!task&&!h.registered_application)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
+      if(!task&&!h.registered_application&&!away.length)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
     });
   }
   function renderSettings(host,h) {

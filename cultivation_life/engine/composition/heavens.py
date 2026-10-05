@@ -18,6 +18,9 @@ from ...system.upper_institutions import advance_time
 from ..transactions import request_games
 from .heavens_mirror import bind_mirror
 from .heavens_ruins import bind_ruins
+from .heavens_visits import bind_visits
+from .heavens_missions import bind_missions
+from ...person_assignments import research_assignment
 
 
 def bind_heavens(engine) -> HeavensDependencies:
@@ -81,6 +84,8 @@ def bind_heavens(engine) -> HeavensDependencies:
         game.world_npcs[identity] = npc
 
     def person_available(game, identity):
+        if research_assignment(game, identity):
+            return False
         npc = find_person(game, identity, include_inactive=True)
         site = next((echo_site(echo) for echo in contacts(game.heavens_state.get('runtime')) if echo['visitor_id'] == identity), None)
         if (site is None or npc is None or not is_free(npc) or npc.world != site.world or npc.location_id != site.location_id
@@ -176,5 +181,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         grant_stones=lambda game, amount: add_item(game.player, 'spirit_stone', amount),
         **bind_mirror(engine),
         **bind_ruins(engine),
+        **bind_visits(engine, lambda: ports),
+        **bind_missions(engine, lambda: ports),
     )
     return ports

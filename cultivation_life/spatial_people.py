@@ -29,6 +29,12 @@ def instance_of(game, identity):
 def accessible(game, person):
     """Same 'lost' world code is insufficient: instances cannot contact each other."""
     identity = person.get('npc_id', person.get('id')) if isinstance(person, dict) else person.id
+    from .person_assignments import research_assignment
+    assignment = research_assignment(game, identity)
+    if assignment:
+        location = person.get('location_id') if isinstance(person, dict) else person.location_id
+        if assignment['phase'] != 'studying' or location != game.player.location_id:
+            return False
     world = person.get('world') if isinstance(person, dict) else person.world
     owner = instance_of(game, identity)
     current = game.spatial_state.get('current') if game.player.world in {'lost', 'rift'} else None
@@ -37,6 +43,9 @@ def accessible(game, person):
 
 def require_access(game, person):
     identity = person.get('npc_id', person.get('id')) if isinstance(person, dict) else getattr(person, 'id', None)
+    from .person_assignments import research_assignment
+    if person and research_assignment(game, identity) and not accessible(game, person):
+        raise ValueError('此人正在访学途中或不在当前接待地点')
     spatial = game.player.world in {'lost', 'rift'} or instance_of(game, identity)
     if person and spatial and not accessible(game, person):
         raise ValueError('此人不在当前空间，无法与外界或其他失落界面交互')

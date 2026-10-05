@@ -53,6 +53,7 @@ def _war_side_name(deps: WarStateDependencies, game: GameState, kind: str, side_
 
 
 def _war_side_members(deps: WarStateDependencies, game: GameState, kind: str, side_id: str, world: str) -> list[SectNpc]:
+    from ...person_assignments import research_assignment
     if kind == "sect":
         sect = deps._war_sect(game, side_id)
         people = deps._sect_members(game, sect) if sect and not sect.extinct else []
@@ -62,6 +63,7 @@ def _war_side_members(deps: WarStateDependencies, game: GameState, kind: str, si
     unique = {
         npc.id: npc for npc in people
         if npc.alive and npc.world == world and not deps._intrigue_is_imprisoned(game, npc.id)
+        and not research_assignment(game, npc.id)
     }
     return sorted(unique.values(), key=deps._npc_power, reverse=True)[:int(deps._war_rules().get("roster_cap", 24))]
 

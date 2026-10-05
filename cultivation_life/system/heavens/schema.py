@@ -10,9 +10,11 @@ import re
 import math
 from typing import Any
 from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition, OMEN_IDS, validate_omen_definition
+from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
+VISIT_FIELDS = frozenset({'destination', 'status', 'return_fare', 'studied', 'started_at', 'arrived_at', 'returned_at'})
 STATE_KEYS = frozenset({
     'schema_version', 'revision', 'generation_enabled', 'definition_versions',
     'watch', 'command_seq', 'receipts',
@@ -91,7 +93,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -136,6 +138,8 @@ def validate_runtime(runtime):
     by_id = {}
     for echo in echoes:
         validate_echo(echo)
+        if 'mission' in echo:
+            validate_mission(echo, runtime)
         by_id[echo['id']] = echo
     if sum(echo['application'] is not None for echo in echoes) > 1:
         raise ValueError('只能同时登记一项诸天参悟')
@@ -193,7 +197,7 @@ def validate_runtime(runtime):
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}
+        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
         if task['action'] not in actions:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
@@ -266,9 +270,95 @@ def validate_runtime(runtime):
             expected_cost = echo['definition'].get(task['action'].removeprefix('ruins_')+'_stones', 0)
             if escrow['material'] is not None or escrow['total'] != expected_cost or escrow['spent'] != expected_cost * task['progress'] // task['duration']:
                 raise ValueError('因果遗址投入账目无效')
+        if task['action'] in VISIT_ACTIONS:
+            visit = echo.get('visit')
+            years = 4 if task['action'] == 'visit_study' else 2
+            cost = 0 if task['action'] == 'visit_study' else 2000
+            if (not visit or task['person_id'] is not None or task['duration'] != years
+                    or escrow['total'] != cost or escrow['spent'] != cost * task['progress'] // years
+                    or escrow['material'] is not None or escrow['mp_paid'] != 0
+                    or is_active and (visit['status'] != ('preparing' if task['action'] == 'visit_depart' else 'visiting'))
+                    or task['status'] == 'completed' and (task['progress'] != years
+                        or task['action'] == 'visit_study' and not visit['studied']
+                        or task['action'] == 'visit_return' and visit['status'] != 'returned')):
+                raise ValueError('个人访学任务或路费账目无效')
+        if task['action'] == 'mission_wait' and (not echo.get('mission') or task['duration'] != 1
+                or task['person_id'] is not None or escrow != dict(total=0, spent=0, refunded=0, material=None, mp_paid=0)
+                or task['status'] == 'completed' and task['progress'] != 1):
+            raise ValueError('等候同道任务无效')
         active += task['status'] in {'reserved', 'running', 'paused'}
     if active > 1:
         raise ValueError('只能同时进行一项诸天亲自任务')
+    for echo in echoes:
+        if 'visit' in echo:
+            validate_visit(echo, runtime)
+    if sum(echo.get('visit', {}).get('status') in {'preparing', 'visiting'} for echo in echoes) > 1:
+        raise ValueError('只能持有一项未结束的个人访学')
+    if sum(echo.get('mission', {}).get('status') == 'active' for echo in echoes) > 1:
+        raise ValueError('只能同时安排一项同道回访')
+
+
+def validate_mission(echo, runtime):
+    row = echo['mission']
+    keys = {'destination', 'status', 'phase', 'progress', 'spent', 'refunded', 'studied', 'elapsed', 'last_year', 'started_at'}
+    if (type(row) is not dict or set(row) != keys or not isinstance(row['phase'], str)
+            or not isinstance(row['status'], str) or row['phase'] not in {'outbound', 'studying', 'returning'}
+            or row['status'] not in {'active', 'completed', 'cancelled', 'failed'}
+            or type(row['studied']) is not bool or row['destination'] != VISIT_DESTINATIONS[echo['id']]
+            or not isinstance(echo.get('visit'), dict) or not echo['visit'].get('studied') or not echo.get('correspondence_completed')):
+        raise ValueError('同道回访许可或字段无效')
+    for key in ('progress', 'spent', 'refunded', 'elapsed', 'last_year', 'started_at'):
+        require_counter(row[key], '同道'+key)
+    if not row['started_at'] <= row['last_year'] <= runtime['processed_years'] or row['elapsed'] > row['last_year'] - row['started_at']:
+        raise ValueError('同道回访年度无效')
+    phase, progress = row['phase'], row['progress']
+    if phase == 'outbound':
+        expected, studied = 1000*progress, False
+        valid = row['elapsed'] == progress and progress < 2
+    elif phase == 'studying':
+        expected, studied = 2000+500*progress, False
+        valid = row['elapsed'] == 2+progress and progress < 4
+    else:
+        study_years = row['elapsed'] - 2 - progress
+        expected, studied = 2000+500*study_years+1000*progress, study_years == 4
+        valid = 0 <= study_years <= 4 and progress <= 2 and (progress < 2 or row['status'] == 'completed')
+    if (not valid or row['spent'] != expected or row['studied'] != studied
+            or row['spent'] + row['refunded'] > 6000
+            or row['status'] == 'active' and row['refunded'] != 0
+            or row['status'] != 'active' and row['spent']+row['refunded'] != 6000
+            or row['status'] == 'completed' and (phase != 'returning' or progress != 2)
+            or row['status'] == 'cancelled' and phase != 'outbound'):
+        raise ValueError('同道回访进度与资金不守恒')
+
+
+def validate_visit(echo, runtime):
+    visit = echo['visit']
+    if (type(visit) is not dict or set(visit) != VISIT_FIELDS or not echo.get('correspondence_completed')
+            or visit['destination'] != VISIT_DESTINATIONS[echo['id']]
+            or visit['status'] not in {'preparing', 'visiting', 'returned', 'cancelled', 'failed'}
+            or type(visit['studied']) is not bool):
+        raise ValueError('个人访学许可或目的地无效')
+    require_counter(visit['started_at'], '访学申请时间')
+    require_counter(visit['return_fare'], '返程路费')
+    if visit['started_at'] > runtime['processed_years']:
+        raise ValueError('访学申请时间在未来')
+    for key in ('arrived_at', 'returned_at'):
+        if visit[key] is not None:
+            require_counter(visit[key], '访学抵达时间')
+            if not visit['started_at'] + 2 <= visit[key] <= runtime['processed_years']:
+                raise ValueError('访学抵达时间无效')
+    returning = any(t.get('target_id') == echo['id'] and t.get('action') == 'visit_return'
+        and t.get('status') in {'reserved', 'running', 'paused'} for t in runtime['tasks'])
+    expected = 2000 if visit['status'] == 'preparing' or visit['status'] == 'visiting' and not returning else 0
+    if (visit['return_fare'] != expected or visit['studied'] and visit['arrived_at'] is None
+            or visit['status'] in {'preparing', 'cancelled'} and visit['arrived_at'] is not None
+            or visit['status'] in {'visiting', 'returned'} and visit['arrived_at'] is None
+            or (visit['returned_at'] is not None) != (visit['status'] == 'returned')
+            or visit['returned_at'] is not None and visit['returned_at'] < visit['arrived_at'] + 2):
+        raise ValueError('访学行程与返程托管不一致')
+    if visit['status'] == 'preparing' and not any(t.get('target_id') == echo['id'] and t.get('action') == 'visit_depart'
+            and t.get('status') in {'reserved', 'running', 'paused'} for t in runtime['tasks']):
+        raise ValueError('访学启程缺少任务')
 
 
 def validate_echo(echo):
@@ -276,8 +366,13 @@ def validate_echo(echo):
         'cycle', 'observed_cycle', 'history_checked', 'exchanged', 'maintained',
         'maintenance_started', 'applications_used', 'reward_base', 'reward_claimed',
         'application', 'project_stones'}
-    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed'} != keys or echo['id'] not in SITE_IDS:
+    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed', 'visit', 'mission'} != keys or echo['id'] not in SITE_IDS:
         raise ValueError('诸天实例字段无效')
+    if 'visit' in echo:
+        visit = echo['visit']
+        if (type(visit) is not dict or set(visit) != VISIT_FIELDS
+                or not isinstance(visit['status'], str)):
+            raise ValueError('个人访学字段无效')
     if 'site' in echo:
         validate_site(echo['site'])
         if echo['site']['id'] != echo['id']:

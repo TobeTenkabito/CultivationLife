@@ -99,6 +99,11 @@ def _sect_members(deps: NpcDependencies, game: GameState, sect: SectState) -> li
 def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | None:
     existing = find_person(game, npc_id)
     if existing is not None:
+        from ...person_assignments import research_assignment
+        if research_assignment(game, npc_id):
+            from ...spatial_people import accessible
+            if not accessible(game, existing):
+                return None
         from ...spatial_people import accessible, instance_of
         if (game.player.world in {'lost', 'rift'} or instance_of(game, npc_id)) and not accessible(game, existing):
             return None
@@ -288,10 +293,11 @@ def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: ra
 
 def _all_world_npcs(game: GameState) -> list[SectNpc]:
     from ...spatial_people import people, instance_of
+    from ...person_assignments import in_transit
     if game.player.world in {'lost', 'rift'}:
         return people(game)
     return [npc for npc in [*game.world_npcs.values(), *game.notable_npcs.values(), *(npc for sect in game.sects.values() for npc in sect.npcs)]
-            if not instance_of(game, npc.id)]
+            if not instance_of(game, npc.id) and not in_transit(game, npc.id)]
 
 
 def _npc_lethal_chance(world: str, realm_index: int, context: str) -> float:

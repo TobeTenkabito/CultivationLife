@@ -5,11 +5,13 @@ import copy
 import hashlib
 import json
 
-from .definitions import ACTIONS, VIEWS, HeavensDefinitions, MIRROR_ID, RUINS_ID, RUINS_ACTIONS, OMEN_IDS
+from .definitions import ACTIONS, VIEWS, HeavensDefinitions, MIRROR_ID, RUINS_ID, RUINS_ACTIONS, OMEN_IDS, VISIT_ACTIONS
 from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
-from . import tasks, mirror, ruins, omens
+from . import tasks, mirror, ruins, omens, visits
+from . import missions
+from .definitions import MISSION_ACTIONS
 
 
 def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict:
@@ -55,6 +57,10 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     result.update(year=runtime['processed_years'], tasks=copy.deepcopy(runtime['tasks']),
                   notifications=copy.deepcopy(runtime['notifications']) if state['watch'] else [],
                   history=copy.deepcopy(runtime['history']), unit_credit=copy.deepcopy(runtime['unit_credit']))
+    result['visits'] = [dict(target_id=row['id'], name=echo_site(row).name, **visits.project(deps, game, row['id']))
+                        for row in contacts(runtime) if row.get('visit')] if deps else []
+    result['missions'] = [missions.project(deps, game, row['id']) for row in contacts(runtime)
+                          if row.get('mission')] if deps and deps.read_mission_facts else []
     def echo_view(echo):
         site = echo_site(echo)
         cycle, offset, cutoff = phase(runtime, echo)
@@ -73,12 +79,17 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     known = [echo_view(row) for row in contacts(runtime)]
     if echo:
         result['echo'] = next(row for row in known if row['id'] == echo['id'])
+    if deps and target_id and deps.read_visit_facts:
+        result['visit'] = visits.project(deps, game, target_id)
+    if deps and target_id and deps.read_mission_facts:
+        result['mission'] = missions.project(deps, game, target_id)
     result['registered_application'] = next((dict(target_id=row['id'], name=row['name'], **row['application'])
                                            for row in known if row['application']), None)
     result['actions'] = []
     if deps and target_id:
         result['materials'] = deps.quote_materials(game, target_id)
-        for action in ('observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond'):
+        for action in ('observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond',
+                       'visit_depart', 'visit_study', 'visit_return'):
             options = ({'person_id': echo['visitor_id']} if action in {'exchange', 'correspond'} and echo else
                        {'material_id': result['materials'][0]['id']} if action=='maintain' and result['materials'] else {})
             row = dict(action=action, target_id=target_id, label=tasks.LABELS[action], options=options)
@@ -110,6 +121,8 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
                    'mirror_enter': set(), 'mirror_leave': set(), 'mirror_probe': set(),
                    'mirror_decipher': {'chamber'}, 'mirror_isolate': {'chamber', 'material_id'}, 'mirror_assault': {'chamber'}}
         allowed.update({key: {'material_id'} if key == 'ruins_replace' else set() for key in RUINS_ACTIONS})
+        allowed.update({key: set() for key in VISIT_ACTIONS})
+        allowed.update({key: set() for key in MISSION_ACTIONS})
         if action not in allowed or not isinstance(target_id, str) or not target_id:
             raise ValueError('诸天动作或目标无效')
         if type(options) is not dict or set(options) != allowed[action] or any(not isinstance(v,str) or not v for v in options.values()):

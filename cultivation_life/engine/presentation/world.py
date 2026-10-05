@@ -50,6 +50,10 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             status = "魂灯熄灭，当前界面将其记录为死亡"
         else:
             status = "不在当前界面，生死不明"
+        from ...person_assignments import research_assignment
+        assignment = research_assignment(game, npc.id)
+        if same_world and npc.alive and assignment:
+            status = '正在当地访学' if assignment['phase'] == 'studying' else '访学途中，暂不可交往'
         from ...system.cultivation_ranks import public_ranks
         ranks = public_ranks(npc)
         public_npc = npc.to_dict()

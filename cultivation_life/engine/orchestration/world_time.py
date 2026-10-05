@@ -55,6 +55,8 @@ def _advance_world_year(
         return False
     era_news.extend(deps._annual_sect_update(game, rng))
     era_news.extend(deps._annual_world_npc_update(game, rng))
+    if deps.advance_researchers:
+        deps.advance_researchers(game)
     deps._annual_demonic_update(game, rng)
     deps._annual_spirit_field_update(player)
     if not player.alive:
