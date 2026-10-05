@@ -2593,6 +2593,27 @@
         "capacity_fraction": 0.25,
         "strength_cap": 0.15,
         "guardian_power": 2200.0
+      },
+      "ruins": {
+        "revision": 1,
+        "world": "human",
+        "location_id": "wudi_plain",
+        "linked_world": "demon",
+        "linked_location_id": "red_marrow_city",
+        "observe_years": 2,
+        "verify_years": 4,
+        "read_years": 6,
+        "take_years": 1,
+        "replace_years": 8,
+        "erase_years": 3,
+        "contact_years": 4,
+        "return_years": 2,
+        "replace_stones": 500,
+        "erase_stones": 300,
+        "mana_fraction": 0.05,
+        "guardian_power": 2200.0,
+        "trace_read_years": 6,
+        "trace_send_years": 4
       }
     },
     "quick_start_presets": [
