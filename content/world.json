@@ -2579,7 +2579,21 @@
           "correspondence_years": 10,
           "correspondence_stones": 2500
         }
-      ]
+      ],
+      "mirror": {
+        "revision": 1,
+        "world": "human",
+        "location_id": "muling_desert",
+        "probe_years": 2,
+        "decipher_years": 4,
+        "isolate_years": 3,
+        "assault_years": 1,
+        "mana_fraction": 0.05,
+        "collection_fraction": 0.25,
+        "capacity_fraction": 0.25,
+        "strength_cap": 0.15,
+        "guardian_power": 2200.0
+      }
     },
     "quick_start_presets": [
       {

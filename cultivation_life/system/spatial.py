@@ -346,6 +346,8 @@ def explore(game, rng):
     scene = current(game)
     if not scene:
         raise ValueError("当前不在独立空间")
+    if scene.get('heavens_target'):
+        raise ValueError('此处所得由诸天机关持有，不能重复随机探索领取')
     scene["explored"] += 1
     if rng.random() < .25:
         from ..talisman_content import local_catalog

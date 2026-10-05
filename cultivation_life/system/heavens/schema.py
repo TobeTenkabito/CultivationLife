@@ -9,7 +9,7 @@ import copy
 import re
 import math
 from typing import Any
-from .definitions import SITE_IDS, default_site, validate_site
+from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -54,12 +54,14 @@ def validate_state(state: Any) -> None:
     if state['generation_enabled'] and 'runtime' not in state:
         raise ValueError('诸天启用状态缺少日历')
     if (type(state['definition_versions']) is not dict
-            or any(key not in SITE_IDS or type(value) is not int or value != 1
+            or any(key not in SITE_IDS | {MIRROR_ID} or type(value) is not int or value != 1
                    for key, value in state['definition_versions'].items())):
         raise ValueError('诸天生成定义版本无效')
     if 'runtime' in state:
         validate_runtime(state['runtime'])
         expected_versions = {echo['id']: 1 for echo in runtime_contacts(state['runtime'])}
+        if 'mirror' in state['runtime']:
+            expected_versions[MIRROR_ID] = 1
         if state['definition_versions'] != expected_versions:
             raise ValueError('诸天实例与生成定义版本不一致')
     receipts = state['receipts']
@@ -86,7 +88,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}
+                'configure', 'watch', 'dismiss', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -117,7 +119,7 @@ def validate_runtime(runtime):
     keys = {'epoch_age', 'processed_years', 'last_year_key', 'last_discovery_window',
             'rng_counter', 'next_task_seq', 'unit_credit', 'sea_echo', 'tasks',
             'history', 'notifications', 'pause_requested', 'pause_on_opportunity'}
-    if type(runtime) is not dict or set(runtime) - {'contacts'} != keys:
+    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror'} != keys:
         raise ValueError('诸天日历字段无效')
     extra = runtime.get('contacts', {})
     if type(extra) is not dict or set(extra) - (SITE_IDS - {'sea_echo'}):
@@ -137,6 +139,8 @@ def validate_runtime(runtime):
     finite_tree(runtime)
     for key in ('epoch_age', 'processed_years', 'last_year_key', 'rng_counter', 'next_task_seq'):
         require_counter(runtime[key], key)
+    if 'mirror' in runtime:
+        validate_mirror(runtime['mirror'], runtime['processed_years'])
     if runtime['last_year_key'] != runtime['processed_years'] or runtime['next_task_seq'] < 1:
         raise ValueError('诸天处理时钟无效')
     window = runtime['last_discovery_window']
@@ -171,16 +175,18 @@ def validate_runtime(runtime):
     active = 0
     ids = set()
     for task in runtime['tasks']:
-        if type(task) is not dict or set(task) - {'target_id', 'project_reward'} != {'id', 'action', 'status', 'cycle', 'progress', 'duration', 'escrow', 'person_id'}:
+        if type(task) is not dict or set(task) - {'target_id', 'project_reward', 'chamber'} != {'id', 'action', 'status', 'cycle', 'progress', 'duration', 'escrow', 'person_id'}:
             raise ValueError('诸天任务字段无效')
         target_id = task.get('target_id', 'sea_echo')
         if not isinstance(target_id, str):
             raise ValueError('诸天任务目标无效')
-        echo = by_id.get(target_id)
+        is_mirror = target_id == MIRROR_ID
+        echo = runtime.get('mirror') if is_mirror else by_id.get(target_id)
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        if task['action'] not in {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}:
+        actions = MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}
+        if task['action'] not in actions:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
             raise ValueError('诸天任务阶段无效')
@@ -188,8 +194,25 @@ def validate_runtime(runtime):
             require_counter(task[key], key)
         if not 0 <= task['progress'] <= task['duration'] or task['duration'] < 1:
             raise ValueError('诸天任务进度无效')
-        if task['person_id'] not in (None, echo['visitor_id']):
+        if task['person_id'] not in (None, echo.get('visitor_id')):
             raise ValueError('诸天任务人物引用无效')
+        if is_mirror:
+            chamber = task.get('chamber')
+            if (('chamber' not in task) or task['cycle'] != 0
+                    or task['action'] == 'mirror_probe' and chamber is not None
+                    or task['action'] != 'mirror_probe' and (type(chamber) is not int or not 0 <= chamber < 3)
+                    or task['duration'] != echo['definition'][task['action'].removeprefix('mirror_')+'_years']):
+                raise ValueError('镜律任务引用或时长无效')
+            if task['status'] == 'completed':
+                row = echo['chambers'][chamber] if chamber is not None else None
+                if (task['progress'] != task['duration']
+                        or task['action'] == 'mirror_probe' and not echo['probed']
+                        or task['action'] == 'mirror_decipher' and not row['opened']
+                        or task['action'] == 'mirror_isolate' and not row['isolated']
+                        or task['action'] == 'mirror_assault' and row['guardian'] is None):
+                    raise ValueError('镜律任务完成事实不一致')
+        elif 'chamber' in task:
+            raise ValueError('非镜律任务不能引用机关')
         reward = task.get('project_reward', 0)
         require_counter(reward, '校订托管')
         is_active = task['status'] in {'reserved', 'running', 'paused'}
@@ -212,6 +235,8 @@ def validate_runtime(runtime):
             raise ValueError('诸天托管账目无效')
         if escrow['material'] is not None and (not isinstance(escrow['material'], dict) or not escrow['material'].get('id')):
             raise ValueError('诸天阵材托管无效')
+        if is_mirror and (escrow['total'] or escrow['spent'] or escrow['refunded'] or escrow['material'] is not None):
+            raise ValueError('镜律任务不持有可退款托管')
         active += task['status'] in {'reserved', 'running', 'paused'}
     if active > 1:
         raise ValueError('只能同时进行一项诸天亲自任务')
@@ -271,8 +296,81 @@ def vars_site(target_id):
     return asdict(default_site(target_id))
 
 
+def validate_mirror(mirror, year):
+    fields = {'id', 'definition', 'scene_id', 'created_year', 'probed', 'mana_capacity',
+              'paid_mana', 'collected_mana', 'stored_mana', 'record_acquired', 'chambers', 'traces'}
+    if type(mirror) is not dict or set(mirror) != fields or mirror['id'] != MIRROR_ID:
+        raise ValueError('镜律实例字段无效')
+    validate_mirror_definition(mirror['definition'])
+    if not isinstance(mirror['scene_id'], str) or not re.fullmatch(r'heavens-mirror-[0-9a-f]{20}', mirror['scene_id']):
+        raise ValueError('镜律空间引用无效')
+    require_counter(mirror['created_year'], '镜律创建时间')
+    if mirror['created_year'] > year:
+        raise ValueError('镜律创建时间在未来')
+    if any(type(mirror[key]) is not bool for key in ('probed', 'record_acquired')):
+        raise ValueError('镜律证据标记无效')
+    for key in ('mana_capacity', 'paid_mana', 'collected_mana', 'stored_mana'):
+        if type(mirror[key]) not in (int, float) or not math.isfinite(mirror[key]) or mirror[key] < 0:
+            raise ValueError('镜律法力账目无效')
+    if (not 0 < mirror['mana_capacity'] or mirror['collected_mana'] > mirror['mana_capacity'] + 1e-6
+            or mirror['collected_mana'] > mirror['paid_mana'] * mirror['definition']['collection_fraction'] + 1e-6):
+        raise ValueError('镜律收集超出实付来源或容量')
+    rows = mirror['chambers']
+    if type(rows) is not list or len(rows) != 3:
+        raise ValueError('镜律实例必须保留三处唯一机关')
+    allocated, materials = 0.0, set()
+    for index, row in enumerate(rows):
+        if type(row) is not dict or set(row) != {'opened', 'isolated', 'guardian', 'reward'}:
+            raise ValueError('镜律机关字段无效')
+        if type(row['opened']) is not bool or type(row['isolated']) is not bool:
+            raise ValueError('镜律机关事实无效')
+        if (row['opened'] or row['isolated'] or row['guardian']) and not mirror['probed']:
+            raise ValueError('镜律机关缺少试探证据')
+        reward = row['reward']
+        if index < 2:
+            if (type(reward) is not dict or set(reward) != {'id', 'material_id', 'name', 'source', 'origin_world', 'acquired_tier', 'base_value'}
+                    or reward['id'] != f'{mirror["scene_id"]}-material-{index}'
+                    or reward['origin_world'] != 'human' or type(reward['acquired_tier']) is not int or reward['acquired_tier'] != 4
+                    or any(not isinstance(reward[key], str) or not reward[key] for key in ('name', 'source', 'material_id'))):
+                raise ValueError('镜律材料预留无效')
+            require_counter(reward['base_value'], '镜律材料价值')
+            if reward['id'] in materials:
+                raise ValueError('镜律材料重复归属')
+            materials.add(reward['id'])
+        elif reward is not None or mirror['record_acquired'] != row['opened']:
+            raise ValueError('镜律规律记录归属无效')
+        guardian = row['guardian']
+        if guardian is not None:
+            if type(guardian) is not dict or set(guardian) != {'mana', 'power', 'wounds', 'encounters', 'result'}:
+                raise ValueError('镜律守护快照无效')
+            for key in ('mana', 'power'):
+                if type(guardian[key]) not in (int, float) or not math.isfinite(guardian[key]) or guardian[key] < 0:
+                    raise ValueError('镜律守护数值无效')
+            expected = mirror['definition']['guardian_power'] * (1 + mirror['definition']['strength_cap'] * guardian['mana']/max(1.0, mirror['mana_capacity']))
+            if guardian['mana'] > mirror['mana_capacity'] + 1e-6 or abs(guardian['power']-expected) > 1e-6:
+                raise ValueError('镜律强度缺少真实供给')
+            require_counter(guardian['wounds'], '镜律机关损伤')
+            require_counter(guardian['encounters'], '镜律遭遇次数')
+            if guardian['wounds'] > 4 or guardian['encounters'] < 1 or not isinstance(guardian['result'], str) or not guardian['result']:
+                raise ValueError('镜律遭遇后果无效')
+            allocated += guardian['mana']
+    if abs(mirror['stored_mana'] + allocated - mirror['collected_mana']) > 1e-6:
+        raise ValueError('镜律供给与储量不守恒')
+    if type(mirror['traces']) is not list or len(mirror['traces']) > 32:
+        raise ValueError('镜律痕迹超出容量')
+    for row in mirror['traces']:
+        if type(row) is not dict or set(row) != {'year', 'kind', 'chamber'} or row['kind'] not in MIRROR_ACTIONS:
+            raise ValueError('镜律痕迹无效')
+        require_counter(row['year'], '镜律痕迹时间')
+        if row['year'] > year or row['chamber'] is not None and (type(row['chamber']) is not int or not 0 <= row['chamber'] < 3):
+            raise ValueError('镜律痕迹来源无效')
+
+
 def validate_references(game):
     runtime = game.heavens_state.get('runtime')
+    scenes = [row for row in game.spatial_state.get('instances', {}).values() if row.get('heavens_target') == MIRROR_ID]
+    if scenes and (not runtime or not runtime.get('mirror')):
+        raise ValueError('镜律空间缺少对应诸天实例，保留原档')
     if not runtime:
         return
     people = set(game.world_npcs) | set(game.notable_npcs) | set(game.inactive_npcs) | set(game.relationship_npcs)
@@ -287,6 +385,20 @@ def validate_references(game):
     inventory = {row['id'] for row in game.player.formation_materials}
     if len(set(held)) != len(held) or inventory.intersection(held):
         raise ValueError('法则天海阵材出现重复所有权')
+    mirror = runtime.get('mirror')
+    if mirror:
+        scene = game.spatial_state.get('instances', {}).get(mirror['scene_id'])
+        if (not scene or len(scenes) != 1 or scene.get('heavens_target') != MIRROR_ID or scene.get('kind') != 'heavens'
+                or scene.get('id') != mirror['scene_id']):
+            raise ValueError('镜律场域空间引用已损坏，保留原档')
+        if (scene.get('location_id') != 'mirror_hall' or len(scene.get('locations', [])) != 1
+                or scene['locations'][0].get('id') != 'mirror_hall' or scene.get('npc_ids') != []
+                or scene.get('materials') != [] or scene.get('techniques') != [] or scene.get('sects') != []):
+            raise ValueError('镜律场域只能保留固定机关与出口')
+        unclaimed = {row['reward']['id'] for row in mirror['chambers'] if row['reward'] and not row['opened']}
+        owned = [row['id'] for row in game.player.formation_materials]
+        if len(owned) != len(set(owned)) or unclaimed.intersection(owned + held):
+            raise ValueError('镜律材料出现重复所有权')
 
 
 def decode_state(value: Any) -> dict[str, Any]:

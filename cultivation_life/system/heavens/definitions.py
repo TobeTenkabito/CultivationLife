@@ -2,8 +2,41 @@
 from dataclasses import dataclass, field, asdict
 
 VIEWS = frozenset({'known', 'opportunities', 'tasks', 'history'})
+MIRROR_ID = 'mirror_field'
+MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mirror_decipher', 'mirror_isolate', 'mirror_assault'})
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'})
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}) | MIRROR_ACTIONS
+
+
+@dataclass(frozen=True, slots=True)
+class MirrorDefinition:
+    revision: int = 1
+    world: str = 'human'
+    location_id: str = 'muling_desert'
+    probe_years: int = 2
+    decipher_years: int = 4
+    isolate_years: int = 3
+    assault_years: int = 1
+    mana_fraction: float = .05
+    collection_fraction: float = .25
+    capacity_fraction: float = .25
+    strength_cap: float = .15
+    guardian_power: float = 2200.0
+
+
+def validate_mirror_definition(raw):
+    if type(raw) is not dict or set(raw) != set(asdict(MirrorDefinition())):
+        raise ValueError('镜律场域定义字段无效')
+    if type(raw['revision']) is not int or raw['revision'] != 1 or (raw['world'], raw['location_id']) != ('human', 'muling_desert'):
+        raise ValueError('镜律场域来源或版本无效')
+    for key in ('probe_years', 'decipher_years', 'isolate_years', 'assault_years'):
+        if type(raw[key]) is not int or not 1 <= raw[key] <= 100:
+            raise ValueError('镜律场域耗时无效')
+    for key, ceiling in (('mana_fraction', .05), ('collection_fraction', .25), ('capacity_fraction', .25), ('strength_cap', .15)):
+        if type(raw[key]) not in (int, float) or not 0 < raw[key] <= ceiling:
+            raise ValueError('镜律场域收集或增幅超出预算')
+    if type(raw['guardian_power']) not in (int, float) or not 1 <= raw['guardian_power'] <= 100000:
+        raise ValueError('镜律场域守护强度无效')
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,10 +112,11 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-upper-worlds'
+    milestone: str = 'M2-mirror'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES
+    mirror: MirrorDefinition = field(default_factory=MirrorDefinition)
 
     def site(self, target_id):
         return next((site for site in self.contact_sites if site.id == target_id), None)
@@ -112,6 +146,8 @@ def validate_framework(framework: dict, world_ids: set[str]) -> None:
         raise ValueError('诸天框架成员必须引用真实界面，诸天不能作为角色界面')
     if 'sea_echo' in framework:
         validate_echo_definition(framework['sea_echo'])
+    if 'mirror' in framework:
+        validate_mirror_definition(framework['mirror'])
     if 'contact_sites' in framework:
         rows = framework['contact_sites']
         if type(rows) is not list or len(rows) != 4:

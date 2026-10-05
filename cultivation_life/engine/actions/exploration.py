@@ -142,6 +142,8 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
         raise ValueError("空间参数必须使用已声明的文本字段")
     game = deps.load(game_id)
     require_free(game)
+    if (spatial.current(game) or {}).get('heavens_target'):
+        raise ValueError('此处是有限诸天异象，请从诸天面板处理机关或沿原路退出')
     state, p = spatial.ensure(game), game.player
     rng = decode_rng(game.seed, game.rng_state)
     target = payload.get("target_id", "")
@@ -290,7 +292,7 @@ def train(deps: ExplorationDependencies, game, action, units):
             gain = (
                 rng.randint(low, high)
                 * opportunity_multiplier(p)
-                * (spatial.cfg()["secluded_multiplier"] if p.world == "rift" else 1)
+                * (spatial.cfg()["secluded_multiplier"] if spatial.current(game)['kind'] == 'secluded' else 1)
             )
             if p.world == "lost" and p.path == "demonic":
                 gain *= WORLD_SYSTEMS["demonic_cultivation"][
