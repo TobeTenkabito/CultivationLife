@@ -4,12 +4,16 @@
 def research_assignments(game):
     runtime = game.heavens_state.get('runtime') or {}
     rows = ([runtime['sea_echo']] if runtime.get('sea_echo') else []) + list(runtime.get('contacts', {}).values())
-    return [(echo, echo[key]) for echo in rows for key in ('mission', 'freight') if echo.get(key)]
+    return [(echo, echo[key]) for echo in rows for key in ('mission', 'freight', 'migration') if echo.get(key)]
+
+
+def assignment_person(echo, row):
+    return row.get('person_id', echo['visitor_id'])
 
 
 def research_assignment(game, identity):
     return next((mission for echo, mission in research_assignments(game)
-                 if echo['visitor_id'] == identity and mission['status'] == 'active'), None)
+                 if assignment_person(echo, mission) == identity and mission['status'] == 'active'), None)
 
 
 def in_transit(game, identity):
@@ -37,7 +41,7 @@ def route_occupied(game, source, destination, *, exclude=None):
         if (source, destination) == (a, b):
             return exclude != game.id
     for echo, mission in research_assignments(game):
-        if echo['visitor_id'] == exclude or mission['status'] != 'active' or mission['phase'] == 'studying':
+        if assignment_person(echo, mission) == exclude or mission['status'] != 'active' or mission['phase'] in {'studying', 'settling'}:
             continue
         a, b = default_site(echo['id']).world, default_site(mission['destination']).world
         if mission['phase'] == 'returning':

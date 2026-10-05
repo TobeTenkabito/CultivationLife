@@ -93,7 +93,7 @@
     copy.append(node('strong',name),node('small',description),badge(status));b.append(icon,copy,node('span','›','heavens-forward'));host.append(b);
   }
   function back(host,label,page){const b=button(`‹ ${label}`,()=>go(page));b.className='heavens-back';host.append(b);}
-  function renderActions(host,rows,materials=[]) {
+  function renderActions(host,rows,materials=[],people=[]) {
     const list=node('div',null,'heavens-actions');
     for(const row of rows){
       const box=node('article',null,'heavens-action'),info=node('div'),options={...row.options};
@@ -104,6 +104,11 @@
         const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':row.action==='maintain'?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
+      }
+      if(row.action==='migration_start'&&people.length){
+        const select=node('select');select.setAttribute('aria-label','迁居居民');
+        for(const person of people){const option=node('option',`${person.name} · 交情 ${person.affinity}`);option.value=person.id;select.append(option);}
+        select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.person_id=select.value;};info.append(select);
       }
       const b=button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending));b.dataset.heavensAction=row.action;
       if(['ruins_take','mirror_assault'].includes(row.action))b.classList.add('heavens-danger');
@@ -294,9 +299,40 @@
     });
   }
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
+  function renderMigration(host,h) {
+    const selected=(h.migrations||[]).find(m=>m.target_id===ui.target);
+    if(!selected){
+      const list=node('div',null,'heavens-directory');
+      for(const m of h.migrations||[])tile(list,{name:m.name+'的接引',description:`迁往 ${m.destination_name}`,status:({unavailable:'一次民用名额',active:'正在迁居',completed:'已经定居',cancelled:'已撤销',failed:'已终止'})[m.status],glyph:'居',onClick:()=>go('journey',m.target_id,'migration')});
+      host.append(node('p','选择出发地，查看真实居民与接引安排。接引是长期迁居，没有自动返乡。'),list);return;
+    }
+    host.append(button('‹ 返回接引目录',()=>go('journey',null,'migration')));
+    if(h.target_id!==selected.target_id){
+      if(loadError)host.append(node('p',loadError),button('重新读取接引',()=>{loadError=null;selectSite(selected.target_id);render(current,ctx);}));
+      else {host.append(node('p','正在读取接引安排…'));if(!loadingKey)selectSite(selected.target_id);}
+      return;
+    }
+    const m=h.migration;
+    if(!m)return;
+    host.append(node('h4',m.name),node('p',`接引地点：${m.destination_name}`));
+    if(m.status==='unavailable'){
+      host.append(node('p','亲自研读确认目的地后，可在出发地或接引地资助一位原住地九阶以上居民迁居。双方交情至少 20；人物须自由且没有势力、关系、队伍或战事职责。'));
+      const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','迁居安排');
+      for(const text of ['通行 · 2 年','当地安置 · 1 年','长期居住'])route.append(node('li',text));
+      host.append(route,node('p','项目承担 4,000 灵石，玩家不另交费。每处接引、每位居民均仅一次。迁走原合作人物，会影响出发地的后续合作。'));
+      if(!m.candidates.length)host.append(node('small','目前没有可接洽的居民。可在出发地或接引地办理；居民须在出发地、已有交情并解除其他职责，路线也须开放。'));
+    }else{
+      host.append(node('h4',m.person_name),badge(({active:'迁居中',completed:'已经定居',cancelled:'已撤销',failed:'已终止'})[m.status]));
+      host.append(node('p',`${m.phase==='outbound'?'通行':'当地安置'} · ${m.progress} / ${m.phase==='outbound'?2:1} 年`),node('small',`项目已耗 ${amount(m.spent)} · 预留 ${amount(m.remaining)} · 退回 ${amount(m.refunded)} 灵石`));
+      if(m.blocked_reason)host.append(node('p',m.blocked_reason,'heavens-visit-finding'));
+      if(m.status==='completed')host.append(node('p',m.alive?'安置已完成，行程占用已解除。可前往目的地通过人物名册继续交往；人物仍会经历正常成长与生死。':'安置记录仍保留，这位居民后来已经陨落。'));
+    }
+    renderActions(host,m.actions.filter(a=>m.status==='unavailable'?a.action==='migration_start':a.action==='mission_wait'||a.action==='migration_cancel'&&m.status==='active'&&m.phase==='outbound'),[],m.candidates);
+  }
   function renderJourney(host,h) {
     title(host,'行程与纪要','查看亲自参与的事务，回顾已有认识。');
-    subview(host,[['active','进行中'],['people','同道'],['cargo','货运'],['history','纪要']],'active',(body,section)=>{
+    subview(host,[['active','进行中'],['people','同道'],['cargo','货运'],['migration','迁居'],['history','纪要']],'active',(body,section)=>{
+      if(section==='migration'){renderMigration(body,h);return;}
       if(section==='cargo'){
         const rows=h.freights||[];
         if(!rows.length){empty(body,'尚无货运委托','同道完成回访后，可在原联系的“运材”页登记一件阵材。');return;}

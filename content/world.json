@@ -3958,7 +3958,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:reincarnation:celestial",
@@ -3969,7 +3970,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:asura:celestial",
@@ -3980,7 +3982,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:celestial:asura",
@@ -3991,7 +3994,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:nether:asura",
@@ -4002,7 +4006,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:asura:nether",
@@ -4013,7 +4018,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:reincarnation:nether",
@@ -4024,7 +4030,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "study:nether:reincarnation",
@@ -4035,7 +4042,8 @@
         "capacity": 1,
         "purpose": "personal_study",
         "research_visitors": true,
-        "civilian_material_capacity": 1
+        "civilian_material_capacity": 1,
+        "civilian_residency": true
       },
       {
         "id": "sealed_descent:spirit:human",
