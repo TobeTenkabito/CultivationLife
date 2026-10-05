@@ -22,6 +22,7 @@ def bind_world_year(host) -> WorldYearDependencies:
         _annual_sect_update=lambda *args, **kwargs: host._annual_sect_update(*args, **kwargs),
         _annual_spirit_field_update=lambda *args, **kwargs: host._annual_spirit_field_update(*args, **kwargs),
         _annual_world_npc_update=lambda *args, **kwargs: host._annual_world_npc_update(*args, **kwargs),
+        advance_researchers=lambda game: host._dependencies.heavens.advance_researchers(game),
         _check_tribulation=lambda *args, **kwargs: host._check_tribulation(*args, **kwargs),
         _die=lambda *args, **kwargs: host._die(*args, **kwargs),
         _maybe_artifact_synthesis=lambda *args, **kwargs: host._maybe_artifact_synthesis(*args, **kwargs),

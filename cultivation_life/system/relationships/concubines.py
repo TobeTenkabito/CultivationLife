@@ -28,6 +28,8 @@ def manage_concubine(
     require_access(game, existing or find_person(game, target_id))
 
     if action == "recruit":
+        from ...person_assignments import require_unassigned
+        require_unassigned(game, target_id)
         if existing:
             raise ValueError("此人已经在侍妾名册中")
         target, source = deps._concubine_target(game, target_id)

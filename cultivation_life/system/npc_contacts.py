@@ -46,6 +46,10 @@ def availability(game, npc):
     elif kind in {'disciple','concubine','party'}: actions['capture'] = '请先解除此段名分或同行，再行生擒'
     if game.governance_actions.get(f'party_interaction:{npc.id}') == p.age:
         actions['improve'] = actions['worsen'] = '本行动单位已与此人交流'
+    from ..person_assignments import research_assignment
+    if research_assignment(game, npc.id):
+        for action in ('party', 'companion', 'friend', 'master', 'disciple', 'concubine'):
+            actions[action] = '此人已有访学行程，返乡前不能另行安排职责'
     return actions
 
 

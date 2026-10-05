@@ -27,6 +27,7 @@ class WorldYearDependencies:
     _maybe_race_war_ambush: Callable[..., Any]
     _maybe_wanted_encounter: Callable[..., Any]
     _resolve_breakthroughs: Callable[..., Any]
+    advance_researchers: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

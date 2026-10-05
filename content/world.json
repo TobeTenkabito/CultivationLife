@@ -3950,6 +3950,86 @@
     },
     "world_transition_routes": [
       {
+        "id": "study:celestial:reincarnation",
+        "source": "celestial",
+        "destination": "reincarnation",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:reincarnation:celestial",
+        "source": "reincarnation",
+        "destination": "celestial",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:asura:celestial",
+        "source": "asura",
+        "destination": "celestial",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:celestial:asura",
+        "source": "celestial",
+        "destination": "asura",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:nether:asura",
+        "source": "nether",
+        "destination": "asura",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:asura:nether",
+        "source": "asura",
+        "destination": "nether",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:reincarnation:nether",
+        "source": "reincarnation",
+        "destination": "nether",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
+        "id": "study:nether:reincarnation",
+        "source": "nether",
+        "destination": "reincarnation",
+        "mode": "study",
+        "enabled": true,
+        "capacity": 1,
+        "purpose": "personal_study",
+        "research_visitors": true
+      },
+      {
         "id": "sealed_descent:spirit:human",
         "source": "spirit",
         "destination": "human",

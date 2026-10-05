@@ -110,6 +110,29 @@ def plan_world_transition(game, request, systems, maps):
                 or route["destination"] != request.destination or route["mode"] != mode.value):
             raise ValueError("此玩法没有获准的跨界路线")
     recovery = bool(route and route.get("seal_recovery"))
+    if mode == TransitionMode.STUDY:
+        from ..person_assignments import route_occupied
+        if route_occupied(game, player.world, request.destination, exclude=game.id):
+            raise ValueError('个人通道已被回访人物占用，请等候通道空出')
+        from .heavens.definitions import VISIT_DESTINATIONS, default_site
+        runtime = game.heavens_state.get('runtime', {})
+        echoes = ([runtime['sea_echo']] if runtime.get('sea_echo') else []) + list(runtime.get('contacts', {}).values())
+        authorized = False
+        for echo in echoes:
+            origin = default_site(echo['id'])
+            destination = default_site(VISIT_DESTINATIONS[echo['id']])
+            visit = echo.get('visit')
+            outgoing = echo.get('correspondence_completed') and (not visit or visit['status'] == 'preparing')
+            returning = visit and visit['status'] == 'visiting'
+            for allowed, source, target in ((outgoing, origin, destination), (returning, destination, origin)):
+                if (allowed and player.world == source.world and player.location_id == source.location_id
+                        and request.destination == target.world and request.arrival_location == target.location_id):
+                    authorized = True
+        if not authorized or seal or player.realm_index < 9 or player.cultivation_suppression:
+            raise ValueError('缺少当前地点的个人访学许可')
+        if (player.party or any(n.alive and n.roster_state == 'held' and (n.custody or {}).get('holder_id') == game.id
+                               for n in game.inactive_npcs.values())):
+            raise ValueError('个人访学路线仅容一人，不能携带队伍或俘虏')
     if seal and mode not in {TransitionMode.SEALED_RETURN, TransitionMode.PASSAGE, TransitionMode.RIFT, TransitionMode.EXPULSION} and not recovery:
         raise ValueError("请先返回原界解除现有封印，不能叠加跨界封印")
     if seal and mode == TransitionMode.PASSAGE and not seal.get("merchant_passage"):

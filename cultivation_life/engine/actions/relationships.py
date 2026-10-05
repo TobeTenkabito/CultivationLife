@@ -85,6 +85,8 @@ def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target
 
 def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: str, npc_id: str, role: str, *, known_target=False) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...person_assignments import require_unassigned
+    require_unassigned(game, npc_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -349,6 +351,8 @@ def manage_dao_companion(
     rng = decode_rng(game.seed, game.rng_state)
     companion = player.dao_companion
     if action == "propose":
+        from ...person_assignments import require_unassigned
+        require_unassigned(game, npc_id)
         if companion and companion.get("alive", True):
             raise ValueError("你已经有道侣")
         npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, "结为道侣")
@@ -487,6 +491,8 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
     friend = next((row for row in player.dao_friends if row.get("id") == npc_id), None)
     rng = decode_rng(game.seed, game.rng_state)
     if action == "befriend":
+        from ...person_assignments import require_unassigned
+        require_unassigned(game, npc_id)
         if friend:
             raise ValueError("此人已经是你的道友")
         npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, "结为道友")
@@ -637,6 +643,9 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
 
 def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    if action == 'invite':
+        from ...person_assignments import require_unassigned
+        require_unassigned(game, npc_id)
     from ...relationship_records import find_person
     if action != 'leave':
         require_access(game, find_person(game, npc_id))

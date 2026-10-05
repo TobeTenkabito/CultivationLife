@@ -3,14 +3,16 @@ from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
-from . import mirror, ruins, omens
-from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS
+from . import mirror, ruins, omens, visits, missions
+from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS, VISIT_ACTIONS
 
 LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
           'attune': '登记本地参悟', 'maintain': '维护观测节点', 'correspond': '协作校订旧录', 'resume': '继续任务', 'cancel': '取消任务'}
 LABELS.update(mirror.LABELS)
 LABELS.update(ruins.LABELS)
 LABELS.update(omens.LABELS)
+LABELS.update(visits.LABELS)
+LABELS.update(missions.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -20,6 +22,10 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if missions.handles(runtime, action, target_id):
+        return missions.quote(deps, game, action, target_id, options)
+    if visits.handles(runtime, action, target_id):
+        return visits.quote(deps, game, action, target_id, options)
     if omens.handles(runtime, action, target_id):
         return omens.quote(deps, game, action, target_id, options)
     if ruins.handles(runtime, action, target_id):
@@ -124,6 +130,10 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
+    if task['action'] == 'mission_wait':
+        return missions.wait_reason(deps, game)
+    if task['action'] in VISIT_ACTIONS:
+        return visits.task_reason(deps, game, task)
     if task.get('target_id') in OMEN_IDS:
         return omens.task_reason(deps, game, task)
     if task.get('target_id') == RUINS_ID:
@@ -144,6 +154,8 @@ def task_reason(deps, game, task):
 
 
 def cancel(deps, game, task, *, failed=False, reason='主动取消'):
+    if task['action'] in VISIT_ACTIONS:
+        return visits.cancel(deps, game, task, failed=failed, reason=reason)
     deps.refund_resources(game, task['escrow'])
     if task.get('project_reward', 0):
         get_echo(game.heavens_state['runtime'], task.get('target_id', 'sea_echo'))['project_stones'] += task['project_reward']
@@ -156,8 +168,21 @@ def reconcile(deps, game):
     runtime = game.heavens_state.get('runtime')
     if not runtime:
         return
+    if not game.player.alive:
+        for echo in contacts(runtime):
+            visit = echo.get('visit')
+            if visit and visit['status'] in {'preparing', 'visiting'}:
+                deps.grant_stones(game, visit['return_fare'])
+                visit.update(status='failed', return_fare=0)
     task = active_task(runtime)
     if task:
+        if task['action'] == 'mission_wait':
+            if not game.player.alive:
+                cancel(deps, game, task, failed=True, reason='此生已结束')
+            return
+        if task['action'] in VISIT_ACTIONS:
+            visits.reconcile(deps, game, task)
+            return
         # Pending events pause a task; they do not cancel its escrow.
         if task.get('target_id') in OMEN_IDS:
             saved = omens.get(game, task['target_id'])
@@ -181,6 +206,12 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if missions.handles(runtime, action, target_id):
+        return missions.execute(deps, game, action, target_id, options, proposal,
+            run_task=run_segment, cancel_task=cancel, task_result=result)
+    if visits.handles(runtime, action, target_id):
+        return visits.execute(deps, game, action, target_id, options, proposal,
+                              run_task=run_segment, task_result=result)
     if omens.handles(runtime, action, target_id):
         return omens.execute(deps, game, action, target_id, options, proposal,
                              cancel_task=cancel, run_task=run_segment, task_result=result)
@@ -271,6 +302,23 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
+    if task['action'] == 'mission_wait':
+        if task['status'] != 'failed':
+            task['status'] = 'completed' if task['progress'] == task['duration'] else 'paused'
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        return
+    if task['action'] in VISIT_ACTIONS:
+        # Crossing occurs only after both real time and unit settlement succeed.
+        # A final-year event or changed route keeps the paid task resumable.
+        if task['status'] != 'failed':
+            if task['progress'] == task['duration'] and not visits.task_reason(deps, game, task):
+                visits.complete(deps, game, task, rng)
+            else:
+                task['status'] = 'paused'
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        return
     physical_reason = (deps.read_omen_facts(game, task['target_id'])['physical_reason'] if task.get('target_id') in OMEN_IDS
                        else deps.read_ruins_facts(game)['physical_reason'] if task.get('target_id') == RUINS_ID
                        else deps.read_mirror_facts(game)['physical_reason'] if task.get('target_id') == MIRROR_ID

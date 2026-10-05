@@ -6,8 +6,12 @@ MIRROR_ID = 'mirror_field'
 MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mirror_decipher', 'mirror_isolate', 'mirror_assault'})
 RUINS_ID = 'causal_ruins'
 RUINS_ACTIONS = frozenset('ruins_' + name for name in ('enter', 'leave', 'observe', 'verify', 'read', 'take', 'replace', 'erase', 'contact', 'return'))
+VISIT_ACTIONS = frozenset({'visit_depart', 'visit_study', 'visit_return'})
+MISSION_ACTIONS = frozenset({'mission_start', 'mission_recall', 'mission_wait'})
+VISIT_DESTINATIONS = {'sea_echo': 'reincarnation_echo', 'asura_echo': 'sea_echo',
+                      'nether_echo': 'asura_echo', 'reincarnation_echo': 'nether_echo'}
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,7 +198,7 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-omens'
+    milestone: str = 'M2-researchers'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES

@@ -151,6 +151,31 @@ def test_heavens_commands_use_isolated_formal_entry(environment):
     assert (engine.store.directory / f'{gid}.json').read_bytes() == source
 
 
+def test_heavens_visit_console_uses_real_route_in_isolated_save(environment):
+    from cultivation_life.rules import add_item, max_hp, max_mp
+    from cultivation_life.system.heavens.state import create_echo
+    engine, manager, _, gid = environment
+    game = engine.store.load(gid)
+    p = game.player
+    p.world, p.location_id, p.realm_index = 'celestial', 'law_sea', 9
+    p.immortal_power_converted, p.lifespan = True, None
+    p.hp, p.mp = max_hp(p), max_mp(p)
+    p.next_tribulation_age = 999999
+    game.settings['silent_events'] = True
+    add_item(p, 'spirit_stone', 10000)
+    echo = create_echo(engine._dependencies.heavens, game)
+    echo.update(history_checked=True, exchanged=True, correspondence_completed=True)
+    engine.store.save(game)
+    source = engine.store._path(gid).read_bytes()
+    sid = manager.start(gid)['session_id']
+    quote = manager.execute("heavens preview visit_depart '{}' sea_echo", session_id=sid)['data']
+    assert quote['years'] == 2 and quote['costs']['stones'] == 4000
+    manager.execute(f"heavens command 1 {quote['revision']} visit_depart '{{}}' sea_echo", session_id=sid)
+    saved = manager.load(sid)['current']['game']
+    assert saved['player']['world'] == 'reincarnation' and saved['player']['location_id'] == 'karma_city'
+    assert engine.store._path(gid).read_bytes() == source
+
+
 def test_market_inventory_equipment_settings_and_field_workflow(environment):
     engine, manager, sid, _ = environment
     source = {p.name: p.read_bytes() for p in engine.store.directory.glob('*.json')}
