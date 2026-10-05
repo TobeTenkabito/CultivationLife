@@ -8,10 +8,10 @@ from ...relationship_records import find_person
 from ...spatial_people import instance_of
 from ...rules import max_mp, add_item, remove_item, can_player_practice_technique
 from ...system.aperture_resources import true_realm
-from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition, ContactSite, CONTACT_SITES, MirrorDefinition, MIRROR_ID, RuinsDefinition, RUINS_ID
+from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition, ContactSite, CONTACT_SITES, MirrorDefinition, MIRROR_ID, RuinsDefinition, RUINS_ID, OmenDefinition, OMENS
 from ...system.heavens.state import current_site, site_for, contacts, echo_site
 from ...system.heavens.dependencies import HeavensDependencies
-from ...system.heavens import tasks
+from ...system.heavens import tasks, omens
 from ...system.combat.npc_lifecycle import initialize_native
 from ...time_flow import advance_elapsed_year, settle_elapsed_time, ACTION_TIME
 from ...system.upper_institutions import advance_time
@@ -27,6 +27,7 @@ def bind_heavens(engine) -> HeavensDependencies:
             sea_echo=SeaEchoDefinition(**config.get('sea_echo', {})),
             mirror=MirrorDefinition(**config.get('mirror', {})),
             ruins=RuinsDefinition(**config.get('ruins', {})),
+            omens=tuple(OmenDefinition(**row) for row in config['omens']) if 'omens' in config else OMENS,
             contact_sites=tuple(ContactSite(**row) for row in config['contact_sites']) if 'contact_sites' in config else CONTACT_SITES)
 
     def read_actor_facts(game, target_id=None):
@@ -54,6 +55,21 @@ def bind_heavens(engine) -> HeavensDependencies:
                 and can_player_practice_technique(p, p.technique.element),
             true_realm=true_realm(p), stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
             mp=p.mp, max_mp=max_mp(p))
+
+    def read_omen_facts(game, target_id):
+        p = game.player
+        desc = omens.definition(ports, game, target_id)
+        assembly = game.buddhist_state.get('assembly')
+        reason = None
+        if not p.alive:
+            reason = '此生已经结束'
+        elif (p.imprisonment or p.ghost_captor or game.active_trial or game.guixu_state.get('player_session')
+              or assembly and assembly.get('world') == p.world and assembly.get('location') == p.location_id):
+            reason = '请先结束拘禁、劫战或专属活动'
+        elif not desc or p.world != desc['world'] or p.location_id != desc['location_id'] or game.spatial_state.get('current'):
+            reason = '须亲自回到征兆出现的本界地点'
+        return dict(alive=p.alive, physical_reason=reason, can_discover=reason is None,
+                    blocked_reason=reason or ('请先处理当前事件' if game.pending_event else None), true_realm=true_realm(p))
 
     def create_visitor(game, identity, site):
         if find_person(game, identity, include_inactive=True) is not None:
@@ -144,6 +160,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         accept_committed=accept_committed,
         invalidate_game=invalidate_game,
         read_actor_facts=read_actor_facts,
+        read_omen_facts=read_omen_facts,
         create_visitor=create_visitor,
         resolve_person=lambda game, identity: find_person(game, identity, include_inactive=True),
         person_available=person_available,

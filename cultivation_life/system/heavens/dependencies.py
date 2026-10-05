@@ -38,3 +38,4 @@ class HeavensDependencies:
     enter_ruins: Callable | None = None
     leave_ruins: Callable | None = None
     fight_ruins: Callable | None = None
+    read_omen_facts: Callable | None = None

@@ -48,8 +48,13 @@ def main():
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     page.locator('[data-panel-target=heavens]').click()
+                    page.get_by_role('tab',name='异象',exact=True).click()
+                    page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     area = page.locator('[data-ruins=field]')
                     def propose(label):
+                        section = ('阵芯' if label in {'直接取走阵芯','替换后取芯','归还并安装阵芯'} else '痕迹' if label=='清理未读残留' else '调查')
+                        tab = page.get_by_role('tab',name=section,exact=True)
+                        if tab.count(): tab.click()
                         before = engine.store._path(key).read_bytes()
                         area.get_by_role('button', name=label, exact=True).click()
                         page.locator('#game-confirm-backdrop:not(.hidden)').wait_for()
@@ -84,7 +89,7 @@ def main():
                     page.wait_for_function('seq=>!busy && game.heavens.next_command_seq===seq', arg=seq)
                     assert engine.store._path(key).read_bytes() == snapshot
                     assert '由你持有' in area.inner_text() and '替代部件维持回响' in area.inner_text()
-                    assert area.get_by_role('button', name='直接取走阵芯', exact=True).is_disabled()
+                    assert area.get_by_role('button', name='直接取走阵芯', exact=True).count() == 0
                     page.wait_for_function("!document.querySelector('#toast').classList.contains('show')")
                     for theme in 'abcdef':
                         page.locator('#theme-open').click()
@@ -98,10 +103,14 @@ def main():
                             assert page.locator('#heavens-content').evaluate('(el)=>el.scrollWidth<=el.clientWidth+1'), (theme,width)
                             page.screenshot(path=str(output/f'{theme}-{width}.png'))
                         page.set_viewport_size({'width':1440,'height':1050})
+                    page.set_viewport_size({'width':393,'height':852})
                     for label in ('归还并安装阵芯', '追查回响接触点', '清理未读残留'):
                         propose(label)
                         commit()
-                    assert '已归还阵眼' in area.inner_text() and '赤髓城' in area.inner_text()
+                    page.get_by_role('tab',name='阵芯',exact=True).click()
+                    assert '已归还阵眼' in area.inner_text()
+                    page.get_by_role('tab',name='调查',exact=True).click()
+                    assert '赤髓城' in area.inner_text()
                     assert engine.store.load(key).heavens_state['runtime']['ruins']['sent_records']
                     snapshot = copy.deepcopy(engine.store.load(key).heavens_state['runtime']['ruins'])
                     for label in ('退出因果遗址', '进入因果遗址'):
@@ -111,8 +120,10 @@ def main():
                     # A separate physical character verifies the destructive choice and recovery UI.
                     key = create(5)
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    if not area.is_visible():
+                    if not page.locator('#heavens-card').is_visible():
                         page.locator('[data-panel-target=heavens]').click()
+                    page.get_by_role('tab',name='异象',exact=True).click()
+                    page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     for label in ('进入因果遗址', '观察阵纹', '查证两端关联'):
                         propose(label)
                         commit()
@@ -122,6 +133,7 @@ def main():
                     assert engine.store.load(key).last_combat_report['result'] == 'victory'
                     page.locator('#battle-report-card button').filter(has_text='关闭').click()
                     assert '阵眼失效' in area.inner_text()
+                    page.get_by_role('tab',name='调查',exact=True).click()
                     assert area.get_by_role('button', name='追查回响接触点', exact=True).is_disabled()
                     for label in ('归还并安装阵芯', '追查回响接触点', '退出因果遗址'):
                         propose(label)

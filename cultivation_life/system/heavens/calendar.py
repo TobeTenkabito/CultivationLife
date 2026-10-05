@@ -1,6 +1,6 @@
 """One explicit hook after the existing ordinary or isolated world year."""
 from dataclasses import dataclass
-from . import ruins
+from . import ruins, omens
 from hashlib import sha256
 
 from .state import create_echo, phase, record, visible_notice, contacts, echo_site, current_site, get_echo
@@ -44,11 +44,13 @@ def year_step(deps, game, context: YearContext):
     if window <= runtime['last_discovery_window']:
         return
     runtime['last_discovery_window'] = window
-    if not state['generation_enabled'] or not deps.get_definitions().generation_available:
+    if not state['generation_enabled'] or not deps.get_definitions().generation_available or len(runtime['notifications']) >= 3:
         return
     facts = deps.read_actor_facts(game)
     site = current_site(deps, game)
-    if not facts['can_discover'] or site is None or get_echo(runtime, site.id) is not None:
+    local_omens = omens.candidates(deps, game)
+    can_echo = facts['can_discover'] and site is not None and get_echo(runtime, site.id) is None
+    if not can_echo and not local_omens:
         return
     # Counter-based SHA-256 stream, independent of all old RNG consumers.
     counter = runtime['rng_counter']
@@ -56,6 +58,9 @@ def year_step(deps, game, context: YearContext):
     runtime['rng_counter'] += 1
     draw = int.from_bytes(raw[:8], 'big') / 2**64
     if draw < PARTICIPATION[min(12, facts['true_realm'])]:
+        if not can_echo:
+            omens.discover(deps, game, local_omens[int.from_bytes(raw[8:16], 'big') % len(local_omens)])
+            return
         create_echo(deps, game, site.id)
         visible_notice(game, f'{site.name}出现可求证的线索，可留在本地体察或继续原有修行。', site.id)
 
