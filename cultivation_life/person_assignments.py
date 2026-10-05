@@ -4,7 +4,7 @@
 def research_assignments(game):
     runtime = game.heavens_state.get('runtime') or {}
     rows = ([runtime['sea_echo']] if runtime.get('sea_echo') else []) + list(runtime.get('contacts', {}).values())
-    return [(echo, echo['mission']) for echo in rows if echo.get('mission')]
+    return [(echo, echo[key]) for echo in rows for key in ('mission', 'freight') if echo.get(key)]
 
 
 def research_assignment(game, identity):

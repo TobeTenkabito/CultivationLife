@@ -36,7 +36,7 @@
       const costs=quote.costs||{},refund=quote.refundable||{};
       const text=[`耗时 ${quote.years||0} 年；不会获得普通修炼机缘。`,
         costs.stones?`托管 ${costs.stones.toLocaleString()} 灵石，按实际进度支出。`:'',
-        costs.material_id?(quote.material_consumed?'开始施工即消耗所选阵材，取消不退还。':'托管所选阵材，完成时消耗；取消退还未耗阵材。'):'',
+        costs.material_id&&action!=='freight_start'?(quote.material_consumed?'开始施工即消耗所选阵材，取消不退还。':'托管所选阵材，完成时消耗；取消退还未耗阵材。'):'',
         costs.mp?`立即消耗 ${costs.mp.toLocaleString()} 法力，不退还。`:'',
         refund.stones!=null?`可退还 ${refund.stones.toLocaleString()} 灵石。`:'',
         quote.reward_stones?`完成后获 ${quote.reward_stones.toLocaleString()} 灵石；从合作项目现有资金预留，取消或失败退回项目。每份旧录仅履约一次。`:'',
@@ -100,8 +100,8 @@
       const costs=[];if(row.years!=null)costs.push(`${row.years} 年`);if(row.costs?.stones)costs.push(`${amount(row.costs.stones)} 灵石`);if(row.costs?.mp)costs.push(`${amount(row.costs.mp)} 法力`);if(row.material_consumed)costs.push('消耗一件阵材');
       info.append(node('h4',row.label),node('small',row.enabled?costs.join(' · '):row.reason));
       if(row.reward_stones)info.append(node('small',`履约酬劳 ${amount(row.reward_stones)} 灵石`));
-      if(['maintain','mirror_isolate','ruins_replace'].includes(row.action)&&materials.length){
-        const select=node('select');select.setAttribute('aria-label',row.action==='maintain'?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
+      if(['maintain','mirror_isolate','ruins_replace','freight_start'].includes(row.action)&&materials.length){
+        const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':row.action==='maintain'?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
@@ -163,15 +163,16 @@
       for(const site of h.sites)tile(list,{name:site.name,description:site.world_name,status:site.current?'当前界面':site.known?'已有档案':'尚未登记',glyph:({celestial:'仙',asura:'修',nether:'幽',reincarnation:'轮'})[site.world],onClick:()=>openTarget(site.id)});
       host.append(list);return;
     }
-    back(host,'返回诸界','worlds');title(host,selected.name,ui.section==='mission'?'同道回访 · 本人出行，循约返乡':ui.section==='visit'?'个人访学 · 往返许可与现场对照':`${selected.world_name} · 亲自参与需抵达当地，并具备未压制的九阶以上修为。`);
+    back(host,'返回诸界','worlds');title(host,selected.name,ui.section==='freight'?'物资委托 · 实物交接，循路承运':ui.section==='mission'?'同道回访 · 本人出行，循约返乡':ui.section==='visit'?'个人访学 · 往返许可与现场对照':`${selected.world_name} · 亲自参与需抵达当地，并具备未压制的九阶以上修为。`);
     if(h.target_id!==selected.id){
       if(loadError){host.append(node('p',loadError),button('重新读取档案',()=>{loadError=null;selectSite(selected.id);render(current,ctx);}));}
       else {const p=node('p','正在读取联系档案…');p.setAttribute('role','status');host.append(p);if(!loadingKey)selectSite(selected.id);}
       return;
     }
     const e=h.echo;
-    if(e&&!['visit','mission'].includes(ui.section)){const facts=node('div',null,'heavens-facts');facts.append(badge(e.remaining?`第 ${e.cycle+1} 周期 · 余 ${e.remaining} 年`:`下周期尚需 ${e.next_cycle_in} 年`),badge(`${e.evidence.length} 份求证记录`));host.append(facts);}
-    subview(host,[['research','求证'],['cooperate','往来'],['visit','访学'],['mission','同道'],['practice','参悟']],'research',(body,section)=>{
+    if(e&&!['visit','mission','freight'].includes(ui.section)){const facts=node('div',null,'heavens-facts');facts.append(badge(e.remaining?`第 ${e.cycle+1} 周期 · 余 ${e.remaining} 年`:`下周期尚需 ${e.next_cycle_in} 年`),badge(`${e.evidence.length} 份求证记录`));host.append(facts);}
+    subview(host,[['research','求证'],['cooperate','往来'],['visit','访学'],['mission','同道'],['freight','运材'],['practice','参悟']],'research',(body,section)=>{
+      if(section==='freight'){renderFreight(body,h.freight);return;}
       if(section==='mission'){renderMission(body,h.mission);return;}
       if(section==='visit'){
         const v=h.visit;
@@ -205,6 +206,25 @@
       renderActions(body,(h.actions||[]).filter(row=>allowed.includes(row.action)),h.materials||[]);
       if(section==='practice'&&h.registered_application?.target_id===selected.id)renderApplication(body,h.registered_application);
     });
+  }
+  function renderFreight(host,f) {
+    if(!f){empty(host,'尚无物资委托','先与当地人物建立合作。');return;}
+    host.append(node('h4',`${f.name} · 承运`),node('p',`交货地点：${f.destination_name}`));
+    if(f.status==='unavailable'){
+      host.append(node('p','同道完成研读并返乡后，可委托运送一件本界九阶普通阵材。每处联系仅接收一次，使用背包中的原物资。'));
+      const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','运材路线');
+      for(const text of ['去程 · 2 年','抵达交货','返乡 · 2 年'])route.append(node('li',text));
+      host.append(route,node('p','这是研究供材捐赠，交货后原物资归当地项目。项目预留 4,000 往返路费及 3,000 定额补贴；补贴并非市价收购款，交货后在出发地领取。'));
+    }else{
+      const owners={carrier:'承运人携带',destination:'目的地研究库存',depot:'出发地托存，待领取',player:'已经取回',lost:'随承运人遗失'};
+      host.append(node('p',f.material.name||f.material.material_id,'heavens-visit-finding'),badge(owners[f.cargo_owner]));
+      host.append(node('p',`${f.phase==='outbound'?'去程':'返程'} ${f.progress} / 2 年 · ${{active:'进行中',completed:'已返乡',cancelled:'已撤销',failed:'已终止'}[f.status]}`));
+      host.append(node('small',`路费已耗 ${amount(f.spent)} · 尚存经费 ${amount(f.remaining)} · 退回项目 ${amount(f.refunded)} 灵石`));
+      if(f.delivered)host.append(node('p',f.claimed?'3,000 灵石供材报酬已领取。':'已交货：3,000 灵石供材报酬待在出发地领取。'));
+      if(f.blocked_reason)host.append(node('p',f.blocked_reason,'heavens-visit-finding'));
+    }
+    if(f.status==='unavailable'||f.status==='active')host.append(node('small','普通世界年度推进行程，独立空间冻结。陨落时未交物资遗失；交货后不可撤回。'));
+    renderActions(host,f.actions.filter(a=>f.status==='unavailable'?a.action==='freight_start':a.action==='mission_wait'||a.action==='freight_cancel'&&f.status==='active'&&f.phase==='outbound'||a.action==='freight_collect'&&(f.cargo_owner==='depot'||f.reward_available)),f.materials);
   }
   function renderMission(host,m) {
     if(!m){empty(host,'尚无回访约定','先与当地人物建立合作。');return;}
@@ -276,7 +296,14 @@
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
   function renderJourney(host,h) {
     title(host,'行程与纪要','查看亲自参与的事务，回顾已有认识。');
-    subview(host,[['active','进行中'],['people','同道'],['history','纪要']],'active',(body,section)=>{
+    subview(host,[['active','进行中'],['people','同道'],['cargo','货运'],['history','纪要']],'active',(body,section)=>{
+      if(section==='cargo'){
+        const rows=h.freights||[];
+        if(!rows.length){empty(body,'尚无货运委托','同道完成回访后，可在原联系的“运材”页登记一件阵材。');return;}
+        const list=node('div',null,'heavens-directory');
+        for(const f of rows)tile(list,{name:f.name+'的运材委托',description:f.destination_name,status:f.delivered?'已交货':f.status==='active'?'在途':'已结束',glyph:'运',onClick:()=>{openTarget(f.target_id);ui.section='freight';render(current,ctx);}});
+        body.append(list);return;
+      }
       if(section==='people'){
         const rows=h.missions||[];
         if(!rows.length){empty(body,'尚无同道行程','亲自完成一次跨界研读后，可在原联系的“同道”页约请回访。');return;}

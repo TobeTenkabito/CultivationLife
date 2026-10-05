@@ -3957,7 +3957,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:reincarnation:celestial",
@@ -3967,7 +3968,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:asura:celestial",
@@ -3977,7 +3979,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:celestial:asura",
@@ -3987,7 +3990,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:nether:asura",
@@ -3997,7 +4001,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:asura:nether",
@@ -4007,7 +4012,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:reincarnation:nether",
@@ -4017,7 +4023,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "study:nether:reincarnation",
@@ -4027,7 +4034,8 @@
         "enabled": true,
         "capacity": 1,
         "purpose": "personal_study",
-        "research_visitors": true
+        "research_visitors": true,
+        "civilian_material_capacity": 1
       },
       {
         "id": "sealed_descent:spirit:human",

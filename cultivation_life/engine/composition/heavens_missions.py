@@ -1,20 +1,20 @@
 """Civilian researcher facts and movement; no alternate NPC registry or year."""
 from ...content_registry import WORLD_SYSTEMS
 from ...npc_custody import is_free
-from ...person_assignments import route_occupied
+from ...person_assignments import route_occupied, research_assignments
 from ...spatial_people import instance_of
 from ...system.combat.npc_lifecycle import move_world
 from ...system.heavens.definitions import VISIT_DESTINATIONS
 from ...system.heavens.state import get_echo, site_for
-from ...system.heavens import missions
+from ...system.heavens import missions, freight
 
 
 def bind_missions(engine, ports):
-    def facts(game, target, *, check_route=True):
+    def facts(game, target, *, check_route=True, assignment="mission"):
         deps = ports()
         echo = get_echo(game.heavens_state.get('runtime'), target)
         npc = deps.resolve_person(game, echo['visitor_id']) if echo else None
-        mission = echo.get('mission') if echo else None
+        mission = echo.get(assignment) if echo else None
         phase = mission['phase'] if mission else 'outbound'
         origin, destination = site_for(deps, game, target), site_for(deps, game, VISIT_DESTINATIONS[target])
         local = origin if phase == 'outbound' else destination
@@ -45,6 +45,7 @@ def bind_missions(engine, ports):
                     or route.get('capacity') != 1 or route.get('purpose') != 'personal_study'
                     or route.get('mode') != 'study' or route.get('source') != local.world
                     or route.get('destination') != remote.world
+                    or assignment == 'freight' and route.get('civilian_material_capacity') != 1
                     or not WORLD_SYSTEMS['world_profiles'][remote.world]['enabled']):
                 reason = '约定研究人员通道尚不可用'
             elif route_occupied(game, local.world, remote.world, exclude=npc.id):
@@ -54,14 +55,14 @@ def bind_missions(engine, ports):
         return dict(alive=bool(npc and npc.alive), blocked_reason=reason,
                     world=npc.world if npc else None, location_id=npc.location_id if npc else None)
 
-    def move(game, target, phase):
+    def move(game, target, phase, *, assignment="mission"):
         deps = ports()
         echo = get_echo(game.heavens_state['runtime'], target)
-        mission = echo['mission']
+        mission = echo[assignment]
         if (mission['status'] != 'active' or mission['phase'] != phase
                 or phase not in {'outbound', 'returning'} or mission['progress'] != 2):
             raise ValueError('研究人员尚未完成实际通行时间')
-        reason = facts(game, target)['blocked_reason']
+        reason = facts(game, target, assignment=assignment)['blocked_reason']
         if reason:
             raise ValueError(reason)
         destination = site_for(deps, game, mission['destination'] if phase == 'outbound' else target)
@@ -69,5 +70,12 @@ def bind_missions(engine, ports):
         move_world(npc, destination.world, game.player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
         npc.location_id = destination.location_id
 
-    return dict(read_mission_facts=facts, move_researcher=move,
-                advance_researchers=lambda game: missions.year_step(ports(), game))
+    def advance(game):
+        missions.year_step(ports(), game)
+        runtime = game.heavens_state.get('runtime')
+        if runtime:
+            for echo, row in research_assignments(game):
+                if row is echo.get('freight'):
+                    freight.year_step(ports(), game, echo, row, runtime['processed_years']+1)
+
+    return dict(read_mission_facts=facts, move_researcher=move, advance_researchers=advance)

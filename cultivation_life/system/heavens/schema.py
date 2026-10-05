@@ -10,7 +10,7 @@ import re
 import math
 from typing import Any
 from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition, OMEN_IDS, validate_omen_definition
-from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS
+from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS, FREIGHT_ACTIONS
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -93,7 +93,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -140,6 +140,8 @@ def validate_runtime(runtime):
         validate_echo(echo)
         if 'mission' in echo:
             validate_mission(echo, runtime)
+        if 'freight' in echo:
+            validate_freight(echo, runtime)
         by_id[echo['id']] = echo
     if sum(echo['application'] is not None for echo in echoes) > 1:
         raise ValueError('只能同时登记一项诸天参悟')
@@ -294,8 +296,45 @@ def validate_runtime(runtime):
             validate_visit(echo, runtime)
     if sum(echo.get('visit', {}).get('status') in {'preparing', 'visiting'} for echo in echoes) > 1:
         raise ValueError('只能持有一项未结束的个人访学')
-    if sum(echo.get('mission', {}).get('status') == 'active' for echo in echoes) > 1:
+    if sum(echo.get(key, {}).get('status') == 'active' for echo in echoes for key in ('mission', 'freight')) > 1:
         raise ValueError('只能同时安排一项同道回访')
+
+
+def validate_freight(echo, runtime):
+    row = echo['freight']
+    keys = {'destination', 'status', 'phase', 'progress', 'elapsed', 'spent', 'refunded', 'started_at',
+            'last_year', 'material', 'cargo_owner', 'delivered', 'claimed'}
+    prior = echo.get('mission', {})
+    if (type(row) is not dict or set(row) != keys or prior.get('status') != 'completed' or not prior.get('studied')
+            or row['destination'] != VISIT_DESTINATIONS[echo['id']]
+            or not isinstance(row['status'], str) or row['status'] not in {'active', 'completed', 'cancelled', 'failed'}
+            or not isinstance(row['phase'], str) or row['phase'] not in {'outbound', 'returning'}
+            or type(row['delivered']) is not bool or type(row['claimed']) is not bool
+            or not isinstance(row['cargo_owner'], str) or row['cargo_owner'] not in {'carrier', 'destination', 'depot', 'player', 'lost'}):
+        raise ValueError('运材委托字段或许可无效')
+    for key in ('progress', 'elapsed', 'spent', 'refunded', 'started_at', 'last_year'):
+        if type(row[key]) is not int or row[key] < 0:
+            raise ValueError('运材委托账目或年号无效')
+    material = row['material']
+    if (type(material) is not dict or any(not isinstance(material.get(key), str) or not material[key] for key in ('id', 'material_id'))
+            or material.get('dynamic_definition') or material.get('acquired_tier', 9) != 9):
+        raise ValueError('运材委托缺少原九阶普通阵材实例')
+    delivered = row['phase'] == 'returning'
+    elapsed = row['progress']+(2 if delivered else 0)
+    expected_owner = ('destination' if delivered else 'carrier' if row['status'] == 'active'
+                      else 'lost' if row['status'] == 'failed' else None)
+    if (not prior['last_year'] <= row['started_at'] <= row['last_year'] <= runtime['processed_years']
+            or row['elapsed'] != elapsed or elapsed > row['last_year']-row['started_at']
+            or row['progress'] > 2 or row['progress'] == 2 and row['status'] != 'completed'
+            or row['spent'] != elapsed*1000 or row['delivered'] != delivered or row['claimed'] and not delivered
+            or row['status'] == 'completed' and (not delivered or row['progress'] != 2)
+            or row['status'] == 'cancelled' and (delivered or row['cargo_owner'] not in {'depot', 'player'})
+            or expected_owner and row['cargo_owner'] != expected_owner
+            or row['status'] == 'active' and row['refunded'] != 0
+            or row['spent']+row['refunded']+(3000 if delivered else 0) > 7000
+            or row['status'] != 'active' and row['spent']+row['refunded']+(3000 if delivered else 0) != 7000):
+        raise ValueError('运材委托进度、物权或经费不守恒')
+
 
 
 def validate_mission(echo, runtime):
@@ -366,7 +405,7 @@ def validate_echo(echo):
         'cycle', 'observed_cycle', 'history_checked', 'exchanged', 'maintained',
         'maintenance_started', 'applications_used', 'reward_base', 'reward_claimed',
         'application', 'project_stones'}
-    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed', 'visit', 'mission'} != keys or echo['id'] not in SITE_IDS:
+    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed', 'visit', 'mission', 'freight'} != keys or echo['id'] not in SITE_IDS:
         raise ValueError('诸天实例字段无效')
     if 'visit' in echo:
         visit = echo['visit']
@@ -602,6 +641,8 @@ def validate_references(game):
     if len(set(visitors)) != len(visitors) or any(identity not in people for identity in visitors):
         raise ValueError('诸天合作人物引用已损坏，保留原档')
     held = [task['escrow']['material']['id'] for task in runtime['tasks'] if task['escrow']['material']]
+    held.extend(echo['freight']['material']['id'] for echo in runtime_contacts(runtime)
+                if echo.get('freight') and echo['freight']['cargo_owner'] != 'player')
     inventory = {row['id'] for row in game.player.formation_materials}
     if len(set(held)) != len(held) or inventory.intersection(held):
         raise ValueError('法则天海阵材出现重复所有权')
