@@ -101,7 +101,10 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             gain *= float(WORLD_SYSTEMS["demonic_cultivation"]["natural_cultivation_multiplier"])
         if player.world == "celestial" and deps._court_law_active(game, "immortal_twofold"):
             gain *= 1.10
-        deps._add_opportunity(player, gain)
+        if deps.heavens_activity_gain:
+            gain = deps.heavens_activity_gain(game, gain, action)
+        else:
+            deps._add_opportunity(player, gain)
         total_gain += gain
         if action == "sense_train":
             sense_gain = deps._sense_training_step(player)
@@ -145,6 +148,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             if action == "rest" and player.heart_demon > 0:
                 player.heart_demon = max(0.0, player.heart_demon - 0.5)
         if not advance_elapsed_year(deps.year, game, rng, era_news):
+            break
+        if (elapsed_index + 1) % time_unit == 0 and deps.heavens_take_pause and deps.heavens_take_pause(game):
+            era_news.append('已完成当前时间单位，停下查看诸天联系。')
             break
         if action == 'treasure' and (elapsed_index + 1) % time_unit == 0:
             # Selecting the reward is a manual event. Stop this batch before

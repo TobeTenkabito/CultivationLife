@@ -51,6 +51,7 @@ from .presentation import world as world_view
 from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 from .transactions import serialized_commands
+from ..system.heavens import operations as heavens_operations
 from ..system.court import state as court_state
 from ..system.court import governance as court_governance
 from ..system.court import lifecycle as court_lifecycle
@@ -192,10 +193,17 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
 
     def _advance_world_year(self, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool=True) -> bool:
         from ..system import spatial
+        from ..system.heavens.calendar import YearContext, year_step
+        runtime = game.heavens_state.get('runtime')
+        context = YearContext(runtime['last_year_key'] + 1) if runtime else None
         spatial.tick(game, rng, self.maps)
         if game.player.world in spatial.SPECIAL_WORLDS:
-            return world_time.advance_spatial_year(self._dependencies.time.world_year, game, rng)
-        return world_time._advance_world_year(self._dependencies.time.world_year, game, rng, era_news, encounters=encounters)
+            result = world_time.advance_spatial_year(self._dependencies.time.world_year, game, rng)
+        else:
+            result = world_time._advance_world_year(self._dependencies.time.world_year, game, rng, era_news, encounters=encounters)
+        if context:
+            year_step(self._dependencies.heavens, game, context)
+        return result
 
     def travel_map(self, game_id: str, destination: str) -> dict[str, Any]:
         return map_travel.travel_map(self._dependencies.time.travel, game_id, destination)
@@ -747,6 +755,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         result["buddhist_system"] = self._public_buddhist(game)
         result['spatial'] = spatial.public(game)
         result['talismans'] = talismans.public(game)
+        result['heavens'] = heavens_operations.project(game, 'known', deps=self._dependencies.heavens)
         spatial_limit = spatial.cultivation_block_reason(game)
         if spatial_limit:
             result['breakthrough'].update(ready=False, enabled=False, met=False, reason=spatial_limit)
@@ -777,6 +786,19 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         if games is not None:
             games[game_id] = game
         return game
+
+    def heavens_view(self, game_id: str, view: str = 'known', target_id: str | None = None) -> dict[str, Any]:
+        return heavens_operations.view(self._dependencies.heavens, game_id, view, target_id)
+
+    def heavens_preview(self, game_id: str, action: str, target_id: str | None = None,
+                        options: dict[str, Any] | None = None) -> dict[str, Any]:
+        return heavens_operations.preview(self._dependencies.heavens, game_id, action, target_id, options)
+
+    def heavens_command(self, game_id: str, command_seq: int, expected_revision: int,
+                        action: str, target_id: str | None = None,
+                        options: dict[str, Any] | None = None) -> dict[str, Any]:
+        return heavens_operations.command(self._dependencies.heavens, game_id, command_seq,
+                                           expected_revision, action, target_id, options)
 
     def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male') -> dict[str, Any]:
         return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender)

@@ -17,6 +17,7 @@ LOCAL_SOCIETY_COMMANDS = frozenset({
     'buddhist_action', 'sage_doctrine_action', 'sage_choose_sage', 'sage_toggle_recruitment', 'sage_debate',
 })
 PERSONAL_PANELS = frozenset({
+    'heavens',
     'map', 'inventory', 'talisman', 'settings', 'secret-art', 'formation', 'combat-plan',
     'bloodline', 'relationship', 'world-npc', 'transformation', 'ghost-soul', 'ghost-attachment',
     'captive', 'puppet-workshop', 'crafting', 'spirit-field', 'natal-artifact',

@@ -18,12 +18,12 @@ game.player.prisoners = [game.detain_person({'id': npc.id, 'source': 'combat', '
 assert npc.alive and not is_free(npc) and game.player.dao_friends[0]['alive']
 ENGINE.store.save(game)
 loaded = ENGINE.store.load(game.id)
-assert loaded.version == SAVE_SCHEMA_VERSION == 8
+assert loaded.version == SAVE_SCHEMA_VERSION
 assert loaded.player.prisoners[0].person is loaded.player.dao_friends[0].person
 assert ENGINE._find_npc(loaded, npc.id) is None
 assert loaded.inactive_npcs[npc.id].custody['kind'] == 'prisoner'
 
-# Exercise the actual device's on-disk 6/7 -> 8 path, keeping the original ID.
+# Exercise the actual device's on-disk migration to current schema, preserving ID.
 canonical = loaded.to_dict()
 for version in (6, 7):
     old = copy.deepcopy(canonical)
@@ -37,9 +37,9 @@ for version in (6, 7):
         alive=True, world=npc.world, source='combat', body_training=42, combat_power=1)]
     ENGINE.store._path(game.id).write_text(json.dumps(old), encoding='utf-8')
     migrated = ENGINE.store.load(game.id)
-    assert migrated.version == 8 and migrated.inactive_npcs[npc.id].alive
+    assert migrated.version == SAVE_SCHEMA_VERSION and migrated.inactive_npcs[npc.id].alive
     assert migrated.player.prisoners[0]['body_training'] == 42
-    assert json.loads(ENGINE.store._path(game.id).read_bytes())['version'] == 8
+    assert json.loads(ENGINE.store._path(game.id).read_bytes())['version'] == SAVE_SCHEMA_VERSION
 
 ENGINE.captive_action(game.id, npc.id, 'release')
 released = ENGINE.store.load(game.id)

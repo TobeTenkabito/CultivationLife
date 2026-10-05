@@ -190,6 +190,9 @@ def create_game(
         player.tribulation_power = float(thunder["base_power"])
     created = now_iso()
     game = GameState(str(uuid.uuid4()), actual_seed, player, created, created)
+    if WORLD_SYSTEMS['heavens_framework']['enabled']:
+        from ...system.heavens.state import initialize
+        initialize(game)
     if preset and preset["world"] == "lost":
         from ...system import spatial
         scene = spatial.create_instance(game, rng, "lost")

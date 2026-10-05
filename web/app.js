@@ -30,7 +30,7 @@ async function api(path, options = {}) {
   const response = await fetch(path, {...options, headers: {'Content-Type': 'application/json',
     ...options.headers, ...window.DebugConsole?.headers(path)}});
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || '天机紊乱，请稍后再试');
+  if (!response.ok) {const error=new Error(data.error || '天机紊乱，请稍后再试');error.status=response.status;throw error;}
   return data;
 }
 
@@ -427,6 +427,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.UtilityPanels?.close('heavens');
   invalidateFormationPreview();
   window.TutorialGuide?.reset();
   window.GameThemes?.showStart();
@@ -442,6 +443,13 @@ function showStart() {
 
 function render(data) {
   game = data;
+  window.HeavensPanel?.render(data,{api,toast,confirm:openGameConfirm,busy:()=>busy,
+    refresh:async()=>render(await api(`/api/games/${game.id}`)),command:async(id,payload)=>{
+    if(busy)return;
+    busy=true;document.body.classList.add('busy');renderButtons();
+    try{await api(`/api/games/${id}/heavens-command`,{method:'POST',body:JSON.stringify(payload)});render(await api(`/api/games/${id}`));}
+    finally{busy=false;document.body.classList.remove('busy');renderButtons();}
+  }});
   $('#start-screen').classList.add('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.remove('hidden'); $('#new-game-button').classList.remove('hidden');
   queueAchievementToasts(data.new_achievements || []);
   const p = data.player;

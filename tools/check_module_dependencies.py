@@ -28,6 +28,7 @@ BATTLE_DEPENDENCY_MODULES = BATTLE_FACADES | BATTLE_PROJECTIONS | BATTLE_SHARED
 CONTENT_VALIDATORS = frozenset(f'cultivation_life.{name}' for name in (
     'achievement_definitions', 'event_catalog', 'system.map_definition',
     'system.world_transition_schema', 'system.combat.lifecycle_schema',
+    'system.heavens.schema', 'system.heavens.definitions',
 ))
 CORE_FACADES = frozenset(f'cultivation_life.{name}' for name in (
     'rules', 'achievements', 'event_repository', 'system.map_system',
@@ -41,6 +42,7 @@ CORE_SHARED = frozenset(f'cultivation_life.{name}' for name in (
 ))
 MODEL_FOUNDATIONS = frozenset(f'cultivation_life.{name}' for name in (
     'models', 'ancestry', 'cultivation_coordinates', 'system.combat.migration',
+    'system.heavens.schema', 'system.heavens.definitions',
 ))
 COURT_FACADES = frozenset(f'cultivation_life.system.{name}' for name in (
     'heavenly_court_system', 'court_governance', 'court_lifecycle', 'yaochi_system',
@@ -169,7 +171,15 @@ def violations(edges):
             and target in COURT_FACADES | {'cultivation_life.system.court.wiring'})
         schema_to_runtime = (source == 'cultivation_life.save_schema'
                              and target.startswith('cultivation_life.')
-                             and target not in {'cultivation_life.relationship_schema', 'cultivation_life.npc_custody_schema'})
+                             and target not in {'cultivation_life.relationship_schema', 'cultivation_life.npc_custody_schema',
+                                                'cultivation_life.system.heavens.schema'})
+        heavens_reverse_import = (
+            source in {'cultivation_life.system.heavens.schema', 'cultivation_life.system.heavens.definitions'}
+            and target.startswith('cultivation_life.')
+            and target != 'cultivation_life.system.heavens.definitions'
+            or source.startswith('cultivation_life.system.heavens.')
+            and (target.startswith(('cultivation_life.debug', 'cultivation_life.engine.'))
+                 or target in {'cultivation_life.content_registry', 'cultivation_life.server'}))
         preparation_to_storage = (source.startswith('cultivation_life.engine.persistence.')
                                   and target in {'cultivation_life.storage', 'cultivation_life.save_transfer',
                                                  'cultivation_life.engine', 'cultivation_life.engine.wiring',
@@ -227,6 +237,7 @@ def violations(edges):
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
+                or heavens_reverse_import
                 or three_group_reverse_import or key_flow_reverse_import or time_flow_reverse_import
                 or relationship_storage_reverse_import or debug_reverse_import or debug_bridge_import):
             invalid.append({'source': source, 'target': target, 'line': line})

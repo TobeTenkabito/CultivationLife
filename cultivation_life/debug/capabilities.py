@@ -88,6 +88,18 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('heavens view', 'heavens-view',
+        (S('view', required=False, choices=('known', 'opportunities', 'tasks', 'history')),),
+        lambda e, g, p: e.heavens_view(g, p.get('view', 'known')), preview=True),
+    Capability('heavens preview', 'heavens-preview',
+        (S('action', choices=('configure','observe','check_history','exchange','attune','maintain','resume','cancel','dismiss')),
+         O('options', {'generation_enabled': {'type': 'boolean'}, 'watch': {'type': 'boolean'}, 'pause_on_opportunity': {'type':'boolean'}, 'person_id': STRING, 'material_id': STRING}, required=True), S('target_id', required=False)),
+        lambda e, g, p: e.heavens_preview(g, p['action'], options=p['options'], target_id=p.get('target_id')), preview=True),
+    Capability('heavens command', 'heavens-command',
+        (I('command_seq', 1, required=True), I('expected_revision', required=True),
+         S('action', choices=('configure','observe','check_history','exchange','attune','maintain','resume','cancel','dismiss')),
+         O('options', {'generation_enabled': {'type': 'boolean'}, 'watch': {'type': 'boolean'}, 'pause_on_opportunity': {'type':'boolean'}, 'person_id': STRING, 'material_id': STRING}, required=True), S('target_id', required=False)),
+        lambda e, g, p: e.heavens_command(g, p['command_seq'], p['expected_revision'], p['action'], options=p['options'], target_id=p.get('target_id'))),
     Capability('spatial action', 'spatial-action',
         (S('action', choices=('open','enter','descend','explore','move','join','talk')), S('target_id', required=False)),
         lambda e,g,p: e.spatial_action(g,p['action'],p)),

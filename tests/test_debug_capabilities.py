@@ -138,6 +138,19 @@ def test_game_view_commits_preparation_and_returns_discoverable_ids(environment)
     assert (engine.store.directory / f'{gid}.json').read_bytes() == before
 
 
+def test_heavens_commands_use_isolated_formal_entry(environment):
+    engine, manager, sid, gid = environment
+    source = (engine.store.directory / f'{gid}.json').read_bytes()
+    command = 'heavens command 1 0 configure \'{"watch":false}\''
+    manager.execute(command, session_id=sid)
+    saved = copy.deepcopy(manager.load(sid)['current']['game'])
+    manager.execute(command, session_id=sid)
+    assert manager.load(sid)['current']['game'] == saved
+    result = manager.execute('heavens view known', session_id=sid)['data']
+    assert result['next_command_seq'] == 2 and result['watch'] is False
+    assert (engine.store.directory / f'{gid}.json').read_bytes() == source
+
+
 def test_market_inventory_equipment_settings_and_field_workflow(environment):
     engine, manager, sid, _ = environment
     source = {p.name: p.read_bytes() for p in engine.store.directory.glob('*.json')}

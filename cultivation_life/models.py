@@ -9,6 +9,7 @@ from .save_schema import SAVE_SCHEMA_VERSION
 from .relationship_schema import normalize_relationship_document
 from .relationship_records import bind_relationship, bind_relationships
 from .npc_custody import bind_custody, detain_person
+from .system.heavens.schema import decode_state as decode_heavens_state, validate_state as validate_heavens_state, validate_references as validate_heavens_references
 
 
 @dataclass(frozen=True)
@@ -243,6 +244,8 @@ class SectNpc:
     roster_state: str = 'active'
     custody: dict[str, Any] | None = None
     roster_origin: list[dict[str, Any]] = field(default_factory=list)
+    # Actual location when a local activity requires one; legacy NPCs remain unspecified.
+    location_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.roster_state not in {'active', 'held', 'retired'}:
@@ -255,7 +258,10 @@ class SectNpc:
             self.gender = "female" if sum(ord(char) for char in identity) % 2 else "male"
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        result = asdict(self)
+        if self.location_id is None:
+            result.pop('location_id')
+        return result
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> SectNpc:
@@ -908,6 +914,8 @@ class GameState:
     # active-session data lives under this one additive container so disabling
     # the package can freeze it without leaking state into unrelated systems.
     guixu_state: dict[str, Any] = field(default_factory=dict)
+    # M0 remains empty until an explicit configuration command is committed.
+    heavens_state: dict[str, Any] = field(default_factory=dict)
     # Optional Tianji artifact DLC state.  Generated definitions, knowledge,
     # unique-body ownership and sparse NPC holders are frozen together here.
     tianji_state: dict[str, Any] = field(default_factory=dict)
@@ -928,12 +936,14 @@ class GameState:
     map_war_last_encounter_unit: int = -2
 
     def __post_init__(self):
+        validate_heavens_state(self.heavens_state)
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
         from .spatial_people import bind as bind_spatial_people
         bind_spatial_people(self, SectNpc)
         bind_custody(self, SectNpc)
         bind_relationships(self, SectNpc)
+        validate_heavens_references(self)
 
     def link_relationship(self, seed):
         return bind_relationship(self, seed, SectNpc)
@@ -942,6 +952,8 @@ class GameState:
         return detain_person(self, seed, SectNpc, kind=kind)
 
     def to_dict(self) -> dict[str, Any]:
+        validate_heavens_state(self.heavens_state)
+        validate_heavens_references(self)
         document = {
             "id": self.id,
             "seed": self.seed,
@@ -991,6 +1003,7 @@ class GameState:
             "buddhist_state": self.buddhist_state,
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
+            "heavens_state": decode_heavens_state(self.heavens_state),
             "tianji_state": self.tianji_state,
             "yaochi_state": self.yaochi_state,
             "doctrine_state": self.doctrine_state,
@@ -1074,6 +1087,7 @@ class GameState:
             if isinstance(value.get("sage_state", {}), dict) else {},
             guixu_state=copy.deepcopy(value.get("guixu_state", {}))
             if isinstance(value.get("guixu_state", {}), dict) else {},
+            heavens_state=decode_heavens_state(value.get("heavens_state", {})),
             tianji_state=copy.deepcopy(value.get("tianji_state", {}))
             if isinstance(value.get("tianji_state", {}), dict) else {},
             yaochi_state=copy.deepcopy(value.get('yaochi_state', {})) if isinstance(value.get('yaochi_state', {}), dict) else {},

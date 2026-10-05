@@ -357,9 +357,10 @@ class Runtime:
         if capability and capability.dlc:
             if not available(capability.dlc):
                 raise CommandError(f'Required DLC is not enabled: {capability.dlc}.')
-        engine.assert_ghost_operation_allowed(game_id, operation)
-        engine.assert_guixu_operation_allowed(game_id, operation)
-        engine.assert_buddhist_operation_allowed(game_id, operation)
+        if operation not in {'heavens-view', 'heavens-preview', 'heavens-command'}:
+            engine.assert_ghost_operation_allowed(game_id, operation)
+            engine.assert_guixu_operation_allowed(game_id, operation)
+            engine.assert_buddhist_operation_allowed(game_id, operation)
 
     def preview(self, session, operation, payload):
         capability = BY_OPERATION.get(operation)

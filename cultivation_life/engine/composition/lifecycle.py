@@ -113,7 +113,11 @@ def bind_session(engine: GameEngine, *, bloodline_content_available: Callable[[]
 
 
 def bind_advancement(engine: GameEngine) -> AdvancementDependencies:
+    from ...system.heavens.cultivation import activity_gain
+    from ...system.heavens.calendar import take_pause
     return AdvancementDependencies(
+        heavens_activity_gain=lambda game, gain, action: activity_gain(engine._dependencies.heavens, game, gain, action),
+        heavens_take_pause=take_pause,
         _spatial_training=lambda *args, **kwargs: engine._spatial_training(*args, **kwargs),
         year=bind_elapsed_year(engine),
         settlement=bind_settlement(engine),

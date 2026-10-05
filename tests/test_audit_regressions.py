@@ -28,6 +28,23 @@ def post_json(base, path, payload):
         return json.load(response)
 
 
+def test_http_heavens_retry_and_gate(local_api, engine):
+    game = create(engine)
+    path = f'/api/games/{game.id}/heavens-command'
+    payload = dict(command_seq=1, expected_revision=0, action='configure', options={'watch': False})
+    first = post_json(local_api, path, payload)
+    assert post_json(local_api, path, payload) == first
+    view = post_json(local_api, f'/api/games/{game.id}/heavens-view', {'view': 'known'})
+    assert view['next_command_seq'] == 2 and view['watch'] is False
+    original = engine.store._path(game.id).read_bytes()
+    for bad in ({**payload, 'command_seq': True},
+                {**payload, 'options': {'generation_enabled': True}}):
+        with pytest.raises(HTTPError) as error:
+            post_json(local_api, path, bad)
+        assert error.value.code == 400
+    assert engine.store._path(game.id).read_bytes() == original
+
+
 def test_http_settings_loads_once_and_next_request_reads_fresh_state(local_api, engine):
     game = create(engine)
     with patch.object(engine.store, 'load', wraps=engine.store.load) as load:
