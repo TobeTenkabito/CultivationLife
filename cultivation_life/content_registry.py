@@ -490,6 +490,13 @@ class ContentRegistry:
                                         registry.world_systems.get("world_transition_routes", []), realms)
         except (ValueError, KeyError, TypeError) as error:
             raise ContentError(f"跨界配置不合法：{error}") from error
+        if 'heavens_framework' in registry.world_systems:
+            from .system.heavens.definitions import validate_framework
+            try:
+                validate_framework(registry.world_systems['heavens_framework'],
+                                   set(registry.world_systems.get('world_profiles', {})))
+            except (ValueError, KeyError, TypeError) as error:
+                raise ContentError(f'诸天框架配置不合法：{error}') from error
         if "maps.json" in documents:
             from .system.map_definition import MapDefinition
 
@@ -1683,7 +1690,7 @@ class ContentRegistry:
             heavens.get("kind") != "cross_world_system"
             or set(heavens.get("member_worlds", [])) != {"celestial", "asura", "nether", "reincarnation"}
         ):
-            raise ContentError("诸天必须作为四个上界之上的跨界系统框架")
+            raise ContentError("诸天须保持跨界系统类型与已登记的四个上界成员")
         if any(
             len(route.get("stages", [])) < 4
             or route["stages"][-1].get("system") != "heavens"

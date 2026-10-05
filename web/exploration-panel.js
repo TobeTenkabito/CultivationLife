@@ -49,7 +49,7 @@
     }
     const s=game.spatial; if(!s)return;
     document.querySelectorAll('[data-panel-target]').forEach(dock=>{
-      const local=s.panels || [];
+      const local=[...(s.panels || []),'heavens'];
       dock.classList.toggle('spatial-unavailable',s.inside && !local.includes(dock.dataset.panelTarget));
       if(s.inside && !local.includes(dock.dataset.panelTarget)) window.UtilityPanels?.close(dock.dataset.panelTarget);
     });

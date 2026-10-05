@@ -103,6 +103,7 @@ def public_map(game):
 
 def guard(game, command):
     allowed = LOCAL_COMMANDS | PERSONAL_COMMANDS
+    allowed |= {'heavens_view', 'heavens_preview', 'heavens_command'}
     if game.player.world == 'lost':
         allowed |= LOCAL_SOCIETY_COMMANDS
     if game.player.world in SPECIAL_WORLDS and command not in allowed:

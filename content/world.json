@@ -2468,9 +2468,22 @@
     "heavens_framework": {
       "id": "heavens",
       "name": "诸天",
-      "enabled": false,
+      "enabled": true,
       "kind": "cross_world_system",
-      "description": "凌驾于仙界、修罗界、幽冥界与轮回界之上的跨界系统框架；未来承载诸界往来、战争、盟约与共同大事。",
+      "description": "宇宙整体之中诸界、修行、往来与共同变化的系统框架；修士只能认识一隅。",
+      "sea_echo": {
+        "revision": 1,
+        "period_years": 2000,
+        "window_years": 1200,
+        "extension_years": 600,
+        "observe_years": 20,
+        "history_years": 30,
+        "exchange_years": 20,
+        "maintain_years": 50,
+        "history_stones": 10000,
+        "exchange_stones": 20000,
+        "maintain_stones": 20000
+      },
       "member_worlds": [
         "celestial",
         "asura",

@@ -11,6 +11,7 @@ from urllib.error import HTTPError
 import pytest
 
 from cultivation_life.engine import GameEngine
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 from cultivation_life.debug.commands import build_registry
 from cultivation_life.debug.engine_adapter import SessionEngine
 from cultivation_life.debug.registry import Command, CommandError
@@ -282,10 +283,11 @@ def test_start_does_not_migrate_source_file(environment):
     path = engine.store.directory / f'{gid}.json'
     source = json.loads(path.read_text(encoding='utf-8'))
     source['version'] = 7
+    source.pop('heavens_state', None)
     path.write_text(json.dumps(source), encoding='utf-8')
     original = path.read_bytes()
     sid = manager.start(gid)['session_id']
-    assert manager.load(sid)['current']['game']['version'] == 8
+    assert manager.load(sid)['current']['game']['version'] == SAVE_SCHEMA_VERSION
     assert path.read_bytes() == original
 
 

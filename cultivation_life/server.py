@@ -229,11 +229,23 @@ class Handler(BaseHTTPRequestHandler):
             game_id, operation = parts[2], parts[3]
             if operation in {'tianji-debug-reveal-all', 'merchant-debug-hq'} and not self.headers.get('X-Cultivation-Debug'):
                 raise NotFoundError('请先通过开发者控制台进入独立调试副本')
-            ENGINE.assert_ghost_operation_allowed(game_id, operation)
-            ENGINE.assert_guixu_operation_allowed(game_id, operation)
-            ENGINE.assert_buddhist_operation_allowed(game_id, operation)
+            # Heavens queries/settings/escrow cleanup remain usable while captive;
+            # participation has its own stricter actor checks in the domain.
+            if operation not in {'heavens-view', 'heavens-preview', 'heavens-command'}:
+                ENGINE.assert_ghost_operation_allowed(game_id, operation)
+                ENGINE.assert_guixu_operation_allowed(game_id, operation)
+                ENGINE.assert_buddhist_operation_allowed(game_id, operation)
             if operation == "advance":
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
+            elif operation == 'heavens-view':
+                result = ENGINE.heavens_view(game_id, payload.get('view', 'known'), payload.get('target_id'))
+            elif operation == 'heavens-preview':
+                result = ENGINE.heavens_preview(game_id, payload.get('action'),
+                                                payload.get('target_id'), payload.get('options'))
+            elif operation == 'heavens-command':
+                result = ENGINE.heavens_command(game_id, payload.get('command_seq'),
+                                                payload.get('expected_revision'), payload.get('action'),
+                                                payload.get('target_id'), payload.get('options'))
             elif operation == 'spatial-action':
                 result = ENGINE.spatial_action(game_id, str(payload.get('action', '')), payload)
             elif operation == 'talisman-action':

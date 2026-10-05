@@ -23,7 +23,7 @@
 
 ## 关系人物的存储边界
 
-普通关系使用 `GameState.link_relationship` 关联 NPC，个人事实通过 `RelationshipRecord` 按 ID 读取和写回，显示名称只作为投影。事件生成人物在 `relationship_npcs` 中有权威记录，但保持原来的关系年度时序；正式加入自由名册时转移同一对象，不能重复推进。当前存档结构为 8，6→7 与 7→8 的纯迁移分别位于 `relationship_schema.py` 和 `npc_custody_schema.py`。俘虏与俘虏来源侍妾也按 NPC ID 关联 `inactive_npcs` 中的权威人物，转换由 `npc_custody.py` 管理；年度养成仍按原专用流程执行。详细边界见 [人物拘禁契约](../../docs/npc-custody.md)。
+普通关系使用 `GameState.link_relationship` 关联 NPC，个人事实通过 `RelationshipRecord` 按 ID 读取和写回，显示名称只作为投影。事件生成人物在 `relationship_npcs` 中有权威记录，但保持原来的关系年度时序；正式加入自由名册时转移同一对象，不能重复推进。当前存档结构为 9，6→7 与 7→8 的纯迁移分别位于 `relationship_schema.py` 和 `npc_custody_schema.py`。俘虏与俘虏来源侍妾也按 NPC ID 关联 `inactive_npcs` 中的权威人物，转换由 `npc_custody.py` 管理；年度养成仍按原专用流程执行。详细边界见 [人物拘禁契约](../../docs/npc-custody.md)。
 
 ## 原模块继续负责兼容
 
@@ -164,3 +164,7 @@ python tools/replay_production.py --output build/production-after.json --compare
 `content_registry` 直接调用定义校验器，仍按原顺序验证完整本体、DLC 和 MOD 内容，没有取消跨表引用、地图、跨界或生命周期校验。修罗入口保留运行期开关；报价、资源加成和无上限机缘仍在调用时读取该开关。
 
 `tests/test_core_dependencies.py` 在新解释器中验证旧档解码与内容注册不会加载玩法入口，覆盖兼容导出、事件覆盖和子类分派、冻结目录、修罗开关，以及新增循环导致检查命令失败。
+
+## 诸天 M1 本地闭环
+
+结构 9 的 8→9 纯迁移只增加空 `heavens_state`，不创建玩法、人物或随机状态。`system/heavens/` 提供纯校验、有限设置、视图和工作副本提交，`engine/composition/heavens.py` 显式装配；仅原子保存成功后更新请求缓存，失败失效缓存并保留原档。M1 已接入公共年度、真实人物引用、短活动精确余量、资源托管和有限修炼应用；新档默认启用，旧档仍由玩家开启。具体接口和边界见[诸天实装进度](../../docs/heavens-implementation.md)。

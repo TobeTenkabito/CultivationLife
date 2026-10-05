@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable
 
 from .dependencies import EngineDependencies, NpcClassDependencies
 from ..system.court import wiring as court_wiring
+from .composition import heavens
 from .composition import ghost_flows, demonic_flows, relationships, buddhist_flows, travel, merchant, cultivation, actions, asura, combat, contacts, events, lifecycle, presentation, systems, world
 
 if TYPE_CHECKING:
@@ -16,6 +17,7 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        heavens=heavens.bind_heavens(engine),
         ghost_flows=ghost_flows.bind_ghost_flows(engine),
         demonic_flows=demonic_flows.bind_demonic_flows(engine),
         relationships=relationships.bind_relationships(engine),

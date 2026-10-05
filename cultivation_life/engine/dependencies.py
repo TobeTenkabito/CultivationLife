@@ -37,6 +37,7 @@ from ..system.buddhist.dependencies import BuddhistFlowDependencies
 from ..time_dependencies import ElapsedYearDependencies, TimeSettlementDependencies, TimeDependencies
 from ..system.merchant.dependencies import MerchantDependencies
 from ..system.cultivation_dependencies import CultivationDependencies
+from ..system.heavens.dependencies import HeavensDependencies
 
 
 
@@ -286,6 +287,8 @@ class AdvancementDependencies:
     _get_maps: Callable[[], MapPort]
     present: Callable[..., dict[str, Any]]
     _get_store: Callable[[], SavePort]
+    heavens_activity_gain: Callable[..., float] | None = None
+    heavens_take_pause: Callable[..., bool] | None = None
 
     @property
     def maps(self) -> MapPort:
@@ -974,6 +977,7 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    heavens: HeavensDependencies
     ghost_flows: GhostFlowDependencies
     demonic_flows: DemonicFlowDependencies
     relationships: RelationshipFlowDependencies
