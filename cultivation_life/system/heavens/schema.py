@@ -9,7 +9,7 @@ import copy
 import re
 import math
 from typing import Any
-from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition
+from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition, OMEN_IDS, validate_omen_definition
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -54,7 +54,7 @@ def validate_state(state: Any) -> None:
     if state['generation_enabled'] and 'runtime' not in state:
         raise ValueError('诸天启用状态缺少日历')
     if (type(state['definition_versions']) is not dict
-            or any(key not in SITE_IDS | {MIRROR_ID, RUINS_ID} or type(value) is not int or value != 1
+            or any(key not in SITE_IDS | {MIRROR_ID, RUINS_ID} | OMEN_IDS or type(value) is not int or value != 1
                    for key, value in state['definition_versions'].items())):
         raise ValueError('诸天生成定义版本无效')
     if 'runtime' in state:
@@ -64,6 +64,7 @@ def validate_state(state: Any) -> None:
             expected_versions[MIRROR_ID] = 1
         if 'ruins' in state['runtime']:
             expected_versions[RUINS_ID] = 1
+        expected_versions.update({key: 1 for key in state['runtime'].get('omens', {})})
         if state['definition_versions'] != expected_versions:
             raise ValueError('诸天实例与生成定义版本不一致')
     receipts = state['receipts']
@@ -90,7 +91,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -121,7 +122,7 @@ def validate_runtime(runtime):
     keys = {'epoch_age', 'processed_years', 'last_year_key', 'last_discovery_window',
             'rng_counter', 'next_task_seq', 'unit_credit', 'sea_echo', 'tasks',
             'history', 'notifications', 'pause_requested', 'pause_on_opportunity'}
-    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins'} != keys:
+    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins', 'omens'} != keys:
         raise ValueError('诸天日历字段无效')
     extra = runtime.get('contacts', {})
     if type(extra) is not dict or set(extra) - (SITE_IDS - {'sea_echo'}):
@@ -145,6 +146,8 @@ def validate_runtime(runtime):
         validate_mirror(runtime['mirror'], runtime['processed_years'])
     if 'ruins' in runtime:
         validate_ruins(runtime['ruins'], runtime['processed_years'])
+    if 'omens' in runtime:
+        validate_omens(runtime['omens'], runtime['processed_years'])
     if runtime['last_year_key'] != runtime['processed_years'] or runtime['next_task_seq'] < 1:
         raise ValueError('诸天处理时钟无效')
     window = runtime['last_discovery_window']
@@ -168,7 +171,7 @@ def validate_runtime(runtime):
         require_counter(row['year'], '纪要时间')
     for row in runtime['notifications']:
         if (type(row) is not dict or set(row) != {'id', 'text', 'expires_at'}
-                or row['id'] not in by_id or not isinstance(row['text'], str)):
+                or row['id'] not in set(by_id) | set(runtime.get('omens', {})) or not isinstance(row['text'], str)):
             raise ValueError('诸天通知无效')
         require_counter(row['expires_at'], '通知期限')
     for echo in echoes:
@@ -185,11 +188,12 @@ def validate_runtime(runtime):
         if not isinstance(target_id, str):
             raise ValueError('诸天任务目标无效')
         is_mirror, is_ruins = target_id == MIRROR_ID, target_id == RUINS_ID
-        echo = runtime.get('ruins') if is_ruins else runtime.get('mirror') if is_mirror else by_id.get(target_id)
+        is_omen = target_id in OMEN_IDS
+        echo = runtime.get('omens', {}).get(target_id) if is_omen else runtime.get('ruins') if is_ruins else runtime.get('mirror') if is_mirror else by_id.get(target_id)
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        actions = (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}
+        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) if is_ruins else MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond'}
         if task['action'] not in actions:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
@@ -200,6 +204,11 @@ def validate_runtime(runtime):
             raise ValueError('诸天任务进度无效')
         if task['person_id'] not in (None, echo.get('visitor_id')):
             raise ValueError('诸天任务人物引用无效')
+        if is_omen:
+            if (task['cycle'] != 0 or 'chamber' in task or task['person_id'] is not None
+                    or task['duration'] != echo['definition']['study_years']
+                    or task['status'] == 'completed' and (not echo['studied'] or task['progress'] != task['duration'])):
+                raise ValueError('征兆任务与对照事实不一致')
         if is_ruins:
             if (task['cycle'] != 0 or 'chamber' in task or task['person_id'] is not None
                     or task['duration'] != echo['definition'][task['action'].removeprefix('ruins_')+'_years']
@@ -251,6 +260,8 @@ def validate_runtime(runtime):
             raise ValueError('诸天阵材托管无效')
         if is_mirror and (escrow['total'] or escrow['spent'] or escrow['refunded'] or escrow['material'] is not None):
             raise ValueError('镜律任务不持有可退款托管')
+        if is_omen and any(escrow[key] != value for key, value in {'total': 0, 'spent': 0, 'refunded': 0, 'mp_paid': 0, 'material': None}.items()):
+            raise ValueError('本地征兆对照不持有资源托管')
         if is_ruins:
             expected_cost = echo['definition'].get(task['action'].removeprefix('ruins_')+'_stones', 0)
             if escrow['material'] is not None or escrow['total'] != expected_cost or escrow['spent'] != expected_cost * task['progress'] // task['duration']:
@@ -382,6 +393,21 @@ def validate_mirror(mirror, year):
         require_counter(row['year'], '镜律痕迹时间')
         if row['year'] > year or row['chamber'] is not None and (type(row['chamber']) is not int or not 0 <= row['chamber'] < 3):
             raise ValueError('镜律痕迹来源无效')
+
+
+def validate_omens(rows, year):
+    if type(rows) is not dict or set(rows) - OMEN_IDS:
+        raise ValueError('诸天征兆目录无效')
+    for key, row in rows.items():
+        if type(row) is not dict or set(row) != {'id', 'definition', 'first_seen', 'last_seen', 'studied'} or row['id'] != key:
+            raise ValueError('诸天征兆字段或身份无效')
+        validate_omen_definition(row['definition'])
+        if row['definition']['id'] != key or type(row['studied']) is not bool:
+            raise ValueError('诸天征兆定义或认识无效')
+        for field in ('first_seen', 'last_seen'):
+            require_counter(row[field], '征兆时间')
+        if not 100 <= row['first_seen'] <= row['last_seen'] <= year or row['first_seen'] % 100 or row['last_seen'] % 100:
+            raise ValueError('诸天征兆必须源自真实百年窗口')
 
 
 def validate_ruins(ruins, year):

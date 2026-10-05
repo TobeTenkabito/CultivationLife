@@ -5,11 +5,11 @@ import copy
 import hashlib
 import json
 
-from .definitions import ACTIONS, VIEWS, HeavensDefinitions, MIRROR_ID, RUINS_ID, RUINS_ACTIONS
+from .definitions import ACTIONS, VIEWS, HeavensDefinitions, MIRROR_ID, RUINS_ID, RUINS_ACTIONS, OMEN_IDS
 from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
-from . import tasks, mirror, ruins
+from . import tasks, mirror, ruins, omens
 
 
 def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict:
@@ -19,7 +19,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     requested_target = target_id
     validate_state(game.heavens_state)
     site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
-    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID}:
+    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID} | OMEN_IDS:
         raise ValueError('诸天对象不可见或不存在')
     target_id = site.id if site else None
     echo = get_echo(runtime, target_id)
@@ -45,6 +45,11 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
         result['ruins'] = ruins.project(deps, game)
         if requested_target == RUINS_ID or result['ruins']['inside']:
             result['target_id'] = RUINS_ID
+    result['omens'] = omens.project(deps, game) if deps and deps.read_omen_facts else []
+    if requested_target in OMEN_IDS:
+        if not any(row['id'] == requested_target for row in result['omens']):
+            raise ValueError('诸天征兆尚不可见')
+        result['target_id'] = requested_target
     if not runtime:
         return result
     result.update(year=runtime['processed_years'], tasks=copy.deepcopy(runtime['tasks']),
@@ -92,7 +97,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     if runtime['notifications']:
         result['available_actions'].append('dismiss')
     known_anomalies = [result[key] for key in ('mirror', 'ruins') if result.get(key, {}).get('known')]
-    result['records'] = known + known_anomalies if view in {'known','opportunities'} else result[view]
+    result['records'] = known + known_anomalies + result['omens'] if view in {'known','opportunities'} else result[view]
     return result
 
 
@@ -101,7 +106,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
         raise ValueError('未知诸天动作')
     if action != 'configure':
         allowed = {'observe': set(), 'check_history': set(), 'exchange': {'person_id'}, 'correspond': {'person_id'},
-                   'attune': set(), 'maintain': {'material_id'}, 'resume': set(), 'cancel': set(), 'dismiss': set(),
+                   'omen_study': set(), 'attune': set(), 'maintain': {'material_id'}, 'resume': set(), 'cancel': set(), 'dismiss': set(),
                    'mirror_enter': set(), 'mirror_leave': set(), 'mirror_probe': set(),
                    'mirror_decipher': {'chamber'}, 'mirror_isolate': {'chamber', 'material_id'}, 'mirror_assault': {'chamber'}}
         allowed.update({key: {'material_id'} if key == 'ruins_replace' else set() for key in RUINS_ACTIONS})

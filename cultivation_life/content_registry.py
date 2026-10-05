@@ -512,6 +512,10 @@ class ContentRegistry:
             if mirror and not any(row['id'] == mirror['location_id'] for row in documents['maps.json']['worlds'][mirror['world']]['locations']):
                 raise ContentError('镜律场域入口必须引用实际本体地点')
             ruins = registry.world_systems.get('heavens_framework', {}).get('ruins')
+            for omen in registry.world_systems.get('heavens_framework', {}).get('omens', []):
+                locations = documents['maps.json']['worlds'].get(omen['world'], {}).get('locations', [])
+                if not any(row['id'] == omen['location_id'] for row in locations):
+                    raise ContentError('诸天征兆必须引用实际本体地点')
             if ruins:
                 for prefix in ('', 'linked_'):
                     locations = documents['maps.json']['worlds'].get(ruins[prefix+'world'], {}).get('locations', [])

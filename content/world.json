@@ -2614,7 +2614,37 @@
         "guardian_power": 2200.0,
         "trace_read_years": 6,
         "trace_send_years": 4
-      }
+      },
+      "omens": [
+        {
+          "id": "sand_glimmer",
+          "name": "沙中重影",
+          "location_id": "muling_desert",
+          "location_name": "穆陵沙漠",
+          "glimpse": "沙粒上偶有错开的双重倒影，静止的石片也映出微光。尚不知其来历，可以留在当地对照。",
+          "finding": "对照日影与旧石后，确认重影来自此地一处稳定镜纹，而非寻常风沙。元婴后可亲自感知入口；现有见闻不能替代入场修为。",
+          "anomaly_id": "mirror_field",
+          "world": "human",
+          "revision": 1,
+          "study_years": 2,
+          "cooldown_years": 200,
+          "lifetime_years": 600
+        },
+        {
+          "id": "stone_resonance",
+          "name": "旧石回声",
+          "location_id": "wudi_plain",
+          "location_name": "无棣原",
+          "glimpse": "旧石上的纹路在无风时仍有微弱回声，附近砂砾随之轻颤。尚不能解释来源，可以在当地核对。",
+          "finding": "反复对照确认石纹与附近旧阵同起同落，可作为寻找遗址的地面标记。元婴后才可感知入口，尚无异界来历或另一端坐标。",
+          "anomaly_id": "causal_ruins",
+          "world": "human",
+          "revision": 1,
+          "study_years": 2,
+          "cooldown_years": 200,
+          "lifetime_years": 600
+        }
+      ]
     },
     "quick_start_presets": [
       {

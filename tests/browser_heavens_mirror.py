@@ -45,7 +45,11 @@ def main():
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     page.locator('[data-panel-target=heavens]').click()
+                    page.get_by_role('tab',name='异象',exact=True).click()
+                    page.get_by_role('button',name='查看镜律场域',exact=True).click()
                     def propose(label, chamber=None):
+                        if chamber is not None:
+                            page.locator(f'#heavens-chamber-{chamber}').click()
                         area = page.locator('[data-mirror=field]') if chamber is None else page.locator(f'[data-mirror-chamber="{chamber}"]')
                         before = engine.store._path(key).read_bytes()
                         area.get_by_role('button', name=label, exact=True).click()

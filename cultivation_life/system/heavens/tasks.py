@@ -3,13 +3,14 @@ from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
-from . import mirror, ruins
-from .definitions import MIRROR_ID, RUINS_ID
+from . import mirror, ruins, omens
+from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS
 
 LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
           'attune': '登记本地参悟', 'maintain': '维护观测节点', 'correspond': '协作校订旧录', 'resume': '继续任务', 'cancel': '取消任务'}
 LABELS.update(mirror.LABELS)
 LABELS.update(ruins.LABELS)
+LABELS.update(omens.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -19,6 +20,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if omens.handles(runtime, action, target_id):
+        return omens.quote(deps, game, action, target_id, options)
     if ruins.handles(runtime, action, target_id):
         return ruins.quote(deps, game, action, target_id, options)
     if mirror.handles(runtime, action, target_id):
@@ -121,6 +124,8 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
+    if task.get('target_id') in OMEN_IDS:
+        return omens.task_reason(deps, game, task)
     if task.get('target_id') == RUINS_ID:
         return ruins.task_reason(deps, game, task)
     if task.get('target_id') == MIRROR_ID:
@@ -154,6 +159,11 @@ def reconcile(deps, game):
     task = active_task(runtime)
     if task:
         # Pending events pause a task; they do not cancel its escrow.
+        if task.get('target_id') in OMEN_IDS:
+            saved = omens.get(game, task['target_id'])
+            if not game.player.alive or runtime['processed_years'] > saved['last_seen']+saved['definition']['lifetime_years']:
+                cancel(deps, game, task, failed=True, reason='此生已结束或征兆已消退')
+            return
         if task.get('target_id') in {MIRROR_ID, RUINS_ID}:
             facts = (deps.read_ruins_facts if task['target_id'] == RUINS_ID else deps.read_mirror_facts)(game)
             if not facts['alive'] or not facts['inside']:
@@ -171,6 +181,9 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if omens.handles(runtime, action, target_id):
+        return omens.execute(deps, game, action, target_id, options, proposal,
+                             cancel_task=cancel, run_task=run_segment, task_result=result)
     if ruins.handles(runtime, action, target_id):
         return ruins.execute(deps, game, action, target_id, options, proposal,
                              cancel_task=cancel, run_task=run_segment, task_result=result)
@@ -258,7 +271,8 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
-    physical_reason = (deps.read_ruins_facts(game)['physical_reason'] if task.get('target_id') == RUINS_ID
+    physical_reason = (deps.read_omen_facts(game, task['target_id'])['physical_reason'] if task.get('target_id') in OMEN_IDS
+                       else deps.read_ruins_facts(game)['physical_reason'] if task.get('target_id') == RUINS_ID
                        else deps.read_mirror_facts(game)['physical_reason'] if task.get('target_id') == MIRROR_ID
                        else deps.read_actor_facts(game, echo['id'])['physical_reason'])
     if task['status'] != 'failed' and physical_reason and task['progress'] == task['duration']:
@@ -273,6 +287,9 @@ def run_segment(deps, game, task):
 
 
 def complete(game, task, deps, rng):
+    if task.get('target_id') in OMEN_IDS:
+        omens.complete(game, task)
+        return
     if task.get('target_id') == RUINS_ID:
         ruins.complete(deps, game, task, rng)
         return

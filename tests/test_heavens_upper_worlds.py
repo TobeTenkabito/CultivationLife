@@ -291,8 +291,17 @@ def test_content_covers_all_highest_worlds_and_discovery_is_local(local):
             digest.return_value.digest.return_value = bytes(32)
             for key in range(index*100+1, (index+1)*100+1):
                 year_step(deps, game, YearContext(key))
-        assert get_echo(game.heavens_state['runtime'], site.id)
+        assert bool(get_echo(game.heavens_state['runtime'], site.id)) == (index < 3)
         assert game.rng_state == original
-    assert game.heavens_state['runtime']['rng_counter'] == 4
+    assert game.heavens_state['runtime']['rng_counter'] == 3
     assert len(game.heavens_state['runtime']['notifications']) == 3
+    game.heavens_state['runtime']['notifications'].clear()
+    year_step(deps, game, YearContext(400))
+    assert not get_echo(game.heavens_state['runtime'], CONTACT_SITES[-1].id)
+    with patch('cultivation_life.system.heavens.calendar.sha256') as digest:
+        digest.return_value.digest.return_value = bytes(32)
+        for key in range(401, 501):
+            year_step(deps, game, YearContext(key))
+    assert get_echo(game.heavens_state['runtime'], CONTACT_SITES[-1].id)
+    assert game.heavens_state['runtime']['rng_counter'] == 4
     validate_state(game.heavens_state)

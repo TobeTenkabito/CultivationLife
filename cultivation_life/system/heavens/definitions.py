@@ -7,7 +7,48 @@ MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mir
 RUINS_ID = 'causal_ruins'
 RUINS_ACTIONS = frozenset('ruins_' + name for name in ('enter', 'leave', 'observe', 'verify', 'read', 'take', 'replace', 'erase', 'contact', 'return'))
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}) | MIRROR_ACTIONS | RUINS_ACTIONS
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS
+
+
+@dataclass(frozen=True, slots=True)
+class OmenDefinition:
+    id: str
+    name: str
+    location_id: str
+    location_name: str
+    glimpse: str
+    finding: str
+    anomaly_id: str
+    world: str = 'human'
+    revision: int = 1
+    study_years: int = 2
+    cooldown_years: int = 200
+    lifetime_years: int = 600
+
+
+OMENS = (
+    OmenDefinition('sand_glimmer', '沙中重影', 'muling_desert', '穆陵沙漠',
+        '沙粒上偶有错开的双重倒影，静止的石片也映出微光。尚不知其来历，可以留在当地对照。',
+        '对照日影与旧石后，确认重影来自此地一处稳定镜纹，而非寻常风沙。元婴后可亲自感知入口；现有见闻不能替代入场修为。', MIRROR_ID),
+    OmenDefinition('stone_resonance', '旧石回声', 'wudi_plain', '无棣原',
+        '旧石上的纹路在无风时仍有微弱回声，附近砂砾随之轻颤。尚不能解释来源，可以在当地核对。',
+        '反复对照确认石纹与附近旧阵同起同落，可作为寻找遗址的地面标记。元婴后才可感知入口，尚无异界来历或另一端坐标。', RUINS_ID),
+)
+OMEN_IDS = frozenset(row.id for row in OMENS)
+
+
+def validate_omen_definition(raw):
+    if type(raw) is not dict or set(raw) != set(asdict(OMENS[0])):
+        raise ValueError('诸天征兆定义字段无效')
+    base = next((row for row in OMENS if row.id == raw['id']), None)
+    if not base or any(raw[key] != getattr(base, key) for key in ('world', 'location_id', 'anomaly_id')):
+        raise ValueError('诸天征兆必须关联实际本地异象')
+    for key in ('name', 'location_name', 'glimpse', 'finding'):
+        if not isinstance(raw[key], str) or not 0 < len(raw[key]) <= 1000:
+            raise ValueError('诸天征兆说明无效')
+    for key in ('revision', 'study_years', 'cooldown_years', 'lifetime_years'):
+        if type(raw[key]) is not int or raw[key] != getattr(base, key):
+            raise ValueError('诸天征兆初值或版本无效')
 
 
 @dataclass(frozen=True, slots=True)
@@ -153,12 +194,13 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-ruins'
+    milestone: str = 'M2-omens'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES
     mirror: MirrorDefinition = field(default_factory=MirrorDefinition)
     ruins: RuinsDefinition = field(default_factory=RuinsDefinition)
+    omens: tuple[OmenDefinition, ...] = OMENS
 
     def site(self, target_id):
         return next((site for site in self.contact_sites if site.id == target_id), None)
@@ -192,6 +234,13 @@ def validate_framework(framework: dict, world_ids: set[str]) -> None:
         validate_mirror_definition(framework['mirror'])
     if 'ruins' in framework:
         validate_ruins_definition(framework['ruins'])
+    if 'omens' in framework:
+        if type(framework['omens']) is not list or len(framework['omens']) != 2:
+            raise ValueError('诸天征兆目录无效')
+        for row in framework['omens']:
+            validate_omen_definition(row)
+        if {row['id'] for row in framework['omens']} != OMEN_IDS:
+            raise ValueError('诸天征兆身份重复或缺失')
     if 'contact_sites' in framework:
         rows = framework['contact_sites']
         if type(rows) is not list or len(rows) != 4:

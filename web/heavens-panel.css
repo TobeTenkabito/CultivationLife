@@ -1,15 +1,75 @@
-#heavens-card{padding:22px;left:154px;width:min(760px,calc(100vw - 308px));box-sizing:border-box}
-#heavens-content{display:grid;gap:16px;color:var(--ink);overflow-wrap:anywhere}
-#heavens-content p{margin:0;line-height:1.7}
-#heavens-content .heavens-group{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-#heavens-content .heavens-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-#heavens-content button{white-space:normal;min-height:40px;color:var(--pine)}
-#heavens-content small{display:block;color:var(--muted);line-height:1.6}
-#heavens-content label{display:flex;gap:10px;align-items:center;justify-content:flex-start}
-#heavens-content input[type=checkbox]{width:16px;height:16px;flex:0 0 16px;margin:0}
-#heavens-content label span{flex:1}
-#heavens-content select{width:100%;min-height:40px;color:var(--ink);background:var(--surface);border:1px solid var(--line)}
-#heavens-content summary{cursor:pointer;color:var(--pine)}
+#heavens-card{padding:22px;left:154px;width:min(940px,calc(100vw - 308px));height:min(820px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+#heavens-card>.section-title{position:static;flex:0 0 auto;padding:0;margin-bottom:16px;background:none}
+#heavens-content{display:flex;flex-direction:column;min-height:0;flex:1;color:var(--ink);overflow-wrap:anywhere}
+#heavens-content p{margin:0;line-height:1.8}
+#heavens-content h3,#heavens-content h4{margin:0}
+#heavens-content h4{font-size:15px;font-weight:600}
+#heavens-content button{white-space:normal;min-height:40px;color:var(--pine);font:inherit;font-size:13px;cursor:pointer}
+#heavens-content button:disabled{cursor:default;opacity:.48}
+#heavens-content button:focus-visible,#heavens-content select:focus-visible,#heavens-content input:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+#heavens-content small{display:block;color:var(--muted);font-size:12px;line-height:1.65}
+#heavens-content .heavens-navigation{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px;flex:0 0 auto}
+#heavens-content .heavens-tabs{display:flex;gap:4px;min-width:0}
+#heavens-content .heavens-primary{flex:1}
+#heavens-content .heavens-tabs button{flex:1;border:0;border-radius:5px;background:transparent;padding:10px 12px;box-shadow:none;color:var(--muted)}
+#heavens-content .heavens-primary button{font-size:15px;letter-spacing:.12em}
+#heavens-content .heavens-tabs button[aria-selected=true]{background:var(--pine);color:var(--on-accent,#fff)}
+#heavens-content .heavens-preferences{border:1px solid var(--line);background:transparent;border-radius:5px;padding:8px 12px}
+#heavens-content .heavens-body{overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:22px 5px 16px 1px;display:flex;flex-direction:column;gap:16px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+#heavens-content .heavens-title{font-size:24px;font-weight:500;letter-spacing:.06em;line-height:1.45;outline:none}
+#heavens-content .heavens-lead{color:var(--muted);font-size:13px;max-width:60ch}
+#heavens-content .heavens-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}
+#heavens-content .heavens-destination{display:flex;align-items:center;gap:16px;text-align:left;min-height:138px;padding:22px 18px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--surface) 85%,transparent);transition:border-color .15s,background .15s;box-shadow:none}
+#heavens-content .heavens-destination:hover{border-color:var(--pine);background:color-mix(in srgb,var(--pine) 6%,var(--surface))}
+#heavens-content .heavens-glyph{display:grid;place-items:center;flex:0 0 46px;width:46px;height:62px;font-size:30px;font-family:serif;border:1px solid var(--line);border-radius:24px 24px 3px 3px;background:color-mix(in srgb,var(--pine) 5%,transparent)}
+#heavens-content .heavens-destination-copy{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;flex:1}
+#heavens-content .heavens-destination strong{font-weight:500;font-size:17px;line-height:1.5}
+#heavens-content .heavens-forward{font-size:24px;color:var(--muted)}
+#heavens-content .heavens-badge{display:inline-block;font-size:11px;padding:3px 8px;background:color-mix(in srgb,var(--pine) 7%,transparent);border-radius:3px;color:var(--pine)}
+#heavens-content .heavens-facts{display:flex;flex-wrap:wrap;gap:8px}
+#heavens-content .heavens-back{align-self:flex-start;border:0;background:transparent;padding:0 4px;box-shadow:none;color:var(--muted);min-height:28px}
+#heavens-content .heavens-object{display:flex;flex-direction:column;gap:16px}
+#heavens-content .heavens-object-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#heavens-content .heavens-exit{align-self:flex-end;border:1px solid var(--line);background:transparent;padding:7px 14px;border-radius:4px}
+#heavens-content .heavens-section,#heavens-content .heavens-chamber{border-bottom:1px solid var(--line);padding-bottom:8px;margin-top:2px}
+#heavens-content .heavens-detail-body{display:flex;flex-direction:column;gap:16px}
+#heavens-content .heavens-actions{display:flex;flex-direction:column;gap:0}
+#heavens-content .heavens-action{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;padding:17px 0;border-bottom:1px solid var(--line)}
+#heavens-content .heavens-action:first-child{padding-top:4px}
+#heavens-content .heavens-action>div{display:grid;gap:6px}
+#heavens-content .heavens-action>button{max-width:175px;padding:9px 14px;border:1px solid var(--line);background:color-mix(in srgb,var(--pine) 6%,var(--surface));border-radius:4px;box-shadow:none}
+#heavens-content .heavens-action>button:not(:disabled):hover{border-color:var(--pine)}
+#heavens-content .heavens-action .heavens-danger{color:var(--cinnabar);background:color-mix(in srgb,var(--cinnabar) 5%,var(--surface))}
+#heavens-content select{width:100%;max-width:300px;min-height:38px;color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:5px 8px;border-radius:3px}
+#heavens-content .heavens-task-strip{padding:10px 12px;margin-top:10px;text-align:left;border:1px solid var(--line);border-left:3px solid var(--pine);background:color-mix(in srgb,var(--pine) 5%,transparent);box-shadow:none}
+#heavens-content .heavens-task{display:grid;gap:14px;border-left:3px solid var(--pine);padding:14px 18px;background:color-mix(in srgb,var(--pine) 4%,transparent)}
+#heavens-content .heavens-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#heavens-content .heavens-inline button{padding:8px 12px;border:1px solid var(--line);border-radius:4px;background:var(--surface);box-shadow:none}
+#heavens-content .heavens-empty{min-height:160px;padding:20px 14px;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;text-align:center;color:var(--muted)}
+#heavens-content .heavens-empty p{font-size:13px;max-width:44ch}
+#heavens-content .heavens-empty-mark{font-size:36px;line-height:1;color:var(--pine)}
+#heavens-content .heavens-home-links{display:flex;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+#heavens-content .heavens-home-links button,#heavens-content .heavens-link{background:none;box-shadow:none;border:0;text-align:left;padding:6px 0}
+#heavens-content .heavens-finding{margin:0;padding:12px 18px;border-left:2px solid var(--gold);background:color-mix(in srgb,var(--gold) 6%,transparent);line-height:1.85;font-size:14px}
+#heavens-content .heavens-notice{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+#heavens-content .heavens-evidence{padding-left:24px;margin:0;font-size:14px;line-height:2.1}
+#heavens-content .heavens-link-state{display:flex;align-items:center;justify-content:space-around;gap:12px;padding:16px;background:color-mix(in srgb,var(--pine) 5%,transparent);border:1px solid var(--line);border-radius:5px;font-size:14px;color:var(--pine)}
+#heavens-content .heavens-link-state.interrupted{color:var(--cinnabar);border-style:dashed}
+#heavens-content .heavens-trace-stats{display:grid;grid-template-columns:repeat(3,1fr);margin:0;gap:12px;padding:12px 0;text-align:center}
+#heavens-content .heavens-trace-stats dt{font-size:12px;color:var(--muted)}
+#heavens-content .heavens-trace-stats dd{font-size:28px;font-weight:500;margin:8px 0 0;color:var(--pine)}
+#heavens-content .heavens-notes{padding:12px 0;border-top:1px solid var(--line);font-size:12px}
+#heavens-content summary{cursor:pointer;color:var(--pine);padding:4px 0}
+#heavens-content .heavens-notes p{margin-top:10px}
+#heavens-content .heavens-timeline{list-style:none;margin:0;padding:0 0 0 14px;border-left:1px solid var(--line);display:grid;gap:20px}
+#heavens-content .heavens-timeline li{position:relative;padding-left:6px;font-size:13px}
+#heavens-content .heavens-timeline li:before{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:var(--pine);left:-17px;top:7px}
+#heavens-content .heavens-setting{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line)}
+#heavens-content .heavens-setting span{display:grid;gap:8px;flex:1}
+#heavens-content .heavens-setting strong{font-size:14px;font-weight:500}
+#heavens-content input[type=checkbox]{width:18px;height:18px;flex:0 0 18px;margin:0;accent-color:var(--pine)}
+#heavens-content .heavens-retry{display:grid;gap:6px;padding:10px;background:color-mix(in srgb,var(--cinnabar) 6%,transparent);border:1px solid var(--line)}
+#heavens-content progress,#heavens-content meter{width:100%;height:8px;accent-color:var(--pine)}
 [data-panel-target=heavens].has-notice:after{content:'';position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--cinnabar)}
-@media(max-width:800px){#heavens-card{left:12px;width:calc(100vw - 24px);padding:16px}}
-@media(max-width:600px){#heavens-content .heavens-actions{grid-template-columns:1fr}}
+@media(max-width:1100px){#heavens-content .heavens-directory{grid-template-columns:1fr}}
+@media(max-width:800px){#heavens-card{left:10px;top:12px;width:calc(100vw - 20px);padding:16px;height:calc(100dvh - 230px);max-height:calc(100dvh - 230px)!important}#heavens-card>.section-title{margin-bottom:12px}#heavens-content .heavens-navigation{gap:8px;padding-bottom:8px}#heavens-content .heavens-primary button{font-size:14px;letter-spacing:0;padding:8px 6px}#heavens-content .heavens-preferences{padding:6px 8px;font-size:12px}#heavens-content .heavens-body{padding-top:16px;gap:12px}#heavens-content .heavens-title{font-size:21px}#heavens-content .heavens-destination{min-height:108px;padding:14px}#heavens-content .heavens-directory{gap:10px}#heavens-content .heavens-action{gap:12px;grid-template-columns:minmax(0,1fr) minmax(80px,110px)}#heavens-content .heavens-action>button{font-size:12px;padding:8px}#heavens-content .heavens-action h4{font-size:14px}}

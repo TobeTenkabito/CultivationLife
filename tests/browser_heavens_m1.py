@@ -44,6 +44,8 @@ def main():
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     page.locator('[data-panel-target=heavens]').click()
+                    page.get_by_role('tab',name='诸界',exact=True).click()
+                    page.get_by_role('button',name='查看法则天海 · 潮汐回响',exact=True).click()
                     before = engine.store._path(key).read_bytes()
                     page.locator('#heavens-content').get_by_role('button',name='体察潮汐',exact=True).click()
                     page.locator('#game-confirm-backdrop:not(.hidden)').wait_for()
@@ -84,6 +86,7 @@ def main():
                     # from the business rejection and obtain the next sequence.
                     state=engine.store.load(key).heavens_state
                     engine.heavens_command(key,state['command_seq']+1,state['revision'],'configure',options={'watch':False})
+                    page.get_by_role('button',name='诸天偏好',exact=True).click()
                     page.locator('#heavens-content input').first.uncheck()
                     page.wait_for_function('!busy && game.heavens.next_command_seq === 3')
                     assert page.locator('#heavens-content input').first.is_checked()

@@ -51,15 +51,15 @@ def main():
                         page.evaluate('async id=>{await loadGame(id)}', key)
                         if not page.locator('#heavens-card').is_visible():
                             page.locator('[data-panel-target=heavens]').click()
-                        selector = page.get_by_label('诸天联系地点', exact=True)
-                        assert selector.input_value() == site.id
                         original = engine.store._path(key).read_bytes()
                         for remote in CONTACT_SITES:
-                            selector.select_option(remote.id)
+                            page.get_by_role('tab',name='诸界',exact=True).click()
+                            page.get_by_role('button',name='查看'+remote.name,exact=True).click()
                             page.wait_for_function('id=>game.heavens.target_id===id', arg=remote.id)
                             if remote.id != site.id:
                                 assert page.locator('#heavens-content .heavens-actions button:enabled').count() == 0
-                        selector.select_option(site.id)
+                        page.get_by_role('tab',name='诸界',exact=True).click()
+                        page.get_by_role('button',name='查看'+site.name,exact=True).click()
                         page.wait_for_function('id=>game.heavens.target_id===id', arg=site.id)
                         assert engine.store._path(key).read_bytes() == original
                         label = '体察潮汐' if site.id == 'sea_echo' else f'体察{site.evidence[0]}'
@@ -90,6 +90,7 @@ def main():
                     engine.store.save(work)
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     before = engine.store._path(key).read_bytes()
+                    page.get_by_role('tab',name='往来',exact=True).click()
                     page.get_by_role('button',name='协作校订旧录',exact=True).click()
                     page.locator('#game-confirm-backdrop:not(.hidden)').wait_for()
                     assert '2,500' in page.locator('#game-confirm-body').inner_text()
