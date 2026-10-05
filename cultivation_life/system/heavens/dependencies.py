@@ -45,3 +45,8 @@ class HeavensDependencies:
     move_researcher: Callable | None = None
     advance_researchers: Callable | None = None
     migration_candidates: Callable | None = None
+
+    read_survey_facts: Callable | None = None
+    survey_candidates: Callable | None = None
+    move_surveyor: Callable | None = None
+    advance_survey: Callable | None = None

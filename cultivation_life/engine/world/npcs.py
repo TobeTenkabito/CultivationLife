@@ -255,6 +255,8 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
 
 
 def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
+    from ...person_assignments import in_transit
+    from ...spatial_people import instance_of
     protected = {
         str(row.get("id")) for row in [game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples]
         if row
@@ -262,6 +264,7 @@ def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: ra
     villains = [
         npc for npc in game.world_npcs.values()
         if npc.alive and not npc.encountered_player and not deps._intrigue_is_imprisoned(game, npc.id)
+        and not instance_of(game, npc.id) and not in_transit(game, npc.id)
         and (npc.notorious or npc.path == "demonic")
         and rng.random() < (0.014 if npc.path == "demonic" else 0.004)
     ]

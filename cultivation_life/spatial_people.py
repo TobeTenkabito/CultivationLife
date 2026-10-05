@@ -33,7 +33,9 @@ def accessible(game, person):
     assignment = research_assignment(game, identity)
     if assignment:
         location = person.get('location_id') if isinstance(person, dict) else person.location_id
-        if assignment['phase'] not in {'studying', 'settling'} or location != game.player.location_id:
+        scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'), {})
+        player_location = scene.get('location_id', game.player.location_id) if game.player.world in {'lost', 'rift'} else game.player.location_id
+        if assignment['phase'] not in {'studying', 'settling'} or location != player_location:
             return False
     world = person.get('world') if isinstance(person, dict) else person.world
     owner = instance_of(game, identity)

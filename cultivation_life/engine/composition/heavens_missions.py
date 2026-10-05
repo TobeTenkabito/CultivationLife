@@ -74,6 +74,7 @@ def bind_missions(engine, ports):
         npc.location_id = destination.location_id
 
     def advance(game):
+        ports().advance_survey(game, True)
         missions.year_step(ports(), game)
         runtime = game.heavens_state.get('runtime')
         if runtime:
