@@ -3,7 +3,7 @@ from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
-from . import mirror, ruins, omens, visits, missions
+from . import mirror, ruins, omens, visits, missions, freight
 from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS, VISIT_ACTIONS
 
 LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
@@ -22,6 +22,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if action in freight.LABELS:
+        return freight.quote(deps, game, action, target_id, options)
     if missions.handles(runtime, action, target_id):
         return missions.quote(deps, game, action, target_id, options)
     if visits.handles(runtime, action, target_id):
@@ -206,6 +208,8 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if action in freight.LABELS:
+        return freight.execute(deps, game, action, target_id, options)
     if missions.handles(runtime, action, target_id):
         return missions.execute(deps, game, action, target_id, options, proposal,
             run_task=run_segment, cancel_task=cancel, task_result=result)

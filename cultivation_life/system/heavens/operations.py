@@ -10,8 +10,8 @@ from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
 from . import tasks, mirror, ruins, omens, visits
-from . import missions
-from .definitions import MISSION_ACTIONS
+from . import missions, freight
+from .definitions import MISSION_ACTIONS, FREIGHT_ACTIONS
 
 
 def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict:
@@ -61,6 +61,8 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
                         for row in contacts(runtime) if row.get('visit')] if deps else []
     result['missions'] = [missions.project(deps, game, row['id']) for row in contacts(runtime)
                           if row.get('mission')] if deps and deps.read_mission_facts else []
+    result['freights'] = [freight.project(deps, game, row['id']) for row in contacts(runtime)
+                           if row.get('freight')] if deps and deps.read_mission_facts else []
     def echo_view(echo):
         site = echo_site(echo)
         cycle, offset, cutoff = phase(runtime, echo)
@@ -83,6 +85,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
         result['visit'] = visits.project(deps, game, target_id)
     if deps and target_id and deps.read_mission_facts:
         result['mission'] = missions.project(deps, game, target_id)
+        result['freight'] = freight.project(deps, game, target_id)
     result['registered_application'] = next((dict(target_id=row['id'], name=row['name'], **row['application'])
                                            for row in known if row['application']), None)
     result['actions'] = []
@@ -123,6 +126,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
         allowed.update({key: {'material_id'} if key == 'ruins_replace' else set() for key in RUINS_ACTIONS})
         allowed.update({key: set() for key in VISIT_ACTIONS})
         allowed.update({key: set() for key in MISSION_ACTIONS})
+        allowed.update({key: {'material_id'} if key == 'freight_start' else set() for key in FREIGHT_ACTIONS})
         if action not in allowed or not isinstance(target_id, str) or not target_id:
             raise ValueError('诸天动作或目标无效')
         if type(options) is not dict or set(options) != allowed[action] or any(not isinstance(v,str) or not v for v in options.values()):
