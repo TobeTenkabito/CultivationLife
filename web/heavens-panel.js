@@ -65,6 +65,7 @@
     }
     host.append(settings);
     if(h.mirror && (h.mirror.inside || data.player.world==='human' || h.mirror.known))renderMirror(host,h.mirror);
+    if(h.ruins && (h.ruins.inside || data.player.world==='human' || h.ruins.known))renderRuins(host,h.ruins);
     if(h.sites?.length) {
       const group=node('div',null,'heavens-group'),select=node('select');select.setAttribute('aria-label','诸天联系地点');
       const placeholder=node('option','选择最高界面的联系地点');placeholder.value='';placeholder.disabled=true;select.append(placeholder);
@@ -111,6 +112,26 @@
     for(const chamber of m.chambers||[]){const card=node('div',null,'heavens-group');card.dataset.mirrorChamber=String(chamber.index);card.append(node('h4',`第 ${chamber.index+1} 处机关 · ${chamber.opened?'已解开':chamber.isolated?'联系已隔断':'尚未解开'}`));if(chamber.reward)card.append(node('small',`已领取：${chamber.reward}`));if(chamber.guardian)card.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守护强度已锁定，损伤保留。`));const actions=node('div',null,'heavens-actions');for(const row of m.actions.filter(a=>a.options.chamber===String(chamber.index)))actionRow(row,actions);card.append(actions);box.append(card);}
     if(m.traces?.length)box.append(node('small',`已保留 ${m.traces.length} 条施术或施工痕迹，退出不会抹除。`));
     host.append(box);
+  }
+  function renderRuins(host,r) {
+    const box=node('section',null,'heavens-group');box.dataset.ruins='field';
+    box.append(node('h3',r.name),node('p',`${r.entry} · ${r.inside?'身处遗址':r.known?'可重访':'元婴起可亲自进入'}`),node('small',r.description));
+    if(r.known){
+      box.append(node('p',`${r.verified?'两端关联已查明':r.observed?'已观察阵纹':'尚未查证'} · ${r.ward_active?r.replacement?'替代部件维持回响':'阵芯维持回响':'阵眼失效，回响通信中断'}`));
+      const ownership=r.core.owner==='player'?'由你持有，可归还安装':r.core.acquisition?'已归还阵眼，不能再次领取':'由阵眼持有';
+      box.append(node('p',`${r.core.name}（唯一任务遗物）：${ownership}。`),node('small','用于此遗址对应阵眼，不可出售或炼化成通用战力。'));
+      if(r.record_acquired)box.append(node('p','已取得回潮阵纹合法抄本与一件四阶阵材。'));
+      if(r.contact)box.append(node('p',`接触线索：${r.contact}`));
+      if(r.trace_rule)box.append(node('small',r.trace_rule));
+      box.append(node('p',`本地未读残留 ${r.traces.local} 类 · 守阵机关留档 ${r.traces.held} 类 · 已送出 ${r.traces.sent} 类`));
+    }
+    const actions=node('div',null,'heavens-actions');
+    for(const row of r.actions){
+      const group=node('div',null,'heavens-group'),options={...row.options};
+      if(row.action==='ruins_replace'&&r.materials.length){const select=node('select');select.setAttribute('aria-label','替换阵芯所用阵材');for(const material of r.materials){const option=node('option',material.name||material.material_id);option.value=material.id;select.append(option);}select.onchange=()=>{options.material_id=select.value;};group.append(select);}
+      group.append(button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending)),node('small',row.enabled?`${row.years} 年${row.costs?.stones?' · '+row.costs.stones.toLocaleString()+' 灵石':''}${row.costs?.mp?' · 实付 '+row.costs.mp.toLocaleString()+' 法力':''}${row.material_consumed?' · 消耗一件四阶阵材':''}`:row.reason));actions.append(group);
+    }
+    box.append(actions);host.append(box);
   }
   window.HeavensPanel={render};
 })();

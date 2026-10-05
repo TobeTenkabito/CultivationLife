@@ -1,5 +1,6 @@
 """One explicit hook after the existing ordinary or isolated world year."""
 from dataclasses import dataclass
+from . import ruins
 from hashlib import sha256
 
 from .state import create_echo, phase, record, visible_notice, contacts, echo_site, current_site, get_echo
@@ -29,6 +30,7 @@ def year_step(deps, game, context: YearContext):
     runtime['processed_years'] += 1
     state['revision'] += 1
     now = runtime['processed_years']
+    ruins.year_step(game)
     runtime['notifications'] = [row for row in runtime['notifications'] if row['expires_at'] > now]
     for echo in contacts(runtime):
         cycle, _offset, _cutoff = phase(runtime, echo)

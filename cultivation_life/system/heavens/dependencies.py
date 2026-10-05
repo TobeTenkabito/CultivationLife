@@ -33,3 +33,8 @@ class HeavensDependencies:
     enter_mirror: Callable | None = None
     leave_mirror: Callable | None = None
     fight_mirror: Callable | None = None
+    read_ruins_facts: Callable | None = None
+    ruins_material: Callable | None = None
+    enter_ruins: Callable | None = None
+    leave_ruins: Callable | None = None
+    fight_ruins: Callable | None = None

@@ -8,7 +8,7 @@ from ...relationship_records import find_person
 from ...spatial_people import instance_of
 from ...rules import max_mp, add_item, remove_item, can_player_practice_technique
 from ...system.aperture_resources import true_realm
-from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition, ContactSite, CONTACT_SITES, MirrorDefinition, MIRROR_ID
+from ...system.heavens.definitions import HeavensDefinitions, SeaEchoDefinition, ContactSite, CONTACT_SITES, MirrorDefinition, MIRROR_ID, RuinsDefinition, RUINS_ID
 from ...system.heavens.state import current_site, site_for, contacts, echo_site
 from ...system.heavens.dependencies import HeavensDependencies
 from ...system.heavens import tasks
@@ -17,6 +17,7 @@ from ...time_flow import advance_elapsed_year, settle_elapsed_time, ACTION_TIME
 from ...system.upper_institutions import advance_time
 from ..transactions import request_games
 from .heavens_mirror import bind_mirror
+from .heavens_ruins import bind_ruins
 
 
 def bind_heavens(engine) -> HeavensDependencies:
@@ -25,6 +26,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         return HeavensDefinitions(generation_available=config['enabled'],
             sea_echo=SeaEchoDefinition(**config.get('sea_echo', {})),
             mirror=MirrorDefinition(**config.get('mirror', {})),
+            ruins=RuinsDefinition(**config.get('ruins', {})),
             contact_sites=tuple(ContactSite(**row) for row in config['contact_sites']) if 'contact_sites' in config else CONTACT_SITES)
 
     def read_actor_facts(game, target_id=None):
@@ -75,7 +77,7 @@ def bind_heavens(engine) -> HeavensDependencies:
 
     def quote_materials(game, target_id=None):
         definitions = engine._formation_material_defs()
-        if target_id == MIRROR_ID:
+        if target_id in {MIRROR_ID, RUINS_ID}:
             return [copy.deepcopy(row) for row in game.player.formation_materials
                     if row.get('id') and not row.get('dynamic_definition')
                     and definitions.get(row.get('material_id'), {}).get('world') == 'human'
@@ -112,7 +114,7 @@ def bind_heavens(engine) -> HeavensDependencies:
 
     def settle_units(game, rng, units, elapsed, start_age, unit, news):
         scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
-        if scene and scene.get('heavens_target') == MIRROR_ID:
+        if scene and scene.get('heavens_target') in {MIRROR_ID, RUINS_ID}:
             # Match isolated activities: no outside wages, politics or market clocks.
             if units and game.player.alive:
                 engine._advance_natal_artifact(game, 'heavens_research', units)
@@ -156,5 +158,6 @@ def bind_heavens(engine) -> HeavensDependencies:
         reconcile_tasks=lambda game: tasks.reconcile(ports, game),
         grant_stones=lambda game, amount: add_item(game.player, 'spirit_stone', amount),
         **bind_mirror(engine),
+        **bind_ruins(engine),
     )
     return ports

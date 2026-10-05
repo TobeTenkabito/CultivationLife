@@ -4,8 +4,49 @@ from dataclasses import dataclass, field, asdict
 VIEWS = frozenset({'known', 'opportunities', 'tasks', 'history'})
 MIRROR_ID = 'mirror_field'
 MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mirror_decipher', 'mirror_isolate', 'mirror_assault'})
+RUINS_ID = 'causal_ruins'
+RUINS_ACTIONS = frozenset('ruins_' + name for name in ('enter', 'leave', 'observe', 'verify', 'read', 'take', 'replace', 'erase', 'contact', 'return'))
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}) | MIRROR_ACTIONS
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'}) | MIRROR_ACTIONS | RUINS_ACTIONS
+
+
+@dataclass(frozen=True, slots=True)
+class RuinsDefinition:
+    revision: int = 1
+    world: str = 'human'
+    location_id: str = 'wudi_plain'
+    linked_world: str = 'demon'
+    linked_location_id: str = 'red_marrow_city'
+    observe_years: int = 2
+    verify_years: int = 4
+    read_years: int = 6
+    take_years: int = 1
+    replace_years: int = 8
+    erase_years: int = 3
+    contact_years: int = 4
+    return_years: int = 2
+    replace_stones: int = 500
+    erase_stones: int = 300
+    mana_fraction: float = .05
+    guardian_power: float = 2200.0
+    trace_read_years: int = 6
+    trace_send_years: int = 4
+
+
+def validate_ruins_definition(raw):
+    base = asdict(RuinsDefinition())
+    if type(raw) is not dict or set(raw) != set(base):
+        raise ValueError('因果遗址定义字段无效')
+    for key in ('revision', 'world', 'location_id', 'linked_world', 'linked_location_id'):
+        if type(raw[key]) is not type(base[key]) or raw[key] != base[key]:
+            raise ValueError('因果遗址来源、关联端或版本无效')
+    for key in base.keys() - {'revision', 'world', 'location_id', 'linked_world', 'linked_location_id', 'mana_fraction', 'guardian_power'}:
+        if type(raw[key]) is not int or not 1 <= raw[key] <= (10000 if key.endswith('_stones') else 100):
+            raise ValueError('因果遗址耗时或成本无效')
+    if type(raw['mana_fraction']) not in (int, float) or not 0 < raw['mana_fraction'] <= .05:
+        raise ValueError('因果遗址法力成本无效')
+    if type(raw['guardian_power']) not in (int, float) or not 1 <= raw['guardian_power'] <= 100000:
+        raise ValueError('因果遗址守护强度无效')
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,11 +153,12 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-mirror'
+    milestone: str = 'M2-ruins'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES
     mirror: MirrorDefinition = field(default_factory=MirrorDefinition)
+    ruins: RuinsDefinition = field(default_factory=RuinsDefinition)
 
     def site(self, target_id):
         return next((site for site in self.contact_sites if site.id == target_id), None)
@@ -148,6 +190,8 @@ def validate_framework(framework: dict, world_ids: set[str]) -> None:
         validate_echo_definition(framework['sea_echo'])
     if 'mirror' in framework:
         validate_mirror_definition(framework['mirror'])
+    if 'ruins' in framework:
+        validate_ruins_definition(framework['ruins'])
     if 'contact_sites' in framework:
         rows = framework['contact_sites']
         if type(rows) is not list or len(rows) != 4:
