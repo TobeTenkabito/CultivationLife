@@ -44,3 +44,4 @@ class HeavensDependencies:
     read_mission_facts: Callable | None = None
     move_researcher: Callable | None = None
     advance_researchers: Callable | None = None
+    migration_candidates: Callable | None = None

@@ -38,7 +38,7 @@ def quote(deps, game, action, target, options):
         raise ValueError('须先登记该地联系')
     mission = echo.get('mission')
     if action == 'mission_wait':
-        if not any(row.get('status') == 'active' for row in (echo.get('mission', {}), echo.get('freight', {}))):
+        if not any(row.get('status') == 'active' for row in (echo.get('mission', {}), echo.get('freight', {}), echo.get('migration', {}))):
             raise ValueError('暂无正在进行的同道行程')
         reason = wait_reason(deps, game)
         if reason or task:
@@ -116,7 +116,7 @@ def year_step(deps, game):
         return
     year = runtime['processed_years'] + 1
     for echo, mission in research_assignments(game):
-        if mission is echo.get('freight'):
+        if mission is not echo.get('mission'):
             continue
         if mission['status'] != 'active' or mission['last_year'] >= year:
             continue

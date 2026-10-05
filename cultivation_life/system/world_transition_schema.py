@@ -54,6 +54,8 @@ def validate_transition_content(profiles, routes, realms):
                 or profiles[route['source']]['tier'] != 3 or route.get('capacity') != 1
                 or route.get('purpose') != 'personal_study'):
             raise ValueError('访学路线仅支持最高界面之间的单人访学')
+        if 'civilian_residency' in route and (mode != TransitionMode.STUDY or type(route['civilian_residency']) is not bool):
+            raise ValueError('民用迁居许可只接受研究通道上的布尔值')
         if 'civilian_material_capacity' in route and (mode != TransitionMode.STUDY
                 or type(route['civilian_material_capacity']) is not int or route['civilian_material_capacity'] not in {0, 1}):
             raise ValueError('民用阵材通道容量无效')

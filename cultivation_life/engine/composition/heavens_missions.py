@@ -1,20 +1,21 @@
 """Civilian researcher facts and movement; no alternate NPC registry or year."""
 from ...content_registry import WORLD_SYSTEMS
 from ...npc_custody import is_free
-from ...person_assignments import route_occupied, research_assignments
+from ...person_assignments import route_occupied, research_assignments, assignment_person, research_assignment
 from ...spatial_people import instance_of
 from ...system.combat.npc_lifecycle import move_world
 from ...system.heavens.definitions import VISIT_DESTINATIONS
 from ...system.heavens.state import get_echo, site_for
-from ...system.heavens import missions, freight
+from ...system.heavens import missions, freight, migration
 
 
 def bind_missions(engine, ports):
-    def facts(game, target, *, check_route=True, assignment="mission"):
+    def facts(game, target, *, check_route=True, assignment="mission", person_id=None):
         deps = ports()
         echo = get_echo(game.heavens_state.get('runtime'), target)
-        npc = deps.resolve_person(game, echo['visitor_id']) if echo else None
         mission = echo.get(assignment) if echo else None
+        identity = (mission['person_id'] if mission else person_id) if assignment == 'migration' else echo['visitor_id'] if echo else None
+        npc = deps.resolve_person(game, identity) if identity else None
         phase = mission['phase'] if mission else 'outbound'
         origin, destination = site_for(deps, game, target), site_for(deps, game, VISIT_DESTINATIONS[target])
         local = origin if phase == 'outbound' else destination
@@ -38,10 +39,12 @@ def bind_missions(engine, ports):
             elif any(npc.id in ids for war in game.wars if war.get('status') in {'active', 'peace_ready'}
                      for ids in war.get('roster', {}).values()):
                 reason = '回访人物已有战事部署'
-        if check_route and not reason and phase != 'studying':
+        if check_route and not reason and phase not in {'studying', 'settling'}:
             route = next((r for r in WORLD_SYSTEMS['world_transition_routes']
                           if r['id'] == f'study:{local.world}:{remote.world}'), None)
-            if (not route or not route['enabled'] or route.get('research_visitors') is not True
+            if (not route or not route['enabled']
+                    or assignment != 'migration' and route.get('research_visitors') is not True
+                    or assignment == 'migration' and route.get('civilian_residency') is not True
                     or route.get('capacity') != 1 or route.get('purpose') != 'personal_study'
                     or route.get('mode') != 'study' or route.get('source') != local.world
                     or route.get('destination') != remote.world
@@ -66,7 +69,7 @@ def bind_missions(engine, ports):
         if reason:
             raise ValueError(reason)
         destination = site_for(deps, game, mission['destination'] if phase == 'outbound' else target)
-        npc = deps.resolve_person(game, echo['visitor_id'])
+        npc = deps.resolve_person(game, assignment_person(echo, mission))
         move_world(npc, destination.world, game.player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
         npc.location_id = destination.location_id
 
@@ -77,5 +80,16 @@ def bind_missions(engine, ports):
             for echo, row in research_assignments(game):
                 if row is echo.get('freight'):
                     freight.year_step(ports(), game, echo, row, runtime['processed_years']+1)
+                elif row is echo.get('migration'):
+                    migration.year_step(ports(), game, echo, row, runtime['processed_years']+1)
 
-    return dict(read_mission_facts=facts, move_researcher=move, advance_researchers=advance)
+    def candidates(game, target):
+        if missions.contact_reason(ports(), game, target):
+            return []
+        used = {row['person_id'] for echo, row in research_assignments(game) if row is echo.get('migration')}
+        return [dict(id=npc.id, name=npc.name, affinity=npc.affinity)
+                for npc in sorted(game.world_npcs.values(), key=lambda npc: npc.id)
+                if npc.id not in used and (npc.affinity or 0) >= 20 and not research_assignment(game, npc.id)
+                and not facts(game, target, assignment='migration', person_id=npc.id)['blocked_reason']]
+
+    return dict(read_mission_facts=facts, move_researcher=move, advance_researchers=advance, migration_candidates=candidates)

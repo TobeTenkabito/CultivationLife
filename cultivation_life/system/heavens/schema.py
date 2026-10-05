@@ -10,7 +10,7 @@ import re
 import math
 from typing import Any
 from .definitions import SITE_IDS, default_site, validate_site, MIRROR_ID, MIRROR_ACTIONS, validate_mirror_definition, RUINS_ID, RUINS_ACTIONS, validate_ruins_definition, OMEN_IDS, validate_omen_definition
-from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS, FREIGHT_ACTIONS
+from .definitions import VISIT_ACTIONS, VISIT_DESTINATIONS, MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -93,7 +93,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -142,6 +142,8 @@ def validate_runtime(runtime):
             validate_mission(echo, runtime)
         if 'freight' in echo:
             validate_freight(echo, runtime)
+        if 'migration' in echo:
+            validate_migration(echo, runtime)
         by_id[echo['id']] = echo
     if sum(echo['application'] is not None for echo in echoes) > 1:
         raise ValueError('只能同时登记一项诸天参悟')
@@ -284,7 +286,7 @@ def validate_runtime(runtime):
                         or task['action'] == 'visit_study' and not visit['studied']
                         or task['action'] == 'visit_return' and visit['status'] != 'returned')):
                 raise ValueError('个人访学任务或路费账目无效')
-        if task['action'] == 'mission_wait' and (not echo.get('mission') or task['duration'] != 1
+        if task['action'] == 'mission_wait' and (not any(echo.get(key) for key in ('mission', 'freight', 'migration')) or task['duration'] != 1
                 or task['person_id'] is not None or escrow != dict(total=0, spent=0, refunded=0, material=None, mp_paid=0)
                 or task['status'] == 'completed' and task['progress'] != 1):
             raise ValueError('等候同道任务无效')
@@ -296,8 +298,35 @@ def validate_runtime(runtime):
             validate_visit(echo, runtime)
     if sum(echo.get('visit', {}).get('status') in {'preparing', 'visiting'} for echo in echoes) > 1:
         raise ValueError('只能持有一项未结束的个人访学')
-    if sum(echo.get(key, {}).get('status') == 'active' for echo in echoes for key in ('mission', 'freight')) > 1:
+    if sum(echo.get(key, {}).get('status') == 'active' for echo in echoes for key in ('mission', 'freight', 'migration')) > 1:
         raise ValueError('只能同时安排一项同道回访')
+
+
+def validate_migration(echo, runtime):
+    row = echo['migration']
+    fields = {'person_id', 'destination', 'status', 'phase', 'progress', 'spent', 'refunded', 'elapsed', 'started_at', 'last_year'}
+    if (type(row) is not dict or set(row) != fields or not isinstance(row['person_id'], str) or not row['person_id']
+            or row['destination'] != VISIT_DESTINATIONS[echo['id']]
+            or not isinstance(row['status'], str) or row['status'] not in {'active', 'completed', 'cancelled', 'failed'}
+            or not isinstance(row['phase'], str) or row['phase'] not in {'outbound', 'settling'}
+            or not echo.get('visit', {}).get('studied') or not echo.get('correspondence_completed')):
+        raise ValueError('民用迁居许可或人物字段无效')
+    for key in ('progress', 'spent', 'refunded', 'elapsed', 'started_at', 'last_year'):
+        require_counter(row[key], '迁居'+key)
+    settling = row['phase'] == 'settling'
+    progress = row['progress']
+    spent = 2000+2000*progress if settling else 1000*progress
+    if (row['elapsed'] != progress+(2 if settling else 0) or row['spent'] != spent
+            or not row['started_at'] <= row['last_year'] <= runtime['processed_years']
+            or row['elapsed'] > row['last_year']-row['started_at']
+            or progress > 1
+            or row['status'] == 'completed' and (not settling or progress != 1)
+            or settling and progress == 1 and row['status'] != 'completed'
+            or row['status'] == 'cancelled' and settling
+            or row['spent']+row['refunded'] > 4000
+            or row['status'] == 'active' and row['refunded'] != 0
+            or row['status'] != 'active' and row['spent']+row['refunded'] != 4000):
+        raise ValueError('民用迁居年度、进度或经费不守恒')
 
 
 def validate_freight(echo, runtime):
@@ -405,7 +434,7 @@ def validate_echo(echo):
         'cycle', 'observed_cycle', 'history_checked', 'exchanged', 'maintained',
         'maintenance_started', 'applications_used', 'reward_base', 'reward_claimed',
         'application', 'project_stones'}
-    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed', 'visit', 'mission', 'freight'} != keys or echo['id'] not in SITE_IDS:
+    if type(echo) is not dict or set(echo) - {'site', 'correspondence_completed', 'visit', 'mission', 'freight', 'migration'} != keys or echo['id'] not in SITE_IDS:
         raise ValueError('诸天实例字段无效')
     if 'visit' in echo:
         visit = echo['visit']
@@ -638,6 +667,9 @@ def validate_references(game):
     if game.family:
         people.update(npc.id for npc in game.family.npcs)
     visitors = [echo['visitor_id'] for echo in runtime_contacts(runtime)]
+    migrants = [echo['migration']['person_id'] for echo in runtime_contacts(runtime) if echo.get('migration')]
+    if len(set(migrants)) != len(migrants) or any(identity not in people for identity in migrants):
+        raise ValueError('迁居人物重复登记或缺少权威引用')
     if len(set(visitors)) != len(visitors) or any(identity not in people for identity in visitors):
         raise ValueError('诸天合作人物引用已损坏，保留原档')
     held = [task['escrow']['material']['id'] for task in runtime['tasks'] if task['escrow']['material']]
