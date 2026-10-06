@@ -3,13 +3,94 @@
   function render(host, campaign, ui, kit) {
     const {node, title, back, subview, renderActions, empty} = kit;
     back(host, '返回边情目录', 'frontier');
-    title(host, '岚疆界门', '一地的守备与去留，取决于真实人物、道路和补给。');
+    const heading = node('header', null, 'heavens-campaign-heading');
+    title(heading, '岚疆界门', '一地的守备与去留，取决于真实人物、道路和补给。');
+    host.append(heading);
     if (!campaign?.known) {
       empty(host, '尚无施工情报', '取得现场见闻或守方送达的预警后，才能查阅此地战局。');
       return;
     }
     const actions = (body, names) => renderActions(body, campaign.actions.filter(a => names.includes(a.action)));
-    subview(host, [['dispatches', '军情'], ['gate', '界门'], ['engagement', '交锋'], ['aid', '援助']], 'dispatches', (body, section) => {
+    const chooser = (body, names, label) => {
+      const rows = campaign.actions.filter(a => names.includes(a.action));
+      const select = node('select'); select.setAttribute('aria-label', label);
+      for (const row of rows) { const option = node('option', row.label); option.value = row.action; select.append(option); }
+      select.value = (rows.find(a => a.enabled) || rows[0])?.action || '';
+      const field = node('label', label, 'heavens-campaign-field'); field.append(select);
+      const detail = node('div'); body.append(field, detail);
+      const update = () => {detail.replaceChildren(); renderActions(detail, rows.filter(a => a.action === select.value));};
+      select.onchange = update; update();
+    };
+    subview(host, [['dispatches', '军情'], ['gate', '界门'], ['engagement', '交锋'], ['aid', '援助'], ['settlement', '地方']], 'dispatches', (body, section) => {
+      if (section === 'settlement') {
+        const state = campaign.settlement;
+        if (!state) { empty(body, '地方职责尚未登记', '实际年度推进后，再到当地查阅。'); return; }
+        const select = node('select'); select.setAttribute('aria-label', '地方档案');
+        for (const [value, text] of [['order', '地方秩序'], ['treaty', '议约文书'], ['recovery', '救护与去留']]) {
+          const option = node('option', text); option.value = value; select.append(option);
+        }
+        select.value = ui.campaignLocal || 'order';
+        const label = node('label', '查阅档案', 'heavens-campaign-field'); label.append(select);
+        const detail = node('div', null, 'heavens-campaign-detail'); body.append(label, detail);
+        const update = () => {
+          ui.campaignLocal = select.value; detail.replaceChildren();
+          if (select.value === 'order') {
+            const card = node('article', null, 'heavens-territory');
+            card.append(node('small', '人界 · 岚疆草原'), node('h4', state.control || '尚无现场见闻'));
+            const route = node('ol', null, 'heavens-territory-route'); route.setAttribute('aria-label', '地点关系');
+            for (const text of ['无棣原\n接应与议报', '岚疆草原\n本案唯一管辖点', '赤髓城\n异界来路']) route.append(node('li', text));
+            card.append(route, node('p', '控制只及岚疆。其他地点和宗门不会随此地交锋转属。'));
+            detail.append(card);
+            if (state.resolution) detail.append(node('p', state.resolution, 'heavens-finding'));
+            if (state.duties.length) {
+              const duties = node('dl', null, 'heavens-campaign-duties');
+              for (const duty of state.duties) duties.append(node('dt', duty.duty), node('dd', duty.name));
+              detail.append(duties);
+            }
+            const policies = node('ul', null, 'heavens-evidence');
+            for (const policy of state.policies) policies.append(node('li', policy));
+            detail.append(policies, node('small', '地方职责依靠原驻军与实有专项；缺人、断供或授权失效时，原管辖不会自行延续。'));
+            return;
+          }
+          if (select.value === 'treaty') {
+            const treaty = state.treaty;
+            const document = node('article', null, 'heavens-treaty-document');
+            document.append(node('small', '地方议约 · 仅限岚疆'), node('h4', treaty?.name || '双方具名代表议约'));
+            if (treaty) document.append(node('p', `签于 ${treaty.signed_at} 年 · 约定期限至 ${treaty.expires_at} 年`));
+            else document.append(node('p', '你可以提出方案。双方代表须持有独立委任并实际到场，玩家不能代替宗门签署。'));
+            const clauses = node('ol', null, 'heavens-evidence');
+            for (const clause of treaty?.clauses || state.clauses.truce) clauses.append(node('li', clause));
+            document.append(clauses); detail.append(document);
+            if (!treaty) {
+              const choices = node('select'); choices.setAttribute('aria-label', '议约方案');
+              for (const [kind, text] of [['truce', '当地停战'], ['vassal', '限期附约'], ['withdrawal', '修复后撤军']]) {
+                const option = node('option', text); option.value = kind; choices.append(option);
+              }
+              const field = node('label', '拟议条款', 'heavens-campaign-field'); field.append(choices);
+              const control = node('div'); detail.append(field, control);
+              const choose = () => {
+                clauses.replaceChildren(); for (const clause of state.clauses[choices.value]) clauses.append(node('li', clause));
+                control.replaceChildren(); actions(control, [`campaign_${choices.value}`]);
+              };
+              choices.onchange = choose; choose();
+            } else detail.append(node('small', '这是你见证的原签署文书。远方履约情况须通过现场查验；旧文书不代表新任者已经续约。'));
+            return;
+          }
+          title(detail, '救护与去留', '败退不结束修行。留在当地调息，或沿原道路回到无棣原。');
+          if (state.patients.length) {
+            const roster = node('div', null, 'heavens-campaign-roster');
+            for (const patient of state.patients) {
+              const card = node('article'); card.append(node('small', patient.treated ? '本案已救护' : `实际伤势 ${patient.wounds} 重`), node('strong', patient.name)); roster.append(card);
+            }
+            detail.append(roster);
+          } else detail.append(node('p', state.local ? '现场未发现待救护的伤员。' : '伤员情况须抵达现场确认。'));
+          const route = node('ol', null, 'heavens-visit-route');
+          for (const text of ['岚疆出发', '循本界道路', '无棣原接应']) route.append(node('li', text));
+          detail.append(route, node('small', '途中事件可中断行程；伤员死亡、离开或受控时不能隔空救护。释放只适用于你实际控制的原俘虏。'));
+          chooser(detail, ['campaign_relief', 'campaign_release', 'campaign_evacuate'], '选择当前事务');
+        };
+        select.onchange = update; update(); return;
+      }
       if (section === 'dispatches') {
         const list = node('ol', null, 'heavens-timeline');
         for (const report of [...campaign.reports].reverse()) {
@@ -64,8 +145,13 @@
       else if (aid) {
         empty(body, aid.available ? '物资已到无棣原' : '已登记援助申请', '到无棣原办理实际交接；远方运输进度不会实时显示。');
         actions(body, ['campaign_collect']);
-      } else actions(body, ['campaign_report', 'campaign_aid', 'campaign_decline']);
-      actions(body, ['campaign_wait']);
+      } else {
+        body.append(node('p', '阵材交付后归你使用；这份物资不会附带援军，也不会改变地方归属。', 'heavens-finding'));
+        const request = campaign.actions.find(a => a.action === 'campaign_report');
+        if (request?.enabled) renderActions(body, [request]);
+        else chooser(body, ['campaign_aid', 'campaign_decline'], '援助意向');
+      }
+      if (aid && !aid.collected && !aid.refused && !aid.cancelled) actions(body, ['campaign_wait']);
     });
   }
   window.HeavensCampaign = {render};

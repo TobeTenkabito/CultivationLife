@@ -117,6 +117,7 @@ def _compact_sect_roster(deps: WorldRuntimeDependencies, game: GameState, sect: 
     if campaign:
         protected.update(u['person_id'] for u in campaign['units'])
         protected.add(campaign['authorization']['issuer_id'])
+        protected.update(m['issuer_id'] for m in campaign.get('settlement', {}).get('mandates', {}).values())
         for key in ('defense', 'aid'):
             permit = (campaign.get(key) or {}).get('authorization')
             if permit:

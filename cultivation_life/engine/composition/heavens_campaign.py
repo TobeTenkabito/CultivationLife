@@ -2,7 +2,7 @@
 import copy
 
 from ...content_registry import WORLD_SYSTEMS
-from ...npc_custody import is_free
+from ...npc_custody import is_free, release_person
 from ...person_assignments import research_assignment
 from ...spatial_people import instance_of
 from ...system.faction_geography import faction_site
@@ -10,7 +10,7 @@ from ...system.formation_system import make_formation_material_instance
 from ...system.combat.npc_lifecycle import move_world
 from ...system.combat.npc_battle import resolve_local_engagement
 from ...system.doctrine.provider import battle_sources
-from ...system.heavens.campaign_definitions import SOURCE, DEFENDER, SOURCE_SITE, TARGET_SITE
+from ...system.heavens.campaign_definitions import SOURCE, SOURCE_SITE, TARGET_SITE, REPORT_SITE
 
 
 def bind_campaign(engine):
@@ -79,6 +79,7 @@ def bind_campaign(engine):
     def facts(game, unit):
         npc = person(game, unit['person_id'])
         return dict(alive=bool(npc and npc.alive), free=free(game, npc),
+                    held_by_player=bool(npc and npc.roster_state == 'held' and (npc.custody or {}).get('holder_id') == game.id),
                     world=npc.world if npc else None, location=npc.location_id if npc else None,
                     rank=npc.realm_index if npc else 0, wounds=npc.wounds if npc else 4,
                     name=npc.name if npc else '已登记人物')
@@ -128,7 +129,31 @@ def bind_campaign(engine):
             WORLD_SYSTEMS.get('transcendent_combat', {}), rng, now=game.player.age,
             sources=battle_sources(game, {a.id: a, b.id: b}))
 
+    def escape_plan(game):
+        p = game.player
+        if p.world != 'human' or p.location_id != TARGET_SITE or not WORLD_SYSTEMS['world_profiles']['human']['enabled']:
+            return None
+        plan = engine.maps.travel_plan('human', TARGET_SITE, REPORT_SITE, p.realm_index,
+                                      engine._monster_travel_multiplier(p, REPORT_SITE))
+        return dict(years=plan.years, route=list(plan.route)) if plan.status == 'ok' and 0 < plan.years <= 1000 else None
+
+    def escape(game):
+        if not escape_plan(game):
+            raise ValueError('原撤离道路不再通行')
+        game.player.location_id = REPORT_SITE
+        engine._clear_market(game)
+
+    def relief(game, unit):
+        npc = person(game, unit['person_id'])
+        npc.wounds = max(0, npc.wounds-1)
+
+    def release(game, unit):
+        release_person(game, unit['person_id'])
+        game.player.prisoners[:] = [p for p in game.player.prisoners if (p.get('npc_id') or p.get('id')) != unit['person_id']]
+
     return dict(campaign_authority=authority, campaign_roster=roster, campaign_deploy=deploy,
                 campaign_facts=facts, campaign_road=route, campaign_move=move, campaign_materials=materials,
                 campaign_fight=fight, campaign_battle=battle,
+                campaign_escape_plan=escape_plan, campaign_escape=escape,
+                campaign_relief=relief, campaign_release=release,
                 campaign_world_open=lambda world: bool(WORLD_SYSTEMS['world_profiles'][world]['enabled']))

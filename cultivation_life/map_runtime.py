@@ -9,6 +9,7 @@ from .runtime import decode_rng, encode_rng, now_iso
 from .system.possession_system import advance_player_age
 from .time_dependencies import MapTravelDependencies
 from .time_flow import advance_elapsed_year
+from .system.heavens.local_control import arrival_notice
 
 def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> dict[str, Any]:
     game = deps._load(game_id)
@@ -53,6 +54,7 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
             result = "arrived"
             route_names = [deps.maps.location(player.world, node)["name"] for node in plan.route]
             summary = f"你沿{'—'.join(route_names)}行进，耗时 {plan.years} 年抵达目的地。"
+            summary += arrival_notice(game)
     else:
         result = "interrupted"
         summary = f"远行在第 {player.age - start_age} 年被突发变故中断，你仍停留在原地。"

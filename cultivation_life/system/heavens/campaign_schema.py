@@ -2,6 +2,7 @@
 from .campaign_definitions import (CAMPAIGN_ID, SOURCE, DEFENDER, DONOR, TARGET_SITE, REPORT_SITE,
     SOURCE_SITE, BUILD_YEARS, BUDGET, MANDATE_YEARS, INITIAL_SUPPLY, ANNUAL_COST, UNIT_PHASES,
     ROUTE_ID, EVAC_ROUTE, AID_ROUTE, AID_BUDGET, AID_COST, DEFENSE_BUDGET, DURATIONS, CAMPAIGN_ACTIONS)
+from .settlement_schema import validate_settlement
 
 
 def counter(value):
@@ -47,7 +48,7 @@ def validate_campaign(row, runtime):
     keys = {'id','revision','created_at','last_year','status','authorization','evacuation_route','evidence','motive',
             'units','budget','materials','gate','supply','shipment','deliveries','defense','defense_requested',
             'aid','known','surveyed','warning_at','warning_received','reports','battles','last_battle','reason'}
-    if type(row) is not dict or set(row) != keys or row['id'] != CAMPAIGN_ID or type(row['revision']) is not int or row['revision'] != 1:
+    if type(row) is not dict or set(row)-{'settlement'} != keys or row['id'] != CAMPAIGN_ID or type(row['revision']) is not int or row['revision'] != 1:
         raise ValueError('军事案例字段或版本无效')
     for key in ('created_at','last_year','deliveries','last_battle'):
         counter(row[key])
@@ -208,10 +209,13 @@ def validate_campaign(row, runtime):
         counter(battle['year'])
         if not row['created_at'] <= battle['year'] <= now or battle['attacker'] not in identities or battle['defender'] not in identities:
             raise ValueError('局部交战缺少实际人物或年份')
+    if 'settlement' in row:
+        validate_settlement(row['settlement'], row, now)
 
 
 def validate_campaign_task(task, row):
-    if (task['action'] not in CAMPAIGN_ACTIONS or task['duration'] != DURATIONS[task['action']]
+    duration_valid = (type(task['duration']) is int and 1 <= task['duration'] <= 1000) if task['action'] == 'campaign_evacuate' else task['duration'] == DURATIONS.get(task['action'])
+    if (task['action'] not in CAMPAIGN_ACTIONS or not duration_valid
             or task['cycle'] != 0 or task['escrow'] != dict(total=0,spent=0,refunded=0,material=None,mp_paid=0)):
         raise ValueError('军事个人任务费用或工期无效')
     if task['status'] == 'completed':
@@ -222,8 +226,16 @@ def validate_campaign_task(task, row):
                 or task['action'] == 'campaign_aid' and row['aid'] is None
                 or task['action'] == 'campaign_collect' and (not row['aid'] or row['aid']['status'] != 'claimed')):
             raise ValueError('军事个人任务完成事实无效')
+        state = row.get('settlement', {})
+        if (task['action'] in {'campaign_truce', 'campaign_vassal', 'campaign_withdrawal'}
+                and (state.get('treaty') or {}).get('kind') != task['action'].removeprefix('campaign_')
+                or task['action'] == 'campaign_relief' and task['person_id'] not in state.get('treated', [])):
+            raise ValueError('战后任务缺少实际协议或救护事实')
     if task['action'] in {'campaign_assault','campaign_capture'}:
         if task['person_id'] not in {u['person_id'] for u in row['units'] if u['faction_id'] == SOURCE}:
             raise ValueError('军事交锋引用无效')
+    elif task['action'] in {'campaign_relief', 'campaign_release'}:
+        if task['person_id'] not in {u['person_id'] for u in row['units']}:
+            raise ValueError('救护缺少原人物引用')
     elif task['person_id'] is not None:
         raise ValueError('非交锋任务不能引用对手')
