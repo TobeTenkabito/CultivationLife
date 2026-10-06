@@ -1,17 +1,19 @@
 /* A single readable dossier at a time; actions share the existing preview flow. */
 window.HeavensIncidents = (() => {
-  const stages={unseen:'待求证',surveying:'求证中',surveyed:'待赴现场',treated:'待返程复核',closed:'已结案'};
   function render(host,row,ui,helpers){
-    const {node,title,back,subview,renderActions}=helpers;
+    const {node,back,subview,renderActions}=helpers;
     back(host,'返回诸界','worlds');
-    title(host,row.name,`${row.world_name} · ${stages[row.stage]}`);
+    window.HeavensAtlas.docket(host,row,node);
     subview(host,[['record','见闻档案'],['response','现场事务'],['aftermath','后续影响']],'record',(body,section)=>{
       body.classList.add('heavens-incident');
       if(section==='record'){
         body.append(node('blockquote',row.glimpse,'heavens-finding'));
         const route=node('ol',null,'heavens-incident-route');route.setAttribute('aria-label','亲历路线');
-        for(const [step,text] of [['壹',`${row.location_name} · 求证`],['贰',`${row.field_name} · 处理`],['叁',`${row.location_name} · 复核`]]){
-          const stop=node('li');stop.append(node('span',step),node('strong',text));route.append(stop);
+        const completed={unseen:0,surveying:0,surveyed:1,treated:2,closed:3}[row.stage];
+        for(const [i,[step,text]] of [['壹',`${row.location_name} · 求证`],['贰',`${row.field_name} · 处理`],['叁',`${row.location_name} · 复核`]].entries()){
+          const stop=node('li');stop.classList.toggle('is-complete',i<completed);stop.classList.toggle('is-current',i===completed);
+          if(i===completed)stop.setAttribute('aria-current','step');
+          stop.append(node('span',i<completed?'✓':step),node('strong',text),node('small',i<completed?'已完成':i===completed?'当前步骤':'后续'));route.append(stop);
         }
         body.append(route,node('p',`参与需未封限的 ${row.rank} 阶以上修为。地点之间通过普通地图行走，行程另计。`));
         if(row.evidence){const article=node('article',null,'heavens-incident-document');article.append(node('small','已取得的证据'),node('p',row.evidence));body.append(article);}

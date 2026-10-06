@@ -155,7 +155,7 @@
     title(host,'一隅见闻','从亲历的征兆出发，逐步认识诸界。');
     const local=h.sites.find(row=>row.current),inside=anomaly(h);
     const incident=(h.incidents||[]).find(row=>row.current);
-    if(incident){const feature=node('article',null,'heavens-incident-document');feature.append(node('small',`${incident.world_name} · 地方事务`),node('h4',incident.name),node('p',incident.glimpse),button('查阅本界事务 ›',()=>openTarget(incident.id)));host.append(feature);}
+    if(incident)host.append(window.HeavensAtlas.feature(incident,node,()=>openTarget(incident.id)));
     if(inside){const b=button(`返回${inside.name} · 当前所在 ›`,()=>openTarget(inside.id));b.className='heavens-task-strip';host.append(b);}
     else if(local){const b=button(`前往${local.name.split(' · ')[0]}的联系档案 ›`,()=>openTarget(local.id));b.className='heavens-task-strip';host.append(b);}
     if(!h.generation_enabled){host.append(node('p','新联系发现已关闭，已有认识仍保留。','heavens-lead'),button('调整发现偏好',()=>go('settings')));}
@@ -177,6 +177,7 @@
       for(const region of regions){const option=node('option',`${region.world_name}${region.current?' · 当前所在':''}`);option.value=region.world;select.append(option);}
       select.value=world;select.onchange=()=>{ui.world=select.value;render(current,ctx);};host.append(select);
       const local=regions.find(r=>r.world===world), list=node('div',null,'heavens-directory');
+      if(local)host.append(window.HeavensAtlas.feature(local,node));
       if(local)tile(list,{name:local.name,description:`${local.location_name} → ${local.field_name} → 返程复核`,status:local.stage==='closed'?'已留录':'地方事务',glyph:'录',onClick:()=>openTarget(local.id)});
       for(const site of h.sites.filter(s=>!regions.length||s.world===world))tile(list,{name:site.name,description:'跨界往来 · 求证、访学与托运',status:site.known?'已有档案':'联系地点',glyph:'界',onClick:()=>openTarget(site.id)});
       host.append(list);return;

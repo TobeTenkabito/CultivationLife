@@ -200,8 +200,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(web!=null,"Release WebView did not start");
             while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
             async("GameThemes.ready");
-            String baseVersion=BuildConfig.VERSION_NAME.split("-android")[0];
-            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch");
+            String baseVersion=getTargetContext().getPackageManager().getPackageInfo(getTargetContext().getPackageName(),0).versionName.split("-android")[0];
+            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
@@ -287,6 +287,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from cultivation_life import server\nfrom cultivation_life.system.heavens.incident_definitions import INCIDENTS\nfrom cultivation_life.system.heavens.state import initialize\nfrom cultivation_life.rules import max_hp,max_mp,add_item\ng=server.ENGINE.store.load('"+id+"')\ninitialize(g)\ng.player.world='human'\ng.player.location_id='lanjiang_steppe'\ng.player.realm_index=2\ng.player.lifespan=None\ng.player.next_tribulation_age=999999\ng.player.hp=max_hp(g.player)\ng.player.mp=max_mp(g.player)\nadd_item(g.player,'spirit_stone',10000)\ng.settings['silent_events']=True\ng.heavens_state['runtime']['incidents']={d.id:dict(stage='surveyed',choice=None,opened_at=0,closed_at=None,remaining=0,base=0.0,claimed=0.0) for d in INCIDENTS}\ng.heavens_state['definition_versions'].update({d.id:1 for d in INCIDENTS})\nserver.ENGINE.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 tapSelector("[data-panel-target=heavens]");
+                check(Boolean.TRUE.equals(js("!!document.querySelector('#strategy-dock [data-panel-target=heavens]') && !document.querySelector('.left-dock [data-panel-target=heavens]')")),"Heavens belongs to social dock");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("document.querySelector('#theme-open').click();true");
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");
@@ -328,9 +329,19 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("!document.querySelector('#debug-console-output pre:last-child')?.classList.contains('debug-error')")), "Command result: "+command);
                 }
                 check(Boolean.TRUE.equals(js("game.player.inventory.find(x=>x.id==='spirit_stone').quantity===1234567 && !!sessionStorage.getItem('cultivation-debug-session')")), "Isolated resource mutation");
+                tapSelector("#debug-heavens>summary");
+                tapSelector("#debug-heavens .debug-actions button:nth-child(1)");
+                waitForJs("!busy && !document.querySelector('#debug-heavens-target').disabled && document.querySelector('#debug-heavens-action').options.length>0", "Heavens workbench loaded");
+                check(Boolean.TRUE.equals(js("document.querySelector('#debug-heavens-target').options.length>=12")), "Heavens target discovery");
+                js("(()=>{window.__heavensWatch=game.heavens.watch;const s=document.querySelector('#debug-heavens-target');s.value='configuration';s.dispatchEvent(new Event('change'));const a=document.querySelector('#debug-heavens-action');a.value='1';a.dispatchEvent(new Event('change'));return true;})()");
+                tapSelector("#debug-heavens .debug-actions button:nth-child(2)");
+                waitForJs("!busy && !document.querySelector('#debug-heavens .debug-actions button:nth-child(3)').disabled", "Heavens preview ready");
+                tapSelector("#debug-heavens .debug-actions button:nth-child(3)");
+                waitForJs("!busy && game.heavens.watch!==__heavensWatch && !document.querySelector('#debug-heavens-target').disabled", "Heavens isolated native commit");
                 for(String theme:new String[]{"a","b","c","d","e","f"}) {
                     js("document.querySelector('[data-theme-choice="+theme+"]').click();true");
                     check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#debug-console').getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+1 && !!document.querySelector('#debug-session-banner').textContent;})()")), "Console geometry theme "+theme);
+                    check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#debug-heavens');return r.scrollWidth<=r.clientWidth+1 && Array.from(r.querySelectorAll('select,button')).every(e=>e.getBoundingClientRect().height>=44);})()")), "Heavens workbench geometry "+theme);
                 }
                 // Exercise the real SAF result handlers with a deterministic test URI.
                 File debugFile=new File(getTargetContext().getExternalFilesDir(null),"verification/debug-export.json");

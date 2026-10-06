@@ -25,6 +25,8 @@ def main():
     passed = re.search(r'(\d+) passed in', test_log)
     require(bool(passed) and 'failed' not in test_log.lower() and 'ERROR' not in test_log, 'Full regression suite must pass')
     require('594 dossier checks' in log(f'heavens-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'heavens-ui-{RELEASE_ID}.log'), 'Eleven-world UI acceptance must pass')
+    workbench = log(f'heavens-workbench-ui-{RELEASE_ID}.log')
+    require('real isolated execution and snapshot restore passed' in workbench and 'Traceback' not in workbench, 'Heavens workbench UI must pass')
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
@@ -50,6 +52,7 @@ def main():
         'themes': list('abcdef'),
         'save_schema': SAVE_SCHEMA_VERSION,
         'validation': [
+            'Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified',
             'Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} automated regression tests passed',
             'Six-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',

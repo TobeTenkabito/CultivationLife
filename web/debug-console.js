@@ -3,7 +3,7 @@
   'use strict';
   let sessionId = sessionStorage.getItem('cultivation-debug-session') || '';
   let catalog = [], history = [], cursor = 0, hooks, enabled = false, initialized = false;
-  let panel, output, input, badge, entry, importInput;
+  let panel, output, input, badge, entry, importInput, heavens;
   let nativeImportParts = [];
   const node = (tag, text, id) => {
     const element = document.createElement(tag);
@@ -26,24 +26,26 @@
     document.getElementById('debug-tools').hidden = !sessionId;
   }
   function setSession(value) {
+    heavens?.invalidate();
     sessionId = value || '';
     if (sessionId) sessionStorage.setItem('cultivation-debug-session', sessionId);
     else sessionStorage.removeItem('cultivation-debug-session');
     updateBadge();
   }
-  async function execute(command, bundle) {
+  async function execute(command, bundle, request = {}, quiet = false, focusInput = true) {
     if (hooks.busy()) { print('请等待当前游戏操作完成。', true); return; }
     hooks.lock(true);
     input.disabled = true;
-    print('> ' + command);
+    if (!quiet) print('> ' + command);
     let switched = false;
     try {
       const response = await fetch('/api/debug/command', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({command, game_id: hooks.gameId(), session_id: sessionId || null, bundle}),
+        body: JSON.stringify({command, game_id: hooks.gameId(), session_id: sessionId || null, bundle, ...request}),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Debug request failed.');
+      if (result.changed || ['session', 'simulation', 'mutation', 'snapshot'].includes(result.type)) heavens?.invalidate();
       catalog = result.catalog || catalog;
       const data = result.data;
       if (data && Object.prototype.hasOwnProperty.call(data, 'session_id') && result.type === 'session') {
@@ -51,18 +53,19 @@
         switched = true;
       }
       if (data?.download) offerDownload(data.download);
-      else print(data);
-      if (result.diff?.total) print(result.diff);
+      else if (!quiet) print(data);
+      if (!quiet && result.diff?.total) print(result.diff);
       if (data?.return_to_title) hooks.reset();
       // Query commands must remain pure: do not follow them with a gameplay GET.
       if (!data?.return_to_title && (result.changed || result.type === 'session') && (data?.game_id || hooks.gameId())) {
         await hooks.refresh(data?.game_id || hooks.gameId());
       }
+      return result;
     } catch (error) {
       print(error.message, true);
       if (switched) hooks.reset();
     }
-    finally { hooks.lock(false); input.disabled = false; input.focus(); }
+    finally { hooks.lock(false); input.disabled = false; if (focusInput) input.focus(); }
   }
   function offerDownload(download) {
     const wrap = node('div');
@@ -164,7 +167,11 @@
       } else if (event.key === 'Tab') { event.preventDefault(); complete(); }
       else if (event.ctrlKey && event.key.toLowerCase() === 'l') { event.preventDefault(); output.replaceChildren(); }
     };
-    panel.append(heading, description, actions, output, form);
+    heavens = window.DebugHeavens.create({
+      execute: (command, bundle, request, quiet) => execute(command, bundle, request, quiet, false),
+      hasSession: () => Boolean(sessionId),
+    });
+    panel.append(heading, description, actions, heavens.element, output, form);
     const tools = node('div', '', 'debug-tools'); tools.append(badge, entry);
     const brand = document.querySelector('.brand');
     if (brand) brand.after(tools); else document.body.prepend(tools);

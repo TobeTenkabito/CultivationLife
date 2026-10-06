@@ -55,6 +55,7 @@ def write_success_logs(root):
     rid = package_windows.RELEASE_ID
     logs = {f'release-{rid}-tests.log': '1518 passed in 441.36s',
             f'heavens-ui-{rid}.log': '594 dossier checks passed',
+            f'heavens-workbench-ui-{rid}.log': 'real isolated execution and snapshot restore passed',
             f'exe-{rid}-verification.log': 'EXE verified: old binary\nEXE verified: old binary'}
     logs.update({f'{check}-ui-{rid}.log': 'passed'
                  for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
