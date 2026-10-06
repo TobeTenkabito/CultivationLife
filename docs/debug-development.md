@@ -1,6 +1,29 @@
 # Debug 系统开发规范与控制台使用
 
-适用基线：本体 **1.59.2**、存档结构 **8**。功能默认关闭，发布包与源码共用下面的隔离与调用契约。
+适用基线：本体 **2.0.1**、存档结构 **9**。控制台始终可用，外部 Agent 接口仍按 Debug 配置开放。发布包与源码共用下面的隔离与调用契约。
+
+### 诸天调试工作台
+
+控制台内展开“诸天调试 · 状态与行动”，先创建调试副本，再“读取诸天”。目标选择包含十一界地方事务、四界联系、异象、已知战局与进行中的个人任务。选择行动后显示可用性及受限原因；“预览行动”检查投入，“在副本执行”沿正式规则推进。高级参数折叠在“行动参数”内；切换目标、恢复快照或修改副本后必须重新预览。
+
+- `heavens inspect [target_id]`：在一次性临时引擎中读取公开投影，并附独立副本的诸天原始状态。属于 `preview`，不写回整理、RNG、年度或成就。原始状态只出现在调试接口，不进入普通诸天页面。
+- `heavens act <action> <options> [target_id]`：自动获取本次行动的正式序号与诸天修订号，先核价再执行。地点、修为、工时、灵石、托管、事件暂停照常生效；失败沿现有调试事务回滚。它不生成战争人物、不直接完成任务、不传送角色。
+- 原有 `heavens view`、`heavens preview`、`heavens command` 保留，适合分别检查投影、报价和精确回执。
+
+例如在独立副本中执行：
+
+```text
+debug start
+heavens inspect
+heavens inspect human_beacon
+heavens preview incident_survey '{}' human_beacon
+snapshot create before_heavens
+heavens act incident_survey '{}' human_beacon
+snapshot restore before_heavens
+heavens act configure '{"watch":false}'
+```
+
+人物须实际位于无棣原并满足本案条件。Agent 通过同一 Registry 自动发现 `cultivation_heavens_inspect`、`cultivation_heavens_act` 工具；结构化写入必须带当前独立会话 `expected_revision` 和唯一 `request_key`。不确定是否成功时沿原参数与同一个键重试，避免再次推进年份。控制台工作台也使用该回执契约。
 
 ## 1. 优先遵循的开发范式
 

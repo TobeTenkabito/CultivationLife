@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
   <script src="/theme-boot.js?v=1.45.0"></script>
-  <link rel="stylesheet" href="/style.css?v=2.0.0">
+  <link rel="stylesheet" href="/style.css?v=2.0.1">
   <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/common.css?v=1.45.0">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=2">
-  <link rel="stylesheet" href="/tutorial.css?v=2.0.0">
+  <link rel="stylesheet" href="/tutorial.css?v=2.0.1">
   <link rel="stylesheet" href="/npc-contacts.css?v=1.51.1">
   <link rel="stylesheet" href="/asura-court-panel.css?v=1.55.0">
   <link rel="stylesheet" href="/upper-energy.css?v=1.55.0">
@@ -255,7 +255,7 @@
             <div id="faction-roster" class="faction-roster hidden"><div class="roster-head"><h3>宗门名单</h3><span id="faction-roster-note"></span></div><div id="faction-roster-list"></div></div>
           </div>
         </article>
-        <article id="heavens-card" class="paper utility-panel left-panel" role="dialog" aria-modal="false" aria-label="诸天联系">
+        <article id="heavens-card" class="paper utility-panel" role="dialog" aria-modal="false" aria-label="诸天联系">
           <div class="section-title"><div><p class="eyebrow">由一隅识诸天</p><h2>诸天</h2></div><button id="heavens-toggle" type="button">关闭</button></div>
           <div id="heavens-content"></div>
         </article>
@@ -290,7 +290,7 @@
           <div id="spirit-field-plots" class="spirit-field-plots"></div>
           <details class="alchemy-workbench"><summary>丹炉 · 任意药材配伍</summary><p class="muted">勾选任意品种与数量的药材，再选择目标丹药。成功率由丹药品阶、炼丹等级、投入数量与药材年份品质共同决定。</p><select id="alchemy-target"></select><div id="alchemy-materials" class="alchemy-materials"></div><button id="alchemy-refine" type="button">开炉炼丹</button></details>
         </article>
-        <article id="relationship-card" class="paper utility-panel left-panel relationship-panel" role="dialog" aria-modal="false" aria-label="人际关系">
+        <article id="relationship-card" class="paper utility-panel relationship-panel" role="dialog" aria-modal="false" aria-label="人际关系">
           <div class="section-title"><div><p class="eyebrow">尘缘牵系</p><h2>人际关系</h2></div><div class="panel-heading"><span>师徒、道友、道侣、侍妾与同行</span><button id="relationship-toggle" type="button">关闭</button></div></div>
           <section id="npc-contacts" aria-label="重要人物交往"></section>
           <section class="concubines"><h3>侍妾</h3><div id="concubine-status"></div><div id="concubine-list"></div></section>
@@ -462,7 +462,7 @@
         <article id="ending-card" class="paper ending-card hidden"><p class="eyebrow">尘缘已了</p><h2>此生落幕</h2><p id="death-reason"></p><div id="post-battle-possession" class="hidden"><p class="post-battle-possession-lead">本魂尚可借俘虏肉身还魂。选择后将立即消耗一次夺舍次数，并改用该 NPC 的年龄与寿元。</p><div id="post-battle-possession-choices" class="choices"></div><p class="muted">若不夺舍，可直接再入轮回，结束此存档的人生。</p></div><button id="restart-button" class="primary">再入轮回</button></article>
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
-      <nav class="strategy-dock left-dock" aria-label="个人窗口">
+      <nav class="strategy-dock left-dock" aria-label="个人修行">
         <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
         <button type="button" data-panel-target="immortal-veins" title="仙脉" class="hidden"><span>脉</span><small>仙脉</small></button>
         <button type="button" data-panel-target="combat-plan" title="战斗预案" class="hidden"><span>策</span><small>预案</small></button>
@@ -482,7 +482,6 @@
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
         <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
-        <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
         <button type="button" data-panel-target="bloodline" data-dlc="monster" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
         <button type="button" data-panel-target="ghost-soul" data-dlc="ghost" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
@@ -492,12 +491,13 @@
         <button type="button" data-panel-target="crafting" title="组合炼器"><span>器</span><small>炼器</small></button>
         <button type="button" data-panel-target="formation" title="九宫阵法"><span>阵</span><small>阵法</small></button>
         <button type="button" data-panel-target="talisman" title="符箓工坊"><span>符</span><small>符箓</small></button>
-        <button type="button" data-panel-target="heavens" title="诸天联系"><span>天</span><small>诸天</small></button>
         <button type="button" data-panel-target="natal-artifact" title="本命法宝"><span>宝</span><small>本命</small></button>
         <button type="button" data-panel-target="sage-inner-outer" data-dlc="sage" title="内圣外王" class="hidden sage-dock-button"><span>圣</span><small>内外</small></button>
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
-      <nav id="strategy-dock" class="strategy-dock" aria-label="功能窗口">
+      <nav id="strategy-dock" class="strategy-dock" aria-label="社会互动">
+        <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
+        <button type="button" data-panel-target="heavens" title="诸天联系"><span>天</span><small>诸天</small></button>
         <button type="button" data-panel-target="yaochi" title="瑶池" class="hidden"><span>池</span><small>瑶池</small></button>
         <button type="button" data-panel-target="daomen" title="道门同道" class="hidden"><span>门</span><small>道门</small></button>
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
@@ -556,10 +556,10 @@
   </dialog>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=2.0.0"></script>
+  <script src="/ui-panels.js?v=2.0.1"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
-  <script src="/merchant-commission-panel.js?v=2.0.0"></script>
-  <script src="/merchant-panel.js?v=2.0.0"></script>
+  <script src="/merchant-commission-panel.js?v=2.0.1"></script>
+  <script src="/merchant-panel.js?v=2.0.1"></script>
   <script src="/map-directory.js?v=1.45.0"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
   <script src="/theme-manager.js?v=1.55.0"></script>
@@ -580,18 +580,20 @@
   <script src="/tutorial-content.js?v=1"></script>
   <script src="/handbook-content.js?v=1.56.2"></script>
   <script src="/tutorial-steps.js?v=1"></script>
-  <script src="/tutorial.js?v=2.0.0"></script>
+  <script src="/tutorial.js?v=2.0.1"></script>
   <script src="/immortal-economy-panel.js?v=1"></script>
   <script src="/npc-contacts.js?v=1.51.1"></script>
-  <link rel="stylesheet" href="/exploration-panel.css?v=2.0.0">
-  <script src="/exploration-panel.js?v=2.0.0"></script>
-  <script src="/debug-console.js?v=2"></script>
-  <link rel="stylesheet" href="/heavens-panel.css?v=2.0.0">
-  <script src="/heavens-incidents.js?v=2.0.0"></script>
-  <script src="/heavens-campaign.js?v=2.0.0"></script>
-  <script src="/heavens-frontier.js?v=2.0.0"></script>
-  <script src="/heavens-panel.js?v=2.0.0"></script>
-  <script src="/app.js?v=2.0.0"></script>
+  <link rel="stylesheet" href="/exploration-panel.css?v=2.0.1">
+  <script src="/exploration-panel.js?v=2.0.1"></script>
+  <script src="/debug-heavens.js?v=2.0.1"></script>
+  <script src="/debug-console.js?v=2.0.1"></script>
+  <link rel="stylesheet" href="/heavens-panel.css?v=2.0.1">
+  <script src="/heavens-atlas.js?v=2.0.1"></script>
+  <script src="/heavens-incidents.js?v=2.0.1"></script>
+  <script src="/heavens-campaign.js?v=2.0.1"></script>
+  <script src="/heavens-frontier.js?v=2.0.1"></script>
+  <script src="/heavens-panel.js?v=2.0.1"></script>
+  <script src="/app.js?v=2.0.1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

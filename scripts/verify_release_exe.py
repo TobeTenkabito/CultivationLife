@@ -46,7 +46,7 @@ def verify(with_dlc):
             assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
-            for asset in ('heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
+            for asset in ('heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abcdef':
@@ -146,6 +146,14 @@ def verify(with_dlc):
                     expected_revision=result['revision'], request_key='release-tianji')
                 knowledge = client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=session)['data']
                 assert knowledge and all(value == 5 for value in knowledge.values())
+            heavens = client.call('heavens inspect', session_id=session)
+            assert len(heavens['data']['view']['incidents']) == 11
+            heavens_args = {'action': 'configure', 'options': {'watch': False}}
+            checked = client.call('heavens act', heavens_args, session_id=session,
+                                  expected_revision=heavens['revision'], request_key='release-heavens')
+            assert checked['data']['heavens']['watch'] is False
+            assert client.call('heavens act', heavens_args, session_id=session,
+                               expected_revision=heavens['revision'], request_key='release-heavens')['replayed']
             assert snapshot_file.read_bytes() == source_before
             (folder / 'game_config.txt').write_text('Debug=False\n', encoding='utf-8')
             with urllib.request.urlopen(base + "/merchant-commission-panel.js", timeout=5) as response:

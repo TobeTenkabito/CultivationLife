@@ -1,4 +1,4 @@
-#heavens-card{padding:22px;left:154px;width:min(940px,calc(100vw - 308px));height:min(820px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+#heavens-card{padding:24px;left:auto;right:154px;width:min(940px,calc(100vw - 308px));height:min(820px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
 #heavens-card>.section-title{position:static;flex:0 0 auto;padding:0;margin-bottom:16px;background:none}
 #heavens-content{display:flex;flex-direction:column;min-height:0;flex:1;color:var(--ink);overflow-wrap:anywhere}
 #heavens-content p{margin:0;line-height:1.8}
@@ -16,7 +16,37 @@
 #heavens-content .heavens-tabs button[aria-selected=true]{background:var(--pine);color:var(--on-accent,#fff)}
 #heavens-content .heavens-preferences{border:1px solid var(--line);background:transparent;border-radius:5px;padding:8px 12px}
 #heavens-content .heavens-body{overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:22px 5px 16px 1px;display:flex;flex-direction:column;gap:16px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+#heavens-content .heavens-body>*{flex-shrink:0;}
 #heavens-content .heavens-title{font-size:24px;font-weight:500;letter-spacing:.06em;line-height:1.45;outline:none}
+#heavens-card{border-top:3px solid var(--pine);box-shadow:0 24px 80px #0003;border-radius:12px;}
+#heavens-card>.section-title .eyebrow{letter-spacing:.24em;font-size:10px;}
+#heavens-card>.section-title h2{font-size:26px;letter-spacing:.2em;}
+#heavens-card #heavens-toggle{min-height:44px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:6px;}
+#heavens-content .heavens-primary button{border-radius:0;border-bottom:2px solid transparent;}
+#heavens-content .heavens-primary button[aria-selected=true]{color:var(--pine);border-bottom-color:var(--pine);background:transparent;font-weight:600;}
+#heavens-content .heavens-feature{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(180px,1fr);min-height:230px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);}
+#heavens-content .heavens-feature-copy{display:flex;flex-direction:column;gap:12px;padding:28px;z-index:1;}
+#heavens-content .heavens-feature-copy>small{letter-spacing:.14em;color:var(--pine);}
+#heavens-content .heavens-feature-copy>p{font-size:13px;color:var(--muted);}
+#heavens-content .heavens-feature-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;}
+#heavens-content .heavens-feature-footer>button{min-height:44px;background:transparent;border:0;border-bottom:1px solid var(--pine);padding:8px 0;box-shadow:none;}
+.heavens-landscape{position:relative;display:grid;align-items:end;min-width:0;overflow:hidden;color:var(--pine);background:linear-gradient(165deg,transparent,color-mix(in srgb,var(--pine) 12%,transparent));}
+.heavens-landscape svg{display:block;width:100%;min-height:180px;}
+.atlas-halo{fill:var(--gold);opacity:.25;}.atlas-orbit{fill:none;stroke:var(--gold);opacity:.35;}
+.atlas-far{fill:currentColor;opacity:.13;}.atlas-near{fill:currentColor;opacity:.25;}
+.atlas-water,.atlas-cloud{fill:none;stroke:currentColor;stroke-width:1.5;opacity:.3;}
+.atlas-pavilion{fill:none;stroke:currentColor;stroke-width:2;opacity:.75;}
+.heavens-world-seal{position:absolute;right:22px;top:22px;border:1px solid var(--cinnabar);padding:9px 6px;color:var(--cinnabar);font:20px serif;writing-mode:vertical-rl;opacity:.8;}
+.heavens-landscape[data-world=asura],.heavens-landscape[data-world=demon]{color:var(--cinnabar);}
+.heavens-landscape[data-world=phantom_underworld],.heavens-landscape[data-world=true_demon]{color:var(--tone-purple,var(--pine));}
+.heavens-landscape[data-world=hell],.heavens-landscape[data-world=reincarnation]{color:var(--tone-blue,var(--pine));}
+.heavens-landscape[data-world=celestial] .atlas-far{transform:translateY(-18px);}
+.heavens-landscape[data-world=spirit] .atlas-cloud{stroke-width:3;stroke-dasharray:14 6;}
+.heavens-landscape[data-world=nether] .atlas-near,.heavens-landscape[data-world=monster_realm] .atlas-near{opacity:.4;}
+#heavens-content .heavens-dossier-heading{display:flex;align-items:center;gap:16px;padding:18px 0 22px;border-bottom:1px solid var(--line);}
+#heavens-content .heavens-dossier-heading>div{flex:1;min-width:0;}
+#heavens-content .heavens-dossier-heading small{letter-spacing:.14em;margin-bottom:7px;}
+.heavens-dossier-seal{display:grid;place-items:center;width:48px;height:64px;flex-shrink:0;border:1px solid var(--pine);outline:1px solid var(--line);outline-offset:4px;font:26px serif;color:var(--pine);border-radius:24px 24px 3px 3px;}
 #heavens-content .heavens-lead{color:var(--muted);font-size:13px;max-width:60ch}
 #heavens-content .heavens-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}
 #heavens-content .heavens-destination{display:flex;align-items:center;gap:16px;text-align:left;min-height:138px;padding:22px 18px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--surface) 85%,transparent);transition:border-color .15s,background .15s;box-shadow:none}
@@ -110,7 +140,9 @@
 /* Local dossiers: a route, one selected response, and a separate aftermath. */
 #heavens-content .heavens-world-select,#heavens-content .heavens-incident select{width:100%;min-height:44px;margin:0 0 16px;}
 .heavens-incident-route{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;}
-.heavens-incident-route li{display:grid;gap:10px;padding:16px 10px;border-top:2px solid var(--pine);background:var(--paper);}
+.heavens-incident-route li{display:grid;gap:10px;padding:16px 10px;border-top:2px solid var(--line);background:var(--surface);}
+.heavens-incident-route li.is-complete{border-color:var(--pine);}
+.heavens-incident-route li.is-current{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 7%,var(--surface));}
 .heavens-incident-route span{font-size:1.5rem;color:var(--pine);opacity:.7;}
 .heavens-incident-route strong{font-size:.88rem;line-height:1.65;overflow-wrap:anywhere;}
 .heavens-incident-document{padding:20px;margin:12px 0 20px;border:1px solid var(--line);border-radius:12px;background:var(--paper);line-height:1.85;}
@@ -120,6 +152,18 @@
 .heavens-incident-balance{display:flex;align-items:baseline;gap:12px;padding:20px 0;border-bottom:1px solid var(--line);margin-bottom:16px;}
 .heavens-incident-balance strong{font-size:2.3rem;color:var(--pine);}
 @media(max-width:440px){.heavens-incident-route{grid-template-columns:1fr;gap:6px;}.heavens-incident-route li{grid-template-columns:32px 1fr;align-items:center;padding:10px;}.heavens-incident-document{padding:14px;}}
+@media(max-width:600px){
+  #heavens-content .heavens-feature{grid-template-columns:1fr;min-height:0;}
+  #heavens-content .heavens-feature-copy{padding:20px;gap:10px;}
+  .heavens-landscape{grid-row:1;height:110px;}
+  .heavens-landscape svg{position:absolute;bottom:-45px;right:0;width:75%;min-height:150px;}
+  .heavens-world-seal{left:20px;right:auto;top:20px;}
+  #heavens-content .heavens-dossier-heading{gap:12px;padding:10px 0 18px;flex-wrap:wrap;}
+  #heavens-content .heavens-dossier-heading>.heavens-badge{margin-left:auto;}
+  .heavens-dossier-seal{width:36px;height:48px;font-size:22px;}
+  #heavens-content .heavens-dossier-heading .heavens-title{font-size:22px;}
+  .heavens-incident-route li small{grid-column:2;}
+}
 /* Short landscape screens need reading space above the underlying docks. */
 @media(max-height:520px) and (orientation:landscape){
   #heavens-card{z-index:60;top:8px;left:10px;right:10px;width:calc(100vw - 20px);height:calc(100vh - 16px);height:calc(100dvh - 16px);max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;padding:10px 16px;}

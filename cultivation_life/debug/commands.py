@@ -13,6 +13,7 @@ from .registry import Argument, Command, CommandError, Registry
 from .state import digest, differences, npc_rows, validate, read_pointer
 from .capabilities import CAPABILITIES, EXCLUDED_OPERATIONS, register as register_capabilities
 from .dlc import available
+from .heavens import register as register_heavens
 
 
 # Exact authoritative field names. Values are (type, minimum, maximum).
@@ -312,4 +313,5 @@ def build_registry():
                                   'shortcut': c.shortcut} for c in CAPABILITIES],
                      'excluded': EXCLUDED_OPERATIONS}, requires_session=False)
     register_capabilities(registry)
+    register_heavens(registry)
     return registry

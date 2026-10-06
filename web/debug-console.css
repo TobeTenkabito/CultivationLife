@@ -17,3 +17,13 @@
 #debug-console-input{min-width:0;flex:1;background:#10151d;color:#edf4ff;padding:10px;border:1px solid #8295ae;font:14px Consolas,monospace}
 #debug-console [hidden],#debug-console-open[hidden],#debug-session-banner[hidden]{display:none!important}
 @media(max-width:500px){#debug-console{padding:10px}#debug-console form label{display:none}#debug-console-output{height:38dvh}#debug-console-open{font-size:12px}}
+#debug-heavens{margin-top:14px;border:1px solid #45576e;border-radius:6px;padding:12px;background:#1d2733;}
+#debug-heavens summary{cursor:pointer;min-height:32px;line-height:32px;color:#ffe2a8;}
+#debug-heavens .debug-heavens-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+#debug-heavens label{display:grid;gap:6px;font-size:12px;min-width:0;color:#c6d3e1;}
+#debug-heavens select,#debug-heavens textarea{box-sizing:border-box;width:100%;min-width:0;min-height:44px;background:#10151d;color:#edf4ff;border:1px solid #62758c;border-radius:4px;padding:8px;font:13px/1.6 sans-serif;}
+#debug-heavens pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 Consolas,monospace;color:#c6d3e1;}
+#debug-heavens button{min-height:44px;}
+#debug-heavens button:disabled{opacity:.45;cursor:default;}
+#debug-heavens :focus-visible{outline:2px solid #ffe2a8;outline-offset:2px;}
+@media(max-width:500px){#debug-heavens .debug-heavens-fields{grid-template-columns:1fr;}}

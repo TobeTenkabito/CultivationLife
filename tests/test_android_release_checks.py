@@ -22,6 +22,7 @@ def release_inputs(tmp_path):
     rid = package_android.RELEASE_ID
     logs = {f'release-{rid}-tests.log': '1574 passed in 268.76s',
             f'heavens-ui-{rid}.log': '594 dossier checks passed',
+            f'heavens-workbench-ui-{rid}.log': 'real isolated execution and snapshot restore passed',
             f'save-crossplatform-{rid}.log': 'roundtrip passed',
             f'android-signature-{rid}.log': 'Verifies',
             f'android-metadata-{rid}.log': (
@@ -63,6 +64,7 @@ def release_inputs(tmp_path):
     ('phase', 'android-experience-'),
     ('heavens', 'Heavens portrait must pass'),
     ('heavens-browser', 'Eleven-world UI acceptance must pass'),
+    ('heavens-workbench', 'Heavens workbench UI must pass'),
     ('suite-uppercase', 'Full regression suite must pass'),
     ('debug-console', 'Android Debug console portrait checks must pass'),
     ('start-layout', 'Android start layout portrait checks must pass'),
@@ -76,6 +78,7 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
     root = release_inputs
     rid = package_android.RELEASE_ID
     corruptions = {
+        'heavens-workbench': (f'heavens-workbench-ui-{rid}.log', 'Traceback: workbench failed'),
         'heavens': (f'android-heavens-portrait-{rid}.log', 'status=failed'),
         'heavens-browser': (f'heavens-ui-{rid}.log', '594 dossier checks\nTraceback'),
         'suite-uppercase': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nFAILED: batch errors'),
