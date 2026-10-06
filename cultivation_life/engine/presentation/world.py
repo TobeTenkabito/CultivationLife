@@ -38,6 +38,10 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
     else:
         world_people = {key: npc for key, npc in world_people.items() if not instance_of(game, key)}
     for npc in sorted(world_people.values(), key=lambda value: (-value.realm_index, -value.layer, value.name)):
+        from ...person_assignments import deployment_assignment
+        deployment = deployment_assignment(game, npc.id)
+        if deployment and not deployment['observed']:
+            continue
         same_world = npc.world == game.player.world
         if not same_world and npc.departed_age is None:
             continue
@@ -57,6 +61,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
                       ('正在当地安置' if assignment['phase'] == 'settling' else '迁居途中，暂不可交往') if 'person_id' in assignment else
                       '运材途中，暂不可交往' if 'cargo_owner' in assignment else
                       '正在当地访学' if assignment['phase'] == 'studying' else '访学途中，暂不可交往')
+        if deployment:
+            status = '正在边地执行有限任务'
         from ...system.cultivation_ranks import public_ranks
         ranks = public_ranks(npc)
         public_npc = npc.to_dict()

@@ -58,6 +58,7 @@
   }
   function openTarget(target) {
     if(['mirror_field','causal_ruins'].includes(target))go('anomalies',target);
+    else if(target==='lanjiang_frontier')go('frontier',target);
     else if(current.heavens.sites.some(s=>s.id===target))go('worlds',target);
     else go('home',target);
   }
@@ -125,7 +126,7 @@
     const key=`${ui.page}:${ui.target}:${ui.section}:${ui.chamber}:${ui.historyPage}`,scroll=key===renderedKey?document.getElementById('heavens-body')?.scrollTop||0:0;renderedKey=key;
     host.replaceChildren();
     const navigation=node('div',null,'heavens-navigation');
-    tabs(navigation,[['home','见闻'],['worlds','诸界'],['anomalies','异象'],['journey','行程']],ui.page,id=>go(id), '诸天导航','primary');
+    tabs(navigation,[['home','见闻'],['worlds','诸界'],['anomalies','异象'],['journey','行程'],['frontier','战局']],ui.page,id=>go(id), '诸天导航','primary');
     const settings=button('偏好',()=>go('settings'));settings.className='heavens-preferences';settings.setAttribute('aria-label','诸天偏好');settings.setAttribute('aria-pressed',String(ui.page==='settings'));navigation.append(settings);host.append(navigation);
     if(pending){const box=node('div',null,'heavens-retry');box.setAttribute('role','status');box.append(node('small','上次提交尚未确认，可安全重试。'),button('重试上次提交（不会重复扣费）',()=>send(pending.payload)));host.append(box);}
     const task=activeTask(h);
@@ -137,6 +138,7 @@
     if(ui.page==='worlds')renderWorlds(body,h);
     if(ui.page==='anomalies')renderAnomalies(body,h);
     if(ui.page==='journey')renderJourney(body,h);
+    if(ui.page==='frontier')window.HeavensFrontier.render(body,h.frontier,ui,{node,title,tile,back,subview,renderActions,empty,go});
     if(ui.page==='settings')renderSettings(body,h);
     body.scrollTop=scroll;
   }
@@ -453,7 +455,7 @@
       const away=(h.visits||[]).filter(v=>v.status==='visiting');
       for(const v of away){const row=node('article',null,'heavens-task');row.append(node('h4',`访学 · ${v.destination_name}`),node('p',v.studied?'现场研读已完成，可循约返程。':'已抵达，可研读或提前返程。'),button('查看访学与返程',()=>{openTarget(v.target_id);ui.section='visit';render(current,ctx);}));body.append(row);}
       if(task){
-        const names={mirror_field:'镜律场域',causal_ruins:'因果遗址',sand_glimmer:'沙中重影',stone_resonance:'旧石回声'},name=h.sites.find(s=>s.id===task.target_id)?.name||names[task.target_id]||'诸天研究';
+        const names={mirror_field:'镜律场域',causal_ruins:'因果遗址',sand_glimmer:'沙中重影',stone_resonance:'旧石回声',lanjiang_frontier:'岚疆边情'},name=h.sites.find(s=>s.id===task.target_id)?.name||names[task.target_id]||'诸天研究';
         const row=node('article',null,'heavens-task');row.append(node('h4',name),node('p',`当前任务：${task.progress} / ${task.duration} 年`));const progress=node('progress');progress.max=task.duration;progress.value=task.progress;progress.setAttribute('aria-label','任务进度');row.append(progress);
         const controls=node('div',null,'heavens-inline');controls.append(button('继续任务',()=>propose('resume',task.id),Boolean(pending)),button('取消任务',()=>propose('cancel',task.id),Boolean(pending)),button('查看对象',()=>openTarget(task.target_id)));row.append(controls,node('small','取消前会显示可退还的未耗投入，已付法力与已耗材料不退。'));body.append(row);
       }
