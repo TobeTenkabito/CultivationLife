@@ -1,7 +1,7 @@
 {
-  "base_version": "1.59.2",
-  "android_version": "1.59.2-android.31",
-  "version_code": 31,
+  "base_version": "2.0.0",
+  "android_version": "2.0.0-android.32",
+  "version_code": 32,
   "application_id": "com.fusheng.wendao",
   "min_sdk": 31,
   "target_sdk": 31,
@@ -12,10 +12,10 @@
   "tested_android": "Android 12 / API 31",
   "tested_abi": "x86_64",
   "physical_device_tested": false,
-  "apk": "浮生问道-v1.59.2-Android12.apk",
-  "apk_sha256": "ca04c4156456880a90c821b9d9469f3e842d6971eb94b717dc2301b34366b75f",
-  "apk_bytes": 50033302,
-  "inputs_sha256": "26edd560828400df0076545c6cf492b15fcd1ef50f4260836d01e088f4abd69d",
+  "apk": "浮生问道-v2.0.0-Android12.apk",
+  "apk_sha256": "a905ff277d6ffa2abfadce23a1045015042df98146d31f9ee6aa13bc50efdda7",
+  "apk_bytes": 50377466,
+  "inputs_sha256": "0abab670d0b111f07915673f8c18c61400adeb3ba239a02b1ff24e010ba019a8",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -26,6 +26,8 @@
     "sage-way": "1.4.0",
     "tianji-artifacts": "2.2.0"
   },
+  "heavens_worlds": 11,
+  "heavens_incident_branches": 22,
   "themes": [
     "a",
     "b",
@@ -34,12 +36,13 @@
     "e",
     "f"
   ],
-  "save_schema": 8,
+  "save_schema": 9,
   "save_import_export": true,
   "offline": true,
   "release_debuggable": false,
   "validation": [
-    "2353 Python regressions passed",
+    "Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes",
+    "3045 Python regressions passed",
     "Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape",
     "Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians",
     "Talisman portrait and landscape: native tiered crafting, materials, sales, experience, left panel and multiple realm-gated map rifts",

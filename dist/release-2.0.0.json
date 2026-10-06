@@ -1,8 +1,8 @@
 {
-  "base_version": "1.59.2",
+  "base_version": "2.0.0",
   "platform": "Windows",
-  "exe_sha256": "83944c6a1197466936a8a816fdf0b7fd788f5c50f06e5aa95748230a73a10319",
-  "inputs_sha256": "c782c8f4e1e7c5f173976adff7fecf7ebe26265c2fc6db9d065a4a12dcd12921",
+  "exe_sha256": "d5d067818637d2155a0f461cdda134dbb3bf5d0c59a351fa313e6dbaf804a1e5",
+  "inputs_sha256": "bb9935b2a7a125faa16e2deee4cb1eaa944e80ea1915924edf4eea05b5ac89a5",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -13,6 +13,8 @@
     "sage-way": "1.4.0",
     "tianji-artifacts": "2.2.0"
   },
+  "heavens_worlds": 11,
+  "heavens_incident_branches": 22,
   "themes": [
     "a",
     "b",
@@ -21,9 +23,10 @@
     "e",
     "f"
   ],
-  "save_schema": 8,
+  "save_schema": 9,
   "validation": [
-    "2353 automated regression tests passed",
+    "Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes",
+    "3045 automated regression tests passed",
     "Six-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"

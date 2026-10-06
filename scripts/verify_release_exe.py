@@ -46,7 +46,7 @@ def verify(with_dlc):
             assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
-            for asset in ('asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
+            for asset in ('heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abcdef':
@@ -69,6 +69,8 @@ def verify(with_dlc):
                                  "preset_id": "core"}).encode(), headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
+            assert len(game['heavens']['incidents']) == 11
+            assert len({r['world'] for r in game['heavens']['incidents']}) == 11
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
             def transfer(operation, payload):
                 request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
@@ -135,7 +137,9 @@ def verify(with_dlc):
                 session_id=session, expected_revision=0, request_key='release-hq')
             assert client.call('state get', {'pointer': '/merchant_state/membership/rank'}, session_id=session)['data'] == 2
             tools = {row['name']: row for row in client.tools()}
-            assert len(tools) == 180 and 'cultivation_custom_lineage_prepare' in tools
+            from cultivation_life.debug.commands import build_registry
+            expected_tools = {'cultivation_' + row['name'].replace(' ', '_') for row in build_registry().catalog()}
+            assert set(tools) == expected_tools and 'cultivation_custom_lineage_prepare' in tools
             assert 'cultivation_spatial_action' in tools and 'cultivation_talisman_action' in tools
             if with_dlc:
                 client.call('tianji reveal all', session_id=session,

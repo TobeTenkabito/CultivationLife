@@ -282,6 +282,39 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("game.demonic_system.soul_refinement_risk.safe_capacity===2 && game.spatial.panels.includes('relationship')")),"Native soul capacity and isolated capabilities");
                 capture("spatial-talisman");
                 result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, black-market finished purchase, lost local NPC interaction and soul capacity, tier/quality/experience, six-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
+            } else if(phase.equals("heavens")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'诸界验收',preset_id:'core',seed:200})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.system.heavens.incident_definitions import INCIDENTS\nfrom cultivation_life.system.heavens.state import initialize\nfrom cultivation_life.rules import max_hp,max_mp,add_item\ng=server.ENGINE.store.load('"+id+"')\ninitialize(g)\ng.player.world='human'\ng.player.location_id='lanjiang_steppe'\ng.player.realm_index=2\ng.player.lifespan=None\ng.player.next_tribulation_age=999999\ng.player.hp=max_hp(g.player)\ng.player.mp=max_mp(g.player)\nadd_item(g.player,'spirit_stone',10000)\ng.settings['silent_events']=True\ng.heavens_state['runtime']['incidents']={d.id:dict(stage='surveyed',choice=None,opened_at=0,closed_at=None,remaining=0,base=0.0,claimed=0.0) for d in INCIDENTS}\ng.heavens_state['definition_versions'].update({d.id:1 for d in INCIDENTS})\nserver.ENGINE.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-panel-target=heavens]");
+                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    js("document.querySelector('#theme-open').click();true");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");
+                    async("GameThemes.saved");
+                    js("document.querySelector('[data-close-dialog=theme-dialog]').click();true");
+                    for(String world:new String[]{"human","spirit","demon","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
+                        js("document.querySelector('#heavens-primary-worlds').click();true");
+                        js("(()=>{const s=document.querySelector('[aria-label=选择界域]');s.value='"+world+"';s.dispatchEvent(new Event('change'));document.querySelector('.heavens-destination').click();return true;})()");
+                        check(Boolean.TRUE.equals(js("(()=>{const c=document.querySelector('#heavens-card').getBoundingClientRect(),b=document.querySelector('#heavens-body').getBoundingClientRect(),x=document.querySelector('#heavens-toggle').getBoundingClientRect();return c.top>=0 && c.bottom<=innerHeight+1 && b.height>=140 && x.top>=0 && x.bottom<=innerHeight;})()")),"Heavens visible reading area "+theme+" "+world);
+                        for(String tab:new String[]{"record","response","aftermath"}) {
+                            js("document.querySelector('[data-heavens-tab="+tab+"]').click();true");
+                            check(Boolean.TRUE.equals(js("(()=>{const b=document.querySelector('#heavens-detail-body');return b.scrollWidth<=b.clientWidth+1 && document.documentElement.scrollWidth<=innerWidth+1 && b.querySelectorAll('[data-heavens-action]').length<=1 && !!b.querySelector('p') && Array.from(b.querySelectorAll('select,[data-heavens-action]')).every(e=>e.getBoundingClientRect().height>=44);})()")),"Heavens dossier "+theme+" "+world+" "+tab);
+                        }
+                    }
+                }
+                js("document.querySelector('#heavens-primary-worlds').click();true");
+                js("(()=>{const s=document.querySelector('[aria-label=选择界域]');s.value='human';s.dispatchEvent(new Event('change'));document.querySelector('.heavens-destination').click();document.querySelector('[data-heavens-tab=response]').click();const c=document.querySelector('[aria-label=界域处理方案]');c.value='incident_seal';c.dispatchEvent(new Event('change'));return true;})()");
+                tapSelector("[data-heavens-action=incident_seal]");
+                waitForJs("!document.querySelector('#game-confirm-backdrop').classList.contains('hidden')","Heavens preview");
+                tapSelector("#game-confirm-cancel");
+                check(Boolean.TRUE.equals(js("game.heavens.incidents.find(r=>r.id==='human_beacon').stage==='surveyed'")),"Heavens cancelled preview is pure");
+                tapSelector("[data-heavens-action=incident_seal]");
+                tapSelector("#game-confirm-accept");
+                waitForJs("!busy && game.heavens.incidents.find(r=>r.id==='human_beacon').stage==='treated'","Heavens native real-year action");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.heavens.incidents.length===11 && game.heavens.incidents.find(r=>r.id==='human_beacon').choice==='incident_seal'")),"Heavens persisted outcome");
+                capture("heavens");
+                result.putString("heavens_scope","Eleven worlds, six themes, independent dossiers, bounded buttons, native touch preview/cancel/commit and persisted result");
             } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);

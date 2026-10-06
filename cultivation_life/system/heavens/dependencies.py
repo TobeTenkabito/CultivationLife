@@ -74,3 +74,6 @@ class HeavensDependencies:
     campaign_escape: Callable | None = None
     campaign_relief: Callable | None = None
     campaign_release: Callable | None = None
+    incident_facts: Callable | None = None
+    incident_relief: Callable | None = None
+    incident_restore: Callable | None = None

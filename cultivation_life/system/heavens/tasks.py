@@ -4,6 +4,8 @@ from fractions import Fraction
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
 from . import mirror, ruins, omens, visits, missions, freight, migration, survey, upkeep, frontier, campaign_actions
+from . import incidents
+from .incident_definitions import INCIDENT_IDS
 from .frontier_definitions import FRONTIER_ID
 from .campaign_definitions import CAMPAIGN_ID
 from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS, VISIT_ACTIONS
@@ -19,6 +21,7 @@ LABELS.update(survey.LABELS)
 LABELS.update(upkeep.LABELS)
 LABELS.update(frontier.LABELS)
 LABELS.update(campaign_actions.LABELS)
+LABELS.update(incidents.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -28,6 +31,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if incidents.handles(runtime, action, target_id):
+        return incidents.quote(deps, game, action, target_id, options)
     if campaign_actions.handles(runtime, action, target_id):
         return campaign_actions.quote(deps, game, action, target_id, options)
     if frontier.handles(runtime, action, target_id):
@@ -148,6 +153,8 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
+    if task.get('target_id') in INCIDENT_IDS:
+        return incidents.task_reason(deps, game, task)
     if task.get('target_id') == CAMPAIGN_ID:
         return campaign_actions.task_reason(deps, game, task)
     if task.get('target_id') == FRONTIER_ID:
@@ -204,7 +211,7 @@ def reconcile(deps, game):
                 visit.update(status='failed', return_fare=0)
     task = active_task(runtime)
     if task:
-        if task.get('target_id') in {FRONTIER_ID, CAMPAIGN_ID}:
+        if task.get('target_id') in {FRONTIER_ID, CAMPAIGN_ID} | INCIDENT_IDS:
             if not game.player.alive:
                 cancel(deps, game, task, failed=True, reason='此生已结束')
             return
@@ -238,6 +245,8 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if incidents.handles(runtime, action, target_id):
+        return incidents.execute(deps, game, action, target_id, options, proposal, run_task=run_segment, cancel_task=cancel, task_result=result)
     if campaign_actions.handles(runtime, action, target_id):
         return campaign_actions.execute(deps, game, action, target_id, options, proposal, run_task=run_segment, cancel_task=cancel, task_result=result)
     if frontier.handles(runtime, action, target_id):
@@ -346,6 +355,15 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
+    if task.get('target_id') in INCIDENT_IDS:
+        if task['status'] != 'failed':
+            if task['status'] != 'paused' and task['progress'] == task['duration'] and not incidents.task_reason(deps, game, task):
+                incidents.complete(deps, game, task)
+            else:
+                task['status'] = 'paused'
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        return
     if task.get('target_id') == CAMPAIGN_ID:
         if task['status'] != 'failed':
             reason = campaign_actions.task_reason(deps, game, task)

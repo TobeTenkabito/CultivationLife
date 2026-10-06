@@ -1,5 +1,6 @@
 """Merge a bounded local application into a single existing cultivation grant."""
 from .state import phase, contacts
+from . import incidents
 
 
 def activity_gain(deps, game, base_gain, action):
@@ -19,7 +20,10 @@ def activity_gain(deps, game, base_gain, action):
         if application['remaining'] <= 0:
             echo['application'] = None
         game.heavens_state['revision'] += 1
-    actual = deps.grant_progress(game.player, base_gain + extra)
+    local_extra, local_record = incidents.activity_extra(deps, game, base_gain, action) if deps.incident_facts else (0.0, None)
+    actual = deps.grant_progress(game.player, base_gain + extra + local_extra)
+    if local_record:
+        local_record['claimed'] += min(local_extra, max(0, actual - max(0, base_gain) - extra))
     if extra:
         echo['reward_claimed'] += min(extra, max(0, actual - max(0, base_gain)))
-    return base_gain + extra
+    return base_gain + extra + local_extra

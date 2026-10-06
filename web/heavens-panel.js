@@ -59,6 +59,7 @@
   function openTarget(target) {
     if(['mirror_field','causal_ruins'].includes(target))go('anomalies',target);
     else if(['lanjiang_frontier','lanjiang_gate'].includes(target))go('frontier',target);
+    else if((current.heavens.incidents||[]).some(s=>s.id===target))go('worlds',target);
     else if(current.heavens.sites.some(s=>s.id===target))go('worlds',target);
     else go('home',target);
   }
@@ -153,6 +154,8 @@
     }
     title(host,'一隅见闻','从亲历的征兆出发，逐步认识诸界。');
     const local=h.sites.find(row=>row.current),inside=anomaly(h);
+    const incident=(h.incidents||[]).find(row=>row.current);
+    if(incident){const feature=node('article',null,'heavens-incident-document');feature.append(node('small',`${incident.world_name} · 地方事务`),node('h4',incident.name),node('p',incident.glimpse),button('查阅本界事务 ›',()=>openTarget(incident.id)));host.append(feature);}
     if(inside){const b=button(`返回${inside.name} · 当前所在 ›`,()=>openTarget(inside.id));b.className='heavens-task-strip';host.append(b);}
     else if(local){const b=button(`前往${local.name.split(' · ')[0]}的联系档案 ›`,()=>openTarget(local.id));b.className='heavens-task-strip';host.append(b);}
     if(!h.generation_enabled){host.append(node('p','新联系发现已关闭，已有认识仍保留。','heavens-lead'),button('调整发现偏好',()=>go('settings')));}
@@ -164,10 +167,18 @@
   }
   function renderWorlds(host,h) {
     const selected=h.sites.find(row=>row.id===ui.target);
+    const incident=(h.incidents||[]).find(row=>row.id===ui.target);
+    if(incident){window.HeavensIncidents.render(host,incident,ui,{node,title,back,subview,renderActions});return;}
     if(!selected){
-      title(host,'诸界联系','选一处地点，查看当地认识与可参与的事务。');
-      const list=node('div',null,'heavens-directory');
-      for(const site of h.sites)tile(list,{name:site.name,description:site.world_name,status:site.current?'当前界面':site.known?'已有档案':'尚未登记',glyph:({celestial:'仙',asura:'修',nether:'幽',reincarnation:'轮'})[site.world],onClick:()=>openTarget(site.id)});
+      title(host,'诸界行录','从一界的地方事务开始，沿亲历留下自己的诸天档案。');
+      const regions=h.incidents||[];
+      const world=regions.some(r=>r.world===ui.world)?ui.world:regions.find(r=>r.current)?.world||'human';
+      const select=node('select');select.className='heavens-world-select';select.setAttribute('aria-label','选择界域');
+      for(const region of regions){const option=node('option',`${region.world_name}${region.current?' · 当前所在':''}`);option.value=region.world;select.append(option);}
+      select.value=world;select.onchange=()=>{ui.world=select.value;render(current,ctx);};host.append(select);
+      const local=regions.find(r=>r.world===world), list=node('div',null,'heavens-directory');
+      if(local)tile(list,{name:local.name,description:`${local.location_name} → ${local.field_name} → 返程复核`,status:local.stage==='closed'?'已留录':'地方事务',glyph:'录',onClick:()=>openTarget(local.id)});
+      for(const site of h.sites.filter(s=>!regions.length||s.world===world))tile(list,{name:site.name,description:'跨界往来 · 求证、访学与托运',status:site.known?'已有档案':'联系地点',glyph:'界',onClick:()=>openTarget(site.id)});
       host.append(list);return;
     }
     back(host,'返回诸界','worlds');title(host,selected.name,ui.section==='freight'?'物资委托 · 实物交接，循路承运':ui.section==='mission'?'同道回访 · 本人出行，循约返乡':ui.section==='visit'?'个人访学 · 往返许可与现场对照':`${selected.world_name} · 亲自参与需抵达当地，并具备未压制的九阶以上修为。`);
