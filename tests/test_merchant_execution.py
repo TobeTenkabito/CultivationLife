@@ -67,12 +67,12 @@ def test_worker_death_fails_without_reward(setup):
     assert '失联' in order['logs'][-1]['message']
 
 
-def test_unlinked_routes_rejected_for_all_order_types(setup):
+def test_unlinked_routes_rejected_for_physical_order_types(setup):
     engine, game = setup
     game, alliance = join(engine, game, world='true_demon', alliance_id='xuanji')
-    assert {row['world'] for row in engine._merchant_procurement_catalog(game, alliance)} == {'spirit', 'true_demon'}
+    assert {row['world'] for row in engine._merchant_procurement_catalog(game, alliance) if not row.get('intel_only')} == {'spirit', 'true_demon'}
     before = copy.deepcopy(game.to_dict())
-    for kind in ('supply', 'item', 'weapon', 'formation', 'bounty', 'intel', 'escort', 'recruit'):
+    for kind in ('supply', 'item', 'weapon', 'formation', 'bounty', 'escort', 'recruit'):
         for target in ('human', 'monster_realm', 'hell'):
             with pytest.raises(ValueError, match='分总部'):
                 engine._merchant_post(game, alliance, {'kind':kind, 'source_world':target})
@@ -90,7 +90,7 @@ def test_v1_migration_preserves_identity_active_task_and_refunds_removed_routes(
     state['membership'].update(alliance_id='xuanji', rank=2)
     state['influence'] = {'human:xuanji:offices':650}
     state['active'] = {'world':'human', 'alliance_id':'xuanji', 'influence_key':'human:xuanji:offices', 'worked':2}
-    order.update(alliance_id='xuanji', source_world='spirit')
+    order.update(alliance_id='xuanji', source_world='spirit', kind='escort')
     state['version'] = 1
     before = stones(game)
     assert engine._ensure_merchant(game)

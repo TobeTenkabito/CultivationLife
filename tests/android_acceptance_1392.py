@@ -19,7 +19,7 @@ def main(serial):
     assert config['base_game']['version']=='1.39.2'
     assert len(config['extensions'])==6,config['extensions']
     print('Android 12 startup, base version and six DLC loaded',flush=True)
-    for theme in 'abcdef':
+    for theme in 'abdf':
         page.tap(f'[data-theme-picker=start] [data-theme-choice={theme}]')
         page.wait(f'document.documentElement.dataset.theme === "{theme}"')
         page.evaluate('GameThemes.saved')
@@ -28,7 +28,7 @@ def main(serial):
         page.evaluate('scrollTo(0,0)')
         page.screenshot(output/f'{theme}-start.png')
     gid=page.evaluate('''(async()=>{const created=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓问道',spirit_root:'supreme_metal',path:'dao',seed:1392,preset_id:'core'})});render(created);return created.id})()''')
-    for theme in 'abcdef':
+    for theme in 'abdf':
         # Independent lives keep random deaths and forced story choices from
         # determining which later presentation can be exercised.
         gid=page.evaluate(f'''(async()=>{{const created=await api('/api/games',{{method:'POST',body:JSON.stringify({{name:'安卓问道',spirit_root:'supreme_metal',path:'dao',seed:{1500+ord(theme)}}})}});render(created);return created.id}})()''')
@@ -93,7 +93,7 @@ def main(serial):
     assert page.evaluate('game.player.name')=='安卓问道'
     assert not page.errors,page.errors
     page.close()
-    print('Android 12 six-theme acceptance, save deletion/cancel, background, rotation and cold restart passed',flush=True)
+    print('Android 12 four-theme acceptance, save deletion/cancel, background, rotation and cold restart passed',flush=True)
 
 
 if __name__=='__main__':

@@ -190,7 +190,7 @@ def propose_race_diplomacy(deps: FactionActionDependencies, game_id: str, target
     if passed:
         emit(game, "diplomacy.proposal_passed", status=status)
         affinity = {"war": -75, "alliance": 80, "truce": -5, "neutral": 0, "vassal": 65}[status]
-        deps._set_diplomatic_relation(game, relation, status, "human", target_race, "race", affinity)
+        deps._set_diplomatic_relation(game, relation, status, "human", target_race, "race", affinity, initiated_by_player=True)
     relation["last_vote"] = {"age": player.age, "proposal": status, "yes": yes, "total": len(ballots), "passed": passed, "ballots": ballots}
     action_name = {"war":"宣战","alliance":"结盟","truce":"停战","neutral":"恢复中立","vassal":"确立依附"}[status]
     target_name = RACE_DEFINITIONS[target_race]["name"]
@@ -242,7 +242,7 @@ def propose_sect_diplomacy(deps: FactionActionDependencies, game_id: str, target
         emit(game, "diplomacy.proposal_passed", status=status)
         deps._set_diplomatic_relation(
             game, relation, status, own.id, target.id, "sect",
-            float({"war":-75,"alliance":80,"truce":-5,"neutral":0,"vassal":65}[status]),
+            float({"war":-75,"alliance":80,"truce":-5,"neutral":0,"vassal":65}[status]), initiated_by_player=True,
         )
     relation["last_vote"] = {"age":player.age,"proposal":status,"yes":yes,"total":len(ballots),"passed":passed,"ballots":ballots}
     action_name = {"war":"宣战","alliance":"结盟","truce":"停战","neutral":"恢复中立","vassal":"确立依附"}[status]

@@ -1,5 +1,5 @@
 """Local evidence, physical fieldwork and finite consequences using shared tasks."""
-from .incident_definitions import BY_ID, INCIDENTS, INCIDENT_IDS, INCIDENT_ACTIONS, LABELS, response, terms
+from .incident_definitions import BY_ID, ALL_INCIDENTS, INCIDENT_IDS, INCIDENT_ACTIONS, LABELS, response, terms
 from .state import active_task, record
 
 
@@ -50,7 +50,7 @@ def quote(deps, game, action, target, options):
     if facts['stones'] < stones or facts['mp'] < mp:
         raise ValueError('本次处理所需灵石或法力不足')
     return dict(years=years, costs=dict(stones=stones, mp=mp), refundable={'unspent_stones': True, 'mp': False},
-                warning='亲自到场后才处理；完成现场事务后须沿普通地图返回复核。每界只结案一次，取消保留已耗年数和投入。')
+                warning='亲自到场后才处理；完成现场事务后须沿普通地图返回复核。每案只结案一次，取消保留已耗年数和投入。')
 
 
 def execute(deps, game, action, target, options, proposal, *, run_task, cancel_task, task_result):
@@ -82,6 +82,9 @@ def complete(deps, game, task):
     elif action in {'incident_preserve', 'incident_seal'}:
         saved.update(stage='treated', choice=action)
         finding = response(desc, action).finding
+        if response(desc, action).effect == 'aid':
+            saved['outcome'] = deps.incident_field_effect(game, desc.id)
+            finding = saved['outcome']
     else:
         outcome = response(desc, saved['choice'])
         saved.update(stage='closed', closed_at=game.heavens_state['runtime']['processed_years'],
@@ -89,6 +92,11 @@ def complete(deps, game, task):
         healed = deps.incident_relief(game) if outcome.effect == 'relief' else 0
         finding = (f'复核结案，实际恢复 {healed:.1f} 气血。' if outcome.effect == 'relief'
                    else f'复核结案，保留 {outcome.allowance} 年当地{ "修行" if outcome.effect == "practice" else "调息"}余量。')
+        if outcome.effect == 'mana':
+            saved['outcome'] = f'复核结案，实际恢复 {deps.incident_mana(game):.1f} 法力。'
+            finding = saved['outcome']
+        elif outcome.effect == 'aid':
+            finding = '救护记录已归档：' + saved['outcome']
     task['status'] = 'completed'
     record(game, f'{desc.name}：{finding}')
 
@@ -117,20 +125,23 @@ def activity_extra(deps, game, base_gain, action):
     return extra, applied
 
 
-def project(deps, game):
+def project(deps, game, category='local'):
     directory = []
-    for desc in INCIDENTS:
+    for desc in ALL_INCIDENTS:
+        if desc.category != category:
+            continue
         saved = get(game, desc.id)
         stage = saved['stage'] if saved else 'unseen'
         local = game.player.world == desc.world
         row = dict(id=desc.id, world=desc.world, world_name=desc.world_name, name=desc.name,
                    location_name=desc.location_name, field_name=desc.field_name,
-                   current=local, stage=stage, rank=desc.rank, glimpse=desc.glimpse, evidence=None, finding=None,
+                   current=local, category=desc.category, stage=stage, rank=desc.rank, glimpse=desc.glimpse, evidence=None, finding=None,
                    choice=saved['choice'] if saved else None, remaining=saved['remaining'] if saved else 0, actions=[])
         if stage in {'surveyed', 'treated', 'closed'}:
             row['evidence'] = desc.evidence
         if stage in {'treated', 'closed'}:
-            row['finding'] = response(desc, saved['choice']).finding
+            row['finding'] = saved.get('outcome') or response(desc, saved['choice']).finding
+            row['effect'] = response(desc, saved['choice']).effect
         choices = ('incident_survey',) if stage in {'unseen', 'surveying'} else ('incident_preserve', 'incident_seal') if stage == 'surveyed' else ('incident_review',) if stage == 'treated' else ()
         for action in choices:
             option = dict(action=action, target_id=desc.id, options={}, label=LABELS[action])

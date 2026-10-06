@@ -84,7 +84,7 @@ def main():
                     page.get_by_role('button',name='查看守约',exact=True).click()
                     page.locator('[data-mirror-pact=kept]').wait_for()
                     disk=engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click()
@@ -119,7 +119,7 @@ def main():
                     assert page.get_by_role('button',name='强攻机关',exact=True).is_enabled()
                     assert mirror.get(engine.store.load(key))['record_acquired']
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=list('abcdef'),widths=[1440,393],
+                    (output/'report.json').write_text(json.dumps(dict(themes=list('abdf'),widths=[1440,393],
                         retry_once=True,read_only_preview=True,shared_record=True,reload=True,local_release=True,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

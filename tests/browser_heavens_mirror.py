@@ -1,4 +1,4 @@
-"""Real HTTP mirror route: all solutions, six themes, retry and persistent revisit."""
+"""Real HTTP mirror route: all solutions, four themes, retry and persistent revisit."""
 import copy
 import json
 import sys
@@ -101,7 +101,7 @@ def main():
                     assert saved.heavens_state['runtime']['mirror']['record_acquired']
                     assert len(saved.player.formation_materials) == 2
                     snapshot = copy.deepcopy(saved.heavens_state['runtime']['mirror'])
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -129,7 +129,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Mirror browser: solutions, retry, revisit and six themes passed')
+    print('Mirror browser: solutions, retry, revisit and four themes passed')
 
 
 if __name__ == '__main__':

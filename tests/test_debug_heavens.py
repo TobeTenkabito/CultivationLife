@@ -9,12 +9,12 @@ from cultivation_life.debug.registry import CommandError
 from cultivation_life.debug.runtime import atomic_json
 
 
-def test_inspection_is_pure_and_discovers_all_worlds(environment):
+def test_inspection_is_pure_and_respects_observer_world(environment):
     engine, manager, sid, gid = environment
     before = manager._path(sid).read_bytes()
     source = engine.store._path(gid).read_bytes()
     data = manager.execute('heavens inspect', session_id=sid)['data']
-    assert len({r['world'] for r in data['view']['incidents']}) == 11
+    assert {r['world'] for r in data['view']['incidents']} == {'human', 'demon', 'hell', 'monster_realm'}
     assert data['saved_state'] == manager.load(sid)['current']['game']['heavens_state']
     for row in data['view']['incidents']:
         detail = manager.execute('heavens inspect', arguments={'target_id': row['id']}, session_id=sid)

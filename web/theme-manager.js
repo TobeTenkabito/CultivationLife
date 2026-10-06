@@ -1,4 +1,4 @@
-/* One live game tree, six presentations. Theme changes never call game actions. */
+/* One live game tree, four presentations. Theme changes never call game actions. */
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
@@ -6,9 +6,7 @@
   const themes = [
     {id:'a', name:'松烟书院', caption:'页首状态 · 温纸松绿', motto:'这一程，向道而行。', bg:'#F9F6ED', ink:'#315C47', symbol:'砚'},
     {id:'b', name:'月下观星', caption:'星月修行 · 深靛月金', motto:'天地辽阔，道在此身。', bg:'#172632', ink:'#DEC58B', symbol:'月'},
-    {id:'c', name:'青玉留白', caption:'清晰卡片 · 瓷青留白', motto:'从容选择，步步精进。', bg:'#E8F0EC', ink:'#28644F', symbol:'玉'},
     {id:'d', name:'丹砂金阙', caption:'三栏铭牌 · 玄漆赤铜', motto:'道心不移，各证其途。', bg:'#2C2925', ink:'#DAB677', symbol:'印'},
-    {id:'e', name:'江山行卷', caption:'山水行旅 · 底部状态', motto:'一程山水，一程修行。', bg:'#F5F6EE', ink:'#315F49', symbol:'山'},
     {id:'f', name:'竹简纪年', caption:'卷首命籍 · 双页纪事', motto:'凡所经历，皆入此卷。', bg:'#F4E9D2', ink:'#52624A', symbol:'卷'},
   ];
   const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
@@ -58,9 +56,8 @@
     if(theme==='b') core.insertBefore(opportunity,$('#cultivate-action'));
     else resources.prepend(opportunity);
     if(theme==='a'||theme==='b') action.prepend(hud);
-    else if(theme==='e'&&!narrowQuery.matches) stage.append(hud);
     else stage.prepend(hud);
-    if(theme==='e')stage.insertBefore(scenery,action);else scenery.remove();
+    scenery.remove();
     window.ThemeComposition?.arrange(theme);
     if(restore&&focus.isConnected)focus.focus({preventScroll:true});
   }
@@ -92,7 +89,7 @@
   }
   document.querySelectorAll('[data-theme-picker]').forEach(container=>{
     for(const t of themes){const b=document.createElement('button');b.type='button';b.dataset.themeChoice=t.id;b.className='theme-choice';b.setAttribute('aria-pressed','false');b.style.setProperty('--choice-bg',t.bg);b.style.setProperty('--choice-ink',t.ink);
-      b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${t.symbol}</i></span><span><b>${t.id.toUpperCase()} · ${t.name}</b><small>${t.caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
+      b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${t.symbol}</i></span><span><b>${t.name}</b><small>${t.caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
       b.addEventListener('click',()=>save({theme:t.id}));container.append(b);}
   });
   document.querySelectorAll('[data-motion-setting]').forEach(i=>i.addEventListener('change',()=>save({reduced_motion:i.checked})));

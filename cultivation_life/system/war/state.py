@@ -7,6 +7,7 @@ import copy
 from ...world_state import race_pair
 from ..faction_geography import war_site
 from .dependencies import WarStateDependencies
+from .policy import system_war_allowed
 
 
 def _war_player_identity(deps: WarStateDependencies, game, war):
@@ -171,6 +172,6 @@ def _ensure_wars(deps: WarStateDependencies, game: GameState) -> bool:
             if relation.get("status") != "war":
                 continue
             first, second = key.split("|") if "|" in key else key.split(":")
-            if not deps._active_war(game, kind, first, second):
+            if not deps._active_war(game, kind, first, second) and system_war_allowed(game, kind, first, second):
                 deps._start_war(game, kind, first, second)
     return changed or len(game.wars) != before

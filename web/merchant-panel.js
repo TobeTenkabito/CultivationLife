@@ -30,7 +30,7 @@
     root.append(element('p', membership ? `${membership.title} · 本部影响力 ${money(membership.influence)}` : '尚未加入商盟。到总部或分部所在地图即可入盟；商盟身份与宗门、家族、种族身份独立。', 'merchant-membership'));
     const rules = element('details'); rules.append(element('summary', '身份与委托规则'));
     rules.append(element('p', '分部成员累计120影响力晋为使节，360晋为特使；600影响力并通过修为、实战考核后，可在总部调任使节。同界各分部共用影响力。总部直入成员不能直接升使节，须前往本界分部从成员历练。总部使节累计360总部影响力可升特使。'));
-    rules.append(element('p', '任务按实际年数消耗时间，途中劫数会中断并保留进度。提交与炼制任务需实物；悬赏和护送会实战，招募及情报可能失败。仅可委托本盟设有总部或分总部的界面，跨界收集耗时为本界的15倍。星级越高、承接修士境界越低，失败风险越高。无人接取超时退还本金；接单后失败退还全部本金及50%手续费（向上取整）。')); root.append(rules);
+    rules.append(element('p', '任务按实际年数消耗时间，途中劫数会中断并保留进度。提交与炼制任务需实物；悬赏和护送会实战，招募及情报可能失败。实物与人员事务须有本盟总部或分总部；情报可经其他商盟转讯，跨界收集耗时为本界的15倍。星级越高、承接修士境界越低，失败风险越高。无人接取超时退还本金；接单后失败退还全部本金及50%手续费（向上取整）。')); root.append(rules);
     const dock = document.querySelector('[data-panel-target="merchant"]');
     dock.classList.toggle('merchant-notice', !!system.notices?.length);
     dock.title = system.notices?.length ? `商盟 · ${system.notices.length}条传讯` : '商盟';

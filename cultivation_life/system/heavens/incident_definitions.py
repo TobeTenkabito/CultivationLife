@@ -28,6 +28,7 @@ class Incident:
     glimpse: str
     evidence: str
     responses: tuple[Response, Response]
+    category: str = 'local'
 
 
 INCIDENTS = (
@@ -77,7 +78,61 @@ INCIDENTS = (
         (Response('厘清空渡因果', 24, 7500, .10, 'practice', 40, '逐项厘清重复因果，回城复核后辅助四十年的普通参悟。'),
          Response('注销重记渡契', 6, 1800, .03, 'relief', 0, '注销重记，回城复核时安定心神，恢复自身两成气血。'))),
 )
-BY_ID = {row.id: row for row in INCIDENTS}
+# Field anomalies and conflict relief have their own records, separate from the
+# original local dossiers. They share the transactional fieldwork lifecycle.
+REGIONAL_CONTENT = (
+    ('落星失序', '星砂在夜间倒流，落点与观测时刻不再相合。', '星砂来自两段错开的地脉回声，稳定相位可取回散逸法力。', '校准星砂', '掩埋失序星眼',
+     '岚疆伤驿', '烽线附近的旧伤驿缺少防护，行旅伤者只能在原地等待。', '核对伤驿名册并实地救护', '加固伤驿屏障'),
+    ('雷海悬昼', '雷潮上方悬着不落的白昼，灵流持续向高处散逸。', '悬昼由雷脉与日光共振形成；可导回灵流，也可切断共振。', '引雷归脉', '断开悬昼回路',
+     '霆潮补给线', '旧补给线被雷汛切断，驻地救治和避雷工事争用同一批物资。', '沿线设立救护点', '修复避雷工事'),
+    ('灰谷逆影', '谷中影子逆着煞风移动，逐步侵蚀周围的法力。', '逆影依附废弃聚煞阵；顺势卸煞与封闭阵面需要不同投入。', '卸煞归元', '封闭逆影阵面',
+     '赤髓停火驿', '昔日征伐留下的驿道仍有残阵，救护伤者前必须先辨明安全地带。', '开放停火救护处', '划定避战屏障'),
+    ('渊底第二日', '深渊水面浮出另一轮黑日，吞纳附近的真魔气。', '第二日只是阵线折返的投影；折返气机仍可导回。', '导回渊底魔息', '沉封黑日投影',
+     '渊城断营', '外营在逆潮中失去屏障，伤员转运与营地加固都需要亲临。', '救治断营伤者', '重设营地屏障'),
+    ('祖山无声林', '林中万声消失，兽息却积聚在树冠上迟迟不散。', '古树共鸣困住了声音和灵息；疏通与静封可分别处理。', '疏通万兽灵息', '静封无声古树',
+     '祖山共护道', '族群争道留下断裂护栏与伤者，共护道需要重新整理。', '救护沿途伤者', '重设共护界标'),
+    ('梦城叠月', '醒时仍能看见两轮月亮，心神消耗被拖入梦影。', '两轮月来自不同梦层；循次醒梦能取回滞留灵息。', '循层醒梦', '隔断叠月梦层',
+     '梦城醒伤所', '旧梦战场的余波困扰途经者，醒伤所和隔梦屏障均已失修。', '主持醒伤救护', '修复隔梦屏障'),
+    ('忘川倒灯', '河面灯火朝水下燃烧，阴息被牵引到废灯座中。', '倒灯与废渡阵相连；疏引阴息或隔绝渡阵都能收束。', '疏引倒灯阴息', '隔绝废渡阵',
+     '幽关安魂线', '关外争渡留下伤者与破损灯线，先查实际在场者再施援。', '救护渡口伤者', '修补安魂灯线'),
+    ('登仙台逆诏', '空中的诏纹逆向流转，仙息停滞在断裂的笔画之间。', '逆诏不含新敕命，只是失配印文；可引回仙息或封住断笔。', '引回印间仙息', '封住逆诏断笔',
+     '玉京护送簿', '旧护送通道尚未复原，地方伤者和沿途掩护都缺少照料。', '按实籍施行救护', '重整护送掩阵'),
+    ('无生赤环', '战场上空浮出赤环，残留杀势吸走附近气机。', '赤环没有新的执阵者；卸去余势可以回收气机，隔离则更稳妥。', '卸环归息', '隔离赤环阵心',
+     '无生收伤阵', '旧战地的收伤阵破损，救治在场伤者与重设庇护只能择一投入。', '收治战地伤者', '重设止戈庇护'),
+    ('太荒息壤潮', '息壤像潮水一样起伏，吞吐的灵息始终无法落地。', '断裂根脉与息壤相位相反；导通能回收灵息，固边则留下静息处。', '导通息壤灵脉', '固住息壤潮边',
+     '天苑护生垒', '争夺地脉留下损坏的护生垒，巡途伤者缺少安置之处。', '救治护生垒伤者', '重筑护生垒'),
+    ('彼岸回声轮', '渡头回声先于脚步传来，因果余息缠绕空转渡轮。', '回声轮仅错接了旧痕；解开顺序可归还灵息，封轮可止住余响。', '解开回声次序', '封止空转渡轮',
+     '彼岸息兵渡', '争渡留下的掩阵和救护处俱损，停战后的安全仍需逐处维护。', '救治渡前伤者', '修复息兵掩阵'),
+)
+
+
+def _regional_cases():
+    result = []
+    for local, content in zip(INCIDENTS, REGIONAL_CONTENT):
+        name, glimpse, evidence, recover, seal, war, situation, aid, shelter = content
+        scale = local.rank
+        common = dict(world=local.world, world_name=local.world_name, location=local.location,
+                      location_name=local.location_name, field=local.field, field_name=local.field_name,
+                      rank=local.rank, survey_years=local.survey_years)
+        result.append(Incident(id=local.world+'_anomaly', name=name, glimpse=glimpse, evidence=evidence,
+            category='anomaly', responses=(
+                Response(recover, scale+2, scale*200, .12, 'mana', 0,
+                         '现场疏导已完成；返程复核后恢复三成法力一次，受自身上限约束。'),
+                Response(seal, max(2, scale//2), scale*80, .03, 'practice', scale*3,
+                         f'封存异象并记录规律；返程复核后用于 {scale*3} 年当地普通参悟。')), **common))
+        result.append(Incident(id=local.world+'_conflict', name=war, glimpse=situation,
+            evidence='实地记录已对照。救护只作用于此地实际存活、自由且负伤的人物；工事方案留下有限当地调息余量。',
+            category='conflict', responses=(
+                Response(aid, scale+1, scale*150, .08, 'aid', 0,
+                         '现场救护至多三名实际伤者，每人减轻一级伤势；人员离开或已痊愈时不补造伤者。'),
+                Response(shelter, scale+3, scale*300, .04, 'rest', scale*4,
+                         f'庇护工事完成；返程复核后可在起始地点调息 {scale*4} 年。')), **common))
+    return tuple(result)
+
+
+REGIONAL_CASES = _regional_cases()
+ALL_INCIDENTS = INCIDENTS + REGIONAL_CASES
+BY_ID = {row.id: row for row in ALL_INCIDENTS}
 INCIDENT_IDS = frozenset(BY_ID)
 INCIDENT_ACTIONS = frozenset({'incident_survey', 'incident_preserve', 'incident_seal', 'incident_review'})
 LABELS = {'incident_survey': '核对本地旧记', 'incident_preserve': '保留并修复',

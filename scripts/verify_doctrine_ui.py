@@ -159,7 +159,7 @@ def main():
                 page.evaluate("UtilityPanels.close('yaochi');UtilityPanels.open('immortal-body')")
                 page.get_by_role('button',name='以仙药淬炼下一层',exact=True).click()
                 page.wait_for_function('game.doctrines.immortal_body.level===1')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(theme)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${theme}]`).click()',theme)
                     page.evaluate('GameThemes.saved')
                     for width,height in [(1440,1080),(412,915)]:

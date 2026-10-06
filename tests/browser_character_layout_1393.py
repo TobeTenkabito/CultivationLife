@@ -1,4 +1,4 @@
-"""Real layout regression: populated NPCs, many actions, long names, all six themes."""
+"""Real layout regression: populated NPCs, many actions, long names, all four themes."""
 import sys
 import tempfile
 import threading
@@ -32,7 +32,7 @@ def main():
                     before=page.evaluate('JSON.stringify(game)')
                     for width in (1440,800,393,360):
                         page.set_viewport_size({'width':width,'height':900})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate("t=>document.querySelector('[data-theme-picker=dialog] [data-theme-choice='+t+']').click()",theme)
                             page.evaluate('GameThemes.saved')
                             for panel in ('faction','world-npc','family','relationship','sage'):

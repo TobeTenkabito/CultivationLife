@@ -209,7 +209,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(phase.equals("start-layout")) {
                 js("document.querySelector('#new-game-button').click();true");
                 waitForJs("!document.querySelector('#start-screen').classList.contains('hidden')", "Start screen visible");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();true");
                     async("GameThemes.saved"); Thread.sleep(400);
                     check(Boolean.TRUE.equals(js("document.documentElement.scrollWidth<=innerWidth+1 && document.querySelector('#start-screen [data-tutorial-open] svg')!==null")), "Start layout theme "+theme);
@@ -251,7 +251,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 tapSelector("#talisman-content .exploration-grid > button");
                 waitForJs("!busy && game.talismans.rows.length===1","Native talisman crafting");
                 check(Boolean.TRUE.equals(js("game.talismans.rows[0].tier===1 && !!game.talismans.rows[0].quality && game.talismans.skill.experience>0")),"Tier, quality and experience");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
                     tapSelector("[data-panel-target=map]");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('#map-locations .map-location .spatial-rift').length===3 && !document.querySelector('#map-card > #spatial-panel')")),"Rifts inside map locations");
@@ -281,20 +281,21 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("!busy && game.world_npcs.some(n=>n.affinity>0)","Native local NPC interaction");
                 check(Boolean.TRUE.equals(js("game.demonic_system.soul_refinement_risk.safe_capacity===2 && game.spatial.panels.includes('relationship')")),"Native soul capacity and isolated capabilities");
                 capture("spatial-talisman");
-                result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, black-market finished purchase, lost local NPC interaction and soul capacity, tier/quality/experience, six-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
+                result.putString("spatial_talisman_scope","Native learn/craft/buy/sell, black-market finished purchase, lost local NPC interaction and soul capacity, tier/quality/experience, four-theme left panel, Nascent Soul visibility, multiple rifts inside map locations and persistence");
             } else if(phase.equals("heavens")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'诸界验收',preset_id:'core',seed:200})});return g.id;})()");
-                python("from cultivation_life import server\nfrom cultivation_life.system.heavens.incident_definitions import INCIDENTS\nfrom cultivation_life.system.heavens.state import initialize\nfrom cultivation_life.rules import max_hp,max_mp,add_item\ng=server.ENGINE.store.load('"+id+"')\ninitialize(g)\ng.player.world='human'\ng.player.location_id='lanjiang_steppe'\ng.player.realm_index=2\ng.player.lifespan=None\ng.player.next_tribulation_age=999999\ng.player.hp=max_hp(g.player)\ng.player.mp=max_mp(g.player)\nadd_item(g.player,'spirit_stone',10000)\ng.settings['silent_events']=True\ng.heavens_state['runtime']['incidents']={d.id:dict(stage='surveyed',choice=None,opened_at=0,closed_at=None,remaining=0,base=0.0,claimed=0.0) for d in INCIDENTS}\ng.heavens_state['definition_versions'].update({d.id:1 for d in INCIDENTS})\nserver.ENGINE.store.save(g)");
+                python("from cultivation_life import server\nfrom cultivation_life.system.heavens.incident_definitions import ALL_INCIDENTS as INCIDENTS\nfrom cultivation_life.system.heavens.state import initialize\nfrom cultivation_life.rules import max_hp,max_mp,add_item\ng=server.ENGINE.store.load('"+id+"')\ninitialize(g)\ng.player.world='human'\ng.player.location_id='lanjiang_steppe'\ng.player.realm_index=2\ng.player.lifespan=None\ng.player.next_tribulation_age=999999\ng.player.hp=max_hp(g.player)\ng.player.mp=max_mp(g.player)\nadd_item(g.player,'spirit_stone',10000)\ng.settings['silent_events']=True\ng.heavens_state['runtime']['incidents']={d.id:dict(stage='surveyed',choice=None,opened_at=0,closed_at=None,remaining=0,base=0.0,claimed=0.0) for d in INCIDENTS}\ng.heavens_state['definition_versions'].update({d.id:1 for d in INCIDENTS})\nserver.ENGINE.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 tapSelector("[data-panel-target=heavens]");
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#strategy-dock [data-panel-target=heavens]') && !document.querySelector('.left-dock [data-panel-target=heavens]')")),"Heavens belongs to social dock");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('#theme-open').click();true");
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");
                     async("GameThemes.saved");
                     js("document.querySelector('[data-close-dialog=theme-dialog]').click();true");
+                    for(String category:new String[]{"worlds","anomalies","frontier"}) {
                     for(String world:new String[]{"human","spirit","demon","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
-                        js("document.querySelector('#heavens-primary-worlds').click();true");
+                        js("document.querySelector('#heavens-primary-"+category+"').click();true");
                         js("(()=>{const s=document.querySelector('[aria-label=选择界域]');s.value='"+world+"';s.dispatchEvent(new Event('change'));document.querySelector('.heavens-destination').click();return true;})()");
                         check(Boolean.TRUE.equals(js("(()=>{const c=document.querySelector('#heavens-card').getBoundingClientRect(),b=document.querySelector('#heavens-body').getBoundingClientRect(),x=document.querySelector('#heavens-toggle').getBoundingClientRect();return c.top>=0 && c.bottom<=innerHeight+1 && b.height>=140 && x.top>=0 && x.bottom<=innerHeight;})()")),"Heavens visible reading area "+theme+" "+world);
                         for(String tab:new String[]{"record","response","aftermath"}) {
@@ -303,6 +304,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         }
                     }
                 }
+                }
+
                 js("document.querySelector('#heavens-primary-worlds').click();true");
                 js("(()=>{const s=document.querySelector('[aria-label=选择界域]');s.value='human';s.dispatchEvent(new Event('change'));document.querySelector('.heavens-destination').click();document.querySelector('[data-heavens-tab=response]').click();const c=document.querySelector('[aria-label=界域处理方案]');c.value='incident_seal';c.dispatchEvent(new Event('change'));return true;})()");
                 tapSelector("[data-heavens-action=incident_seal]");
@@ -315,7 +318,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.heavens.incidents.length===11 && game.heavens.incidents.find(r=>r.id==='human_beacon').choice==='incident_seal'")),"Heavens persisted outcome");
                 capture("heavens");
-                result.putString("heavens_scope","Eleven worlds, six themes, independent dossiers, bounded buttons, native touch preview/cancel/commit and persisted result");
+                result.putString("heavens_scope","Eleven worlds, four themes, independent dossiers, bounded buttons, native touch preview/cancel/commit and persisted result");
             } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);
@@ -338,7 +341,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("!busy && !document.querySelector('#debug-heavens .debug-actions button:nth-child(3)').disabled", "Heavens preview ready");
                 tapSelector("#debug-heavens .debug-actions button:nth-child(3)");
                 waitForJs("!busy && game.heavens.watch!==__heavensWatch && !document.querySelector('#debug-heavens-target').disabled", "Heavens isolated native commit");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-choice="+theme+"]').click();true");
                     check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#debug-console').getBoundingClientRect();return r.left>=0 && r.right<=innerWidth+1 && !!document.querySelector('#debug-session-banner').textContent;})()")), "Console geometry theme "+theme);
                     check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#debug-heavens');return r.scrollWidth<=r.clientWidth+1 && Array.from(r.querySelectorAll('select,button')).every(e=>e.getBoundingClientRect().height>=44);})()")), "Heavens workbench geometry "+theme);
@@ -375,7 +378,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from android_runtime import set_debug_mode\nset_debug_mode(False)");
                 check(((Number)async("fetch(`/api/games/${game.id}`,{headers:DebugConsole.headers(`/api/games/${game.id}`)}).then(r=>r.status)")).intValue()==200, "Legacy config does not disconnect isolated session");
                 js("sessionStorage.removeItem('cultivation-debug-session');true");
-                result.putString("debug_scope","Isolated source and achievements, resource and probability commands, snapshots, six themes, native document callbacks, source fingerprint, native back and config-independent isolated session");
+                result.putString("debug_scope","Isolated source and achievements, resource and probability commands, snapshots, four themes, native document callbacks, source fingerprint, native back and config-independent isolated session");
             } else if(phase.equals("custody")) {
                 python(assetText("npc_custody_release.py"));
             } else if(phase.equals("asura")) {
@@ -407,7 +410,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("(()=>{const old=JSON.parse(__oldAsuraPowers);return game.asura.powers.every((r,i)=>(JSON.stringify(r)===JSON.stringify(old[i]))===(i===0));})()")),"Locked attribute preserved; all other attributes rerolled");
                 check(Boolean.TRUE.equals(js("game.player.opportunity_unbounded && game.player.opportunity>game.player.opportunity_required && game.asura.meridians.breakthrough_cost===18000")),"Asura reserve and immortal-scale fee");
 
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     for(String panel:new String[]{"asura-conversion","asura-body","asura-veins","asura-route","asura-domain","asura-powers","puppet-workshop"}) {
                         tapSelector("[data-panel-target="+panel+"]");
@@ -453,7 +456,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         tapSelector("#upper-institution-content [data-section=jobs] button");
                     }
                     waitForJs("!busy&&game.upper_institution.job!==null","Native institution commission");
-                    for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    for(String theme:new String[]{"a","b","d","f"}) {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                         for(String panel:new String[]{"upper-voisinage","immortal-aperture","upper-institution"}) {
                             js("UtilityPanels.open('"+panel+"');true");
@@ -467,12 +470,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("game.upper_voisinages.rows[0].level===2&&game.aperture.current>0")),"Upper cultivation persisted");
                 }
                 check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='upper-voisinages')")),"Upper domain handbook missing");
-                result.putString("upper_voisinage_scope","Three worlds, six themes, native ninth-realm presets, institution enrollment/commissions, acquisition/training/refinement and persisted domains; handbook available");
+                result.putString("upper_voisinage_scope","Three worlds, four themes, native ninth-realm presets, institution enrollment/commissions, acquisition/training/refinement and persisted domains; handbook available");
             } else if(phase.equals("bulk")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'批量兑换验收',preset_id:'true_immortal',seed:1521})});return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.yaochi_state['merit']=100000\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     js("UtilityPanels.open('yaochi');window.__bulkOffer=game.yaochi.shop.find(o=>o.kind==='item'&&o.quantity>1);window.__bulkBalance=game.yaochi.merit;window.__bulkCount=(game.player.inventory.find(i=>i.id===__bulkOffer.id)||{quantity:0}).quantity;document.querySelector('[data-offer-id=\"'+__bulkOffer.id+'\"]').dataset.bulkTest='true';true");
                     js("(()=>{const q=document.querySelector('[data-bulk-test] input');q.value='0';q.dispatchEvent(new Event('input',{bubbles:true}));})()");
@@ -492,7 +495,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nfrom cultivation_life.rules import learn_technique\nimport copy,random\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.location_id='expanse_celestial_8'\ng.heavenly_court['player_grade']=4\ng.yaochi_state['experience']=200\ng.yaochi_state['job']={'name':'验收委托','years':100,'progress':100,'reward':400}\nfor d in g.doctrine_state['definitions'].values():\n learn_technique(g.player,Technique(**copy.deepcopy(d['manuals'][0])))\n g.doctrine_state['player']['progress'][d['id']]={'level':4,'experience':0}\ng.doctrine_state['player']['active']=next(iter(g.doctrine_state['definitions']))\ne._court_open_election(g,'sun',random.Random(1))\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 js("window.__experienceAge=game.player.age;true");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     for(String panel:new String[]{"doctrine","voisinage","daomen"}) {
                         js("UtilityPanels.open('"+panel+"');true");
@@ -521,7 +524,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.sects['yaochi'].kind='sect'\ng.player.faction_id='yaochi'\ng.player.faction_contribution=231\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.player.faction_id===null && game.player.institution_affiliations.yaochi.legacy_contribution===231 && game.faction.available.every(f=>!['heavenly_court','yaochi'].includes(f.id))")),"Institution migration and sect exclusion");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     js("UtilityPanels.open('map');Array.from(document.querySelectorAll('#map-view-tabs button')).find(b=>b.textContent==='活动与据点').click();Array.from(document.querySelectorAll('.map-directory-filters button')).find(b=>b.textContent==='势力驻地').click();true");
                     check(Boolean.TRUE.equals(js("['天庭','瑶池'].every(name=>Array.from(document.querySelectorAll('.map-directory-entry')).some(r=>r.querySelector('strong').textContent===name && r.textContent.includes('机构驻地')))")),"Institution map classification "+theme);
@@ -549,7 +552,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("game.doctrines.rows.some(r=>r.fusion && (r.fusion.level>1 || r.fusion.experience>0))","Fusion study advances real time");
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     js("UtilityPanels.open('doctrine');document.querySelector('[data-fusion-id]').scrollIntoView({block:'center'});true");
                     check(Boolean.TRUE.equals(js("document.querySelector('#doctrine-card').scrollWidth<=document.querySelector('#doctrine-card').clientWidth+1")),"Fusion layout "+theme);
@@ -558,12 +561,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('#yaochi-content optgroup').length===26 && game.yaochi.shop.filter(o=>o.id.startsWith('daluo_breakthrough_')).length===3")),"Grouped catalog and realm pills");
                     js("UtilityPanels.close('yaochi');true");
                 }
-                result.putString("fusion_scope","Real fusion/study, single trace payment, true voisinage persistence, six themes and grouped catalog");
+                result.putString("fusion_scope","Real fusion/study, single trace payment, true voisinage persistence, four themes and grouped catalog");
             } else if(phase.equals("governance")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'故人议政验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("import random\nfrom cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.heavenly_court['player_grade']=9\ng.player.location_id='expanse_celestial_8'\ng.yaochi_state['merit']=100000\ng.player.faction_id=next(s.id for s in g.sects.values() if s.world=='celestial' and not s.extinct and s.npcs)\ne._advance_heavenly_court_unit(g,random.Random(9))\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     for(String panel:new String[]{"yaochi","heavenly-court","relationship"}) {
                         js("UtilityPanels.open('"+panel+"');true");
@@ -593,7 +596,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'瑶池金光验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.player.immortal_body['level']=20\ng.yaochi_state['merit']=100000\nadd_item(g.player,'great_sun_divine_light',8)\nadd_item(g.player,'spirit_stone',100000)\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     for(String panel:new String[]{"golden-light","yaochi"}) {
                         js("UtilityPanels.open('"+panel+"');true");
@@ -621,7 +624,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界验收',spirit_root:'supreme_metal',path:'dao',seed:1520})});return g.id;})()");
                     python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\np.realm_index=9\np.layer=1\np.lifespan=None\np.location_id=e.maps.normalize_location(p.world,None)\np.opportunity=opportunity_required(p)*3\ng.pending_event=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
-                    for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                    for(String theme:new String[]{"a","b","d","f"}) {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                         check(Boolean.TRUE.equals(js("!game.player.opportunity_unbounded && !document.querySelector('#opportunity-text').textContent.includes('无尽') && document.querySelector('#upper-progression-note').textContent.includes(game.player.world==='nether'?'血脉进化':'普通修行')")),"Upper progression routing: "+world+theme);
                         check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#upper-progression-note');return e.scrollWidth<=e.clientWidth+1})()")),"Upper progression overflow");
@@ -634,13 +637,13 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     }
                 }
                 check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='roots') && TutorialHandbook.build(configData,game).some(c=>c.id==='upper-worlds')")),"Missing upper/root handbook");
-                result.putString("upper_scope","Three worlds, six themes, finite opportunity, DLC routing, native breakthrough and persistence, root handbook");
+                result.putString("upper_scope","Three worlds, four themes, finite opportunity, DLC routing, native breakthrough and persistence, root handbook");
             } else if(phase.equals("trials")) {
                 python("from cultivation_life.system.doctrine.voisinage_training import multiplier,base_multiplier\nassert [round(multiplier(n),2) for n in (8,9,10,11,12,13)]==[2.54,2.76,3.06,3.36,3.66,4.55]\nassert round(base_multiplier(13),2)==3.64");
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'天域培养验收',preset_id:'true_immortal',seed:7429})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.models import Technique\nimport copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.opportunity=1e12\ng.player.immortal_traces=100000\ng.player.combat_plan={'manual':True,'stance':'guard','investment':40}\nd=next(iter(g.doctrine_state['definitions'].values()))\nk=d['id']\ng.player.known_techniques.append(Technique(**copy.deepcopy(d['manuals'][0])))\nr=g.doctrine_state['player']\nr['progress'][k]={'level':4,'experience':0}\nr['active']=k\nr['voisinage_training'][k]={'rank':4,'stability':10}\ng.player.immortal_aperture['current']=g.player.immortal_aperture['capacity']\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     js("UtilityPanels.open('voisinage');document.querySelector('#voisinage-content .doctrine-compact').open=true;true");Thread.sleep(500);
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('.voisinage-stages>span').length===4 && document.querySelector('#voisinage-content').textContent.includes('初成4层') && document.querySelector('#voisinage-card').scrollWidth<=document.querySelector('#voisinage-card').clientWidth+1")),"Trial stage layout: "+theme);
@@ -659,7 +662,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("trials-victory-1520");
                 result.putString("trials_scope","Six themes; native training tap and back; five-round field-only backlash; real growth and reload persistence; unlimited three-corpses handbook");
             } else if(phase.equals("tutorial")) {
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'亲手问道',spirit_root:'supreme_wood',path:'dao',seed:1520,tutorial_enabled:true})});return g.id;})()");
                     async("loadGame("+JSONObject.quote(id)+")");js("window.__tutorialAge=game.player.age");
@@ -694,7 +697,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             } else if(phase.equals("save-transfer")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓长卷验收',spirit_root:'supreme_wood',path:'buddhist',seed:1450})});return g.id;})()");
                 python("from cultivation_life import server\nimport json,copy\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.layer=1\ng.player.age=330\ng.player.lifespan=2000\nd=g.to_dict()\nt=d['history'][0]\nd['history']=[{**copy.deepcopy(t),'age':i,'summary':f'第{i}年，修士于山门往返、闭关、游历，记录功法与人间事。'*8,'state_diff':{'npc_id':f'npc_{i%1000}','opportunity':i*3.2}} for i in range(12000)]\nraw=json.dumps(d,ensure_ascii=False,indent=2)\nassert len(raw.encode())>10000000\ne.store._path(g.id).write_text(raw,encoding='utf-8')\nserver._transfer_test_original=d");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     async("SaveTransfer.exportSave("+JSONObject.quote(id)+")");
@@ -740,7 +743,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item,max_hp,max_mp\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.active_trial=None\ng.heavenly_court['open_election']=None\ng.player.next_tribulation_age=None\ng.player.opportunity=10**9\ng.player.immortal_traces=10000\ng.player.immortal_vein_pity={'9:1':100,'9:2':100,'9:3':100}\nadd_item(g.player,'spirit_stone',10**8)\ng.player.hp=max_hp(g.player)*.6\ng.player.mp=max_mp(g.player)*.6\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=voisinage]').classList.contains('hidden') && !document.querySelector('[data-panel-target=immortal-body]').classList.contains('hidden')")),"Immortal entry gates");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     js("UtilityPanels.close('immortal-body');UtilityPanels.open('immortal-veins');document.querySelector('.meridian-figure').scrollIntoView({block:'center'});true");
@@ -777,10 +780,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.layer=4\ne.store.save(g)");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.aperture.capacity===2000 && game.aperture.current===300")),"Stage capacity must conserve current");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     async("mutate('/api/games/'+game.id+'/settings',{setting:'manual_combat_plan',enabled:true})");
-                    int investment=37+"abcdef".indexOf(theme);
+                    int investment=37+"abdf".indexOf(theme);
                     js("(()=>{UtilityPanels.open('combat-plan');const n=document.querySelector('[aria-label=每轮追加仙力]');n.value='"+investment+"';return true;})()");
                     check(Boolean.TRUE.equals(js("!document.querySelector('[data-panel-target=combat-plan]').classList.contains('hidden') && document.querySelector('#combat-plan-card').scrollWidth<=document.querySelector('#combat-plan-card').clientWidth+1")),"Manual plan layout");
                     tapSelector("#combat-plan-content button[type=submit]");waitForJs("!busy && game.combat_plan.investment==="+investment,"Saved plan");capture("minor-plan-"+theme);
@@ -828,7 +831,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 async("mutate('/api/games/'+game.id+'/merchant-action',{action:'join',alliance_id:game.merchant_system.alliances[0].id})");
                 js("UtilityPanels.open('merchant');const form=document.querySelector('.merchant-post');form.parentElement.open=true;const kind=form.querySelector('[aria-label=委托类型]');kind.value='formation';kind.dispatchEvent(new Event('change'));true");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     enterCommissionNumber("杀势最低要求","0.25");
@@ -862,7 +865,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
                 }
                 String before=(String)js("JSON.stringify(game)");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     for(String panel:new String[]{"map","growth"}) {
@@ -886,7 +889,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
                 }
                 String before=(String)js("JSON.stringify(game)");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     for(String panel:new String[]{"family","offer","guixu"}) {
@@ -910,7 +913,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js(new String(buffer.toByteArray(),StandardCharsets.UTF_8));
                 }
                 String before=(String)js("JSON.stringify(game)");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     for(String panel:new String[]{"faction","world-npc","family","relationship","sage"}) {
@@ -937,7 +940,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("release-offline-upgrade");
             } else {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'安卓发行验收',spirit_root:'supreme_metal',path:'dao',seed:1392,preset_id:'core'})});render(g);return g.id;})()");
-                for(String theme:new String[]{"a","b","c","d","e","f"}) {
+                for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('#theme-open').click();document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");
                     async("GameThemes.saved");
                     js("AndroidUI.back()");
@@ -954,7 +957,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("release-action");
             }
             result.putString("status","passed");result.putString("phase",phase);
-            result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : "Signed release APK, Android 12, offline upgrade preservation and six themes");
+            result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : "Signed release APK, Android 12, offline upgrade preservation and four themes");
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);

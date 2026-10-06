@@ -1,4 +1,4 @@
-"""Live six-theme training, backlash, battle report and Dao Ancestor UI."""
+"""Live four-theme training, backlash, battle report and Dao Ancestor UI."""
 import copy
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -58,7 +58,7 @@ def main():
                 page.evaluate("battleReportOpen=false;renderBattleReport(game.last_combat_report)")
                 saved=engine.store.load(game.id);saved.doctrine_state['player']['voisinage_training'][key]['rank']=12
                 engine.store.save(saved);page.evaluate('(id)=>loadGame(id)',game.id)
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width in (1440,412):
                         page.set_viewport_size({'width':width,'height':1000 if width>500 else 915})

@@ -101,7 +101,7 @@ def main():
                     page.locator('[data-section=politics] summary').click()
                     page.locator('[data-section=politics] button').first.click()
                     page.wait_for_function("!busy&&game.upper_institution.policy==='war'")
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
                         page.evaluate('GameThemes.saved')
                         for width, height in [(1440,1080), (412,915), (915,412)]:
@@ -143,7 +143,7 @@ def main():
         finally:
             httpd.shutdown()
             httpd.server_close()
-    print('Upper voisinage and institutions UI passed: three worlds, six themes, three viewports, acquisition/training/selection/refinement, membership, claims, monarchy petitions, oligarchic unequal votes, religious vows/rites, crossing persistence and handbook')
+    print('Upper voisinage and institutions UI passed: three worlds, four themes, three viewports, acquisition/training/selection/refinement, membership, claims, monarchy petitions, oligarchic unequal votes, religious vows/rites, crossing persistence and handbook')
 
 
 if __name__ == '__main__':

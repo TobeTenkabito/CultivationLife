@@ -55,7 +55,7 @@ window.DebugHeavens = (() => {
       if(!result)return;
       view=result.data.view;snapshotRevision=result.revision;
       const targets=new Map([['configuration','诸天偏好']]);
-      for(const row of [...(view.incidents||[]),...(view.sites||[]),...(view.omens||[]),view.mirror,view.ruins,view.frontier,view.campaign]){
+      for(const row of [...(view.incidents||[]),...(view.anomalies||[]),...(view.conflicts||[]),...(view.sites||[]),...(view.omens||[]),view.mirror,view.ruins,view.frontier,view.campaign]){
         if(row?.id)targets.set(row.id,`${row.world_name?row.world_name+' · ':''}${row.name||row.id}`);
       }
       for(const task of view.tasks||[])if(['reserved','running','paused'].includes(task.status))targets.set(task.id,`进行中 · ${task.action}`);

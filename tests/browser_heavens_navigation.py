@@ -1,4 +1,4 @@
-"""Real UI navigation, local omens, stale response isolation and compact six-theme pages."""
+"""Real UI navigation, local omens, stale response isolation and compact four-theme pages."""
 import json
 import sys
 import tempfile
@@ -102,7 +102,7 @@ def main():
                     assert page.locator('#heavens-body').get_attribute('data-heavens-view')=='anomalies'
                     assert engine.store.load(key).player.age==after.player.age
                     snapshot=engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -149,7 +149,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Heavens navigation: six themes, distinct views, keyboard, stale response and local omen passed')
+    print('Heavens navigation: four themes, distinct views, keyboard, stale response and local omen passed')
 
 
 if __name__=='__main__':main()

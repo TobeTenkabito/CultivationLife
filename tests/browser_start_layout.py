@@ -1,4 +1,4 @@
-"""Check real start controls, compact groups and tutorial in all six themes."""
+"""Check real start controls, compact groups and tutorial in all four themes."""
 import sys
 import tempfile
 import threading
@@ -38,7 +38,7 @@ def main():
                     count = page.evaluate('configData.quick_starts.length')
                     for width, height in ((1440, 1000), (393, 873), (320, 700)):
                         page.set_viewport_size({'width': width, 'height': height})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('GameThemes.saved')
                             page.wait_for_timeout(350)
@@ -113,7 +113,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Start layout passed: six themes, desktop and two phone widths; folding, tutorial, DLC labels, Buddhist and lost-world starts, mandatory path/species and generated maps.')
+    print('Start layout passed: four themes, desktop and two phone widths; folding, tutorial, DLC labels, Buddhist and lost-world starts, mandatory path/species and generated maps.')
 
 
 if __name__ == '__main__':

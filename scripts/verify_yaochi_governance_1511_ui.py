@@ -37,7 +37,7 @@ def main():
                 page.on('pageerror',lambda err:errors.append(str(err)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
                 page.evaluate('(id)=>loadGame(id)',g.id)
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme);page.evaluate('GameThemes.saved')
                     for width,height in [(1440,1080),(412,915),(915,412)]:
                         page.set_viewport_size(dict(width=width,height=height))
@@ -74,6 +74,6 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally:httpd.shutdown()
-    print('Yaochi governance UI passed: six themes and three viewports, stock lock/purchase/reload, autonomous cabinet, categorized NPC search and actual interactions')
+    print('Yaochi governance UI passed: four themes and three viewports, stock lock/purchase/reload, autonomous cabinet, categorized NPC search and actual interactions')
 
 if __name__=='__main__':main()

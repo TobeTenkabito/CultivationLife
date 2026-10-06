@@ -10,6 +10,7 @@ from ...models import GameState, HistoryRecord, SectNpc
 from ...runtime import decode_rng, encode_rng, now_iso
 from ...world_state import race_pair
 from .dependencies import IntrigueResolutionsDependencies
+from ..war.policy import system_war_allowed
 
 
 def _intrigue_vote_chance(
@@ -96,8 +97,10 @@ def _intrigue_resolve(
         "proposer_id": proposer_id, "target_id": target_id, "votes": ballots,
         "yes": yes, "total": len(ballots), "result": "passed" if passed else "rejected", "age": game.player.age,
     }
+    if resolution_type == "declare_war" and proposer_id != deps.PLAYER_ID and not system_war_allowed(game, kind, faction_id, target_id):
+        passed = False
     if passed:
-        deps._intrigue_apply_resolution(game, record, resolution_type, target_id, rng, context=context)
+        deps._intrigue_apply_resolution(game, record, resolution_type, target_id, rng, context={**(context or {}), "initiated_by_player": proposer_id == deps.PLAYER_ID})
         if proposer_id == deps.PLAYER_ID and resolution_type == "declare_war":
             emit(game, "diplomacy.proposal_passed", status="war")
         if resolution_type == "disciple_recruitment":
@@ -140,7 +143,8 @@ def _intrigue_apply_resolution(
             # Field wars still use the established war-peace settlement flow.
             return
         deps._set_diplomatic_relation(game, relation, status, faction_id, target_id, kind,
-                                       {"war": -75.0, "truce": -5.0, "alliance": 80.0, "neutral": 0.0}[status])
+                                       {"war": -75.0, "truce": -5.0, "alliance": 80.0, "neutral": 0.0}[status],
+                                       initiated_by_player=bool((context or {}).get("initiated_by_player")))
     elif resolution_type == "mass_recruitment" and kind in {"sect", "family"}:
         entity = deps._intrigue_entity(game, kind, faction_id)
         if not entity:

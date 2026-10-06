@@ -67,7 +67,7 @@ def main():
                         before = engine.store.load(key)
                         disk = engine.store._path(key).read_bytes()
                         if index == 0:
-                            for theme in 'abcdef':
+                            for theme in 'abdf':
                                 page.locator('#theme-open').click()
                                 page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                                 page.evaluate('GameThemes.saved')
@@ -105,7 +105,7 @@ def main():
                         assert page.get_by_role('button',name='启程访学',exact=True).count() == 0
                         results.append(dict(source=site.world,destination=destination.world,years=8))
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(trips=results,themes=list('abcdef'),
+                    (output/'report.json').write_text(json.dumps(dict(trips=results,themes=list('abdf'),
                         widths=[1440,393],reload_return_ticket=True,navigation_read_only=True,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

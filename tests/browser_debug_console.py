@@ -1,4 +1,4 @@
-"""Run directly: six-theme desktop/mobile console, session isolation and recovery."""
+"""Run directly: four-theme desktop/mobile console, session isolation and recovery."""
 import json
 from pathlib import Path
 import sys
@@ -91,7 +91,7 @@ def main():
                     assert page.evaluate("game.player.inventory.find(x=>x.id==='spirit_stone').quantity") == 7654321
                     for width, height in ((1440, 1000), (412, 915), (915, 412)):
                         page.set_viewport_size({'width': width, 'height': height})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate("theme => document.querySelector(`[data-theme-choice=\"${theme}\"]`).click()", theme)
                             command('player get realm_index')
                             assert page.locator('#debug-console-input').is_visible()
@@ -130,7 +130,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close(); thread.join(timeout=5)
-    print('Debug console: six themes, three viewports, items, action simulation, snapshots, completion, export, two-tab isolation and config-independent keyboard access passed.')
+    print('Debug console: four themes, three viewports, items, action simulation, snapshots, completion, export, two-tab isolation and config-independent keyboard access passed.')
 
 
 if __name__ == '__main__':

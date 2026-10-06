@@ -1,4 +1,4 @@
-"""Real HTTP facilities in four highest worlds, six themes and separate pages."""
+"""Real HTTP facilities in four highest worlds, four themes and separate pages."""
 import json
 import sys
 import tempfile
@@ -89,7 +89,7 @@ def main():
                         assert not deployed.player.formation_materials
                         disk = engine.store._path(key).read_bytes()
                         if index == 0:
-                            for theme in 'abcdef':
+                            for theme in 'abdf':
                                 page.locator('#theme-open').click()
                                 page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                                 page.locator('[data-close-dialog=theme-dialog]').click()
@@ -132,7 +132,7 @@ def main():
                         results.append(dict(world=site.world,status=final['upkeep']['status'],progress=final['upkeep']['progress'],
                                             remote_in_mirror=index == 3))
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(facilities=results,themes=list('abcdef'),
+                    (output/'report.json').write_text(json.dumps(dict(facilities=results,themes=list('abdf'),
                         widths=[1440,393],reload=True,preview_read_only=True,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

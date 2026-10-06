@@ -8,7 +8,7 @@ from cultivation_life.ui_preferences import load_ui_preferences, write_ui_prefer
 
 def test_defaults_and_partial_updates_survive_reload(tmp_path):
     assert load_ui_preferences(tmp_path) == {'theme': 'a', 'reduced_motion': False}
-    for theme in 'abcdef':
+    for theme in 'abdf':
         write_ui_preferences(tmp_path, {'theme': theme})
         assert load_ui_preferences(tmp_path)['theme'] == theme
     write_ui_preferences(tmp_path, {'reduced_motion': True})
@@ -29,8 +29,8 @@ def test_corrupt_file_recovers_without_breaking_startup(tmp_path, raw):
     (tmp_path / 'data').mkdir()
     (tmp_path / 'data/ui_preferences.json').write_text(raw, encoding='utf-8')
     assert load_ui_preferences(tmp_path) == {'theme': 'a', 'reduced_motion': False}
-    write_ui_preferences(tmp_path, {'theme': 'e'})
-    assert load_ui_preferences(tmp_path)['theme'] == 'e'
+    write_ui_preferences(tmp_path, {'theme': 'f'})
+    assert load_ui_preferences(tmp_path)['theme'] == 'f'
 
 
 def test_concurrent_writes_are_atomic_and_do_not_touch_saves(tmp_path):
@@ -39,7 +39,7 @@ def test_concurrent_writes_are_atomic_and_do_not_touch_saves(tmp_path):
     sentinel = saves / 'existing.json'
     sentinel.write_text('{"age":38}', encoding='utf-8')
     with ThreadPoolExecutor(max_workers=8) as pool:
-        list(pool.map(lambda theme: write_ui_preferences(tmp_path, {'theme': theme}), 'abcdef' * 5))
-    assert json.loads((tmp_path / 'data/ui_preferences.json').read_text())['theme'] in 'abcdef'
+        list(pool.map(lambda theme: write_ui_preferences(tmp_path, {'theme': theme}), 'abdf' * 5))
+    assert json.loads((tmp_path / 'data/ui_preferences.json').read_text())['theme'] in 'abdf'
     assert sentinel.read_text() == '{"age":38}'
     assert not list((tmp_path / 'data').glob('*.tmp'))

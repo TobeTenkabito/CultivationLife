@@ -255,7 +255,7 @@ class FamilySystemMixin:
                 relation.pop('overlord', None); relation.pop('subject', None); relation.pop('vassal', None)
             relation.update(status=status, since_age=player.age)
             if status == 'war':
-                self._start_war(game,'sect',family.id,other.id)
+                self._start_war(game,'sect',family.id,other.id,initiated_by_player=True)
             summary = f'{family.name}与{other.name}{RELATION_LABELS.get(status,status)}。'
         elif action in {'fund','gather','expel'}:
             if not self._intrigue_enabled():

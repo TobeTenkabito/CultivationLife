@@ -1,4 +1,4 @@
-"""Real HTTP survey, isolated subpages, reload and six-theme responsive checks."""
+"""Real HTTP survey, isolated subpages, reload and four-theme responsive checks."""
 import json
 import sys
 import tempfile
@@ -62,7 +62,7 @@ def main():
                     page.get_by_role('tab',name='同勘',exact=True).click()
                     page.get_by_label('勘察居民',exact=True).select_option(npc.id)
                     disk = engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -105,7 +105,7 @@ def main():
                         act(label,years)
                     assert len(engine.store.load(key).player.formation_materials) == 1
                     assert not errors, errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=list('abcdef'),widths=[1440,393],
+                    (output/'report.json').write_text(json.dumps(dict(themes=list('abdf'),widths=[1440,393],
                         outside_frozen=True,reload=True,shared_read_years=3,unique_material=True,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

@@ -57,7 +57,9 @@
     document.querySelector('#heavens-body h3')?.focus({preventScroll:true});
   }
   function openTarget(target) {
-    if(['mirror_field','causal_ruins'].includes(target))go('anomalies',target);
+    if((current.heavens.anomalies||[]).some(s=>s.id===target))go('anomalies',target);
+    else if((current.heavens.conflicts||[]).some(s=>s.id===target))go('frontier',target);
+    else if(['mirror_field','causal_ruins'].includes(target))go('anomalies',target);
     else if(['lanjiang_frontier','lanjiang_gate'].includes(target))go('frontier',target);
     else if((current.heavens.incidents||[]).some(s=>s.id===target))go('worlds',target);
     else if(current.heavens.sites.some(s=>s.id===target))go('worlds',target);
@@ -128,22 +130,34 @@
     host.replaceChildren();
     const navigation=node('div',null,'heavens-navigation');
     tabs(navigation,[['home','见闻'],['worlds','诸界'],['anomalies','异象'],['journey','行程'],['frontier','战局']],ui.page,id=>go(id), '诸天导航','primary');
-    const settings=button('偏好',()=>go('settings'));settings.className='heavens-preferences';settings.setAttribute('aria-label','诸天偏好');settings.setAttribute('aria-pressed',String(ui.page==='settings'));navigation.append(settings);host.append(navigation);
+    host.append(navigation);
     if(pending){const box=node('div',null,'heavens-retry');box.setAttribute('role','status');box.append(node('small','上次提交尚未确认，可安全重试。'),button('重试上次提交（不会重复扣费）',()=>send(pending.payload)));host.append(box);}
     const task=activeTask(h);
     if(task&&ui.page!=='journey'){const strip=button(`进行中 · ${task.progress}/${task.duration} 年 · 查看行程 ›`,()=>go('journey'));strip.className='heavens-task-strip';host.append(strip);}
     const body=node('div',null,'heavens-body');body.id='heavens-body';body.dataset.heavensView=ui.page;body.setAttribute('role','tabpanel');
-    if(ui.page!=='settings')body.setAttribute('aria-labelledby',`heavens-primary-${ui.page}`);else body.setAttribute('aria-label','诸天偏好');
+    body.setAttribute('aria-labelledby',`heavens-primary-${ui.page}`);
     host.append(body);
     if(ui.page==='home')renderHome(body,h);
     if(ui.page==='worlds')renderWorlds(body,h);
     if(ui.page==='anomalies')renderAnomalies(body,h);
     if(ui.page==='journey')renderJourney(body,h);
-    if(ui.page==='frontier')window.HeavensFrontier.render(body,h.frontier,ui,{node,title,tile,back,subview,renderActions,empty,go},h.campaign);
-    if(ui.page==='settings')renderSettings(body,h);
+    if(ui.page==='frontier'){
+      if(!ui.target||h.conflicts?.some(r=>r.id===ui.target))renderRegional(body,h,'conflict');
+      else window.HeavensFrontier.render(body,h.frontier,ui,{node,title,tile,back,subview,renderActions,empty,go},h.campaign);
+    }
+    const settings=document.getElementById('settings-heavens');
+    if(settings){settings.replaceChildren();renderSettings(settings,h);}
     body.scrollTop=scroll;
   }
   function renderHome(host,h) {
+    if(ui.target==='intelligence'){
+      back(host,'返回见闻','home');title(host,'诸天风闻','同一件事，因所处界层而有不同认识。详报保留确证，传闻不推断胜负。');
+      const select=node('select');select.setAttribute('aria-label','选择诸天消息');
+      for(const [i,row] of (h.intelligence||[]).entries()){const option=node('option',row.title);option.value=i;select.append(option);}
+      const article=node('article',null,'heavens-incident-document');
+      const show=()=>{article.replaceChildren();const row=h.intelligence?.[Number(select.value)];if(!row){select.disabled=true;article.append(node('p','尚未核实到新的战事；可通过商盟委托打听远界近况。'));}if(row)article.append(badge(({1:'征兆 · lv1',2:'传闻 · lv2',3:'详报 · lv3'})[row.level]),node('h4',row.title),node('p',row.text),node('small',row.source?`${row.source} · 取得时年龄 ${row.acquired_age} 岁 · 历史记录`:'据当前界层可辨识的消息'));};
+      select.onchange=show;host.append(select,article,node('p','可前往商盟发布情报委托：1–2 星获取传闻，3–5 星核实详报；消息记录在取得时，不自动追踪后续。'),button('前往商盟打听',()=>window.UtilityPanels?.open('merchant')));show();return;
+    }
     const omen=(h.omens||[]).find(row=>row.id===ui.target);
     if(omen){
       back(host,'返回见闻','home');title(host,omen.name,`人界 · ${omen.location_name}`);
@@ -158,7 +172,8 @@
     if(incident)host.append(window.HeavensAtlas.feature(incident,node,()=>openTarget(incident.id)));
     if(inside){const b=button(`返回${inside.name} · 当前所在 ›`,()=>openTarget(inside.id));b.className='heavens-task-strip';host.append(b);}
     else if(local){const b=button(`前往${local.name.split(' · ')[0]}的联系档案 ›`,()=>openTarget(local.id));b.className='heavens-task-strip';host.append(b);}
-    if(!h.generation_enabled){host.append(node('p','新联系发现已关闭，已有认识仍保留。','heavens-lead'),button('调整发现偏好',()=>go('settings')));}
+    if(!h.generation_enabled){host.append(node('p','新联系发现已关闭，可在设置的「诸天偏好」中调整；已有认识仍保留。','heavens-lead'));}
+    tile(host,{name:'诸天风闻',description:'按当前界层查阅战事消息',status:`${h.intelligence?.length||0} 则可知消息`,glyph:'闻',onClick:()=>go('home','intelligence')});
     const notices=h.notifications||[];
     for(const notice of notices){const row=node('article',null,'heavens-notice');row.append(node('p',notice.text));const controls=node('div',null,'heavens-inline');controls.append(button('查看线索',()=>openTarget(notice.id)),button('忽略此通知',()=>propose('dismiss',notice.id)));row.append(controls);host.append(row);}
     if(h.omens?.length){const list=node('div',null,'heavens-directory');for(const row of h.omens)tile(list,{name:row.name,description:`人界 · ${row.location_name}`,status:row.studied?'已对照':row.remaining?'待求证':'旧见闻',glyph:'闻',onClick:()=>openTarget(row.id)});host.append(list);}
@@ -172,9 +187,11 @@
     if(!selected){
       title(host,'诸界行录','从一界的地方事务开始，沿亲历留下自己的诸天档案。');
       const regions=h.incidents||[];
-      const world=regions.some(r=>r.world===ui.world)?ui.world:regions.find(r=>r.current)?.world||'human';
+      const worlds=[...regions];
+      for(const site of h.sites)if(!worlds.some(r=>r.world===site.world))worlds.push(site);
+      const world=worlds.some(r=>r.world===ui.world)?ui.world:worlds.find(r=>r.current)?.world||'human';
       const select=node('select');select.className='heavens-world-select';select.setAttribute('aria-label','选择界域');
-      for(const region of regions){const option=node('option',`${region.world_name}${region.current?' · 当前所在':''}`);option.value=region.world;select.append(option);}
+      for(const region of worlds){const option=node('option',`${region.world_name}${region.current?' · 当前所在':''}`);option.value=region.world;select.append(option);}
       select.value=world;select.onchange=()=>{ui.world=select.value;render(current,ctx);};host.append(select);
       const local=regions.find(r=>r.world===world), list=node('div',null,'heavens-directory');
       if(local)host.append(window.HeavensAtlas.feature(local,node));
@@ -263,6 +280,7 @@
     renderActions(host,m.actions.filter(row=>m.status==='unavailable'?row.action==='mission_start':m.status==='active'&&row.action!=='mission_start'));
   }
   function renderAnomalies(host,h) {
+    if(!ui.target||h.anomalies?.some(r=>r.id===ui.target)){renderRegional(host,h,'anomaly');return;}
     const entries=[h.mirror,h.ruins].filter(Boolean),selected=entries.find(row=>row.id===ui.target);
     if(!selected){
       title(host,'异象行旅','从真实地点进入一处异象，沿原路返回。每处机关与所得都将保留。');
@@ -283,6 +301,23 @@
       return;
     }
     if(selected.id==='mirror_field')renderMirror(box,selected);else renderRuins(box,selected);
+  }
+  function renderRegional(host,h,category){
+    const page=category==='anomaly'?'anomalies':'frontier',rows=h[category==='anomaly'?'anomalies':'conflicts']||[];
+    const selected=rows.find(r=>r.id===ui.target);
+    if(selected){window.HeavensIncidents.render(host,selected,ui,{node,title,back,subview,renderActions});return;}
+    title(host,category==='anomaly'?'异象行旅':'诸界战局',category==='anomaly'?'亲临异象所在，求证后选择疏导或封存。':'战地救护与庇护工事各有投入；真实战争消息另记于风闻。');
+    const world=rows.some(r=>r.world===ui.world)?ui.world:rows.find(r=>r.current)?.world||rows[0]?.world;
+    const select=node('select');select.className='heavens-world-select';select.setAttribute('aria-label','选择界域');
+    for(const row of rows){const option=node('option',`${row.world_name}${row.current?' · 当前所在':''}`);option.value=row.world;select.append(option);}
+    select.value=world;select.onchange=()=>{ui.world=select.value;render(current,ctx);};host.append(select);
+    const row=rows.find(r=>r.world===world),list=node('div',null,'heavens-directory');
+    if(row){host.append(window.HeavensAtlas.feature(row,node));tile(list,{name:row.name,description:`${row.location_name} → ${row.field_name}`,status:row.stage==='closed'?'已归档':category==='anomaly'?'本地异象':'战地事务',glyph:category==='anomaly'?'象':'戈',onClick:()=>go(page,row.id)});}
+    if(world==='human'){
+      if(category==='anomaly')for(const entry of [h.mirror,h.ruins].filter(Boolean))tile(list,{name:entry.name,description:entry.entry,status:entry.inside?'身处其中':'独立场域',glyph:'界',onClick:()=>openTarget(entry.id)});
+      else {if(h.frontier)tile(list,{name:h.frontier.name,description:'岚疆问讯与跨界接触',status:'边情',glyph:'疆',onClick:()=>go(page,h.frontier.id)});if(h.campaign?.known)tile(list,{name:h.campaign.name,description:'实际军队、输送与交锋',status:'战役',glyph:'关',onClick:()=>go(page,h.campaign.id)});}
+    }
+    host.append(list,node('small','远界细节受界层认识限制；可辨识的传闻与征兆收录于「见闻 · 诸天风闻」。'));
   }
   function renderMirror(host,m) {
     subview(host,[['mechanisms','机关'],['pact','守约'],['survey','同勘']],'mechanisms',(body,section)=>section==='survey'?renderSurvey(body,m):section==='pact'?renderMirrorPact(body,m):renderMirrorMechanisms(body,m));
@@ -456,7 +491,7 @@
       if(section==='history'){
         const rows=[...(h.history||[])].reverse(),size=12,pages=Math.max(1,Math.ceil(rows.length/size));ui.historyPage=Math.min(ui.historyPage,pages-1);
         if(!rows.length){empty(body,'尚无纪要','亲历的征兆、求证与履约会记在这里。');return;}
-        const list=node('ol',null,'heavens-timeline');for(const row of rows.slice(ui.historyPage*size,(ui.historyPage+1)*size)){const item=node('li');item.append(node('small',`登记后 ${row.year} 年`),node('p',row.text));list.append(item);}body.append(list);
+        const list=node('ol',null,'heavens-timeline');for(const row of rows.slice(ui.historyPage*size,(ui.historyPage+1)*size)){const item=node('li');item.append(node('small',`登记后 ${row.year} 年`),node('p',row.text),node('small',row.source?`${row.source} · 取得时年龄 ${row.acquired_age} 岁 · 历史记录`:'据当前界层可辨识的消息'));list.append(item);}body.append(list);
         const pager=node('div',null,'heavens-inline');pager.append(button('上一页',()=>{ui.historyPage--;render(current,ctx);},ui.historyPage===0),node('small',`${ui.historyPage+1} / ${pages}`),button('下一页',()=>{ui.historyPage++;render(current,ctx);},ui.historyPage===pages-1));body.append(pager);return;
       }
       const task=activeTask(h);

@@ -2,7 +2,8 @@
 window.HeavensIncidents = (() => {
   function render(host,row,ui,helpers){
     const {node,back,subview,renderActions}=helpers;
-    back(host,'返回诸界','worlds');
+    const category=row.category||'local';
+    back(host,category==='anomaly'?'返回异象':category==='conflict'?'返回战局':'返回诸界',category==='anomaly'?'anomalies':category==='conflict'?'frontier':'worlds');
     window.HeavensAtlas.docket(host,row,node);
     subview(host,[['record','见闻档案'],['response','现场事务'],['aftermath','后续影响']],'record',(body,section)=>{
       body.classList.add('heavens-incident');
@@ -31,10 +32,10 @@ window.HeavensIncidents = (() => {
       }else{
         body.append(node('h4',row.stage==='closed'?'此案已留录':'复核与余响'));
         if(row.finding)body.append(node('p',row.finding));
-        if(row.stage==='closed'){
+        if(row.stage==='closed'&&!['mana','aid'].includes(row.effect)){
           const balance=node('div',null,'heavens-incident-balance');balance.append(node('strong',`${row.remaining}`),node('span','年 · 可用当地余量'));body.append(balance);
           body.append(node('p','修行余量仅作用于当地普通修炼，累计额外所得不超过结案时境界基准的 2%；调息余量每年恢复 2% 气血。气血调理分支结案时恢复两成气血一次，满血不补发奖励。'));
-        }else body.append(node('p',`完成现场处理后，亲自回到${row.location_name}复核。已耗年数和投入保留，处理不会自动传送人物。`));
+        }else if(row.stage!=='closed')body.append(node('p',`完成现场处理后，亲自回到${row.location_name}复核。已耗年数和投入保留，处理不会自动传送人物。`));
         renderActions(body,row.actions.filter(a=>a.action==='incident_review'));
       }
     });

@@ -1,6 +1,7 @@
 """Explicit operations for calendar."""
 
 from __future__ import annotations
+from ..merchant_definitions import intelligence_route
 
 import copy
 import random
@@ -63,7 +64,7 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
         if order["status"] not in {"open", "working"}:
             continue
         alliance = deps._merchant_alliance(game, order["world"], order["alliance_id"])
-        if not deps._merchant_route_exists(game, alliance, order["source_world"]):
+        if not deps._merchant_route_exists(game, alliance, order["source_world"]) and not (alliance and order["kind"] == "intel" and intelligence_route(game, order["source_world"])):
             deps._merchant_refund(game, order, "cancelled", "目标界面未设本盟总部，商路不可用", order["fee"])
             continue
         if not deps._merchant_commission_available(order):

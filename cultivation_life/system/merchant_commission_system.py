@@ -12,7 +12,7 @@ from ..content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, WORLD_SYSTEMS
 from ..models import Player
 from ..runtime import now_iso
 from .formation_system import calculate_formation_profile, formation_alpha, formation_config
-from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
+from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS, intelligence_route
 from .merchant.dependencies import MerchantCommissionDependencies
 from ..talisman_content import catalog as talisman_catalog
 
@@ -77,7 +77,13 @@ def _merchant_procurement_catalog(deps: MerchantCommissionDependencies, game, al
     from .spirit_voisinage import secondary, catalog
     result = []
     for world, profile in WORLD_SYSTEMS["world_profiles"].items():
-        if not profile.get("enabled", True) or not deps._merchant_route_exists(game, alliance, world):
+        if not profile.get("enabled", True):
+            continue
+        if not deps._merchant_route_exists(game, alliance, world):
+            if intelligence_route(game, world):
+                result.append(dict(world=world, world_name=WORLD_SYSTEMS['world_names'][world], linked=False,
+                                   intel_only=True, targets=[], materials=[], formation_materials=[], talisman_materials=[],
+                                   talismans=[], items=[], spirit_manuals=[], formation_tiers=[], weapon_tiers=[]))
             continue
         formation = [row for row in deps._formation_material_defs().values() if row.get("world") == world]
         crafting = deps._merchant_materials(world)
@@ -189,7 +195,7 @@ def _merchant_quote(deps: MerchantCommissionDependencies, game, alliance, payloa
     if not profile or not profile.get("enabled", True):
         raise ValueError("目标界面尚未开放")
     linked, cross = deps._merchant_route_exists(game, alliance, world), world != game.player.world
-    if not linked:
+    if not linked and not (kind == 'intel' and intelligence_route(game, world)):
         raise ValueError("该界面没有本商盟总部或分总部，无法发布委托")
     price_factor = 4 if cross else 1
     time_factor = 15 if cross else 1
@@ -261,7 +267,7 @@ def _merchant_quote(deps: MerchantCommissionDependencies, game, alliance, payloa
                  f"{spec['quality_name']}品质验收" if kind == 'weapon' else
                  f"{spec['quality_name']}符箓验收，四维与概览一致" if kind == 'talisman' else
                  f"范围内优选稳定阵型，附赠{stars - 1}份同阶备用阵材" if kind == 'formation' else
-                 "打听修士关系；神机开启时有机会获得本界榜单的多条情报" if kind == 'intel' else '按星级提供商路服务'),
+                 "打听修士关系与诸天战讯；1–2 星核实传闻，3–5 星提供现有详报，保存取得时的记录；神机开启时可得榜单线索" if kind == 'intel' else '按星级提供商路服务'),
              "route_description": "跨界商路：时间×15、基础费用×4" if cross else "本界商路"}
     quote["preview_token"] = hashlib.sha256(json.dumps(quote, sort_keys=True).encode()).hexdigest()
     return quote

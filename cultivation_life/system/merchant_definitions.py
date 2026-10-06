@@ -12,3 +12,8 @@ CROSS_ALLIANCES = {
 }
 METRICS = {"growth": "生势", "kill": "杀势", "focus": "聚势", "balance": "均势", "cycle": "环势", "change": "变势"}
 PROCUREMENT_KINDS = {"supply", "item", "formation", "weapon", "spirit_manual", "talisman"}
+
+
+def intelligence_route(game, world):
+    """Brokers can relay letters between existing offices, without a goods route."""
+    return bool(game.merchant_state.get('worlds', {}).get(world))

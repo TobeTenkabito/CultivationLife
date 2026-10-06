@@ -105,7 +105,7 @@ def main():
                     assert page.locator("#map-locations .map-location").count() == 4
                     for width, height in [(1440, 1000), (412, 915), (915, 412)]:
                         page.set_viewport_size({"width": width, "height": height})
-                        for theme in "abcdef":
+                        for theme in "abdf":
                             page.evaluate(
                                 't=>document.querySelector(`[data-theme-choice="${t}"]`).click()',
                                 theme,
@@ -198,7 +198,7 @@ def main():
                 httpd.shutdown()
                 httpd.server_close()
                 thread.join(timeout=5)
-    print("Spatial/talisman/royal UI passed in six themes at three viewport sizes.")
+    print("Spatial/talisman/royal UI passed in four themes at three viewport sizes.")
 
 
 if __name__ == "__main__":

@@ -571,10 +571,10 @@ def _simulate_cultivator_duel(deps: FactionDependencies, game: GameState, rng: r
 
 def _set_diplomatic_relation(
     deps: FactionDependencies, game: GameState, relation: dict[str, Any], status: str,
-    first: str, second: str, kind: str, affinity: float,
+    first: str, second: str, kind: str, affinity: float, *, initiated_by_player=False,
 ) -> None:
     if status == "war":
-        deps._start_war(game, kind, first, second)
+        deps._start_war(game, kind, first, second, initiated_by_player=initiated_by_player)
     relation.update(status=status, affinity=round(float(affinity), 1), since_age=game.player.age)
     relation.pop("overlord", None)
     relation.pop("subject", None)

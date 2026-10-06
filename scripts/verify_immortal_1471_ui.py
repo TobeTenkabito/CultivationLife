@@ -1,4 +1,4 @@
-"""Actual six-theme controls, lower-world MP transitions and manual plans."""
+"""Actual four-theme controls, lower-world MP transitions and manual plans."""
 import sys, tempfile, threading
 from pathlib import Path
 from http.server import ThreadingHTTPServer
@@ -24,7 +24,7 @@ def main():
                 browser=pw.chromium.launch();page=browser.new_page(viewport={'width':412,'height':915})
                 page.on('pageerror',lambda error:errors.append(str(error)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     g=e.store.load(g.id);g.player.world='celestial';g.player.realm_index=9;g.player.layer=4
                     g.player.location_id=e.maps.default_location('celestial');g.player.combat_plan['manual']=False;e.store.save(g)
                     page.evaluate('(id)=>loadGame(id)',g.id)
@@ -77,6 +77,6 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally:httpd.shutdown()
-    print('v1.47.1 six-theme UI passed: lower MP / return conversion, phase capacity, saved manual plans, method-first teleport and real assassination transit')
+    print('v1.47.1 four-theme UI passed: lower MP / return conversion, phase capacity, saved manual plans, method-first teleport and real assassination transit')
 
 if __name__=='__main__':main()

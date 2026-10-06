@@ -52,7 +52,7 @@ def main():
                     page.locator('[data-panel-target=heavens]').click()
                     assert page.locator('#heavens-card').bounding_box()['x'] > 200
                     checks = []
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.evaluate('t=>document.querySelector(`[data-theme-choice="${t}"]`).click()', theme)
                         for width, height in ((1440,1050),(393,852),(320,852),(780,360)):
                             page.set_viewport_size({'width':width,'height':height})
@@ -105,7 +105,7 @@ def main():
                     assert engine.store._path(made['id']).read_bytes() == source
                     for width,height in ((1440,1050),(393,852),(780,360)):
                         page.set_viewport_size({'width':width,'height':height})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate('t=>document.querySelector(`[data-theme-choice="${t}"]`).click()',theme)
                             assert page.locator('#debug-heavens').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                             for control in page.locator('#debug-heavens select,#debug-heavens button').all():
@@ -122,7 +122,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Right dock, 48 atlas views, six-theme console, real isolated execution and snapshot restore passed')
+    print('Right dock, 48 atlas views, four-theme console, real isolated execution and snapshot restore passed')
 
 
 if __name__ == '__main__':

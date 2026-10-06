@@ -79,7 +79,7 @@
     };
     const refreshKind=()=>{
       const previous=world.value,procurement=['supply','item','formation','weapon'].includes(kind.value);
-      options(world,alliance.catalog.filter(row=>kind.value!=='talisman'||row.world===alliance.world).map(row=>({id:row.world,name:row.world_name})));
+      options(world,alliance.catalog.filter(row=>(!row.intel_only||kind.value==='intel')&&(kind.value!=='talisman'||row.world===alliance.world)).map(row=>({id:row.world,name:row.world_name+(row.intel_only?' · 商盟转讯':'')})));
       if([...world.options].some(row=>row.value===previous))world.value=previous;else world.value=alliance.world;
       show(category,kind.value==='supply');show(material,['supply','item','spirit_manual','talisman'].includes(kind.value));show(quantity,['supply','item','spirit_manual','talisman'].includes(kind.value));
       show(target,kind.value==='bounty');show(tier,['formation','weapon'].includes(kind.value));show(mold,kind.value==='weapon');

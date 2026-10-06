@@ -9,7 +9,7 @@ from .definitions import ACTIONS, VIEWS, HeavensDefinitions, MIRROR_ID, RUINS_ID
 from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
-from . import tasks, mirror, ruins, omens, visits, incidents
+from . import tasks, mirror, ruins, omens, visits, incidents, intelligence
 from .incident_definitions import INCIDENT_IDS, INCIDENT_ACTIONS
 from . import missions, freight, migration, survey, upkeep, frontier, campaign_actions
 from .frontier_definitions import FRONTIER_ID, FRONTIER_ACTIONS
@@ -24,6 +24,8 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     requested_target = target_id
     validate_state(game.heavens_state)
     site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
+    if target_id and (not intelligence.knows(game, target_id) or site and intelligence.level(game.player.world, site.world) < 3 and not get_echo(runtime, site.id)):
+        raise ValueError('当前只能获知远界传闻，尚不了解此处详情')
     if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS | INCIDENT_IDS:
         raise ValueError('诸天对象不可见或不存在')
     target_id = site.id if site else None
@@ -58,6 +60,8 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
         if requested_target == RUINS_ID or requested_target is None and result['ruins']['inside']:
             result['target_id'] = RUINS_ID
     result['incidents'] = incidents.project(deps, game) if deps and deps.incident_facts else []
+    result['anomalies'] = incidents.project(deps, game, 'anomaly') if deps and deps.incident_facts else []
+    result['conflicts'] = incidents.project(deps, game, 'conflict') if deps and deps.incident_facts else []
     if requested_target in INCIDENT_IDS:
         result['target_id'] = requested_target
     result['omens'] = omens.project(deps, game) if deps and deps.read_omen_facts else []
@@ -76,7 +80,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
         if target_id:
             result['migration'] = migration.project(deps, game, target_id)
     if not runtime:
-        return result
+        return intelligence.restrict(game, result)
     result.update(year=runtime['processed_years'], tasks=copy.deepcopy(runtime['tasks']),
                   notifications=copy.deepcopy(runtime['notifications']) if state['watch'] else [],
                   history=copy.deepcopy(runtime['history']), unit_credit=copy.deepcopy(runtime['unit_credit']))
@@ -135,7 +139,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
         result['available_actions'].append('dismiss')
     known_anomalies = [result[key] for key in ('mirror', 'ruins') if result.get(key, {}).get('known')]
     result['records'] = known + known_anomalies + result['omens'] if view in {'known','opportunities'} else result[view]
-    return result
+    return intelligence.restrict(game, result)
 
 
 def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> dict:
@@ -210,6 +214,8 @@ def apply_configuration(game, options: dict) -> None:
 
 
 def quote_action(deps, game, action, target_id, options):
+    if not intelligence.knows(game, target_id):
+        raise ValueError('当前只能获知远界传闻，尚不了解此处详情')
     if action == 'dismiss':
         runtime = game.heavens_state.get('runtime')
         if not runtime or not any(row['id'] == target_id for row in runtime['notifications']):
