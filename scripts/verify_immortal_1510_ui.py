@@ -1,4 +1,4 @@
-"""Live six-theme checks for merit economy, gold tempering and timed permits."""
+"""Live four-theme checks for merit economy, gold tempering and timed permits."""
 import sys
 import tempfile
 import threading
@@ -39,7 +39,7 @@ def main():
                 assert page.locator('.left-dock [data-panel-target=golden-light]').count()==1
                 assert page.locator('#strategy-dock [data-panel-target=yaochi]').count()==1
                 assert page.locator('#immortal-market-content').is_hidden()
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     page.evaluate('GameThemes.saved')
                     for width,height in [(1440,1080),(412,915),(915,412)]:
@@ -76,7 +76,7 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally:httpd.shutdown()
-    print('Immortal 1510 UI passed: six themes, desktop/portrait/landscape, actual merit trade, gold training and timed teleport')
+    print('Immortal 1510 UI passed: four themes, desktop/portrait/landscape, actual merit trade, gold training and timed teleport')
 
 
 if __name__=='__main__':main()

@@ -25,7 +25,9 @@ def main():
     tests = log(f'release-{RELEASE_ID}-tests.log')
     passed = re.search(r'(\d+) passed in', tests)
     require(bool(passed) and 'failed' not in tests.lower() and 'ERROR' not in tests, 'Full regression suite must pass')
-    require('594 dossier checks' in log(f'heavens-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'heavens-ui-{RELEASE_ID}.log'), 'Eleven-world UI acceptance must pass')
+    require('1980 dossier checks' in log(f'heavens-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'heavens-ui-{RELEASE_ID}.log'), 'Eleven-world UI acceptance must pass')
+    knowledge = log(f'heavens-knowledge-ui-{RELEASE_ID}.log')
+    require('Knowledge UI passed:' in knowledge and 'Traceback' not in knowledge, 'Knowledge and settings UI must pass')
     workbench = log(f'heavens-workbench-ui-{RELEASE_ID}.log')
     require('real isolated execution and snapshot restore passed' in workbench and 'Traceback' not in workbench, 'Heavens workbench UI must pass')
     for name in (f'android-experience-{RELEASE_ID}.log', f'android-institutions-{RELEASE_ID}.log', f'android-governance-{RELEASE_ID}.log', f'android-economy-{RELEASE_ID}.log', f'android-upper-{RELEASE_ID}.log', f'android-trials-{RELEASE_ID}.log', f'android-save-transfer-{RELEASE_ID}.log', f'android-initial-{RELEASE_ID}.log', f'android-immortal-{RELEASE_ID}.log', f'android-minor-{RELEASE_ID}.log', f'android-tutorial-{RELEASE_ID}.log'):
@@ -73,7 +75,7 @@ def main():
                     expected = expected.decode('utf-8').replace('</head>', '<link rel="stylesheet" href="/android/mobile.css"></head>').replace('</body>', '<script src="/android/mobile.js"></script></body>').encode('utf-8')
                 require(assets.read(name) == expected, name)
             require(assets.read('web/save-transfer.js') == (ROOT/'web/save-transfer.js').read_bytes(), 'Packaged save-transfer script differs from source')
-            for theme in 'abcdef':
+            for theme in 'abdf':
                 require(f'web/themes/{theme}.css' in assets.namelist(), f'Missing theme {theme}')
             manifests = [n for n in assets.namelist() if n.startswith('dlc/') and n.endswith('/manifest.json')]
             require(len(manifests) == len(list((ROOT/'dlc').glob('*/manifest.json'))), 'Packaged DLC manifest count differs from source')
@@ -90,19 +92,20 @@ def main():
         'tested_abi': 'x86_64', 'physical_device_tested': False,
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
         'inputs_sha256': hashlib.sha256(json.dumps(provenance['inputs'], sort_keys=True).encode()).hexdigest(),
-        'dlc_versions': dlcs, 'heavens_worlds': 11, 'heavens_incident_branches': 22,
-        'themes': list('abcdef'), 'save_schema': SAVE_SCHEMA_VERSION,
+        'dlc_versions': dlcs, 'heavens_worlds': 11, 'heavens_incident_branches': 66, 'heavens_anomalies': 13, 'heavens_conflict_cases': 12,
+        'themes': list('abdf'), 'save_schema': SAVE_SCHEMA_VERSION,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [
+            'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',
             'Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified',
-            'Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes',
+            'Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} Python regressions passed',
-            'Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
-            'Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians',
+            'Signed Android 12 release: four-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
+            'Four-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians',
             'Talisman portrait and landscape: native tiered crafting, materials, sales, experience, left panel and multiple realm-gated map rifts',
             'Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence',
             'Live tutorial actions, native back and persisted progress',
-            'Save transfer: six themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip',
+            'Save transfer: four themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip',
             'Debug console portrait and landscape: isolated writes, snapshots, DLC commands, native document callbacks and configuration-independent opening',
             'Signature, version metadata, installed APK hash, source provenance, archive integrity and release lint verified',
         ],

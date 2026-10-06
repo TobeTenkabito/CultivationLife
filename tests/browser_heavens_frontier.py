@@ -66,7 +66,7 @@ def main():
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     if not page.locator('#heavens-card').is_visible(): page.locator('[data-panel-target=heavens]').click()
                     snapshot = engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click()
@@ -84,13 +84,13 @@ def main():
                                 if width != 320: page.screenshot(path=str(output/f'{theme}-{width}-{tab}.png'))
                     assert engine.store._path(key).read_bytes() == snapshot
                     assert not errors, errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=list('abcdef'),widths=[1440,393,320],errors=errors,
+                    (output/'report.json').write_text(json.dumps(dict(themes=list('abdf'),widths=[1440,393,320],errors=errors,
                         local_scout=True,peaceful_return_started=True,pure_navigation=True),indent=2),encoding='utf-8')
                     browser.close()
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('M3 frontier HTTP / six-theme browser acceptance passed')
+    print('M3 frontier HTTP / four-theme browser acceptance passed')
 
 
 if __name__ == '__main__':

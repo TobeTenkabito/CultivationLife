@@ -17,7 +17,7 @@
 | [Debug DLC 指令清单](debug-dlc-coverage.md) | 剩余 17 个入口、内容门禁、立祖预览、结构化参数与使用示例 |
 | [系统边界](../cultivation_life/system/README.md) | 各算法目录、兼容入口与反向依赖约束 |
 | [Android](../android/README.md) | 构建、签名、设备和发布证明 |
-| [主题维护](../web/themes/README.md) | 六主题与共享控件 |
+| [主题维护](../web/themes/README.md) | 四主题与共享控件 |
 | [扩展包](../dlc/README.md)、[MOD](../mods/README.md) | 清单、合并与启停 |
 | [更新日志](../CHANGELOG.md) | 当前发行说明与兼容信息 |
 

@@ -1,4 +1,4 @@
-"""Eleven-world dossiers: six themes, narrow screens, touch and persisted work."""
+"""Eleven-world dossiers: four themes, narrow screens, touch and persisted work."""
 import json
 import sys
 import tempfile
@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from playwright.sync_api import sync_playwright
 from cultivation_life import server
-from cultivation_life.system.heavens.incident_definitions import INCIDENTS
+from cultivation_life.system.heavens.incident_definitions import ALL_INCIDENTS as INCIDENTS
 from test_heavens_incidents import local, quiet, positioned
 from test_heavens_m1 import issue
 
@@ -42,7 +42,7 @@ def main():
                     page.evaluate('async id=>{await loadGame(id)}', initial.id)
                     page.locator('[data-panel-target=heavens]').tap()
                     before = engine.store._path(initial.id).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.set_viewport_size({'width':393,'height':852})
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
@@ -50,9 +50,9 @@ def main():
                         for width,height in ((1440,1050),(393,852),(320,852),(780,360),(1024,400)):
                             page.set_viewport_size({'width':width,'height':height})
                             for desc in INCIDENTS:
-                                page.get_by_role('tab',name='诸界',exact=True).click()
+                                page.get_by_role('tab',name={'local':'诸界','anomaly':'异象','conflict':'战局'}[desc.category],exact=True).click()
                                 page.get_by_label('选择界域',exact=True).select_option(desc.world)
-                                assert page.locator('.heavens-destination').count() <= 2
+                                assert page.locator('.heavens-destination').count() <= 3
                                 page.get_by_role('button',name='查看'+desc.name,exact=True).click()
                                 for tab in ('见闻档案','现场事务','后续影响'):
                                     page.get_by_role('tab',name=tab,exact=True).click()
@@ -70,7 +70,7 @@ def main():
                                     checks.append(dict(theme=theme,width=width,world=desc.world,tab=tab))
                                 if desc.world in {'human','asura'} and width!=320:
                                     page.get_by_role('tab',name='见闻档案',exact=True).click()
-                                    page.screenshot(path=str(output/f'{theme}-{width}-{desc.world}.png'))
+                                    page.screenshot(path=str(output/f'{theme}-{width}-{desc.id}.png'))
                     assert engine.store._path(initial.id).read_bytes() == before
                     page.set_viewport_size({'width':393,'height':852})
                     page.get_by_role('tab',name='诸界',exact=True).tap()
@@ -94,7 +94,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown();httpd.server_close()
-    print('Eleven worlds, six themes, 594 dossier checks plus 396 landscape checks, real touch and reload passed')
+    print('Eleven worlds, four themes, 1980 dossier checks including short landscape, real touch and reload passed')
 
 
 if __name__ == '__main__':

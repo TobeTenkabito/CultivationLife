@@ -56,7 +56,7 @@ def main():
                         assert await_image == [1122, 1402]
                         for width, height in [(1440, 1100), (390, 844), (320, 720), (844, 390)]:
                             page.set_viewport_size({'width': width, 'height': height})
-                            for theme in 'abcdef':
+                            for theme in 'abdf':
                                 page.evaluate('theme => document.querySelector(`[data-theme-choice="${theme}"]`).click()', theme)
                                 for opened, layer, expected_next in [(0, 1, 1), (3, 1, 0), (3, 2, 1), (26, 9, 1), (27, 9, 0)]:
                                     result = page.evaluate('''({kind, opened, layer}) => {

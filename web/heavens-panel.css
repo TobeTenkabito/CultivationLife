@@ -175,3 +175,11 @@
   #heavens-content .heavens-body{padding-top:12px;}
   #heavens-content .heavens-body>*{flex-shrink:0;}
 }
+
+.settings-heavens{margin:24px 0;padding:20px 0;border-top:1px solid var(--line)}
+.settings-heavens .heavens-setting{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 0;border-bottom:1px solid var(--line)}
+.settings-heavens .heavens-setting span{display:grid;gap:6px;min-width:0}
+.settings-heavens .heavens-setting small{color:var(--muted);line-height:1.7}
+.settings-heavens input{flex:0 0 22px;width:22px;height:22px}
+.settings-heavens .heavens-title{font-size:19px}
+.heavens-incident-document p{white-space:pre-line}

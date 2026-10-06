@@ -33,7 +33,7 @@ def test_android_bundle_contains_complete_desktop_content(tmp_path):
         for directory in ('content','dlc'):
             for path in (ROOT/directory).rglob('*.json'):
                 assert bundle.read(path.relative_to(ROOT).as_posix()) == path.read_bytes()
-        for theme in 'abcdef': assert f'web/themes/{theme}.css' in bundle.namelist()
+        for theme in 'abdf': assert f'web/themes/{theme}.css' in bundle.namelist()
         assert not any(name.startswith('data/') for name in bundle.namelist())
         assert b'/android/mobile.js' in bundle.read('web/index.html')
         assert len(bundle.read('web/android/fonts/WendaoSerif.woff2')) > 1000000

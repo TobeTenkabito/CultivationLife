@@ -61,7 +61,7 @@ def main():
                     wait_quote(form)
                     for width in (360,393,800):
                         page.set_viewport_size({'width':width,'height':900})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate("t=>document.querySelector('[data-theme-picker=dialog] [data-theme-choice='+t+']').click()",theme)
                             page.evaluate('GameThemes.saved')
                             field=form.get_by_label('杀势最低要求',exact=True)
@@ -92,6 +92,6 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown();httpd.server_close()
-    print('Commission touch layout and decimal input passed: six themes, three widths, actual publication')
+    print('Commission touch layout and decimal input passed: four themes, three widths, actual publication')
 
 if __name__=='__main__':main()

@@ -64,7 +64,7 @@ def main():
                 training.get_by_label('培养轮数').select_option('5')
                 training.get_by_role('button',name='培养炼体 · 5轮',exact=True).click()
                 page.wait_for_function('game.demonic_system.puppets[0].immortal_body_level === 15')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width,height in [(1440,1000),(412,915),(932,430)]:
                         page.set_viewport_size({'width':width,'height':height})
@@ -80,7 +80,7 @@ def main():
                 page.set_viewport_size({'width':1440,'height':1000})
                 for id_,label in other:
                     page.evaluate('(id)=>loadGame(id)',id_)
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                         assert label in page.locator('#hud-mp').inner_text()
                         assert '仙灵力' not in page.locator('#hud-mp').inner_text()
@@ -89,6 +89,6 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally:httpd.shutdown()
-    print('Puppet UI passed: real materials purchase, preview, assembly, training, silent settings and six themes; native energy labels verified.')
+    print('Puppet UI passed: real materials purchase, preview, assembly, training, silent settings and four themes; native energy labels verified.')
 
 if __name__=='__main__':main()

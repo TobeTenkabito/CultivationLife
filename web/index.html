@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <script src="/theme-boot.js?v=1.45.0"></script>
+  <script src="/theme-boot.js?v=2.1.0"></script>
   <link rel="stylesheet" href="/style.css?v=2.0.1">
   <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
@@ -12,9 +12,7 @@
   <link rel="stylesheet" href="/themes/composition.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/a.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/b.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/c.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/d.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/e.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=2">
@@ -36,7 +34,7 @@
     </header>
 
     <section id="theme-entry" class="theme-entry" aria-label="选择界面主题">
-      <div class="theme-entry-heading"><div><p class="eyebrow">六境随心</p><h2>择一方天地，开启此生。</h2></div><span>随时可在右上角或设置中更换</span></div>
+      <div class="theme-entry-heading"><div><p class="eyebrow">四境随心</p><h2>择一方天地，开启此生。</h2></div><span>随时可在右上角或设置中更换</span></div>
       <div class="theme-choices" data-theme-picker="start"></div>
     </section>
     <section id="start-screen" class="paper start-card">
@@ -457,6 +455,7 @@
             <label id="setting-guixu-popup-row" class="settings-row hidden"><span><b>关闭秘境出现提示</b><small>归墟周期与宝池仍会正常推进，但潮讯和门开不再弹出事件阻断行动。</small></span><input id="setting-guixu-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>自动推进会战</b><small>每个行动单位自动推进由你主导的征伐，但不会让玩家本人出阵。</small></span><input id="setting-auto-war" type="checkbox"></label>
           </div>
+          <section id="settings-heavens" class="settings-heavens" aria-label="诸天偏好"></section>
           <section class="tutorial-handbook"><h3>新手百科与修行指南</h3><p class="muted">按本次已加载的 DLC 展示规则，支持搜索与分类查阅；操作教程可随时暂停或继续。</p><button id="setting-tutorial-open" type="button">打开教程与开关</button><div id="tutorial-handbook"></div></section>
         </article>
         <article id="ending-card" class="paper ending-card hidden"><p class="eyebrow">尘缘已了</p><h2>此生落幕</h2><p id="death-reason"></p><div id="post-battle-possession" class="hidden"><p class="post-battle-possession-lead">本魂尚可借俘虏肉身还魂。选择后将立即消耗一次夺舍次数，并改用该 NPC 的年龄与寿元。</p><div id="post-battle-possession-choices" class="choices"></div><p class="muted">若不夺舍，可直接再入轮回，结束此存档的人生。</p></div><button id="restart-button" class="primary">再入轮回</button></article>
@@ -536,8 +535,8 @@
     </section>
   </div>
   <dialog id="theme-dialog" class="appearance-dialog" aria-labelledby="theme-dialog-title">
-    <div class="dialog-heading"><div><p class="eyebrow">六境随心</p><h2 id="theme-dialog-title">界面主题</h2></div><button type="button" data-close-dialog="theme-dialog">完成</button></div>
-    <p class="muted">主题会立即应用并记住选择。A「松烟书院」是默认主题。</p>
+    <div class="dialog-heading"><div><p class="eyebrow">四境随心</p><h2 id="theme-dialog-title">界面主题</h2></div><button type="button" data-close-dialog="theme-dialog">完成</button></div>
+    <p class="muted">主题会立即应用并记住选择。「松烟书院」是默认主题。</p>
     <div class="theme-choices" data-theme-picker="dialog"></div>
     <label class="settings-row"><span><b>减弱动态效果</b><small>保留静态主题与全部操作，系统的减弱动态设置也会生效。</small></span><input type="checkbox" data-motion-setting></label>
     <p class="theme-save-status" role="status" aria-live="polite"></p>
@@ -562,8 +561,8 @@
   <script src="/merchant-panel.js?v=2.0.1"></script>
   <script src="/map-directory.js?v=1.45.0"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
-  <script src="/theme-manager.js?v=1.55.0"></script>
-  <script src="/theme-composition.js?v=1.55.0"></script>
+  <script src="/theme-manager.js?v=2.1.0"></script>
+  <script src="/theme-composition.js?v=2.1.0"></script>
   <script src="/family-panel.js?v=1.45.0"></script>
   <script src="/buddhist-wish.js?v=1.45.0"></script>
   <script src="/buddhist-panel.js?v=1.45.0"></script>
@@ -585,14 +584,14 @@
   <script src="/npc-contacts.js?v=1.51.1"></script>
   <link rel="stylesheet" href="/exploration-panel.css?v=2.0.1">
   <script src="/exploration-panel.js?v=2.0.1"></script>
-  <script src="/debug-heavens.js?v=2.0.1"></script>
+  <script src="/debug-heavens.js?v=2.1.0"></script>
   <script src="/debug-console.js?v=2.0.1"></script>
-  <link rel="stylesheet" href="/heavens-panel.css?v=2.0.1">
-  <script src="/heavens-atlas.js?v=2.0.1"></script>
-  <script src="/heavens-incidents.js?v=2.0.1"></script>
-  <script src="/heavens-campaign.js?v=2.0.1"></script>
-  <script src="/heavens-frontier.js?v=2.0.1"></script>
-  <script src="/heavens-panel.js?v=2.0.1"></script>
+  <link rel="stylesheet" href="/heavens-panel.css?v=2.1.0">
+  <script src="/heavens-atlas.js?v=2.1.0"></script>
+  <script src="/heavens-incidents.js?v=2.1.0"></script>
+  <script src="/heavens-campaign.js?v=2.1.0"></script>
+  <script src="/heavens-frontier.js?v=2.1.0"></script>
+  <script src="/heavens-panel.js?v=2.1.0"></script>
   <script src="/app.js?v=2.0.1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

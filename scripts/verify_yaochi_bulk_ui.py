@@ -1,4 +1,4 @@
-"""Real bulk exchanges and responsive shop controls in all six themes."""
+"""Real bulk exchanges and responsive shop controls in all four themes."""
 import sys
 import tempfile
 import threading
@@ -48,7 +48,7 @@ def main():
                 row = page.locator(f'[data-offer-id="{offer["id"]}"]')
                 quantity = row.get_by_role('spinbutton')
                 buy = row.get_by_role('button', name='兑换', exact=True)
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
                     page.evaluate('GameThemes.saved')
                     page.evaluate("UtilityPanels.open('yaochi')")
@@ -80,7 +80,7 @@ def main():
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Bulk shop UI passed: six themes, three viewports, invalid quantities, totals and persisted purchases')
+    print('Bulk shop UI passed: four themes, three viewports, invalid quantities, totals and persisted purchases')
 
 
 if __name__ == '__main__':

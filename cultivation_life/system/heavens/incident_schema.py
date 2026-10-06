@@ -7,8 +7,12 @@ def validate_incidents(rows, year):
     if type(rows) is not dict or rows.keys() - INCIDENT_IDS:
         raise ValueError('界域事务目录无效')
     for identity, row in rows.items():
-        if type(row) is not dict or set(row) != {'stage', 'choice', 'opened_at', 'closed_at', 'remaining', 'base', 'claimed'}:
+        if type(row) is not dict or set(row) - {'outcome'} != {'stage', 'choice', 'opened_at', 'closed_at', 'remaining', 'base', 'claimed'}:
             raise ValueError('界域事务字段无效')
+        effect = response(BY_ID[identity], row['choice']).effect if row['choice'] in {'incident_preserve', 'incident_seal'} else None
+        expected_outcome = effect == 'aid' and row['stage'] in {'treated', 'closed'} or effect == 'mana' and row['stage'] == 'closed'
+        if ('outcome' in row) != expected_outcome or 'outcome' in row and (type(row['outcome']) is not str or not 1 <= len(row['outcome']) <= 500):
+            raise ValueError('界域事务实际结算记录无效')
         if row['stage'] not in {'surveying', 'surveyed', 'treated', 'closed'}:
             raise ValueError('界域事务阶段无效')
         if type(row['opened_at']) is not int or not 0 <= row['opened_at'] <= year:

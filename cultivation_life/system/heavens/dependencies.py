@@ -77,3 +77,5 @@ class HeavensDependencies:
     incident_facts: Callable | None = None
     incident_relief: Callable | None = None
     incident_restore: Callable | None = None
+    incident_field_effect: Callable | None = None
+    incident_mana: Callable | None = None

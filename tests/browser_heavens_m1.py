@@ -1,4 +1,4 @@
-"""Real HTTP/UI M1 smoke: six themes, narrow screens and lost response retry."""
+"""Real HTTP/UI M1 smoke: four themes, narrow screens and lost response retry."""
 import json
 import sys
 import tempfile
@@ -68,7 +68,7 @@ def main():
                     assert requests[0]['command_seq'] == 1
                     assert page.locator('#heavens-content').get_by_text('法则天海 · 潮汐回响',exact=True).is_visible()
                     snapshot=engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -100,7 +100,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('M1 browser: six themes, two widths, preview purity and response-loss retry passed')
+    print('M1 browser: four themes, two widths, preview purity and response-loss retry passed')
 
 
 if __name__ == '__main__':

@@ -32,14 +32,14 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     assert page.locator('html').get_attribute('data-theme') == 'a'
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
                         page.wait_for_timeout(250)
                         page.screenshot(path=str(ROOT / f'build/theme-139-{theme}-start.png'))
                     page.evaluate('async id=>{await loadGame(id);render(game)}',game_id)
                     before=page.evaluate('JSON.stringify(game)')
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')

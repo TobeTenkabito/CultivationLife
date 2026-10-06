@@ -49,7 +49,7 @@ def verify(with_dlc):
             for asset in ('heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
-            for theme in 'abcdef':
+            for theme in 'abdf':
                 with urllib.request.urlopen(base + f'/themes/{theme}.css', timeout=5) as response:
                     assert f'data-theme={theme}'.encode() in response.read()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
@@ -69,8 +69,10 @@ def verify(with_dlc):
                                  "preset_id": "core"}).encode(), headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
-            assert len(game['heavens']['incidents']) == 11
-            assert len({r['world'] for r in game['heavens']['incidents']}) == 11
+            assert len(game['heavens']['incidents']) == 4
+            assert len(game['heavens']['anomalies']) == len(game['heavens']['conflicts']) == 4
+            assert game['heavens']['sites'] == []
+            assert {r['world'] for r in game['heavens']['incidents']} == {'human','demon','hell','monster_realm'}
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
             def transfer(operation, payload):
                 request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
@@ -97,7 +99,7 @@ def verify(with_dlc):
                 joined = json.load(response)
             assert joined["merchant_system"]["membership"]["alliance_id"] == local["id"]
             owned = next(row for row in joined['merchant_system']['alliances'] if row['member'])
-            assert [row['world'] for row in owned['catalog']] == ['human']
+            assert [row['world'] for row in owned['catalog'] if not row.get('intel_only')] == ['human']
             assert 'guixu_canghai_equipment_01' not in {row['id'] for row in owned['catalog'][0]['items']}
             assert 'heroic_progeny_elixir' not in {row['id'] for row in owned['catalog'][0]['items']}
             assert owned['catalog'][0]['weapon_tiers'] == [1,2,3,4,5]
@@ -147,7 +149,7 @@ def verify(with_dlc):
                 knowledge = client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=session)['data']
                 assert knowledge and all(value == 5 for value in knowledge.values())
             heavens = client.call('heavens inspect', session_id=session)
-            assert len(heavens['data']['view']['incidents']) == 11
+            assert len(heavens['data']['view']['incidents']) == 4
             heavens_args = {'action': 'configure', 'options': {'watch': False}}
             checked = client.call('heavens act', heavens_args, session_id=session,
                                   expected_revision=heavens['revision'], request_key='release-heavens')

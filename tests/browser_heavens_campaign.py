@@ -1,4 +1,4 @@
-"""Actual HTTP military actions and six-theme independent page acceptance."""
+"""Actual HTTP military actions and four-theme independent page acceptance."""
 import json
 import sys
 import tempfile
@@ -54,7 +54,7 @@ def main():
                     page.locator('#game-confirm-accept').click()
                     page.wait_for_function('!busy && game.heavens.campaign.gate')
                     snapshot = engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click()
@@ -89,12 +89,12 @@ def main():
                     page.evaluate('async id=>{await loadGame(id)}',key)
                     assert page.evaluate("game.heavens.campaign.reports.some(r=>r.kind==='demolition')")
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=list('abcdef'),widths=[1440,393,320],
+                    (output/'report.json').write_text(json.dumps(dict(themes=list('abdf'),widths=[1440,393,320],
                         errors=errors,preview_cancel=True,pure_navigation=True,real_combat=True,demolition=True,reload=True),indent=2),encoding='utf-8')
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('M3 second round HTTP combat / gate / six-theme acceptance passed')
+    print('M3 second round HTTP combat / gate / four-theme acceptance passed')
 
 
 if __name__ == '__main__':

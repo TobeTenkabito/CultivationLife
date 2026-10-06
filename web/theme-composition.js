@@ -39,7 +39,7 @@
     else {history.querySelectorAll('#history-filters input').forEach(i=>{i.checked=mode==='all'||i.value==='self';i.dispatchEvent(new Event('change',{bubbles:true}));});tools.querySelectorAll('[aria-pressed]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));}
   };
   const footer=document.createElement('footer');footer.className='theme-signature';footer.innerHTML='<span></span><small></small>';stage.after(footer);
-  const names={a:['松烟书院','页首状态带 · 常看信息与行动同处一屏'],b:['月下观星','机缘入月轮 · 血蓝置于行动上缘'],c:['青玉留白','身份页签与状态卡 · 当前值清晰呈现'],d:['丹砂金阙','人物铭牌与三栏仪表'],e:['江山行卷','山水行旅 · 底部独立状态带'],f:['竹简纪年','卷首命籍 · 左页修行，右页纪事']};
+  const names={a:['松烟书院','页首状态带 · 常看信息与行动同处一屏'],b:['月下观星','机缘入月轮 · 血蓝置于行动上缘'],d:['丹砂金阙','人物铭牌与三栏仪表'],f:['竹简纪年','卷首命籍 · 左页修行，右页纪事']};
   for(const [node,glyph] of [[$('#cultivate-action'),'修'],[$('#body-train-action'),'体'],[$('#sense-train-action'),'识'],[rest,'息'],[neighbors,'缘']]){
     const emblem=document.createElement('i');emblem.className='action-emblem';emblem.setAttribute('aria-hidden','true');emblem.textContent=glyph;node.prepend(emblem);
     const time=document.createElement('small');time.className='action-duration';node.append(time);
@@ -54,7 +54,7 @@
   nav.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.actionTab));
   nav.querySelector('.action-tabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const keys=['daily','living','combat'];let i=keys.indexOf(selected);i=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;selectTab(keys[i]);nav.querySelector(`[data-action-tab=${keys[i]}]`).focus();};
   function updateTimes(){const years=Number(current?.player?.time_unit_years||1)*units;
-    document.querySelectorAll('.action-duration').forEach(n=>n.textContent=root.dataset.theme==='e'?`${years} 年`:`本次耗时 ${years} 年`);
+    document.querySelectorAll('.action-duration').forEach(n=>n.textContent=`本次耗时 ${years} 年`);
     $('#action-units').value=units;nav.querySelector('[data-unit-step="-1"]').disabled=units<=1;nav.querySelector('[data-unit-step="1"]').disabled=units>=10;
     $('#action-units').title='1–10 个行动单位；重大事件会提前中断行动';
   }
@@ -70,14 +70,14 @@
       action.prepend(hud);core.prepend($('#hud-opportunity'));action.append(core,details);
     }else if(theme==='d'){
       action.prepend(hud);nav.after(resources);dock.append(rest,neighbors);primary.after(dock);dock.hidden=selected!=='daily';
-    }else if(theme==='e')stage.append(hud);
+    }
     else stage.prepend(hud);
     if(theme==='b'&&selected!=='daily') {core.classList.add('core-summary');action.append(core);}else core.classList.remove('core-summary');
     const landscape=$('#main-scenery');
     if(landscape&&!landscape.dataset.originalArt){landscape.dataset.originalArt='true';landscape.innerHTML='<img class="original-landscape" src="/themes/landscape.svg" alt=""><p class="landscape-eyebrow">山中无历日</p><div class="landscape-title-mask"><div class="landscape-title-track"><span>一程山水，一程修行。</span><span aria-hidden="true">一程山水，一程修行。</span></div></div><p class="landscape-place"></p><small class="landscape-date"></small>';}
-    $('#cultivate-action .action-cta').textContent=theme==='e'||theme==='f'?'→':'入定修炼 →';
-    for(const n of [$('#body-train-action'),$('#sense-train-action'),rest,neighbors])n.querySelector('.action-cta').textContent=theme==='d'&&![rest,neighbors].includes(n)?'开始修行 →':theme==='c'?'选择 →':['e','f'].includes(theme)?'→':'›';
-    footer.firstElementChild.textContent=`${theme.toUpperCase()} / ${names[theme][0]}`;footer.lastElementChild.textContent=names[theme][1];
+    $('#cultivate-action .action-cta').textContent=theme==='f'?'→':'入定修炼 →';
+    for(const n of [$('#body-train-action'),$('#sense-train-action'),rest,neighbors])n.querySelector('.action-cta').textContent=theme==='d'&&![rest,neighbors].includes(n)?'开始修行 →':theme==='f'?'→':'›';
+    footer.firstElementChild.textContent=`${names[theme][0]}`;footer.lastElementChild.textContent=names[theme][1];
     if(current)updateWorld();
     updateTimes();
   }

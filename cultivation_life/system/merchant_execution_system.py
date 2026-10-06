@@ -1,6 +1,7 @@
 """Explicit operations for merchant execution system."""
 
 from __future__ import annotations
+from .merchant_definitions import intelligence_route
 import math
 from ..content_registry import REALMS, WORLD_SYSTEMS
 from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
@@ -36,7 +37,7 @@ def _migrate_merchant_routes(deps: MerchantExecutionDependencies, game):
             deps._merchant_notice(game, f"{WORLD_SYSTEMS['world_names'][world]}璇玑商盟据点已撤销，由{alliance['name']}承接当地事务；已有职衔、影响力和待完成任务保留。")
     for order in state['posted']:
         alliance = deps._merchant_alliance(game, order['world'], order['alliance_id'])
-        if order['status'] in {'open', 'working'} and not deps._merchant_route_exists(game, alliance, order['source_world']):
+        if order['status'] in {'open', 'working'} and not deps._merchant_route_exists(game, alliance, order['source_world']) and not (alliance and order['kind'] == 'intel' and intelligence_route(game, order['source_world'])):
             deps._merchant_refund(game, order, 'cancelled', '目标界面未设本盟总部，商路已撤销', order['fee'])
     player = game.player
     sealed = player.sealed_cultivation

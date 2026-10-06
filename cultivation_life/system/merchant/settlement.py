@@ -67,6 +67,7 @@ def _merchant_intelligence(deps: MerchantSettlementDependencies, game, world, st
     """Report actual NPC ties; optional Tianji clues use the real knowledge ledger."""
     from ...world_state import race_pair
     from ..tianji_system import tianji_content_available
+    from ..heavens.intelligence import acquire_merchant_reports
     npcs = [npc for npc in deps._all_world_npcs(game) if npc.alive and npc.world == world]
     rng.shuffle(npcs)
     facts, pairs = [], set()
@@ -108,7 +109,8 @@ def _merchant_intelligence(deps: MerchantSettlementDependencies, game, world, st
             level = int(state['knowledge'].get(artifact['id'], 0)) + 1
             if deps._tianji_reveal(game, artifact['id'], level, f'{stars}星商盟情报委托'):
                 clues.append(f"【{artifact['name']}】情报提升至 Lv{level}")
-    return f"{WORLD_SYSTEMS['world_names'][world]}修士关系：" + '；'.join(facts) + ('；神机榜线索：' + '；'.join(clues) if clues else '')
+    report = acquire_merchant_reports(game, world, stars)
+    return f"{WORLD_SYSTEMS['world_names'][world]}修士关系：" + '；'.join(facts) + ('；神机榜线索：' + '；'.join(clues) if clues else '') + '；诸天战讯：' + report
 
 
 def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, order):

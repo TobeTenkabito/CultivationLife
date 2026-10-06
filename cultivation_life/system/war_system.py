@@ -156,8 +156,8 @@ class WarSystemMixin:
     def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
         return war_diplomacy._player_has_war_voice(self._war_dependencies.diplomacy, game, war)
 
-    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str) -> dict[str, Any]:
-        return war_diplomacy._start_war(self._war_dependencies.diplomacy, game, kind, attacker, defender)
+    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False) -> dict[str, Any]:
+        return war_diplomacy._start_war(self._war_dependencies.diplomacy, game, kind, attacker, defender, initiated_by_player=initiated_by_player)
 
     def _ensure_wars(self, game: GameState) -> bool:
         return war_state._ensure_wars(self._war_dependencies.state, game)

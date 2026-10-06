@@ -49,7 +49,7 @@ def main():
                 page.evaluate("UtilityPanels.close('map');UtilityPanels.open('immortal-aperture')")
                 page.get_by_role('button',name='凝练仿仙灵力',exact=True).click()
                 page.wait_for_function('game.aperture.current===20')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     page.evaluate('GameThemes.saved')
                     page.evaluate("UtilityPanels.close('immortal-aperture');UtilityPanels.open('spirit-voisinage')")
@@ -77,6 +77,6 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally:httpd.shutdown()
-    print('v1.47 UI passed: seeded quick-start, market/daomen separation, instant teleport, six-theme spirit domain and merchant manual commission')
+    print('v1.47 UI passed: seeded quick-start, market/daomen separation, instant teleport, four-theme spirit domain and merchant manual commission')
 
 if __name__=='__main__':main()

@@ -36,7 +36,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('Quick-start regression passed: ten presets including three native upper starts; demonic void in six themes')
+    print('Quick-start regression passed: ten presets including three native upper starts; demonic void in four themes')
 
 
 if __name__ == '__main__':

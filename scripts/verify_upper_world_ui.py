@@ -35,7 +35,7 @@ def main():
                     p.location_id=engine.maps.normalize_location(world,None)
                     p.opportunity=opportunity_required(p)*3;game.pending_event=None
                     engine.store.save(game);page.evaluate('(id)=>loadGame(id)',game.id)
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                         page.evaluate('GameThemes.saved')
                         for width in (1440,412):

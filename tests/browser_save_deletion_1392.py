@@ -32,7 +32,7 @@ def main():
                     page.wait_for_function('configData && window.GameThemes')
                     page.evaluate('GameThemes.ready')
                     assert page.locator('.save-entry').count() == 7
-                    for theme, gid in zip('abcdef', ids):
+                    for theme, gid in zip('abdf', ids):
                         page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                         row = page.locator(f'[data-save-id="{gid}"]')
                         row.locator('.save-delete').click()

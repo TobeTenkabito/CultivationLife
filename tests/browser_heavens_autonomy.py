@@ -68,7 +68,7 @@ def main():
                     assert '自行探访' in page.locator('[data-survey]').inner_text()
                     assert page.get_by_role('button',name='商请结束勘察',exact=True).is_disabled()
                     disk=engine.store._path(key).read_bytes()
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -107,7 +107,7 @@ def main():
                     assert saved.world_npcs[identity].world=='human'
                     assert len(saved.player.formation_materials)==1
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=list('abcdef'),widths=[1440,393],
+                    (output/'report.json').write_text(json.dumps(dict(themes=list('abdf'),widths=[1440,393],
                         hidden_before_meeting=True,real_social_contacts=visits,reload=True,unique_material=True,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

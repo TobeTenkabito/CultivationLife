@@ -51,7 +51,7 @@ def main():
                     before=page.evaluate('JSON.stringify(game)')
                     for width in (1440,800,393,360):
                         page.set_viewport_size({'width':width,'height':1000})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate("t=>document.querySelector('[data-theme-picker=dialog] [data-theme-choice='+t+']').click()",theme)
                             page.evaluate('GameThemes.saved')
                             for panel in ('map','growth'):
@@ -66,7 +66,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown();httpd.server_close()
-    print('World map and technique API; six themes x four widths passed; state isolation passed')
+    print('World map and technique API; four themes x four widths passed; state isolation passed')
 
 
 if __name__=='__main__':

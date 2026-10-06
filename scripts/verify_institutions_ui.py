@@ -43,7 +43,7 @@ def main():
                 page.evaluate('(id)=>loadGame(id)', game.id)
                 assert page.evaluate('game.player.faction_id===null && game.player.institution_affiliations.yaochi.legacy_contribution===231')
                 assert page.evaluate("game.faction.available.every(s=>!['heavenly_court','yaochi'].includes(s.id))")
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
                     page.evaluate('GameThemes.saved')
                     for width, height in [(1440,1080), (412,915), (915,412)]:
@@ -83,7 +83,7 @@ def main():
             assert not errors, errors
         finally:
             httpd.shutdown()
-    print('Institution UI passed: six themes, three viewports, institution maps, six officials, real contact, legacy record and same-world scope.')
+    print('Institution UI passed: four themes, three viewports, institution maps, six officials, real contact, legacy record and same-world scope.')
 
 
 if __name__ == '__main__':

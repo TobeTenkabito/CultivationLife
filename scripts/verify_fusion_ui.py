@@ -1,4 +1,4 @@
-"""Real fusion/study actions and six-theme responsive presentation."""
+"""Real fusion/study actions and four-theme responsive presentation."""
 import copy
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -48,7 +48,7 @@ def main():
                 page.wait_for_function('(key)=>{const f=game.doctrines.rows.find(r=>r.id===key).fusion;return f.level>1||f.experience>0}',arg=key)
                 saved=engine.store.load(g.id);saved.pending_event=None;saved.heavenly_court['open_election']=None
                 engine.store.save(saved);page.evaluate('(id)=>loadGame(id)',g.id)
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width in (1440,412):
                         page.set_viewport_size({'width':width,'height':1000})
@@ -66,6 +66,6 @@ def main():
                 assert not errors,errors
                 browser.close()
         finally: httpd.shutdown()
-    print('Fusion UI passed: actual collection/study, trace payment, true voisinage, six themes, grouped commission catalog')
+    print('Fusion UI passed: actual collection/study, trace payment, true voisinage, four themes, grouped commission catalog')
 
 if __name__=='__main__': main()

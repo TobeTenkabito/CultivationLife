@@ -42,7 +42,7 @@ def main():
                     before=page.evaluate('JSON.stringify(game)')
                     for width in (1440,800,393,360):
                         page.set_viewport_size({'width':width,'height':900})
-                        for theme in 'abcdef':
+                        for theme in 'abdf':
                             page.evaluate("t=>document.querySelector('[data-theme-picker=dialog] [data-theme-choice='+t+']').click()",theme)
                             page.evaluate('GameThemes.saved')
                             for panel in ('family','offer','guixu'):
@@ -57,6 +57,6 @@ def main():
                     assert not errors,errors
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()
-    print('Family live API actions and six themes x four widths x family/invitation/treasure controls: passed; state isolation passed')
+    print('Family live API actions and four themes x four widths x family/invitation/treasure controls: passed; state isolation passed')
 
 if __name__=='__main__':main()

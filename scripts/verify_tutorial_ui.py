@@ -1,4 +1,4 @@
-"""Click the real highlighted controls through the complete six-theme course."""
+"""Click the real highlighted controls through the complete four-theme course."""
 import sys,tempfile,threading
 from pathlib import Path
 from http.server import ThreadingHTTPServer
@@ -20,7 +20,7 @@ def main():
                 browser=pw.chromium.launch();page=browser.new_page(viewport={'width':412,'height':915})
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('showStart()')
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=start] [data-theme-choice=${t}]`).click()',theme);page.evaluate('GameThemes.saved')
                     if theme=='a':
@@ -71,5 +71,5 @@ def main():
             print(errors,flush=True)
             raise
         finally:httpd.shutdown()
-    print('Tutorial UI passed: real controls, spotlight and arrows, deterministic practice/treasure/equip/master/sect, six themes, three widths, pause/reload, no elapsed time')
+    print('Tutorial UI passed: real controls, spotlight and arrows, deterministic practice/treasure/equip/master/sect, four themes, three widths, pause/reload, no elapsed time')
 if __name__=='__main__':main()

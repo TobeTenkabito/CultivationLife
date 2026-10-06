@@ -5,6 +5,7 @@ from ...models import HistoryRecord
 import random
 import uuid
 from .dependencies import WarDiplomacyDependencies
+from .policy import system_war_allowed
 
 
 def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[str, Any], side: str) -> list[dict[str, Any]]:
@@ -105,10 +106,12 @@ def _player_has_war_voice(deps: WarDiplomacyDependencies, game: GameState, war: 
     return deps._has_race_voice(game) if war["kind"] == "race" else deps._has_sect_voice(game)
 
 
-def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str) -> dict[str, Any]:
+def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False) -> dict[str, Any]:
     current = deps._active_war(game, kind, attacker, defender)
     if current:
         return current
+    if not initiated_by_player and not system_war_allowed(game, kind, attacker, defender):
+        raise ValueError('系统势力只能在同层级界面之间发起战争')
     relation = deps._war_relation(game, kind, attacker, defender)
     truce_until = max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0)))
     if game.diplomacy_unit < truce_until:

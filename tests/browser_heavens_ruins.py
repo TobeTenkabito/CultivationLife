@@ -91,7 +91,7 @@ def main():
                     assert '由你持有' in area.inner_text() and '替代部件维持回响' in area.inner_text()
                     assert area.get_by_role('button', name='直接取走阵芯', exact=True).count() == 0
                     page.wait_for_function("!document.querySelector('#toast').classList.contains('show')")
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
@@ -148,7 +148,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Ruins browser: reading, replacement, combat, restoration, retry and six themes passed')
+    print('Ruins browser: reading, replacement, combat, restoration, retry and four themes passed')
 
 
 if __name__ == '__main__':

@@ -42,7 +42,7 @@ window.HeavensAtlas = (() => {
     const header=node('header',null,'heavens-dossier-heading');header.dataset.world=row.world;
     const stamp=node('span',(motifs[row.world]||motifs.human)[0],'heavens-dossier-seal');stamp.setAttribute('aria-hidden','true');
     const copy=node('div');const h=node('h3',row.name,'heavens-title');h.tabIndex=-1;
-    copy.append(node('small',`${row.world_name} / 地方行录`),h);header.append(stamp,copy,node('span',stages[row.stage],'heavens-badge'));host.append(header);
+    copy.append(node('small',`${row.world_name} / ${({anomaly:'异象档案',conflict:'战地档案'})[row.category]||'地方行录'}`),h);header.append(stamp,copy,node('span',stages[row.stage],'heavens-badge'));host.append(header);
   }
   return {feature,docket,plate};
 })();

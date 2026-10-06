@@ -47,7 +47,7 @@ def main():
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData!==null')
                 page.evaluate('(id)=>loadGame(id)',g.id)
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width,height in [(1440,1000),(412,915),(915,412)]:
                         page.set_viewport_size(dict(width=width,height=height))
@@ -97,7 +97,7 @@ def main():
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Experience UI passed: six themes, three viewports, 25 collapsed searchable collections, retained open state, real free preview and retained peer, settings persistence and Yaochi experience')
+    print('Experience UI passed: four themes, three viewports, 25 collapsed searchable collections, retained open state, real free preview and retained peer, settings persistence and Yaochi experience')
 
 
 if __name__=='__main__': main()

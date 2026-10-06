@@ -85,7 +85,7 @@ def main():
                 key = page.evaluate('game.id')
                 before = engine.store._path(key).read_bytes()
                 page.evaluate("UtilityPanels.open('settings')")
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-choice="${t}"]`).click()', theme)
                     page.evaluate('GameThemes.saved')
                     for cfg, label in ((pure, 'base'), (full, 'full')):

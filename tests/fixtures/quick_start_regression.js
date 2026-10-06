@@ -15,7 +15,7 @@ window.QuickStartProbe = (() => {
     if (preset === 'demonic_void') {
       check(game.player.path === 'demonic' && game.player.realm_index === 6, 'Wrong demonic void preset');
       check(document.querySelectorAll('.intrigue-member').length > 0, 'Missing actual intrigue members');
-      for (const theme of 'abcdef') {
+      for (const theme of 'abdf') {
         document.querySelector('[data-theme-picker=dialog] [data-theme-choice=' + theme + ']').click();
         await GameThemes.saved;
         render(game);

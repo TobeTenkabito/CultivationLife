@@ -1463,8 +1463,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _simulate_cultivator_duel(self, game: GameState, rng: random.Random, news: list[str]) -> None:
         return world_factions._simulate_cultivator_duel(self._dependencies.world_factions, game, rng, news)
 
-    def _set_diplomatic_relation(self, game: GameState, relation: dict[str, Any], status: str, first: str, second: str, kind: str, affinity: float) -> None:
-        return world_factions._set_diplomatic_relation(self._dependencies.world_factions, game, relation, status, first, second, kind, affinity)
+    def _set_diplomatic_relation(self, game: GameState, relation: dict[str, Any], status: str, first: str, second: str, kind: str, affinity: float, *, initiated_by_player=False) -> None:
+        return world_factions._set_diplomatic_relation(self._dependencies.world_factions, game, relation, status, first, second, kind, affinity, initiated_by_player=initiated_by_player)
 
     def _race_power(self, game: GameState, race_id: str) -> float:
         return world_factions._race_power(self._dependencies.world_factions, game, race_id)
@@ -2944,8 +2944,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
         return war_diplomacy._player_has_war_voice(self._dependencies.war.diplomacy, game, war)
 
-    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str) -> dict[str, Any]:
-        return war_diplomacy._start_war(self._dependencies.war.diplomacy, game, kind, attacker, defender)
+    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False) -> dict[str, Any]:
+        return war_diplomacy._start_war(self._dependencies.war.diplomacy, game, kind, attacker, defender, initiated_by_player=initiated_by_player)
 
     def _war_total_power(
         self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,

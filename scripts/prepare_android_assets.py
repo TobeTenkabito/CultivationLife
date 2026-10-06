@@ -38,7 +38,7 @@ def main(destination, staged_python=None):
     else:
         # Standalone UI fixture bundles are not evidence of an APK build.
         (destination / 'game-build.json').unlink(missing_ok=True)
-    print(f'Android game bundle: {archive.stat().st_size:,} bytes; six themes and all installed DLC')
+    print(f'Android game bundle: {archive.stat().st_size:,} bytes; four themes and all installed DLC')
 
 
 if __name__ == '__main__':

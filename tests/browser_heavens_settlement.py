@@ -44,7 +44,7 @@ def main():
                     page.get_by_role('tab', name='地方', exact=True).tap()
                     before = engine.store._path(initial.id).read_bytes()
                     measurements = []
-                    for theme in 'abcdef':
+                    for theme in 'abdf':
                         page.locator('#theme-open').click()
                         page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click()
@@ -96,7 +96,7 @@ def main():
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('M3 final: six themes, independent content pages, touch truce and evacuation passed')
+    print('M3 final: four themes, independent content pages, touch truce and evacuation passed')
 
 
 if __name__ == '__main__':

@@ -86,7 +86,7 @@ def main():
                 assert page.locator('[data-asura-action=lock_power]').first.get_attribute('aria-pressed')=='true'
                 assert '无尽' in page.locator('#opportunity-text').inner_text()
 
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
                     for width in (1440, 412, 932):
                         print(f'Asura theme {theme}, width {width}',flush=True)
@@ -123,7 +123,7 @@ def main():
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Asura UI passed: purification, random power, six themes and mobile widths.')
+    print('Asura UI passed: purification, random power, four themes and mobile widths.')
 
 
 if __name__ == '__main__':

@@ -59,7 +59,7 @@ def main():
                 page.wait_for_function("!busy&&game.upper_institution.court.project?.id==='market'")
                 root.get_by_role('heading',name='开仓安抚',exact=True).locator('..').get_by_role('button').click()
                 page.wait_for_function('!busy&&game.upper_institution.court.public_support===65')
-                for theme in 'abcdef':
+                for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width,height in [(1440,1080),(412,915),(915,412)]:
                         page.set_viewport_size(dict(width=width,height=height))
@@ -86,7 +86,7 @@ def main():
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Asura court UI passed: actual promotion, policy, appointment, construction, decree, surrender and persistence; six themes, desktop, portrait and landscape.')
+    print('Asura court UI passed: actual promotion, policy, appointment, construction, decree, surrender and persistence; four themes, desktop, portrait and landscape.')
 
 
 if __name__ == '__main__':

@@ -74,7 +74,7 @@ def main():
                         assert page.get_by_role('button',name='部署托管护持',exact=True).is_disabled()
                         if index==0:
                             disk=engine.store._path(key).read_bytes()
-                            for theme in 'abcdef':
+                            for theme in 'abdf':
                                 page.locator('#theme-open').tap()
                                 page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').tap()
                                 page.locator('[data-close-dialog=theme-dialog]').tap()
@@ -88,7 +88,7 @@ def main():
                     assert 'Android' in page.evaluate('navigator.userAgent')
                     assert not errors,errors
                     (output/'report.json').write_text(json.dumps(dict(device='Pixel 7',android_browser_emulation=True,
-                        native_apk_test=False,worlds=[c.world for c in CONTACT_SITES],themes=list('abcdef'),
+                        native_apk_test=False,worlds=[c.world for c in CONTACT_SITES],themes=list('abdf'),
                         touch_events=touches,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

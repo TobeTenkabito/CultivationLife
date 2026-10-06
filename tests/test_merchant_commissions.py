@@ -76,7 +76,7 @@ def test_jinque_local_delivery_and_no_unlinked_targets(setup):
         alliance=engine._merchant_alliance(game,'true_demon',key)
         with pytest.raises(ValueError, match='分总部'):
             engine._merchant_quote(game,alliance,payload)
-        assert 'human' not in {row['world'] for row in engine._merchant_procurement_catalog(game,alliance)}
+        assert 'human' not in {row['world'] for row in engine._merchant_procurement_catalog(game,alliance) if not row.get('intel_only')}
 
 
 @pytest.mark.parametrize('payload',[

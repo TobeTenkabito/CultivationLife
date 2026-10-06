@@ -48,7 +48,7 @@ def main():
                         page.evaluate('async id => render(await api(`/api/games/${id}`))', made['id'])
                         count = page.evaluate('''() => {
                           let count = 0;
-                          for (const theme of 'abcdef') {
+                          for (const theme of 'abdf') {
                             document.querySelector(`[data-theme-choice="${theme}"]`).click();
                             for (const button of document.querySelectorAll('[data-panel-target]')) {
                               if (button.classList.contains('hidden')) continue;
