@@ -173,6 +173,8 @@ def cancel(deps, game, task, *, failed=False, reason='主动取消'):
         get_echo(game.heavens_state['runtime'], task.get('target_id', 'sea_echo'))['project_stones'] += task['project_reward']
         task['project_reward'] = 0
     task['status'] = 'failed' if failed else 'cancelled'
+    if task['action'] == 'mirror_repair':
+        mirror.end_repair(game, task['status'])
     record(game, f'{LABELS[task["action"]]}结束：{reason}。保留已耗时间与投入，退还未耗托管。')
 
 
@@ -346,7 +348,7 @@ def run_segment(deps, game, task):
     if task['status'] != 'failed' and physical_reason and task['progress'] == task['duration']:
         cancel(deps, game, task, failed=True, reason=physical_reason)
     if (task['status'] != 'failed' and task['progress'] == task['duration'] and game.player.alive
-            and not (task['action'] in {'mirror_assault', 'ruins_take'} and game.pending_event)):
+            and not (task['action'] in {'mirror_assault', 'mirror_repair', 'ruins_take'} and game.pending_event)):
         complete(game, task, deps, rng)
     elif task['status'] == 'running':
         task['status'] = 'paused'

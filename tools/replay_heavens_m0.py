@@ -1,7 +1,7 @@
 """Compare closed mode with a pre-M0 source tree using the time replay.
 
 Only the intentional schema increment, empty heavens container and framework
-description correction and new pure UI projections are normalized.
+description/default-availability correction and new pure UI projections are normalized.
 Old NPCs, resources, clocks and RNG are hashed.
 Use separate processes with the same extension configuration for each tree.
 """
@@ -42,6 +42,11 @@ def normalized_digest(raw):
             if stage.get('description') not in descriptions:
                 raise ValueError('Unexpected framework description in M0 replay')
             stage['description'] = 'heavens M0 description correction'
+            if type(stage.get('enabled')) is not bool:
+                raise ValueError('Unexpected framework availability in closed replay')
+            # The map describes installed content, not this save's generation
+            # setting. M1 intentionally enabled the framework by default.
+            stage['enabled'] = False
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True).encode())
 
 

@@ -220,7 +220,7 @@ def validate_runtime(runtime):
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) | {'survey_wait'} if is_ruins else (MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave'}) | {'survey_wait'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
+        actions = {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) | {'survey_wait'} if is_ruins else (MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave', 'mirror_release'}) | {'survey_wait'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
         if task['action'] not in actions:
             raise ValueError('诸天任务动作无效')
         if task['status'] not in {'reserved', 'running', 'paused', 'completed', 'cancelled', 'failed'}:
@@ -253,12 +253,12 @@ def validate_runtime(runtime):
             if echo.get('capacity_pending'):
                 raise ValueError('尚未亲自入场不能保存镜律机关任务')
             chamber = task.get('chamber')
-            durations = {echo['definition'][task['action'].removeprefix('mirror_')+'_years']}
+            durations = {3} if task['action'] == 'mirror_repair' else {echo['definition'][task['action'].removeprefix('mirror_')+'_years']}
             if task['action'] == 'mirror_decipher' and echo.get('survey', {}).get('shared'):
                 durations.add(2)
             if (('chamber' not in task) or task['cycle'] != 0
-                    or task['action'] == 'mirror_probe' and chamber is not None
-                    or task['action'] != 'mirror_probe' and (type(chamber) is not int or not 0 <= chamber < 3)
+                    or task['action'] in {'mirror_probe', 'mirror_repair'} and chamber is not None
+                    or task['action'] not in {'mirror_probe', 'mirror_repair'} and (type(chamber) is not int or not 0 <= chamber < 3)
                     or task['duration'] not in durations):
                 raise ValueError('镜律任务引用或时长无效')
             if task['status'] == 'completed':
@@ -332,6 +332,21 @@ def validate_runtime(runtime):
         raise ValueError('只能持有一项未结束的个人访学')
     if sum(echo.get(key, {}).get('status') == 'active' for echo in echoes for key in ('mission', 'freight', 'migration')) > 1:
         raise ValueError('只能同时安排一项同道回访')
+    pact = runtime.get('mirror', {}).get('pact')
+    if pact and int(pact['task_id'].removeprefix('heavens-task-')) >= runtime['next_task_seq']:
+        raise ValueError('镜律守约不能引用未来任务')
+    repairs = [task for task in runtime['tasks'] if task['action'] == 'mirror_repair']
+    if len(repairs) > 1 or repairs and (not pact or repairs[0]['id'] != pact['task_id']):
+        raise ValueError('镜律修补任务缺少唯一约定')
+    if pact and pact['status'] == 'repairing' and not repairs:
+        raise ValueError('镜律修补缺少在途任务')
+    if repairs:
+        task = repairs[0]
+        expected = {'repairing': {'reserved', 'running', 'paused'}, 'kept': {'completed'},
+                    'released': {'completed'}, 'cancelled': {'cancelled'}, 'failed': {'failed'}}[pact['status']]
+        if (task['status'] not in expected or task['escrow']['mp_paid'] != 0
+                or task['progress'] > runtime['processed_years']-pact['started_at']):
+            raise ValueError('镜律修补状态或真实时间不一致')
 
 
 def validate_migration(echo, runtime):
@@ -562,7 +577,7 @@ def vars_site(target_id):
 def validate_mirror(mirror, year):
     fields = {'id', 'definition', 'scene_id', 'created_year', 'probed', 'mana_capacity',
               'paid_mana', 'collected_mana', 'stored_mana', 'record_acquired', 'chambers', 'traces'}
-    if type(mirror) is not dict or set(mirror) - {'survey', 'player_known', 'capacity_pending'} != fields or mirror['id'] != MIRROR_ID:
+    if type(mirror) is not dict or set(mirror) - {'survey', 'player_known', 'capacity_pending', 'pact'} != fields or mirror['id'] != MIRROR_ID:
         raise ValueError('镜律实例字段无效')
     if 'survey' in mirror:
         validate_survey(mirror['survey'], year)
@@ -631,6 +646,8 @@ def validate_mirror(mirror, year):
             allocated += guardian['mana']
     if abs(mirror['stored_mana'] + allocated - mirror['collected_mana']) > 1e-6:
         raise ValueError('镜律供给与储量不守恒')
+    if 'pact' in mirror:
+        validate_mirror_pact(mirror, year)
     if type(mirror['traces']) is not list or len(mirror['traces']) > 32:
         raise ValueError('镜律痕迹超出容量')
     for row in mirror['traces']:
@@ -682,6 +699,46 @@ def validate_survey(row, year):
             or row['status'] == 'cancelled' and phase != 'outbound'
             or (row['status'] == 'completed') != (phase == 'returning' and progress == 1)):
         raise ValueError('勘察进度与实际经历不一致')
+
+
+def validate_mirror_pact(mirror, year):
+    pact = mirror['pact']
+    if (type(pact) is not dict or set(pact) != {'revision', 'status', 'duration', 'task_id', 'started_at', 'settled_at', 'released_at', 'material'}
+            or type(pact['revision']) is not int or pact['revision'] != 1 or type(pact['duration']) is not int or pact['duration'] != 3
+            or not isinstance(pact['status'], str) or pact['status'] not in {'repairing', 'kept', 'cancelled', 'failed', 'released'}
+            or not isinstance(pact['task_id'], str) or not re.fullmatch(r'heavens-task-[1-9][0-9]*', pact['task_id'])):
+        raise ValueError('镜律守约字段无效')
+    require_counter(pact['started_at'], '立约年份')
+    if not mirror['probed'] or mirror.get('capacity_pending') or not mirror['created_year'] <= pact['started_at'] <= year:
+        raise ValueError('镜律守约缺少实际试探与入场')
+    settled, released = pact['settled_at'], pact['released_at']
+    if pact['status'] == 'repairing':
+        if settled is not None:
+            raise ValueError('未完成修补不能结清守约')
+    else:
+        require_counter(settled, '守约结清年份')
+        if not pact['started_at'] <= settled <= year:
+            raise ValueError('镜律守约结清时间无效')
+    if pact['status'] == 'released':
+        require_counter(released, '解约年份')
+        if not settled <= released <= year:
+            raise ValueError('镜律解除不能早于履约')
+    elif released is not None:
+        raise ValueError('镜律守约解除时间无效')
+    if pact['status'] in {'kept', 'released'} and (settled < pact['started_at']+pact['duration'] or not mirror['record_acquired']):
+        raise ValueError('镜律守约缺少实际工期或共同记录')
+    if pact['status'] in {'kept', 'released'} and (mirror['chambers'][2]['isolated'] or mirror['chambers'][2]['guardian']):
+        raise ValueError('守约抄录不能来自隔断或强攻')
+    if pact['status'] == 'released' and any(row['isolated'] or row['opened'] and (not row['guardian'] or row['guardian']['result'] != 'victory') for row in mirror['chambers'][:2]):
+        raise ValueError('解除守约后的核心须经实际强攻取得')
+    if pact['status'] in {'repairing', 'kept'}:
+        protected = mirror['chambers'][:2] if pact['status'] == 'kept' else mirror['chambers']
+        if any(row['opened'] or row['isolated'] or row['guardian'] for row in protected):
+            raise ValueError('镜律守约保留对象已被取用')
+    material = pact['material']
+    if (type(material) is not dict or any(not isinstance(material.get(key), str) or not material[key] for key in ('id', 'material_id'))
+            or material.get('dynamic_definition') or material.get('acquired_tier', 4) != 4 or material.get('origin_world', 'human') != 'human'):
+        raise ValueError('镜律修补缺少真实人界四阶阵材')
 
 
 def validate_ruins(ruins, year):
@@ -805,6 +862,8 @@ def validate_references(game):
     held.extend(echo['freight']['material']['id'] for echo in runtime_contacts(runtime)
                 if echo.get('freight') and echo['freight']['cargo_owner'] != 'player')
     held.extend(echo['upkeep']['material']['id'] for echo in runtime_contacts(runtime) if echo.get('upkeep'))
+    if runtime.get('mirror', {}).get('pact'):
+        held.append(runtime['mirror']['pact']['material']['id'])
     inventory = {row['id'] for row in game.player.formation_materials}
     if len(set(held)) != len(held) or inventory.intersection(held):
         raise ValueError('法则天海阵材出现重复所有权')

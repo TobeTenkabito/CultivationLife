@@ -25,6 +25,10 @@ from ...person_assignments import research_assignment
 
 
 def bind_heavens(engine) -> HeavensDependencies:
+    def perception_realm(player):
+        # Suppression changes usable power, not the cultivation already attained.
+        return max(true_realm(player), int((player.cultivation_suppression or {}).get('realm_index', 0)))
+
     def get_definitions():
         config = WORLD_SYSTEMS['heavens_framework']
         return HeavensDefinitions(generation_available=config['enabled'],
@@ -48,16 +52,17 @@ def bind_heavens(engine) -> HeavensDependencies:
             reason = '须在仙界、修罗界、幽冥界或轮回界的诸天联系地点参与'
         elif p.world != site.world or p.location_id != site.location_id:
             reason = f'须在{site.name.split(" · ")[0]}亲自参与'
-        elif p.realm_index < 9 or p.cultivation_suppression:
-            reason = '须具备未压制的九阶以上修为'
+        can_perceive = reason is None and not game.spatial_state.get('current') and perception_realm(p) >= 9
+        if reason is None and (p.realm_index < 9 or p.cultivation_suppression or p.sealed_cultivation):
+            reason = '须具备未封印、未压制的九阶以上修为'
         physical_reason = reason
         if reason is None and game.pending_event:
             reason = '请先处理当前事件'
         return dict(alive=p.alive, blocked_reason=reason, physical_reason=physical_reason,
-            can_discover=physical_reason is None and true_realm(p) >= 9,
+            can_discover=can_perceive,
             can_apply=physical_reason is None and (p.world != 'celestial' or p.immortal_power_converted) and p.technique is not None
                 and can_player_practice_technique(p, p.technique.element),
-            true_realm=true_realm(p), stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
+            true_realm=perception_realm(p), stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
             mp=p.mp, max_mp=max_mp(p))
 
     def read_omen_facts(game, target_id):
@@ -73,7 +78,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         elif not desc or p.world != desc['world'] or p.location_id != desc['location_id'] or game.spatial_state.get('current'):
             reason = '须亲自回到征兆出现的本界地点'
         return dict(alive=p.alive, physical_reason=reason, can_discover=reason is None,
-                    blocked_reason=reason or ('请先处理当前事件' if game.pending_event else None), true_realm=true_realm(p))
+                    blocked_reason=reason or ('请先处理当前事件' if game.pending_event else None), true_realm=perception_realm(p))
 
     def create_visitor(game, identity, site):
         if find_person(game, identity, include_inactive=True) is not None:

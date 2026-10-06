@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict
 
 VIEWS = frozenset({'known', 'opportunities', 'tasks', 'history'})
 MIRROR_ID = 'mirror_field'
-MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mirror_decipher', 'mirror_isolate', 'mirror_assault'})
+MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mirror_decipher', 'mirror_isolate', 'mirror_assault', 'mirror_repair', 'mirror_release'})
 RUINS_ID = 'causal_ruins'
 RUINS_ACTIONS = frozenset('ruins_' + name for name in ('enter', 'leave', 'observe', 'verify', 'read', 'take', 'replace', 'erase', 'contact', 'return'))
 VISIT_ACTIONS = frozenset({'visit_depart', 'visit_study', 'visit_return'})
@@ -202,7 +202,7 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-upkeep'
+    milestone: str = 'M2'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES

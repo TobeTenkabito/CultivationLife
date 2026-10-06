@@ -100,8 +100,8 @@
       const costs=[];if(row.years!=null)costs.push(`${row.years} 年`);if(row.costs?.stones)costs.push(`${amount(row.costs.stones)} 灵石`);if(row.costs?.mp)costs.push(`${amount(row.costs.mp)} 法力`);if(row.material_consumed)costs.push('消耗一件阵材');
       info.append(node('h4',row.label),node('small',row.enabled?costs.join(' · '):row.reason));
       if(row.reward_stones)info.append(node('small',`履约酬劳 ${amount(row.reward_stones)} 灵石`));
-      if(['maintain','upkeep_start','mirror_isolate','ruins_replace','freight_start'].includes(row.action)&&materials.length){
-        const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':['maintain','upkeep_start'].includes(row.action)?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
+      if(['maintain','upkeep_start','mirror_isolate','mirror_repair','ruins_replace','freight_start'].includes(row.action)&&materials.length){
+        const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':row.action==='mirror_repair'?'修补镜阵所用阵材':['maintain','upkeep_start'].includes(row.action)?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
@@ -111,7 +111,7 @@
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.person_id=select.value;};info.append(select);
       }
       const b=button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending));b.dataset.heavensAction=row.action;
-      if(['ruins_take','mirror_assault'].includes(row.action))b.classList.add('heavens-danger');
+      if(['ruins_take','mirror_assault','mirror_release'].includes(row.action))b.classList.add('heavens-danger');
       box.append(info,b);list.append(box);
     }host.append(list);
   }
@@ -264,25 +264,47 @@
     if(leave&&!leave.enabled)box.append(node('small',leave.reason));
     if(!selected.inside){
       const entry=body=>{body.append(node('p',selected.description));if(selected.capacity_pending)body.append(node('p','你尚未入场，镜储上限将在首次亲自入场时按当时法力上限的 25% 固定；之后重访不再改变。'));renderActions(body,selected.actions.filter(row=>row.action.endsWith('_enter')));};
-      if(selected.known&&selected.survey)subview(box,[['entrance','入口'],['survey','同勘']],'entrance',(body,section)=>section==='survey'?renderSurvey(body,selected):entry(body));
+      if(selected.known&&selected.survey)subview(box,[['entrance','入口'],...(selected.id==='mirror_field'&&selected.probed?[['pact','守约']]:[]),['survey','同勘']],'entrance',(body,section)=>section==='survey'?renderSurvey(body,selected):section==='pact'?renderMirrorPact(body,selected):entry(body));
       else entry(box);
       return;
     }
     if(selected.id==='mirror_field')renderMirror(box,selected);else renderRuins(box,selected);
   }
   function renderMirror(host,m) {
-    subview(host,[['mechanisms','机关'],['survey','同勘']],'mechanisms',(body,section)=>section==='survey'?renderSurvey(body,m):renderMirrorMechanisms(body,m));
+    subview(host,[['mechanisms','机关'],['pact','守约'],['survey','同勘']],'mechanisms',(body,section)=>section==='survey'?renderSurvey(body,m):section==='pact'?renderMirrorPact(body,m):renderMirrorMechanisms(body,m));
+  }
+  function renderMirrorPact(host,m) {
+    const p=m.pact,labels={repairing:'修补中',kept:'守约生效',released:'已解除',cancelled:'已取消',failed:'未能完成'};
+    host.dataset.mirrorPact=p?.status||'available';
+    title(host,'修补与守约',p?labels[p.status]:'镜纹留下了一条无需强攻的交换条件。');
+    host.append(node('p','守护机关允许以修补换取规律抄录，条件是保留第一、第二处材料核心。抄录与第三处机关共用同一份记录，不另发机缘或物品。'));
+    if(!p){
+      host.append(node('p','低耗试探之后、三处机关尚未被解开、隔断或强攻之前，可安装一件人界四阶普通阵材，修补 3 年；不额外施法。'));
+    }else{
+      host.append(node('p',`已安装：${p.material.name||p.material.material_id}。阵材与已耗工时不退，每处场域只接受一次修补。`));
+      if(p.status==='repairing'){
+        const task=(current.heavens.tasks||[]).find(t=>t.id===p.task_id);
+        if(task)host.append(node('p',`实际修补 ${task.progress} / ${task.duration} 年`),button('查看任务与续做',()=>go('journey')));
+      }else if(p.status==='kept')host.append(node('p','规律记录已取得，两处核心仍留在场域。离开和重访不会解除这项约定。','heavens-finding'));
+      else if(p.status==='released')host.append(node('p','已有记录保留，两处核心永久关闭低耗破解与材料隔断许可；可到机关页按真实战斗规则强攻。'));
+      else host.append(node('p','本次修补未取得记录，已安装阵材保留。原机关探索仍可继续，不再受理第二次修补约定。'));
+    }
+    host.append(node('small','解除守约须在场明确确认，之后只能强攻核心；不退修补投入，也不重置已有机关与镜储。'));
+    if(!m.inside)host.append(node('p','此处可查阅已知约定；继续操作须从入口页亲自重返场域。'));
+    renderActions(host,m.actions.filter(a=>!p?a.action==='mirror_repair':p.status==='kept'&&a.action==='mirror_release'),m.materials);
   }
   function renderMirrorMechanisms(host,m) {
     if(m.survey?.shared)host.append(node('p',m.survey.benefit));
     if(!m.probed){host.append(node('blockquote','镜纹随施术明灭。先低耗试探，确认机关的收集规律。','heavens-finding'));renderActions(host,m.actions.filter(row=>row.action==='mirror_probe'));return;}
     const facts=node('div',null,'heavens-facts');facts.append(badge(`镜储 ${amount(m.stored_mana)} / ${amount(m.mana_capacity)}`),badge(`已解开 ${m.chambers.filter(c=>c.opened).length} / 3`));host.append(facts);
+    if(m.pact?.status==='kept')host.append(node('p','守约期间保留两处材料核心；约定详情及解除入口位于“守约”页。'));
     const meter=node('meter');meter.min=0;meter.max=m.mana_capacity;meter.value=m.stored_mana;meter.setAttribute('aria-label','当前镜储');host.append(meter);
     const choices=m.chambers.map(c=>[String(c.index),`${['一','二','三'][c.index]} · ${c.opened?'已解开':c.isolated?'已隔断':'机关'}`]);
     tabs(host,choices,String(ui.chamber),id=>{ui.chamber=Number(id);render(current,ctx);document.getElementById(`heavens-chamber-${id}`)?.focus();},'选择镜律机关','chamber');
     const chamber=m.chambers[ui.chamber],body=node('div',null,'heavens-detail-body');body.id='heavens-chamber-body';body.dataset.mirrorChamber=String(chamber.index);body.setAttribute('role','tabpanel');body.setAttribute('aria-labelledby',`heavens-chamber-${chamber.index}`);host.append(body);
     if(chamber.opened){body.append(node('p',chamber.reward?`已领取：${chamber.reward}`:'已取得镜律规律记录。'));body.append(node('small','此处机关已解开，重访不会重复领取所得。'));}
-    else {body.append(node('p',chamber.isolated?'此处联系已隔断，后续施术不再供给这处机关。':'可投入法力破解、消耗阵材隔断，或按当前战斗预案强攻。'));renderActions(body,m.actions.filter(row=>row.options.chamber===String(chamber.index)),m.materials);}
+    else if(m.pact?.status==='kept'&&chamber.index<2){body.append(node('p','这处核心依约保留，仍由场域持有。'),button('查看守约',()=>go('anomalies',m.id,'pact')));}
+    else {body.append(node('p',m.pact?.status==='released'&&chamber.index<2?'约定已解除，此处只能按当前战斗预案强攻；原守护状态继续保留。':chamber.isolated?'此处联系已隔断，后续施术不再供给这处机关。':'可投入法力破解、消耗阵材隔断，或按当前战斗预案强攻。'));renderActions(body,m.actions.filter(row=>row.options.chamber===String(chamber.index)),m.materials);}
     if(chamber.guardian)body.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守护快照与损伤保留。`));
     const rules=node('details',null,'heavens-notes');rules.append(node('summary','查阅收集规律与痕迹'),node('p','登记施术实付法力的 25% 被收集；普通修炼和其他战斗不计入。隔断停止对应联系，守护强度最多增加 15%。'),node('small',`累计收集 ${amount(m.collected_mana)}；保留 ${m.traces.length} 条施术或施工痕迹。`));body.append(rules);
   }
