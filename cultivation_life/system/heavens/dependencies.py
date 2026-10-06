@@ -59,3 +59,14 @@ class HeavensDependencies:
     frontier_player_reason: Callable | None = None
     frontier_route_reason: Callable | None = None
     frontier_move: Callable | None = None
+
+    campaign_authority: Callable | None = None
+    campaign_roster: Callable | None = None
+    campaign_deploy: Callable | None = None
+    campaign_facts: Callable | None = None
+    campaign_road: Callable | None = None
+    campaign_move: Callable | None = None
+    campaign_materials: Callable | None = None
+    campaign_fight: Callable | None = None
+    campaign_battle: Callable | None = None
+    campaign_world_open: Callable | None = None

@@ -22,6 +22,40 @@ class NpcEngagement:
     rounds: tuple[dict[str, Any], ...]
 
 
+def resolve_local_engagement(attackers, defenders, config, rng, *, now=None, sources=None):
+    """Actual bounded encounters, including mortals, with persistent wounds.
+
+    Repelling a combatant does not capture them or transfer a map location.
+    Higher capabilities use the existing arbitration and resource settlement.
+    """
+    special = resolve_npc_engagement(attackers, defenders, config, rng, now=now, sources=sources,
+                                    attacker_objective='repel', defender_objective='repel')
+    if special is not None:
+        return special
+    if not attackers or not defenders:
+        raise ValueError('局部交战须有双方实际人物')
+    vitality = {'player': 1.0, 'enemy': 1.0}
+    powers = {side: sum(max(1.0, power) for _, power in roster)
+              for side, roster in [('player', attackers), ('enemy', defenders)]}
+    rounds = []
+    for index in range(8):
+        damage = {side: exchange_damage(powers[other] * vitality[other], powers[side],
+                    powers[other] / powers[side], rng.uniform(.9, 1.1),
+                    coefficient=.135, minimum=.045, maximum=.42)
+                  for side, other in [('player', 'enemy'), ('enemy', 'player')]}
+        for side in vitality:
+            vitality[side] = max(0.0, vitality[side]-damage[side])
+        rounds.append(dict(round=index+1, player_condition=vitality['player'], enemy_condition=vitality['enemy']))
+        if min(vitality.values()) <= .3:
+            break
+    for side, roster in [('player', attackers), ('enemy', defenders)]:
+        for npc, _ in roster:
+            npc.wounds = min(4, npc.wounds + max(1, int((1-vitality[side])*3)))
+    difference = vitality['player']-vitality['enemy']
+    outcome = 'stalemate' if abs(difference) < .08 else 'victory' if difference > 0 else 'defeat'
+    return NpcEngagement(outcome, (), (), tuple(rounds))
+
+
 def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[tuple[Any, float]],
                            config: Mapping[str, Any], rng: Any, *, max_rounds: int = 5,
                            now: float | None = None,

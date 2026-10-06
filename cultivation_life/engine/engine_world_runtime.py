@@ -113,6 +113,14 @@ def _compact_sect_roster(deps: WorldRuntimeDependencies, game: GameState, sect: 
     frontier = heavens.get('frontier')
     if frontier and frontier.get('person_id'):
         protected.update((frontier['person_id'], frontier['authorization']['issuer_id']))
+    campaign = heavens.get('campaign')
+    if campaign:
+        protected.update(u['person_id'] for u in campaign['units'])
+        protected.add(campaign['authorization']['issuer_id'])
+        for key in ('defense', 'aid'):
+            permit = (campaign.get(key) or {}).get('authorization')
+            if permit:
+                protected.add(permit['issuer_id'])
     protected.update(str(row.get("id")) for row in [
         game.player.master, game.player.dao_companion, *game.player.dao_friends, *game.player.disciples,
     ] if row and row.get("id"))

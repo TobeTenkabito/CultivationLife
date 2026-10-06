@@ -6,7 +6,7 @@ from ...spatial_people import instance_of
 from ...system.combat.npc_lifecycle import move_world
 from ...system.heavens.definitions import VISIT_DESTINATIONS
 from ...system.heavens.state import get_echo, site_for
-from ...system.heavens import upkeep, missions, freight, migration, autonomy, frontier
+from ...system.heavens import upkeep, missions, freight, migration, autonomy, frontier, campaign
 
 
 def bind_missions(engine, ports):
@@ -75,6 +75,7 @@ def bind_missions(engine, ports):
 
     def advance(game):
         frontier.year_step(ports(), game)
+        campaign.year_step(ports(), game)
         upkeep.year_step(ports(), game)
         ports().advance_survey(game, True)
         autonomy.year_step(ports(), game)
