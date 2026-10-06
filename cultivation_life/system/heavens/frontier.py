@@ -57,6 +57,8 @@ def task_reason(deps, game, task):
     reason = deps.frontier_player_reason(game, location)
     if reason:
         return reason
+    if action == 'frontier_inquire' and game.heavens_state['runtime'].get('ruins', {}).get('ward', {}).get('component') is None:
+        return '关联阵眼尚未恢复，不能递送问讯'
     if action in {'frontier_scout', 'frontier_parley'} and not together(deps, game):
         return '先遣已离开或不能接触，不能隔空完成现场行动'
     if action == 'frontier_parley' and game.heavens_state['runtime']['ruins']['ward']['component'] is None:
@@ -215,6 +217,7 @@ def year_step(deps, game):
         if together(deps, game):
             report(game, 'sighting', '你在岚疆草原亲见一名异界先遣；可以查明来意、离开当地，或递交警讯。', now)
     elif row['phase'] == 'scouting':
+        row['landing_evidence'] = dict(world='human', location=ROUTE.destination_location, observer_id=row['person_id'], surveyed_at=now)
         phase(row, 'returning', ROUTE.crossing_years)
     elif row['phase'] == 'returning':
         deps.frontier_move(game, row, 'demon', ROUTE.source_location)

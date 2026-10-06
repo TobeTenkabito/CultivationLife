@@ -12,6 +12,11 @@ def assignment_person(echo, row):
 
 
 def deployment_assignment(game, identity):
+    campaign = game.heavens_state.get('runtime', {}).get('campaign')
+    if campaign:
+        unit = next((u for u in campaign['units'] if u['person_id'] == identity and u['phase'] not in {'home', 'lost'}), None)
+        if unit:
+            return unit
     row = game.heavens_state.get('runtime', {}).get('frontier')
     return row if row and row['status'] == 'active' and row['person_id'] == identity else None
 
@@ -31,7 +36,7 @@ def research_assignment(game, identity):
 
 def in_transit(game, identity):
     mission = research_assignment(game, identity)
-    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'returning', 'homeward'})
+    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'transport', 'returning', 'homeward'})
 
 
 def require_unassigned(game, identity):

@@ -1,7 +1,11 @@
 /* Border affairs have their own directory and one selected detail at a time. */
 (() => {
-  function render(host, frontier, ui, kit) {
+  function render(host, frontier, ui, kit, campaign) {
     const {node, title, tile, back, subview, renderActions, empty, go} = kit;
+    if (ui.target === 'lanjiang_gate') {
+      window.HeavensCampaign.render(host, campaign, ui, kit);
+      return;
+    }
     if (!ui.target) {
       title(host, '边情与战局', '从亲历的消息出发，判断是否介入一地事务。');
       const intro = node('div', null, 'heavens-frontier-intro');
@@ -11,6 +15,9 @@
       const latest = frontier.reports?.at(-1);
       tile(directory, {name: frontier.name, description: '无棣原的阵眼问讯 · 岚疆草原的有限接触',
         status: latest ? '已有亲历报告' : '尚未递送问讯', glyph: '疆', onClick: () => go('frontier', frontier.id)});
+      if (campaign?.known) tile(directory, {name: campaign.name,
+        description: '两端施工与有限输送 · 局部交锋与灵界援助', status: '已有军情', glyph: '关',
+        onClick: () => go('frontier', campaign.id)});
       host.append(directory);
       return;
     }

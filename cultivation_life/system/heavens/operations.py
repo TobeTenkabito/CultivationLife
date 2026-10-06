@@ -10,8 +10,9 @@ from .dependencies import HeavensDependencies
 from .schema import RECEIPT_LIMIT, initial_state, require_counter, validate_state, validate_references
 from .state import initialize, phase, contacts, get_echo, echo_site, current_site, site_for
 from . import tasks, mirror, ruins, omens, visits
-from . import missions, freight, migration, survey, upkeep, frontier
+from . import missions, freight, migration, survey, upkeep, frontier, campaign_actions
 from .frontier_definitions import FRONTIER_ID, FRONTIER_ACTIONS
+from .campaign_definitions import CAMPAIGN_ID, CAMPAIGN_ACTIONS
 from .definitions import MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS, SURVEY_ACTIONS, UPKEEP_ACTIONS
 
 
@@ -22,7 +23,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     requested_target = target_id
     validate_state(game.heavens_state)
     site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
-    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID} | OMEN_IDS:
+    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS:
         raise ValueError('诸天对象不可见或不存在')
     target_id = site.id if site else None
     echo = get_echo(runtime, target_id)
@@ -58,8 +59,10 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     result['omens'] = omens.project(deps, game) if deps and deps.read_omen_facts else []
     if deps and deps.frontier_player_reason:
         result['frontier'] = frontier.project(deps, game)
-    if requested_target == FRONTIER_ID:
-        result['target_id'] = FRONTIER_ID
+    if deps and deps.campaign_facts:
+        result['campaign'] = campaign_actions.project(deps, game)
+    if requested_target in {FRONTIER_ID, CAMPAIGN_ID}:
+        result['target_id'] = requested_target
     if requested_target in OMEN_IDS:
         if not any(row['id'] == requested_target for row in result['omens']):
             raise ValueError('诸天征兆尚不可见')
@@ -141,7 +144,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
                    'mirror_repair': {'material_id'}, 'mirror_release': set(),
                    'mirror_decipher': {'chamber'}, 'mirror_isolate': {'chamber', 'material_id'}, 'mirror_assault': {'chamber'}}
         allowed.update({key: {'material_id'} if key == 'ruins_replace' else set() for key in RUINS_ACTIONS})
-        allowed.update({key: set() for key in VISIT_ACTIONS | FRONTIER_ACTIONS})
+        allowed.update({key: set() for key in VISIT_ACTIONS | FRONTIER_ACTIONS | CAMPAIGN_ACTIONS})
         allowed.update({key: set() for key in MISSION_ACTIONS})
         allowed.update({key: {'material_id'} if key == 'freight_start' else set() for key in FREIGHT_ACTIONS})
         allowed.update({key: {'person_id'} if key == 'migration_start' else set() for key in MIGRATION_ACTIONS})

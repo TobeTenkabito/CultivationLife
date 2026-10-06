@@ -85,4 +85,8 @@
 #heavens-content .heavens-frontier-route span{color:var(--muted);font-size:13px}
 #heavens-content .heavens-frontier-contact{padding:20px;border:1px solid var(--line);border-radius:8px;line-height:1.8}
 #heavens-content .heavens-frontier-contact h4{font-size:20px;margin:12px 0}
+#heavens-content .heavens-frontier-contact progress{display:block;width:100%;margin:14px 0 6px;accent-color:var(--gold)}
+#heavens-content .heavens-campaign-roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+#heavens-content .heavens-campaign-roster article{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid var(--line);border-radius:8px}
+#heavens-content .heavens-campaign-roster small{color:var(--muted)}
 @media(max-width:800px){#heavens-content .heavens-primary button{font-size:13px;padding:8px 3px;white-space:nowrap}#heavens-content .heavens-frontier-intro{gap:12px;padding:8px 0 16px}#heavens-content .heavens-frontier-contact{padding:14px}}

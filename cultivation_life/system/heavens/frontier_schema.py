@@ -12,7 +12,7 @@ def validate_frontier(row, runtime):
     keys = {'id', 'revision', 'created_at', 'last_year', 'status', 'phase', 'progress', 'duration',
             'person_id', 'home', 'road', 'road_years', 'authorization', 'budget', 'source_evidence',
             'withdrawal', 'reason', 'observed', 'reported', 'reports'}
-    if type(row) is not dict or set(row) != keys or row['id'] != FRONTIER_ID or type(row['revision']) is not int or row['revision'] != 1:
+    if type(row) is not dict or set(row) - {'landing_evidence'} != keys or row['id'] != FRONTIER_ID or type(row['revision']) is not int or row['revision'] != 1:
         raise ValueError('边情字段或定义版本无效')
     for key in ('created_at', 'last_year', 'progress', 'duration', 'road_years'):
         counter(row[key])
@@ -55,6 +55,15 @@ def validate_frontier(row, runtime):
     if (not ruins.get('contact_known') or 'ruins_contact' not in ruins.get('sent_records', {})
             or ruins['sent_records']['ruins_contact']['sent_at'] > row['created_at']):
         raise ValueError('边情缺少原有阵眼接触记录')
+    landing = row.get('landing_evidence')
+    if landing is not None:
+        if (type(landing) is not dict or set(landing) != {'world','location','observer_id','surveyed_at'}
+                or landing['world'] != 'human' or landing['location'] != ROUTE.destination_location
+                or landing['observer_id'] != row['person_id']):
+            raise ValueError('先遣落点证据无效')
+        counter(landing['surveyed_at'])
+        if not row['created_at'] <= landing['surveyed_at'] <= runtime['processed_years']:
+            raise ValueError('先遣落点证据年代无效')
     authorization = row['authorization']
     if row['person_id'] is not None:
         if not isinstance(row['person_id'], str) or not row['person_id'] or not isinstance(row['home'], str) or not row['home']:
