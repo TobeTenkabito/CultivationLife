@@ -106,7 +106,7 @@ def main():
                         page.locator('[data-close-dialog=theme-dialog]').click()
                         for width in (1440,393):
                             page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
-                            for label,slug in [('见闻','home'),('诸界','worlds'),('异象','anomalies'),('行程','journey')]:
+                            for label,slug in [('见闻','home'),('诸界','worlds'),('异象','anomalies'),('行程','journey'),('战局','frontier')]:
                                 nav(label)
                                 no_other_details()
                                 assert page.locator('#heavens-body').get_attribute('data-heavens-view')==slug

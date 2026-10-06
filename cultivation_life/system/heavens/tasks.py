@@ -3,7 +3,8 @@ from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
-from . import mirror, ruins, omens, visits, missions, freight, migration, survey, upkeep
+from . import mirror, ruins, omens, visits, missions, freight, migration, survey, upkeep, frontier
+from .frontier_definitions import FRONTIER_ID
 from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS, VISIT_ACTIONS
 
 LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
@@ -15,6 +16,7 @@ LABELS.update(visits.LABELS)
 LABELS.update(missions.LABELS)
 LABELS.update(survey.LABELS)
 LABELS.update(upkeep.LABELS)
+LABELS.update(frontier.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -24,6 +26,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if frontier.handles(runtime, action, target_id):
+        return frontier.quote(deps, game, action, target_id, options)
     if action in upkeep.LABELS:
         return upkeep.quote(deps, game, action, target_id, options)
     if survey.handles(runtime, action, target_id):
@@ -140,6 +144,8 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
+    if task.get('target_id') == FRONTIER_ID:
+        return frontier.task_reason(deps, game, task)
     if task['action'] == 'survey_wait':
         return survey.actor_reason(deps, game, task['target_id'])
     if task['action'] == 'mission_wait':
@@ -173,6 +179,8 @@ def cancel(deps, game, task, *, failed=False, reason='主动取消'):
         get_echo(game.heavens_state['runtime'], task.get('target_id', 'sea_echo'))['project_stones'] += task['project_reward']
         task['project_reward'] = 0
     task['status'] = 'failed' if failed else 'cancelled'
+    if task['action'] == 'frontier_inquire':
+        frontier.close(game, 'failed' if failed else 'cancelled', game.heavens_state['runtime']['processed_years'])
     if task['action'] == 'mirror_repair':
         mirror.end_repair(game, task['status'])
     record(game, f'{LABELS[task["action"]]}结束：{reason}。保留已耗时间与投入，退还未耗托管。')
@@ -190,6 +198,10 @@ def reconcile(deps, game):
                 visit.update(status='failed', return_fare=0)
     task = active_task(runtime)
     if task:
+        if task.get('target_id') == FRONTIER_ID:
+            if not game.player.alive:
+                cancel(deps, game, task, failed=True, reason='此生已结束')
+            return
         if task['action'] in {'mission_wait', 'survey_wait'}:
             if not game.player.alive:
                 cancel(deps, game, task, failed=True, reason='此生已结束')
@@ -220,6 +232,8 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if frontier.handles(runtime, action, target_id):
+        return frontier.execute(deps, game, action, target_id, options, proposal, run_task=run_segment, cancel_task=cancel, task_result=result)
     if action in upkeep.LABELS:
         return upkeep.execute(deps, game, action, target_id, options, proposal)
     if survey.handles(runtime, action, target_id):
@@ -324,6 +338,16 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
+    if task.get('target_id') == FRONTIER_ID:
+        if task['status'] != 'failed':
+            reason = frontier.task_reason(deps, game, task)
+            if task['progress'] == task['duration'] and not reason:
+                frontier.complete(deps, game, task)
+            else:
+                task['status'] = 'paused'
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        return
     if task['action'] in {'mission_wait', 'survey_wait'}:
         if task['status'] != 'failed':
             task['status'] = 'completed' if task['progress'] == task['duration'] else 'paused'

@@ -21,6 +21,7 @@ from .heavens_ruins import bind_ruins
 from .heavens_visits import bind_visits
 from .heavens_missions import bind_missions
 from .heavens_survey import bind_survey
+from .heavens_frontier import bind_frontier
 from ...person_assignments import research_assignment
 
 
@@ -190,5 +191,6 @@ def bind_heavens(engine) -> HeavensDependencies:
         **bind_visits(engine, lambda: ports),
         **bind_missions(engine, lambda: ports),
         **bind_survey(engine, lambda: ports),
+        **bind_frontier(engine),
     )
     return ports

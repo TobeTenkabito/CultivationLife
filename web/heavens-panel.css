@@ -78,3 +78,11 @@
 .heavens-visit-route{display:flex;gap:8px;padding:0;list-style:none;margin:20px 0}
 .heavens-visit-route li{flex:1;border-bottom:2px solid var(--line);padding:8px 0;font-size:.9em}
 .heavens-visit-finding{border-left:3px solid var(--pine);padding-left:12px}
+
+#heavens-content .heavens-frontier-intro{display:flex;align-items:center;gap:20px;padding:20px 0 26px;border-bottom:1px solid var(--line);margin-bottom:12px}
+#heavens-content .heavens-frontier-intro p{max-width:36em;color:var(--muted);line-height:1.9}
+#heavens-content .heavens-frontier-route{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:22px 0;border-bottom:1px solid var(--line)}
+#heavens-content .heavens-frontier-route span{color:var(--muted);font-size:13px}
+#heavens-content .heavens-frontier-contact{padding:20px;border:1px solid var(--line);border-radius:8px;line-height:1.8}
+#heavens-content .heavens-frontier-contact h4{font-size:20px;margin:12px 0}
+@media(max-width:800px){#heavens-content .heavens-primary button{font-size:13px;padding:8px 3px;white-space:nowrap}#heavens-content .heavens-frontier-intro{gap:12px;padding:8px 0 16px}#heavens-content .heavens-frontier-contact{padding:14px}}

@@ -52,3 +52,10 @@ class HeavensDependencies:
     advance_survey: Callable | None = None
     prepare_ruins: Callable | None = None
     prepare_mirror: Callable | None = None
+
+    frontier_authority: Callable | None = None
+    frontier_candidate: Callable | None = None
+    frontier_deploy: Callable | None = None
+    frontier_player_reason: Callable | None = None
+    frontier_route_reason: Callable | None = None
+    frontier_move: Callable | None = None

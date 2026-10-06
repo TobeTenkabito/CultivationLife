@@ -11,7 +11,16 @@ def assignment_person(echo, row):
     return row.get('person_id', echo['visitor_id'])
 
 
+def deployment_assignment(game, identity):
+    row = game.heavens_state.get('runtime', {}).get('frontier')
+    return row if row and row['status'] == 'active' and row['person_id'] == identity else None
+
+
 def research_assignment(game, identity):
+    # Compatibility accessor: old consumers must also respect military occupancy.
+    deployment = deployment_assignment(game, identity)
+    if deployment:
+        return deployment
     for key in ('ruins', 'mirror'):
         survey = game.heavens_state.get('runtime', {}).get(key, {}).get('survey')
         if survey and survey['status'] == 'active' and survey['person_id'] == identity:
@@ -22,10 +31,12 @@ def research_assignment(game, identity):
 
 def in_transit(game, identity):
     mission = research_assignment(game, identity)
-    return bool(mission and mission['phase'] in {'outbound', 'returning'})
+    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'returning', 'homeward'})
 
 
 def require_unassigned(game, identity):
+    if deployment_assignment(game, identity):
+        raise ValueError('此人已有先遣部署，结束前不能另行安排关系或同行职责')
     if research_assignment(game, identity):
         raise ValueError('此人已有访学行程，返乡前不能另行安排关系或同行职责')
 
