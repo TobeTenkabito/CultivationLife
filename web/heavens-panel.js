@@ -70,7 +70,7 @@
     rows.forEach(([id,text])=>{
       const b=button(text,()=>onSelect(id));b.dataset.heavensTab=id;b.setAttribute('role','tab');
       b.id=`heavens-${kind}-${id}`;b.setAttribute('aria-selected',String(id===selected));b.tabIndex=id===selected||(!rows.some(row=>row[0]===selected)&&id===rows[0][0])?0:-1;
-      b.setAttribute('aria-controls',kind==='primary'?'heavens-body':'heavens-detail-body');
+      b.setAttribute('aria-controls',kind==='primary'?'heavens-body':kind==='chamber'?'heavens-chamber-body':'heavens-detail-body');
       b.onkeydown=event=>{
         const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(event.key))return;event.preventDefault();
         let index=rows.findIndex(row=>row[0]===id);index=event.key==='Home'?0:event.key==='End'?rows.length-1:(index+(event.key==='ArrowLeft'?-1:1)+rows.length)%rows.length;
@@ -100,8 +100,8 @@
       const costs=[];if(row.years!=null)costs.push(`${row.years} 年`);if(row.costs?.stones)costs.push(`${amount(row.costs.stones)} 灵石`);if(row.costs?.mp)costs.push(`${amount(row.costs.mp)} 法力`);if(row.material_consumed)costs.push('消耗一件阵材');
       info.append(node('h4',row.label),node('small',row.enabled?costs.join(' · '):row.reason));
       if(row.reward_stones)info.append(node('small',`履约酬劳 ${amount(row.reward_stones)} 灵石`));
-      if(['maintain','mirror_isolate','ruins_replace','freight_start'].includes(row.action)&&materials.length){
-        const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':row.action==='maintain'?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
+      if(['maintain','upkeep_start','mirror_isolate','ruins_replace','freight_start'].includes(row.action)&&materials.length){
+        const select=node('select');select.setAttribute('aria-label',row.action==='freight_start'?'托运阵材':['maintain','upkeep_start'].includes(row.action)?'维护阵材':row.action==='ruins_replace'?'替换阵芯所用阵材':`第 ${Number(options.chamber)+1} 处隔断阵材`);
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
@@ -209,6 +209,7 @@
       if(section==='practice'&&e)body.append(node('p',`本周期实际增益 ${amount(e.reward_claimed)}${e.reward_base?' · 上限基准 '+amount(e.reward_base):''}`),node('small','登记后在当地正常修炼时应用，维护后的再次参悟共用周期上限。'));
       const allowed={research:['observe','check_history'],cooperate:['exchange','correspond'],practice:['attune','maintain']}[section];
       renderActions(body,(h.actions||[]).filter(row=>allowed.includes(row.action)),h.materials||[]);
+      if(section==='practice')body.append(button('查看托管护持',()=>go('journey',selected.id,'upkeep')));
       if(section==='practice'&&h.registered_application?.target_id===selected.id)renderApplication(body,h.registered_application);
     });
   }
@@ -252,30 +253,34 @@
     if(!selected){
       title(host,'异象行旅','从真实地点进入一处异象，沿原路返回。每处机关与所得都将保留。');
       const list=node('div',null,'heavens-directory');
-      for(const row of entries)tile(list,{name:row.name,description:row.entry,status:row.inside?'身处其中':row.known?'可重访':'元婴起可进入',glyph:row.id==='mirror_field'?'镜':'因',onClick:()=>openTarget(row.id)});
+      for(const row of entries)tile(list,{name:row.name,description:row.entry,status:row.inside?'身处其中':row.capacity_pending?'已知入口':row.known?'可重访':'元婴起可进入',glyph:row.id==='mirror_field'?'镜':'因',onClick:()=>openTarget(row.id)});
       host.append(list);return;
     }
     back(host,'返回异象','anomalies');
     const box=node('section',null,'heavens-object');if(selected.id==='mirror_field')box.dataset.mirror='field';else box.dataset.ruins='field';
     host.append(box);const heading=node('div',null,'heavens-object-heading');title(heading,selected.name);box.append(heading);
     const leave=selected.actions.find(row=>row.action.endsWith('_leave'));if(leave){const b=button(leave.label,()=>propose(leave.action,leave.target_id),!leave.enabled||Boolean(pending));b.className='heavens-exit';heading.append(b);}
-    box.append(node('p',`${selected.entry} · ${selected.inside?'身处其中':selected.known?'可重访':'元婴起可进入'}`,'heavens-lead'));
+    box.append(node('p',`${selected.entry} · ${selected.inside?'身处其中':selected.capacity_pending?'已知入口':selected.known?'可重访':'元婴起可进入'}`,'heavens-lead'));
     if(leave&&!leave.enabled)box.append(node('small',leave.reason));
     if(!selected.inside){
-      const entry=body=>{body.append(node('p',selected.description));renderActions(body,selected.actions.filter(row=>row.action.endsWith('_enter')));};
-      if(selected.id==='causal_ruins'&&selected.known&&selected.survey)subview(box,[['entrance','入口'],['survey','同勘']],'entrance',(body,section)=>section==='survey'?renderSurvey(body,selected):entry(body));
+      const entry=body=>{body.append(node('p',selected.description));if(selected.capacity_pending)body.append(node('p','你尚未入场，镜储上限将在首次亲自入场时按当时法力上限的 25% 固定；之后重访不再改变。'));renderActions(body,selected.actions.filter(row=>row.action.endsWith('_enter')));};
+      if(selected.known&&selected.survey)subview(box,[['entrance','入口'],['survey','同勘']],'entrance',(body,section)=>section==='survey'?renderSurvey(body,selected):entry(body));
       else entry(box);
       return;
     }
     if(selected.id==='mirror_field')renderMirror(box,selected);else renderRuins(box,selected);
   }
   function renderMirror(host,m) {
+    subview(host,[['mechanisms','机关'],['survey','同勘']],'mechanisms',(body,section)=>section==='survey'?renderSurvey(body,m):renderMirrorMechanisms(body,m));
+  }
+  function renderMirrorMechanisms(host,m) {
+    if(m.survey?.shared)host.append(node('p',m.survey.benefit));
     if(!m.probed){host.append(node('blockquote','镜纹随施术明灭。先低耗试探，确认机关的收集规律。','heavens-finding'));renderActions(host,m.actions.filter(row=>row.action==='mirror_probe'));return;}
     const facts=node('div',null,'heavens-facts');facts.append(badge(`镜储 ${amount(m.stored_mana)} / ${amount(m.mana_capacity)}`),badge(`已解开 ${m.chambers.filter(c=>c.opened).length} / 3`));host.append(facts);
     const meter=node('meter');meter.min=0;meter.max=m.mana_capacity;meter.value=m.stored_mana;meter.setAttribute('aria-label','当前镜储');host.append(meter);
     const choices=m.chambers.map(c=>[String(c.index),`${['一','二','三'][c.index]} · ${c.opened?'已解开':c.isolated?'已隔断':'机关'}`]);
     tabs(host,choices,String(ui.chamber),id=>{ui.chamber=Number(id);render(current,ctx);document.getElementById(`heavens-chamber-${id}`)?.focus();},'选择镜律机关','chamber');
-    const chamber=m.chambers[ui.chamber],body=node('div',null,'heavens-detail-body');body.id='heavens-detail-body';body.dataset.mirrorChamber=String(chamber.index);body.setAttribute('role','tabpanel');body.setAttribute('aria-labelledby',`heavens-chamber-${chamber.index}`);host.append(body);
+    const chamber=m.chambers[ui.chamber],body=node('div',null,'heavens-detail-body');body.id='heavens-chamber-body';body.dataset.mirrorChamber=String(chamber.index);body.setAttribute('role','tabpanel');body.setAttribute('aria-labelledby',`heavens-chamber-${chamber.index}`);host.append(body);
     if(chamber.opened){body.append(node('p',chamber.reward?`已领取：${chamber.reward}`:'已取得镜律规律记录。'));body.append(node('small','此处机关已解开，重访不会重复领取所得。'));}
     else {body.append(node('p',chamber.isolated?'此处联系已隔断，后续施术不再供给这处机关。':'可投入法力破解、消耗阵材隔断，或按当前战斗预案强攻。'));renderActions(body,m.actions.filter(row=>row.options.chamber===String(chamber.index)),m.materials);}
     if(chamber.guardian)body.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守护快照与损伤保留。`));
@@ -307,17 +312,18 @@
   }
   function renderSurvey(host,r) {
     const s=r.survey;if(!s)return;
+    const place=s.exit||(r.id==='mirror_field'?'穆陵沙漠':'无棣原');
     host.dataset.survey=s.status;
-    if(s.status==='unmet'){empty(host,'尚未遇到同行者','可继续亲自调查，在遗址中留意真实来访者。');return;}
+    if(s.status==='unmet'){empty(host,'尚未遇到同行者','可继续亲自调查，在场域中留意真实来访者。');return;}
     if(s.status==='unavailable'){
       title(host,'结伴同勘','邀一位相熟居民自行观察、抄录，归来后当面交流。');
-      host.append(node('p','先亲自踏勘遗址，再返回无棣原邀约。可选择人界自由、无其他职责、交情至少 20 的四至五阶居民；每座遗址安排一次。'));
+      host.append(node('p',`先亲自踏勘，再返回${place}邀约。可选择人界自由、无其他职责、交情至少 20 的四至五阶居民；每座异象安排一次，同时进行一项。`));
       const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','勘察安排');
       for(const text of ['赴约 · 外界 2 年','观察与抄录 · 空间 8 年','原路退出 · 空间 1 年'])route.append(node('li',text));
       host.append(route);
       if(!s.candidates.length)host.append(node('small','目前没有符合条件的相熟居民。'));
     }else{
-      title(host,s.name,({active:'正在勘察',completed:'已返回无棣原',cancelled:s.autonomous?'自行结束探访':'邀约已撤销',failed:'勘察已终止'})[s.status]);
+      title(host,s.name,({active:'正在勘察',completed:`已返回${place}`,cancelled:s.autonomous?'自行结束探访':'邀约已撤销',failed:'勘察已终止'})[s.status]);
       if(s.autonomous)host.append(node('p',`自行探访 · 交情 ${s.affinity??0}`),node('small','对方自行发现旧路并出发。交换笔记或商请返程须当面相谈且交情至少 20，可前往交往页增进了解。'));
       if(s.autonomous&&(current.world_npcs||[]).some(n=>n.id===s.person_id&&n.perceived_alive))host.append(button('前往交往页交流',()=>{
         if(window.NpcContacts?.open(s.person_id))window.UtilityPanels?.open('relationship');
@@ -325,10 +331,10 @@
       const phase=({outbound:s.autonomous?'寻访旧路':'赴约',studying:'观察与抄录',returning:'原路退出'})[s.phase];
       host.append(node('p',`${phase} · ${s.progress} / ${s.duration} 年`));
       const progress=node('progress');progress.max=s.duration;progress.value=s.progress;progress.setAttribute('aria-label','勘察阶段进度');host.append(progress);
-      host.append(node('p',s.shared?'已当面交换笔记，亲自读取缩短为 3 年。':s.learned?'本人已有完整笔记，可在遗址内或无棣原当面交换。':s.observed?'本人已看懂阵纹，正在抄录。':'本人尚未完成观察。'));
+      host.append(node('p',s.shared?`已当面交换笔记，${s.benefit}`:s.learned?`本人已有完整笔记，可在场域内或${place}当面交换。`:s.observed?'本人已完成观察，正在整理笔记。':'本人尚未完成观察。'));
       if(s.blocked_reason)host.append(node('p',s.blocked_reason,'heavens-visit-finding'));
     }
-    host.append(node('small','入场后只随同一遗址的空间年度行动；你离开时内部冻结，外界年月不补算。本人会真实衰老，抄录不会自动交给你。'));
+    host.append(node('small','入场后只随同一场域的空间年度行动；你离开时内部冻结，外界年月不补算。本人会真实衰老，笔记不会自动交给你。'));
     renderActions(host,s.actions.filter(a=>s.status==='unavailable'?a.action==='survey_start':a.action==='survey_share'&&s.learned&&!s.shared||s.status==='active'&&(a.action==='survey_wait'||a.action==='survey_recall'&&s.phase!=='returning')),[],s.candidates);
   }
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
@@ -362,10 +368,41 @@
     }
     renderActions(host,m.actions.filter(a=>m.status==='unavailable'?a.action==='migration_start':a.action==='mission_wait'||a.action==='migration_cancel'&&m.status==='active'&&m.phase==='outbound'),[],m.candidates);
   }
+  function renderUpkeep(host,h) {
+    const rows=h.upkeeps||[],selected=rows.find(u=>u.target_id===ui.target);
+    const labels={unavailable:'可查看部署条件',active:'供能中',completed:'已完成',cancelled:'已终止',expired:'窗口已结束',failed:'已结清'};
+    if(!selected){
+      host.append(node('p','选择一处求道节点，为后续维护预留经费。设施只执行已授权的有限护持。'));
+      const list=node('div',null,'heavens-directory');
+      for(const u of rows)tile(list,{name:u.name,description:'当地阵材设施 · 有限供能',status:labels[u.status],glyph:'护',onClick:()=>go('journey',u.target_id,'upkeep')});
+      host.append(list);return;
+    }
+    host.append(button('‹ 返回护持目录',()=>go('journey',null,'upkeep')));
+    if(h.target_id!==selected.target_id){
+      if(loadError)host.append(node('p',loadError),button('重新读取护持',()=>{loadError=null;selectSite(selected.target_id);render(current,ctx);}));
+      else {host.append(node('p','正在读取护持安排…'));if(!loadingKey)selectSite(selected.target_id);}
+      return;
+    }
+    const u=h.upkeep;if(!u)return;
+    host.dataset.upkeep=u.status;
+    title(host,selected.name,labels[u.status]);
+    if(u.status==='unavailable'){
+      host.append(node('p',`在当地完成当期体察并取得合法抄录后，可预留 ${amount(u.budget)} 灵石、一件本界九阶阵材及法力上限的 5%，由设施完成 ${u.duration} 个外界年的维护。`),node('p',`完成后取得本周期 ${u.extension_years} 年维护余韵与第二次参悟名额，仍共用原参悟收益上限。`));
+    }else{
+      host.append(node('p',`供能进度 ${u.progress} / ${u.duration} 年`));
+      const bar=node('progress');bar.max=u.duration;bar.value=u.progress;bar.setAttribute('aria-label','护持供能进度');host.append(bar);
+      host.append(node('p',`已耗 ${amount(u.escrow.spent)} · 托管尚存 ${amount(u.remaining)} · 已退 ${amount(u.escrow.refunded)} 灵石`),node('small',`已安装：${u.material.name||u.material.material_id}；部署法力与安装阵材不退还。`));
+      if(u.status==='active')host.append(node('p',`距离本期护持截止尚有 ${u.deadline_remaining} 年；独立空间内度过的年份也计入期限。`));
+      if(u.status==='completed')host.append(node('p',u.effective?'本周期维护已生效；亲自维护不会再增加名额或收益上限。':'此前护持已完成，维护余韵不跨周期延续。'));
+    }
+    host.append(node('small','每处联系仅一次部署，与亲自维护共用当期名额。外界年度供能，独立空间冻结且不补算；窗口过期或此生结束自动结清。可在任意地点终止后续托管，退回未耗经费。'));
+    renderActions(host,u.actions.filter(a=>u.status==='unavailable'?a.action==='upkeep_start':u.status==='active'&&a.action==='upkeep_cancel'),u.materials);
+  }
   function renderJourney(host,h) {
     title(host,'行程与纪要','查看亲自参与的事务，回顾已有认识。');
-    subview(host,[['active','进行中'],['people','同道'],['cargo','货运'],['migration','迁居'],['history','纪要']],'active',(body,section)=>{
+    subview(host,[['active','进行中'],['people','同道'],['cargo','货运'],['migration','迁居'],['upkeep','护持'],['history','纪要']],'active',(body,section)=>{
       if(section==='migration'){renderMigration(body,h);return;}
+      if(section==='upkeep'){renderUpkeep(body,h);return;}
       if(section==='cargo'){
         const rows=h.freights||[];
         if(!rows.length){empty(body,'尚无货运委托','同道完成回访后，可在原联系的“运材”页登记一件阵材。');return;}
@@ -387,8 +424,10 @@
         const pager=node('div',null,'heavens-inline');pager.append(button('上一页',()=>{ui.historyPage--;render(current,ctx);},ui.historyPage===0),node('small',`${ui.historyPage+1} / ${pages}`),button('下一页',()=>{ui.historyPage++;render(current,ctx);},ui.historyPage===pages-1));body.append(pager);return;
       }
       const task=activeTask(h);
-      const survey=h.ruins?.survey;
-      if(survey?.status==='active'){const row=node('article',null,'heavens-task');row.append(node('h4',`${survey.name} · 遗址同勘`),node('p',survey.phase==='outbound'?'正在赴约入场。':'本人留在遗址中，只随该空间年度行动。'),button('查看同勘',()=>{openTarget('causal_ruins');ui.section='survey';render(current,ctx);}));body.append(row);}
+      const facilities=(h.upkeeps||[]).filter(u=>u.status==='active');
+      if(facilities.length)body.append(button(`${facilities.length} 处托管护持进行中 · 查看`,()=>go('journey',null,'upkeep')));
+      const surveys=[h.ruins,h.mirror].filter(a=>a?.survey?.status==='active');
+      for(const anomaly of surveys){const survey=anomaly.survey,row=node('article',null,'heavens-task');row.append(node('h4',`${survey.name} · ${anomaly.name}同勘`),node('p',survey.phase==='outbound'?'正在赴约入场。':'本人留在场域中，只随该空间年度行动。'),button('查看同勘',()=>{openTarget(anomaly.id);ui.section='survey';render(current,ctx);}));body.append(row);}
       const away=(h.visits||[]).filter(v=>v.status==='visiting');
       for(const v of away){const row=node('article',null,'heavens-task');row.append(node('h4',`访学 · ${v.destination_name}`),node('p',v.studied?'现场研读已完成，可循约返程。':'已抵达，可研读或提前返程。'),button('查看访学与返程',()=>{openTarget(v.target_id);ui.section='visit';render(current,ctx);}));body.append(row);}
       if(task){
@@ -397,7 +436,7 @@
         const controls=node('div',null,'heavens-inline');controls.append(button('继续任务',()=>propose('resume',task.id),Boolean(pending)),button('取消任务',()=>propose('cancel',task.id),Boolean(pending)),button('查看对象',()=>openTarget(task.target_id)));row.append(controls,node('small','取消前会显示可退还的未耗投入，已付法力与已耗材料不退。'));body.append(row);
       }
       if(h.registered_application)renderApplication(body,h.registered_application);
-      if(!task&&!h.registered_application&&!away.length&&survey?.status!=='active')empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
+      if(!task&&!h.registered_application&&!away.length&&!surveys.length&&!facilities.length)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
     });
   }
   function renderSettings(host,h) {

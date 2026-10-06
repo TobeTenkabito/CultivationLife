@@ -12,9 +12,10 @@ def assignment_person(echo, row):
 
 
 def research_assignment(game, identity):
-    survey = game.heavens_state.get('runtime', {}).get('ruins', {}).get('survey')
-    if survey and survey['status'] == 'active' and survey['person_id'] == identity:
-        return survey
+    for key in ('ruins', 'mirror'):
+        survey = game.heavens_state.get('runtime', {}).get(key, {}).get('survey')
+        if survey and survey['status'] == 'active' and survey['person_id'] == identity:
+            return survey
     return next((mission for echo, mission in research_assignments(game)
                  if assignment_person(echo, mission) == identity and mission['status'] == 'active'), None)
 

@@ -2,6 +2,7 @@
 from ...rules import max_mp
 from ...system import spatial
 from ...system.heavens.definitions import MIRROR_ID
+from ...system.heavens import survey
 from ...system.formation_system import make_formation_material_instance
 from ..actions.exploration import move_world
 
@@ -44,7 +45,7 @@ def bind_mirror(engine):
             result.append(material)
         return result
 
-    def enter(game, mirror, rng):
+    def prepare(game, mirror):
         state = spatial.ensure(game)
         scene = state['instances'].get(mirror['scene_id'])
         if scene is None:
@@ -57,9 +58,19 @@ def bind_mirror(engine):
                 visits=0, explored=0, power_ceiling=None, resource_ceiling=None,
                 power_description='有限机关场域。', resource_description='所得仅来自三处已登记机关，不生成随机战利品。')
             state['instances'][scene['id']] = scene
+        return scene
+
+    def enter(game, mirror, rng):
+        state = spatial.ensure(game)
+        scene = prepare(game, mirror)
+        if mirror.pop('capacity_pending', False):
+            mirror['mana_capacity'] = max_mp(game.player) * mirror['definition']['capacity_fraction']
+        if 'player_known' in mirror:
+            mirror['player_known'] = True
         state['current'] = scene['id']
         scene['visits'] += 1
         move_world(engine._exploration_dependencies(), game, 'rift', rng)
+        survey.reveal(engine._dependencies.heavens, game, target=MIRROR_ID)
 
     def leave(game, mirror, rng):
         spatial.ensure(game)['current'] = None
@@ -81,4 +92,4 @@ def bind_mirror(engine):
         wounds = max(guardian['wounds'], member.get('wounds', 0), min(4, int((1-report.get('enemy_hp_ratio', 1))*4)))
         return result, summary, wounds
 
-    return dict(read_mirror_facts=facts, mirror_materials=materials, enter_mirror=enter, leave_mirror=leave, fight_mirror=fight)
+    return dict(read_mirror_facts=facts, mirror_materials=materials, enter_mirror=enter, leave_mirror=leave, fight_mirror=fight, prepare_mirror=prepare)

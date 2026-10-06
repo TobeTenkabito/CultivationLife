@@ -7,6 +7,7 @@ MIRROR_ACTIONS = frozenset({'mirror_enter', 'mirror_leave', 'mirror_probe', 'mir
 RUINS_ID = 'causal_ruins'
 RUINS_ACTIONS = frozenset('ruins_' + name for name in ('enter', 'leave', 'observe', 'verify', 'read', 'take', 'replace', 'erase', 'contact', 'return'))
 VISIT_ACTIONS = frozenset({'visit_depart', 'visit_study', 'visit_return'})
+UPKEEP_ACTIONS = frozenset({'upkeep_start', 'upkeep_cancel'})
 SURVEY_ACTIONS = frozenset({'survey_start', 'survey_recall', 'survey_share', 'survey_wait'})
 MIGRATION_ACTIONS = frozenset({'migration_start', 'migration_cancel'})
 FREIGHT_ACTIONS = frozenset({'freight_start', 'freight_cancel', 'freight_collect'})
@@ -14,7 +15,7 @@ MISSION_ACTIONS = frozenset({'mission_start', 'mission_recall', 'mission_wait'})
 VISIT_DESTINATIONS = {'sea_echo': 'reincarnation_echo', 'asura_echo': 'sea_echo',
                       'nether_echo': 'asura_echo', 'reincarnation_echo': 'nether_echo'}
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS | UPKEEP_ACTIONS
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,7 +202,7 @@ class SeaEchoDefinition:
 
 @dataclass(frozen=True, slots=True)
 class HeavensDefinitions:
-    milestone: str = 'M2-autonomy'
+    milestone: str = 'M2-upkeep'
     generation_available: bool = False
     sea_echo: SeaEchoDefinition = field(default_factory=SeaEchoDefinition)
     contact_sites: tuple[ContactSite, ...] = CONTACT_SITES

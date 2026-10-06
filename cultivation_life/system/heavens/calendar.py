@@ -1,6 +1,6 @@
 """One explicit hook after the existing ordinary or isolated world year."""
 from dataclasses import dataclass
-from . import ruins, omens
+from . import ruins, omens, upkeep
 from hashlib import sha256
 
 from .state import create_echo, phase, record, visible_notice, contacts, echo_site, current_site, get_echo
@@ -41,6 +41,7 @@ def year_step(deps, game, context: YearContext):
                         applications_used=0, reward_base=None, reward_claimed=0.0, application=None)
             record(game, f'{echo_site(echo).name}进入下一周期。旧记和合法抄录仍在，应用前须重新体察当期现象。')
         # Existing tasks still close when generation is switched off.
+    upkeep.reconcile(deps, game)
     deps.reconcile_tasks(game)
     window = now // 100 - 1
     if window <= runtime['last_discovery_window']:
