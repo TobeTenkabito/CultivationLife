@@ -3,7 +3,7 @@ from fractions import Fraction
 
 from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
-from . import mirror, ruins, omens, visits, missions, freight, migration, survey
+from . import mirror, ruins, omens, visits, missions, freight, migration, survey, upkeep
 from .definitions import MIRROR_ID, RUINS_ID, OMEN_IDS, VISIT_ACTIONS
 
 LABELS = {'observe': '体察本地现象', 'check_history': '查证旧碑', 'exchange': '对照抄录',
@@ -14,6 +14,7 @@ LABELS.update(omens.LABELS)
 LABELS.update(visits.LABELS)
 LABELS.update(missions.LABELS)
 LABELS.update(survey.LABELS)
+LABELS.update(upkeep.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -23,6 +24,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if action in upkeep.LABELS:
+        return upkeep.quote(deps, game, action, target_id, options)
     if survey.handles(runtime, action, target_id):
         return survey.quote(deps, game, action, target_id, options)
     if action in migration.LABELS:
@@ -138,7 +141,7 @@ def deadline(runtime, echo):
 
 def task_reason(deps, game, task):
     if task['action'] == 'survey_wait':
-        return survey.actor_reason(deps, game)
+        return survey.actor_reason(deps, game, task['target_id'])
     if task['action'] == 'mission_wait':
         return missions.wait_reason(deps, game)
     if task['action'] in VISIT_ACTIONS:
@@ -215,6 +218,8 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if action in upkeep.LABELS:
+        return upkeep.execute(deps, game, action, target_id, options, proposal)
     if survey.handles(runtime, action, target_id):
         return survey.execute(deps, game, action, target_id, options, run_task=run_segment, cancel_task=cancel, task_result=result)
     if action in migration.LABELS:

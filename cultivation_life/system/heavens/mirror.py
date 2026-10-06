@@ -23,21 +23,24 @@ def handles(runtime, action, target_id):
             and target_id == task['id'] and task.get('target_id') == MIRROR_ID)
 
 
-def create(deps, game):
+def create(deps, game, *, known=True, year=None):
     runtime = game.heavens_state['runtime']
     identity = 'heavens-mirror-' + sha256(f'{game.id}:{game.seed}:mirror:v1'.encode()).hexdigest()[:20]
     definition = asdict(deps.get_definitions().mirror)
     materials = deps.mirror_materials(game, identity)
     mirror = dict(id=MIRROR_ID, definition=definition, scene_id=identity,
-                  created_year=runtime['processed_years'], probed=False,
-                  mana_capacity=deps.read_mirror_facts(game)['max_mp'] * definition['capacity_fraction'],
+                  created_year=runtime['processed_years'] if year is None else year, probed=False,
+                  mana_capacity=deps.read_mirror_facts(game)['max_mp'] * definition['capacity_fraction'] if known else 0.0,
                   paid_mana=0.0, collected_mana=0.0, stored_mana=0.0,
                   record_acquired=False, chambers=[dict(opened=False, isolated=False,
                       guardian=None, reward=materials[index] if index < 2 else None)
                       for index in range(3)], traces=[])
     runtime['mirror'] = mirror
     game.heavens_state['definition_versions'][MIRROR_ID] = definition['revision']
-    record(game, '穆陵沙漠的镜纹通往镜律场域；入口有稳定退路，施术可能被镜阵收集。')
+    if known:
+        record(game, '穆陵沙漠的镜纹通往镜律场域；入口有稳定退路，施术可能被镜阵收集。')
+    else:
+        mirror.update(player_known=False, capacity_pending=True)
     return mirror
 
 
@@ -119,7 +122,8 @@ def quote(deps, game, action, target_id, options):
     mp = facts['max_mp'] * definition['mana_fraction'] if action in {'mirror_probe', 'mirror_decipher'} else 0
     if facts['mp'] < mp:
         raise ValueError('法力不足；已付法力不会因取消或重访返还')
-    return dict(years=definition[f'{key}_years'], costs=dict(stones=0, mp=mp, material_id=options.get('material_id')),
+    years = 2 if action == 'mirror_decipher' and mirror.get('survey', {}).get('shared') else definition[f'{key}_years']
+    return dict(years=years, costs=dict(stones=0, mp=mp, material_id=options.get('material_id')),
                 refundable={}, deadline=None, chamber=chamber, material_consumed=action == 'mirror_isolate',
                 warning=('强攻将使用当前战斗预案，可能负伤或死亡；后续机关可能获得本次实付法力供给。'
                          if action == 'mirror_assault' else '登记施术实付法力会被未隔断的镜阵收集；不会获得普通修炼机缘。'))
@@ -212,13 +216,14 @@ def complete(deps, game, task, rng):
 def project(deps, game):
     mirror = get(game)
     facts = deps.read_mirror_facts(game)
+    known = bool(mirror and mirror.get('player_known', True))
     value = dict(id=MIRROR_ID, name='镜律场域', entry='人界 · 穆陵沙漠', inside=facts['inside'],
-                 known=mirror is not None, probed=bool(mirror and mirror['probed']), actions=[],
+                 known=known, probed=bool(known and mirror['probed']), actions=[],
                  description='镜纹随施术明灭，三处机关共享有限供给。入口保留退路；每处所得只归属一次。',
                  materials=deps.quote_materials(game, MIRROR_ID))
     candidates = [('mirror_leave' if facts['inside'] else 'mirror_enter', {})]
-    if mirror:
-        value.update(record_acquired=mirror['record_acquired'], traces=copy.deepcopy(mirror['traces']),
+    if known:
+        value.update(capacity_pending=mirror.get('capacity_pending', False), record_acquired=mirror['record_acquired'], traces=copy.deepcopy(mirror['traces']),
                      chambers=[dict(index=i, opened=row['opened'], isolated=row['isolated'],
                          guardian=copy.deepcopy(row['guardian']),
                          reward=row['reward']['name'] if row['opened'] and row['reward'] else None)
