@@ -8,6 +8,7 @@ from ..models import HistoryRecord
 from ..rules import remove_item, effective_fame
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..time_dependencies import TeleportDependencies
+from .heavens.local_control import arrival_notice
 
 def separated(maps, world, origin, destination):
     return origin != destination and destination not in {node for node, _ in maps._graphs[world][origin]}
@@ -122,6 +123,7 @@ def teleport_action(deps: TeleportDependencies, game_id, action, destination=Non
                 p.teleport_passes[permission]['used'] = True
             method = {'travel': '', 'bribe': '买通守阵人偷渡，', 'assassinate': '暗杀守阵人偷渡，', 'forge':'凭伪造通行证偷渡，', 'temporary':'凭单次临时通行证，'}[action]
             summary = f"{method}瞬息抵达{deps.maps.location(p.world, destination)['name']}，不增加年龄。{exposure}"
+            summary += arrival_notice(game)
         else:
             summary = f"伪造通行证被识破，留在原地，材料费用已消耗。{exposure}"
     else:

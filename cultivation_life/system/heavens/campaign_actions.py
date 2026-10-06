@@ -2,6 +2,7 @@
 import copy
 
 from . import campaign
+from . import settlement, settlement_actions
 from .campaign_definitions import (CAMPAIGN_ID, CAMPAIGN_ACTIONS, LABELS, DURATIONS, SOURCE,
                                   TARGET_SITE, REPORT_SITE, AID_BUDGET, BUILD_YEARS)
 from .campaign_logistics import located, retreat
@@ -29,6 +30,8 @@ def task_reason(deps, game, task):
     row = campaign.get(game)
     if not row:
         return '尚未收到军事施工情报'
+    if reason := settlement_actions.reason(deps, game, row, task):
+        return reason
     if action in {'campaign_assault', 'campaign_capture'}:
         actual = guards(deps, game)
         if not actual or task.get('person_id') and task['person_id'] not in {u['person_id'] for u in actual}:
@@ -67,9 +70,22 @@ def quote(deps, game, action, target, options):
             raise ValueError('须先递交真实守备报告')
         if row['aid'] is not None:
             raise ValueError('本次有限援助已经作出选择，不会刷新物资')
-    return dict(years=DURATIONS[action], costs={}, refundable={},
-                message='仅在实际所在地执行个人行动。击退不等于占领；援助不附带军队指挥权。',
-                warning='这是实际交锋，可能负伤、受控或陨落。' if action in {'campaign_assault', 'campaign_capture'} else '')
+    years = deps.campaign_escape_plan(game)['years'] if action == 'campaign_evacuate' else DURATIONS[action]
+    message = '仅在实际所在地执行个人行动。击退不等于占领；援助不附带军队指挥权。'
+    if action in {'campaign_relief', 'campaign_release'}:
+        unit = settlement_actions.patient(deps, game, row, captive=action == 'campaign_release')
+        name = deps.campaign_facts(game, unit)['name']
+        message = f'当面处理原人物{name}：' + ('解除你对其拘禁，保留伤势并准其实际返乡。' if action == 'campaign_release' else '两年救护减轻一重伤势，每人仅有一次。')
+    elif action in {'campaign_truce', 'campaign_vassal', 'campaign_withdrawal'}:
+        message = '仅约束岚疆与双方原部署；双方具名代表依各自委任签署。失去履约条件即终止地方保障，原撤离许可保留。'
+    elif action == 'campaign_evacuate':
+        message = '沿本界实际道路前往无棣原；途中可因事件暂停。不会搬迁军队、带走他人或转移地点归属。'
+    warning = '这是实际交锋，可能负伤、受控或陨落。' if action in {'campaign_assault', 'campaign_capture'} else ''
+    if warning and settlement.treaty_active(row):
+        warning += '当前已有地方协议，动武将使其保障中止。'
+    return dict(years=years, costs={}, refundable={},
+                message=message,
+                warning=warning)
 
 
 def execute(deps, game, action, target, options, proposal, *, run_task, cancel_task, task_result):
@@ -84,6 +100,8 @@ def execute(deps, game, action, target, options, proposal, *, run_task, cancel_t
             return task_result(task)
     else:
         opponent = guards(deps, game)[-1]['person_id'] if action in {'campaign_assault', 'campaign_capture'} else None
+        if action in {'campaign_relief', 'campaign_release'}:
+            opponent = settlement_actions.patient(deps, game, campaign.get(game), captive=action == 'campaign_release')['person_id']
         task = dict(id=f'heavens-task-{runtime["next_task_seq"]}', action=action, target_id=CAMPAIGN_ID,
                     status='reserved', cycle=0, progress=0, duration=proposal['years'], person_id=opponent,
                     escrow=dict(total=0, spent=0, refunded=0, material=None, mp_paid=0))
@@ -97,7 +115,9 @@ def complete(deps, game, task, rng):
     row = campaign.get(game)
     now, action = game.heavens_state['runtime']['processed_years'], task['action']
     task['status'] = 'completed'
-    if action == 'campaign_scout':
+    if action in settlement_actions.LABELS:
+        settlement_actions.complete(deps, game, row, task, now, campaign.withdraw, campaign.report)
+    elif action == 'campaign_scout':
         row['surveyed'] = True
         for unit in row['units']:
             if located(deps, game, unit, 'human', TARGET_SITE):
@@ -111,6 +131,9 @@ def complete(deps, game, task, rng):
         campaign.report(game, 'defense', '天剑宗已收到守备请求，' + ('批准一位门人循本界道路护守岚疆。玩家未获征发全宗的权限。' if row['defense']['status'] == 'approved' else '现有权限或可用人物不足，未派出守军。'), now)
     elif action in {'campaign_assault', 'campaign_capture'}:
         result, summary = deps.campaign_fight(game, task['person_id'], action == 'campaign_capture', rng)
+        if settlement.treaty_active(row):
+            row['settlement']['treaty']['status'] = 'lapsed'
+            campaign.withdraw(row, '签约后发生个人袭击，地方保障中止，按原许可撤回')
         unit = next(u for u in row['units'] if u['person_id'] == task['person_id'])
         facts = deps.campaign_facts(game, unit)
         unit['observed'] = True
@@ -149,11 +172,12 @@ def project(deps, game):
         return result
     result['reports'] = copy.deepcopy(row['reports'])
     result['local'] = campaign.local(deps, game, TARGET_SITE)
+    result['settlement'] = settlement.public(deps, game, row)
     if result['local'] and row['surveyed']:
         result['gate'] = dict(state=row['gate']['state'], target_progress=row['gate']['target_progress'],
                               duration=BUILD_YEARS, stability=row['gate']['stability'])
         result['people'] = [dict(id=u['person_id'], name=deps.campaign_facts(game, u)['name'],
-                                side='守备' if u['faction_id'] != SOURCE else '来犯')
+                                side='本地守备' if u['faction_id'] != SOURCE else '来方驻守')
                             for u in row['units'] if u['observed'] and located(deps, game, u, 'human', TARGET_SITE)]
     if row['aid']:
         # Public application facts are kept; distant transport clocks and offices are not.

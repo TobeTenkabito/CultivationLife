@@ -6,6 +6,7 @@ from .campaign_definitions import (CAMPAIGN_ID, SOURCE, DEFENDER, DONOR, SOURCE_
     ROUTE_ID, EVAC_ROUTE, AID_ROUTE, AID_BUDGET, AID_COST, DEFENSE_BUDGET, TERMINAL_UNITS)
 from .campaign_logistics import phase, stationed, located, retreat, advance_unit, advance_transport
 from .state import record
+from . import settlement
 
 
 def get(game):
@@ -65,6 +66,7 @@ def start(deps, game, now):
     game.heavens_state['definition_versions'][CAMPAIGN_ID] = 1
     for unit in row['units']:
         deps.campaign_deploy(game, unit)
+    settlement.delegate(deps, game, row, SOURCE, now)
     if recon['reported']:
         row['defense_requested'] = True
         request_defense(deps, game, now)
@@ -84,6 +86,7 @@ def request_defense(deps, game, now):
     for unit in plan['units']:
         deps.campaign_deploy(game, unit)
         row['units'].append(unit)
+    settlement.delegate(deps, game, row, DEFENDER, now)
 
 
 def request_aid(deps, game, now):
@@ -193,6 +196,8 @@ def observe(deps, game, row, now):
 
 
 def battles(deps, game, row, now):
+    if settlement.treaty_active(row):
+        return
     if now-row['last_battle'] < 8 or len(row['battles']) >= 6:
         return
     attacker, defender = stationed(deps, game, row, 'soldier'), stationed(deps, game, row, 'defender')
@@ -222,7 +227,9 @@ def year_step(deps, game):
         return
     row['last_year'] = now
     advance_aid(deps, game, row, now)
+    settlement.before_year(deps, game, row, now, withdraw)
     if row['status'] in {'withdrawn', 'failed'}:
+        settlement.after_year(deps, game, row, now, withdraw)
         return
     if row['status'] == 'active' and runtime['frontier']['reported'] and not row['defense_requested']:
         row['defense_requested'] = True
@@ -271,3 +278,4 @@ def year_step(deps, game):
     if all(u['phase'] in TERMINAL_UNITS for u in row['units']):
         row['status'] = 'withdrawn'
         row['budget']['refunded'] = BUDGET-row['budget']['spent']
+    settlement.after_year(deps, game, row, now, withdraw)

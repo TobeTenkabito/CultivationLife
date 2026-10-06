@@ -1,4 +1,5 @@
 """Finite, explicitly authorized military case; no generic invasion generator."""
+from .settlement_definitions import LABELS as SETTLEMENT_LABELS
 CAMPAIGN_ID = 'lanjiang_gate'
 SOURCE = 'blood_prison'
 DEFENDER = 'tianjian'
@@ -19,6 +20,7 @@ LABELS = {'campaign_scout': '查勘界门工地', 'campaign_report': '呈交守�
           'campaign_sabotage': '拆除目标端界门', 'campaign_aid': '申请灵界物资',
           'campaign_collect': '接收援助阵材', 'campaign_decline': '婉拒本次援助',
           'campaign_wait': '等候一年'}
+LABELS.update(SETTLEMENT_LABELS)
 DURATIONS = {key: 2 for key in LABELS}
 DURATIONS.update(campaign_assault=1, campaign_capture=1, campaign_sabotage=4,
                  campaign_decline=0, campaign_wait=1)

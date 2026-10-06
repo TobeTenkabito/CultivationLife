@@ -889,9 +889,12 @@ def validate_references(game):
             mandate = (campaign.get(key) or {}).get('authorization')
             if mandate:
                 refs.add(mandate['issuer_id'])
+        refs.update(m['issuer_id'] for m in campaign.get('settlement', {}).get('mandates', {}).values())
         if not refs <= people:
             raise ValueError('军事人物或批准者引用丢失')
         raw = list(game.world_npcs)+list(game.notable_npcs)+list(game.inactive_npcs)+[n.id for s in game.sects.values() for n in s.npcs]
+        if game.family:
+            raw.extend(n.id for n in game.family.npcs)
         if any(raw.count(u['person_id']) != 1 for u in campaign['units']):
             raise ValueError('军事人物必须只有一个权威名册')
     visitors = [echo['visitor_id'] for echo in runtime_contacts(runtime)]

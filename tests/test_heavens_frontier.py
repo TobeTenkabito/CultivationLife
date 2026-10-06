@@ -8,6 +8,7 @@ import pytest
 from test_heavens_m1 import local
 from test_heavens_ruins import site, act, prepared, load
 from cultivation_life.models import GameState
+from cultivation_life.content_registry import FACTION_SYSTEMS
 from cultivation_life.person_assignments import deployment_assignment, require_unassigned
 from cultivation_life.system.heavens import frontier, operations
 from cultivation_life.system.heavens.calendar import year_step, YearContext
@@ -317,14 +318,23 @@ def test_normal_growth_beyond_route_capacity_releases_deployment_without_faking_
 
 
 def test_actual_road_and_recon_route_roundtrip_uses_one_npc_year_per_elapsed_year(ready):
+    work = load(ready)
+    issuer = ready[2].frontier_authority(work)['issuer_id']
+    # Use the supported existing-office path so an unrelated strong recruit
+    # does not replace the authorizer through the native leadership fallback.
+    work.intrigue_state.setdefault('factions', {})['sect:blood_prison'] = {'controller_id': issuer}
+    ready[0].store.save(work)
     work = start(ready)
     identity = frontier.get(work)['person_id']
     start_age = work.world_npcs[identity].age
     real = ready[0], ready[1], ready[0]._dependencies.heavens
     count = 0
-    # Remove random cultivation/Guixu interruptions, retaining both real annual
-    # loops, resource settlement and ordinary age processing for the roundtrip.
-    with patch.object(ready[0], '_advance_guixu_calendar', return_value=False), patch.object(ready[0], '_advance_npc_cultivation', return_value=None):
+    # This exact-duration test needs a surviving authorizer. A DLC changes the
+    # unrelated random accident stream; revocation/death have separate tests.
+    # Keep both real annual loops, settlement and all ordinary age processing.
+    with (patch.object(ready[0], '_advance_guixu_calendar', return_value=False),
+          patch.object(ready[0], '_advance_npc_cultivation', return_value=None),
+          patch.dict(FACTION_SYSTEMS['npc_cultivation'], accident_death_chance=0)):
         while frontier.get(load(real))['status'] == 'active' and count < 160:
             issue(real,'frontier_wait')
             count += 1

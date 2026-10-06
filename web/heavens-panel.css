@@ -89,4 +89,20 @@
 #heavens-content .heavens-campaign-roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
 #heavens-content .heavens-campaign-roster article{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid var(--line);border-radius:8px}
 #heavens-content .heavens-campaign-roster small{color:var(--muted)}
+#heavens-content .heavens-campaign-field{display:grid;gap:8px;font-size:12px;color:var(--muted)}
+#heavens-content .heavens-campaign-field select{min-height:44px;max-width:100%;font-size:14px}
+#heavens-content .heavens-campaign-detail{display:flex;flex-direction:column;gap:18px}
+#heavens-content .heavens-territory{padding:22px 18px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(145deg,color-mix(in srgb,var(--pine) 10%,var(--surface)),var(--surface));line-height:1.8}
+#heavens-content .heavens-territory h4,#heavens-content .heavens-treaty-document h4{font-size:22px;font-weight:500;margin:10px 0 18px}
+#heavens-content .heavens-territory-route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));list-style:none;padding:0;margin:24px 0;gap:10px}
+#heavens-content .heavens-territory-route li{white-space:pre-line;text-align:center;font-size:12px;border-top:2px solid var(--line);padding-top:12px}
+#heavens-content .heavens-territory-route li:nth-child(2){border-color:var(--pine);color:var(--pine)}
+#heavens-content .heavens-campaign-duties{display:grid;grid-template-columns:auto 1fr;gap:12px 24px;margin:0;padding:16px;border-bottom:1px solid var(--line)}
+#heavens-content .heavens-campaign-duties dt{color:var(--muted);font-size:13px}
+#heavens-content .heavens-campaign-duties dd{margin:0}
+#heavens-content .heavens-treaty-document{padding:22px 18px;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:3px;line-height:1.85;background:color-mix(in srgb,var(--gold) 4%,var(--surface))}
+#heavens-content .heavens-treaty-document ol{font-size:13px;padding-left:20px}
+#heavens-content .heavens-action>button{min-height:44px}
+#heavens-content .heavens-campaign-heading{display:grid;gap:6px}
+@media(max-width:800px){#heavens-content .heavens-campaign-heading .heavens-title{font-size:19px}#heavens-content .heavens-campaign-heading .heavens-lead{font-size:12px}#heavens-content .heavens-campaign-heading h3,#heavens-content .heavens-campaign-heading p{margin:0}}
 @media(max-width:800px){#heavens-content .heavens-primary button{font-size:13px;padding:8px 3px;white-space:nowrap}#heavens-content .heavens-frontier-intro{gap:12px;padding:8px 0 16px}#heavens-content .heavens-frontier-contact{padding:14px}}

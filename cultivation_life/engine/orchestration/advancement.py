@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...system.cultivation_policy import ordinary_upper, opportunity_unbounded
+from ...system.heavens.local_control import resource_reason
 
 import random
 from typing import Any
@@ -43,6 +44,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("魂印受制时只能等待、有限修炼、反抗或夺舍拘魂者")
     if action not in ACTIONS:
         raise ValueError("未知行动")
+    if reason := resource_reason(game, action):
+        raise ValueError(reason)
     guixu_session = (
         game.guixu_state.get("player_session")
         if isinstance(game.guixu_state, dict) else None
@@ -91,6 +94,11 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     start_world_age = player.age
     start_age = current_body_age(player)
     for elapsed_index in range(years):
+        # Finish the already-paid ordinary unit before a new local blockade
+        # stops the next one. Legacy partial units round up their settlement.
+        if elapsed_index % time_unit == 0 and (reason := resource_reason(game, action)):
+            era_news.append(reason)
+            break
         if elapsed_index % time_unit == 0:
             ledger = ActionUnitLedger(action, time_unit)
         ledger.begin_year()
