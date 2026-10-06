@@ -28,6 +28,9 @@ canonical = loaded.to_dict()
 for version in (6, 7):
     old = copy.deepcopy(canonical)
     old['version'] = version
+    # These historical formats predate heavens_state. Do not fabricate an
+    # impossible old save by retaining a newly initialized schema-9 system.
+    old.pop('heavens_state', None)
     person = old.pop('inactive_npcs')[npc.id]
     person.update(alive=False, death_reason='被玩家生擒')
     for field in ('roster_state', 'custody', 'roster_origin'):
@@ -40,6 +43,16 @@ for version in (6, 7):
     assert migrated.version == SAVE_SCHEMA_VERSION and migrated.inactive_npcs[npc.id].alive
     assert migrated.player.prisoners[0]['body_training'] == 42
     assert json.loads(ENGINE.store._path(game.id).read_bytes())['version'] == SAVE_SCHEMA_VERSION
+
+# The last public release used schema 8 and already had authoritative custody.
+old = migrated.to_dict()
+old['version'] = 8
+old.pop('heavens_state', None)
+ENGINE.store._path(game.id).write_text(json.dumps(old), encoding='utf-8')
+migrated = ENGINE.store.load(game.id)
+assert migrated.version == SAVE_SCHEMA_VERSION
+assert migrated.inactive_npcs[npc.id].alive and not is_free(migrated.inactive_npcs[npc.id])
+assert migrated.player.prisoners[0]['body_training'] == 42
 
 ENGINE.captive_action(game.id, npc.id, 'release')
 released = ENGINE.store.load(game.id)

@@ -1,0 +1,55 @@
+{
+  "base_version": "2.0.0",
+  "android_version": "2.0.0-android.32",
+  "version_code": 32,
+  "application_id": "com.fusheng.wendao",
+  "min_sdk": 31,
+  "target_sdk": 31,
+  "included_abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "tested_android": "Android 12 / API 31",
+  "tested_abi": "x86_64",
+  "physical_device_tested": false,
+  "apk": "浮生问道-v2.0.0-Android12.apk",
+  "apk_sha256": "a905ff277d6ffa2abfadce23a1045015042df98146d31f9ee6aa13bc50efdda7",
+  "apk_bytes": 50377466,
+  "inputs_sha256": "0abab670d0b111f07915673f8c18c61400adeb3ba239a02b1ff24e010ba019a8",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.0",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "heavens_worlds": 11,
+  "heavens_incident_branches": 22,
+  "themes": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "save_schema": 9,
+  "save_import_export": true,
+  "offline": true,
+  "release_debuggable": false,
+  "validation": [
+    "Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes",
+    "3045 Python regressions passed",
+    "Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape",
+    "Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians",
+    "Talisman portrait and landscape: native tiered crafting, materials, sales, experience, left panel and multiple realm-gated map rifts",
+    "Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence",
+    "Live tutorial actions, native back and persisted progress",
+    "Save transfer: six themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip",
+    "Debug console portrait and landscape: isolated writes, snapshots, DLC commands, native document callbacks and configuration-independent opening",
+    "Signature, version metadata, installed APK hash, source provenance, archive integrity and release lint verified"
+  ]
+}

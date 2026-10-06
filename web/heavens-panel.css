@@ -106,3 +106,28 @@
 #heavens-content .heavens-campaign-heading{display:grid;gap:6px}
 @media(max-width:800px){#heavens-content .heavens-campaign-heading .heavens-title{font-size:19px}#heavens-content .heavens-campaign-heading .heavens-lead{font-size:12px}#heavens-content .heavens-campaign-heading h3,#heavens-content .heavens-campaign-heading p{margin:0}}
 @media(max-width:800px){#heavens-content .heavens-primary button{font-size:13px;padding:8px 3px;white-space:nowrap}#heavens-content .heavens-frontier-intro{gap:12px;padding:8px 0 16px}#heavens-content .heavens-frontier-contact{padding:14px}}
+
+/* Local dossiers: a route, one selected response, and a separate aftermath. */
+#heavens-content .heavens-world-select,#heavens-content .heavens-incident select{width:100%;min-height:44px;margin:0 0 16px;}
+.heavens-incident-route{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;}
+.heavens-incident-route li{display:grid;gap:10px;padding:16px 10px;border-top:2px solid var(--pine);background:var(--paper);}
+.heavens-incident-route span{font-size:1.5rem;color:var(--pine);opacity:.7;}
+.heavens-incident-route strong{font-size:.88rem;line-height:1.65;overflow-wrap:anywhere;}
+.heavens-incident-document{padding:20px;margin:12px 0 20px;border:1px solid var(--line);border-radius:12px;background:var(--paper);line-height:1.85;}
+.heavens-incident-document small{color:var(--muted);letter-spacing:.08em;}
+.heavens-incident-document h4{margin:6px 0 12px;}
+.heavens-incident-document>button{min-height:44px;}
+.heavens-incident-balance{display:flex;align-items:baseline;gap:12px;padding:20px 0;border-bottom:1px solid var(--line);margin-bottom:16px;}
+.heavens-incident-balance strong{font-size:2.3rem;color:var(--pine);}
+@media(max-width:440px){.heavens-incident-route{grid-template-columns:1fr;gap:6px;}.heavens-incident-route li{grid-template-columns:32px 1fr;align-items:center;padding:10px;}.heavens-incident-document{padding:14px;}}
+/* Short landscape screens need reading space above the underlying docks. */
+@media(max-height:520px) and (orientation:landscape){
+  #heavens-card{z-index:60;top:8px;left:10px;right:10px;width:calc(100vw - 20px);height:calc(100vh - 16px);height:calc(100dvh - 16px);max-height:calc(100vh - 16px)!important;max-height:calc(100dvh - 16px)!important;padding:10px 16px;}
+  #heavens-card>.section-title{position:static;padding:0;margin-bottom:6px;min-height:44px;}
+  #heavens-card>.section-title .eyebrow{display:none;}
+  #heavens-card>.section-title h2{font-size:20px;margin:0;}
+  #heavens-card>.section-title button{min-height:44px;}
+  #heavens-content .heavens-navigation{padding-bottom:6px;gap:8px;}
+  #heavens-content .heavens-body{padding-top:12px;}
+  #heavens-content .heavens-body>*{flex-shrink:0;}
+}

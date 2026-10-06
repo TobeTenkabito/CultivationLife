@@ -72,7 +72,8 @@ def main():
                     no_other_details()
                     assert page.locator('.heavens-destination').count()==2
                     nav('诸界')
-                    assert page.locator('.heavens-destination').count()==4
+                    assert page.get_by_label('选择界域',exact=True).locator('option').count()==11
+                    assert page.locator('.heavens-destination').count()==1
                     assert page.locator('[data-heavens-action]').count()==0
                     # Only a newly selected target may publish its read-only projection.
                     held=[]
@@ -81,9 +82,11 @@ def main():
                             held.append((route,route.fetch()))
                         else:route.continue_()
                     page.route('**/heavens-view',delay_first)
+                    page.get_by_label('选择界域',exact=True).select_option('celestial')
                     page.get_by_role('button',name='查看法则天海 · 潮汐回响',exact=True).click()
                     page.wait_for_function("document.querySelector('#heavens-body').textContent.includes('正在读取')")
                     nav('诸界')
+                    page.get_by_label('选择界域',exact=True).select_option('asura')
                     page.get_by_role('button',name='查看寂灭海 · 战律余响',exact=True).click()
                     page.wait_for_function("game.heavens.target_id==='asura_echo'")
                     assert held

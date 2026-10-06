@@ -16,6 +16,8 @@ from .frontier_definitions import FRONTIER_ID, FRONTIER_ACTIONS
 from .frontier_schema import validate_frontier, validate_frontier_task
 from .campaign_definitions import CAMPAIGN_ID, CAMPAIGN_ACTIONS
 from .campaign_schema import validate_campaign, validate_campaign_task
+from .incident_definitions import INCIDENT_IDS, INCIDENT_ACTIONS
+from .incident_schema import validate_incidents, validate_incident_task
 
 SCHEMA_VERSION = 1
 RECEIPT_LIMIT = 128
@@ -61,7 +63,7 @@ def validate_state(state: Any) -> None:
     if state['generation_enabled'] and 'runtime' not in state:
         raise ValueError('诸天启用状态缺少日历')
     if (type(state['definition_versions']) is not dict
-            or any(key not in SITE_IDS | {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS or type(value) is not int or value != 1
+            or any(key not in SITE_IDS | {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS | INCIDENT_IDS or type(value) is not int or value != 1
                    for key, value in state['definition_versions'].items())):
         raise ValueError('诸天生成定义版本无效')
     if 'runtime' in state:
@@ -76,6 +78,7 @@ def validate_state(state: Any) -> None:
         if 'campaign' in state['runtime']:
             expected_versions[CAMPAIGN_ID] = 1
         expected_versions.update({key: 1 for key in state['runtime'].get('omens', {})})
+        expected_versions.update({key: 1 for key in state['runtime'].get('incidents', {})})
         if state['definition_versions'] != expected_versions:
             raise ValueError('诸天实例与生成定义版本不一致')
     receipts = state['receipts']
@@ -102,7 +105,7 @@ def validate_state(state: Any) -> None:
         require_counter(result['revision'], '回执修订')
         require_counter(result['command_seq'], '结果序号')
         if (result['command_seq'] != expected or result['action'] not in {
-                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS | UPKEEP_ACTIONS | FRONTIER_ACTIONS | CAMPAIGN_ACTIONS
+                'configure', 'watch', 'dismiss', 'omen_study', 'observe', 'check_history', 'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel'} | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS | UPKEEP_ACTIONS | FRONTIER_ACTIONS | CAMPAIGN_ACTIONS | INCIDENT_ACTIONS
                 or type(result['generation_enabled']) is not bool or type(result['watch']) is not bool
                 or not last_revision <= result['revision'] <= state['revision']):
             raise ValueError('诸天回执与状态不一致')
@@ -133,7 +136,7 @@ def validate_runtime(runtime):
     keys = {'epoch_age', 'processed_years', 'last_year_key', 'last_discovery_window',
             'rng_counter', 'next_task_seq', 'unit_credit', 'sea_echo', 'tasks',
             'history', 'notifications', 'pause_requested', 'pause_on_opportunity'}
-    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins', 'omens', 'survey_discovery_window', 'frontier', 'campaign'} != keys:
+    if type(runtime) is not dict or set(runtime) - {'contacts', 'mirror', 'ruins', 'omens', 'survey_discovery_window', 'frontier', 'campaign', 'incidents'} != keys:
         raise ValueError('诸天日历字段无效')
     if 'survey_discovery_window' in runtime:
         require_counter(runtime['survey_discovery_window'], '自主探访窗口')
@@ -182,6 +185,8 @@ def validate_runtime(runtime):
     for row in surveys:
         if row.get('autonomous') and runtime.get('survey_discovery_window', 0) < row['started_at'] // 100:
             raise ValueError('自主探访缺少对应实际窗口')
+    if 'incidents' in runtime:
+        validate_incidents(runtime['incidents'], runtime['processed_years'])
     if 'campaign' in runtime:
         validate_campaign(runtime['campaign'], runtime)
     if 'frontier' in runtime:
@@ -231,11 +236,12 @@ def validate_runtime(runtime):
         is_frontier = target_id == FRONTIER_ID
         is_campaign = target_id == CAMPAIGN_ID
         is_omen = target_id in OMEN_IDS
-        echo = runtime.get('campaign') if is_campaign else runtime.get('frontier') if is_frontier else runtime.get('omens', {}).get(target_id) if is_omen else runtime.get('ruins') if is_ruins else runtime.get('mirror') if is_mirror else by_id.get(target_id)
+        is_incident = target_id in INCIDENT_IDS
+        echo = runtime.get('incidents', {}).get(target_id) if is_incident else runtime.get('campaign') if is_campaign else runtime.get('frontier') if is_frontier else runtime.get('omens', {}).get(target_id) if is_omen else runtime.get('ruins') if is_ruins else runtime.get('mirror') if is_mirror else by_id.get(target_id)
         if not echo or task['id'] in ids or not isinstance(task['id'], str):
             raise ValueError('诸天任务引用无效')
         ids.add(task['id'])
-        actions = CAMPAIGN_ACTIONS if is_campaign else FRONTIER_ACTIONS if is_frontier else {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) | {'survey_wait'} if is_ruins else (MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave', 'mirror_release'}) | {'survey_wait'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
+        actions = INCIDENT_ACTIONS if is_incident else CAMPAIGN_ACTIONS if is_campaign else FRONTIER_ACTIONS if is_frontier else {'omen_study'} if is_omen else (RUINS_ACTIONS - {'ruins_enter', 'ruins_leave'}) | {'survey_wait'} if is_ruins else (MIRROR_ACTIONS - {'mirror_enter', 'mirror_leave', 'mirror_release'}) | {'survey_wait'} if is_mirror else {'observe', 'check_history', 'exchange', 'maintain', 'correspond', 'mission_wait'} | VISIT_ACTIONS
         if is_campaign:
             validate_campaign_task(task, echo)
         if is_frontier:
@@ -319,6 +325,8 @@ def validate_runtime(runtime):
             raise ValueError('镜律任务不持有可退款托管')
         if is_omen and any(escrow[key] != value for key, value in {'total': 0, 'spent': 0, 'refunded': 0, 'mp_paid': 0, 'material': None}.items()):
             raise ValueError('本地征兆对照不持有资源托管')
+        if is_incident:
+            validate_incident_task(task, echo)
         if is_ruins:
             expected_cost = echo['definition'].get(task['action'].removeprefix('ruins_')+'_stones', 0)
             if escrow['material'] is not None or escrow['total'] != expected_cost or escrow['spent'] != expected_cost * task['progress'] // task['duration']:

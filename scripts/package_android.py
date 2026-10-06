@@ -24,7 +24,8 @@ def main():
         return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
     tests = log(f'release-{RELEASE_ID}-tests.log')
     passed = re.search(r'(\d+) passed in', tests)
-    require(bool(passed) and 'failed' not in tests and 'ERROR' not in tests, 'Full regression suite must pass')
+    require(bool(passed) and 'failed' not in tests.lower() and 'ERROR' not in tests, 'Full regression suite must pass')
+    require('594 dossier checks' in log(f'heavens-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'heavens-ui-{RELEASE_ID}.log'), 'Eleven-world UI acceptance must pass')
     for name in (f'android-experience-{RELEASE_ID}.log', f'android-institutions-{RELEASE_ID}.log', f'android-governance-{RELEASE_ID}.log', f'android-economy-{RELEASE_ID}.log', f'android-upper-{RELEASE_ID}.log', f'android-trials-{RELEASE_ID}.log', f'android-save-transfer-{RELEASE_ID}.log', f'android-initial-{RELEASE_ID}.log', f'android-immortal-{RELEASE_ID}.log', f'android-minor-{RELEASE_ID}.log', f'android-tutorial-{RELEASE_ID}.log'):
         require('status=passed' in log(name) and 'status=failed' not in log(name), name)
     require('status=passed' in log(f'android-bulk-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-bulk-{RELEASE_ID}.log'), 'Android bulk checks must pass')
@@ -32,6 +33,8 @@ def main():
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
     for orientation in ('portrait', 'landscape'):
+        result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')
+        require('status=passed' in result and 'status=failed' not in result, f'Heavens {orientation} must pass')
         result = log(f'android-spatial-talisman-{orientation}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android spatial talisman {orientation} checks must pass')
         result = log(f'android-start-layout-{orientation}-{RELEASE_ID}.log')
@@ -60,7 +63,7 @@ def main():
             require(assets.read('web/npc-contacts.js') == (ROOT/'web/npc-contacts.js').read_bytes(), 'Packaged web/npc-contacts.js differs from source')
             require(assets.read('web/map-directory.js') == (ROOT/'web/map-directory.js').read_bytes(), 'Packaged web/map-directory.js differs from source')
             require(assets.read('web/npc-contacts.css') == compile_css((ROOT/'web/npc-contacts.css').read_text(encoding='utf-8')).encode('utf-8'), 'Packaged NPC stylesheet differs from compiled source')
-            for name in ('web/upper-institution-panel.js', 'web/upper-voisinage-panel.js', 'web/immortal-economy-panel.js', 'web/ui-panels.js', 'web/asura-panel.js', 'web/asura-meridians.js', 'web/meridian-atlas.js', 'web/meridian-atlas.css', 'web/assets/asura-anatomy.png', 'web/assets/immortal-anatomy.png', 'web/asura-panel.css', 'web/puppet-workshop.js', 'web/handbook-content.js', 'web/doctrine-panel.css', 'web/tutorial.js', 'web/tutorial-steps.js', 'web/tutorial-content.js', 'web/tutorial.css', 'web/index.html', 'web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/crafting.json', 'content/formations.json', 'content/techniques.json', 'content/market.json', 'content/factions.json', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
+            for name in ('web/heavens-incidents.js', 'web/heavens-panel.js', 'web/heavens-panel.css', 'web/heavens-frontier.js', 'web/heavens-campaign.js', 'web/upper-institution-panel.js', 'web/upper-voisinage-panel.js', 'web/immortal-economy-panel.js', 'web/ui-panels.js', 'web/asura-panel.js', 'web/asura-meridians.js', 'web/meridian-atlas.js', 'web/meridian-atlas.css', 'web/assets/asura-anatomy.png', 'web/assets/immortal-anatomy.png', 'web/asura-panel.css', 'web/puppet-workshop.js', 'web/handbook-content.js', 'web/doctrine-panel.css', 'web/tutorial.js', 'web/tutorial-steps.js', 'web/tutorial-content.js', 'web/tutorial.css', 'web/index.html', 'web/combat-plan-panel.js', 'web/doctrine-panel.js', 'web/immortal-aperture-panel.js', 'web/theme-manager.js', 'web/theme-composition.js', 'content/crafting.json', 'content/formations.json', 'content/techniques.json', 'content/market.json', 'content/factions.json', 'content/doctrines.json', 'content/maps.json', 'content/items.json', 'content/world.json'):
                 expected = (ROOT/name).read_bytes()
                 if name.endswith('.css'):
                     expected = compile_css(expected.decode('utf-8')).encode('utf-8')
@@ -85,9 +88,11 @@ def main():
         'tested_abi': 'x86_64', 'physical_device_tested': False,
         'apk': target.name, 'apk_sha256': digest, 'apk_bytes': target.stat().st_size,
         'inputs_sha256': hashlib.sha256(json.dumps(provenance['inputs'], sort_keys=True).encode()).hexdigest(),
-        'dlc_versions': dlcs, 'themes': list('abcdef'), 'save_schema': SAVE_SCHEMA_VERSION,
+        'dlc_versions': dlcs, 'heavens_worlds': 11, 'heavens_incident_branches': 22,
+        'themes': list('abcdef'), 'save_schema': SAVE_SCHEMA_VERSION,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [
+            'Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} Python regressions passed',
             'Signed Android 12 release: six-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
             'Six-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians',
@@ -108,7 +113,7 @@ def main():
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
         for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
-                     'spatial-talismans.md', 'asura-court-1530.md'):
+                     'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md'):
             package.write(ROOT/'docs'/name, 'docs/'+name)
     with zipfile.ZipFile(archive) as package:
         require(package.testzip() is None, 'Release ZIP integrity check failed')

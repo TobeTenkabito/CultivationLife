@@ -23,7 +23,8 @@ def main():
         return (ROOT/'build'/name).read_text(encoding='utf-8', errors='replace')
     test_log = log(f'release-{RELEASE_ID}-tests.log')
     passed = re.search(r'(\d+) passed in', test_log)
-    require(bool(passed) and 'failed' not in test_log and 'ERROR' not in test_log, 'Full regression suite must pass')
+    require(bool(passed) and 'failed' not in test_log.lower() and 'ERROR' not in test_log, 'Full regression suite must pass')
+    require('594 dossier checks' in log(f'heavens-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'heavens-ui-{RELEASE_ID}.log'), 'Eleven-world UI acceptance must pass')
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
@@ -45,9 +46,11 @@ def main():
         'inputs_sha256': evidence['inputs_sha256'],
         'dlc_versions': {p.parent.name: json.loads(p.read_text(encoding='utf-8-sig'))['version']
                          for p in sorted((ROOT/'dlc').glob('*/manifest.json'))},
+        'heavens_worlds': 11, 'heavens_incident_branches': 22,
         'themes': list('abcdef'),
         'save_schema': SAVE_SCHEMA_VERSION,
         'validation': [
+            'Eleven-world dossiers: six themes, 990 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} automated regression tests passed',
             'Six-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',
             'Exact executable hash verified in isolated directories with and without optional DLC',

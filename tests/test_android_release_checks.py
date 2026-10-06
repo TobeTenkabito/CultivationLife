@@ -21,6 +21,7 @@ def release_inputs(tmp_path):
     (tmp_path / 'dist').mkdir()
     rid = package_android.RELEASE_ID
     logs = {f'release-{rid}-tests.log': '1574 passed in 268.76s',
+            f'heavens-ui-{rid}.log': '594 dossier checks passed',
             f'save-crossplatform-{rid}.log': 'roundtrip passed',
             f'android-signature-{rid}.log': 'Verifies',
             f'android-metadata-{rid}.log': (
@@ -28,7 +29,7 @@ def release_inputs(tmp_path):
                 f"versionName='{package_android.ANDROID_VERSION}' sdkVersion:'31'"),
             f'quick-start-ui-{rid}.log': 'Quick-start regression passed',
             f'start-layout-ui-{rid}.log': 'Start layout passed'}
-    phases = ('experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
+    phases = ('heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
               'debug-console-portrait', 'debug-console-landscape',
@@ -60,6 +61,9 @@ def release_inputs(tmp_path):
     ('suite', 'Full regression suite must pass'),
     ('collection', 'Full regression suite must pass'),
     ('phase', 'android-experience-'),
+    ('heavens', 'Heavens portrait must pass'),
+    ('heavens-browser', 'Eleven-world UI acceptance must pass'),
+    ('suite-uppercase', 'Full regression suite must pass'),
     ('debug-console', 'Android Debug console portrait checks must pass'),
     ('start-layout', 'Android start layout portrait checks must pass'),
     ('start-browser', 'Start layout UI checks must pass'),
@@ -72,6 +76,9 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
     root = release_inputs
     rid = package_android.RELEASE_ID
     corruptions = {
+        'heavens': (f'android-heavens-portrait-{rid}.log', 'status=failed'),
+        'heavens-browser': (f'heavens-ui-{rid}.log', '594 dossier checks\nTraceback'),
+        'suite-uppercase': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nFAILED: batch errors'),
         'suite': (f'release-{rid}-tests.log', '1 failed, 1574 passed in 268.76s'),
         'collection': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nERROR collecting tests'),
         'phase': (f'android-experience-{rid}.log', 'status=passed\nstatus=failed'),

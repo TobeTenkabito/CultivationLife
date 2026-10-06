@@ -54,11 +54,13 @@ def main():
                         original = engine.store._path(key).read_bytes()
                         for remote in CONTACT_SITES:
                             page.get_by_role('tab',name='诸界',exact=True).click()
+                            page.get_by_label('选择界域',exact=True).select_option(remote.world)
                             page.get_by_role('button',name='查看'+remote.name,exact=True).click()
                             page.wait_for_function('id=>game.heavens.target_id===id', arg=remote.id)
                             if remote.id != site.id:
                                 assert page.locator('#heavens-content .heavens-actions button:enabled').count() == 0
                         page.get_by_role('tab',name='诸界',exact=True).click()
+                        page.get_by_label('选择界域',exact=True).select_option(site.world)
                         page.get_by_role('button',name='查看'+site.name,exact=True).click()
                         page.wait_for_function('id=>game.heavens.target_id===id', arg=site.id)
                         assert engine.store._path(key).read_bytes() == original
