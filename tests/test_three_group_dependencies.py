@@ -117,13 +117,25 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
             return stopping
         return call
 
-    deps, unexpected = contract(WorldYearDependencies, **{name: callback(name) for name in set(ANNUAL_ORDER)})
+    def advance_researchers(actual):
+        assert actual is game
+        # M2 civilian work runs only after the original NPC annual settlement.
+        # Keep the legacy callback list and interruption indices unchanged.
+        assert seen == ANNUAL_ORDER[:9]
+
+    researchers = Mock(side_effect=advance_researchers)
+    deps, unexpected = contract(WorldYearDependencies,
+        **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers)
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
     end = None if stop is None else stop + (2 if stop == 9 else 1)
     assert seen == ANNUAL_ORDER[:end]
     assert news == [name for name in seen if name in list_hooks]
+    if stop is None or stop >= 9:
+        researchers.assert_called_once_with(game)
+    else:
+        researchers.assert_not_called()
     unexpected.assert_not_called()
 
 

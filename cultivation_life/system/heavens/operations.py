@@ -133,6 +133,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
         allowed = {'observe': set(), 'check_history': set(), 'exchange': {'person_id'}, 'correspond': {'person_id'},
                    'omen_study': set(), 'attune': set(), 'maintain': {'material_id'}, 'resume': set(), 'cancel': set(), 'dismiss': set(),
                    'mirror_enter': set(), 'mirror_leave': set(), 'mirror_probe': set(),
+                   'mirror_repair': {'material_id'}, 'mirror_release': set(),
                    'mirror_decipher': {'chamber'}, 'mirror_isolate': {'chamber', 'material_id'}, 'mirror_assault': {'chamber'}}
         allowed.update({key: {'material_id'} if key == 'ruins_replace' else set() for key in RUINS_ACTIONS})
         allowed.update({key: set() for key in VISIT_ACTIONS})

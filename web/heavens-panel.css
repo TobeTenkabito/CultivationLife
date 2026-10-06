@@ -72,6 +72,7 @@
 #heavens-content progress,#heavens-content meter{width:100%;height:8px;accent-color:var(--pine)}
 [data-panel-target=heavens].has-notice:after{content:'';position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--cinnabar)}
 @media(max-width:1100px){#heavens-content .heavens-directory{grid-template-columns:1fr}}
+@media(max-width:800px){#heavens-content .heavens-section button{font-size:12px;letter-spacing:0;padding:8px 2px;white-space:nowrap}}
 @media(max-width:800px){#heavens-card{left:10px;top:12px;width:calc(100vw - 20px);padding:16px;height:calc(100dvh - 230px);max-height:calc(100dvh - 230px)!important}#heavens-card>.section-title{margin-bottom:12px}#heavens-content .heavens-navigation{gap:8px;padding-bottom:8px}#heavens-content .heavens-primary button{font-size:14px;letter-spacing:0;padding:8px 6px}#heavens-content .heavens-preferences{padding:6px 8px;font-size:12px}#heavens-content .heavens-body{padding-top:16px;gap:12px}#heavens-content .heavens-title{font-size:21px}#heavens-content .heavens-destination{min-height:108px;padding:14px}#heavens-content .heavens-directory{gap:10px}#heavens-content .heavens-action{gap:12px;grid-template-columns:minmax(0,1fr) minmax(80px,110px)}#heavens-content .heavens-action>button{font-size:12px;padding:8px}#heavens-content .heavens-action h4{font-size:14px}}
 /* A compact itinerary belongs to the study detail, never the directory. */
 .heavens-visit-route{display:flex;gap:8px;padding:0;list-style:none;margin:20px 0}

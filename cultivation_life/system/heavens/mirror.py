@@ -9,7 +9,10 @@ from .state import active_task, record
 
 LABELS = {'mirror_enter': '进入镜律场域', 'mirror_leave': '沿原路退出',
           'mirror_probe': '低耗试探', 'mirror_decipher': '低耗破解',
-          'mirror_isolate': '材料隔断', 'mirror_assault': '强攻机关'}
+          'mirror_isolate': '材料隔断', 'mirror_assault': '强攻机关',
+          'mirror_repair': '修补并立约', 'mirror_release': '解除守约'}
+
+PACT_YEARS = 3
 
 
 def get(game):
@@ -100,6 +103,26 @@ def quote(deps, game, action, target_id, options):
     if facts['activity_reason']:
         raise ValueError(facts['activity_reason'])
     definition = mirror['definition']
+    pact = mirror.get('pact')
+    if action == 'mirror_release':
+        if not pact or pact['status'] != 'kept':
+            raise ValueError('没有可解除的守约')
+        return dict(years=0, costs={}, refundable={}, deadline=None,
+                    message='解除保留两处材料核心的约定，已有规律记录保留。',
+                    warning='守护机关会永久关闭这两处的低耗破解与材料隔断许可；以后只能实际强攻取物。不会重置机关、镜储或战斗快照，也不退修补投入。')
+    if action == 'mirror_repair':
+        if not mirror['probed']:
+            raise ValueError('须先低耗试探，读懂镜纹留下的修补条件')
+        if pact:
+            raise ValueError('每处镜律场域只接受一次修补约定')
+        if any(row['opened'] or row['isolated'] or row['guardian'] for row in mirror['chambers']):
+            raise ValueError('须在三处机关尚未被解开、隔断或强攻时立约')
+        if options.get('material_id') not in {m['id'] for m in deps.quote_materials(game, MIRROR_ID)}:
+            raise ValueError('须提供一件闲置的人界四阶普通阵材')
+        return dict(years=PACT_YEARS, costs=dict(stones=0, mp=0, material_id=options['material_id']),
+                    refundable={}, deadline=None, chamber=None, material_consumed=True,
+                    message='以一件阵材修补镜阵，实际工作 3 年，不额外施法。完成后取得第三处同一份规律记录，承诺保留前两处材料核心；不领取阵材或额外机缘。',
+                    warning='阵材安装即消耗，中断可续做，取消不退且不再受理。守约期间不能操作两处核心；以后可明确解除，但解除后只能强攻取物。')
     chamber = None
     if action == 'mirror_probe':
         if mirror['probed']:
@@ -113,6 +136,10 @@ def quote(deps, game, action, target_id, options):
         row = mirror['chambers'][chamber]
         if row['opened']:
             raise ValueError('此机关已解开，所得不会刷新')
+        if chamber < 2 and pact and pact['status'] == 'kept':
+            raise ValueError('已承诺保留此核心；须先在守约页明确解除约定')
+        if chamber < 2 and pact and pact['status'] == 'released' and action != 'mirror_assault':
+            raise ValueError('解除约定后，此核心只接受实际强攻，不再开放破解或隔断')
         if action == 'mirror_isolate':
             if row['isolated']:
                 raise ValueError('此机关已与镜阵隔断')
@@ -154,8 +181,18 @@ def execute(deps, game, action, target_id, options, proposal, *, cancel_task, ru
         record(game, '进入镜律场域，镜纹随施术明灭；可先试探，也可沿原路退出。' if action == 'mirror_enter' else '沿稳定入口退出镜律场域；机关、记录与所得归属均已保留。')
         return {'message': LABELS[action]}
     mirror = get(game)
+    if action == 'mirror_release':
+        mirror['pact'].update(status='released', released_at=runtime['processed_years'])
+        trace(game, action)
+        record(game, '已明确解除镜律守约；原记录与修补事实保留，两处材料核心关闭和平取用许可，只能实际强攻。')
+        return {'message': '镜律守约已解除'}
     before = game.player.mp
     escrow = deps.reserve_resources(game, 0, options.get('material_id'), proposal['costs']['mp'], target_id=MIRROR_ID)
+    if action == 'mirror_repair':
+        mirror['pact'] = dict(revision=1, status='repairing', duration=PACT_YEARS,
+            task_id=f'heavens-task-{runtime["next_task_seq"]}', started_at=runtime['processed_years'],
+            settled_at=None, released_at=None, material=escrow['material'])
+        escrow['material'] = None
     if action == 'mirror_isolate':
         # A fitted material is physically consumed when work starts, including interruption.
         escrow['material'] = None
@@ -183,11 +220,19 @@ def open_chamber(game, chamber):
     record(game, f'镜律第 {chamber+1} 处机关已解开：' + (f'取得{row["reward"]["name"]}，本份实体归你持有。' if row['reward'] else '取得镜律规律记录，不重复发放机缘。'))
 
 
+def end_repair(game, status):
+    get(game)['pact'].update(status=status, settled_at=game.heavens_state['runtime']['processed_years'])
+
+
 def complete(deps, game, task, rng):
     mirror = get(game)
     action, chamber = task['action'], task['chamber']
     task['status'] = 'completed'
-    if action == 'mirror_probe':
+    if action == 'mirror_repair':
+        end_repair(game, 'kept')
+        open_chamber(game, 2)
+        record(game, '镜阵修补完成，守护机关依约开放规律抄录；两处材料核心继续留在场域，约定不因离开或重访失效。')
+    elif action == 'mirror_probe':
         mirror['probed'] = True
         record(game, '低耗试探证实：登记施术实付法力的 25% 留在镜阵，隔断可停止对应联系；普通浏览与未关联消耗不被收集。')
     elif action == 'mirror_isolate':
@@ -223,6 +268,7 @@ def project(deps, game):
                  materials=deps.quote_materials(game, MIRROR_ID))
     candidates = [('mirror_leave' if facts['inside'] else 'mirror_enter', {})]
     if known:
+        value['pact'] = copy.deepcopy(mirror.get('pact'))
         value.update(capacity_pending=mirror.get('capacity_pending', False), record_acquired=mirror['record_acquired'], traces=copy.deepcopy(mirror['traces']),
                      chambers=[dict(index=i, opened=row['opened'], isolated=row['isolated'],
                          guardian=copy.deepcopy(row['guardian']),
@@ -233,6 +279,7 @@ def project(deps, game):
                          mana_capacity=mirror['mana_capacity'])
         if facts['inside']:
             candidates.append(('mirror_probe', {}))
+            candidates.extend([('mirror_repair', {'material_id': value['materials'][0]['id']} if value['materials'] else {}), ('mirror_release', {})])
             for i in range(3):
                 candidates.extend((action, dict(chamber=str(i), **({'material_id': value['materials'][0]['id']} if action == 'mirror_isolate' and value['materials'] else {})))
                                   for action in ('mirror_decipher', 'mirror_isolate', 'mirror_assault'))
