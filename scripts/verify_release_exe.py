@@ -108,6 +108,16 @@ def verify(with_dlc):
                     data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
                 with urllib.request.urlopen(request, timeout=30) as response:
                     return json.load(response)
+            economy = joined['map']['economy']
+            item = next(row for row in economy['rows'] if row['stock'] >= 1
+                        and row['quotes']['1']['buy']['total'] <= joined['market']['spirit_stones'])
+            traded = post('local-market-trade', dict(market_id=economy['market_id'], revision=economy['revision'],
+                item_id=item['id'], side='buy', quantity=1, total=item['quotes']['1']['buy']['total']))
+            bought = next(row for row in traded['map']['economy']['rows'] if row['id'] == item['id'])
+            assert bought['held'] == item['held'] + 1 and bought['stock'] == item['stock'] - 1
+            sold = post('local-market-trade', dict(market_id=economy['market_id'], revision=traded['map']['economy']['revision'],
+                item_id=item['id'], side='sell', quantity=1, total=bought['quotes']['1']['sell']['total']))
+            assert next(row for row in sold['map']['economy']['rows'] if row['id'] == item['id'])['held'] == item['held']
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

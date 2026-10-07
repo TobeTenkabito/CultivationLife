@@ -31,6 +31,13 @@ def request_games(engine):
     return None
 
 
+def accept_committed_game(engine, game):
+    """Publish a successful copy-on-write command into this request only."""
+    games = request_games(engine)
+    if games is not None:
+        games[game.id] = game
+
+
 def serialized_commands(cls):
     # Include mixin entry points. Private helpers and static utilities operate
     # inside their caller's transaction; nested public calls use the same RLock.

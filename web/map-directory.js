@@ -61,14 +61,15 @@
     const switchMode = value => { mode = value; draw(); scrollTop(); };
     function draw() {
       tabs.replaceChildren();
-      [['terrain','地域地图'],['directory','活动与据点']].forEach(([id, title]) => {
+      [['terrain','地域地图'],['directory','活动与据点'], ...(map.economy?.available ? [['economy','本地市场']] : [])].forEach(([id, title]) => {
         const tab = button(title, () => switchMode(id));
         tab.setAttribute('aria-pressed', String(mode === id));
-        tab.setAttribute('aria-controls', id === 'terrain' ? 'map-locations' : 'map-directory');
+        tab.setAttribute('aria-controls', id === 'terrain' ? 'map-locations' : id === 'economy' ? 'map-economy' : 'map-directory');
         tabs.append(tab);
       });
       terrain.classList.toggle('hidden', mode !== 'terrain');
       directory.classList.toggle('hidden', mode !== 'directory');
+      document.querySelector('#map-economy').classList.toggle('hidden', mode !== 'economy' || !map.economy?.available);
       directory.replaceChildren();
       const intro = node('div', null, 'map-directory-intro');
       intro.append(node('strong', '坊间见闻 · 商旅名录'), node('p', '会期、战事与各方驻地，依所在地域收录。'));

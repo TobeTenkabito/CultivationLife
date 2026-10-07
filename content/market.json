@@ -1,6 +1,16 @@
 {
   "schema_version": 1,
   "settings": {
+    "economy_v2": {
+      "growth_rate": 0.003,
+      "growth_cap": 1000,
+      "base_stock": 120,
+      "recovery_rate": 0.12,
+      "annual_consumption": 0.08,
+      "transaction_fee": 0.05,
+      "market_opening": 100000000,
+      "background_opening": 1000000000000
+    },
     "offer_count": 6,
     "material_offer_count": 6,
     "next_tier_chance": 0.02,

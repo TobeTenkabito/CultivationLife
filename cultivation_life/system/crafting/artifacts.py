@@ -82,7 +82,8 @@ def crafted_artifact_action(
             ),
         )
         deps.remove_crafted_artifact(player, artifact)
-        add_item(player, "spirit_stone", price)
+        from ..economy.local_market import legacy_sale
+        legacy_sale(game, price, '独立法器收购')
         game.history.append(
             HistoryRecord(
                 "SYS_ARTIFACT_SELL",
@@ -141,6 +142,8 @@ def _consign_crafted_artifact(
     )
     if not remove_item(game.player, "spirit_stone", fee):
         raise ValueError(f"上拍前须支付 {fee:,} 枚灵石占位费")
+    from ..economy.local_market import auction_fee
+    auction_fee(game, fee, '拍卖占位费')
     snapshot = copy.deepcopy(artifact)
     deps.remove_crafted_artifact(game.player, artifact)
     consignment = {

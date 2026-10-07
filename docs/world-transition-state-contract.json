@@ -204,6 +204,7 @@
     "talisman_sequence": "personal"
   },
   "GameState": {
+    "economy_v2": "global",
     "id": "history",
     "seed": "history",
     "player": "global",

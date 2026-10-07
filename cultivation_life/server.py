@@ -296,6 +296,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.arrange_faction_succession(game_id)
             elif operation == "market-buy":
                 result = ENGINE.buy_market_offer(game_id, payload.get("offer_id", ""))
+            elif operation == "local-market-trade":
+                result = ENGINE.trade_local_market(game_id, payload)
             elif operation == "market-lock":
                 result = ENGINE.toggle_market_offer_lock(game_id, payload.get("offer_id", ""))
             elif operation == "market-sell-plant":

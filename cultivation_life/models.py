@@ -888,6 +888,7 @@ class GameState:
     market_location_id: str | None = None
     market_age: int | None = None
     market_offers: list[dict[str, Any]] = field(default_factory=list)
+    economy_v2: dict[str, Any] = field(default_factory=dict)
     auction_state: dict[str, Any] = field(default_factory=dict)
     exchange_state: dict[str, Any] = field(default_factory=dict)
     exchange_sequence: int = 0
@@ -987,6 +988,7 @@ class GameState:
             "market_location_id": self.market_location_id,
             "market_age": self.market_age,
             "market_offers": self.market_offers,
+            "economy_v2": self.economy_v2,
             "auction_state": self.auction_state,
             "exchange_state": self.exchange_state,
             "exchange_sequence": self.exchange_sequence,
@@ -1033,6 +1035,8 @@ class GameState:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
+        from .economy_schema import validate_economy
+        validate_economy(value.get('economy_v2', {}))
         if not value.get("voisinage_schema"):
             from .system.combat.migration import migrate
             value = migrate(value)
@@ -1064,6 +1068,7 @@ class GameState:
             market_location_id=value.get("market_location_id"),
             market_age=value.get("market_age"),
             market_offers=value.get("market_offers", []),
+            economy_v2=copy.deepcopy(value.get("economy_v2", {})),
             auction_state=dict(value.get("auction_state", {})),
             exchange_state=dict(value.get("exchange_state", {})),
             exchange_sequence=int(value.get("exchange_sequence", 0)),

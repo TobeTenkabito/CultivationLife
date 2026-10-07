@@ -293,7 +293,8 @@ def sell_spirit_plant(deps: SpiritFieldsDependencies, game_id: str, item_id: str
     if not remove_item(game.player, item_id):
         raise ValueError("行囊中没有这株灵植")
     price = max(1, round(value * ratio))
-    add_item(game.player, "spirit_stone", price)
+    from .local_market import legacy_sale
+    legacy_sale(game, price, '灵植收购', black_market=black_market)
     name = item.name
     game.history.append(HistoryRecord(
         "SYS_SPIRIT_PLANT_SELL", 1, game.player.age, title, item_id, "sold",

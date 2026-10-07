@@ -1,0 +1,18 @@
+#map-economy { min-width: 0; }
+.economy-heading, .economy-tools, .economy-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.economy-heading { justify-content:space-between; }
+.economy-heading h3, .economy-good p { margin:8px 0; }
+.economy-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.economy-metrics div { border-bottom:1px solid currentColor; padding:10px 0; }
+.economy-metrics small, .economy-metrics strong { display:block; overflow-wrap:anywhere; }
+.economy-metrics strong { margin-top:6px; font-size:1.15em; }
+.economy-world { margin:12px 0 20px; }
+.economy-world summary { cursor:pointer; }
+.economy-tools input { flex:1; min-width:120px; }
+.economy-tools select { max-width:100%; }
+.economy-goods { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.economy-good { min-width:0; padding:12px; border:1px solid rgba(128,128,128,.3); border-radius:8px; }
+.economy-good small { display:block; }
+.economy-actions { margin-top:12px; gap:8px; }
+.economy-actions button { flex:1; white-space:normal; overflow-wrap:anywhere; }
+@media(max-width:600px) { .economy-goods { grid-template-columns:1fr; } .economy-metrics { gap:8px; font-size:.9em; } }

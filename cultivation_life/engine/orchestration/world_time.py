@@ -14,6 +14,8 @@ from ...time_flow import TRAVEL_TIME, completed_action_units, settle_elapsed_tim
 def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     """Isolated year: same personal breakthrough, thunder and lifespan order."""
     p = game.player
+    from ...system.economy.state import advance_economy
+    advance_economy(game)
     emit(game, 'time.elapsed', years=1, unit_years=WORLD_SYSTEMS['time_units'][str(p.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_sage_year(game, rng)
@@ -38,6 +40,8 @@ def _advance_world_year(
     deps: WorldYearDependencies, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
 ) -> bool:
     player = game.player
+    from ...system.economy.state import advance_economy
+    advance_economy(game)
     emit(game, "time.elapsed", years=1, unit_years=WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_merchant_year(game)
