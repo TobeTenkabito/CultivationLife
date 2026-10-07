@@ -208,6 +208,8 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
         add_item(game.player, "spirit_stone", listing_fee)
         raise ValueError("行囊中没有该物品")
     tier = max((int(row["tier"]) for row in MARKET_GOODS if row["kind"] == "item" and row["content_id"] == item_id), default=1)
+    from .local_market import auction_fee
+    auction_fee(game, listing_fee, '拍卖占位费')
     consignment = {
         "content_id":item_id, "start_price":start_price, "tier":tier,
         "rated_price":base_price, "listing_fee":listing_fee,
@@ -304,6 +306,11 @@ def _grant_auction_content(deps: AuctionsDependencies, player: Player, kind: str
 
 def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reason: str = "") -> None:
     state = game.auction_state
+    if state.get('economy_settled'):
+        return
+    from .state import ensure_state
+    from .ledger import transfer_value, record_external
+    ensure_state(game)
     purchased: list[str] = []
     sold: list[str] = []
     commission = float(deps._auction_rules()["commission_rate"])
@@ -322,13 +329,17 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
         lot["closed"] = True
         if lot.get("current_bidder") == "player":
             deps._grant_auction_content(game.player, str(lot["kind"]), str(lot["content_id"]))
+            record_external(game, 'auction_escrow', f'background:{game.player.world}',
+                            int(lot['current_bid']), '拍卖货款交割')
             purchased.append(f"{lot['name']}（{lot['current_bid']}灵石）")
         if lot.get("seller") == "player":
             net = max(0, math.floor(int(lot["current_bid"]) * (1 - commission)))
-            add_item(game.player, "spirit_stone", net)
+            transfer_value(game, f'background:{game.player.world}', 'player', net, '拍卖寄售收入')
+            from .local_market import auction_fee
+            auction_fee(game, int(lot['current_bid']) - net, '拍卖成交手续费')
             lot["seller_net"] = net
             sold.append(f"{lot['name']}（实得{net}灵石）")
-    state.update({"status":"black_market", "black_market_results":[]})
+    state.update({"status":"black_market", "black_market_results":[], "economy_settled":True})
     summary = reason or "拍卖会完成全部结拍"
     if purchased:
         summary += "；你拍得" + "、".join(purchased)

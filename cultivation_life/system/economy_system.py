@@ -83,6 +83,8 @@ def _market_tier(player: Player) -> int:
 
 
 def _clear_market(game: GameState) -> None:
+    from .economy.local_market import release_shelf
+    release_shelf(game, [])
     game.market_realm_index = None
     game.market_world = None
     game.market_location_id = None

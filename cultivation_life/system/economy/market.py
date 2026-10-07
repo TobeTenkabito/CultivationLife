@@ -8,6 +8,7 @@ from ...runtime import now_iso
 from ...rules import QI_SOURCE_NAMES, can_player_practice_technique, combat_requirement_display
 from .dependencies import MarketDependencies
 from ...content_registry import restricted_acquisition
+from . import state as economy_state, local_market as local_trade
 
 
 def _ensure_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
@@ -17,10 +18,14 @@ def _ensure_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
 
 def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
     player = game.player
+    economy_changed = economy_state.ensure_state(game)
+    economy_changed = economy_state.advance_economy(game) or economy_changed
     if player.world in {"lost", "rift"}:
         changed = bool(game.market_offers or game.market_world)
         deps._clear_market(game)
-        return changed
+        return changed or economy_changed
+    player.location_id = deps.maps.normalize_location(player.world, player.location_id)
+    economy_changed = economy_state.ensure_market(game, deps.maps) or economy_changed
     # Drop stale/locked offers from saves made before source restrictions.
     previous_count = len(game.market_offers)
     repriced = False
@@ -40,7 +45,7 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
             or game.market_world is not None or game.market_location_id is not None
         )
         deps._clear_market(game)
-        return changed
+        return changed or economy_changed
     tier = deps._market_tier(player)
     location_id = deps.maps.normalize_location(player.world, player.location_id)
     current_material_offers = [
@@ -61,9 +66,10 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
         if not any(row.get("kind") == "talisman_material" for row in game.market_offers):
             from ..talismans import market_offers as talisman_offers
             game.market_offers.extend(talisman_offers(game, tier, "符材坊市", location_id))
-        return repriced or len(game.market_offers) != previous_count
+        reserved = local_trade.sync_shelf(game)
+        return reserved or economy_changed or repriced or len(game.market_offers) != previous_count
     same_market = (
-        game.market_realm_index == tier and game.market_world == player.world
+        game.market_world == player.world
         and game.market_location_id == location_id
     )
     retained: list[dict[str, Any]] = []
@@ -79,7 +85,14 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
             ):
                 retained.append(copy.deepcopy(old_offer) | {"locked": True})
                 retained_groups.add(group)
+    market_state = economy_state.local_market(game)
+    for reserved in market_state.pop('reserved_offers', []):
+        group = deps._market_offer_group(reserved)
+        if group not in retained_groups:
+            retained.append(reserved)
+            retained_groups.add(group)
     location_name = deps.maps.location(player.world, location_id)["name"]
+    local_trade.release_shelf(game, retained)
     market_name = f"{location_name}·{REALMS[tier].name}坊市"
     world_goods = deps.maps.localize_goods(MARKET_GOODS, player.world, location_id, "market")
     general_locked = [row for row in retained if deps._market_offer_group(row) == "general"]
@@ -189,14 +202,18 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     offers.extend(material_locked)
     offers.extend(selected_materials[:fresh_material_count])
     from cultivation_life.system.puppet_crafting import market_offers
-    offers.extend(market_offers(game, tier, market_name, location_id))
+    offers.extend(row for row in market_offers(game, tier, market_name, location_id)
+                  if row['content_id'] not in retained_content_ids)
     from ..talismans import market_offers as talisman_offers
-    offers.extend(talisman_offers(game, tier, market_name, location_id))
+    offers.extend(row for row in talisman_offers(game, tier, market_name, location_id)
+                  if row['content_id'] not in retained_content_ids)
+    offers.extend(row for row in retained if deps._market_offer_group(row) in {'puppet', 'talisman'})
     game.market_realm_index = tier
     game.market_world = player.world
     game.market_location_id = location_id
     game.market_age = player.age
     game.market_offers = offers
+    local_trade.sync_shelf(game)
     return True
 
 
@@ -217,7 +234,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
         shown = dict(offer)
         shown["locked"] = bool(offer.get("locked", False))
         shown["base_price"] = offer["price"]
-        shown["price"] = adjusted_cost(game, offer["price"], "market")
+        shown["price"] = adjusted_cost(game, local_trade.shelf_price(game, offer), "market")
         shown["affordable"] = stones >= shown["price"]
         shown["market_group"] = deps._market_offer_group(offer)
         shown["known"] = bool(
@@ -282,6 +299,10 @@ def toggle_market_offer_lock(deps: MarketDependencies, game_id: str, offer_id: s
             if deps._market_offer_group(row) == group:
                 row["locked"] = False
     offer["locked"] = locking
+    if locking and 'price' in offer:
+        offer["locked"] = False
+        offer["price"] = local_trade.shelf_price(game, offer)
+        offer["locked"] = True
     game.updated_at = now_iso()
     deps.store.save(game)
     return deps.present(game)

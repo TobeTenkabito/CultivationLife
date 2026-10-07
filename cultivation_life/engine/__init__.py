@@ -2625,6 +2625,12 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def toggle_market_offer_lock(self, game_id: str, offer_id: str) -> dict[str, Any]:
         return economy_market.toggle_market_offer_lock(self._dependencies.economy.market, game_id, offer_id)
 
+    def trade_local_market(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        from ..system.economy.local_market import trade
+        from .transactions import accept_committed_game
+        return trade(self._dependencies.economy.market, game_id, payload,
+                     committed=lambda game: accept_committed_game(self, game))
+
     @staticmethod
     def _spirit_stones(player: Player) -> int:
         return economy_compat._spirit_stones(player)

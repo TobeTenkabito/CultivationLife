@@ -244,9 +244,12 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
         raise ValueError("此物只能通过其专属来源获得，不能在坊市购买")
     if offer.get("world", "human") != game.player.world:
         raise ValueError("此物不属于当前世界的坊市货池")
-    price = adjusted_cost(game, int(offer["price"]), "market")
-    if not remove_item(game.player, "spirit_stone", price):
-        raise ValueError(f"需要 {price} 枚下品灵石")
+    from ...system.economy.local_market import pay_shelf, shelf_price, require_access
+    require_access(game)
+    if offer.get('location_id') != game.player.location_id:
+        raise ValueError('该货物不在当前地点')
+    price = adjusted_cost(game, shelf_price(game, offer), "market")
+    pay_shelf(game, offer, price)
     if offer["kind"] == "crafting_material":
         summary = deps._buy_crafting_material_offer(game, offer, price)
     elif offer["kind"] == "formation_material":

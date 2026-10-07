@@ -2598,6 +2598,7 @@ function renderExchange(system) {
 
 function renderMap(map, auction) {
   if (!map) return;
+  window.LocalEconomy?.render(map.economy, game, payload => mutate(`/api/games/${game.id}/local-market-trade`, payload));
   $('#map-title').textContent = `${map.world_name}地图`;
   $('#map-current').textContent = `当前：${map.current_name}`;
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
@@ -2694,7 +2695,7 @@ function renderMarket(market) {
     lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
     const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : `${offer.price} 灵石`;
     buy.className = 'market-buy'; buy.dataset.offerId = offer.id;
-    buy.disabled = busy || offer.sold || market.spirit_stones < offer.price || !!game.pending_event || !game.player.alive;
+    buy.disabled = busy || offer.sold || offer.economy_unavailable || market.spirit_stones < offer.price || !!game.pending_event || !game.player.alive;
     buy.onclick = () => mutate(`/api/games/${game.id}/market-buy`, {offer_id:offer.id});
     controls.append(lock, buy); row.append(info, controls); list.appendChild(row);
     });
@@ -3910,11 +3911,12 @@ function renderButtons() {
   });
   document.querySelectorAll('.market-buy').forEach(button => {
     const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || []), ...(game?.market?.talisman_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
-    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || game.market.spirit_stones < offer.price;
+    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.economy_unavailable || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('.market-lock').forEach(button => {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
   });
+  window.LocalEconomy?.setBusy(busy);
   document.querySelectorAll('#merchant-card button, #merchant-card input, #merchant-card select').forEach(control=>{if(control.id!=='merchant-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.merchantUnavailable==='1';});
   document.querySelectorAll('#exchange-card button, #exchange-card input').forEach(control=>{if(control.id!=='exchange-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.exchangeUnavailable==='1';});
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {

@@ -79,6 +79,8 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
     else:
         for _ in range(quantity):
             deps._grant_auction_content(game.player, kind, str(result["content_id"]))
+    from .local_market import black_market_receipt
+    black_market_receipt(game, total_price, quantity)
     game.history.append(HistoryRecord(
         "SYS_BLACK_MARKET_BUY", 1, game.player.age, "黑市补缺", result_id, "purchased",
         f"你以严重溢价支付 {total_price} 枚灵石，购得{result['name']} ×{quantity}。",
@@ -123,7 +125,8 @@ def sell_black_market_asset(deps: BlackMarketDependencies, game_id: str, kind: s
         price = max(5, round(float(puppet.get("combat_power", 0)) * 0.08))
     else:
         raise ValueError("未知黑市资产类型")
-    add_item(game.player, "spirit_stone", price)
+    from .local_market import legacy_sale
+    legacy_sale(game, price, '黑市收购', black_market=True)
     game.history.append(HistoryRecord(
         "SYS_BLACK_MARKET_SELL", 1, game.player.age, "黑市销赃", asset_id, "sold",
         f"你在黑市出手{name}，获得 {price} 枚下品灵石。", {"spirit_stone":price},

@@ -597,6 +597,27 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("economy-v2")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本地经济验收',preset_id:'core',seed:213})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\nadd_item(g.player,'spirit_stone',100000000)\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.open('map');true");
+                    tapSelector("#map-view-tabs button[aria-controls=map-economy]");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#map-economy').offsetHeight>0 && document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+1")),"Market layout: "+theme);
+                    js("window.__econRevision=game.map.economy.revision;window.__econItem=document.querySelector('.economy-good [data-trade=buy]:not(:disabled)').closest('.economy-good').dataset.itemId;true");
+                    tapSelector(".economy-good [data-trade=buy]:not(:disabled)");
+                    waitForJs("!busy && game.map.economy.revision>window.__econRevision","Native market purchase");
+                    check(Boolean.TRUE.equals(js("game.map.economy.rows.find(r=>r.id===window.__econItem).held>0")),"Purchase inventory");
+                    js("window.__econRevision=game.map.economy.revision;document.querySelector('.economy-good[data-item-id=\"'+window.__econItem+'\"] [data-trade=sell]').id='native-economic-sale';true");
+                    tapSelector("#native-economic-sale");
+                    waitForJs("!busy && game.map.economy.revision>window.__econRevision","Native market sale");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.map.economy.turnover>0 && !busy")),"Economic persistence");
+                    capture("economy-v2-"+theme+"-"+arguments.getString("orientation","portrait"));
+                }
+                result.putString("economy_v2_scope","Four themes, native market tab and buy/sell taps, no overflow, persistence");
             } else if(phase.equals("economy")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'瑶池金光验收',preset_id:'true_immortal',seed:1520})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.location_id='expanse_celestial_8'\ng.player.immortal_body['level']=20\ng.yaochi_state['merit']=100000\nadd_item(g.player,'great_sun_divine_light',8)\nadd_item(g.player,'spirit_stone',100000)\ne.store.save(g)");

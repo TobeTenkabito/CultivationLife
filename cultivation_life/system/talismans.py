@@ -226,7 +226,8 @@ def act(game, action, payload):
         if not quote:
             raise ValueError("符箓次数耗尽，无法出售")
         p.talismans.remove(row)
-        add_item(p, "spirit_stone", quote["price"])
+        from .economy.local_market import legacy_sale
+        legacy_sale(game, quote['price'], '独立符箓收购')
         return f"在坊市售出{row['name']}，获得 {quote['price']} 灵石。"
     if action == "toggle":
         if row["uses"] <= 0:
