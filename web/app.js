@@ -1191,9 +1191,10 @@ function renderHeavenlyCourt(court) {
   const legacy=game.player.institution_affiliations?.heavenly_court;
   if(legacy){const note=document.createElement('p');note.className='muted';note.textContent=`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，不占用宗门归属。`;root.append(note);}
   const summary = document.createElement('div'); summary.className = 'court-summary';
-  [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],['功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['每单位俸禄',`${number(court.stipend)} 灵石`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
+  [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],['功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['每年俸禄',`${number(court.stipend)} 灵石`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
     const row=document.createElement('div'), small=document.createElement('small'), strong=document.createElement('strong'); small.textContent=label; strong.textContent=value; row.append(small,strong); summary.appendChild(row);
   }); root.appendChild(summary);
+  window.renderOrganizationFinance?.(root, court.finance);
   const officeSection=document.createElement('section'), officeTitle=document.createElement('h3'), offices=document.createElement('div'); officeTitle.textContent='七曜星君'; offices.className='court-offices';
   (court.offices||[]).forEach(office => { const row=document.createElement('div'), name=document.createElement('b'), holder=document.createElement('small'); row.className=office.holder?.holder_id==='player'?'player-held':''; name.textContent=`${office.name} · ${office.element}`; holder.textContent=office.holder?`${office.holder.holder_name}${office.holder.holder_id==='player'?'（你）':''} · 至第 ${office.holder.end_unit} 单位`:'席位待选'; row.append(name,holder); offices.appendChild(row); });
   officeSection.append(officeTitle,offices); root.appendChild(officeSection);
@@ -1634,6 +1635,7 @@ function renderFaction(faction) {
   $('#faction-description').textContent = faction.description;
   const details = document.createElement('p'); details.className = 'faction-meta';
   details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution} · 宗门总战力 ${number(faction.total_power || 0)}`; summary.appendChild(details);
+  window.renderOrganizationFinance?.(summary, faction.finance);
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);

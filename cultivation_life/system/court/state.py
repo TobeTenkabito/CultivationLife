@@ -5,6 +5,7 @@ from ...content_registry import WORLD_SYSTEMS
 from ...models import GameState, HistoryRecord
 from ...runtime import decode_rng, encode_rng, now_iso
 from .dependencies import CourtStateDependencies
+from ..economy import organizations as finance
 
 
 def _court_config() -> dict[str, Any]:
@@ -74,6 +75,7 @@ def _ensure_heavenly_court(deps: CourtStateDependencies, game: GameState, rng: A
         "active_decrees": [], "wanted_ids": [], "officials": officials, "seats": seats,
         "election_queue": [], "open_election": None, "pledges": [], "last_vote": None,
     }
+    finance.register(game, 'court', 'heavenly', 'celestial')
     return True
 
 
@@ -114,9 +116,9 @@ def _court_player_controls(court: dict[str, Any]) -> int:
 def _court_open_election(deps: CourtStateDependencies, game: GameState, office_id: str, rng: Any) -> None:
     court = game.heavenly_court
     deps._sync_player_court_identity(game)
-    court["treasury"] = max(
-        0.0, float(court["treasury"]) - float(deps._court_config().get("election_treasury_cost", 0)),
-    )
+    finance.register(game, 'court', 'heavenly', 'celestial')
+    finance.procure(game, finance.key('court', 'heavenly'), 'celestial',
+        int(deps._court_config().get('election_treasury_cost', 0)), '天庭选举支出', partial=True)
     eligible = [row for row in court["officials"].values() if int(row.get("grade", 9)) <= 4]
     incumbent = court["offices"].get(office_id)
     if incumbent and incumbent.get("holder_id") == "player" and float(court["player_support"]) < 25:
@@ -254,20 +256,15 @@ def _advance_heavenly_court_unit(deps: CourtStateDependencies, game: GameState, 
     laws = court["laws"]
     court["active_decrees"] = [row for row in court["active_decrees"] if int(row["expires_unit"]) >= unit]
 
-    income_multiplier = 1.0
-    for decree in court["active_decrees"]:
-        income_multiplier *= float(decree.get("income_multiplier", 1.0))
     if laws.get("wide_domain"):
-        income_multiplier *= 0.95
         court["authority"] += 5
     if laws.get("traveling_palace"):
-        income_multiplier *= 1.05
         court["authority"] = max(0.0, float(court["authority"]) - 5)
     if laws.get("direct_appointment_law"):
         court["authority"] += 5
     if laws.get("recommendation_law"):
         court["authority"] += 5
-    court["treasury"] += round(float(deps._court_config()["base_treasury_income"]) * income_multiplier, 2)
+    # Fiscal income is settled by the shared elapsed-year economy clock.
 
     if laws.get("celestial_sects"):
         for seat in court["seats"]:
@@ -403,7 +400,11 @@ def _court_enact_decree(
         raise ValueError("该人并不在天庭通缉名单上")
 
     court["authority"] -= cost
-    court["treasury"] += treasury_delta
+    finance.register(game, 'court', 'heavenly', 'celestial')
+    if treasury_delta >= 0:
+        finance.pay(game, 'background:celestial', finance.key('court', 'heavenly'), int(treasury_delta), '天庭政令税赋')
+    else:
+        finance.procure(game, finance.key('court', 'heavenly'), 'celestial', math.ceil(-treasury_delta), '天庭政令支出')
     court["equipment"] += float(decree.get("immediate_equipment", 0)) * multiplier
     support_delta = float(decree.get('support', 0)) * multiplier
     if actor_id == 'player':
@@ -458,7 +459,8 @@ def _court_vote_law(
     operating_cost = float(deps._court_config().get("policy_treasury_cost", 0))
     if float(court["treasury"]) < operating_cost:
         raise ValueError("天庭府库不足以召开天条表决")
-    court["treasury"] -= operating_cost
+    finance.register(game, 'court', 'heavenly', 'celestial')
+    finance.procure(game, finance.key('court', 'heavenly'), 'celestial', math.ceil(operating_cost), '天庭天条施行支出')
     influence_spend = deps._court_spend_influence(game, influence_spend) if actor_id == "player" else 0
     persuasion = min(0.35, influence_spend * 0.02)
     if actor_id == 'player':
@@ -560,7 +562,8 @@ def _public_heavenly_court(deps: CourtStateDependencies, game: GameState) -> dic
     }
     return {
         "visible": True, "initialized": True, "unit": int(court["unit"]),
-        "term_units": config["term_units"], "stipend": config["grade_stipends"][str(court["player_grade"])],
+        "term_units": config["term_units"], "stipend": config["grade_stipends"][str(court["player_grade"])] / 100,
+        "finance": finance.public_finance(game, 'court', 'heavenly'),
         "election_notices": (game.settings.get("court_election_popup", True) and not game.settings.get("silent_events", False)),
         "location_id": 'jade_capital', "location_name": '玉京仙都',
         "authority": round(float(court["authority"]), 2),

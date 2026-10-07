@@ -1,4 +1,4 @@
-"""Base-game descendants and family decisions; financial privileges require Intrigue."""
+"""Base-game descendants, family decisions and authoritative family finance."""
 from __future__ import annotations
 
 from ..npc_custody import is_free
@@ -15,6 +15,7 @@ from ..runtime import decode_rng, encode_rng, now_iso
 from ..world_state import race_pair, RELATION_LABELS
 from .crafting_system import remove_crafted_artifact
 from .faction_geography import can_enter_faction, require_faction_admission
+from .economy import organizations as finance
 
 
 class FamilySystemMixin:
@@ -258,27 +259,27 @@ class FamilySystemMixin:
                 self._start_war(game,'sect',family.id,other.id,initiated_by_player=True)
             summary = f'{family.name}与{other.name}{RELATION_LABELS.get(status,status)}。'
         elif action in {'fund','gather','expel'}:
-            if not self._intrigue_enabled():
+            if action == 'expel' and not self._intrigue_enabled():
                 raise ValueError('家族内政需要启用合纵连横 DLC')
-            record = self._ensure_intrigue_faction(game,'family',family.id)
+            fiscal = finance.register(game, 'family', family.id, family.world)
+            treasury = finance.key('family', family.id)
             if action == 'fund':
                 amount = payload.get('amount')
                 if isinstance(amount,bool) or not isinstance(amount,int) or amount <= 0:
                     raise ValueError('注资须为正整数灵石')
-                if not remove_item(player,'spirit_stone',amount):
-                    raise ValueError('灵石不足')
+                finance.transfer_value(game, 'player', treasury, amount, '玩家家族注资')
                 debt = int(game.family_state.get('debt',0))
                 paid = min(debt,amount)
+                finance.procure(game, treasury, family.world, paid, '偿还家族供养欠款')
                 game.family_state['debt'] = debt-paid
-                record['resources'] = int(record.get('resources',0)) + amount-paid
                 summary = f'你向家族资材注入{amount}灵石。'
             elif action == 'gather':
                 if game.family_state.get('gather_age') == player.age:
                     raise ValueError('本年已组织过产业经营')
                 game.family_state['gather_age'] = player.age
-                amount = max(20, int(sum(self._npc_power(n) ** .5 for n in family.npcs if n.alive)))
-                record['resources'] = int(record.get('resources',0)) + amount
-                summary = f'家族组织经营采集，取得{amount}资材。'
+                amount = finance.produce(game, self.maps, family, fiscal, extra=True)
+                fiscal['income'] += amount
+                summary = f'家族组织经营采集，本地市场实际收购所得{amount}灵石。'
             else:
                 if not npc or npc not in family.npcs:
                     raise ValueError('该修士不在族籍')
@@ -353,36 +354,42 @@ class FamilySystemMixin:
                         return news
                 else:state[key]=0
             else:state[key]=0
-            if self._intrigue_enabled():
-                if officials and relation['status'] != 'war':
-                    office_income += int(sum(max(100,n.realm_index**4*12) for n in officials))
+            if sect.kind == 'institution':
+                continue
+            finance.register(game, 'sect', sect.id, sect.world)
+            finance.register(game, 'family', family.id, family.world)
+            source, target = finance.key('sect', sect.id), finance.key('family', family.id)
+            if state.get('finance_year', -1) < game.player.age:
+                if officials and relation['status'] != 'war' and family.world == game.player.world and game.player.alive:
+                    office_income += finance.pay(game, source, 'player', int(sum(max(100,n.realm_index**4*12) for n in officials)), '宗门族人奉赠')
                 if relation['status'] == 'vassal' and relation.get('overlord') == family.id:
-                    tribute += max(200,int(self._family_total_power(game,sect)**.5 * 8))
-        if self._intrigue_enabled():
-            record = self._ensure_intrigue_faction(game,'family',family.id)
-            income = sum(max(5,n.realm_index**4*10) for n in people) + tribute
-            children = sum(c.get('alive',True) and c.get('world')==family.world and c.get('age',0)<8 for c in game.player.offspring)
-            expenses = sum(25*self._family_world_tier(family.world)+n.realm_index**2*12 for n in people) + children*15
-            resources = int(record.get('resources',0)) + income - expenses - int(state.get('debt',0))
-            surplus = max(0,income-expenses)
-            dividend = min(max(0,resources),int(surplus*.15)) if family.world == game.player.world else 0
-            record['resources'] = max(0,resources-dividend)
-            state['debt'] = max(0,-resources)
-            state['ledger'] = {'year':game.player.age,'income':income,'expenses':expenses,'balance':income-expenses,
-                'tribute':tribute,'dividend':dividend,'office_income':office_income if family.world==game.player.world else 0,'shortfall':max(0,-resources)}
-            if family.world==game.player.world and game.player.alive:
-                add_item(game.player,'spirit_stone',dividend+office_income)
-                if dividend or office_income:self._family_log(game,'dividend',f'家族盈余分红{dividend}灵石，宗门族人奉赠{office_income}灵石；只在本界发放。')
-            if resources < 0:
-                state['deficit_years'] = int(state.get('deficit_years',0))+1
-                self._family_log(game,'deficit',f'家族本年资材缺口{-resources}，请注资、经营或调整族籍。')
-                if state['deficit_years'] >= 2:
-                    outsider = next((n for n in people if not self._family_is_kin(game,n)),None)
-                    if outsider:
-                        family.npcs.remove(outsider)
-                        game.notable_npcs[outsider.id] = outsider
-                        self._family_log(game,'desertion',f'连年拖欠供养，外姓门人{outsider.name}离族。')
-            else:state['deficit_years']=0
+                    tribute += finance.pay(game, source, target, max(200,int(self._family_total_power(game,sect)**.5 * 8)), '附属宗门上供')
+        fiscal = finance.register(game, 'family', family.id, family.world)
+        if state.get('finance_year', -1) >= game.player.age:
+            return news
+        state['finance_year'] = game.player.age
+        income, expenses = fiscal['income'] + tribute, fiscal['expense']
+        surplus = max(0, income - expenses)
+        dividend = 0
+        if family.world == game.player.world and game.player.alive and not state.get('debt', 0):
+            dividend = finance.pay(game, finance.key('family', family.id), 'player', int(surplus * .15), '家族年度盈余分红')
+        fiscal['benefit_due'], fiscal['benefit_paid'] = int(surplus * .15), dividend
+        fiscal['expense'] += dividend
+        state['ledger'] = dict(year=game.player.age, income=income, expenses=expenses, balance=income-expenses,
+            tribute=tribute, dividend=dividend, office_income=office_income, shortfall=int(state.get('debt', 0)))
+        if dividend or office_income:
+            self._family_log(game,'dividend',f'家族盈余分红{dividend}灵石，宗门族人奉赠{office_income}灵石；只在本界发放。')
+        if state.get('debt', 0):
+            state['deficit_years'] = int(state.get('deficit_years',0))+1
+            self._family_log(game,'deficit',f'家族供养欠款{state["debt"]}灵石，请注资、经营或调整族籍。')
+            if state['deficit_years'] >= 2:
+                outsider = next((n for n in people if not self._family_is_kin(game,n)),None)
+                if outsider:
+                    family.npcs.remove(outsider)
+                    game.notable_npcs[outsider.id] = outsider
+                    self._family_log(game,'desertion',f'连年拖欠供养，外姓门人{outsider.name}离族。')
+        else:
+            state['deficit_years']=0
         return news
 
     def _family_dissolve(self, game, reason, absorber=None):
@@ -401,6 +408,7 @@ class FamilySystemMixin:
     def _family_presentation(self, game, result):
         family = game.family
         result.update(reproduction_enabled=game.family_state.get('reproduction_enabled',True),
+            gather_used=game.family_state.get('gather_age') == game.player.age,
             intrigue_enabled=self._intrigue_enabled(),pressure=family.pressure if family else 0,
             protection_realm=REALMS[2+self._family_world_tier(family.world if family else game.player.world)].name,
             total_power=self._family_total_power(game,family) if family and not family.extinct else 0)
@@ -429,7 +437,8 @@ class FamilySystemMixin:
         result['diplomacy'] = [{'id':s.id,'name':s.name,'kind':s.kind,'total_power':self._family_total_power(game,s),
             **copy.deepcopy(self._family_relation(game,s))} for s in powers] if family and not family.extinct and family.world==game.player.world else []
         result['ledger'] = None
-        if family and not family.extinct and self._intrigue_enabled() and family.world==game.player.world:
-            record=self._ensure_intrigue_faction(game,'family',family.id)
+        if family and not family.extinct and family.world==game.player.world:
+            record=game.intrigue_state.get('factions', {}).get(f'family:{family.id}', {})
             result['ledger'] = {**copy.deepcopy(game.family_state.get('ledger',{})), 'resources':int(record.get('resources',0)), 'shortfall':int(game.family_state.get('debt',0))}
+            result['finance'] = finance.public_finance(game, 'family', family.id)
         return result

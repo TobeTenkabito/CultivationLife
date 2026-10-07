@@ -173,7 +173,11 @@ def _intrigue_apply_resolution(
         )
         record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 1)
     elif resolution_type == "investment":
-        record["resources"] = int(record.get("resources", 0)) + 25
+        from ..economy.organizations import register, key, pay
+        entity = deps._intrigue_entity(game, kind, faction_id)
+        if entity:
+            register(game, kind, faction_id, entity.world)
+            pay(game, f'background:{entity.world}', key(kind, faction_id), 25, '组织投资经营结算')
         record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 4)
     elif resolution_type == "relocate" and kind in {"sect", "family"}:
         from ..combat.npc_lifecycle import move_world

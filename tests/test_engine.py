@@ -385,6 +385,9 @@ class EngineTests(unittest.TestCase):
         selected = self.engine.set_faction_reward(created["id"], "vitality")
         self.assertEqual(selected["faction"]["reward_preference"], "vitality")
         game = self.engine.store.load(created["id"])
+        from cultivation_life.system.economy.organizations import transfer_value, key, register
+        register(game, "sect", "tianjian", "human")
+        transfer_value(game, "background:human", key("sect", "tianjian"), 100, "测试年度福利预算")
         before = game.player.faction_hp_bonus
         self.engine._annual_sect_update(game, random.Random(2))
         self.assertEqual(game.player.faction_hp_bonus, before + 2)
@@ -418,6 +421,9 @@ class EngineTests(unittest.TestCase):
         game = self.engine.store.load(created["id"])
         game.player.faction_id = "tianjian"
         game.player.realm_index = 2
+        from cultivation_life.system.economy.organizations import transfer_value, key, register
+        register(game, "sect", "tianjian", "human")
+        transfer_value(game, "background:human", key("sect", "tianjian"), 100, "测试年度福利预算")
         before = (
             game.player.opportunity,
             game.player.faction_hp_bonus,

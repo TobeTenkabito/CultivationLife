@@ -131,10 +131,12 @@ def test_stipends_rise_with_grade_and_only_pay_on_time_progress(prepared):
     e, g, _ = prepared
     c = g.heavenly_court
     before = sum(i.quantity for i in g.player.inventory if i.id == 'spirit_stone')
-    e._advance_heavenly_court_unit(g, random.Random(1))
+    from cultivation_life.system.economy import organizations as finance
+    row = finance.register(g, 'court', 'heavenly', 'celestial')
+    finance.settle_institution(g, row, 1)
     first = c['stipend_total']
     c['player_grade'] = 1
-    e._advance_heavenly_court_unit(g, random.Random(2))
+    finance.settle_institution(g, row, 1)
     assert c['stipend_total'] - first > first
     assert sum(i.quantity for i in g.player.inventory if i.id == 'spirit_stone') == before + c['stipend_total']
     e.store.save(g)

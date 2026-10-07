@@ -227,7 +227,11 @@ def test_appointments_have_actual_income_costs_and_cannot_stack(ready):
     benefits = court.benefits(g,state)
     before = state['treasury']
     advance_time(g, 100, 100)
-    assert state['treasury'] == before + int(600000 * benefits['revenue']) - 30000 - 60000
+    assert state['treasury'] == before
+    from cultivation_life.system.economy import organizations as finance
+    row = finance.register(g, 'upper', 'asura', 'asura')
+    finance.settle_institution(g, row, 100)
+    assert state['treasury'] == before + int(600000 * benefits['revenue'] * g.economy_v2['worlds']['asura']['scale']) - 30000 - 60000
     e.store.save(g)
     with pytest.raises(ValueError, match='不得兼任'):
         e.upper_institution_action(g.id, 'appoint', f'ritual:{npc_id}')

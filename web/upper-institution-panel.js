@@ -18,13 +18,14 @@
     const rank=oligarchy?(d.seat_active?'门阀代言人':'宫内客卿'):d.ranks[d.rank];
     const location=game.map?.locations?.find(x=>x.id===d.location)?.name||({asura:'万战魔城',nether:'祖兽神苑',reincarnation:'因果城'})[d.world];
     root.append(el('p',`${d.regime} · 驻地 ${location}`,'doctrine-lead'),el('p',d.description),el('p',`本界政历 ${d.unit} 单位 · 府库 ${fmt(d.treasury)} 灵石。政务随实际在本界度过的时间推进，短途余时会累计；读界面、投票和传送不推进政历。`,'muted'));
+    window.renderOrganizationFinance?.(root, d.finance);
     if(!d.local)root.append(el('p',`须前往${location}办理事务。此处可查看政务；离开本界后身份和进度保留。`,'doctrine-note'));
     root.append(el('p',`现行${religious?'法旨':oligarchy?'门阀盟令':'王令'}：【${d.current_policy.name}】${d.current_policy.description}`,'doctrine-note'));
     const identity=section('identity','身份与供养',d.joined?rank:'尚未登记');
     if(!d.joined){identity.append(el('p','加入机构不占用宗门名额，不限制邻域入门；登记后方可享受政务与领取委托。'),button(religious?'登记奉愿':'登记效力','join'));}
     else{
       identity.append(el('p',`${rank} · 功勋 ${fmt(d.merit)} · 累计功绩 ${fmt(d.earned)}${oligarchy?'':` · ${regard} ${d.regard}/100`}`));
-      identity.append(el('p','每满一个本界行动单位，成员基础供养 10,000 灵石，职阶每升一级另加 10,000；门阀代言人基础津贴为 20,000。政策可提高收益，实际支付以府库为限。'));
+      identity.append(el('p','每在本界度过一年，成员基础供养 100 灵石，职阶每升一级另加 100；门阀代言人基础津贴为 200。政策可提高收益，实际支付以府库为限。'));
       if(!oligarchy&&d.rank<d.ranks.length-1){const next=d.rank+1;identity.append(el('p',`晋升 ${d.ranks[next]}：累计功绩 ${fmt(d.rank_merit[next])}，第 ${9+Math.floor(next/2)} 阶修为，${regard} ${next*20}。`),button('申请晋阶','promote'));}
       if(d.obligation)identity.append(el('p',`${d.obligation.name} · 最迟第 ${d.obligation.deadline} 单位交付；逾期 ${regard} −15。`,'doctrine-note'));
       identity.append(button('退出机构','leave','',!!d.job),el('small','有委托时须先交付或放弃；带未竟王命或誓愿退出会降低恩宠或信望。'));
@@ -33,7 +34,8 @@
     jobs.append(el('p','每份委托须在驻地实际履约一个行动单位，基础 100 功勋，接取时按当前政务与赐福确定奖励；遇到事件可处理后续做。功勋消费不减少累计功绩。'));
     if(d.job)jobs.append(el('p',`本单报酬 ${d.job.reward} 功勋，当前 ${d.job.progress}/${d.job.years} 年。`),button('继续履约','work','',d.job.progress>=d.job.years),button('交付领取','claim','',d.job.progress<d.job.years),button('放弃委托','abandon'));
     else jobs.append(button('接取委托','accept','',!d.joined));
-    jobs.append(button('100 功勋 → 250,000 灵石','stones','',!d.joined||d.merit<100),button(`${d.material_merit} 功勋 → 本界筑域材料一份`,'material','',!d.joined||d.merit<d.material_merit));
+    jobs.append(el('p',`资材兑换需机构支付 ${fmt(d.material_stone_cost)} 灵石采购费；府库不足时暂缓兑换。`,'muted'));
+    jobs.append(button('100 功勋 → 250,000 灵石','stones','',!d.joined||d.merit<100||d.treasury<250000),button(`${d.material_merit} 功勋 → 本界筑域材料一份`,'material','',!d.joined||d.merit<d.material_merit||d.treasury<d.material_stone_cost));
     if(oligarchy){
       const council=section('council','祖族议权',d.seat_active?'持有代言资格':'祖族授席，无定期选举');
       council.append(el('p','五门阀议权依次为 5、4、3、2、1，总计十五。取得代言资格后没有固定任期，但本族支持低于五十时失去资格。法令须至少八议权支持；空缺不赞成，玩家未主动提案时弃权。支持达到七十的门阀愿意支持你的政见。'));

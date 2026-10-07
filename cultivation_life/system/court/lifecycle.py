@@ -1,5 +1,4 @@
 from __future__ import annotations
-from ...rules import add_item
 from .dependencies import CourtLifecycleDependencies
 
 
@@ -80,11 +79,10 @@ def _court_schedule_elections(deps: CourtLifecycleDependencies, game, rng):
 
 
 def _court_pay_stipend(deps: CourtLifecycleDependencies, game):
-    court = game.heavenly_court
-    amount = int(deps._court_config()['grade_stipends'][str(court['player_grade'])])
-    add_item(game.player, 'spirit_stone', amount)
-    court['stipend_total'] = court.get('stipend_total', 0) + amount
-    return f"天庭{court['player_grade']}品俸禄：灵石 +{amount}。"
+    # Politics can tick after a partial action; the yearly fiscal clock pays once.
+    grade = game.heavenly_court['player_grade']
+    annual = deps._court_config()['grade_stipends'][str(grade)] / 100
+    return f'天庭{grade}品俸禄基准每年 {annual:g} 灵石，按实际年数与府库余额结算。'
 
 
 def private_combat(target, wanted_ids):

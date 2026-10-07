@@ -176,7 +176,9 @@ def test_top_seven_member_receives_office_without_decision_authority(
     for index, npc in enumerate(sect.npcs):
         npc.realm_index = 4 if index == 0 else 3 if index < 3 else 2
         npc.layer = 1 if index == 0 else max(1, 8 - index)
-    game.intrigue_state = {}
+    # Reset political appointments while retaining the base game's treasury.
+    game.intrigue_state = {'factions': {key: {**row, 'controller_id': None, 'positions': {}, 'positions_initialized': False}
+        for key, row in game.intrigue_state.get('factions', {}).items()}}
     engine.store.save(game)
 
     section = _sect_section(engine.get_game(game_id))

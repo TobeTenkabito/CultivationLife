@@ -7,6 +7,7 @@ from ...rules import add_item
 from ...runtime import now_iso
 from ..yaochi_rules import config, account, spend, require_market, offers, grant, experience, commission_reward, lock_price
 from .dependencies import YaochiDependencies
+from ..economy import organizations as finance
 
 
 def _begin_yaochi_action(deps: YaochiDependencies, game, action):
@@ -66,6 +67,11 @@ def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amoun
         if action == 'publish' and len(state.get('orders', [])) >= cfg['max_orders']:
             raise ValueError('待交付委托已达上限，请先领取')
         price = math.ceil(offer['price'] * (1 + cfg['order_fee'])) if action=='publish' else offer['price'] * amount
+        if state.get('merit', 0) < price:
+            raise ValueError('瑶池功勋不足')
+        finance.register(game, 'yaochi', 'yaochi', 'celestial')
+        finance.procure(game, finance.key('yaochi', 'yaochi'), 'celestial',
+            offer['price'] * amount * cfg['stones_per_merit'], '瑶池资材采购与传承供养')
         spend(game, price)
         if action=='buy':
             grant(game, offer, amount)
@@ -94,7 +100,11 @@ def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amoun
         state['experience'] = state.get('experience', 0) + gain
         summary=f"交付【{job['name']}】，获得 {job['reward']} 功勋、{gain} 瑶池经验。";state['job']=None
     elif action=='exchange_stones':
-        spend(game,amount);add_item(p,'spirit_stone',amount*cfg['stones_per_merit'])
+        finance.register(game, 'yaochi', 'yaochi', 'celestial')
+        if state.get('merit', 0) < amount:
+            raise ValueError('瑶池功勋不足')
+        finance.transfer_value(game, finance.key('yaochi', 'yaochi'), 'player', amount * cfg['stones_per_merit'], '瑶池功勋兑换灵石')
+        spend(game,amount)
         summary=f"以 {amount} 功勋兑换灵石 ×{amount*cfg['stones_per_merit']}。"
     elif action=='exchange_court_merit':
         spend(game,amount*cfg['merit_per_court_merit']);deps._add_court_merit(game,amount)
@@ -136,6 +146,7 @@ def _public_yaochi(deps: YaochiDependencies, game):
     for o in offers(game):
         rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
     return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
+                finance=finance.public_finance(game, 'yaochi', 'yaochi'),
                 experience=experience(game), commission_catalog=catalog,
                 manual_catalog_counts={'total':total_manuals, 'eligible':sum(o['doctrine'] is not None for o in catalog)},
                 merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j,game),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],

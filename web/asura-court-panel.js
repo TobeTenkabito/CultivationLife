@@ -22,6 +22,7 @@
     const metrics = node('div', null, 'court-metrics');
     [['府库灵石', fmt(d.treasury)], ['可用功勋', fmt(d.merit)], ['民心', `${c.public_support}/100`], ['王庭政历', `${d.unit} 单位`]].forEach(([label, value]) => { const m = node('div'); m.append(node('small', label), node('strong', value)); metrics.append(m); });
     root.append(metrics);
+    window.renderOrganizationFinance?.(root, d.finance);
     if (!d.local) root.append(note('前往万战魔城办理王庭事务；离界后保留爵位和进度。'));
     if (!d.joined) root.append(button('登记效力', 'join'), note('加入王庭保留原有宗门身份；派系与贡赋须开启修罗界 DLC。'));
     if (c.challenge) {
@@ -75,7 +76,7 @@
     }
     if (selected === 'domestic') {
       if (!c.king) body.append(note('登上修罗王位后，可以任免廷臣、营建王庭并颁布内政决策。'));
-      body.append(note(`现行${d.current_policy.name} · 府库基础收入倍率 ${c.effects.revenue.toFixed(2)} · 每单位官俸 ${fmt(c.effects.wages)} · 新委托功勋倍率 ${(c.effects.service * d.current_policy.service).toFixed(2)} · 养域总减免 ${Math.round(d.discount * 100)}%。民心越高，府库收入越高。`));
+      body.append(note(`现行${d.current_policy.name} · 府库基础收入倍率 ${c.effects.revenue.toFixed(2)} · 每年官俸 ${fmt(c.effects.wages / 100)} · 新委托功勋倍率 ${(c.effects.service * d.current_policy.service).toFixed(2)} · 养域总减免 ${Math.round(d.discount * 100)}%。民心越高，府库收入越高。`));
       const locked = !c.king || !!c.challenge, appointments = box('王庭任命', '爵位与官职分开：一人可持爵并任一官职。任命支出六万灵石，官俸每单位三万；每单位可调整一职。忠诚越高，越不愿发起血战。');
       const officials = grid();
       c.office_definitions.forEach(office => {
@@ -113,8 +114,9 @@
       if (d.job) job.append(node('p', `已履约 ${d.job.progress}/${d.job.years} 年 · 报酬 ${d.job.reward} 功勋`), button('继续履约', 'work', '', d.job.progress >= d.job.years), button('交付领取', 'claim', '', d.job.progress < d.job.years), button('放弃委托', 'abandon'));
       else job.append(button('接取委托', 'accept', '', !d.joined));
       body.append(job);
-      const rewards = box('俸禄与府库', `当前基础俸禄 ${fmt((10000 + d.rank * 10000) * d.current_policy.income)} 灵石／单位，以府库实有为限。仅实际经过本界时间才结算，刷新界面不推进政历。`);
-      rewards.append(button('100 功勋 → 250,000 灵石', 'stones', '', !d.joined || d.merit < 100 || d.treasury < 250000), button(`${d.material_merit} 功勋 → 筑域材料`, 'material', '', !d.joined || d.merit < d.material_merit)); body.append(rewards);
+      const rewards = box('俸禄与府库', `当前基础俸禄 ${fmt((100 + d.rank * 100) * d.current_policy.income)} 灵石／年，以府库实有为限。仅实际经过本界时间才结算，刷新界面不推进政历。`);
+      rewards.append(note(`资材兑换需府库支付 ${fmt(d.material_stone_cost)} 灵石采购费。`));
+      rewards.append(button('100 功勋 → 250,000 灵石', 'stones', '', !d.joined || d.merit < 100 || d.treasury < 250000), button(`${d.material_merit} 功勋 → 筑域材料`, 'material', '', !d.joined || d.merit < d.material_merit || d.treasury < d.material_stone_cost)); body.append(rewards);
       if (d.joined) body.append(button('退出王庭并放弃爵位', 'leave', '', !!d.job || !!c.challenge));
     }
     if (selected === 'history') {

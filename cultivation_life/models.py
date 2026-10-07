@@ -417,8 +417,8 @@ class Player:
     faction_contribution: int = 0
     institution_affiliations: dict[str, dict[str, Any]] = field(default_factory=dict)
     faction_reward_preference: str | None = None
-    faction_hp_bonus: int = 0
-    faction_mp_bonus: int = 0
+    faction_hp_bonus: float = 0.0
+    faction_mp_bonus: float = 0.0
     faction_combat_bonus: float = 0.0
     # High-realm quick starts are authored against the base-game benchmark.
     # Keep that original loadout power so enabled DLC benchmark increases can
@@ -1036,7 +1036,7 @@ class GameState:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
         from .economy_schema import validate_economy
-        validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}))
+        validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}), value)
         if not value.get("voisinage_schema"):
             from .system.combat.migration import migrate
             value = migrate(value)

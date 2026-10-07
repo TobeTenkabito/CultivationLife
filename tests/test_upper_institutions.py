@@ -49,7 +49,7 @@ def test_fractional_time_cannot_mint_stipends_or_double_claim(upper):
     assert state['unit']==0
     advance_time(g,1,100)
     assert state['unit']==1
-    assert state['treasury']==2000000+600000-10000
+    assert state['treasury']==2000000  # Politics does not settle fiscal time.
     e.store.save(g)
     e.upper_institution_action(g.id,'accept')
     g=e._load(g.id);begin_work(g)
@@ -76,6 +76,13 @@ def test_policies_materials_and_currency_are_real_and_atomic(upper):
     state.update(merit=800,earned=800)
     e.store.save(g)
     before=len(g.player.crafting_materials)
+    from cultivation_life.system.crafting_system import crafting_material_definitions
+    from cultivation_life.system.upper_voisinage_rules import world_config
+    material_cost=crafting_material_definitions()[world_config(g.player)['material_id']]['base_material_value']
+    from cultivation_life.system.economy import organizations as finance
+    finance.register(g, 'upper', g.player.world, g.player.world)
+    finance.transfer_value(g, f'background:{g.player.world}', finance.key('upper', g.player.world), material_cost, '测试采购预算')
+    e.store.save(g)
     e.upper_institution_action(g.id,'material')
     g=e._load(g.id)
     assert len(g.player.crafting_materials)==before+1

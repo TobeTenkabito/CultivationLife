@@ -107,17 +107,27 @@ def test_marriage_birth_guaranteed_roots_and_stop_decision(engine):
     g.player.age+=1;g.family_state['reproduction_enabled']=True;g.family.npcs[1].realm_index=5
     engine._family_annual_governance(g,rng);assert len(g.player.offspring)==count
 
-def test_finance_only_with_dlc_and_only_local_cash(engine):
+def test_finance_in_base_game_and_only_local_cash(engine):
+    from cultivation_life.system.economy import organizations as finance
     g=family_game(engine);g.family.npcs[0].realm_index=4
+    finance.ensure_organizations(g)
     before=wallet(g)
     with patch.object(engine,'_intrigue_enabled',return_value=False):
-        engine._family_annual_governance(g,random.Random(2));assert wallet(g)==before;assert 'ledger' not in g.family_state
+        engine._family_annual_governance(g,random.Random(2))
+        assert wallet(g)==before and 'ledger' in g.family_state
         engine.store.save(g)
-        with pytest.raises(ValueError,match='合纵连横'):engine.family_action(g.id,'fund',{'amount':100})
-    g.player.age+=1;engine._family_annual_governance(g,random.Random(2));assert wallet(g)>before
+        engine.family_action(g.id,'fund',{'amount':100})
+        g=engine._load(g.id)
+        assert wallet(g)==before-100
+    g.player.age+=1
+    finance.advance_organizations(g,engine.maps)
+    before=wallet(g)
+    engine._family_annual_governance(g,random.Random(2));assert wallet(g)>before
     g.player.world='spirit';g.player.age+=1;before=wallet(g)
+    finance.advance_organizations(g,engine.maps)
     engine._family_annual_governance(g,random.Random(2));assert wallet(g)==before
     assert g.family_state['ledger']['dividend']==0
+
 
 def test_weak_family_annexation_and_official_protection(engine):
     g=family_game(engine);g.family.npcs[0].realm_index=4
@@ -154,7 +164,8 @@ def test_sect_appointment_preserves_family_and_ages_member_once(engine):
     engine.family_action(g.id,'send_sect',{'npc_id':npc.id,'sect_id':sect.id})
     g=engine.store.load(g.id);npc=g.family.npcs[0];before=npc.age
     assert npc.id in {n.id for n in engine._sect_members(g,g.sects[sect.id])}
-    g.player.age+=1;engine._annual_sect_update(g,random.Random(23))
+    from cultivation_life.system.economy.organizations import advance_organizations
+    g.player.age+=1;advance_organizations(g,engine.maps);engine._annual_sect_update(g,random.Random(23))
     assert npc.age==before+1
     assert g.player.offspring[0]['age']==npc.age
     assert g.family_state['ledger']['office_income']>0

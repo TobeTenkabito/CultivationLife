@@ -20,6 +20,7 @@
     }
     const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
     root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
+    window.renderOrganizationFinance?.(root, pool.finance);
     if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));root.append(box);}
     const legacy=game.player.institution_affiliations?.yaochi;
     if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
@@ -51,6 +52,7 @@
         const amount=quantity.valueAsNumber;
         total.textContent=valid()?`所得 ×${fmt(o.quantity*amount)} · 合计 ${fmt(o.price*amount)} 功勋`:`请输入 1 至 ${fmt(quantity.max)} 的整数份数`;
         buy.disabled=blocked||!pool.local||o.owned||!o.eligible||!valid()||pool.merit<o.price*amount;
+        if(pool.finance && pool.finance.balance<o.price*amount*pool.exchange.stones_per_merit){buy.disabled=true;total.textContent+=' · 瑶池采购资金不足';}
       };
       quantity.addEventListener('input',update);
       buy.onclick=()=>{update();if(!buy.disabled)trade({action:'buy',target_id:o.id,amount:quantity.valueAsNumber});};

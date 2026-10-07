@@ -19,6 +19,7 @@ from ...world_state import RELATION_LABELS, race_pair
 from ...system.concubine_system import gender_name
 from ...system.possession_system import current_body_age
 from ..dependencies import FactionViewDependencies
+from ...system.economy.organizations import public_finance
 
 
 def _public_family(deps: FactionViewDependencies, game: GameState) -> dict[str, Any]:
@@ -255,6 +256,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     roster.sort(key=lambda entry: (-entry["realm_index"], -entry["layer"], entry["name"]))
     return {
         "member": True,
+        "finance": public_finance(game, 'sect', sect.id),
         "world": player.world,
         "world_name": world_name,
         "id": sect.id,

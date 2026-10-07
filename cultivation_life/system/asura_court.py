@@ -8,7 +8,7 @@ from ..rules import combat_power, expected_combat_power, max_hp, max_mp
 from .npc_system import npc_combat_power
 from . import asura_factions
 
-COURT = 'asura_royal_court'
+from .asura_court_finance import COURT, people, present, talent, benefits
 KING = 5
 OFFICES = {
     'treasury': ('府库总管', '每单位府库收入增加才干值的千分之二'),
@@ -31,13 +31,6 @@ def cfg():
     return WORLD_SYSTEMS['upper_institutions']['worlds']['asura']
 
 
-def people(game):
-    court = game.sects.get(COURT)
-    return {n.id: n for n in court.npcs} if court else {}
-
-
-def present(npc):
-    return bool(npc and npc.alive and npc.world == 'asura' and npc.faction_id in (None, COURT))
 
 
 def initial(state):
@@ -81,34 +74,12 @@ def is_king(state):
     return state['joined'] and state.get('court', {}).get('holders', {}).get(str(KING)) == 'player'
 
 
-def talent(npc, office):
-    digest = hashlib.sha256(f'{npc.id}:{office}'.encode()).digest()
-    return min(95, 35 + digest[0] % 46 + max(0, npc.realm_index - 9) * 5)
-
 
 def npc_power(npc):
     root = ROOT_DEFINITIONS.get(npc.spirit_root, {})
     return npc_combat_power(npc, expected_combat_power, float(root.get('efficiency', 1)),
                             ITEM_CATALOG.get(npc.treasure_item_id or '')) * max(.1, npc.combat_factor) * max(.35, 1 - npc.wounds * .15) + npc.family_combat_bonus
 
-
-def benefits(game, state):
-    court, roster = state['court'], people(game)
-    result = dict(revenue=1., service=1., discount=0., wages=0)
-    for office, identity in court['offices'].items():
-        npc = roster.get(identity)
-        if not present(npc):
-            continue
-        skill = talent(npc, office)
-        result['wages'] += 30000
-        key, scale = {'treasury': ('revenue', .002), 'marshal': ('service', .002), 'ritual': ('discount', .001)}[office]
-        result[key] += skill * scale
-    result['revenue'] += .1 * court['buildings']['market']
-    result['service'] += .1 * court['buildings']['barracks']
-    result['discount'] += .03 * court['buildings']['sanctum']
-    # Starting at fifty preserves the old basic treasury economy.
-    result['revenue'] *= .75 + court['public_support'] / 200
-    return result
 
 
 def sync_titles(game, state):
@@ -216,9 +187,7 @@ def tick(game, state):
     court, unit = state['court'], state['unit']
     current = policy(game, state)
     court['public_support'] = min(100, max(0, court['public_support'] + current.get('support', 0)))
-    benefit = benefits(game, state)
-    gross = int(WORLD_SYSTEMS['upper_institutions']['unit_income'] * benefit['revenue'] * current.get('revenue', 1))
-    state['treasury'] += max(0, gross - benefit['wages'])
+    # Income and wages are paid on the common yearly fiscal clock.
     project = court['project']
     if project and unit >= project['complete_at']:
         court['buildings'][project['id']] += 1
@@ -361,10 +330,12 @@ def act(engine, game, state, action, target):
                 raise ValueError('人选须为在世廷臣，同一人不得兼任多个官职')
             if state['treasury'] < 60000:
                 raise ValueError('任命须府库 60,000 灵石')
-            state['treasury'] -= 60000
+            from .economy import organizations as finance
+            finance.register(game, 'upper', 'asura', 'asura')
+            finance.procure(game, finance.key('upper', 'asura'), 'asura', 60000, '王庭任命支出')
             court['offices'][office] = identity
             court['loyalty'][identity] = min(100, court['loyalty'].get(identity, 50) + 10)
-            text = f'任命{npc.name}为{OFFICES[office][0]}，才干 {talent(npc, office)}，每单位俸禄 30,000 灵石。'
+            text = f'任命{npc.name}为{OFFICES[office][0]}，才干 {talent(npc, office)}，每年俸禄 300 灵石，以府库实付为限。'
         court['appointment_at'] = state['unit']
         sync_titles(game, state)
         return text
@@ -374,7 +345,9 @@ def act(engine, game, state, action, target):
         cost = 400000 * (court['buildings'][target] + 1)
         if state['treasury'] < cost:
             raise ValueError('营建府库不足')
-        state['treasury'] -= cost
+        from .economy import organizations as finance
+        finance.register(game, 'upper', 'asura', 'asura')
+        finance.procure(game, finance.key('upper', 'asura'), 'asura', cost, '王庭营建支出')
         court['project'] = dict(id=target, complete_at=state['unit']+4, cost=cost)
         return f'{WORKS[target][0]}开工，支出 {cost:,} 灵石，四单位后竣工。'
     if action == 'decree':
@@ -383,12 +356,14 @@ def act(engine, game, state, action, target):
         title, cost, description = DECREES[target]
         if state['treasury'] < cost or (target == 'levy' and court['public_support'] < 40):
             raise ValueError('府库或民心不足以执行此决策')
-        state['treasury'] -= cost
+        from .economy import organizations as finance
+        finance.register(game, 'upper', 'asura', 'asura')
+        finance.procure(game, finance.key('upper', 'asura'), 'asura', cost, '王庭内政支出')
         if target == 'relief':
             court['public_support'] = min(100, court['public_support'] + 15)
         elif target == 'levy':
             court['public_support'] -= 15
-            state['treasury'] += 300000
+            finance.pay(game, 'background:asura', finance.key('upper', 'asura'), 300000, '王庭征收战赋')
         else:
             for npc in people(game).values():
                 if present(npc):
