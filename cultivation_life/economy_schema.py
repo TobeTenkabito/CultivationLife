@@ -2,7 +2,7 @@
 import math
 
 
-def validate_economy(value):
+def validate_economy(value, merchants=None):
     if value == {}:
         return
     def require(condition):
@@ -22,7 +22,8 @@ def validate_economy(value):
         require(nonnegative(row.get('price_level')) and row['price_level'] > 0)
         require(type(row.get('last_year')) is int)
         require(isinstance(row.get('history'), list) and len(row['history']) <= 24)
-    for row in value['accounts'].values():
+    for key, row in value['accounts'].items():
+        require(not key.startswith('alliance:'))  # Merchant reserves have one owner.
         require(isinstance(row, dict))
         for field in ('balance', 'income', 'expense'):
             require(type(row.get(field)) is int and row[field] >= 0)
@@ -38,6 +39,44 @@ def validate_economy(value):
                 require(nonnegative(commodity.get(field)))
             require(commodity['target'] > 0 and commodity['reference'] > 0 and commodity['initial_target'] > 0)
             require(isinstance(commodity.get('history'), list) and len(commodity['history']) <= 12)
+    if 'transport' in value:
+        transport = value['transport']
+        require(isinstance(transport, dict) and transport.get('version') == 1)
+        require(isinstance(transport.get('worlds'), dict))
+        for world, region in transport['worlds'].items():
+            require(world in value['worlds'] and isinstance(region, dict))
+            require(type(region.get('last_year')) is int and region['last_year'] >= value['base_year'])
+            require(isinstance(region.get('fleets'), dict) and len(region['fleets']) <= 3)
+            require(isinstance(region.get('history'), list) and len(region['history']) <= 36)
+            owners = {row['id'] for row in (merchants or {}).get('worlds', {}).get(world, [])}
+            for key, fleet in region['fleets'].items():
+                require(isinstance(fleet, dict) and key == fleet.get('id') and fleet.get('world') == world)
+                require(isinstance(fleet.get('alliance_id'), str) and key == f"{world}:{fleet['alliance_id']}:1")
+                if merchants is not None:
+                    require(fleet['alliance_id'] in owners)
+                require(f'caravan:{key}' in value['accounts'] and isinstance(fleet.get('location'), str))
+                require(fleet.get('status') in {'waiting','travelling','selling','stranded','retired'})
+                for field in ('capacity','investment','dividends','voyages','delivered','lost','loss_streak',
+                              'idle_years','next_departure','operating_costs'):
+                    require(type(fleet.get(field)) is int and fleet[field] >= 0)
+                require(6 <= fleet['capacity'] <= 240 and type(fleet.get('profit')) is int)
+                cargo = fleet.get('cargo')
+                require((cargo is None) == (fleet['status'] in {'waiting','retired'}))
+                if cargo is None:
+                    continue
+                require(isinstance(cargo, dict))
+                for place in ('origin','destination'):
+                    require(f"{world}:{cargo.get(place)}" in value['markets'])
+                require(cargo['origin'] != cargo['destination'])
+                require(isinstance(cargo.get('item'), str))
+                for field in ('quantity','purchased','departure','arrival','cost','revenue','normal_years',
+                              'years','transport_cost','array_fee','quoted_sale','expected_profit'):
+                    require(type(cargo.get(field)) is int and cargo[field] >= 0)
+                require(cargo['quantity'] <= cargo['purchased'] <= fleet['capacity'])
+                require(cargo['arrival'] == cargo['departure'] + cargo['years'] and cargo['years'] >= 1)
+                require(cargo['normal_years'] >= cargo['years'])
+                require(nonnegative(cargo.get('risk')) and cargo['risk'] <= 1)
+                require(nonnegative(cargo.get('saved_ratio')) and cargo['saved_ratio'] <= 1)
 
 
 def validate_economy_settings(config):

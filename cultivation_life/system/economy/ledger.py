@@ -2,13 +2,26 @@
 from ...rules import add_item, remove_item
 
 
+def _merchant(game, key):
+    if not key.startswith('alliance:'):
+        return None
+    _, world, identity = key.split(':', 2)
+    return next((row for row in game.merchant_state.get('worlds', {}).get(world, [])
+                 if row['id'] == identity), None)
+
+
 def balance(game, account):
     if account == 'player':
         return sum(i.quantity for i in game.player.inventory if i.id == 'spirit_stone')
+    merchant = _merchant(game, account)
+    if merchant is not None:
+        return merchant['reserves']
     return game.economy_v2['accounts'][account]['balance']
 
 
 def account(game, key, opening=0):
+    if key.startswith('alliance:'):
+        raise ValueError('商盟资金使用原储备字段，不能建立重复账户')
     return game.economy_v2['accounts'].setdefault(key, {
         'balance': opening, 'income': 0, 'expense': 0,
     })
@@ -17,7 +30,8 @@ def account(game, key, opening=0):
 def transfer_value(game, source, destination, amount, reason):
     if type(amount) is not int or amount < 0 or source == destination:
         raise ValueError('资金转移参数无效')
-    if any(key != 'player' and key not in game.economy_v2['accounts'] for key in (source, destination)):
+    if any(key != 'player' and key not in game.economy_v2['accounts'] and _merchant(game, key) is None
+           for key in (source, destination)):
         raise ValueError('资金账户不存在')
     if balance(game, source) < amount:
         raise ValueError('付款方灵石不足')
@@ -26,12 +40,16 @@ def transfer_value(game, source, destination, amount, reason):
     if source == 'player':
         if not remove_item(game.player, 'spirit_stone', amount):
             raise ValueError('灵石不足')
+    elif _merchant(game, source) is not None:
+        _merchant(game, source)['reserves'] -= amount
     else:
         row = game.economy_v2['accounts'][source]
         row['balance'] -= amount
         row['expense'] += amount
     if destination == 'player':
         add_item(game.player, 'spirit_stone', amount)
+    elif _merchant(game, destination) is not None:
+        _merchant(game, destination)['reserves'] += amount
     else:
         row = game.economy_v2['accounts'][destination]
         row['balance'] += amount

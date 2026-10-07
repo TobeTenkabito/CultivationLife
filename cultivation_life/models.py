@@ -1036,7 +1036,7 @@ class GameState:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
         from .economy_schema import validate_economy
-        validate_economy(value.get('economy_v2', {}))
+        validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}))
         if not value.get("voisinage_schema"):
             from .system.combat.migration import migrate
             value = migrate(value)

@@ -87,9 +87,9 @@ def _variation(world, location, item):
     return .75 + (value % 501) / 1000
 
 
-def ensure_market(game, maps):
+def ensure_regional_market(game, maps, world, location):
+    """Create/settle one real address without borrowing the player's address."""
     changed = ensure_state(game)
-    world, location = game.player.world, game.player.location_id
     if world not in game.economy_v2['worlds']:
         return changed
     # Validate the actual address; never turn an unknown world into human.
@@ -112,6 +112,15 @@ def ensure_market(game, maps):
         transfer_value(game, f'background:{world}', f'market:{key}', opening, '市场开业周转金')
         account(game, f'operator:{key}')
         changed = True
+    return settle_market(game, game.economy_v2['markets'][key]) or changed
+
+
+def ensure_market(game, maps):
+    world, location = game.player.world, game.player.location_id
+    changed = ensure_regional_market(game, maps, world, location)
+    if world not in game.economy_v2['worlds']:
+        return changed
+    key = market_id(world, location)
     market = game.economy_v2['markets'][key]
     missing = [item.id for item in game.player.inventory if item.quantity > 0
                and item.id != 'spirit_stone' and item.id not in market['commodities']]
@@ -141,10 +150,12 @@ def settle_market(game, market):
     if years <= 0:
         return False
     world = game.economy_v2['worlds'][market['world']]
-    for row in market['commodities'].values():
+    for item, row in market['commodities'].items():
         old_stock = row['stock']
         target = row['initial_target'] * world['scale']
-        new_stock = target + (old_stock - target) * math.exp(-settings()['recovery_rate'] * years)
+        # Stable local specialisation creates supply differences; no goods teleport.
+        supply = target * (.4 + (_variation(market['world'], market['location'], item) - .75) * 3.2)
+        new_stock = supply + (old_stock - supply) * math.exp(-settings()['recovery_rate'] * years)
         consumed = target * settings()['annual_consumption'] * years + max(0., old_stock - new_stock)
         produced = consumed + new_stock - old_stock
         if row.get('imported'):

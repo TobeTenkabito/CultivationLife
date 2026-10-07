@@ -24,6 +24,11 @@
     const macro = el('details', null, 'economy-world');
     macro.append(el('summary',`${market.world_name}经济 · 开局规模的 ${money(market.scale)} 倍`),
       el('p',`界面经济随岁月发展，接近 ${money(market.growth_cap)} 倍时逐渐放缓。物价水平 ${money(market.price_level)} 倍；黑市收入归本界府库，当前 ${money(market.world_treasury)} 灵石。`));
+    const freight = el('details', null, 'economy-freight');
+    freight.append(el('summary', `商队流通 · 累计到货 ${money(market.freight_in || 0)} / 发货 ${money(market.freight_out || 0)} 件`));
+    (market.caravans || []).forEach(fleet => freight.append(el('p',
+      `${fleet.name} · ${{waiting:'候货',travelling:'在途',selling:'待售',stranded:'受阻',retired:'已解散'}[fleet.status]} · ${fleet.destination ? `${fleet.origin} → ${fleet.destination}，预计第 ${fleet.arrival} 年抵达` : fleet.location}`)));
+    if (!market.caravans?.length) freight.append(el('p', '当前没有涉及本地的商队运输。'));
     const tools = el('div',null,'economy-tools');
     const input = el('input'); input.type='search'; input.placeholder='查找商品'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
     const quantity = el('select'); quantity.setAttribute('aria-label','本地市场交易数量');
@@ -57,7 +62,7 @@
     }
     input.oninput=()=>{search=input.value;draw();};
     quantity.onchange=()=>{selectedQuantity=quantity.value;draw();};
-    root.append(head,intro,metrics,macro,tools,note,list);draw();
+    root.append(head,intro,metrics,freight,tools,note,list);draw();
   }
   window.LocalEconomy={render,setBusy};
 })();

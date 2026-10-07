@@ -39,6 +39,8 @@ def _public_merchant(deps: MerchantViewDependencies, game):
         row["destinations"] = [{"id": world, "name": WORLD_SYSTEMS["world_names"][world],
                                  "cost": deps._merchant_passage_cost(game, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
         row["catalog"] = deps._merchant_procurement_catalog(game, alliance) if owned else []
+        from ..economy.caravans import public_caravans
+        row['caravans'] = public_caravans(game, deps.maps, alliance['id'])
         from ..teleport_system import separated
         row['teleports'] = [{'id': key, 'name': deps.maps.location(game.player.world, key)['name']}
             for key in [alliance['hq'], *(o['location_id'] for o in alliance['offices'])]

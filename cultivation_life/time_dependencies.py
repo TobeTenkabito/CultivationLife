@@ -28,6 +28,7 @@ class WorldYearDependencies:
     _maybe_wanted_encounter: Callable[..., Any]
     _resolve_breakthroughs: Callable[..., Any]
     advance_researchers: Callable[..., Any] | None = None
+    advance_caravans: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

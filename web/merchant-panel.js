@@ -29,7 +29,7 @@
     const membership = system.membership;
     root.append(element('p', membership ? `${membership.title} · 本部影响力 ${money(membership.influence)}` : '尚未加入商盟。到总部或分部所在地图即可入盟；商盟身份与宗门、家族、种族身份独立。', 'merchant-membership'));
     const rules = element('details'); rules.append(element('summary', '身份与委托规则'));
-    rules.append(element('p', '分部成员累计120影响力晋为使节，360晋为特使；600影响力并通过修为、实战考核后，可在总部调任使节。同界各分部共用影响力。总部直入成员不能直接升使节，须前往本界分部从成员历练。总部使节累计360总部影响力可升特使。'));
+    rules.append(element('p', '分部成员累计120影响力晋为使节，360晋为特使；600影响力并通过修为、实战考核后，可在总部调任使节。同界各分部共用影响力。总部直入成员不能直接升使节，须前往本界分部从成员历练。总部使节累计360总部影响力可升特使。委托现金报酬由商盟储备支付，资金不足时实付减少。'));
     rules.append(element('p', '任务按实际年数消耗时间，途中劫数会中断并保留进度。提交与炼制任务需实物；悬赏和护送会实战，招募及情报可能失败。实物与人员事务须有本盟总部或分总部；情报可经其他商盟转讯，跨界收集耗时为本界的15倍。星级越高、承接修士境界越低，失败风险越高。无人接取超时退还本金；接单后失败退还全部本金及50%手续费（向上取整）。')); root.append(rules);
     const dock = document.querySelector('[data-panel-target="merchant"]');
     dock.classList.toggle('merchant-notice', !!system.notices?.length);
@@ -57,6 +57,29 @@
       panel.append(element('p', `${alliance.policy_name}（第${alliance.next_policy_age}年调整） · 势力 ${money(alliance.power)} · 资材 ${money(alliance.reserves)} · ${alliance.relation}`));
       panel.append(element('p', `本界总部：${alliance.hq_name} · 盟主 ${alliance.leader_name}（${alliance.leader_realm}）${alliance.cross_world ? `；总盟主 ${alliance.chief_name}（${alliance.chief_realm}），战力 ${money(alliance.chief_power)}` : ''}`));
       panel.append(element('p', `分部：${alliance.offices.map(row => `${row.name}〔${row.leader} · ${row.realm}〕`).join('、')}`));
+      const fleets = element('details', null, 'merchant-caravans');
+      fleets.dataset.allianceId = alliance.id;
+      fleets.append(element('summary', `商队经营 · ${(alliance.caravans || []).length} 支`));
+      fleets.append(element('p', '商队用本盟资金采购实货，在本界据点之间运输、售货；只有实现利润才向商盟上缴。运价不足时会留驻，长期亏损会缩编或解散。'));
+      (alliance.caravans || []).forEach(fleet => {
+        const row = element('section', null, 'merchant-order caravan-row');
+        row.dataset.caravanId = fleet.id;
+        const status = {waiting:'留驻候货',travelling:'在途',selling:'抵达待售',stranded:'运输受阻',retired:'已解散'}[fleet.status];
+        row.append(element('strong', `${fleet.name} · ${status}`),
+          element('p', `运力 ${money(fleet.capacity)} 件 · 已发 ${money(fleet.voyages)} 趟${fleet.destination ? ` · ${fleet.origin} → ${fleet.destination} · 预计第 ${fleet.arrival} 年抵达` : ` · 驻 ${fleet.location}`}`));
+        if (fleet.detail) {
+          row.append(element('p', `周转资金 ${money(fleet.cash)} · 累计经营净收支 ${money(fleet.profit)} · 已上缴 ${money(fleet.dividends)} 灵石`),
+            element('p', `已交付 ${money(fleet.delivered)} 件 · 途中损失 ${money(fleet.lost)} 件 · 留驻及扩编支出 ${money(fleet.operating_costs)} 灵石`),
+            element('p', fleet.last_result));
+          if (fleet.cargo) {
+            const cargo = fleet.cargo;
+            row.append(element('p', `${cargo.name} ×${cargo.quantity} · 本趟总成本 ${money(cargo.cost)} 灵石 · 启程时预估利润 ${money(cargo.expected_profit)} 灵石`),
+              element('p', `路程 ${cargo.years}/${cargo.normal_years} 年 · 沿途运输 ${money(cargo.transport_cost)} / 传送费 ${money(cargo.array_fee)} 灵石 · 风险 ${Math.round(cargo.risk * 100)}%`));
+          }
+        } else row.append(element('p', '加入本界商盟后可查看货单与经营账目。', 'muted'));
+        fleets.append(row);
+      });
+      panel.append(fleets);
       if (!membership) panel.append(button(alliance.local_site ? '加入商盟' : '前往上述据点后可入盟', 'join', {alliance_id:alliance.id}, !alliance.local_site));
       if(capabilities.debug){const grant=button('Debug：一键总部特使','',{},!!system.active);grant.classList.add('merchant-debug-hq');grant.onclick=()=>capabilities.debugGrant(alliance.id);panel.append(grant);}
       if (alliance.member) {

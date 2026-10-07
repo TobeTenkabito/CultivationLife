@@ -597,6 +597,28 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("economy-caravans")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商队经营验收',preset_id:'core',seed:213})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.system.economy import state,caravans\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.player.location_id=g.merchant_state['worlds']['human'][0]['hq']\nfor _ in range(50):\n g.player.age+=1\n state.advance_economy(g)\n caravans.advance_caravans(g,e.maps)\ng.pending_event=None\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("UtilityPanels.open('merchant');true");
+                tapSelector(".merchant-alliance button");
+                waitForJs("!busy && !!game.merchant_system.membership","Native merchant join");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.open('merchant');document.querySelector('.merchant-caravans').open=false;true");
+                    tapSelector(".merchant-caravans summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.caravan-row').innerText.includes('周转资金') && game.merchant_system.alliances[0].caravans[0].voyages>0")),"Native freight accounts");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#merchant-card').scrollWidth<=document.querySelector('#merchant-card').clientWidth+1")),"Native caravan width");
+                    capture("caravans-merchant-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    js("UtilityPanels.open('map');true");tapSelector("#map-view-tabs button[aria-controls=map-economy]");
+                    js("document.querySelector('.economy-freight').open=false;true");tapSelector(".economy-freight summary");
+                    check(Boolean.TRUE.equals(js("game.map.economy.freight_in+game.map.economy.freight_out>0 && document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+1")),"Native local freight");
+                    capture("caravans-map-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!busy && game.merchant_system.alliances[0].caravans[0].detail")),"Freight reload");
+                }
+                result.putString("caravan_scope","Four themes, native join and disclosure, same-world freight, map activity, persistence");
             } else if(phase.equals("economy-v2")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本地经济验收',preset_id:'core',seed:213})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\nadd_item(g.player,'spirit_stone',100000000)\ne.store.save(g)");

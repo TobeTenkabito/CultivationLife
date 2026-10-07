@@ -118,6 +118,17 @@ def verify(with_dlc):
             sold = post('local-market-trade', dict(market_id=economy['market_id'], revision=traded['map']['economy']['revision'],
                 item_id=item['id'], side='sell', quantity=1, total=bought['quotes']['1']['sell']['total']))
             assert next(row for row in sold['map']['economy']['rows'] if row['id'] == item['id'])['held'] == item['held']
+            assert any(row['caravans'] for row in sold['merchant_system']['alliances'])
+            freight_raw = json.loads(snapshot_file.read_bytes())
+            freight_raw['pending_event'] = None
+            freight_raw['settings']['silent_events'] = True
+            snapshot_file.write_text(json.dumps(freight_raw,ensure_ascii=False),encoding='utf-8')
+            advanced_freight = post('advance', {'action':'rest','years':1})
+            freight_raw = json.loads(snapshot_file.read_bytes())
+            transport = freight_raw['economy_v2']['transport']['worlds']['human']
+            assert transport['last_year'] == freight_raw['player']['age']
+            assert any(row['investment'] > 0 for row in transport['fleets'].values())
+            assert all(row['world'] == 'human' for row in transport['fleets'].values())
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

@@ -12,8 +12,8 @@ from .heavens.local_control import arrival_notice
 
 def separated(maps, world, origin, destination):
     return origin != destination and destination not in {node for node, _ in maps._graphs[world][origin]}
-def arrays(game, maps):
-    world = game.player.world
+def arrays(game, maps, world=None):
+    world = world or game.player.world
     factions = sorted((s for s in game.sects.values() if s.world == world and not s.extinct and s.id not in {'heavenly_court', 'yaochi'}), key=lambda s: s.id)
     result = {}
     for location in maps.worlds[world]['locations']:
