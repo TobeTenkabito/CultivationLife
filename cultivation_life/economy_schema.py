@@ -2,7 +2,7 @@
 import math
 
 
-def validate_economy(value, merchants=None):
+def validate_economy(value, merchants=None, document=None):
     if value == {}:
         return
     def require(condition):
@@ -23,7 +23,7 @@ def validate_economy(value, merchants=None):
         require(type(row.get('last_year')) is int)
         require(isinstance(row.get('history'), list) and len(row['history']) <= 24)
     for key, row in value['accounts'].items():
-        require(not key.startswith('alliance:'))  # Merchant reserves have one owner.
+        require(not key.startswith(('alliance:', 'organization:')))  # One treasury per organization.
         require(isinstance(row, dict))
         for field in ('balance', 'income', 'expense'):
             require(type(row.get(field)) is int and row[field] >= 0)
@@ -39,6 +39,36 @@ def validate_economy(value, merchants=None):
                 require(nonnegative(commodity.get(field)))
             require(commodity['target'] > 0 and commodity['reference'] > 0 and commodity['initial_target'] > 0)
             require(isinstance(commodity.get('history'), list) and len(commodity['history']) <= 12)
+    if 'organizations' in value:
+        require(isinstance(value['organizations'], dict))
+        for key, row in value['organizations'].items():
+            require(isinstance(row, dict) and row.get('kind') in {'sect', 'family', 'court', 'upper', 'yaochi'})
+            require(isinstance(row.get('identity'), str) and row.get('world') in value['worlds'])
+            expected = f"organization:{row['kind']}:{row['identity']}" if row['kind'] != 'yaochi' else 'institution:celestial:yaochi'
+            require(key == expected)
+            if row['kind'] == 'court':
+                require(row['identity'] == 'heavenly' and row['world'] == 'celestial')
+            elif row['kind'] == 'upper':
+                require(row['identity'] == row['world'] and row['world'] in {'asura', 'nether', 'reincarnation'})
+            elif row['kind'] == 'yaochi':
+                require(row['identity'] == 'yaochi' and row['world'] == 'celestial' and key in value['accounts'])
+            if document is not None and row['kind'] != 'yaochi':
+                if row['kind'] in {'sect', 'family'}:
+                    owner = document.get('intrigue_state', {}).get('factions', {}).get(f"{row['kind']}:{row['identity']}", {})
+                    funds = owner.get('resources')
+                elif row['kind'] == 'court':
+                    funds = document.get('heavenly_court', {}).get('treasury')
+                else:
+                    funds = document.get('upper_institutions', {}).get(row['identity'], {}).get('treasury')
+                require(nonnegative(funds))
+            for field in ('last_year', 'income', 'expense', 'shortfall', 'benefit_paid', 'benefit_due', 'produced'):
+                require(type(row.get(field)) is int and row[field] >= 0)
+            require(row['last_year'] >= value['base_year'])
+            require(row.get('commodity') is None or isinstance(row['commodity'], str))
+            require(isinstance(row.get('history'), list) and len(row['history']) <= 12)
+            require(nonnegative(row.get('production_credit', 0)))
+            if 'welfare_year' in row:
+                require(type(row['welfare_year']) is int and row['welfare_year'] >= 0)
     if 'transport' in value:
         transport = value['transport']
         require(isinstance(transport, dict) and transport.get('version') == 1)

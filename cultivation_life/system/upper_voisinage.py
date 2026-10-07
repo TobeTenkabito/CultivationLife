@@ -37,8 +37,12 @@ def quote(player, rank, game=None):
     material = next(m for m in CONTENT_DOCUMENTS['crafting.json']['materials'] if m['id'] == world['material_id'])
     from .upper_institutions import cultivation_discount
     discount = cultivation_discount(game) if game is not None else 0
+    if game is not None and discount:
+        from .institution_state import account
+        discount = min(discount, account(game)['treasury'] / max(1, cfg['stone_costs'][rank - 1]))
     return dict(opportunity=ceil(opportunity_required(player) * cfg['opportunity_fractions'][rank - 1] * (1-discount)),
         stones=ceil(cfg['stone_costs'][rank - 1] * (1-discount)), discount=discount, material_id=material['id'], material_name=material['name'],
+        subsidy=cfg['stone_costs'][rank - 1] - ceil(cfg['stone_costs'][rank - 1] * (1-discount)),
         materials=cfg['material_counts'][rank - 1],
         owned_materials=sum(m.get('material_id') == material['id'] and not m.get('dynamic_definition')
                             for m in player.crafting_materials),
@@ -103,7 +107,12 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
             raise ValueError(row['reason'])
         cost = row['cost']
         consumed = material_stock(p)[:cost['materials']]
-        remove_item(p, 'spirit_stone', cost['stones'])
+        from .economy import organizations as finance
+        finance.ensure_state(game)
+        if cost['subsidy']:
+            finance.register(game, 'upper', p.world, p.world)
+            finance.procure(game, finance.key('upper', p.world), p.world, cost['subsidy'], '机构邻域修炼补贴')
+        finance.transfer_value(game, 'player', f'background:{p.world}', cost['stones'], '邻域修炼支付')
         p.opportunity -= cost['opportunity']
         for material in consumed:
             p.crafting_materials.remove(material)

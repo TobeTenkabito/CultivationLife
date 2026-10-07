@@ -129,7 +129,7 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     freight = Mock(side_effect=advance_freight)
     deps, unexpected = contract(WorldYearDependencies,
         **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers,
-        advance_caravans=freight)
+        advance_caravans=freight, advance_organizations=Mock())
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
@@ -150,7 +150,7 @@ def test_lifespan_stops_before_world_npcs_and_demonic_updates():
     die = Mock(side_effect=lambda *args: setattr(game.player, 'alive', False))
     permitted = {name: Mock(return_value=[]) for name in ANNUAL_ORDER[:7]}
     freight = Mock()
-    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight)
+    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight, advance_organizations=Mock())
     assert not _advance_world_year(deps, game, random.Random(1), [])
     die.assert_called_once_with(game, '寿元已尽', 'SYS_LIFESPAN')
     freight.assert_called_once_with(game)

@@ -9,6 +9,7 @@ from math import floor
 from ..content_registry import WORLD_SYSTEMS
 from ..rules import add_item
 from ..runtime import now_iso, decode_rng, encode_rng
+from .economy import organizations as finance
 
 from .institution_state import (
     config as config,
@@ -62,7 +63,8 @@ def votes(game, target, *, player=False):
 def enact(game, state, target, author):
     if state['treasury'] < config()['policy_cost']:
         raise ValueError('机构府库不足以施行政务')
-    state['treasury'] -= config()['policy_cost']
+    finance.register(game, 'upper', game.player.world, game.player.world)
+    finance.procure(game, finance.key('upper', game.player.world), game.player.world, config()['policy_cost'], '机构施行政务')
     state['policy'] = target
     state['agenda_at'] = state['unit'] + config()['agenda_interval']
     record(game, state, f"{author}施行【{policy(game, state)['name']}】。{policy(game,state)['description']}")
@@ -83,8 +85,6 @@ def advance_time(game, elapsed, unit_years):
         state['unit'] += 1
         if game.player.world == 'asura':
             asura_court.tick(game, state)
-        else:
-            state['treasury'] += config()['unit_income']
         obligation = state['obligation']
         if obligation and state['unit'] > obligation['deadline']:
             state['regard'] = max(0, state['regard'] - 15)
@@ -110,14 +110,9 @@ def advance_time(game, elapsed, unit_years):
         if game.player.world=='nether' and state['seat_active'] and state['support'][state['bloc']]<50:
             state['seat_active']=False
             record(game,state,'本族支持低于五十，门阀收回你的代言资格。')
-        rank=state['rank'] if game.player.world!='nether' else int(state['seat_active'])
-        amount=int((10000+rank*10000)*policy(game,state)['income'])
-        paid=min(amount,state['treasury'])
-        state['treasury']-=paid
-        add_item(game.player,'spirit_stone',paid)
         if state['obligation'] is None and game.player.world=='asura' and not asura_court.is_king(state):
             state['obligation']=dict(name='王命：完成一次王庭委托',deadline=state['unit']+4)
-        record(game,state,f"第 {state['unit']} 单位：领取{'神职供养' if game.player.world=='reincarnation' else '俸禄津贴'}，灵石 +{paid}。")
+        record(game,state,f"第 {state['unit']} 单位：政务完成；供养已按实际年数与府库余额结算。")
 
 
 def require_action(game, *, local=True):
@@ -157,6 +152,7 @@ def act(engine, game_id, action, target=''):
     game=engine._load(game_id)
     require_action(game)
     cfg, state, p=definition(game), account(game,create=True),game.player
+    finance.register(game, 'upper', p.world, p.world)
     from . import asura_court
     if p.world == 'asura':
         asura_court.ensure(game)
@@ -329,13 +325,17 @@ def act(engine, game_id, action, target=''):
             if state['treasury']<amount:
                 raise ValueError('机构府库不足')
             spend(state,100)
-            state['treasury']-=amount
-            add_item(p,'spirit_stone',amount)
+            finance.register(game, 'upper', p.world, p.world)
+            finance.transfer_value(game, finance.key('upper', p.world), 'player', amount, '机构功勋兑换灵石')
             text=f'消耗 100 功勋领取灵石 {amount}。'
         elif action=='material':
             from .upper_voisinage_rules import world_config
             from .crafting_system import crafting_material_definitions, make_crafting_material_instance
             material=crafting_material_definitions()[world_config(p)['material_id']]
+            finance.register(game, 'upper', p.world, p.world)
+            if state['merit'] < config()['material_merit']:
+                raise ValueError('机构功勋不足')
+            finance.procure(game, finance.key('upper', p.world), p.world, int(material['base_material_value']), '机构筑域材料采购')
             spend(state,config()['material_merit'])
             rng=decode_rng(game.seed,game.rng_state)
             p.crafting_materials.append(make_crafting_material_instance(material,rng,source=cfg['name'],origin_world=p.world))
@@ -355,6 +355,10 @@ def public_institution(game):
         return {'available':False}
     state=account(game)
     result=copy.deepcopy(state)
+    result['finance'] = finance.public_finance(game, 'upper', game.player.world)
+    from .upper_voisinage_rules import world_config
+    from .crafting_system import crafting_material_definitions
+    result['material_stone_cost'] = crafting_material_definitions()[world_config(game.player)['material_id']]['base_material_value']
     result.update(available=True,name=cfg['name'],regime=cfg['regime'],description=cfg['description'],
                   location=cfg['location'],local=game.player.location_id==cfg['location'],world=game.player.world,
                   policies=copy.deepcopy(cfg['policies']),ranks=cfg['ranks'],people=officials(game),

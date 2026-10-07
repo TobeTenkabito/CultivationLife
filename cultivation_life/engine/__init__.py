@@ -220,8 +220,10 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
 
     def _ensure_merchant(self, game) -> bool:
         from ..system.economy.caravans import ensure_caravans
+        from ..system.economy.organizations import ensure_organizations
         changed = merchant_state._ensure_merchant(self._dependencies.merchant.state, game)
-        return ensure_caravans(game, self.maps) or changed
+        changed = ensure_caravans(game, self.maps) or changed
+        return ensure_organizations(game) or changed
 
     def _merchant_alliance(self, game, world, alliance_id):
         return merchant_state._merchant_alliance(game, world, alliance_id)

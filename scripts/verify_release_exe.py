@@ -129,6 +129,12 @@ def verify(with_dlc):
             assert transport['last_year'] == freight_raw['player']['age']
             assert any(row['investment'] > 0 for row in transport['fleets'].values())
             assert all(row['world'] == 'human' for row in transport['fleets'].values())
+            organizations = freight_raw['economy_v2']['organizations']
+            assert organizations and any(row['produced'] > 0 for row in organizations.values())
+            assert all(row['last_year'] == freight_raw['player']['age'] for row in organizations.values())
+            assert not any(key.startswith('organization:') for key in freight_raw['economy_v2']['accounts'])
+            with urllib.request.urlopen(base + '/organization-finance.js', timeout=5) as response:
+                assert b'renderOrganizationFinance' in response.read()
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

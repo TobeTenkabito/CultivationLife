@@ -89,6 +89,10 @@ def test_tribute_materials_cover_base_sources_only(throne, kind):
     rows = asura_factions.materials()
     assert not any("guixu" in r["id"] or r["id"].startswith("SPATIAL_") for r in rows)
     row = next(r for r in rows if r["kind"] == kind)
+    from cultivation_life.system.economy import organizations as finance
+    finance.register(game, "upper", "asura", "asura")
+    finance.transfer_value(game, "background:asura", finance.key("upper", "asura"), 10**10, "测试贡赋采购预算")
+    engine.store.save(game)
     engine.upper_institution_action(game.id, "royal_tribute", "material:" + row["id"])
     p = engine.store.load(game.id).player
     if kind == "item":

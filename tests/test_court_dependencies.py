@@ -30,9 +30,9 @@ def test_court_stipend_can_run_without_an_engine():
     arguments['_court_config'] = lambda: {'grade_stipends': {'9': 17}}
     game = GameState('stipend', 7, Player('Player', 'none'), '', '')
     game.heavenly_court = {'player_grade': 9}
-    _court_pay_stipend(CourtLifecycleDependencies(**arguments), game)
-    assert game.heavenly_court['stipend_total'] == 17
-    assert next(item.quantity for item in game.player.inventory if item.id == 'spirit_stone') == 17
+    assert '0.17' in _court_pay_stipend(CourtLifecycleDependencies(**arguments), game)
+    assert 'stipend_total' not in game.heavenly_court
+    assert not game.player.inventory
     unrelated.assert_not_called()
 
 
@@ -47,8 +47,8 @@ def test_court_bindings_follow_late_overrides_and_replaced_storage(tmp_path, mon
     assert engine._dependencies.court_yaochi._load('save') == 'replacement game'
     game = GameState('stipend', 7, Player('Player', 'none'), '', '')
     game.heavenly_court = {'player_grade': 9}
-    engine._court_pay_stipend(game)
-    assert game.heavenly_court['stipend_total'] == 23
+    assert '0.23' in engine._court_pay_stipend(game)
+    assert 'stipend_total' not in game.heavenly_court
 
 
 def test_legacy_yaochi_mixin_still_supports_an_independent_consumer(tmp_path):

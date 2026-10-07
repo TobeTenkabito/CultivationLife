@@ -18,6 +18,8 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     advance_economy(game)
     if deps.advance_caravans:
         deps.advance_caravans(game)
+    if deps.advance_organizations:
+        deps.advance_organizations(game)
     emit(game, 'time.elapsed', years=1, unit_years=WORLD_SYSTEMS['time_units'][str(p.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_sage_year(game, rng)
@@ -46,6 +48,8 @@ def _advance_world_year(
     advance_economy(game)
     if deps.advance_caravans:
         deps.advance_caravans(game)
+    if deps.advance_organizations:
+        deps.advance_organizations(game)
     emit(game, "time.elapsed", years=1, unit_years=WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_merchant_year(game)

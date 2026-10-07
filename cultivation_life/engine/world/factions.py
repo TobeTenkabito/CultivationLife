@@ -305,25 +305,27 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         else rng.choice(sorted(FACTION_REWARDS))
     )
     reward_name = FACTION_REWARDS[reward_id]["name"]
+    from ...system.economy.organizations import welfare
+    funding = welfare(game, game.sects[player.faction_id])
     if reward_id == "opportunity":
-        deps._add_opportunity(player, 3)
-        reward_text = "机缘 +3"
+        deps._add_opportunity(player, 3 * funding)
+        reward_text = f"机缘 +{3 * funding:g}"
     elif reward_id == "vitality":
-        player.faction_hp_bonus += 2
-        player.hp = min(max_hp(player), player.hp + 2)
-        reward_text = "HP 上限永久 +2"
+        player.faction_hp_bonus += 2 * funding
+        player.hp = min(max_hp(player), player.hp + 2 * funding)
+        reward_text = f"HP 上限永久 +{2 * funding:g}"
     elif reward_id == "mana":
-        player.faction_mp_bonus += 2
-        player.mp = min(max_mp(player), player.mp + 2)
-        reward_text = "MP 上限永久 +2"
+        player.faction_mp_bonus += 2 * funding
+        player.mp = min(max_mp(player), player.mp + 2 * funding)
+        reward_text = f"MP 上限永久 +{2 * funding:g}"
     else:
-        player.faction_combat_bonus += 3
-        reward_text = "独立战斗力永久 +3"
+        player.faction_combat_bonus += 3 * funding
+        reward_text = f"独立战斗力永久 +{3 * funding:g}"
     player.faction_contribution += 1
     sect_name = faction_meta["name"]
     game.history.append(HistoryRecord(
         "SYS_FACTION_WELFARE", 1, player.age, f"{sect_name}年度结算", reward_id, "rewarded",
-        f"宗门发放{reward_name}：{reward_text}；年度履职记宗门贡献 +1。",
+        f"宗门发放{reward_name}：{reward_text}（财政支付 {funding:.0%}）；年度履职记宗门贡献 +1。",
         {"reward": reward_id, "faction_contribution": player.faction_contribution},
         ["system", "faction", "annual"],
     ))

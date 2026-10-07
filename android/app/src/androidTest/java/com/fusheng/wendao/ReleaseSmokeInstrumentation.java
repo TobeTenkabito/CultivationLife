@@ -597,6 +597,25 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("economy-organizations")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'组织财政验收',preset_id:'core',seed:315})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.models import SectState,SectNpc\nfrom cultivation_life.rules import add_item\nfrom cultivation_life.system.economy import organizations as f\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=5\ng.player.lifespan=None\ng.player.next_tribulation_age=None\ng.player.faction_id=next(s.id for s in g.sects.values() if s.world=='human' and s.kind=='sect')\nn=SectNpc('fiscal_heir','沈宁','族人',4,1,100,1000,world='human')\ng.family=SectState('native_family','沈氏','human',[n],kind='family',founded_by_player=True,founder_player_id=g.id)\nadd_item(g.player,'spirit_stone',10000)\nf.ensure_organizations(g)\ng.player.age+=1\nf.advance_organizations(g,e.maps)\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.open('family');window.__familyCash=game.family.ledger.resources;document.querySelector('[data-family-funds]').value='1000';Array.from(document.querySelectorAll('[data-family]')).find(b=>JSON.parse(b.dataset.family).action==='fund').id='native-family-fund';true");
+                    tapSelector("#native-family-fund");
+                    waitForJs("!busy && game.family.ledger.resources===window.__familyCash+1000","Native family treasury transfer");
+                    tapSelector("#family-card .organization-finance summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#family-card .organization-finance').innerText.includes('驻地产出') && document.querySelector('#family-card').scrollWidth<=document.querySelector('#family-card').clientWidth+1")),"Native family finance");
+                    capture("organizations-family-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    js("UtilityPanels.open('faction');true");tapSelector("#faction-card .organization-finance summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#faction-card .organization-finance').innerText.includes('福利实付') && document.querySelector('#faction-card').scrollWidth<=document.querySelector('#faction-card').clientWidth+1")),"Native sect finance");
+                    capture("organizations-sect-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!busy && game.family.ledger.resources===window.__familyCash+1000")),"Native treasury persistence");
+                }
+                result.putString("organization_scope","Four themes, native family funding, real local production, sect finance, no overflow and persistence");
             } else if(phase.equals("economy-caravans")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商队经营验收',preset_id:'core',seed:213})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.system.economy import state,caravans\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.player.location_id=g.merchant_state['worlds']['human'][0]['hq']\nfor _ in range(50):\n g.player.age+=1\n state.advance_economy(g)\n caravans.advance_caravans(g,e.maps)\ng.pending_event=None\ne.store.save(g)");

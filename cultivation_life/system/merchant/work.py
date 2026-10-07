@@ -104,10 +104,18 @@ def _merchant_work(deps: MerchantWorkDependencies, game, rng):
     alliance = deps._merchant_alliance(game, task['world'], task['alliance_id'])
     paid = min(reward['stones'], alliance['reserves'])
     transfer_value(game, treasury(task['world'], task['alliance_id']), 'player', paid, '商盟委托报酬')
-    deps._add_opportunity(game.player, reward["opportunity"])
-    game.player.karma = max(0, game.player.karma - reward["karma"])
     definition = deps._crafting_material_defs()[task.get("reward_definition_id", task["definition_id"])]
-    for _ in range(reward["materials"]):
+    from ..economy.organizations import procure
+    source = treasury(task['world'], task['alliance_id'])
+    unit_cost = max(1, int(definition['base_material_value']))
+    material_count = min(reward['materials'], alliance['reserves'] // unit_cost)
+    procure(game, source, task['world'], material_count * unit_cost, '商盟委托材料采购')
+    cultivation_cost = max(1, int(reward['opportunity'] * 100))
+    funding = procure(game, source, task['world'], cultivation_cost, '商盟委托修炼供养', partial=True) / cultivation_cost
+    opportunity = reward['opportunity'] * funding
+    deps._add_opportunity(game.player, opportunity)
+    game.player.karma = max(0, game.player.karma - reward["karma"])
+    for _ in range(material_count):
         game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟报酬", origin_world=task["world"]))
     key = task["influence_key"]
     state["influence"][key] = state["influence"].get(key, 0) + reward["influence"]
@@ -116,4 +124,4 @@ def _merchant_work(deps: MerchantWorkDependencies, game, rng):
     state["completed"] = state["completed"][-350:]
     state["active"] = None
     shortfall = f"商盟财政不足，本次现金报酬原额 {reward['stones']:,}，实付 {paid:,}。" if paid < reward['stones'] else ''
-    deps._merchant_notice(game, f"完成{task['stars']}星「{task['name']}」，灵石 +{paid:,}，材料 +{reward['materials']}，机缘 +{reward['opportunity']}，因果 -{reward['karma']}，商盟影响力 +{reward['influence']}。{shortfall}{detail}")
+    deps._merchant_notice(game, f"完成{task['stars']}星「{task['name']}」，灵石 +{paid:,}，材料 +{material_count}（约定 {reward['materials']}），机缘 +{opportunity:g}（财政支付 {funding:.0%}），因果 -{reward['karma']}，商盟影响力 +{reward['influence']}。{shortfall}{detail}")

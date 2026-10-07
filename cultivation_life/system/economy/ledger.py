@@ -2,6 +2,21 @@
 from ...rules import add_item, remove_item
 
 
+def _organization(game, key):
+    if not key.startswith('organization:'):
+        return None
+    _, kind, identity = key.split(':', 2)
+    if kind in {'sect', 'family'}:
+        row = game.intrigue_state.get('factions', {}).get(f'{kind}:{identity}')
+        return (row, 'resources') if row is not None else None
+    if kind == 'court' and identity == 'heavenly':
+        return (game.heavenly_court, 'treasury') if game.heavenly_court else None
+    if kind == 'upper':
+        row = game.upper_institutions.get(identity)
+        return (row, 'treasury') if row is not None else None
+    return None
+
+
 def _merchant(game, key):
     if not key.startswith('alliance:'):
         return None
@@ -13,6 +28,9 @@ def _merchant(game, key):
 def balance(game, account):
     if account == 'player':
         return sum(i.quantity for i in game.player.inventory if i.id == 'spirit_stone')
+    organization = _organization(game, account)
+    if organization is not None:
+        return int(organization[0][organization[1]])
     merchant = _merchant(game, account)
     if merchant is not None:
         return merchant['reserves']
@@ -20,8 +38,8 @@ def balance(game, account):
 
 
 def account(game, key, opening=0):
-    if key.startswith('alliance:'):
-        raise ValueError('商盟资金使用原储备字段，不能建立重复账户')
+    if key.startswith(('alliance:', 'organization:')):
+        raise ValueError('组织资金使用原府库字段，不能建立重复账户')
     return game.economy_v2['accounts'].setdefault(key, {
         'balance': opening, 'income': 0, 'expense': 0,
     })
@@ -30,9 +48,10 @@ def account(game, key, opening=0):
 def transfer_value(game, source, destination, amount, reason):
     if type(amount) is not int or amount < 0 or source == destination:
         raise ValueError('资金转移参数无效')
-    if any(key != 'player' and key not in game.economy_v2['accounts'] and _merchant(game, key) is None
+    if any(key != 'player' and key not in game.economy_v2['accounts'] and _merchant(game, key) is None and _organization(game, key) is None
            for key in (source, destination)):
         raise ValueError('资金账户不存在')
+    balance(game, destination)  # Validate the receiving treasury before any debit.
     if balance(game, source) < amount:
         raise ValueError('付款方灵石不足')
     if not amount:
@@ -40,6 +59,9 @@ def transfer_value(game, source, destination, amount, reason):
     if source == 'player':
         if not remove_item(game.player, 'spirit_stone', amount):
             raise ValueError('灵石不足')
+    elif _organization(game, source) is not None:
+        row, field = _organization(game, source)
+        row[field] -= amount
     elif _merchant(game, source) is not None:
         _merchant(game, source)['reserves'] -= amount
     else:
@@ -48,6 +70,9 @@ def transfer_value(game, source, destination, amount, reason):
         row['expense'] += amount
     if destination == 'player':
         add_item(game.player, 'spirit_stone', amount)
+    elif _organization(game, destination) is not None:
+        row, field = _organization(game, destination)
+        row[field] += amount
     elif _merchant(game, destination) is not None:
         _merchant(game, destination)['reserves'] += amount
     else:

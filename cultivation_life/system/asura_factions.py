@@ -182,7 +182,9 @@ def act(game, state, action, target, roster):
             raise ValueError("请选择派系与政令")
         if unit - f["target_at"] < 4 or state["treasury"] < 100000:
             raise ValueError("派系政令需要十万府库灵石，间隔四单位")
-        state["treasury"] -= 100000
+        from .economy import organizations as finance
+        finance.register(game, 'upper', 'asura', 'asura')
+        finance.procure(game, finance.key('upper', 'asura'), 'asura', 100000, '王庭派系政令支出')
         delta, loyalty = {
             "patronize": (8, 15),
             "restrain": (-12, -10),
@@ -205,6 +207,20 @@ def act(game, state, action, target, roster):
                 "只可索取修罗界本体资材，其他 DLC 与专属秘境产物不在贡赋范围"
             )
         quantity = 1000000 if identity == "spirit_stone" else 1
+        from .economy import organizations as finance
+        finance.register(game, 'upper', 'asura', 'asura')
+        source = finance.key('upper', 'asura')
+        if identity == 'spirit_stone':
+            finance.transfer_value(game, source, 'player', quantity, '王庭现金贡赋')
+        else:
+            if item['kind'] == 'crafting':
+                cost = crafting_material_definitions()[identity]['base_material_value']
+            elif item['kind'] == 'formation':
+                cost = formation_material_definitions()[identity]['base_value']
+            else:
+                from .economy.state import commodity_catalog
+                cost = commodity_catalog('asura').get(identity, {}).get('base_price', 100000)
+            finance.procure(game, source, 'asura', int(cost), '王庭资材贡赋采购')
         if item["kind"] == "crafting":
             rng = random.Random(f"{game.seed}:royal:{unit}:{identity}")
             instance = make_crafting_material_instance(
@@ -223,7 +239,7 @@ def act(game, state, action, target, roster):
             )
             instance["id"] = f"royal-{unit}-{identity}"
             game.player.formation_materials.append(instance)
-        else:
+        elif identity != 'spirit_stone':
             add_item(game.player, identity, quantity)
         text = f"王庭征调{item['name']} × {quantity}。"
         faction = "free_cities"
