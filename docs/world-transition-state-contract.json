@@ -5,8 +5,12 @@
     "economy_v2.organizations": "组织年度账目归 identity 与 world；产业仅在真实驻地向本地市场供货；玩家跨界不复制府库、不携带组织产出，同界身份才发放供养",
     "intrigue_state.factions.*.resources": "宗门及家族唯一现金余额，基础财政属于本体；organization 适配器直接转账，DLC 开关不重置",
     "heavenly_court.treasury / upper_institutions.*.treasury": "机构唯一府库，政治时钟不再生成收入或俸禄，统一年度经济入口结算",
-    "economy_v2.transport": "商队归固定 world 与 alliance_id；现金在 caravan 账户，实货仅在 cargo；玩家跨界不迁移这些资产",
-    "merchant_state.worlds.*.reserves": "商盟现金唯一权威字段，alliance 账本适配器直接结算，不另建镜像钱包"
+    "economy_v2.transport": "商队固定登记于出资界面，owner_kind/owner_id 明确商盟、宗门、家族或独立归属；加盟只改变归属不改编号、地址或复制货物。cargo 为同界唯一货单，cross_trip 为跨界唯一货单；运力与组织商队数量上限分离。护卫为付薪聚合战力，不复制世界 NPC。",
+    "merchant_state.worlds.*.reserves": "商盟现金唯一权威字段，alliance 账本适配器直接结算，不另建镜像钱包",
+    "economy_v2.network": "逆灵通道以主总部及分总部组成的世界对持久登记；建设及维护使用真实账户。总部年费由总部支付，票款归出发端，freight 托运账户仅随总部商队实际返航交款。关闭路线不交付、不复制在途实货。",
+    "economy_v2.personal": "只保存采用时现金基线、有限个人流水及收支累计，余额仍读玩家灵石背包，其他现金变动单列。不评估或限制跨界背包。",
+    "economy_v2.organizations.industry_level / war_funding": "驻地产业扩建最高十级，养护和军需采购来自既有组织府库；战争消耗真实商品，供给不足影响部队保障。市场 suppliers 仅记录近年真实交付并衰减，不授予人物或市场产权。",
+    "merchant_state.worlds.*.network_id / player_owned": "玩家商盟身份与跨界网络关联；吸纳既有商盟保留其原 id、府库及商队编号，仅改名并关联总部。每处本地据点增加三个商队名额，分部不自动共享现金。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",

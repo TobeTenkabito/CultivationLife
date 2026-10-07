@@ -267,7 +267,9 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return merchant_passage._merchant_passage_cost(game, destination)
 
     def merchant_action(self, game_id, action, payload=None):
-        return merchant_actions.merchant_action(self._dependencies.merchant.actions, game_id, action, payload)
+        from .transactions import accept_committed_game
+        return merchant_actions.merchant_action(self._dependencies.merchant.actions, game_id, action, payload,
+                                               committed=lambda game: accept_committed_game(self, game))
 
     def _merchant_post(self, game, alliance, payload):
         return merchant_actions._merchant_post(self._dependencies.merchant.actions, game, alliance, payload)
@@ -2634,6 +2636,12 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from .transactions import accept_committed_game
         return trade(self._dependencies.economy.market, game_id, payload,
                      committed=lambda game: accept_committed_game(self, game))
+
+    def fleet_action(self, game_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        from ..system.economy.network_actions import command
+        from .transactions import accept_committed_game
+        return command(self._dependencies.economy.market, game_id, payload,
+                       committed=lambda game: accept_committed_game(self, game))
 
     @staticmethod
     def _spirit_stones(player: Player) -> int:

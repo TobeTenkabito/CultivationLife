@@ -8,8 +8,8 @@ from ..runtime import decode_rng, encode_rng, now_iso
 from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
 from .merchant.dependencies import MerchantActionDependencies
 
-def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=None):
-    game = deps._load(game_id)
+def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=None, *, committed=None):
+    game = copy.deepcopy(deps._load(game_id))
     deps._ensure_merchant(game)
     payload = payload or {}
     player, state = game.player, game.merchant_state
@@ -35,7 +35,7 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
             state["membership"] = {"alliance_id": alliance_id, "world": player.world, "site": site, "rank": 0}
             deps._merchant_notice(game, f"你已加入{alliance['name']}，成为{'总部' if site == 'hq' else deps.maps.location(player.world, site)['name'] + '分部'}成员。宗门、家族和种族身份不受影响。")
         else:
-            if not member or member["alliance_id"] != alliance_id or (member["world"] != player.world and not alliance["cross_world"]):
+            if not member or member["alliance_id"] not in {alliance_id, alliance.get('network_id')} or (member["world"] != player.world and not alliance["cross_world"]):
                 raise ValueError("你不是该商盟成员")
             influence_key = deps._merchant_influence_key(member)
             influence = state["influence"].get(influence_key, 0)
@@ -96,8 +96,11 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
                 raise ValueError("未知商盟操作")
     game.rng_state = encode_rng(rng)
     game.updated_at = now_iso()
+    result = deps.present(game)
     deps.store.save(game)
-    return deps.present(game)
+    if committed:
+        committed(game)
+    return result
 
 
 def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):

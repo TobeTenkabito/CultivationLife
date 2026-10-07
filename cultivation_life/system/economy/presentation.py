@@ -36,4 +36,7 @@ def public_economy(game):
         world_treasury=balance(game, f'world:{game.player.world}'),
         turnover=market['turnover'], fees=market['fees'], rows=rows,
         freight_in=market.get('freight_in', 0), freight_out=market.get('freight_out', 0),
+        war_pressure=market.get('war_pressure', False),
+        suppliers=[dict(owner=k, volume=round(v, 1), share=round(v / max(1, sum(market.get('suppliers', {}).values())), 3))
+                   for k, v in sorted(market.get('suppliers', {}).items(), key=lambda kv: kv[1], reverse=True)[:5]],
         can_trade=trade_available(game))

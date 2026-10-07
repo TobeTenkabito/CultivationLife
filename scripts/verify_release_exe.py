@@ -135,6 +135,11 @@ def verify(with_dlc):
             assert not any(key.startswith('organization:') for key in freight_raw['economy_v2']['accounts'])
             with urllib.request.urlopen(base + '/organization-finance.js', timeout=5) as response:
                 assert b'renderOrganizationFinance' in response.read()
+            with urllib.request.urlopen(base + '/fleet-network-panel.js', timeout=5) as response:
+                assert b'FleetNetworkPanel' in response.read()
+            assert advanced_freight['personal_economy']['balance'] == advanced_freight['market']['spirit_stones']
+            assert any(f['owner_kind'] == 'independent' for f in transport['fleets'].values())
+            assert all(a['capacity'] >= 3 for a in advanced_freight['fleet_network']['alliances'])
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

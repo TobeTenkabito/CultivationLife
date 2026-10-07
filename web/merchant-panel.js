@@ -114,7 +114,7 @@
         if (alliance.destinations.length) {
           const passage = element('details'); passage.append(element('summary', '逆灵通道'));
           passage.append(element('p', '总部或分总部使节、特使可用。凭原签发总部身份在同盟异界总部付费往返，影响力仍归原任职地；修为受到目的界面的承载上限约束。'));
-          alliance.destinations.forEach(destination => passage.append(button(`前往${destination.name} · ${money(destination.cost)}灵石`, 'passage', {alliance_id:alliance.id, destination:destination.id}, membership.site !== 'hq' || membership.rank < 1 || alliance.local_site !== 'hq' || !!system.active)));
+          alliance.destinations.forEach(destination => passage.append(button(`${destination.open ? '前往' : '通道关闭 · '}${destination.name} · ${money(destination.cost)}灵石`, 'passage', {alliance_id:alliance.id, destination:destination.id}, !destination.open || membership.site !== 'hq' || membership.rank < 1 || alliance.local_site !== 'hq' || !!system.active)));
           panel.append(passage);
         }
       }

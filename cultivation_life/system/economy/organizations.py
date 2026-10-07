@@ -117,6 +117,7 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     if extra:
         capacity = max(20, capacity // 4) if members else 0
     capacity *= min(1000, game.economy_v2['worlds'][world]['scale'])
+    capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1.)
     credit = row.get('production_credit', 0) if row.get('commodity') == item else 0
     # Expensive upper-world goods may require several years of work. Keep a
     # bounded work-in-progress value, never manufacture unsold inventory.
@@ -145,6 +146,8 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     market['fees'] += sale['fee']
     reprice(game, market, product)
     row['produced'] += low
+    from .industry import supplier_delivery
+    supplier_delivery(market, key(row['kind'], entity.id), low)
     row['production_credit'] = max(0, credit - low * product['reference'])
     return sale['total']
 
@@ -158,6 +161,8 @@ def settle_faction(game, maps, row, years):
         row['production_credit'] = 0
         row['world'] = entity.world
     source, world = key(row['kind'], entity.id), entity.world
+    from .industry import settle_industry
+    settle_industry(game, maps, entity, row, years)
     row['income'] += produce(game, maps, entity, row, years=years)
     freight = f'transport:{world}:{entity.id}'
     if freight in game.economy_v2['accounts']:
@@ -244,7 +249,8 @@ def public_finance(game, kind, identity):
     if not row or row['world'] != game.player.world:
         return None
     return {k: row[k] for k in ('last_year', 'income', 'expense', 'shortfall', 'benefit_paid', 'benefit_due', 'produced')} | dict(
-        balance=balance(game, address), product=ITEM_CATALOG[row['commodity']].name if row['commodity'] else None)
+        balance=balance(game, address), product=ITEM_CATALOG[row['commodity']].name if row['commodity'] else None,
+        industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.))
 
 
 def welfare(game, entity):

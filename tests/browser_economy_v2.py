@@ -38,7 +38,7 @@ def main():
                             engine.store.save(game)
                             page=browser.new_page(viewport=dict(width=width,height=height))
                             errors=[];requests=[]
-                            page.on('pageerror',lambda err:errors.append(str(err)))
+                            page.on('pageerror',lambda err:errors.append(str(err.stack)))
                             page.on('request',lambda req:requests.append(req.post_data_json)
                                     if req.method=='POST' and req.url.endswith('/local-market-trade') else None)
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')

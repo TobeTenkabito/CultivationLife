@@ -7,6 +7,8 @@ from ..teleport_system import arrays, separated
 from .ledger import account, balance, transfer_value
 from .local_market import quote
 from .state import ensure_state, ensure_regional_market, market_id, reprice
+from .fleet_network import (ensure_network, ensure_routes, advance_network, owner_key,
+    owner_sites, seed_organization_fleets, guard_required)
 
 
 def treasury(world, identity):
@@ -22,14 +24,19 @@ def _roll(game, fleet, suffix):
     return int.from_bytes(hashlib.blake2s(value.encode(), digest_size=8).digest(), 'big') / 2**64
 
 
-def ensure_caravans(game, maps):
+def ensure_caravans(game, maps, *, _world=None, _linked=True):
     """Adopt a visited realm without spending, dispatching, or drawing game RNG."""
     ensure_state(game)
     state = game.economy_v2.setdefault('transport', dict(version=1, worlds={}))
-    world = game.player.world
+    world = _world or game.player.world
     alliances = game.merchant_state.get('worlds', {}).get(world, [])
     if not alliances or world in state['worlds']:
-        return False
+        changed = ensure_network(game, maps)
+        route_change = ensure_routes(game)
+        if _linked:
+            for home in sorted({a['home_world'] for a in alliances if a['cross_world']} - {world}):
+                changed = ensure_caravans(game, maps, _world=home, _linked=False) or changed
+        return route_change or changed
     adopted_year = max(game.player.age, game.economy_v2['last_year'])
     state['worlds'][world] = dict(last_year=adopted_year, fleets={}, history=[])
     region = state['worlds'][world]
@@ -42,6 +49,11 @@ def ensure_caravans(game, maps):
             next_departure=adopted_year + 1)
         region['fleets'][key] = fleet
         account(game, _cash(fleet))
+    ensure_network(game, maps)
+    ensure_routes(game)
+    if _linked:
+        for home in sorted({a['home_world'] for a in alliances if a['cross_world']} - {world}):
+            ensure_caravans(game, maps, _world=home, _linked=False)
     return True
 
 
@@ -113,6 +125,11 @@ def _candidate(game, maps, alliance, fleet):
                     continue
                 purchase = quote(row, 'buy', quantity)
                 transport = dict(geography)
+                coverage = fleet.get('guard_power', guard_required(world)) / guard_required(world)
+                transport['risk'] = min(.9, transport['risk'] + max(0, 1 - coverage) * .65)
+                if any(w.get('status') in {'active', 'peace_ready'} and w.get('world') == world
+                       and w.get('location_id') in transport['route'] for w in game.wars):
+                    transport['risk'] = min(.95, transport['risk'] + .2)
                 transport['cost'] = max(1, math.ceil(purchase['total'] * .003 * transport['normal_years']))
                 transport['array_fee'] = math.floor(transport['cost'] * transport['saved_ratio'])
                 transport['transport_cost'] = transport['cost'] - transport['array_fee']
@@ -207,6 +224,8 @@ def _arrival(game, maps, fleet, region):
         cargo['quantity'] -= low
         cargo['revenue'] += sale['total']
         fleet['delivered'] += low
+        from .industry import supplier_delivery
+        supplier_delivery(target, owner_key(fleet), low)
     if cargo['quantity']:
         fleet['last_result'] = f"抵达后待售 {cargo['quantity']} 件，等待当地收购资金"
         return
@@ -215,7 +234,7 @@ def _arrival(game, maps, fleet, region):
     fleet['loss_streak'] = fleet['loss_streak'] + 1 if profit < 0 else 0
     dividend = min(balance(game, _cash(fleet)), max(0, profit) // 4)
     if dividend:
-        transfer_value(game, _cash(fleet), treasury(world, fleet['alliance_id']), dividend, '商队实得利润上缴商盟')
+        transfer_value(game, _cash(fleet), owner_key(fleet), dividend, '商队实得利润分红')
         fleet['dividends'] += dividend
     _history(region, game.player.age, fleet, f"本趟交割完成，净收益 {profit:+,} 灵石，上缴 {dividend:,} 灵石")
     fleet.update(status='waiting', cargo=None, next_departure=game.player.age + 1)
@@ -232,28 +251,34 @@ def _arrival(game, maps, fleet, region):
 
 def advance_caravans(game, maps):
     ensure_caravans(game, maps)
+    advance_network(game, maps)
     state = game.economy_v2['transport']
     for world, region in state['worlds'].items():
         years = game.player.age - region['last_year']
         if years <= 0:
             continue
         region['last_year'] = game.player.age
-        alliances = {row['id']: row for row in game.merchant_state['worlds'].get(world, [])}
-        for fleet in region['fleets'].values():
+        seed_organization_fleets(game, maps, world, region)
+        for fleet in list(region['fleets'].values()):
             if fleet['status'] == 'retired':
                 continue
-            alliance = alliances.get(fleet['alliance_id'])
+            alliance = owner_sites(game, maps, fleet)
             if alliance is None:
                 # No fabricated replacement owner or treasury.
-                fleet['status'] = 'stranded'
+                fleet['last_result'] = '所属组织失效，停止派货；既有货物仍由原队伍保管'
+                if fleet['cargo'] and game.player.age >= fleet['cargo']['arrival']:
+                    _arrival(game, maps, fleet, region)
                 continue
             if not fleet['investment']:
-                funding = min(alliance['reserves'] // 4, 50000 * WORLD_SYSTEMS['world_profiles'][world]['tier'])
+                funding = min(balance(game, owner_key(fleet)) // 4, 50000 * WORLD_SYSTEMS['world_profiles'][world]['tier'])
                 if funding < 40:
                     fleet.update(status='retired', last_result='商盟无力出资，商队解散')
                     continue
-                transfer_value(game, treasury(world, alliance['id']), _cash(fleet), int(funding), '商盟出资组建商队')
+                transfer_value(game, owner_key(fleet), _cash(fleet), int(funding), '所属方出资组建商队')
                 fleet['investment'] = funding
+            from .cross_freight import advance_freight
+            if advance_freight(game, maps, fleet, region):
+                continue
             if fleet['cargo']:
                 if game.player.age >= fleet['cargo']['arrival']:
                     _arrival(game, maps, fleet, region)
@@ -264,8 +289,15 @@ def advance_caravans(game, maps):
             transfer_value(game, _cash(fleet), f'background:{world}', upkeep, '商队留驻养护')
             fleet['operating_costs'] += upkeep
             fleet['profit'] -= upkeep
+            wages = max(1, round(fleet.get('guard_power', 0) ** .5)) * years if fleet.get('guard_power') else 0
+            paid = min(wages, balance(game, _cash(fleet)))
+            transfer_value(game, _cash(fleet), f'background:{world}', paid, '商队护卫薪饷')
+            fleet['operating_costs'] += paid
+            fleet['profit'] -= paid
+            if paid < wages:
+                fleet['guard_power'] = round(fleet['guard_power'] * paid / wages)
             if balance(game, _cash(fleet)) < 20 or (fleet['loss_streak'] >= 4 and fleet['capacity'] == 6):
-                transfer_value(game, _cash(fleet), treasury(world, alliance['id']), balance(game, _cash(fleet)), '商队清算归还余额')
+                transfer_value(game, _cash(fleet), owner_key(fleet), balance(game, _cash(fleet)), '商队清算归还余额')
                 fleet.update(status='retired', last_result='连续亏损或资金耗尽，商队已清算解散')
                 _history(region, game.player.age, fleet, fleet['last_result'])
             elif game.player.age >= fleet['next_departure']:
@@ -276,22 +308,25 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
     """Only current-world rows; cargo values are known only to this alliance's member."""
     world = game.player.world
     region = game.economy_v2.get('transport', {}).get('worlds', {}).get(world)
-    if not region:
-        return []
     result = []
     member = game.merchant_state.get('membership') or {}
-    for fleet in region['fleets'].values():
+    for fleet in (region or {}).get('fleets', {}).values():
         if alliance_id is not None and fleet['alliance_id'] != alliance_id:
             continue
         cargo = fleet['cargo']
         if local and game.player.location_id not in ({cargo['origin'], cargo['destination']} if cargo else {fleet['location']}):
             continue
-        owned = member.get('world') == world and member.get('alliance_id') == fleet['alliance_id']
+        owned = fleet.get('player_controlled') or (member.get('world') == world and member.get('alliance_id') == fleet['alliance_id'])
         row = {key: fleet[key] for key in ('id','name','alliance_id','status','capacity','voyages','last_result')}
         row.update(location=maps.location(world, fleet['location'])['name'],
             origin=maps.location(world, cargo['origin'])['name'] if cargo else None,
             destination=maps.location(world, cargo['destination'])['name'] if cargo else None,
             arrival=cargo['arrival'] if cargo else None, detail=owned and not local)
+        row.update(owner_kind=fleet.get('owner_kind', 'alliance'), guard_power=fleet.get('guard_power', 0),
+                   guard_required=guard_required(world), pledged=fleet.get('pledged', False),
+                   player_controlled=fleet.get('player_controlled', False), location_id=fleet['location'],
+                   cross_trip=({k: fleet['cross_trip'][k] for k in ('destination', 'phase', 'arrival')}
+                               if fleet.get('cross_trip') and owned else None))
         if owned and not local:
             row.update(cash=balance(game, _cash(fleet)), profit=fleet['profit'], dividends=fleet['dividends'],
                 delivered=fleet['delivered'], lost=fleet['lost'], investment=fleet['investment'])
@@ -303,4 +338,26 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
         else:
             row.pop('last_result')
         result.append(row)
+        trip = fleet.get('cross_trip')
+        if trip:
+            row.update(status='selling' if trip['phase'] == 'selling' else 'travelling',
+                       origin=maps.location(world, fleet['location'])['name'],
+                       destination=maps.location(trip['destination'], trip['location'])['name'], arrival=trip['arrival'])
+            if trip['phase'] == 'return':
+                row['origin'], row['destination'] = row['destination'], row['origin']
+    if local:
+        # The receiving map can see an incoming shipment, never the foreign wallet.
+        for home_world, remote in game.economy_v2.get('transport', {}).get('worlds', {}).items():
+            if home_world == world:
+                continue
+            for fleet in remote['fleets'].values():
+                trip = fleet.get('cross_trip')
+                if not trip or trip['destination'] != world or trip['location'] != game.player.location_id:
+                    continue
+                result.append(dict(id=fleet['id'], name=fleet['name'], alliance_id=fleet['alliance_id'],
+                    status='selling' if trip['phase'] == 'selling' else 'travelling', capacity=fleet['capacity'],
+                    voyages=fleet['voyages'], location=maps.location(world, trip['location'])['name'],
+                    origin=maps.location(home_world, fleet['location'])['name'] if trip['phase'] != 'return' else maps.location(world, trip['location'])['name'],
+                    destination=maps.location(world, trip['location'])['name'] if trip['phase'] != 'return' else maps.location(home_world, fleet['location'])['name'],
+                    arrival=trip['arrival'], detail=False))
     return result

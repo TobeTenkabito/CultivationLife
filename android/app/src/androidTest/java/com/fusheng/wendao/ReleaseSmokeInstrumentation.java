@@ -597,6 +597,36 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("economy-network")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'四轮商路验收',preset_id:'core',seed:419})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=2\ntransfer_value(g,'background:human','player',10000000,'验收资本')\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-panel-target=merchant]");
+                tapSelector("#fleet-network-content > details:first-child > summary");
+                tapSelector("#fleet-network-content [data-fleet-action=create]");
+                waitForJs("!busy && game.fleet_network.fleets.some(f=>f.player_controlled)","Native independent fleet creation");
+                tapSelector("#fleet-network-content > details:first-child > summary");
+                tapSelector("#fleet-network-content [data-fleet-action=guard]");
+                waitForJs("!busy && game.fleet_network.fleets.some(f=>f.player_controlled&&f.guard_power>0)","Native guard hiring");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.close('personal-economy');true");
+                    tapSelector("[data-panel-target=personal-economy]");
+                    waitForJs("getComputedStyle(document.querySelector('#personal-economy-card')).opacity==='1'","Native personal account open");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#personal-economy-content').innerText.includes('聘请商队护卫') && document.querySelector('#personal-economy-card').scrollWidth<=document.querySelector('#personal-economy-card').clientWidth+1")),"Native personal statement");
+                    capture("network-personal-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-panel-target=merchant]");
+                    js("document.querySelector('#fleet-network-content > details').open=false;window.__fleetCash=game.fleet_network.fleets.find(f=>f.player_controlled).cash;true");
+                    tapSelector("#fleet-network-content > details:first-child > summary");
+                    tapSelector("#fleet-network-content [data-fleet-action=fund]");
+                    waitForJs("!busy && game.fleet_network.fleets.find(f=>f.player_controlled).cash===window.__fleetCash+5000","Native caravan funding");
+                    tapSelector("#fleet-network-content > details:first-child > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#merchant-card').scrollWidth<=document.querySelector('#merchant-card').clientWidth+1")),"Native network layout");
+                    capture("network-fleet-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!busy && game.fleet_network.fleets.find(f=>f.player_controlled).cash===window.__fleetCash+5000")),"Native fleet persistence");
+                }
+                result.putString("network_scope","Four themes, personal accounts, independent creation, paid guards, fleet funding, no overflow and persistence");
             } else if(phase.equals("economy-organizations")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'组织财政验收',preset_id:'core',seed:315})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.models import SectState,SectNpc\nfrom cultivation_life.rules import add_item\nfrom cultivation_life.system.economy import organizations as f\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=5\ng.player.lifespan=None\ng.player.next_tribulation_age=None\ng.player.faction_id=next(s.id for s in g.sects.values() if s.world=='human' and s.kind=='sect')\nn=SectNpc('fiscal_heir','沈宁','族人',4,1,100,1000,world='human')\ng.family=SectState('native_family','沈氏','human',[n],kind='family',founded_by_player=True,founder_player_id=g.id)\nadd_item(g.player,'spirit_stone',10000)\nf.ensure_organizations(g)\ng.player.age+=1\nf.advance_organizations(g,e.maps)\ne.store.save(g)");

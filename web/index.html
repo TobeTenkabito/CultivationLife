@@ -209,6 +209,7 @@
         </article>
         <article id="merchant-card" class="paper utility-panel merchant-panel hidden" role="dialog" aria-modal="false" aria-label="商盟">
           <div class="section-title"><h2>商盟</h2><button id="merchant-toggle" type="button">关闭</button></div>
+          <div id="fleet-network-content"></div>
           <div id="merchant-content"></div>
         </article>
         <article id="exchange-card" class="paper utility-panel exchange-panel hidden" role="dialog" aria-modal="false" aria-label="匿名交换会">
@@ -262,6 +263,10 @@
         <article id="talisman-card" class="paper utility-panel left-panel talisman-panel" role="dialog" aria-modal="false" aria-label="符箓工坊">
           <div class="section-title"><div><p class="eyebrow">注灵绘符</p><h2>符箓工坊</h2></div><button id="talisman-toggle" type="button">关闭</button></div>
           <div id="talisman-content"></div>
+        </article>
+        <article id="personal-economy-card" class="paper utility-panel left-panel merchant-panel" role="dialog" aria-modal="false" aria-label="个人经济">
+          <div class="section-title"><h2>个人经济</h2><button id="personal-economy-toggle" type="button">关闭</button></div>
+          <div id="personal-economy-content"></div>
         </article>
         <article id="inventory-card" class="paper utility-panel left-panel inventory-panel" role="dialog" aria-modal="false" aria-label="分类行囊">
           <div class="section-title"><div><p class="eyebrow">袖里乾坤</p><h2>分类行囊</h2></div><div class="panel-heading"><span>同名常驻属性按数量叠加</span><button id="inventory-toggle" type="button">关闭</button></div></div>
@@ -481,6 +486,7 @@
         <button type="button" data-panel-target="voisinage" title="仙域管理与温养" class="hidden"><span>域</span><small>仙域</small></button>
         <button type="button" data-panel-target="buddhist-wish" data-dlc="buddhist" title="愿力 · 清净道心" class="hidden buddhist-dock-button"><span>愿</span><small>愿力</small></button>
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
+        <button type="button" data-panel-target="personal-economy" title="个人经济"><span>账</span><small>经济</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
         <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
@@ -560,6 +566,7 @@
   <script src="/ui-panels.js?v=2.0.1"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
   <script src="/merchant-commission-panel.js?v=2.0.1"></script>
+  <script src="/fleet-network-panel.js?v=economy4"></script>
   <script src="/merchant-panel.js?v=economy2"></script>
   <script src="/local-economy.js?v=2"></script>
   <script src="/map-directory.js?v=economy1"></script>

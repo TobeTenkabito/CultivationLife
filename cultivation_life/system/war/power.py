@@ -12,7 +12,9 @@ def _war_total_power(
 ) -> float:
     members = deps._available_warriors(game, war, side)
     powers = [
-        deps._npc_power(npc) * deps._npc_formation_power_multiplier(game, npc.id)
+        deps._npc_power(npc) * deps._npc_formation_power_multiplier(game, npc.id) * (
+            .5 + .5 * game.economy_v2.get('organizations', {}).get(
+                f'organization:{"family" if game.family and npc.faction_id == game.family.id else "sect"}:{npc.faction_id}', {}).get('war_funding', 1.))
         for npc in members
     ]
     own_id = deps._war_player_identity(game, war)

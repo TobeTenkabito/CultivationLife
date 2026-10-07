@@ -18,5 +18,10 @@
     note.className = 'muted';
     note.textContent = `按实际年数结算，府库不足时减少支付。${data.product ? `驻地产出：${data.product}，最近售出 ${num(data.produced)} 件。` : ''}`;
     section.append(note); root.append(section);
+    if (data.industry_level !== undefined) {
+      const industry = document.createElement('p');
+      industry.textContent = `产业扩建 ${data.industry_level} / 10 级 · 最近军需保障 ${Math.round(data.war_funding * 100)}%`;
+      section.append(industry);
+    }
   };
 })();

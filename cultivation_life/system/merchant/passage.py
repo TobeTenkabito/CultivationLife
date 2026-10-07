@@ -20,12 +20,13 @@ def _merchant_passage(deps: MerchantPassageDependencies, game, alliance, destina
     price = deps._merchant_passage_cost(game, destination)
     if not has_item(game.player, "spirit_stone", price):
         raise ValueError(f"逆灵通道需支付 {price:,} 灵石")
-    target_alliance = deps._merchant_alliance(game, destination, alliance["id"])
+    target_alliance = deps._merchant_alliance(game, destination, alliance.get('network_id', alliance['id']))
     player = game.player
     plan = deps._plan_world_transition(game, destination, "passage",
                                        arrival_location=target_alliance["hq"], reason="商盟逆灵通道")
+    from ..economy.ledger import transfer_value
+    transfer_value(game, 'player', f'alliance:{alliance["world"]}:{alliance["id"]}', price, '逆灵通道出发地票款')
     deps._apply_world_transition(game, plan)
-    remove_item(player, "spirit_stone", price)
     # Credentials remain issued by the original regional HQ. Reciprocal
     # offices recognise the rank, but do not silently transfer local influence.
     deps._merchant_notice(game, f"支付 {price:,} 灵石，乘{alliance['name']}逆灵通道抵达{WORLD_SYSTEMS['world_names'][destination]}。" + ("修为已按当地界面法则压制。" if player.sealed_cultivation else ""))

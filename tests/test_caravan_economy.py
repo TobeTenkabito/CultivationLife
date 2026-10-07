@@ -288,7 +288,10 @@ def test_long_running_fleets_have_bounded_state_and_actual_profit(trade):
         state.advance_economy(game)
         caravans.advance_caravans(game,engine.maps)
     region = game.economy_v2['transport']['worlds']['human']
-    assert len(region['fleets']) == 3 and len(region['history']) <= 36
+    from cultivation_life.system.economy.fleet_network import active_fleets, fleet_limit
+    assert len(region['fleets']) <= 100 and len(region['history']) <= 36
+    for alliance in game.merchant_state['worlds']['human']:
+        assert len(active_fleets(game, 'human', 'alliance', alliance['id'])) <= fleet_limit('alliance', alliance)
     assert any(row['delivered'] > 0 for row in region['fleets'].values())
     assert all(row['capacity'] <= 240 for row in region['fleets'].values())
     assert len(game.economy_v2['ledger']) <= 80
