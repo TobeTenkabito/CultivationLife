@@ -24,7 +24,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     requested_target = target_id
     validate_state(game.heavens_state)
     site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
-    if target_id and (not intelligence.knows(game, target_id) or site and intelligence.level(game.player.world, site.world) < 3 and not get_echo(runtime, site.id)):
+    if target_id and (not intelligence.knows(game, target_id) or site and intelligence.level(game.player.world, site.world) < 5 and not get_echo(runtime, site.id)):
         raise ValueError('当前只能获知远界传闻，尚不了解此处详情')
     if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS | INCIDENT_IDS:
         raise ValueError('诸天对象不可见或不存在')

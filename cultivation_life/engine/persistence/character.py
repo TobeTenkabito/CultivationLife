@@ -47,10 +47,7 @@ def prepare_character(deps: CharacterPreparationDependencies, game: GameState) -
         game.player.monster_lifespan_scaled = True
         monster_lifespan_migrated = True
     if game.player.world not in deps.maps.worlds:
-        game.player.world = "human"
-        game.player.location_id = None
-        deps._clear_market(game)
-        monster_lifespan_migrated = True
+        raise ValueError(f"存档所在界面 {game.player.world} 不存在；请恢复所需内容包，原存档不会被迁移到人界")
     if game.player.world == "celestial":
         if game.player.immortal_power_converted:
             if game.player.immortal_conversion_stage != 5:

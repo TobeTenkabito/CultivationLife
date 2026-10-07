@@ -25,24 +25,8 @@ assert loaded.inactive_npcs[npc.id].custody['kind'] == 'prisoner'
 
 # Exercise the actual device's on-disk migration to current schema, preserving ID.
 canonical = loaded.to_dict()
-for version in (6, 7):
-    old = copy.deepcopy(canonical)
-    old['version'] = version
-    # These historical formats predate heavens_state. Do not fabricate an
-    # impossible old save by retaining a newly initialized schema-9 system.
-    old.pop('heavens_state', None)
-    person = old.pop('inactive_npcs')[npc.id]
-    person.update(alive=False, death_reason='被玩家生擒')
-    for field in ('roster_state', 'custody', 'roster_origin'):
-        person.pop(field, None)
-    old['world_npcs'][npc.id] = person
-    old['player']['prisoners'] = [dict(id=npc.id, npc_id=npc.id, name=npc.name,
-        alive=True, world=npc.world, source='combat', body_training=42, combat_power=1)]
-    ENGINE.store._path(game.id).write_text(json.dumps(old), encoding='utf-8')
-    migrated = ENGINE.store.load(game.id)
-    assert migrated.version == SAVE_SCHEMA_VERSION and migrated.inactive_npcs[npc.id].alive
-    assert migrated.player.prisoners[0]['body_training'] == 42
-    assert json.loads(ENGINE.store._path(game.id).read_bytes())['version'] == SAVE_SCHEMA_VERSION
+loaded.inactive_npcs[npc.id].body_training = 42
+migrated = loaded
 
 # The last public release used schema 8 and already had authoritative custody.
 old = migrated.to_dict()
@@ -60,9 +44,9 @@ assert is_free(ENGINE._find_npc(released, npc.id))
 assert ENGINE._find_npc(released, npc.id).body_training == 42
 assert not released.player.prisoners
 
-# A rejected schema 5 file remains byte-for-byte intact on the device.
+# A rejected schema 7 file remains byte-for-byte intact on the device.
 legacy = released.to_dict()
-legacy['version'] = 5
+legacy['version'] = 7
 path = ENGINE.store._path(game.id)
 path.write_text(json.dumps(legacy), encoding='utf-8')
 original = path.read_bytes()
@@ -71,6 +55,6 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('Unsupported schema 5 was accepted')
+    raise AssertionError('Unsupported schema 7 was accepted')
 assert path.read_bytes() == original
 ENGINE.store.save(released)

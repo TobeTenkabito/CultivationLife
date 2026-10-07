@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..semantic_events import emit
-from ..faction_geography import can_enter_faction
+from ..faction_geography import can_enter_faction, faction_site
 import copy
 import random
 import uuid
@@ -175,13 +175,23 @@ def _intrigue_apply_resolution(
     elif resolution_type == "investment":
         record["resources"] = int(record.get("resources", 0)) + 25
         record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 4)
-    elif resolution_type == "relocate" and kind in {"sect", "family"} and target_id in WORLD_SYSTEMS.get("world_profiles", {}):
+    elif resolution_type == "relocate" and kind in {"sect", "family"}:
         from ..combat.npc_lifecycle import move_world
+        profile = WORLD_SYSTEMS.get('world_profiles', {}).get(target_id, {})
+        if not profile.get('enabled') or profile.get('tier', 0) <= 0:
+            raise ValueError('迁址须选择已开放的主界面，不能将势力直接迁入未知空间')
         entity = deps._intrigue_entity(game, kind, faction_id)
         if entity:
+            planned = copy.copy(entity)
+            planned.world, planned.location_id = target_id, None
+            location = faction_site(planned)['id']
+            origin = entity.world
             entity.world = target_id
+            entity.location_id = location
             for npc in entity.npcs:
-                move_world(npc, target_id, game.player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+                if npc.alive and npc.world == origin:
+                    move_world(npc, target_id, game.player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
+                    npc.location_id = location
     elif resolution_type == "policy" and target_id in deps.STYLE_LABELS:
         record["policy"] = target_id
     elif resolution_type == "intervene_war":

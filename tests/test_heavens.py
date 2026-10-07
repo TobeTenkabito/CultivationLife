@@ -33,7 +33,7 @@ def saved(tmp_path):
     return game, store, deps
 
 
-@pytest.mark.parametrize('version', [6, 7, 8])
+@pytest.mark.parametrize('version', [8])
 def test_migration_is_empty_pure_and_round_trips(saved, version):
     game, store, _deps = saved
     old = game.to_dict()

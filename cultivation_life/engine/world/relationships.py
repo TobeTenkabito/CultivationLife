@@ -392,7 +392,7 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                 tribulation_power=child.get("tribulation_power"),
             )
             tribulation = deps._resolve_npc_periodic_tribulation(game, descendant, rng, "后代")
-            result = None if not descendant.alive else deps._advance_npc_cultivation(descendant, rng)
+            result = None if not descendant.alive else deps._advance_npc_cultivation(descendant, rng, world_age=game.player.age)
             child.update(
                 age=descendant.age, alive=descendant.alive, realm_index=descendant.realm_index,
                 layer=descendant.layer, lifespan=descendant.lifespan, world=descendant.world,
@@ -440,7 +440,7 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                 {"npc_id":npc.id},["system","family","npc","world_news",f"world:{family.world}"],
             ))
             continue
-        result = deps._advance_npc_cultivation(npc, rng)
+        result = deps._advance_npc_cultivation(npc, rng, world_age=game.player.age)
         if child:
             child.update(
                 age=npc.age,alive=npc.alive,realm_index=npc.realm_index,layer=npc.layer,
@@ -656,6 +656,7 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
         breakthrough = deps._advance_npc_cultivation(
             shell, rng, allow_spirit_crossing=True,
             breakthrough_bonus=float(relation.get("breakthrough_bonus", 0)),
+            world_age=game.player.age,
         )
         relation.update(
             realm_index=shell.realm_index, layer=shell.layer, realm_name=deps._npc_realm_name(shell),

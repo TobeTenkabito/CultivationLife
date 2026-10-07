@@ -384,6 +384,7 @@ def _guixu_trapped_training(
             deps._advance_soul_erosion_time(game, 1)
         if (
             not game.player.alive or game.pending_event
+            or (action == 'body_train' and game.player.awaiting_body_breakthrough)
             or not (game.guixu_state.get("player_session") or {}).get("trapped")
         ):
             break

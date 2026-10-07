@@ -1896,11 +1896,11 @@
         14
       ],
       "base_chance": {
-        "1-20": 0.68,
-        "21-40": 0.22,
-        "41-60": 0.15,
-        "61-80": 0.1,
-        "81-100": 0.06
+        "1-20": 0.85,
+        "21-40": 0.55,
+        "41-60": 0.4,
+        "61-80": 0.3,
+        "81-100": 0.22
       },
       "failure_retention": 0.7,
       "pity_start_target": 21,
@@ -3949,6 +3949,8 @@
       }
     },
     "world_transition_routes": [
+      {"id": "story:monster_realm:phantom_underworld", "source": "monster_realm", "destination": "phantom_underworld", "mode": "story", "enabled": true, "monster_crossing": true},
+      {"id": "story:phantom_underworld:monster_realm", "source": "phantom_underworld", "destination": "monster_realm", "mode": "story", "enabled": true, "monster_crossing": true},
       {
         "id": "study:celestial:reincarnation",
         "source": "celestial",

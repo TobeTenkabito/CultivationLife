@@ -282,7 +282,7 @@ def test_start_does_not_migrate_source_file(environment):
     engine, manager, _, gid = environment
     path = engine.store.directory / f'{gid}.json'
     source = json.loads(path.read_text(encoding='utf-8'))
-    source['version'] = 7
+    source['version'] = 8
     source.pop('heavens_state', None)
     path.write_text(json.dumps(source), encoding='utf-8')
     original = path.read_bytes()

@@ -61,19 +61,16 @@ def bind_mirror(engine):
         return scene
 
     def enter(game, mirror, rng):
-        state = spatial.ensure(game)
         scene = prepare(game, mirror)
         if mirror.pop('capacity_pending', False):
             mirror['mana_capacity'] = max_mp(game.player) * mirror['definition']['capacity_fraction']
         if 'player_known' in mirror:
             mirror['player_known'] = True
-        state['current'] = scene['id']
         scene['visits'] += 1
-        move_world(engine._exploration_dependencies(), game, 'rift', rng)
+        move_world(engine._exploration_dependencies(), game, 'rift', rng, instance_id=scene['id'])
         survey.reveal(engine._dependencies.heavens, game, target=MIRROR_ID)
 
     def leave(game, mirror, rng):
-        spatial.ensure(game)['current'] = None
         move_world(engine._exploration_dependencies(), game, mirror['definition']['world'], rng,
                    location=mirror['definition']['location_id'])
 

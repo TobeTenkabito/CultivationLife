@@ -543,10 +543,10 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _spend_asura_souls(state, cost):
         return asura_actions._spend_asura_souls(state, cost)
 
-    def _plan_world_transition(self, game, destination, mode="progression", *, route_id=None, arrival_location=None, reason=""):
+    def _plan_world_transition(self, game, destination, mode="progression", *, route_id=None, arrival_location=None, reason="", instance_id=None):
         from ..system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
         route_id = route_id or ("sealed_return" if mode == "sealed_return" else f"{mode}:{game.player.world}:{destination}")
-        request = WorldTransitionRequest(destination, TransitionMode(mode), route_id, reason, arrival_location)
+        request = WorldTransitionRequest(destination, TransitionMode(mode), route_id, reason, arrival_location, instance_id)
         return plan_world_transition(game, request, WORLD_SYSTEMS, self.maps)
 
     def _apply_world_transition(self, game, plan, *, entourage=None):
@@ -1288,8 +1288,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _maybe_npc_found_power(self, game: GameState, rng: random.Random, news: list[str]) -> None:
         return npcs._maybe_npc_found_power(self._dependencies.npcs, game, rng, news)
 
-    def _advance_npc_cultivation(self, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool=True, breakthrough_bonus: float=0.0) -> dict[str, str] | None:
-        return npcs._advance_npc_cultivation(self._dependencies.npcs, npc, rng, allow_spirit_crossing, breakthrough_bonus)
+    def _advance_npc_cultivation(self, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool=True, breakthrough_bonus: float=0.0, *, world_age: float | None = None) -> dict[str, str] | None:
+        return npcs._advance_npc_cultivation(self._dependencies.npcs, npc, rng, allow_spirit_crossing, breakthrough_bonus, world_age=world_age)
 
     def _resolve_npc_periodic_tribulation(self, game: GameState, npc: SectNpc, rng: random.Random, affiliation: str='') -> str | None:
         'Resolve one NPC thunder tribulation; immortal lifespan does not mean immortal NPCs.'

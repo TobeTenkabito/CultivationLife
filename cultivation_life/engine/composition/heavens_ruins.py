@@ -57,17 +57,14 @@ def bind_ruins(engine):
         return scene
 
     def enter(game, ruins, rng):
-        state = spatial.ensure(game)
         scene = prepare(game, ruins)
-        state['current'] = scene['id']
         scene['visits'] += 1
-        move_world(engine._exploration_dependencies(), game, 'rift', rng)
+        move_world(engine._exploration_dependencies(), game, 'rift', rng, instance_id=scene['id'])
         if 'player_known' in ruins:
             ruins['player_known'] = True
         survey.reveal(engine._dependencies.heavens, game)
 
     def leave(game, ruins, rng):
-        spatial.ensure(game)['current'] = None
         move_world(engine._exploration_dependencies(), game, ruins['definition']['world'], rng,
                    location=ruins['definition']['location_id'])
 

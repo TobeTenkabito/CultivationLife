@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ...system.cultivation_policy import ordinary_upper, opportunity_unbounded
 from ...system.heavens.local_control import resource_reason
+from ...system.instant_actions import INSTANT_ACTIONS, available
 
 import random
 from typing import Any
@@ -70,6 +71,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         return deps._guixu_trapped_training(game_id, action, years)
     if ACTIONS[action].get("combat") and player.realm_index == 0:
         raise ValueError("凡人尚无力参与修士层面的猎杀与斗法")
+    if action in INSTANT_ACTIONS:
+        return _instant_action(deps, game, action)
     deps._prepare_sage_action(game, action)
     if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique.element):
         raise ValueError("灵根属性与五行功法不合，无法修炼")
@@ -120,7 +123,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             total_sense_gain += sense_gain
             deps._apply_action_resources(player, action, ledger.claim_resource_cost())
         elif action == "body_train":
-            training_gain = deps._body_training_step(player, rng)
+            training_gain = min(deps._body_training_step(player, rng),
+                                deps._body_progress_required(player) - player.body_progress)
             player.body_progress = min(deps._body_progress_required(player), player.body_progress + training_gain)
             total_body_gain += training_gain
             deps._apply_action_resources(player, action, ledger.claim_resource_cost())
@@ -156,6 +160,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             if action == "rest" and player.heart_demon > 0:
                 player.heart_demon = max(0.0, player.heart_demon - 0.5)
         if not advance_elapsed_year(deps.year, game, rng, era_news):
+            break
+        if action == "body_train" and player.awaiting_body_breakthrough:
             break
         if (elapsed_index + 1) % time_unit == 0 and deps.heavens_take_pause and deps.heavens_take_pause(game):
             era_news.append('已完成当前时间单位，停下查看诸天联系。')
@@ -217,6 +223,31 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     deps._ensure_market(game, rng)
 
     deps._compact_world_history(game)
+    game.updated_at = now_iso()
+    game.rng_state = encode_rng(rng)
+    deps.store.save(game)
+    return deps.present(game)
+
+
+def _instant_action(deps: AdvancementDependencies, game: GameState, action: str) -> dict[str, Any]:
+    player = game.player
+    if not available(player, action):
+        raise ValueError("本次行动已结束；经过至少一年后才会出现新的交互机会")
+    rng = decode_rng(game.seed, game.rng_state)
+    player.instant_action_ages[action] = player.age
+    if action == 'befriend_neighbors':
+        rules = WORLD_SYSTEMS['fame']
+        reduction = min(player.fame, float(rules['reconciliation_base'])
+                        + player.realm_index * float(rules['reconciliation_realm_scale']))
+        player.fame = max(0.0, player.fame - reduction)
+        deps._apply_action_resources(player, action, True)
+        summary = f"你修复了近邻关系，本界威名降低 {reduction:g}；本次往来不消耗年份。"
+    else:
+        summary = deps._personal_combat_step(game, action, rng)
+    game.history.append(HistoryRecord(
+        'ACT_' + action.upper(), 1, player.age, ACTIONS[action]['name'], action,
+        'completed', summary, {'elapsed_years': 0}, ['action', action, 'instant'],
+    ))
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)
     deps.store.save(game)

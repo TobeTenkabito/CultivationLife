@@ -155,8 +155,8 @@
       const select=node('select');select.setAttribute('aria-label','选择诸天消息');
       for(const [i,row] of (h.intelligence||[]).entries()){const option=node('option',row.title);option.value=i;select.append(option);}
       const article=node('article',null,'heavens-incident-document');
-      const show=()=>{article.replaceChildren();const row=h.intelligence?.[Number(select.value)];if(!row){select.disabled=true;article.append(node('p','尚未核实到新的战事；可通过商盟委托打听远界近况。'));}if(row)article.append(badge(({1:'征兆 · lv1',2:'传闻 · lv2',3:'详报 · lv3'})[row.level]),node('h4',row.title),node('p',row.text),node('small',row.source?`${row.source} · 取得时年龄 ${row.acquired_age} 岁 · 历史记录`:'据当前界层可辨识的消息'));};
-      select.onchange=show;host.append(select,article,node('p','可前往商盟发布情报委托：1–2 星获取传闻，3–5 星核实详报；消息记录在取得时，不自动追踪后续。'),button('前往商盟打听',()=>window.UtilityPanels?.open('merchant')));show();return;
+      const show=()=>{article.replaceChildren();const row=h.intelligence?.[Number(select.value)];if(!row){select.disabled=true;article.append(node('p','尚未核实到新的战事；可通过商盟委托打听远界近况。'));}if(row)article.append(badge(({1:'征兆 · lv1',2:'传闻 · lv2',3:'简报 · lv3',4:'详报 · lv4',5:'全卷 · lv5'})[row.level]),node('h4',row.title),node('p',row.text),node('small',row.source?`${row.source} · 取得时年龄 ${row.acquired_age} 岁 · 历史记录`:'据当前界层可辨识的消息'));};
+      select.onchange=show;host.append(select,article,node('p','可前往商盟发布情报委托：1–5 星分别获取征兆、传闻、参战简报、战事详报、战局全卷；消息记录在取得时，不自动追踪后续。'),button('前往商盟打听',()=>window.UtilityPanels?.open('merchant')));show();return;
     }
     const omen=(h.omens||[]).find(row=>row.id===ui.target);
     if(omen){

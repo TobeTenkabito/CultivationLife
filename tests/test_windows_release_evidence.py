@@ -12,9 +12,10 @@ from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 
 @pytest.fixture
 def release(tmp_path):
-    for directory in ('build', 'dist', 'web', 'dlc/asura-manifestation'):
+    for directory in ('build', 'dist', 'web', 'docs', 'dlc/asura-manifestation'):
         (tmp_path / directory).mkdir(parents=True)
-    for name in ('launcher.py', 'build/launcher.spec', 'web/app.js', 'README.md', 'CHANGELOG.md'):
+    for name in ('launcher.py', 'build/launcher.spec', 'web/app.js', 'README.md', 'CHANGELOG.md',
+                 'AGENTS.md', 'docs/world-transition-state-contract.json'):
         (tmp_path / name).write_text('release fixture', encoding='utf-8')
     for name in package_windows.AGENT_FILES:
         target = tmp_path / name
@@ -84,6 +85,9 @@ def test_packaging_uses_the_verified_binary(release, monkeypatch):
     archive, = (root / 'dist').glob('*.zip')
     with zipfile.ZipFile(archive) as bundle:
         assert bundle.read('launcher.exe') == (root / 'dist/launcher.exe').read_bytes()
+        assert bundle.read('AGENTS.md') == (root / 'AGENTS.md').read_bytes()
+        assert bundle.read('docs/world-transition-state-contract.json') == (
+            root / 'docs/world-transition-state-contract.json').read_bytes()
         manifest = json.loads(bundle.read(f'release-{package_windows.VERSION}.json'))
         assert manifest['exe_sha256'] == receipt['exe_sha256']
         assert manifest['inputs_sha256'] == receipt['inputs_sha256']

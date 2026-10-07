@@ -231,7 +231,7 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
             continue
         crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
         event_world = npc.world
-        result = deps._advance_npc_cultivation(npc, rng, not crossing_to_spirit or living_human_spirits < 1)
+        result = deps._advance_npc_cultivation(npc, rng, not crossing_to_spirit or living_human_spirits < 1, world_age=game.player.age)
         if not result:
             continue
         if result["type"] == "departure":
@@ -366,6 +366,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
 def _advance_npc_cultivation(
     deps: NpcDependencies, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool = True,
     breakthrough_bonus: float = 0.0,
+    *, world_age: float | None = None,
 ) -> dict[str, str] | None:
     if not npc.alive or npc.realm_index <= 0:
         return None
@@ -400,7 +401,11 @@ def _advance_npc_cultivation(
     npc.cultivation_progress = max(0.0, npc.cultivation_progress - threshold)
     if leaving_human_world:
         destination = deps._ascension_destination(npc.path)
-        npc.world = destination
+        from ...system.combat.npc_lifecycle import move_world
+        if world_age is None and npc.transcendence is not None:
+            raise ValueError('携带资源账本的 NPC 飞升必须提供世界时钟')
+        move_world(npc, destination, world_age or 0, WORLD_SYSTEMS.get('transcendent_combat', {}))
+        npc.location_id = None
         npc.departed_age = npc.age
         npc.departure_reason = f"飞升{WORLD_SYSTEMS['world_names'][destination]}"
         return {"type": "departure", "old": old_name, "new": npc.departure_reason}

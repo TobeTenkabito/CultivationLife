@@ -119,7 +119,8 @@ def main():
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
         for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
-                     'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md'):
+                     'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md',
+                     'world-transition-development.md', 'world-transition-audit.md', 'world-transition-state-contract.json'):
             package.write(ROOT/'docs'/name, 'docs/'+name)
     with zipfile.ZipFile(archive) as package:
         require(package.testzip() is None, 'Release ZIP integrity check failed')

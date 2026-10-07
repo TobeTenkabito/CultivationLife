@@ -222,47 +222,8 @@ def test_temporary_passage_carries_held_authority(held_game):
     assert npc.faction_id is None and game.notable_npcs[npc.id] is npc
 
 
-@pytest.mark.parametrize('version', [6, 7])
-@pytest.mark.parametrize('reason,alive', [('被主角生擒', True), ('被主角扣作议和人质', True), ('寿元耗尽', False), ('生擒后处死', False)])
-def test_migration_corrects_only_capture_death_and_is_atomic(held_game, version, reason, alive):
-    _, game, npc = held_game
-    data = game.to_dict()
-    raw = data.pop('inactive_npcs')[npc.id]
-    raw.update(alive=False, death_reason=reason)
-    for field in ('roster_state', 'custody', 'roster_origin'):
-        raw.pop(field)
-    data['sects']['old']['npcs'] = [raw]
-    data['player']['prisoners'] = [dict(id=npc.id, name=npc.name, age=40, alive=True, body_training=45)]
-    data['player']['party'] = [{'id': npc.id}]
-    data['version'] = version
-    before = copy.deepcopy(data)
-    migrated = migrate_document(data)
-    assert data == before and migrated['version'] == SAVE_SCHEMA_VERSION
-    assert migrate_document(migrated) is migrated
-    loaded = GameState.from_dict(migrated)
-    assert loaded.player.prisoners[0].person is loaded.inactive_npcs[npc.id]
-    assert loaded.player.dao_companion['alive'] is alive
-    assert not loaded.player.party and not loaded.sects['old'].npcs
-    if alive:
-        assert loaded.inactive_npcs[npc.id].age == 40
-        assert loaded.inactive_npcs[npc.id].body_training == 45
-    else:
-        assert loaded.inactive_npcs[npc.id].death_reason == reason
 
 
-def test_legacy_puppet_identity_is_not_guessed_from_name(held_game):
-    _, game, npc = held_game
-    data = game.to_dict()
-    raw = data.pop('inactive_npcs')[npc.id]
-    raw.update(alive=False, death_reason='被主角炼为活傀')
-    data['sects']['old']['npcs'] = [raw]
-    data['player']['prisoners'] = []
-    data['player']['puppets'] = [dict(id='old-puppet', name=npc.name, type='living', alive=True)]
-    data['version'] = 7
-    loaded = GameState.from_dict(migrate_document(data))
-    assert loaded.inactive_npcs[npc.id].alive
-    assert loaded.inactive_npcs[npc.id].roster_state == 'retired'
-    assert 'source_npc_id' not in loaded.player.puppets[0]
 
 
 def test_held_descendant_cannot_rejoin_family_or_tick_twice(held_game):
@@ -281,31 +242,8 @@ def test_held_descendant_cannot_rejoin_family_or_tick_twice(held_game):
     assert not game.player.offspring[0]['alive']
 
 
-def test_migration_rekeys_pending_possession_choices_and_retains_real_death(held_game):
-    _, game, npc = held_game
-    data = game.to_dict()
-    raw = data.pop('inactive_npcs')[npc.id]
-    raw.update(alive=False, death_reason='被主角生擒')
-    data['notable_npcs'][npc.id] = raw
-    data['player']['prisoners'] = [dict(id='old-alias', npc_id=npc.id, name=npc.name)]
-    data['pending_event'] = dict(id='SYS_POST_BATTLE_POSSESSION',
-                                runtime={'prisoner_ids': ['old-alias']}, choices=[{'id': 'old-alias'}])
-    data['version'] = 7
-    migrated = migrate_document(data)
-    assert migrated['pending_event']['runtime']['prisoner_ids'] == [npc.id]
-    assert migrated['pending_event']['choices'] == [{'id': npc.id}]
-    assert GameState.from_dict(migrated).player.prisoners[0]['id'] == npc.id
 
 
-def test_invalid_migration_does_not_mutate_document(held_game):
-    _, game, _ = held_game
-    data = game.to_dict()
-    data['version'] = 7
-    data['player']['prisoners'].append({'id': 'missing'})
-    original = copy.deepcopy(data)
-    with pytest.raises(ValueError, match='身份'):
-        migrate_document(data)
-    assert data == original
 
 
 def test_prisoner_also_recorded_as_disciple_can_still_be_released(held_game):

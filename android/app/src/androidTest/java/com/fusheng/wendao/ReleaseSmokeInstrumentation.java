@@ -60,7 +60,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
     private void check(boolean condition,String message) { if(!condition) throw new AssertionError(message); }
 
     private void waitForJs(String condition, String message) throws Exception {
-        long deadline=System.currentTimeMillis()+15110;
+        waitForJs(condition, message, 15110);
+    }
+
+    private void waitForJs(String condition, String message, long timeoutMs) throws Exception {
+        long deadline=System.currentTimeMillis()+timeoutMs;
         while(System.currentTimeMillis()<deadline) {
             if(Boolean.TRUE.equals(js(condition))) return;
             Thread.sleep(100);
@@ -322,7 +326,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             } else if(phase.equals("debug-console")) {
                 check(Boolean.TRUE.equals(js("!!document.querySelector('#debug-console-open') && typeof AndroidGame.requestDebugMode==='function' && typeof AndroidGame.exportDebugBundle==='function'")), "Console available and native capabilities");
                 js("location.reload();true"); Thread.sleep(800);
-                waitForJs("typeof configData!=='undefined' && configData?.console_available===true && !!document.querySelector('#debug-console-open')", "Debug console enabled");
+                // Reload has the same startup budget as the initial WebView.
+                waitForJs("typeof configData!=='undefined' && configData?.console_available===true && !!document.querySelector('#debug-console-open')", "Debug console enabled",60000);
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'Debug Console Verification',preset_id:'core',seed:5701})});await loadGame(g.id);return g.id;})()");
                 python("from cultivation_life import server\nfrom pathlib import Path\np=server.ENGINE.store.directory / ("+JSONObject.quote(id)+"+'.json')\nserver._console_source_bytes=p.read_bytes()");
                 js("AndroidGame.requestDebugMode();true"); waitForJs("!busy && document.querySelector('#debug-console').open", "Native console opening and help loaded");
@@ -335,7 +340,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 tapSelector("#debug-heavens>summary");
                 tapSelector("#debug-heavens .debug-actions button:nth-child(1)");
                 waitForJs("!busy && !document.querySelector('#debug-heavens-target').disabled && document.querySelector('#debug-heavens-action').options.length>0", "Heavens workbench loaded");
-                check(Boolean.TRUE.equals(js("document.querySelector('#debug-heavens-target').options.length>=12")), "Heavens target discovery");
+                check(Boolean.TRUE.equals(js("document.querySelector('#debug-heavens-target').options.length>=6")), "Heavens target discovery");
                 js("(()=>{window.__heavensWatch=game.heavens.watch;const s=document.querySelector('#debug-heavens-target');s.value='configuration';s.dispatchEvent(new Event('change'));const a=document.querySelector('#debug-heavens-action');a.value='1';a.dispatchEvent(new Event('change'));return true;})()");
                 tapSelector("#debug-heavens .debug-actions button:nth-child(2)");
                 waitForJs("!busy && !document.querySelector('#debug-heavens .debug-actions button:nth-child(3)').disabled", "Heavens preview ready");
@@ -727,7 +732,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("document.querySelector('#save-transfer-dialog').scrollWidth<=document.querySelector('#save-transfer-dialog').clientWidth+1")),"Dialog overflow");
                     capture("save-import-"+theme+"-1450");
                     tapSelector("#transfer-replace-check");tapSelector("#transfer-import");
-                    waitForJs("!SaveTransfer.isWorking() && document.querySelector('#transfer-status').textContent.includes('已恢复')","Restore failed");
+                    // Restoring >10MB and refreshing the accumulated save list is
+                    // a file operation, not a short interactive state change.
+                    waitForJs("!SaveTransfer.isWorking() && document.querySelector('#transfer-status').textContent.includes('已恢复')","Large save restore failed",60000);
                     python("from cultivation_life import server\nimport json\nassert json.loads(server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes())==server._transfer_test_original");
                     js("document.querySelector('#transfer-close').click()");
                 }

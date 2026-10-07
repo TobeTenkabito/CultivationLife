@@ -72,7 +72,7 @@ def war(world='celestial'):
 
 @pytest.mark.parametrize('observer,subject,expected', [
     ('human','celestial',1),('human','spirit',2),('spirit','celestial',2),
-    ('spirit','human',3),('celestial','human',3),('celestial','spirit',3),('celestial','asura',3)])
+    ('spirit','human',5),('celestial','human',5),('celestial','spirit',5),('celestial','asura',5)])
 def test_same_real_event_has_observer_relative_detail(local, observer, subject, expected):
     game=local[1];game.player.world=observer;game.wars=[war(subject)]
     before=copy.deepcopy(game.to_dict())
@@ -103,10 +103,10 @@ def test_hidden_dossiers_cannot_be_fetched_directly(local):
 def test_merchant_completion_preserves_snapshot_without_live_access(local):
     engine,game,_=local;game.player.world='human';game.wars=[war()]
     engine._ensure_merchant(game)
-    report=engine._merchant_intelligence(game,'celestial',3,random.Random(9))
+    report=engine._merchant_intelligence(game,'celestial',5,random.Random(9))
     assert '甲宗撤退' in report
     saved=copy.deepcopy(game.merchant_state['heavens_reports'])
-    assert saved[0]['level']==3 and saved[0]['acquired_age']==game.player.age
+    assert saved[0]['level']==5 and saved[0]['acquired_age']==game.player.age
     game.wars[0]['logs'].append(dict(text='乙宗撤退，新一轮已结束。'))
     assert intelligence.news(game)[0]['level']==1
     assert game.merchant_state['heavens_reports']==saved

@@ -325,7 +325,7 @@ def begin_asura_ascension(deps: WorldTravelDependencies, game_id: str) -> dict[s
 def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) -> dict[str, Any]:
     """魔界路线直接渡界；飞升真魔界时必须承受魔气纯度判定。"""
     player = game.player
-    if player.world == "human" and player.realm_index == 5 and player.layer >= 3:
+    if player.world == "human" and player.realm_index == 5 and player.layer >= 1:
         destination = "demon"
     elif player.world == "demon" and player.realm_index == 5 and player.layer >= 1:
         destination = "true_demon"
@@ -379,6 +379,16 @@ def plan_public_crossing(game, destination, maps):
         raise ValueError("当前状态无法跨越界面")
     if (player.sealed_cultivation or {}).get("merchant_passage"):
         raise ValueError("逆灵通道的访客封印须经商盟通道返界解除")
+    from ...system.world_transition_system import WorldTransitionRequest, TransitionMode, plan_world_transition
+    lateral = next((row for row in WORLD_SYSTEMS['world_transition_routes']
+                    if row.get('monster_crossing') and row['enabled']
+                    and row['source'] == player.world and row['destination'] == destination), None)
+    if lateral:
+        if (player.path != 'monster' or player.realm_index < 5 or player.sealed_cultivation
+                or player.cultivation_suppression or game.active_trial or player.ghost_captor):
+            raise ValueError('妖修须化神初期以上，且不受封印或拘禁，方可循祖兽梦径往返')
+        return plan_world_transition(game, WorldTransitionRequest(
+            destination, TransitionMode.STORY, lateral['id'], '祖兽梦径'), WORLD_SYSTEMS, maps)
     route = next((row for row in WORLD_SYSTEMS["world_transition_routes"]
                   if row.get("generic_cross_world") and row["enabled"] and row["source"] == player.world
                   and row["destination"] == destination), None)
@@ -411,6 +421,8 @@ def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -
     world_name = WORLD_SYSTEMS['world_names'][destination]
     summary = (f"你凭秘法压制修为，逆穿界壁重返{world_name}，显露{REALMS[player.realm_index].name}{player.layer}层；解除秘法后按真实道果重新判断界面排斥。"
                if descending else f"你再入{world_name}，界面压制尽去，被封存的道果与法力层次完全复原。")
+    if plan.mode.value == 'story':
+        summary = f'你循祖兽梦径抵达{world_name}，同阶界面往返不压制修为。'
     result = f"returned_{destination}"
     game.history.append(HistoryRecord(
         "SYS_CROSS_WORLD", 1, player.age, "跨界往返", destination, result, summary,
