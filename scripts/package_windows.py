@@ -79,12 +79,13 @@ def main():
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as package:
         package.writestr('launcher.exe', executable)
         package.write(manifest_path, manifest_path.name)
-        for file in ('README.md', 'CHANGELOG.md'):
+        for file in ('README.md', 'CHANGELOG.md', 'AGENTS.md'):
             package.write(ROOT/file, file)
         for file in AGENT_FILES:
             package.write(ROOT/file, file)
         for path in sorted((ROOT/'docs').glob('*.md')):
             package.write(path, path.relative_to(ROOT).as_posix())
+        package.write(ROOT/'docs/world-transition-state-contract.json', 'docs/world-transition-state-contract.json')
         package.writestr('game_config.txt', 'Debug=False\n')
         for directory in ('dlc', 'mods'):
             for path in sorted((ROOT/directory).rglob('*')):

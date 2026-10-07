@@ -1,9 +1,7 @@
 """Save-document versions and pure, sequential migrations.
 
-Release versions are independent. Schema 6 starts a new supported lineage;
-schema 7 stores NPC identity references; schema 8 separates custody and life;
-schema 9 reserves the empty heavens container without generating gameplay.
-Schemas 1--5 have no upgrade path.
+Release versions are independent. Schema 8 starts the supported lineage;
+schema 9 reserves the heavens container. Schemas 1--7 have no upgrade path.
 Future schema changes register
 one step per version here, before any GameState or runtime system is loaded.
 """
@@ -14,16 +12,14 @@ from collections.abc import Callable, Mapping
 from types import MappingProxyType
 from typing import Any
 
-from .relationship_schema import migrate_relationships_v6
-from .npc_custody_schema import migrate_custody_v7
 from .system.heavens.schema import migrate_heavens_v8
 
 SAVE_SCHEMA_VERSION = 9
-MIN_SAVE_SCHEMA_VERSION = 6
+MIN_SAVE_SCHEMA_VERSION = 8
 Migration = Callable[[dict[str, Any]], None]
 # Key N transforms schema N into N + 1; the runner owns version advancement.
 SAVE_MIGRATIONS: Mapping[int, Migration] = MappingProxyType({
-    6: migrate_relationships_v6, 7: migrate_custody_v7, 8: migrate_heavens_v8,
+    8: migrate_heavens_v8,
 })
 
 

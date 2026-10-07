@@ -47,7 +47,7 @@ def main():
                     assert page.locator('#heavens-content input[type=checkbox]').count()==0
                     assert page.locator('#heavens-content').get_by_text('偏好',exact=True).count()==0
                     view=page.evaluate('game.heavens')
-                    assert len(view['incidents'])==len(view['anomalies'])==len(view['conflicts'])==4
+                    assert len(view['incidents'])==len(view['anomalies'])==len(view['conflicts'])==2
                     assert view['intelligence'][0]['level']==1
                     assert factions[0].name not in json.dumps(view,ensure_ascii=False)
                     page.get_by_role('button',name='查看诸天风闻',exact=True).tap()
@@ -62,7 +62,7 @@ def main():
                     assert engine.store.load(initial.id).heavens_state['watch'] is False
                     assert engine.store.load(initial.id).player.age==before
                     page.screenshot(path=str(output/'settings.png'))
-                    for desc,expected in [(INCIDENTS[1],2),(INCIDENTS[7],3)]:
+                    for desc,expected in [(INCIDENTS[1],2),(INCIDENTS[7],5)]:
                         positioned(bundle,desc)
                         page.evaluate('async id=>loadGame(id)',initial.id)
                         assert page.evaluate('game.heavens.intelligence[0].level')==expected
@@ -78,13 +78,37 @@ def main():
                     page.get_by_label('选择界域',exact=True).select_option('celestial')
                     assert page.locator('.heavens-destination').count()==1
                     assert '法则天海' in page.locator('.heavens-destination').inner_text()
-                    acquire_merchant_reports(game,'celestial',3)
+                    acquire_merchant_reports(game,'celestial',5)
                     engine.store.save(game)
                     page.evaluate('async id=>loadGame(id)',initial.id)
                     rows=page.evaluate('game.heavens.intelligence')
-                    assert rows[0]['level']==1 and rows[-1]['level']==3
+                    assert rows[0]['level']==1 and rows[-1]['level']==5
                     assert rows[-1]['source']=='跨界商盟情报委托'
                     assert war['logs'][-1]['text'] in rows[-1]['text']
+                    # Current release: early demonic entry and persistent zero-time button.
+                    game=engine.store.load(initial.id)
+                    game.pending_event=None
+                    p=game.player
+                    p.world,p.location_id,p.path,p.realm_index,p.layer='human',engine.maps.default_location('human'),'demonic',5,1
+                    p.fame=100
+                    engine.store.save(game)
+                    page.evaluate('async id=>loadGame(id)',initial.id)
+                    page.evaluate("UtilityPanels.closeAll?.()")
+                    crossing=page.locator('#spirit-crossing-action')
+                    assert '偷渡魔界' in crossing.inner_text()
+                    assert 'hidden' not in (crossing.get_attribute('class') or '')
+                    before=p.age
+                    page.evaluate("document.querySelector('[data-action=befriend_neighbors]').click()")
+                    page.wait_for_function('!busy && game.instant_actions.befriend_neighbors===false')
+                    assert engine.store.load(initial.id).player.age==before
+                    assert page.locator('[data-action=befriend_neighbors]').is_disabled()
+                    page.evaluate('async id=>loadGame(id)',initial.id)
+                    assert page.locator('[data-action=befriend_neighbors]').is_disabled()
+                    game=engine.store.load(initial.id)
+                    game.player.path,game.player.world,game.player.location_id='monster','monster_realm',engine.maps.default_location('monster_realm')
+                    engine.store.save(game)
+                    page.evaluate('async id=>loadGame(id)',initial.id)
+                    assert any(row['destination']=='phantom_underworld' for row in page.evaluate('game.world_travel.routes'))
                     assert not errors,errors
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()

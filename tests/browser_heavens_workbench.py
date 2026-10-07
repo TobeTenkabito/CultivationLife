@@ -83,7 +83,7 @@ def main():
                     page.get_by_role('button',name='读取诸天',exact=True).click()
                     page.wait_for_function('!busy && !document.querySelector("#debug-heavens-target").disabled && document.querySelector("#debug-heavens-action").options.length>0')
                     assert page.evaluate('document.activeElement.id') != 'debug-console-input'
-                    assert page.locator('#debug-heavens-target option').count() >= 12
+                    assert page.locator('#debug-heavens-target option').count() >= 6
                     assert page.locator('#debug-heavens-target').input_value() == 'human_beacon'
                     assert page.get_by_role('button',name='在副本执行').is_disabled()
                     # A response arriving after an option edit must not arm an old action.

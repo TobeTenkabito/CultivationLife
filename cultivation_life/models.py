@@ -408,6 +408,7 @@ class Player:
     transcendence: dict[str, Any] | None = None
     immortal_conversion_stage: int = 0
     immortal_conversion_last_age: int | None = None
+    immortal_conversion_paused_age: int | None = None
     immortal_conversion_checked_units: int = 0
     tribulation_count: int = 0
     tribulation_power: float | None = None
@@ -448,6 +449,9 @@ class Player:
     race: str = "human"
     spirit_realm_attempted: bool = False
     fame: float = 0.0
+    fame_by_world: dict[str, float] = field(default_factory=dict)
+    race_hostility_by_world: dict[str, dict[str, float]] = field(default_factory=dict)
+    instant_action_ages: dict[str, int] = field(default_factory=dict)
     hostility: dict[str, float] = field(default_factory=dict)
     faction_warnings: list[str] = field(default_factory=list)
     imprisonment: dict[str, Any] | None = None

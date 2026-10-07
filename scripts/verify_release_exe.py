@@ -69,10 +69,10 @@ def verify(with_dlc):
                                  "preset_id": "core"}).encode(), headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
-            assert len(game['heavens']['incidents']) == 4
-            assert len(game['heavens']['anomalies']) == len(game['heavens']['conflicts']) == 4
+            assert len(game['heavens']['incidents']) == 2
+            assert len(game['heavens']['anomalies']) == len(game['heavens']['conflicts']) == 2
             assert game['heavens']['sites'] == []
-            assert {r['world'] for r in game['heavens']['incidents']} == {'human','demon','hell','monster_realm'}
+            assert {r['world'] for r in game['heavens']['incidents']} == {'human','demon'}
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
             def transfer(operation, payload):
                 request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
@@ -149,7 +149,7 @@ def verify(with_dlc):
                 knowledge = client.call('state get', {'pointer': '/tianji_state/knowledge'}, session_id=session)['data']
                 assert knowledge and all(value == 5 for value in knowledge.values())
             heavens = client.call('heavens inspect', session_id=session)
-            assert len(heavens['data']['view']['incidents']) == 4
+            assert len(heavens['data']['view']['incidents']) == 2
             heavens_args = {'action': 'configure', 'options': {'watch': False}}
             checked = client.call('heavens act', heavens_args, session_id=session,
                                   expected_revision=heavens['revision'], request_key='release-heavens')

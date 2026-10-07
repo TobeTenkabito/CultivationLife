@@ -32,15 +32,16 @@ class ExplorationDependencies:
 
 
 def move_world(
-    deps: ExplorationDependencies, game, destination, rng, *, mode="rift", location=None
+    deps: ExplorationDependencies, game, destination, rng, *, mode="rift", location=None, instance_id=None
 ):
     source = game.player.world
-    if source != destination:
+    if source != destination or instance_id and instance_id != game.spatial_state.get('current'):
         plan = deps.plan(
             game,
             destination,
             mode,
             arrival_location=location,
+            instance_id=instance_id,
             reason="空间通道" if mode == "rift" else "界面排斥",
         )
         deps.apply(game, plan)
@@ -72,7 +73,6 @@ def reconcile_boundary(deps: ExplorationDependencies, game, rng=None):
         return False
     rng = rng if rng is not None else decode_rng(game.seed, game.rng_state)
     origin = game.player.world
-    spatial.ensure(game)["current"] = None
     move_world(deps, game, destination, rng, mode="expulsion")
     spatial.journal(
         game,
@@ -128,9 +128,8 @@ def require_free(game):
 
 
 def enter_scene(deps: ExplorationDependencies, game, scene, rng):
-    spatial.ensure(game)["current"] = scene["id"]
+    move_world(deps, game, "rift" if scene["kind"] == "secluded" else "lost", rng, instance_id=scene['id'])
     scene["visits"] += 1
-    move_world(deps, game, "rift" if scene["kind"] == "secluded" else "lost", rng)
     spatial.journal(game, f"抵达{scene['name']}；此空间与外界隔绝。")
 
 
@@ -198,16 +197,10 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
                 f"裂缝将你安全送往本界地图：{deps.maps.location(origin, location)['name']}。",
             )
         else:
-            destinations = [
-                w
-                for w, profile in WORLD_SYSTEMS["world_profiles"].items()
-                if profile["enabled"] and w not in {origin, "rift"}
-            ]
-            destination = rng.choice(destinations)
+            destination = rift.get('destination') or rng.choice(spatial.destinations(origin))
             if destination == "lost":
                 enter_scene(deps, game, spatial.create_instance(game, rng, "lost"), rng)
             else:
-                state["current"] = None
                 move_world(deps, game, destination, rng)
                 spatial.journal(
                     game,

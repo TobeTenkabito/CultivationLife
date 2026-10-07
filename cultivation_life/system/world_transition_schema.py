@@ -48,6 +48,10 @@ def validate_transition_content(profiles, routes, realms):
         mode = TransitionMode(route["mode"])
         if type(route.get("enabled")) is not bool:
             raise ValueError("跨界路线必须声明开关")
+        if route.get('monster_crossing') and (mode != TransitionMode.STORY
+                or direction != TransitionDirection.LATERAL
+                or {route['source'], route['destination']} != {'monster_realm', 'phantom_underworld'}):
+            raise ValueError('祖兽梦径仅连接妖界与幻冥界')
         if mode == TransitionMode.SEALED_RETURN:
             raise ValueError("返界授权仅能来自当前封印")
         if mode == TransitionMode.STUDY and (direction != TransitionDirection.LATERAL

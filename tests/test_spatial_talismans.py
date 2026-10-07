@@ -383,6 +383,10 @@ def test_secluded_late_breakthrough_and_manual_exit_need_no_smuggling(
     e.store.save(g)
     opened = e.spatial_action(g.id, "open")
     rift = opened["spatial"]["rifts"][-1]
+    # Endpoints are now bound at creation, not rerolled at entry.
+    stored = e.store.load(g.id)
+    next(row for row in stored.spatial_state['rifts'] if row['id'] == rift['id'])['destination'] = 'human'
+    e.store.save(stored)
     monkeypatch.setitem(spatial.cfg(), "outcome_weights", {"passage": 1})
     original = random.Random.choice
     monkeypatch.setattr(

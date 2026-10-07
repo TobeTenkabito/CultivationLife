@@ -597,7 +597,7 @@ function render(data) {
     : `血缘 ${p.lineage_race_name} · 势力 ${p.allegiance_race_name}`;
   $('#player-gender').textContent = p.gender_name || (p.gender === 'female' ? '女' : '男');
   $('#action-heading').textContent = p.time_unit_years === 1 ? '这一年，你将如何度过？' : `未来 ${p.time_unit_years} 年，你将如何度过？`;
-  $('#time-unit-hint').textContent = `当前境界每个行动单位流逝 ${p.time_unit_years} 年；期间收益、寿元、NPC 修炼、突破与陨落均逐年结算。重大事件会在发生年份中断本期行动。`;
+  $('#time-unit-hint').textContent = `当前境界每个修炼行动单位最多流逝 ${p.time_unit_years} 年；炼体圆满即停，神识经验逐年累计并保留。切磋、生擒、灭杀、睦邻不耗时，每种当年一次；期间收益、寿元、NPC 修炼、突破与陨落均逐年结算。重大事件会在发生年份中断本期行动。`;
   const breakthrough = data.breakthrough || {};
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
@@ -644,7 +644,7 @@ function render(data) {
   ) : [];
   crossing.classList.toggle('hidden', !canCross);
   crossing.dataset.operation = canCelestialCross ? 'celestial-ascension' : canAsuraCross ? 'asura-ascension' : 'spirit-crossing';
-  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? (p.world === 'human' ? '平移魔界' : '飞升真魔界') : `偷渡${data.world_travel?.ascension_destination === 'hell' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
+  crossing.querySelector('b').textContent = canCelestialCross ? '渡劫飞升' : canAsuraCross ? '飞升修罗界' : canDemonicCross ? (p.world === 'human' ? '偷渡魔界' : '偷渡真魔界') : `偷渡${data.world_travel?.ascension_destination === 'hell' ? '地狱界' : p.path === 'monster' ? '妖界' : '灵界'}`;
   crossing.querySelector('span').textContent = canCelestialCross
     ? '开启九重飞升判定；第三、六、九关为可受雷伤减免影响的仙雷'
     : canAsuraCross
@@ -3866,13 +3866,18 @@ function renderButtons() {
     const blockedByGuixu = !!guixuSession && !(trappedInGuixu && trappedTraining);
       const localSage = game?.player.world==='lost' && ['sage_preach','sage_teach','sage_answer'].includes(button.dataset.action);
       const blockedBySpatial = !!game?.spatial?.inside && !trappedTraining && !localSage;
+    const instantUnavailable = game?.instant_actions?.[button.dataset.action] === false;
+    if (game?.instant_actions && button.dataset.action in game.instant_actions) {
+      button.title = instantUnavailable ? '本次已完成，推进至少一年后恢复' : '即时交互 · 不消耗年份 · 当年限一次';
+      button.classList.toggle('action-completed', instantUnavailable);
+    }
     const mortalCommission = button.dataset.action === 'commission' && game?.player?.realm_index === 0;
     const mortalCombat = ['hunt_beast', 'spar', 'slay', 'capture'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
     const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
     const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate' && !trappedInGuixu;
-      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial;
+      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || instantUnavailable || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);

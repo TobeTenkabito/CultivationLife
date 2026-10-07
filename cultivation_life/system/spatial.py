@@ -144,8 +144,15 @@ def new_rift(game, rng, maps, *, controlled=False):
         controlled=controlled,
         kind="node" if rng.random() < .35 else "rift",
     )
+    # Bind the unknown endpoint once. Opening views or reloading cannot reroll it.
+    row['destination'] = rng.choice(destinations(p.world))
     state["rifts"].append(row)
     return row
+
+
+def destinations(origin):
+    return [world for world, profile in WORLD_SYSTEMS['world_profiles'].items()
+            if profile['enabled'] and world not in {origin, 'rift'}]
 
 
 def tick(game, rng, maps):
@@ -436,7 +443,7 @@ def public(game):
         visible=visible(game),
         scene=copy.deepcopy(scene),
         rifts=[
-            dict(copy.deepcopy(r), requirement=rift_requirement(r, p.age),
+            dict({key: copy.deepcopy(value) for key, value in r.items() if key != 'destination'}, requirement=rift_requirement(r, p.age),
                  name="空间节点" if r.get("kind") == "node" else "空间裂缝",
                  passage_chance=outcome_weights(r).get("passage", 0) / sum(outcome_weights(r).values()))
             for r in state.get("rifts", [])

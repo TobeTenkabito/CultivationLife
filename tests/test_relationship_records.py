@@ -121,30 +121,13 @@ def test_missing_reference_rejects_instead_of_recreating_a_dead_person():
         GameState.from_dict(document)
 
 
-def test_v6_migration_keeps_npc_authority_and_is_pure_and_idempotent():
-    game, npc = state()
-    document = game.to_dict()
-    document['version'] = 6
-    document['player']['dao_companion'].update(name='旧姓名', alive=True, realm_index=0, world='human')
-    document['sects']['old']['npcs'][0].update(alive=False, world='spirit', realm_index=3)
-    document['player']['master'] = {'id': 'event', 'name': '老师', 'realm_index': 2, 'age': 80, 'lifespan': 250}
-    original = copy.deepcopy(document)
-    migrated = migrate_document(document)
-    assert document == original
-    assert migrated['version'] == SAVE_SCHEMA_VERSION
-    assert migrate_document(migrated) is migrated
-    assert migrated['relationship_npcs']['event']['age'] == 80
-    restored = GameState.from_dict(migrated)
-    assert not restored.player.dao_companion['alive']
-    assert restored.player.dao_companion['world'] == 'spirit'
-    assert restored.player.dao_companion['realm_index'] == 3
-    assert restored.player.master['age'] == 80
 
 
-def test_v6_save_migrates_once_and_keeps_opaque_extensions(tmp_path, monkeypatch):
+def test_v8_save_migrates_once_and_keeps_opaque_extensions(tmp_path, monkeypatch):
     game, _ = state()
     document = game.to_dict()
-    document.update(version=6, opaque_mod_state={'keep': [1, 2]})
+    document.pop('heavens_state', None)
+    document.update(version=8, opaque_mod_state={'keep': [1, 2]})
     store = SaveStore(tmp_path)
     store._path(game.id).write_text(json.dumps(document), encoding='utf-8')
     store.load(game.id)
@@ -223,14 +206,6 @@ def test_duplicate_event_registry_cannot_create_a_second_annual_owner():
     assert game.player.dao_companion.person is npc
 
 
-def test_party_alias_is_migrated_to_the_person_id():
-    game, npc = state()
-    document = game.to_dict()
-    document['version'] = 6
-    document['player']['dao_companion']['id'] = 'old-reference'
-    document['player']['party'] = [{'id': 'old-reference', 'name': 'stale'}]
-    migrated = migrate_document(document)
-    assert migrated['player']['party'] == [{'id': npc.id}]
 
 
 def test_affinity_change_does_not_promote_event_person_or_spawn_social_npcs(tmp_path, monkeypatch):

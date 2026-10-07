@@ -26,6 +26,7 @@ class WorldTransitionRequest:
     route_id: str
     reason: str = ""
     arrival_location: str | None = None
+    instance_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +42,9 @@ class WorldTransitionPlan:
     target_rank: tuple[int, int]
     seal_action: str
     seal_snapshot: dict | None
+    source_location: str | None = None
+    source_instance: str | None = None
+    destination_instance: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,10 +95,22 @@ def normalized_seal(player):
 def plan_world_transition(game, request, systems, maps):
     player = game.player
     profiles = systems["world_profiles"]
-    direction = classify_transition(profiles, player.world, request.destination)
+    source_instance = game.spatial_state.get('current') if player.world in {'rift', 'lost'} else None
+    same_space_type = player.world == request.destination and player.world in {'rift', 'lost'}
+    direction = (TransitionDirection.LATERAL if same_space_type else
+                 classify_transition(profiles, player.world, request.destination))
     if not profiles[request.destination].get("enabled", False):
         raise ValueError("目标界面尚未开放")
     mode = TransitionMode(request.mode)
+    if same_space_type and (mode != TransitionMode.RIFT or not request.instance_id
+                            or request.instance_id == source_instance):
+        raise ValueError('同类独立空间之间必须经有效裂缝前往不同实例')
+    scene = game.spatial_state.get('instances', {}).get(request.instance_id)
+    if request.destination in {'rift', 'lost'} and (mode != TransitionMode.RIFT or not scene):
+        raise ValueError('进入独立空间必须提供真实目标实例')
+    if request.instance_id and (request.destination not in {'rift', 'lost'} or not scene
+            or (request.destination == 'lost') != (scene.get('kind') == 'lost')):
+        raise ValueError('空间落点与目标实例不符')
     seal = normalized_seal(player)
     route = None
     if mode == TransitionMode.SEALED_RETURN:
@@ -155,7 +171,8 @@ def plan_world_transition(game, request, systems, maps):
     if mode != TransitionMode.RIFT and target[0] < int(site.get("min_realm_index", 0)):
         raise ValueError("跨界落点的境界要求高于你抵达后的修为")
     return WorldTransitionPlan(player.world, request.destination, direction, mode, request.route_id,
-                               request.reason, location, current, target, action, copy.deepcopy(player.sealed_cultivation))
+                               request.reason, location, current, target, action, copy.deepcopy(player.sealed_cultivation),
+                               player.location_id, source_instance, request.instance_id)
 
 
 def apply_world_transition(game, plan, ports, *, entourage=None):
@@ -167,10 +184,20 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
     from ..rules import max_hp, max_mp
     player = game.player
     if (player.world != plan.source or (player.realm_index, player.layer) != plan.source_rank
-            or player.sealed_cultivation != plan.seal_snapshot):
+            or player.sealed_cultivation != plan.seal_snapshot
+            or plan.source_instance != (game.spatial_state.get('current') if player.world in {'rift', 'lost'} else None)
+            or plan.source_location is not None and player.location_id != plan.source_location):
         raise ValueError("跨界计划已失效，请重新规划")
     hp, mp = player.hp / max(1, max_hp(player)), player.mp / max(1, max_mp(player))
     ports.cancel_auction(game)
+    # Every route shares this boundary, including rifts and reversible visits.
+    source_scope = f'{plan.source}:{plan.source_instance}' if plan.source_instance else plan.source
+    destination_scope = f'{plan.destination}:{plan.destination_instance}' if plan.destination_instance else plan.destination
+    player.fame_by_world[source_scope] = player.fame
+    player.race_hostility_by_world[source_scope] = {
+        key: value for key, value in player.hostility.items() if key.startswith('race:')}
+    player.hostility = {key: value for key, value in player.hostility.items() if not key.startswith('race:')}
+    player.hostility.update(player.race_hostility_by_world.get(destination_scope, {}))
     if plan.mode in {TransitionMode.PROGRESSION, TransitionMode.EXPULSION}:
         keep_companion, keep_ids = False, set()
         if entourage:
@@ -195,7 +222,18 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
         player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
         player.sealed_cultivation = None
     player.world = plan.destination
+    game.spatial_state['current'] = plan.destination_instance
+    player.fame = player.fame_by_world.get(destination_scope, 0.0)
     player.location_id = plan.arrival_location
+    if plan.source == 'celestial' and not player.immortal_power_converted:
+        player.immortal_conversion_paused_age = player.age
+    if plan.destination == 'celestial' and not player.immortal_power_converted:
+        if player.immortal_conversion_last_age is None:
+            player.immortal_conversion_last_age = player.age
+            player.immortal_conversion_checked_units = 0
+        elif player.immortal_conversion_paused_age is not None:
+            player.immortal_conversion_last_age += max(0, player.age - player.immortal_conversion_paused_age)
+        player.immortal_conversion_paused_age = None
     if plan.mode != TransitionMode.PROGRESSION:
         for npc in game.inactive_npcs.values():
             if npc.alive and npc.roster_state == "held" and (npc.custody or {}).get("holder_id") == game.id:
@@ -210,6 +248,8 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
         player.awaiting_spirit_realm_crossing = False
         player.active_breakthrough_aids = []
         player.hp, player.mp = max_hp(player) * hp, max_mp(player) * mp
+    if plan.destination == 'celestial' and not player.immortal_power_converted:
+        player.mp = min(player.mp, max_mp(player) * player.immortal_conversion_stage / 5)
     ports.clear_market(game)
     result = WorldTransitionResult(plan.source, plan.destination, plan.direction, plan.mode,
                                    plan.route_id, bool(player.sealed_cultivation))

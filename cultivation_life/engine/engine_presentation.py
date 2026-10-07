@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ..system.path_modifiers import modifier, pursuit_immunity, projected_resource
 from ..rules import effective_fame, effective_sha_qi, effective_karma
+from ..system.instant_actions import public as instant_actions
 
 import copy
 from typing import Any
@@ -210,11 +211,12 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         except ValueError:
             continue
         restoring = plan.mode.value == "sealed_return"
-        label = "返回" if restoring else "下界"
+        lateral = plan.direction.value == 'lateral'
+        label = "前往" if lateral else "返回" if restoring else "下界"
         target_shell = SectNpc("arrival", "", "", *plan.target_rank, 0, None, world=destination)
         travel_routes.append({"destination": destination, "direction": plan.direction.value,
                               "mode": plan.mode.value, "label": label + WORLD_SYSTEMS["world_names"][destination],
-                              "hint": "解除界面压制，完整恢复封存道果" if restoring else
+                              "hint": "循祖兽梦径往返；同阶界面不压制修为" if lateral else "解除界面压制，完整恢复封存道果" if restoring else
                               f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
     eligible = {row["destination"] for row in travel_routes}
     return {
@@ -277,8 +279,9 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "ghost_system": deps._public_ghost_system(game),
         "breakthrough": deps._public_major_breakthrough(game.player),
         "body_cultivation": deps._public_body_cultivation(game.player),
+        "instant_actions": instant_actions(game.player),
         "world_travel": {
-            "ascension_destination": modifier(game.player, "ascension_destination", "celestial" if game.player.world == "spirit" else "hell" if game.player.path == "ghost" else "demon" if game.player.path == "monster" else "spirit"),
+            "ascension_destination": modifier(game.player, "ascension_destination", "celestial" if game.player.world == "spirit" else "hell" if game.player.path == "ghost" else "monster_realm" if game.player.path == "monster" else "spirit"),
             "can_ascend_celestial": bool(
                 modifier(game.player, "ascension_source", game.player.world == "spirit") and game.player.realm_index == 8
                 and game.player.layer == REALMS[8].layers
