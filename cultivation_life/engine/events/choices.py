@@ -7,13 +7,20 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import ChoiceDependencies
 
 
-def choose(deps: ChoiceDependencies, game_id: str, choice_id: str) -> dict[str, Any]:
+def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: str | None = None) -> dict[str, Any]:
     game = deps._load(game_id)
     if not game.player.alive:
         raise ValueError("此生已经结束")
     pending = game.pending_event
     if not pending:
         raise ValueError("当前没有待处理事件")
+    if event_id is not None and pending['id'] != event_id:
+        raise ValueError('待处理事件已经变化，请查看当前事件后再选择')
+    offered = next((row for row in pending.get('choices', []) if row.get('id') == choice_id), None)
+    if offered is None:
+        raise ValueError('当前事件没有提供此选项')
+    if offered.get('enabled') is False:
+        raise ValueError(offered.get('disabled_reason', '当前条件不满足'))
     followup_event = pending.get("_followup_event")
     event = deps.events_by_id[pending["id"]]
     tags = event.get("tags", [])

@@ -251,7 +251,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == 'talisman-action':
                 result = ENGINE.talisman_action(game_id, str(payload.get('action', '')), payload)
             elif operation == "choice":
-                result = ENGINE.choose(game_id, payload.get("choice_id", ""))
+                result = ENGINE.choose(game_id, payload.get("choice_id", ""), event_id=payload.get('event_id'))
             elif operation == "npc-contact":
                 result = ENGINE.contact_action(game_id, payload.get("npc_id", ""), payload.get("action", ""))
             elif operation == "relationship-violence":

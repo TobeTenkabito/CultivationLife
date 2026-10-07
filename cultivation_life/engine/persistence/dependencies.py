@@ -65,6 +65,7 @@ class ServicesPreparationDependencies:
 @dataclass(frozen=True, slots=True)
 class EventsPreparationDependencies:
     _get_events_by_id: Callable[[], dict[str, dict[str, Any]]]
+    _condition: Callable[..., bool]
 
     @property
     def events_by_id(self) -> dict[str, dict[str, Any]]:
