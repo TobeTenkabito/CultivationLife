@@ -8,6 +8,7 @@ from ...content_registry import REALMS, WORLD_SYSTEMS
 from ..merchant_definitions import KINDS as KINDS
 from ..merchant_definitions import METRICS, POLICIES, RANKS
 from .dependencies import MerchantViewDependencies
+from ..economy.fleet_network import route_open
 
 
 def _public_merchant(deps: MerchantViewDependencies, game):
@@ -25,7 +26,7 @@ def _public_merchant(deps: MerchantViewDependencies, game):
                     "influence": state["influence"].get(deps._merchant_influence_key(member), 0)}
     visible = []
     for alliance in state["worlds"][game.player.world]:
-        owned = bool(member and member["alliance_id"] == alliance["id"] and (member["world"] == game.player.world or alliance["cross_world"]))
+        owned = bool(member and member["alliance_id"] in {alliance["id"], alliance.get('network_id')} and (member["world"] == game.player.world or alliance["cross_world"]))
         site = deps._merchant_site(game, alliance)
         row = {key: copy.deepcopy(alliance[key]) for key in ("id", "name", "world", "hq", "home_world", "cross_world", "linked_worlds", "reserves", "relation", "policy", "next_policy_age")}
         row.update(policy_name=POLICIES[alliance["policy"]], power=deps._merchant_power(alliance),
@@ -37,7 +38,8 @@ def _public_merchant(deps: MerchantViewDependencies, game):
                              "leader": office["leader"]["name"], "realm": REALMS[office["leader"]["realm_index"]].name} for office in alliance["offices"]],
                    tasks=deps._merchant_board(game, alliance) if owned else [])
         row["destinations"] = [{"id": world, "name": WORLD_SYSTEMS["world_names"][world],
-                                 "cost": deps._merchant_passage_cost(game, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
+                                 "cost": deps._merchant_passage_cost(game, world),
+                                 "open": route_open(game, alliance, world)} for world in alliance["linked_worlds"] if world != game.player.world] if owned else []
         row["catalog"] = deps._merchant_procurement_catalog(game, alliance) if owned else []
         from ..economy.caravans import public_caravans
         row['caravans'] = public_caravans(game, deps.maps, alliance['id'])

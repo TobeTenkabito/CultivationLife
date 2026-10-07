@@ -128,25 +128,15 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
         detail = f"{loser_name}被迫对第三方改为{RELATION_LABELS.get(third_status, third_status)}"
     elif term == "stones":
         amount = int(deps._war_rules().get("stone_tribute", 10000))
-        own_id = deps._war_player_identity(game, war)
-        if own_id == winner_id:
-            add_item(game.player, "spirit_stone", amount)
-        elif own_id == loser_id:
-            held = next((item.quantity for item in game.player.inventory if item.id == "spirit_stone"), 0)
-            paid = min(held, amount)
-            if paid:
-                remove_item(game.player, "spirit_stone", paid)
-            amount = paid
+        from ..economy.war_finance import reparations
+        amount = reparations(game, war, winner_id, loser_id, amount)
         detail = f"{loser_name}向{winner_name}上供灵石 {amount}"
     elif term == "supplies":
         own_id = deps._war_player_identity(game, war)
         supplied: list[str] = []
         if own_id == winner_id:
-            pool = [row["content_id"] for row in MARKET_GOODS if row["kind"] == "item" and row["content_id"] in ITEM_CATALOG
-                    and "currency" not in ITEM_CATALOG[row["content_id"]].tags]
-            for item_id in list(dict.fromkeys(pool))[:3]:
-                add_item(game.player, item_id)
-                supplied.append(ITEM_CATALOG[item_id].name)
+            from ..economy.war_finance import supplies
+            supplied = supplies(game, deps.maps, war, loser_id, True)
         elif own_id == loser_id:
             for item in list(game.player.inventory):
                 if len(supplied) >= 3:

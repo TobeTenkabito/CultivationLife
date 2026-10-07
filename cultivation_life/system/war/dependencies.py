@@ -127,6 +127,7 @@ class WarLifecycleDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WarPeaceDependencies:
+    _get_maps: Callable[[], MapPort]
     _append_war_log: Callable[..., Any]
     _available_warriors: Callable[..., Any]
     _coalition_ids: Callable[..., Any]
@@ -152,6 +153,10 @@ class WarPeaceDependencies:
     _get_store: Callable[[], SavePort]
     decode_rng: Callable[..., Any]
     _get_WAR_TERM_DEFS: Callable[[], Any]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
 
     @property
     def store(self) -> SavePort:

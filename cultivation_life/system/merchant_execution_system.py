@@ -8,8 +8,8 @@ from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PRO
 from .merchant.dependencies import MerchantExecutionDependencies
 
 def _merchant_route_exists(deps: MerchantExecutionDependencies, game, alliance, world):
-    return bool(alliance and world in alliance['linked_worlds']
-                and deps._merchant_alliance(game, world, alliance['id']))
+    from .economy.fleet_network import route_open
+    return route_open(game, alliance, world)
 
 
 def _migrate_merchant_routes(deps: MerchantExecutionDependencies, game):

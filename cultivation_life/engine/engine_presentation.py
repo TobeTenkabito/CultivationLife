@@ -1,6 +1,8 @@
 from __future__ import annotations
 from ..system.economy.presentation import public_economy
 from ..system.economy.caravans import public_caravans
+from ..system.economy.personal import public_personal
+from ..system.economy.network_actions import public_network
 
 from ..system.path_modifiers import modifier, pursuit_immunity, projected_resource
 from ..rules import effective_fame, effective_sha_qi, effective_karma
@@ -245,6 +247,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "auction_system": deps._public_auction(game),
         "exchange_system": deps._public_exchange(game),
         "merchant_system": deps._public_merchant(game),
+        "personal_economy": public_personal(game),
+        "fleet_network": public_network(game, deps.maps),
         "spirit_field": deps._public_spirit_field(game.player),
         "art_skills": deps._public_art_skills(game.player),
         "map": {**deps._public_map_with_ghost_parade(game, location_id), "economy": {

@@ -16,6 +16,25 @@ def validate_economy(value, merchants=None, document=None):
     require(isinstance(value.get('ledger'), list) and len(value['ledger']) <= 80)
     def nonnegative(number):
         return type(number) in (int, float) and math.isfinite(number) and number >= 0
+    if 'personal' in value:
+        row = value['personal']
+        require(isinstance(row, dict))
+        for field in ('since', 'opening', 'income', 'expense'):
+            require(type(row.get(field)) is int and row[field] >= 0)
+        require(isinstance(row.get('entries'), list) and len(row['entries']) <= 80)
+        for entry in row['entries']:
+            require(isinstance(entry, dict) and type(entry.get('amount')) is int and entry['amount'] >= 0)
+            require(entry.get('world') in value['worlds'] or entry.get('world') in {'lost', 'rift'})
+    if 'network' in value:
+        network = value['network']
+        require(isinstance(network, dict) and type(network.get('last_year')) is int)
+        require(isinstance(network.get('routes'), dict))
+        for key, route in network['routes'].items():
+            require(isinstance(route, dict) and route.get('home') in value['worlds'] and route.get('branch') in value['worlds'])
+            require(route['home'] != route['branch'] and type(route.get('open')) is bool)
+            require(isinstance(route.get('alliance_id'), str) and key == '|'.join([route['alliance_id'], *sorted([route['home'], route['branch']])]))
+            for field in ('last_year', 'maintenance', 'paid', 'shortfall'):
+                require(type(route.get(field)) is int and route[field] >= 0)
     for world, row in value['worlds'].items():
         require(world not in {'lost', 'rift'} and isinstance(row, dict))
         require(nonnegative(row.get('scale')) and 1 <= row['scale'] <= 1000)
@@ -33,6 +52,9 @@ def validate_economy(value, merchants=None, document=None):
         require(type(row.get('last_year')) is int and type(row.get('revision')) is int and row['revision'] >= 0)
         require(f'market:{key}' in value['accounts'] and f'operator:{key}' in value['accounts'])
         require(isinstance(row.get('commodities'), dict))
+        require(type(row.get('war_pressure', False)) is bool)
+        require(isinstance(row.get('suppliers', {}), dict))
+        require(all(isinstance(k, str) and nonnegative(v) for k, v in row.get('suppliers', {}).items()))
         for commodity in row['commodities'].values():
             require(isinstance(commodity, dict))
             for field in ('stock', 'target', 'price', 'reference', 'initial_target', 'production', 'consumption', 'volume'):
@@ -67,6 +89,9 @@ def validate_economy(value, merchants=None, document=None):
             require(row.get('commodity') is None or isinstance(row['commodity'], str))
             require(isinstance(row.get('history'), list) and len(row['history']) <= 12)
             require(nonnegative(row.get('production_credit', 0)))
+            require(type(row.get('industry_level', 0)) is int and 0 <= row.get('industry_level', 0) <= 10)
+            for field in ('industry_utilization', 'war_funding'):
+                require(nonnegative(row.get(field, 1)) and row.get(field, 1) <= 1)
             if 'welfare_year' in row:
                 require(type(row['welfare_year']) is int and row['welfare_year'] >= 0)
     if 'transport' in value:
@@ -76,14 +101,35 @@ def validate_economy(value, merchants=None, document=None):
         for world, region in transport['worlds'].items():
             require(world in value['worlds'] and isinstance(region, dict))
             require(type(region.get('last_year')) is int and region['last_year'] >= value['base_year'])
-            require(isinstance(region.get('fleets'), dict) and len(region['fleets']) <= 3)
+            require(isinstance(region.get('fleets'), dict))
+            require(region.get('ownership_version', 1) in {1, 2})
+            require(type(region.get('sequence', 0)) is int and region.get('sequence', 0) >= 0)
             require(isinstance(region.get('history'), list) and len(region['history']) <= 36)
             owners = {row['id'] for row in (merchants or {}).get('worlds', {}).get(world, [])}
             for key, fleet in region['fleets'].items():
                 require(isinstance(fleet, dict) and key == fleet.get('id') and fleet.get('world') == world)
-                require(isinstance(fleet.get('alliance_id'), str) and key == f"{world}:{fleet['alliance_id']}:1")
-                if merchants is not None:
+                require(isinstance(fleet.get('alliance_id'), str) and key.startswith(f'{world}:'))
+                kind = fleet.get('owner_kind', 'alliance')
+                require(kind in {'alliance', 'sect', 'family', 'independent'})
+                if merchants is not None and kind == 'alliance':
                     require(fleet['alliance_id'] in owners)
+                if region.get('ownership_version') == 2:
+                    require(isinstance(fleet.get('owner_id'), str) and bool(fleet['owner_id']))
+                    require(type(fleet.get('player_controlled')) is bool and type(fleet.get('pledged')) is bool)
+                    require(type(fleet.get('guard_power')) is int and fleet['guard_power'] >= 0)
+                    require(kind != 'alliance' or fleet['owner_id'] == fleet['alliance_id'])
+                trip = fleet.get('cross_trip')
+                if trip is not None:
+                    require(isinstance(trip, dict) and kind == 'alliance' and fleet.get('cargo') is None and fleet.get('status') == 'waiting')
+                    require(trip.get('destination') in value['worlds'] and trip['destination'] != world)
+                    require(trip.get('phase') in {'outbound', 'selling', 'return'})
+                    require(f"{trip['destination']}:{trip.get('location')}" in value['markets'])
+                    require(trip.get('item') in value['markets'][f"{trip['destination']}:{trip['location']}"]['commodities'])
+                    for field in ('arrival', 'quantity', 'purchased', 'cost', 'revenue', 'remittance'):
+                        require(type(trip.get(field)) is int and trip[field] >= 0)
+                    require(trip['quantity'] <= trip['purchased'] <= fleet['capacity'])
+                    if trip['phase'] == 'return':
+                        require(value['accounts'].get(f'freight:{key}', {}).get('balance') == trip['remittance'])
                 require(f'caravan:{key}' in value['accounts'] and isinstance(fleet.get('location'), str))
                 require(fleet.get('status') in {'waiting','travelling','selling','stranded','retired'})
                 for field in ('capacity','investment','dividends','voyages','delivered','lost','loss_streak',

@@ -32,7 +32,7 @@ def prepare(engine):
 
 
 def main():
-    output=ROOT/'build/economy-v2-r2-browser';output.mkdir(exist_ok=True)
+    output=ROOT/'build/economy-v2-r4-caravan-browser';output.mkdir(exist_ok=True)
     checks=[]
     with tempfile.TemporaryDirectory() as folder:
         engine=GameEngine(ROOT,Path(folder)/'saves')
@@ -57,13 +57,13 @@ def main():
                             page.locator('[data-panel-target=merchant]').click()
                             group=page.locator('.merchant-alliance').first
                             group.locator('.merchant-caravans summary').click()
-                            assert group.locator('.caravan-row').count()==1
+                            assert group.locator('.caravan-row').count()>=3
                             assert not group.locator('.caravan-row').get_by_text('周转资金',exact=False).count()
                             group.get_by_role('button',name='加入商盟',exact=True).click()
                             page.wait_for_function('!busy && !!game.merchant_system.membership')
                             group.locator('.merchant-caravans summary').click()
-                            assert '周转资金' in group.locator('.caravan-row').inner_text()
-                            assert '已上缴' in group.locator('.caravan-row').inner_text()
+                            assert '周转资金' in group.locator('.caravan-row').first.inner_text()
+                            assert '已上缴' in group.locator('.caravan-row').first.inner_text()
                             before=engine.store._path(gid).read_bytes()
                             group.locator('.merchant-caravans summary').click()
                             group.locator('.merchant-caravans summary').click()
@@ -75,7 +75,8 @@ def main():
                             page.get_by_role('button',name='本地市场',exact=True).click()
                             page.locator('.economy-freight summary').click()
                             assert page.locator('.economy-freight').is_visible()
-                            assert page.locator('#map-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
+                            page.wait_for_function('getComputedStyle(document.querySelector("#map-card")).opacity==="1" && document.querySelector("#map-card").scrollWidth<=document.querySelector("#map-card").clientWidth+1')
+                            assert page.locator('#map-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1'), (theme, width, page.locator('#map-card').evaluate('(root)=>({width:root.clientWidth,scroll:root.scrollWidth,overflow:[...root.querySelectorAll("*")].filter(n=>n.scrollWidth>root.clientWidth).map(n=>[n.tagName,n.className,n.scrollWidth,n.textContent.slice(0,100)])})'))
                             page.locator('.economy-freight').scroll_into_view_if_needed()
                             page.screenshot(path=str(output/f'{theme}-{width}-map.png'))
                             page.reload();page.wait_for_function('configData')

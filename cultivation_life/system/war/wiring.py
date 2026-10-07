@@ -132,6 +132,7 @@ def bind_war_lifecycle(host) -> WarLifecycleDependencies:
 
 def bind_war_peace(host, *, _get_WAR_TERM_DEFS: Callable[..., Any], decode_rng: Callable[..., Any]) -> WarPeaceDependencies:
     return WarPeaceDependencies(
+        _get_maps=lambda: host.maps,
         _append_war_log=lambda *args, **kwargs: host._append_war_log(*args, **kwargs),
         _available_warriors=lambda *args, **kwargs: host._available_warriors(*args, **kwargs),
         _coalition_ids=lambda *args, **kwargs: host._coalition_ids(*args, **kwargs),

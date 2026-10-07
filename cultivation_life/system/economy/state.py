@@ -21,7 +21,8 @@ def local_market(game):
 
 def ensure_state(game):
     if game.economy_v2:
-        return False
+        from .personal import ensure_personal
+        return ensure_personal(game)
     from ...economy_schema import validate_economy_settings
     validate_economy_settings(settings())
     game.economy_v2 = dict(schema_version=1, base_year=game.player.age, last_year=game.player.age,
@@ -33,6 +34,8 @@ def ensure_state(game):
             last_year=game.player.age, history=[], black_market_volume=0, black_market_quantity=0)
         account(game, f'background:{world}', settings()['background_opening'] * int(profile['tier']))
         account(game, f'world:{world}')
+    from .personal import ensure_personal
+    ensure_personal(game)
     return True
 
 
@@ -149,12 +152,16 @@ def settle_market(game, market):
     years = game.player.age - market['last_year']
     if years <= 0:
         return False
+    market['war_pressure'] = any(w.get('status') in {'active', 'peace_ready'} and w.get('world') == market['world']
+        and w.get('location_id') == market['location'] for w in game.wars)
     world = game.economy_v2['worlds'][market['world']]
     for item, row in market['commodities'].items():
         old_stock = row['stock']
         target = row['initial_target'] * world['scale']
         # Stable local specialisation creates supply differences; no goods teleport.
         supply = target * (.4 + (_variation(market['world'], market['location'], item) - .75) * 3.2)
+        if market.get('war_pressure'):
+            supply *= .6
         new_stock = supply + (old_stock - supply) * math.exp(-settings()['recovery_rate'] * years)
         consumed = target * settings()['annual_consumption'] * years + max(0., old_stock - new_stock)
         produced = consumed + new_stock - old_stock
@@ -175,6 +182,10 @@ def settle_market(game, market):
     if top_up:
         transfer_value(game, f'background:{market["world"]}', f'market:{key}', top_up, '背景消费回款')
     market['last_year'] = game.player.age
+    for owner in list(market.get('suppliers', {})):
+        market['suppliers'][owner] *= math.exp(-.1 * years)
+        if market['suppliers'][owner] < .01:
+            del market['suppliers'][owner]
     market['revision'] += 1
     return True
 

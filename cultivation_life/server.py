@@ -298,6 +298,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.buy_market_offer(game_id, payload.get("offer_id", ""))
             elif operation == "local-market-trade":
                 result = ENGINE.trade_local_market(game_id, payload)
+            elif operation == 'fleet-action':
+                result = ENGINE.fleet_action(game_id, payload)
             elif operation == "market-lock":
                 result = ENGINE.toggle_market_offer_lock(game_id, payload.get("offer_id", ""))
             elif operation == "market-sell-plant":

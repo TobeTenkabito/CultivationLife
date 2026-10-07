@@ -83,6 +83,8 @@ def transfer_value(game, source, destination, amount, reason):
     entries.append(dict(year=game.player.age, source=source, destination=destination,
                         amount=amount, reason=reason))
     del entries[:-80]
+    from .personal import record
+    record(game, entries[-1])
 
 
 def record_external(game, source, destination, amount, reason):
@@ -100,3 +102,5 @@ def record_external(game, source, destination, amount, reason):
     entries.append(dict(year=game.player.age, source=source, destination=destination,
                         amount=amount, reason=reason))
     del entries[:-80]
+    from .personal import record
+    record(game, entries[-1])

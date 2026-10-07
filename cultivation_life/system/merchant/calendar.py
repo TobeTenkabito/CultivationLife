@@ -37,18 +37,19 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
             occupied = {alliance["hq"], *(row["location_id"] for row in alliance["offices"])}
             expansion = [row["id"] for row in deps.maps.worlds[world]["locations"]
                          if not row.get("min_realm_index") and row["id"] not in occupied]
-            if expansion and len(alliance["offices"]) < 4 and alliance["reserves"] >= 20000 and rng.random() < .2:
+            if not alliance.get('player_owned') and expansion and alliance['reserves'] >= 40000 and rng.random() < .2:
                 location = rng.choice(expansion)
-                deputy = copy.deepcopy(alliance["offices"][0]["leader"])
+                deputy = copy.deepcopy(alliance["offices"][0]["leader"] if alliance['offices'] else alliance['leader'])
                 deputy.update(id=f"merchant-{world}-{alliance['id']}-{location}", name=rng.choice(["叶知秋", "方清和", "江行远"]))
                 alliance["offices"].append({"location_id": location, "leader": deputy})
                 transfer_value(game, treasury(world, alliance['id']), f'background:{world}', 10000, '商盟分部建设')
-            elif len(alliance["offices"]) > 1 and alliance["reserves"] < 3000:
+            elif not alliance.get('player_owned') and len(alliance["offices"]) > 1 and alliance["reserves"] < 3000:
                 member = state["membership"] or {}
                 removable = [office for office in alliance["offices"] if not (
                     member.get("world") == world and member.get("alliance_id") == alliance["id"]
                     and member.get("site") == office["location_id"])]
-                if removable:
+                from ..economy.fleet_network import active_fleets
+                if removable and len(active_fleets(game, world, 'alliance', alliance['id'])) <= len(alliance['offices']) * 3:
                     alliance["offices"].remove(removable[-1])
                     refund = min(2000, balance(game, f'background:{world}'))
                     transfer_value(game, f'background:{world}', treasury(world, alliance['id']), refund, '商盟撤部资产出售')

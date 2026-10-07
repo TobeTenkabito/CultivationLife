@@ -17,6 +17,7 @@
     const head = el('div', null, 'economy-heading');
     head.append(el('h3', `${market.name} · 本地市场`), el('span', `世界历 ${market.year} 年`));
     const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
+    if (market.war_pressure) intro.append(' 当地战事正在压低生产并增加运输风险。');
     const metrics = el('div', null, 'economy-metrics');
     for (const [label, value] of [['累计成交',market.turnover],['收购资金',market.liquidity],['运营府库',market.operator_balance]]) {
       const cell = el('div'); cell.append(el('small',label), el('strong',money(value))); metrics.append(cell);
@@ -29,6 +30,7 @@
     (market.caravans || []).forEach(fleet => freight.append(el('p',
       `${fleet.name} · ${{waiting:'候货',travelling:'在途',selling:'待售',stranded:'受阻',retired:'已解散'}[fleet.status]} · ${fleet.destination ? `${fleet.origin} → ${fleet.destination}，预计第 ${fleet.arrival} 年抵达` : fleet.location}`)));
     if (!market.caravans?.length) freight.append(el('p', '当前没有涉及本地的商队运输。'));
+    if (market.suppliers?.length) freight.append(el('p', `近期已建模组织与商队的最大供给占比：${Math.round(market.suppliers[0].share * 100)}%。此比例不含背景作坊；新增产出和外来商队会稀释集中度。`));
     const tools = el('div',null,'economy-tools');
     const input = el('input'); input.type='search'; input.placeholder='查找商品'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
     const quantity = el('select'); quantity.setAttribute('aria-label','本地市场交易数量');

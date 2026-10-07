@@ -74,7 +74,8 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
 
 
 def _merchant_alliance(game, world, alliance_id):
-    return next((row for row in game.merchant_state["worlds"].get(world, []) if row["id"] == alliance_id), None)
+    from ..economy.fleet_network import alliance_at
+    return alliance_at(game, world, alliance_id)
 
 
 def _merchant_site(game, alliance):
