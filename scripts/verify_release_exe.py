@@ -140,6 +140,12 @@ def verify(with_dlc):
             assert advanced_freight['personal_economy']['balance'] == advanced_freight['market']['spirit_stones']
             assert any(f['owner_kind'] == 'independent' for f in transport['fleets'].values())
             assert all(a['capacity'] >= 3 for a in advanced_freight['fleet_network']['alliances'])
+            from scripts.verify_economy_expansion import verify_economy_expansion
+            verify_economy_expansion(base, folder)
+            from scripts.verify_economy_enterprises import verify_economy_enterprises
+            verify_economy_enterprises(base, folder)
+            from scripts.verify_economy_governance import verify_economy_governance
+            verify_economy_governance(base, folder)
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

@@ -7,10 +7,10 @@
     return node;
   };
   const money = value => Number(value).toLocaleString('zh-CN', {maximumFractionDigits: 2});
-  const setBusy = busy => document.querySelectorAll('#map-economy button[data-trade]').forEach(button => {
+  const setBusy = busy => document.querySelectorAll('#map-economy button[data-trade], #map-economy button[data-governance]').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1';
   });
-  function render(market, game, submit) {
+  function render(market, game, submit, enterpriseSubmit) {
     const root = document.querySelector('#map-economy'); root.replaceChildren();
     if (!market?.available) return;
     if (address !== market.market_id) { address = market.market_id; search = ''; }
@@ -64,7 +64,40 @@
     }
     input.oninput=()=>{search=input.value;draw();};
     quantity.onchange=()=>{selectedQuantity=quantity.value;draw();};
-    root.append(head,intro,metrics,freight,tools,note,list);draw();
+    root.append(head,intro,metrics,macro,freight);
+    renderCompetition(root,market,enterpriseSubmit);
+    window.EnterprisePanel?.render(root,market.enterprises,enterpriseSubmit);
+    root.append(tools,note,list);draw();
+  }
+  function renderCompetition(root,market,submit) {
+    const data=market.competition;if(!data)return;
+    const box=el('details',null,'competition-panel');box.id='market-governance';
+    box.append(el('summary','市政与商势 · 产权、供给和竞争'));
+    const claim=data.control;
+    const hero=el('div',null,'market-control');
+    hero.append(el('small','本地市税权'),el('h4',claim?.owner || '本地公共市场'),
+      el('p',claim?`${claim.label} · 累计上缴 ${money(claim.received)} 灵石 · 第 ${claim.since} 年接管`:'手续费留用于本地运营与竞争扩产'));
+    box.append(hero,el('p','商势按近期成交和本地产业仓储估算，背景产销以近五年规模计入。集中度达到 60% 且持续缺货时，本地基金出资扩产，竞争商队寻找有利可图的补货路线。进口商品只能等待实际运输。','muted'));
+    const controls=el('div',null,'market-governance-controls');
+    const button=(title,action,payload)=>{const b=el('button',title);b.type='button';b.dataset.governance=action;b.dataset.unavailable=market.can_trade?'0':'1';b.onclick=()=>submit({action,market_id:market.market_id,revision:market.revision,...payload()});controls.append(b);};
+    if(claim?.can_manage){
+      const label=el('label','市税经营方针'),select=el('select');select.setAttribute('aria-label','市税经营方针');
+      for(const p of data.policies){const o=el('option',`${p.name} · 实收手续费上缴 ${p.percent}%`);o.value=p.id;select.append(o);}select.value=claim.policy;label.append(select);controls.append(label);
+      button('调整经营方针','market_policy',()=>({policy:select.value}));
+    }
+    const label=el('label','竞争基金投入'),amount=el('input');amount.type='number';amount.min='1';amount.max='1000000000';amount.step='1';amount.value='1000';amount.setAttribute('aria-label','竞争基金投入');label.append(amount);controls.append(label);
+    button('出资改善本地供给','market_relief',()=>({amount:Number(amount.value)}));box.append(controls);
+    const list=el('div',null,'competition-grid');
+    for(const row of data.rows){
+      const card=el('article',null,'competition-card');card.dataset.commodity=row.item;
+      const title=el('div',null,'economy-heading');title.append(el('b',row.name),el('span',row.pressure>=32?'竞争补货中':row.power>=60?'供给集中':'自由竞争'));card.append(title,el('small',`主要经营者 · ${row.owner}`));
+      for(const [label,value] of [['供给份额',row.supply],['收购份额',row.purchase],['仓储份额',row.storage]]){
+        const line=el('div',null,'competition-share');line.append(el('span',label),el('b',`${money(value)}%`));const bar=el('progress');bar.max=100;bar.value=value;bar.setAttribute('aria-label',`${row.name}${label}`);line.append(bar);card.append(line);
+      }
+      card.append(el('p',`竞争压力 ${money(row.pressure)} / 100 · 实付工料 ${money(row.invested)} · 已增供 ${money(row.added)} 件`));list.append(card);
+    }
+    if(!data.rows.length)list.append(el('p','成交后逐步形成商品商势记录。','muted'));
+    box.append(list);root.append(box);
   }
   window.LocalEconomy={render,setBusy};
 })();

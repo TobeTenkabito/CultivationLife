@@ -7,7 +7,7 @@ import hashlib
 
 from ...content_registry import ITEM_CATALOG, WORLD_SYSTEMS
 from .ledger import account, balance, transfer_value
-from .state import ensure_state, ensure_regional_market, reprice
+from .state import ensure_state, ensure_regional_market, reprice, commodity_catalog
 from .local_market import quote
 
 
@@ -104,7 +104,10 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     world, location = entity.world, faction_site(entity)['id']
     ensure_regional_market(game, maps, world, location)
     market = game.economy_v2['markets'][f'{world}:{location}']
-    native = {k: v for k, v in market['commodities'].items() if not v.get('imported')}
+    # New commercial crop chains must not reroll legacy faction output or make
+    # upper-world organizations select tier-one crops instead of local goods.
+    original = commodity_catalog(world, commercial=False)
+    native = {k: v for k, v in market['commodities'].items() if not v.get('imported') and k in original}
     minimum_tier = min((v['tier'] for v in native.values()), default=0)
     goods = sorted(k for k, v in native.items() if v['tier'] == minimum_tier)
     if not goods:
@@ -147,7 +150,7 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     reprice(game, market, product)
     row['produced'] += low
     from .industry import supplier_delivery
-    supplier_delivery(market, key(row['kind'], entity.id), low)
+    supplier_delivery(market, key(row['kind'], entity.id), low, game=game, item=item)
     row['production_credit'] = max(0, credit - low * product['reference'])
     return sale['total']
 
@@ -240,6 +243,10 @@ def advance_organizations(game, maps):
         row['last_year'] = game.player.age
         row['history'].append([game.player.age, row['income'], row['expense']])
         del row['history'][:-12]
+    from .enterprise_operations import advance_estates
+    advance_estates(game, maps)
+    from .market_governance import advance_governance
+    advance_governance(game)
 
 
 def public_finance(game, kind, identity):

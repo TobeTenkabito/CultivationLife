@@ -27,7 +27,8 @@ def public_economy(game):
             trend='↑' if row['price'] > previous * 1.01 else '↓' if row['price'] < previous * .99 else '→',
             production=round(row['production'], 1), consumption=round(row['consumption'], 1),
             volume=row['volume'], history=list(row['history'])))
-    return dict(available=True, market_id=market['id'], revision=market['revision'], name=market['name'],
+    from .competition_view import public
+    return dict(competition=public(game, market, {r['id'] for r in rows}), available=True, market_id=market['id'], revision=market['revision'], name=market['name'],
         world_name=WORLD_SYSTEMS['world_names'][game.player.world], year=game.player.age,
         scale=round(world['scale'], 4), growth_cap=settings()['growth_cap'],
         price_level=world['price_level'], fee_rate=settings()['transaction_fee'],

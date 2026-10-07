@@ -1,5 +1,7 @@
 """Pure validation of the optional economy subdocument; no runtime imports."""
 import math
+from .enterprise_schema import validate_estates, validate_order
+from .market_governance_schema import validate_market, validate_receipts
 
 
 def validate_economy(value, merchants=None, document=None):
@@ -32,6 +34,7 @@ def validate_economy(value, merchants=None, document=None):
         for key, route in network['routes'].items():
             require(isinstance(route, dict) and route.get('home') in value['worlds'] and route.get('branch') in value['worlds'])
             require(route['home'] != route['branch'] and type(route.get('open')) is bool)
+            require(type(route.get('built', False)) is bool)
             require(isinstance(route.get('alliance_id'), str) and key == '|'.join([route['alliance_id'], *sorted([route['home'], route['branch']])]))
             for field in ('last_year', 'maintenance', 'paid', 'shortfall'):
                 require(type(route.get(field)) is int and route[field] >= 0)
@@ -55,6 +58,7 @@ def validate_economy(value, merchants=None, document=None):
         require(type(row.get('war_pressure', False)) is bool)
         require(isinstance(row.get('suppliers', {}), dict))
         require(all(isinstance(k, str) and nonnegative(v) for k, v in row.get('suppliers', {}).items()))
+        validate_market(row, value, require, nonnegative)
         for commodity in row['commodities'].values():
             require(isinstance(commodity, dict))
             for field in ('stock', 'target', 'price', 'reference', 'initial_target', 'production', 'consumption', 'volume'):
@@ -94,6 +98,8 @@ def validate_economy(value, merchants=None, document=None):
                 require(nonnegative(row.get(field, 1)) and row.get(field, 1) <= 1)
             if 'welfare_year' in row:
                 require(type(row['welfare_year']) is int and row['welfare_year'] >= 0)
+    validate_estates(value, require, document)
+    validate_receipts(document, require)
     if 'transport' in value:
         transport = value['transport']
         require(isinstance(transport, dict) and transport.get('version') == 1)
@@ -119,16 +125,41 @@ def validate_economy(value, merchants=None, document=None):
                     require(type(fleet.get('guard_power')) is int and fleet['guard_power'] >= 0)
                     require(kind != 'alliance' or fleet['owner_id'] == fleet['alliance_id'])
                 trip = fleet.get('cross_trip')
+                validate_order(fleet, value, require)
                 if trip is not None:
                     require(isinstance(trip, dict) and kind == 'alliance' and fleet.get('cargo') is None and fleet.get('status') == 'waiting')
                     require(trip.get('destination') in value['worlds'] and trip['destination'] != world)
-                    require(trip.get('phase') in {'outbound', 'selling', 'return'})
+                    require(trip.get('phase') in {'outbound', 'selling', 'return', 'return_selling'})
                     require(f"{trip['destination']}:{trip.get('location')}" in value['markets'])
                     require(trip.get('item') in value['markets'][f"{trip['destination']}:{trip['location']}"]['commodities'])
                     for field in ('arrival', 'quantity', 'purchased', 'cost', 'revenue', 'remittance'):
                         require(type(trip.get(field)) is int and trip[field] >= 0)
                     require(trip['quantity'] <= trip['purchased'] <= fleet['capacity'])
-                    if trip['phase'] == 'return':
+                    if 'path' in trip:
+                        path = trip['path']
+                        require(isinstance(path, list) and 1 <= len(path) <= len(value['worlds']))
+                        require(all(isinstance(w, str) and w in value['worlds'] for w in path) and len(set(path)) == len(path))
+                        require(type(trip.get('index')) is int and 0 <= trip['index'] < len(path))
+                        require(type(trip.get('leg_paid')) is bool and type(trip.get('recalled')) is bool)
+                        require(type(trip.get('tariff')) is int and trip['tariff'] >= 0)
+                        require(type(trip.get('remittance_percent')) is int and trip['remittance_percent'] in {0, 25, 50, 100})
+                        require(f"{world}:{trip.get('source_location')}" in value['markets'])
+                        require(trip['source_location'] == fleet['location'])
+                        require(path[-1] == (world if trip['phase'] in {'return', 'return_selling'} else trip['destination']))
+                        if trip['phase'] in {'outbound', 'selling'}:
+                            require(path[0] == world and trip['remittance'] == 0)
+                        if merchants is not None:
+                            owner = next((a for a in merchants['worlds'][world] if a['id'] == fleet['alliance_id']), None)
+                            require(owner is not None)
+                            identity = owner.get('network_id', owner['id'])
+                            for first, second in zip(path, path[1:]):
+                                require('|'.join([identity, *sorted([first, second])]) in value.get('network', {}).get('routes', {}))
+                            require(not trip['remittance'] or owner['home_world'] == world)
+                        if trip['phase'] in {'selling', 'return_selling'}:
+                            require(trip['index'] == len(path) - 1)
+                        if trip['phase'] in {'return', 'return_selling'}:
+                            require(trip['item'] in value['markets'][f"{world}:{trip['source_location']}"]['commodities'])
+                    if trip['phase'] in {'return', 'return_selling'}:
                         require(value['accounts'].get(f'freight:{key}', {}).get('balance') == trip['remittance'])
                 require(f'caravan:{key}' in value['accounts'] and isinstance(fleet.get('location'), str))
                 require(fleet.get('status') in {'waiting','travelling','selling','stranded','retired'})

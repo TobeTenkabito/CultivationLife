@@ -7,6 +7,7 @@ from ..rules import remove_item, has_item, expected_combat_power, combat_power
 from ..runtime import decode_rng, encode_rng, now_iso
 from .merchant_definitions import POLICIES, RANKS, CROSS_ALLIANCES, METRICS, PROCUREMENT_KINDS
 from .merchant.dependencies import MerchantActionDependencies
+from .economy.fleet_network import member_of
 
 def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=None, *, committed=None):
     game = copy.deepcopy(deps._load(game_id))
@@ -19,6 +20,12 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
     member = state["membership"]
     alliance_id = str(payload.get("alliance_id") or (member or {}).get("alliance_id", ""))
     alliance = deps._merchant_alliance(game, player.world, alliance_id)
+    if not alliance and member and not payload.get('alliance_id'):
+        issuer = deps._merchant_alliance(game, member['world'], member['alliance_id'])
+        if issuer:
+            alliance = deps._merchant_alliance(game, player.world, issuer.get('network_id', issuer['id']))
+            if alliance:
+                alliance_id = alliance['id']
     if action == "dismiss_notices":
         state["notices"] = []
     elif action == "leave":
@@ -35,7 +42,7 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
             state["membership"] = {"alliance_id": alliance_id, "world": player.world, "site": site, "rank": 0}
             deps._merchant_notice(game, f"你已加入{alliance['name']}，成为{'总部' if site == 'hq' else deps.maps.location(player.world, site)['name'] + '分部'}成员。宗门、家族和种族身份不受影响。")
         else:
-            if not member or member["alliance_id"] not in {alliance_id, alliance.get('network_id')} or (member["world"] != player.world and not alliance["cross_world"]):
+            if not member_of(game, alliance):
                 raise ValueError("你不是该商盟成员")
             influence_key = deps._merchant_influence_key(member)
             influence = state["influence"].get(influence_key, 0)

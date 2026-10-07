@@ -9,6 +9,13 @@ def alliance_at(game, world, identity):
     return next((a for a in rows if a['id'] == identity), None) or next((a for a in rows if a.get('network_id') == identity), None)
 
 
+def member_of(game, alliance):
+    member = game.merchant_state.get('membership') or {}
+    issuer = alliance_at(game, member.get('world'), member.get('alliance_id'))
+    return bool(issuer and alliance and issuer.get('network_id', issuer['id']) == alliance.get('network_id', alliance['id'])
+                and (member['world'] == alliance['world'] or alliance['cross_world']))
+
+
 def owner_key(fleet):
     kind = fleet.get('owner_kind', 'alliance')
     identity = fleet.get('owner_id', fleet['alliance_id'])
@@ -107,6 +114,9 @@ def seed_organization_fleets(game, maps, world, region):
             if balance(game, cash) == 0:
                 del region['fleets'][fleet['id']]
                 del game.economy_v2['accounts'][cash]
+                escrow = f'freight:{fleet["id"]}'
+                if escrow in game.economy_v2['accounts'] and balance(game, escrow) == 0:
+                    del game.economy_v2['accounts'][escrow]
     for entity in [*game.sects.values(), *([game.family] if game.family else [])]:
         if entity.extinct or entity.kind == 'institution' or entity.world != world:
             continue
@@ -145,41 +155,67 @@ def ensure_routes(game):
                 if destination != world and alliance_at(game, destination, alliance['id']):
                     key = route_key(alliance['id'], world, destination)
                     network['routes'][key] = dict(alliance_id=alliance['id'], home=world, branch=destination,
-                        open=True, maintenance=0, paid=0, shortfall=0, last_year=network['last_year'])
+                        open=True, built=True, maintenance=0, paid=0, shortfall=0, last_year=network['last_year'])
     return True
 
 
 def route_open(game, alliance, destination):
-    if not alliance or destination not in alliance['linked_worlds'] or not alliance_at(game, destination, alliance.get('network_id', alliance['id'])):
+    return bool(route_path(game, alliance, destination))
+
+
+def qualified_site(game, alliance):
+    if not alliance:
         return False
+    if alliance['world'] == alliance['home_world']:
+        return (WORLD_SYSTEMS['world_profiles'][alliance['world']]['tier'] >= 2
+                and alliance.get('chief_realm', 0) >= 8)
+    cap = int(WORLD_SYSTEMS['world_profiles'][alliance['world']]['npc_realm_cap'])
+    return alliance['leader']['realm_index'] >= cap - 1 and alliance['leader'].get('alive', True)
+
+
+def route_path(game, alliance, destination):
+    """Read-only shortest open physical path; network identity is not a passage."""
+    if not alliance or destination not in alliance['linked_worlds'] or not alliance_at(game, destination, alliance.get('network_id', alliance['id'])):
+        return []
     if destination == alliance['world']:
-        return True
+        return [destination]
     network = game.economy_v2.get('network')
     if network is None:
-        return True  # Legacy adoption, before the first normal session preparation.
+        return [alliance['world'], destination]  # Legacy adoption.
     home = alliance['home_world']
     identity = alliance.get('network_id', alliance['id'])
     headquarters = alliance_at(game, home, identity)
-    if (not headquarters or WORLD_SYSTEMS['world_profiles'][home]['tier'] < 2
-            or headquarters.get('chief_realm', 0) < 8):
-        return False
-    for world in {alliance['world'], destination} - {home}:
-        branch = alliance_at(game, world, identity)
-        cap = int(WORLD_SYSTEMS['world_profiles'][world]['npc_realm_cap'])
-        if not branch or branch['leader']['realm_index'] < cap - 1 or not branch['leader'].get('alive', True):
-            return False
-        route = routes(game).get(route_key(identity, home, world))
-        if not route or not route['open']:
-            return False
-    return True
+    if not qualified_site(game, headquarters) or not qualified_site(game, alliance):
+        return []
+    queue, seen = [[alliance['world']]], {alliance['world']}
+    for path in queue:
+        for route in sorted(routes(game).values(), key=lambda r: route_key(r['alliance_id'], r['home'], r['branch'])):
+            if route['alliance_id'] != identity or not route['open'] or path[-1] not in {route['home'], route['branch']}:
+                continue
+            other = route['branch'] if path[-1] == route['home'] else route['home']
+            if other in seen or not qualified_site(game, alliance_at(game, other, identity)):
+                continue
+            if other == destination:
+                return [*path, other]
+            seen.add(other)
+            queue.append([*path, other])
+    return []
+
+
+def leg_years(first, second):
+    return 3 + abs(WORLD_SYSTEMS['world_profiles'][first]['tier'] - WORLD_SYSTEMS['world_profiles'][second]['tier'])
 
 
 def maintenance_cost(game, maps, world, location):
     from .state import ensure_regional_market
     ensure_regional_market(game, maps, world, location)
-    goods = game.economy_v2['markets'][f'{world}:{location}']['commodities'].values()
+    return maintenance_quote(game, world, location)
+
+
+def maintenance_quote(game, world, location):
+    goods = game.economy_v2['markets'].get(f'{world}:{location}', {}).get('commodities', {}).values()
     rows = [r for r in goods if not r.get('imported')]
-    multiplier = sum(r['price'] / r['reference'] for r in rows) / max(1, len(rows))
+    multiplier = sum(r['price'] / r['reference'] for r in rows) / len(rows) if rows else 1
     tier = WORLD_SYSTEMS['world_profiles'][world]['tier']
     return max(1, round(25000 * tier ** 2 * multiplier))
 
@@ -193,27 +229,38 @@ def advance_network(game, maps):
         return
     network['last_year'] = game.player.age
     for route in routes(game).values():
-        region = game.economy_v2.get('transport', {}).get('worlds', {}).get(route['home'])
+        endpoint = alliance_at(game, route['home'], route['alliance_id'])
+        home = alliance_at(game, endpoint['home_world'], route['alliance_id']) if endpoint else None
+        region = game.economy_v2.get('transport', {}).get('worlds', {}).get(home['world']) if home else None
         years = max(0, game.player.age - max(route['last_year'], region['last_year'])) if region else 0
         route['last_year'] = game.player.age
-        if not route['open'] or not years:
+        if not years:
             continue
-        home = alliance_at(game, route['home'], route['alliance_id'])
         branch = alliance_at(game, route['branch'], route['alliance_id'])
         if not home or not branch:
             route['open'] = False
             continue
-        cost = maintenance_cost(game, maps, route['home'], home['hq'])
+        cost = maintenance_cost(game, maps, home['world'], home['hq'])
+        source = f'alliance:{home["world"]}:{home["id"]}'
+        if not route['open']:
+            # Closed years accrue no bill. AI only repairs previously built links,
+            # retaining two years' network upkeep after the repair payment.
+            count = sum(r['alliance_id'] == route['alliance_id'] for r in routes(game).values())
+            if (not home.get('player_owned') and (route.get('built') or route['paid'])
+                    and qualified_site(game, home) and qualified_site(game, endpoint) and qualified_site(game, branch)
+                    and balance(game, source) >= cost * (1 + 2 * count)):
+                transfer_value(game, source, f'background:{home["world"]}', cost, '商盟恢复逆灵通道')
+                route.update(open=True, built=True, shortfall=0, maintenance=cost)
+            continue
         due = cost * years
-        source = f'alliance:{route["home"]}:{route["alliance_id"]}'
         paid = min(due, balance(game, source))
-        transfer_value(game, source, f'background:{route["home"]}', paid, '逆灵通道年度原料维护')
-        route.update(maintenance=cost, paid=route['paid'] + paid, shortfall=due - paid)
+        transfer_value(game, source, f'background:{home["world"]}', paid, '逆灵通道年度原料维护')
+        route.update(built=True, maintenance=cost, paid=route['paid'] + paid, shortfall=due - paid)
         if paid < due:
             route['open'] = False
 
 
-def leader_record(game, identity, title, realm):
+def leader_record(game, identity, title, realm, *, world=None):
     """A newly contracted local officer, never a copied player or existing NPC."""
     from ...models import SectNpc
-    return SectNpc(identity, title, '盟务主事', realm, REALMS[realm].layers, 100, None, world=game.player.world).to_dict()
+    return SectNpc(identity, title, '盟务主事', realm, REALMS[realm].layers, 100, None, world=world or game.player.world).to_dict()

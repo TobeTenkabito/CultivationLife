@@ -38,6 +38,7 @@ def _generate_ai_peace_offer(deps: WarPeaceDependencies, game: GameState, war: d
         winner_power /= 1 + float(deps._war_rules().get("defender_power_bonus", 0.10))
     target_power = deps._war_entity_power(game, war, recipient, target_power_id)
     ratio = winner_power / max(1.0, target_power)
+    from ..economy.war_assets import eligible
     if war["kind"] == "sect" and budget >= deps.WAR_TERM_DEFS["annex"][1]:
         if ratio >= float(deps._war_rules().get("annex_power_ratio", 2.5)):
             add("annex")
@@ -48,6 +49,11 @@ def _generate_ai_peace_offer(deps: WarPeaceDependencies, game: GameState, war: d
     elif (war["kind"] == "sect" and budget >= deps.WAR_TERM_DEFS["dissolve"][1]
           and ratio >= float(deps._war_rules().get("dissolve_power_ratio", 1.35))):
         add("dissolve")
+    elif (budget >= deps.WAR_TERM_DEFS['economic_rights'][1]
+          and any(r['owner_id'] == target_power_id and r['owner_kind'] in {'sect', 'family'}
+                  and r['world'] == war['world'] for r in game.economy_v2.get('estates', {}).values())
+          and eligible(game, war, war[f'{proposer}_id'], target_power_id)):
+        add('economic_rights')
     elif budget >= deps.WAR_TERM_DEFS["vassal"][1]:
         add("vassal")
 
@@ -144,6 +150,9 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
                 if item.id != "spirit_stone" and remove_item(game.player, item.id):
                     supplied.append(item.name)
         detail = f"{loser_name}缴纳丹药与装备" + (f"（{'、'.join(supplied)}）" if supplied else "")
+    elif term == 'economic_rights':
+        from ..economy.war_assets import transfer
+        detail = transfer(game, deps.maps, war, winner_id, loser_id, strict=True)
     elif term in {"dissolve", "annex"}:
         if war["kind"] != "sect":
             raise ValueError("种族与界面势力不能被解散或合并")
@@ -177,6 +186,8 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
                     npc.faction_id = None
                     game.notable_npcs.setdefault(npc.id, npc)
             detail = f"{loser_name}就地解散"
+        from ..economy.war_assets import transfer
+        detail += '；' + transfer(game, deps.maps, war, winner_id, loser_id)
         loser_sect.extinct = True
         own_id = game.player.faction_id
         if own_id == winner_id and term == "annex":
@@ -220,7 +231,7 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
 
 def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, *, target_id: str = "", target_power_id: str = "",
               third_party_id: str = "", third_status: str = "neutral", concede: bool = False) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = copy.deepcopy(deps._load(game_id))
     war = next((row for row in game.wars if row.get("id") == war_id), None)
     if not war or war.get("status") not in {"active", "peace_ready"}:
         raise ValueError("当前没有可供和谈的战争")
@@ -245,6 +256,10 @@ def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, 
         cost = int(round(cost * float(deps._war_rules().get("ally_term_cost_multiplier", 1.25))))
     if not concede and term != "white_peace" and effective_score < cost:
         raise ValueError(f"当前战争分数 {effective_score:.0f}，不足以提出该条款（需要 {cost}）")
+    if term == 'economic_rights':
+        from ..economy.war_assets import eligible
+        if not eligible(game, war, war[f'{beneficiary}_id'], selected_power):
+            raise ValueError('产业和市税接管仅适用于同界存续的宗门或家族')
     if deps._intrigue_enabled():
         own_id = str(war[f"{player_side}_id"])
         opposing_id = str(war[f"{'defender' if player_side == 'attacker' else 'attacker'}_id"])

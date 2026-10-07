@@ -73,7 +73,7 @@ def test_ai_demands_respect_score_budget_without_engine(score):
         _war_total_power=lambda *args: 100, _war_entity_power=lambda *args: 100,
         _war_rules=lambda: {}, _available_warriors=lambda *args: [])
     war = {'kind': 'sect', 'attacker_id': 'a', 'defender_id': 'b', 'war_score': score}
-    offer = _generate_ai_peace_offer(deps, SimpleNamespace(diplomacy_unit=7), war, 'attacker')
+    offer = _generate_ai_peace_offer(deps, SimpleNamespace(diplomacy_unit=7, economy_v2={}), war, 'attacker')
     assert offer['total_cost'] == sum(row['cost'] for row in offer['demands'])
     assert 0 <= offer['total_cost'] <= offer['budget'] == score
     assert all(row['target_power_id'] == 'b' for row in offer['demands'])

@@ -11,9 +11,12 @@ def participating_wars(game, identity, world):
                 *(r['id'] for side in ('attacker', 'defender') for r in w.get('coalitions', {}).get(side, []))}]
 
 
-def supplier_delivery(market, owner, quantity):
+def supplier_delivery(market, owner, quantity, *, game=None, item=None):
     suppliers = market.setdefault('suppliers', {})
     suppliers[owner] = suppliers.get(owner, 0.) + quantity
+    if game is not None and item is not None:
+        from .market_power import record_trade
+        record_trade(game, market, item, owner, 'sell', quantity)
 
 
 def settle_industry(game, maps, entity, row, years):
@@ -50,6 +53,8 @@ def settle_industry(game, maps, entity, row, years):
         transfer_value(game, source, f'market:{market["id"]}', bill['total'], '参战组织采购军需并消耗')
         transfer_value(game, f'market:{market["id"]}', f'operator:{market["id"]}', bill['fee'], '军需采购手续费')
         product['stock'] -= low
+        from .market_power import record_trade
+        record_trade(game, market, item, source, 'buy', low)
         product['consumption'] += low / max(1, years)
         product['volume'] += low
         market['turnover'] += bill['gross']

@@ -7,7 +7,7 @@ from .ledger import balance, transfer_value
 from .local_market import require_access
 from .dependencies import MarketDependencies
 from .fleet_network import (alliance_at, active_fleets, fleet_limit, new_fleet, guard_required,
-    owner_key, leader_record, route_key, routes, maintenance_cost)
+    owner_key, leader_record, route_key, routes, maintenance_quote, member_of)
 
 
 def controlled_alliance(game):
@@ -21,7 +21,7 @@ def home_alliance(game):
 
 def _create_alliance(game, region, fleets, home=None):
     p = game.player
-    identity = home['id'] if home else f'player-{game.id}'
+    identity = home.get('network_id', home['id']) if home else f'player-{game.id}'
     name = home['name'] if home else f'{p.name}商盟'
     cap = int(WORLD_SYSTEMS['world_profiles'][p.world]['npc_realm_cap'])
     realm = max(1, cap - 1) if home else min(cap, p.realm_index)
@@ -52,16 +52,46 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None):
     fleet = region['fleets'].get(payload.get('fleet_id'))
     alliance = controlled_alliance(game)
     home = home_alliance(game)
-    if action == 'industry':
+    identity = home.get('network_id', home['id']) if home else None
+    if action in {'market_policy', 'market_relief'}:
+        from .market_governance import command as governance_command
+        governance_command(game, deps.maps, payload)
+    elif isinstance(action, str) and action.startswith('estate_'):
+        from .enterprise_actions import command as estate_command
+        estate_command(game, deps.maps, payload)
+    elif action in {'order_configure', 'order_dispatch', 'order_limits'}:
+        from .trade_orders import authorized, configure, update_limits
+        authorized(game, fleet)
+        if action == 'order_configure':
+            configure(game, deps.maps, fleet, payload)
+        elif action == 'order_limits':
+            update_limits(game, fleet, payload)
+        else:
+            if fleet['cargo'] or fleet.get('cross_trip') or fleet['status'] != 'waiting':
+                raise ValueError('商队已有在途货物')
+            order = fleet.get('trade_order', {})
+            if order.get('mode') not in {'once', 'repeat'}:
+                raise ValueError('请先保存单次或长期订单')
+            if order['kind'] == 'cross':
+                from .cross_freight import dispatch
+                dispatch(game, deps.maps, fleet, order['destination'], remittance_percent=0, order=order)
+            else:
+                from .caravans import _dispatch
+                from .fleet_network import owner_sites
+                _dispatch(game, deps.maps, owner_sites(game, deps.maps, fleet), fleet, region)
+    elif action == 'industry':
         from .industry_actions import invest
         invest(game, deps.maps, payload.get('owner_kind'))
+    elif action == 'relocate':
+        from .headquarters import relocate
+        relocate(game, home, alliance, lambda fleets, old: _create_alliance(game, region, fleets, old))
     elif action == 'create':
         kind = payload.get('owner_kind', 'independent')
         identity, payer, name, location = 'player', 'player', f'{p.name}商队', p.location_id
         owner = None
         if kind == 'alliance':
             member = game.merchant_state.get('membership') or {}
-            owner = alliance_at(game, p.world, member.get('alliance_id'))
+            owner = next((a for a in game.merchant_state['worlds'].get(p.world, []) if member_of(game, a)), None)
             if not owner or p.location_id not in {owner['hq'], *(o['location_id'] for o in owner['offices'])}:
                 raise ValueError('请先加入商盟，并前往本界总部或分部申请')
             identity, payer, name = owner['id'], f'alliance:{p.world}:{owner["id"]}', f'{p.name}领办商队'
@@ -142,14 +172,14 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None):
                 if alliance['leader']['realm_index'] < cap - 1 or combat_power(p) < alliance['chief_power']:
                     raise ValueError('坐镇修为或说服所需实力不足')
                 transfer_value(game, 'player', f'alliance:{p.world}:{alliance["id"]}', max(1000000 * tier, alliance['reserves']), '商盟加盟合作出资')
-                alliance.update(network_id=home['id'], name=home['name'], home_world=home['world'], player_owned=True)
+                alliance.update(network_id=identity, name=home['name'], home_world=home['world'], player_owned=True)
                 for existing in active_fleets(game, p.world, 'alliance', alliance['id']):
                     existing['player_controlled'] = True
             worlds = sorted({*home['linked_worlds'], p.world})
             for world in worlds:
-                row = alliance_at(game, world, home['id'])
+                row = alliance_at(game, world, identity)
                 row.update(cross_world=True, linked_worlds=worlds, chief_realm=true_realm, chief_name=p.name)
-            routes(game)[route_key(home['id'], home['world'], p.world)] = dict(alliance_id=home['id'],
+            routes(game)[route_key(identity, home['world'], p.world)] = dict(alliance_id=identity,
                 home=home['world'], branch=p.world, open=False, maintenance=0, paid=0, shortfall=0, last_year=p.age)
     elif action == 'branch':
         if not alliance or not alliance.get('player_owned'):
@@ -162,24 +192,20 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None):
         leader = leader_record(game, f'merchant-{p.world}-{alliance["id"]}-{p.location_id}', '分部主事', max(1, alliance['leader']['realm_index'] - 1))
         alliance['offices'].append(dict(location_id=p.location_id, leader=leader))
     elif action in {'build_passage', 'reopen'}:
-        if not alliance or not home or p.world == home['world'] or p.location_id != alliance['hq']:
-            raise ValueError('请前往自建商盟的异界分总部建设通道')
-        route = routes(game).get(route_key(home['id'], home['world'], p.world))
-        if not route or route['open']:
-            raise ValueError('没有可建设或重启的通道')
-        annual = maintenance_cost(game, deps.maps, home['world'], home['hq'])
-        cost = annual if route.get('built') or route['paid'] else 10000000 * tier
-        transfer_value(game, 'player', f'background:{p.world}', cost, '建设或修复逆灵通道')
-        route.update(open=True, built=True, last_year=p.age, shortfall=0)
+        from .headquarters import passage_command
+        passage_command(game, deps.maps, home, alliance, payload)
     elif action == 'alliance_fund':
         if not alliance or p.location_id not in {alliance['hq'], *(o['location_id'] for o in alliance['offices'])}:
             raise ValueError('请前往本界自建商盟据点注资')
         transfer_value(game, 'player', f'alliance:{p.world}:{alliance["id"]}', 50000 * tier, '商盟本界府库注资')
-    elif action == 'cross_dispatch':
+    elif action in {'cross_dispatch', 'cross_recall'}:
         if not alliance or not fleet or fleet['alliance_id'] != alliance['id'] or p.location_id != alliance['hq']:
             raise ValueError('请在自建商盟总部指派本盟商队')
-        from .cross_freight import dispatch
-        dispatch(game, deps.maps, fleet, str(payload.get('destination', '')))
+        from .cross_freight import dispatch, recall
+        if action == 'cross_recall':
+            recall(game, fleet)
+        else:
+            dispatch(game, deps.maps, fleet, str(payload.get('destination', '')), remittance_percent=payload.get('remittance_percent', 25))
     else:
         raise ValueError('未知商队经营操作')
     game.updated_at = now_iso()
@@ -197,18 +223,45 @@ def public_network(game, maps):
     own = controlled_alliance(game)
     home = home_alliance(game)
     fleets = public_caravans(game, maps)
+    from .trade_orders import authorized
+    from .state import commodity_catalog
+    from .enterprise_view import known_estates
+    for view in fleets:
+        fleet = game.economy_v2['transport']['worlds'][p.world]['fleets'][view['id']]
+        try:
+            authorized(game, fleet)
+            view.update(can_order=True, trade_order=copy.deepcopy(fleet.get('trade_order', {'mode':'auto'})))
+        except ValueError:
+            view['can_order'] = False
     member = game.merchant_state.get('membership') or {}
-    joined = alliance_at(game, p.world, member.get('alliance_id'))
+    joined = next((a for a in game.merchant_state.get('worlds', {}).get(p.world, []) if member_of(game, a)), None)
     tier = WORLD_SYSTEMS['world_profiles'][p.world]['tier']
     can_apply = bool(joined and p.location_id in {joined['hq'], *(o['location_id'] for o in joined['offices'])}
                      and len(active_fleets(game, p.world, 'alliance', joined['id'])) < fleet_limit('alliance', joined))
+    from .fleet_network import route_path, leg_years
+    identity = home.get('network_id', home['id']) if home else None
+    destinations = []
+    for world in own['linked_worlds'] if own else []:
+        if world == p.world:
+            continue
+        path = route_path(game, own, world)
+        destinations.append(dict(world=world, name=WORLD_SYSTEMS['world_names'][world], open=bool(path),
+            path=[WORLD_SYSTEMS['world_names'][w] for w in path], years=sum(leg_years(a, b) for a, b in zip(path, path[1:]))))
     return dict(can_act=trade_available(game), fleets=fleets, owned=own['id'] if own else None,
+        order_goods=[dict(id=k, name=v['name']) for k,v in commodity_catalog().items()],
+        order_sites=[dict(id=k, name=v['name']) for k,v in maps._locations.get(p.world, {}).items()],
+        order_estates=known_estates(game, maps),
         can_apply=can_apply, found_cost=20000 * tier, branch_cost=20000 * tier,
         hq_cost=1000000 * tier, passage_cost=10000000 * tier, pledge_cost=1000 * tier,
         guard_cost=max(100, round(guard_required(p.world) ** .5) * 5) if tier > 0 else 0,
-        has_home=bool(home), world=p.world, location=p.location_id,
+        has_home=bool(home), world=p.world, location=p.location_id, destinations=destinations,
+        at_hq=bool(own and own['hq'] == p.location_id), main_hq=bool(own and own['home_world'] == p.world),
+        relocation_cost=(20000 if home and home['world'] == p.world else 1000000) * tier,
         capital=5000 * WORLD_SYSTEMS['world_profiles'][p.world]['tier'],
         routes=[{k:r[k] for k in ('home', 'branch', 'open', 'maintenance')} | dict(
+            id=route_key(r['alliance_id'], r['home'], r['branch']), owned=r['alliance_id'] == identity,
+            repair_cost=(maintenance_quote(game, home['world'], home['hq']) if home and r['alliance_id'] == identity and (r.get('built') or r['paid'])
+                         else 10000000 * max(WORLD_SYSTEMS['world_profiles'][w]['tier'] for w in (r['home'], r['branch']))),
             home_name=WORLD_SYSTEMS['world_names'][r['home']], branch_name=WORLD_SYSTEMS['world_names'][r['branch']])
             for r in routes(game).values() if p.world in {r['home'], r['branch']}],
         alliances=[dict(id=a['id'], name=a['name'], count=len(active_fleets(game, p.world, 'alliance', a['id'])),

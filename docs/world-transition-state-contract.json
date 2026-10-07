@@ -1,16 +1,21 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "economy_v2.markets.*.competition / control": "竞争统计仅归实际本地市场，买卖按真实交割记账，仓储只读同地产权库存，不估值玩家背包；统计衰减、最多十六个主体。市税权归同界宗门或家族，原市场运营账户不复制，仅新实收手续费按政策汇入原组织府库。竞争扩产从有限本地资金支付，进口品不造本地产能。",
+    "wars.*.economic_transfers / economy_v2.estates.*.sale_quota": "和约仅改变同界原产业、原商队及市税权归属，原编号、地点、库存、在制批次、矿藏、商队现金与在途货物不迁移或复制；超容量队伍转独立，交接按战败方幂等留痕。sale_quota 属产业经营方案，每次年度结算限制自动售货，旧档缺失默认为一百万件上限。",
+    "economy_v2.estates": "固定 world/location/kind 的唯一产权记录，owner_kind/owner_id 与库存、在制批次、有限矿藏分别保存。本人产业周转金使用 estate 账户，组织产业直接使用原府库；当地手工办理，年度生产按真实世界年结算。跨界不携带、复制或重置地产、库存及产出；旧档缺失表示尚未购置，不追发历史收入。",
+    "economy_v2.transport.worlds.*.fleets.*.trade_order": "每队最多一份自动、暂停、单次或长期订单；本界源驻地或本界所属总部下达。限价在实际采购和交割复核；同界空返付费，跨界复用既有逐段货单。产业库存装车后从源仓扣除，到达再入目标仓；满仓余货留在唯一 cargo，订单本身不保存物资副本。",
     "Player.faction_hp_bonus / Player.faction_mp_bonus": "仍归 personal；财政部分供养以小数累计永久加成，旧整数兼容，跨界不重置或重复领取",
     "economy_v2.organizations": "组织年度账目归 identity 与 world；产业仅在真实驻地向本地市场供货；玩家跨界不复制府库、不携带组织产出，同界身份才发放供养",
     "intrigue_state.factions.*.resources": "宗门及家族唯一现金余额，基础财政属于本体；organization 适配器直接转账，DLC 开关不重置",
     "heavenly_court.treasury / upper_institutions.*.treasury": "机构唯一府库，政治时钟不再生成收入或俸禄，统一年度经济入口结算",
     "economy_v2.transport": "商队固定登记于出资界面，owner_kind/owner_id 明确商盟、宗门、家族或独立归属；加盟只改变归属不改编号、地址或复制货物。cargo 为同界唯一货单，cross_trip 为跨界唯一货单；运力与组织商队数量上限分离。护卫为付薪聚合战力，不复制世界 NPC。",
     "merchant_state.worlds.*.reserves": "商盟现金唯一权威字段，alliance 账本适配器直接结算，不另建镜像钱包",
-    "economy_v2.network": "逆灵通道以主总部及分总部组成的世界对持久登记；建设及维护使用真实账户。总部年费由总部支付，票款归出发端，freight 托运账户仅随总部商队实际返航交款。关闭路线不交付、不复制在途实货。",
+    "economy_v2.network": "通道以网络身份及实际端点世界对持久登记；built 区分已建与待建，迁址保留端点，维护转由当前总部原府库支付。关闭不追费，AI 修复留两年储备；票款、逐段货运关税归出发端。freight 托运款仅主总部派队可索取，实际返航结清才入账。",
     "economy_v2.personal": "只保存采用时现金基线、有限个人流水及收支累计，余额仍读玩家灵石背包，其他现金变动单列。不评估或限制跨界背包。",
     "economy_v2.organizations.industry_level / war_funding": "驻地产业扩建最高十级，养护和军需采购来自既有组织府库；战争消耗真实商品，供给不足影响部队保障。市场 suppliers 仅记录近年真实交付并衰减，不授予人物或市场产权。",
-    "merchant_state.worlds.*.network_id / player_owned": "玩家商盟身份与跨界网络关联；吸纳既有商盟保留其原 id、府库及商队编号，仅改名并关联总部。每处本地据点增加三个商队名额，分部不自动共享现金。"
+    "merchant_state.worlds.*.network_id / player_owned": "跨界网络身份与地方原 id 分离；迁址仅交接 home_world、据点职能和任职签发地，原界商队、府库、人物、产业不迁移。旧址保留；不合格原总部主事进入至多四人的本地 retired_leaders 历史表，由新聘当地修士坐镇。影响力不复制，各地不共享现金。",
+    "economy_v2.transport.worlds.*.fleets.*.cross_trip": "同一商队只保留唯一往返货单：path/index 为实际通道路径和已达端点，leg_paid/tariff 为本段费用，source_location 为原驻地；去程、待售、返程、返程待售分别结算。返程采购替换已售罄货物，托运款不作采购资金。撤回仅逆走已达路径，recalled 留痕；新字段旧档首次运营确定性补充，不复制、不重抽、不重复扣旧关税。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
