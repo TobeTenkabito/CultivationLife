@@ -1,0 +1,57 @@
+{
+  "base_version": "2.1.2",
+  "android_version": "2.1.2-android.36",
+  "version_code": 36,
+  "application_id": "com.fusheng.wendao",
+  "min_sdk": 31,
+  "target_sdk": 31,
+  "included_abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "tested_android": "Android 12 / API 31",
+  "tested_abi": "x86_64",
+  "physical_device_tested": false,
+  "apk": "浮生问道-v2.1.2-Android12.apk",
+  "apk_sha256": "8694b7e71062b528741b1ae1521a8e8f08f596846a67f58036a3e6d122a47d46",
+  "apk_bytes": 50414474,
+  "inputs_sha256": "569e83ee6bf2ff91d7be2adf2430a723320aa75fd6e51a79d81aad79c7340a83",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.0",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.8.0",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.14.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "heavens_worlds": 11,
+  "heavens_incident_branches": 66,
+  "heavens_anomalies": 13,
+  "heavens_conflict_cases": 12,
+  "themes": [
+    "a",
+    "b",
+    "d",
+    "f"
+  ],
+  "save_schema": 9,
+  "save_import_export": true,
+  "offline": true,
+  "release_debuggable": false,
+  "validation": [
+    "Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified",
+    "Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified",
+    "Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes",
+    "3175 Python regressions passed",
+    "Signed Android 12 release: four-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape",
+    "Four-theme native gameplay: court, institutions, upper worlds, economy, bulk controls, fusion, trials and meridians",
+    "Talisman portrait and landscape: native tiered crafting, materials, sales, experience, left panel and multiple realm-gated map rifts",
+    "Asura portrait and landscape: realm gate, native vein opening, power acquisition, controls and persistence",
+    "Live tutorial actions, native back and persisted progress",
+    "Save transfer: four themes, native clipboard, large and segmented saves, confirmation and lossless Windows to Android to Windows roundtrip",
+    "Debug console portrait and landscape: isolated writes, snapshots, DLC commands, native document callbacks and configuration-independent opening",
+    "Signature, version metadata, installed APK hash, source provenance, archive integrity and release lint verified"
+  ]
+}

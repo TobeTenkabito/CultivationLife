@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Any
-from ...content_registry import ITEM_CATALOG, MARKET_GOODS, TECHNIQUE_CATALOG
+from ...content_registry import ITEM_CATALOG, MARKET_GOODS, TECHNIQUE_CATALOG, WORLD_SYSTEMS
 from ...models import GameState
 from ...rules import acquire_technique, add_item, max_hp, max_mp
 from .dependencies import TreasureDependencies
@@ -10,7 +10,17 @@ def _treasure_reward_pool(deps: TreasureDependencies, game: GameState, category:
     player = game.player
     target_tier = max(1, player.realm_index)
     location_id = deps.maps.normalize_location(player.world, player.location_id)
-    world_goods = [row for row in MARKET_GOODS if int(row["tier"]) <= target_tier]
+    profiles = WORLD_SYSTEMS['world_profiles']
+    world_tier = profiles[player.world]['tier']
+    # Ordinary inheritances can circulate among peers and higher worlds. Relabel
+    # copies for local distribution; never change market stock or import upper loot.
+    sources = [row for row in MARKET_GOODS if int(row['tier']) <= target_tier
+               and (row.get('world', 'human') == player.world
+                    or 0 < profiles.get(row.get('world', 'human'), {}).get('tier', 0) <= world_tier)]
+    unique = {}
+    for row in sorted(sources, key=lambda row: row.get('world', 'human') != player.world):
+        unique.setdefault((row['kind'], row['content_id']), dict(row, world=player.world))
+    world_goods = list(unique.values())
     if category == "technique":
         eligible = [row for row in world_goods if row["kind"] == "technique"]
     elif category == "pill":

@@ -24,6 +24,8 @@ def _load(deps: PersistenceDependencies, game_id: str) -> GameState:
         deps.services._ensure_buddhist_state(game)
         deps.services._ensure_natal_artifact(game)
         vitality.prepare_vitality(deps.vitality, game)
+        if events.prepare_events(deps.events, game):
+            deps.store.save(game)
         return game
     changed = foundations.prepare_foundations(deps.foundations, game)
     changed = vitality.prepare_vitality(deps.vitality, game) or changed

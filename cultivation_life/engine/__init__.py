@@ -1058,8 +1058,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def manage_party(self, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
         return relationship_actions.manage_party(self._dependencies.relationship_actions, game_id, npc_id, action)
 
-    def choose(self, game_id: str, choice_id: str) -> dict[str, Any]:
-        return choices.choose(self._dependencies.choices, game_id, choice_id)
+    def choose(self, game_id: str, choice_id: str, *, event_id: str | None = None) -> dict[str, Any]:
+        return choices.choose(self._dependencies.choices, game_id, choice_id, event_id=event_id)
 
     @staticmethod
     def _queue_followup_event(game: GameState, event: dict[str, Any]) -> None:

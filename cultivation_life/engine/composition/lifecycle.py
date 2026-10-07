@@ -79,6 +79,7 @@ def bind_persistence_runtime(engine: GameEngine, *, bloodline_content_available:
             _ensure_natal_artifact=lambda *args, **kwargs: engine._ensure_natal_artifact(*args, **kwargs),
         ),
         events=EventsPreparationDependencies(
+            _condition=lambda *args, **kwargs: engine._condition(*args, **kwargs),
             _get_events_by_id=lambda: engine.events_by_id,
         ),
         _get_store=lambda: engine.store,
