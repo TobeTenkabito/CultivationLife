@@ -66,7 +66,7 @@ def advance_economy(game):
     return True
 
 
-def commodity_catalog(world=None):
+def commodity_catalog(world=None, *, commercial=True):
     result = {}
     for good in MARKET_GOODS:
         key = good['content_id']
@@ -82,6 +82,10 @@ def commodity_catalog(world=None):
         if (world is None or definition['world'] == world) and key in ITEM_CATALOG:
             result[key] = dict(id=key, name=definition['name'],
                 base_price=int(definition.get('base_value', definition.get('price'))), tier=int(definition['tier']))
+    from .enterprise_rules import farm_goods
+    for place in (([world] if world else WORLD_SYSTEMS['world_profiles']) if commercial else []):
+        for key, row in farm_goods(place).items():
+            result.setdefault(key, row)
     return result
 
 
@@ -125,6 +129,15 @@ def ensure_market(game, maps):
         return changed
     key = market_id(world, location)
     market = game.economy_v2['markets'][key]
+    from .enterprise_rules import farm_goods
+    for item, definition in farm_goods(world).items():
+        if item not in market['commodities']:
+            target = settings()['base_stock']
+            market['commodities'][item] = dict(stock=0., target=target, price=float(definition['base_price']),
+                reference=definition['base_price'], tier=definition['tier'], production=0., consumption=0.,
+                volume=0, history=[], initial_target=target, imported=True)
+            market['revision'] += 1
+            changed = True
     missing = [item.id for item in game.player.inventory if item.quantity > 0
                and item.id != 'spirit_stone' and item.id not in market['commodities']]
     if missing:
@@ -155,6 +168,8 @@ def settle_market(game, market):
     market['war_pressure'] = any(w.get('status') in {'active', 'peace_ready'} and w.get('world') == market['world']
         and w.get('location_id') == market['location'] for w in game.wars)
     world = game.economy_v2['worlds'][market['world']]
+    from .market_power import settle
+    competitive_supply = settle(game, market, years)
     for item, row in market['commodities'].items():
         old_stock = row['stock']
         target = row['initial_target'] * world['scale']
@@ -168,6 +183,8 @@ def settle_market(game, market):
         if row.get('imported'):
             new_stock = old_stock * math.exp(-settings()['annual_consumption'] * years)
             produced, consumed = 0., old_stock - new_stock
+        new_stock += competitive_supply.get(item, 0)
+        produced += competitive_supply.get(item, 0)
         row.update(stock=max(0., new_stock), target=target,
                    production=max(0., produced) / years, consumption=max(0., consumed) / years)
         target_price = row['reference'] * world['price_level'] * price_multiplier(row['stock'], target)

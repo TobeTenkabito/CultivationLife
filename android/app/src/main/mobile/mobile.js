@@ -5,7 +5,11 @@
   const syncTheme = () => window.AndroidGame?.setTheme(root.dataset.theme || 'a');
   new MutationObserver(syncTheme).observe(root, {attributes:true, attributeFilter:['data-theme']});
   syncTheme();
-  const syncPanels = () => document.body.classList.toggle('android-panel-open', !!document.querySelector('.panel-open'));
+  const syncPanels = () => {
+    document.body.classList.toggle('android-panel-open', !!document.querySelector('.panel-open'));
+    document.body.classList.toggle('android-economy-panel-open', !!document.querySelector(
+      '#map-card.panel-open, #merchant-card.panel-open, #personal-economy-card.panel-open, #war-card.panel-open'));
+  };
   new MutationObserver(syncPanels).observe(document.querySelector('#game-screen'),
     {attributes:true, attributeFilter:['class'], childList:true, subtree:true});
   const viewport = window.visualViewport;

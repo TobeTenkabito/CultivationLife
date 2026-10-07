@@ -73,6 +73,8 @@ def trade(deps: MarketDependencies, game_id, payload, *, committed=None):
         transfer_value(game, cash, 'player', bill['total'], '本地市场收购')
         transfer_value(game, cash, operator, bill['fee'], '交易手续费')
         row['stock'] += quantity
+    from .market_power import record_trade
+    record_trade(game, market, item_id, 'player', side, quantity)
     row['volume'] += quantity
     market['turnover'] += bill['gross']
     market['fees'] += bill['fee']
@@ -156,6 +158,9 @@ def pay_shelf(game, offer, price):
     fee = math.floor(price * settings()['transaction_fee'])
     transfer_value(game, 'player', cash, price, '坊市货架购货')
     transfer_value(game, cash, operator_account(game), fee, '坊市交易手续费')
+    if offer.get('content_id') in market['commodities']:
+        from .market_power import record_trade
+        record_trade(game, market, offer['content_id'], 'player', 'buy', 1)
     market['turnover'] += price
     market['fees'] += fee
     market['revision'] += 1

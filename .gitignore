@@ -17,3 +17,4 @@ android/**/build/
 android/local.properties
 *.keystore
 *.jks
+.VSCodeCounter

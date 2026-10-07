@@ -1821,6 +1821,12 @@ function renderWars(system) {
       coalitions.appendChild(column);
     });
     body.appendChild(coalitions);
+    if(war.economic_transfers?.length){
+      const receipt=document.createElement('section');receipt.className='war-economic-receipt';
+      const title=document.createElement('h3');title.textContent='战后经济产权交接';receipt.append(title);
+      for(const row of war.economic_transfers){const line=document.createElement('p');line.textContent=`第 ${row.year} 年 · 产业 ${row.estates.length} 处 / 市税 ${row.markets.length} 处 / 接管商队 ${row.fleets.length} 支 / 独立商队 ${row.released.length} 支`;receipt.append(line);}
+      const note=document.createElement('small');note.textContent='资产保留原地点与库存；接管产业暂停后续生产，请到所在地恢复经营。';receipt.append(note);body.append(receipt);
+    }
     const rosters = document.createElement('div'); rosters.className = 'war-rosters';
     ['attacker', 'defender'].forEach(side => {
       const column = document.createElement('section');
@@ -1885,7 +1891,7 @@ function renderWars(system) {
     const heading = document.createElement('b'); heading.textContent = '提出和谈条件';
     const term = document.createElement('select');
     Object.entries(terms).forEach(([id, def]) => {
-      if (war.kind === 'race' && ['dissolve', 'annex'].includes(id)) return;
+      if (war.kind !== 'sect' && ['dissolve', 'annex', 'economic_rights'].includes(id)) return;
       const powerRequirement = def.power_ratio ? `，总战力比至少 ${def.power_ratio}` : '';
       const option = document.createElement('option'); option.value = id; option.textContent = `${def.name}${def.cost ? `（需战争分数 ${def.cost}${powerRequirement}）` : ''}`; term.appendChild(option);
     });
@@ -2601,7 +2607,7 @@ function renderExchange(system) {
 
 function renderMap(map, auction) {
   if (!map) return;
-  window.LocalEconomy?.render(map.economy, game, payload => mutate(`/api/games/${game.id}/local-market-trade`, payload));
+  window.LocalEconomy?.render(map.economy, game, payload => mutate(`/api/games/${game.id}/local-market-trade`, payload), payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   $('#map-title').textContent = `${map.world_name}地图`;
   $('#map-current').textContent = `当前：${map.current_name}`;
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
@@ -3920,6 +3926,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   window.LocalEconomy?.setBusy(busy);
+  window.EnterprisePanel?.setBusy(busy);
   document.querySelectorAll('#merchant-card button, #merchant-card input, #merchant-card select').forEach(control=>{if(control.id!=='merchant-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.merchantUnavailable==='1';});
   document.querySelectorAll('#exchange-card button, #exchange-card input').forEach(control=>{if(control.id!=='exchange-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.exchangeUnavailable==='1';});
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {

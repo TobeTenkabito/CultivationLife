@@ -30,6 +30,7 @@ from .faction_geography import war_site, can_enter_faction
 
 
 WAR_TERM_DEFS = {
+    "economic_rights": ("接管当地产业与市税", 55),
     "execute": ("处死指定修士", 30),
     "alliance": ("确立同盟", 18),
     "vassal": ("迫使对方依附", 55),

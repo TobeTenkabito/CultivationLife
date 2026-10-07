@@ -202,7 +202,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 Thread.sleep(150);
             }
             check(web!=null,"Release WebView did not start");
-            while(!Boolean.TRUE.equals(js("typeof configData!=='undefined' && !!configData && !!window.AndroidUI")) && System.currentTimeMillis()<deadline) Thread.sleep(150);
+            // Give page loading its own deadline after Python and the WebView
+            // are ready; don't misreport a cold-load timeout as a version mismatch.
+            waitForJs("typeof configData!=='undefined' && !!configData?.base_game && !!window.AndroidUI",
+                      "Release page configuration did not load",120000);
             async("GameThemes.ready");
             String baseVersion=getTargetContext().getPackageManager().getPackageInfo(getTargetContext().getPackageName(),0).versionName.split("-android")[0];
             check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
@@ -435,7 +438,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             } else if(phase.equals("upper-voisinage")) {
                 for(String world:new String[]{"asura","nether","reincarnation"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'三界修域验收',preset_id:'"+world+"_upper',monster_species_id:'serpent',seed:1560})});if(!g.upper_institution.local||g.player.realm_index!==9||!g.upper_voisinages.rows[0].active)throw Error('Upper preset mismatch');return g.id;})()");
-                    python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required,max_hp,max_mp,add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\nfrom cultivation_life.system.upper_institutions import definition\np.location_id=definition(g)['location']\np.world_voisinages={}\np.opportunity=opportunity_required(p)\np.hp=max_hp(p)\np.mp=max_mp(p)\np.immortal_aperture['current']=0\nadd_item(p,'spirit_stone',1000000)\ng.pending_event=None\ng.heavenly_court['open_election']=None\ne.store.save(g)");
+                    python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required,max_hp,max_mp,add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\nfrom cultivation_life.system.upper_institutions import definition\np.location_id=definition(g)['location']\np.world_voisinages={}\np.opportunity=opportunity_required(p)\np.hp=max_hp(p)\np.mp=max_mp(p)\np.immortal_aperture['current']=0\nadd_item(p,'spirit_stone',1000000)\ng.pending_event=None\nif g.heavenly_court: g.heavenly_court['open_election']=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
                     tapSelector("[data-panel-target=upper-voisinage]");
                     tapSelector("#upper-voisinage-content details summary");
@@ -597,6 +600,102 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("economy-governance")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商势验收',preset_id:'core',seed:419})});return g.id;})()");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\nfrom cultivation_life.system.faction_geography import faction_site\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.next_tribulation_age=None\ng.player.faction_id='tianjian'\ng.sects['tianjian'].founded_by_player=True\ntransfer_value(g,'background:human','player',10000000,'验收资本')\nr=e._war_relation(g,'sect','tianjian','wanmo')\ne._set_diplomatic_relation(g,r,'war','tianjian','wanmo','sect',-75)\ng.wars[-1].update(war_score=100,battles=2,controller='player',status='peace_ready')\ng.player.location_id=faction_site(g.sects['wanmo'])['id']\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=war]");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('.war-card').open")))tapSelector(".war-card > summary");
+                    js("document.querySelector('.war-peace-form select').value='economic_rights';true");
+                    tapSelector(".war-peace-form button[type=submit]");
+                    waitForJs("!busy && game.war_system.wars.some(w=>w.economic_transfers?.length)","Native economic peace");
+                    tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs button[aria-controls=map-economy]");tapSelector("#market-governance > summary");
+                    js("document.querySelector('[aria-label=市税经营方针]').value='reinvest';true");tapSelector("[data-governance=market_policy]");
+                    waitForJs("!busy && game.map.economy.competition.control.policy==='reinvest'","Native fiscal policy");
+                    tapSelector("#market-governance > summary");tapSelector("[data-governance=market_relief]");waitForJs("!busy","Native competition funding");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.market_power import record_trade\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nm=g.economy_v2['markets'][g.player.world+':'+g.player.location_id]\ni=next(iter(m['commodities']))\nm['commodities'][i]['stock']=0\nrecord_trade(g,m,i,'player','buy',100000)\ne.store.save(g)\ne.advance(g.id,'rest',3)\ng=e._load(g.id)\ng.pending_event=None\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");tapSelector("#market-governance > summary");
+                    check(Boolean.TRUE.equals(js("game.map.economy.competition.rows.some(r=>r.added>0)&&document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Paid competition and narrow layout");
+                    tapSelector(".competition-card");capture("economy-governance-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.map.economy.competition.control.policy==='reinvest'&&!busy")),"Native governance persistence");
+                }
+                result.putString("economy_governance_scope","Four themes, native peace, fee policy, real funding, paid annual supply, layout and reload");
+            } else if(phase.equals("economy-enterprises")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'实业验收',preset_id:'core',seed:419})});return g.id;})()");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=2\ng.player.next_tribulation_age=None\ntransfer_value(g,'background:human','player',100000000,'验收资本')\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs button[aria-controls=map-economy]");
+                    tapSelector("#enterprise-panel > summary");
+                    js("document.querySelector('[aria-label=购置产业]').value='mine';true");
+                    tapSelector("[data-estate-action=buy]");
+                    waitForJs("!busy && game.map.economy.enterprises.owned.length===1","Native estate title");
+                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    tapSelector("[data-estate-action=fund]");
+                    waitForJs("!busy && game.map.economy.enterprises.owned[0].cash===10000","Native working capital");
+                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    tapSelector("[data-estate-action=start]");
+                    waitForJs("!busy && !!game.map.economy.enterprises.owned[0].job","Native paid production");
+                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-estate-action=start]').disabled && document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Production duplicate disabled and layout");
+                    js("document.querySelector('[data-estate-action=start]').scrollIntoView({block:'center'});true");
+                    capture("enterprises-estate-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python("from cultivation_life import server\ne=server.ENGINE\ne.advance("+JSONObject.quote(id)+",'rest',2)\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.map.economy.enterprises.owned[0].produced===4")),"Production from actual annual command");
+                    tapSelector("[data-panel-target=merchant]");tapSelector("#fleet-network-content > details:first-child > summary");tapSelector("[data-fleet-action=create]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.player_controlled)","Native operating fleet");
+                    tapSelector("#trade-orders-panel > summary");tapSelector("[data-order-fleet] > summary");
+                    js("document.querySelector('[aria-label=订单执行方式]').value='repeat';document.querySelector('[aria-label=订单商品]').value='dew_grass_seed';true");
+                    tapSelector("[data-fleet-action=order_configure]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.trade_order?.mode==='repeat')","Native standing order saved");
+                    tapSelector("#trade-orders-panel > summary");tapSelector("[data-order-fleet] > summary");tapSelector("[data-fleet-action=order_dispatch]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.player_controlled&&f.status==='travelling')","Native actual dispatch");
+                    tapSelector("#trade-orders-panel > summary");tapSelector("[data-order-fleet] > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-fleet-action=order_dispatch]').disabled && document.querySelector('#merchant-card').scrollWidth<=document.querySelector('#merchant-card').clientWidth+2")),"Duplicate freight disabled and layout");
+                    js("document.querySelector('[data-fleet-action=order_dispatch]').scrollIntoView({block:'center'});true");
+                    capture("enterprises-orders-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("!busy && game.fleet_network.fleets.some(f=>f.player_controlled&&f.status==='travelling'&&f.trade_order.mode==='repeat')")),"Native order persistence");
+                }
+                result.putString("enterprise_scope","Four themes, native title/funding/production/order/dispatch, authoritative years, duplicate disabling, layout and reload");
+            } else if(phase.equals("economy-expansion")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'迁盟验收',preset_id:'core',seed:419})});return g.id;})()");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\nfrom cultivation_life.system.economy import caravans\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=2\ng.player.next_tribulation_age=None\ntransfer_value(g,'background:human','player',1000000000,'验收资本')\ndef act(action,**args):\n global g\n e.store.save(g)\n e.fleet_action(g.id,dict(action=action,**args))\n g=e._load(g.id)\nact('create')\nfree=[f['id'] for f in g.economy_v2['transport']['worlds']['human']['fleets'].values() if f['owner_kind']=='independent' and not f['player_controlled']]\nfor key in free[:2]:\n g.player.location_id=g.economy_v2['transport']['worlds']['human']['fleets'][key]['location']\n act('pledge',fleet_id=key)\nact('found')\ng.player.world='spirit'\ng.player.realm_index=8\ng.player.location_id=g.merchant_state['worlds']['spirit'][0]['hq']\ncaravans.ensure_caravans(g,e.maps)\nfree=[f['id'] for f in g.economy_v2['transport']['worlds']['spirit']['fleets'].values() if f['owner_kind']=='independent']\nfor key in free[:3]:\n g.player.location_id=g.economy_v2['transport']['worlds']['spirit']['fleets'][key]['location']\n act('pledge',fleet_id=key)\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    js("UtilityPanels.close('merchant');true");tapSelector("[data-panel-target=merchant]");
+                    tapSelector("#fleet-network-content > details:nth-child(2) > summary");
+                    tapSelector("[data-fleet-action=relocate]");
+                    waitForJs("!busy && game.fleet_network.main_hq","Native HQ relocation");
+                    tapSelector("#fleet-network-content > details:nth-child(3) > summary");
+                    tapSelector("[data-fleet-action=build_passage]");
+                    waitForJs("!busy && game.fleet_network.destinations.some(d=>d.open)","Native passage construction");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.network_actions import home_alliance\nfrom cultivation_life.system.economy.fleet_network import active_fleets\nfrom cultivation_life.system.economy.ledger import transfer_value\nfrom cultivation_life.system.economy.state import ensure_regional_market\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nh=home_alliance(g)\nf=active_fleets(g,'spirit','alliance',h['id'])[0]\nf['location']=h['hq']\ntransfer_value(g,'background:spirit','caravan:'+f['id'],10000000,'验收运输')\nf['investment']+=10000000\nensure_regional_market(g,e.maps,'spirit',h['hq'])\nfor row in g.economy_v2['markets']['spirit:'+h['hq']]['commodities'].values():\n row['stock']=row['target']*3\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("#fleet-network-content > details:nth-child(4) > summary");
+                    tapSelector("[data-fleet-action=cross_dispatch]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.cross_trip)","Native freight dispatch");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy import cross_freight\nfrom cultivation_life.system.economy.fleet_network import routes\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nf=next(f for f in g.economy_v2['transport']['worlds']['spirit']['fleets'].values() if f.get('cross_trip'))\nfor r in routes(g).values():\n if r['alliance_id'].startswith('player-'): r['open']=False\ng.player.age=f['cross_trip']['arrival']\ncross_freight.advance_freight(g,e.maps,f,{})\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("#fleet-network-content > details:first-child > summary");
+                    tapSelector("[data-fleet-action=cross_recall]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')","Native stranded freight recall");
+                    tapSelector("#fleet-network-content > details:nth-child(3) > summary");
+                    tapSelector("[data-fleet-action=build_passage]");
+                    waitForJs("!busy && game.fleet_network.destinations.some(d=>d.open)","Native passage repair");
+                    tapSelector("#fleet-network-content > details:nth-child(4) > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#merchant-card').scrollWidth<=document.querySelector('#merchant-card').clientWidth+1")),"Expansion panel width");
+                    capture("economy-expansion-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.fleet_network.main_hq && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')")),"Expansion persistence");
+                }
+                result.putString("economy_expansion_scope","Four themes, native relocation, passage build, dispatch, recall, repair, layout and persistence");
             } else if(phase.equals("economy-network")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'四轮商路验收',preset_id:'core',seed:419})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=2\ntransfer_value(g,'background:human','player',10000000,'验收资本')\ne.store.save(g)");
