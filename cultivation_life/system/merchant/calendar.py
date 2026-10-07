@@ -9,6 +9,8 @@ import random
 from ...models import SectNpc
 from ..merchant_definitions import POLICIES
 from .dependencies import MerchantCalendarDependencies
+from ..economy.ledger import transfer_value, balance
+from ..economy.caravans import treasury
 
 
 def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
@@ -40,7 +42,7 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
                 deputy = copy.deepcopy(alliance["offices"][0]["leader"])
                 deputy.update(id=f"merchant-{world}-{alliance['id']}-{location}", name=rng.choice(["叶知秋", "方清和", "江行远"]))
                 alliance["offices"].append({"location_id": location, "leader": deputy})
-                alliance["reserves"] -= 10000
+                transfer_value(game, treasury(world, alliance['id']), f'background:{world}', 10000, '商盟分部建设')
             elif len(alliance["offices"]) > 1 and alliance["reserves"] < 3000:
                 member = state["membership"] or {}
                 removable = [office for office in alliance["offices"] if not (
@@ -48,17 +50,12 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
                     and member.get("site") == office["location_id"])]
                 if removable:
                     alliance["offices"].remove(removable[-1])
-                    alliance["reserves"] += 2000
+                    refund = min(2000, balance(game, f'background:{world}'))
+                    transfer_value(game, f'background:{world}', treasury(world, alliance['id']), refund, '商盟撤部资产出售')
             rival = rng.choice([row for row in alliances if row is not alliance])
             if rng.random() < .5:
-                gain = max(50, min(alliance["reserves"], rival["reserves"]) // 40)
-                alliance["reserves"] += gain
-                rival["reserves"] += gain
                 alliance["relation"] = f"与{rival['name']}合作通商"
             else:
-                transfer = min(rival["reserves"] // 20, max(30, alliance["reserves"] // 100))
-                alliance["reserves"] += transfer
-                rival["reserves"] -= transfer
                 alliance["relation"] = f"与{rival['name']}竞争商路"
     for order in state["posted"]:
         if order["status"] not in {"open", "working"}:

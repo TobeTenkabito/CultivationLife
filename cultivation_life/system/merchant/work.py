@@ -99,7 +99,11 @@ def _merchant_work(deps: MerchantWorkDependencies, game, rng):
             game.player.formation_materials.remove(row)
         deps._grant_art_experience(game.player, "formation", task["stars"] * 20)
     reward = task["reward"]
-    add_item(game.player, "spirit_stone", reward["stones"])
+    from ..economy.ledger import transfer_value
+    from ..economy.caravans import treasury
+    alliance = deps._merchant_alliance(game, task['world'], task['alliance_id'])
+    paid = min(reward['stones'], alliance['reserves'])
+    transfer_value(game, treasury(task['world'], task['alliance_id']), 'player', paid, '商盟委托报酬')
     deps._add_opportunity(game.player, reward["opportunity"])
     game.player.karma = max(0, game.player.karma - reward["karma"])
     definition = deps._crafting_material_defs()[task.get("reward_definition_id", task["definition_id"])]
@@ -108,8 +112,8 @@ def _merchant_work(deps: MerchantWorkDependencies, game, rng):
     key = task["influence_key"]
     state["influence"][key] = state["influence"].get(key, 0) + reward["influence"]
     alliance = deps._merchant_alliance(game, task["world"], task["alliance_id"])
-    alliance["reserves"] += max(20, reward["stones"] // 5)
     state["completed"].append(task["id"])
     state["completed"] = state["completed"][-350:]
     state["active"] = None
-    deps._merchant_notice(game, f"完成{task['stars']}星「{task['name']}」，灵石 +{reward['stones']:,}，材料 +{reward['materials']}，机缘 +{reward['opportunity']}，因果 -{reward['karma']}，商盟影响力 +{reward['influence']}。{detail}")
+    shortfall = f"商盟财政不足，本次现金报酬原额 {reward['stones']:,}，实付 {paid:,}。" if paid < reward['stones'] else ''
+    deps._merchant_notice(game, f"完成{task['stars']}星「{task['name']}」，灵石 +{paid:,}，材料 +{reward['materials']}，机缘 +{reward['opportunity']}，因果 -{reward['karma']}，商盟影响力 +{reward['influence']}。{shortfall}{detail}")

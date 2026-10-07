@@ -48,6 +48,7 @@ def test_three_alliances_per_world_single_hq_and_save_migration(setup):
     saved = game.to_dict()
     assert GameState.from_dict(saved).merchant_state == game.merchant_state
     saved.pop('merchant_state')
+    saved['economy_v2'].pop('transport', None)
     old = GameState.from_dict(saved)
     assert engine._ensure_merchant(old)
     assert old.merchant_state == game.merchant_state
@@ -249,7 +250,11 @@ def test_policies_rotate_reserves_change_but_presentation_does_not_tick(setup):
     engine._advance_merchant_year(game)
     for world, rows in game.merchant_state['worlds'].items():
         assert all(row['policy'] != old['policy'] for row,old in zip(rows,before['worlds'][world]))
-        assert any(row['reserves'] != old['reserves'] for row,old in zip(rows,before['worlds'][world]))
+        # Policy changes no longer mint cooperative profits or steal rival cash.
+        for row, old in zip(rows, before['worlds'][world]):
+            branch_change = len(row['offices']) - len(old['offices'])
+            expected = -10000 if branch_change > 0 else 2000 if branch_change < 0 else 0
+            assert row['reserves'] - old['reserves'] == expected
 
 
 def test_natal_cost_exact_base_and_nonlinear_growth(setup):

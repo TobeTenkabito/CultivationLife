@@ -124,14 +124,19 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
         assert seen == ANNUAL_ORDER[:9]
 
     researchers = Mock(side_effect=advance_researchers)
+    def advance_freight(actual):
+        assert actual is game and seen == []
+    freight = Mock(side_effect=advance_freight)
     deps, unexpected = contract(WorldYearDependencies,
-        **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers)
+        **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers,
+        advance_caravans=freight)
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
     end = None if stop is None else stop + (2 if stop == 9 else 1)
     assert seen == ANNUAL_ORDER[:end]
     assert news == [name for name in seen if name in list_hooks]
+    freight.assert_called_once_with(game)
     if stop is None or stop >= 9:
         researchers.assert_called_once_with(game)
     else:
@@ -144,9 +149,11 @@ def test_lifespan_stops_before_world_npcs_and_demonic_updates():
     game.player.lifespan = game.player.age
     die = Mock(side_effect=lambda *args: setattr(game.player, 'alive', False))
     permitted = {name: Mock(return_value=[]) for name in ANNUAL_ORDER[:7]}
-    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die)
+    freight = Mock()
+    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight)
     assert not _advance_world_year(deps, game, random.Random(1), [])
     die.assert_called_once_with(game, '寿元已尽', 'SYS_LIFESPAN')
+    freight.assert_called_once_with(game)
     unexpected.assert_not_called()
 
 

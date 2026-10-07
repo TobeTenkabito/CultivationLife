@@ -35,4 +35,5 @@ def public_economy(game):
         operator_balance=balance(game, f'operator:{market["id"]}'),
         world_treasury=balance(game, f'world:{game.player.world}'),
         turnover=market['turnover'], fees=market['fees'], rows=rows,
+        freight_in=market.get('freight_in', 0), freight_out=market.get('freight_out', 0),
         can_trade=trade_available(game))

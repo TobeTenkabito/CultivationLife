@@ -1,5 +1,9 @@
 {
   "version": 1,
+  "economy_ownership_notes": {
+    "economy_v2.transport": "商队归固定 world 与 alliance_id；现金在 caravan 账户，实货仅在 cargo；玩家跨界不迁移这些资产",
+    "merchant_state.worlds.*.reserves": "商盟现金唯一权威字段，alliance 账本适配器直接结算，不另建镜像钱包"
+  },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
     "address": "统一玩家提交器管理；特殊空间包含实例，不只比较 world 字符串",
