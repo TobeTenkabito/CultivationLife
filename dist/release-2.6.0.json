@@ -1,63 +1,14 @@
 {
   "base_version": "2.6.0",
+  "build_id": "2.6.0",
   "save_schema": 10,
-  "compatible_save_schemas": [
-    10
-  ],
-  "incompatible_save_schemas": "1–9; no migration",
-  "dlc_versions": {
-    "asura-manifestation": "1.2.0",
-    "buddhist-dharma": "1.0.0",
-    "ghost-reincarnation": "3.9.0",
-    "guixu-tide": "2.6.0",
-    "intrigue-coalitions": "1.3.0",
-    "monster-bloodlines": "4.15.0",
-    "sage-way": "1.4.0",
-    "tianji-artifacts": "2.2.0"
-  },
-  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
-  "tests": 334,
-  "runs": [
-    {
-      "name": "related-tests",
-      "log": "build\\related-tests-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "check_documentation",
-      "log": "build\\check_documentation-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_release_260",
-      "log": "build\\browser_release_260-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_release_251",
-      "log": "build\\browser_release_251-260.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_events_212",
-      "log": "build\\browser_events_212-260.log",
-      "status": "passed"
-    }
-  ],
-  "save_transfer_log": "build/save-transfer-260.log",
-  "inputs_sha256": "abe74d53f931a1b06d5e959d64c0d0019312365feca08ec6c8b6adfcfbd3aef9",
-  "platform": "Windows",
-  "exe_sha256": "821436f44163cad85676756e74906471643f12a911f5e680e1f7320fba14ea06",
-  "with_and_without_dlc_verified": true,
-  "root_launcher_updated": false
+  "validation_status": "not_run_at_user_request",
+  "tests_run": [],
+  "note": "三尸调整包（2026-10-09）\n游戏版本仍为 2.6.0，存档结构仍为 10。\n自我尸、本我尸、超我尸各继承玩家 100% 本体战力与普通六项战斗属性，敌方合计 300%。\n已生成的战斗快照继续原有数值；新规则适用于尚未初始化的三尸战斗。\n本次按用户要求仅编译打包，未执行测试、静态检查、浏览器、EXE 或 Android 运行验收。\n历史版本的验收记录不适用于本次调整包。\n",
+  "exe_sha256": "df6c9b0d1bd57d6a18d677050d941621a95432cbb0a732841994ff3e4316a734",
+  "apk_sha256": "e18a3815380fcdedf77d3c8c53b4fd61bf3b9fe6bc0122d7e53e678bbfae6308",
+  "changed_source": "cultivation_life/engine/progression/immortal_trials.py",
+  "source_sha256": "620f3d4a84e5252f60c823f02a09d5564be63995a00a02a67a29e27ba62563ca",
+  "root_launcher_updated": false,
+  "platform": "Windows"
 }
