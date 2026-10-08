@@ -63,6 +63,6 @@ dlc/
 | [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.8.0 | `official.ghost-reincarnation` |
 | [归墟之潮：九死一生](guixu-tide/README.md) | 2.6.0 | `official.guixu-tide` |
 | [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.3.0 | `official.intrigue-coalitions` |
-| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.14.0 | `official.monster-bloodlines` |
+| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.14.1 | `official.monster-bloodlines` |
 | [圣人之道：内圣外王](sage-way/README.md) | 1.4.0 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.0 | `official.tianji-artifacts` |

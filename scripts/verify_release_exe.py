@@ -76,6 +76,8 @@ def verify(with_dlc):
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
             from scripts.verify_world_life import verify_world_life
             verify_world_life(base, folder)
+            from scripts.verify_true_forms import verify_true_forms
+            verify_true_forms(base, folder, with_dlc)
             def transfer(operation, payload):
                 request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
                     data=json.dumps(payload).encode(), headers={'Content-Type':'application/json'})

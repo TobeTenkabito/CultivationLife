@@ -1,7 +1,8 @@
 (() => {
   const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
   const fmt=n=>Number(n||0).toLocaleString('zh-CN',{maximumFractionDigits:1});
-  const effects={strike:'邻域杀伤',suppress:'镇压',seal:'封锁退路与支援',restrict:'禁制功法',restore_body:'修复肉身',restore_spirit:'稳定心神',restore_field:'修复邻域稳固'};
+  const effects={strike:'邻域杀伤',suppress:'镇压',seal:'封锁退路与支援',restrict:'禁制功法',isolate:'隔绝支援',restore_body:'修复肉身',restore_spirit:'稳定心神',restore_field:'修复邻域稳固'};
+  const features={fortify:'固守',opening:'先发',retaliate:'反击',sacrifice:'舍身',frugal:'节用',shelter:'庇护'};
   const opened=new Set();let owner=null;
   function render(game,act){
     const data=game.upper_voisinages||{},aperture=game.aperture||{};
@@ -19,6 +20,42 @@
     const refill=el('button',`前往${aperture.title}凝练`);refill.type='button';refill.onclick=()=>window.UtilityPanels.open('immortal-aperture');
     reserve.append(el('h3',`${data.energy} ${fmt(aperture.current)} / ${fmt(aperture.capacity)}`),el('p','展开、维持与施权都消耗这份储量，战后不会自动补满。恢复邻域可以修复伤势或稳固，不能恢复元力。'),refill);root.append(reserve);
     root.append(el('p',`现有机缘 ${fmt(data.opportunity)} · 灵石 ${fmt(data.stones)}`));
+    const form=data.true_form;
+    if(form){
+      const box=el('section',null,'doctrine-entry true-form-panel');box.dataset.trueForm='';
+      box.append(el('span','血脉 · 本相 · 归真','true-form-eyebrow'),el('h3',form.name||'本相铸域'));
+      if(form.reason)box.append(el('p',form.reason,'doctrine-note'));
+      else{
+        box.append(el('p',form.route==='ancestral'?'真灵返祖 · 沿祖相而铸域':'自成血脉 · 以已确认祖谱为根'));
+        const stages=el('div',null,'true-form-stages');
+        for(const [rank,name] of [[1,'立相'],[4,'铭辅'],[7,'调校'],[9,'归真']]){
+          const step=el('span',`Lv${rank} · ${name}`,Number(form.level||0)>=rank?'attained':'');stages.append(step);
+        }box.append(stages);
+        const preview=form.preview;
+        box.append(el('p',`本源权能：${preview.effects.map(e=>effects[e]).join(' / ')} · 特征：${features[preview.feature.kind]} ${fmt(preview.feature.value*100)}%`));
+        box.append(el('p',`基础偏向：稳固 ×${fmt(preview.stability)} · 侵夺 ×${fmt(preview.incursion)} · 权能 ×${fmt(preview.authority)}。同阶使用通用冥域的修习报价与元力消耗。`,'muted'));
+        const choose=(label,choices,action,names)=>{
+          const wrap=el('div',null,'true-form-choice'),field=el('label',label),select=el('select');
+          select.setAttribute('aria-label',label);for(const key of choices){const option=el('option',names[key]||key);option.value=key;select.append(option);}
+          field.append(select);wrap.append(field);
+          const go=button(action==='true_form_confirm'?'确认本相蓝图':action==='true_form_secondary'?'铭定辅权能':'锁定归真方向',{},false);
+          go.dataset.trueFormAction=action;go.onclick=()=>act({action,voisinage_id:select.value});wrap.append(go);box.append(wrap);
+        };
+        if(!form.blueprint){
+          const cost=form.first_cost;
+          box.append(el('p',`确认后领悟一级需：机缘 ${fmt(cost.opportunity)}、灵石 ${fmt(cost.stones)}${cost.materials?`、${cost.material_name} ×${cost.materials}`:''}。`));
+          box.append(el('p','预览不消耗资源。确认后主权能永久锁定；不会赠送一级境界或补充元力。','doctrine-note'));
+          choose('主权能',form.choices,'true_form_confirm',effects);
+        }else{
+          const b=form.blueprint;
+          box.append(el('p',`主权能：${effects[b.primary]} · 辅权能：${effects[b.secondary]||'三级后铭定'} · 归真方向：${form.tunings[b.tuning]||'六级后择定'}`));
+          if(form.level===3&&!b.secondary_locked)choose('辅权能',form.secondary_choices.filter(k=>k!==b.primary),'true_form_secondary',effects);
+          if(form.level===6&&!b.tuning_locked)choose('归真方向',Object.keys(form.tunings),'true_form_tuning',form.tunings);
+          if(b.finalized)box.append(el('p','本相归真 · 主辅相合，祖相长存。','doctrine-note'));
+          else box.append(el('p','下方展开本相条目修习或上阵。已铭定的选择随蓝图保存，离界与关闭 DLC 均不会重置。','muted'));
+        }
+      }root.append(box);
+    }
     for(const row of data.rows){
       const panel=el('details',null,'doctrine-entry doctrine-compact');panel.dataset.voisinageId=row.id;
       panel.open=opened.has(row.id);panel.addEventListener('toggle',()=>{if(panel.isConnected){if(panel.open)opened.add(row.id);else opened.delete(row.id);}});

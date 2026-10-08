@@ -58,6 +58,7 @@ def main():
     require('Quick-start regression passed' in log(f'quick-start-ui-{RELEASE_ID}.log'), 'Quick-start UI checks must pass')
     require('Start layout passed' in log(f'start-layout-ui-{RELEASE_ID}.log'), 'Start layout UI checks must pass')
     require('Release 250 UI passed:' in log(f'world-life-ui-{RELEASE_ID}.log'), 'World life UI checks must pass')
+    require('Release 251 UI passed:' in log(f'true-form-ui-{RELEASE_ID}.log'), 'True form UI checks must pass')
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     apk_bytes = source.read_bytes()
     digest = hashlib.sha256(apk_bytes).hexdigest()

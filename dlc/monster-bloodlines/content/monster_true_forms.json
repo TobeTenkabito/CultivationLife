@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "blueprint_version": 1,
+  "forms": {
+    "serpent": {
+      "name": "蟠天锁相",
+      "description": "蟠天锁相承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "suppress",
+        "seal"
+      ],
+      "feature": {
+        "kind": "fortify",
+        "value": 0.1
+      },
+      "stability": 1.1,
+      "incursion": 0.9,
+      "authority": 1
+    },
+    "avian": {
+      "name": "罡羽破界",
+      "description": "罡羽破界承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "strike",
+        "restrict"
+      ],
+      "feature": {
+        "kind": "opening",
+        "value": 0.1
+      },
+      "stability": 0.9,
+      "incursion": 1.1,
+      "authority": 1
+    },
+    "ape": {
+      "name": "战天真身",
+      "description": "战天真身承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "strike",
+        "suppress"
+      ],
+      "feature": {
+        "kind": "retaliate",
+        "value": 0.1
+      },
+      "stability": 0.95,
+      "incursion": 1.15,
+      "authority": 0.9
+    },
+    "fox": {
+      "name": "幻心梦相",
+      "description": "幻心梦相承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "suppress",
+        "restrict"
+      ],
+      "feature": {
+        "kind": "shelter",
+        "value": 0.1
+      },
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1
+    },
+    "turtle": {
+      "name": "玄甲镇世",
+      "description": "玄甲镇世承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "restore_field",
+        "suppress"
+      ],
+      "feature": {
+        "kind": "fortify",
+        "value": 0.1
+      },
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1
+    },
+    "insect": {
+      "name": "万虫共相",
+      "description": "万虫共相承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "suppress",
+        "isolate"
+      ],
+      "feature": {
+        "kind": "sacrifice",
+        "value": 0.1
+      },
+      "stability": 0.9,
+      "incursion": 1,
+      "authority": 1.1
+    },
+    "aquatic": {
+      "name": "万流归源",
+      "description": "万流归源承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "restore_body",
+        "restore_field"
+      ],
+      "feature": {
+        "kind": "frugal",
+        "value": 0.1
+      },
+      "stability": 1.1,
+      "incursion": 0.9,
+      "authority": 1
+    },
+    "flora": {
+      "name": "万木生息",
+      "description": "万木生息承接本源血脉。返祖沿袭祖相，自成血脉可择定主辅；三级铭辅、六级择向、九级归真。",
+      "effects": [
+        "restore_body",
+        "restore_spirit"
+      ],
+      "feature": {
+        "kind": "shelter",
+        "value": 0.1
+      },
+      "stability": 1.15,
+      "incursion": 0.85,
+      "authority": 1
+    }
+  }
+}

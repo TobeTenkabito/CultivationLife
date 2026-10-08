@@ -491,10 +491,14 @@ class GhostReincarnationDlcTests(unittest.TestCase):
             "captured_age": prison_game.player.age, "hostility": 10,
             "sentence_years": 1, "hostility_reduction_per_year": 10,
         }
+        # Advanced births now carry equipped souls; their ordinary soul pressure
+        # also applies while imprisoned. Instant reclamation above remains free.
+        from cultivation_life.system.ghost_resources import ghost_soul_pressure
+        expected_growth = 0.0002 * (1 + ghost_soul_pressure(prison_game.player)[1])
         self.engine.store.save(prison_game)
         self.engine.prison_action(prison_game.id, "endure")
         self.assertAlmostEqual(
-            self.engine.store.load(prison_game.id).player.ghost_soul_erosion_rate_pp, 0.0002,
+            self.engine.store.load(prison_game.id).player.ghost_soul_erosion_rate_pp, expected_growth,
         )
 
     def test_reenable_after_disabled_progress_reconciles_new_historical_height_once(self):

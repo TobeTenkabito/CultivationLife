@@ -20,6 +20,7 @@ from .upper_voisinage_rules import (
     level as level,
     project as project,
     player_source as player_source,
+    definitions,
 )
 
 
@@ -58,7 +59,8 @@ def public_upper_voisinages(player, game=None):
     world = world_config(player)
     stones = sum(i.quantity for i in player.inventory if i.id == 'spirit_stone')
     rows = []
-    for definition in world['fields']:
+    from . import monster_true_form
+    for definition in definitions(player):
         rank = level(player, definition['id'])
         cost = quote(player, rank + 1, game) if rank < 9 else None
         reason = None
@@ -71,13 +73,19 @@ def public_upper_voisinages(player, game=None):
                 reason = '灵石不足'
             elif cost['owned_materials'] < cost['materials']:
                 reason = '本界筑域材料不足，请在坊市炼器材料中寻找'
+        reason = monster_true_form.training_reason(player, definition['id'], rank) or reason
         rows.append(dict(id=definition['id'], name=definition['name'], description=definition['description'],
+            true_form=bool(definition.get('true_form')),
             level=rank, active=record(player).get('active') == definition['id'], cost=cost,
             reason=reason, can_train=bool(cost) and not reason,
             field=asdict(project(definition, max(1, rank))),
-            next_field=asdict(project(definition, rank + 1)) if rank and cost else None))
+            next_field=asdict(project(definition, rank + 1)) if rank and cost and not monster_true_form.training_reason(player, definition['id'], rank) else None))
+    true_form = monster_true_form.public(player)
+    if true_form and not true_form['reason'] and not true_form['blueprint']:
+        true_form['first_cost'] = quote(player, 1, game)
     return dict(available=True, world=player.world, title=world['title'], energy=world['energy'],
-        description=world['description'], opportunity=player.opportunity, stones=stones, rows=rows)
+        description=world['description'], opportunity=player.opportunity, stones=stones, rows=rows,
+        true_form=true_form)
 
 
 def act(deps: ApertureDependencies, game_id, action, voisinage_id):
@@ -89,8 +97,16 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
     if not available(p):
         raise ValueError('须在修罗、幽冥或轮回界达到第九阶修为')
     if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-            or (game.guixu_state.get('player_session') or {}).get('trapped')):
+            or (game.guixu_state.get('player_session') or {}).get('trapped')
+            or p.sealed_cultivation or p.cultivation_suppression):
         raise ValueError('当前状态无法修习邻域')
+    if action.startswith('true_form_'):
+        from .monster_true_form import configure
+        summary = configure(p, action, voisinage_id)
+        game.history.append(HistoryRecord('SYS_TRUE_FORM', 1, p.age, '本相铸域', action, 'completed', summary, {}, ['cultivation', 'voisinage']))
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
     row = next((r for r in public_upper_voisinages(p, game)['rows'] if r['id'] == voisinage_id), None)
     if not row:
         raise ValueError('只能修习或上阵本界邻域')
@@ -118,6 +134,8 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
             p.crafting_materials.remove(material)
         state = p.world_voisinages.setdefault(p.world, {})
         state.setdefault('levels', {})[voisinage_id] = row['level'] + 1
+        if row.get('true_form') and row['level'] + 1 == 9:
+            state['true_form']['finalized'] = True
         state.setdefault('active', voisinage_id)
         summary = (f"【{row['name']}】修至 Lv{row['level'] + 1}，消耗机缘 {cost['opportunity']}、"
                    f"灵石 {cost['stones']}、{cost['material_name']} ×{cost['materials']}。")

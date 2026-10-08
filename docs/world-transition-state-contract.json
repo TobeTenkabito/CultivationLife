@@ -291,5 +291,9 @@
     "last_saved_with_game_version": "history",
     "version": "history",
     "map_war_last_encounter_unit": "clock"
+  },
+  "true_form_ownership_notes": {
+    "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
+    "birth_dlc": "仅创建预设/自定义角色时一次配置已达境界血脉、族血、独立结契魂魄、往生、浩然气、愿力及八部状态；不复制世界 NPC，不伪造轮回印记，不在旧档载入时补发。"
   }
 }
