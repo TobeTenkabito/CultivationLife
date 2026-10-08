@@ -96,6 +96,7 @@ def bind_aperture(host) -> ApertureDependencies:
         _load=lambda *args, **kwargs: host._load(*args, **kwargs),
         present=lambda *args, **kwargs: host.present(*args, **kwargs),
         _get_store=lambda: host.store,
+        _soul_contemplate=lambda *args: host._soul_contemplate(*args),
     )
 
 

@@ -1,0 +1,1367 @@
+{
+  "schema_version": 1,
+  "blueprint_version": 1,
+  "causes": {
+    "life_death": "生死",
+    "resentment": "怨憎",
+    "oath": "誓愿",
+    "bonds": "故缘",
+    "battle_scars": "战殇",
+    "seeking": "求道",
+    "renown": "浮名",
+    "homeland": "故土",
+    "solitude": "孤寂",
+    "legacy": "遗业",
+    "forgetting": "遗忘",
+    "reincarnation": "轮回"
+  },
+  "forms": {
+    "life_death.guard": {
+      "name": "不灭心灯域",
+      "cause": "life_death",
+      "route": "guard",
+      "description": "以生死为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "life_death.sever": {
+      "name": "断生无常域",
+      "cause": "life_death",
+      "route": "sever",
+      "description": "以生死为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "life_death.transmute": {
+      "name": "生死轮照域",
+      "cause": "life_death",
+      "route": "transmute",
+      "description": "以生死为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "resentment.guard": {
+      "name": "血怨幽牢域",
+      "cause": "resentment",
+      "route": "guard",
+      "description": "以怨憎为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "resentment.sever": {
+      "name": "恩仇两绝域",
+      "cause": "resentment",
+      "route": "sever",
+      "description": "以怨憎为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "isolate",
+          "restriction": "voisinage"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "isolate",
+          "restriction": "voisinage"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "resentment.transmute": {
+      "name": "业火化怨域",
+      "cause": "resentment",
+      "route": "transmute",
+      "description": "以怨憎为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "oath.guard": {
+      "name": "千誓魂印域",
+      "cause": "oath",
+      "route": "guard",
+      "description": "以誓愿为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "oath.sever": {
+      "name": "破誓空律域",
+      "cause": "oath",
+      "route": "sever",
+      "description": "以誓愿为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "suppress"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "oath.transmute": {
+      "name": "万愿同归域",
+      "cause": "oath",
+      "route": "transmute",
+      "description": "以誓愿为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "bonds.guard": {
+      "name": "羁魂守望域",
+      "cause": "bonds",
+      "route": "guard",
+      "description": "以故缘为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "bonds.sever": {
+      "name": "斩缘寂界域",
+      "cause": "bonds",
+      "route": "sever",
+      "description": "以故缘为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "bonds.transmute": {
+      "name": "众缘回响域",
+      "cause": "bonds",
+      "route": "transmute",
+      "description": "以故缘为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "battle_scars.guard": {
+      "name": "血战魂关域",
+      "cause": "battle_scars",
+      "route": "guard",
+      "description": "以战殇为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "battle_scars.sever": {
+      "name": "断戈寂灭域",
+      "cause": "battle_scars",
+      "route": "sever",
+      "description": "以战殇为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "battle_scars.transmute": {
+      "name": "万劫回锋域",
+      "cause": "battle_scars",
+      "route": "transmute",
+      "description": "以战殇为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "seeking.guard": {
+      "name": "长明照理域",
+      "cause": "seeking",
+      "route": "guard",
+      "description": "以求道为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "seeking.sever": {
+      "name": "绝法空境域",
+      "cause": "seeking",
+      "route": "sever",
+      "description": "以求道为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "suppress"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "seeking.transmute": {
+      "name": "万法归源域",
+      "cause": "seeking",
+      "route": "transmute",
+      "description": "以求道为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "renown.guard": {
+      "name": "千面留名域",
+      "cause": "renown",
+      "route": "guard",
+      "description": "以浮名为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "renown.sever": {
+      "name": "无名虚界域",
+      "cause": "renown",
+      "route": "sever",
+      "description": "以浮名为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "renown.transmute": {
+      "name": "众名镜庭域",
+      "cause": "renown",
+      "route": "transmute",
+      "description": "以浮名为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "suppress"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "homeland.guard": {
+      "name": "归乡守土域",
+      "cause": "homeland",
+      "route": "guard",
+      "description": "以故土为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "homeland.sever": {
+      "name": "离乡断界域",
+      "cause": "homeland",
+      "route": "sever",
+      "description": "以故土为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "homeland.transmute": {
+      "name": "万里归魂域",
+      "cause": "homeland",
+      "route": "transmute",
+      "description": "以故土为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "solitude.guard": {
+      "name": "独影长夜域",
+      "cause": "solitude",
+      "route": "guard",
+      "description": "以孤寂为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "solitude.sever": {
+      "name": "绝响无声域",
+      "cause": "solitude",
+      "route": "sever",
+      "description": "以孤寂为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "isolate",
+          "restriction": "support"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "solitude.transmute": {
+      "name": "千影回声域",
+      "cause": "solitude",
+      "route": "transmute",
+      "description": "以孤寂为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "legacy.guard": {
+      "name": "千秋不坠域",
+      "cause": "legacy",
+      "route": "guard",
+      "description": "以遗业为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "legacy.sever": {
+      "name": "毁业归尘域",
+      "cause": "legacy",
+      "route": "sever",
+      "description": "以遗业为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "legacy.transmute": {
+      "name": "前功后业域",
+      "cause": "legacy",
+      "route": "transmute",
+      "description": "以遗业为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "forgetting.guard": {
+      "name": "昔影长存域",
+      "cause": "forgetting",
+      "route": "guard",
+      "description": "以遗忘为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_body"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "forgetting.sever": {
+      "name": "忘川绝念域",
+      "cause": "forgetting",
+      "route": "sever",
+      "description": "以遗忘为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "forgetting.transmute": {
+      "name": "前尘镜海域",
+      "cause": "forgetting",
+      "route": "transmute",
+      "description": "以遗忘为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "seal"
+        },
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    },
+    "reincarnation.guard": {
+      "name": "六世归命域",
+      "cause": "reincarnation",
+      "route": "guard",
+      "description": "以轮回为魂因，沿守念凝成魂相。",
+      "battle_role": "稳固庇护与持续恢复",
+      "weakness": "侵夺偏低，难以迅速击穿高稳固邻域",
+      "effects": [
+        {
+          "kind": "restore_body"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "restore_spirit"
+        },
+        {
+          "kind": "restore_field"
+        }
+      ],
+      "feature_choices": [
+        "fortify",
+        "shelter",
+        "frugal"
+      ],
+      "stability": 1.2,
+      "incursion": 0.8,
+      "authority": 1.0,
+      "opening_factor": 1,
+      "upkeep_factor": 0.9,
+      "effect_factor": 1
+    },
+    "reincarnation.sever": {
+      "name": "斩轮无归域",
+      "cause": "reincarnation",
+      "route": "sever",
+      "description": "以轮回为魂因，沿断执凝成魂相。",
+      "battle_role": "侵夺、禁制与终局强攻",
+      "weakness": "稳固偏低，施权较贵，长战易耗竭",
+      "effects": [
+        {
+          "kind": "restrict",
+          "restriction": "technique"
+        },
+        {
+          "kind": "isolate",
+          "restriction": "voisinage"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "isolate",
+          "restriction": "voisinage"
+        },
+        {
+          "kind": "suppress"
+        },
+        {
+          "kind": "seal"
+        }
+      ],
+      "feature_choices": [
+        "opening",
+        "execution",
+        "sacrifice"
+      ],
+      "stability": 0.75,
+      "incursion": 1.3,
+      "authority": 0.95,
+      "opening_factor": 1.1,
+      "upkeep_factor": 1.1,
+      "effect_factor": 1.15
+    },
+    "reincarnation.transmute": {
+      "name": "生灭往复域",
+      "cause": "reincarnation",
+      "route": "transmute",
+      "description": "以轮回为魂因，沿化愿凝成魂相。",
+      "battle_role": "恢复反击与持续周旋",
+      "weakness": "开局侵夺偏弱，难以迅速建立支配",
+      "effects": [
+        {
+          "kind": "restore_field"
+        },
+        {
+          "kind": "strike"
+        }
+      ],
+      "secondary_choices": [
+        {
+          "kind": "strike"
+        },
+        {
+          "kind": "restore_spirit"
+        }
+      ],
+      "feature_choices": [
+        "retaliate",
+        "frugal",
+        "shelter"
+      ],
+      "stability": 1,
+      "incursion": 0.9,
+      "authority": 1.1,
+      "opening_factor": 1,
+      "upkeep_factor": 0.95,
+      "effect_factor": 1.05
+    }
+  }
+}

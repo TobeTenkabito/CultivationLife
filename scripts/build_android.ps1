@@ -1,4 +1,4 @@
-param([ValidateSet('Debug','Release')][string]$Configuration = 'Release')
+param([ValidateSet('Debug','Release')][string]$Configuration = 'Release', [switch]$IncludeTests)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'android_environment.ps1')
 $projectRoot = Split-Path $PSScriptRoot -Parent
@@ -11,6 +11,10 @@ if ($Configuration -eq 'Release') {
 try {
     & $androidGradle -p (Join-Path $projectRoot 'android') --no-daemon "assemble$Configuration" "lint$Configuration"
     if ($LASTEXITCODE -ne 0) { throw "Android $Configuration build failed ($LASTEXITCODE)" }
+    if ($IncludeTests) {
+        & $androidGradle -p (Join-Path $projectRoot 'android') --no-daemon "assemble${Configuration}AndroidTest" "-PtestBuildType=$($Configuration.ToLower())"
+        if ($LASTEXITCODE -ne 0) { throw "Android instrumentation build failed ($LASTEXITCODE)" }
+    }
 } finally {
     Remove-Item Env:CULTIVATION_KEYSTORE_PASSWORD -ErrorAction SilentlyContinue
 }

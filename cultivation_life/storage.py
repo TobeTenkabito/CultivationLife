@@ -81,10 +81,16 @@ class SaveStore:
         for path in sorted(self.directory.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True):
             try:
                 data = json.loads(path.read_text(encoding="utf-8"))
-                migration_path(schema_version(data))
+                incompatibility = None
+                try:
+                    migration_path(schema_version(data))
+                except ValueError as error:
+                    incompatibility = str(error)
                 games.append({
                     "id": data["id"],
                     "name": data["player"]["name"],
+                    "compatible": incompatibility is None,
+                    "incompatibility": incompatibility,
                     "updated_at": data["updated_at"],
                     "game_version": str(data.get("last_saved_with_game_version", "pre-1.0.0")),
                     "age": data['player'].get('age', 0),

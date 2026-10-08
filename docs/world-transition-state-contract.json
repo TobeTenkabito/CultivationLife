@@ -295,5 +295,11 @@
   "true_form_ownership_notes": {
     "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
     "birth_dlc": "仅创建预设/自定义角色时一次配置已达境界血脉、族血、独立结契魂魄、往生、浩然气、愿力及八部状态；不复制世界 NPC，不伪造轮回印记，不在旧档载入时补发。"
+  },
+  "soul_form_ownership_notes": {
+    "Player.world_voisinages.reincarnation.ghost_soul_form": "同一玩家本魂的魂因、道路、稳定游戏身份与蓝图编号、证据引用、辅权能和魂痕锁定；离界、低阶轮回或关闭 DLC 沉寂保留，寄身冻结；不得复制宿主或拘魂。",
+    "Player.world_voisinages.*.levels": "结构 10：统一初成四层、化境四层、大成四层、至臻共十三阶。旧结构 1–9 拒绝加载，不映射、不覆盖原档。",
+    "GameState.active_trial": "妖鬼劫战保存引劫快照、真实损伤与元力、待完成进化与祖谱；仅胜利提交进化。照魂保存所选魂因，正常时间账本推进一次后提交归真道路。",
+    "Player.world_voisinages.reincarnation.contemplation": "本魂个人参悟的魂因、已结算年数和初始所需年数；被事件中断可续修，切换魂因拒绝，完成后删除，不重复计算行动单位结算。不属于可迁移世界资源。"
   }
 }

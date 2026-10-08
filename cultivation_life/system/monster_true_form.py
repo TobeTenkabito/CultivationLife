@@ -90,7 +90,7 @@ def validate(player):
     if tuning is not None and (tuning not in tunings(data) or not data.get('tuning_locked')):
         raise ValueError('本相调校无效')
     rank = player.world_voisinages['nether'].get('levels', {}).get(data['blueprint_id'], 0)
-    if (rank >= 4 and aux is None) or (rank >= 7 and tuning is None) or (rank >= 9 and not data.get('finalized')):
+    if (rank >= 5 and aux is None) or (rank >= 9 and tuning is None) or (rank >= 13 and not data.get('finalized')):
         raise ValueError('本相阶段锁定记录不完整')
     return data
 
@@ -145,17 +145,17 @@ def configure(player, action, choice):
     data = validate(player)
     rank = player.world_voisinages['nether'].get('levels', {}).get(data['blueprint_id'], 0)
     if action == 'true_form_secondary':
-        if rank != 3 or data['secondary_locked']:
-            raise ValueError('辅权能须在三级圆满后、晋升四级前铭定一次')
+        if rank != 4 or data['secondary_locked']:
+            raise ValueError('辅权能须在初成四层后、进入化境前铭定一次')
         if choice not in catalog()[context['origin_species_id']]['effects'] or choice == data['primary']:
             raise ValueError('辅权能须选本源的另一项权能')
         data.update(secondary=choice, secondary_locked=True)
-        return '辅权能已铭定，修至四级后生效，不增加每轮动作次数。'
+        return '辅权能已铭定，修至化境后生效，不增加每轮动作次数。'
     if action == 'true_form_tuning':
-        if rank != 6 or data['tuning_locked'] or choice not in tunings(data):
-            raise ValueError('归真调校须在六级圆满后择定一次')
+        if rank != 8 or data['tuning_locked'] or choice not in tunings(data):
+            raise ValueError('归真调校须在化境四层后择定一次')
         data.update(tuning=choice, tuning_locked=True)
-        return '归真方向已锁定，七级起生效；九级修成时完成本相归真。'
+        return '归真方向已锁定，大成起生效；至臻修成时完成本相归真。'
     raise ValueError('未知本相铸域操作')
 
 
@@ -164,8 +164,8 @@ def training_reason(player, key, rank):
     if not row or row['id'] != key:
         return None
     data = stored(player)
-    if rank == 3 and not data['secondary_locked']:
-        return '请先铭定辅权能，再修习四级'
-    if rank == 6 and not data['tuning_locked']:
-        return '请先择定归真方向，再修习七级'
+    if rank == 4 and not data['secondary_locked']:
+        return '请先铭定辅权能，再进入化境'
+    if rank == 8 and not data['tuning_locked']:
+        return '请先择定归真方向，再进入大成'
     return None

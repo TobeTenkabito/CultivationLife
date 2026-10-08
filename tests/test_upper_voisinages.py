@@ -31,7 +31,7 @@ def upper(prepared, request):
     return e, e._load(g.id)
 
 
-def test_acquire_switch_and_nine_levels_are_persistent_and_bounded(upper):
+def test_acquire_switch_and_thirteen_stages_are_persistent_and_bounded(upper):
     e, g = upper
     world = world_config(g.player)
     key, other = [r['id'] for r in world['fields']]
@@ -46,7 +46,7 @@ def test_acquire_switch_and_nine_levels_are_persistent_and_bounded(upper):
     e.upper_voisinage_action(g.id, 'select', other)
     assert player_source(e._load(g.id).player).voisinages[0].id == other
     definition = crafting_material_definitions()[world['material_id']]
-    for target in range(2, 10):
+    for target in range(2, 14):
         saved = e._load(g.id)
         saved.player.realm_index = config()['realms'][target - 1]
         saved.player.opportunity = opportunity_required(saved.player)
@@ -57,15 +57,15 @@ def test_acquire_switch_and_nine_levels_are_persistent_and_bounded(upper):
         e.upper_voisinage_action(g.id, 'train', key)
     saved = e._load(g.id)
     assert saved.player.age == age
-    assert saved.player.world_voisinages[g.player.world]['levels'] == {key: 9, other: 1}
-    with pytest.raises(ValueError, match='九级'):
+    assert saved.player.world_voisinages[g.player.world]['levels'] == {key: 13, other: 1}
+    with pytest.raises(ValueError, match='至臻'):
         e.upper_voisinage_action(g.id, 'train', key)
 
 
 def test_rejections_preserve_resources_and_materials(upper):
     e, g = upper
     key = world_config(g.player)['fields'][0]['id']
-    g.player.world_voisinages[g.player.world] = {'levels': {key: 3}, 'active': key}
+    g.player.world_voisinages[g.player.world] = {'levels': {key: 4}, 'active': key}
     e.store.save(g)
     before = e._load(g.id).to_dict()
     with pytest.raises(ValueError, match='第 10 阶'):
@@ -92,7 +92,7 @@ def test_material_consumption_prefers_lower_quality_without_substitutions(upper)
     key = world_config(p)['fields'][0]['id']
     p.realm_index = 10
     p.opportunity = opportunity_required(p)
-    p.world_voisinages[p.world] = {'levels': {key: 3}, 'active': key}
+    p.world_voisinages[p.world] = {'levels': {key: 4}, 'active': key}
     definition = crafting_material_definitions()[world_config(p)['material_id']]
     m = make_crafting_material_instance(definition, random.Random(1), source='test', origin_world=p.world)
     p.crafting_materials = [dict(m, id='best', quality=1.2), dict(m, id='worn', quality=.7),

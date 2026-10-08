@@ -744,6 +744,14 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         advanced = self.engine.confirm_custom_lineage(
             game.id, "FOX_NETHER_SELF_2", "青丘自在脉", expanded_rules,
         )
+        self.assertEqual(advanced['player']['realm_index'], 9)
+        waiting = self.engine.store.load(game.id)
+        self.assertEqual(waiting.player.monster_custom_lineage['finalized_stage'], 1)
+        self.assertEqual(waiting.active_trial['lineage']['finalized_stage'], 2)
+        # Isolate deferred lineage commit from encounter difficulty.
+        waiting.active_trial['battle_state']['stats']['enemy']['might'] = 0
+        self.engine.store.save(waiting)
+        advanced = self.engine.choose(game.id, 'fight')
         self.assertEqual(advanced["player"]["realm_index"], 10)
         self.assertEqual(advanced["monster_bloodline"]["custom_lineage"]["finalized_stage"], 2)
         self.assertEqual(len(advanced["monster_bloodline"]["custom_lineage"]["rules"]), 2)

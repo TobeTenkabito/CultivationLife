@@ -89,6 +89,7 @@ class ApertureDependencies:
     _load: Callable[[str], GameState]
     present: Callable[[GameState], dict[str, Any]]
     _get_store: Callable[[], SavePort]
+    _soul_contemplate: Callable[..., Any]
 
     @property
     def store(self) -> SavePort:

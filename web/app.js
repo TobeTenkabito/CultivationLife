@@ -127,6 +127,11 @@ function renderSaveList(saves) {
     meta.textContent = `${save.path_name || ''}${saveVersion} · ${Number.isNaN(savedAt.getTime()) ? '落笔时间未明' : savedAt.toLocaleString('zh-CN', {hour12:false})}`;
     const resume = document.createElement('span'); resume.className = 'save-resume-label'; resume.textContent = save.alive === false ? '回望此生 →' : '续接此生 →';
     button.append(title, details, meta, resume);
+    if (save.compatible === false) {
+      button.disabled = true;
+      resume.textContent = '旧存档不兼容 · 请新建角色';
+      meta.textContent = save.incompatibility;
+    }
     button.onclick = () => loadGame(save.id);
     const exportButton = document.createElement('button'); exportButton.className = 'save-export';
     exportButton.textContent = '导出'; exportButton.setAttribute('aria-label', `导出存档：${save.name}`);

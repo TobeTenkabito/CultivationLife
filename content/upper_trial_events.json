@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_UPPER_ENDURANCE",
+      "version": 1,
+      "title": "本魂与血脉劫",
+      "body": "前两道突破劫只需存活完整五轮，无须击杀。劫相继承引劫时本体属性；第二劫复制当前邻域，培养境界最高化境四层。渡劫失败会死亡。",
+      "tags": [
+        "manual_only",
+        "breakthrough_trial"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "fight",
+          "text": "迎劫／继续交战",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "upper_battle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_UPPER_FINAL",
+      "version": 1,
+      "title": "归真终劫",
+      "body": "末劫两名劫相同时出场，各继承引劫时 100% 本体属性，并各复制当前邻域，培养境界最高化境四层。必须实际击杀全部劫相；双方不能逃跑，无总轮数上限，失败死亡。",
+      "tags": [
+        "manual_only",
+        "breakthrough_trial"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "fight",
+          "text": "迎劫／继续交战",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "upper_battle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EVT_SOUL_CONTEMPLATION",
+      "version": 1,
+      "title": "照前尘 · 辨今心",
+      "body": "守念：保存所执，以稳固与庇护延续本心。断执：割断束缚，以侵夺和禁制开辟自由。化愿：将过往化为新愿，以恢复和反击承接前尘。",
+      "tags": [
+        "manual_only"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "guard",
+          "text": "守念 · 承认并保存",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "soul_guard"
+            }
+          ]
+        },
+        {
+          "id": "sever",
+          "text": "断执 · 割断束缚",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "soul_sever"
+            }
+          ]
+        },
+        {
+          "id": "transmute",
+          "text": "化愿 · 化作新愿",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "soul_transmute"
+            }
+          ]
+        },
+        {
+          "id": "cancel",
+          "text": "暂不定性",
+          "effects": [
+            {
+              "type": "trial_step",
+              "step": "soul_cancel"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

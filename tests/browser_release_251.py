@@ -49,7 +49,7 @@ def main():
                             page.wait_for_function('!busy && game.upper_voisinages.true_form.level===1')
                             panel.get_by_role('button',name='选为斗法邻域',exact=True).click()
                             page.wait_for_function('!busy && game.upper_voisinages.rows.at(-1).active')
-                            for level in (2,3):
+                            for level in (2,3,4):
                                 panel.get_by_role('button',name='培养下一层',exact=True).click()
                                 page.wait_for_function('(n)=>!busy && game.upper_voisinages.true_form.level===n',arg=level)
                             assert panel.get_by_role('button',name='培养下一层').is_disabled()
