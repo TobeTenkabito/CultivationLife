@@ -30,6 +30,12 @@ class WarStateDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WarDiplomacyDependencies:
+    _get_maps: Callable[[], MapPort]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
+
     _active_war: Callable[..., Any]
     _add_war_participant: Callable[..., Any]
     _allied_powers: Callable[..., Any]
@@ -78,6 +84,12 @@ class WarPowerDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WarCombatDependencies:
+    _get_maps: Callable[[], MapPort]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
+
     _append_war_log: Callable[..., Any]
     _available_warriors: Callable[..., Any]
     _combat: Callable[..., Any]
@@ -102,6 +114,12 @@ class WarCombatDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WarLifecycleDependencies:
+    _get_maps: Callable[[], MapPort]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
+
     _append_war_log: Callable[..., Any]
     _available_warriors: Callable[..., Any]
     _call_war_allies: Callable[..., Any]

@@ -19,6 +19,8 @@ from .dependencies import CharacterPreparationDependencies
 
 def prepare_character(deps: CharacterPreparationDependencies, game: GameState) -> bool:
     ghost_migrated = conversion_migrated = monster_lifespan_migrated = sense_baseline_migrated = False
+    from ...system.conversion import retire_events
+    conversion_migrated = retire_events(game)
     if ghost_cultivation_active(game.player) and game.player.active_breakthrough_aids:
         valid_ghost_aids = [
             item_id for item_id in game.player.active_breakthrough_aids

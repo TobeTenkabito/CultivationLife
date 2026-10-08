@@ -53,7 +53,10 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None):
     alliance = controlled_alliance(game)
     home = home_alliance(game)
     identity = home.get('network_id', home['id']) if home else None
-    if action in {'market_policy', 'market_relief'}:
+    if isinstance(action, str) and action.startswith('depot_'):
+        from .depot import command as depot_command
+        depot_command(game, deps.maps, payload)
+    elif action in {'market_policy', 'market_relief'}:
         from .market_governance import command as governance_command
         governance_command(game, deps.maps, payload)
     elif isinstance(action, str) and action.startswith('estate_'):

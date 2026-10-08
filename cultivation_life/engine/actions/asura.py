@@ -37,10 +37,17 @@ def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', b
             stage = s.get('conversion', 0)
             if stage >= 5:
                 raise ValueError('煞元已经完全转化')
-            game.active_trial = dict(kind='asura_conversion', stage=stage + 1,
-                                     event_ids=[f'EVT_ASURA_CONVERSION_{stage + 1}'])
-            deps.queue_trial(game)
-            summary = f'开始煞元转化第 {stage + 1}/5 事件。'
+            from ...system.conversion import quote
+            bill = quote(game, asura=True)
+            if not bill['can_convert']:
+                raise ValueError('煞元转化的机缘不足')
+            p.opportunity -= bill['cost']
+            s['conversion'] = stage + 1
+            from ...system.immortal_aperture import ensure_aperture
+            ensure_aperture(p)
+            ledger = p.immortal_aperture
+            ledger['current'] = min(ledger['capacity'], ledger['current'] + ledger['capacity'] / 5)
+            summary = f"消耗 {bill['cost']} 机缘，煞元转化第 {stage + 1}/5 重完成。"
         else:
             if s.get('conversion', 0) < 5:
                 raise ValueError('须先完成五重煞元转化')

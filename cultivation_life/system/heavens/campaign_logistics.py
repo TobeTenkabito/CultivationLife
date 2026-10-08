@@ -125,6 +125,8 @@ def advance_transport(deps, game, row):
         deps.campaign_move(game, soldier, 'human', TARGET_SITE)
         phase(soldier, 'stationed')
     else:
-        row['supply']['target'] += shipment['quantity']
+        delivered = shipment['quantity'] * 4 // 5
+        row['supply']['target'] += delivered
+        row['supply']['lost'] += shipment['quantity'] - delivered
     row['shipment'] = None
     row['deliveries'] += 1

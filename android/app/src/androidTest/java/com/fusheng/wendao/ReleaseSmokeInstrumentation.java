@@ -600,6 +600,38 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.faction.roster.some(n=>n.id===window.__contactId&&n.contact_actions.improve.includes('已与此人交流'))")),"Contact persistence");
                 result.putString("governance_scope","Six themes, paid stock lock across refresh, purchase, automatic NPC government, categorized sect contact actions and persistence");
+            } else if(phase.equals("war-logistics")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'军需验收',preset_id:'core',seed:419})});return g.id;})()");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy import depot, organizations\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.faction_id='tianjian'\ng.player.location_id=g.sects['tianjian'].location_id\nfor identity in ('tianjian','wanmo'):\n x=g.sects[identity]\n organizations.register(g,'sect',identity,x.world)\n transfer_value(g,'background:human',depot.treasury(g,x),1000000,'原生军需验收')\ne._start_war(g,'sect','tianjian','wanmo',initiated_by_player=True)\nx=g.sects['tianjian']\nm=g.economy_v2['markets']['human:'+x.location_id]\nk=next(k for k,v in depot.catalog('human').items() if v['kind']=='item' and v['tier']<=5 and m['commodities'].get(v['id'],{}).get('stock',0)>=3)\ndepot.purchase(g,e.maps,x,k,3)\nfor n in depot.seniors(g,x):n.affinity=100\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('#war-card').classList.contains('panel-open')")))tapSelector("[data-panel-target=war]");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.war-supply-card').parentElement.textContent.includes('敌情未明')")),"Enemy supplies hidden");
+                    tapSelector("[data-war-strategy=scout]");waitForJs("!busy && document.querySelector('[data-war-strategy=scout]').disabled","Native scouting charged once");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#war-card').scrollWidth<=document.querySelector('#war-card').clientWidth+2")),"War responsive layout");
+                    capture("war-logistics-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-panel-target=faction]");tapSelector("#faction-card .organization-depot > summary");tapSelector("[data-depot-action=depot_request]");waitForJs("!busy","Native requisition");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('#faction-card .organization-depot').open")))tapSelector("#faction-card .organization-depot > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-depot-action=depot_review]').disabled")),"Early approval blocked");
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.diplomacy_unit+=1\ne.store.save(g)");async("loadGame("+JSONObject.quote(id)+")");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('#faction-card .organization-depot').open")))tapSelector("#faction-card .organization-depot > summary");
+                    tapSelector("[data-depot-action=depot_review]");waitForJs("!busy","Native elder approval");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('#faction-card .organization-depot').open")))tapSelector("#faction-card .organization-depot > summary");
+                    tapSelector("[data-depot-action=depot_collect]");waitForJs("!busy && document.querySelector('#faction-card .organization-depot').textContent.includes('已领取')","Native collection");
+                    String cid=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'仙元验收',preset_id:'true_immortal',seed:9921})});return g.id;})()");
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(cid)+")\ng.pending_event=None\ng.heavenly_court['open_election']=None\ng.player.immortal_conversion_stage=0\ng.player.immortal_power_converted=False\ng.player.opportunity=100\ne.store.save(g)");async("loadGame("+JSONObject.quote(cid)+")");
+                    tapSelector("[data-panel-target=immortal-conversion]");tapSelector("#immortal-conversion-card button[data-doctrine-action=convert]");
+                    waitForJs("!busy && game.player.immortal_conversion_stage===1","Native opportunity conversion");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#immortal-conversion-card button[data-doctrine-action=convert]').disabled")),"Insufficient opportunity blocked");
+                    capture("conversion-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    String aid=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'煞元验收',preset_id:'asura_upper',seed:9922})});return g.id;})()");
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(aid)+")\ng.pending_event=None\ng.active_trial=None\ng.player.asura_cultivation['conversion']=0\ng.player.opportunity=100\ne.store.save(g)");async("loadGame("+JSONObject.quote(aid)+")");
+                    tapSelector("[data-panel-target=asura-conversion]");tapSelector("[data-asura-action=convert]");waitForJs("!busy && game.asura.conversion===1","Native paid Asura conversion");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-asura-action=convert]').disabled")),"Asura opportunity checked");
+
+                }
+                result.putString("war_logistics_scope","Four themes, hidden enemy stock, real scout and delayed approval/collection, paid conversion, narrow layouts");
             } else if(phase.equals("economy-governance")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商势验收',preset_id:'core',seed:419})});return g.id;})()");
@@ -615,7 +647,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("document.querySelector('[aria-label=市税经营方针]').value='reinvest';true");tapSelector("[data-governance=market_policy]");
                     waitForJs("!busy && game.map.economy.competition.control.policy==='reinvest'","Native fiscal policy");
                     tapSelector("#market-governance > summary");tapSelector("[data-governance=market_relief]");waitForJs("!busy","Native competition funding");
-                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.market_power import record_trade\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nm=g.economy_v2['markets'][g.player.world+':'+g.player.location_id]\ni=next(iter(m['commodities']))\nm['commodities'][i]['stock']=0\nrecord_trade(g,m,i,'player','buy',100000)\ne.store.save(g)\ne.advance(g.id,'rest',3)\ng=e._load(g.id)\ng.pending_event=None\ne.store.save(g)");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy.market_power import record_trade\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nm=g.economy_v2['markets'][g.player.world+':'+g.player.location_id]\ni=next(iter(m['commodities']))\nm['commodities'][i]['stock']=0\nrecord_trade(g,m,i,'player','buy',100000)\nm['competition'][i]['pressure']=16\ne.store.save(g)\ne.advance(g.id,'rest',1)\ng=e._load(g.id)\ng.pending_event=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");tapSelector("#market-governance > summary");
                     check(Boolean.TRUE.equals(js("game.map.economy.competition.rows.some(r=>r.added>0)&&document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Paid competition and narrow layout");
                     tapSelector(".competition-card");capture("economy-governance-"+theme+"-"+arguments.getString("orientation","portrait"));
@@ -634,7 +666,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("document.querySelector('[aria-label=购置产业]').value='mine';true");
                     tapSelector("[data-estate-action=buy]");
                     waitForJs("!busy && game.map.economy.enterprises.owned.length===1","Native estate title");
-                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    tapSelector("#map-view-tabs button[aria-controls=map-locations]");tapSelector(".map-directory-link.estate");tapSelector(".map-directory-entry.estate button");
                     tapSelector("[data-estate-action=fund]");
                     waitForJs("!busy && game.map.economy.enterprises.owned[0].cash===10000","Native working capital");
                     tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");

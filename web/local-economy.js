@@ -19,7 +19,7 @@
     const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
     if (market.war_pressure) intro.append(' 当地战事正在压低生产并增加运输风险。');
     const metrics = el('div', null, 'economy-metrics');
-    for (const [label, value] of [['累计成交',market.turnover],['收购资金',market.liquidity],['运营府库',market.operator_balance]]) {
+    for (const [label, value] of [['累计成交',market.turnover],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
       const cell = el('div'); cell.append(el('small',label), el('strong',money(value))); metrics.append(cell);
     }
     const macro = el('details', null, 'economy-world');
@@ -27,8 +27,7 @@
       el('p',`界面经济随岁月发展，接近 ${money(market.growth_cap)} 倍时逐渐放缓。物价水平 ${money(market.price_level)} 倍；黑市收入归本界府库，当前 ${money(market.world_treasury)} 灵石。`));
     const freight = el('details', null, 'economy-freight');
     freight.append(el('summary', `商队流通 · 累计到货 ${money(market.freight_in || 0)} / 发货 ${money(market.freight_out || 0)} 件`));
-    (market.caravans || []).forEach(fleet => freight.append(el('p',
-      `${fleet.name} · ${{waiting:'候货',travelling:'在途',selling:'待售',stranded:'受阻',retired:'已解散'}[fleet.status]} · ${fleet.destination ? `${fleet.origin} → ${fleet.destination}，预计第 ${fleet.arrival} 年抵达` : fleet.location}`)));
+    window.CaravanMap?.render(freight,market,game.map);
     if (!market.caravans?.length) freight.append(el('p', '当前没有涉及本地的商队运输。'));
     if (market.suppliers?.length) freight.append(el('p', `近期已建模组织与商队的最大供给占比：${Math.round(market.suppliers[0].share * 100)}%。此比例不含背景作坊；新增产出和外来商队会稀释集中度。`));
     const tools = el('div',null,'economy-tools');
@@ -44,9 +43,12 @@
       const rows=market.rows.filter(row=>row.name.includes(search));
       rows.forEach(row=>{
         const card=el('article',null,'economy-good'); card.dataset.itemId=row.id;
-        const title=el('div',null,'economy-heading'); title.append(el('b',row.name),el('span',`${row.trend} ${row.status}`));
+        card.dataset.supply=row.status==='紧缺'?'scarce':row.status==='充足'?'surplus':'normal';
+        const title=el('div',null,'economy-heading'); title.append(el('b',row.name),el('span',`${row.trend} ${row.status}`,'supply-badge'));
         card.append(title,el('p',`现货 ${money(row.stock)} · 持有 ${money(row.held)} · 累计成交 ${money(row.volume)}`),
           el('small',`近期年均产出 ${money(row.production)} / 消费 ${money(row.consumption)}`, 'muted'));
+        const stock=el('progress');stock.max=2;stock.value=Math.min(2,row.stock_ratio||0);stock.setAttribute('aria-label',`${row.name}库存为常备需求的${Math.round((row.stock_ratio||0)*100)}%`);
+        card.append(stock,el('small',`库存 / 常备需求 ${Math.round((row.stock_ratio||0)*100)}% · 单价 ${money(row.price)} 灵石 · 参考价 ${money(row.reference)}`,'supply-detail'));
         const actions=el('div',null,'economy-actions');
         for (const side of ['buy','sell']) {
           const bill=row.quotes[selectedQuantity][side];

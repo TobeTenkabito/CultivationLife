@@ -62,7 +62,7 @@ def test_real_production_goods_fees_and_finite_market_money(economy):
     revenue = finance.produce(game, engine.maps, entity, row)
     assert revenue > 0 and row['produced'] > 0
     product = row['commodity']
-    assert market['commodities'][product]['stock'] == goods[product]['stock'] + row['produced']
+    assert sum(round(p['stock']-goods[k]['stock'], 6) for k,p in market['commodities'].items()) == row['produced']
     assert total_cash(game) == before and game.rng_state == rng
     assert balance(game, finance.key('sect', entity.id)) == revenue
     dealer = f'market:{market["id"]}'

@@ -94,17 +94,7 @@ def resolve(deps: AsuraTrialDependencies, game, step, rng):
         raise ValueError('当前没有修罗劫战')
     s = p.asura_cultivation
     if trial['kind'] == 'asura_conversion':
-        stage = trial['stage']
-        if step != 'asura_conversion' or stage != s.get('conversion', 0) + 1:
-            raise ValueError('煞元转化顺序不符')
-        s['conversion'] = stage
-        ensure_aperture(p)
-        # One-time conversion releases the newly converted fifth, rather than
-        # refilling all resources whenever the interface is opened.
-        ledger = p.immortal_aperture
-        ledger['current'] = min(ledger['capacity'], ledger['current'] + ledger['capacity'] / 5)
-        game.active_trial = None
-        return 'trial_completed', f'煞元转化第 {stage}/5 重完成。'
+        raise ValueError('煞元转化事件已经停用，请在修罗面板消耗机缘推进')
     if step != 'asura_battle':
         raise ValueError('劫战步骤不匹配')
     battle = load_battle(trial['snapshot'])

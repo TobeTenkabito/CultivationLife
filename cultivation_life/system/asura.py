@@ -266,7 +266,8 @@ def public(game):
         rule['description'] = describe_rule(rule)
     exposed['bodies'] = [dict(b, **{k:v for k,v in public_body(b).items() if k not in b}) for b in s.get('bodies', [])]
     field = field_for(p) if active(p) else None
-    return dict(available=True, can_cultivate=active(p), **exposed,
+    from .conversion import quote
+    return dict(available=True, can_cultivate=active(p), **exposed, conversion_quote=quote(game, asura=True),
         route_name=route.get('name', ''), part=route.get('part', ''),
         routes=[dict(id=k, **v) for k, v in config()['routes'].items()],
         candidates=bodies, meridians=public_meridians(p),

@@ -250,24 +250,34 @@ def test_npc_training_is_lazy_shared_and_bounded(setup):
     assert "definitions" not in record
 
 
-def test_conversion_uses_actual_elapsed_time_and_existing_mp(setup, monkeypatch):
+def test_conversion_spends_opportunity_without_elapsed_time(setup, monkeypatch):
     engine, game = setup
     game.player.immortal_power_converted = False
     game.player.immortal_conversion_stage = 0
     game.player.mp = 0
-    engine._begin_doctrine_action(game, "immortal_conversion")
-    engine._finish_doctrine_action(game, "immortal_conversion", 99)
-    assert game.player.immortal_conversion_stage == 0
-    engine._finish_doctrine_action(game, "immortal_conversion", 1)
+    game.player.opportunity = 2000
+    game.pending_event = None
+    engine.store.save(game)
+    engine.get_game(game.id)  # Complete ordinary initial-world preparation first.
+    game = engine._load(game.id)
+    age, rng = game.player.age, game.rng_state
+    engine.doctrine_action(game.id, 'convert')
+    game = engine._load(game.id)
     assert game.player.immortal_conversion_stage == 1
+    assert game.player.opportunity == 1900 and game.player.age == age
+    assert game.rng_state == rng and game.pending_event is None
     assert game.player.mp == pytest.approx(max_mp(game.player) * .2)
-    with patch.object(engine, "_instantiate_event", side_effect=AssertionError("No random wait event")):
-        assert not engine._maybe_immortal_conversion_event(game, random.Random(1))
-    engine._finish_doctrine_action(game, "immortal_conversion", 100000)
+    assert not engine._maybe_immortal_conversion_event(game, random.Random(1))
+    with pytest.raises(ValueError, match='机缘'):
+        engine._begin_doctrine_action(game, 'immortal_conversion')
+    engine._finish_doctrine_action(game, 'immortal_conversion', 100000)
+    assert game.player.immortal_conversion_stage == 1
+    for _ in range(4): engine.doctrine_action(game.id, 'convert')
+    game = engine._load(game.id)
     assert game.player.immortal_power_converted and game.player.immortal_conversion_stage == 5
-    assert game.player.transcendence is None
+    assert game.player.opportunity == 420 and game.player.age == age
     assert game.player.mp == max_mp(game.player)
-    assert game.doctrine_state["player"]["conversion_progress"] == 0
+    assert game.doctrine_state['player']['conversion_progress'] == 0
 
 
 def voisinage_battle(a, b):

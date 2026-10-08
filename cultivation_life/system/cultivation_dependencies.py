@@ -17,6 +17,7 @@ class DoctrineStudyDependencies:
 
 @dataclass(frozen=True, slots=True)
 class DoctrineActionDependencies:
+    _complete_immortal_conversion_stage: Callable[..., Any]
     _begin_doctrine_action: Callable[..., Any]
     _begin_fusion_study: Callable[..., Any]
     _cultivation_game: Callable[..., Any]

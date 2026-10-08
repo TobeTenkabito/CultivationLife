@@ -240,7 +240,7 @@ def _resolve_celestial_ascension_step(
     game.pending_event = None
     game.history.append(HistoryRecord(
         "SYS_CELESTIAL_ASCENSION_COMPLETE", 1, player.age, f"飞升{destination_name}", None, "ascended",
-        ("你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个长期阶段逐步转化为仙灵力。首次机缘最早在十个仙界时间单位后出现。" if destination == "celestial" else "你渡过九重飞升劫，自地狱界登临轮回界，原有道统不改。")
+        ("你渡过九重飞升劫，自灵界登临仙界并成就真仙；下界法力暂时归零，此后需经过五个转化阶段逐步转化为仙灵力。请在左侧仙元面板消耗机缘逐步推进。" if destination == "celestial" else "你渡过九重飞升劫，自地狱界登临轮回界，原有道统不改。")
         + (f" 道侣与你一同登临{destination_name}。" if companion_kept else "")
         + (f" 道友{'、'.join(friend_names)}成功同行。" if friend_names else "")
         + (f" 道友{'、'.join(fallen_names)}陨落于界壁。" if fallen_names else ""),
@@ -358,37 +358,7 @@ def _resolve_asura_ascension_step(
 
 
 def _maybe_immortal_conversion_event(deps: TrialDependencies, game: GameState, rng: random.Random) -> bool:
-    player = game.player
-    if game.doctrine_state.get("player", {}).get("conversion_active"):
-        return False
-    if (
-        player.world != "celestial" or player.realm_index < 9 or player.immortal_power_converted
-        or player.immortal_conversion_stage >= 5 or game.pending_event or game.active_trial
-    ):
-        return False
-    config = WORLD_SYSTEMS["immortal_power_conversion"]
-    unit_years = int(config["time_unit_years"])
-    min_gap = int(config["min_gap_units"])
-    if player.immortal_conversion_last_age is None:
-        player.immortal_conversion_last_age = player.age
-        player.immortal_conversion_checked_units = 0
-        return False
-    elapsed_units = max(0, (player.age - player.immortal_conversion_last_age) // unit_years)
-    checked_units = min(elapsed_units, max(0, player.immortal_conversion_checked_units))
-    for unit in range(checked_units + 1, elapsed_units + 1):
-        player.immortal_conversion_checked_units = unit
-        if unit < min_gap:
-            continue
-        chance = min(0.98, float(config["base_chance"]) + float(config["chance_per_unit"]) * (unit - min_gap))
-        if rng.random() >= chance:
-            continue
-        stage = player.immortal_conversion_stage + 1
-        event_id = f"EVT_IMMORTAL_CONVERSION_{stage:03d}"
-        event = deps._instantiate_event(deps.events_by_id[event_id], game, rng)
-        event["body"] += f"\n\n你已等待 {unit} 个仙界时间单位，本次触发概率为 {chance:.0%}。"
-        event["runtime"] = {"conversion_stage": stage, "waited_units": unit, "trigger_chance": chance}
-        game.pending_event = event
-        return True
+    # Conversion is now an explicit opportunity-funded command, never a random event.
     return False
 
 
@@ -413,7 +383,7 @@ def _complete_immortal_conversion_stage(deps: TrialDependencies, game: GameState
         return "immortal_conversion_stage", (
             f"第 {expected_stage}/5 阶段完成，可用仙灵力上限现为 {expected_stage * 20}%。"
             + ("可继续主动转化，积累不会因调息或战斗倒退。" if game.doctrine_state.get("player", {}).get("conversion_active")
-               else "下一阶段需再间隔至少 10 个仙界时间单位。")
+               else "可在左侧仙元面板消耗机缘继续推进。")
         )
     player.immortal_power_converted = True
     learn_technique(player, copy.deepcopy(TECHNIQUE_CATALOG["TECH_CELESTIAL_BREATHING"]))
@@ -422,7 +392,7 @@ def _complete_immortal_conversion_stage(deps: TrialDependencies, game: GameState
     player.mp = max_mp(player)
     game.history.append(HistoryRecord(
         "SYS_IMMORTAL_POWER_CONVERTED", 1, player.age, "仙元初成", None, "completed",
-        "五个长期阶段全部完成：原有 MP 基准已整体蜕变为仙灵力。你获得《真仙引灵经》与三枚仙元石。",
+        "五个转化阶段全部完成：原有 MP 基准已整体蜕变为仙灵力。你获得《真仙引灵经》与三枚仙元石。",
         {"immortal_power_converted":[False, True], "conversion_stage":5},
         ["system", "celestial", "immortal_power", "milestone"],
     ))

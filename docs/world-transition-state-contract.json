@@ -15,7 +15,13 @@
     "economy_v2.personal": "只保存采用时现金基线、有限个人流水及收支累计，余额仍读玩家灵石背包，其他现金变动单列。不评估或限制跨界背包。",
     "economy_v2.organizations.industry_level / war_funding": "驻地产业扩建最高十级，养护和军需采购来自既有组织府库；战争消耗真实商品，供给不足影响部队保障。市场 suppliers 仅记录近年真实交付并衰减，不授予人物或市场产权。",
     "merchant_state.worlds.*.network_id / player_owned": "跨界网络身份与地方原 id 分离；迁址仅交接 home_world、据点职能和任职签发地，原界商队、府库、人物、产业不迁移。旧址保留；不合格原总部主事进入至多四人的本地 retired_leaders 历史表，由新聘当地修士坐镇。影响力不复制，各地不共享现金。",
-    "economy_v2.transport.worlds.*.fleets.*.cross_trip": "同一商队只保留唯一往返货单：path/index 为实际通道路径和已达端点，leg_paid/tariff 为本段费用，source_location 为原驻地；去程、待售、返程、返程待售分别结算。返程采购替换已售罄货物，托运款不作采购资金。撤回仅逆走已达路径，recalled 留痕；新字段旧档首次运营确定性补充，不复制、不重抽、不重复扣旧关税。"
+    "economy_v2.transport.worlds.*.fleets.*.cross_trip": "同一商队只保留唯一往返货单：path/index 为实际通道路径和已达端点，leg_paid/tariff 为本段费用，source_location 为原驻地；去程、待售、返程、返程待售分别结算。返程采购替换已售罄货物，托运款不作采购资金。撤回仅逆走已达路径，recalled 留痕；新字段旧档首次运营确定性补充，不复制、不重抽、不重复扣旧关税。",
+    "economy_v2.depots": "原组织固定 world/location/owner 府库；stock 与 requests.reserved 唯一占有，等待 diplomacy_unit 一单位审批；迁址及玩家跨界不搬运、不复制。缺失旧档不赠送物资。",
+    "wars.*.logistics / economy_v2.accounts.war-supply:*": "战争唯一实物及现金托管。拨付扣原府库，采购扣市场库存，战损不返市；所在地、运输损耗、回合、贡献及侦察快照分别保存。参战敌情后端隐藏，旁观者仅按原战局可见性读取。",
+    "economy_v2.markets.*.manual_orders / war_income": "本地书坊每年每功法最多十二份付费抄录；war_income 仅累计实际军需成交，不是可支出余额。",
+    "economy_v2.organizations.*.workforce / workforce_year / labor_capacity / expected_upkeep": "按原组织真实存续且同界自由成员统计境界组；劳动及供养按组计算，收入由本地经销商真实支付。",
+    "Player.immortal_conversion_stage / Player.asura_cultivation.conversion / doctrine_state.player.conversion_progress": "个人成长随原玩家保留；在对应上界由主动指令支付 100/180/280/420/600 机缘推进，不随机触发事件。旧年进度只抵扣当前阶段费用，不追补离界时间。",
+    "economy_v2.campaigns": "岚疆既有有限远征专项的经济收据及现金账本，来源为原宗门府库。source/carried/target/spent/lost 仍是唯一运输实物计数，收据 quantity 仅记录已购总量；人物和货物只走原军事路线。初始采购扣市场库存；前线交易归实际驻守端，攻方按驻军规模支付界门能源，货运交割损毁两成；余款返原府库，不迁移玩家或复制远征物资。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",

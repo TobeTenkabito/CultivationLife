@@ -54,7 +54,8 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         shown = self.engine.choose(game_id, "fight")
         war = next(row for row in shown["war_system"]["wars"] if row["id"] == war_id)
         self.assertTrue(war["preliminary_resolved"])
-        self.assertIn(war["morale"]["attacker"], {80.0, 130.0})
+        shortage = 25 * (1 - war['supplies']['attacker']['coverage'])
+        self.assertIn(war["morale"]["attacker"] + shortage, {80.0, 130.0})
         self.assertLessEqual(len(war["roster"]["attacker"]), 24)
         self.assertLessEqual(len(war["roster"]["defender"]), 24)
 

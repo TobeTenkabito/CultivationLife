@@ -208,6 +208,8 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
         raise ValueError("未知战争条款")
     if not finalize:
         return detail
+    from .logistics import refund
+    refund(game, war)
     war["status"] = "ended"
     war["end_age"] = game.player.age
     war["peace_term"] = term

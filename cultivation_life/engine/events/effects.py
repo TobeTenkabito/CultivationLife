@@ -330,7 +330,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
     if kind == "trial_step":
         return deps._resolve_trial_step(game, str(effect["step"]), rng)
     if kind == "advance_immortal_conversion":
-        return deps._complete_immortal_conversion_stage(game, int(effect["stage"]))
+        raise ValueError('转化事件已经停用，请在左侧仙元面板消耗机缘推进')
     if kind == "add_court_merit":
         return None, deps._add_court_merit(game, int(value))
     if kind == "relationship_capture_step":

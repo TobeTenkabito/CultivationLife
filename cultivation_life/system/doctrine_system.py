@@ -6,6 +6,7 @@ from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..models import HistoryRecord
 from ..rules import add_technique_copy, remove_item
 from ..runtime import now_iso
+from .conversion import quote as conversion_quote
 from .doctrine.generation import rng_for
 from .doctrine.progression import source
 from .doctrine.provider import config, ensure, player_record
@@ -48,10 +49,7 @@ def _begin_doctrine_action(deps: DoctrineStudyDependencies, game, action, *, com
     if action == "daomen_explore":
         raise ValueError("道门寻访已改为即时预览，请在道门选择寻找同道并确认结识")
     if action == "immortal_conversion":
-        if game.player.immortal_power_converted:
-            raise ValueError("仙灵力已完成转化")
-        record["conversion_active"] = True
-        return
+        raise ValueError("请在左侧仙元面板消耗机缘推进转化")
     key = record.get("study_target")
     definition = game.doctrine_state["definitions"].get(key)
     if not definition or not _known(game, key):
@@ -96,24 +94,7 @@ def _finish_doctrine_action(deps: DoctrineStudyDependencies, game, action, elaps
                                              "discovered", f"循传承线索结识了{npc.name}，可向其请教。", {}, ["system", "daomen"]))
         return
     if action == "immortal_conversion":
-        record["conversion_progress"] = record.get("conversion_progress", 0) + elapsed
-        completed = []
-        for _ in range(5):
-            stage = game.player.immortal_conversion_stage
-            if stage >= 5:
-                record["conversion_progress"] = 0
-                break
-            cost = config()["conversion_years"][stage]
-            if record["conversion_progress"] < cost:
-                break
-            record["conversion_progress"] -= cost
-            deps._complete_immortal_conversion_stage(game, stage + 1)
-            completed.append(stage + 1)
-        if game.player.immortal_power_converted:
-            record["conversion_progress"] = 0
-        message = (f"转化修炼 {elapsed:g} 年，现完成 {game.player.immortal_conversion_stage}/5 阶段。"
-                   "转化提升了可调用的仙灵力。")
-        key = "conversion"
+        return  # Old elapsed-time completions cannot bypass opportunity payment.
     else:
         key = record["study_target"]
         definition = game.doctrine_state["definitions"][key]
@@ -195,7 +176,19 @@ def doctrine_action(deps: DoctrineActionDependencies, game_id, action, doctrine_
                 raise ValueError("请教所需灵石不足")
             add_technique_copy(game.player, book, level=book.level)
             summary = f"{npc.name}交付《{book.name}》Lv{book.level} 功法玉简，可在功法面板合参至下一层，尚未直接升级。"
-    elif action in {"study", "convert"}:
+    elif action == 'convert':
+        from .conversion import quote as conversion_quote
+        bill = conversion_quote(game)
+        if game.player.sealed_cultivation or game.player.cultivation_suppression:
+            raise ValueError('修为受压制，不能推进仙灵力转化')
+        if not bill['can_convert']:
+            raise ValueError('仙灵力已完成转化或机缘不足')
+        game.player.opportunity -= bill['cost']
+        record['conversion_active'] = True
+        record['conversion_progress'] = 0
+        _, summary = deps._complete_immortal_conversion_stage(game, bill['stage'] + 1)
+        summary += f" 消耗机缘 {bill['cost']}。"
+    elif action == "study":
         if action == "study":
             record["study_target"] = doctrine_id
         operation = "doctrine_study" if action == "study" else "immortal_conversion"
@@ -309,7 +302,7 @@ def _public_doctrines(deps: DoctrineViewDependencies, game):
                 veins=deps._public_immortal(game), immortal_body=deps._public_immortal_body(game), voisinages=voisinages,
                 explore_price=rules["explore_price"], annotation_price=rules["annotation_price"],
                 unit_years=WORLD_SYSTEMS["time_units"][str(game.player.realm_index)], rows=rows,
-                conversion={"stage": stage, "complete": game.player.immortal_power_converted,
+                conversion={**conversion_quote(game), "stage": stage, "complete": game.player.immortal_power_converted,
                             "progress": record.get("conversion_progress", 0),
                             "required": config()["conversion_years"][stage] if stage < 5 else 0,
                             "capacity": game.player.immortal_aperture.get('capacity', 1000),

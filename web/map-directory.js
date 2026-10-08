@@ -15,6 +15,9 @@
     if (!places.some(place => place.id === selected)) selected = null;
     const entries = new Map(places.map(place => [place.id, []]));
     const add = (id, entry) => entries.get(id)?.push(entry);
+    (map.economy?.enterprises?.destinations || []).filter(r=>r.world===map.world).forEach(estate=>add(estate.location,{
+      kind:'estate',title:estate.name,detail:'你的产业 · 赴当地本地市场办理经营',seal:'产',estateId:estate.id,
+    }));
     (state?.merchant_system?.alliances || []).forEach(alliance => {
       const label = alliance.cross_world && alliance.home_world !== map.world ? '分总部' : '本界总部';
       // Public headquarters are world-local; the originating HQ need not be exposed.
@@ -53,7 +56,7 @@
         detail:`${array.owner_kind === 'sect' ? `${array.owner_name}护山阵` : '私阵'} · 完整度 ${Number(array.durability).toFixed(0)}%`,
       }));
     });
-    entries.forEach(rows => rows.sort((a, b) => ({event:0, merchant:1, faction:2, formation:3}[a.kind] - {event:0, merchant:1, faction:2, formation:3}[b.kind])));
+    entries.forEach(rows => rows.sort((a, b) => ({estate:0,event:1, merchant:2, faction:3, formation:4}[a.kind] - {estate:0,event:1, merchant:2, faction:3, formation:4}[b.kind])));
     const tabs = document.querySelector('#map-view-tabs');
     const terrain = document.querySelector('#map-locations');
     const directory = document.querySelector('#map-directory');
@@ -76,7 +79,7 @@
       directory.append(intro);
       const filters = node('div', null, 'map-directory-filters');
       filters.setAttribute('aria-label', '名录分类');
-      [['all','全部'],['event','时令活动'],['merchant','商盟据点'],['faction','势力驻地']].forEach(([id, title]) => {
+      [['all','全部'],['estate','我的产业'],['event','时令活动'],['merchant','商盟据点'],['faction','势力驻地']].forEach(([id, title]) => {
         const filter = button(title, () => { category = id; draw(); });
         filter.setAttribute('aria-pressed', String(category === id)); filters.append(filter);
       });
@@ -102,6 +105,11 @@
           const copy = node('div');
           copy.append(node('strong', entry.title), node('p', entry.detail));
           row.append(node('span', entry.seal, 'map-directory-seal'), copy);
+          if(entry.kind==='estate'&&place.current)row.append(button('管理产业',()=>{
+            switchMode('economy');const panel=document.querySelector('#enterprise-panel');if(panel)panel.open=true;
+            const target=[...document.querySelectorAll('[data-estate-id]')].find(n=>n.dataset.estateId===entry.estateId);
+            if(target){target.open=true;target.scrollIntoView({block:'start'});}
+          }));
           if (entry.live) row.append(node('span', '进行中', 'map-directory-live'));
           card.append(row);
         });
@@ -121,7 +129,7 @@
       const rows = entries.get(location.id) || [];
       if (!rows.length) return null;
       const strip = node('div', null, 'map-directory-links');
-      [['event','活动'],['merchant','商盟'],['faction','势力'],['formation','驻阵']].forEach(([id, title]) => {
+      [['estate','我的产业'],['event','活动'],['merchant','商盟'],['faction','势力'],['formation','驻阵']].forEach(([id, title]) => {
         const count = rows.filter(entry => entry.kind === id).length;
         if (!count) return;
         const link = button(`${title} · ${count}`, () => {

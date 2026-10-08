@@ -350,5 +350,5 @@ def test_industry_paid_investment_and_war_supply_shortage(economy):
     market = game.economy_v2['markets'][f'human:{entity.location_id}']
     stocks = {k:r['stock'] for k,r in market['commodities'].items()}
     settle_industry(game, engine.maps, entity, row, 1)
-    assert row['war_funding'] == 0 and row['industry_utilization'] == 0
+    assert row['industry_utilization'] == 0  # No separate legacy war procurement.
     assert stocks == {k:r['stock'] for k,r in market['commodities'].items()}

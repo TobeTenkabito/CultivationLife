@@ -20,6 +20,7 @@ from ...system.concubine_system import gender_name
 from ...system.possession_system import current_body_age
 from ..dependencies import FactionViewDependencies
 from ...system.economy.organizations import public_finance
+from ...system.economy.depot import public as public_depot
 
 
 def _public_family(deps: FactionViewDependencies, game: GameState) -> dict[str, Any]:
@@ -55,6 +56,7 @@ def _public_family(deps: FactionViewDependencies, game: GameState) -> dict[str, 
             "member_type":"本家" if npc.id in {child.get('id') for child in player.offspring} else "外姓门人",
         })
     return {
+        "depot":public_depot(game, family),
         "exists":True, "id":family.id, "name":family.name, "description":family.description,
         "world":family.world, "same_world":family.world == player.world, "extinct":family.extinct,
         "has_voice":deps._has_family_voice(game), "offspring":offspring, "roster":roster,
@@ -257,6 +259,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     return {
         "member": True,
         "finance": public_finance(game, 'sect', sect.id),
+        "depot": public_depot(game, sect),
         "world": player.world,
         "world_name": world_name,
         "id": sect.id,

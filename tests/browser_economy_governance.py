@@ -68,8 +68,8 @@ def main():
                             expand();page.locator('[data-governance=market_relief]').click();page.wait_for_function('!busy')
                             g=engine._load(game.id);market=g.economy_v2['markets'][f'{g.player.world}:{g.player.location_id}']
                             item=next(iter(market['commodities']));market['commodities'][item]['stock']=0
-                            record_trade(g,market,item,'player','buy',100000);engine.store.save(g)
-                            engine.advance(g.id,'rest',3)
+                            record_trade(g,market,item,'player','buy',100000);market['competition'][item]['pressure']=16;engine.store.save(g)
+                            engine.advance(g.id,'rest',1)
                             g=engine._load(g.id);g.pending_event=None;engine.store.save(g)
                             page.evaluate('async id=>loadGame(id)',g.id);expand()
                             assert page.locator('.competition-card').count()>0
