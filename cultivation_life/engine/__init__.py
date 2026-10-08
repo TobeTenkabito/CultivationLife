@@ -806,8 +806,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return heavens_operations.command(self._dependencies.heavens, game_id, command_seq,
                                            expected_revision, action, target_id, options)
 
-    def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male') -> dict[str, Any]:
-        return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender)
+    def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male', custom_start: dict | None=None) -> dict[str, Any]:
+        return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender, custom_start, sync_natal=self._sync_natal_artifact_bonuses)
 
     def advance(self, game_id: str, action: str, years: int=1) -> dict[str, Any]:
         return advancement.advance(self._dependencies.advancement, game_id, action, years)
@@ -832,8 +832,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from .actions.exploration import talisman_action
         return talisman_action(self._exploration_dependencies(), game_id, action, payload or {})
 
-    def _add_opportunity(self, player: Player, amount: float, regional_efficiencies: dict[str, float] | None=None) -> float:
-        return advancement._add_opportunity(self._dependencies.advancement, player, amount, regional_efficiencies)
+    def _add_opportunity(self, player: Player, amount: float, regional_efficiencies: dict[str, float] | None=None, *, apply_efficiency: bool=True) -> float:
+        return advancement._add_opportunity(self._dependencies.advancement, player, amount, regional_efficiencies, apply_efficiency=apply_efficiency)
 
     def _sense_training_step(self, player: Player, regional: dict[str, float] | None=None, concentrations: dict[str, float] | None=None) -> float:
         'Calculate one year of sense training for every training context.'
@@ -2641,6 +2641,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from ..system.economy.network_actions import command
         from .transactions import accept_committed_game
         return command(self._dependencies.economy.market, game_id, payload,
+                       combat=self._combat, cache=self._cache_encounter_target,
                        committed=lambda game: accept_committed_game(self, game))
 
     @staticmethod

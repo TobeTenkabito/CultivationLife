@@ -37,8 +37,8 @@ def active_fleets(game, world, kind, identity):
 
 
 def guard_required(world):
-    cap = int(WORLD_SYSTEMS['world_profiles'][world].get('npc_realm_cap', 0))
-    return max(100, round(expected_combat_power(max(1, cap - 3), 1)))
+    tier = max(1, int(WORLD_SYSTEMS['world_profiles'][world]['tier']))
+    return max(100, round(expected_combat_power(tier + 1, 1) * 2))
 
 
 def new_fleet(game, region, world, identity, kind, location, name, *, identifier=None, player=False):

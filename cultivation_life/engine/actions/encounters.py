@@ -336,7 +336,7 @@ def _apply_combat_action_rewards(
         summary += f" 你从战利品中获得下品灵石 ×{reward}。"
     if action == "spar" and result == "victory":
         bonus = round(2 * opportunity_multiplier(player), 1)
-        deps._add_opportunity(player, bonus)
+        deps._add_opportunity(player, bonus, apply_efficiency=False)
         summary += f" 印证所学使机缘 +{bonus}。"
     return summary
 

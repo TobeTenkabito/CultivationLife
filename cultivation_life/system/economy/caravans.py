@@ -210,6 +210,11 @@ def _arrival(game, maps, fleet, region):
             lost = min(cargo['quantity'], math.ceil(cargo['quantity'] * fraction))
         cargo['quantity'] -= lost
         fleet['lost'] += lost
+        if lost and fleet.get('guard_power', 0) < guard_required(world) * .8 and _roll(game, fleet, 'crew_loss') < .18:
+            fleet['lost'] += cargo['quantity']
+            fleet.update(status='retired', cargo=None, guard_power=0, last_result='领队与护卫战力不足，途中遭劫灭队，货物毁失')
+            transfer_value(game, _cash(fleet), f'background:{world}', balance(game, _cash(fleet)), '商队灭队后散失的周转金')
+            return
         fleet.update(status='selling', location=cargo['destination'])
     ensure_regional_market(game, maps, world, fleet['location'])
     target = _market(game, world, fleet['location'])
@@ -381,7 +386,9 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
             origin=maps.location(world, cargo['origin'])['name'] if cargo else None,
             destination=maps.location(world, cargo['destination'])['name'] if cargo else None,
             arrival=cargo['arrival'] if cargo else None, detail=owned and not local)
-        row.update(owner_kind=fleet.get('owner_kind', 'alliance'), guard_power=fleet.get('guard_power', 0),
+        from .caravan_raids import available as raid_available
+        row.update(can_raid=raid_available(game, fleet), crew_count=2, crew_roles=['领队', '护卫'])
+        row.update(owner_id=fleet.get('owner_id', fleet['alliance_id']), owner_kind=fleet.get('owner_kind', 'alliance'), guard_power=fleet.get('guard_power', 0),
                    guard_required=guard_required(world), pledged=fleet.get('pledged', False),
                    player_controlled=fleet.get('player_controlled', False), location_id=fleet['location'],
                    cross_trip=({k: fleet['cross_trip'][k] for k in ('destination', 'phase', 'arrival')}

@@ -49,7 +49,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         amount = round(float(value) * opportunity_multiplier(player), 1)
         if player.world == "celestial" and deps._court_law_active(game, "immortal_twofold"):
             amount = round(amount * 1.10, 1)
-        deps._add_opportunity(player, amount)
+        amount = deps._add_opportunity(player, amount, apply_efficiency=False)
         sign = "+" if amount >= 0 else ""
         return None, f"机缘 {sign}{amount}。"
     if kind == "concubine_proposal":
@@ -159,7 +159,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             return "declined", f"你未收礼物，但{npc.name}仍领会了你的礼数（好感 {affinity:.0f}）。"
         if mode in {"discuss","share"}:
             gain = rng.randint(5,10) * max(1,npc.realm_index)
-            deps._add_opportunity(player, gain)
+            gain = deps._add_opportunity(player, gain)
             if mode == "share":
                 player.mp = min(max_mp(player),player.mp + max_mp(player) * 0.08)
             affinity = deps._adjust_person_affinity(game,npc_id,2)

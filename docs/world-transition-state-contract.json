@@ -21,7 +21,11 @@
     "economy_v2.markets.*.manual_orders / war_income": "本地书坊每年每功法最多十二份付费抄录；war_income 仅累计实际军需成交，不是可支出余额。",
     "economy_v2.organizations.*.workforce / workforce_year / labor_capacity / expected_upkeep": "按原组织真实存续且同界自由成员统计境界组；劳动及供养按组计算，收入由本地经销商真实支付。",
     "Player.immortal_conversion_stage / Player.asura_cultivation.conversion / doctrine_state.player.conversion_progress": "个人成长随原玩家保留；在对应上界由主动指令支付 100/180/280/420/600 机缘推进，不随机触发事件。旧年进度只抵扣当前阶段费用，不追补离界时间。",
-    "economy_v2.campaigns": "岚疆既有有限远征专项的经济收据及现金账本，来源为原宗门府库。source/carried/target/spent/lost 仍是唯一运输实物计数，收据 quantity 仅记录已购总量；人物和货物只走原军事路线。初始采购扣市场库存；前线交易归实际驻守端，攻方按驻军规模支付界门能源，货运交割损毁两成；余款返原府库，不迁移玩家或复制远征物资。"
+    "economy_v2.campaigns": "岚疆既有有限远征专项的经济收据及现金账本，来源为原宗门府库。source/carried/target/spent/lost 仍是唯一运输实物计数，收据 quantity 仅记录已购总量；人物和货物只走原军事路线。初始采购扣市场库存；前线交易归实际驻守端，攻方按驻军规模支付界门能源，货运交割损毁两成；余款返原府库，不迁移玩家或复制远征物资。",
+    "economy_v2.estates.*.entrusted": "固定产业的经营委托，缺失视为关闭；年度自动方案走唯一库存与原资金，不随玩家跨界，不因打开 UI 结算。",
+    "economy_v2.transport.worlds.*.fleets.*.last_raid_unit": "商队原地点的最近玩家袭击行动单位，缺失表示未受袭击；只限同界同地驻留、待售队伍，不复制货物或远程扣款。",
+    "Player.story_flags custom_start / Player.divine_sense_rank": "新人生显式配置独立神识的标记，个人保留；禁止读档以修为自然基准覆盖选定数值。运行中没有设置此标记的玩法入口。",
+    "Player.hostility alliance:<world>:<id>": "个人对原本界商盟的通缉关系，跨界保留但异界不触发；本界盟库支付和解款，不将原钱复制到异界。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",

@@ -12,9 +12,14 @@ def authorized(game, fleet):
     if not fleet or fleet['world'] != game.player.world or fleet['status'] == 'retired':
         raise ValueError('商队不在本界或已经解散')
     owner = alliance_at(game, fleet['world'], fleet['alliance_id']) if fleet['owner_kind'] == 'alliance' else None
-    if not fleet.get('player_controlled') and not (owner and owner.get('player_owned')):
+    controlled = owner_allowed(game, fleet['owner_kind'], fleet['owner_id'], fleet['world'])
+    if not fleet.get('player_controlled') and not controlled:
         raise ValueError('只能安排本人领办或自建商盟的商队')
-    if game.player.location_id not in {fleet['location'], owner['hq'] if owner else None}:
+    hq = owner['hq'] if owner else None
+    if controlled and fleet['owner_kind'] in {'sect', 'family'}:
+        entity = game.family if fleet['owner_kind'] == 'family' else game.sects.get(fleet['owner_id'])
+        hq = entity.location_id if entity else None
+    if game.player.location_id not in {fleet['location'], hq}:
         raise ValueError('请前往商队驻地或所属本界总部下达订单')
 
 

@@ -48,14 +48,16 @@ def test_reserve_survives_load_gain_and_terminal_realm(ready):
     saved = engine._load(game.id)
     before = saved.player.opportunity
     assert before == game.player.opportunity
+    from cultivation_life.rules import opportunity_multiplier
+    gain = 12345 * opportunity_multiplier(saved.player)
     engine._add_opportunity(saved.player, 12345)
-    assert saved.player.opportunity == before + 12345
+    assert saved.player.opportunity == pytest.approx(before + gain)
     saved.player.realm_index, saved.player.layer = 12, 9
     engine._resolve_breakthroughs(saved, random.Random(1))
     engine.store.save(saved)
     result = engine.present(engine._load(game.id))
     assert result['player']['opportunity_unbounded']
-    assert result['player']['opportunity'] == before + 12345
+    assert result['player']['opportunity'] == pytest.approx(before + gain)
 
 
 def test_disabled_dlc_keeps_ordinary_cap_and_hides_ui(ready):

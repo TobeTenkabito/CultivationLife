@@ -145,14 +145,17 @@ class MapEngineTests(unittest.TestCase):
         game = self.engine.store.load(created["id"])
         assign_technique(game.player, TECHNIQUE_CATALOG["TECH_COMMON_QI"], "main")
         assign_technique(game.player, TECHNIQUE_CATALOG["TECH_BLOOD_RIVER"], "support")
+        from cultivation_life.rules import opportunity_multiplier
+        gain = 10 * opportunity_multiplier(game.player)
         self.engine._add_opportunity(game.player, 10)
-        self.assertEqual(game.player.qi_experience["spirit"], 10)
-        self.assertEqual(game.player.qi_experience["demon"], 4.5)
+        self.assertAlmostEqual(game.player.qi_experience["spirit"], gain)
+        self.assertAlmostEqual(game.player.qi_experience["demon"], gain * .45)
         game.player.qi_experience = {source: 0.0 for source in game.player.qi_experience}
         game.player.location_id = "muling_desert"
+        gain = 10 * opportunity_multiplier(game.player)
         self.engine._add_opportunity(game.player, 10)
-        self.assertEqual(game.player.qi_experience["spirit"], 7.5)
-        self.assertEqual(game.player.qi_experience["demon"], 8.5)
+        self.assertAlmostEqual(game.player.qi_experience["spirit"], gain * .75)
+        self.assertAlmostEqual(game.player.qi_experience["demon"], gain * .85)
 
 
 if __name__ == "__main__":

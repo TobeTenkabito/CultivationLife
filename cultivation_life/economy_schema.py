@@ -126,6 +126,8 @@ def validate_economy(value, merchants=None, document=None):
                     require(type(fleet.get('player_controlled')) is bool and type(fleet.get('pledged')) is bool)
                     require(type(fleet.get('guard_power')) is int and fleet['guard_power'] >= 0)
                     require(kind != 'alliance' or fleet['owner_id'] == fleet['alliance_id'])
+                if 'last_raid_unit' in fleet:
+                    require(type(fleet['last_raid_unit']) is int and fleet['last_raid_unit'] >= 0)
                 trip = fleet.get('cross_trip')
                 validate_order(fleet, value, require)
                 if trip is not None:

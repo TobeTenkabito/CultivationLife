@@ -185,7 +185,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         settle_activity_units=settle_units,
         unit_years=lambda game: int(WORLD_SYSTEMS['time_units'][str(game.player.realm_index)]),
         opportunity_base=lambda game: float(REALMS[game.player.realm_index].opportunity_base),
-        grant_progress=lambda player, gain: engine._add_opportunity(player, gain),
+        grant_progress=lambda player, gain: engine._add_opportunity(player, gain, apply_efficiency=False),
         reconcile_tasks=lambda game: tasks.reconcile(ports, game),
         grant_stones=lambda game, amount: add_item(game.player, 'spirit_stone', amount),
         **bind_mirror(engine),

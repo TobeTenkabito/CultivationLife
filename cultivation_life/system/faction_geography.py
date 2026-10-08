@@ -10,7 +10,7 @@ def faction_site(faction):
     world = CONTENT_DOCUMENTS["maps.json"]["worlds"][faction.world]
     locations = world["locations"]
     current = next((row for row in locations if row["id"] == faction.location_id), None)
-    if current and (faction.founded_by_player or faction.player_founded_site or not current.get("min_realm_index", 0)):
+    if current:
         return current
     safe = [row for row in locations if not row.get("min_realm_index", 0)]
     if not safe:

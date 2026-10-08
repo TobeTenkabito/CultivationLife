@@ -284,7 +284,7 @@ def guixu_action(deps: GuixuActionsDependencies, game_id: str, action: str, payl
                 game.player, dict(layer["qi_concentrations"]),
             )
             deps._add_opportunity(
-                game.player, gain, dict(layer["qi_gain_efficiencies"]),
+                game.player, gain, dict(layer["qi_gain_efficiencies"]), apply_efficiency=False,
             )
             era_news: list[str] = []
             advance_player_age(game.player)
@@ -361,7 +361,7 @@ def _guixu_trapped_training(
         advance_player_age(game.player)
         low, high = ACTIONS[action]["opportunity"]
         gain = rng.randint(low, high) * opportunity_multiplier(game.player, concentrations)
-        total_opportunity += deps._add_opportunity(game.player, gain, efficiencies)
+        total_opportunity += deps._add_opportunity(game.player, gain, efficiencies, apply_efficiency=False)
         if action == "body_train":
             body_gain = deps._body_training_step(game.player, rng, concentrations)
             required = deps._body_progress_required(game.player)

@@ -26,6 +26,7 @@ def validate_estates(value, require, document):
         require(1 <= row['level'] <= 5 and 1 <= row['batches'] <= row['level'] * 4 and row['reserve'] <= 5000)
         require(row['buy_limit'] <= 10**12 and row['sell_limit'] <= 10**12)
         require(type(row.get('sale_quota', 1000000)) is int and 0 <= row.get('sale_quota', 1000000) <= 1000000)
+        require(type(row.get('entrusted', False)) is bool)
         for field in ('enabled','auto_buy','auto_sell'):
             require(type(row.get(field)) is bool)
         require(row.get('recipe') is None or isinstance(row['recipe'], str))

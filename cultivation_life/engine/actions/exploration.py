@@ -294,12 +294,8 @@ def train(deps: ExplorationDependencies, game, action, units):
             if p.world == "lost":
                 gain *= (spatial.current(game).get("population_rules") or {}).get("cultivation_multiplier", 1.)
             if p.technique and p.spirit_root != "none":
-                p.opportunity += gain
-                grant_qi_experience(
-                    p,
-                    gain,
-                    spatial.current_qi(game),
-                )
+                from ...system.opportunity import grant
+                grant(p, gain, spatial.current_qi(game), apply_efficiency=False)
         elif action == "body_train":
             p.body_progress = min(
                 deps.body_required(p), p.body_progress + deps.body_step(p, rng)

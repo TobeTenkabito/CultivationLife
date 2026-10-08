@@ -18,7 +18,18 @@ def owner_allowed(game, kind, identity, world):
     if not entity or entity.id != identity or entity.world != world or entity.extinct or entity.kind == 'institution':
         return False
     record = game.intrigue_state.get('factions', {}).get(f'{kind}:{identity}', {})
-    return kind == 'family' or entity.founded_by_player or record.get('controller_id') == 'player'
+    if entity.founded_by_player or record.get('controller_id') == 'player':
+        return True
+    member = entity is game.family if kind == 'family' else p.faction_id == identity
+    from ...content_registry import WORLD_SYSTEMS
+    intrigue = WORLD_SYSTEMS.get('intrigue_dlc', {})
+    if intrigue.get('enabled'):
+        rank = (p.cultivation_suppression or p.sealed_cultivation or {}).get('realm_index', p.realm_index)
+        return member and rank >= intrigue.get('decision_thresholds', {}).get(kind, 99)
+    if kind == 'sect':
+        threshold = WORLD_SYSTEMS['player_faction']['governance_threshold']
+        return member and p.realm_index >= int(threshold.get(world, threshold.get('human', 4)))
+    return False
 
 
 def payer(row):

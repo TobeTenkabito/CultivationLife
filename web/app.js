@@ -99,6 +99,7 @@ async function boot() {
   $('#path-select').addEventListener('change', updateCreationFields);
   updateCreationFields();
   renderQuickStarts(config.quick_starts || []);
+  window.CustomStart?.render(config, payload => mutate('/api/games', payload));
   renderExtensions(config.extensions || []);
   renderStartExtensionManager(config.extensions || []);
   renderSaveList(saves.games);
@@ -292,7 +293,7 @@ function renderStartExtensionManager(extensions) {
 
 function renderQuickStarts(presets) {
   const list = $('#quick-start-list'); list.innerHTML = '';
-  const groupFor = preset => preset.category || (preset.realm_index >= 9 ? '飞升开局' : preset.path === 'dao' ? '正统进阶' : '异道结丹');
+  const groupFor = preset => preset.world === 'lost' ? '特殊境遇' : preset.realm_index >= 9 ? '上界仙途' : preset.realm_index >= 5 ? '高阶修行' : '初入仙途';
   const groups = new Map();
   presets.forEach(preset => {
     const group = groupFor(preset);
@@ -601,7 +602,7 @@ function render(data) {
     ? `${p.body_training}/100 层${bodyCultivation.technique ? ` · 《${bodyCultivation.technique.name}》` : ''}${bodyCultivation.training_speed_multiplier > 1 ? ` · 修炼×${Number(bodyCultivation.training_speed_multiplier).toFixed(1)}` : ''}`
     : (bodyCultivation.technique ? `0/100 层 · 《${bodyCultivation.technique.name}》${bodyCultivation.training_speed_multiplier > 1 ? ` · 修炼×${Number(bodyCultivation.training_speed_multiplier).toFixed(1)}` : ''}` : '未入门');
   const sense = p.divine_sense || {};
-  $('#divine-sense').textContent = `Lv.${sense.level || 0} · 御傀 ${sense.used || 0}/${sense.capacity || 0}`;
+  $('#divine-sense').textContent = `${p.cultivation_ranks?.sense?.name || ''} · Lv.${sense.level || 0} · 御傀 ${sense.used || 0}/${sense.capacity || 0}`;
   $('#divine-sense').title = sense.technique ? `《${sense.technique.name}》· 当前环境 ×${Number(sense.technique.environment_multiplier || 0).toFixed(3)}` : '尚未配置神识功法';
   $('#player-race').textContent = p.lineage_race_name === p.allegiance_race_name
     ? p.lineage_race_name
@@ -1637,6 +1638,7 @@ function renderFaction(faction) {
   const details = document.createElement('p'); details.className = 'faction-meta';
   details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution} · 宗门总战力 ${number(faction.total_power || 0)}`; summary.appendChild(details);
   window.renderOrganizationFinance?.(summary, faction.finance);
+  window.renderOrganizationBusiness?.(summary, 'sect', faction, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationDepot?.render(summary, faction.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
@@ -1988,6 +1990,7 @@ function renderFamily(family, governance) {
     : '与道侣缠绵可能孕育后代；双方境界越高概率越低，化神起无法自然孕育。拥有踏入仙途的后代后方可立族。';
 
   window.FamilyPanel?.render(content, family, payload => mutate(`/api/games/${game.id}/family-action`, payload));
+  window.renderOrganizationBusiness?.(content, 'family', family, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationDepot?.render(content, family?.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if ((!family?.exists || family?.extinct) && family?.can_found) {
     content.appendChild(namedCreationForm('建立修仙家族', '家族名号', '开枝立族', name => mutate(`/api/games/${game.id}/create-family`, {name})));
@@ -3929,7 +3932,9 @@ function renderButtons() {
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   window.LocalEconomy?.setBusy(busy);
+  window.CustomStart?.setBusy(busy);
   window.EnterprisePanel?.setBusy(busy);
+  document.querySelectorAll('[data-org-business]').forEach(b=>b.disabled=busy||b.dataset.unavailable==='1');
   document.querySelectorAll('#merchant-card button, #merchant-card input, #merchant-card select').forEach(control=>{if(control.id!=='merchant-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.merchantUnavailable==='1';});
   document.querySelectorAll('#exchange-card button, #exchange-card input').forEach(control=>{if(control.id!=='exchange-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.exchangeUnavailable==='1';});
   document.querySelectorAll('#auction-card button, #auction-card input, #auction-card select').forEach(control => {

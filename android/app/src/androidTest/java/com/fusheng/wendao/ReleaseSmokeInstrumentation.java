@@ -213,7 +213,37 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("start-layout")) {
+            if(phase.equals("custom-start")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('#new-game-button').click();window.__customOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
+                    async("GameThemes.saved");
+                    js("document.querySelectorAll('#custom-inventory button').forEach(n=>n.click());true");
+                    js("document.querySelector('#custom-realm').value='3';document.querySelector('#custom-realm').dispatchEvent(new Event('change'));document.querySelector('#custom-sense').value='23';document.querySelector('#custom-sect').value='new';document.querySelector('#custom-sect').dispatchEvent(new Event('change'));document.querySelector('#custom-sect-name').value='原生青玉宗';document.querySelector('#custom-item-search').value='spirit_stone';document.querySelector('#custom-item-search').dispatchEvent(new Event('input'));document.querySelector('#custom-item').value='spirit_stone';document.querySelector('#custom-quantity').value='1000000';true");
+                    tapSelector("#custom-add-item");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#custom-inventory').textContent.includes('1,000,000') && document.documentElement.scrollWidth<=innerWidth+1")),"Custom bag and responsive layout: "+js("JSON.stringify({bag:document.querySelector('#custom-inventory').textContent,width:innerWidth,scroll:document.documentElement.scrollWidth})"));
+                    capture("custom-start-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("#custom-start-submit");
+                    waitForJs("!busy && game && game.id!==window.__customOld && game.faction.name==='原生青玉宗'","Native custom creation",60000);
+                    check(Boolean.TRUE.equals(js("game.player.divine_sense.level===23 && document.querySelector('#divine-sense').textContent.includes('筑基中期')")),"Independent sense display");
+                    check(Boolean.TRUE.equals(js("game.faction.join_age===game.player.age")),"Initial faction admission age");
+                    tapSelector("[data-panel-target=faction]");
+                    tapSelector("[data-organization=sect]>summary");
+                    js("document.querySelector('[data-organization=sect] input').value='100000';true");
+                    tapSelector("[data-organization=sect] [data-org-business=organization_fund]");
+                    waitForJs("!busy && game.faction.finance.balance===100000","Native organizational funding");
+                    js("document.querySelector('[data-organization=sect]').open=true;true");
+                    tapSelector("[data-organization=sect] [data-org-business=create]");
+                    waitForJs("!busy && game.fleet_network.fleets.some(f=>f.player_controlled&&f.owner_kind==='sect')","Native organization caravan");
+                    js("document.querySelector('[data-organization=sect]').open=true;document.querySelector('#enterprise-panel-sect').open=true;document.querySelector('#enterprise-panel-sect select[aria-label=购置产业]').value='farm';true");
+                    tapSelector("#enterprise-panel-sect [data-estate-action=buy]");
+                    waitForJs("!busy && game.map.economy.enterprises.owned.length>0","Native organizational deed");
+                    js("document.querySelector('[data-organization=sect]').open=true;document.querySelector('#enterprise-panel-sect').open=true;document.querySelector('#enterprise-panel-sect [data-estate-id]').open=true;true");
+                    tapSelector("#enterprise-panel-sect [data-estate-action=entrust]");
+                    waitForJs("!busy && game.map.economy.enterprises.owned[0].entrusted","Native steward commission");
+                    async("loadGame(game.id)");
+                    check(Boolean.TRUE.equals(js("game.map.economy.enterprises.owned[0].entrusted && game.player.divine_sense.level===23")),"Native commission and sense reload");
+                }
+            } else if(phase.equals("start-layout")) {
                 js("document.querySelector('#new-game-button').click();true");
                 waitForJs("!document.querySelector('#start-screen').classList.contains('hidden')", "Start screen visible");
                 for(String theme:new String[]{"a","b","d","f"}) {

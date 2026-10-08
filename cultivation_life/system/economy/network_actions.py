@@ -39,7 +39,7 @@ def _create_alliance(game, region, fleets, home=None):
     return alliance
 
 
-def command(deps: MarketDependencies, game_id, payload, *, committed=None):
+def command(deps: MarketDependencies, game_id, payload, *, committed=None, combat=None, cache=None):
     game = copy.deepcopy(deps._load(game_id))
     require_access(game)
     from .caravans import ensure_caravans
@@ -82,6 +82,21 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None):
                 from .caravans import _dispatch
                 from .fleet_network import owner_sites
                 _dispatch(game, deps.maps, owner_sites(game, deps.maps, fleet), fleet, region)
+    elif action in {'raid', 'exterminate'}:
+        from .caravan_raids import attack
+        attack(game, fleet, action, combat, cache)
+    elif action == 'organization_fund':
+        kind = payload.get('owner_kind')
+        entity = game.family if kind == 'family' else game.sects.get(p.faction_id) if kind == 'sect' else None
+        if not entity or entity.extinct or entity.world != p.world or entity.kind == 'institution':
+            raise ValueError('只能向本界所属宗门或家族注资')
+        from ..faction_geography import faction_site
+        if p.location_id != faction_site(entity)['id']:
+            raise ValueError('请前往组织驻地注资')
+        from .organizations import register
+        from .enterprise_state import quantity
+        register(game, kind, entity.id, p.world)
+        transfer_value(game, 'player', f'organization:{kind}:{entity.id}', quantity(payload.get('amount'), 10**12), '成员向组织府库注资')
     elif action == 'industry':
         from .industry_actions import invest
         invest(game, deps.maps, payload.get('owner_kind'))

@@ -46,7 +46,7 @@ def verify(with_dlc):
             assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
-            for asset in ('caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
+            for asset in ('custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abdf':
@@ -148,6 +148,8 @@ def verify(with_dlc):
             verify_economy_governance(base, folder)
             from scripts.verify_war_logistics import verify_war_logistics
             verify_war_logistics(base, folder)
+            from scripts.verify_custom_start import verify_custom_start
+            verify_custom_start(base, with_dlc)
             consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
             assert consumed['player']['guaranteed_progeny']
             assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])

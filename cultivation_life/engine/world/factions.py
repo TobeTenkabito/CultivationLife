@@ -262,8 +262,10 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         if deps._check_sect_extinction(game, sect):
             continue
         deps._compact_sect_roster(game, sect)
+        from ...system.economy.estate_management import recruitment_ready
         if (
-            player.age % int(FACTION_SYSTEMS["recruitment_interval_years"]) == 0
+            recruitment_ready(game, sect)
+            and player.age % int(FACTION_SYSTEMS["recruitment_interval_years"]) == 0
             and len([npc for npc in deps._sect_members(game, sect) if npc.alive])
             < int(FACTION_SYSTEMS.get("max_members", 36))
         ):

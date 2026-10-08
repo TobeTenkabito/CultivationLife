@@ -7,6 +7,7 @@ from typing import Any
 from ...content_registry import (
     PATH_NAMES,
     ROOT_NAMES,
+    REALMS,
     TECHNIQUE_CATALOG,
     WORLD_SYSTEMS,
     MONSTER_BLOODLINE_SETTINGS,
@@ -34,7 +35,7 @@ def create_game(
     deps: SessionDependencies, name: str, spirit_root: str, path: str, seed: int | None = None,
     technique_element: str | None = None, preset_id: str | None = None,
     start_world: str | None = None, monster_species_id: str | None = None,
-    gender: str = "male",
+    gender: str = "male", custom_start: dict | None = None, *, sync_natal=None,
 ) -> dict[str, Any]:
     preset = next(
         (entry for entry in WORLD_SYSTEMS.get("quick_start_presets", []) if entry["id"] == preset_id),
@@ -44,6 +45,13 @@ def create_game(
         raise ValueError("未知快速开局预设")
     if preset and not preset.get("enabled"):
         raise ValueError(preset.get("status", "该快速开局尚未开放"))
+    custom = None
+    if custom_start is not None:
+        if preset_id:
+            raise ValueError('自定义开局不能同时使用快速预设')
+        from .custom_start import validate, preset as custom_preset
+        custom = validate(custom_start, spirit_root, path)
+        preset = custom_preset(custom, spirit_root, path)
     if preset and preset.get("select_path"):
         variant_id = preset.get("path_presets", {}).get(path)
         if not variant_id:
@@ -67,6 +75,9 @@ def create_game(
     clean_name = name.strip()[:16] or "无名散修"
     actual_seed = seed if seed is not None else random.SystemRandom().randrange(1, 2**31)
     rng = random.Random(actual_seed)
+    if custom:
+        base_age = [18, 18, 55, 170, 420, 1000, 2500, 7000, 15000, 68000, 200000, 700000, 2000000][custom['realm_index']]
+        preset['age'] = base_age + rng.randrange(max(1, base_age // 3))
     player = Player(
         name=clean_name, spirit_root=spirit_root, path=path, gender=gender,
         born_rootless=spirit_root == "none",
@@ -135,7 +146,7 @@ def create_game(
         # equipped starting technique is immediately usable.
         if starting_qi_level and starting_source != "spirit":
             player.qi_experience["spirit"] = qi_level_threshold(starting_qi_level)
-        if player.realm_index >= 6:
+        if player.realm_index >= 6 and not custom:
             for affinity in ("metal", "wood", "water", "fire", "earth"):
                 if affinity not in deps._base_affinities(player) and affinity not in player.additional_roots:
                     player.additional_roots.append(affinity)
@@ -220,6 +231,10 @@ def create_game(
         deps._ensure_heavenly_court(game, rng)
     deps._ensure_race_relations(game)
     deps._ensure_sect_relations(game)
+    if custom:
+        from .custom_start import configure
+        configure(game, custom, rng, sync_natal=sync_natal)
+        player.hp, player.mp = max_hp(player), max_mp(player)
     game.history.append(HistoryRecord(
         "SYS_BIRTH", 1, player.age, "问道之始", None, "created",
         (

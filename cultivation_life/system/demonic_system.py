@@ -371,8 +371,7 @@ class DemonicSystemMixin:
         gain = float(rules["kill_opportunity_base"]) + max(0, int(victim_realm_index)) * float(
             rules["kill_opportunity_per_realm"]
         )
-        self._add_opportunity(player, gain)
-        return gain
+        return self._add_opportunity(player, gain)
 
     @staticmethod
     def _raise_divine_sense_one_level(player: Player) -> None:

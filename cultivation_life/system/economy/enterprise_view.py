@@ -34,7 +34,7 @@ def public_estates(game, maps):
             continue
         record = {k:row[k] for k in ('id', 'kind', 'level', 'recipe', 'reserve', 'produced', 'income', 'expense',
             'arrears', 'enabled', 'auto_buy', 'auto_sell', 'batches', 'buy_limit', 'sell_limit', 'revision', 'owner_kind')}
-        record.update(name=name, sale_quota=row.get('sale_quota', 1000000), capacity=capacity(row), used=used(row), cash=balance(game, payer(row)),
+        record.update(entrusted=row.get("entrusted", False), name=name, sale_quota=row.get('sale_quota', 1000000), capacity=capacity(row), used=used(row), cash=balance(game, payer(row)),
             stock=[dict(id=k, name=ITEM_CATALOG[k].name, quantity=n) for k,n in row['stock'].items()],
             job=dict(row['job']) if row['job'] else None, history=list(row['history']),
             upgrade_cost=price(kind, row['level'] + 1), release_price=price(kind, row['level']) // 2)
