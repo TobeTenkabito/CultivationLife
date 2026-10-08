@@ -236,6 +236,12 @@ class ContentRegistry:
                     validate_true_forms(documents['monster_true_forms.json'], registry.monster_species, registry.monster_evolutions)
                 except (ValueError, KeyError, TypeError) as error:
                     raise ContentError(f'本相内容不合法：{error}') from error
+            if "ghost_soul_forms.json" in documents:
+                from .ghost_soul_form_content import validate as validate_soul_forms
+                try:
+                    validate_soul_forms(documents['ghost_soul_forms.json'])
+                except (ValueError, KeyError, TypeError) as error:
+                    raise ContentError(f'魂相内容不合法：{error}') from error
             if "buddhist_way.json" in documents:
                 from .buddhist_content import validate_buddhist_content
                 validate_buddhist_content(documents["buddhist_way.json"], documents)

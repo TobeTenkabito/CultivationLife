@@ -1,7 +1,7 @@
 """Save-document versions and pure, sequential migrations.
 
-Release versions are independent. Schema 8 starts the supported lineage;
-schema 9 reserves the heavens container. Schemas 1--7 have no upgrade path.
+Release versions are independent. Schema 10 starts the thirteen-stage domain
+lineage. Schemas 1--9 are explicitly incompatible; no level mapping is performed.
 Future schema changes register
 one step per version here, before any GameState or runtime system is loaded.
 """
@@ -12,14 +12,12 @@ from collections.abc import Callable, Mapping
 from types import MappingProxyType
 from typing import Any
 
-from .system.heavens.schema import migrate_heavens_v8
 
-SAVE_SCHEMA_VERSION = 9
-MIN_SAVE_SCHEMA_VERSION = 8
+SAVE_SCHEMA_VERSION = 10
+MIN_SAVE_SCHEMA_VERSION = 10
 Migration = Callable[[dict[str, Any]], None]
 # Key N transforms schema N into N + 1; the runner owns version advancement.
 SAVE_MIGRATIONS: Mapping[int, Migration] = MappingProxyType({
-    8: migrate_heavens_v8,
 })
 
 
@@ -34,7 +32,7 @@ def migration_path(version: int, *, target: int = SAVE_SCHEMA_VERSION,
     if type(version) is not int:
         raise ValueError('存档结构版本无效')
     if version < MIN_SAVE_SCHEMA_VERSION:
-        raise ValueError('该存档使用已停止支持的旧结构，请新建角色')
+        raise ValueError('旧存档与 v2.6.0 邻域／劫战体系不兼容（仅支持结构 10），请新建角色；原存档不会转换或覆盖')
     if version > target:
         raise ValueError('此存档来自更高结构版本，请先更新游戏')
     path = []

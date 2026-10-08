@@ -50,16 +50,16 @@ def run_batch(battle, state, rng, *, batch_size=24):
     """Return victory/defeat/ongoing, and at most batch_size real round rows."""
     battle.set_objectives('capture' if state['mode'] == 'asura_fusion' else 'kill', 'kill')
     battle.escape_forbidden_sides = battle.escape_forbidden_sides | (
-        {'enemy', 'player'} if state['mode'].startswith('asura_') else {'enemy'})
+        {'enemy', 'player'} if state['mode'].startswith(('asura_', 'upper_')) else {'enemy'})
     # Old snapshots may contain a living manifestation which escaped. Bring
     # it back without restoring any health or resources; escape is not a kill.
     for unit in battle.units.values():
         if unit.unit.side == 'enemy':
             unit.escaped = False
     rows = []
-    asura_trial = state['mode'] in {'asura_fusion', 'asura_breakthrough'}
+    asura_trial = state['mode'] in {'asura_fusion', 'asura_breakthrough', 'upper_final', 'upper_endurance'}
     fusion = state['mode'] == 'asura_fusion'
-    endurance = state['mode'] not in {'three_corpses', 'asura_fusion', 'asura_breakthrough'}
+    endurance = state['mode'] not in {'three_corpses', 'asura_fusion', 'asura_breakthrough', 'upper_final'}
     only_fields = state['mode'] == 'voisinage_backlash'
     player = battle.units['player']
     for _ in range(batch_size):

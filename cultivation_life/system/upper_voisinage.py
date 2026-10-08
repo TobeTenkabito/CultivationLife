@@ -59,10 +59,11 @@ def public_upper_voisinages(player, game=None):
     world = world_config(player)
     stones = sum(i.quantity for i in player.inventory if i.id == 'spirit_stone')
     rows = []
-    from . import monster_true_form
+    from . import monster_true_form, ghost_soul_form
+    from .doctrine.voisinage_training import label
     for definition in definitions(player):
         rank = level(player, definition['id'])
-        cost = quote(player, rank + 1, game) if rank < 9 else None
+        cost = quote(player, rank + 1, game) if rank < 13 else None
         reason = None
         if cost:
             if player.realm_index < cost['realm']:
@@ -74,18 +75,20 @@ def public_upper_voisinages(player, game=None):
             elif cost['owned_materials'] < cost['materials']:
                 reason = '本界筑域材料不足，请在坊市炼器材料中寻找'
         reason = monster_true_form.training_reason(player, definition['id'], rank) or reason
+        reason = ghost_soul_form.training_reason(player, definition['id'], rank) or reason
         rows.append(dict(id=definition['id'], name=definition['name'], description=definition['description'],
             true_form=bool(definition.get('true_form')),
+            soul_form=bool(definition.get('soul_form')), label=label(rank) if rank else '尚未领悟',
             level=rank, active=record(player).get('active') == definition['id'], cost=cost,
             reason=reason, can_train=bool(cost) and not reason,
             field=asdict(project(definition, max(1, rank))),
-            next_field=asdict(project(definition, rank + 1)) if rank and cost and not monster_true_form.training_reason(player, definition['id'], rank) else None))
+            next_field=asdict(project(definition, rank + 1)) if rank and cost and not reason else None))
     true_form = monster_true_form.public(player)
     if true_form and not true_form['reason'] and not true_form['blueprint']:
         true_form['first_cost'] = quote(player, 1, game)
     return dict(available=True, world=player.world, title=world['title'], energy=world['energy'],
         description=world['description'], opportunity=player.opportunity, stones=stones, rows=rows,
-        true_form=true_form)
+        true_form=true_form, soul_form=ghost_soul_form.public(player, game))
 
 
 def act(deps: ApertureDependencies, game_id, action, voisinage_id):
@@ -100,6 +103,18 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
             or (game.guixu_state.get('player_session') or {}).get('trapped')
             or p.sealed_cultivation or p.cultivation_suppression):
         raise ValueError('当前状态无法修习邻域')
+    from .possession_system import is_possessed
+    if is_possessed(p):
+        raise ValueError('寄身期间本魂邻域修行冻结')
+    if action == 'soul_form_contemplate':
+        return deps._soul_contemplate(game, voisinage_id)
+    if action.startswith('soul_form_'):
+        from .ghost_soul_form import configure
+        summary = configure(p, action, voisinage_id)
+        game.history.append(HistoryRecord('SYS_SOUL_FORM', 1, p.age, '照魂归真', action, 'completed', summary, {}, ['cultivation', 'voisinage']))
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
     if action.startswith('true_form_'):
         from .monster_true_form import configure
         summary = configure(p, action, voisinage_id)
@@ -117,11 +132,15 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
         state['active'] = voisinage_id
         summary = f"已选定斗法采用【{row['name']}】，原有培养保留。"
     elif action == 'train':
-        if not row['cost']:
-            raise ValueError('此邻域已修至九级')
+        cost = row['cost']
+        if not cost:
+            raise ValueError('此邻域已修至至臻')
         if row['reason']:
             raise ValueError(row['reason'])
-        cost = row['cost']
+        if p.realm_index < cost['realm'] or p.opportunity < cost['opportunity']:
+            raise ValueError('境界或机缘不足')
+        if sum(i.quantity for i in p.inventory if i.id == 'spirit_stone') < cost['stones'] or len(material_stock(p)) < cost['materials']:
+            raise ValueError('灵石或筑域材料不足')
         consumed = material_stock(p)[:cost['materials']]
         from .economy import organizations as finance
         finance.ensure_state(game)
@@ -133,11 +152,16 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
         for material in consumed:
             p.crafting_materials.remove(material)
         state = p.world_voisinages.setdefault(p.world, {})
+        state['progression_version'] = 2
         state.setdefault('levels', {})[voisinage_id] = row['level'] + 1
-        if row.get('true_form') and row['level'] + 1 == 9:
+        if action == 'train' and row.get('true_form') and row['level'] + 1 == 13:
             state['true_form']['finalized'] = True
+        if action == 'train' and row.get('soul_form') and row['level'] + 1 == 13:
+            state['ghost_soul_form']['finalized'] = True
         state.setdefault('active', voisinage_id)
-        summary = (f"【{row['name']}】修至 Lv{row['level'] + 1}，消耗机缘 {cost['opportunity']}、"
+        from .doctrine.voisinage_training import label
+        target = label(row['level'] + 1)
+        summary = (f"【{row['name']}】修至 {target}，消耗机缘 {cost['opportunity']}、"
                    f"灵石 {cost['stones']}、{cost['material_name']} ×{cost['materials']}。")
     else:
         raise ValueError('未知本界邻域操作')

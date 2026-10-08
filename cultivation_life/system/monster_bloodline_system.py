@@ -493,17 +493,26 @@ class MonsterBloodlineSystemMixin:
         return candidate
 
     def _complete_monster_evolution(
-        self, game: GameState, evolution_id: str, candidate: dict[str, Any],
+        self, game: GameState, evolution_id: str, candidate: dict[str, Any], *, trial_completed=False, prepared_lineage=None, trial_rng=None,
     ) -> dict[str, Any]:
         player = game.player
+        if not trial_completed and player.world == 'nether' and player.realm_index in {9, 10, 11}:
+            player.opportunity -= opportunity_required(player)
+            self._consume_breakthrough_aids(player, f'major:{player.realm_index}')
+            player.awaiting_major_breakthrough = False
+            self._start_upper_trial(game, 'monster_upper', evolution=dict(candidate, id=evolution_id), lineage=prepared_lineage)
+            game.updated_at = now_iso()
+            self.store.save(game)
+            return self.present(game)
         required = opportunity_required(player)
-        rng = decode_rng(game.seed, game.rng_state)
+        rng = trial_rng if trial_rng is not None else decode_rng(game.seed, game.rng_state)
         old_label = public_player(player)["realm_name"]
         old_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
         old_realm_index = player.realm_index
         old_world = player.world
-        player.opportunity = max(0.0, player.opportunity - required)
-        self._consume_breakthrough_aids(player, f"major:{player.realm_index}")
+        if not trial_completed:
+            player.opportunity = max(0.0, player.opportunity - required)
+            self._consume_breakthrough_aids(player, f"major:{player.realm_index}")
         if evolution_id != "__stable__":
             player.monster_evolution_id = evolution_id
             player.monster_evolution_history.append(evolution_id)
@@ -545,6 +554,9 @@ class MonsterBloodlineSystemMixin:
             {"from": old_node["id"], "to": new_node["id"], "lifespan_gain": lifespan_gain},
             ["system", "monster", "bloodline", "evolution", "major", "milestone"],
         ))
+        if trial_completed:
+            game.rng_state = encode_rng(rng)
+            return None
         self._ensure_market(game, rng)
         game.rng_state = encode_rng(rng)
         game.updated_at = now_iso()
@@ -642,6 +654,10 @@ class MonsterBloodlineSystemMixin:
             self.store.save(game)
             return self.present(game)
         assert candidate is not None
+        if player.world == 'nether' and player.realm_index in {9, 10, 11}:
+            player.monster_custom_lineage = existing or {}
+            player.monster_custom_lineage_id = existing['id'] if existing else None
+            return self._complete_monster_evolution(game, evolution_id, candidate, prepared_lineage=lineage)
         return self._complete_monster_evolution(game, evolution_id, candidate)
 
     def grant_monster_imprint(self, player: Player, imprint_id: str) -> bool:

@@ -52,13 +52,13 @@ def test_eight_origins_two_routes_stable_single_source(species, route):
     key = form.stored(p)['blueprint_id']
     assert not player_source(p).voisinages
     state = p.world_voisinages['nether']
-    state.update(levels={key:3}, active=key)
+    state.update(levels={key:4}, active=key)
     assert len(player_source(p).voisinages[0].effects) == 1
     secondary = next(e for e in preview['secondary_choices'] if e != primary)
     form.configure(p, 'true_form_secondary', secondary)
-    state['levels'][key] = 6
+    state['levels'][key] = 8
     form.configure(p, 'true_form_tuning', 'balanced')
-    state['levels'][key] = 9
+    state['levels'][key] = 13
     state['true_form']['finalized'] = True
     source = player_source(p)
     assert len(source.voisinages) == 1
@@ -149,7 +149,7 @@ def test_actual_train_gates_payments_confirmation_and_energy(tmp_path):
     g = e._load(g.id); key = form.stored(g.player)['blueprint_id']
     assert g.player.immortal_aperture == reserve and g.rng_state == rng
     assert g.player.world_voisinages['nether']['levels'].get(key, 0) == 0
-    for target in range(1,10):
+    for target in range(1,14):
         g = e._load(g.id)
         g.player.realm_index = WORLD_SYSTEMS['upper_voisinages']['realms'][target-1]
         g.player.opportunity = opportunity_required(g.player)
@@ -158,12 +158,12 @@ def test_actual_train_gates_payments_confirmation_and_energy(tmp_path):
         material = crafting_material_definitions()[cost['material_id']]
         g.player.crafting_materials.extend(make_crafting_material_instance(material, random.Random(i), source='test', origin_world='nether') for i in range(cost['materials']))
         e.store.save(g)
-        if target in (4,7):
+        if target in (5,9):
             before = e._load(g.id).to_dict()
             with pytest.raises(ValueError, match='先'):
                 e.upper_voisinage_action(g.id, 'train', key)
             assert e.store.load(g.id).to_dict() == before
-            e.upper_voisinage_action(g.id, 'true_form_secondary' if target==4 else 'true_form_tuning', 'restrict' if target==4 else 'assault')
+            e.upper_voisinage_action(g.id, 'true_form_secondary' if target==5 else 'true_form_tuning', 'restrict' if target==5 else 'assault')
         before = e._load(g.id)
         e.upper_voisinage_action(g.id, 'train', key)
         after = e._load(g.id)

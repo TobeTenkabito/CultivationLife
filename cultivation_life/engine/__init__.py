@@ -1131,7 +1131,65 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from .progression.immortal_trials import start
         start(self._dependencies.immortal_trials, game, 'voisinage_backlash', doctrine_id=doctrine_id)
 
+    def _upper_trial_dependencies(self):
+        from .progression.upper_trials import Dependencies
+        return Dependencies(lambda: self.events_by_id, self._instantiate_event, self._die,
+                            self._complete_major_breakthrough, self._finish_monster_trial)
+
+    def _start_upper_trial(self, game, kind, **kwargs):
+        from .progression.upper_trials import start
+        return start(self._upper_trial_dependencies(), game, kind, **kwargs)
+
+    def _finish_monster_trial(self, game, evolution, lineage, rng):
+        if lineage:
+            game.player.monster_custom_lineage = lineage
+            game.player.monster_custom_lineage_id = lineage['id']
+        return self._complete_monster_evolution(game, evolution['id'], evolution, trial_completed=True, trial_rng=rng)
+
+    def _soul_contemplate(self, game, cause):
+        from ..system import ghost_soul_form as soul
+        soul.require(game.player)
+        if soul.stored(game.player) is not None or cause not in soul.catalog()['causes']:
+            raise ValueError('魂相已定或魂因无效')
+        rng = decode_rng(game.seed, game.rng_state)
+        from ..system.possession_system import advance_player_age
+        from ..time_flow import advance_elapsed_year, settle_elapsed_time, completed_action_units, ACTION_TIME
+        from ..system.upper_institutions import advance_time
+        unit = int(WORLD_SYSTEMS['time_units'][str(game.player.realm_index)])
+        holder = game.player.world_voisinages.setdefault('reincarnation', {})
+        progress = holder.setdefault('contemplation', dict(cause=cause, elapsed=0, required=unit))
+        if progress['cause'] != cause:
+            raise ValueError('已有未完成的照魂参悟，请先完成当前魂因')
+        remaining = max(0, progress['required']-progress['elapsed'])
+        settled_before = completed_action_units(progress['elapsed'], unit)
+        start_age, news, survived = game.player.age, [], True
+        for _ in range(remaining):
+            advance_player_age(game.player)
+            progress['elapsed'] += 1
+            survived = advance_elapsed_year(self._dependencies.advancement.year, game, rng, news, encounters=False)
+            if not survived or game.pending_event:
+                break
+        elapsed = game.player.age - start_age
+        advance_time(game, elapsed, unit)
+        if game.player.alive:
+            settle_elapsed_time(self._dependencies.advancement.settlement, game, rng, news,
+                action='soul_contemplate', units=completed_action_units(progress['elapsed'], unit)-settled_before, start_age=start_age, policy=ACTION_TIME)
+        if progress['elapsed'] >= progress['required'] and game.player.alive and not game.pending_event:
+            soul.require(game.player)
+            holder.pop('contemplation', None)
+            game.active_trial = dict(kind='soul_contemplation', cause=cause, event_ids=['EVT_SOUL_CONTEMPLATION'])
+            template = dict(self.events_by_id['EVT_SOUL_CONTEMPLATION'])
+            template['body'] = f"围绕【{soul.catalog()['causes'][cause]}】完成一单位照魂。此为内景试炼，不改写真实经历。选择归真道路后蓝图永久锁定，领悟另付正常费用。" + template['body']
+            game.pending_event = self._instantiate_event(template, game, rng)
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
     def _start_breakthrough_trial(self, game: GameState, kind: str, source: int, target: int, old_label: str, major: bool, rng: random.Random) -> None:
+        from .progression.upper_trials import KINDS as upper_kinds
+        if kind in upper_kinds:
+            return self._start_upper_trial(game, kind)
         from .progression import asura_trials
         if kind in asura_trials.KINDS:
             return asura_trials.start(self._dependencies.asura_trials, game, kind)
@@ -1153,6 +1211,11 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return breakthroughs._complete_minor_breakthrough(self._dependencies.breakthroughs, game, rng, old_label)
 
     def _resolve_trial_step(self, game: GameState, step: str, rng: random.Random) -> tuple[str, str]:
+        from .progression import upper_trials
+        if (game.active_trial or {}).get('kind') == 'soul_contemplation':
+            return upper_trials.soul_resolve(game, step)
+        if (game.active_trial or {}).get('kind') in upper_trials.KINDS:
+            return upper_trials.resolve(self._upper_trial_dependencies(), game, step, rng)
         from .progression import asura_trials
         if (game.active_trial or {}).get("kind") in asura_trials.KINDS:
             return asura_trials.resolve(self._dependencies.asura_trials, game, step, rng)

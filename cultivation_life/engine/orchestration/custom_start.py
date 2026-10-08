@@ -202,10 +202,10 @@ def configure_domain(game, data):
     from ...system.upper_voisinage_rules import world_config
     upper = world_config(p)
     if upper:
-        if rank > 9 or warming:
-            raise ValueError('此道途本体邻域支持一至九级，尚无独立温养轴')
+        if rank > 13 or warming:
+            raise ValueError('此道途邻域支持初成至至臻共十三阶，尚无独立温养轴')
         definition = max(upper['fields'], key=lambda r: int(tendency in r['effects']))
-        p.world_voisinages[p.world] = dict(levels={definition['id']: rank}, active=definition['id'])
+        p.world_voisinages[p.world] = dict(progression_version=2, levels={definition['id']: rank}, active=definition['id'])
         return
     from ...system.doctrine.state import ensure, player_record
     ensure(game, celestial_context=True)

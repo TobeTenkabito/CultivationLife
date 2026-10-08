@@ -217,7 +217,38 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("custom-start")) {
+            if(phase.equals("soul-forms")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'照魂原生验收',preset_id:'reincarnation_upper',seed:260})});return g.id;})()");
+                // Resume an already elapsed contemplation, avoiding unrelated yearly incidents in the UI fixture.
+                python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.world_voisinages.setdefault('reincarnation',{})['contemplation']={'cause':'life_death','elapsed':100,'required':100}\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-panel-target=upper-voisinage]");
+                tapSelector("[data-soul-form] button");
+                waitForJs("!busy && game.pending_event?.id==='EVT_SOUL_CONTEMPLATION'","Soul contemplation event");
+                js("UtilityPanels.close('upper-voisinage');true");
+                tapSelector("#event-choices button:first-child");
+                waitForJs("!busy && !!game.upper_voisinages.soul_form.blueprint","Native soul confirmation");
+                tapSelector("[data-panel-target=upper-voisinage]");
+                tapSelector("#upper-voisinage-content > details:last-of-type summary");
+                tapSelector("#upper-voisinage-content > details:last-of-type button:last-child");
+                waitForJs("!busy && game.upper_voisinages.soul_form.level===1","Native soul learning");
+                tapSelector("#upper-voisinage-content > details:last-of-type button:first-of-type");
+                waitForJs("!busy && game.upper_voisinages.rows[game.upper_voisinages.rows.length-1].active","Native soul selection");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#upper-voisinage-card').scrollWidth<=document.querySelector('#upper-voisinage-card').clientWidth+1")),"Soul mobile overflow");
+                    capture("soul-260-"+theme);
+                }
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.upper_voisinages.soul_form.level===1")),"Soul reload");
+                python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.layer=9\ng.player.opportunity=opportunity_required(g.player)\ng.player.awaiting_major_breakthrough=True\ne.store.save(g)\ne.breakthrough(g.id)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("UtilityPanels.close('upper-voisinage');true");
+                tapSelector("#event-choices button:first-child");
+                waitForJs("!busy && !!game.last_combat_report && !game.active_trial","Native survival trial result");
+                check(Boolean.TRUE.equals(js("game.last_combat_report.objective==='survive' && game.last_combat_report.total_rounds<=5")),"Survival objective");
+                result.putString("soul_scope","Four themes, real event choice, paid cultivation, selection/reload and survival trial; resumed elapsed contemplation fixture");
+            } else if(phase.equals("custom-start")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('#new-game-button').click();window.__customOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
                     async("GameThemes.saved");
@@ -493,10 +524,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     python("from cultivation_life import server\nfrom cultivation_life.rules import opportunity_required,max_hp,max_mp,add_item\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\np=g.player\np.world="+JSONObject.quote(world)+"\np.path={'asura':'demonic','nether':'monster','reincarnation':'ghost'}[p.world]\nfrom cultivation_life.system.upper_institutions import definition\np.location_id=definition(g)['location']\np.world_voisinages={}\np.opportunity=opportunity_required(p)\np.hp=max_hp(p)\np.mp=max_mp(p)\np.immortal_aperture['current']=0\nadd_item(p,'spirit_stone',1000000)\ng.pending_event=None\nif g.heavenly_court: g.heavenly_court['open_election']=None\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
                     tapSelector("[data-panel-target=upper-voisinage]");
-                    tapSelector("#upper-voisinage-content details summary");
-                    tapSelector("#upper-voisinage-content details button");
+                    tapSelector("#upper-voisinage-content > details summary");
+                    tapSelector("#upper-voisinage-content > details button");
                     waitForJs("!busy && game.upper_voisinages.rows[0].level===1 && game.upper_voisinages.rows[0].active","Native domain acquisition");
-                    tapSelector("#upper-voisinage-content details button:last-child");
+                    tapSelector("#upper-voisinage-content > details button:last-child");
                     waitForJs("!busy && game.upper_voisinages.rows[0].level===2","Native domain training");
                     js("UtilityPanels.open('upper-institution');true");
                     if(world.equals("asura")) {
@@ -536,10 +567,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 tapSelector("[data-true-form-action=true_form_confirm]");
                 waitForJs("!busy && !!game.upper_voisinages.true_form.blueprint","Native blueprint confirmation");
                 check(((Number)js("game.aperture.current")).doubleValue()==trueFormEnergy,"Blueprint must not refill energy");
-                tapSelector("#upper-voisinage-content details:last-of-type summary");
-                tapSelector("#upper-voisinage-content details:last-of-type button:last-child");
+                tapSelector("#upper-voisinage-content > details:last-of-type summary");
+                tapSelector("#upper-voisinage-content > details:last-of-type button:last-child");
                 waitForJs("!busy && game.upper_voisinages.true_form.level===1","Native true form learning");
-                tapSelector("#upper-voisinage-content details:last-of-type button:first-of-type");
+                tapSelector("#upper-voisinage-content > details:last-of-type button:first-of-type");
                 waitForJs("!busy && game.upper_voisinages.rows[game.upper_voisinages.rows.length-1].active","Native true form selection");
                 capture("true-form-251");
                 async("loadGame("+JSONObject.quote(trueFormId)+").then(()=>true)");
