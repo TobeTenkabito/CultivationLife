@@ -35,7 +35,7 @@ def site_key(game):
 
 
 def panels(game):
-    return sorted(PERSONAL_PANELS | ({'sage', 'buddhist'} if game.player.world == 'lost' else set()))
+    return sorted(PERSONAL_PANELS | ({'sage', 'buddhist', 'faction', 'family'} if game.player.world == 'lost' else set()))
 
 
 def local_names(game, maps, world, location):

@@ -1249,7 +1249,10 @@ class EngineTests(unittest.TestCase):
         for seed in range(30):
             event = self.engine._select_event(game, "travel", random.Random(seed))
             if event:
-                self.assertNotIn("world:human", event.get("tags", []))
+                world_tags = [tag for tag in event.get('tags', []) if tag.startswith('world:')]
+                # A shared encounter can name several worlds; exclusive human
+                # events still cannot be selected from the spirit realm.
+                self.assertTrue(not world_tags or 'world:spirit' in world_tags)
 
     def test_spirit_races_and_human_monster_alliance_affect_kill_karma(self):
         created = self.engine.create_game("盟约", "supreme_fire", "dao", 251)

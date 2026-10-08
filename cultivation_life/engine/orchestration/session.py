@@ -126,6 +126,12 @@ def create_game(
         player.body_training = max(0, int(preset.get("body_training", player.body_training)))
         player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
         player.immortal_body = copy.deepcopy(preset.get('immortal_body', {}))
+        if player.world == 'celestial' and player.realm_index >= 9:
+            # Birth prerequisites, never a load-time grant to an existing life.
+            player.immortal_veins = {str(rank): 27 for rank in range(9, player.realm_index)}
+            player.immortal_veins[str(player.realm_index)] = (player.layer - 1) * 3
+            if player.realm_index >= 10:
+                player.immortal_body['level'] = max(20, int(player.immortal_body.get('level', 0)))
         player.immortal_aperture = copy.deepcopy(preset.get('immortal_aperture', {}))
         player.world_voisinages = copy.deepcopy(preset.get('world_voisinages', {}))
         player.immortal_traces = max(0, int(preset.get('immortal_traces', 0)))
@@ -211,6 +217,13 @@ def create_game(
         scene["visits"] = 1
     from ...system.asura import ensure as ensure_asura
     ensure_asura(game)
+    if preset and player.world == 'asura' and player.path == 'demonic' and player.realm_index >= 9:
+        from ...system.asura import active
+        if active(player):
+            player.asura_cultivation['veins'] = {str(rank): 27 for rank in range(9, player.realm_index)}
+            player.asura_cultivation['veins'][str(player.realm_index)] = (player.layer - 1) * 3
+            if player.realm_index > 9 or player.layer > 1:
+                player.asura_cultivation['conversion'] = 5
     game.sects = deps._new_sects()
     game.world_npcs = deps._new_world_npcs()
     deps._ensure_sects(game)

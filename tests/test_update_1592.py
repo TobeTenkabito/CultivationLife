@@ -148,7 +148,10 @@ def test_buddhist_lost_temple_annual_and_instance_isolation(tmp_path):
     assert site['temple'] == 1
     site['followers'] = 1000
     e.store.save(g)
-    e.advance(g.id, 'rest', 1)
+    shown = e.advance(g.id, 'rest', 1)
+    # Spatial training now opens the same personal encounters as other worlds.
+    if shown['pending_event']:
+        e.choose(g.id, 'leave', event_id=shown['pending_event']['id'])
     g = e.store.load(g.id)
     assert g.buddhist_state['last_settlement']['income'] > 0
     frozen = copy.deepcopy(g.buddhist_state['worlds'][first])

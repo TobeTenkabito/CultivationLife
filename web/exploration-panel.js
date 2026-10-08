@@ -48,6 +48,34 @@
       if(!t.rows.length)root.append(node('p','尚未持有符箓。符材可从本界坊市或商盟取得。'));
     }
     const s=game.spatial; if(!s)return;
+    document.querySelectorAll('.spatial-society').forEach(n=>n.remove());
+    for(const kind of ['faction','family']){
+      const content=document.getElementById(kind+'-content');content.hidden=!!s.scene?.society;
+    }
+    if(s.scene?.society){
+      const scene=s.scene;
+      for(const [panel,kind,rows] of [['faction','sect',scene.society.sects],['family','family',scene.society.families]]){
+        document.getElementById(panel+'-title').textContent=scene.name+(kind==='sect'?'宗门':'家族');
+        const badge=document.getElementById(panel==='faction'?'faction-role':'family-status');
+        badge.textContent=rows.find(r=>r.joined)?.name||'尚未加入';
+        if(panel==='family')document.getElementById('family-description').textContent='本界家族客卿身份，与外界家族独立。';
+        const section=node('div');section.className='spatial-society';
+        section.append(node('p','本界宗族成员、驻地与传承。前往驻地加入、请教或辞别，各消耗一年。外界身份保留，本界暂不经营市场与商队。'));
+        for(const row of rows){
+          const card=node('article');card.className='exploration-row';card.dataset.localSociety=row.id;
+          const place=scene.locations.find(l=>l.id===row.location_id);
+          card.append(node('h3',row.name+(row.joined?' · 已加入':'')),node('p',`${place?.name||'本界驻地'} · 在世成员 ${row.members.length} 人`));
+          const members=node('details');members.append(node('summary','查看成员'));
+          row.members.forEach(n=>members.append(node('p',`${n.name} · ${n.realm_index}阶${n.layer}层`),button('交流 · 一年','spatial','talk',{target_id:n.id})));
+          card.append(members);
+          if(!row.here)card.append(button('前往驻地 · 一年','spatial','move',{target_id:row.location_id}));
+          if(row.joined){card.append(button('请教本界传承 · 一年','spatial','study_'+kind,{target_id:row.id},!row.here||!row.members.length),button('辞别 · 一年','spatial','leave_'+kind,{target_id:row.id}));}
+          else card.append(button(kind==='sect'?'拜入宗门 · 一年':'成为客卿 · 一年','spatial','join_'+kind,{target_id:row.id},!row.here||!row.members.length||rows.some(r=>r.joined)));
+          section.append(card);
+        }
+        document.getElementById(panel+'-card').append(section);
+      }
+    }
     document.querySelectorAll('[data-panel-target]').forEach(dock=>{
       const local=[...(s.panels || []),'heavens'];
       dock.classList.toggle('spatial-unavailable',s.inside && !local.includes(dock.dataset.panelTarget));
@@ -75,6 +103,7 @@
     if(s.visible){
       root.append(node('p',`护持评分 ${s.protection.score.toFixed(1)} = 符箓防护 × ${s.weights.protection} + 阵法生势 × ${s.weights.growth}。裂缝越接近崩溃，护持要求越高；不足则身死道消。`));
       if(s.can_open)root.append(button('消耗四分之一法力开辟裂缝','spatial','open'));
+      else root.append(node('small',`主动开辟裂缝须达到${s.opening_requirement.name}${s.opening_requirement.layer}层，消耗四分之一法力上限。`));
       if(!s.rifts.length)root.append(node('small','当前未发现仍开放的裂缝。'));
     }
     const appendRifts=(parent,locationId)=>{
@@ -87,7 +116,7 @@
     if(!s.scene)maps.querySelectorAll('.map-location').forEach(row=>appendRifts(row,row.dataset.location));
     if(s.scene){
       const scene=s.scene;
-      root.append(node('p',`界面等级 ${scene.tier}。${scene.kind==='secluded'?'此地修炼收益为普通地图的六倍，魔修不受自然修炼折损；只能等待裂缝或于化神后期自行开辟。':`${scene.resource_description||'本界修炼资源可支持至大乘后期。'} ${scene.power_description||'界面之力承载至大乘后期，九阶道果将被排斥。'} 本界人物仍会老去并经历雷劫。`} 外界交互暂停；此地专属产物不会进入外界货源。`),
+      root.append(node('p',`界面等级 ${scene.tier}。${scene.kind==='secluded'?`此地修炼收益为普通地图的六倍，魔修不受自然修炼折损。界壁门槛：${({5:'化神',6:'炼虚',7:'合体',8:'大乘'})[scene.exit_realm||5]}后期；主动开辟还须至少合体期。自然裂缝可提前离开。`:`${scene.resource_description||'本界修炼资源可支持至大乘后期。'} ${scene.power_description||'界面之力承载至大乘后期，九阶道果将被排斥。'} 本界人物仍会老去并经历雷劫。`} 外界交互暂停；此地专属产物不会进入外界货源。`),
         button('探索 · 一年','spatial','explore'));
       if(scene.population_rules){const r=scene.population_rules;root.append(node('p',`本界${r.abundance==='barren'?'资源匮乏':'资源寻常'}，修炼收益 ×${r.cultivation_multiplier}；初始修士最高 ${r.npc_realm_ceiling}阶后期。此为人口生成状况，并非界面修炼上限。`));}
       scene.locations.forEach(l=>{const card=node('article');card.className='map-location';card.dataset.location=l.id;card.append(node('h3',l.name),node('p',l.description||'独立空间内的地域。'),node('small',`气经验：${Object.entries(l.qi_gain_efficiencies).map(([key,value])=>`${({spirit:'灵气',demon:'魔气',monster:'妖气',yin:'阴气'})[key]} ×${value.toFixed(2)}`).join(' · ')}`),button(l.id===scene.location_id?'所在地':'前往 · 一年','spatial','move',{target_id:l.id},l.id===scene.location_id));appendRifts(card,l.id);root.append(card);});

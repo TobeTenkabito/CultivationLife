@@ -319,6 +319,7 @@ def create_instance(game, rng, kind):
         power_ceiling=power_ceiling if kind == "lost" else None,
         power_description=f"界面之力最多承载{REALMS[power_ceiling].name}后期九层，超出后将被排斥。" if kind == "lost" else "独立秘境没有界面之力修为上限。",
         population_rules=population,
+        exit_realm=generator.randint(5, 8) if kind == 'secluded' else None,
         resource_description=(f"修炼资源稀薄，本界只能支持修炼至{REALMS[resource_ceiling].name}后期九层；须另觅界面继续修炼。"
                               if kind == "lost" and resource_ceiling < 8 else "修炼资源可支持至大乘后期。" if kind == "lost" else "灵气充沛的独立秘境。"),
     )
@@ -394,11 +395,11 @@ def local_action(game, action, target):
         scene["location_id"] = target
         return "抵达空间内的新地点。"
     if action == "join":
-        sect = next((r for r in scene["sects"] if r["id"] == target), None)
-        if not sect or scene["location_id"] != sect["location_id"]:
-            raise ValueError("须前往该宗门所在地图")
-        scene["joined_sect"] = target
-        return f"加入{sect['name']}，本界身份仅在此失落界面生效。"
+        from .spatial_society import act
+        return act(game, scene, 'join_sect', target)
+    if action in {'join_sect', 'leave_sect', 'study_sect', 'join_family', 'leave_family', 'study_family'}:
+        from .spatial_society import act
+        return act(game, scene, action, target)
     if action == "talk":
         person = next((r for r in people(game, scene) if r.id == target and r.alive), None)
         npc = person.__dict__ if person else None
@@ -411,6 +412,13 @@ def local_action(game, action, target):
 
 def visible(game):
     return game.player.realm_index >= 4
+
+
+def opening_requirement(game):
+    scene = current(game) or {}
+    # Old scenes retain their former boundary; reading saves consumes no RNG.
+    boundary = (int(scene.get('exit_realm') or 5), 7) if scene.get('kind') == 'secluded' else (0, 1)
+    return max((7, 1), boundary)
 
 
 def cultivation_block_reason(game):
@@ -437,6 +445,8 @@ def public(game):
     if scene:
         scene["locations"] = public_map(game)["locations"]
         scene['npcs'] = [npc.to_dict() for npc in people(game)]
+        from .spatial_society import public as society_view
+        scene['society'] = society_view(game, current(game))
     return dict(
         inside=p.world in SPECIAL_WORLDS,
         panels=panels(game),
@@ -452,7 +462,9 @@ def public(game):
             and r["expires_age"] > p.age
         ],
         protection=protection(game) if visible(game) else None,
-        can_open=(p.realm_index, p.layer) >= (5, 7),
+        can_open=(p.realm_index, p.layer) >= opening_requirement(game),
+        opening_requirement=dict(realm=opening_requirement(game)[0], layer=opening_requirement(game)[1],
+                                 name=REALMS[opening_requirement(game)[0]].name),
         visited=[
             dict(id=r["id"], name=r["name"])
             for r in state.get("instances", {}).values()

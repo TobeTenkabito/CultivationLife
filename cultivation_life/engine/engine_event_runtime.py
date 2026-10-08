@@ -26,10 +26,11 @@ from .dependencies import EventDependencies
 
 def _select_event(deps: EventDependencies, game: GameState, action: str, rng: random.Random) -> dict[str, Any] | None:
     # 无灵根开局的第一节点是路线入口，不能被普通随机事件淹没。
-    if game.player.spirit_root == "none" and game.player.realm_index == 0 and game.player.body_training == 0:
+    inside = game.player.world in {'lost', 'rift'}
+    if not inside and game.player.spirit_root == "none" and game.player.realm_index == 0 and game.player.body_training == 0:
         return deps.events_by_id["EVT_MORTAL_BODY_BEGIN_001"]
     if (
-        game.player.realm_index == 0 and game.player.born_rootless and game.player.age >= 25
+        not inside and game.player.realm_index == 0 and game.player.born_rootless and game.player.age >= 25
         and game.player.body_training < 3 and game.player.mortal_aspiration is None
     ):
         return deps.events_by_id["EVT_MORTAL_ASPIRATION_001"]
@@ -38,6 +39,8 @@ def _select_event(deps: EventDependencies, game: GameState, action: str, rng: ra
     candidates: list[tuple[dict[str, Any], float]] = []
     for event in sorted(deps.events, key=lambda value: value["id"]):
         tags = event.get("tags", [])
+        if inside and 'spatial_safe' not in tags:
+            continue
         world_tags = [tag for tag in tags if tag.startswith("world:")]
         if (
             int(WORLD_SYSTEMS.get("world_profiles", {}).get(game.player.world, {}).get("tier", 1)) >= 3
@@ -64,7 +67,7 @@ def _select_event(deps: EventDependencies, game: GameState, action: str, rng: ra
         if "faction" in tags and "faction_join" not in tags:
             continue
         is_mortal_event = "mortal" in tags
-        if game.player.realm_index == 0 and not is_mortal_event:
+        if game.player.realm_index == 0 and not is_mortal_event and 'all_realms' not in tags:
             continue
         if game.player.realm_index > 0 and is_mortal_event:
             continue

@@ -25,7 +25,9 @@
     "economy_v2.estates.*.entrusted": "固定产业的经营委托，缺失视为关闭；年度自动方案走唯一库存与原资金，不随玩家跨界，不因打开 UI 结算。",
     "economy_v2.transport.worlds.*.fleets.*.last_raid_unit": "商队原地点的最近玩家袭击行动单位，缺失表示未受袭击；只限同界同地驻留、待售队伍，不复制货物或远程扣款。",
     "Player.story_flags custom_start / Player.divine_sense_rank": "新人生显式配置独立神识的标记，个人保留；禁止读档以修为自然基准覆盖选定数值。运行中没有设置此标记的玩法入口。",
-    "Player.hostility alliance:<world>:<id>": "个人对原本界商盟的通缉关系，跨界保留但异界不触发；本界盟库支付和解款，不将原钱复制到异界。"
+    "Player.hostility alliance:<world>:<id>": "个人对原本界商盟的通缉关系，跨界保留但异界不触发；本界盟库支付和解款，不将原钱复制到异界。",
+    "spatial_state.instances.*.exit_realm / families / joined_family": "实例本地界壁和社会身份；exit_realm 生成时唯一抽签，旧值缺失固定解释为五阶；家族只引用本实例权威 NPC 编号，封存保留，不携带或改写外界宗族，无独立经济账本。",
+    "Player.ghost_intrinsic_highwater_realm": "个人历史最高水位，沿用个人保留分类；九阶起永久停止魂蚀率增长，轮回和压制不清除，不恢复已有魂伤。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",

@@ -124,6 +124,9 @@ def test_spatial_isolation_blocks_direct_engine_and_allows_personal_training(rea
         with pytest.raises(ValueError, match="隔绝"):
             command()
     e.advance(g.id, "rest", 1)
+    pending = e.store.load(g.id).pending_event
+    if pending:
+        e.choose(g.id, 'leave', event_id=pending['id'])
     with pytest.raises(ValueError):
         e.advance(g.id, "commission", 1)
     assert e.store.load(g.id).player.world == "rift"
@@ -379,6 +382,9 @@ def test_secluded_late_breakthrough_and_manual_exit_need_no_smuggling(
     result = e.breakthrough(g.id)
     assert result["player"]["world"] == "rift" and result["player"]["layer"] == 7
     g = e.store.load(g.id)
+    with pytest.raises(ValueError, match='合体'):
+        e.spatial_action(g.id, 'open')
+    g.player.realm_index, g.player.layer = 8, 7
     g.player.mp = max_mp(g.player)
     e.store.save(g)
     opened = e.spatial_action(g.id, "open")

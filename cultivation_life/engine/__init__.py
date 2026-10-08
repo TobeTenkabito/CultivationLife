@@ -822,7 +822,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             self._plan_world_transition, self._apply_world_transition, self._ensure_market,
             self._die, self._advance_world_year,
             self._body_training_step, self._body_progress_required, self._sense_training_step, self._advance_soul_erosion_time,
-            self._prepare_sage_action, self._finish_sage_action, self._advance_natal_artifact)
+            self._prepare_sage_action, self._finish_sage_action, self._advance_natal_artifact,
+            self._select_event, self._instantiate_event)
 
     def spatial_action(self, game_id, action, payload=None):
         from .actions.exploration import spatial_action

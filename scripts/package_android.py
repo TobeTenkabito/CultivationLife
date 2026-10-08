@@ -57,6 +57,7 @@ def main():
     require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text(encoding='utf-8').strip() == 'No issues found.', 'Android release lint must pass')
     require('Quick-start regression passed' in log(f'quick-start-ui-{RELEASE_ID}.log'), 'Quick-start UI checks must pass')
     require('Start layout passed' in log(f'start-layout-ui-{RELEASE_ID}.log'), 'Start layout UI checks must pass')
+    require('Release 250 UI passed:' in log(f'world-life-ui-{RELEASE_ID}.log'), 'World life UI checks must pass')
     source = ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     apk_bytes = source.read_bytes()
     digest = hashlib.sha256(apk_bytes).hexdigest()
