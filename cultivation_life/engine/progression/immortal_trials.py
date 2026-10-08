@@ -52,9 +52,9 @@ def target_for(game, trial):
         if field:
             field = replace(field, id='trial:superego', attainment='superego', name='超我尸·' + field.name)
             definitions.append(asdict(field))
-        members = [dict(name=f'{p.name}·{name}', power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
+        members = [dict(name=f'{p.name}·{name}', power=trial['power'], realm_index=p.realm_index, layer=p.layer,
                         path=p.path, kind='environment', transcendence=state_for(field if i == 2 else None))
-                   for i, (name, ratio) in enumerate(zip(('自我尸', '本我尸', '超我尸'), (.38, .42, .60)))]
+                   for i, name in enumerate(('自我尸', '本我尸', '超我尸'))]
     else:
         field = None
         strength = 0
@@ -138,6 +138,10 @@ def initialize(game, trial):
     stats = {side: PlayerCombatSystem._aggregate_stats(roster, player=p if side == 'player' else None,
                                                        terrain_tags=['开阔'])
              for side, roster in (('player', units), ('enemy', PlayerCombatSystem._enemy_units(target)))}
+    if trial['kind'] == 'three_corpses':
+        # Each corpse inherits 100% of the player's actual ordinary attributes.
+        # The shared side-level combat resolver therefore receives three copies.
+        stats['enemy'] = {key: value * len(target['members']) for key, value in stats['player'].items()}
     trial['battle_state'] = dict(mode=trial['kind'], round=0, mp_ratio=min(1, p.mp / max_mp(p)), stats=stats)
     trial['snapshot'] = dump_battle(battle)
     trial['target'] = target
