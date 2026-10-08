@@ -758,15 +758,16 @@ def combat_requirement_display(requirement: dict[str, Any]) -> str:
 
 def opportunity_multiplier(
     player: Player, concentrations: dict[str, float] | None = None,
+    *, allow_untrained: bool = False,
 ) -> float:
     """原有效率保持独立，最后仅为当前主修乘上所在界面的气环境倍率。"""
     root_efficiency = root_definition(player.spirit_root)["efficiency"]
-    if player.technique is None:
+    if player.technique is None and not allow_untrained:
         return 0.0
     main_bonus = (
         player.technique.opportunity_bonus * technique_scale(player.technique, "opportunity_bonus")
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
-    )
+    ) if player.technique else 0.0
     from .system.crafted_artifact_rules import crafted_artifact_bonuses
     item_bonus = (
         sum(item.opportunity_bonus * item.quantity for item in player.inventory)
@@ -776,7 +777,7 @@ def opportunity_multiplier(
     inner_multiplier = (1 + main_bonus) * (1 + item_bonus)
     return (
         root_efficiency * inner_multiplier
-        * technique_environment_multiplier(player.technique, player.world, concentrations)
+        * (technique_environment_multiplier(player.technique, player.world, concentrations) if player.technique else 1.0)
         * ghost_opportunity_multiplier(player)
         * modifier(player, "opportunity_efficiency", 1.0)
         * (1 + max(0.0, float(player.sage_effects.get("opportunity_multiplier", 0.0))))

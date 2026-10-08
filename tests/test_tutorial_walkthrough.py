@@ -37,7 +37,8 @@ def test_full_course_changes_real_state_without_time_or_randomness(guide):
     assert g.player.tutorial_state['guide_completed']
     assert not g.player.tutorial_state['enabled']
     assert g.player.age==before.player.age and g.rng_state==before.rng_state
-    assert g.player.opportunity==before.player.opportunity+5
+    from cultivation_life.rules import opportunity_multiplier
+    assert g.player.opportunity==pytest.approx(before.player.opportunity+5*opportunity_multiplier(before.player, allow_untrained=True))
     assert g.player.technique and g.player.master['realm_index']==3
     assert g.player.faction_id in g.sects and g.player.faction_join_age==g.player.age
     assert g.pending_event==before.pending_event

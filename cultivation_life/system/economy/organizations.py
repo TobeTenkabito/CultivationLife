@@ -124,6 +124,8 @@ def settle_faction(game, maps, row, years):
         game.family_state['debt'] = due - paid
     from .depot import advance as advance_depot
     advance_depot(game, maps, entity, row)
+    from .estate_management import invest_surplus
+    invest_surplus(game, maps, entity, row)
 
 
 def settle_institution(game, row, years):

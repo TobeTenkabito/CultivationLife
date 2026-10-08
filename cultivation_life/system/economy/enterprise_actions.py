@@ -1,6 +1,7 @@
 """Local property deeds and inventory commands inside the existing transaction."""
 from ...rules import add_item, remove_item
 from ...content_registry import ITEM_CATALOG
+from .enterprise_acquisition import price, acquire
 from .enterprise_rules import KINDS, MAX_LEVEL, title_cost, recipes, capacity
 from .enterprise_state import estates, payer, owner_allowed, require_local, cash_ready, quantity, put, take, encumbered, log
 from .enterprise_operations import market_at, market_trade, start_job
@@ -29,12 +30,6 @@ def actor(game, kind):
     return identity, f'alliance:{p.world}:{identity}' if kind == 'alliance' else f'organization:{kind}:{identity}'
 
 
-def price(game, maps, row, level=None):
-    market = market_at(game, maps, row)
-    goods = [r for r in market['commodities'].values() if not r.get('imported')]
-    multiplier = sum(r['price'] / r['reference'] for r in goods) / max(1, len(goods))
-    return max(1, round(title_cost(row['world'], row['kind'], level or row['level']) * multiplier))
-
 
 def command(game, maps, payload):
     action = payload['action'].removeprefix('estate_')
@@ -43,27 +38,11 @@ def command(game, maps, payload):
         kind = payload.get('kind')
         if kind not in KINDS:
             raise ValueError('未知产业类型')
+        if type(payload.get('cost')) is not int:
+            raise ValueError('请先取得有效产权报价')
         owner_kind = payload.get('owner_kind', 'player')
         identity, source = actor(game, owner_kind)
-        key = f'{p.world}:{p.location_id}:{kind}'
-        existing = estates(game).get(key)
-        if existing and existing['owner_kind'] != 'background':
-            raise ValueError('该地块已有产权所有者')
-        options = recipes(p.world, commodity_catalog(p.world))
-        catalog = commodity_catalog(p.world)
-        recipe = next((k for k,r in options.items() if r['kind'] == kind and catalog[r['output']]['tier'] <= p.realm_index + 1), None)
-        row = existing or dict(id=key, kind=kind, world=p.world, location=p.location_id, level=1, reserve=5000,
-            recipe=recipe, stock={}, job=None, produced=0, income=0, expense=0, arrears=0,
-            enabled=False, auto_buy=False, auto_sell=False, batches=1, buy_limit=10**12,
-            sell_limit=0, history=[], revision=0, last_year=p.age)
-        cost = price(game, maps, row)
-        if payload.get('cost') != cost:
-            raise ValueError('产权报价已变化，请刷新后重新办理')
-        transfer_value(game, source, f'background:{p.world}', cost, '购入固定地点产业产权')
-        row.update(owner_kind=owner_kind, owner_id=identity, last_year=p.age, enabled=False, revision=row['revision'] + 1)
-        game.economy_v2.setdefault('estates', {})[key] = row
-        cash_ready(game, row)
-        log(row, p.age, '产权登记完成；库存、储量与产业地点保持唯一')
+        acquire(game, maps, p.world, p.location_id, kind, owner_kind, identity, source, p.realm_index, payload.get('cost'))
         return
     row = require_local(game, payload.get('estate_id'))
     if type(payload.get('revision')) is not int or payload['revision'] != row['revision']:
@@ -81,7 +60,16 @@ def command(game, maps, payload):
         transfer_value(game, key, f'background:{p.world}', row['arrears'], '结清产业仓储欠费')
         row['expense'] += row['arrears']
         row['arrears'] = 0
+    elif action == 'entrust':
+        if type(payload.get('enabled')) is not bool:
+            raise ValueError('请明确启用或收回委托')
+        row['entrusted'] = payload['enabled']
+        if row['entrusted']:
+            from .estate_management import plan
+            plan(game, maps, row)
+        log(row, p.age, '委托驻地掌柜自动经营' if row['entrusted'] else '收回经营委托，保留当前批次与方案')
     elif action == 'configure':
+        row['entrusted'] = False
         for name in ('enabled', 'auto_buy', 'auto_sell'):
             if type(payload.get(name)) is not bool:
                 raise ValueError('经营开关必须明确设置')
@@ -158,7 +146,7 @@ def command(game, maps, payload):
         transfer_value(game, source, recipient, refund, '产业产权实付转让')
         if row['owner_kind'] == 'player':
             transfer_value(game, key, 'player', balance(game, key), '产权交接提回原经营现金')
-        row.update(owner_kind=kind, owner_id=identity, enabled=False, last_year=p.age)
+        row.update(owner_kind=kind, owner_id=identity, enabled=False, entrusted=False, last_year=p.age)
         if kind != 'background':
             cash_ready(game, row)
         log(row, p.age, '产权有偿交接；矿藏储量、等级与原编号保留')

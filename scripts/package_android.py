@@ -37,7 +37,7 @@ def main():
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
     for orientation in ('portrait', 'landscape'):
-        for phase in ('war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
+        for phase in ('custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
             result = log(f'android-{phase}-{orientation}-{RELEASE_ID}.log')
             require('status=passed' in result and 'status=failed' not in result, f'Android {phase} {orientation} must pass')
         result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')

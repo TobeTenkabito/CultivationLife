@@ -412,7 +412,7 @@ def manage_dao_companion(
             gain = 0.0
             if sex_ids:
                 gain = round(opportunity_required(player) * 0.04 * opportunity_multiplier(player), 1)
-                deps._add_opportunity(player, gain)
+                deps._add_opportunity(player, gain, apply_efficiency=False)
             gain_text = f" 合欢功法运转，机缘 +{gain:g}。" if gain else ""
             child_text = deps._try_conceive_child(game, rng)
             emit(game, "companion.entwined", target_id=companion["id"])
@@ -528,13 +528,13 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
         if action == "spar":
             low, high = WORLD_SYSTEMS["relationship"]["friend_spar_opportunity"]
             gain = rng.randint(int(low), int(high))
-            deps._add_opportunity(player, gain)
+            gain = deps._add_opportunity(player, gain)
             deps._adjust_person_affinity(game, npc_id, 1)
             result, summary = "friend_sparred", f"你与{friend['name']}点到为止地切磋数场，彼此印证招式，机缘 +{gain}。"
         elif action == "discuss":
             low, high = WORLD_SYSTEMS["relationship"]["friend_discuss_opportunity"]
             gain = rng.randint(int(low), int(high))
-            deps._add_opportunity(player, gain)
+            gain = deps._add_opportunity(player, gain)
             deps._adjust_person_affinity(game, npc_id, 2)
             result, summary = "friend_discussed", f"你与{friend['name']}交换修炼心得，解开数处疑难，机缘 +{gain}。"
         else:

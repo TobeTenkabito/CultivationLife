@@ -354,13 +354,8 @@ class NatalArtifactSystemMixin:
                     raise ValueError("这件炼器法宝的唯一实例已经损坏")
                 self._bind_crafted_natal_artifact(game, crafted)
             else:
-                if not remove_item(player, item_id):
-                    raise ValueError("法宝已经不在背包中")
-                game.natal_artifact = {
-                    "item_id":item_id, "name":item.name, "level":1,
-                    "experience":0, "bound_age":player.age, "slots":[],
-                    "slot_rule_version":2,
-                }
+                from .natal_binding import bind_standard
+                bind_standard(game, item_id)
             summary = f"你将{item.name}收入丹田，以精血和金丹真火炼为本命法宝。"
             result = "bound"
         elif action == "unbind":

@@ -115,7 +115,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if deps.heavens_activity_gain:
             gain = deps.heavens_activity_gain(game, gain, action)
         else:
-            deps._add_opportunity(player, gain)
+            gain = deps._add_opportunity(player, gain, apply_efficiency=False)
         total_gain += gain
         if action == "sense_train":
             sense_gain = deps._sense_training_step(player)
@@ -285,22 +285,12 @@ def _finish_action_events(deps: AdvancementDependencies, game: GameState, action
 def _add_opportunity(
     deps: AdvancementDependencies, player: Player, amount: float,
     regional_efficiencies: dict[str, float] | None = None,
+    *, apply_efficiency: bool = True,
 ) -> float:
-    before = player.opportunity
-    player.opportunity = max(0.0, before + float(amount))
-    if ordinary_upper(player) and not opportunity_unbounded(player):
-        player.opportunity = min(player.opportunity, opportunity_required(player))
-    actual_gain = player.opportunity - before
-    if actual_gain > 0:
-        from ...system.immortal_cultivation import grant_trace_chance
-        grant_trace_chance(player, actual_gain)
-        grant_qi_experience(
-            player, actual_gain,
-            regional_efficiencies
-            if regional_efficiencies is not None
-            else deps.maps.qi_gain_efficiencies(player.world, player.location_id),
-        )
-    return actual_gain
+    from ...system.opportunity import grant
+    return grant(player, amount, regional_efficiencies if regional_efficiencies is not None
+                 else deps.maps.qi_gain_efficiencies(player.world, player.location_id),
+                 apply_efficiency=apply_efficiency)
 
 
 def _sense_training_step(

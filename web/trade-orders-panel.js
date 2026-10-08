@@ -1,7 +1,7 @@
 (() => {
   const e=(tag,text)=>{const n=document.createElement(tag);n.textContent=text??'';return n;};
   function render(root,system,act){
-    const group=e('details');group.id='trade-orders-panel';group.append(e('summary','指定商路与长期订单'),e('p','订单按真实库存和当时价格执行。长期同界订单售罄后付费空返，再次采购；跨界订单逐段交税往返。产业调货只装载源仓库存，满仓时余货留在商队。'));
+    const group=e('details');group.id=system.scope?'trade-orders-panel-'+system.scope:'trade-orders-panel';group.append(e('summary','指定商路与长期订单'),e('p','订单按真实库存和当时价格执行。长期同界订单售罄后付费空返，再次采购；跨界订单逐段交税往返。产业调货只装载源仓库存，满仓时余货留在商队。'));
     const fleets=system.fleets.filter(f=>f.can_order);
     if(!fleets.length)group.append(e('p','请前往本人领办商队驻地，或自建商盟的本界总部下达订单。'));
     for(const f of fleets){

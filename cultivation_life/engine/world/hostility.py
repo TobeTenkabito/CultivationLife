@@ -146,6 +146,16 @@ def _hostility_entity_members(deps: HostilityDependencies, game: GameState, kind
 def _hostility_entity_state(deps: HostilityDependencies, game: GameState, key: str) -> dict[str, Any]:
     kind, entity_id = key.split(":", 1)
     player = game.player
+    if kind == "alliance":
+        world, _, identity = entity_id.partition(':')
+        if world != player.world:
+            return {'status': 'inactive'}
+        from ...system.economy.fleet_network import alliance_at
+        alliance = alliance_at(game, world, identity)
+        if not alliance:
+            return dict(status='fallen', kind=kind, entity_id=entity_id, members=[])
+        return dict(status='active', kind=kind, entity_id=entity_id, members=[],
+                    power=alliance['chief_power'], max_realm=alliance['leader']['realm_index'])
     if kind == "world" and entity_id != player.world:
         return {"status":"inactive"}
     if kind == "race" and (
@@ -232,7 +242,13 @@ def _resolve_wanted_settlement(
     target = max(members, key=deps._npc_power, default=None)
     if mode == "compensation":
         amount = max(500, int(max(1.0, float(runtime.get("power", 1))) ** 0.5) * 80)
-        add_item(game.player, "spirit_stone", amount)
+        if kind == 'alliance':
+            from ...system.economy.ledger import balance, transfer_value
+            source = f'alliance:{entity_id}'
+            amount = min(amount, balance(game, source))
+            transfer_value(game, source, 'player', amount, '商盟撤销通缉并支付和解金')
+        else:
+            add_item(game.player, "spirit_stone", amount)
         return "compensated", f"{name}交出下品灵石 ×{amount}作为巨额赔偿，并撤销全部追杀令。"
     if mode == "dissolve":
         entity = game.sects.get(entity_id)
@@ -287,6 +303,11 @@ def _wanted_target(
 ) -> dict[str, Any]:
     player = game.player
     desired_realm = min(8, player.realm_index + max(0, int(hostility // 45)))
+    if kind == 'alliance':
+        from ...system.economy.fleet_network import alliance_at
+        world, _, identity = entity_id.partition(':')
+        alliance = alliance_at(game, world, identity)
+        desired_realm = min(alliance['leader']['realm_index'], player.realm_index + 1) if alliance else desired_realm
     candidates = [
         npc for npc in deps._hostility_entity_members(game, kind, entity_id)
         if npc.id not in deps._player_protected_npc_ids(game) and npc.realm_index >= player.realm_index
@@ -378,6 +399,11 @@ def _imprison_or_execute(
 
 def _hostility_name(deps: HostilityDependencies, key: str, game: GameState | None = None) -> str:
     kind, entity_id = key.split(":", 1)
+    if kind == 'alliance' and game:
+        from ...system.economy.fleet_network import alliance_at
+        world, _, identity = entity_id.partition(':')
+        row = alliance_at(game, world, identity)
+        return row['name'] if row else '已散商盟'
     if kind in {"sect", "family"}:
         if game and entity_id in game.sects:
             return game.sects[entity_id].name

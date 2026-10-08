@@ -4,12 +4,12 @@
   const money=n=>Number(n||0).toLocaleString('zh-CN');
   function render(root,data,act) {
     if(!data?.available)return;
-    const box=e('details');box.id='enterprise-panel';box.className='enterprise-panel';box.append(e('summary','本地产权与生产经营'));
+    const box=e('details');box.id=data.scope?'enterprise-panel-'+data.scope:'enterprise-panel';box.className='enterprise-panel';box.append(e('summary','本地产权与生产经营'));
     box.append(e('p','产业固定在本地图，周转金独立结算。原料实际入库后投产，成品在完工年入库；异地调货须由商队运输。'));
     const select=(parent,label,options,value)=>{const l=e('label',label),s=e('select');s.setAttribute('aria-label',label);for(const [v,t] of options){const o=e('option',t);o.value=v;s.append(o);}if(value!=null)s.value=value;l.append(s);parent.append(l);return s;};
     const input=(parent,label,value)=>{const l=e('label',label),n=e('input');n.type='number';n.min='0';n.step='1';n.value=value;n.setAttribute('aria-label',label);l.append(n);parent.append(l);return n;};
     const button=(parent,label,action,payload,disabled=false)=>{const b=e('button',label);b.type='button';b.dataset.estateAction=action;b.dataset.unavailable=!data.can_act||disabled?'1':'0';b.disabled=b.dataset.unavailable==='1';b.onclick=()=>act({action:'estate_'+action,...(typeof payload==='function'?payload():payload)});parent.append(b);return b;};
-    const owners=[['player','本人'],['family','家族'],['sect','宗门'],['alliance','自建商盟']];
+    const owners=[['player','本人'],['family','家族'],['sect','宗门'],['alliance','自建商盟']].filter(o=>!data.scope||o[0]===data.scope);
     const buy=e('section');buy.className='estate-controls';
     const owner=select(buy,'产权登记方',owners),kind=select(buy,'购置产业',data.offers.filter(o=>!o.occupied).map(o=>[o.kind,`${o.name} · ${money(o.cost)} 灵石`]));
     button(buy,'购置产权','buy',()=>({owner_kind:owner.value,kind:kind.value,cost:data.offers.find(o=>o.kind===kind.value)?.cost}),!kind.options.length);box.append(buy);
@@ -18,6 +18,8 @@
       card.append(e('p',`周转金 ${money(row.cash)} · 经营收入 ${money(row.income)} / 支出 ${money(row.expense)} · 欠费 ${money(row.arrears)}`),e('p',`仓储及在制占用 ${row.used} / ${row.capacity} 件 · 累计生产 ${row.produced} 件${row.kind==='mine'?` · 剩余矿藏 ${row.reserve} 件`:''}`));
       if(row.job)card.append(e('p',`在制 ${row.job.quantity} 件 · 第 ${row.job.finish} 年完工（已扣原料与劳务）`));
       const base={estate_id:row.id,revision:row.revision},operation=(parent,label,action,payload={},disabled=false)=>button(parent,label,action,()=>({...base,...(typeof payload==='function'?payload():payload)}),disabled);
+      operation(card,row.entrusted?'收回掌柜委托':'委托驻地掌柜经营','entrust',{enabled:!row.entrusted});
+      if(row.entrusted)card.append(e('p','掌柜按当地需求安排采购、生产与销售，保留组织供养预算；资金或利润不足时暂停投产。'));
       const funds=e('div');funds.className='estate-controls';
       if(row.owner_kind==='player'){
         const amount=input(funds,'产业资金金额',10000);

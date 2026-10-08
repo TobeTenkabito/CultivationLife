@@ -356,6 +356,10 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     )
     for _ in range(2):
         deps._recruit_sect_npc(sect, game.player.age, rng)
+    from ...system.faction_geography import faction_site
+    site = faction_site(sect)
+    for member in sect.npcs:
+        member.location_id = site["id"]
     game.sects[sect_id] = sect
     deps._ensure_sect_relations(game)
     summary = f"{founder_name}建立了{power_name}，一座新的{'修仙家族' if kind == 'family' else '宗门'}进入天下势力谱。"

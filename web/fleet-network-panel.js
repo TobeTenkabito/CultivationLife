@@ -29,11 +29,13 @@
     management.append(node('p', '组织执掌者可在驻地扩建产业，费用随当地原料价格变化，最高十级。战争会削弱产出，军需采购消耗真实库存与府库。'));
     management.append(action('扩建家族产业', 'industry', {owner_kind:'family'}), action('扩建宗门产业', 'industry', {owner_kind:'sect'}));
     for (const a of system.alliances || []) management.append(node('p', `${a.name}：${a.count} / ${a.capacity} 支商队`));
-    for (const f of system.fleets.filter(f => f.owner_kind !== 'alliance' || f.player_controlled)) {
+    for (const f of system.fleets.filter(f => f.owner_kind !== 'alliance' || f.player_controlled || f.can_raid)) {
       const row = node('section', '', 'merchant-order'); row.dataset.fleetId = f.id;
       const status = {waiting:'留驻',travelling:'运输中',selling:'待售',stranded:'受阻',retired:'解散'}[f.status];
       row.append(node('strong', `${f.name} · ${f.pledged ? '已约定加盟' : status}`),
         node('p', `${f.location} · 载货 ${f.capacity} 件 · 护卫战力 ${money(f.guard_power)} / 建议 ${money(f.guard_required)}`));
+      row.append(node('small','领队 1 名 · 护卫 1 名'));
+      if(f.can_raid)row.append(action('劫掠货财','raid',{fleet_id:f.id}),action('灭队夺货','exterminate',{fleet_id:f.id}));
       if (f.detail) row.append(node('p', `周转金 ${money(f.cash)} · 经营净收支 ${money(f.profit)} · ${f.last_result}`));
       if (f.cross_trip) row.append(node('p', `跨界运输 · ${{outbound:'去程',selling:'异界待售',return:'返航',return_selling:'返程货物待售'}[f.cross_trip.phase]} · 本段预计第 ${f.cross_trip.arrival} 年抵达`));
       if (f.cross_trip && f.player_controlled) row.append(action('撤回本趟跨界商队', 'cross_recall', {fleet_id:f.id}, !system.at_hq || ['return','return_selling'].includes(f.cross_trip.phase)));

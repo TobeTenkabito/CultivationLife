@@ -254,7 +254,11 @@ def act(game, state, action, target, roster):
                 raise ValueError("此修士暂无可贡献的修行积累")
             amount = min(available, opportunity_required(game.player) * 0.1)
             npc.cultivation_progress -= amount
-            game.player.opportunity += amount
+            from .opportunity import grant
+            from .map_system import MapCatalog
+            from ..content_registry import CONTENT_DOCUMENTS
+            maps = MapCatalog(CONTENT_DOCUMENTS["maps.json"])
+            amount = grant(game.player, amount, maps.qi_gain_efficiencies(game.player.world, game.player.location_id))
             text = f"{npc.name}贡献机缘 {amount:,.1f}，其自身修行积累相应减少。"
         else:
             victims = [

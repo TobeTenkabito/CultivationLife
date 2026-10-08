@@ -137,7 +137,8 @@ def test_real_opportunity_debited_and_prisoner_keeps_identity(throne):
     engine.store.save(game)
     engine.upper_institution_action(game.id, "royal_tribute", "opportunity:" + donor.id)
     loaded = engine.store.load(game.id)
-    assert loaded.player.opportunity == before + 1000
+    from cultivation_life.rules import opportunity_multiplier
+    assert loaded.player.opportunity == pytest.approx(before + 1000 * opportunity_multiplier(game.player))
     assert loaded.world_npcs[donor.id].cultivation_progress == 0
     engine.upper_institution_action(game.id, "royal_tribute", "prisoner:" + donor.id)
     loaded = engine.store.load(game.id)

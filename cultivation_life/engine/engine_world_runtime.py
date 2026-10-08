@@ -56,6 +56,8 @@ def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
         locations.setdefault(npc.id, []).append((None, npc))
     known_ids = set(locations)
     for sect_id, new_sect in fresh.items():
+        if game.family and game.family.id == sect_id:
+            continue  # An initial family choice keeps the original faction and NPC IDs.
         if sect_id not in game.sects:
             new_sect.npcs = [npc for npc in new_sect.npcs if npc.id not in known_ids]
             game.sects[sect_id] = new_sect

@@ -394,7 +394,8 @@ class DemonicSystemTests(unittest.TestCase):
         game.race_relations[race_pair("human", "heaven_demon")]["status"] = "alliance"
         before = game.player.opportunity
         self.engine._advance_diplomacy_unit(game, Mock(random=lambda: 0.99))
-        self.assertEqual(game.player.opportunity, before + 2)
+        from cultivation_life.rules import opportunity_multiplier
+        self.assertAlmostEqual(game.player.opportunity, before + 2 * opportunity_multiplier(game.player))
 
     def test_v7_save_migrates_demon_world_upper_realm_npcs(self):
         game_id, game = self.demonic_game()

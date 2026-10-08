@@ -125,7 +125,7 @@ def prepare_character(deps: CharacterPreparationDependencies, game: GameState) -
         int(true_cultivation.get("realm_index", game.player.realm_index)),
         int(true_cultivation.get("layer", game.player.layer)),
     )
-    if game.player.divine_sense_rank < natural_sense:
+    if game.player.divine_sense_rank < natural_sense and "custom_start" not in game.player.story_flags:
         game.player.divine_sense_rank = natural_sense
         sense_baseline_migrated = True
     changed = (

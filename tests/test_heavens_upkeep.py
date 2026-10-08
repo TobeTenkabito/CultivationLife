@@ -1,5 +1,6 @@
 """Four-world prepaid facilities: one authoritative clock and conserved inputs."""
 import copy
+from unittest.mock import patch
 
 import pytest
 
@@ -62,10 +63,14 @@ def test_all_four_worlds_finish_real_maintenance_without_new_people(local, site)
     assert deployed.player.mp == pytest.approx(before.player.mp-preview['costs']['mp'])
     assert material not in {m['id'] for m in deployed.player.formation_materials}
     assert deployed.heavens_state['runtime']['tasks'] == []
-    during = annual(local, 17)
+    # This verifies living-person clock accounting, independent of an optional
+    # ruin adventure which can now kill this visitor as organization RNG changes.
+    with patch.object(local[0], '_advance_guixu_calendar', return_value=False):
+        during = annual(local, 17)
     row = get_echo(during.heavens_state['runtime'], site.id)['upkeep']
     assert row['progress'] == 17 and row['escrow']['spent'] == 10200
-    done = annual(local, 33)
+    with patch.object(local[0], '_advance_guixu_calendar', return_value=False):
+        done = annual(local, 33)
     echo = get_echo(done.heavens_state['runtime'], site.id)
     assert echo['upkeep']['status'] == 'completed' and echo['maintained']
     assert echo['upkeep']['escrow']['spent'] == 30000 and echo['upkeep']['escrow']['refunded'] == 0

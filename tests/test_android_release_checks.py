@@ -38,7 +38,7 @@ def release_inputs(tmp_path):
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
+                 for phase in ('custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')

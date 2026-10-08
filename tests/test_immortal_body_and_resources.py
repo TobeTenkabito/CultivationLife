@@ -41,9 +41,11 @@ def test_legacy_trace_inventory_migrates_exactly_once(prepared):
 
 def test_common_opportunity_award_rolls_once_even_for_large_reward(prepared):
     engine, game, _ = prepared
-    with patch('cultivation_life.system.immortal_cultivation.grant_trace_chance') as grant:
+    from cultivation_life.rules import opportunity_multiplier
+    gain = 10**9 * opportunity_multiplier(game.player)
+    with patch('cultivation_life.system.opportunity.grant_trace_chance') as grant:
         engine._add_opportunity(game.player, 10**9)
-        grant.assert_called_once_with(game.player, 10**9)
+        grant.assert_called_once_with(game.player, pytest.approx(gain))
         engine._add_opportunity(game.player, -100)
         assert grant.call_count == 1
 

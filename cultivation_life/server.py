@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .engine.orchestration.custom_start import catalog as custom_start_catalog
 
 import argparse
 import json
@@ -145,6 +146,7 @@ class Handler(BaseHTTPRequestHandler):
                     "start_worlds": WORLD_SYSTEMS.get("start_worlds", {}),
                     "qi_sources": QI_SOURCE_NAMES,
                     "quick_starts": WORLD_SYSTEMS.get("quick_start_presets", []),
+                    "custom_start": custom_start_catalog(),
                     "extensions": EXTENSION_REPORT,
                     "monster_species": WORLD_SYSTEMS["monster_species"],
                 })
@@ -217,7 +219,7 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("path", "dao"), payload.get("seed"), payload.get("technique_element", "neutral"),
                     payload.get("preset_id"), payload.get("start_world"),
                     payload.get("monster_species_id"),
-                    payload.get("gender", "male"),
+                    payload.get("gender", "male"), payload.get("custom_start"),
                 )
                 if payload.get('tutorial_enabled') is True:
                     result = ENGINE.tutorial_action(result['id'], 'enable')

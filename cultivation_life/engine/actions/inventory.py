@@ -55,7 +55,7 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
                 raise ValueError('请先处理当前事件或劫战')
             from ...rules import opportunity_required
             remove_item(game.player,item_id)
-            game.player.opportunity += opportunity_required(game.player)*.1
+            deps._add_opportunity(game.player, opportunity_required(game.player)*.1)
             game.history.append(HistoryRecord('SYS_SPATIAL_CONSUME',1,game.player.age,'炼化空间资材',item_id,'consumed',
                 f'炼化{item.name}，获得当前境界一成机缘。',{},['spatial','item']))
             deps.store.save(game)
@@ -132,7 +132,7 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         opportunity_gain = REALMS[game.player.realm_index].opportunity_base * (.20 + potency * .04)
         game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
         game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
-        deps._add_opportunity(game.player, opportunity_gain)
+        opportunity_gain = deps._add_opportunity(game.player, opportunity_gain)
         game.history.append(HistoryRecord(
             "SYS_USE_GUIXU_CONSUMABLE", 1, game.player.age, "服用归墟奇物", item_id, "consumed",
             f"你使用{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}，并获得机缘 {opportunity_gain:.1f}。",
@@ -148,7 +148,7 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         opportunity_gain = REALMS[game.player.realm_index].opportunity_base * min(.90, .10 + potency * .06)
         game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
         game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
-        deps._add_opportunity(game.player, opportunity_gain)
+        opportunity_gain = deps._add_opportunity(game.player, opportunity_gain)
         game.history.append(HistoryRecord(
             "SYS_REFINE_GUIXU_PLANT", 1, game.player.age, "炼化归墟灵植", item_id, "refined",
             f"你炼化{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}，并获得机缘 {opportunity_gain:.1f}。",
