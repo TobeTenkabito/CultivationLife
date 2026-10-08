@@ -15,9 +15,13 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
     for war in reversed(visible_wars[-20:]):
         deps._ensure_war_shape(game, war)
         public = copy.deepcopy(war)
+        public.pop("logistics", None)
         public["attacker_name"] = deps._war_side_name(game, war["kind"], war["attacker_id"])
         public["defender_name"] = deps._war_side_name(game, war["kind"], war["defender_id"])
         public["player_side"] = deps._player_war_side(game, war)
+        from .logistics import public as public_logistics, action_quotes
+        public["supplies"] = public_logistics(game, war, public["player_side"])
+        public["supply_actions"] = action_quotes(game, war, public["player_side"])
         public["player_controls"] = war.get("status") in {"active", "peace_ready"} and deps._player_has_war_voice(game, war)
         public["can_participate"] = bool(
             war.get("status") == "active" and public["player_side"]

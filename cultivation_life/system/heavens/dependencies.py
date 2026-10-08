@@ -69,6 +69,7 @@ class HeavensDependencies:
     campaign_materials: Callable | None = None
     campaign_fight: Callable | None = None
     campaign_battle: Callable | None = None
+    campaign_finance: Callable | None = None
     campaign_world_open: Callable | None = None
     campaign_escape_plan: Callable | None = None
     campaign_escape: Callable | None = None

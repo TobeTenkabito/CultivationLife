@@ -424,6 +424,9 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
             new_status, affinity, action = "alliance", rng.uniform(72, 90), "结盟"
         else:
             new_status, affinity, action = "vassal", rng.uniform(62, 84), "确立依附"
+    from ...system.war.logistics import ready_to_attack
+    if new_status == 'war' and not ready_to_attack(game, 'race', first, world):
+        return
     deps._set_diplomatic_relation(game, relation, new_status, first, second, "race", affinity)
     first_name, second_name = RACE_DEFINITIONS[first]["name"], RACE_DEFINITIONS[second]["name"]
     summary = f"{first_name}与{second_name}{action}，双方关系转为{RELATION_LABELS[new_status]}（好感 {affinity:.0f}）。"
@@ -460,6 +463,9 @@ def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng
             new_status, affinity, action = "alliance", rng.uniform(68, 90), "缔结盟约"
         else:
             new_status, affinity, action = "vassal", rng.uniform(58, 82), "确立依附"
+    from ...system.war.logistics import ready_to_attack
+    if new_status == 'war' and not ready_to_attack(game, 'sect', first.id, world):
+        return
     deps._set_diplomatic_relation(game, relation, new_status, first.id, second.id, "sect", affinity)
     summary = f"{first.name}与{second.name}{action}，宗门关系转为{RELATION_LABELS[new_status]}（好感 {affinity:.0f}）。"
     game.history.append(HistoryRecord(

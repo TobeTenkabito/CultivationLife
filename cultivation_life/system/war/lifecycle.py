@@ -4,6 +4,7 @@ from ...models import GameState
 from ...content_registry import WORLD_SYSTEMS
 from ..doctrine.provider import battle_sources
 import random
+from . import logistics
 from ..combat.npc_battle import resolve_npc_engagement
 from .dependencies import WarLifecycleDependencies
 
@@ -38,6 +39,7 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
                     war["preliminary_resolved"] = True
                     war["vanguard_skipped"] = True
                     deps._append_war_log(game, war, "自动略过先锋战", "自动推进仅调度势力主力，玩家本人没有出阵。")
+                logistics.begin_round(game, deps.maps, war, rng, player_side)
                 contexts = deps._war_formation_contexts(game, war)
                 lines = [deps._war_formation_text(contexts)]
                 lines.append(deps._resolve_field_attack(game, war, "attacker", rng, contexts))
@@ -60,21 +62,22 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             deps._call_war_allies(game, war, "defender", rng, limit=1)
         # The player contributes personal combat power only after choosing
         # to participate through the detailed battle action.
+        logistics.begin_round(game, deps.maps, war, rng)
         attack_profile = deps._war_power_profile(game, war, "attacker", include_player=False)
         defend_profile = deps._war_power_profile(game, war, "defender", include_player=False)
         contexts = deps._war_formation_contexts(game, war)
         attack_power = max(
-            1.0, float(attack_profile["composite"]) * float(contexts["attacker"]["modifier"]),
+            1.0, float(attack_profile["composite"]) * float(contexts["attacker"]["modifier"]) * logistics.factor(war, "attacker"),
         )
         defend_power = max(
-            1.0, float(defend_profile["composite"]) * float(contexts["defender"]["modifier"]),
+            1.0, float(defend_profile["composite"]) * float(contexts["defender"]["modifier"]) * logistics.factor(war, "defender"),
         )
         voisinage_rosters = {side: deps._available_warriors(game, war, side)
                           for side in ("attacker", "defender")}
         voisinage_result = resolve_npc_engagement(
-            [(npc, deps._npc_power(npc) * float(contexts["attacker"].get("modifier", 1)))
+            [(npc, deps._npc_power(npc) * float(contexts["attacker"].get("modifier", 1)) * logistics.factor(war, "attacker"))
              for npc in voisinage_rosters["attacker"]],
-            [(npc, deps._npc_power(npc) * float(contexts["defender"].get("modifier", 1)))
+            [(npc, deps._npc_power(npc) * float(contexts["defender"].get("modifier", 1)) * logistics.factor(war, "defender"))
              for npc in voisinage_rosters["defender"]],
             WORLD_SYSTEMS.get("transcendent_combat", {}), rng,
             now=game.player.age,

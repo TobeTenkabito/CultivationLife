@@ -35,6 +35,7 @@ def bind_war_state(host) -> WarStateDependencies:
 
 def bind_war_diplomacy(host) -> WarDiplomacyDependencies:
     return WarDiplomacyDependencies(
+        _get_maps=lambda: host.maps,
         _active_war=lambda *args, **kwargs: host._active_war(*args, **kwargs),
         _add_war_participant=lambda *args, **kwargs: host._add_war_participant(*args, **kwargs),
         _allied_powers=lambda *args, **kwargs: host._allied_powers(*args, **kwargs),
@@ -83,6 +84,7 @@ def bind_war_power(host) -> WarPowerDependencies:
 
 def bind_war_combat(host) -> WarCombatDependencies:
     return WarCombatDependencies(
+        _get_maps=lambda: host.maps,
         _append_war_log=lambda *args, **kwargs: host._append_war_log(*args, **kwargs),
         _available_warriors=lambda *args, **kwargs: host._available_warriors(*args, **kwargs),
         _combat=lambda *args, **kwargs: host._combat(*args, **kwargs),
@@ -107,6 +109,7 @@ def bind_war_combat(host) -> WarCombatDependencies:
 
 def bind_war_lifecycle(host) -> WarLifecycleDependencies:
     return WarLifecycleDependencies(
+        _get_maps=lambda: host.maps,
         _append_war_log=lambda *args, **kwargs: host._append_war_log(*args, **kwargs),
         _available_warriors=lambda *args, **kwargs: host._available_warriors(*args, **kwargs),
         _call_war_allies=lambda *args, **kwargs: host._call_war_allies(*args, **kwargs),

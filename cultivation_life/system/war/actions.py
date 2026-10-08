@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import Any
+import copy
+from . import logistics
 from ...runtime import encode_rng
 from ...runtime import now_iso
 from ..npc_system import npc_team_combat_power
@@ -8,11 +10,11 @@ from .dependencies import WarActionsDependencies
 
 
 def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: str, *, ally_id: str = "") -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = copy.deepcopy(deps._load(game_id))
     war = next((row for row in game.wars if row.get("id") == war_id), None)
     if not war or war.get("status") not in {"active", "peace_ready"}:
         raise ValueError("这场战争已经结束或不存在")
-    if game.pending_event or not game.player.alive or game.player.imprisonment:
+    if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor:
         raise ValueError("当前状态无法处理征伐")
     side = deps._player_war_side(game, war)
     if not side:
@@ -22,7 +24,12 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
     ):
         raise ValueError("你尚未取得本势力的战争指挥权")
     rng = deps.decode_rng(game.seed, game.rng_state)
-    if action == "participate_round":
+    if action in {'scout', 'forage', 'resupply'}:
+        if war.get('status') != 'active':
+            raise ValueError('战争已停战，不能继续执行军需策略')
+        text = logistics.strategy(game, deps.maps, war, side, action, rng)
+        deps._append_war_log(game, war, '军需策略', text)
+    elif action == "participate_round":
         if war.get("status") != "active":
             raise ValueError("战场胜负已定，无法再次参战")
         deps._resolve_player_war_round(game, war, side, rng)
@@ -71,6 +78,7 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
             war["preliminary_resolved"] = True
             war["vanguard_skipped"] = True
             deps._append_war_log(game, war, "放弃先锋战", "你没有亲自参加先锋遭遇，直接命双方主力推进会战；本场不获得先锋士气修正。")
+        logistics.begin_round(game, deps.maps, war, rng, side)
         contexts = deps._war_formation_contexts(game, war)
         lines = [deps._war_formation_text(contexts)]
         lines.append(deps._resolve_field_attack(game, war, "attacker", rng, contexts))

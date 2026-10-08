@@ -1,4 +1,32 @@
 #map-economy { min-width: 0; }
+.caravan-atlas { margin-top:14px; min-width:0; }
+.caravan-atlas-heading { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.caravan-atlas-heading span { color:var(--muted); font-size:.85em; }
+.caravan-atlas svg { display:block; width:100%; max-height:440px; border:1px solid var(--line); border-radius:12px; margin:14px 0; background:var(--paper); }
+.caravan-route { fill:none; stroke:var(--gold); stroke-width:3; stroke-dasharray:7 6; opacity:.65; }
+.caravan-place circle { fill:var(--surface); stroke:var(--muted); stroke-width:2; }
+.caravan-place.current circle { stroke:var(--pine); stroke-width:4; }
+.caravan-place text { fill:var(--ink); font-size:17px; }
+.caravan-marker { cursor:pointer; }
+.caravan-marker circle { fill:var(--pine); stroke:var(--paper); stroke-width:2; }
+.caravan-marker text { fill:var(--paper); font-size:13px; font-weight:700; pointer-events:none; }
+.caravan-marker.selected circle,.caravan-marker:focus circle { stroke:var(--gold); stroke-width:5; }
+.caravan-map-detail { border-left:3px solid var(--gold); padding:12px 16px; background:var(--paper); min-height:100px; }
+.caravan-map-detail p { margin:6px 0; }
+.caravan-map-roster { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; max-height:160px; overflow:auto; }
+.caravan-map-roster button { font-size:.82em; text-align:left; padding:8px 12px; }
+.caravan-map-roster button[aria-pressed=true] { border-color:var(--pine); box-shadow:inset 0 -2px var(--pine); }
+#map-economy .economy-good[data-supply=scarce] { border-left-color:#b34c36; }
+#map-economy .economy-good[data-supply=surplus] { border-left-color:#3d8578; }
+#map-economy .economy-heading .supply-badge { border:1px solid currentColor; border-radius:20px; padding:3px 9px; font-weight:700; }
+#map-economy [data-supply=scarce] .supply-badge { color:#b34c36; background:#b34c3612; }
+#map-economy [data-supply=surplus] .supply-badge { color:#3d8578; background:#3d857812; }
+#map-economy [data-supply=normal] .supply-badge { color:var(--muted); }
+.economy-good > progress { width:100%; height:7px; accent-color:var(--pine); margin:12px 0 6px; }
+.economy-good[data-supply=scarce] > progress { accent-color:#b34c36; }
+.economy-good .supply-detail { font-size:.8em; line-height:1.7; }
+.map-directory-link.estate { border:1px solid var(--gold); color:var(--pine); font-weight:700; background:var(--surface); }
+.map-directory-entry.estate { border-left:3px solid var(--gold); padding-left:12px; }
 .economy-heading, .economy-tools, .economy-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .economy-heading { justify-content:space-between; }
 .economy-heading h3, .economy-good p { margin:8px 0; }

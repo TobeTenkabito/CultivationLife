@@ -106,7 +106,7 @@ def _player_has_war_voice(deps: WarDiplomacyDependencies, game: GameState, war: 
     return deps._has_race_voice(game) if war["kind"] == "race" else deps._has_sect_voice(game)
 
 
-def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False) -> dict[str, Any]:
+def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True) -> dict[str, Any]:
     current = deps._active_war(game, kind, attacker, defender)
     if current:
         return current
@@ -144,6 +144,9 @@ def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attac
     }
     war["player_side"] = deps._player_war_side(game, war)
     war["controller"] = "player" if deps._player_has_war_voice(game, war) else "ai"
+    from .logistics import initialize
+    if prepare_supplies:
+        initialize(game, deps.maps, war)
     game.wars.append(war)
     deps._append_war_log(game, war, "宣战", f"{deps._war_side_name(game, kind, attacker)}向{deps._war_side_name(game, kind, defender)}正式宣战。")
     game.history.append(HistoryRecord(

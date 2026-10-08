@@ -75,11 +75,10 @@ class CelestialSystemTests(unittest.TestCase):
 
         for stage in range(1, 6):
             game = self.engine.store.load(game_id)
-            game.player.age += 1000
-            self.assertTrue(self.engine._maybe_immortal_conversion_event(game, CertainRng()))
+            game.player.opportunity = 2000
+            self.assertFalse(self.engine._maybe_immortal_conversion_event(game, CertainRng()))
             self.engine.store.save(game)
-            choice_id = self.engine.get_game(game_id)["pending_event"]["choices"][0]["id"]
-            shown = self.engine.choose(game_id, choice_id)
+            shown = self.engine.doctrine_action(game_id, 'convert')
             self.assertEqual(shown["player"]["immortal_conversion_stage"], stage)
             self.assertAlmostEqual(shown["player"]["immortal_power"]["usable_ratio"], stage / 5)
         self.assertTrue(shown["player"]["immortal_power_converted"])
@@ -94,27 +93,19 @@ class CelestialSystemTests(unittest.TestCase):
         restored = self.engine.manage_secret_art(game_id, "suppress", "cancel")
         self.assertEqual(restored["player"]["realm_index"], 9)
 
-    def test_conversion_probability_starts_after_ten_units_and_grows_two_percent(self):
+    def test_elapsed_time_never_triggers_legacy_conversion(self):
         shown = self.engine.create_game("转元者", "otherworld", "dao", 916, preset_id="true_immortal")
         game = self.engine.store.load(shown["id"])
         game.player.immortal_power_converted = False
         game.player.immortal_conversion_stage = 0
-        game.player.immortal_conversion_last_age = game.player.age
         game.player.immortal_conversion_checked_units = 0
-        game.player.mp = 0
-
-        class ThresholdRng:
-            @staticmethod
-            def random():
-                return 0.15
-
-        game.player.age += 1000
-        self.assertFalse(self.engine._maybe_immortal_conversion_event(game, ThresholdRng()))
-        self.assertEqual(game.player.immortal_conversion_checked_units, 10)
-        game.player.age += 300
-        self.assertTrue(self.engine._maybe_immortal_conversion_event(game, ThresholdRng()))
-        self.assertEqual(game.pending_event["runtime"]["waited_units"], 13)
-        self.assertAlmostEqual(game.pending_event["runtime"]["trigger_chance"], 0.16)
+        game.pending_event = None
+        game.player.age += 10000
+        class NoRoll:
+            def random(self): raise AssertionError('conversion must not roll RNG')
+        self.assertFalse(self.engine._maybe_immortal_conversion_event(game, NoRoll()))
+        self.assertEqual(game.player.immortal_conversion_checked_units, 0)
+        self.assertIsNone(game.pending_event)
 
     def test_lower_world_periodic_thunder_is_fifty_percent_stronger(self):
         shown = self.engine.create_game("逆界者", "law_space", "dao", 914)

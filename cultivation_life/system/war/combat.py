@@ -5,6 +5,7 @@ from ...content_registry import REALMS
 from ...content_registry import WORLD_SYSTEMS
 from ..doctrine.provider import battle_sources
 import copy
+from . import logistics
 from ..npc_system import npc_team_combat_power
 import random
 from ..combat.npc_battle import resolve_npc_engagement
@@ -62,6 +63,8 @@ def _resolve_field_attack(
     defense_bonus = 1 + float(deps._war_rules().get("defender_power_bonus", 0.10))
     attack_power = deps._npc_power(striker) * deps._npc_formation_power_multiplier(game, striker.id)
     defend_power = deps._npc_power(target) * deps._npc_formation_power_multiplier(game, target.id)
+    attack_power *= logistics.factor(war, attacking)
+    defend_power *= logistics.factor(war, defending)
     attack_power *= defense_bonus if attacking == "defender" else 1.0
     defend_power *= defense_bonus if defending == "defender" else 1.0
     contexts = formation_contexts or deps._war_formation_contexts(game, war)
@@ -125,6 +128,7 @@ def _resolve_player_war_round(
             game, war, "转入主力会战",
             "你越过单独先锋战，选择直接在本轮主力会战中亲自出阵。",
         )
+    logistics.begin_round(game, deps.maps, war, rng, side if deps._player_has_war_voice(game, war) else None)
     contexts = deps._war_formation_contexts(game, war)
     pool = candidates[:min(12, len(candidates))]
     team_size = min(len(pool), rng.randint(1, 3))
@@ -145,6 +149,7 @@ def _resolve_player_war_round(
     target = {
         "target_name": f"{deps._war_side_name(game, war['kind'], war[f'{enemy}_id'])}会战队",
         "player_defending": side == "defender",
+        "war_supply_player": logistics.factor(war, side), "war_supply_enemy": logistics.factor(war, enemy),
         "target_power": max(1.0, required),
         "target_realm_index": max((npc.realm_index for npc in opponents), default=game.player.realm_index),
         "target_layer": max((npc.layer for npc in opponents), default=1),
@@ -193,6 +198,8 @@ def _resolve_war_vanguard(deps: WarCombatDependencies, game: GameState, pending:
     side = deps._player_war_side(game, war)
     if not side or not deps._player_has_war_voice(game, war):
         return "authority_lost", "你已经失去代表本势力出阵的权力。"
+    enemy = 'defender' if side == 'attacker' else 'attacker'
+    logistics.begin_round(game, deps.maps, war, rng, side)
     required = max(1.0, float(pending.get("runtime", {}).get("required_power", 1.0)))
     enemy_ids = [str(npc_id) for npc_id in pending.get("runtime", {}).get("enemy_ids", [])]
     opponents = [deps._find_npc(game, npc_id) for npc_id in enemy_ids]
@@ -206,6 +213,7 @@ def _resolve_war_vanguard(deps: WarCombatDependencies, game: GameState, pending:
     result, combat_text = deps._combat(game, {
         "target_name": enemy_name, "target_power": required,
         "player_defending": side == "defender",
+        "war_supply_player": logistics.factor(war, side), "war_supply_enemy": logistics.factor(war, enemy),
         "target_realm_index": max((npc.realm_index for npc in opponents), default=game.player.realm_index),
         "target_layer": max((npc.layer for npc in opponents), default=1),
         "combat_type": "cultivator", "members": members, "action": "repel",

@@ -20,7 +20,7 @@
     section.append(note); root.append(section);
     if (data.industry_level !== undefined) {
       const industry = document.createElement('p');
-      industry.textContent = `产业扩建 ${data.industry_level} / 10 级 · 最近军需保障 ${Math.round(data.war_funding * 100)}%`;
+      industry.textContent = `产业扩建 ${data.industry_level} / 10 级 · 门内聚合产能 ${num(data.labor_capacity)} / 年 · 基础供养 ${num(data.expected_upkeep)} / 年`;
       section.append(industry);
     }
   };

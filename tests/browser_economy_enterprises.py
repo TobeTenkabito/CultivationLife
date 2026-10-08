@@ -47,6 +47,10 @@ def main():
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned.length===1')
                             key=page.evaluate('game.map.economy.enterprises.owned[0].id')
                             card=page.locator(f'[data-estate-id="{key}"]')
+                            page.locator('#map-view-tabs button[aria-controls=map-locations]').click()
+                            page.locator('.map-directory-link.estate').click()
+                            page.get_by_role('button',name='管理产业',exact=True).click()
+                            assert card.get_attribute('open') is not None
                             def opened():expand(box);expand(card)
                             opened();page.get_by_label('产业资金金额').fill('10000');card.locator('[data-estate-action=fund]').click()
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].cash===10000')

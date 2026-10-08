@@ -28,7 +28,7 @@
   function render(data, act, options = {}) {
     const currentGame = typeof game !== 'undefined' ? game?.id : null;
     if(collectionGame!==currentGame){opened.clear();queries.clear();collectionGame=currentGame;}
-    for (const name of ['doctrine', 'immortal-veins', 'immortal-body', 'voisinage', 'daomen']) {
+    for (const name of ['immortal-conversion', 'doctrine', 'immortal-veins', 'immortal-body', 'voisinage', 'daomen']) {
       const visible = data.available && (name !== 'voisinage' || !!data.voisinages?.length);
       document.querySelector(`#${name}-card`).classList.toggle('hidden', !visible);
       document.querySelector(`[data-panel-target="${name}"]`).classList.toggle('hidden', !visible);
@@ -44,18 +44,19 @@
     const blocked = options.pending || !options.alive;
     function button(text, payload, disabled = false, dispatch = act) {
       const node = el('button', text); node.type = 'button'; node.disabled = disabled || blocked;
+      node.dataset.doctrineAction = payload.action;
       node.onclick = () => dispatch(payload); return node;
     }
     content.append(el('p', '仙界二十五道统 · Lv4 开域 · Lv5 归源 · Lv9 道成', 'doctrine-lead'));
     content.append(el('p', `可兼修多门，只有一个道统能越过 Lv4。修成当前阶段后才会揭示下一阶段。每次专修推进一个时间单位（${fmt(data.unit_years)} 年），至多修成一个道统等级。`, 'muted'));
     const conversion = el('section', null, 'doctrine-conversion');
-    conversion.append(el('h3', '仙灵力转化'), el('p', `${data.conversion.stage}/5 阶段 · 可用容量 ${fmt(data.conversion.capacity)} · 当前 ${fmt(data.conversion.current)}`));
+    conversion.append(el('h3', '仙灵力转化'), el('p', `${data.conversion.stage}/5 阶段 · 仙窍容量 ${fmt(data.conversion.capacity)} · 当前储量 ${fmt(data.conversion.current)}`));
     if (!data.conversion.complete) {
-      conversion.append(meter(data.conversion.progress, data.conversion.required, '本阶段转化积累'),
-        el('p', `积累 ${fmt(data.conversion.progress)} / ${fmt(data.conversion.required)} 年；仙界环境提供转化所需本源，普通灵气不能替代。`, 'muted'),
-        button('专修仙灵力转化', {action: 'convert'}));
+      conversion.append(meter(data.conversion.stage, 5, '仙灵力转化阶段'),
+        el('p', `下一阶段消耗 ${fmt(data.conversion.cost)} 机缘 · 当前 ${fmt(data.conversion.opportunity)}。旧专修积累已抵扣本阶段费用。`, 'muted'),
+        button('推进下一阶段', {action: 'convert'}, !data.conversion.can_convert));
     } else conversion.append(el('p', '仙元已成。消耗仙灵力不会使转化程度倒退。', 'muted'));
-    veins.append(conversion);
+    document.querySelector('#immortal-conversion-content').replaceChildren(conversion);
     const v = data.veins;
     veins.append(el('h3', `${v.realm} · ${v.phase?.name || '仙脉'} · 第 ${v.layer} 层`), el('p', `已开仙脉 ${v.opened} / ${v.total} · 每层须开 ${v.per_layer} 条，再手动突破；第九层需本境 27 脉贯通。`),
       meter(v.opened, v.total, '本境仙脉'), el('p', `机缘 ${fmt(v.opportunity)} / 无尽 · 仙痕 ${fmt(v.traces)}`));

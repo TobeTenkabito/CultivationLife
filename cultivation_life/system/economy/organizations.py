@@ -94,65 +94,8 @@ def _entity(game, row):
 
 
 def produce(game, maps, entity, row, *, years=1, extra=False):
-    """Produce against local dealer orders; unsold output is never fabricated.
-
-    No interregional supply is credited. Each sold unit is added once to the
-    producing site's stock; all other regions still require merchant caravans.
-    """
-    from ..faction_geography import faction_site
-    from ...npc_custody import is_free
-    world, location = entity.world, faction_site(entity)['id']
-    ensure_regional_market(game, maps, world, location)
-    market = game.economy_v2['markets'][f'{world}:{location}']
-    # New commercial crop chains must not reroll legacy faction output or make
-    # upper-world organizations select tier-one crops instead of local goods.
-    original = commodity_catalog(world, commercial=False)
-    native = {k: v for k, v in market['commodities'].items() if not v.get('imported') and k in original}
-    minimum_tier = min((v['tier'] for v in native.values()), default=0)
-    goods = sorted(k for k, v in native.items() if v['tier'] == minimum_tier)
-    if not goods:
-        return 0
-    index = int.from_bytes(hashlib.sha256(entity.id.encode()).digest()[:4], 'big') % len(goods)
-    item = goods[index]
-    product = market['commodities'][item]
-    members = [n for n in entity.npcs if is_free(n) and n.world == world]
-    capacity = sum(max(5, n.realm_index ** 4 * 10) for n in members)
-    if extra:
-        capacity = max(20, capacity // 4) if members else 0
-    capacity *= min(1000, game.economy_v2['worlds'][world]['scale'])
-    capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1.)
-    credit = row.get('production_credit', 0) if row.get('commodity') == item else 0
-    # Expensive upper-world goods may require several years of work. Keep a
-    # bounded work-in-progress value, never manufacture unsold inventory.
-    credit = min(credit + capacity * years, product['reference'] * min(1000000, product['target'] * 2))
-    row['production_credit'] = credit
-    quantity = min(1000000, int(credit / max(1, product['reference'])),
-                   max(0, int(product['target'] * 2 - product['stock'])))
-    dealer = f'market:{market["id"]}'
-    low, high = 0, quantity
-    while low < high:
-        middle = (low + high + 1) // 2
-        if quote(product, 'sell', middle)['gross'] <= balance(game, dealer):
-            low = middle
-        else:
-            high = middle - 1
-    row['commodity'] = item
-    if not low:
-        return 0
-    sale = quote(product, 'sell', low)
-    transfer_value(game, dealer, key(row['kind'], entity.id), sale['total'], '组织驻地产出销售')
-    transfer_value(game, dealer, f'operator:{market["id"]}', sale['fee'], '组织产出交易手续费')
-    product['stock'] += low
-    product['production'] += low
-    product['volume'] += low
-    market['turnover'] += sale['gross']
-    market['fees'] += sale['fee']
-    reprice(game, market, product)
-    row['produced'] += low
-    from .industry import supplier_delivery
-    supplier_delivery(market, key(row['kind'], entity.id), low, game=game, item=item)
-    row['production_credit'] = max(0, credit - low * product['reference'])
-    return sale['total']
+    from .organization_production import produce as produce_portfolio
+    return produce_portfolio(game, maps, entity, row, years=years, extra=extra)
 
 
 def settle_faction(game, maps, row, years):
@@ -170,9 +113,7 @@ def settle_faction(game, maps, row, years):
     freight = f'transport:{world}:{entity.id}'
     if freight in game.economy_v2['accounts']:
         row['income'] += pay(game, freight, source, balance(game, freight), '传送阵货运收入归属府库')
-    from ...npc_custody import is_free
-    members = [n for n in entity.npcs if is_free(n) and n.world == world]
-    due = sum(25 * WORLD_SYSTEMS['world_profiles'][world]['tier'] + n.realm_index ** 2 * 12 for n in members) * years
+    due = row.get('expected_upkeep', 0) * years
     if row['kind'] == 'family':
         due += sum(c.get('alive', True) and c.get('world') == world and c.get('age', 0) < 8 for c in game.player.offspring) * 15 * years
         due += int(game.family_state.get('debt', 0))
@@ -181,6 +122,8 @@ def settle_faction(game, maps, row, years):
     row['shortfall'] = due - paid
     if row['kind'] == 'family':
         game.family_state['debt'] = due - paid
+    from .depot import advance as advance_depot
+    advance_depot(game, maps, entity, row)
 
 
 def settle_institution(game, row, years):
@@ -257,7 +200,9 @@ def public_finance(game, kind, identity):
         return None
     return {k: row[k] for k in ('last_year', 'income', 'expense', 'shortfall', 'benefit_paid', 'benefit_due', 'produced')} | dict(
         balance=balance(game, address), product=ITEM_CATALOG[row['commodity']].name if row['commodity'] else None,
-        industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.))
+        industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.),
+        workforce=dict(row.get('workforce', {})), labor_capacity=row.get('labor_capacity', 0),
+        expected_upkeep=row.get('expected_upkeep', 0))
 
 
 def welfare(game, entity):

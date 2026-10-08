@@ -123,9 +123,53 @@ def bind_campaign(engine):
                       non_story_combat=True, max_rounds=12)
         return engine._combat(game, target, True, rng)
 
+    def funding(game, action, row=None, materials=None):
+        from ...system.economy import campaign_finance as finance
+        from ...system.heavens.campaign_definitions import CAMPAIGN_ID, BUDGET, DEFENSE_BUDGET, DEFENDER, INITIAL_SUPPLY, DONOR, AID_BUDGET
+        if action == 'prepare':
+            return finance.prepare(game,engine.maps,CAMPAIGN_ID,'attacker',SOURCE,'demon',SOURCE_SITE,
+                BUDGET,INITIAL_SUPPLY,sum(i['base_value'] for i in materials))
+        if action == 'defense':
+            return finance.prepare(game,engine.maps,CAMPAIGN_ID,'defender',DEFENDER,'human',TARGET_SITE,DEFENSE_BUDGET)
+        if action == 'aid':
+            entity=game.sects.get(DONOR)
+            return bool(entity and finance.prepare(game,engine.maps,CAMPAIGN_ID,'aid',DONOR,'spirit',
+                faction_site(entity)['id'],AID_BUDGET,materials=sum(i['base_value'] for i in materials)))
+        coverage=1.
+        for side,owner,world,site,budget in [('attacker',SOURCE,'demon',SOURCE_SITE,row['budget']),
+                ('defender',DEFENDER,'human',TARGET_SITE,(row.get('defense') or {}).get('budget'))]:
+            if not budget:continue
+            if side=='defender' and row['defense']['status']=='declined':continue
+            key=finance.address(CAMPAIGN_ID,side)
+            if key not in game.economy_v2.get('campaigns',{}):
+                # Existing transported items stay in their old unique counters.
+                # Only future cash commitment is adopted, on an actual year step.
+                if not finance.prepare(game,engine.maps,CAMPAIGN_ID,side,owner,world,site,max(0,budget['total']-budget['spent'])):
+                    if side=='attacker':coverage=0.
+                    continue
+                game.economy_v2['campaigns'][key]['charged']=budget['spent']
+            present=[u for u in row['units'] if u['faction_id']==owner and u['phase']=='stationed']
+            forward=side=='attacker' and any(facts(game,u)['world']=='human' for u in present)
+            frontworld,frontsite=('human',TARGET_SITE) if forward else (world,site)
+            ratio=finance.settle(game,engine.maps,CAMPAIGN_ID,side,budget['spent'],frontworld,frontsite,
+                portal_scale=len(present) if side=='attacker' and row['gate']['state']=='open' else 0,
+                finished=row['status'] in {'withdrawn','failed'} or bool(budget['refunded']))
+            coverage=min(coverage,ratio) if side=='attacker' else coverage
+        aid=row.get('aid')
+        if aid and aid['status']!='declined':
+            book=game.economy_v2.get('campaigns',{}).get(finance.address(CAMPAIGN_ID,'aid'))
+            if book:
+                finance.settle(game,engine.maps,CAMPAIGN_ID,'aid',aid['spent'],book['world'],book['location'],
+                    finished=aid['status'] in {'arrived','claimed','cancelled'})
+        return coverage
+
     def battle(game, attacker, defender, rng):
         a, b = person(game, attacker), person(game, defender)
-        return resolve_local_engagement([(a, engine._npc_power(a))], [(b, engine._npc_power(b))],
+        books=game.economy_v2.get('campaigns',{})
+        def factor(side):
+            coverage=books.get(f'campaign:lanjiang_gate:{side}',{}).get('coverage',0.)
+            return 1. if coverage>=1 else .95 if coverage>=.75 else .8 if coverage>=.5 else .55 if coverage>=.25 else .25
+        return resolve_local_engagement([(a, engine._npc_power(a)*factor('attacker'))], [(b, engine._npc_power(b)*factor('defender'))],
             WORLD_SYSTEMS.get('transcendent_combat', {}), rng, now=game.player.age,
             sources=battle_sources(game, {a.id: a, b.id: b}))
 
@@ -153,7 +197,7 @@ def bind_campaign(engine):
 
     return dict(campaign_authority=authority, campaign_roster=roster, campaign_deploy=deploy,
                 campaign_facts=facts, campaign_road=route, campaign_move=move, campaign_materials=materials,
-                campaign_fight=fight, campaign_battle=battle,
+                campaign_fight=fight, campaign_battle=battle, campaign_finance=funding,
                 campaign_escape_plan=escape_plan, campaign_escape=escape,
                 campaign_relief=relief, campaign_release=release,
                 campaign_world_open=lambda world: bool(WORLD_SYSTEMS['world_profiles'][world]['enabled']))

@@ -99,6 +99,8 @@ def validate_economy(value, merchants=None, document=None):
             if 'welfare_year' in row:
                 require(type(row['welfare_year']) is int and row['welfare_year'] >= 0)
     validate_estates(value, require, document)
+    from .logistics_schema import validate_logistics
+    validate_logistics(value, document, require)
     validate_receipts(document, require)
     if 'transport' in value:
         transport = value['transport']

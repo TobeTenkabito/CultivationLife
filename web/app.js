@@ -1637,6 +1637,7 @@ function renderFaction(faction) {
   const details = document.createElement('p'); details.className = 'faction-meta';
   details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution} · 宗门总战力 ${number(faction.total_power || 0)}`; summary.appendChild(details);
   window.renderOrganizationFinance?.(summary, faction.finance);
+  window.OrganizationDepot?.render(summary, faction.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);
@@ -1811,6 +1812,7 @@ function renderWars(system) {
       : '无统御阵势';
     morale.innerHTML = htmlText`<div><b>${war.attacker_name || '未知进攻方'}</b><span>士气 ${number(war.morale.attacker)} · 厌战 ${number(war.exhaustion.attacker)}%</span><small>总战力 ${number(attackPower.total || 0)} · 高阶战力 ${number(attackPower.elite || 0)} · 阵势后 ${number(attackPower.effective_composite || attackPower.composite || 0)}</small><small>${formationLine(attackFormation)}</small><i style="width:${Math.min(100, war.morale.attacker)}%"></i></div><div><b>${war.defender_name || '未知防御方'}（守方战力 +10%）</b><span>士气 ${number(war.morale.defender)} · 厌战 ${number(war.exhaustion.defender)}%</span><small>总战力 ${number(defendPower.total || 0)} · 高阶战力 ${number(defendPower.elite || 0)} · 阵势后 ${number(defendPower.effective_composite || defendPower.composite || 0)}</small><small>${formationLine(defendFormation)}</small><i style="width:${Math.min(100, war.morale.defender)}%"></i></div>`;
     body.appendChild(morale);
+    window.WarLogistics?.render(body, war, action => mutate(`/api/games/${game.id}/war-action`, {war_id:war.id, action}));
     const coalitions = document.createElement('div'); coalitions.className = 'war-coalitions';
     ['attacker', 'defender'].forEach(side => {
       const column = document.createElement('section');
@@ -1840,7 +1842,7 @@ function renderWars(system) {
       rosters.appendChild(column);
     });
     body.appendChild(rosters);
-    const actions = document.createElement('div'); actions.className = 'war-actions';
+    const actions = document.createElement('div'); actions.className = 'war-actions war-command-group';
     if (war.can_participate && war.status === 'active') {
       actions.appendChild(warButton(war.id, 'participate_round', `亲自参加第 ${Number(war.battles || 0) + 1} 场会战`));
     }
@@ -1986,6 +1988,7 @@ function renderFamily(family, governance) {
     : '与道侣缠绵可能孕育后代；双方境界越高概率越低，化神起无法自然孕育。拥有踏入仙途的后代后方可立族。';
 
   window.FamilyPanel?.render(content, family, payload => mutate(`/api/games/${game.id}/family-action`, payload));
+  window.OrganizationDepot?.render(content, family?.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if ((!family?.exists || family?.extinct) && family?.can_found) {
     content.appendChild(namedCreationForm('建立修仙家族', '家族名号', '开枝立族', name => mutate(`/api/games/${game.id}/create-family`, {name})));
   }

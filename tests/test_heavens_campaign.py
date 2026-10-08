@@ -40,9 +40,21 @@ def advance(bundle, count=1, until=None):
     return work
 
 
+def fund_campaign(engine,game):
+    from cultivation_life.system.economy.organizations import register
+    from cultivation_life.system.economy.ledger import transfer_value
+    work=engine.store.load(game.id)
+    for identity in ('blood_prison','tianjian','taixuan'):
+        entity=work.sects[identity]
+        register(work,'sect',identity,entity.world)
+        transfer_value(work,f'background:{entity.world}',f'organization:sect:{identity}',2000000,'验收远征预备资金')
+    engine.store.save(work)
+
+
 @pytest.fixture
 def military(ready):
     engine, game, deps = ready
+    fund_campaign(engine,game)
     def step(work, rng, news):
         annual(bundle, work)
         return True
@@ -73,6 +85,20 @@ def opened(bundle):
     work = advance(bundle, 100, until=lambda g: campaign.get(g)['gate']['state'] == 'open')
     assert campaign.get(work)['gate']['state'] == 'open'
     return work
+
+
+def test_legacy_unfunded_defender_does_not_withdraw_funded_attacker(military):
+    from cultivation_life.system.economy.ledger import balance, transfer_value
+    work=load(military)
+    campaign.request_defense(military[2],work,work.heavens_state['runtime']['processed_years'])
+    row=campaign.get(work)
+    assert row['defense']['status']=='approved'
+    book=work.economy_v2['campaigns'].pop('campaign:lanjiang_gate:defender')
+    source='organization:sect:tianjian'
+    transfer_value(work,source,'background:human',balance(work,source),'旧档无力继续拨付')
+    assert military[2].campaign_finance(work,'settle',row=row)==1
+    assert 'campaign:lanjiang_gate:defender' not in work.economy_v2['campaigns']
+    assert row['status']=='active'
 
 
 def test_two_end_construction_real_roads_and_exclusive_assets(military):
@@ -125,7 +151,7 @@ def test_closing_route_freezes_manifest_and_does_not_duplicate_people(military):
 
 def test_authority_revocation_stops_lift_and_returns_actual_people(military):
     work = opened(military)
-    work.intrigue_state.setdefault('factions', {})['sect:blood_prison'] = {'controller_id':'player'}
+    work.intrigue_state.setdefault('factions', {}).setdefault('sect:blood_prison', {}).update(controller_id='player')
     military[0].store.save(work)
     work = advance(military)
     assert campaign.get(work)['status'] == 'withdrawing'
@@ -354,7 +380,7 @@ def test_donor_change_revokes_only_undelivered_aid(military):
     work = load(military); work.player.location_id = 'wudi_plain'; military[0].store.save(work)
     issue(military,'campaign_report'); issue(military,'campaign_aid')
     work = advance(military,3)
-    work.intrigue_state.setdefault('factions',{})['sect:taixuan'] = {'controller_id':'player'}
+    work.intrigue_state.setdefault('factions',{}).setdefault('sect:taixuan',{}).update(controller_id='player')
     military[0].store.save(work)
     work = advance(military)
     aid = campaign.get(work)['aid']
@@ -415,7 +441,7 @@ def test_transport_arrival_save_failure_restores_same_manifest_and_person(milita
 
 def test_return_lane_admits_only_one_actual_person_per_year(military):
     work = opened(military); work = advance(military,16)
-    work.intrigue_state.setdefault('factions',{})['sect:blood_prison'] = {'controller_id':'player'}
+    work.intrigue_state.setdefault('factions',{}).setdefault('sect:blood_prison',{}).update(controller_id='player')
     military[0].store.save(work)
     work = advance(military)
     returning = [u for u in campaign.get(work)['units'] if u['phase'] == 'returning']
@@ -457,7 +483,7 @@ def test_legacy_completed_recon_is_read_only_then_derives_only_existing_survey(m
 @pytest.mark.parametrize('block', ['player_office','extinct','no_people','no_budget','generation_off','ward_restored'])
 def test_no_military_order_without_real_approval_people_or_motive(military, block):
     work = legacy_recon_save(military)
-    if block == 'player_office': work.intrigue_state.setdefault('factions',{})['sect:blood_prison'] = {'controller_id':'player'}
+    if block == 'player_office': work.intrigue_state.setdefault('factions',{}).setdefault('sect:blood_prison',{}).update(controller_id='player')
     elif block == 'extinct': work.sects[SOURCE].extinct = True
     elif block == 'no_people':
         for npc in work.sects[SOURCE].npcs: npc.realm_index = 6
@@ -483,6 +509,7 @@ def test_no_military_order_without_real_approval_people_or_motive(military, bloc
 
 
 def test_late_original_warning_still_reaches_defender_after_campaign_started(ready):
+    fund_campaign(ready[0],ready[1])
     issue(ready,'frontier_inquire','lanjiang_frontier')
     work = advance(ready,100,until=lambda g: frontier.get(g)['phase'] == 'scouting')
     work.player.location_id = 'lanjiang_steppe'; ready[0].store.save(work)

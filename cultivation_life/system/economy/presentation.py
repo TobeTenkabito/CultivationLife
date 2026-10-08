@@ -22,7 +22,8 @@ def public_economy(game):
         previous = row['history'][-1][1] if row['history'] else row['reference']
         rows.append(dict(id=item, name=ITEM_CATALOG[item].name, stock=int(row['stock']),
             held=holdings.get(item, 0), can_buy=row['tier'] <= game.player.realm_index + 1,
-            price=round(row['price'], 2), quotes=prices,
+            price=round(row['price'], 2), quotes=prices, stock_ratio=round(ratio, 3),
+            target=round(row['target'], 1), reference=round(row['reference'], 2),
             status='紧缺' if ratio < .6 else '充足' if ratio > 1.3 else '正常',
             trend='↑' if row['price'] > previous * 1.01 else '↓' if row['price'] < previous * .99 else '→',
             production=round(row['production'], 1), consumption=round(row['consumption'], 1),
@@ -35,7 +36,7 @@ def public_economy(game):
         liquidity=balance(game, f'market:{market["id"]}'),
         operator_balance=balance(game, f'operator:{market["id"]}'),
         world_treasury=balance(game, f'world:{game.player.world}'),
-        turnover=market['turnover'], fees=market['fees'], rows=rows,
+        turnover=market['turnover'], fees=market['fees'], war_income=market.get('war_income', 0), rows=rows,
         freight_in=market.get('freight_in', 0), freight_out=market.get('freight_out', 0),
         war_pressure=market.get('war_pressure', False),
         suppliers=[dict(owner=k, volume=round(v, 1), share=round(v / max(1, sum(market.get('suppliers', {}).values())), 3))

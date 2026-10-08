@@ -173,5 +173,5 @@ def _ensure_wars(deps: WarStateDependencies, game: GameState) -> bool:
                 continue
             first, second = key.split("|") if "|" in key else key.split(":")
             if not deps._active_war(game, kind, first, second) and system_war_allowed(game, kind, first, second):
-                deps._start_war(game, kind, first, second)
+                deps._start_war(game, kind, first, second, prepare_supplies=False)
     return changed or len(game.wars) != before

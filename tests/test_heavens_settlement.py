@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from test_heavens_campaign import local, site, ready, military, construction, opened, advance, issue, load, annual
+from test_heavens_campaign import local, site, ready, military, construction, opened, advance, issue, load, annual, fund_campaign
 from cultivation_life.system.heavens import operations
 from cultivation_life.models import GameState
 from cultivation_life.rules import max_hp, max_mp
@@ -44,7 +44,7 @@ def test_actual_garrison_and_finite_admin_no_whole_world_seizure(military):
     assert state['garrison_id'] != state['governor_id']
     assert state['administration_spent'] == 100
     assert work.sects['tianjian'].world == 'human'
-    assert not work.intrigue_state.get('factions') and not work.wars
+    assert all(not r.get('controller_id') for r in work.intrigue_state['factions'].values()) and not work.wars
     assert occupied(work) and resource_reason(work, 'treasure')
     assert not occupied(work, 'human', 'muling_desert')
     assert not occupied(work, 'demon', 'lanjiang_steppe')
@@ -100,7 +100,7 @@ def test_local_truce_named_delegates_and_actual_return(military):
     row = campaign.get(work)
     assert row['status'] == 'withdrawn' and row['settlement']['outcome'] == 'truce'
     assert all(work.world_npcs[u['person_id']].location_id == u['home'] for u in row['units'])
-    assert not work.wars and not work.intrigue_state.get('factions')
+    assert not work.wars and all(not r.get('controller_id') for r in work.intrigue_state['factions'].values())
 
 
 def test_vassal_requires_real_guards_and_expires_without_scope_expansion(military):
@@ -127,13 +127,13 @@ def test_successor_does_not_inherit_treaty_and_original_ids_survive(military):
     issue(military, 'campaign_vassal')
     work = load(military); row = campaign.get(work)
     mandates = copy.deepcopy(row['settlement']['mandates'])
-    work.intrigue_state.setdefault('factions', {})['sect:blood_prison'] = {'controller_id': 'player'}
+    work.intrigue_state.setdefault('factions', {}).setdefault('sect:blood_prison', {}).update(controller_id='player')
     military[0].store.save(work)
     work = advance(military)
     assert campaign.get(work)['status'] == 'withdrawing'
     assert campaign.get(work)['settlement']['treaty']['status'] == 'review'
     assert campaign.get(work)['settlement']['mandates'] == mandates
-    assert work.intrigue_state['factions']['sect:blood_prison'] == {'controller_id': 'player'}
+    assert work.intrigue_state['factions']['sect:blood_prison']['controller_id'] == 'player'
 
 
 def test_old_campaign_load_is_pure_and_does_not_forge_remote_delegation(military):
@@ -304,6 +304,7 @@ def test_returning_actual_ward_allows_scoped_withdrawal_agreement(military):
 
 
 def test_real_early_warning_to_gate_aid_and_peace_without_synthetic_delegates(ready):
+    fund_campaign(ready[0],ready[1])
     bundle = None
     def step(work, rng, news):
         annual(bundle, work)

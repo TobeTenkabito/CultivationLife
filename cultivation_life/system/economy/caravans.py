@@ -374,6 +374,10 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
         owned = fleet.get('player_controlled') or owned_alliance or (member.get('world') == world and member.get('alliance_id') == fleet['alliance_id'])
         row = {key: fleet[key] for key in ('id','name','alliance_id','status','capacity','voyages','last_result')}
         row.update(location=maps.location(world, fleet['location'])['name'],
+            origin_id=cargo['origin'] if cargo else None,
+            destination_id=cargo['destination'] if cargo else None,
+            departure=cargo['departure'] if cargo else None,
+            route=list(cargo.get('route', [cargo['origin'], cargo['destination']])) if cargo else [],
             origin=maps.location(world, cargo['origin'])['name'] if cargo else None,
             destination=maps.location(world, cargo['destination'])['name'] if cargo else None,
             arrival=cargo['arrival'] if cargo else None, detail=owned and not local)

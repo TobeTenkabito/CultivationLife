@@ -24,6 +24,7 @@ def bind_doctrine_study(host) -> DoctrineStudyDependencies:
 
 def bind_doctrine_actions(host) -> DoctrineActionDependencies:
     return DoctrineActionDependencies(
+        _complete_immortal_conversion_stage=lambda *args, **kwargs: host._complete_immortal_conversion_stage(*args, **kwargs),
         _begin_doctrine_action=lambda *args, **kwargs: host._begin_doctrine_action(*args, **kwargs),
         _begin_fusion_study=lambda *args, **kwargs: host._begin_fusion_study(*args, **kwargs),
         _cultivation_game=lambda *args, **kwargs: host._cultivation_game(*args, **kwargs),

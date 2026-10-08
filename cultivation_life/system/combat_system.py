@@ -209,6 +209,11 @@ class PlayerCombatSystem:
                 artificial.append(condition)
         tags = [natural, *artificial]
         enemy_units = cls._enemy_units(target)
+        if 'war_supply_player' in target or 'war_supply_enemy' in target:
+            from dataclasses import replace
+            player_units = [replace(u, power=u.power * max(.25, min(1., target.get('war_supply_player', 1.)))) for u in player_units]
+            enemy_units = [replace(u, power=u.power * max(.25, min(1., target.get('war_supply_enemy', 1.)))) for u in enemy_units]
+
         player_power_max = max(1.0, sum(unit.power for unit in player_units))
         player_power = max(1.0, sum(unit.power * unit.integrity for unit in player_units))
         enemy_power = max(1.0, sum(unit.power for unit in enemy_units))

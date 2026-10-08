@@ -51,6 +51,8 @@ def start(deps, game, now):
     # One registration only. A returned expedition's physical survey is the
     # evidence; an unrelated player victory never grants military permission.
     items = deps.campaign_materials(game, 'demon', CAMPAIGN_ID, 3)
+    if not deps.campaign_finance(game,'prepare',materials=items):
+        return
     row = dict(id=CAMPAIGN_ID, revision=1, created_at=now, last_year=now, status='active',
         authorization=permit(plan['permit'], now), evacuation_route=EVAC_ROUTE,
         evidence=dict(recon['landing_evidence']), motive='recover_linked_ward', units=plan['units'],
@@ -78,7 +80,8 @@ def request_defense(deps, game, now):
         return
     plan = deps.campaign_roster(game, DEFENDER, ['defender'])
     budget = dict(owner=DEFENDER, total=DEFENSE_BUDGET, spent=0, refunded=0)
-    if not plan or (2*plan['units'][0]['road_years']+40)*ANNUAL_COST > DEFENSE_BUDGET:
+    if (not plan or (2*plan['units'][0]['road_years']+40)*ANNUAL_COST > DEFENSE_BUDGET
+            or not deps.campaign_finance(game,'defense')):
         budget['refunded'] = DEFENSE_BUDGET
         row['defense'] = dict(status='declined', authorization=None, budget=budget)
         return
@@ -94,6 +97,8 @@ def request_aid(deps, game, now):
     authority = deps.campaign_authority(game, DONOR, 'one_material_aid')
     if authority and deps.campaign_world_open('spirit') and deps.campaign_world_open('human'):
         item = deps.campaign_materials(game, 'spirit', 'lanjiang-aid', 1)[0]
+        if not deps.campaign_finance(game,'aid',materials=[item]):
+            raise ValueError('援助宗门府库不足以支付阵材和运输经费')
         row['aid'] = dict(status='transit', authorization=permit(authority, now, route=AID_ROUTE),
             material=item, progress=0, duration=16, spent=0, refunded=0, owner='shipment', last_year=now,
             notice_progress=0, notice_delivered=False)
@@ -229,6 +234,7 @@ def year_step(deps, game):
     advance_aid(deps, game, row, now)
     settlement.before_year(deps, game, row, now, withdraw)
     if row['status'] in {'withdrawn', 'failed'}:
+        deps.campaign_finance(game,'settle',row=row)
         settlement.after_year(deps, game, row, now, withdraw)
         return
     if row['status'] == 'active' and runtime['frontier']['reported'] and not row['defense_requested']:
@@ -278,4 +284,6 @@ def year_step(deps, game):
     if all(u['phase'] in TERMINAL_UNITS for u in row['units']):
         row['status'] = 'withdrawn'
         row['budget']['refunded'] = BUDGET-row['budget']['spent']
+    if deps.campaign_finance(game,'settle',row=row)<.25 and row['status']=='active':
+        withdraw(row,'府库实际军费枯竭，停止维持界门并撤离')
     settlement.after_year(deps, game, row, now, withdraw)

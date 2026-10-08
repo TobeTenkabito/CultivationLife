@@ -30,9 +30,9 @@
     if(!s.can_cultivate){root.append(note('已炼化元神可在御傀面板提纯。登临修罗界、达到修罗境后开启此处修持。'));return;}
     const content=el('div',null,'asura-page');content.dataset.page=tab;root.append(content);
     if(tab==='conversion'){
-      const conversion=section('煞元转化',converted?'五重转化已完成，可开脉、锻体和凝练煞元。':'按顺序完成五重转化事件，每重开放两成可用煞元。');
+      const conversion=section('煞元转化',converted?'五重转化已完成，可开脉、锻体和凝练煞元。':'消耗少量机缘逐重转化，每重开放两成可用煞元。');
       const steps=el('ol',null,'asura-steps');['引煞','洗元','凝旋','通窍','归一'].forEach((title,i)=>{const n=el('li',`${i+1} · ${title}`);n.dataset.state=i<(s.conversion||0)?'done':i===(s.conversion||0)?'current':'locked';steps.append(n);});conversion.append(steps);
-      if(!converted)conversion.append(button(`进行第 ${(s.conversion||0)+1} 重转化`,'convert'));
+      if(!converted)conversion.append(note(`下一重消耗 ${fmt(s.conversion_quote.cost)} 机缘 · 当前 ${fmt(s.conversion_quote.opportunity)}`),button(`进行第 ${(s.conversion||0)+1} 重转化`,'convert',{},!s.conversion_quote.can_convert));
       content.append(conversion);
     }
     if(tab==='body'){

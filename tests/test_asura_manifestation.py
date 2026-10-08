@@ -93,17 +93,20 @@ def test_refined_soul_consumed_once(ready):
         engine.asura_action(game.id, 'purify', 'soul')
 
 
-def test_five_real_conversion_events(ready):
+def test_five_paid_conversion_commands(ready):
     engine, game = ready
     game.player.asura_cultivation['conversion'] = 0
     game.player.immortal_aperture['current'] = 0
     engine.store.save(game)
-    for stage in range(1, 6):
+    from cultivation_life.system.conversion import COSTS
+    opportunity=game.player.opportunity
+    for stage, cost in enumerate(COSTS, 1):
         result = engine.asura_action(game.id, 'convert')
-        assert result['pending_event']['id'] == f'EVT_ASURA_CONVERSION_{stage}'
-        engine.choose(game.id, 'convert')
+        assert result['pending_event'] is None
+        opportunity-=cost
         saved = engine.store.load(game.id)
         assert saved.player.asura_cultivation['conversion'] == stage
+        assert saved.player.opportunity == opportunity and saved.active_trial is None
     with pytest.raises(ValueError):
         engine.asura_action(game.id, 'convert')
 

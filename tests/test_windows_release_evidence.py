@@ -60,7 +60,7 @@ def write_success_logs(root):
             f'heavens-workbench-ui-{rid}.log': 'real isolated execution and snapshot restore passed',
             f'exe-{rid}-verification.log': 'EXE verified: old binary\nEXE verified: old binary'}
     logs.update({f'{check}-ui-{rid}.log': 'passed'
-                 for check in ('asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
+                 for check in ('war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
                                'start-layout', 'tutorial', 'spatial', 'debug-console',
                                'economy-governance', 'economy-enterprises', 'economy-expansion', 'events')})
     for name, text in logs.items():
