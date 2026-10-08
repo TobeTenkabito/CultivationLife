@@ -65,4 +65,15 @@
 .doctrine-seal { display:grid; place-items:center; flex:0 0 2.7rem; height:2.7rem; border:1px solid currentColor; border-radius:50%; opacity:.8; font-size:1.3rem; }
 .doctrine-search { width:100%; min-width:0; box-sizing:border-box; margin:.6rem 0; padding:.7rem; color:inherit; background:transparent; border:1px solid currentColor; border-radius:.5rem; }
 .doctrine-compact[hidden] { display:none !important; }
+.true-form-panel { border-inline-start:4px solid var(--accent, #88733e); background:linear-gradient(120deg, rgba(136,115,62,.08), transparent); }
+.true-form-eyebrow { display:block; font-size:.78rem; letter-spacing:.18em; opacity:.7; }
+.true-form-panel h3 { margin:.65rem 0; font-size:1.5rem; }
+.true-form-stages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.45rem; margin:1rem 0; }
+.true-form-stages span { padding:.65rem .3rem; border:1px solid var(--line, #b9b099); border-radius:.5rem; text-align:center; font-size:.8rem; opacity:.65; }
+.true-form-stages .attained { opacity:1; background:rgba(136,115,62,.14); font-weight:700; }
+.true-form-choice { display:flex; align-items:end; flex-wrap:wrap; gap:.8rem; margin:1rem 0; }
+.true-form-choice label { display:grid; gap:.5rem; flex:1 1 12rem; min-width:0; }
+.true-form-choice select { width:100%; min-height:44px; color:inherit; background:var(--paper, #f5f0e3); border:1px solid var(--line, #b9b099); border-radius:.45rem; padding:.6rem; }
+.true-form-choice button { min-height:44px; }
+@media(max-width:480px) { .true-form-stages { grid-template-columns:repeat(2,minmax(0,1fr)); } .true-form-choice button { width:100%; } }
 @media(max-width:480px) { .doctrine-compact > summary { padding:.3rem; gap:.5rem; } .doctrine-compact > summary::after { font-size:.7em; } }

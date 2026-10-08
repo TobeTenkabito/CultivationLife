@@ -529,6 +529,24 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     async("loadGame("+JSONObject.quote(id)+")");
                     check(Boolean.TRUE.equals(js("game.upper_voisinages.rows[0].level===2&&game.aperture.current>0")),"Upper cultivation persisted");
                 }
+                String trueFormId=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本相铸域原生验收',preset_id:'nether_upper',monster_species_id:'avian',seed:251})});await loadGame(g.id);return g.id;})()");
+                tapSelector("[data-panel-target=upper-voisinage]");
+                waitForJs("!!document.querySelector('[data-true-form-action=true_form_confirm]')","True form preview");
+                double trueFormEnergy=((Number)js("game.aperture.current")).doubleValue();
+                tapSelector("[data-true-form-action=true_form_confirm]");
+                waitForJs("!busy && !!game.upper_voisinages.true_form.blueprint","Native blueprint confirmation");
+                check(((Number)js("game.aperture.current")).doubleValue()==trueFormEnergy,"Blueprint must not refill energy");
+                tapSelector("#upper-voisinage-content details:last-of-type summary");
+                tapSelector("#upper-voisinage-content details:last-of-type button:last-child");
+                waitForJs("!busy && game.upper_voisinages.true_form.level===1","Native true form learning");
+                tapSelector("#upper-voisinage-content details:last-of-type button:first-of-type");
+                waitForJs("!busy && game.upper_voisinages.rows[game.upper_voisinages.rows.length-1].active","Native true form selection");
+                capture("true-form-251");
+                async("loadGame("+JSONObject.quote(trueFormId)+").then(()=>true)");
+                check(Boolean.TRUE.equals(js("game.upper_voisinages.true_form.level===1")),"True form survives reload");
+                String ghostBirthId=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'魂契开局原生验收',preset_id:'ghost_void',seed:251})});return g.id;})()");
+                python("from cultivation_life import server\np=server.ENGINE.store.load("+JSONObject.quote(ghostBirthId)+").player\nassert p.ghost_bound_souls and p.ghost_soul_slots and p.ghost_wangsheng_energy>0");
+                result.putString("true_form_scope","Native preview, immutable confirmation, paid cultivation, selection, reload and ghost attained birth passed");
                 check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='upper-voisinages')")),"Upper domain handbook missing");
                 result.putString("upper_voisinage_scope","Three worlds, four themes, native ninth-realm presets, institution enrollment/commissions, acquisition/training/refinement and persisted domains; handbook available");
             } else if(phase.equals("bulk")) {

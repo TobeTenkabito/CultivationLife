@@ -144,7 +144,7 @@ def create_game(
         player.immortal_power_converted = bool(preset.get("immortal_power_converted", False))
         player.immortal_conversion_stage = 5 if player.immortal_power_converted else 0
         player.immortal_conversion_last_age = player.age if player.world == "celestial" else None
-        starting_qi_level = {3: 5, 4: 8, 5: 12, 6: 17, 7: 23, 8: 30, 9: 30}.get(player.realm_index, 0)
+        starting_qi_level = {3: 5, 4: 8, 5: 12, 6: 17, 7: 23, 8: 30, 9: 30}.get(min(9, player.realm_index), 0)
         starting_source = "demon" if path == "demonic" else "monster" if path == "monster" else "yin" if path == "ghost" else "spirit"
         player.qi_experience[starting_source] = qi_level_threshold(starting_qi_level)
         # Compatibility presets may combine a path-native circulation with
@@ -168,9 +168,10 @@ def create_game(
             assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[technique_id]), "combat")
         for item in preset.get("inventory", []):
             add_item(player, item["id"], int(item["quantity"]))
-        if preset.get('world_voisinages') and player.world == 'nether':
-            from ...system.monster_bloodline_system import seed_upper_bloodline
-            seed_upper_bloodline(player)
+        from . import dlc_birth
+        dlc_birth.monster(player, actual_seed)
+        dlc_birth.ghost(player, actual_seed)
+        dlc_birth.scholar(player)
         player.opportunity = round(opportunity_required(player) * float(preset.get("opportunity_fraction", 0)), 1)
         player.opportunity = max(player.opportunity, float(preset.get('opportunity_reserve', 0)))
     player.divine_sense_rank = max(
@@ -247,6 +248,10 @@ def create_game(
     if custom:
         from .custom_start import configure
         configure(game, custom, rng, sync_natal=sync_natal)
+        player.hp, player.mp = max_hp(player), max_mp(player)
+    if preset:
+        from .dlc_birth import upper_path
+        upper_path(game, custom)
         player.hp, player.mp = max_hp(player), max_mp(player)
     game.history.append(HistoryRecord(
         "SYS_BIRTH", 1, player.age, "问道之始", None, "created",

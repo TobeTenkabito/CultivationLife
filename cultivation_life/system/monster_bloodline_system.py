@@ -226,6 +226,10 @@ def ensure_monster_bloodline_state(player: Player) -> bool:
                 if trait_id not in discarded_slots
             ]
         changed = True
+    if player.world_voisinages.get('nether', {}).get('true_form') is not None:
+        # A confirmed blueprint binds the original identity. Corrupt or missing
+        # IDs must remain inspectable/dormant, never acquire a replacement UUID.
+        return changed
     if isinstance(player.monster_custom_lineage, dict):
         lineage_id = str(
             player.monster_custom_lineage.get("id")

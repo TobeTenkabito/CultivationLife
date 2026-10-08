@@ -31,7 +31,7 @@ def main():
     require('real isolated execution and snapshot restore passed' in workbench and 'Traceback' not in workbench, 'Heavens workbench UI must pass')
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
-    for check in ('world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
+    for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
                   'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')

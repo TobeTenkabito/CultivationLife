@@ -1,6 +1,6 @@
 # 妖修复合族血规则
 
-维护基线：DLC 4.14.0 / 本体 v1.56.2 开发源码，2026-10-04。规则生成见 `cultivation_life/monster_bloodline_rules.py`，解释与运行时限制见 `cultivation_life/combat_rule_engine.py`；这些 V1／V2 族血规则与战斗语义 V3 分开。
+维护基线：DLC 4.14.1 / 本体 v1.56.2 开发源码，2026-10-04。规则生成见 `cultivation_life/monster_bloodline_rules.py`，解释与运行时限制见 `cultivation_life/combat_rule_engine.py`；这些 V1／V2 族血规则与战斗语义 V3 分开。
 
 新获得的随机族血不是运行时脚本，也不会在每场战斗重新随机。大境界进化时，系统从以下有限组件中生成一条合法规则，写入固定 ID、规则快照、自然语言描述与强度快照，并占用本族 16 个觉醒槽位之一。旧存档里的固定血脉特质继续生效。
 
