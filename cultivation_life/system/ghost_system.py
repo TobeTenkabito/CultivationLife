@@ -477,6 +477,7 @@ class GhostSystemMixin:
             "available": True,
             "name": GHOST_DLC_NAME,
             "erosion_rate_pp": round(player.ghost_soul_erosion_rate_pp, 6),
+            "erosion_growth_stopped": max(player.realm_index, int(player.ghost_intrinsic_highwater_realm or 0)) >= 9,
             "erosion_time": {
                 "progress_ratio": round(erosion_time_progress, 8),
                 "elapsed_equivalent_years": round(erosion_time_progress * time_unit_years, 6),

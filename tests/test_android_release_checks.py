@@ -30,7 +30,8 @@ def release_inputs(tmp_path):
                 f"versionCode='{package_android.VERSION_CODE}' "
                 f"versionName='{package_android.ANDROID_VERSION}' sdkVersion:'31'"),
             f'quick-start-ui-{rid}.log': 'Quick-start regression passed',
-            f'start-layout-ui-{rid}.log': 'Start layout passed'}
+            f'start-layout-ui-{rid}.log': 'Start layout passed',
+            f'world-life-ui-{rid}.log': 'Release 250 UI passed:'}
     phases = ('heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',

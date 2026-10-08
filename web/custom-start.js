@@ -9,7 +9,14 @@
     const form=el('form');form.id='custom-start-form';root.append(form);
     const group=title=>{const d=el('fieldset');d.append(el('legend',title));const grid=el('div',null,'custom-start-grid');d.append(grid);form.append(d);return grid;};
     const select=(parent,label,options,id)=>{const l=el('label',label),s=el('select');s.id='custom-'+id;s.setAttribute('aria-label',label);Object.entries(options).forEach(([v,t])=>s.add(new Option(t,v)));l.append(s);parent.append(l);return s;};
-    const input=(parent,label,id,value,min,max)=>{const l=el('label',label),n=el('input');n.id='custom-'+id;n.setAttribute('aria-label',label);n.type=max==null?'text':'number';n.value=value;if(max!=null){n.min=min;n.max=max;n.step=1;}l.append(n);parent.append(l);return n;};
+    const input=(parent,label,id,value,min,max)=>{
+      const l=el('label',label),n=el('input');n.id='custom-'+id;n.setAttribute('aria-label',label);
+      n.type=max==null?'text':'number';n.value=value;
+      if(max!=null){n.min=min;n.max=max;n.step=1;n.required=true;n.inputMode='numeric';n.autocomplete='off';
+        n.addEventListener('focus',()=>n.select());
+      }
+      l.append(n);parent.append(l);return n;
+    };
     const identity=group('根骨与修行');
     const rootSelect=select(identity,'自定义灵根',config.spirit_roots,'root'),path=select(identity,'自定义道途',config.paths,'path');
     const species=select(identity,'妖修种属',Object.fromEntries(Object.entries(config.monster_species).map(([k,v])=>[k,v.name])),'species');
@@ -24,12 +31,19 @@
     const bag=group('行囊与本命');const inventory=[],manuals=[];
     const search=input(bag,'搜索物品','item-search','',null,null),items=select(bag,'添加行囊物品',{},'item'),quantity=input(bag,'物品数量','quantity',1,1,1000000000000);
     const add=el('button','加入行囊');add.type='button';add.id='custom-add-item';bag.append(add);
+    const amounts=el('div',null,'custom-amounts');amounts.setAttribute('aria-label','数量快捷填写');
+    [[1,'1'],[100,'100'],[10000,'1 万'],[1000000,'100 万']].forEach(([value,title])=>{
+      const b=el('button',title);b.type='button';b.onclick=()=>{quantity.value=value;};amounts.append(b);
+    });quantity.parentElement.append(amounts);
+    identity.append(el('p','数值框可直接输入：点击后输入完整数字即可替换，无需反复点箭头。','muted'));
     const list=el('div',null,'custom-inventory');list.id='custom-inventory';bag.append(list);
     const natal=select(bag,'本命法宝（从行囊选择）',{'':'不携带'},'natal');
     const bookSearch=input(bag,'搜索功法','book-search','',null,null),books=select(bag,'携带功法',{},'book'),addBook=el('button','加入功法');addBook.type='button';bag.append(addBook);const bookList=el('div',null,'custom-inventory');bag.append(bookList);
     const filter=(source,text,target)=>{const old=target.value;target.replaceChildren();source.filter(r=>!text||r.name.includes(text)||r.id.toLowerCase().includes(text.toLowerCase())).slice(0,150).forEach(r=>target.add(new Option(r.name,r.id)));if([...target.options].some(o=>o.value===old))target.value=old;};
     search.oninput=()=>filter(c.items,search.value.trim(),items);bookSearch.oninput=()=>filter(c.techniques,bookSearch.value.trim(),books);search.oninput();bookSearch.oninput();
-    const refreshBag=()=>{list.replaceChildren();const old=natal.value;natal.replaceChildren(new Option('不携带',''));for(const row of inventory){const item=c.items.find(i=>i.id===row.id),line=el('div'),remove=el('button','移除');remove.type='button';remove.onclick=()=>{inventory.splice(inventory.indexOf(row),1);refreshBag();};line.append(el('span',`${item.name} × ${row.quantity.toLocaleString('zh-CN')}`),remove);list.append(line);if(item.natal)natal.add(new Option(item.name,item.id));}natal.value=[...natal.options].some(o=>o.value===old)?old:'';};
+    const refreshBag=()=>{list.replaceChildren();const old=natal.value;natal.replaceChildren(new Option('不携带',''));for(const row of inventory){const item=c.items.find(i=>i.id===row.id),line=el('div'),remove=el('button','移除');remove.type='button';remove.onclick=()=>{inventory.splice(inventory.indexOf(row),1);refreshBag();};
+      const count=input(line,item.name+' 数量','bag-'+row.id,row.quantity,1,1e12);
+      count.oninput=()=>{if(count.checkValidity())row.quantity=Number(count.value);};line.append(remove);list.append(line);if(item.natal)natal.add(new Option(item.name,item.id));}natal.value=[...natal.options].some(o=>o.value===old)?old:'';};
     add.onclick=()=>{if(!items.value||!quantity.reportValidity())return;const existing=inventory.find(r=>r.id===items.value);if(existing)existing.quantity=Math.min(1e12,existing.quantity+Number(quantity.value));else inventory.push({id:items.value,quantity:Number(quantity.value)});refreshBag();};
     const refreshBooks=()=>{bookList.replaceChildren();for(const id of manuals){const line=el('div'),remove=el('button','移除');remove.type='button';remove.onclick=()=>{manuals.splice(manuals.indexOf(id),1);refreshBooks();};line.append(el('span',c.techniques.find(t=>t.id===id).name),remove);bookList.append(line);}};
     addBook.onclick=()=>{if(books.value&&!manuals.includes(books.value)){manuals.push(books.value);refreshBooks();}};

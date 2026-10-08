@@ -74,6 +74,8 @@ def verify(with_dlc):
             assert game['heavens']['sites'] == []
             assert {r['world'] for r in game['heavens']['incidents']} == {'human','demon'}
             assert "exchange_system" in game and game["natal_artifact"]["visible"]
+            from scripts.verify_world_life import verify_world_life
+            verify_world_life(base, folder)
             def transfer(operation, payload):
                 request = urllib.request.Request(base + '/api/save-transfer/' + operation, method='POST',
                     data=json.dumps(payload).encode(), headers={'Content-Type':'application/json'})

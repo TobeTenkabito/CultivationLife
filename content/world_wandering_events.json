@@ -1,0 +1,2048 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "EVT_WANDER_SHARED_01",
+      "version": 1,
+      "title": "雨夜听息",
+      "body": "一场细雨落在栖身处，你在雨声中察觉呼吸有几分急促。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "循雨声调匀吐纳",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.08
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "暂放杂念安睡",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_02",
+      "version": 1,
+      "title": "旧札重读",
+      "body": "整理行囊时，一张记有往日修行疑问的旧札从衣襟滑落。如今再读，竟有不同理解。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "对照今日所学",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "将执念付之一笑",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_03",
+      "version": 1,
+      "title": "石罅新芽",
+      "body": "崖壁石罅中，一株幼芽顶开碎石。此地虽陌生，生机却同样顽强。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "静观生息流转",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "整理周围落石",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_04",
+      "version": 1,
+      "title": "夜观星痕",
+      "body": "夜色里，天幕上几道微光忽明忽暗，与你体内灵力的节律短暂重合。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "试以心神追摹",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": -0.06
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "守住本心",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_05",
+      "version": 1,
+      "title": "掌心残纹",
+      "body": "一次调息后，掌心残留的灵力纹路迟迟不散，你想起一个未能解开的运功关节。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "耗费心力逐笔推演",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 16
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "散去残纹休养",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.05
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_06",
+      "version": 1,
+      "title": "修行小憩",
+      "body": "长久的修行让你忽略了身体的疲惫。眼下没有急事，不妨留出片刻喘息。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "舒展筋骨",
+          "effects": [
+            {
+              "type": "heal",
+              "value": 0.08
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "闭目养神",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.08
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_07",
+      "version": 1,
+      "title": "旧梦照心",
+      "body": "梦中又见初入仙途时的自己。醒来时，成功与失败的旧事仍历历在目。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "直面旧日过失",
+          "effects": [
+            {
+              "type": "add_karma",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "承认遗憾放下执著",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -2
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_08",
+      "version": 1,
+      "title": "回声辨息",
+      "body": "空谷传回数重回声，其中一声比其余回声迟了半拍，似被地势引向了深处。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "循声推算地势",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "不冒进，原地调息",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.05
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_09",
+      "version": 1,
+      "title": "无字石面",
+      "body": "一块被风磨平的石面偶尔映出模糊光影。没有文字，也不知是否有人留下过什么。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "以自身所学印证",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "任其随风而去",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_10",
+      "version": 1,
+      "title": "一息之差",
+      "body": "你发现惯用的运功顺序中，两次换气之间存在极小的停滞。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "暂缓进度细细校正",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 18
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "稳住现有周天",
+          "effects": [
+            {
+              "type": "restore_mp",
+              "value": 0.06
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_11",
+      "version": 1,
+      "title": "逆风行止",
+      "body": "迎面风势忽强忽弱。与之相抗固然痛快，顺势而行却也别有章法。",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "收敛锋芒体悟变化",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "静立避风恢复气力",
+          "effects": [
+            {
+              "type": "heal",
+              "value": 0.06
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SHARED_12",
+      "version": 1,
+      "title": "灯下问己",
+      "body": "独坐片刻，你忽然问自己：若再无旁人评价，仍会走如今这条路吗？",
+      "tags": [
+        "common",
+        "spatial_safe",
+        "all_realms",
+        "world:human",
+        "world:demon",
+        "world:spirit",
+        "world:true_demon",
+        "world:phantom_underworld",
+        "world:hell",
+        "world:celestial",
+        "world:asura",
+        "world:nether",
+        "world:reincarnation",
+        "world:monster_realm",
+        "world:rift",
+        "world:lost"
+      ],
+      "weight": 1,
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "重申本愿",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -2
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "写下此刻的疑问",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "记下此景，继续前行",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HUMAN_01",
+      "version": 1,
+      "title": "渡口乡约",
+      "body": "溪边乡民正在重修渡口，约定涨水时先渡老幼。",
+      "tags": [
+        "common",
+        "world:human"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "帮忙搬开阻水巨石",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "听他们商定轮渡次序",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HUMAN_02",
+      "version": 1,
+      "title": "秋收灵田",
+      "body": "收获后的灵田升起淡淡谷香，田埂灵力随昼夜缓缓交替。",
+      "tags": [
+        "common",
+        "world:human"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "体会四时生息",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "替农户加固田埂",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HUMAN_03",
+      "version": 1,
+      "title": "古观残钟",
+      "body": "荒观的铜钟缺了一角，风过时却仍能发出清越长音。",
+      "tags": [
+        "common",
+        "world:human"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "参悟钟声里的余韵",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "清扫观前落叶",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_DEMON_01",
+      "version": 1,
+      "title": "赤月潮息",
+      "body": "赤月映在黑石上，魔气起伏有如巨大心脏的搏动。",
+      "tags": [
+        "common",
+        "world:demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "以定力调顺气息",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "避开潮头养神",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_DEMON_02",
+      "version": 1,
+      "title": "熔砂旧痕",
+      "body": "熔砂凝固的层层纹路记下历次魔焰喷发的方向。",
+      "tags": [
+        "common",
+        "world:demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "推演魔焰的聚散",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "绕开新裂的砂层",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_DEMON_03",
+      "version": 1,
+      "title": "黑莲孤影",
+      "body": "荒池里一朵黑莲在魔气中舒展，莲影与本体的节奏略有差异。",
+      "tags": [
+        "common",
+        "world:demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "静察莲影变化",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "闭目平定躁意",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SPIRIT_01",
+      "version": 1,
+      "title": "浮山晴岚",
+      "body": "浮山边缘的云岚层层相叠，浓郁灵气在云隙中化为细雨。",
+      "tags": [
+        "common",
+        "world:spirit"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察灵雨升降",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "借灵雨调息",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SPIRIT_02",
+      "version": 1,
+      "title": "百族路碑",
+      "body": "古道旁的路碑用数种文字记载同一处险地，各族对危险的描述却各有侧重。",
+      "tags": [
+        "common",
+        "world:spirit"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "比较各族眼中的天地",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "留下一笔清晰路标",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_SPIRIT_03",
+      "version": 1,
+      "title": "灵潮退痕",
+      "body": "灵潮刚刚退去，石壁上留着一圈圈尚未散尽的灵光。",
+      "tags": [
+        "common",
+        "world:spirit"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "以灵光印证周天",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "等余波平息再行",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_TRUE_DEMON_01",
+      "version": 1,
+      "title": "渊风藏雷",
+      "body": "深渊吹出的魔风裹着闷雷，每一阵雷声都让体内法力短暂凝滞。",
+      "tags": [
+        "common",
+        "world:true_demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "稳住法力体悟节律",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "退至背风处调息",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_TRUE_DEMON_02",
+      "version": 1,
+      "title": "魔碑剥文",
+      "body": "古魔碑外壳剥落，显露出的断句强调约束力量而非一味宣泄。",
+      "tags": [
+        "common",
+        "world:true_demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "参悟碑中收放之理",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "平复争强之念",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_TRUE_DEMON_03",
+      "version": 1,
+      "title": "血雾凝珠",
+      "body": "血色雾气沿岩壁凝成水珠，离开岩壁后便散成普通清雾。",
+      "tags": [
+        "common",
+        "world:true_demon"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察地势对魔气的束缚",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "保持距离养神",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_MONSTER_REALM_01",
+      "version": 1,
+      "title": "群兽迁徙",
+      "body": "远处兽群循旧路迁徙，强弱各有位置，幼兽始终被护在队列中央。",
+      "tags": [
+        "common",
+        "world:monster_realm"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察群兽气机呼应",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "绕道让出迁徙路径",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_MONSTER_REALM_02",
+      "version": 1,
+      "title": "古木换皮",
+      "body": "一株古木正褪去老皮，新生树皮下隐有血脉般的纹路。",
+      "tags": [
+        "common",
+        "world:monster_realm"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "体悟形体更替",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "静坐树荫休养",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_MONSTER_REALM_03",
+      "version": 1,
+      "title": "月下兽鸣",
+      "body": "不同兽鸣沿山岭依次响起，看似杂乱，却共同指向月光最浓之处。",
+      "tags": [
+        "common",
+        "world:monster_realm"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "辨认鸣声中的节律",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "收敛气息静听",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_PHANTOM_UNDERWORLD_01",
+      "version": 1,
+      "title": "幻雾返影",
+      "body": "迷雾映出你未曾选择过的一条人生道路，细看时每处景象都有微妙缺憾。",
+      "tags": [
+        "common",
+        "world:phantom_underworld"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "分辨幻景中的矛盾",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "坚定此生选择",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_PHANTOM_UNDERWORLD_02",
+      "version": 1,
+      "title": "幽花昼合",
+      "body": "幽花在微光中合拢，花影却还留在原地，片刻后才一同消散。",
+      "tags": [
+        "common",
+        "world:phantom_underworld"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "推敲形影相离之理",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "闭目隔绝幻光",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_PHANTOM_UNDERWORLD_03",
+      "version": 1,
+      "title": "镜湖双月",
+      "body": "湖面两轮月影一明一暗，你每走一步，两者距离便略有变化。",
+      "tags": [
+        "common",
+        "world:phantom_underworld"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "记录月影与步伐关系",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "离开湖岸安神",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HELL_01",
+      "version": 1,
+      "title": "阴河缓流",
+      "body": "阴河转弯处的寒气比河心温和，几缕游离执念在这里渐渐消散。",
+      "tags": [
+        "common",
+        "world:hell"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察阴气回旋",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "静守不扰残念",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HELL_02",
+      "version": 1,
+      "title": "冥灯余烬",
+      "body": "一盏冥灯只余灯芯，忽明忽暗间似在重复主人最后的念想。",
+      "tags": [
+        "common",
+        "world:hell"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "从余烬体会聚散",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "为残念留一刻安静",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_HELL_03",
+      "version": 1,
+      "title": "寒碑无名",
+      "body": "风霜抹去了碑上姓名，只留下几行劝人莫负今生的浅痕。",
+      "tags": [
+        "common",
+        "world:hell"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "拓下字痕自省",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "放下无益怨恨",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_CELESTIAL_01",
+      "version": 1,
+      "title": "仙露成纹",
+      "body": "仙露在阶前连成细小脉络，每一滴都反映出不同的灵机走向。",
+      "tags": [
+        "common",
+        "world:celestial"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "以仙脉周天印证",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "凝神平复法力",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_CELESTIAL_02",
+      "version": 1,
+      "title": "云海法音",
+      "body": "云海深处传来无词法音，远听雄浑，静心细听却朴素得如同呼吸。",
+      "tags": [
+        "common",
+        "world:celestial"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "体悟繁简相通",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "不逐异象守住本心",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_CELESTIAL_03",
+      "version": 1,
+      "title": "星槎遗光",
+      "body": "远去星槎留下的光痕横贯天幕，数息后仍未完全融入夜色。",
+      "tags": [
+        "common",
+        "world:celestial"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "推演光痕转折",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "借夜色休养",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_ASURA_01",
+      "version": 1,
+      "title": "战鼓止息",
+      "body": "远方战鼓骤停，余震却仍沿地面传来。动静交替中，心中战意变得格外清晰。",
+      "tags": [
+        "common",
+        "world:asura"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "参悟收放战意",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "放下无谓杀念",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_ASURA_02",
+      "version": 1,
+      "title": "八部石影",
+      "body": "残破浮雕上八部形貌各异，午后的影子却在石台中央汇成一处。",
+      "tags": [
+        "common",
+        "world:asura"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "对照形貌体悟本性",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "退开调顺气息",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_ASURA_03",
+      "version": 1,
+      "title": "赤河回浪",
+      "body": "赤河激浪冲上黑岩又倒卷回来，破坏与修复在同一处反复发生。",
+      "tags": [
+        "common",
+        "world:asura"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察气势由盛转衰",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "远离险岸养神",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_NETHER_01",
+      "version": 1,
+      "title": "冥林万息",
+      "body": "幽冥古林里万千生灵的气息低沉而持久，与你的呼吸互不相扰。",
+      "tags": [
+        "common",
+        "world:nether"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "体悟万类共存",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "收敛锋芒静养",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_NETHER_02",
+      "version": 1,
+      "title": "祖骨石脉",
+      "body": "巨大的古老骨骸已化成山脉，仍可从石纹中辨出力量传递的方向。",
+      "tags": [
+        "common",
+        "world:nether"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "推演筋骨承力",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "在山阴避风调息",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_NETHER_03",
+      "version": 1,
+      "title": "幽泉返生",
+      "body": "一缕微弱生机从幽泉深处冒出，又很快隐入厚重阴气。",
+      "tags": [
+        "common",
+        "world:nether"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "观察生死气机相接",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "不扰泉中变化",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_REINCARNATION_01",
+      "version": 1,
+      "title": "轮台落尘",
+      "body": "轮台遗址上落着极细尘埃，清风吹过又归于原处，仿佛从未移动。",
+      "tags": [
+        "common",
+        "world:reincarnation"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "体会循环中的差别",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "放下追逐旧因",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_REINCARNATION_02",
+      "version": 1,
+      "title": "忘川隔岸",
+      "body": "忘川彼岸的模糊人影渐行渐远，你忽然记不起自己为何觉得熟悉。",
+      "tags": [
+        "common",
+        "world:reincarnation"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "检视心中执著",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "安守此岸调息",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_WANDER_REINCARNATION_03",
+      "version": 1,
+      "title": "因果微线",
+      "body": "入定时几缕极淡光线从心头浮现，越急于抓住，反而越快消散。",
+      "tags": [
+        "common",
+        "world:reincarnation"
+      ],
+      "weight": 2,
+      "conditions": {
+        "path": "player.realm_index",
+        "op": "gte",
+        "value": 1
+      },
+      "choices": [
+        {
+          "id": "ponder",
+          "text": "缓缓梳理旧日选择",
+          "effects": [
+            {
+              "type": "add_opportunity",
+              "value": 35
+            }
+          ]
+        },
+        {
+          "id": "settle",
+          "text": "任因果自行沉淀",
+          "effects": [
+            {
+              "type": "add_heart_demon",
+              "value": -1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "不作停留",
+          "effects": []
+        }
+      ]
+    }
+  ]
+}

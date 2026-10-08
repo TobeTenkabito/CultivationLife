@@ -29,6 +29,8 @@ class ExplorationDependencies:
     prepare_sage: Callable
     finish_sage: Callable
     advance_natal: Callable
+    select_event: Callable
+    instantiate_event: Callable
 
 
 def move_world(
@@ -147,8 +149,8 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
     rng = decode_rng(game.seed, game.rng_state)
     target = payload.get("target_id", "")
     if action == "open":
-        if (p.realm_index, p.layer) < (5, 7) or p.mp < max_mp(p) * 0.25:
-            raise ValueError("开辟裂缝须化神后期显露修为，并消耗四分之一法力上限")
+        if (p.realm_index, p.layer) < spatial.opening_requirement(game) or p.mp < max_mp(p) * 0.25:
+            raise ValueError("开辟裂缝须至少合体期，达到本秘境界壁门槛，并消耗四分之一法力上限")
         p.mp -= max_mp(p) * 0.25
         spatial.new_rift(game, rng, deps.maps, controlled=True)
         spatial.journal(game, "以神通开辟可控裂缝。通往何处仍不可预知。")
@@ -228,7 +230,8 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
         advance_elapsed_year(deps, game, rng, [], encounters=False)
         if p.alive and not game.pending_event and spatial.current(game):
             spatial.journal(game, spatial.explore(game, rng))
-    elif action in {"move", "join", "talk"}:
+    elif action in {"move", "join", "talk", 'join_sect', 'leave_sect', 'study_sect',
+                    'join_family', 'leave_family', 'study_family'}:
         text = spatial.local_action(game, action, target)
         advance_player_age(p)
         advance_elapsed_year(deps, game, rng, [], encounters=False)
@@ -318,4 +321,8 @@ def train(deps: ExplorationDependencies, game, action, units):
     if elapsed and p.alive:
         from ...time_flow import completed_action_units
         deps.advance_natal(game, action, completed_action_units(elapsed, time_unit))
+        if not game.pending_event and not game.active_trial and not (spatial.current(game) or {}).get('heavens_target'):
+            event = deps.select_event(game, action, rng)
+            if event:
+                game.pending_event = deps.instantiate_event(event, game, rng)
     return commit(deps, game, rng)

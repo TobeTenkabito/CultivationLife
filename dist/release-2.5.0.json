@@ -1,8 +1,8 @@
 {
-  "base_version": "2.4.0",
+  "base_version": "2.5.0",
   "platform": "Windows",
-  "exe_sha256": "2d6ed50db22d09b44f28a0942cb63300fa6836ecb0f3edb1729fa06df8f34969",
-  "inputs_sha256": "270052f9932703cacf353c27dc8982ce2500fd5a7a510bbf29ba02afd533d22c",
+  "exe_sha256": "540bb23bae3cae6ed38808d4347f0a565e9a7603cabfd2b18bbd5b9739d69445",
+  "inputs_sha256": "9eb0ea76e1881449ab4a06d7f2daf43cd2a37745e79e960f480a13f3fa1d1018",
   "dlc_versions": {
     "asura-manifestation": "1.2.0",
     "buddhist-dharma": "1.0.0",
@@ -29,7 +29,7 @@
     "Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified",
     "Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified",
     "Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes",
-    "3337 automated regression tests passed",
+    "3365 automated regression tests passed",
     "Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"

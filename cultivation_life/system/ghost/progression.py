@@ -161,6 +161,9 @@ def apply_soul_erosion(player: Player, units: int = 1) -> dict[str, Any]:
     ensure_ghost_cultivation_state(player)
     config = ghost_cultivation_config()
     growth = max(0.0, float(config.get("erosion_growth_per_time_unit_pp", 0.0002)))
+    # The existing intrinsic high-water mark survives reincarnation and suppression.
+    if max(player.realm_index, int(player.ghost_intrinsic_highwater_realm or 0)) >= 9:
+        growth = 0.0
     _, pressure_modifier = ghost_soul_pressure(player)
     growth *= 1.0 + pressure_modifier
     if player.ghost_attachment:

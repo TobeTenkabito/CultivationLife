@@ -537,7 +537,7 @@ function render(data) {
     const erosionTime = ghost.erosion_time || {};
     const erosionClock = `魂蚀计时 ${formatDecimal(erosionTime.elapsed_equivalent_years || 0)}/${number(erosionTime.time_unit_years || p.time_unit_years)} 年（${precisePercent(erosionTime.progress_ratio || 0)}）`;
     const markText = ghost.effective_marks ? ` · 本境有效轮回 ${ghost.effective_marks} 次（突破 +${percent(ghost.breakthrough_bonus)}）` : '';
-    const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}`;
+    const capText = `最终有效突破率封顶 ${percent(ghost.breakthrough_probability_cap || .98)}${ghost.erosion_growth_stopped?' · 已达九阶，魂蚀率永久停止增长':''}`;
     $('#ghost-system-summary').textContent = ghost.suspended
       ? `${ghost.suspension_reason} · 本魂 HP ${number(ihp.current)}/${number(ihp.reference)} · MP ${number(imp.current)}/${number(imp.reference)} · ${capText}`
       : `${ghost.soul_integrity?.label || '魂基'} · ${erosionClock} · 魂基 HP ${number(ihp.current)}/${number(ihp.reference)}（承载 ${percent(ihp.carry_ratio)}） · MP ${number(imp.current)}/${number(imp.reference)}（承载 ${percent(imp.carry_ratio)}）${markText} · ${capText} · 历史最高 ${ghost.highwater?.name || '未记录'}`;

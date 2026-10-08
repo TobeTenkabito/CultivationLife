@@ -74,7 +74,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     /** Tap the actual input and send text through Android's IME InputConnection. */
     private void enterCommissionNumber(String label, String value) throws Exception {
-        String selector=JSONObject.quote(".merchant-metrics input[aria-label='"+label+"']");
+        enterNumericField(".merchant-metrics input[aria-label='"+label+"']", label, value);
+    }
+
+    private void enterNumericField(String field, String label, String value) throws Exception {
+        String selector=JSONObject.quote(field);
         js("window.__imeField=document.querySelector("+selector+");__imeField.scrollIntoView({block:'center'});true");
         Thread.sleep(350);
         JSONObject point=new JSONObject((String)js("JSON.stringify((()=>{const r=__imeField.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,width:innerWidth}})())"));
@@ -220,7 +224,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("document.querySelectorAll('#custom-inventory button').forEach(n=>n.click());true");
                     js("document.querySelector('#custom-realm').value='3';document.querySelector('#custom-realm').dispatchEvent(new Event('change'));document.querySelector('#custom-sense').value='23';document.querySelector('#custom-sect').value='new';document.querySelector('#custom-sect').dispatchEvent(new Event('change'));document.querySelector('#custom-sect-name').value='原生青玉宗';document.querySelector('#custom-item-search').value='spirit_stone';document.querySelector('#custom-item-search').dispatchEvent(new Event('input'));document.querySelector('#custom-item').value='spirit_stone';document.querySelector('#custom-quantity').value='1000000';true");
                     tapSelector("#custom-add-item");
-                    check(Boolean.TRUE.equals(js("document.querySelector('#custom-inventory').textContent.includes('1,000,000') && document.documentElement.scrollWidth<=innerWidth+1")),"Custom bag and responsive layout: "+js("JSON.stringify({bag:document.querySelector('#custom-inventory').textContent,width:innerWidth,scroll:document.documentElement.scrollWidth})"));
+                    enterNumericField("#custom-sense", "自定义神识", "23");
+                    enterNumericField("#custom-bag-spirit_stone", "行囊数量", "1000000");
+                    runOnMainSync(()->((android.view.inputmethod.InputMethodManager)activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(web.getWindowToken(),0));
+                    js("document.activeElement.blur();true");Thread.sleep(400);
+                    check(Boolean.TRUE.equals(js("document.querySelector('#custom-bag-spirit_stone').value==='1000000' && document.documentElement.scrollWidth<=innerWidth+1")),"Custom bag and responsive layout");
                     capture("custom-start-"+theme+"-"+arguments.getString("orientation","portrait"));
                     tapSelector("#custom-start-submit");
                     waitForJs("!busy && game && game.id!==window.__customOld && game.faction.name==='原生青玉宗'","Native custom creation",60000);
@@ -274,6 +282,20 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 tapSelector("[data-panel-target=map]");
                 check(Boolean.TRUE.equals(js("game.map.locations.length===4 && game.map.locations.every(l=>Object.values(l.qi_concentrations).every(v=>Number.isFinite(v)&&v>0)) && document.querySelectorAll('#map-locations .map-location').length===4")), "Generated lost maps and finite qi");
                 capture("lost-quick-start");
+                tapSelector("[data-panel-target=faction]");
+                tapSelector("#faction-card .spatial-society .exploration-row > button:not([disabled]):last-child");
+                waitForJs("!busy && !!game.spatial.scene.joined_sect", "Lost native sect membership");
+                tapSelector("[data-panel-target=family]");
+                tapSelector("#family-card .spatial-society .exploration-row > button");
+                waitForJs("!busy && game.spatial.scene.society.families[0].here", "Lost native family site");
+                tapSelector("#family-card .spatial-society .exploration-row > button");
+                waitForJs("!busy && game.spatial.scene.society.families[0].joined", "Lost native family membership");
+                capture("lost-family-native");
+                tapSelector("#family-toggle");
+                tapSelector("[data-action=rest]");
+                waitForJs("!busy && game.pending_event && game.pending_event.id.startsWith('EVT_WANDER_SHARED_')", "Lost native shared event");
+                tapSelector("#event-choices button:last-child");
+                waitForJs("!busy && !game.pending_event", "Lost native event completion");
             } else if(phase.equals("spatial-talisman")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'符道地图验收',spirit_root:'supreme_metal',path:'dao',preset_id:'core',seed:1591})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item,max_mp\nfrom cultivation_life.system import spatial\nfrom cultivation_life.runtime import encode_rng\nimport random\ng=server.ENGINE._load("+JSONObject.quote(id)+")\ng.pending_event=g.active_trial=None\nadd_item(g.player,'spirit_stone',10**12)\nadd_item(g.player,'talisman_human_1_paper',10)\nadd_item(g.player,'talisman_human_1_ink',10)\ng.player.mp=max_mp(g.player)\nfor i in range(3): spatial.new_rift(g,random.Random(i),server.ENGINE.maps,controlled=True)\ng.rng_state=encode_rng(random.Random(1))\nserver.ENGINE.store.save(g)");
