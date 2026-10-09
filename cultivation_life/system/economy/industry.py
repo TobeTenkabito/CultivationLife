@@ -27,7 +27,7 @@ def settle_industry(game, maps, entity, row, years):
     source = f'organization:{row["kind"]}:{entity.id}'
     wars = participating_wars(game, entity.id, world)
     level = row.get('industry_level', 0)
-    due = round(100 * (level + 1) * years * sum(r['price'] / r['reference'] for r in market['commodities'].values()) / max(1, len(market['commodities']))) if level else 0
+    due = round(100 * (level + 1) * years) if level else 0
     paid = min(due, balance(game, source))
     transfer_value(game, source, f'background:{world}', paid, '组织产业原料与设备养护')
     row['expense'] += paid
@@ -37,4 +37,5 @@ def settle_industry(game, maps, entity, row, years):
         return
     # Battlefield logistics now owns all military procurement. Do not charge
     # these organizations a second time through the old annual supply sink.
-    row['industry_utilization'] *= .6
+    # The production histogram excludes deployed and research-occupied people;
+    # don't charge a second blanket utilization penalty for the same workers.

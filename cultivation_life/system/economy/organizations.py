@@ -46,6 +46,7 @@ def register(game, kind, identity, world):
         # The existing faction migration owns its treasury. No goods or accrued
         # production work are transported by this fiscal address reconciliation.
         rows[address].update(world=world, production_credit=0,
+            demand_credit={},cultivation_support={},maintenance_support={},
             last_year=max(game.player.age, game.economy_v2['last_year']))
     return rows[address]
 
@@ -105,6 +106,8 @@ def settle_faction(game, maps, row, years):
     # A relocated faction retains its one treasury. Output uses its real site.
     if row['world'] != entity.world:
         row['production_credit'] = 0
+        row['demand_credit'] = {}
+        row['cultivation_support']={};row['maintenance_support']={}
         row['world'] = entity.world
     source, world = key(row['kind'], entity.id), entity.world
     from .industry import settle_industry
@@ -114,14 +117,25 @@ def settle_faction(game, maps, row, years):
     if freight in game.economy_v2['accounts']:
         row['income'] += pay(game, freight, source, balance(game, freight), '传送阵货运收入归属府库')
     due = row.get('expected_upkeep', 0) * years
+    carried_debt = 0
+    child_care = 0
     if row['kind'] == 'family':
-        due += sum(c.get('alive', True) and c.get('world') == world and c.get('age', 0) < 8 for c in game.player.offspring) * 15 * years
-        due += int(game.family_state.get('debt', 0))
-    paid = procure(game, source, world, due, '组织日常养护与成员供养', partial=True)
+        child_care = sum(c.get('alive', True) and c.get('world') == world and c.get('age', 0) < 8 for c in game.player.offspring) * 15 * years
+        carried_debt = int(game.family_state.get('debt',0))
+    # Services keep the old authoritative treasury; supplies are goods, not a
+    # second service debit. Optional supplies may use only this interval's
+    # welfare envelope, leaving three years of basic maintenance intact.
+    service_due = int(due*.65)+carried_debt+child_care
+    paid = procure(game, source, world, service_due, '组织基本养护与日常劳务', partial=True)
     row['expense'] += paid
-    row['shortfall'] = due - paid
+    row['shortfall'] = service_due - paid
     if row['kind'] == 'family':
-        game.family_state['debt'] = due - paid
+        game.family_state['debt'] = service_due - paid
+    from .organization_consumption import consume
+    market = game.economy_v2['markets'][f'{world}:{entity.location_id}']
+    reserve = int(row.get('expected_upkeep', 0)*.65*3)
+    budget = min(int(due*.35), max(0,balance(game,source)-reserve))
+    row['expense'] += consume(game, market, entity, row, years, budget)
     from .depot import advance as advance_depot
     advance_depot(game, maps, entity, row)
     from .estate_management import invest_surplus
@@ -204,7 +218,8 @@ def public_finance(game, kind, identity):
         balance=balance(game, address), product=ITEM_CATALOG[row['commodity']].name if row['commodity'] else None,
         industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.),
         workforce=dict(row.get('workforce', {})), labor_capacity=row.get('labor_capacity', 0),
-        expected_upkeep=row.get('expected_upkeep', 0))
+        expected_upkeep=row.get('expected_upkeep', 0), supply_coverage=row.get('supply_coverage',1),
+        supply_expense=row.get('supply_expense',0),supplies_consumed=row.get('supplies_consumed',0))
 
 
 def welfare(game, entity):
@@ -213,7 +228,9 @@ def welfare(game, entity):
         return 0.
     row['welfare_year'] = game.player.age
     due = max(25, WORLD_SYSTEMS['world_profiles'][entity.world]['tier'] * 100)
-    paid = procure(game, key('sect', entity.id), entity.world, due, '宗门年度修炼福利采购', partial=True)
+    source=key('sect',entity.id)
+    reserve=int(row.get('expected_upkeep',0)*.65*3)
+    paid=pay(game,source,f'background:{entity.world}',min(due,max(0,balance(game,source)-reserve)),'宗门年度修炼福利采购')
     row['benefit_due'], row['benefit_paid'] = due, paid
     row['expense'] += paid
     return paid / due

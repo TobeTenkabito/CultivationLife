@@ -423,7 +423,15 @@ class FormationIntegrationTests(unittest.TestCase):
         entry["last_maintenance_year"] = game.player.age
         game.player.age += 100
         self.assertTrue(self.engine._ensure_npc_formations(game))
-        self.assertEqual(entry["durability"], 32.0)
+        self.assertEqual(entry["durability"], 20.0)  # No unpaid annual repair.
+        npc = self.engine._find_npc(game,npc_id)
+        from cultivation_life.system.economy.organizations import register
+        row=register(game,'sect',npc.faction_id,npc.world)
+        row.update(maintenance_support={str(npc.realm_index):1.})
+        game.player.age += 100
+        row['last_year']=game.player.age
+        self.engine._ensure_npc_formations(game)
+        self.assertEqual(entry['durability'],32.)
         self.assertEqual(entry["slots"], original["slots"])
 
     def test_offscreen_npc_profile_skips_full_spectrum_but_preserves_battle_rules(self):

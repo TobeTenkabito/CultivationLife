@@ -57,8 +57,14 @@ def main():
                             card=page.locator('.war-card').first
                             page.locator('.war-supply-card').first.wait_for(state='visible')
                             assert '敌情未明' in card.inner_text(), (errors,card.inner_text())
+                            war_id=page.evaluate("game.war_system.wars.find(w=>w.player_controls && w.status==='active').id")
+                            full=sum(next(w for w in engine._load(gid).wars if w['id']==war_id)['logistics']['sides']['attacker']['realm_groups'].values())
+                            page.locator('[data-war-strategy=deploy_half]').first.click()
+                            page.wait_for_function("id=>!busy && game.war_system.wars.find(w=>w.id===id).supply_actions.some(a=>a.action==='deploy_half' && !a.allowed)",arg=war_id)
+                            assert sum(next(w for w in engine._load(gid).wars if w['id']==war_id)['logistics']['sides']['attacker']['realm_groups'].values())<full
+                            assert page.locator('[data-war-strategy=deploy_half]').first.is_disabled()
                             page.locator('[data-war-strategy=scout]').first.click()
-                            page.wait_for_function('!busy && game.war_system.wars[0].supply_actions[0].reason')
+                            page.wait_for_function("id=>!busy && game.war_system.wars.find(w=>w.id===id).supply_actions.some(a=>a.action==='scout' && a.reason)",arg=war_id)
                             assert page.locator('[data-war-strategy=scout]').first.is_disabled()
                             assert page.locator('#war-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.screenshot(path=str(output/f'{theme}-{width}-war.png'))

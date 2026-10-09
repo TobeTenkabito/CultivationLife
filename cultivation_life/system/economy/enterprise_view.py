@@ -35,9 +35,12 @@ def public_estates(game, maps):
         record = {k:row[k] for k in ('id', 'kind', 'level', 'recipe', 'reserve', 'produced', 'income', 'expense',
             'arrears', 'enabled', 'auto_buy', 'auto_sell', 'batches', 'buy_limit', 'sell_limit', 'revision', 'owner_kind')}
         record.update(entrusted=row.get("entrusted", False), name=name, sale_quota=row.get('sale_quota', 1000000), capacity=capacity(row), used=used(row), cash=balance(game, payer(row)),
+            reserve_cash=row.get('reserve_cash',100),expense_limit=row.get('expense_limit',100000),
             stock=[dict(id=k, name=ITEM_CATALOG[k].name, quantity=n) for k,n in row['stock'].items()],
             job=dict(row['job']) if row['job'] else None, history=list(row['history']),
             upgrade_cost=price(kind, row['level'] + 1), release_price=price(kind, row['level']) // 2)
+        from .enterprise_operations import annual_maintenance,operating_reserve
+        record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market))
         owned.append(record)
     return dict(available=True, can_act=trade_available(game), offers=offers, owned=owned,
         recipes=[dict(id=k, **r, output_name=ITEM_CATALOG[r['output']].name,

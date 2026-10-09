@@ -1,6 +1,7 @@
 """World economy and persistent local inventories, with lazy regional settlement."""
 import hashlib
 import math
+from functools import lru_cache
 
 from ...content_registry import ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS, WORLD_SYSTEMS, restricted_acquisition
 from .pricing import growth, price_multiplier
@@ -22,11 +23,21 @@ def local_market(game):
 def ensure_state(game):
     if game.economy_v2:
         from .personal import ensure_personal
-        return ensure_personal(game)
+        changed = ensure_personal(game)
+        if 'consumption_policy' not in game.economy_v2:
+            game.economy_v2.update(consumption_policy=2, policy_year=game.player.age)
+            for row in game.economy_v2['markets'].values():
+                row['last_year'] = game.player.age
+            for row in game.economy_v2.get('organizations',{}).values():
+                row['last_year'] = game.player.age
+            for row in game.economy_v2.get('estates',{}).values():
+                row['last_year'] = game.player.age
+            changed = True
+        return changed
     from ...economy_schema import validate_economy_settings
     validate_economy_settings(settings())
     game.economy_v2 = dict(schema_version=1, base_year=game.player.age, last_year=game.player.age,
-                           worlds={}, markets={}, accounts={}, ledger=[])
+                           worlds={}, markets={}, accounts={}, ledger=[], consumption_policy=2, policy_year=game.player.age)
     for world, profile in WORLD_SYSTEMS['world_profiles'].items():
         if int(profile['tier']) <= 0:
             continue
@@ -49,12 +60,15 @@ def advance_economy(game):
     for world, row in state['worlds'].items():
         previous = row['scale']
         row['scale'] = growth(previous, years, settings()['growth_rate'], settings()['growth_cap'])
-        row['money_supply_index'] = row['scale']
         row['last_year'] = game.player.age
-        # Explicit macro issue, proportional to actual expansion, not flat annual gifts.
+        # Issue only against completed terminal purchases, and only when the
+        # existing background pool is short of operating liquidity.
         pool = account(game, f'background:{world}')
-        amount = int(settings()['background_opening'] * (row['scale'] - previous))
+        eligible = int(row.pop('unfunded_growth_sales', 0))
+        amount = min(int(eligible * .02), max(0, settings()['market_opening'] - pool['balance']))
         pool['balance'] += amount
+        row['issued'] = row.get('issued', 0)+amount
+        row['money_supply_index'] = 1+row['issued']/max(1,settings()['background_opening'])
         state.setdefault('issued', 0)
         state['issued'] += amount
         row['history'].append([game.player.age, round(row['scale'], 6)])
@@ -66,6 +80,7 @@ def advance_economy(game):
     return True
 
 
+@lru_cache(maxsize=32)
 def commodity_catalog(world=None, *, commercial=True):
     result = {}
     for good in MARKET_GOODS:
@@ -106,11 +121,11 @@ def ensure_regional_market(game, maps, world, location):
         scale = game.economy_v2['worlds'][world]['scale']
         commodities = {}
         for item, definition in commodity_catalog(world).items():
-            target = settings()['base_stock'] * _variation(world, location, item) * scale
+            target = settings()['base_stock'] * _variation(world, location, item)
             commodities[item] = dict(stock=target, target=target, price=float(definition['base_price']),
                 reference=definition['base_price'], tier=definition['tier'],
-                production=target * settings()['annual_consumption'], consumption=target * settings()['annual_consumption'],
-                volume=0, history=[], initial_target=target / scale)
+                production=0., consumption=0.,
+                volume=0, history=[], initial_target=target)
         game.economy_v2['markets'][key] = dict(id=key, world=world, location=location,
             name=maps.location(world, location)['name'], last_year=game.player.age,
             revision=0, commodities=commodities, turnover=0, fees=0, unique_sales=0)
@@ -157,11 +172,7 @@ def ensure_market(game, maps):
 
 
 def settle_market(game, market):
-    """Analytical local production/consumption; never transfers goods between towns.
-
-    Background workshops replace consumed stock and respond gradually to shortages.
-    A return after centuries costs O(commodities), not O(years * commodities).
-    """
+    """Settle bounded real baskets once for the observed interval."""
     years = game.player.age - market['last_year']
     if years <= 0:
         return False
@@ -170,34 +181,13 @@ def settle_market(game, market):
     world = game.economy_v2['worlds'][market['world']]
     from .market_power import settle
     competitive_supply = settle(game, market, years)
-    for item, row in market['commodities'].items():
-        old_stock = row['stock']
-        target = row['initial_target'] * world['scale']
-        # Stable local specialisation creates supply differences; no goods teleport.
-        supply = target * (.4 + (_variation(market['world'], market['location'], item) - .75) * 3.2)
-        if market.get('war_pressure'):
-            supply *= .6
-        new_stock = supply + (old_stock - supply) * math.exp(-settings()['recovery_rate'] * years)
-        consumed = target * settings()['annual_consumption'] * years + max(0., old_stock - new_stock)
-        produced = consumed + new_stock - old_stock
-        if row.get('imported'):
-            new_stock = old_stock * math.exp(-settings()['annual_consumption'] * years)
-            produced, consumed = 0., old_stock - new_stock
-        new_stock += competitive_supply.get(item, 0)
-        produced += competitive_supply.get(item, 0)
-        row.update(stock=max(0., new_stock), target=target,
-                   production=max(0., produced) / years, consumption=max(0., consumed) / years)
-        target_price = row['reference'] * world['price_level'] * price_multiplier(row['stock'], target)
-        row['price'] = target_price + (row['price'] - target_price) * math.exp(-.5 * years)
-        row['history'].append([game.player.age, round(row['price'], 2)])
-        del row['history'][:-12]
-    # Background household purchases replenish finite dealer liquidity, sourced explicitly.
-    key = market['id']
-    cash = account(game, f'market:{key}')
-    desired = int(settings()['market_opening'] * world['scale'])
-    top_up = min(max(0, desired - cash['balance']), account(game, f'background:{market["world"]}')['balance'])
-    if top_up:
-        transfer_value(game, f'background:{market["world"]}', f'market:{key}', top_up, '背景消费回款')
+    for item, quantity in competitive_supply.items():
+        row = market['commodities'][item]
+        row['production'] += quantity / years
+        reprice(game, market, row)
+    from .basket_consumption import settle as settle_baskets
+    spent = settle_baskets(game, market, years)
+    world['unfunded_growth_sales'] = world.get('unfunded_growth_sales', 0)+spent
     market['last_year'] = game.player.age
     for owner in list(market.get('suppliers', {})):
         market['suppliers'][owner] *= math.exp(-.1 * years)
@@ -208,8 +198,8 @@ def settle_market(game, market):
 
 
 def reprice(game, market, row):
-    row['price'] = row['reference'] * game.economy_v2['worlds'][market['world']]['price_level'] * price_multiplier(row['stock'], row['target'])
-    market['revision'] += 1
+    from .basket_trade import reprice as update_price
+    update_price(game, market, row)
 
 
 def operator_account(game, world=None, location=None):

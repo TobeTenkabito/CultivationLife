@@ -795,7 +795,8 @@ class SageSystemMixin:
         elif action == "spirit_stone":
             rules = inner_outer_config().get("outer_king", {}).get("spirit_stone", {})
             gain = int(rules.get("gain_by_realm", {}).get(str(player.realm_index), 0))
-            add_item(player, "spirit_stone", gain)
+            from .economy.rewards import grant
+            gain = grant(game,gain,'外王经世收益（背景实付）')
             reward_text = f"下品灵石 +{gain}"
         else:
             rules = inner_outer_config().get("outer_king", {}).get("opportunity", {})

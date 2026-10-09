@@ -264,7 +264,7 @@ def test_fraction_is_exact_across_realm_change_and_resume(local):
     result = issue(local, 'resume', target=partial['task_id'])
     g = engine.store.load(game.id)
     assert result['status'] == 'completed'
-    assert g.heavens_state['runtime']['unit_credit'] == {'numerator': 13, 'denominator': 50}
+    assert g.heavens_state['runtime']['unit_credit'] == {'numerator': 1, 'denominator': 2}
 
 
 @pytest.mark.parametrize('result,dead', [(True,False),(False,False),(False,True)])
@@ -369,14 +369,14 @@ def test_late_window_quote_and_next_cycle_needs_observation(local):
     assert tasks.quote(deps,g,'observe','sea_echo',{})['years']==20
 
 
-def test_normal_500_year_application_stops_at_actual_old_interrupt(local):
+def test_normal_100_year_application_stops_at_actual_old_interrupt(local):
     local=quiet(local)
     engine,game,deps=local
     issue(local,'observe');issue(local,'check_history')
     g=engine.store.load(game.id);g.player.realm_index=10;engine.store.save(g)
     issue(local,'attune')
     g=engine.store.load(game.id)
-    assert g.heavens_state['runtime']['sea_echo']['application']['unit_years']==500
+    assert g.heavens_state['runtime']['sea_echo']['application']['unit_years']==100
     start_age=g.player.age
     def interrupt(work,rng,news,**kwargs):
         runtime=work.heavens_state['runtime']
@@ -387,10 +387,10 @@ def test_normal_500_year_application_stops_at_actual_old_interrupt(local):
     g=engine.store.load(game.id)
     assert g.player.age-start_age==7
     assert grant.call_count==7
-    assert g.heavens_state['runtime']['sea_echo']['application']['remaining']==493
+    assert g.heavens_state['runtime']['sea_echo']['application']['remaining']==93
 
 
-@pytest.mark.parametrize('watch_pause,expected',[(False,1000),(True,500)])
+@pytest.mark.parametrize('watch_pause,expected',[(False,200),(True,100)])
 def test_opportunity_pause_only_at_full_normal_unit(local,watch_pause,expected):
     from cultivation_life.system.heavens.state import visible_notice
     engine,game,deps=local

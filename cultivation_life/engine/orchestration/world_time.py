@@ -16,6 +16,8 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     p = game.player
     from ...system.economy.state import advance_economy
     advance_economy(game)
+    if deps.advance_war_finance:
+        deps.advance_war_finance(game)
     if deps.advance_caravans:
         deps.advance_caravans(game)
     if deps.advance_organizations:
@@ -46,6 +48,8 @@ def _advance_world_year(
     player = game.player
     from ...system.economy.state import advance_economy
     advance_economy(game)
+    if deps.advance_war_finance:
+        deps.advance_war_finance(game)
     if deps.advance_caravans:
         deps.advance_caravans(game)
     if deps.advance_organizations:

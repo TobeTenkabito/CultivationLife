@@ -50,6 +50,8 @@ def validate_logistics(economy, document, require):
         require(number(r.get('coverage')) and r['coverage']<=1)
         require(type(r.get('gate_opened')) is bool and type(r.get('refunded')) is bool)
     for war in (document or {}).get('wars',[]):
+        require(isinstance(war.get('deployment',{}),dict) and set(war.get('deployment',{})) <= {'attacker','defender'})
+        require(all(type(n) in (int,float) and n in {.5,1.} for n in war.get('deployment',{}).values()))
         book=war.get('logistics')
         if book is None:continue
         require(isinstance(book,dict) and book.get('version')==1 and integer(book.get('round')))
@@ -60,8 +62,17 @@ def validate_logistics(economy, document, require):
             require(f"{row['world']}:{row.get('location')}" in markets)
             require(f'war-supply:{war["id"]}:{side}' in economy['accounts'])
             for field in ('mobilized','spent','purchased','destroyed','transport_loss','distance'):require(number(row.get(field)))
+            for field in ('stationing_year','stationing_paid','stationing_shortfall','mobilization_paid','reference_need'):
+                require(integer(row.get(field,0)))
+            require(number(row.get('stationing_credit',0)) and row.get('stationing_credit',0) < 1)
             require(number(row.get('coverage')) and row['coverage']<=1 and type(row.get('cross_realm')) is bool)
             stock(row.get('items'));stock(row.get('consumed_items'),10**18);stock(row.get('contributions'),10**18)
+            groups=row.get('realm_groups',{})
+            require(isinstance(groups,dict) and len(groups) <= 13)
+            require(all(isinstance(k,str) and k.isdigit() and 0 <= int(k) <= 12 and integer(n,1000) for k,n in groups.items()))
+            credits=row.get('demand_credit',{})
+            require(isinstance(credits,dict) and len(credits) <= 52)
+            require(all(isinstance(k,str) and type(n) in (int,float) and math.isfinite(n) and -1 < n <= 0 for k,n in credits.items()))
         require(isinstance(book.get('actions'),dict) and len(book['actions'])<=6)
         for key,n in book['actions'].items():
             require(key in {f'{s}:{a}' for s in ('attacker','defender') for a in ('scout','forage','resupply')} and integer(n) and n<=book['round'])
@@ -69,3 +80,4 @@ def validate_logistics(economy, document, require):
         for r in book['intel'].values():
             require(isinstance(r,dict) and integer(r.get('value')) and integer(r.get('round')) and r['round']<=book['round'])
             require(integer(r.get('need')) and isinstance(r.get('base'),str))
+            require(number(r.get('turns',0)) and r.get('turns',0)<=10000)

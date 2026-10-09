@@ -73,6 +73,7 @@ def _ensure_npc_formations(deps: FormationNpcsDependencies, game: GameState) -> 
         definitions_by_world.setdefault(
             str(definition.get("world", "human")), []
         ).append(definition)
+    family_ids={n.id for n in game.family.npcs} if game.family else set()
     for npc_id, npc in living.items():
         existing = game.npc_formations.get(npc_id)
         if (
@@ -88,9 +89,13 @@ def _ensure_npc_formations(deps: FormationNpcsDependencies, game: GameState) -> 
             elapsed = max(0, int(game.player.age) - last_year)
             if elapsed > 0:
                 before = float(existing.get("durability", 0.0))
-                existing["durability"] = round(
-                    min(100.0, before + min(12.0, elapsed * 0.15)), 4
-                )
+                # Repair is part of the organization's paid supply basket.
+                # No separate per-NPC buying or free annual material recovery.
+                organization = game.economy_v2.get('organizations', {}).get(f'organization:sect:{npc.faction_id}', {})
+                if npc.id in family_ids:
+                    organization = game.economy_v2.get('organizations', {}).get(f'organization:family:{game.family.id}', {})
+                coverage = organization.get('maintenance_support',{}).get(str(npc.realm_index),0) if organization.get('last_year')==game.player.age else 0
+                existing["durability"] = round(min(100.,before+min(12.,elapsed*.15)*coverage),4)
                 existing["last_maintenance_year"] = int(game.player.age)
                 changed = True
             continue

@@ -4,6 +4,8 @@ from ...models import GameState, HistoryRecord
 from ...runtime import now_iso
 from ...rules import add_item, remove_item
 from .dependencies import PrivateTradeDependencies
+from .state import ensure_state
+from .ledger import balance, transfer_value
 
 
 def _private_trade_attendee(deps: PrivateTradeDependencies, game: GameState, npc_id: str) -> dict[str, Any]:
@@ -24,8 +26,10 @@ def buy_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id:
         game.player.world, str(offer.get("kind", "")), str(offer.get("content_id", "")),
     ):
         raise ValueError("这件货物不属于当前世界的流通范围")
-    if not remove_item(game.player, "spirit_stone", int(offer["price"])):
+    ensure_state(game)
+    if balance(game,'player') < int(offer['price']):
         raise ValueError(f"私下交易需要 {offer['price']} 枚下品灵石")
+    transfer_value(game,'player',f'background:{game.player.world}',int(offer['price']),'拍卖场私下购买（背景持有者收款）')
     deps._grant_auction_content(game.player, str(offer["kind"]), str(offer["content_id"]))
     offer["sold"] = True
     npc = deps._find_npc(game, npc_id)
@@ -61,9 +65,13 @@ def sell_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id
     multiplier = float(deps._auction_rules()["private_trade_sell_multiplier"])
     multiplier *= float(attendee.get("sell_bargains", {}).get(item_id, 1.0))
     price = max(1, round(base * multiplier))
+    ensure_state(game)
+    source = f'background:{game.player.world}'
+    if balance(game,source) < price:
+        raise ValueError('私下收购方的实际资金不足')
     if not remove_item(game.player, item_id):
         raise ValueError("行囊中已没有这件物品")
-    add_item(game.player, "spirit_stone", price)
+    transfer_value(game,source,'player',price,'拍卖场私下出售（背景持有者实付）')
     game.history.append(HistoryRecord(
         "SYS_AUCTION_PRIVATE_SELL", 1, game.player.age, "拍卖场私下交易", npc_id, "sold",
         f"{attendee['name']}私下收购{item.name}，向你支付 {price} 枚灵石。",

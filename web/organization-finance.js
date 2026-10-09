@@ -16,7 +16,7 @@
     section.append(metrics);
     const note = document.createElement('p');
     note.className = 'muted';
-    note.textContent = `按实际年数结算，府库不足时减少支付。${data.product ? `驻地产出：${data.product}，最近售出 ${num(data.produced)} 件。` : ''}`;
+    note.textContent = `按实际年数结算，府库不足时减少支付。物资保障 ${Math.round((data.supply_coverage??1)*100)}%，累计实际消费 ${num(data.supplies_consumed)} 件。${data.product ? `驻地产出：${data.product}，最近售出 ${num(data.produced)} 件。` : ''}`;
     section.append(note); root.append(section);
     if (data.industry_level !== undefined) {
       const industry = document.createElement('p');

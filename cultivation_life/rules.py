@@ -886,7 +886,7 @@ def public_player(player: Player) -> dict[str, Any]:
     conversion_stage = conversion_total if player.immortal_power_converted else min(
         conversion_total, max(0, player.immortal_conversion_stage),
     )
-    conversion_unit_years = max(1, int(conversion_config.get("time_unit_years", 500)))
+    conversion_unit_years = max(1, int(conversion_config.get("time_unit_years", 100)))
     conversion_min_gap = max(1, int(conversion_config.get("min_gap_units", 10)))
     elapsed_conversion_units = (
         max(0, (player.age - player.immortal_conversion_last_age) // conversion_unit_years)

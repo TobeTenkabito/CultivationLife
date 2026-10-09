@@ -440,7 +440,9 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                 {"npc_id":npc.id},["system","family","npc","world_news",f"world:{family.world}"],
             ))
             continue
-        result = deps._advance_npc_cultivation(npc, rng, world_age=game.player.age)
+        from ...system.economy.organization_consumption import support
+        provision=support(game,'family',family.id,npc.realm_index)
+        result = deps._advance_npc_cultivation(npc, rng, world_age=game.player.age,**({'support':provision} if provision else {}))
         if child:
             child.update(
                 age=npc.age,alive=npc.alive,realm_index=npc.realm_index,layer=npc.layer,

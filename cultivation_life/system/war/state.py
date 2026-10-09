@@ -155,9 +155,14 @@ def _war_npc(deps: WarStateDependencies, game: GameState, npc_id: str) -> SectNp
 def _available_warriors(deps: WarStateDependencies, game: GameState, war: dict[str, Any], side: str, power_id: str = "") -> list[SectNpc]:
     deps._ensure_war_shape(game, war)
     escaped = set(war.get("escaped", {}).get(side, [])) | set(war.get("voisinage_suppressed", []))
-    return [npc for npc_id in war.get("roster", {}).get(side, [])
+    from .requirements import deployed_ids
+    from ...npc_custody import is_free
+    from ...person_assignments import research_assignment
+    source_world=war.get('logistics',{}).get('sides',{}).get(side,{}).get('world',war['world'])
+    return [npc for npc_id in deployed_ids(war,side)
             if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
-            and (npc := deps._war_npc(game, npc_id)) and npc.alive
+            and (npc := deps._war_npc(game, npc_id)) and is_free(npc) and npc.world==source_world
+            and not research_assignment(game,npc.id)
             and not deps._intrigue_is_imprisoned(game, npc.id)]
 
 

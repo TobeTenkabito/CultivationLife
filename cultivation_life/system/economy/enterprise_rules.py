@@ -1,9 +1,11 @@
 """Bounded commercial recipes using existing standard goods, never unique items."""
 import math
+from collections import OrderedDict
 from ...content_registry import ITEM_CATALOG, WORLD_SYSTEMS
 
 KINDS = dict(farm='药田', mine='矿区', alchemy='丹坊', forge='器坊', shop='商铺仓库')
 MAX_LEVEL = 5
+_RECIPES=OrderedDict()
 
 
 def farm_goods(world):
@@ -16,6 +18,18 @@ def farm_goods(world):
 
 
 def recipes(world, catalog):
+    key=(world,id(catalog),len(catalog))
+    cached=_RECIPES.get(key)
+    if cached and cached[0] is catalog:
+        _RECIPES.move_to_end(key)
+        return cached[1]
+    result=_compile_recipes(world,catalog)
+    _RECIPES[key]=(catalog,result)
+    while len(_RECIPES)>32:_RECIPES.popitem(last=False)
+    return result
+
+
+def _compile_recipes(world,catalog):
     if WORLD_SYSTEMS['world_profiles'].get(world, {}).get('tier', 0) <= 0:
         return {}
     native = {k:v for k,v in catalog.items() if k in ITEM_CATALOG}
@@ -27,7 +41,8 @@ def recipes(world, catalog):
                   and any(c in v['name'] for c in ('参','莲','花','草','果','芝'))]
         if plants:
             crop = min(plants, key=lambda k: native[k]['base_price'])
-    ores = [k for k,v in native.items() if v['tier'] >= minimum and k != crop and 'pill' not in ITEM_CATALOG[k].tags
+    from .basket_rules import is_raw
+    ores = [k for k,v in native.items() if v['tier'] >= minimum and k != crop and is_raw(k) and 'herb' not in ITEM_CATALOG[k].tags
             and 'seed' not in ITEM_CATALOG[k].tags and any(c in v['name'] for c in ('晶','铜','铁','砂','玉','矿'))]
     ore = min(ores, key=lambda k: (native[k]['tier'], native[k]['base_price']))
     result = dict(farm=dict(kind='farm', name='种植' + native[crop]['name'], inputs={'dew_grass_seed': 1},

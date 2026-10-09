@@ -11,6 +11,9 @@ def validate_economy(value, merchants=None, document=None):
         if not condition:
             raise ValueError('经济存档结构或数值无效，原文件已保留')
     require(isinstance(value, dict) and value.get('schema_version') == 1)
+    require(type(value.get('issued',0)) is int and value.get('issued',0)>=0)
+    if 'consumption_policy' in value:
+        require(value['consumption_policy'] == 2 and type(value.get('policy_year')) is int and value['policy_year'] >= 0)
     for key in ('worlds', 'markets', 'accounts'):
         require(isinstance(value.get(key), dict))
     for key in ('base_year', 'last_year'):
@@ -44,6 +47,7 @@ def validate_economy(value, merchants=None, document=None):
         require(nonnegative(row.get('price_level')) and row['price_level'] > 0)
         require(type(row.get('last_year')) is int)
         require(isinstance(row.get('history'), list) and len(row['history']) <= 24)
+        require(nonnegative(row.get('issued',0)) and nonnegative(row.get('unfunded_growth_sales',0)))
     for key, row in value['accounts'].items():
         require(not key.startswith(('alliance:', 'organization:')))  # One treasury per organization.
         require(isinstance(row, dict))
@@ -55,16 +59,27 @@ def validate_economy(value, merchants=None, document=None):
         require(type(row.get('last_year')) is int and type(row.get('revision')) is int and row['revision'] >= 0)
         require(f'market:{key}' in value['accounts'] and f'operator:{key}' in value['accounts'])
         require(isinstance(row.get('commodities'), dict))
+        for field in ('household_spending','terminal_consumed','input_consumed','actual_produced'):
+            require(type(row.get(field,0)) is int and row.get(field,0) >= 0)
         require(type(row.get('war_pressure', False)) is bool)
+        if 'production_allocation' in row:
+            allocation=row['production_allocation']
+            require(isinstance(allocation,dict) and type(allocation.get('year')) is int and allocation['year']>=0)
+            require(isinstance(allocation.get('items'),dict) and len(allocation['items'])<=4096)
+            for item,owners in allocation['items'].items():
+                require(item in row['commodities'] and isinstance(owners,dict) and len(owners)<=256)
+                require(all(isinstance(k,str) and k.startswith('organization:') and type(n) is int and 0 <= n <= 1000000 for k,n in owners.items()))
         require(isinstance(row.get('suppliers', {}), dict))
         require(all(isinstance(k, str) and nonnegative(v) for k, v in row.get('suppliers', {}).items()))
         validate_market(row, value, require, nonnegative)
         for commodity in row['commodities'].values():
             require(isinstance(commodity, dict))
+            require(type(commodity.get('tier')) is int and 0 <= commodity['tier'] <= 13)
             for field in ('stock', 'target', 'price', 'reference', 'initial_target', 'production', 'consumption', 'volume'):
                 require(nonnegative(commodity.get(field)))
             require(commodity['target'] > 0 and commodity['reference'] > 0 and commodity['initial_target'] > 0)
             require(isinstance(commodity.get('history'), list) and len(commodity['history']) <= 12)
+            require(nonnegative(commodity.get('demand_credit',0)) and commodity.get('demand_credit',0) < 1)
     if 'organizations' in value:
         require(isinstance(value['organizations'], dict))
         for key, row in value['organizations'].items():
@@ -93,6 +108,15 @@ def validate_economy(value, merchants=None, document=None):
             require(row.get('commodity') is None or isinstance(row['commodity'], str))
             require(isinstance(row.get('history'), list) and len(row['history']) <= 12)
             require(nonnegative(row.get('production_credit', 0)))
+            require(nonnegative(row.get('supply_coverage',1)) and row.get('supply_coverage',1) <= 1)
+            for field in ('supplies_consumed','supply_expense'):
+                require(type(row.get(field,0)) is int and row.get(field,0) >= 0)
+            require(isinstance(row.get('demand_credit',{}),dict) and len(row.get('demand_credit',{})) <= 78)
+            require(all(nonnegative(n) and n < 1 for n in row.get('demand_credit',{}).values()))
+            for field in ('cultivation_support','maintenance_support'):
+                mapping=row.get(field,{})
+                require(isinstance(mapping,dict) and len(mapping)<=13)
+                require(all(isinstance(k,str) and k.isdigit() and 0 <= int(k) <= 12 and nonnegative(n) and n<=1 for k,n in mapping.items()))
             require(type(row.get('industry_level', 0)) is int and 0 <= row.get('industry_level', 0) <= 10)
             for field in ('industry_utilization', 'war_funding'):
                 require(nonnegative(row.get(field, 1)) and row.get(field, 1) <= 1)

@@ -9,7 +9,8 @@
       card.append(node('small',side==='attacker'?'进攻方军需':'防守方军需'));
       if(r.known){
         card.append(node('strong',r.balance==null?'尚未筹备':`${num(r.balance)} 灵石折值`));
-        card.append(node('p',`标准会战 ${num(r.need)} / 回合 · 预计可维持 ${num(r.turns)} 回合`));
+        card.append(node('p',`标准会战参考成本 ${num(r.need)} · 按实物可维持 ${num(r.turns)} 回合`));
+        if(r.realm_groups)card.append(node('small',`实际参战：${Object.entries(r.realm_groups).map(([rank,count])=>`${rank} 阶 ${count} 人`).join('、')||'暂无在役修士'}`));
         const bar=node('progress');bar.max=1;bar.value=r.coverage;bar.setAttribute('aria-label','上一回合补给率');card.append(bar);
         card.append(node('small',`上一回合补给 ${Math.round(r.coverage*100)}% · 战力 ${Math.round(r.factor*100)}%`));
         card.append(node('small',`最近据点：${r.base||'待确定'} · 陆路 ${num(r.distance)} 年 · 运输损耗 ${Math.round(r.loss*100)}%`));

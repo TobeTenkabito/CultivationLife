@@ -43,9 +43,11 @@ def market_trade(game, row, market, item, number, side):
     return bill
 
 
-def start_job(game, maps, row):
+def start_job(game, maps, row, *, automatic=False):
     if row['job'] or row['kind'] == 'shop':
         raise ValueError('已有在制批次，或该产业不从事生产')
+    if row['arrears']:
+        raise ValueError('尚有仓储欠费，暂停新投产')
     recipe = recipes(row['world'], commodity_catalog(row['world'])).get(row['recipe'])
     if not recipe or recipe['kind'] != row['kind']:
         raise ValueError('此产业尚未配置有效配方')
@@ -73,6 +75,14 @@ def start_job(game, maps, row):
     source = cash_ready(game, row)
     if balance(game, source) < total or row['arrears']:
         raise ValueError('产业周转金不足，或尚有仓储欠费')
+    if automatic:
+        reserve = operating_reserve(game,row,market)
+        limit = row.get('expense_limit', 100000)
+        available = max(0, balance(game,source)-reserve)
+        if total > min(available, limit):
+            raise ValueError('保留养护储备或本次自动经营支出上限不足，暂停投产')
+        if quote(market['commodities'][recipe['output']], 'sell', count)['total'] < total*1.05:
+            raise ValueError('预期利润不足工料成本的 5%，暂停自动投产')
     for item, number in missing.items():
         if number:
             market_trade(game, row, market, item, number, 'buy')
@@ -128,8 +138,7 @@ def advance_estates(game, maps):
             from .estate_management import plan
             plan(game, maps, row)
         market = market_at(game, maps, row)
-        due = min(10**12, row['arrears'] + max(1, math.ceil(sum(row['stock'].get(k, 0) * v['price'] * .002
-                            for k,v in market['commodities'].items()))) * years)
+        due = min(10**12, row['arrears'] + annual_maintenance(row,market) * years)
         source = cash_ready(game, row)
         paid = min(due, balance(game, source))
         transfer_value(game, source, f'background:{row["world"]}', paid, '产业年度仓储及场地养护')
@@ -148,13 +157,28 @@ def advance_estates(game, maps):
         if row['kind'] == 'shop' and row['auto_buy'] and not row['arrears'] and row['recipe'] in market['commodities']:
             item = row['recipe']
             amount = min(row['batches'] * 4 - row['stock'].get(item, 0), capacity(row) - used(row))
-            if amount > 0 and quote(market['commodities'][item], 'buy', amount)['total'] <= amount * row['buy_limit']:
+            bill = quote(market['commodities'][item], 'buy', max(0,amount)) if amount > 0 else {'total':0}
+            available = max(0,balance(game,source)-operating_reserve(game,row,market))
+            if amount > 0 and bill['total'] <= min(amount*row['buy_limit'],available,row.get('expense_limit',100000)):
                 try:
                     market_trade(game, row, market, item, amount, 'buy')
                 except ValueError:
                     pass
         elif not row['job'] and not row['arrears'] and (not row.get('entrusted') or row['auto_buy']):
             try:
-                start_job(game, maps, row)
+                start_job(game, maps, row, automatic=True)
             except ValueError as exc:
                 log(row, game.player.age, str(exc))
+
+
+def annual_maintenance(row,market):
+    return max(1,math.ceil(sum(n*market['commodities'][k]['price']*.002
+        for k,n in row['stock'].items() if k in market['commodities'])))
+
+
+def operating_reserve(game,row,market):
+    reserve=max(row.get('reserve_cash',100),annual_maintenance(row,market)*3)
+    if row['owner_kind'] in {'sect','family'}:
+        org=game.economy_v2.get('organizations',{}).get(payer(row),{})
+        reserve+=math.ceil(org.get('expected_upkeep',0)*.65*3)
+    return reserve

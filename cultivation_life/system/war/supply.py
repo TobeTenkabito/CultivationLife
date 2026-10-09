@@ -5,6 +5,33 @@ from ..economy import depot
 from ..economy.ledger import account, balance, transfer_value
 from ..economy.state import ensure_regional_market, reprice
 from ..economy.local_market import quote
+from . import requirements
+
+
+def order_plan(game,war,side,market,turns=4):
+    row=war['logistics']['sides'][side]
+    available=dict(row['items']);orders={}
+    for group,quantity in sorted(requirements.physical(game,war,side).items(),key=lambda x:-int(x[0].split(':')[1])):
+        missing=max(0,ceil(quantity*turns+row.get('demand_credit',{}).get(group,0)-1e-10))
+        eligible=requirements.suitable(market,group)
+        for item in eligible:
+            held=min(missing,available.get(item,0))
+            available[item]=available.get(item,0)-held;missing-=held
+        for item in eligible:
+            product=market['commodities'][item]
+            count=min(missing,max(0,int(product['stock'])-orders.get(item,0)))
+            if count:
+                orders[item]=orders.get(item,0)+count;missing-=count
+            if not missing:break
+    return orders
+
+
+def procurement_budget(game,war,side):
+    row=war['logistics']['sides'][side]
+    market=game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
+    orders=order_plan(game,war,side,market)
+    total=sum(quote(market['commodities'][k],'buy',n)['total'] for k,n in orders.items())
+    return max(0,total+requirements.energy(game,war,side)*4-balance(game,wallet(war,side)))
 
 
 def wallet(war,side):
@@ -49,11 +76,9 @@ def purchase(game,maps,war,side,world,location,budget,*,loss=0):
     market=game.economy_v2['markets'][f'{world}:{location}'];row=war['logistics']['sides'][side]
     budget=min(max(0,int(budget)),balance(game,wallet(war,side)))
     spent=0
-    goods=sorted((k for k,v in market['commodities'].items() if k in ITEM_CATALOG and v['stock']>=1),
-                 key=lambda k:(market['commodities'][k]['price'],k))
-    # At most six finite orders, no per-soldier or per-year buying loop.
-    for item in goods[:6]:
-        product=market['commodities'][item];low,high=0,min(1000000,int(product['stock']))
+    orders = order_plan(game,war,side,market)
+    for item, wanted in orders.items():
+        product=market['commodities'][item];low,high=0,min(1000000,int(product['stock']),wanted)
         while low<high:
             mid=(low+high+1)//2
             if quote(product,'buy',mid)['total']<=budget-spent:low=mid
@@ -73,15 +98,55 @@ def purchase(game,maps,war,side,world,location,budget,*,loss=0):
     return spent
 
 
+def turns(game,war,side):
+    row=war['logistics']['sides'][side]
+    market=game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
+    return requirements.turns(game,war,side,market,row,balance(game,wallet(war,side)))
+
+
+def consume_battle(game,war,side):
+    row=war['logistics']['sides'][side]
+    market=game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
+    credits=row.setdefault('demand_credit',{})
+    coverage=[];removed={};value=0
+    for group, quantity in sorted(requirements.physical(game,war,side).items(),key=lambda x:-int(x[0].split(':')[1])):
+        demand=round(quantity+credits.get(group,0.),9)
+        wanted=max(0,ceil(demand-1e-10))
+        # Whole pieces paid ahead cover the fraction of the next battle.
+        credits[group]=demand-wanted
+        missing=wanted
+        for item in requirements.suitable(market,group):
+            count=min(missing,row['items'].get(item,0))
+            if count:
+                row['items'][item]-=count
+                removed[item]=removed.get(item,0)+count
+                value+=price(game,row,item)*count
+                missing-=count
+            if not missing:break
+        if missing:
+            credits[group]=0.  # Unmet needs never count as a prepaid asset.
+        coverage.append((wanted-missing)/wanted if wanted else 1.)
+    required=requirements.energy(game,war,side)
+    paid=consume(game,war,side,required,'会战阵法能源',cash_only=True)
+    coverage.append(paid/required)
+    row['spent']+=round(value);row['destroyed']+=round(value)
+    for item, count in removed.items():
+        row['consumed_items'][item]=row['consumed_items'].get(item,0)+count
+    # Each purpose matters; an excess of repair goods cannot replace medicine.
+    return min(coverage)
+
+
 def mobilize(game,maps,war,side,entity,amount,distance):
     row=war['logistics']['sides'][side];stock=depot.find(game,entity)
     loss=min(.7,.02+distance*.003+(.2 if row.get('cross_realm') else 0))
     value=0
     if stock:
+        market=game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
+        allowed={k for group in requirements.physical(game,war,side) for k in requirements.suitable(market,group)}
         for key in sorted(stock['stock']):
             if not key.startswith('item:') or stock['stock'][key]<=0:continue
             item=key[5:]
-            if item not in ITEM_CATALOG:continue
+            if item not in ITEM_CATALOG or item not in allowed:continue
             quantity=min(stock['stock'][key],int(max(0,amount-value)/price(game,row,item)))
             if not quantity:continue
             stock['stock'][key]-=quantity

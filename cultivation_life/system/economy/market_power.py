@@ -89,18 +89,16 @@ def settle(game, market, years):
         row['dominant'] = leader['owner'] if dominant else None
         row['pressure'] = min(100., row['pressure'] + 16 * min(years, 5)) if dominant and tight else max(0., row['pressure'] - 12 * years)
         if row['pressure'] >= 32 and tight and not product.get('imported'):
-            # Public workshops respond with paid local labor/material services.
-            unit_cost = max(1, math.ceil(product['reference'] * .45))
             budget = f'operator:{market["id"]}'
-            quantity = min(1000000, math.ceil(product['target'] * .35 * min(years, 5)), balance(game, budget) // unit_cost)
+            from .basket_production import produce
+            quantity, net = produce(game,market,budget,item,
+                min(1000000, math.ceil(product['target']*.35*min(years,5))),allow_loss=True)
             if quantity:
-                receiver = f'competition:{market["id"]}'
-                account(game, receiver)
-                transfer_value(game, budget, receiver, quantity * unit_cost, '本地竞争扩产支付工料')
-                extra[item] = quantity
-                row['invested'] += quantity * unit_cost
+                cost = max(0, round(product['reference']*quantity)-net)
+                row['invested'] += cost
                 row['added'] += quantity
-                row['history'].append([game.player.age, f'公营作坊扩产 {quantity} 件，实付 {quantity * unit_cost} 灵石'])
+                extra[item] = quantity
+                row['history'].append([game.player.age, f'公营作坊实物扩产 {quantity} 件，工料折支 {cost} 灵石'])
                 del row['history'][:-8]
         for side in ('buyers', 'sellers'):
             row[side] = {k:v * math.exp(-.2 * years) for k,v in row[side].items() if v * math.exp(-.2 * years) >= .01}

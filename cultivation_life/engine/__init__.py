@@ -1358,8 +1358,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _maybe_npc_found_power(self, game: GameState, rng: random.Random, news: list[str]) -> None:
         return npcs._maybe_npc_found_power(self._dependencies.npcs, game, rng, news)
 
-    def _advance_npc_cultivation(self, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool=True, breakthrough_bonus: float=0.0, *, world_age: float | None = None) -> dict[str, str] | None:
-        return npcs._advance_npc_cultivation(self._dependencies.npcs, npc, rng, allow_spirit_crossing, breakthrough_bonus, world_age=world_age)
+    def _advance_npc_cultivation(self, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool=True, breakthrough_bonus: float=0.0, *, world_age: float | None = None, support: float = 0.) -> dict[str, str] | None:
+        return npcs._advance_npc_cultivation(self._dependencies.npcs, npc, rng, allow_spirit_crossing, breakthrough_bonus, world_age=world_age,support=support)
 
     def _resolve_npc_periodic_tribulation(self, game: GameState, npc: SectNpc, rng: random.Random, affiliation: str='') -> str | None:
         'Resolve one NPC thunder tribulation; immortal lifespan does not mean immortal NPCs.'

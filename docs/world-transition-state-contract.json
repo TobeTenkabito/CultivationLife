@@ -1,6 +1,12 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "economy_v2.consumption_policy / policy_year / issued / worlds.*.issued / unfunded_growth_sales": "消费规则版本与实际启用年份归原经济世界状态；结构仍为 10，不转换结构 1–9。旧结构 10 首次启用只推进市场、组织及固定产业结算基线，不追扣历史消费；原欠费和已付款批次保留。issued 为实际发行累计；unfunded_growth_sales 仅实际终端消费收据，受背景资金短缺及 2% 上限约束，不由发展指数直接发币。特殊实例明确发现奖励仅向实际 world 的 discovery 账户记录具体发行数额，不默认人界或复制主界资源池。",
+    "economy_v2.markets.*.household_spending / terminal_consumed / input_consumed / actual_produced / commodities.*.demand_credit / production_allocation": "原市场的真实收支及数量累计，不是账户余额。需求余量仅本地不足一件的小数，跨界不迁移；库存、生产、消费仍逐笔在原商品记录扣加。production_allocation 只记录本年原组织完成订单件数及原地址，每年重置，不存物资副本。用途品阶索引为最多 64 个市场的运行时缓存，增加商品时重建，未知编号不加入；不持久化 basket_index 或 basket_count。",
+    "economy_v2.organizations.*.demand_credit / supply_coverage / supplies_consumed / supply_expense / cultivation_support / maintenance_support": "原组织境界组供养记录，不建立 NPC 钱包或逐人交易；先扣固定驻地府库非预留实物，再采购真实缺口。迁址清除劳动、需求余量和收益覆盖率，原府库实物和申请仍留原地址，不传送。保障率及修炼和养护覆盖率仅最近实际支付结算有效；原 NPC 生命周期读取同界组织本年收益，免费基本修炼不因短缺被禁用。",
+    "wars.*.logistics.sides.*.realm_groups / demand_credit": "军需按原参战名册的在役境界组计算，逃离、死亡、被囚和科研占用在会战前重新核对；境界组不是参战 NPC 副本。余量为已经整件支付的不足一件预付部分，仅用于同用途同品阶下次会战；不满足的需求不成为库存或欠费。",
+    "wars.*.deployment / logistics.sides.*.reference_need / stationing_year / stationing_credit / stationing_paid / stationing_shortfall / mobilization_paid / logistics.intel.*.turns": "deployment 为原战争各方名册的半数或全数范围，同步控制战力、需求与劳动占用，不复制 NPC。驻军计费归原战争、原前线与真实年份；旧记录缺少基线只从当前年开始，不追扣。reference_need 为最近参战组的参考成本，paid 为实际累计转账，shortfall 为最近未支付额而非复利债。侦察 turns 为当次物理可用场数快照，查询不读取或泄露敌方最新实物。",
+    "economy_v2.estates.*.reserve_cash / expense_limit": "固定产业的自动经营限额，缺失分别为 100 和 100000 灵石；只能通过原所在地及原权限配置。本人使用产业周转金，不自动扣玩家行囊；组织直接使用原府库并另保留三年基本维护。欠费仅暂停进货投产，既付批次与原实物保留。",
     "economy_v2.markets.*.competition / control": "竞争统计仅归实际本地市场，买卖按真实交割记账，仓储只读同地产权库存，不估值玩家背包；统计衰减、最多十六个主体。市税权归同界宗门或家族，原市场运营账户不复制，仅新实收手续费按政策汇入原组织府库。竞争扩产从有限本地资金支付，进口品不造本地产能。",
     "wars.*.economic_transfers / economy_v2.estates.*.sale_quota": "和约仅改变同界原产业、原商队及市税权归属，原编号、地点、库存、在制批次、矿藏、商队现金与在途货物不迁移或复制；超容量队伍转独立，交接按战败方幂等留痕。sale_quota 属产业经营方案，每次年度结算限制自动售货，旧档缺失默认为一百万件上限。",
     "economy_v2.estates": "固定 world/location/kind 的唯一产权记录，owner_kind/owner_id 与库存、在制批次、有限矿藏分别保存。本人产业周转金使用 estate 账户，组织产业直接使用原府库；当地手工办理，年度生产按真实世界年结算。跨界不携带、复制或重置地产、库存及产出；旧档缺失表示尚未购置，不追发历史收入。",

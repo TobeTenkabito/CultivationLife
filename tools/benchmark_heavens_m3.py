@@ -1,4 +1,4 @@
-"""Paired real 500-year actions; run alone after functional acceptance."""
+"""Paired real 100-year actions; run alone after functional acceptance."""
 import argparse
 import copy
 import json
@@ -65,9 +65,9 @@ def main():
                         engine.advance(work.id, 'cultivate', 1)
                         samples[mode].append((time.perf_counter()-start)*1000)
                         saved = engine.store.load(work.id)
-                        assert saved.player.age-work.player.age == 500, (case, mode, 'interrupted')
+                        assert saved.player.age-work.player.age == 100, (case, mode, 'interrupted')
                         if mode == 'on':
-                            assert saved.heavens_state['runtime']['processed_years']-on.heavens_state['runtime']['processed_years'] == 500
+                            assert saved.heavens_state['runtime']['processed_years']-on.heavens_state['runtime']['processed_years'] == 100
                             final = saved
                     print(f'{case}: {repeat+1}/{args.repeats}', flush=True)
             before = on.to_dict()
@@ -80,7 +80,7 @@ def main():
             off_ms, on_ms = statistics.median(samples['off']), statistics.median(samples['on'])
             p95 = sorted(views)[94]
             size = max(len(json.dumps(g.heavens_state, ensure_ascii=False).encode()) for g in (on, final))
-            row = dict(case=case, repeats=args.repeats, years=500, off_median_ms=off_ms, on_median_ms=on_ms,
+            row = dict(case=case, repeats=args.repeats, years=100, off_median_ms=off_ms, on_median_ms=on_ms,
                 overhead_ms=on_ms-off_ms, limit_ms=max(100, off_ms*.2), view_p95_ms=p95, heavens_bytes=size,
                 passed=on_ms-off_ms <= max(100, off_ms*.2) and p95 < 200 and size < 512*1024,
                 samples_ms=samples)

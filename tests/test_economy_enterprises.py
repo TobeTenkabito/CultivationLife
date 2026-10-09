@@ -70,6 +70,34 @@ def test_property_production_cash_and_readonly_reload(economy):
     GameState.from_dict(game.to_dict())
 
 
+def test_automatic_budget_reserve_and_paid_job_survive_arrears(economy):
+    from cultivation_life.system.economy.enterprise_operations import start_job
+    engine,game=economy
+    game,key=buy(engine,game,'farm')
+    game=estate_act(engine,game,key,'fund',amount=10000)
+    game=configure(engine,game,key,expense_limit=0,reserve_cash=321)
+    row=game.economy_v2['estates'][key]
+    snapshot=copy.deepcopy(game.to_dict())
+    with pytest.raises(ValueError,match='支出上限'):
+        start_job(game,engine.maps,row,automatic=True)
+    assert game.to_dict()==snapshot
+    row['expense_limit']=100000;row['reserve_cash']=10000
+    with pytest.raises(ValueError,match='储备'):
+        start_job(game,engine.maps,row,automatic=True)
+    # An explicitly paid manual order may accept this expense. Losing funds
+    # afterwards must not destroy that already-funded output.
+    start_job(game,engine.maps,row)
+    source=f'estate:{key}'
+    transfer_value(game,source,'background:human',balance(game,source),'耗尽测试周转金')
+    game.player.age=row['job']['finish']
+    advance_estates(game,engine.maps)
+    assert row['arrears']>0 and row['job'] is None
+    assert row['stock']=={'dew_grass_ten':4}
+    with pytest.raises(ValueError,match='欠费'):
+        start_job(game,engine.maps,row,automatic=True)
+    assert GameState.from_dict(game.to_dict())
+
+
 def test_missing_inputs_stale_revision_and_remote_actions_atomic(economy):
     engine, game = economy
     game, key = buy(engine, game, 'farm')

@@ -1,4 +1,4 @@
-"""Bounded all-world save/view sizes and paired real 500-year advancement."""
+"""Bounded all-world save/view sizes and paired real 100-year advancement."""
 import copy
 import json
 from pathlib import Path
@@ -42,10 +42,10 @@ def main():
                     engine.advance(original.id, 'cultivate', 1)
                     samples[mode].append((time.perf_counter()-started)*1000)
                     current = engine.store.load(original.id)
-                    assert current.player.age-original.player.age == 500
+                    assert current.player.age-original.player.age == 100
                     if mode=='on':
                         assert current.heavens_state['runtime']['incidents']['celestial_seal']['remaining'] == 0
-                print(f'500-year pair {repeat+1}/5 passed',flush=True)
+                print(f'100-year pair {repeat+1}/5 passed',flush=True)
         baseline = on.to_dict()
         views = []
         for _ in range(200):
@@ -54,7 +54,7 @@ def main():
             views.append((time.perf_counter()-started)*1000)
         assert on.to_dict() == baseline
         medians = {key:statistics.median(value) for key,value in samples.items()}
-        result = dict(years=500,repeats=5,medians_ms=medians,samples_ms=samples,
+        result = dict(years=100,repeats=5,medians_ms=medians,samples_ms=samples,
             view_p95_ms=sorted(views)[189],state_bytes=len(json.dumps(on.heavens_state,ensure_ascii=False).encode()),
             view_bytes=len(json.dumps(projected,ensure_ascii=False).encode()),pure_projection=True)
         result['passed'] = (medians['on']-medians['off'] <= max(100,medians['off']*.2)

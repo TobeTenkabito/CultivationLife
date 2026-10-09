@@ -19,12 +19,12 @@
     const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
     if (market.war_pressure) intro.append(' 当地战事正在压低生产并增加运输风险。');
     const metrics = el('div', null, 'economy-metrics');
-    for (const [label, value] of [['累计成交',market.turnover],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
+    for (const [label, value] of [['累计成交',market.turnover],['居民实付',market.household_spending||0],['实际消费件数',market.terminal_consumed||0],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
       const cell = el('div'); cell.append(el('small',label), el('strong',money(value))); metrics.append(cell);
     }
     const macro = el('details', null, 'economy-world');
-    macro.append(el('summary',`${market.world_name}经济 · 开局规模的 ${money(market.scale)} 倍`),
-      el('p',`界面经济随岁月发展，接近 ${money(market.growth_cap)} 倍时逐渐放缓。物价水平 ${money(market.price_level)} 倍；黑市收入归本界府库，当前 ${money(market.world_treasury)} 灵石。`));
+    macro.append(el('summary',`${market.world_name}发展潜力 · 开局的 ${money(market.scale)} 倍`),
+      el('p',`发展潜力随岁月提升，接近 ${money(market.growth_cap)} 倍时逐渐放缓；实际生产与消费受资材和资金约束。物价水平 ${money(market.price_level)} 倍；黑市收入归本界府库，当前 ${money(market.world_treasury)} 灵石。`));
     const freight = el('details', null, 'economy-freight');
     freight.append(el('summary', `商队流通 · 累计到货 ${money(market.freight_in || 0)} / 发货 ${money(market.freight_out || 0)} 件`));
     window.CaravanMap?.render(freight,market,game.map);

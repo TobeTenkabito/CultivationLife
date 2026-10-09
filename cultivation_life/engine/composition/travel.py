@@ -13,9 +13,11 @@ from ...time_dependencies import (
 def bind_world_year(host) -> WorldYearDependencies:
     from ...system.economy.caravans import advance_caravans
     from ...system.economy.organizations import advance_organizations
+    from ...system.war.stationing import advance as advance_stationing
     return WorldYearDependencies(
         advance_caravans=lambda game: advance_caravans(game, host.maps),
         advance_organizations=lambda game: advance_organizations(game, host.maps),
+        advance_war_finance=advance_stationing,
         _advance_buddhist_year=lambda *args, **kwargs: host._advance_buddhist_year(*args, **kwargs),
         _advance_ghost_phase_two_year=lambda *args, **kwargs: host._advance_ghost_phase_two_year(*args, **kwargs),
         _advance_guixu_calendar=lambda *args, **kwargs: host._advance_guixu_calendar(*args, **kwargs),

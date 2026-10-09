@@ -370,7 +370,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
 def _advance_npc_cultivation(
     deps: NpcDependencies, npc: SectNpc, rng: random.Random, allow_spirit_crossing: bool = True,
     breakthrough_bonus: float = 0.0,
-    *, world_age: float | None = None,
+    *, world_age: float | None = None, support: float = 0.,
 ) -> dict[str, str] | None:
     if not npc.alive or npc.realm_index <= 0:
         return None
@@ -388,7 +388,7 @@ def _advance_npc_cultivation(
     settings = FACTION_SYSTEMS["npc_cultivation"]
     rate = float(settings["progress_per_year"][str(npc.realm_index)])
     root_efficiency = deps._npc_root_efficiency(npc.spirit_root)
-    npc.cultivation_progress += rate * root_efficiency * rng.uniform(0.82, 1.18)
+    npc.cultivation_progress += rate * root_efficiency * rng.uniform(0.82, 1.18) * (1+.1*max(0.,min(1.,support)))
     threshold = float(settings["threshold"]) * (1 + 0.06 * (npc.layer - 1))
     if npc.cultivation_progress < threshold:
         return None

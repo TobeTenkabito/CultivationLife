@@ -1599,7 +1599,7 @@ class ContentRegistry:
             if not isinstance(cultivation.get(field), (int, float)) or float(cultivation[field]) <= 0:
                 raise ContentError(f"人界 NPC 修炼参数 {field} 必须为正数")
         time_units = world.get("time_units", {})
-        if time_units != {"0": 1, "1": 1, "2": 1, "3": 1, "4": 5, "5": 10, "6": 20, "7": 50, "8": 100, "9": 100, "10": 500, "11": 500, "12": 500}:
+        if time_units != {"0": 1, "1": 1, "2": 1, "3": 1, "4": 5, "5": 10, "6": 20, "7": 50, "8": 100, "9": 100, "10": 100, "11": 100, "12": 100}:
             raise ContentError("境界时间单位配置不符合 1/5/10/20/50/100 年规则")
         conversion = world.get("immortal_power_conversion", {})
         if (

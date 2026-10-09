@@ -3,9 +3,7 @@ from collections import Counter
 from ...npc_custody import is_free
 from ...content_registry import WORLD_SYSTEMS
 from ..faction_geography import faction_site
-from .state import ensure_regional_market, commodity_catalog, reprice
-from .local_market import quote
-from .ledger import balance, transfer_value
+from .state import ensure_regional_market
 from .industry import supplier_delivery
 
 
@@ -19,53 +17,64 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     world, location = entity.world, faction_site(entity)['id']
     ensure_regional_market(game, maps, world, location)
     market = game.economy_v2['markets'][f'{world}:{location}']
-    groups = workforce(entity)
+    from ..war.requirements import deployed_ids
+    from ...person_assignments import research_assignment
+    deployed={(war.get('logistics',{}).get('sides',{}).get(side,{}).get('world',war['world']),identity)
+        for war in game.wars if war.get('status') in {'active','peace_ready'}
+        for side in ('attacker','defender') for identity in deployed_ids(war,side)
+        if identity not in war.get('escaped',{}).get(side,()) and identity not in war.get('voisinage_suppressed',())}
+    groups=Counter();working=Counter()
+    for npc in entity.npcs:
+        if not is_free(npc) or npc.world != entity.world:continue
+        groups[npc.realm_index]+=1
+        if (npc.world,npc.id) not in deployed and not research_assignment(game,npc.id):
+            working[npc.realm_index]+=1
     tier = WORLD_SYSTEMS['world_profiles'][world]['tier']
-    row['expected_upkeep'] = sum(count*(25*tier+rank**2*12) for rank,count in groups.items())
+    row['expected_upkeep'] = sum(count*(25*tier+rank**2*8) for rank,count in groups.items())
     row['workforce'] = {str(k):v for k,v in sorted(groups.items())}
     row['workforce_year'] = game.player.age
-    capacity = sum(count * (60 + 60 * rank ** 3) for rank,count in groups.items()) * 5 ** (tier-1)
+    capacity = sum(count * (60 + 60 * rank ** 3) for rank,count in working.items()) * 5 ** (tier-1)
     row['labor_capacity'] = capacity
     if not capacity:
         return 0
     capacity *= .25 if extra else 1
-    capacity *= min(1000, game.economy_v2['worlds'][world]['scale'])
+    # Ordinary production and fixed estates draw on the same workforce.
+    estate_count = sum(e['owner_kind'] == row['kind'] and e['owner_id'] == entity.id
+        and e['world'] == world and e['enabled'] for e in game.economy_v2.get('estates', {}).values())
+    capacity /= 1 + estate_count
     capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1)
-    native = commodity_catalog(world, commercial=False)
-    # Demand and realm capability determine the portfolio, not repeated random
-    # choices. Local cash/stock constrain every accepted dealer order.
-    goods = [k for k,p in market['commodities'].items() if k in native and not p.get('imported')
-             and p['tier'] <= max(groups)+1 and p['stock'] < p['target']*1.5]
-    goods.sort(key=lambda k:(market['commodities'][k]['stock']/market['commodities'][k]['target'],
-                             -market['commodities'][k]['tier'],k))
+    from .basket_rules import index, candidates, raw_candidates
+    from .basket_production import produce as workshop_produce
     credit = min(10**12, row.get('production_credit', 0) + capacity * years)
     earned = 0
-    dealer = f'market:{market["id"]}'
-    goods = [k for k in goods if market['commodities'][k]['reference'] <= credit
-             and quote(market['commodities'][k],'sell',1)['gross'] <= balance(game,dealer)]
-    for item in goods[:4]:
+    source = f'organization:{row["kind"]}:{entity.id}'
+    index(market)
+    goods = []
+    for rank in range(max(working)+1,0,-1):
+        goods.extend(raw_candidates(market,rank,limit=1))
+    for category in ('material', 'training', 'medical', 'arms', 'energy', 'general'):
+        for rank in range(max(working)+1, 0, -1):
+            goods.extend(candidates(market, f'{category}:{rank}', limit=1))
+    completed = 0
+    from .production_allocation import quota, record
+    for item in dict.fromkeys(goods):
+        if row['produced'] >= 1000000:
+            break
         product = market['commodities'][item]
-        wanted = min(1000000, int(credit / product['reference']), max(0,int(product['target']*1.5-product['stock'])))
-        dealer = f'market:{market["id"]}'
-        low, high = 0, wanted
-        while low < high:
-            mid = (low+high+1)//2
-            if quote(product,'sell',mid)['gross'] <= balance(game,dealer): low=mid
-            else: high=mid-1
-        if not low:
+        if product['reference'] > credit:
             continue
-        bill = quote(product,'sell',low)
-        source = f'organization:{row["kind"]}:{entity.id}'
-        transfer_value(game,dealer,source,bill['total'],'门内分境界产能完成本地订单')
-        transfer_value(game,dealer,f'operator:{market["id"]}',bill['fee'],'组织产出交易手续费')
-        product['stock'] += low
-        product['production'] += low / max(1,years)
-        product['volume'] += low
-        market['turnover'] += bill['gross'];market['fees'] += bill['fee']
-        reprice(game,market,product)
-        supplier_delivery(market,source,low,game=game,item=item)
-        earned += bill['total'];credit -= low*product['reference']
-        row['produced'] += low;row['commodity'] = item
+        room=max(0,int(product['target']*1.5-product['stock']))
+        allowance=quota(game,market,source,item,room)
+        quantity, net = workshop_produce(game, market, source, item,
+            min(int(credit/product['reference']),allowance), labor_credit=credit)
+        if not quantity:
+            continue
+        supplier_delivery(market, source, quantity, game=game, item=item)
+        record(game,market,source,item,quantity)
+        earned += net; credit -= quantity*product['reference']
+        row['produced'] += quantity; row['commodity'] = item
+        completed += 1
+        if completed >= 4:
+            break
     row['production_credit'] = max(0,credit)
-    row['expected_upkeep'] = sum(count*(25*WORLD_SYSTEMS['world_profiles'][world]['tier']+rank**2*12) for rank,count in groups.items())
     return earned
