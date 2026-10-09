@@ -2,6 +2,60 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "cultivation_upper_immortal", "name": "长生初成", "category": "cultivation",
+      "description": "在三级界面修至真仙或同等境界。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_realm_at_least": 9}
+    },
+    {
+      "id": "cultivation_upper_golden", "name": "金仙不朽", "category": "cultivation",
+      "description": "在三级界面修至金仙或同等境界。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_realm_at_least": 10}
+    },
+    {
+      "id": "cultivation_upper_taiyi", "name": "太乙逍遥", "category": "cultivation",
+      "description": "在三级界面修至太乙或同等境界。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_realm_at_least": 11}
+    },
+    {
+      "id": "cultivation_upper_daluo", "name": "大罗无量", "category": "cultivation",
+      "description": "在三级界面修至大罗或同等境界。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_realm_at_least": 12}
+    },
+    {
+      "id": "cultivation_voisinage_transformed", "name": "一域化境", "category": "cultivation",
+      "description": "将任一邻域或魔域修持至化境。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"voisinage_rank_at_least": 5}
+    },
+    {
+      "id": "cultivation_voisinage_perfected", "name": "一域至臻", "category": "cultivation",
+      "description": "将任一邻域或魔域修持至至臻。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"voisinage_rank_at_least": 13}
+    },
+    {
+      "id": "cultivation_asura_king", "name": "万战称王", "category": "cultivation",
+      "description": "在修罗王庭取得修罗王之位。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_institution": "asura"}
+    },
+    {
+      "id": "cultivation_nether_delegate", "name": "五阀有席", "category": "cultivation",
+      "description": "在万妖宫取得并维持一个门阀代言席位。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_institution": "nether"}
+    },
+    {
+      "id": "cultivation_reincarnation_envoy", "name": "奉愿神使", "category": "cultivation",
+      "description": "在轮回殿晋升为轮回神使。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"upper_institution": "reincarnation"}
+    },
+    {
       "id": "cultivation_dao_ancestor", "name": "道祖", "category": "cultivation",
       "description": "修至大罗，拥有任一至臻邻域，并将任一道统参悟至 Lv9。",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},

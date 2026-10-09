@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "asura_natal_manifestation", "name": "八部立命", "category": "cultivation",
+      "description": "在修罗界完成一次凝身融合，确立八部本命。",
+      "condition": {"asura_attainment": {"level": 1}}
+    },
+    {
+      "id": "asura_domain_perfected", "name": "魔域至臻", "category": "cultivation",
+      "description": "将八部本命的魔域修持至至臻。",
+      "condition": {"asura_attainment": {"level": 1, "domain_rank": 13}}
+    }
+  ]
+}

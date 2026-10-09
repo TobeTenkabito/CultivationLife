@@ -271,7 +271,7 @@ class DemonicSystemTests(unittest.TestCase):
         raw["player"]["divine_sense_experience"] = 87
         save_path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
         before = save_path.read_bytes()
-        with self.assertRaisesRegex(ValueError, "停止支持"):
+        with self.assertRaisesRegex(ValueError, "不兼容"):
             self.engine.get_game(game_id)
         self.assertEqual(save_path.read_bytes(), before)
 

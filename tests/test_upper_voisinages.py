@@ -182,7 +182,7 @@ def test_all_configured_domains_project_and_grow_without_randomness():
         p = Player('成长', 'supreme_metal', world=world, realm_index=12)
         for field in world_config(p)['fields']:
             previous = None
-            for rank in range(1, 10):
+            for rank in range(1, 14):
                 p.world_voisinages[world] = {'levels': {field['id']: rank}, 'active': field['id']}
                 current = player_source(p).voisinages[0]
                 if previous:

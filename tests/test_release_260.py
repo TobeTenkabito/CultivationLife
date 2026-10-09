@@ -15,6 +15,7 @@ from cultivation_life.system.upper_voisinage import quote
 from cultivation_life.system.combat.trials import load_battle, dump_battle, run_batch
 from cultivation_life.rules import opportunity_required, max_hp, max_mp, add_item
 from cultivation_life.save_schema import migrate_document, SAVE_SCHEMA_VERSION
+from cultivation_life.system.crafting_system import crafting_material_definitions, make_crafting_material_instance
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,7 +32,9 @@ def fund(g):
     p.opportunity=opportunity_required(p)
     add_item(p,'spirit_stone',100000000)
     key=WORLD_SYSTEMS['upper_voisinages']['worlds'][p.world]['material_id']
-    p.crafting_materials += [dict(id=f'cost-{i}',material_id=key,quality=1) for i in range(10)]
+    definition = crafting_material_definitions()[key]
+    rng = random.Random(260)
+    p.crafting_materials += [make_crafting_material_instance(definition, rng, source='test', origin_world=p.world) for _ in range(10)]
 
 
 @pytest.mark.parametrize('version',[1,7,8,9])

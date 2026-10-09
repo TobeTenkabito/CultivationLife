@@ -32,6 +32,12 @@ def verify_matrix(page, config):
         by_id = {c['id']: c for c in chapters}
         assert len(by_id) == len(chapters)
         assert 'routes' in by_id and 'worlds' in by_id and 'save' in by_id
+        economics = ('economic-materials', 'economic-recipes', 'economic-demand', 'economic-estates', 'economic-war')
+        assert all(key in by_id for key in economics), mask
+        economy_text = json.dumps([by_id[key] for key in economics], ensure_ascii=False)
+        assert all(value in economy_text for value in ('四十五种', '七十二种', '一百零八种'))
+        assert all(word not in economy_text for word in ('分桶', '缓存', '代表商品', '后台循环', '聚合近似'))
+        assert '500 年' not in json.dumps(by_id, ensure_ascii=False)
         for i, (key, *_) in enumerate(packages):
             assert (f'dlc-{key}' in by_id) == bool(mask & (1 << i)), (mask, key)
         route_text = json.dumps(by_id['routes'], ensure_ascii=False)
@@ -98,6 +104,15 @@ def main():
                             assert page.locator('[data-chapter="routes"]').get_attribute('open') is not None
                             assert page.locator('#handbook-search').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
                             assert page.locator('#settings-card').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
+                            for term, chapter in (('九类原料', 'economic-materials'), ('军需', 'economic-war'), ('掌柜', 'economic-estates')):
+                                page.locator('#handbook-search').fill(term)
+                                article = page.locator(f'[data-chapter="{chapter}"]')
+                                assert article.is_visible() and article.get_attribute('open') is not None
+                                assert page.locator('#settings-card').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
+                                if term == '九类原料' and width == 412 and label == 'full':
+                                    article.locator('summary').scroll_into_view_if_needed()
+                                    page.screenshot(path=str(ROOT/f'build/handbook-economy-{theme}-mobile.png'))
+                            page.locator('#handbook-search').fill('魔气')
                             if width==412 and label=='full':
                                 page.locator('[data-chapter="routes"] summary').scroll_into_view_if_needed()
                                 page.screenshot(path=str(ROOT/f'build/handbook-{theme}-mobile.png'))

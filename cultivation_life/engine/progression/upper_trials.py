@@ -36,7 +36,7 @@ def eligible(p):
             (p.path == 'monster' and p.world == 'nether' and bool(CONTENT_DOCUMENTS.get('monster_true_forms.json'))))
 
 
-def queue(deps, game):
+def queue(deps: Dependencies, game):
     t = game.active_trial
     event = copy.deepcopy(deps.events()[t['event_ids'][0]])
     event['title'] = t['title']
@@ -44,7 +44,7 @@ def queue(deps, game):
     game.pending_event = deps.instantiate(event, game, None)
 
 
-def start(deps, game, kind, *, evolution=None, lineage=None):
+def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     p = game.player
     if kind not in KINDS or not eligible(p) or kind != p.path + '_upper' or game.active_trial:
         raise ValueError('当前无法引发此道途劫难')
@@ -84,7 +84,7 @@ def start(deps, game, kind, *, evolution=None, lineage=None):
     queue(deps, game)
 
 
-def resolve(deps, game, step, rng):
+def resolve(deps: Dependencies, game, step, rng):
     t, p = game.active_trial, game.player
     if not t or t.get('kind') not in KINDS or step != 'upper_battle':
         raise ValueError('当前没有对应妖鬼劫战')

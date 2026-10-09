@@ -1,6 +1,6 @@
 # 万妖归宗：本相铸域
 
-本体 v2.6.0 / DLC I 4.15.0，2026-10-08。内容目录为 `dlc/monster-bloodlines/content/monster_true_forms.json`，使用已有幽冥界邻域面板、培养报价、元力与战斗能力入口。
+本体 v2.7.0 / 万妖归宗 4.15.1，2026-10-09。内容目录为 `dlc/monster-bloodlines/content/monster_true_forms.json`，使用已有幽冥界邻域面板、培养报价、元力与战斗能力入口。蓝图确认、化境和至臻定型新增独立成就，见 [三级界面成就](upper-achievements-270.md)。
 
 ## 边界与培养
 

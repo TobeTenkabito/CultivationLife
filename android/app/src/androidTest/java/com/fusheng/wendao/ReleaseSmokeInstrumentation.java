@@ -217,7 +217,28 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("soul-forms")) {
+            if(phase.equals("economy-handbook")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'资粮百科验收',preset_id:'nether_upper',monster_species_id:'serpent',seed:270})});await loadGame(g.id);return g.id;})()");
+                python("from cultivation_life import server\ne=server.ENGINE\nserver._handbook_release_snapshot=e.store._path("+JSONObject.quote(id)+").read_bytes()");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+                    js("UtilityPanels.open('settings');true");
+                    for(String chapter:new String[]{"economic-materials","economic-recipes","economic-demand","economic-estates","economic-war"}) {
+                        tapSelector("[data-chapter="+chapter+"] summary");
+                        check(Boolean.TRUE.equals(js("document.querySelector('[data-chapter="+chapter+"]').open && document.querySelector('#settings-card').scrollWidth<=document.querySelector('#settings-card').clientWidth+2")),"Economic handbook overflow: "+theme+chapter);
+                        tapSelector("[data-chapter="+chapter+"] summary");
+                    }
+                    check(Boolean.TRUE.equals(js("!['分桶','缓存','代表商品','后台循环'].some(w=>JSON.stringify(TutorialHandbook.build(configData,game).filter(c=>c.id.startsWith('economic-'))).includes(w))")),"Internal economy vocabulary visible");
+                    capture("economy-handbook-270-"+theme);
+                    js("UtilityPanels.close('settings');true");
+                }
+                python("from cultivation_life import server\ne=server.ENGINE\nassert e.store._path("+JSONObject.quote(id)+").read_bytes()==server._handbook_release_snapshot");
+                js("showStart();true");tapSelector("#achievement-open");
+                waitForJs("!document.querySelector('#achievement-screen').classList.contains('hidden') && document.querySelector('#achievement-groups').textContent.includes('本相初铭')","Upper achievements not displayed");
+                check(Boolean.TRUE.equals(js("['万战称王','五阀有席','奉愿神使','照魂见我','八部立命','魔域至臻'].every(n=>document.querySelector('#achievement-groups').textContent.includes(n)) && achievementCatalog.achievements.find(r=>r.id==='monster_true_form_confirmed').source.id==='official.monster-bloodlines'")),"Achievement source or institution entries mismatch");
+                check(Boolean.TRUE.equals(js("document.querySelector('#achievement-screen').scrollWidth<=document.querySelector('#achievement-screen').clientWidth+2")),"Achievement mobile overflow");
+                result.putString("economy_handbook_scope","Five player-facing economy chapters, four themes, native reading taps, unchanged save/RNG/time, real upper achievement list and DLC sources");
+            } else if(phase.equals("soul-forms")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'照魂原生验收',preset_id:'reincarnation_upper',seed:260})});return g.id;})()");
                 // Resume an already elapsed contemplation, avoiding unrelated yearly incidents in the UI fixture.
                 python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.world_voisinages.setdefault('reincarnation',{})['contemplation']={'cause':'life_death','elapsed':100,'required':100}\ne.store.save(g)");

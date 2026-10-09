@@ -123,11 +123,11 @@ def test_missing_reference_rejects_instead_of_recreating_a_dead_person():
 
 
 
-def test_v8_save_migrates_once_and_keeps_opaque_extensions(tmp_path, monkeypatch):
+def test_current_save_reads_keep_opaque_extensions_without_rewriting(tmp_path, monkeypatch):
     game, _ = state()
     document = game.to_dict()
     document.pop('heavens_state', None)
-    document.update(version=8, opaque_mod_state={'keep': [1, 2]})
+    document.update(opaque_mod_state={'keep': [1, 2]})
     store = SaveStore(tmp_path)
     store._path(game.id).write_text(json.dumps(document), encoding='utf-8')
     store.load(game.id)

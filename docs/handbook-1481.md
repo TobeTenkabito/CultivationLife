@@ -1,6 +1,6 @@
 # 新手百科维护说明
 
-> 维护基线：本体 v1.58.0，2026-10-04。存档结构 8，支持 6→7→8；文中“旧档补全”仅适用于允许加载的结构。文件名编号仅用于保持链接。
+> 维护基线：本体 v2.7.0，2026-10-09。仅支持存档结构 10，结构 1–9 明确不兼容。文件名编号仅用于保持链接。
 
 玩家入口：设置 → 新手百科与修行指南。百科是查阅资料，32 步操作教程仍单独运行。旧版十课数据保留，保证旧教学概念与阅读进度不被误当成新增百科的章节序号。
 
@@ -21,6 +21,9 @@
 | 家族灌顶、内政与同界收益 | `system/family_system.py`、`system/intrigue/governance.py` |
 | 仙界进阶与材料购买 | `system/immortal_cultivation.py`、`system/immortal_body_system.py`、`system/doctrine/`、`content/doctrines.json` |
 | 归墟索宝与临时队友 | `system/guixu/` |
+| 九类材料、诸界物产与有限配方 | `economy_content.py`、`economy_metadata.py` |
+| 修士需求、延寿与产业经营 | `system/economy/basket_consumption.py`、`system/economy/organization_consumption.py`、`system/economy/enterprise_operations.py`、`system/economy/estate_management.py` |
+| 战争参与范围与军需替代 | `system/economy/war_assets.py`、`system/economy/war_finance.py`，以及 [军需规则](war-logistics.md) |
 
 表中的 Python 路径相对 `cultivation_life/`。更新规则后也应核对百科，不能仅按历史 README 或策划案继续写旧版本规则。
 
@@ -28,6 +31,8 @@
 
 ## 验收
 
-`scripts/verify_handbook_ui.py` 按八个包动态覆盖 256 种官方 DLC 组合、加载错误、待重启状态，并在六主题、桌面和手机横竖屏检查搜索、分类、排版和只读性。`scripts/verify_tutorial_ui.py` 重新走完整 32 步控件引导，防止百科筛选或控件变化挡住教学。后端兼容测试为 `tests/test_tutorial.py` 和 `tests/test_tutorial_walkthrough.py`。
+`scripts/verify_handbook_ui.py` 按八个包动态覆盖 256 种官方 DLC 组合、加载错误、待重启状态，并在四主题、桌面和手机横竖屏检查搜索、分类、经济表格排版和只读性。`scripts/verify_tutorial_ui.py` 重新走完整 32 步控件引导，防止百科筛选或控件变化挡住教学。后端兼容测试为 `tests/test_tutorial.py` 和 `tests/test_tutorial_walkthrough.py`。
+
+经济百科属于本体，采用原料、成品、修行资粮、驻地掌柜和军需等玩家用语。说明可观察的供给与消耗、品阶范围、产权限制和费用，不向玩家介绍聚合分桶、缓存、代表商品轮换、采购采样或后台年度循环。元婴／化神的延寿需求须与炼虚起寿元无上限的规则一致；所有界面的最长行动单位均为一百年。
 
 验收脚本是独立浏览器检查，不由 pytest 自动执行；验证方法与开发边界见 [项目诊断](project-diagnosis.md)。

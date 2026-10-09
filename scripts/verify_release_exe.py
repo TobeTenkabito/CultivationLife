@@ -46,6 +46,16 @@ def verify(with_dlc):
             assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
             assert len(config["extensions"]) == (len(list((ROOT/'dlc').glob('*/manifest.json'))) if with_dlc else 0)
+            with urllib.request.urlopen(base + '/api/achievements', timeout=5) as response:
+                catalog = {row['id']: row for row in json.load(response)['achievements']}
+            assert {'cultivation_upper_immortal', 'cultivation_upper_daluo', 'cultivation_voisinage_perfected',
+                    'cultivation_asura_king', 'cultivation_nether_delegate', 'cultivation_reincarnation_envoy'} <= catalog.keys()
+            for key, source in {'monster_true_form_confirmed': 'official.monster-bloodlines',
+                                'ghost_soul_form_confirmed': 'official.ghost-reincarnation',
+                                'asura_natal_manifestation': 'official.asura-manifestation'}.items():
+                assert (key in catalog) == with_dlc
+                if with_dlc:
+                    assert catalog[key]['source']['id'] == source
             for asset in ('custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()

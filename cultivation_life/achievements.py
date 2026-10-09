@@ -119,6 +119,59 @@ class AchievementSystem:
 
     def _matches(self, condition: dict[str, Any], game: GameState, *, player_rank: int | None, history_index: dict | None = None) -> bool:
         player = game.player
+        if "upper_realm_at_least" in condition:
+            from .content_registry import WORLD_SYSTEMS
+            worlds = set(WORLD_SYSTEMS.get('upper_voisinages', {}).get('worlds', {})) | {'celestial'}
+            return player.world in worlds and player.realm_index >= int(condition['upper_realm_at_least'])
+        if "voisinage_rank_at_least" in condition:
+            from .system import upper_voisinage_rules, asura
+            minimum = int(condition['voisinage_rank_at_least'])
+            if player.realm_index < 9:
+                return False
+            if player.world == 'celestial':
+                state = game.doctrine_state.get('player', {})
+                definitions = game.doctrine_state.get('definitions', {})
+                return any(key in definitions and state.get('progress', {}).get(key, {}).get('level', 0) >= 4
+                           and int(training.get('rank', 1)) >= minimum
+                           for key, training in state.get('voisinage_training', {}).items())
+            if asura.active(player) and player.asura_cultivation.get('route') in asura.config().get('routes', {}):
+                state = player.asura_cultivation
+                return state.get('level', 0) >= 1 and state.get('domain_rank', 1) >= minimum
+            return upper_voisinage_rules.available(player) and any(
+                upper_voisinage_rules.level(player, row['id']) >= minimum
+                for row in upper_voisinage_rules.definitions(player))
+        if "upper_institution" in condition:
+            from .content_registry import WORLD_SYSTEMS
+            world = str(condition['upper_institution'])
+            cfg = WORLD_SYSTEMS.get('upper_institutions', {}).get('worlds', {}).get(world, {})
+            state = game.upper_institutions.get(world, {})
+            if (player.world != world or player.realm_index < 9 or player.path != cfg.get('path')
+                    or not state.get('joined')):
+                return False
+            if world == 'asura':
+                from .system.asura_court import is_king
+                return is_king(state)
+            if world == 'nether':
+                bloc, support = state.get('bloc', -1), state.get('support', [])
+                return (state.get('seat_active', False) and isinstance(bloc, int)
+                        and 0 <= bloc < len(support) and support[bloc] >= 50)
+            if world == 'reincarnation':
+                return state.get('rank') == len(cfg.get('ranks', [])) - 1
+            return False
+        if "personal_form" in condition:
+            from .system import monster_true_form, ghost_soul_form, upper_voisinage_rules
+            expected = condition['personal_form']
+            authority = {'monster': monster_true_form, 'ghost': ghost_soul_form}.get(expected['kind'])
+            definition = authority.definition(player) if authority else None
+            return bool(definition
+                        and upper_voisinage_rules.level(player, definition['id']) >= int(expected.get('minimum', 0))
+                        and (not expected.get('finalized') or authority.stored(player).get('finalized')))
+        if "asura_attainment" in condition:
+            from .system import asura
+            state, expected = player.asura_cultivation, condition['asura_attainment']
+            return bool(asura.active(player) and state.get('route') in asura.config().get('routes', {})
+                        and state.get('level', 0) >= int(expected.get('level', 1))
+                        and state.get('domain_rank', 1) >= int(expected.get('domain_rank', 1)))
         if 'dao_ancestor' in condition:
             from .system.doctrine.voisinage_training import dao_ancestor
             return dao_ancestor(game) == bool(condition['dao_ancestor'])

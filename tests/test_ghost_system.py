@@ -84,6 +84,7 @@ class GhostSystemTests(unittest.TestCase):
             for row in MARKET_GOODS
             if row.get("world") == "hell" and row["kind"] == "item"
             and ITEM_CATALOG[row["content_id"]].breakthrough_bonus > 0
+            and "ghost" in ITEM_CATALOG[row["content_id"]].tags
         }
         self.assertEqual(sold, expected)
 
