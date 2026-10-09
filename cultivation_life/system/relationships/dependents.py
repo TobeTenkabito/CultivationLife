@@ -321,7 +321,8 @@ def manage_concubine_status(deps: DependentLifecycleDependencies, game_id: str, 
             result, summary = "equipment_given", f"{owner.name}赐下{ITEM_CATALOG[content_id].name}，装备已放入包裹。"
         else:
             amount = max(3, int(4 * (max(1, owner.realm_index) ** 2) * rng.uniform(0.8, 1.25)))
-            add_item(player, "spirit_stone", amount)
+            from ..economy.rewards import grant
+            amount = grant(game,amount,'依附关系馈赠（背景实付）')
             details["quantity"] = amount
             result, summary = "stones_given", f"{owner.name}赐下下品灵石 ×{amount}。"
     else:

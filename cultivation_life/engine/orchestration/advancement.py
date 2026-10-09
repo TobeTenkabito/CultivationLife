@@ -380,6 +380,7 @@ def _record_era_summary(game: GameState, start_age: int, news: list[str]) -> Non
 def _commission_step(deps: AdvancementDependencies, game: GameState, rng: random.Random) -> str:
     tier = deps._market_tier(game.player)
     quantity = rng.randint(*MARKET_SETTINGS["commission_stones"][str(tier)])
-    add_item(game.player, "spirit_stone", quantity)
+    from ...system.economy.rewards import grant
+    quantity = grant(game, quantity, '坊市委托报酬（背景雇主实付）')
     world_name = WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world)
     return f"完成一项{world_name}{REALMS[tier].name}坊市委托，获得下品灵石 ×{quantity}。"

@@ -88,6 +88,11 @@ def command(game, maps, payload):
         for name in ('buy_limit', 'sell_limit'):
             if type(payload.get(name)) is not int or not 0 <= payload[name] <= 10**12:
                 raise ValueError('买卖单价限制须为非负整数')
+        for name, default in (('reserve_cash',100),('expense_limit',100000)):
+            value=payload.get(name,row.get(name,default))
+            if type(value) is not int or not 0 <= value <= 10**12:
+                raise ValueError('自动经营储备和单次支出上限须为非负整数')
+            row[name]=value
         row.update({k:payload[k] for k in ('enabled', 'auto_buy', 'auto_sell', 'buy_limit', 'sell_limit')})
         row.update(recipe=recipe, batches=batches, sale_quota=quota)
     elif action == 'start':

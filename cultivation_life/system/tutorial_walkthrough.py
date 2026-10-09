@@ -117,7 +117,8 @@ def perform_guide(engine, game, action, expected, target_id=None):
     elif action == 'guide_treasure' and step == 'treasure':
         art = lesson_art(game)
         if beginner(game):
-            add_item(p, 'spirit_stone', 3)
+            from .economy.rewards import grant
+            grant(game,3,'教学探宝：既有藏石交付')
             if art:
                 acquire_technique(p, deepcopy(art))
             summary = '你在旧亭找到灵石三枚' + (f'与《{art.name}》玉简一份。' if art else '。') + '此次教学探宝不推进岁月。'

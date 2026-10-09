@@ -37,6 +37,8 @@ def public_economy(game):
         operator_balance=balance(game, f'operator:{market["id"]}'),
         world_treasury=balance(game, f'world:{game.player.world}'),
         turnover=market['turnover'], fees=market['fees'], war_income=market.get('war_income', 0), rows=rows,
+        household_spending=market.get('household_spending',0), terminal_consumed=market.get('terminal_consumed',0),
+        input_consumed=market.get('input_consumed',0),
         freight_in=market.get('freight_in', 0), freight_out=market.get('freight_out', 0),
         war_pressure=market.get('war_pressure', False),
         suppliers=[dict(owner=k, volume=round(v, 1), share=round(v / max(1, sum(market.get('suppliers', {}).values())), 3))

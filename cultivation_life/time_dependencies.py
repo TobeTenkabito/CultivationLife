@@ -30,6 +30,7 @@ class WorldYearDependencies:
     advance_researchers: Callable[..., Any] | None = None
     advance_caravans: Callable[..., Any] | None = None
     advance_organizations: Callable[..., Any] | None = None
+    advance_war_finance: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

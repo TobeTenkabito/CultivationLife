@@ -127,9 +127,12 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     def advance_freight(actual):
         assert actual is game and seen == []
     freight = Mock(side_effect=advance_freight)
+    def advance_war_finance(actual):
+        assert actual is game and seen == []
+    war_finance=Mock(side_effect=advance_war_finance)
     deps, unexpected = contract(WorldYearDependencies,
         **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers,
-        advance_caravans=freight, advance_organizations=Mock())
+        advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance)
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
@@ -137,6 +140,7 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     assert seen == ANNUAL_ORDER[:end]
     assert news == [name for name in seen if name in list_hooks]
     freight.assert_called_once_with(game)
+    war_finance.assert_called_once_with(game)
     if stop is None or stop >= 9:
         researchers.assert_called_once_with(game)
     else:
@@ -150,10 +154,12 @@ def test_lifespan_stops_before_world_npcs_and_demonic_updates():
     die = Mock(side_effect=lambda *args: setattr(game.player, 'alive', False))
     permitted = {name: Mock(return_value=[]) for name in ANNUAL_ORDER[:7]}
     freight = Mock()
-    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight, advance_organizations=Mock())
+    war_finance=Mock()
+    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance)
     assert not _advance_world_year(deps, game, random.Random(1), [])
     die.assert_called_once_with(game, '寿元已尽', 'SYS_LIFESPAN')
     freight.assert_called_once_with(game)
+    war_finance.assert_called_once_with(game)
     unexpected.assert_not_called()
 
 

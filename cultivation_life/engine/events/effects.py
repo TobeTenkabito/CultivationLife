@@ -182,7 +182,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             gift_text = ITEM_CATALOG[item_id].name
         else:
             amount = rng.randint(3,8) * max(1,npc.realm_index)
-            add_item(player,"spirit_stone",amount)
+            from ...system.economy.rewards import grant
+            amount = grant(game,amount,'故人赠礼（背景持有者实付）')
             gift_text = f"下品灵石 ×{amount}"
         affinity = deps._adjust_person_affinity(game,npc_id,3)
         return "gift_received", f"{npc.name}赠予你{gift_text}；对方境界越高，来礼层次也越高（好感 {affinity:.0f}）。"
@@ -235,7 +236,11 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
             deps._die(game, effect.get("reason", "伤势过重"), pending["id"])
         return "dead" if not player.alive else "injured", f"受到 {amount:.0f} 点伤害。"
     if kind == "add_item":
-        add_item(player, effect["item_id"], int(effect.get("quantity", 1)))
+        if effect['item_id'] == 'spirit_stone':
+            from ...system.economy.rewards import grant
+            grant(game,int(effect.get('quantity',1)),f"事件奖励：{pending.get('id','event')}")
+        else:
+            add_item(player, effect["item_id"], int(effect.get("quantity", 1)))
         return None, f"获得{ITEM_CATALOG[effect['item_id']].name}。"
     if kind == "remove_item":
         removed = remove_item(player, effect["item_id"], int(effect.get("quantity", 1)))

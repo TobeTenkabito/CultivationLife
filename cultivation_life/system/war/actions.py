@@ -24,7 +24,16 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
     ):
         raise ValueError("你尚未取得本势力的战争指挥权")
     rng = deps.decode_rng(game.seed, game.rng_state)
-    if action in {'scout', 'forage', 'resupply'}:
+    if action in {'deploy_half','deploy_all'}:
+        if war.get('status') != 'active':
+            raise ValueError('战争已停战，不能调整动员')
+        war.setdefault('deployment',{})[side] = .5 if action == 'deploy_half' else 1.
+        from .requirements import refresh
+        refresh(game,war,side)
+        row=war.get('logistics',{}).get('sides',{}).get(side)
+        if row is not None:row['reference_need']=logistics.need(game,war,side)
+        deps._append_war_log(game,war,'调整动员','动员半数名册修士' if action=='deploy_half' else '动员全体名册修士')
+    elif action in {'scout', 'forage', 'resupply'}:
         if war.get('status') != 'active':
             raise ValueError('战争已停战，不能继续执行军需策略')
         text = logistics.strategy(game, deps.maps, war, side, action, rng)

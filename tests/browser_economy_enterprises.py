@@ -54,6 +54,10 @@ def main():
                             def opened():expand(box);expand(card)
                             opened();page.get_by_label('产业资金金额').fill('10000');card.locator('[data-estate-action=fund]').click()
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].cash===10000')
+                            opened();card.get_by_label('自动经营保留灵石').fill('321')
+                            card.get_by_label('单次自动投产支出上限').fill('4321')
+                            card.locator('[data-estate-action=configure]').click()
+                            page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].reserve_cash===321 && game.map.economy.enterprises.owned[0].expense_limit===4321')
                             # A second page writes first. Stale native buttons cannot charge again.
                             opened();saved=engine._load(game.id);row=saved.economy_v2['estates'][key]
                             engine.fleet_action(game.id,dict(action='estate_fund',estate_id=key,revision=row['revision'],amount=1))
@@ -75,7 +79,7 @@ def main():
                             management.get_by_role('button',name='自建独立商队',exact=True).click()
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f=>f.player_controlled)')
                             orders=page.locator('#trade-orders-panel');expand(orders);form=orders.locator('[data-order-fleet]').first;expand(form)
-                            form.get_by_label('订单执行方式').select_option('repeat');form.get_by_label('订单商品').select_option('dew_grass_seed')
+                            form.get_by_label('订单执行方式').select_option('repeat');form.get_by_label('订单商品').select_option('purple_cloud_ginseng_seed')
                             form.locator('[data-fleet-action=order_configure]').click()
                             page.wait_for_function("!busy && game.fleet_network.fleets.some(f=>f.trade_order?.mode==='repeat')")
                             expand(orders);expand(form);form.locator('[data-fleet-action=order_dispatch]').click()

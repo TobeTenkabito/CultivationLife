@@ -332,7 +332,8 @@ def _apply_combat_action_rewards(
         summary += f" 妖血淬身，煞气 +{sha_gain}。"
     if result in {"victory", "killed"} and settings.get("reward_stones"):
         reward = rng.randint(*settings["reward_stones"])
-        add_item(player, "spirit_stone", reward)
+        from ...system.economy.rewards import grant
+        reward = grant(game,reward,'实际战利品：背景持有者灵石')
         summary += f" 你从战利品中获得下品灵石 ×{reward}。"
     if action == "spar" and result == "victory":
         bonus = round(2 * opportunity_multiplier(player), 1)

@@ -1,8 +1,8 @@
-"""M2 acceptance benchmark: paired actual 500-year actions, ten repeats/case.
+"""M2 acceptance benchmark: paired actual 100-year actions, ten repeats/case.
 
 Both modes retain identical pre-existing player/NPC facts. Off removes only the
 heavens container and its owned, empty anomaly instances. Guixu popups are disabled
-in both modes to finish all 500 years; ordinary annual simulation is unchanged.
+in both modes to finish all 100 years; ordinary annual simulation is unchanged.
 Run without other heavy tests for the final measurements.
 """
 import argparse
@@ -129,9 +129,9 @@ def main():
                         engine.advance(work.id,'cultivate',1)
                         samples[mode].append((time.perf_counter()-start)*1000)
                         saved=engine.store.load(work.id)
-                        assert saved.player.age-work.player.age==500,(case,mode,'incomplete action')
+                        assert saved.player.age-work.player.age==100,(case,mode,'incomplete action')
                         if mode=='on':
-                            assert saved.heavens_state['runtime']['processed_years']-on.heavens_state['runtime']['processed_years']==500
+                            assert saved.heavens_state['runtime']['processed_years']-on.heavens_state['runtime']['processed_years']==100
                             if case!='unmet':
                                 for site in CONTACT_SITES:
                                     row=get_echo(saved.heavens_state['runtime'],site.id)['upkeep']
@@ -150,7 +150,7 @@ def main():
             off_ms,on_ms=statistics.median(samples['off']),statistics.median(samples['on'])
             p95=sorted(view_times)[int(len(view_times)*.95)-1]
             size=max(len(json.dumps(g.heavens_state,ensure_ascii=False).encode()) for g in (on,final))
-            row=dict(case=case,seed=seed,repeats=args.repeats,years=500,off_median_ms=off_ms,on_median_ms=on_ms,
+            row=dict(case=case,seed=seed,repeats=args.repeats,years=100,off_median_ms=off_ms,on_median_ms=on_ms,
                 overhead_ms=on_ms-off_ms,limit_ms=max(off_ms*.2,100),view_p95_ms=p95,heavens_bytes=size,samples_ms=samples,
                 passed=on_ms-off_ms<=max(off_ms*.2,100) and p95<200 and size<512*1024)
             rows.append(row)

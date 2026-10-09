@@ -7,17 +7,9 @@ from ...models import HistoryRecord
 from ...rules import add_item, remove_item
 from ...runtime import now_iso
 from .ledger import balance, account, transfer_value, record_external
-from .pricing import total_price
 from .state import ensure_state, ensure_market, local_market, operator_account, reprice, settings
 from .dependencies import MarketDependencies
-
-
-def quote(row, side, quantity):
-    if side not in {'buy', 'sell'} or type(quantity) is not int or not 1 <= quantity <= 1000000:
-        raise ValueError('交易方向或数量无效')
-    gross = total_price(row['reference'], row['stock'], quantity, row['target'], side)
-    fee = math.floor(gross * settings()['transaction_fee'])
-    return dict(gross=gross, fee=fee, total=gross if side == 'buy' else gross - fee)
+from .basket_trade import quote
 
 
 def trade_available(game):

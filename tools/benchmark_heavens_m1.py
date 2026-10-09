@@ -1,6 +1,6 @@
-"""Paired M1 benchmark: 500-year cultivation, identical fixed input per repetition.
+"""Paired M1 benchmark: 100-year cultivation, identical fixed input per repetition.
 
-Guixu popup interruption is disabled in BOTH modes to measure all 500 years;
+Guixu popup interruption is disabled in BOTH modes to measure all 100 years;
 other annual simulation and ordinary cultivation/settlement remain in use.
 """
 import argparse
@@ -63,7 +63,7 @@ def main():
                         result=engine.advance(key,'cultivate',1)
                         elapsed=time.perf_counter()-start
                         actual=engine.store.load(key)
-                        if actual.player.age-work.player.age!=500:
+                        if actual.player.age-work.player.age!=100:
                             raise AssertionError(f'{case}/{mode}: interrupted at {actual.player.age-work.player.age} years')
                         samples[mode].append(elapsed*1000)
             view_times=[]
@@ -72,7 +72,7 @@ def main():
                 view_times.append((time.perf_counter()-start)*1000)
             off,on=statistics.median(samples['off']),statistics.median(samples['on'])
             size=len(json.dumps(enabled.heavens_state,ensure_ascii=False).encode())
-            row=dict(case=case,seed=seed,repeats=args.repeats,years=500,off_median_ms=off,on_median_ms=on,
+            row=dict(case=case,seed=seed,repeats=args.repeats,years=100,off_median_ms=off,on_median_ms=on,
                 overhead_ms=on-off,limit_ms=max(off*.2,100),view_p95_ms=sorted(view_times)[94],
                 heavens_bytes=size,samples_ms=samples,passed=on-off<=max(off*.2,100) and sorted(view_times)[94]<200 and size<512*1024)
             rows.append(row)

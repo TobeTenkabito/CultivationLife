@@ -21,6 +21,17 @@ from ...world_state import race_pair
 from ..dependencies import HostilityDependencies
 
 
+def _settlement_payment(game, kind, identity, amount):
+    from ...system.economy.state import ensure_state
+    from ...system.economy.ledger import balance, transfer_value
+    ensure_state(game)
+    source=(f'organization:{kind}:{identity}' if kind in {'sect','family'} else
+            f'alliance:{identity}' if kind=='alliance' else f'background:{game.player.world}')
+    paid=min(amount,balance(game,source))
+    transfer_value(game,source,'player',paid,'撤销通缉后的实际和解款')
+    return paid
+
+
 def _hostility_key(kind: str, entity_id: str) -> str:
     return f"{kind}:{entity_id}"
 
@@ -242,14 +253,8 @@ def _resolve_wanted_settlement(
     target = max(members, key=deps._npc_power, default=None)
     if mode == "compensation":
         amount = max(500, int(max(1.0, float(runtime.get("power", 1))) ** 0.5) * 80)
-        if kind == 'alliance':
-            from ...system.economy.ledger import balance, transfer_value
-            source = f'alliance:{entity_id}'
-            amount = min(amount, balance(game, source))
-            transfer_value(game, source, 'player', amount, '商盟撤销通缉并支付和解金')
-        else:
-            add_item(game.player, "spirit_stone", amount)
-        return "compensated", f"{name}交出下品灵石 ×{amount}作为巨额赔偿，并撤销全部追杀令。"
+        amount=_settlement_payment(game,kind,entity_id,amount)
+        return "compensated", f"{name}从现有资金实付下品灵石 ×{amount}作为赔偿，并撤销全部追杀令。"
     if mode == "dissolve":
         entity = game.sects.get(entity_id)
         if entity is None and game.family and game.family.id == entity_id:
@@ -281,7 +286,7 @@ def _resolve_wanted_settlement(
         return "personal_vassal", f"{name}向你本人奉上臣服契约，承诺不再追杀并听候你的号令。"
     if mode == "hostages":
         amount = max(200, int(max(1.0, float(runtime.get("power", 1))) ** 0.5) * 35)
-        add_item(game.player, "spirit_stone", amount)
+        amount=_settlement_payment(game,kind,entity_id,amount)
         if target:
             game.player.prisoners.append(game.detain_person({
                 "id":target.id, "npc_id":target.id, "name":target.name,

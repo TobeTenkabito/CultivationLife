@@ -1,5 +1,6 @@
 """Fixed-site organizational stores, paid purchases and delayed requisitions."""
 import copy
+from functools import lru_cache
 from math import ceil
 from ...content_registry import ITEM_CATALOG, TECHNIQUE_CATALOG, MARKET_GOODS, WORLD_SYSTEMS, restricted_acquisition
 from ...rules import add_item, add_technique_copy
@@ -34,6 +35,7 @@ def record(row, game, message):
     row['history'] = (row['history'] + [dict(year=game.player.age, text=message)])[-24:]
 
 
+@lru_cache(maxsize=16)
 def catalog(world):
     result = {}
     for good in MARKET_GOODS:
@@ -46,6 +48,12 @@ def catalog(world):
             result[f'{kind}:{identity}'] = dict(kind=kind, id=identity, name=content.name,
                 price=max(1, int(good['price'])), tier=int(good['tier']))
     return result
+
+
+@lru_cache(maxsize=16)
+def manual_choices(world):
+    offers=catalog(world)
+    return tuple(sorted((k for k,r in offers.items() if r['kind']=='technique'),key=lambda k:(offers[k]['price'],k))[:2])
 
 
 def unit_value(game, row, key):
@@ -155,11 +163,11 @@ def advance(game, maps, entity, finance):
     # Purchase at most four lots per settlement, only from genuine operating
     # surplus. Zero cash never receives complimentary stock on adoption.
     budget = min(balance(game, treasury(game, entity)) // 10, max(0, finance['income'] - finance['expense']) // 4)
-    offers = catalog(entity.world)
-    candidates = sorted(offers, key=lambda k: (row['stock'].get(k, 0), offers[k]['price'], k))
-    chosen = []
-    for kind in ('technique', 'item'):
-        chosen.extend([k for k in candidates if offers[k]['kind'] == kind][:2])
+    from .basket_rules import candidates
+    market=game.economy_v2['markets'][f'{entity.world}:{entity.location_id}']
+    grade=max((int(r) for r in finance.get('workforce',{})),default=1)
+    items=candidates(market,f'training:{grade}') or candidates(market,f'material:{grade}')
+    chosen=[*manual_choices(entity.world),*('item:'+item for item in items[:2])]
     for key in chosen:
         if row['stock'].get(key, 0) >= 20 or occupied(row) >= 10000:
             continue

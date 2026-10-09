@@ -65,7 +65,8 @@ class BuddhistSystemMixin:
         active = selected_blessings(game)
         if "stipend" in active and total > 0:
             table = config["blessings"]["stipend"]["realm_stones"]
-            add_item(player, "spirit_stone", table[min(player.realm_index, len(table) - 1)])
+            from .economy.rewards import grant
+            grant(game,table[min(player.realm_index,len(table)-1)],'佛门信众供奉（背景实付）')
         for blessing, attribute in [("karma_decay", "karma"), ("sha_decay", "sha_qi")]:
             if blessing in active:
                 spec = config["blessings"][blessing]

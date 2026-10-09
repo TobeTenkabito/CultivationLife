@@ -235,7 +235,9 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
             can_cross = not crossing_to_spirit or living_spirit_npcs < 1
             old_title = deps._dynamic_sect_title(npc, sect)
-            breakthrough = deps._advance_npc_cultivation(npc, rng, can_cross, world_age=game.player.age)
+            from ...system.economy.organization_consumption import support
+            provision=support(game,'sect',sect.id,npc.realm_index)
+            breakthrough = deps._advance_npc_cultivation(npc, rng, can_cross, world_age=game.player.age,**({'support':provision} if provision else {}))
             if breakthrough:
                 old_name, new_name = breakthrough["old"], breakthrough["new"]
                 new_title = deps._dynamic_sect_title(npc, sect)

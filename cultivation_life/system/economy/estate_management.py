@@ -16,7 +16,7 @@ def recruitment_ready(game, entity):
     tier = WORLD_SYSTEMS['world_profiles'][entity.world]['tier']
     upkeep = row.get('expected_upkeep')
     if upkeep is None:
-        upkeep = sum(n * (25 * tier + rank ** 2 * 12) for rank, n in workforce(entity).items())
+        upkeep = sum(n * (25 * tier + rank ** 2 * 8) for rank, n in workforce(entity).items())
     return not row.get('shortfall') and game.intrigue_state.get('factions', {}).get(f'{kind}:{entity.id}', {}).get('resources', 0) >= (upkeep + 100 * tier) * 3
 
 
@@ -45,7 +45,7 @@ def plan(game, maps, row):
     # same local goods at a guaranteed spread loss simply to show activity.
     row.update(enabled=True, auto_buy=bool(candidates) and row['kind'] != 'shop',
                auto_sell=True, batches=1, buy_limit=max(1, budget), sell_limit=0,
-               sale_quota=1000000)
+               sale_quota=1000000, expense_limit=budget)
     if not candidates and not row['job'] and row['kind'] != 'shop':
         row['enabled'] = bool(row['stock'])
 
@@ -53,6 +53,9 @@ def plan(game, maps, row):
 def invest_surplus(game, maps, entity, finance):
     kind = finance['kind']
     if owner_allowed(game, kind, entity.id, entity.world) or finance.get('shortfall'):
+        return
+    from .industry import participating_wars
+    if participating_wars(game,entity.id,entity.world):
         return
     from ..faction_geography import faction_site
     from .enterprise_acquisition import acquire, price
