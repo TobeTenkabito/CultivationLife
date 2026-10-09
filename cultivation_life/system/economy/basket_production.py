@@ -29,26 +29,40 @@ def produce(game, market, owner, item, wanted, *, labor_credit=None, allow_loss=
     row = market['commodities'][item]
     if row.get('imported'):
         return 0, 0
+    wanted = min(int(wanted), max(0, int(row['target']*1.5-row['stock'])))
+    if labor_credit is not None:
+        wanted = min(wanted, int(labor_credit / row['reference']))
+    if wanted <= 0:
+        return 0, 0
     inputs = recipe(market, item)
     if inputs is None:
         return 0, 0
     dealer = f'market:{market["id"]}'
-    wanted = min(int(wanted), max(0, int(row['target']*1.5-row['stock'])))
-    if labor_credit is not None:
-        wanted = min(wanted, int(labor_credit / row['reference']))
     for key, units in inputs.items():
         wanted = min(wanted, int(market['commodities'][key]['stock']) // units, 1000000 // units)
     wanted = affordable(row, 'sell', wanted, balance(game, dealer))
     # Workers can reinvest only existing money; a dealer order does not grant
     # a free advance or use future profit to pay today's missing inputs.
     low, high = 0, wanted
+    owner_funds = balance(game, owner)
+    background_owner = owner == f'background:{market["world"]}'
+    if background_owner and len(inputs) <= 1:
+        # Internal labour has no wage/profit constraint. A single raw input
+        # reduces to its exact affordable quantity, avoiding nested quote
+        # searches and output-price calculations for each midpoint.
+        if inputs:
+            material, units = next(iter(inputs.items()))
+            low = affordable(market['commodities'][material], 'buy', wanted*units, owner_funds) // units
+        else:
+            low = wanted
+        high = low
     while low < high:
         n = (low+high+1)//2
         cost = sum(quote(market['commodities'][k], 'buy', n*q)['total'] for k,q in inputs.items())
         revenue = quote(row, 'sell', n)['total']
-        wage = (math.ceil(revenue*.70) if not inputs else math.ceil(row['reference']*n*.12)) if owner != f'background:{market["world"]}' else 0
-        profitable = allow_loss or owner == f'background:{market["world"]}' or revenue >= (cost+wage)*1.05
-        if cost+(wage if inputs else 0) <= balance(game, owner) and wage <= revenue and profitable: low=n
+        wage = (math.ceil(revenue*.70) if not inputs else math.ceil(row['reference']*n*.12)) if not background_owner else 0
+        profitable = allow_loss or background_owner or revenue >= (cost+wage)*1.05
+        if cost+(wage if inputs else 0) <= owner_funds and wage <= revenue and profitable: low=n
         else: high=n-1
     if not low:
         return 0, 0

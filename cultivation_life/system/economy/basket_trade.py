@@ -15,6 +15,11 @@ def quote(row, side, quantity):
 
 def affordable(row, side, wanted, funds):
     low, high = 0, min(1000000, max(0, int(wanted)))
+    if not high:
+        return 0
+    if quote(row, side, high)['gross'] <= funds:
+        return high
+    high -= 1
     while low < high:
         mid = (low+high+1)//2
         if quote(row, side, mid)['gross'] <= funds:

@@ -1,5 +1,6 @@
 """Same-world freight: merchant-owned cash, unique cargo and elapsed-year arrivals."""
 import hashlib
+import heapq
 import math
 
 from ...content_registry import ITEM_CATALOG, WORLD_SYSTEMS
@@ -95,6 +96,14 @@ def _history(region, year, fleet, message):
     fleet['last_result'] = message
 
 
+def _candidate_items(source, target):
+    """Keep the original price/stock/ID tie order without sorting all goods."""
+    goods, other = source['commodities'], target['commodities']
+    return heapq.nlargest(12, (item for item in goods if item in other),
+        key=lambda item: (other[item]['price'] / goods[item]['price'],
+                          goods[item]['stock'] / goods[item]['target'], item))
+
+
 def _candidate(game, maps, alliance, fleet):
     if fleet.get('trade_order', {}).get('mode', 'auto') != 'auto':
         from .trade_orders import candidate
@@ -107,10 +116,12 @@ def _candidate(game, maps, alliance, fleet):
     for site in {origin, *sites}:
         ensure_regional_market(game, maps, world, site)
     source = _market(game, world, origin)
-    # Trade only standard goods already present in both actual markets.
-    goods = sorted(source['commodities'], key=lambda item: (
-        source['commodities'][item]['stock'] / source['commodities'][item]['target'], item), reverse=True)
     budget = balance(game, _cash(fleet))
+    required_guard = guard_required(world)
+    coverage = fleet.get('guard_power', required_guard) / required_guard
+    guard_risk = max(0, 1 - coverage) * .65
+    war_sites = {w.get('location_id') for w in game.wars
+                 if w.get('status') in {'active', 'peace_ready'} and w.get('world') == world}
     best = None
     for destination in sites:
         if destination == origin:
@@ -119,32 +130,29 @@ def _candidate(game, maps, alliance, fleet):
         geography = route_quote(game, maps, world, origin, destination, 1)
         if not geography:
             continue
+        risk = min(.9, geography['risk'] + guard_risk)
+        if any(site in war_sites for site in geography['route']):
+            risk = min(.95, risk + .2)
+        buyer_funds = balance(game, f'market:{target["id"]}')
         # Bounded search; never scan millions of units individually.
-        candidates = sorted((item for item in goods if item in target['commodities']),
-            key=lambda item: target['commodities'][item]['price'] / source['commodities'][item]['price'], reverse=True)[:12]
-        for item in candidates:
+        for item in _candidate_items(source, target):
             row, other = source['commodities'][item], target['commodities'][item]
             maximum = min(fleet['capacity'], int(row['stock']))
             for quantity in sorted({maximum, maximum // 2, maximum // 4}, reverse=True):
                 if quantity <= 0:
                     continue
                 purchase = quote(row, 'buy', quantity)
-                transport = dict(geography)
-                coverage = fleet.get('guard_power', guard_required(world)) / guard_required(world)
-                transport['risk'] = min(.9, transport['risk'] + max(0, 1 - coverage) * .65)
-                if any(w.get('status') in {'active', 'peace_ready'} and w.get('world') == world
-                       and w.get('location_id') in transport['route'] for w in game.wars):
-                    transport['risk'] = min(.95, transport['risk'] + .2)
-                transport['cost'] = max(1, math.ceil(purchase['total'] * .003 * transport['normal_years']))
-                transport['array_fee'] = math.floor(transport['cost'] * transport['saved_ratio'])
-                transport['transport_cost'] = transport['cost'] - transport['array_fee']
-                cost = purchase['total'] + transport['cost']
+                transport_cost = max(1, math.ceil(purchase['total'] * .003 * geography['normal_years']))
+                cost = purchase['total'] + transport_cost
                 sale = quote(other, 'sell', quantity)
-                expected = math.floor(sale['total'] * (1 - transport['risk'] * .55)) - cost
-                if cost > budget or sale['gross'] > balance(game, f'market:{target["id"]}') or expected <= max(2, cost * .02):
+                expected = math.floor(sale['total'] * (1 - risk * .55)) - cost
+                if cost > budget or sale['gross'] > buyer_funds or expected <= max(2, cost * .02):
                     continue
-                score = expected / transport['years']
+                score = expected / geography['years']
                 if best is None or score > best['score']:
+                    array_fee = math.floor(transport_cost * geography['saved_ratio'])
+                    transport = dict(geography, risk=risk, cost=transport_cost,
+                                     array_fee=array_fee, transport_cost=transport_cost-array_fee)
                     best = dict(item=item, quantity=quantity, purchase=purchase, transport=transport,
                         expected=expected, cost=cost, score=score, quoted_sale=sale['total'])
     return best
