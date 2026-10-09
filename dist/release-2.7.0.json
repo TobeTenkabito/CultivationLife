@@ -1,0 +1,39 @@
+{
+  "base_version": "2.7.0",
+  "platform": "Windows",
+  "exe_sha256": "fc8c4d26e59fc055d5b4f4e9efa5cdd621ff63f384c8252b916572c6505d267c",
+  "inputs_sha256": "e06263caa9d68b7d8c8124a73009fe20f52b4e309f42c83e22265f21399a0824",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.6.0",
+    "intrigue-coalitions": "1.3.0",
+    "monster-bloodlines": "4.15.1",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0"
+  },
+  "heavens_worlds": 11,
+  "heavens_incident_branches": 66,
+  "heavens_anomalies": 13,
+  "heavens_conflict_cases": 12,
+  "themes": [
+    "a",
+    "b",
+    "d",
+    "f"
+  ],
+  "save_schema": 10,
+  "validation": [
+    "Commodity-backed military supplies, delayed depot requisitions, caravan atlas, estate locating and opportunity conversions verified",
+    "Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified",
+    "Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified",
+    "Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes",
+    "3598 automated regression tests passed",
+    "Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
+    "Exact executable hash verified in isolated directories with and without optional DLC",
+    "Release inputs match the fingerprint recorded by EXE verification"
+  ],
+  "android_release": "Not included in this Windows release",
+  "root_launcher_updated": true
+}

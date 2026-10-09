@@ -34,7 +34,7 @@ def saved(tmp_path):
     return store, game
 
 
-@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 6, 7, SAVE_SCHEMA_VERSION + 1, 999])
+@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, SAVE_SCHEMA_VERSION + 1, 999])
 def test_unsupported_versions_never_decode_or_rewrite(saved, monkeypatch, version):
     store, game = saved
     path = store._path(game.id)
@@ -47,7 +47,9 @@ def test_unsupported_versions_never_decode_or_rewrite(saved, monkeypatch, versio
     with pytest.raises(ValueError):
         store.load(game.id)
     assert path.read_bytes() == original
-    assert store.list_games() == []
+    summaries = store.list_games()
+    assert len(summaries) == 1 and summaries[0]['id'] == game.id
+    assert summaries[0]['compatible'] is False and summaries[0]['incompatibility']
     decode.assert_not_called()
 
 
@@ -65,30 +67,30 @@ def test_current_schema_read_is_pure_and_no_copy_migration_is_needed(saved, monk
     commit.assert_not_called()
 
 
-def test_migrations_run_in_order_on_a_copy_and_only_once():
-    document = {'id': 'game', 'version': 8, 'nested': {'values': []}}
+def test_future_migration_runner_orders_registered_steps_on_a_copy_once():
+    document = {'id': 'game', 'version': 10, 'nested': {'values': []}}
     calls = []
     def step(data):
         calls.append(data['version'])
         data['nested']['values'].append(data['version'])
-    converted = migrate_document(document, target=10, steps={8: step, 9: step})
-    assert calls == [8, 9]
-    assert converted == {'id': 'game', 'version': 10, 'nested': {'values': [8, 9]}}
-    assert document == {'id': 'game', 'version': 8, 'nested': {'values': []}}
-    assert migrate_document(converted, target=10, steps={8: step, 9: step}) is converted
-    assert calls == [8, 9]
+    converted = migrate_document(document, target=12, steps={10: step, 11: step})
+    assert calls == [10, 11]
+    assert converted == {'id': 'game', 'version': 12, 'nested': {'values': [10, 11]}}
+    assert document == {'id': 'game', 'version': 10, 'nested': {'values': []}}
+    assert migrate_document(converted, target=12, steps={10: step, 11: step}) is converted
+    assert calls == [10, 11]
 
 
 def test_missing_migration_is_rejected_before_any_step_runs():
     step = Mock()
     with pytest.raises(ValueError, match='缺少'):
-        migrate_document({'version': 8}, target=10, steps={8: step})
+        migrate_document({'version': 10}, target=12, steps={10: step})
     step.assert_not_called()
 
 
 @pytest.mark.parametrize('corruption', ['raises', 'identity', 'version'])
 def test_failed_migrations_preserve_the_original_document(corruption):
-    document = {'id': 'game', 'version': 8, 'nested': []}
+    document = {'id': 'game', 'version': 10, 'nested': []}
     original = copy.deepcopy(document)
     def step(data):
         data['nested'].append('changed')
@@ -96,23 +98,22 @@ def test_failed_migrations_preserve_the_original_document(corruption):
             raise RuntimeError('Interrupted')
         data['id' if corruption == 'identity' else 'version'] = 'changed'
     with pytest.raises(RuntimeError):
-        migrate_document(document, target=9, steps={8: step})
+        migrate_document(document, target=11, steps={10: step})
     assert document == original
 
 
-def test_migration_commit_preserves_opaque_extensions_and_is_not_repeated(saved, monkeypatch):
+def test_copy_commit_preserves_opaque_extensions_and_is_not_repeated(saved, monkeypatch):
     store, game = saved
     path = store._path(game.id)
     document = json.loads(path.read_bytes())
-    document['version'] = 8
     document['opaque_mod_state'] = {'value': [1, 2]}
     path.write_text(json.dumps(document), encoding='utf-8')
-    step = Mock(side_effect=lambda data: data.update(new_schema_field=True))
-    monkeypatch.setattr(storage, 'migrate_document', lambda data: migrate_document(data, target=9, steps={8: step}))
-    assert store.load(game.id).version == 9
+    step = Mock(side_effect=lambda data: {**copy.deepcopy(data), 'prepared_marker': True})
+    monkeypatch.setattr(storage, 'migrate_document', lambda data: data if data.get('prepared_marker') else step(data))
+    assert store.load(game.id).version == SAVE_SCHEMA_VERSION
     converted = json.loads(path.read_bytes())
     assert converted['opaque_mod_state'] == document['opaque_mod_state']
-    assert converted['new_schema_field'] is True
+    assert converted['prepared_marker'] is True
     store.load(game.id)
     step.assert_called_once()
 
@@ -122,14 +123,15 @@ def test_failed_migration_load_keeps_original_file(saved, monkeypatch, failure):
     store, game = saved
     path = store._path(game.id)
     document = json.loads(path.read_bytes())
-    document['version'] = 8
     path.write_text(json.dumps(document), encoding='utf-8')
     original = path.read_bytes()
     def step(data):
+        data = copy.deepcopy(data)
         data['player']['name'] = 'Migrated'
         if failure == 'migration':
             raise RuntimeError('Interrupted migration')
-    monkeypatch.setattr(storage, 'migrate_document', lambda data: migrate_document(data, target=9, steps={8: step}))
+        return data
+    monkeypatch.setattr(storage, 'migrate_document', step)
     if failure == 'decode':
         monkeypatch.setattr(storage.GameState, 'from_dict', Mock(side_effect=RuntimeError('Decode failed')))
     if failure == 'write':
@@ -161,7 +163,7 @@ def test_transfer_rejects_retired_schema_without_creating_files(saved, tmp_path,
     document['save']['version'] = 5
     payload = base64.b64encode(zlib.compress(json.dumps(document).encode())).decode()
     target = SaveStore(tmp_path / 'target')
-    with pytest.raises(ValueError, match='停止支持'):
+    with pytest.raises(ValueError, match='不兼容'):
         operation(target, payload, None)
     assert not list(target.directory.iterdir())
 

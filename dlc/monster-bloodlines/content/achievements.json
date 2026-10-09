@@ -2,6 +2,21 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "monster_true_form_confirmed", "name": "本相初铭", "category": "cultivation",
+      "description": "在幽冥界确认自己的本相蓝图。",
+      "condition": {"personal_form": {"kind": "monster"}}
+    },
+    {
+      "id": "monster_true_form_transformed", "name": "本相化境", "category": "cultivation",
+      "description": "将自己的本相邻域修持至化境。",
+      "condition": {"personal_form": {"kind": "monster", "minimum": 5}}
+    },
+    {
+      "id": "monster_true_form_perfected", "name": "本相归真", "category": "cultivation",
+      "description": "将自己的本相邻域修持至至臻，定型独属自身的本相。",
+      "condition": {"personal_form": {"kind": "monster", "minimum": 13, "finalized": true}}
+    },
+    {
       "id": "monster_atavism_complete",
       "name": "返祖现象",
       "description": "作为妖修走完任意一条返祖路线",

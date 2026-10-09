@@ -11,7 +11,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.engine.transactions import request_games, request_scope
 from cultivation_life.models import GameState, Player
 from cultivation_life.runtime import decode_rng, encode_rng
-from cultivation_life.save_schema import migrate_document, migration_path
+from cultivation_life.save_schema import migrate_document, migration_path, SAVE_SCHEMA_VERSION
 from cultivation_life.storage import SaveStore
 from cultivation_life.system.heavens import operations
 from cultivation_life.system.heavens.definitions import HeavensDefinitions, validate_framework
@@ -33,16 +33,15 @@ def saved(tmp_path):
     return game, store, deps
 
 
-@pytest.mark.parametrize('version', [8])
-def test_migration_is_empty_pure_and_round_trips(saved, version):
+def test_current_schema_empty_heavens_state_is_pure_and_round_trips(saved):
     game, store, _deps = saved
     old = game.to_dict()
     old.pop('heavens_state')
-    old['version'] = version
+    old['version'] = SAVE_SCHEMA_VERSION
     before = copy.deepcopy(old)
     migrated = migrate_document(old)
     assert old == before
-    assert migrated['version'] == 9 and migrated['heavens_state'] == {}
+    assert migrated is old and migrated['version'] == SAVE_SCHEMA_VERSION
     assert migrated['rng_state'] == old['rng_state']
     store._path(game.id).write_text(json.dumps(old), encoding='utf-8')
     reloaded = store.load(game.id)
@@ -51,16 +50,17 @@ def test_migration_is_empty_pure_and_round_trips(saved, version):
     store.save(reloaded)
     assert store.load(game.id).to_dict() == reloaded.to_dict()
     with pytest.raises(ValueError, match='更高结构'):
-        migration_path(9, target=8)
+        migration_path(SAVE_SCHEMA_VERSION, target=SAVE_SCHEMA_VERSION - 1)
 
 
-def test_v8_conflict_is_not_silently_deleted(saved):
+@pytest.mark.parametrize('version', range(1, 10))
+def test_retired_schema_conflict_is_not_silently_deleted(saved, version):
     game, store, _deps = saved
     old = game.to_dict()
-    old.update(version=8, heavens_state={'foreign_extension': True})
+    old.update(version=version, heavens_state={'foreign_extension': True})
     store._path(game.id).write_text(json.dumps(old), encoding='utf-8')
     before = store._path(game.id).read_bytes()
-    with pytest.raises(ValueError, match='冲突'):
+    with pytest.raises(ValueError, match='不兼容'):
         store.load(game.id)
     assert store._path(game.id).read_bytes() == before
 

@@ -1,4 +1,5 @@
 import copy
+import json
 import random
 import tempfile
 import unittest
@@ -6,7 +7,7 @@ from pathlib import Path
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
-from cultivation_life.content_registry import TECHNIQUE_CATALOG
+from cultivation_life.content_registry import TECHNIQUE_CATALOG, ContentRegistry
 from cultivation_life.system.ghost_system import (
     SOUL_SLOTS, active_generated_soul_traits, apply_soul_erosion, ensure_ghost_cultivation_state,
     ghost_opportunity_multiplier, ghost_soul_effects, ghost_soul_pressure,
@@ -45,8 +46,11 @@ class GhostPhaseTwoTests(unittest.TestCase):
         }
 
     def test_phase_two_dlc_version(self):
-        manifest = (Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8")
-        self.assertIn('"version": "3.8.0"', manifest)
+        manifest = json.loads((Path(__file__).parents[1] / "dlc/ghost-reincarnation/manifest.json").read_text("utf-8"))
+        self.assertGreaterEqual(tuple(map(int, manifest['version'].split('.'))), (3, 8, 0))
+        loaded = next(row for row in ContentRegistry.extension_report if row['id'] == manifest['id'])
+        self.assertEqual(loaded['status'], 'loaded')
+        self.assertEqual(loaded['version'], manifest['version'])
 
     def test_ten_fixed_slots_saturate_and_pressure_only_changes_future_growth(self):
         player = Player("魂主", "mutated_yin", path="ghost", realm_index=3, layer=2)

@@ -1,4 +1,4 @@
-"""Base upper worlds share ordinary progression; DLC routes remain opt-in."""
+"""Base upper worlds share ordinary cultivation and authored major trials; DLC routes remain opt-in."""
 import random
 from pathlib import Path
 from unittest.mock import patch
@@ -63,13 +63,20 @@ def test_base_old_save_caps_and_restores_manual_progression(prepared, world, pat
 @pytest.mark.parametrize('world,path', WORLDS)
 @pytest.mark.parametrize('rank', [9, 10, 11])
 @pytest.mark.parametrize('layer', [3, 6, 9])
-def test_base_upper_uses_legacy_trials_not_immortal_trials(prepared, world, path, rank, layer):
+@pytest.mark.parametrize('special_trials', [False, True])
+def test_upper_trials_follow_loaded_dlc_and_local_minor_gates(prepared, world, path, rank, layer, special_trials):
     engine, game = prepared
     upper(engine, game, world, path, rank, layer)
-    with patch('cultivation_life.engine.bloodline_content_available', return_value=False), patch('cultivation_life.system.monster_bloodline_system.bloodline_content_available', return_value=False), patch.object(engine, '_breakthrough_chance', return_value={'final': 1}):
+    documents = {} if special_trials else {'monster_true_forms.json': {}, 'ghost_soul_forms.json': {}}
+    with patch.dict(CONTENT_DOCUMENTS, documents), patch('cultivation_life.engine.bloodline_content_available', return_value=False), patch('cultivation_life.system.monster_bloodline_system.bloodline_content_available', return_value=False), patch.object(engine, '_breakthrough_chance', return_value={'final': 1}):
         engine.breakthrough(game.id)
     saved = engine.store.load(game.id)
-    assert saved.active_trial['kind'] == ('traditional' if layer < 9 else 'heavenly_demon' if path == 'demonic' else 'heavenly')
+    expected = ('traditional' if layer < 9 else 'heavenly_demon' if path == 'demonic' else
+                path + '_upper' if special_trials else 'heavenly')
+    assert saved.active_trial['kind'] == expected
+    if layer == 9 and special_trials and path in {'monster', 'ghost'}:
+        assert saved.active_trial['battle_state']['mode'] == ('upper_final' if rank == 11 else 'upper_endurance')
+        assert len(saved.active_trial['target']['members']) == (2 if rank == 11 else 1)
     assert (saved.player.realm_index, saved.player.layer) == (rank, layer)
 
 

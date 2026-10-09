@@ -455,7 +455,7 @@ class EngineTests(unittest.TestCase):
             raw["player"].pop(field)
         save_path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
         before = save_path.read_bytes()
-        with self.assertRaisesRegex(ValueError, "停止支持"):
+        with self.assertRaisesRegex(ValueError, "不兼容"):
             self.engine.get_game(created["id"])
         self.assertEqual(save_path.read_bytes(), before)
 

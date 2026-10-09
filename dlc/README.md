@@ -1,6 +1,6 @@
 # DLC 内容包
 
-> 源码维护基线：本体 v1.58.0，2026-10-04；存档结构 8 支持 6→7，结构 1–5 不再加载。扩展版本以各包目录的 manifest.json 为准；旧档字段补全不扩大本体兼容范围。
+> 源码维护基线：本体 v2.7.0，2026-10-09；仅支持存档结构 10，结构 1–9 不兼容。扩展版本以各包目录的 manifest.json 为准。
 
 官方 DLC 不再提供界面或地域地图；全部地理内容位于本体 `content/world.json` 与 `content/maps.json`。专属副本、剧情、道途与特色功能仍由各 DLC 独立提供。
 
@@ -56,13 +56,15 @@ dlc/
 
 八个包的默认启用状态、加载次序和版本以清单为准。
 
+本相、魂相和八部魔域的专属成就按相应 DLC 实际加载；三级界面的境界、普通邻域和三套机构成就属于本体。既有跨存档成就记录不因关闭扩展而清除。
+
 | 包 | 版本 | ID |
 | --- | --- | --- |
-| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.2.0 | `official.asura-manifestation` |
+| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.2.1 | `official.asura-manifestation` |
 | [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.0.0 | `official.buddhist-dharma` |
-| [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.9.0 | `official.ghost-reincarnation` |
+| [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.9.1 | `official.ghost-reincarnation` |
 | [归墟之潮：九死一生](guixu-tide/README.md) | 2.6.0 | `official.guixu-tide` |
 | [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.3.0 | `official.intrigue-coalitions` |
-| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.15.0 | `official.monster-bloodlines` |
+| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.15.1 | `official.monster-bloodlines` |
 | [圣人之道：内圣外王](sage-way/README.md) | 1.4.0 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.0 | `official.tianji-artifacts` |

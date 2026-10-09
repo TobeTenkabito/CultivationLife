@@ -133,7 +133,9 @@ def test_corpse_roster_and_capped_copy_are_fixed_at_start(field_index):
     assert copied.stability < battle.units['player'].unit.capabilities.voisinages[0].stability
     old_power = game.active_trial['power']
     game.player.outer_king_fixed_combat_power += 1e12
-    assert sum(m['power'] for m in target_for(game,game.active_trial)['members']) == pytest.approx(old_power*1.4)
+    members = target_for(game, game.active_trial)['members']
+    assert [member['power'] for member in members] == pytest.approx([old_power]*3)
+    assert sum(member['power'] for member in members) == pytest.approx(old_power*3)
 
 
 def test_resuming_a_snapshot_matches_uninterrupted_rounds():

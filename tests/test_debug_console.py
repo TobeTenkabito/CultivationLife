@@ -278,16 +278,23 @@ def test_api_internal_errors_are_not_reported_as_input_errors(environment, api_e
     assert request('/api/debug/command', {'command': 'player set age abc'})[0] == 400
 
 
-def test_start_does_not_migrate_source_file(environment):
+@pytest.mark.parametrize('version', range(1, SAVE_SCHEMA_VERSION + 1))
+def test_start_obeys_schema_boundary_and_does_not_rewrite_source(environment, version):
     engine, manager, _, gid = environment
     path = engine.store.directory / f'{gid}.json'
     source = json.loads(path.read_text(encoding='utf-8'))
-    source['version'] = 8
+    source['version'] = version
     source.pop('heavens_state', None)
     path.write_text(json.dumps(source), encoding='utf-8')
     original = path.read_bytes()
-    sid = manager.start(gid)['session_id']
-    assert manager.load(sid)['current']['game']['version'] == SAVE_SCHEMA_VERSION
+    existing = sorted(manager.directory.glob('*.json'))
+    if version < SAVE_SCHEMA_VERSION:
+        with pytest.raises(ValueError, match='不兼容'):
+            manager.start(gid)
+        assert sorted(manager.directory.glob('*.json')) == existing
+    else:
+        sid = manager.start(gid)['session_id']
+        assert manager.load(sid)['current']['game']['version'] == SAVE_SCHEMA_VERSION
     assert path.read_bytes() == original
 
 

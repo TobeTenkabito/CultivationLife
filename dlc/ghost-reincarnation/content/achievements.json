@@ -2,6 +2,21 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "ghost_soul_form_confirmed", "name": "照魂见我", "category": "cultivation",
+      "description": "在轮回界完成照魂观照，确认自己的魂相。",
+      "condition": {"personal_form": {"kind": "ghost"}}
+    },
+    {
+      "id": "ghost_soul_form_transformed", "name": "魂相化境", "category": "cultivation",
+      "description": "将自己的魂相邻域修持至化境。",
+      "condition": {"personal_form": {"kind": "ghost", "minimum": 5}}
+    },
+    {
+      "id": "ghost_soul_form_perfected", "name": "真我归一", "category": "cultivation",
+      "description": "将自己的魂相邻域修持至至臻，定型独属自身的魂相。",
+      "condition": {"personal_form": {"kind": "ghost", "minimum": 13, "finalized": true}}
+    },
+    {
       "id": "ghost_first_reincarnation",
       "name": "再世为魂",
       "description": "作为鬼修第一次舍世入轮回",
