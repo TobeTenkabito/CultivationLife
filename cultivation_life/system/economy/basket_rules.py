@@ -2,6 +2,7 @@
 from functools import lru_cache
 from collections import OrderedDict
 from ...content_registry import ITEM_CATALOG, restricted_acquisition
+from ...economy_content import specification
 
 CATEGORIES = ('medical', 'training', 'material', 'arms', 'energy', 'general')
 RATES = dict(medical=.10, training=.08, material=.08, arms=.008, energy=.06, general=.02)
@@ -14,6 +15,11 @@ def category(item, registry, definition_identity):
     definition = ITEM_CATALOG.get(item)
     tags = set(definition.tags) if definition else set()
     name = definition.name if definition else ''
+    spec = specification(item)
+    if definition and spec:
+        if spec['raw']: return 'material'
+        return dict(healing='medical', cultivation='training', longevity='training',
+                    breakthrough='training', artifact='arms', repair='material', energy='energy')[spec['use']]
     if tags & {'healing', 'medicine', 'elixir'} or item == 'healing_pill' or any(s in name for s in ('疗伤', '回春', '养魂', '魂泉', '甘露')):
         return 'medical'
     if 'pill' in tags:
@@ -35,6 +41,8 @@ def is_raw(item):
     definition=ITEM_CATALOG.get(item)
     if definition is None:return False
     tags=set(definition.tags)
+    if 'economic_raw' in tags:return True
+    if 'economic_product' in tags:return False
     if tags & {'herb','seed'}:return True
     if 'talisman_material' in tags and item.endswith('_jade'):
         return True  # Unengraved jade is mineral stock; paper/ink are processed.
@@ -52,11 +60,14 @@ def index(market, *, rebuild=False):
     if not rebuild and cached and cached[0] is market and cached[1] == len(market['commodities']):
         _INDEXES.move_to_end(key)
         return cached[2]
-    groups = {};raw = {}
+    groups = {};raw = {};purposes = {}
     for item, row in market['commodities'].items():
         if item not in ITEM_CATALOG or restricted_acquisition('item',item):continue
         groups.setdefault(f'{kind(item)}:{row["tier"]}', []).append(item)
         if is_raw(item):raw.setdefault(row['tier'],[]).append(item)
+        use = purpose(item)
+        if use:
+            purposes.setdefault(f'{use}:{row["tier"]}', []).append(item)
     for group,keys in groups.items():
         keys.sort(key=lambda k: (market['commodities'][k]['reference'], k))
         if group.startswith('material:'):
@@ -65,18 +76,46 @@ def index(market, *, rebuild=False):
             selected=natural[:1]+processed[:1]
             keys[:]=selected+[k for k in keys if k not in selected]
     for keys in raw.values():keys.sort(key=lambda k:(market['commodities'][k]['reference'],k))
-    _INDEXES[key]=(market,len(market['commodities']),groups,raw)
+    for keys in purposes.values():keys.sort(key=lambda k:(market['commodities'][k]['reference'],k))
+    _INDEXES[key]=(market,len(market['commodities']),groups,raw,purposes)
     _INDEXES.move_to_end(key)
     while len(_INDEXES)>64:_INDEXES.popitem(last=False)
     return groups
 
 
-def raw_candidates(market,rank,limit=2):
+def raw_candidates(market,rank,limit=2,rotation=0):
     index(market)
-    chosen=tuple(_INDEXES[id(market)][3].get(rank,())[:limit])
+    keys=_INDEXES[id(market)][3].get(rank,())
+    chosen=tuple(keys[(rotation+i)%len(keys)] for i in range(min(limit,len(keys)))) if keys else ()
     if any(k not in market['commodities'] or market['commodities'][k]['tier'] != rank for k in chosen):
         index(market,rebuild=True)
-        return raw_candidates(market,rank,limit)
+        return raw_candidates(market,rank,limit,rotation)
+    return chosen
+
+
+def purpose(item):
+    definition=ITEM_CATALOG.get(item)
+    if definition is None or is_raw(item):return None
+    spec=specification(item)
+    if spec:return spec['use']
+    category=kind(item)
+    if category=='training':
+        return 'breakthrough' if definition.breakthrough_bonus > 0 else 'cultivation'
+    return dict(medical='healing', material='repair', arms='artifact', energy='energy', general='general')[category]
+
+
+def purpose_index(market):
+    index(market)
+    return _INDEXES[id(market)][4]
+
+
+def purpose_candidates(market, group, *, limit=2, rotation=0):
+    keys=purpose_index(market).get(group,())
+    if not keys:return ()
+    chosen=tuple(keys[(rotation+i)%len(keys)] for i in range(min(limit,len(keys))))
+    if any(k not in market['commodities'] or market['commodities'][k]['tier']!=int(group.split(':')[1]) for k in chosen):
+        index(market,rebuild=True)
+        return purpose_candidates(market,group,limit=limit,rotation=rotation)
     return chosen
 
 

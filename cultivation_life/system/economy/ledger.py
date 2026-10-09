@@ -48,7 +48,17 @@ def account(game, key, opening=0):
 def transfer_value(game, source, destination, amount, reason):
     if type(amount) is not int or amount < 0 or source == destination:
         raise ValueError('资金转移参数无效')
-    if any(key != 'player' and key not in game.economy_v2['accounts'] and _merchant(game, key) is None and _organization(game, key) is None
+    accounts=game.economy_v2['accounts']
+    direct_source=accounts.get(source) if source!='player' and not source.startswith(('organization:','alliance:')) else None
+    direct_destination=accounts.get(destination) if destination!='player' and not destination.startswith(('organization:','alliance:')) else None
+    if direct_source is not None and direct_destination is not None:
+        if direct_source['balance']<amount:raise ValueError('付款方灵石不足')
+        if not amount:return
+        direct_source['balance']-=amount;direct_source['expense']+=amount
+        direct_destination['balance']+=amount;direct_destination['income']+=amount
+        _record_transfer(game,source,destination,amount,reason)
+        return
+    if any(key != 'player' and key not in accounts and _merchant(game, key) is None and _organization(game, key) is None
            for key in (source, destination)):
         raise ValueError('资金账户不存在')
     balance(game, destination)  # Validate the receiving treasury before any debit.
@@ -79,6 +89,10 @@ def transfer_value(game, source, destination, amount, reason):
         row = game.economy_v2['accounts'][destination]
         row['balance'] += amount
         row['income'] += amount
+    _record_transfer(game,source,destination,amount,reason)
+
+
+def _record_transfer(game,source,destination,amount,reason):
     entries = game.economy_v2['ledger']
     entries.append(dict(year=game.player.age, source=source, destination=destination,
                         amount=amount, reason=reason))

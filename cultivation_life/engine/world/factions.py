@@ -214,6 +214,8 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                 if not npc.alive:
                     continue
             death_reason: str | None = None
+            from ...system.economy.organization_consumption import apply_longevity
+            apply_longevity(game,npc,'sect',sect.id)
             if npc.lifespan is not None and npc.age >= npc.lifespan:
                 death_reason = "寿元耗尽，坐化于宗门祖庭"
             elif rng.random() < float(FACTION_SYSTEMS["npc_cultivation"]["accident_death_chance"]):
@@ -237,7 +239,11 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             old_title = deps._dynamic_sect_title(npc, sect)
             from ...system.economy.organization_consumption import support
             provision=support(game,'sect',sect.id,npc.realm_index)
-            breakthrough = deps._advance_npc_cultivation(npc, rng, can_cross, world_age=game.player.age,**({'support':provision} if provision else {}))
+            pill_bonus=(.05*support(game,'sect',sect.id,npc.realm_index,'breakthrough_support')
+                        if npc.layer>=REALMS[npc.realm_index].layers else 0.)
+            breakthrough = deps._advance_npc_cultivation(npc, rng, can_cross, world_age=game.player.age,
+                **({'support':provision} if provision else {}),
+                **({'breakthrough_bonus':pill_bonus} if pill_bonus else {}))
             if breakthrough:
                 old_name, new_name = breakthrough["old"], breakthrough["new"]
                 new_title = deps._dynamic_sect_title(npc, sect)

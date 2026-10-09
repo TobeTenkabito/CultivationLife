@@ -25,11 +25,13 @@ def public_estates(game, maps):
     def price(kind, level):
         return max(1, round(title_cost(p.world, kind, level) * multiplier))
     offers, owned = [], []
+    from .resource_access import site_profile,permits
     for kind, name in KINDS.items():
         identity = f'{p.world}:{p.location_id}:{kind}'
         row = estates(game).get(identity)
         offers.append(dict(kind=kind, name=name, cost=price(kind, row['level'] if row else 1),
-                           occupied=bool(row and row['owner_kind'] != 'background')))
+                           occupied=bool(row and row['owner_kind'] != 'background'),
+                           resources=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]))
         if not row or not owner_allowed(game, row['owner_kind'], row['owner_id'], p.world):
             continue
         record = {k:row[k] for k in ('id', 'kind', 'level', 'recipe', 'reserve', 'produced', 'income', 'expense',
@@ -41,10 +43,12 @@ def public_estates(game, maps):
             upgrade_cost=price(kind, row['level'] + 1), release_price=price(kind, row['level']) // 2)
         from .enterprise_operations import annual_maintenance,operating_reserve
         record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market))
+        record['resources']=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]
         owned.append(record)
     return dict(available=True, can_act=trade_available(game), offers=offers, owned=owned,
         recipes=[dict(id=k, **r, output_name=ITEM_CATALOG[r['output']].name,
                       input_names='、'.join(f'{ITEM_CATALOG[i].name} ×{n}' for i,n in r['inputs'].items()) or '天然矿藏',
+                      estates=[x['id'] for x in owned if x['kind']==r['kind'] and permits(dict(world=p.world,location=p.location_id,kind=x['kind']),r)],
                       can_use=catalog[r['output']]['tier'] <= p.realm_index + 1) for k,r in options.items()],
         market_revision=market['revision'],
         goods=[dict(id=k, name=ITEM_CATALOG[k].name, stock=int(r['stock']), price=r['price'],

@@ -51,6 +51,9 @@ def start_job(game, maps, row, *, automatic=False):
     recipe = recipes(row['world'], commodity_catalog(row['world'])).get(row['recipe'])
     if not recipe or recipe['kind'] != row['kind']:
         raise ValueError('此产业尚未配置有效配方')
+    from .resource_access import permits
+    if not permits(row,recipe):
+        raise ValueError('此地矿脉、药田或丹源不支持该材料；扩建不会提高天然品阶')
     market = market_at(game, maps, row)
     batches = row['batches']
     count = batches * recipe['quantity']
@@ -60,8 +63,8 @@ def start_job(game, maps, row, *, automatic=False):
         raise ValueError('仓库原料不足；补充原料或开启自动采购')
     if used(row) + sum(missing.values()) > capacity(row) or used(row) + sum(missing.values()) - sum(inputs.values()) + count > capacity(row):
         raise ValueError('原料与预留成品超过仓储容量')
-    if row['kind'] == 'mine' and row['reserve'] < count:
-        raise ValueError('此矿区剩余储量不足，不能凭空再生矿藏')
+    if row['kind'] in {'mine','hunt'} and row['reserve'] < count:
+        raise ValueError('此矿区或猎场剩余储量不足，不能凭空再生矿藏或丹源')
     wage = max(1, math.ceil(market['commodities'][recipe['output']]['price'] * count * recipe['labor']))
     total = wage
     for item, number in missing.items():
@@ -90,7 +93,7 @@ def start_job(game, maps, row, *, automatic=False):
         take(row, item, number)
     transfer_value(game, source, f'background:{row["world"]}', wage, '产业工匠、种植或采掘劳务')
     row['expense'] += wage
-    if row['kind'] == 'mine':
+    if row['kind'] in {'mine','hunt'}:
         row['reserve'] -= count
     row['job'] = dict(recipe=row['recipe'], item=recipe['output'], quantity=count, inputs=inputs,
                       started=game.player.age, finish=game.player.age + recipe['years'], cost=total)

@@ -428,6 +428,8 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
             if child:
                 child.update(age=npc.age,alive=False,death_reason=npc.death_reason)
             continue
+        from ...system.economy.organization_consumption import apply_longevity
+        apply_longevity(game,npc,'family',family.id)
         if npc.lifespan is not None and npc.age >= npc.lifespan:
             npc.alive = False
             npc.death_reason = "寿元耗尽，族谱除名"
@@ -441,12 +443,17 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
             ))
             continue
         from ...system.economy.organization_consumption import support
-        provision=support(game,'family',family.id,npc.realm_index)
-        result = deps._advance_npc_cultivation(npc, rng, world_age=game.player.age,**({'support':provision} if provision else {}))
+        provision=support(game,'family',family.id,npc.realm_index) if npc.world==family.world else 0.
+        pill_bonus=(.05*support(game,'family',family.id,npc.realm_index,'breakthrough_support')
+                    if npc.world==family.world and npc.layer>=REALMS[npc.realm_index].layers else 0.)
+        result = deps._advance_npc_cultivation(npc, rng, world_age=game.player.age,
+            **({'support':provision} if provision else {}),
+            **({'breakthrough_bonus':pill_bonus} if pill_bonus else {}))
         if child:
             child.update(
                 age=npc.age,alive=npc.alive,realm_index=npc.realm_index,layer=npc.layer,
                 lifespan=npc.lifespan,world=npc.world,cultivation_progress=npc.cultivation_progress,
+                economic_lifespan_bonus=npc.economic_lifespan_bonus,economic_provision_year=npc.economic_provision_year,
                 next_tribulation_age=npc.next_tribulation_age,tribulation_count=npc.tribulation_count,
                 tribulation_power=npc.tribulation_power,death_reason=npc.death_reason,
             )

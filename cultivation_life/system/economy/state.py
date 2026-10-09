@@ -33,11 +33,20 @@ def ensure_state(game):
             for row in game.economy_v2.get('estates',{}).values():
                 row['last_year'] = game.player.age
             changed = True
+        if game.economy_v2.get('demand_policy') != 1:
+            game.economy_v2.update(demand_policy=1,demand_policy_year=game.player.age)
+            for row in game.economy_v2['markets'].values():row.update(last_year=game.player.age,household_year=game.player.age)
+            for row in game.economy_v2.get('organizations',{}).values():
+                row.update(last_year=game.player.age,demand_credit={},cultivation_support={},
+                           maintenance_support={},breakthrough_support={},longevity_support={})
+            for row in game.economy_v2.get('estates',{}).values():row['last_year']=game.player.age
+            changed=True
         return changed
     from ...economy_schema import validate_economy_settings
     validate_economy_settings(settings())
     game.economy_v2 = dict(schema_version=1, base_year=game.player.age, last_year=game.player.age,
-                           worlds={}, markets={}, accounts={}, ledger=[], consumption_policy=2, policy_year=game.player.age)
+                           worlds={}, markets={}, accounts={}, ledger=[], consumption_policy=2, policy_year=game.player.age,
+                           demand_policy=1,demand_policy_year=game.player.age)
     for world, profile in WORLD_SYSTEMS['world_profiles'].items():
         if int(profile['tier']) <= 0:
             continue
@@ -134,7 +143,22 @@ def ensure_regional_market(game, maps, world, location):
         transfer_value(game, f'background:{world}', f'market:{key}', opening, '市场开业周转金')
         account(game, f'operator:{key}')
         changed = True
-    return settle_market(game, game.economy_v2['markets'][key]) or changed
+    market=game.economy_v2['markets'][key]
+    if market.get('goods_policy') != 1:
+        # Existing schema-10 markets acquire a catalogue, not free stock or
+        # historical production. New markets above already have opening stock.
+        for item,definition in commodity_catalog(world).items():
+            if item in market['commodities']:continue
+            target=settings()['base_stock']*_variation(world,location,item)
+            market['commodities'][item]=dict(stock=0.,target=target,price=float(definition['base_price']),
+                reference=definition['base_price'],tier=definition['tier'],production=0.,consumption=0.,
+                volume=0,history=[],initial_target=target)
+        market['goods_policy']=1
+        changed=True
+    if 'household_year' not in market:
+        market['household_year']=game.player.age
+        changed=True
+    return settle_market(game, market) or changed
 
 
 def ensure_market(game, maps):
@@ -186,7 +210,14 @@ def settle_market(game, market):
         row['production'] += quantity / years
         reprice(game, market, row)
     from .basket_consumption import settle as settle_baskets
-    spent = settle_baskets(game, market, years)
+    # The background household sector batches procurement over five real
+    # years. NPC provisions/jobs/combat/events still tick annually. This is an
+    # explicit transaction-timing approximation, not a replay of skipped years.
+    household_years=game.player.age-market.get('household_year',market['last_year'])
+    spent=0
+    if household_years>=5:
+        spent=settle_baskets(game,market,household_years)
+        market['household_year']=game.player.age
     world['unfunded_growth_sales'] = world.get('unfunded_growth_sales', 0)+spent
     market['last_year'] = game.player.age
     for owner in list(market.get('suppliers', {})):

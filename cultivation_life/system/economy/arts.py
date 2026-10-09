@@ -53,10 +53,14 @@ def refine_pill(deps: ArtsDependencies, game_id: str, target_item_id: str, mater
             requested[item_id] = requested.get(item_id, 0) + quantity
     if not requested:
         raise ValueError("至少投入一株药材")
+    exact=recipe.get('inputs')
+    if exact is not None and requested!=exact:
+        raise ValueError('标准丹药须投入完整的同阶配方，不能以一种药材替代全部原料')
     selected: list[tuple[Item, int]] = []
     for item_id, quantity in requested.items():
         item = next((entry for entry in player.inventory if entry.id == item_id), None)
-        if not item or "herb" not in item.tags or "seed" in item.tags or item.quantity < quantity:
+        suitable=item and (item_id in exact if exact is not None else 'herb' in item.tags and 'seed' not in item.tags)
+        if not suitable or item.quantity < quantity:
             raise ValueError("药材数量不足或混入了非药材物品")
         selected.append((item, quantity))
     mp_cost = max(1.0, max_mp(player) * 0.15)

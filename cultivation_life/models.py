@@ -247,7 +247,19 @@ class SectNpc:
     # Actual location when a local activity requires one; legacy NPCs remain unspecified.
     location_id: str | None = None
 
+    # Paid medicinal extension is bounded across this NPC's lifetime. It is
+    # personal tolerance, not an economic wallet or a copied supply inventory.
+    economic_lifespan_bonus: float = 0.0
+    economic_provision_year: int | None = None
+
     def __post_init__(self) -> None:
+        import math
+        if (type(self.economic_lifespan_bonus) not in (int, float)
+                or not math.isfinite(self.economic_lifespan_bonus)
+                or not 0 <= self.economic_lifespan_bonus <= 320
+                or (self.economic_provision_year is not None and
+                    (type(self.economic_provision_year) is not int or self.economic_provision_year < 0))):
+            raise ValueError('无效人物供养记录')
         if self.roster_state not in {'active', 'held', 'retired'}:
             raise ValueError('无效人物名册状态')
         if self.path == "monster" and not self.monster_species_id:
