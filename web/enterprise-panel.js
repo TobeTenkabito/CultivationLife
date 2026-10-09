@@ -16,6 +16,7 @@
     for(const row of data.owned){
       const card=e('details');card.dataset.estateId=row.id;card.append(e('summary',`${row.name} · ${row.level} 级 · ${owners.find(x=>x[0]===row.owner_kind)?.[1]}`));
       card.append(e('p',`周转金 ${money(row.cash)} · 经营收入 ${money(row.income)} / 支出 ${money(row.expense)} · 欠费 ${money(row.arrears)}`),e('p',`仓储及在制占用 ${row.used} / ${row.capacity} 件 · 累计生产 ${row.produced} 件${row.kind==='mine'?` · 剩余矿藏 ${row.reserve} 件`:''}`));
+      if(row.resources?.length)card.append(e('p',`本地资源：${row.resources.join('、')}；扩建提高容量，不改变天然品阶。${row.kind==='hunt'?` 剩余丹源 ${row.reserve} 件。`:''}`));
       if(row.job)card.append(e('p',`在制 ${row.job.quantity} 件 · 第 ${row.job.finish} 年完工（已扣原料与劳务）`));
       const base={estate_id:row.id,revision:row.revision},operation=(parent,label,action,payload={},disabled=false)=>button(parent,label,action,()=>({...base,...(typeof payload==='function'?payload():payload)}),disabled);
       operation(card,row.entrusted?'收回掌柜委托':'委托驻地掌柜经营','entrust',{enabled:!row.entrusted});
@@ -27,7 +28,7 @@
       }
       operation(funds,'结清欠费','pay_arrears',{},!row.arrears);operation(funds,`扩建 · ${money(row.upgrade_cost)}`,'upgrade',{cost:row.upgrade_cost},row.level>=5);card.append(funds);
       const production=e('div');production.className='estate-controls';
-      const recipes=row.kind==='shop'?data.goods.filter(g=>g.can_buy).map(g=>[g.id,g.name]):data.recipes.filter(r=>r.kind===row.kind&&r.can_use).map(r=>[r.id,`${r.name}：${r.input_names} → ${r.output_name} ×${r.quantity} / ${r.years} 年`]);
+      const recipes=row.kind==='shop'?data.goods.filter(g=>g.can_buy).map(g=>[g.id,g.name]):data.recipes.filter(r=>r.kind===row.kind&&r.can_use&&r.estates.includes(row.id)).map(r=>[r.id,`${r.name}：${r.input_names} → ${r.output_name} ×${r.quantity} / ${r.years} 年`]);
       const recipe=select(production,row.kind==='shop'?'经营商品':'生产配方',recipes,row.recipe),batches=input(production,'每批生产份数',row.batches);
       batches.min='1';batches.max=String(row.level*4);
       const buyLimit=input(production,'最高采购均价',row.buy_limit),sellLimit=input(production,'最低销售均价',row.sell_limit);

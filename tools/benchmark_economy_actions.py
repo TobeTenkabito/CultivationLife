@@ -108,7 +108,9 @@ if __name__ == '__main__':
     parser.add_argument('phase', choices=('baseline', 'optimized'))
     parser.add_argument('--runs', type=int, default=3)
     parser.add_argument('--profile', action='store_true')
+    parser.add_argument('--output-dir',type=Path,default=OUTPUT)
     options = parser.parse_args()
+    OUTPUT=options.output_dir.resolve()
     if options.runs < 1:
         parser.error('--runs must be positive')
     benchmark(options.phase, options.runs, options.profile)

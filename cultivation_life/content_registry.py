@@ -279,6 +279,11 @@ class ContentRegistry:
         items_doc["items"].extend(item_definitions())
         from .talisman_content import item_definitions as talisman_items
         items_doc["items"].extend(talisman_items())
+        from .economy_content import build as economic_definitions
+        economic_items, economic_goods = economic_definitions(
+            world_doc['systems']['world_profiles'], world_doc['realms'])
+        items_doc['items'].extend(economic_items)
+        market_doc['goods'].extend(economic_goods)
         items = cls._index_models(items_doc, "items", Item)
         source_defaults = techniques_doc.get("source_defaults_by_path", {})
         expected_source_paths = {"dao", "demonic", "ghost", "monster", "buddhist", "confucian"}

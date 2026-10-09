@@ -27,6 +27,16 @@ def prepare(engine):
     return game.id
 
 
+def settle_panel(page, selector):
+    # The book theme's finite page-turn pseudo-element temporarily contributes
+    # to scrollWidth. Measure the real panel after its feedback/opening ends.
+    page.wait_for_function('''selector => {
+        const panel = document.querySelector(selector);
+        return panel && !panel.getAnimations({subtree: true}).some(animation =>
+            animation.playState === 'running' && animation.effect.getTiming().iterations !== Infinity);
+    }''', arg=selector)
+
+
 def main():
     output = ROOT / 'build/economy-v2-r3-browser'
     output.mkdir(exist_ok=True)
@@ -65,12 +75,14 @@ def main():
                             assert page.get_by_role('button', name='本年已经营', exact=True).is_disabled()
                             page.locator('#family-card .organization-finance summary').click()
                             assert '驻地产出' in page.locator('#family-card .organization-finance').inner_text()
+                            settle_panel(page, '#family-card')
                             assert page.locator('#family-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.locator('#family-card .organization-finance').scroll_into_view_if_needed()
                             page.screenshot(path=str(output / f'{theme}-{width}-family.png'))
                             page.locator('[data-panel-target=faction]').click()
                             page.locator('#faction-card .organization-finance summary').click()
                             assert '福利实付' in page.locator('#faction-card .organization-finance').inner_text()
+                            settle_panel(page, '#faction-card')
                             page.screenshot(path=str(output / f'{theme}-{width}-sect.png'))
                             assert page.locator('#faction-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1'), page.locator('#faction-card').evaluate('(n)=>[n.clientWidth,n.scrollWidth,...Array.from(n.querySelectorAll("*")).filter(e=>e.getBoundingClientRect().right>n.getBoundingClientRect().right).map(e=>[e.tagName,e.className,e.textContent.slice(0,80)])]')
                             page.screenshot(path=str(output / f'{theme}-{width}-sect.png'))

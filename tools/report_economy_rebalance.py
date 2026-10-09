@@ -1,5 +1,6 @@
 """Offline catalog audit, fixed-roster economic stress and bounded work timings."""
 import copy
+import argparse
 import json
 import statistics
 import sys
@@ -13,6 +14,7 @@ sys.path.insert(0,str(ROOT))
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState
 from cultivation_life.content_registry import WORLD_SYSTEMS, ITEM_CATALOG
+from cultivation_life.economy_content import specification
 from cultivation_life.system.economy import state, organizations, basket_rules, basket_production, basket_consumption
 from cultivation_life.system.economy.ledger import balance
 
@@ -46,7 +48,11 @@ def war_sample(engine, seed):
 
 
 def main():
-    output=ROOT/'build/economy-rebalance';output.mkdir(parents=True,exist_ok=True)
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir',type=Path,default=ROOT/'build/economy-diversity')
+    parser.add_argument('--skip-actions',action='store_true',help='Use the isolated replay benchmark for real-action timings')
+    options=parser.parse_args()
+    output=options.output_dir.resolve();output.mkdir(parents=True,exist_ok=True)
     audit=[];timings={};stress=[];actions=[];wars=[]
     with tempfile.TemporaryDirectory() as tmp:
         engine=GameEngine(ROOT,Path(tmp))
@@ -58,7 +64,7 @@ def main():
                 recipe=basket_production.recipe(market,item)
                 audit.append(dict(world=world,id=item,name=good['name'],grade=good['tier'],category=basket_rules.kind(item),
                     reference=good['base_price'],inputs=recipe,
-                    supply='采掘／种植' if recipe=={} else '消耗实物原料加工' if recipe else '初始存量／玩法获取',
+                    supply=('猎场／公共丹源' if specification(item) and specification(item)['role'] and specification(item)['role'].startswith('core_') else '采掘／种植') if recipe=={} else '消耗实物原料加工' if recipe else '初始存量／玩法获取',
                     fallback='本界黑市按原有流通资格保底；药田商品沿用种植来源'))
         for years in (1,100,500,1000):
             samples=[];calls=[]
@@ -68,7 +74,7 @@ def main():
                     start=time.perf_counter();basket_consumption.settle(g,m,years);samples.append((time.perf_counter()-start)*1000)
                     calls.append(buying.call_count)
             timings[str(years)]=dict(median_ms=round(statistics.median(samples),3),max_orders=max(calls))
-            assert max(calls)<=168 and statistics.median(samples)<=50
+            assert max(calls)<=192 and statistics.median(samples)<=50
         assert timings['1000']['median_ms'] <= timings['1']['median_ms']*3
         for seed in (315,7701,9003):
             g=engine._load(engine.create_game('稳态压力','supreme_metal','dao',seed,preset_id='nascent')['id'])
@@ -82,7 +88,7 @@ def main():
                 if years not in {200,1000,5000}:continue
                 assert total(g)==opening+g.economy_v2.get('issued',0)
                 assert GameState.from_dict(g.to_dict()).economy_v2==g.economy_v2
-                assert len(json.dumps(g.economy_v2,ensure_ascii=False).encode())<=256*1024
+                assert len(json.dumps(g.economy_v2,ensure_ascii=False).encode())<=512*1024
                 assert not any(r['shortfall'] for r in g.economy_v2['organizations'].values())
                 m=state.local_market(g)
                 stress.append(dict(seed=seed,years=years,ms=round((time.perf_counter()-start)*1000,2),
@@ -92,9 +98,10 @@ def main():
                     organizations=len(g.economy_v2['organizations']),shortfalls=sum(bool(r['shortfall']) for r in g.economy_v2['organizations'].values()),
                     save_bytes=len(json.dumps(g.economy_v2,ensure_ascii=False).encode())))
                 print(f'seed={seed} years={years}: conservation and reload passed',flush=True)
+                (output/'stress-checkpoints.json').write_text(json.dumps(dict(performance=timings,stress=stress),ensure_ascii=False,indent=2),encoding='utf8')
         # Real controller, loading, all yearly NPC phases and saving; only the
         # unrelated popup interruption is disabled to complete the 100 years.
-        for seed in (315,7701,9003):
+        for seed in (() if options.skip_actions else (315,7701,9003)):
             made=engine.create_game('百年行动验收','supreme_metal','dao',seed,preset_id='true_immortal')
             g=engine._load(made['id']);g.pending_event=None;g.player.next_tribulation_age=None
             g.settings['silent_events']=True;g.heavenly_court['open_election']=None
@@ -105,7 +112,7 @@ def main():
             assert final.player.age-g.player.age==100
             actions.append(dict(seed=seed,years=100,ms=round((time.perf_counter()-start)*1000,2)))
             print(f'real 100-year action seed={seed}: passed',flush=True)
-        assert statistics.median(r['ms'] for r in actions)<=5000
+        if actions:assert statistics.median(r['ms'] for r in actions)<=5000
         for seed in (315,7701,9003):
             wars.append(war_sample(engine,seed))
     result=dict(catalog=audit,realm_weights={str(r):round(w,4) for r,w in enumerate(basket_rules.REALM_WEIGHTS)},

@@ -36,13 +36,21 @@ def _alchemy_targets(player: Player) -> dict[str, dict[str, Any]]:
     # This basic recipe predates the market. Special-currency and DLC loot
     # without a generic recipe must not silently become tier-one recipes.
     tiers.setdefault('healing_pill', 1)
-    return {
+    from ..economy_content import specification, inputs as native_inputs
+    result = {
         item_id: {'id': item_id, 'name': item.name, 'tier': tier, 'description': item.description}
         for item_id, tier in tiers.items()
         if (item := ITEM_CATALOG.get(item_id)) and 'pill' in item.tags
         and not restricted_acquisition('item', item_id)
-        and tier <= min(8, player.realm_index + 1)
+        and tier <= min(12 if specification(item_id) else 8, player.realm_index + 1)
+        and (not specification(item_id) or specification(item_id)['world']==player.world)
     }
+    for item,row in result.items():
+        spec=specification(item)
+        if spec:
+            row['inputs']=native_inputs(spec['world'],spec['grade'],spec['template'])
+            row['input_names']='、'.join(f'{ITEM_CATALOG[k].name} ×{n}' for k,n in row['inputs'].items())
+    return result
 
 
 def _art_names() -> dict[str, str]:

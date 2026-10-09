@@ -164,7 +164,8 @@ def test_stable_fractional_demand_batch_and_split_match(economy):
         basket_consumption.settle(batch,local_market(batch),100)
         for _ in range(100):basket_consumption.settle(split,local_market(split),1)
     a,b=local_market(batch),local_market(split)
-    assert a['terminal_consumed']==b['terminal_consumed']==80
+    from cultivation_life.system.economy.demand_profiles import rates
+    assert a['terminal_consumed']==b['terminal_consumed']==int(100*100*rates(1)['artifact'])
     assert a['commodities']['green_bamboo_sword']['stock']==b['commodities']['green_bamboo_sword']['stock']
     assert abs(a['household_spending']-b['household_spending'])<=100  # Integer bill rounding.
 
@@ -190,10 +191,10 @@ def test_small_battle_baskets_keep_prepaid_fraction(economy):
 def test_basket_work_bounded_by_groups_not_elapsed_years(economy,years):
     _,game=economy;market=local_market(game)
     basket_rules.index(market)
-    groups=len(basket_rules.index(market))
+    groups=len(basket_rules.purpose_index(market))
     with patch.object(basket_consumption,'purchase',wraps=basket_consumption.purchase) as buying:
         basket_consumption.settle(game,market,years)
-    assert buying.call_count <= 2*groups <= 168
+    assert buying.call_count <= 2*groups <= 192
     assert len(game.economy_v2['ledger'])<=80
 
 

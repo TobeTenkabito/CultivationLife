@@ -74,6 +74,12 @@ class ContentRegistryTests(unittest.TestCase):
             if item.breakthrough_bonus <= 0:
                 continue
             source = int(item.breakthrough_scope.split(":", 1)[1])
+            from cultivation_life.economy_content import specification
+            economic=specification(item.id)
+            if economic:
+                self.assertIn((item.id,source,economic['world']),sold,item.name)
+                self.assertFalse(any(k==item.id and w!=economic['world'] for k,t,w in sold),item.name)
+                continue
             if 'celestial' in item.tags:
                 offers = registry.world_systems['yaochi']['breakthrough_pills']
                 self.assertTrue(any(o['id'] == item.id and o['realm'] == source for o in offers), item.name)

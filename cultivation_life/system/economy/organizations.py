@@ -6,6 +6,7 @@ does not pay historical income, create NPCs, or touch the simulation RNG.
 import hashlib
 
 from ...content_registry import ITEM_CATALOG, WORLD_SYSTEMS
+from ...economy_content import BASE_PRICES
 from .ledger import account, balance, transfer_value
 from .state import ensure_state, ensure_regional_market, reprice, commodity_catalog
 from .local_market import quote
@@ -46,7 +47,7 @@ def register(game, kind, identity, world):
         # The existing faction migration owns its treasury. No goods or accrued
         # production work are transported by this fiscal address reconciliation.
         rows[address].update(world=world, production_credit=0,
-            demand_credit={},cultivation_support={},maintenance_support={},
+            demand_credit={},cultivation_support={},maintenance_support={},breakthrough_support={},longevity_support={},supply_budget_credit=0,
             last_year=max(game.player.age, game.economy_v2['last_year']))
     return rows[address]
 
@@ -107,7 +108,7 @@ def settle_faction(game, maps, row, years):
     if row['world'] != entity.world:
         row['production_credit'] = 0
         row['demand_credit'] = {}
-        row['cultivation_support']={};row['maintenance_support']={}
+        row['cultivation_support']={};row['maintenance_support']={};row['breakthrough_support']={};row['longevity_support']={};row['supply_budget_credit']=0
         row['world'] = entity.world
     source, world = key(row['kind'], entity.id), entity.world
     from .industry import settle_industry
@@ -134,12 +135,23 @@ def settle_faction(game, maps, row, years):
     from .organization_consumption import consume
     market = game.economy_v2['markets'][f'{world}:{entity.location_id}']
     reserve = int(row.get('expected_upkeep', 0)*.65*3)
-    budget = min(int(due*.35), max(0,balance(game,source)-reserve))
-    row['expense'] += consume(game, market, entity, row, years, budget)
+    # Save actual surplus for rare high-grade goods. A low service-price cap
+    # must not make a perfectly funded organization unable to buy one artifact.
+    rank=max((int(r) for r in row.get('workforce',{})),default=1)
+    cap=min(10**12,max(int(row.get('expected_upkeep',0)*.35*100),BASE_PRICES[max(1,rank)-1]*36))
+    envelope=int(due*.35)+int(max(0,row['income']-row['expense'])*.25)
+    allowance=min(cap,row.get('supply_budget_credit',0)+envelope)
+    budget=min(allowance,max(0,balance(game,source)-reserve))
+    supplies=consume(game,market,entity,row,years,budget)
+    row['expense']+=supplies
+    row['supply_budget_credit']=max(0,min(allowance-supplies,max(0,balance(game,source)-reserve)))
     from .depot import advance as advance_depot
     advance_depot(game, maps, entity, row)
     from .estate_management import invest_surplus
     invest_surplus(game, maps, entity, row)
+    # Depot purchases and investments spend the same treasury after welfare.
+    # Keep the saved allowance bounded by the final available cash as well.
+    row['supply_budget_credit']=min(row['supply_budget_credit'],max(0,balance(game,source)-reserve))
 
 
 def settle_institution(game, row, years):

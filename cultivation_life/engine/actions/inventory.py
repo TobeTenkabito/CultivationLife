@@ -62,6 +62,11 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             return deps.present(game)
     if not item or not has_item(game.player, item_id):
         raise ValueError("物品不存在")
+    from ...economy_content import specification
+    economic=specification(item_id)
+    if economic and economic['use'] in {'healing','cultivation','longevity','breakthrough'}:
+        if economic['grade']!=max(1,game.player.realm_index):
+            raise ValueError('标准丹药须与当前真实境界同阶，不能以低阶丹药供养高阶修士')
     if game.player.cultivation_suppression and item.breakthrough_bonus > 0:
         raise ValueError("压制修为期间不能服用突破丹药")
     if ghost_cultivation_active(game.player) and item.breakthrough_bonus > 0:
@@ -217,12 +222,36 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             ), item_id, "root_added", summary,
             {"additional_root": affinity}, ["system", "item", "root"],
         ))
-    elif item_id == "healing_pill" and remove_item(game.player, item_id):
+    elif economic and economic['use'] in {'cultivation','longevity'}:
+        from ...system.economy.state import ensure_state
+        ensure_state(game)
+        personal=game.economy_v2['personal']
+        if economic['use']=='longevity':
+            if game.player.lifespan is None:
+                raise ValueError('当前境界已无自然寿元上限，无需延寿丹')
+            span=REALMS[game.player.realm_index].lifespan
+            if not span:raise ValueError('当前境界不适用延寿丹')
+            cap=int(span[1]*.1)
+            used=personal.get('longevity_used',0)
+            gain=min(5,max(0,cap-used))
+            if not gain:raise ValueError('累计延寿药力已达本境界上限，不能反复服丹无限延寿')
+            game.player.lifespan+=gain;personal['longevity_used']=used+gain
+            summary=f'服下{item.name}，寿元增加 {gain} 年。'
+        else:
+            if personal.get('medicine_year')==game.player.age:
+                raise ValueError('本年养元药力尚未消化，请在时间推进后再服用')
+            personal['medicine_year']=game.player.age
+            gain=deps._add_opportunity(game.player,REALMS[game.player.realm_index].opportunity_base*.02)
+            summary=f'服下{item.name}，获得机缘 {gain:.1f}。'
+        remove_item(game.player,item_id)
+        game.history.append(HistoryRecord('SYS_ECONOMIC_MEDICINE',1,game.player.age,'服用标准丹药',item_id,
+            'consumed',summary,{'gain':gain},['system','item','economy']))
+    elif (item_id == "healing_pill" or economic and economic['use']=='healing') and remove_item(game.player, item_id):
         restored = max_hp(game.player) * 0.35
         game.player.hp = min(max_hp(game.player), game.player.hp + restored)
         game.history.append(HistoryRecord(
             "SYS_USE_ITEM", 1, game.player.age, "服用丹药", item_id, "healed",
-            f"服下回春丹，恢复了 {restored:.0f} 点 HP。", {"hp": round(restored, 1)}, ["system", "item"],
+            f"服下{item.name}，恢复了 {restored:.0f} 点 HP。", {"hp": round(restored, 1)}, ["system", "item"],
         ))
     else:
         raise ValueError("该物品当前不能使用")

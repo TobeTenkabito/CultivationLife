@@ -43,18 +43,19 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
         and e['world'] == world and e['enabled'] for e in game.economy_v2.get('estates', {}).values())
     capacity /= 1 + estate_count
     capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1)
-    from .basket_rules import index, candidates, raw_candidates
+    from .basket_rules import index, purpose_candidates, raw_candidates
     from .basket_production import produce as workshop_produce
     credit = min(10**12, row.get('production_credit', 0) + capacity * years)
     earned = 0
     source = f'organization:{row["kind"]}:{entity.id}'
     index(market)
     goods = []
+    rotation=game.player.age//20
     for rank in range(max(working)+1,0,-1):
-        goods.extend(raw_candidates(market,rank,limit=1))
-    for category in ('material', 'training', 'medical', 'arms', 'energy', 'general'):
+        goods.extend(raw_candidates(market,rank,limit=2,rotation=rotation))
+    for category in ('repair', 'breakthrough', 'cultivation', 'longevity', 'healing', 'artifact', 'energy', 'general'):
         for rank in range(max(working)+1, 0, -1):
-            goods.extend(candidates(market, f'{category}:{rank}', limit=1))
+            goods.extend(purpose_candidates(market, f'{category}:{rank}', limit=1,rotation=rotation))
     completed = 0
     from .production_allocation import quota, record
     for item in dict.fromkeys(goods):

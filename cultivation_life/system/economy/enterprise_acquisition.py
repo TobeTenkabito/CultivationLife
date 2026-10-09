@@ -20,7 +20,10 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
         raise ValueError('该地块已有产权所有者')
     options = recipes(world, commodity_catalog(world))
     catalog = commodity_catalog(world)
-    recipe = next((k for k,r in options.items() if r['kind'] == kind and catalog[r['output']]['tier'] <= realm_index + 1), None)
+    from .resource_access import permits
+    site=dict(world=world,location=location,kind=kind)
+    recipe = next((k for k,r in options.items() if r['kind'] == kind and permits(site,r)
+                   and catalog[r['output']]['tier'] <= realm_index + 1), None)
     row = existing or dict(id=key, kind=kind, world=world, location=location, level=1, reserve=5000,
         recipe=recipe, stock={}, job=None, produced=0, income=0, expense=0, arrears=0,
         enabled=False, auto_buy=False, auto_sell=False, batches=1, buy_limit=10**12,

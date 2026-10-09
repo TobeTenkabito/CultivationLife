@@ -1,6 +1,11 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "economy_v2.demand_policy / demand_policy_year / markets.*.goods_policy / basket_credit / resource_use": "商品细化政策仅对结构 10 在采用年生效，不追扣过去；已有地区新增材料从零库存加入，原实物与既付批次不变。basket_credit 为原市场最多 96 个用途品阶小数，不保存物资；resource_use 仅原地址本年已完成公共采集数量，最多 108 种、逐年重置。私人产权占用本地资源份额，公共生产不读取或恢复私人矿藏和丹源；运行时索引最多 64 个市场，不复制库存。",
+    "economy_v2.markets.*.household_year": "原市场背景居民五真实年聚合采购的起始年；稀疏访问按当前库存结算完整区间，不逐年制造历史。采用时从当前年开始，不追扣旧消费；NPC 供养、产业、战争、事件仍逐年执行，玩家即时交易不受五年节拍限制。",
+    "economy_v2.organizations.*.breakthrough_support / longevity_support / provision_year / supply_budget_credit": "原组织真实府库与境界组供养。突破覆盖率本年有效；真实消耗的延寿药力按同界成员平均，由原年度生命周期应用。迁址清除覆盖率。supply_budget_credit 是基础供养预算及已实收经营盈余形成的支出额度；上限取百年基础预算与四件同阶标准法宝参照价较大值，最高一万亿，始终受原府库实款及三年基本养护储备限制，不是新增现金账户；迁址清零。",
+    "SectNpc.economic_lifespan_bonus / economic_provision_year / economy_v2.personal.longevity_used / medicine_year": "寿元药耐性随原人物保留，不随地点重置。NPC 本年药力只应用一次，终身额外寿元不超过有限寿元境界天然上限的 10%，长生境界不加寿。玩家药耐性归原 personal，延寿累计同样受 10% 上限约束，养元丹每真实年一次；仅同阶标准丹药生效。具体使用经原 use_item 和人物年度生命周期，不复制 NPC 或为每人建钱包。",
+    "economy_v2.estates.kind hunt / native site profile": "猎场同原药田矿区使用固定 world/location/kind 唯一产权、仓库、在制订单和真实账户。丹源与矿藏最多 5000 件，开工扣除，转卖、升级或战争交接不恢复。天然材料资格由原地址固定两种同阶本界材料，不保存资源副本；扩建只提高仓储与批量。普通旧许可证保留，原个人灵田药龄实例不加入商业产权。",
     "economy_v2.consumption_policy / policy_year / issued / worlds.*.issued / unfunded_growth_sales": "消费规则版本与实际启用年份归原经济世界状态；结构仍为 10，不转换结构 1–9。旧结构 10 首次启用只推进市场、组织及固定产业结算基线，不追扣历史消费；原欠费和已付款批次保留。issued 为实际发行累计；unfunded_growth_sales 仅实际终端消费收据，受背景资金短缺及 2% 上限约束，不由发展指数直接发币。特殊实例明确发现奖励仅向实际 world 的 discovery 账户记录具体发行数额，不默认人界或复制主界资源池。",
     "economy_v2.markets.*.household_spending / terminal_consumed / input_consumed / actual_produced / commodities.*.demand_credit / production_allocation": "原市场的真实收支及数量累计，不是账户余额。需求余量仅本地不足一件的小数，跨界不迁移；库存、生产、消费仍逐笔在原商品记录扣加。production_allocation 只记录本年原组织完成订单件数及原地址，每年重置，不存物资副本。用途品阶索引为最多 64 个市场的运行时缓存，增加商品时重建，未知编号不加入；不持久化 basket_index 或 basket_count。",
     "economy_v2.organizations.*.demand_credit / supply_coverage / supplies_consumed / supply_expense / cultivation_support / maintenance_support": "原组织境界组供养记录，不建立 NPC 钱包或逐人交易；先扣固定驻地府库非预留实物，再采购真实缺口。迁址清除劳动、需求余量和收益覆盖率，原府库实物和申请仍留原地址，不传送。保障率及修炼和养护覆盖率仅最近实际支付结算有效；原 NPC 生命周期读取同界组织本年收益，免费基本修炼不因短缺被禁用。",

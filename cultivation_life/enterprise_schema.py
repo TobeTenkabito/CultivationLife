@@ -5,7 +5,7 @@ def validate_estates(value, require, document):
     rows = value.get('estates', {})
     require(isinstance(rows, dict))
     for key, row in rows.items():
-        require(isinstance(row, dict) and row.get('kind') in {'farm','mine','alchemy','forge','shop'})
+        require(isinstance(row, dict) and row.get('kind') in {'farm','mine','hunt','alchemy','forge','shop'})
         require(row.get('world') in value['worlds'] and isinstance(row.get('location'), str))
         require(key == row.get('id') == f"{row['world']}:{row['location']}:{row['kind']}")
         require(f"{row['world']}:{row['location']}" in value['markets'])

@@ -4,7 +4,7 @@ from collections import Counter
 from ...npc_custody import is_free
 from ...person_assignments import research_assignment
 from ...content_registry import WORLD_SYSTEMS
-from ..economy.basket_rules import REALM_WEIGHTS, index, candidates
+from ..economy.basket_rules import REALM_WEIGHTS, purpose_candidates
 
 SHARES = dict(medical=.04, material=.064, energy=.03)
 
@@ -51,14 +51,13 @@ def physical(game, war, side):
 
 def suitable(market, group):
     category, rank = group.split(':'); rank = int(rank)
-    # Equivalent uses, same grade or one grade higher; cheaper low-grade goods
-    # never cover elite needs. Pills supply the medical basket where classified
-    # as cultivation drugs; repairs consume materials at a low replacement rate.
-    uses = (category, 'training') if category == 'medical' else (category,)
+    # Lifespan/breakthrough pills and raw herbs/cores cannot masquerade as
+    # wound treatment or ready-to-use repair supplies.
+    uses = (dict(medical='healing',material='repair',energy='energy')[category],)
     result = []
     for grade in (rank, rank+1):
         for use in uses:
-            result.extend(candidates(market, f'{use}:{grade}'))
+            result.extend(purpose_candidates(market, f'{use}:{grade}'))
     return tuple(dict.fromkeys(result))[:4]
 
 

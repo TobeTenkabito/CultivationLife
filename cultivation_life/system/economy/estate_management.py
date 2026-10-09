@@ -30,8 +30,9 @@ def plan(game, maps, row):
         cash = max(0, cash - org.get('expected_upkeep', 0) * 3)
     budget = cash // 10
     candidates = []
+    from .resource_access import permits
     for identity, recipe in options.items():
-        if recipe['kind'] != row['kind']:
+        if recipe['kind'] != row['kind'] or not permits(row,recipe):
             continue
         product = market['commodities'][recipe['output']]
         cost = max(1, int(product['price'] * recipe['quantity'] * recipe['labor'] + .999))
@@ -65,8 +66,8 @@ def invest_surplus(game, maps, entity, finance):
     reserve = max(10000, finance.get('expected_upkeep', 0) * 5)
     if funds < reserve * 2:
         return
-    # One purchase per organization settlement; five fixed plots per map.
-    for asset in ('farm', 'mine', 'alchemy', 'forge'):
+    # One purchase per organization settlement; six fixed plots per map.
+    for asset in ('farm', 'mine', 'hunt', 'alchemy', 'forge'):
         identity = f'{entity.world}:{location}:{asset}'
         existing = estates(game).get(identity)
         if existing and existing['owner_kind'] != 'background':

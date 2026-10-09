@@ -40,9 +40,17 @@ def purchase(game, market, source, item, wanted, budget, reason):
     if not amount:
         return 0, 0
     bill = quote(row, 'buy', amount)
+    return _commit_purchase(game,market,source,item,amount,bill,reason)
+
+
+def _commit_purchase(game,market,source,item,amount,bill,reason):
+    """Commit a just-computed internal quote; no second affordability search."""
+    row=market['commodities'][item]
+    if amount<1 or row['stock']<amount or balance(game,source)<bill['total']:
+        raise ValueError('真实采购库存或现款不足')
     dealer = f'market:{market["id"]}'
     transfer_value(game, source, dealer, bill['total'], reason)
-    transfer_value(game, dealer, f'operator:{market["id"]}', bill['fee'], reason+'手续费')
+    if bill['fee']:transfer_value(game, dealer, f'operator:{market["id"]}', bill['fee'], reason+'手续费')
     row['stock'] -= amount
     row['volume'] += amount
     market['turnover'] += bill['gross']; market['fees'] += bill['fee']

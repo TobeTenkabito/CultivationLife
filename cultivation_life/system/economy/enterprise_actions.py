@@ -81,6 +81,9 @@ def command(game, maps, payload):
             raise ValueError('本界商品或经营资质不满足所选配方')
         if row['kind'] != 'shop' and options[recipe]['kind'] != row['kind']:
             raise ValueError('该配方不适用于此产业')
+        if row['kind'] != 'shop':
+            from .resource_access import permits
+            if not permits(row,options[recipe]):raise ValueError('所选材料不属于此地资源；扩建不会提高天然品阶')
         batches = quantity(payload.get('batches'), row['level'] * 4)
         quota = payload.get('sale_quota', row.get('sale_quota', 1000000))
         if type(quota) is not int or not 0 <= quota <= 1000000:

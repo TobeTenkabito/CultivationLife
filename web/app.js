@@ -2995,14 +2995,22 @@ function renderSpiritField(field) {
     tools.append(amount, booster, water, harvest); row.append(info, tools); plots.appendChild(row);
   }
   const alchemy = field.alchemy || {};
-  const target = $('#alchemy-target'); target.innerHTML = '';
+  const target = $('#alchemy-target'); const previousTarget = target.value; target.innerHTML = '';
   (alchemy.targets || []).forEach(entry => { const option = document.createElement('option'); option.value = entry.id; option.textContent = `${entry.tier}阶 · ${entry.name}`; target.appendChild(option); });
+  if ([...target.options].some(option => option.value === previousTarget)) target.value = previousTarget;
   const materials = $('#alchemy-materials'); materials.innerHTML = '';
   (alchemy.materials || []).forEach(item => {
     const label = document.createElement('label'); label.textContent = `${item.name}（品质 ${percent(item.quality)}，有 ${item.quantity}）`;
     const input = document.createElement('input'); input.type = 'number'; input.min = '0'; input.max = item.quantity; input.value = '0'; input.dataset.itemId = item.id;
     label.appendChild(input); materials.appendChild(label);
   });
+  let recipeHint = $('#alchemy-recipe-hint');
+  if (!recipeHint) { recipeHint = document.createElement('p'); recipeHint.id = 'alchemy-recipe-hint'; target.after(recipeHint); }
+  const showRecipe = () => {
+    const entry = (alchemy.targets || []).find(row => row.id === target.value);
+    recipeHint.textContent = entry?.input_names ? `同阶配方：${entry.input_names}。须完整投入。` : '普通旧丹方可选药材，品质与数量影响成功率。';
+  };
+  target.onchange = showRecipe; showRecipe();
   const refine = $('#alchemy-refine'); refine.disabled = !target.options.length || !(alchemy.materials || []).length;
   refine.dataset.actionUnavailable = refine.disabled ? '1' : '0';
   refine.onclick = () => {
@@ -3094,7 +3102,8 @@ function renderInventory(items) {
     const trialRecovery = (item.trial_restore_hp > 0 || item.trial_restore_mp > 0) && game.trial?.active;
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
-    const normalUse = item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
+    const normalUse = economicMedicine || item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';

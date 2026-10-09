@@ -97,7 +97,7 @@ def _public_spirit_field(deps: SpiritFieldsDependencies, player: Player) -> dict
         {"id":item.id, "name":item.name, "quantity":item.quantity,
          "years":item.plant_years, "quality":item.plant_quality or 0.55}
         for item in player.inventory
-        if "herb" in item.tags and "seed" not in item.tags and item.quantity > 0
+        if ("herb" in item.tags and "seed" not in item.tags or "economic_raw" in item.tags) and item.quantity > 0
     ]
     return {
         "max_qing":int(rules["max_qing"]), "reclaimed_qing":reclaimed,
