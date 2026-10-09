@@ -269,6 +269,22 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("!busy && !!game.last_combat_report && !game.active_trial","Native survival trial result");
                 check(Boolean.TRUE.equals(js("game.last_combat_report.objective==='survive' && game.last_combat_report.total_rounds<=5")),"Survival objective");
                 result.putString("soul_scope","Four themes, real event choice, paid cultivation, selection/reload and survival trial; resumed elapsed contemplation fixture");
+            } else if(phase.equals("custom-start-eligibility")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    for(int realm:new int[]{8,9}) {
+                        js("document.querySelector('#new-game-button').click();window.__customOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
+                        async("GameThemes.saved");
+                        String world=realm==8?"spirit":"celestial";
+                        js("document.querySelector('#custom-root').value='otherworld';document.querySelector('#custom-path').value='dao';document.querySelector('#custom-path').dispatchEvent(new Event('change'));document.querySelector('#custom-world').value='"+world+"';document.querySelector('#custom-world').dispatchEvent(new Event('change'));document.querySelector('#custom-realm').value='"+realm+"';document.querySelector('#custom-realm').dispatchEvent(new Event('change'));document.querySelector('#custom-body').value='0';true");
+                        tapSelector("#custom-start-submit");
+                        waitForJs("!busy && game && game.id!==window.__customOld && game.player.realm_index==="+realm,"Native eligible custom creation",60000);
+                        String id=(String)js("game.id");
+                        python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\np=g.player\nassert p.immortal_power_converted == "+(realm==9?"True":"False")+"\nassert p.body_training == 0\nassert not p.body_technique.requires_immortal_power or p.immortal_power_converted\nassert p.body_technique.required_body_training <= p.body_training");
+                        async("loadGame("+JSONObject.quote(id)+")");
+                        check(Boolean.TRUE.equals(js("game.player.immortal_power_converted==="+(realm==9?"true":"false")+" && document.documentElement.scrollWidth<=innerWidth+2")),"Native custom conversion and reload");
+                    }
+                }
+                result.putString("custom_eligibility_scope","Four themes, native Mahayana/true-immortal creation, zero body training, conversion qualification and reload");
             } else if(phase.equals("custom-start")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('#new-game-button').click();window.__customOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
