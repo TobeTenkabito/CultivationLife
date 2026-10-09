@@ -24,3 +24,9 @@ def verify_custom_start(base, with_dlc):
     result = request(f'games/{gid}/fleet-action', dict(action='create', owner_kind='sect'))
     assert any(f['owner_kind'] == 'sect' and f['player_controlled'] for f in result['fleet_network']['fleets'])
     assert request(f'games/{gid}')['player']['divine_sense']['level'] == 23
+    for realm, world in ((8, 'spirit'), (9, 'celestial')):
+        result = request('games', dict(name='成品转化资格', spirit_root='otherworld', path='dao', seed=271,
+            custom_start=dict(world=world, realm_index=realm, layer=1)))
+        assert result['player']['realm_index'] == realm
+        assert result['player']['immortal_power_converted'] == (realm >= 9)
+        assert request(f"games/{result['id']}")['player']['immortal_power_converted'] == (realm >= 9)

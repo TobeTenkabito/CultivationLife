@@ -118,6 +118,8 @@ def preset(data, root, path):
     for slot, category in [('main', 'spiritual'), ('support', 'spiritual'), ('body', 'body'), ('divine_sense', 'divine_sense')]:
         books = [t for t in TECHNIQUE_CATALOG.values() if t.category == category and t.grade <= max(1, realm)
                  and t.path == path and t.element == 'neutral'
+                  and (not t.requires_immortal_power or template['immortal_power_converted'])
+                  and t.required_body_training <= data['body_training']
                  and (not t.effective_worlds or data['world'] in t.effective_worlds)]
         if books:
             template[slot + '_technique'] = max(books, key=lambda t: (t.grade, t.id)).id
