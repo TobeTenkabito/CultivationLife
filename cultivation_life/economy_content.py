@@ -87,7 +87,7 @@ def build(profiles, realms):
             for role, name in zip(ROLES, names):
                 family = role.split('_', 1)[0]
                 item = material_id(world, grade, role)
-                definitions.append(dict(id=item, name=f'{name}（{grade}阶）', force_tier=grade,
+                definitions.append(dict(id=item, name=f'{name}（{grade}阶）', force_tier=1,
                     tags=['material', 'economic_raw', f'economic_role:{role}', f'native_world:{world}'],
                     description=f'{THEMES[world]}本界{grade}阶{dict(ore="矿石",herb="草药",core="内丹")[family]}，用于同阶有限加工配方；内丹是原料，不能作为成品丹药服用。'))
                 goods.append(dict(world=world, kind='item', content_id=item, tier=grade, price=base))
@@ -96,7 +96,10 @@ def build(profiles, realms):
                 use = 'artifact' if template.startswith('artifact_') else template
                 tags = [f'economic_use:{use}', f'native_world:{world}', 'economic_product']
                 tags += ['pill'] if category in {'medical', 'training'} else ['artifact'] if category == 'arms' else ['material']
-                row = dict(id=item, name=f'{THEMES[world]}{name}（{grade}阶）', force_tier=grade, tags=tags,
+                # Commercial grade lives in the specification and market good.
+                # Combat force is a separate mortal/upper qualification.
+                row = dict(id=item, name=f'{THEMES[world]}{name}（{grade}阶）',
+                    force_tier=2 if use == 'artifact' and grade >= 9 else 1, tags=tags,
                     description=f'本界同阶原料加工的标准{ name }；居民供养按用途消费，军需仅接受适用用途及品阶。')
                 if use == 'artifact':
                     row['combat_bonus'] = float(realms[grade]['base_power']) * .025

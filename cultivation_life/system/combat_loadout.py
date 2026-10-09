@@ -14,6 +14,14 @@ from .cultivation_ranks import npc_golden_light
 def _tier(entry):
     if not entry:
         return 1
+    # Existing economic bag copies can retain the pre-2.7.2 commercial grade
+    # in force_tier. Resolve their qualification from the authoritative catalog
+    # once at the battle boundary; never rewrite inventories or scan them yearly.
+    identity = read(entry, 'id', '')
+    if isinstance(identity, str) and identity.startswith('econ_'):
+        definition = ITEM_CATALOG.get(identity)
+        if definition and ('economic_raw' in definition.tags or 'economic_product' in definition.tags):
+            entry = definition
     return max(int(read(entry, 'force_tier', 1)),
                2 if 'immortal_attack' in read(entry, 'tags', ()) or read(entry, 'requires_immortal_power', False) else 1)
 

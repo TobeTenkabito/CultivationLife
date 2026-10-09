@@ -217,7 +217,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("economy-handbook")) {
+            if(phase.equals("economic-force")) {
+                python(assetText("economic-force-272.py"));
+                result.putString("economic_force_scope","1666 packaged catalog entries; fresh and stale schema-10 equipment actual damage against golden light in all eleven worlds");
+            } else if(phase.equals("economy-handbook")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'资粮百科验收',preset_id:'nether_upper',monster_species_id:'serpent',seed:270})});await loadGame(g.id);return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\nserver._handbook_release_snapshot=e.store._path("+JSONObject.quote(id)+").read_bytes()");
                 for(String theme:new String[]{"a","b","d","f"}) {
