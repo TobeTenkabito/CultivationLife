@@ -15,6 +15,8 @@ from cultivation_life.engine import GameEngine
 from scripts.release_evidence import inputs_digest
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/release-260-browser';output.mkdir(exist_ok=True)
     fingerprint=inputs_digest(ROOT)
@@ -36,7 +38,7 @@ def main():
                             page.wait_for_selector('#custom-start')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             identity=page.evaluate("""async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'照魂验收',preset_id:'reincarnation_upper',seed:260})});await loadGame(g.id);return g.id;}""")
-                            page.locator('[data-panel-target=upper-voisinage]').click()
+                            navigation_locator(page,'[data-panel-target=upper-voisinage]').click()
                             box=page.locator('[data-soul-form]')
                             box.get_by_label('魂因',exact=True).select_option('battle_scars')
                             box.get_by_label('归真道路预览').select_option('sever')
@@ -47,7 +49,7 @@ def main():
                             page.evaluate("UtilityPanels.close('upper-voisinage')")
                             page.get_by_role('button',name='断执 · 割断束缚',exact=True).click()
                             page.wait_for_function('!busy && !!game.upper_voisinages.soul_form.blueprint')
-                            page.locator('[data-panel-target=upper-voisinage]').click()
+                            navigation_locator(page,'[data-panel-target=upper-voisinage]').click()
                             g=engine._load(identity);key=g.player.world_voisinages['reincarnation']['ghost_soul_form']['blueprint_id']
                             panel=page.locator(f'[data-voisinage-id="{key}"]');panel.locator('summary').click()
                             panel.get_by_role('button',name='领悟并开域',exact=True).click()

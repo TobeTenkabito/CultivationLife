@@ -4,12 +4,14 @@
   const node = (tag, text) => { const e=document.createElement(tag); if(text!=null)e.textContent=text; return e; };
   const select = (label, rows) => { const e=node('select'); e.setAttribute('aria-label',label); rows.forEach(r=>e.append(new Option(r.name,r.id))); return e; };
   let selectedTier=null;
-  function render(game, mutate) {
+  function render(game, mutate, mapOnly=false) {
     const locked=!game.player.alive || !!game.pending_event || !!game.trial?.active;
     const button=(title,kind,action,payload={},disabled=false)=>{
       const b=node('button',title); b.type='button'; b.disabled=locked||disabled;
       b.className='exploration-action';b.dataset.unavailable=disabled?'1':'0';b.onclick=()=>mutate(`/api/games/${game.id}/${kind}-action`,{action,...payload}); return b;
     };
+    const s=game.spatial;
+    if(!mapOnly){
     const t=game.talismans;
     if(t){
       const root=document.getElementById('talisman-content'); root.replaceChildren();
@@ -47,7 +49,7 @@
       });
       if(!t.rows.length)root.append(node('p','尚未持有符箓。符材可从本界坊市或商盟取得。'));
     }
-    const s=game.spatial; if(!s)return;
+    if(!s)return;
     document.querySelectorAll('.spatial-society').forEach(n=>n.remove());
     for(const kind of ['faction','family']){
       const content=document.getElementById(kind+'-content');content.hidden=!!s.scene?.society;
@@ -81,6 +83,8 @@
       dock.classList.toggle('spatial-unavailable',s.inside && !local.includes(dock.dataset.panelTarget));
       if(s.inside && !local.includes(dock.dataset.panelTarget)) window.UtilityPanels?.close(dock.dataset.panelTarget);
     });
+    }
+    if(!mapOnly || !s)return;
     const maps=document.getElementById('map-locations'); if(maps)maps.hidden=false;
     document.querySelectorAll('.spatial-map-tools,.spatial-rift').forEach(e=>e.remove());
     let root=document.getElementById('spatial-panel');root?.remove();
@@ -129,5 +133,5 @@
       s.visited.forEach(v=>panel.append(button(`重访${v.name}`,'spatial','descend',{target_id:v.id})));root.append(panel);
     }
   }
-  window.ExplorationPanel={render};
+  window.ExplorationPanel={render,renderMap:(game,mutate)=>render(game,mutate,true)};
 })();

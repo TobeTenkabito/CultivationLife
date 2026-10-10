@@ -15,6 +15,8 @@ from cultivation_life.rules import max_hp, max_mp
 from test_heavens_campaign import local, site, ready, military, construction, load
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-m3-r2-browser'
     output.mkdir(parents=True,exist_ok=True)
@@ -38,7 +40,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='战局',exact=True).click()
                     assert page.locator('#heavens-content .heavens-destination').count() == 2
                     assert page.get_by_role('button',name='击退当地守卫',exact=True).count() == 0

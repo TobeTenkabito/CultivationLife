@@ -1,5 +1,13 @@
 (() => {
   const panelNames = ['immortal-conversion', 'heavens', 'asura-conversion', 'asura-body', 'asura-veins', 'asura-route', 'asura-domain', 'asura-powers', 'talisman', 'puppet-workshop', 'upper-institution', 'golden-light', 'yaochi', 'combat-plan', 'map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'personal-economy', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'doctrine', 'immortal-veins', 'immortal-body', 'immortal-aperture', 'spirit-voisinage', 'upper-voisinage', 'voisinage', 'daomen', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
+  const pending = new Map();
+
+  // The latest authoritative response replaces any unopened presentation work.
+  // Only DOM creation is deferred; server preparation and settlement are unchanged.
+  function schedule(name, render) {
+    if (card(name)?.classList.contains('panel-open')) { pending.delete(name); render(); }
+    else pending.set(name, render);
+  }
 
   function card(name) { return document.querySelector(`#${name}-card`); }
   function dockButton(name) { return document.querySelector(`[data-panel-target="${name}"]`); }
@@ -11,13 +19,16 @@
   }
 
   function open(name) {
+    window.GameNavigation?.close({restoreFocus:false});
     panelNames.forEach(close);
     const target = card(name);
     const trigger = dockButton(name);
     if (!target || target.classList.contains('hidden')) return;
+    if (pending.has(name)) { const render = pending.get(name); pending.delete(name); render(); }
     target.classList.add('panel-open');
     trigger?.classList.add('active');
     trigger?.setAttribute('aria-expanded', 'true');
+    window.renderButtons?.();
     window.dispatchEvent(new CustomEvent('game:panel-open', {detail:{name,target}}));
   }
 
@@ -36,9 +47,11 @@
       document.querySelector(`#${name}-toggle`)?.addEventListener('click', () => close(name));
     });
     document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && window.GameNavigation?.isOpen()) { event.preventDefault(); window.GameNavigation.close(); return; }
       if (event.key === 'Escape' && !document.querySelector('.appearance-dialog[open]')) panelNames.forEach(close);
     });
+    window.GameNavigation?.init();
   }
 
-  window.UtilityPanels = {init, open, close, toggle};
+  window.UtilityPanels = {init, open, close, toggle, schedule};
 })();

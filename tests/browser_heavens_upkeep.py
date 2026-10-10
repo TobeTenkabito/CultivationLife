@@ -18,6 +18,8 @@ from cultivation_life.system.heavens.definitions import CONTACT_SITES
 from cultivation_life.system.heavens.state import create_echo, get_echo
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/heavens-upkeep-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -57,7 +59,7 @@ def main():
                     def open_detail(key, site):
                         page.evaluate('async id=>{await loadGame(id)}', key)
                         if not page.locator('#heavens-card').is_visible():
-                            page.locator('[data-panel-target=heavens]').click()
+                            navigation_locator(page,'[data-panel-target=heavens]').click()
                         page.get_by_role('tab',name='行程',exact=True).click()
                         page.get_by_role('tab',name='护持',exact=True).click()
                         back = page.get_by_role('button',name='‹ 返回护持目录',exact=True)

@@ -17,6 +17,8 @@ from cultivation_life.system.economy.state import local_market
 from cultivation_life.system.economy.local_market import quote
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/economy-v2-browser';output.mkdir(exist_ok=True)
     checks=[]
@@ -45,7 +47,7 @@ def main():
                             page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',game.id)
-                            page.locator('[data-panel-target=map]').click()
+                            navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
                             assert page.locator('#map-economy').is_visible()
                             before=engine.store._path(game.id).read_bytes()

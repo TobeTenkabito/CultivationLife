@@ -15,6 +15,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/heavens-ui-workbench'
     output.mkdir(parents=True, exist_ok=True)
@@ -49,7 +51,7 @@ def main():
                     for name in ('heavens', 'relationship'):
                         assert page.locator(f'#strategy-dock [data-panel-target={name}]').count() == 1
                         assert page.locator(f'.left-dock [data-panel-target={name}]').count() == 0
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     assert page.locator('#heavens-card').bounding_box()['x'] > 200
                     checks = []
                     for theme in 'abdf':

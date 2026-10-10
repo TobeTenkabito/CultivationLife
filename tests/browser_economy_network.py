@@ -15,6 +15,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy.ledger import transfer_value, balance
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/economy-v2-r4-browser'
     output.mkdir(exist_ok=True)
@@ -45,13 +47,13 @@ def main():
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id => loadGame(id)', game.id)
                             page.wait_for_function('!busy && document.querySelector("#personal-economy-content h3")')
-                            page.locator('[data-panel-target=personal-economy]').click()
+                            navigation_locator(page,'[data-panel-target=personal-economy]').click()
                             expect(page.locator('#personal-economy-card')).to_have_css('opacity', '1')
                             expect(page.locator('#personal-economy-content')).to_contain_text('现有灵石')
                             before = engine.store._path(game.id).read_bytes()
                             page.screenshot(path=str(output / f'{theme}-{width}-personal.png'))
                             page.locator('#personal-economy-toggle').click()
-                            page.locator('[data-panel-target=merchant]').click()
+                            navigation_locator(page,'[data-panel-target=merchant]').click()
                             management = page.locator('#fleet-network-content > details').nth(0)
                             management.locator('summary').click()
                             management.get_by_role('button', name='自建独立商队', exact=True).click()
@@ -71,7 +73,7 @@ def main():
                                 engine.store.save(latest)
                                 page.evaluate('async id => loadGame(id)', game.id)
                                 if 'panel-open' not in page.locator('#merchant-card').get_attribute('class'):
-                                    page.locator('[data-panel-target=merchant]').click()
+                                    navigation_locator(page,'[data-panel-target=merchant]').click()
                                 management.locator('summary').click()
                                 page.locator(f'[data-fleet-id="{identity}"] [data-fleet-action=pledge]').click()
                                 page.wait_for_function('!busy && game.fleet_network.fleets.some(f => f.id === "' + identity + '" && f.pledged)')

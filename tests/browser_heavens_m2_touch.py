@@ -17,6 +17,8 @@ from cultivation_life.system.heavens.definitions import CONTACT_SITES
 from cultivation_life.system.heavens.state import get_echo
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/heavens-m2-touch'
     output.mkdir(parents=True,exist_ok=True)
@@ -50,7 +52,7 @@ def main():
                     page.evaluate('window.touchEvents=0;document.addEventListener("touchstart",()=>touchEvents++,{passive:true})')
                     for index,(key,contact) in enumerate(zip(keys,CONTACT_SITES)):
                         page.evaluate('async id=>{await loadGame(id)}',key)
-                        if not page.locator('#heavens-card').is_visible(): page.locator('[data-panel-target=heavens]').tap()
+                        if not page.locator('#heavens-card').is_visible(): navigation_locator(page,'[data-panel-target=heavens]').tap()
                         page.get_by_role('tab',name='诸界',exact=True).tap()
                         page.get_by_role('button',name='查看'+contact.name,exact=True).tap()
                         label='体察潮汐' if contact.id=='sea_echo' else '体察'+contact.evidence[0]

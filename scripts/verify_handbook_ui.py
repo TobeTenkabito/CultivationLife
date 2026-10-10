@@ -96,7 +96,12 @@ def main():
                     page.evaluate('GameThemes.saved')
                     for cfg, label in ((pure, 'base'), (full, 'full')):
                         page.evaluate('c=>TutorialGuide.configure(c)', cfg)
-                        page.locator('.handbook-categories button', has_text='全部').click()
+                        try:
+                            page.locator('.handbook-categories button', has_text='全部').click()
+                        except Exception:
+                            print(page.evaluate('JSON.stringify([document.querySelector("#settings-card"),document.querySelector(".handbook-categories button")].map(e=>({rect:e.getBoundingClientRect().toJSON(),scrollTop:e.scrollTop,style:{height:getComputedStyle(e).height,maxHeight:getComputedStyle(e).maxHeight,top:getComputedStyle(e).top,bottom:getComputedStyle(e).bottom,overflow:getComputedStyle(e).overflow,transform:getComputedStyle(e).transform}})))'),flush=True)
+                            page.screenshot(path=str(ROOT/'build/handbook-failure-280.png'))
+                            raise
                         for width, height in ((1440,1000),(412,915),(915,412)):
                             page.set_viewport_size({'width':width,'height':height})
                             page.locator('#handbook-search').fill('魔气')

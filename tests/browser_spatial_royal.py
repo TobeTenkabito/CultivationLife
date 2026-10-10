@@ -21,6 +21,8 @@ from cultivation_life.system import spatial, asura_court
 from cultivation_life.system.upper_institutions import account
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -69,7 +71,7 @@ def main():
                     page.goto(f"http://127.0.0.1:{httpd.server_port}")
                     page.wait_for_function("!!configData")
                     page.evaluate("id => loadGame(id)", gid)
-                    page.locator("[data-panel-target=talisman]").first.click()
+                    navigation_locator(page,"[data-panel-target=talisman]").first.click()
                     panel = page.locator("#talisman-content")
                     panel.get_by_label("符箓阶数", exact=True).select_option("1")
                     panel.get_by_role("button", name="学习 一阶灵破军符", exact=False).click()
@@ -78,7 +80,7 @@ def main():
                     page.wait_for_function("!busy && game.talismans.rows.length===1")
                     panel.get_by_role("button", name="启用", exact=True).click()
                     page.wait_for_function("!busy && game.talismans.rows[0].enabled")
-                    page.locator('[data-panel-target=market]').click()
+                    navigation_locator(page,'[data-panel-target=market]').click()
                     page.locator('#talisman-market-offers .market-buy:not([disabled])').first.click()
                     page.wait_for_function('!busy && game.market.talisman_material_offers.some(r=>r.sold)')
                     page.locator('#market-talisman-sellables button').click()
@@ -135,7 +137,7 @@ def main():
                     page.evaluate("id => loadGame(id)", gid)
                     assert page.locator("#spatial-panel button").count() >= 10
                     page.set_viewport_size({"width": 1440, "height": 1000})
-                    page.locator('[data-panel-target=relationship]').click()
+                    navigation_locator(page,'[data-panel-target=relationship]').click()
                     page.locator('#npc-contacts .contact-directory button').first.click()
                     page.locator('[data-contact-action=improve]').click()
                     page.wait_for_function('!busy && game.world_npcs.some(n=>n.affinity>0)')

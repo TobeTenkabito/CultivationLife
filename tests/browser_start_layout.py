@@ -19,6 +19,8 @@ class Quiet(server.Handler):
         pass
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -103,7 +105,7 @@ def main():
                         lost.click()
                         page.wait_for_function('game?.player.world==="lost" && !busy')
                         assert page.evaluate('game.player.path') == path
-                        page.locator('[data-panel-target=map]').click()
+                        navigation_locator(page,'[data-panel-target=map]').click()
                         assert page.locator('#map-locations .map-location').count() == 4
                         assert 'null' not in page.locator('#map-locations').inner_text()
                         assert page.locator('#map-locations').get_by_text('气经验：', exact=False).count() == 4

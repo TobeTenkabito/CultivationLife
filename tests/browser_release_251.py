@@ -13,6 +13,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/release-251-browser'; output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as directory:
@@ -33,7 +35,7 @@ def main():
                             page.wait_for_selector('#custom-start')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             identity = page.evaluate("""async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本相验收',preset_id:'nether_upper',monster_species_id:'serpent',seed:251})});await loadGame(g.id);return g.id;}""")
-                            page.locator('[data-panel-target=upper-voisinage]').click()
+                            navigation_locator(page,'[data-panel-target=upper-voisinage]').click()
                             box = page.locator('[data-true-form]')
                             box.get_by_text('蟠天锁相',exact=True).wait_for(state='visible')
                             before = engine._load(identity)

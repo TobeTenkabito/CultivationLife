@@ -16,6 +16,8 @@ from cultivation_life.rules import max_hp, max_mp
 from cultivation_life.system.heavens.calendar import year_step, YearContext
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/heavens-navigation-browser'
     output.mkdir(parents=True,exist_ok=True)
@@ -45,7 +47,7 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     def nav(label):page.get_by_role('tab',name=label,exact=True).click()
                     def no_other_details():
                         assert page.locator('[data-mirror=field]').count()==0
@@ -136,7 +138,7 @@ def main():
                     page.reload()
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     assert page.locator('#heavens-body').get_attribute('data-heavens-view')=='home'
                     page.get_by_role('button',name='查看旧石回声',exact=True).wait_for()
                     assert page.get_by_role('button',name='查看旧石回声',exact=True).count()==1

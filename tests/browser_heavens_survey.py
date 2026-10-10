@@ -16,6 +16,8 @@ from cultivation_life.models import SectNpc
 from cultivation_life.rules import max_hp, max_mp
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-survey-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -45,7 +47,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='异象',exact=True).click()
                     page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     def act(label, years):
@@ -87,7 +89,7 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
                     if not page.locator('#heavens-card').is_visible():
-                        page.locator('[data-panel-target=heavens]').click()
+                        navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='行程',exact=True).click()
                     page.get_by_role('button',name='查看同勘',exact=True).click()
                     page.locator('[data-survey=active]').wait_for()

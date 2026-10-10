@@ -15,6 +15,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy.ledger import transfer_value
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/economy-expansion-step2-browser';output.mkdir(parents=True,exist_ok=True)
     checks=[]
@@ -37,7 +39,7 @@ def main():
                             page.on('pageerror',lambda error:errors.append(str(error)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
-                            page.evaluate('async id=>loadGame(id)',game.id);page.locator('[data-panel-target=map]').click()
+                            page.evaluate('async id=>loadGame(id)',game.id);navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
                             def expand(locator):
                                 if locator.get_attribute('open') is None:locator.locator(':scope > summary').click()
@@ -74,7 +76,7 @@ def main():
                             assert page.evaluate('game.map.economy.enterprises.owned[0].produced')==4
                             if page.evaluate('!!game.pending_event'):
                                 g=engine._load(game.id);g.pending_event=None;engine.store.save(g);page.evaluate('async id=>loadGame(id)',game.id)
-                            page.locator('[data-panel-target=merchant]').click()
+                            navigation_locator(page,'[data-panel-target=merchant]').click()
                             management=page.locator('#fleet-network-content > details').nth(0);expand(management)
                             management.get_by_role('button',name='自建独立商队',exact=True).click()
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f=>f.player_controlled)')

@@ -57,8 +57,9 @@ def main():
                 assert result['parts'] == 3
                 print('Codec probe:',result,flush=True)
                 fixtures = ROOT/'build/transfer-fixtures'; fixtures.mkdir(exist_ok=True)
-                (fixtures/'from-windows.txt').write_text(page.evaluate('window.__transferTestCode'), encoding='utf-8')
-                (fixtures/'from-windows.json').write_text(json.dumps(original, ensure_ascii=False), encoding='utf-8')
+                if '--preserve-fixture' not in sys.argv:
+                    (fixtures/'from-windows.txt').write_text(page.evaluate('window.__transferTestCode'), encoding='utf-8')
+                    (fixtures/'from-windows.json').write_text(json.dumps(original, ensure_ascii=False), encoding='utf-8')
                 for theme in 'abdf':
                     page.evaluate('(theme)=>document.querySelector(`[data-theme-picker="start"] [data-theme-choice="${theme}"]`).click()',theme)
                     page.evaluate('GameThemes.saved')

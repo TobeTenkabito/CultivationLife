@@ -10,8 +10,9 @@
     document.body.classList.toggle('android-economy-panel-open', !!document.querySelector(
       '#map-card.panel-open, #merchant-card.panel-open, #personal-economy-card.panel-open, #war-card.panel-open'));
   };
-  new MutationObserver(syncPanels).observe(document.querySelector('#game-screen'),
-    {attributes:true, attributeFilter:['class'], childList:true, subtree:true});
+  const panelObserver=new MutationObserver(syncPanels);
+  document.querySelectorAll('.utility-panel').forEach(panel=>panelObserver.observe(panel,
+    {attributes:true,attributeFilter:['class']}));
   const viewport = window.visualViewport;
   const keyboard = () => document.body.classList.toggle('android-keyboard',
     !!viewport && window.innerHeight - viewport.height > 140);
@@ -21,6 +22,7 @@
     if (window.SaveTransfer?.isWorking()) { toast('正在处理存档，请稍候'); return true; }
     if (typeof busy !== 'undefined' && busy) { toast('正在结算，请稍候'); return true; }
     if (window.TutorialGuide?.isGuiding()) { window.TutorialGuide.pause(); return true; }
+    if (window.GameNavigation?.close()) return true;
     const confirm = document.querySelector('#game-confirm-backdrop:not(.hidden)');
     if (confirm) { closeGameConfirm(); return true; }
     const dialog = document.querySelector('dialog[open]');

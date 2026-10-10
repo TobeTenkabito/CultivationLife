@@ -16,6 +16,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         engine = GameEngine(ROOT, Path(directory))
@@ -47,7 +49,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('!!configData')
                     page.evaluate('async id=>{await loadGame(id);render(game);}', game_id)
-                    page.locator('[data-panel-target="merchant"]').click()
+                    navigation_locator(page,'[data-panel-target="merchant"]').click()
                     failed = page.locator('.merchant-order[data-status="failed"]')
                     working = page.locator('.merchant-order[data-status="working"]')
                     assert failed.count() == working.count() == 1

@@ -15,6 +15,8 @@ from cultivation_life.rules import max_hp, max_mp
 from test_heavens_settlement import local, site, ready, military, delegates
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-m3-final-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -38,7 +40,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}', initial.id)
-                    page.locator('[data-panel-target=heavens]').tap()
+                    navigation_locator(page,'[data-panel-target=heavens]').tap()
                     page.get_by_role('tab', name='战局', exact=True).tap()
                     page.get_by_role('button', name='查看岚疆界门', exact=True).tap()
                     page.get_by_role('tab', name='地方', exact=True).tap()

@@ -16,6 +16,8 @@ from cultivation_life.rules import max_hp, max_mp
 from cultivation_life.system.heavens import mirror
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-pact-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -43,7 +45,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='异象',exact=True).click()
                     page.get_by_role('button',name='查看镜律场域',exact=True).click()
                     def propose(label):
@@ -104,7 +106,7 @@ def main():
                     page.reload()
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    if not page.locator('#heavens-card').is_visible(): page.locator('[data-panel-target=heavens]').click()
+                    if not page.locator('#heavens-card').is_visible(): navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='守约',exact=True).click()
                     propose('解除守约')
                     assert '永久关闭' in page.locator('#game-confirm-body').inner_text()

@@ -131,6 +131,16 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     private void tapSelector(String selector) throws Exception {
         String quoted=JSONObject.quote(selector);
+        if(selector.contains("data-panel-target")) {
+            String group=(String)js("document.querySelector("+quoted+")?.dataset.navigationGroup||''");
+            if(!group.isEmpty()) {
+                if(Boolean.TRUE.equals(js("document.querySelector('#navigation-menu').open"))) {
+                    String tab="[data-navigation-tab='"+group+"']";
+                    if(!Boolean.TRUE.equals(js("document.querySelector("+JSONObject.quote(tab)+").getAttribute('aria-selected')==='true' || (()=>{const e=document.querySelector("+quoted+");return e && !e.closest('[hidden]') && e.getClientRects().length>0;})()"))) tapSelector(tab);
+                } else tapSelector("[data-navigation-category='"+group+"']");
+                waitForJs("document.querySelector('#navigation-menu').open","Navigation directory did not open");
+            }
+        }
         // Observe before tutorial capture handlers intercept the intended click.
         js("window.__releaseNativeTap=false;window.addEventListener('click',event=>{const target=document.querySelector("+quoted+");window.__releaseNativeTap=!!target&&target.contains(event.target);},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
         Thread.sleep(300);
@@ -220,6 +230,46 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(phase.equals("economic-force")) {
                 python(assetText("economic-force-272.py"));
                 result.putString("economic_force_scope","1666 packaged catalog entries; fresh and stale schema-10 equipment actual damage against golden light in all eleven worlds");
+            } else if(phase.equals("navigation")) {
+                async("GameNavigation.ready");
+                if("landscape".equals(arguments.getString("orientation"))) check(Boolean.TRUE.equals(async("fetch('/api/ui-preferences').then(r=>r.json()).then(p=>p.navigation.pins.includes('spirit-voisinage'))")),"Navigation pin survives process restart and new server origin");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    for(int rank:new int[]{1,4}) {
+                        js("document.querySelector('#new-game-button').click();window.__navigationOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
+                        async("GameThemes.saved");
+                        js("document.querySelector('#custom-root').value='otherworld';document.querySelector('#custom-path').value='dao';document.querySelector('#custom-path').dispatchEvent(new Event('change'));document.querySelector('#custom-world').value='spirit';document.querySelector('#custom-world').dispatchEvent(new Event('change'));document.querySelector('#custom-realm').value='8';document.querySelector('#custom-realm').dispatchEvent(new Event('change'));document.querySelector('#custom-tendency').value='strike';document.querySelector('#custom-domain-rank').value='"+rank+"';true");
+                        tapSelector("#custom-start-submit");
+                        waitForJs("!busy && game && game.id!==window.__navigationOld","Navigation custom creation",60000);
+                        check(Boolean.TRUE.equals(js("document.querySelectorAll('[data-navigation-category]').length===6 && document.documentElement.scrollWidth<=innerWidth+1 && [...document.querySelectorAll('#navigation-bar button')].every(b=>b.getBoundingClientRect().height>=44)")),"Six stationary touch targets");
+                        tapSelector("[data-panel-target=spirit-voisinage]");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#spirit-voisinage-card').classList.contains('panel-open') && document.querySelector('#spirit-voisinage-content').textContent.includes('Lv"+rank+"') && game.aperture.available==="+(rank>=4?"true":"false"))),"Lower-world study and level-four gate");
+                        tapSelector("[data-navigation-category=practice]");
+                        if(!Boolean.TRUE.equals(js("document.querySelector('[data-navigation-pin=spirit-voisinage]').getAttribute('aria-pressed')==='true'"))) tapSelector("[data-navigation-pin=spirit-voisinage]");
+                        tapSelector("[data-navigation-tab=common]");
+                        check(Boolean.TRUE.equals(js("!!document.querySelector('[data-navigation-shortcut=spirit-voisinage]')")),"Common field pin");
+                        runOnMainSync(()->activity.onBackPressed());
+                        waitForJs("!document.querySelector('#navigation-menu').open && document.querySelector('#spirit-voisinage-card').classList.contains('panel-open')","Back closes directory only");
+                        tapSelector("[data-navigation-category=worlds]");
+                        enterNumericField("#navigation-search","查找地图","地图");
+                        runOnMainSync(()->((android.view.inputmethod.InputMethodManager)activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(web.getWindowToken(),0));
+                        js("document.activeElement.blur();true");Thread.sleep(400);
+                        tapSelector("[data-panel-target=map]");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#navigation-search').value==='地图'")),"Actual search result selected without clearing filter");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#map-card').classList.contains('panel-open') && document.querySelector('#map-current').textContent==='当前：'+game.map.current_name")),"Fresh deferred map");
+                        for(String category:new String[]{"common","practice","craft","economy","people","worlds"}) {
+                            tapSelector(Boolean.TRUE.equals(js("document.querySelector('#navigation-menu').open"))?"[data-navigation-tab="+category+"]":"[data-navigation-category="+category+"]");
+                            check(Boolean.TRUE.equals(js("document.querySelector('#navigation-menu').scrollWidth<=document.querySelector('#navigation-menu').clientWidth+1")),"Directory overflow: "+category);
+                        }
+                        capture("navigation-"+theme+"-"+rank+"-"+arguments.getString("orientation","portrait"));
+                        tapSelector("#navigation-close");
+                        async("GameNavigation.saved");
+                        async("loadGame(game.id)");
+                        tapSelector("[data-navigation-category=common]");
+                        check(Boolean.TRUE.equals(js("!!document.querySelector('[data-navigation-shortcut=spirit-voisinage]')")),"Pin persists after reload");
+                        tapSelector("#navigation-close");
+                    }
+                }
+                result.putString("navigation_scope","Four themes, native lower-world Lv1/Lv4 creation, six categories, pin, search, Back and fresh map");
             } else if(phase.equals("economy-handbook")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'资粮百科验收',preset_id:'nether_upper',monster_species_id:'serpent',seed:270})});await loadGame(g.id);return g.id;})()");
                 python("from cultivation_life import server\ne=server.ENGINE\nserver._handbook_release_snapshot=e.store._path("+JSONObject.quote(id)+").read_bytes()");

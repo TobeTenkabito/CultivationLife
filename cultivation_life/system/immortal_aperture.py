@@ -19,8 +19,13 @@ from .aperture_resources import (
 from .cultivation_dependencies import ApertureDependencies
 
 def public_aperture(player, game=None):
+    # Owning a lower-world manual opens its study view before the Lv4 combat
+    # gate. This projection does not grant energy or change learned levels.
+    studies = [{'id': t.id, 'name': t.name, 'level': t.level}
+               for t in player.known_techniques
+               if t.spirit_voisinage_id and t.active_in(player.world)] if lower_world(player) else []
     if not available(player):
-        return {'available': False}
+        return {'available': False, 'lower': lower_world(player), 'spirit_studies': studies}
     ensure_aperture(player)
     ledger = player.immortal_aperture
     lower = lower_world(player)
@@ -42,6 +47,7 @@ def public_aperture(player, game=None):
             from dataclasses import asdict
             field = asdict(source.voisinages[0])
     return {'available': True, 'lower': lower, 'field': field,
+            'spirit_studies': studies,
             'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
             'title': upper['aperture'] if upper else '仙窍', 'native': bool(upper),
             'energy_kind': player.world if upper else 'imitation' if lower else 'immortal',

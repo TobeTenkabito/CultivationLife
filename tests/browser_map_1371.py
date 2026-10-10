@@ -13,6 +13,8 @@ from cultivation_life import server as server_module
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         engine = GameEngine(ROOT, Path(directory))
@@ -43,7 +45,7 @@ def main():
                       renderMap(game.map,game.auction_system);
                       return {id,name:place.name};
                     }''')
-                    page.locator('[data-panel-target="map"]').click()
+                    navigation_locator(page,'[data-panel-target="map"]').click()
                     card = page.locator('#map-card')
                     card.wait_for(state='visible')
                     marker = card.locator(f'.map-location[data-location="{place["id"]}"]')

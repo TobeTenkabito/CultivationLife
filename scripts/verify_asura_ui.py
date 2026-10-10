@@ -18,6 +18,8 @@ class Quiet(server.Handler):
         pass
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         server.PERSISTENCE_ROOT = Path(directory)
@@ -93,7 +95,7 @@ def main():
                         page.set_viewport_size({'width':width,'height':430 if width==932 else 915 if width==412 else 1000})
                         page.evaluate("UtilityPanels.open('asura-veins')")
                         for title in ['conversion','body','veins','route','domain','powers']:
-                            page.locator(f'[data-panel-target=asura-{title}]').click()
+                            navigation_locator(page,f'[data-panel-target=asura-{title}]').click()
                             assert page.locator(f'#asura-{title}-content').evaluate('e=>e.scrollWidth <= e.clientWidth + 1'), (theme,width,title)
                         assert '煞元' in page.locator('#hud-mp').inner_text()
                         assert '精魂' in page.locator('#hud-power').inner_text()

@@ -13,6 +13,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/release-250-browser';output.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory() as directory:
@@ -55,14 +57,14 @@ def main():
                             assert next(i.quantity for i in game.player.inventory if i.id=='spirit_stone')==2500000
                             lost=engine.create_game('失落宗族','supreme_metal','dao',250,preset_id='lost_world')
                             page.evaluate('async id=>loadGame(id)',lost['id'])
-                            page.locator('[data-panel-target=faction]').click()
+                            navigation_locator(page,'[data-panel-target=faction]').click()
                             panel=page.locator('#faction-card .spatial-society')
                             panel.get_by_role('button',name='拜入宗门 · 一年',exact=True).first.click()
                             page.wait_for_function('!busy && !!game.spatial.scene.joined_sect')
                             panel.get_by_role('button',name='请教本界传承 · 一年',exact=True).click()
                             page.wait_for_function('!busy')
                             assert any(t.id.startswith('SPATIAL_') for t in engine._load(lost['id']).player.known_techniques)
-                            page.locator('[data-panel-target=family]').click()
+                            navigation_locator(page,'[data-panel-target=family]').click()
                             panel=page.locator('#family-card .spatial-society')
                             card=panel.locator('[data-local-society]').first
                             card.get_by_role('button',name='前往驻地 · 一年').click()
