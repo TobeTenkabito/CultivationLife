@@ -56,7 +56,7 @@ def main():
         'validation': [
             'Commodity-backed military supplies, delayed depot requisitions, caravan atlas, estate locating and opportunity conversions verified',
             'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',
-            'Right-side social navigation, illustrated dossiers and registry-backed heavens debug workbench verified',
+            'Category navigation with search and persistent favorites, illustrated dossiers and registry-backed heavens debug workbench verified',
             'Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} automated regression tests passed',
             'Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',

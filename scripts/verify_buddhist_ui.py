@@ -21,6 +21,8 @@ class QuietHandler(server.Handler):
         pass
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory(prefix='buddhist-ui-', dir=ROOT/'build') as directory:
         isolated = Path(directory)
@@ -62,7 +64,7 @@ def main():
                 wish_panel.get_by_role('button', name='消耗 100 愿力 · 涅槃').click()
                 page.wait_for_function('game.player.layer === 2 && game.buddhist_system.wish.value === 0')
                 assert engine.store.load(game.id).buddhist_state['wish']['nirvana_units'] == 3
-                page.locator('[data-panel-target="buddhist"]').click()
+                navigation_locator(page,'[data-panel-target="buddhist"]').click()
                 panel = page.locator('#buddhist-card')
                 panel.wait_for(state="visible", timeout=5000)
                 assert panel.get_by_role('meter', name='业力').get_attribute('aria-valuenow') == '48'
@@ -88,7 +90,7 @@ def main():
                 add_item(books.player, 'yaoque_water'); add_item(books.player, 'yaoque_thunder')
                 engine.store.save(books)
                 page.evaluate('(id) => loadGame(id)', books.id)
-                page.locator('[data-panel-target="inventory"]').click()
+                navigation_locator(page,'[data-panel-target="inventory"]').click()
                 page.locator('#inventory-card').get_by_role('button', name='参悟', exact=True).first.click()
                 page.wait_for_function('game.player.additional_roots.length > 0')
                 assert engine.store.load(books.id).player.additional_roots
@@ -99,7 +101,7 @@ def main():
                 world_save.player.realm_index = 9; world_save.player.layer = 1
                 engine.store.save(world_save)
                 page.evaluate('(id) => loadGame(id)', world_save.id)
-                page.locator('[data-panel-target="map"]').click()
+                navigation_locator(page,'[data-panel-target="map"]').click()
                 page.locator('#map-card').wait_for(state='visible')
                 assert page.evaluate('game.map.locations.length') == 10
                 assert page.locator('#map-card').get_by_text('莲灯山', exact=True).count() > 0

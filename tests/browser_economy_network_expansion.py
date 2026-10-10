@@ -20,6 +20,8 @@ from test_economy_network import found
 from test_economy_network_expansion import visit, recruit
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/economy-expansion-step1-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -57,7 +59,7 @@ def main():
                                 page.evaluate('async id => loadGame(id)', game.id)
                                 page.wait_for_function('!busy && !!game.fleet_network')
                                 if 'panel-open' not in page.locator('#merchant-card').get_attribute('class'):
-                                    page.locator('[data-panel-target=merchant]').click()
+                                    navigation_locator(page,'[data-panel-target=merchant]').click()
                                 expect(page.locator('#merchant-card')).to_have_css('opacity', '1')
                             def expand(index):
                                 section = page.locator('#fleet-network-content > details').nth(index)

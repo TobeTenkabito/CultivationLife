@@ -17,6 +17,8 @@ from cultivation_life.system.faction_geography import faction_site
 from test_economy_governance import war_fixture
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/economy-governance-browser';output.mkdir(parents=True,exist_ok=True)
     checks=[]
@@ -42,7 +44,7 @@ def main():
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',game.id)
-                            if 'panel-open' not in page.locator('#war-card').get_attribute('class'):page.locator('[data-panel-target=war]').click()
+                            if 'panel-open' not in page.locator('#war-card').get_attribute('class'):navigation_locator(page,'[data-panel-target=war]').click()
                             active=page.locator('.war-card').first
                             if active.get_attribute('open') is None:active.locator(':scope > summary').click()
                             form=page.locator('.war-peace-form');form.locator('select').first.select_option('economic_rights')
@@ -51,7 +53,7 @@ def main():
                             card=page.locator('.war-card').first
                             if card.get_attribute('open') is None:card.locator(':scope > summary').click()
                             assert page.locator('.war-economic-receipt').is_visible()
-                            page.locator('[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
+                            navigation_locator(page,'[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
                             box=page.locator('#market-governance')
                             def expand():
                                 if box.get_attribute('open') is None:box.locator(':scope > summary').click()

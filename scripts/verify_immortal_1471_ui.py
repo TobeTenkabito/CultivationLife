@@ -11,6 +11,8 @@ from cultivation_life.engine import GameEngine
 class Quiet(server.Handler):
     def log_message(self,*args):pass
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as folder:
         server.PERSISTENCE_ROOT=Path(folder)
@@ -36,7 +38,7 @@ def main():
                     page.evaluate("UtilityPanels.open('settings')")
                     page.locator('#setting-manual-combat-plan').select_option('manual')
                     page.wait_for_function('!busy && game.combat_plan.manual')
-                    page.locator('[data-panel-target=combat-plan]').click()
+                    navigation_locator(page,'[data-panel-target=combat-plan]').click()
                     page.get_by_label('邻域姿态',exact=True).select_option('guard')
                     page.get_by_label('每轮追加仙力',exact=True).fill('37')
                     page.get_by_label('高消耗术式',exact=True).select_option('never')

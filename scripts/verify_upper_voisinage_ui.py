@@ -19,6 +19,8 @@ class Quiet(server.Handler):
         pass
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as folder:
         server.PERSISTENCE_ROOT = Path(folder)
@@ -50,7 +52,7 @@ def main():
                     e.store.save(g)
                     page.wait_for_function('!busy')
                     page.evaluate('(id)=>loadGame(id)', g.id)
-                    page.locator('[data-panel-target="upper-voisinage"]').click()
+                    navigation_locator(page,'[data-panel-target="upper-voisinage"]').click()
                     assert page.locator('#upper-voisinage-card h2').inner_text() == title
                     rows = page.locator('#upper-voisinage-content details')
                     rows.first.locator('summary').click()
@@ -68,7 +70,7 @@ def main():
                     e.store.save(saved)
                     page.wait_for_function('!busy')
                     page.evaluate('(id)=>loadGame(id)',g.id)
-                    page.locator('[data-panel-target="upper-institution"]').click()
+                    navigation_locator(page,'[data-panel-target="upper-institution"]').click()
                     page.locator('[data-section=identity] summary').click()
                     page.locator('[data-section=identity] button').first.click()
                     page.wait_for_function('!busy&&game.upper_institution.joined')

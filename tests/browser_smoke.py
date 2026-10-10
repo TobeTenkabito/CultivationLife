@@ -21,6 +21,8 @@ from cultivation_life.system.formation_system import formation_material_definiti
 from cultivation_life.rules import TECHNIQUE_CATALOG, add_item, add_technique_copy, assign_technique, learn_technique, max_hp, max_mp, opportunity_required
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main() -> None:
     with tempfile.TemporaryDirectory() as save_directory:
         engine = GameEngine(ROOT, Path(save_directory))
@@ -181,7 +183,7 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("[data-panel-target='bloodline']").is_visible()
                 assert page.locator("[data-panel-target='bloodline']").evaluate("node => node.classList.contains('dlc-active')")
-                page.locator("[data-panel-target='bloodline']").click()
+                navigation_locator(page,"[data-panel-target='bloodline']").click()
                 page.locator("#bloodline-card").wait_for(state="visible")
                 page.locator("#bloodline-current").get_by_text("山雀妖", exact=True).wait_for()
                 assert "羽属" in page.locator("#bloodline-summary").text_content()
@@ -211,7 +213,7 @@ def main() -> None:
                 page.reload()
                 page.locator(".save-resume", has_text="羽族烟测").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
-                page.locator("[data-panel-target='bloodline']").click()
+                navigation_locator(page,"[data-panel-target='bloodline']").click()
                 assert "罡羽破界" in page.locator("#bloodline-current").text_content()
                 self_route = page.locator(".bloodline-candidate", has_text="万翼新祖")
                 self_route.get_by_role("button").click()
@@ -246,7 +248,7 @@ def main() -> None:
                 engine.store.save(quick_game)
                 page.evaluate('async () => loadGame(game.id)')
                 assert len(page.locator(".left-dock").evaluate("node => getComputedStyle(node).gridTemplateColumns").split()) == 2
-                page.locator("[data-panel-target='natal-artifact']").click()
+                navigation_locator(page,"[data-panel-target='natal-artifact']").click()
                 page.locator("#natal-artifact-card").wait_for(state="visible")
                 assert page.get_by_role("button", name="炼为本命").count() >= 1
                 page.get_by_role("button", name="炼为本命").first.click()
@@ -260,7 +262,7 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.evaluate("game.natal_artifact.level") > 1
                 assert page.locator("#natal-artifact-card .natal-slot:not(.locked)").count() == page.evaluate("game.natal_artifact.unlocked_slots")
-                page.locator("[data-panel-target='inventory']").click()
+                navigation_locator(page,"[data-panel-target='inventory']").click()
                 assert page.locator("#inventory-list .natal-artifact-item").count() == 1
                 page.locator("#new-game-button").click()
                 page.locator(".save-resume", has_text="前端烟测").click()
@@ -282,7 +284,7 @@ def main() -> None:
                 assert page.get_by_text("战斗门槛", exact=False).count() >= 1
                 assert not page.locator("details.techniques").evaluate("node => node.open")
                 assert not page.locator("details.technique-library").evaluate("node => node.open")
-                page.locator("[data-panel-target='world-npc']").click()
+                navigation_locator(page,"[data-panel-target='world-npc']").click()
                 page.locator("#world-npc-card").wait_for(state="visible")
                 assert page.locator("#world-npc-list .world-npc-row").count() >= 1
                 assert page.locator('#world-npc-list .world-npc-row', has_text='顾长庚').count() == 1
@@ -301,7 +303,7 @@ def main() -> None:
                 assert "当前境界期望战斗力" in page.locator("#combat-power").get_attribute("title")
                 assert page.locator("#relationship-list").count() == 1
                 assert page.locator("#dao-companion-list").count() == 1
-                page.locator("[data-panel-target='relationship']").click()
+                navigation_locator(page,"[data-panel-target='relationship']").click()
                 page.locator("#relationship-card").wait_for(state="visible")
                 assert page.locator('#relationship-list').get_by_text('烟霞真人', exact=False).count() >= 1
                 assert '120 岁 / 寿元 230' in page.locator('#relationship-list').text_content()
@@ -311,7 +313,7 @@ def main() -> None:
                 assert page.get_by_role("button", name="传功").is_enabled()
                 page.locator("#relationship-toggle").click()
 
-                page.locator("[data-panel-target='inventory']").click()
+                navigation_locator(page,"[data-panel-target='inventory']").click()
                 guixu_consumable = page.locator("#inventory-list .item", has_text="海眼定神丹")
                 assert guixu_consumable.locator(".item-use").is_enabled()
                 guixu_consumable.locator(".item-use").click()
@@ -337,7 +339,7 @@ def main() -> None:
                 assert "Lv.3" in page.locator("#known-technique-list .known-technique", has_text=TECHNIQUE_CATALOG["TECH_BASIC_QI"].name).text_content()
                 page.locator('#player-details-dialog').press('Escape')
 
-                page.locator("[data-panel-target='formation']").click()
+                navigation_locator(page,"[data-panel-target='formation']").click()
                 page.locator("#formation-card").wait_for(state="visible")
                 assert page.locator("#formation-grid .formation-slot").count() == 9
                 assert page.locator("#formation-material-library .formation-material-row").count() == 3
@@ -371,7 +373,7 @@ def main() -> None:
                 assert all(not row.get("occupied") for row in page.evaluate("game.formation_system.materials"))
                 page.locator("#formation-toggle").click()
 
-                page.locator("[data-panel-target='transformation']").click()
+                navigation_locator(page,"[data-panel-target='transformation']").click()
                 page.locator("#transformation-card").wait_for(state="visible")
                 assert "2/2" in page.locator("#transformation-summary").text_content()
                 assert page.locator("#transformation-stored .transformation-form").count() == 2
@@ -396,7 +398,7 @@ def main() -> None:
                 assert page.locator("#transformation-materials .transformation-material").count() == 0
                 page.locator("#transformation-toggle").click()
 
-                page.locator("[data-panel-target='settings']").click()
+                navigation_locator(page,"[data-panel-target='settings']").click()
                 page.locator("#settings-card").wait_for(state="visible")
                 assert not page.locator("#setting-combat-popup").is_checked()
                 assert not page.locator("#setting-auto-war").is_checked()
@@ -416,7 +418,7 @@ def main() -> None:
                 }
                 page.locator("#settings-toggle").click()
 
-                page.locator("[data-panel-target='extension']").click()
+                navigation_locator(page,"[data-panel-target='extension']").click()
                 page.locator("#extension-card").wait_for(state="visible")
                 extension_count = page.evaluate('configData.extensions.length')
                 assert f"已识别 {extension_count}" in page.locator("#extension-summary").text_content()
@@ -427,7 +429,7 @@ def main() -> None:
                 assert "神机百变：巧夺天工" in extension_text
                 page.locator("#extension-toggle").click()
 
-                page.locator("[data-panel-target='tianji']").click()
+                navigation_locator(page,"[data-panel-target='tianji']").click()
                 assert page.locator("[data-panel-target='tianji']").evaluate("node => node.parentElement.id") == "strategy-dock"
                 page.locator("#tianji-card").wait_for(state="visible")
                 assert not page.locator("#tianji-card").evaluate("node => node.classList.contains('left-panel')")
@@ -437,12 +439,12 @@ def main() -> None:
                 assert not page.locator("#tianji-debug-lv5").is_visible()
                 page.locator("#tianji-toggle").click()
 
-                page.locator("[data-panel-target='intrigue']").click()
+                navigation_locator(page,"[data-panel-target='intrigue']").click()
                 page.locator("#intrigue-card").wait_for(state="visible")
                 assert "职位、控制权与决策权彼此独立" in page.locator("#intrigue-card").text_content()
                 page.locator("#intrigue-toggle").click()
 
-                page.locator("[data-panel-target='captive']").click()
+                navigation_locator(page,"[data-panel-target='captive']").click()
                 page.locator("#captive-card").wait_for(state="visible")
                 capacity = page.evaluate('game.demonic_system.capacity')
                 assert f"神识容量 1/{capacity}" in page.locator("#puppet-capacity").text_content()
@@ -459,7 +461,7 @@ def main() -> None:
                 assert page.locator("#secluded-refine-souls").is_hidden()
                 page.locator("#captive-toggle").click()
 
-                page.locator("[data-panel-target='spirit-field']").click()
+                navigation_locator(page,"[data-panel-target='spirit-field']").click()
                 page.locator("#spirit-field-card").wait_for(state="visible")
                 assert page.locator("#spirit-field-plots .spirit-crop-tile").count() == 8
                 assert "荒地" in page.locator("#spirit-field-plots").text_content()
@@ -481,7 +483,7 @@ def main() -> None:
                 engine.store.save(auction_game)
                 page.reload()
                 page.locator(".save-resume", has_text="前端烟测").click()
-                page.locator("[data-panel-target='auction']").click()
+                navigation_locator(page,"[data-panel-target='auction']").click()
                 page.locator("#auction-card").wait_for(state="visible")
                 page.locator("#auction-lots .auction-lot").first.wait_for()
                 assert page.locator("#auction-lots .auction-lot").count() == 5
@@ -507,7 +509,7 @@ def main() -> None:
                 page.locator("#black-market-leave").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
 
-                page.locator("[data-panel-target='map']").click()
+                navigation_locator(page,"[data-panel-target='map']").click()
                 page.locator("#map-card").wait_for(state="visible")
                 assert page.locator("#map-locations .map-location").count() == page.evaluate('game.map.locations.length')
                 lethal_button = page.locator(".map-travel[data-destination='border_void_watch']")
@@ -525,12 +527,12 @@ def main() -> None:
                 assert "岚疆草原" in page.locator("#player-subtitle").text_content()
                 page.locator("#map-toggle").click()
 
-                page.locator("[data-panel-target='inventory']").click()
+                navigation_locator(page,"[data-panel-target='inventory']").click()
                 page.locator("#inventory-card").wait_for(state="visible")
                 assert page.locator("#inventory-list .inventory-category").count() >= 1
                 page.locator("#inventory-toggle").click()
 
-                page.locator("[data-panel-target='market']").click()
+                navigation_locator(page,"[data-panel-target='market']").click()
                 assert "panel-open" in page.locator("#market-card").get_attribute("class")
                 assert page.locator("#market-offers .market-offer").count() == 6
                 assert page.locator("#material-market-offers .market-offer").count() == 6
@@ -538,13 +540,13 @@ def main() -> None:
                 assert page.locator("#material-market-offers .market-lock").count() == 6
                 page.locator("#market-toggle").click()
                 assert "panel-open" not in page.locator("#market-card").get_attribute("class")
-                page.locator("[data-panel-target='market']").click()
+                navigation_locator(page,"[data-panel-target='market']").click()
 
-                page.locator("[data-panel-target='faction']").click()
+                navigation_locator(page,"[data-panel-target='faction']").click()
                 assert "panel-open" in page.locator("#faction-card").get_attribute("class")
                 page.locator("#faction-toggle").click()
                 assert "panel-open" not in page.locator("#faction-card").get_attribute("class")
-                page.locator("[data-panel-target='market']").click()
+                navigation_locator(page,"[data-panel-target='market']").click()
 
                 first = page.locator(".market-buy:not([disabled])").first
                 first.click()
@@ -574,7 +576,7 @@ def main() -> None:
                 engine.store.save(social_game)
                 page.reload()
                 page.locator(".save-resume", has_text="前端烟测").click()
-                page.locator("[data-panel-target='relationship']").click()
+                navigation_locator(page,"[data-panel-target='relationship']").click()
                 page.locator("#dao-companion-list .companion-row").wait_for()
                 assert page.locator("#dao-companion-list .companion-row").count() == 1
                 # A living captive must not display death or ordinary social actions.
@@ -628,7 +630,7 @@ def main() -> None:
                 for title in ("节点启封", "界壁炼身", "破界天光"):
                     page.get_by_role("heading", name=title).wait_for()
                     page.locator("#event-choices button:not([disabled])").click()
-                page.locator("[data-panel-target='faction']").click()
+                navigation_locator(page,"[data-panel-target='faction']").click()
                 page.get_by_role("heading", name="灵界宗门").wait_for()
                 assert page.locator("#faction-title").text_content() == "灵界宗门"
                 faction_summary = page.locator("#faction-summary")
@@ -637,7 +639,7 @@ def main() -> None:
                 assert faction_summary.get_by_text("星河书院", exact=True).count() == 1
                 assert page.locator("#spirit-crossing-action").is_hidden()
                 assert page.locator("[data-panel-target='race']").is_visible()
-                page.locator("[data-panel-target='race']").click()
+                navigation_locator(page,"[data-panel-target='race']").click()
                 page.locator("#race-card").wait_for(state="visible")
                 assert page.locator("#race-list .race-chip").count() == 20
                 assert page.get_by_text("人妖两族盟约", exact=True).count() == 1
@@ -645,11 +647,11 @@ def main() -> None:
                 assert page.locator("#race-detail .race-relation").count() == 19
                 assert page.locator("#race-detail .race-factions p").count() >= 1
                 assert page.locator("#race-detail .race-events h3").text_content() == "族群大事"
-                page.locator("[data-panel-target='world-route']").click()
+                navigation_locator(page,"[data-panel-target='world-route']").click()
                 page.locator("#world-route-card").wait_for(state="visible")
                 assert page.locator("#world-route-stages .world-route-stage").count() == 4
                 assert page.locator("#world-route-stages .world-route-stage.system").count() == 1
-                page.locator("[data-panel-target='ranking']").click()
+                navigation_locator(page,"[data-panel-target='ranking']").click()
                 page.locator("#ranking-card").wait_for(state="visible")
                 assert page.locator("#ranking-list .ranking-row").count() == 20
                 assert "排名" in page.locator("#ranking-player-status").text_content()
@@ -701,7 +703,7 @@ def main() -> None:
                 assert page.locator("[data-panel-target='ghost-soul']").is_visible()
                 assert page.locator("[data-panel-target='ghost-attachment']").is_visible()
                 assert page.locator("[data-panel-target='ghost-parade']").is_visible()
-                page.locator("[data-panel-target='ghost-soul']").click()
+                navigation_locator(page,"[data-panel-target='ghost-soul']").click()
                 page.locator("#ghost-soul-card").wait_for(state="visible")
                 assert page.locator("#ghost-soul-slots .captive-row").count() == 10
                 assert page.locator("#ghost-bound-souls .captive-row").count() == 1
@@ -718,7 +720,7 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#ghost-bound-souls .captive-row").count() == 0
                 page.locator("#ghost-soul-toggle").click()
-                page.locator("[data-panel-target='ghost-attachment']").click()
+                navigation_locator(page,"[data-panel-target='ghost-attachment']").click()
                 page.locator("#ghost-attachment-card").wait_for(state="visible")
                 assert "载体与器灵状态" in page.locator("#ghost-attachment-card").text_content()
                 attach_button = page.locator("#ghost-attachment-list").get_by_role("button", name="附入 养魂木匣")
@@ -733,13 +735,13 @@ def main() -> None:
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 assert page.locator("#ghost-attachment-summary").text_content() == "自由魂体"
                 page.locator("#ghost-attachment-toggle").click()
-                page.locator("[data-panel-target='ghost-parade']").click()
+                navigation_locator(page,"[data-panel-target='ghost-parade']").click()
                 page.locator("#ghost-parade-card").wait_for(state="visible")
                 assert "正在夜行" in page.locator("#ghost-parade-card").text_content()
                 assert page.locator("#ghost-parade-list .captive-row").count() >= 3
                 assert parade_trait_description in page.locator("#ghost-parade-card").text_content()
                 page.locator("#ghost-parade-toggle").click()
-                page.locator("[data-panel-target='inventory']").click()
+                navigation_locator(page,"[data-panel-target='inventory']").click()
                 page.locator("#inventory-card").wait_for(state="visible")
                 assert page.get_by_role("button", name="鬼修不可用").count() >= 1
                 assert page.get_by_role("button", name="鬼修不可用").first.is_disabled()

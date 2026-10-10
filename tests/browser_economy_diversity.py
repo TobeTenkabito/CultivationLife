@@ -19,6 +19,8 @@ from cultivation_life.system.economy.ledger import transfer_value
 from cultivation_life.system.economy.state import local_market
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/economy-diversity/browser';output.mkdir(parents=True,exist_ok=True)
     checks=[]
@@ -49,7 +51,7 @@ def main():
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',game.id)
-                            page.locator('[data-panel-target=auction]').click()
+                            navigation_locator(page,'[data-panel-target=auction]').click()
                             page.locator('#black-market-pattern').fill(ITEM_CATALOG[core].name)
                             page.locator('#black-market-search-form button').click()
                             page.wait_for_function('!busy && game.auction_system.black_market_results.length>0')
@@ -58,7 +60,7 @@ def main():
                             page.wait_for_function('id=>!busy && game.player.inventory.some(i=>i.id===id && i.quantity===3)',arg=core)
                             assert local_market(engine.store.load(game.id))['commodities'][core]['stock']==0
                             page.locator('#black-market-leave').click();page.wait_for_function('!busy')
-                            page.locator('[data-panel-target=spirit-field]').click()
+                            navigation_locator(page,'[data-panel-target=spirit-field]').click()
                             workbench=page.locator('.alchemy-workbench');workbench.locator('summary').click()
                             page.locator('#alchemy-target').select_option(pill)
                             assert '完整' in page.locator('#alchemy-recipe-hint').inner_text()
@@ -73,7 +75,7 @@ def main():
                             page.wait_for_function('ids=>!busy && ids.every(k=>!game.player.inventory.some(i=>i.id===k))',arg=list(required))
                             assert engine.store.load(game.id).history[-1].event_id=='SYS_ALCHEMY'
                             assert all(not any(i.id==k for i in engine.store.load(game.id).player.inventory) for k in required)
-                            page.locator('[data-panel-target=inventory]').click()
+                            navigation_locator(page,'[data-panel-target=inventory]').click()
                             row=page.locator('#inventory-list .item').filter(has_text=ITEM_CATALOG[pill].name).first
                             before=engine.store.load(game.id).player.lifespan
                             row.get_by_role('button',name='服用',exact=True).click()
@@ -81,7 +83,7 @@ def main():
                             saved=engine.store._path(game.id).read_bytes()
                             row.get_by_role('button',name='服用',exact=True).click();page.wait_for_function('!busy')
                             assert engine.store._path(game.id).read_bytes()==saved
-                            page.locator('[data-panel-target=map]').click()
+                            navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
                             box=page.locator('#enterprise-panel');box.locator(':scope > summary').click()
                             page.get_by_label('购置产业',exact=True).select_option('hunt')

@@ -16,6 +16,8 @@ from cultivation_life.system.economy import organizations as finance
 from test_family_expansion import family_game
 
 
+from scripts.browser_navigation import navigation_locator
+
 def prepare(engine):
     game = family_game(engine)
     game.family.npcs[0].realm_index = 4
@@ -61,7 +63,7 @@ def main():
                             page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)', gid)
-                            page.locator('[data-panel-target=family]').click()
+                            navigation_locator(page,'[data-panel-target=family]').click()
                             saved = engine.store.load(gid)
                             source = finance.key('family', saved.family.id)
                             before = finance.balance(saved, source)
@@ -79,7 +81,7 @@ def main():
                             assert page.locator('#family-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.locator('#family-card .organization-finance').scroll_into_view_if_needed()
                             page.screenshot(path=str(output / f'{theme}-{width}-family.png'))
-                            page.locator('[data-panel-target=faction]').click()
+                            navigation_locator(page,'[data-panel-target=faction]').click()
                             page.locator('#faction-card .organization-finance summary').click()
                             assert '福利实付' in page.locator('#faction-card .organization-finance').inner_text()
                             settle_panel(page, '#faction-card')

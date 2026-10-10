@@ -16,6 +16,8 @@ from test_heavens_incidents import local, quiet, positioned
 from test_heavens_m1 import issue
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-all-worlds-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -40,7 +42,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}', initial.id)
-                    page.locator('[data-panel-target=heavens]').tap()
+                    navigation_locator(page,'[data-panel-target=heavens]').tap()
                     before = engine.store._path(initial.id).read_bytes()
                     for theme in 'abdf':
                         page.set_viewport_size({'width':393,'height':852})

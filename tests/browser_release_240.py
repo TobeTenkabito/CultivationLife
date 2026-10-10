@@ -13,6 +13,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/release-240-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -58,7 +60,7 @@ def main():
                             page.wait_for_function('game && !busy && game.faction.name === "青玉宗"')
                             assert '筑基中期' in page.locator('#divine-sense').text_content()
                             assert page.evaluate('game.faction.join_age === game.player.age')
-                            page.locator('[data-panel-target=faction]').click()
+                            navigation_locator(page,'[data-panel-target=faction]').click()
                             box = page.locator('[data-organization=sect]')
                             box.locator(':scope > summary').click()
                             box.get_by_label('府库注资金额').fill('100000')

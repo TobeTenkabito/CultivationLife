@@ -17,6 +17,8 @@ from cultivation_life.rules import add_item
 from android_css import compile_css
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         engine=GameEngine(ROOT,Path(directory))
@@ -42,7 +44,7 @@ def main():
                     page.add_style_tag(content=compile_css((ROOT/'android/app/src/main/mobile/mobile.css').read_text(encoding='utf-8')))
                     page.evaluate('document.fonts.ready')
                     page.evaluate('async id=>{await loadGame(id);render(game);}',game_id)
-                    page.locator('[data-panel-target="merchant"]').click()
+                    navigation_locator(page,'[data-panel-target="merchant"]').click()
                     page.locator('.merchant-debug-hq').first.click()
                     page.wait_for_function('game.merchant_system.membership?.rank===2')
                     assert '总部 特使' in page.locator('.merchant-membership').text_content()

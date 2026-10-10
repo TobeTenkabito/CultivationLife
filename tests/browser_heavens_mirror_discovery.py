@@ -17,6 +17,8 @@ from test_heavens_autonomy import annual
 from test_heavens_mirror_discovery import undiscovered
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-mirror-discovery-browser'
     output.mkdir(parents=True,exist_ok=True)
@@ -50,7 +52,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     assert '访古客' not in page.locator('#heavens-content').inner_text()
                     assert not page.evaluate('game.heavens.mirror.known')
                     assert engine.store.load(key).heavens_state['runtime']['mirror']['capacity_pending']
@@ -96,7 +98,7 @@ def main():
                         affinity=engine.store.load(key).world_npcs[identity].affinity
                         page.locator('#npc-contacts [data-contact-action=improve]').click()
                         page.wait_for_function('args=>!busy && game.world_npcs.find(n=>n.id===args[0]).affinity>args[1]',arg=[identity,affinity])
-                        page.locator('[data-panel-target=heavens]').click()
+                        navigation_locator(page,'[data-panel-target=heavens]').click()
                         visits+=1
                         assert visits<=5
                     while engine.store.load(key).heavens_state['runtime']['mirror']['survey']['phase']=='studying':
@@ -106,7 +108,7 @@ def main():
                     page.reload()
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
-                    if not page.locator('#heavens-card').is_visible():page.locator('[data-panel-target=heavens]').click()
+                    if not page.locator('#heavens-card').is_visible():navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='机关',exact=True).click()
                     act('低耗试探',2)
                     assert page.locator('#heavens-detail-body').count()==1

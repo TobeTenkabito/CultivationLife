@@ -16,6 +16,8 @@ from cultivation_life.rules import add_item
 from cultivation_life.system.crafting_system import make_crafting_material_instance
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         engine = GameEngine(ROOT, Path(directory))
@@ -35,7 +37,7 @@ def main():
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(f"http://127.0.0.1:{httpd.server_port}")
                 page.evaluate("async id => { await loadGame(id); render(game); }", game_id)
-                page.locator('[data-panel-target="exchange"]').click()
+                navigation_locator(page,'[data-panel-target="exchange"]').click()
                 assert "2 个时间单位" in page.locator("#exchange-description").text_content(), (page.locator("#exchange-description").text_content(), errors, page.evaluate("game.exchange_system"))
                 page.locator("#exchange-toggle").click()
                 engine._open_exchange(game, random.Random(3))
@@ -47,7 +49,7 @@ def main():
                 add_item(game.player, "spirit_stone", 1000000)
                 engine.store.save(game)
                 page.evaluate("async id => { await loadGame(id); render(game); }", game_id)
-                page.locator('[data-panel-target="exchange"]').click()
+                navigation_locator(page,'[data-panel-target="exchange"]').click()
                 page.locator("#exchange-content").get_by_role("button", name="青笠客", exact=True).click()
                 page.wait_for_function("!document.body.classList.contains('busy')")
                 first = page.locator("#exchange-content section").first
@@ -63,7 +65,7 @@ def main():
                 engine.store.save(game)
                 engine.search_black_market(game_id, "阵法材料")
                 page.evaluate("async id => { await loadGame(id); render(game); }", game_id)
-                page.locator('[data-panel-target="auction"]').click()
+                navigation_locator(page,'[data-panel-target="auction"]').click()
                 first = page.locator("#black-market-results .auction-lot").first
                 first.locator('input[type="number"]').fill("3")
                 first.get_by_role("button").click()
@@ -71,7 +73,7 @@ def main():
                 assert len(engine.store.load(game_id).player.formation_materials) == 3
                 engine.natal_artifact_action(game_id, "bind", "starfall_blade")
                 page.evaluate("async id => { await loadGame(id); render(game); }", game_id)
-                page.locator('[data-panel-target="natal-artifact"]').click()
+                navigation_locator(page,'[data-panel-target="natal-artifact"]').click()
                 page.get_by_role("button", name="移除本命 · 下次突破 −10%").click()
                 page.locator("#game-confirm-accept").click()
                 page.wait_for_function("!document.body.classList.contains('busy')")

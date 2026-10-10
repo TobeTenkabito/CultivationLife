@@ -16,6 +16,8 @@ from cultivation_life.rules import add_item
 from cultivation_life.system.crafting_system import make_crafting_material_instance
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as directory:
         engine = GameEngine(ROOT, Path(directory))
@@ -39,7 +41,7 @@ def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.evaluate('async id => { await loadGame(id); render(game); }', game_id)
-                page.locator('[data-panel-target="merchant"]').click()
+                navigation_locator(page,'[data-panel-target="merchant"]').click()
                 assert page.locator('.merchant-alliance').count() == 3
                 page.locator('.merchant-alliance').first.get_by_role('button', name='加入商盟', exact=True).click()
                 page.wait_for_function('!!game.merchant_system.membership')

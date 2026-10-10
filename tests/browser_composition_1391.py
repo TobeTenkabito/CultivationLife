@@ -15,6 +15,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'design/release-v1.39.1-comparison'
     output.mkdir(exist_ok=True)
@@ -88,7 +90,7 @@ def main():
                     assert pending.value.post_data_json['years']==2
                     page.wait_for_function('!busy && game.player.age>'+str(age))
                     page.emulate_media(reduced_motion='no-preference')
-                    page.locator('[data-panel-target=merchant]').click()
+                    navigation_locator(page,'[data-panel-target=merchant]').click()
                     assert page.locator('#merchant-card').evaluate("n=>getComputedStyle(n,'::after').display")=='block'
                     assert page.locator('#merchant-card').evaluate("n=>getComputedStyle(n,'::after').animationName")=='book-turn'
                     page.emulate_media(reduced_motion='reduce')

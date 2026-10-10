@@ -15,6 +15,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, max_hp, max_mp
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/heavens-m1-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -43,7 +45,7 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='诸界',exact=True).click()
                     page.get_by_role('button',name='查看法则天海 · 潮汐回响',exact=True).click()
                     before = engine.store._path(key).read_bytes()

@@ -18,6 +18,8 @@ class Quiet(server.Handler):
         pass
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as folder:
         server.PERSISTENCE_ROOT = Path(folder)
@@ -35,7 +37,7 @@ def main():
                 page.evaluate("async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'本相功业',preset_id:'nether_upper',monster_species_id:'serpent',seed:270})});await loadGame(g.id);}")
                 page.wait_for_function('game && !busy')
                 game_id = page.evaluate('game.id')
-                page.locator('[data-panel-target="upper-voisinage"]').click()
+                navigation_locator(page,'[data-panel-target="upper-voisinage"]').click()
                 confirm = page.locator('[data-true-form] button').first
                 confirm.click()
                 page.wait_for_function('!busy && !!game.upper_voisinages.true_form.blueprint')

@@ -17,6 +17,8 @@ from cultivation_life.system.heavens.incident_definitions import INCIDENTS
 from cultivation_life.system.heavens.intelligence import acquire_merchant_reports
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output=ROOT/'build/heavens-knowledge-browser';output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as folder:
@@ -43,7 +45,7 @@ def main():
                     assert page.locator('[data-theme-choice=c],[data-theme-choice=e]').count()==0
                     names=page.locator('[data-theme-picker=dialog] b').all_text_contents()
                     assert names==['松烟书院','月下观星','丹砂金阙','竹简纪年']
-                    page.locator('[data-panel-target=heavens]').tap()
+                    navigation_locator(page,'[data-panel-target=heavens]').tap()
                     assert page.locator('#heavens-content input[type=checkbox]').count()==0
                     assert page.locator('#heavens-content').get_by_text('偏好',exact=True).count()==0
                     view=page.evaluate('game.heavens')
@@ -54,7 +56,7 @@ def main():
                     assert '小周天' in page.locator('.heavens-incident-document').inner_text()
                     page.screenshot(path=str(output/'human-omen.png'))
                     page.locator('#heavens-toggle').tap()
-                    page.locator('[data-panel-target=settings]').tap()
+                    navigation_locator(page,'[data-panel-target=settings]').tap()
                     row=page.get_by_label('显示诸天机会通知',exact=True)
                     before=engine.store.load(initial.id).player.age
                     row.scroll_into_view_if_needed();row.uncheck()

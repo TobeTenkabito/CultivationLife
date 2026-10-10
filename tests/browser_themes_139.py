@@ -13,6 +13,8 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     with tempfile.TemporaryDirectory() as folder:
         root = Path(folder)
@@ -71,7 +73,7 @@ def main():
                         page.set_viewport_size({'width':1440,'height':1050})
                         page.wait_for_timeout(300)
                     # A pending form keeps its exact node and field values during theme changes.
-                    page.locator('[data-panel-target=merchant]').click()
+                    navigation_locator(page,'[data-panel-target=merchant]').click()
                     panel=page.locator('#merchant-card')
                     page.evaluate("window.__merchantNode=document.querySelector('#merchant-card')")
                     page.locator('#theme-open').click()

@@ -17,6 +17,8 @@ from cultivation_life.system.heavens.definitions import CONTACT_SITES, VISIT_DES
 from cultivation_life.system.heavens.state import create_echo, get_echo
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT / 'build/heavens-missions-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -63,7 +65,7 @@ def main():
                     for index,(key,site) in enumerate(zip(ids,CONTACT_SITES)):
                         page.evaluate('async id=>{await loadGame(id)}', key)
                         if not page.locator('#heavens-card').is_visible():
-                            page.locator('[data-panel-target=heavens]').click()
+                            navigation_locator(page,'[data-panel-target=heavens]').click()
                         page.get_by_role('tab',name='诸界',exact=True).click()
                         page.get_by_role('button',name='查看'+site.name,exact=True).click()
                         page.get_by_role('tab',name='同道',exact=True).click()
@@ -101,7 +103,7 @@ def main():
                         page.wait_for_function('window.GameThemes && configData')
                         page.evaluate('async id=>{await loadGame(id)}',key)
                         if not page.locator('#heavens-card').is_visible():
-                            page.locator('[data-panel-target=heavens]').click()
+                            navigation_locator(page,'[data-panel-target=heavens]').click()
                         page.get_by_role('tab',name='行程',exact=True).click()
                         page.get_by_role('tab',name='同道',exact=True).click()
                         page.get_by_role('button',name='查看'+site.visitor_name,exact=True).click()

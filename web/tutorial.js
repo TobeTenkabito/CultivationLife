@@ -71,6 +71,8 @@
   function stop(){root.hidden=true;focus=null;currentKey='';observer.disconnect();}
   async function act(action,extra={}){if(working||!send)return;working=true;draw();try{await send({action,step:data?.tutorial.guide.step,...extra});}finally{working=false;draw();}}
   function context(step){
+    const entry=document.querySelector(step.target)?.dataset.panelTarget;
+    if(entry)window.GameNavigation?.reveal(entry);
     if(data?.tutorial.guide.step==='handbook')resetHandbookFilter();
     if(step.context==='details'){if(!$('#player-details-dialog').open)$('#player-details-dialog').showModal();}
     else if(['living','daily'].includes(step.context))$(`#tab-${step.context}`).click();

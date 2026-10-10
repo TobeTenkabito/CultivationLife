@@ -15,6 +15,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy import state, caravans
 
 
+from scripts.browser_navigation import navigation_locator
+
 def prepare(engine):
     game=engine._load(engine.create_game('商路经营','supreme_metal','dao',213,preset_id='core')['id'])
     alliance=game.merchant_state['worlds']['human'][0]
@@ -54,7 +56,7 @@ def main():
                             page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',gid)
-                            page.locator('[data-panel-target=merchant]').click()
+                            navigation_locator(page,'[data-panel-target=merchant]').click()
                             group=page.locator('.merchant-alliance').first
                             group.locator('.merchant-caravans summary').click()
                             assert group.locator('.caravan-row').count()>=3
@@ -71,7 +73,7 @@ def main():
                             assert page.locator('#merchant-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             group.locator('.merchant-caravans').scroll_into_view_if_needed()
                             page.screenshot(path=str(output/f'{theme}-{width}-merchant.png'))
-                            page.locator('[data-panel-target=map]').click()
+                            navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
                             page.locator('.economy-freight summary').click()
                             assert page.locator('.economy-freight').is_visible()

@@ -14,6 +14,8 @@ from cultivation_life import server
 from test_heavens_frontier import local, site, ready, arrive, load
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-m3-r1-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -34,7 +36,7 @@ def main():
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     snapshot = engine.store._path(key).read_bytes()
                     page.get_by_role('tab', name='战局', exact=True).click()
                     assert page.locator('#heavens-content .heavens-destination').count() == 1
@@ -64,7 +66,7 @@ def main():
                     page.reload()
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    if not page.locator('#heavens-card').is_visible(): page.locator('[data-panel-target=heavens]').click()
+                    if not page.locator('#heavens-card').is_visible(): navigation_locator(page,'[data-panel-target=heavens]').click()
                     snapshot = engine.store._path(key).read_bytes()
                     for theme in 'abdf':
                         page.locator('#theme-open').click()

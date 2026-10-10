@@ -18,6 +18,8 @@ from cultivation_life.system.possession_system import enter_host_body
 from test_ghost_phase_two import GhostPhaseTwoTests
 
 
+from scripts.browser_navigation import navigation_locator
+
 def verify_ghost_controls(page, engine):
     game = engine.store.load(engine.create_game('魂位验收', 'mutated_yin', 'ghost', 212)['id'])
     player = game.player
@@ -29,7 +31,7 @@ def verify_ghost_controls(page, engine):
     game.pending_event = engine._instantiate_event(engine.events_by_id['EVT_SECT_FIRST_WARNING_001'], game, random.Random(1))
     engine.store.save(game)
     page.evaluate('async id => loadGame(id)', game.id)
-    page.locator('[data-panel-target=ghost-soul]').click()
+    navigation_locator(page,'[data-panel-target=ghost-soul]').click()
     page.get_by_role('button', name='卸下', exact=True).click()
     page.wait_for_function('!busy && game.ghost_system.phase_two.slots.every(s => !s.soul_id)')
     assert engine.store.load(game.id).pending_event['id'] == 'EVT_SECT_FIRST_WARNING_001'
@@ -44,7 +46,7 @@ def verify_ghost_controls(page, engine):
                             souls=[GhostPhaseTwoTests._soul('parade-soul')])
     engine.store.save(game)
     page.evaluate('async id => loadGame(id)', game.id)
-    page.locator('[data-panel-target=ghost-parade]').click()
+    navigation_locator(page,'[data-panel-target=ghost-parade]').click()
     page.get_by_role('button', name='参悟夜行', exact=True).click()
     page.wait_for_function('!busy && game.ghost_system.phase_two.parade.participated')
     assert page.get_by_role('button', name='本次已参悟', exact=True).is_disabled()
@@ -58,7 +60,7 @@ def verify_ghost_controls(page, engine):
     enter_host_body(game.player, host)
     engine.store.save(game)
     page.evaluate('async id => loadGame(id)', game.id)
-    page.locator('[data-panel-target=ghost-soul]').click()
+    navigation_locator(page,'[data-panel-target=ghost-soul]').click()
     assert page.get_by_role('button', name='入魂位', exact=True).is_disabled()
     page.get_by_role('button', name='主动离舍', exact=True).click()
     page.wait_for_function("!busy && game.ghost_system.phase_two.state === 'free'")
@@ -108,7 +110,7 @@ def main():
                                 setattr(player, 'master' if kind == 'master' else 'dao_companion', target.to_dict())
                                 engine.store.save(game)
                                 page.evaluate('async id => loadGame(id)', game.id)
-                                page.locator('[data-panel-target=relationship]').click()
+                                navigation_locator(page,'[data-panel-target=relationship]').click()
                                 page.get_by_role('button', name=label, exact=True).click()
                                 page.wait_for_function("!busy && game.pending_event?.id === 'EVT_SECT_FIRST_WARNING_001'")
                                 # Return from the relationship window to the main event card.

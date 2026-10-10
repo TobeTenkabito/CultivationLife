@@ -16,6 +16,8 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, max_hp, max_mp
 
 
+from scripts.browser_navigation import navigation_locator
+
 def main():
     output = ROOT/'build/heavens-ruins-browser'
     output.mkdir(parents=True, exist_ok=True)
@@ -47,7 +49,7 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id=>{await loadGame(id)}', key)
-                    page.locator('[data-panel-target=heavens]').click()
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='异象',exact=True).click()
                     page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     area = page.locator('[data-ruins=field]')
@@ -65,7 +67,7 @@ def main():
                         page.wait_for_function('seq=>!busy && game.heavens.next_command_seq===seq', arg=seq)
                     propose('进入因果遗址')
                     commit()
-                    page.locator('[data-panel-target=map]').click()
+                    navigation_locator(page,'[data-panel-target=map]').click()
                     page.get_by_role('button', name='查看诸天机关与返程', exact=True).wait_for()
                     assert '回潮阵室' in page.locator('#spatial-panel').inner_text()
                     page.get_by_role('button', name='查看诸天机关与返程', exact=True).click()
@@ -121,7 +123,7 @@ def main():
                     key = create(5)
                     page.evaluate('async id=>{await loadGame(id)}', key)
                     if not page.locator('#heavens-card').is_visible():
-                        page.locator('[data-panel-target=heavens]').click()
+                        navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='异象',exact=True).click()
                     page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     for label in ('进入因果遗址', '观察阵纹', '查证两端关联'):

@@ -17,6 +17,8 @@ from cultivation_life.system.economy.ledger import transfer_value
 from browser_caravan_economy import prepare as prepare_caravans
 
 
+from scripts.browser_navigation import navigation_locator
+
 def prepare(engine):
     gid=prepare_caravans(engine);game=engine._load(gid)
     game.player.realm_index=4;game.player.faction_id='tianjian'
@@ -53,7 +55,7 @@ def main():
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',gid)
-                            if 'panel-open' not in page.locator('#war-card').get_attribute('class'):page.locator('[data-panel-target=war]').click()
+                            if 'panel-open' not in page.locator('#war-card').get_attribute('class'):navigation_locator(page,'[data-panel-target=war]').click()
                             card=page.locator('.war-card').first
                             page.locator('.war-supply-card').first.wait_for(state='visible')
                             assert '敌情未明' in card.inner_text(), (errors,card.inner_text())
@@ -68,7 +70,7 @@ def main():
                             assert page.locator('[data-war-strategy=scout]').first.is_disabled()
                             assert page.locator('#war-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.screenshot(path=str(output/f'{theme}-{width}-war.png'))
-                            page.locator('[data-panel-target=faction]').click()
+                            navigation_locator(page,'[data-panel-target=faction]').click()
                             box=page.locator('#faction-card .organization-depot');box.locator('summary').click()
                             box.get_by_role('button',name='申请一件').first.click();page.wait_for_function('!busy')
                             if box.get_attribute('open') is None:box.locator('summary').click()
@@ -87,7 +89,7 @@ def main():
                             page.screenshot(path=str(output/f'{theme}-{width}-depot.png'))
                             g=engine._load(gid);g.player.location_id=g.merchant_state['worlds']['human'][0]['hq'];engine.store.save(g)
                             page.evaluate('async id=>loadGame(id)',gid)
-                            page.locator('[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
+                            navigation_locator(page,'[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
                             assert page.locator('.economy-good[data-supply]').count()>0
                             atlas=page.locator('.caravan-atlas')
                             assert atlas.count()==1
@@ -116,7 +118,7 @@ def main():
                             assert engine.store.load(cid).player.immortal_conversion_stage==0
                             page.locator('#event-choices button').first.click()
                             page.wait_for_function('!busy && !game.pending_event')
-                            page.locator('[data-panel-target=immortal-conversion]').click()
+                            navigation_locator(page,'[data-panel-target=immortal-conversion]').click()
                             page.get_by_role('button',name='推进下一阶段',exact=True).click()
                             page.wait_for_function('!busy && game.player.immortal_conversion_stage===1')
                             assert page.get_by_role('button',name='推进下一阶段',exact=True).is_disabled()
@@ -126,7 +128,7 @@ def main():
                             g=engine._load(aid);g.pending_event=None;g.active_trial=None
                             g.player.asura_cultivation['conversion']=0;g.player.opportunity=100;engine.store.save(g)
                             page.evaluate('async id=>loadGame(id)',aid)
-                            page.locator('[data-panel-target=asura-conversion]').click()
+                            navigation_locator(page,'[data-panel-target=asura-conversion]').click()
                             page.locator('[data-asura-action=convert]').click()
                             page.wait_for_function('!busy && game.asura.conversion===1')
                             assert page.locator('[data-asura-action=convert]').is_disabled()

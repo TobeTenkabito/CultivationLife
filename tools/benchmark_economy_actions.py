@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState
+from cultivation_life.version import BASE_GAME_VERSION
 
 OUTPUT = ROOT / 'build/economy-performance'
 SEEDS = (315, 7701, 9003)
@@ -52,6 +53,10 @@ def benchmark(phase, runs=3, profile=False):
             else:
                 original = GameState.from_dict(json.loads(before_path.read_text(encoding='utf8')))
             expected = None if phase == 'baseline' else json.loads(expected_path.read_text(encoding='utf8'))
+            if expected is not None:
+                # Saving intentionally stamps the current release. Keep every
+                # simulation field; compare this metadata to its required value.
+                expected['last_saved_with_game_version'] = BASE_GAME_VERSION
             samples = []
             for repeat in range(runs + int(profile)):
                 engine.store.save(GameState.from_dict(original.to_dict()))
@@ -73,6 +78,7 @@ def benchmark(phase, runs=3, profile=False):
                 elapsed = (time.perf_counter() - start) * 1000
                 assert final.player.age - original.player.age == 100
                 actual = normalize(final)
+                assert actual['last_saved_with_game_version'] == BASE_GAME_VERSION
                 if expected is None:
                     expected = actual
                     expected_path.write_text(json.dumps(actual, ensure_ascii=False), encoding='utf8')
@@ -89,6 +95,8 @@ def benchmark(phase, runs=3, profile=False):
             print(json.dumps(row), flush=True)
     result = dict(phase=phase, runs=runs, measurements=measurements,
                   median_ms=round(statistics.median(r['median_ms'] for r in measurements), 3),
+                  saved_with_version_asserted=BASE_GAME_VERSION,
+                  state_comparison='All fields compared; wall-clock updated_at excluded; last_saved_with_game_version required to equal the current release.',
                   scope='Real controller + annual simulation + save/load; Guixu interruption disabled, fresh UUIDs reproducible; simulation RNG unchanged.')
     if phase != 'baseline':
         baseline = json.loads((OUTPUT / 'baseline.json').read_text(encoding='utf8'))
