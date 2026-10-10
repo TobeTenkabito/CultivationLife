@@ -139,6 +139,17 @@ def can_manage(game, entity):
                 or 'player' in row.get('positions', {}).values())
 
 
+def contribution_cost(good,quantity=1):
+    return max(1,ceil(good['tier']*.75))*quantity
+
+
+def refund_contribution(game,entity,request):
+    reserved=request.get('contribution_reserved',0)
+    if reserved and game.player.faction_id==entity.id and game.player.faction_join_age==request.get('join_age'):
+        game.player.faction_contribution+=reserved
+    request['contribution_reserved']=0
+
+
 def approve(game, entity, request, approver):
     row = ensure(game, entity)
     if request['status'] != 'pending' or game.diplomacy_unit < request['ready_unit']:
@@ -152,6 +163,8 @@ def approve(game, entity, request, approver):
     if request['status'] == 'approved':
         row['stock'][key] -= qty
         request['reserved'] = qty  # Unique escrow; neither stock nor war requisition may reuse it.
+    else:
+        refund_contribution(game,entity,request)
     record(row, game, f"申请 {request['id']}：{'批准并留存待领' if request['status']=='approved' else '库存不足，驳回'}")
 
 
@@ -213,10 +226,14 @@ def command(game, maps, payload):
             raise ValueError('此物资超出当前修为可申领品阶')
         if sum(r['status'] in {'pending','approved'} for r in row['requests']) >= 5:
             raise ValueError('最多保留五份未完成申请')
+        cost=contribution_cost(good,qty) if entity.kind=='sect' else 0
+        if p.faction_contribution<cost: raise ValueError(f'宗门贡献不足，本次申请需要{cost}点贡献')
+        p.faction_contribution-=cost
         row['sequence'] += 1
         row['requests'] = [r for r in row['requests'] if r['status'] in {'pending','approved'}] + [r for r in row['requests'] if r['status'] not in {'pending','approved'}][-14:]
         row['requests'].append(dict(id=str(row['sequence']), applicant='player', item=key, quantity=qty,
-            ready_unit=game.diplomacy_unit + 1, status='pending', approver=None, reserved=0))
+            ready_unit=game.diplomacy_unit + 1, status='pending', approver=None, reserved=0,
+            contribution_reserved=cost,join_age=p.faction_join_age))
         record(row, game, f"申请{good['name']} ×{qty}，一个行动单位后可审批")
     else:
         request = next((r for r in row['requests'] if r['id'] == payload.get('request_id')), None)
@@ -240,12 +257,13 @@ def command(game, maps, payload):
             else:
                 for _ in range(request['reserved']):
                     add_technique_copy(p, copy.deepcopy(TECHNIQUE_CATALOG[good['id']]))
-            request.update(status='collected', reserved=0)
+            request.update(status='collected', reserved=0,contribution_reserved=0)
             record(row, game, f"领取{good['name']} ×{request['quantity']}")
         elif action == 'depot_cancel':
             if request['status'] not in {'pending','approved'}:
                 raise ValueError('该申请已经结案')
             row['stock'][request['item']] = row['stock'].get(request['item'], 0) + request['reserved']
+            refund_contribution(game,entity,request)
             request.update(status='cancelled', reserved=0)
             record(row, game, '取消申请，已预留实物归还府库')
         else:
@@ -262,7 +280,9 @@ def public(game, entity):
         location=entity.location_id, local=game.player.location_id == entity.location_id,
         can_manage=can_manage(game, entity), balance=int(game.intrigue_state.get('factions', {}).get(f'{owner_kind(game,entity)}:{entity.id}', {}).get('resources', 0)),
         value=worth(game, entity), unit=game.diplomacy_unit,
-        stock=[dict(key=k, quantity=n, value=unit_value(game, row, k), requestable=offers[k]['tier']<=game.player.realm_index+1, **offers[k]) for k,n in stock.items() if n and k in offers],
+        contribution=game.player.faction_contribution if entity.kind=='sect' else None,
+        stock=[dict(key=k, quantity=n, value=unit_value(game, row, k), contribution_cost=contribution_cost(offers[k]) if entity.kind=='sect' else 0,
+            requestable=offers[k]['tier']<=game.player.realm_index+1 and (entity.kind!='sect' or game.player.faction_contribution>=contribution_cost(offers[k])), **offers[k]) for k,n in stock.items() if n and k in offers],
         offers=[dict(key=k, **v) for k,v in offers.items()][:128],
         seniors=[dict(id=n.id, name=n.name) for n in seniors(game, entity)],
         requests=copy.deepcopy(row['requests']) if row else [], history=list(row['history']) if row else [])

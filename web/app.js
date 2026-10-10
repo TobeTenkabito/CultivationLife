@@ -1647,6 +1647,7 @@ function renderFaction(faction) {
   window.renderOrganizationFinance?.(summary, faction.finance);
   window.renderOrganizationBusiness?.(summary, 'sect', faction, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationDepot?.render(summary, faction.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
+  window.OrganizationHeritage?.render(summary, faction.heritage, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if (faction.can_leave) {
     const leave = document.createElement('button'); leave.className = 'relationship-exit'; leave.textContent = '退出宗门';
     leave.onclick = () => mutate(`/api/games/${game.id}/leave-faction`, {}); summary.appendChild(leave);
@@ -1999,6 +2000,7 @@ function renderFamily(family, governance) {
   window.FamilyPanel?.render(content, family, payload => mutate(`/api/games/${game.id}/family-action`, payload));
   window.renderOrganizationBusiness?.(content, 'family', family, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationDepot?.render(content, family?.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
+  window.OrganizationHeritage?.render(content, family?.heritage, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if ((!family?.exists || family?.extinct) && family?.can_found) {
     content.appendChild(namedCreationForm('建立修仙家族', '家族名号', '开枝立族', name => mutate(`/api/games/${game.id}/create-family`, {name})));
   }
@@ -2595,6 +2597,8 @@ function renderGhostPhaseTwo(system) {
 function renderExchange(system) {
   const card=$('#exchange-card'),dock=document.querySelector('[data-panel-target="exchange"]');
   card.classList.toggle('hidden',!system.available);dock.classList.toggle('hidden',!system.available);
+  dock.classList.toggle('notice',!!system.available);
+  dock.dataset.activityState=system.available?(system.status==='scheduled'?`${system.actions_until_open}个时间单位后开幕`:`正在举行 · 剩余${system.remaining}个时间单位`):'';
   if(!system.available){window.UtilityPanels?.close('exchange');return;}
   dock.querySelector('small').textContent=system.status==='scheduled'?`${system.actions_until_open}时后`:'交换会';
   dock.title=`${system.location_name} · 匿名交换会`;
@@ -2626,6 +2630,18 @@ function renderMap(map, auction) {
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
   const tp=map.teleport;
+  for(const plan of tp?.construction||[]){
+    const box=document.createElement('details');box.className='teleport-controls';
+    const heading=document.createElement('summary');heading.textContent=`建立当地传送阵 · ${plan.owner_name}`;box.append(heading);
+    const description=document.createElement('p');description.textContent=`府库余额 ${number(plan.balance)} 灵石；施工 ${number(plan.fee)} 灵石，含当地补购预计实付 ${number(plan.total)} 灵石。须持控制权；建阵不开放跨界或境界禁制。`;box.append(description);
+    const supplies=document.createElement('p');supplies.textContent=plan.materials.map(r=>`${r.name} ×${r.quantity}（当地府库${r.stored}，补购${r.purchase}）`).join('；');box.append(supplies);
+    if(!plan.stock_available){const hint=document.createElement('p');hint.textContent='当地资材不足，请先运入或等待当地补货。';box.append(hint);}
+    const build=document.createElement('button');build.type='button';build.className='map-teleport';build.dataset.teleportBuild=plan.owner_id;
+    build.dataset.unavailable=plan.can_build?'0':'1';build.disabled=!plan.can_build||busy||!!game.pending_event||!game.player.alive;
+    build.textContent='支付势力府库与当地资材建阵';
+    build.onclick=()=>openGameConfirm({title:'建立当地传送阵',body:`由${plan.owner_name}支付预计 ${number(plan.total)} 灵石并消耗所列资材。费用以提交时当地账目为准，确认建阵？`,confirmText:'确认建阵',onConfirm:()=>mutate(`/api/games/${game.id}/teleport-action`,{action:'build',owner_id:plan.owner_id})});
+    box.append(build);list.append(box);
+  }
   if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。先选通行方式，再选择目的地。`;box.append(label);
     const action=(text,payload,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.className='map-teleport';b.dataset.unavailable=disabled?'1':'0';b.disabled=disabled||busy||!!game.pending_event||!game.player.alive;b.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,payload);box.append(b);};
     action(tp.origin.licensed?'已取得许可':'申请通行许可',{action:'request'},tp.origin.licensed||!tp.can_request);
@@ -2748,6 +2764,8 @@ function renderAuction(system) {
   const dock = document.querySelector("[data-panel-target='auction']");
   card.classList.toggle('hidden', !system.available);
   dock?.classList.toggle('hidden', !system.available);
+  dock?.classList.toggle('notice', !!system.available);
+  if(dock) dock.dataset.activityState=system.available?(system.status==='scheduled'?`${system.actions_until_open}个时间单位后开幕`:system.status==='open'?'正在举行': '散场黑市 · 推进岁月后关闭'):'';
   if (!system.available) return;
   const statusNames = {scheduled:'拍卖会预告', open:'拍卖会', black_market:'散场黑市'};
   $('#auction-title').textContent = `${system.location_name}·${statusNames[system.status] || '交易集会'}`;

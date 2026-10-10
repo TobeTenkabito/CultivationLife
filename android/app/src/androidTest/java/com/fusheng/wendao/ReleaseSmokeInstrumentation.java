@@ -230,6 +230,39 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(phase.equals("economic-force")) {
                 python(assetText("economic-force-272.py"));
                 result.putString("economic_force_scope","1666 packaged catalog entries; fresh and stale schema-10 equipment actual damage against golden light in all eleven worlds");
+            } else if(phase.equals("organizations")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'势力原生验收',spirit_root:'supreme_earth',path:'dao',seed:290,custom_start:{world:'human',realm_index:4,sect:'new',sect_name:'验收宗'}})});return g.id;})()");
+                    python(assetText("organizations-290.py")+"\nfrom cultivation_life import server\nprepare(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();UtilityPanels.close('faction');true");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=faction]");tapSelector("#faction-card .organization-heritage > summary");
+                    tapSelector("[data-heritage-action=heritage_learn]");waitForJs("!busy && game.faction.heritage.books[0].learned","Native free study");
+                    tapSelector("#faction-card .organization-heritage > summary");tapSelector("[data-heritage-action=heritage_copy]");waitForJs("!busy","Native paid jade slip");
+                    tapSelector("#faction-card .organization-heritage > summary");js("document.querySelector('.organization-heritage select').value='TECH_HUMAN_HERITAGE_2';true");
+                    tapSelector("[data-heritage-action=heritage_add]");waitForJs("!busy && game.faction.heritage.books.length===2","Native inheritance donation");
+                    tapSelector("#faction-card .organization-depot > summary");tapSelector("[data-depot-action=depot_request]");waitForJs("!busy && game.faction.contribution===9","Native contribution reservation");
+                    tapSelector("#faction-card .organization-depot > summary");tapSelector("[data-depot-action=depot_cancel]");waitForJs("!busy && game.faction.contribution===10","Native contribution refund");
+                    js("UtilityPanels.close('map');true");tapSelector("[data-panel-target=map]");tapSelector(".teleport-controls > summary");tapSelector("[data-teleport-build]");tapSelector("#game-confirm-accept");waitForJs("!busy && !!game.map.teleport.origin","Native owner-funded array construction");
+                    capture("organizations-array-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python(assetText("organizations-290.py")+"\nfrom cultivation_life import server\nactivities(server.ENGINE,"+JSONObject.quote(id)+",'scheduled')");async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("document.querySelector('[data-navigation-category=economy]').classList.contains('navigation-notice')")),"Activity category reminder");
+                    tapSelector("[data-navigation-category=common]");check(Boolean.TRUE.equals(js("document.querySelectorAll('#navigation-current-events [data-navigation-shortcut]').length===2")),"Automatic common activities");
+                    tapSelector("#navigation-current-events [data-navigation-shortcut=auction]");check(Boolean.TRUE.equals(js("document.querySelector('#auction-title').textContent.includes('预告')")),"Auction notice real click");
+                    python(assetText("organizations-290.py")+"\nfrom cultivation_life import server\nactivities(server.ENGINE,"+JSONObject.quote(id)+",'open')");async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("[data-navigation-category=common]");tapSelector("#navigation-current-events [data-navigation-shortcut=exchange]");check(Boolean.TRUE.equals(js("document.querySelector('#exchange-description').textContent.includes('剩余')")),"Exchange event real click");
+                    python(assetText("organizations-290.py")+"\nfrom cultivation_life import server\nactivities(server.ENGINE,"+JSONObject.quote(id)+",'closed')\nclan(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("[data-navigation-category=common]");check(Boolean.TRUE.equals(js("!document.querySelector('#navigation-current-events')")),"Expired shortcuts disappear");tapSelector("#navigation-close");
+                    js("UtilityPanels.close('family');true");tapSelector("[data-panel-target=family]");tapSelector("[data-family*='join']:not(:disabled)");waitForJs("!busy && game.family.exists && game.family.player_member_type==='外姓修士'","Native outsider clan admission");
+                    python(assetText("organizations-290.py")+"\nfrom cultivation_life import server\nsucceed(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+                    enterNumericField("[data-family-name]","承宗更名","原生本家仙族");
+                    runOnMainSync(()->((android.view.inputmethod.InputMethodManager)activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(web.getWindowToken(),0));js("document.activeElement.blur();true");Thread.sleep(400);
+                    tapSelector("[data-family*='rename']");waitForJs("!busy && !game.family.can_rename","Native once-only clan rename");async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.family.player_member_type==='本家' && !document.querySelector('[data-family-name]') && document.documentElement.scrollWidth<=innerWidth+1")),"Succession and responsive persistence");
+                    capture("organizations-family-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python("from cultivation_life import server\ng=server.ENGINE._load("+JSONObject.quote(id)+")\nassert g.family.name=='原生本家仙族'\nassert g.economy_v2['teleport_arrays']\nassert any(i.technique_id=='TECH_HUMAN_HERITAGE_1' for i in g.player.inventory)");
+                }
+                result.putString("organizations_scope","Four themes, actual free learning, paid copy, decision donation, contribution refund, array confirmation, temporary activity lifecycle, outsider clan join, succession and one rename");
             } else if(phase.equals("navigation")) {
                 async("GameNavigation.ready");
                 if("landscape".equals(arguments.getString("orientation"))) check(Boolean.TRUE.equals(async("fetch('/api/ui-preferences').then(r=>r.json()).then(p=>p.navigation.pins.includes('spirit-voisinage'))")),"Navigation pin survives process restart and new server origin");
@@ -794,7 +827,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             } else if(phase.equals("war-logistics")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'军需验收',preset_id:'core',seed:419})});return g.id;})()");
-                    python("from cultivation_life import server\nfrom cultivation_life.system.economy import depot, organizations\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.faction_id='tianjian'\ng.player.location_id=g.sects['tianjian'].location_id\nfor identity in ('tianjian','wanmo'):\n x=g.sects[identity]\n organizations.register(g,'sect',identity,x.world)\n transfer_value(g,'background:human',depot.treasury(g,x),1000000,'原生军需验收')\ne._start_war(g,'sect','tianjian','wanmo',initiated_by_player=True)\nx=g.sects['tianjian']\nm=g.economy_v2['markets']['human:'+x.location_id]\nk=next(k for k,v in depot.catalog('human').items() if v['kind']=='item' and v['tier']<=5 and m['commodities'].get(v['id'],{}).get('stock',0)>=3)\ndepot.purchase(g,e.maps,x,k,3)\nfor n in depot.seniors(g,x):n.affinity=100\ne.store.save(g)");
+                    python("from cultivation_life import server\nfrom cultivation_life.system.economy import depot, organizations\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=4\ng.player.faction_id='tianjian'\ng.player.faction_contribution=10\ng.player.location_id=g.sects['tianjian'].location_id\nfor identity in ('tianjian','wanmo'):\n x=g.sects[identity]\n organizations.register(g,'sect',identity,x.world)\n transfer_value(g,'background:human',depot.treasury(g,x),1000000,'原生军需验收')\ne._start_war(g,'sect','tianjian','wanmo',initiated_by_player=True)\nx=g.sects['tianjian']\nm=g.economy_v2['markets']['human:'+x.location_id]\nk=next(k for k,v in depot.catalog('human').items() if v['kind']=='item' and v['tier']<=5 and m['commodities'].get(v['id'],{}).get('stock',0)>=3)\ndepot.purchase(g,e.maps,x,k,3)\nfor n in depot.seniors(g,x):n.affinity=100\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     if(Boolean.TRUE.equals(js("!document.querySelector('#war-card').classList.contains('panel-open')")))tapSelector("[data-panel-target=war]");

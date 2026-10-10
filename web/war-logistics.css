@@ -11,11 +11,11 @@
 .war-strategy small { color:var(--muted); line-height:1.7; }
 .war-strategy .war-action-reason { color:var(--red); }
 .war-actions.war-command-group { display:flex; gap:12px; flex-wrap:wrap; }
-.organization-depot { margin:16px 0; border:1px solid var(--line); border-radius:10px; padding:16px; }
-.organization-depot > summary { cursor:pointer; font-weight:700; color:var(--pine); }
+.organization-depot,.organization-heritage { margin:16px 0; border:1px solid var(--line); border-radius:10px; padding:16px; }
+.organization-depot > summary,.organization-heritage > summary { cursor:pointer; font-weight:700; color:var(--pine); }
 .depot-purchase { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; }
 .depot-purchase select { flex:2 1 180px; min-width:0; }
 .depot-purchase input { flex:0 1 80px; width:80px; min-width:0; }
 .depot-requests { display:grid; gap:12px; }
 .depot-request button,.depot-request select { margin:6px 8px 0 0; max-width:100%; }
-@media(max-width:600px) { .war-supply-grid,.war-strategy-grid { grid-template-columns:1fr; } .war-command-group,.organization-depot { padding:12px; } }
+@media(max-width:600px) { .war-supply-grid,.war-strategy-grid { grid-template-columns:1fr; } .war-command-group,.organization-depot,.organization-heritage { padding:12px; } }

@@ -5021,6 +5021,2202 @@
         }
       },
       "divine_sense_bonus": 3.0
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_1",
+      "name": "青岚养气诀",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 1,
+      "level": 1,
+      "opportunity_bonus": 0.086,
+      "hp_bonus": 0.07,
+      "mp_bonus": 0.08,
+      "combat_bonus": 13,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 0
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_2",
+      "name": "松风归元经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 2,
+      "level": 1,
+      "opportunity_bonus": 0.151,
+      "hp_bonus": 0.14,
+      "mp_bonus": 0.14,
+      "combat_bonus": 42,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 3
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_3",
+      "name": "紫府澄心录",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.216,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.19,
+      "combat_bonus": 99,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_4",
+      "name": "九霄会元真经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 4,
+      "level": 1,
+      "opportunity_bonus": 0.292,
+      "hp_bonus": 0.24,
+      "mp_bonus": 0.28,
+      "combat_bonus": 301,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 8
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_5",
+      "name": "流霞御剑诀",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.176,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.19,
+      "combat_bonus": 118,
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_6",
+      "name": "磐岳金身功",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 2,
+      "level": 1,
+      "opportunity_bonus": 0.08,
+      "hp_bonus": 0.24,
+      "mp_bonus": 0.06,
+      "combat_bonus": 75,
+      "karma_multiplier": 1.0,
+      "category": "body",
+      "body_breakthrough_bonus": 0.04,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 3
+        }
+      }
+    },
+    {
+      "id": "TECH_HUMAN_HERITAGE_7",
+      "name": "秋水照神篇",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.05,
+      "hp_bonus": 0.04,
+      "mp_bonus": 0.1,
+      "combat_bonus": 10,
+      "karma_multiplier": 1.0,
+      "category": "divine_sense",
+      "divine_sense_bonus": 0.6,
+      "growth_preference": "support",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_1",
+      "name": "赤砂炼息诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 1,
+      "level": 1,
+      "opportunity_bonus": 0.108,
+      "hp_bonus": 0.08,
+      "mp_bonus": 0.11,
+      "combat_bonus": 17,
+      "karma_multiplier": 1.05,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 0
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_2",
+      "name": "玄烬养煞经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 2,
+      "level": 1,
+      "opportunity_bonus": 0.194,
+      "hp_bonus": 0.2,
+      "mp_bonus": 0.08,
+      "combat_bonus": 49,
+      "karma_multiplier": 1.12,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 3
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_3",
+      "name": "血海归元录",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.238,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.14,
+      "combat_bonus": 73,
+      "karma_multiplier": 1.08,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_4",
+      "name": "无相镇魔典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 4,
+      "level": 1,
+      "opportunity_bonus": 0.335,
+      "hp_bonus": 0.35,
+      "mp_bonus": 0.24,
+      "combat_bonus": 2914,
+      "karma_multiplier": 1.12,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 8
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_5",
+      "name": "七杀断岳诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.194,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.14,
+      "combat_bonus": 87,
+      "karma_multiplier": 1.08,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_6",
+      "name": "黑曜铸骨功",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 2,
+      "level": 1,
+      "opportunity_bonus": 0.18,
+      "hp_bonus": 0.24,
+      "mp_bonus": 0.08,
+      "combat_bonus": 52,
+      "karma_multiplier": 1.12,
+      "growth_preference": "balanced",
+      "category": "body",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "body_breakthrough_bonus": 0.04,
+      "body_bonus_max_layer": 100,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 3
+        }
+      }
+    },
+    {
+      "id": "TECH_DEMON_HERITAGE_7",
+      "name": "烛阴摄念篇",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 3,
+      "level": 1,
+      "opportunity_bonus": 0.22,
+      "hp_bonus": 0.18,
+      "mp_bonus": 0.14,
+      "combat_bonus": 78,
+      "karma_multiplier": 1.08,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "divine_sense_bonus": 0.6,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 5
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_1",
+      "name": "清微纳虚经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.367,
+      "hp_bonus": 0.31,
+      "mp_bonus": 0.36,
+      "combat_bonus": 987,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 12
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_2",
+      "name": "玉衡归真录",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.756,
+      "hp_bonus": 0.5,
+      "mp_bonus": 0.5,
+      "combat_bonus": 4747,
+      "karma_multiplier": 1.0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_3",
+      "name": "万川合道典",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.702,
+      "hp_bonus": 0.62,
+      "mp_bonus": 0.68,
+      "combat_bonus": 131600,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_4",
+      "name": "太玄照世经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 0.918,
+      "hp_bonus": 0.82,
+      "mp_bonus": 0.9,
+      "combat_bonus": 846000,
+      "karma_multiplier": 1.0,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_5",
+      "name": "星河问剑诀",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.572,
+      "hp_bonus": 0.62,
+      "mp_bonus": 0.68,
+      "combat_bonus": 156800,
+      "karma_multiplier": 1.0,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_6",
+      "name": "玄岳不坏身",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.28,
+      "hp_bonus": 0.72,
+      "mp_bonus": 0.18,
+      "combat_bonus": 110000,
+      "karma_multiplier": 1.0,
+      "category": "body",
+      "body_breakthrough_bonus": 0.12,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_SPIRIT_HERITAGE_7",
+      "name": "太清观神篇",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.65,
+      "hp_bonus": 0.62,
+      "mp_bonus": 0.68,
+      "combat_bonus": 140000,
+      "karma_multiplier": 1.0,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "divine_sense_bonus": 1.4,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_1",
+      "name": "幽渊返元经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.464,
+      "hp_bonus": 0.39,
+      "mp_bonus": 0.47,
+      "combat_bonus": 13630,
+      "karma_multiplier": 1.14,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 12
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_2",
+      "name": "无相养魔录",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.616,
+      "hp_bonus": 0.54,
+      "mp_bonus": 0.61,
+      "combat_bonus": 92120,
+      "karma_multiplier": 1.16,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_3",
+      "name": "九狱合煞典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.799,
+      "hp_bonus": 0.7,
+      "mp_bonus": 0.77,
+      "combat_bonus": 676800,
+      "karma_multiplier": 1.18,
+      "sources": {
+        "demon": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_4",
+      "name": "混元镇渊经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.015,
+      "hp_bonus": 0.92,
+      "mp_bonus": 0.96,
+      "combat_bonus": 4418000,
+      "karma_multiplier": 1.2,
+      "sources": {
+        "demon": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_5",
+      "name": "裂界斩魂诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.651,
+      "hp_bonus": 0.7,
+      "mp_bonus": 0.77,
+      "combat_bonus": 806400,
+      "karma_multiplier": 1.18,
+      "sources": {
+        "demon": 1.0
+      },
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_6",
+      "name": "玄煞不灭躯",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.57,
+      "hp_bonus": 0.72,
+      "mp_bonus": 0.61,
+      "combat_bonus": 98000,
+      "karma_multiplier": 1.16,
+      "growth_preference": "balanced",
+      "category": "body",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "body_breakthrough_bonus": 0.12,
+      "body_bonus_max_layer": 100,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_TRUE_DEMON_HERITAGE_7",
+      "name": "冥烛观心篇",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.74,
+      "hp_bonus": 0.7,
+      "mp_bonus": 0.77,
+      "combat_bonus": 720000,
+      "karma_multiplier": 1.18,
+      "sources": {
+        "demon": 1.0
+      },
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "divine_sense_bonus": 1.4,
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_1",
+      "name": "山海养元经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.497,
+      "hp_bonus": 0.56,
+      "mp_bonus": 0.45,
+      "combat_bonus": 14852,
+      "karma_multiplier": 1.0,
+      "required_body_training": 30,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 12
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_2",
+      "name": "万灵归祖录",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.648,
+      "hp_bonus": 0.76,
+      "mp_bonus": 0.5,
+      "combat_bonus": 110920,
+      "karma_multiplier": 1.0,
+      "required_body_training": 45,
+      "sources": {
+        "monster": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_3",
+      "name": "星斗融血典",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.853,
+      "hp_bonus": 0.92,
+      "mp_bonus": 0.74,
+      "combat_bonus": 808400,
+      "karma_multiplier": 1.0,
+      "required_body_training": 60,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_4",
+      "name": "太荒承天经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 1.102,
+      "hp_bonus": 1.3,
+      "mp_bonus": 0.91,
+      "combat_bonus": 5828000,
+      "karma_multiplier": 1.0,
+      "required_body_training": 80,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_5",
+      "name": "啸岳破空诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.695,
+      "hp_bonus": 0.92,
+      "mp_bonus": 0.74,
+      "combat_bonus": 963200,
+      "karma_multiplier": 1.0,
+      "required_body_training": 60,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_6",
+      "name": "盘山炼骨功",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.4,
+      "hp_bonus": 0.88,
+      "mp_bonus": 0.28,
+      "combat_bonus": 150000,
+      "karma_multiplier": 1.0,
+      "category": "body",
+      "body_breakthrough_bonus": 0.12,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_MONSTER_REALM_HERITAGE_7",
+      "name": "明心识灵篇",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.79,
+      "hp_bonus": 0.92,
+      "mp_bonus": 0.74,
+      "combat_bonus": 860000,
+      "karma_multiplier": 1.0,
+      "required_body_training": 60,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "divine_sense_bonus": 1.4,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_1",
+      "name": "幻月凝魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.464,
+      "hp_bonus": 0.34,
+      "mp_bonus": 0.52,
+      "combat_bonus": 12972,
+      "karma_multiplier": 0.94,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 12
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_2",
+      "name": "夜海归梦录",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.605,
+      "hp_bonus": 0.49,
+      "mp_bonus": 0.66,
+      "combat_bonus": 86480,
+      "karma_multiplier": 0.92,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_3",
+      "name": "空冥合魄典",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.778,
+      "hp_bonus": 0.63,
+      "mp_bonus": 0.82,
+      "combat_bonus": 639200,
+      "karma_multiplier": 0.9,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_4",
+      "name": "幽镜照世经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 0.994,
+      "hp_bonus": 0.84,
+      "mp_bonus": 1.04,
+      "combat_bonus": 4136000,
+      "karma_multiplier": 0.88,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_5",
+      "name": "碎梦断影诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.634,
+      "hp_bonus": 0.63,
+      "mp_bonus": 0.82,
+      "combat_bonus": 761600,
+      "karma_multiplier": 0.9,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_6",
+      "name": "藏影凝身功",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.66,
+      "hp_bonus": 0.96,
+      "mp_bonus": 0.65,
+      "combat_bonus": 760000,
+      "karma_multiplier": 0.91,
+      "category": "body",
+      "body_breakthrough_bonus": 0.12,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_7",
+      "name": "照夜观心篇",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.39,
+      "hp_bonus": 0.28,
+      "mp_bonus": 0.58,
+      "combat_bonus": 12100,
+      "karma_multiplier": 0.93,
+      "category": "divine_sense",
+      "divine_sense_bonus": 1.4,
+      "growth_preference": "support",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_1",
+      "name": "黄泉养魂经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 5,
+      "level": 1,
+      "opportunity_bonus": 0.464,
+      "hp_bonus": 0.34,
+      "mp_bonus": 0.52,
+      "combat_bonus": 12972,
+      "karma_multiplier": 0.94,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 12
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_2",
+      "name": "九幽返真录",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.605,
+      "hp_bonus": 0.49,
+      "mp_bonus": 0.66,
+      "combat_bonus": 86480,
+      "karma_multiplier": 0.92,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_3",
+      "name": "冥河合魄典",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.778,
+      "hp_bonus": 0.63,
+      "mp_bonus": 0.82,
+      "combat_bonus": 639200,
+      "karma_multiplier": 0.9,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_4",
+      "name": "十殿镇狱经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 8,
+      "level": 1,
+      "opportunity_bonus": 0.994,
+      "hp_bonus": 0.84,
+      "mp_bonus": 1.04,
+      "combat_bonus": 4136000,
+      "karma_multiplier": 0.88,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 30
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_5",
+      "name": "断罪斩业诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.634,
+      "hp_bonus": 0.63,
+      "mp_bonus": 0.82,
+      "combat_bonus": 761600,
+      "karma_multiplier": 0.9,
+      "sources": {
+        "yin": 1.0
+      },
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_6",
+      "name": "狱火锻魂身",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 6,
+      "level": 1,
+      "opportunity_bonus": 0.66,
+      "hp_bonus": 0.96,
+      "mp_bonus": 0.65,
+      "combat_bonus": 760000,
+      "karma_multiplier": 0.91,
+      "category": "body",
+      "body_breakthrough_bonus": 0.12,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 17
+        }
+      }
+    },
+    {
+      "id": "TECH_HELL_HERITAGE_7",
+      "name": "净业照心篇",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 7,
+      "level": 1,
+      "opportunity_bonus": 0.39,
+      "hp_bonus": 0.28,
+      "mp_bonus": 0.58,
+      "combat_bonus": 12100,
+      "karma_multiplier": 0.93,
+      "category": "divine_sense",
+      "divine_sense_bonus": 1.4,
+      "growth_preference": "support",
+      "force_tier": 1,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 23
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_1",
+      "name": "太清引元仙经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.296,
+      "hp_bonus": 1.05,
+      "mp_bonus": 1.28,
+      "combat_bonus": 16920000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 32
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_2",
+      "name": "玉宸归一仙典",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 1.102,
+      "hp_bonus": 0.88,
+      "mp_bonus": 1.06,
+      "combat_bonus": 35720000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_3",
+      "name": "混元承天道经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 1.102,
+      "hp_bonus": 0.88,
+      "mp_bonus": 1.06,
+      "combat_bonus": 35720000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_4",
+      "name": "无极演道真经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 1.102,
+      "hp_bonus": 0.88,
+      "mp_bonus": 1.06,
+      "combat_bonus": 35720000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_5",
+      "name": "天衡诛邪剑经",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.898,
+      "hp_bonus": 0.88,
+      "mp_bonus": 1.06,
+      "combat_bonus": 42560000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_6",
+      "name": "琼华不坏仙躯",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.92,
+      "hp_bonus": 1.42,
+      "mp_bonus": 0.78,
+      "combat_bonus": 30000000,
+      "karma_multiplier": 1.0,
+      "category": "body",
+      "body_breakthrough_bonus": 0.2,
+      "body_bonus_max_layer": 100,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "balanced",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_CELESTIAL_HERITAGE_7",
+      "name": "玄天观神秘典",
+      "path": "dao",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.98,
+      "hp_bonus": 0.84,
+      "mp_bonus": 1.24,
+      "combat_bonus": 21000000,
+      "karma_multiplier": 1.0,
+      "category": "divine_sense",
+      "divine_sense_bonus": 2.2,
+      "requires_immortal_power": true,
+      "immortal_power_cost": 0.08,
+      "growth_preference": "support",
+      "force_tier": 2,
+      "sources": {
+        "spirit": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "spirit",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_1",
+      "name": "血曜养元经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.274,
+      "hp_bonus": 1.18,
+      "mp_bonus": 1.08,
+      "combat_bonus": 20680000,
+      "karma_multiplier": 0.78,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 32
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_2",
+      "name": "战魂归一典",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 1.21,
+      "hp_bonus": 1.26,
+      "mp_bonus": 1.24,
+      "combat_bonus": 39480000,
+      "karma_multiplier": 0.74,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_3",
+      "name": "万劫承天战经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.916,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 329000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_4",
+      "name": "无间演武真经",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.402,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 1974000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_5",
+      "name": "破狱斩天诀",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.376,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 392000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_6",
+      "name": "铁狱不灭战躯",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.96,
+      "hp_bonus": 1.62,
+      "mp_bonus": 0.86,
+      "combat_bonus": 50000000,
+      "karma_multiplier": 0.75,
+      "category": "body",
+      "body_breakthrough_bonus": 0.2,
+      "body_bonus_max_layer": 100,
+      "growth_preference": "balanced",
+      "force_tier": 2,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_ASURA_HERITAGE_7",
+      "name": "照煞观神篇",
+      "path": "demonic",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "sources": {
+        "demon": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "demon",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.2
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_1",
+      "name": "忘川凝元经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.102,
+      "hp_bonus": 1.3,
+      "mp_bonus": 0.91,
+      "combat_bonus": 5828000,
+      "karma_multiplier": 1.0,
+      "required_body_training": 80,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "force_tier": 2,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 32
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_2",
+      "name": "黄泉归一典",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 2.43,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 59220000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_3",
+      "name": "万灵承天祖经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.916,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 329000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_4",
+      "name": "太初演灵真经",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.402,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 1974000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_5",
+      "name": "九冥断界诀",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.376,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 392000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_6",
+      "name": "冥山不坏妖躯",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 2.1,
+      "mp_bonus": 0.85,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 36
+        }
+      },
+      "body_breakthrough_bonus": 0.2,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_NETHER_HERITAGE_7",
+      "name": "渡厄照神篇",
+      "path": "monster",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "sources": {
+        "monster": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "monster",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.2
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_1",
+      "name": "三生养元经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 9,
+      "level": 1,
+      "opportunity_bonus": 1.944,
+      "hp_bonus": 0.65,
+      "mp_bonus": 1.6,
+      "combat_bonus": 10528000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 32
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_2",
+      "name": "因果归一典",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 2.43,
+      "hp_bonus": 0.85,
+      "mp_bonus": 2.0,
+      "combat_bonus": 59220000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 36
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_3",
+      "name": "宿命承天道经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.916,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 329000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_4",
+      "name": "太始演劫真经",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 12,
+      "level": 1,
+      "opportunity_bonus": 3.402,
+      "hp_bonus": 1.25,
+      "mp_bonus": 2.8,
+      "combat_bonus": 1974000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "main",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 45
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_5",
+      "name": "断劫斩缘诀",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 2.376,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 392000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "combat",
+      "category": "spiritual",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      }
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_6",
+      "name": "莲台凝魄法身",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 10,
+      "level": 1,
+      "opportunity_bonus": 0.75,
+      "hp_bonus": 2.1,
+      "mp_bonus": 0.85,
+      "combat_bonus": 63000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "balanced",
+      "category": "body",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 36
+        }
+      },
+      "body_breakthrough_bonus": 0.2,
+      "body_bonus_max_layer": 100
+    },
+    {
+      "id": "TECH_REINCARNATION_HERITAGE_7",
+      "name": "前尘观神秘篇",
+      "path": "ghost",
+      "element": "neutral",
+      "grade": 11,
+      "level": 1,
+      "opportunity_bonus": 0.9,
+      "hp_bonus": 1.05,
+      "mp_bonus": 2.4,
+      "combat_bonus": 350000000,
+      "karma_multiplier": 1.0,
+      "requires_immortal_power": false,
+      "immortal_power_cost": 0,
+      "force_tier": 2,
+      "growth_preference": "support",
+      "category": "divine_sense",
+      "sources": {
+        "yin": 1.0
+      },
+      "combat_requirements": {
+        "source": {
+          "id": "yin",
+          "op": ">=",
+          "level": 40
+        }
+      },
+      "divine_sense_bonus": 2.2
     }
   ]
 }

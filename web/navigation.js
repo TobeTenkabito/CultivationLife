@@ -50,6 +50,13 @@
   }
   function renderCommon(){
     common.replaceChildren();shortcuts.length=0;
+    const activities=[...entries].filter(([,row])=>eligible(row)&&row.button.dataset.activityState);
+    if(activities.length){
+      const section=el('section'),list=el('div',null,'navigation-shortcuts');section.id='navigation-current-events';
+      section.append(el('h3','当前限时活动'));
+      for(const [id,row] of activities){const b=shortcut(id);b.append(el('small',row.button.dataset.activityState));list.append(b);}
+      section.append(list);common.append(section);
+    }
     for(const [label,ids] of [['常用入口',pins],['最近打开',recent.filter(x=>!pins.includes(x))]]){
       const visible=ids.filter(id=>eligible(entries.get(id)));
       if(!visible.length)continue;

@@ -22,10 +22,19 @@ def main():
     with tempfile.TemporaryDirectory(dir=ROOT/'build') as directory:
         server.PERSISTENCE_ROOT = Path(directory)
         engine = server.ENGINE = GameEngine(ROOT, Path(directory)/'saves')
-        made = engine.create_game('照尘·长卷验收', 'supreme_wood', 'buddhist', seed=1450)
-        game = engine.store.load(made['id']); game.pending_event = None
-        game.player.realm_index = 1; game.player.layer = 1
-        engine.store.save(game)
+        made = engine.create_game('照尘·长卷验收', 'supreme_wood', 'buddhist', seed=1450,
+            custom_start=dict(world='human',realm_index=4,sect='new',sect_name='长卷验收宗'))
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('organizations_fixture',ROOT/'tests/fixtures/organizations-290.py')
+        fixture=importlib.util.module_from_spec(spec);spec.loader.exec_module(fixture)
+        fixture.prepare(engine,made['id'])
+        game=engine._load(made['id']);entity=game.sects[game.player.faction_id]
+        engine.fleet_action(game.id,dict(action='heritage_learn',owner_id=entity.id,revision=entity.heritage['revision'],technique_id='TECH_HUMAN_HERITAGE_1'))
+        engine.teleport_action(game.id,'build',owner_id=entity.id)
+        fixture.clan(engine,game.id);game=engine._load(game.id)
+        clan=next(s for s in game.sects.values() if s.kind=='family' and s.location_id==game.player.location_id and s.world=='human')
+        engine.family_action(game.id,'join',dict(target_id=clan.id))
+        game=engine._load(game.id)
         original = json.loads(engine.store._path(game.id).read_bytes())
         httpd = ThreadingHTTPServer(('127.0.0.1', 0), QuietHandler)
         threading.Thread(target=httpd.serve_forever, daemon=True).start()

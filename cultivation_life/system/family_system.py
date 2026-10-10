@@ -47,6 +47,8 @@ class FamilySystemMixin:
         family = game.family
         if not family or family.extinct:
             return
+        from .family_membership import player_kin
+        if not player_kin(game,family): return
         family.kind = 'family'
         known = {n.id for n in family.npcs}
         for child in game.player.offspring:
@@ -59,7 +61,8 @@ class FamilySystemMixin:
                 known.add(member.id)
 
     def _family_is_kin(self, game, npc):
-        return bool(npc.family_traits.get('kin') or any(c.get('id') == npc.id for c in game.player.offspring))
+        from .family_membership import player_kin
+        return bool(npc.family_traits.get('kin') or (game.family and player_kin(game,game.family) and any(c.get('id') == npc.id for c in game.player.offspring)))
 
     def _family_relation(self, game, other):
         if not game.family:
@@ -122,10 +125,18 @@ class FamilySystemMixin:
 
     def family_action(self, game_id, action, payload):
         self.assert_guixu_operation_allowed(game_id, 'family-action')
-        game = self._load(game_id)
+        game = copy.deepcopy(self._load(game_id))
         player, family = game.player, game.family
         if not player.alive or game.pending_event or player.imprisonment:
             raise ValueError('当前状态无法处理家族事务')
+        if action in {'join','rename'}:
+            from .economy.local_market import require_access
+            from .family_membership import adopt,rename
+            require_access(game)
+            summary=adopt(game,payload.get('target_id')) if action=='join' else rename(game,str(payload.get('name','')))
+            self._family_log(game,action,summary)
+            game.updated_at=now_iso();self.store.save(game)
+            return self.present(game)
         self._family_register_children(game)
         rng = decode_rng(game.seed, game.rng_state)
         child = next((c for c in player.offspring if c.get('id') == payload.get('npc_id')), None)
@@ -307,6 +318,8 @@ class FamilySystemMixin:
         if state.get('settled_age') == game.player.age:
             return []
         state['settled_age'] = game.player.age
+        from .family_membership import resolve_line,player_kin
+        resolve_line(game,family)
         news = []
         people = [n for n in family.npcs if n.alive and n.world == family.world]
         by_id = {n.id:n for n in people}
@@ -325,8 +338,11 @@ class FamilySystemMixin:
                     'age':0,'alive':True,'world':family.world,'spirit_root':root,'cultivation_started':False,
                     'realm_index':0,'layer':1,'path':family.path,'race':parent.race,'lifespan':rng.randint(80,100),
                     'gender':rng.choice(['male','female']),'parents':[parent.name,spouse.name],
-                    'family_traits':{'kin':True,'parents':[parent.id,spouse.id]}}
-                game.player.offspring.append(child)
+                    'family_traits':{'kin':bool(parent.family_traits.get('kin') or spouse.family_traits.get('kin')),'parents':[parent.id,spouse.id]}}
+                if player_kin(game,family) and child['family_traits']['kin']:
+                    game.player.offspring.append(child)
+                else:
+                    family.npcs.append(self._family_child_npc(child))
                 self._family_log(game,'birth',f'{parent.name}与{spouse.name}诞下{child["name"]}，天生具有{self._npc_root_name(root)}。')
         threshold = 2 + self._family_world_tier(family.world)
         if not self._family_elites(game,family):
@@ -371,12 +387,13 @@ class FamilySystemMixin:
         income, expenses = fiscal['income'] + tribute, fiscal['expense']
         surplus = max(0, income - expenses)
         dividend = 0
-        if family.world == game.player.world and game.player.alive and not state.get('debt', 0):
+        if family.world == game.player.world and game.player.alive and player_kin(game,family) and not state.get('debt', 0):
             dividend = finance.pay(game, finance.key('family', family.id), 'player', int(surplus * .15), '家族年度盈余分红')
-        fiscal['benefit_due'], fiscal['benefit_paid'] = int(surplus * .15), dividend
+        if player_kin(game,family): fiscal['benefit_due'], fiscal['benefit_paid'] = int(surplus * .15), dividend
         fiscal['expense'] += dividend
         state['ledger'] = dict(year=game.player.age, income=income, expenses=expenses, balance=income-expenses,
-            tribute=tribute, dividend=dividend, office_income=office_income, shortfall=int(state.get('debt', 0)))
+            tribute=tribute, dividend=dividend, office_income=office_income, shortfall=int(state.get('debt', 0)),
+            wage=0 if player_kin(game,family) else fiscal.get('benefit_paid',0),wage_due=0 if player_kin(game,family) else fiscal.get('benefit_due',0))
         if dividend or office_income:
             self._family_log(game,'dividend',f'家族盈余分红{dividend}灵石，宗门族人奉赠{office_income}灵石；只在本界发放。')
         if state.get('debt', 0):
@@ -407,6 +424,11 @@ class FamilySystemMixin:
 
     def _family_presentation(self, game, result):
         family = game.family
+        from .family_membership import player_kin,wage
+        from .organization_heritage import public as public_heritage
+        result['heritage']=public_heritage(game,family)
+        result['player_member_type']='本家' if family and player_kin(game,family) else '外姓修士'
+        result['can_rename']=bool(family and family.heritage.get('line_successor')=='player' and family.heritage.get('rename_available') and family.world==game.player.world)
         result.update(reproduction_enabled=game.family_state.get('reproduction_enabled',True),
             gather_used=game.family_state.get('gather_age') == game.player.age,
             intrigue_enabled=self._intrigue_enabled(),pressure=family.pressure if family else 0,
@@ -433,7 +455,9 @@ class FamilySystemMixin:
             row['in_party'] = any(m.get('id')==npc.id for m in game.player.party)
         powers = [s for s in game.sects.values() if not s.extinct and s.world==game.player.world]
         result['other_families'] = [{'id':s.id,'name':s.name,'total_power':self._family_total_power(game,s),
-            'living_count':sum(n.alive for n in s.npcs),'description':s.description} for s in powers if s.kind=='family']
+            'living_count':sum(n.alive for n in s.npcs),'description':s.description,'location':s.location_id,
+            'can_join':bool((not family or family.extinct) and game.player.location_id==s.location_id),
+            'annual_wage':wage(s.world,game.player.realm_index)} for s in powers if s.kind=='family']
         result['diplomacy'] = [{'id':s.id,'name':s.name,'kind':s.kind,'total_power':self._family_total_power(game,s),
             **copy.deepcopy(self._family_relation(game,s))} for s in powers] if family and not family.extinct and family.world==game.player.world else []
         result['ledger'] = None

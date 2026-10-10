@@ -37,7 +37,7 @@ def main():
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
     for orientation in ('portrait', 'landscape'):
-        for phase in ('custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
+        for phase in ('organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
             result = log(f'android-{phase}-{orientation}-{RELEASE_ID}.log')
             require('status=passed' in result and 'status=failed' not in result, f'Android {phase} {orientation} must pass')
         result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')
@@ -103,7 +103,7 @@ def main():
         'validation': [
             'Four-theme native military logistics, delayed depot approval/collection and paid immortal/Asura conversion verified in both orientations',
             'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',
-            'Category navigation with search and persistent favorites, illustrated dossiers and registry-backed heavens debug workbench verified',
+            'Organization inheritance, contribution-backed requisitions, outsider clan succession, owner-funded local teleport arrays and temporary activity navigation verified',
             'Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} Python regressions passed',
             'Signed Android 12 release: four-theme start layout, folding, tutorial, Buddhist DLC label and native quick start in portrait and landscape',
@@ -125,7 +125,7 @@ def main():
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
         for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
-                     'war-logistics.md',
+                     'war-logistics.md', 'organizations-290.md',
                      'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md',
                      'world-transition-development.md', 'world-transition-audit.md', 'world-transition-state-contract.json'):
             package.write(ROOT/'docs'/name, 'docs/'+name)

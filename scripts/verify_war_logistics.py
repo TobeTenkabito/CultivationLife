@@ -17,7 +17,7 @@ def verify_war_logistics(base, folder):
     result=request('games',dict(name='府库成品验收',preset_id='core',seed=419));identity=result['id']
     path=folder/'data/saves'/f'{identity}.json'
     data=json.loads(path.read_bytes());data['pending_event']=None
-    data['player'].update(faction_id='tianjian',realm_index=4,location_id=data['sects']['tianjian']['location_id'])
+    data['player'].update(faction_id='tianjian',faction_contribution=10,realm_index=4,location_id=data['sects']['tianjian']['location_id'])
     data['sects']['tianjian']['founded_by_player']=True
     data['intrigue_state'].setdefault('factions',{}).setdefault('sect:tianjian',dict(
         kind='sect',id='tianjian',controller_id=None,positions={},guests=[],prison=[],

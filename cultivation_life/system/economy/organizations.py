@@ -10,46 +10,7 @@ from ...economy_content import BASE_PRICES
 from .ledger import account, balance, transfer_value
 from .state import ensure_state, ensure_regional_market, reprice, commodity_catalog
 from .local_market import quote
-
-
-def key(kind, identity):
-    return f'organization:{kind}:{identity}' if kind != 'yaochi' else 'institution:celestial:yaochi'
-
-
-def faction_record(game, kind, identity):
-    # This is the old authoritative treasury, also when the politics DLC is off.
-    record = game.intrigue_state.setdefault('factions', {}).setdefault(f'{kind}:{identity}', dict(
-        kind=kind, id=identity, controller_id=None, positions={}, guests=[], prison=[],
-        member_contribution={}, unrest=0., fear=0., resources=0, policy='balance'))
-    record.setdefault('resources', 0)
-    return record
-
-
-def register(game, kind, identity, world):
-    ensure_state(game)
-    if world not in game.economy_v2['worlds']:
-        raise ValueError('组织财政必须属于已知主界面')
-    address = key(kind, identity)
-    rows = game.economy_v2.setdefault('organizations', {})
-    if kind in {'sect', 'family'}:
-        faction_record(game, kind, identity)
-    if address not in rows:
-        if kind == 'yaochi':
-            account(game, address)
-        rows[address] = dict(kind=kind, identity=identity, world=world,
-            last_year=max(game.player.age, game.economy_v2['last_year']),
-            income=0, expense=0, shortfall=0, benefit_paid=0, benefit_due=0,
-            produced=0, commodity=None, history=[])
-        # A finite transfer funds institutions without a pre-existing treasury.
-        if kind == 'yaochi':
-            pay(game, f'background:{world}', address, 2000000, '瑶池设立采购周转金')
-    elif rows[address]['world'] != world:
-        # The existing faction migration owns its treasury. No goods or accrued
-        # production work are transported by this fiscal address reconciliation.
-        rows[address].update(world=world, production_credit=0,
-            demand_credit={},cultivation_support={},maintenance_support={},breakthrough_support={},longevity_support={},supply_budget_credit=0,
-            last_year=max(game.player.age, game.economy_v2['last_year']))
-    return rows[address]
+from .organization_accounts import key, faction_record, register, pay, procure
 
 
 def ensure_organizations(game):
@@ -72,21 +33,6 @@ def ensure_organizations(game):
     if game.player.world == 'celestial':
         register(game, 'yaochi', 'yaochi', 'celestial')
     return adopted or before != len(game.economy_v2['organizations'])
-
-
-def pay(game, source, destination, amount, reason):
-    paid = min(max(0, int(amount)), balance(game, source))
-    transfer_value(game, source, destination, paid, reason)
-    return paid
-
-
-def procure(game, source, world, amount, reason, *, partial=False):
-    """Pay aggregate craftsmen for non-standard goods/services before granting."""
-    ensure_state(game)
-    amount = max(0, int(amount))
-    if not partial and balance(game, source) < amount:
-        raise ValueError('组织府库不足，无法支付本次资材或修炼供养')
-    return pay(game, source, f'background:{world}', amount, reason)
 
 
 def _entity(game, row):
@@ -127,11 +73,22 @@ def settle_faction(game, maps, row, years):
     # second service debit. Optional supplies may use only this interval's
     # welfare envelope, leaving three years of basic maintenance intact.
     service_due = int(due*.65)+carried_debt+child_care
-    paid = procure(game, source, world, service_due, '组织基本养护与日常劳务', partial=True)
+    from ..organization_heritage import allowance_account
+    allowance_account(game,entity)
+    paid=min(service_due,balance(game,source))
+    study_paid=int(paid*.15)
+    pay(game,source,f'study:{row["kind"]}:{entity.id}',study_paid,'门人日常劳务所得留作研习津贴')
+    procure(game,source,world,paid-study_paid,'组织基本养护与日常劳务',partial=True)
     row['expense'] += paid
     row['shortfall'] = service_due - paid
     if row['kind'] == 'family':
         game.family_state['debt'] = service_due - paid
+        from ..family_membership import player_kin,wage
+        if entity is game.family and not player_kin(game,entity) and game.player.alive and game.player.world==world:
+            amount=wage(world,game.player.realm_index)*years
+            actual=pay(game,source,'player',amount,'外姓修士年度供养')
+            row['benefit_due'],row['benefit_paid']=amount,actual
+            row['expense']+=actual
     from .organization_consumption import consume
     market = game.economy_v2['markets'][f'{world}:{entity.location_id}']
     reserve = int(row.get('expected_upkeep', 0)*.65*3)

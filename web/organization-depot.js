@@ -6,12 +6,13 @@
     const section=node('details',null,'organization-depot');
     section.append(node('summary',`府库实物 · ${num(d.value)} 灵石折值`));
     section.append(node('p','申请须提前一个行动单位；任一高层批准后，物资预留待领。战备只征用未预留库存。','muted'));
+    if(d.contribution!=null)section.append(node('p',`宗门贡献 ${num(d.contribution)}；申请时扣除，驳回或撤销后退还，同次入宗期间有效。`,'muted'));
     if(!d.local)section.append(node('p','请到组织驻地办理采购、审批及领取。','muted'));
     const send=(action,payload={})=>submit({action,owner_id:d.owner_id,revision:d.revision,...payload});
     const button=(text,action,payload={},disabled=false)=>{const b=node('button',text);b.type='button';b.dataset.depotAction=action;b.disabled=!d.local||disabled;b.onclick=()=>send(action,payload);return b;};
     const goods=node('div',null,'depot-goods');
     for(const r of d.stock){const card=node('article',null,'depot-good');card.append(node('b',r.name),node('small',`库存 ${num(r.quantity)} · 单件现值 ${num(r.value)}`));
-      card.append(button('申请一件','depot_request',{item:r.key,quantity:1},!r.requestable));goods.append(card);}
+      card.append(button(`申请一件${r.contribution_cost?' · '+num(r.contribution_cost)+'贡献':''}`,'depot_request',{item:r.key,quantity:1},!r.requestable));goods.append(card);}
     section.append(goods);
     if(!d.stock.length)section.append(node('p','暂无实物储备；年度经营有盈余时会从本地市场采购。','muted'));
     if(d.can_manage){const form=node('form',null,'depot-purchase'),select=node('select'),qty=node('input');

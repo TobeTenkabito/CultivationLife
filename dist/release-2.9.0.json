@@ -1,8 +1,8 @@
 {
-  "base_version": "2.8.0",
+  "base_version": "2.9.0",
   "platform": "Windows",
-  "exe_sha256": "cc09b215bb980033f757016bd2371b9a5d4ace6941083cb998e9e5b89272772c",
-  "inputs_sha256": "24c9be16656eae9292228dcfdab2d4a49f1be703c4b70fa8a042967b974ba264",
+  "exe_sha256": "a01eca46be11d56ac1d29e255ba799be9599730f050aa7976a818b7aefbd3339",
+  "inputs_sha256": "71f5eddfe2c52356dc4166e5dda118b7b0608addfbaaa9e55fdbff8f9dbef833",
   "dlc_versions": {
     "asura-manifestation": "1.2.1",
     "buddhist-dharma": "1.0.0",
@@ -27,9 +27,9 @@
   "validation": [
     "Commodity-backed military supplies, delayed depot requisitions, caravan atlas, estate locating and opportunity conversions verified",
     "Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified",
-    "Category navigation with search and persistent favorites, illustrated dossiers and registry-backed heavens debug workbench verified",
+    "Organization inheritance, contribution-backed requisitions, outsider clan succession, owner-funded local teleport arrays and temporary activity navigation verified",
     "Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes",
-    "3814 automated regression tests passed",
+    "3849 automated regression tests passed",
     "Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"

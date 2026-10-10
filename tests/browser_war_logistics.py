@@ -21,7 +21,7 @@ from scripts.browser_navigation import navigation_locator
 
 def prepare(engine):
     gid=prepare_caravans(engine);game=engine._load(gid)
-    game.player.realm_index=4;game.player.faction_id='tianjian'
+    game.player.realm_index=4;game.player.faction_id='tianjian';game.player.faction_contribution=10
     game.player.location_id=game.sects['tianjian'].location_id
     game.pending_event=None
     for identity in ('tianjian','wanmo'):

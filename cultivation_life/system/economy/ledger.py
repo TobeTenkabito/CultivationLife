@@ -5,6 +5,7 @@ from ...rules import add_item, remove_item
 def _organization(game, key):
     if not key.startswith('organization:'):
         return None
+    key=game.economy_v2.get('organization_aliases',{}).get(key,key)
     _, kind, identity = key.split(':', 2)
     if kind in {'sect', 'family'}:
         row = game.intrigue_state.get('factions', {}).get(f'{kind}:{identity}')

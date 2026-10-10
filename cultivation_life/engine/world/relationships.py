@@ -443,6 +443,11 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
             ))
             continue
         from ...system.economy.organization_consumption import support
+        if (child is None and npc.realm_index == 0 and npc.family_traits.get('parents')
+                and npc.spirit_root != 'none' and npc.age >= int(WORLD_SYSTEMS['family']['cultivation_start_age'])):
+            npc.realm_index=1;npc.layer=1;npc.lifespan=rng.randint(100,120)
+            game.history.append(HistoryRecord('SYS_FAMILY_CHILD_CULTIVATION',1,player.age,'族人问道',npc.id,'cultivator',
+                f'{family.name}后辈{npc.name}正式引气入体，踏入练气一层。',{'npc_id':npc.id},['family','npc',f'world:{npc.world}']))
         provision=support(game,'family',family.id,npc.realm_index) if npc.world==family.world else 0.
         pill_bonus=(.05*support(game,'family',family.id,npc.realm_index,'breakthrough_support')
                     if npc.world==family.world and npc.layer>=REALMS[npc.realm_index].layers else 0.)
@@ -466,7 +471,11 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                 {"npc_id":npc.id,"realm":[result["old"],result["new"]]},
                 ["system","family","npc","world_news",f"world:{family.world}"],
             ))
-    if not any(npc.alive for npc in family.npcs):
+        from ...system.organization_heritage import advance_member
+        advance_member(game,family,npc)
+    from ...system.family_membership import resolve_line
+    resolve_line(game,family)
+    if not any(npc.alive for npc in family.npcs) and not player.alive:
         family.extinct = True
         game.history.append(HistoryRecord(
             "SYS_FAMILY_EXTINCT",1,player.age,"家族断绝",family.id,"extinct",

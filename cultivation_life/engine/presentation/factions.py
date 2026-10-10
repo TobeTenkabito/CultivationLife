@@ -21,6 +21,7 @@ from ...system.possession_system import current_body_age
 from ..dependencies import FactionViewDependencies
 from ...system.economy.organizations import public_finance
 from ...system.economy.depot import public as public_depot
+from ...system.organization_heritage import public as public_heritage
 
 
 def _public_family(deps: FactionViewDependencies, game: GameState) -> dict[str, Any]:
@@ -260,6 +261,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         "member": True,
         "finance": public_finance(game, 'sect', sect.id),
         "depot": public_depot(game, sect),
+        "heritage": public_heritage(game, sect),
         "world": player.world,
         "world_name": world_name,
         "id": sect.id,

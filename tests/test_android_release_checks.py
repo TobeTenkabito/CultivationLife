@@ -40,7 +40,7 @@ def release_inputs(tmp_path):
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
+                 for phase in ('organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -68,6 +68,7 @@ def release_inputs(tmp_path):
     ('suite', 'Full regression suite must pass'),
     ('collection', 'Full regression suite must pass'),
     ('phase', 'android-experience-'),
+    ('organizations', 'Android organizations portrait must pass'),
     ('heavens', 'Heavens portrait must pass'),
     ('heavens-browser', 'Eleven-world UI acceptance must pass'),
     ('heavens-workbench', 'Heavens workbench UI must pass'),
@@ -91,6 +92,7 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
         'suite': (f'release-{rid}-tests.log', '1 failed, 1574 passed in 268.76s'),
         'collection': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nERROR collecting tests'),
         'phase': (f'android-experience-{rid}.log', 'status=passed\nstatus=failed'),
+        'organizations': (f'android-organizations-portrait-{rid}.log', 'status=failed'),
         'debug-console': (f'android-debug-console-portrait-{rid}.log', 'status=failed'),
         'start-layout': (f'android-start-layout-portrait-{rid}.log', 'status=failed'),
         'start-browser': (f'start-layout-ui-{rid}.log', 'Traceback: failed'),

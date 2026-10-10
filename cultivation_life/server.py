@@ -438,7 +438,7 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "black-market-leave":
                 result = ENGINE.leave_black_market(game_id)
             elif operation == 'teleport-action':
-                result = ENGINE.teleport_action(game_id, payload.get('action', ''), payload.get('destination'))
+                result = ENGINE.teleport_action(game_id, payload.get('action', ''), payload.get('destination'), payload.get('owner_id'))
             elif operation == "map-travel":
                 result = ENGINE.travel_map(game_id, payload.get("destination", ""))
             elif operation == "equip-technique":
