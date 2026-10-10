@@ -112,15 +112,10 @@ def _ensure_intrigue_faction(deps: IntrigueStateDependencies, game: GameState, k
     entity = deps._intrigue_entity(game, kind, faction_id)
     controller = str(record.get("controller_id") or "")
     valid_npc_ids = {npc.id for npc in members}
-    player_controls = bool(
-        entity and entity.world == game.player.world
-        and entity.founded_by_player and entity.founder_player_id == game.id and game.player.alive
-    )
     player_is_member = deps._intrigue_player_faction_id(game, kind) == faction_id and game.player.alive
     player_realm, player_layer = deps._actual_player_realm(game.player)
-    npc_first = max(((npc.realm_index, npc.layer) for npc in members), default=(-1, -1))
-    if player_is_member and (player_realm, player_layer) >= npc_first:
-        player_controls = True
+    from ..organization_authority import player_controls as control_rule
+    player_controls = control_rule(game, entity, members, member=player_is_member, rank=(player_realm, player_layer))
     if player_controls:
         controller = deps.PLAYER_ID
     elif controller == deps.PLAYER_ID or controller not in valid_npc_ids:

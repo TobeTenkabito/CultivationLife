@@ -211,8 +211,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _instant_arrival(self, game, destination):
         return teleport_actions._instant_arrival(self._dependencies.time.teleport, game, destination)
 
-    def teleport_action(self, game_id, action, destination=None):
-        return teleport_actions.teleport_action(self._dependencies.time.teleport, game_id, action, destination)
+    def teleport_action(self, game_id, action, destination=None, owner_id=None):
+        return teleport_actions.teleport_action(self._dependencies.time.teleport, game_id, action, destination, owner_id)
 
     @staticmethod
     def _merchant_realm_cap(world):

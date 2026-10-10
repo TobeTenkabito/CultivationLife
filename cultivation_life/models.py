@@ -298,6 +298,12 @@ class SectState:
     allegiance_race: str | None = None
     location_id: str | None = None
     player_founded_site: bool = False
+    # Local organizational inheritance; these books stay with the original entity.
+    heritage: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        from .organization_heritage_schema import validate
+        validate(self.heritage)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -311,6 +317,7 @@ class SectState:
             "allegiance_race": self.allegiance_race,
             "location_id": self.location_id,
             "player_founded_site": self.player_founded_site,
+            "heritage": copy.deepcopy(self.heritage),
         }
 
     @classmethod
@@ -332,6 +339,7 @@ class SectState:
             allegiance_race=value.get("allegiance_race"),
             location_id=value.get("location_id"),
             player_founded_site=bool(value.get("player_founded_site", value.get("founded_by_player", False))),
+            heritage=copy.deepcopy(value.get('heritage', {})),
         )
 
 

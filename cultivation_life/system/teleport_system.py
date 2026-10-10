@@ -27,6 +27,12 @@ def arrays(game, maps, world=None):
         result[location['id']] = dict(id=location['id'], name=location['name'],
             owner_id=owner.id if owner else world + ':array-keepers',
             owner_name=owner.name if owner else WORLD_SYSTEMS['world_names'][world] + '守阵盟')
+    for built in game.economy_v2.get('teleport_arrays',{}).values():
+        if built['world']!=world: continue
+        owner=game.family if game.family and game.family.id==built['owner_id'] else game.sects.get(built['owner_id'])
+        if owner and not owner.extinct and owner.world==world and built['location'] not in result:
+            site=maps.location(world,built['location'])
+            if site: result[built['location']]=dict(id=built['location'],name=site['name'],owner_id=owner.id,owner_name=owner.name)
     return result
 def public_teleport(game, maps):
     p = game.player
@@ -41,8 +47,10 @@ def public_teleport(game, maps):
         permit['status'] = ('used' if permit.get('used') else 'pending' if p.age < permit['ready_age']
                             else 'expired' if p.age >= permit['expires_age'] else 'ready')
     for row in rows.values():
-        row['licensed'] = f"{p.world}:{row['owner_id']}" in p.teleport_permissions or row['owner_id'] == p.faction_id
-    return dict(arrays=list(rows.values()), origin=here, bribe=1000 * tier ** 2,
+        row['licensed'] = f"{p.world}:{row['owner_id']}" in p.teleport_permissions or row['owner_id'] == p.faction_id or bool(game.family and not game.family.extinct and game.family.world==p.world and row['owner_id']==game.family.id)
+    from .teleport_construction import owners,estimate
+    construction=[estimate(game,s) for s in owners(game)] if not here else []
+    return dict(arrays=list(rows.values()), origin=here, construction=construction, bribe=1000 * tier ** 2,
         temporary=permit, temporary_fee=500 * tier ** 2, wait_years=unit,
         forge_fee=300 * tier ** 2, forge_chance=min(.95, max(.05, .12 + .035 * talisman_level - .03 * (tier - 1))), talisman_level=talisman_level,
         exposure={'bribe': .12, 'assassinate': .40}, fame_penalty=500 * tier ** 2,
@@ -65,14 +73,21 @@ def _instant_arrival(deps: TeleportDependencies, game, destination):
     game.rng_state = encode_rng(rng)
 
 
-def teleport_action(deps: TeleportDependencies, game_id, action, destination=None):
-    game = deps._load(game_id)
+def teleport_action(deps: TeleportDependencies, game_id, action, destination=None, owner_id=None):
+    import copy
+    game = copy.deepcopy(deps._load(game_id))
     p = game.player
     if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-            or game.guixu_state.get('player_session')):
+            or game.guixu_state.get('player_session') or p.world in {'lost','rift'}):
         raise ValueError('当前状态无法使用传送阵')
     info = public_teleport(game, deps.maps)
     here = info['origin']
+    if action=='build':
+        from .teleport_construction import build
+        summary=build(game,deps.maps,owner_id,arrays(game,deps.maps))
+        game.history.append(HistoryRecord('SYS_TELEPORT_BUILD',1,p.age,'当地建阵',owner_id,'completed',summary,{},['travel','construction']))
+        game.updated_at=now_iso();deps.store.save(game)
+        return deps.present(game)
     if not here:
         raise ValueError('此地没有地图传送阵；商盟内部阵请到商盟办理')
     permission = f"{p.world}:{here['owner_id']}"

@@ -265,6 +265,11 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                     {"npc_id": npc.id, "realm": [old_name, new_name]},
                     ["system", "faction", "npc", "world_news", f"world:{sect.world}"],
                 ))
+            from ...system.organization_heritage import advance_member
+            advance_member(game,sect,npc)
+        if sect.kind == "family":
+            from ...system.family_membership import resolve_line
+            resolve_line(game,sect)
         if sect.kind == "institution":
             continue
         if deps._check_sect_extinction(game, sect):

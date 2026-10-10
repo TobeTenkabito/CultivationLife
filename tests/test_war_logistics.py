@@ -86,6 +86,7 @@ def test_no_funds_no_supply_severe_penalty_and_no_attacking_preference(setup):
 
 def test_depot_request_waits_approval_escrows_and_collects_once(setup):
     engine,game=setup;e=game.sects['tianjian'];game.player.location_id=faction_site(e)['id']
+    game.player.faction_contribution=10
     row=depot.ensure(game,e)
     key=next(k for k,v in depot.catalog('human').items() if v['kind']=='item' and v['tier']==1)
     depot.purchase(game,engine.maps,e,key,3)

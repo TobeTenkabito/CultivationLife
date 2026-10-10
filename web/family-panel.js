@@ -30,16 +30,17 @@
     const sections=[];
     if(family.exists) sections.push(`<section class="family-overview"><strong>家族总战力 ${num(family.total_power)}</strong><p>立族底线：至少一位${esc(family.protection_realm || '结丹')}修士坐镇${family.pressure?` · 排挤 ${family.pressure}/3`:''}。</p>
       ${family.can_manage?button(family.reproduction_enabled?'暂停族内繁衍':'恢复族内繁衍','reproduction',{enabled:!family.reproduction_enabled}):''}
-      <small>外聘婚配需支付本界礼仪费用；族人生育按双方较高境界结算，化神起自然概率为0。所生后代必有灵根。</small></section>`);
+      <small>你的族籍：${esc(family.player_member_type||'本家')}。外聘婚配需支付本界礼仪费用；族人生育按双方较高境界结算，化神起自然概率为0。</small>
+      ${family.can_rename?`<label>承宗更名<input data-family-name maxlength="18" placeholder="新家族名号">${button('使用一次更名资格','rename')}</label>`:''}</section>`);
     const registered=new Set((family.roster || []).map(r=>r.id));
     const children=(family.offspring || []).filter(c=>!registered.has(c.id));
     sections.push(`<section><h3>血脉后代</h3>${children.map(c=>member(c,family,false)).join('') || '<p class="muted">暂无未入族籍的后代；已入族籍者见下方名册。</p>'}</section>`);
     if(family.exists)sections.push(`<section><h3>家族名册</h3>${(family.roster || []).map(c=>member(c,family,true)).join('') || '<p class="muted">当前没有可见的族人名册。</p>'}</section>`);
     const ledger=family.ledger;
-    if(ledger)sections.push(`<section class="family-finances"><h3>家族内政</h3><div class="family-metrics">${[['资材',ledger.resources],['年度收入',ledger.income],['年度开支',ledger.expenses],['收支差额',ledger.balance],['资材缺口',ledger.shortfall],['本年分红',ledger.dividend],['宗门奉赠',ledger.office_income],['附属宗门上供',ledger.tribute]].map(([k,v])=>`<span><small>${k}</small><b>${num(v)}</b></span>`).join('')}</div>
-      <p>人数增加会提高开支，高阶修士带来更多收入。盈余分红与宗门奉赠只在家族所在界面发放。</p>
+    if(ledger)sections.push(`<section class="family-finances"><h3>家族内政</h3><div class="family-metrics">${[['府库灵石',ledger.resources],['年度收入',ledger.income],['年度开支',ledger.expenses],['收支差额',ledger.balance],['养护缺款',ledger.shortfall],['本年分红',ledger.dividend],['外姓供养应付',ledger.wage_due],['外姓供养实付',ledger.wage],['宗门奉赠',ledger.office_income],['附属宗门上供',ledger.tribute]].map(([k,v])=>`<span><small>${k}</small><b>${num(v)}</b></span>`).join('')}</div>
+      <p>人数增加会提高开支，高阶修士带来更多收入。外姓供养由府库支付，资金不足按实款发放；离开本界期间不发放，也不追补。盈余分红与宗门奉赠只在家族所在界面发放。</p>
       ${family.can_manage?`<div class="family-member-actions"><label>注入灵石<input data-family-funds type="number" min="1" step="1" value="1000">${button('注资','fund')}</label>${button(family.gather_used?'本年已经营':'组织经营采集（每年一次）','gather',{},family.gather_used)}</div>`:''}</section>`);
-    sections.push(`<section><h3>本界其他修仙家族</h3>${(family.other_families || []).map(f=>`<div class="family-other"><b>${esc(f.name)}</b><span>${f.living_count}人在册 · 总战力 ${num(f.total_power)}</span><small>${esc(f.description)}</small></div>`).join('') || '<p class="muted">本界暂未出现其他存续的修仙家族。</p>'}</section>`);
+    sections.push(`<section><h3>本界其他修仙家族</h3>${(family.other_families || []).map(f=>`<div class="family-other"><b>${esc(f.name)}</b><span>${f.living_count}人在册 · 总战力 ${num(f.total_power)}</span><small>${esc(f.description)}</small>${!family.exists||family.extinct?`<p>外姓年度供养 ${num(f.annual_wage)} 灵石，由真实府库支付。${f.can_join?'须有三年供养储备方可接纳。':'请先亲赴家族驻地申请。'}</p>${button('申请加入 · 外姓修士','join',{target_id:f.id},!f.can_join)}`:''}</div>`).join('') || '<p class="muted">本界暂未出现其他存续的修仙家族。</p>'}</section>`);
     if(family.diplomacy?.length)sections.push(`<section><h3>家族外交</h3><p>依附主从按高阶修士数量及总战力判定。依附宗门且族内无人拥有其决策权时，可能遭到兼并。</p>${family.diplomacy.map(s=>`<div class="family-other"><b>${esc(s.name)} · ${esc(({alliance:'同盟',neutral:'中立',vassal:'依附',war:'交战',truce:'停战'})[s.status] || s.status)}${s.status==='vassal'?' · '+(s.overlord===family.id?'对方依附本族':'本族依附对方'):''}</b><span>总战力 ${num(s.total_power)}</span>${family.can_manage?`<div class="family-member-actions">${button('结盟','diplomacy',{target_id:s.id,status:'alliance'},s.status==='war')}${button('确立依附','diplomacy',{target_id:s.id,status:'vassal'},s.status==='war')}${button('恢复中立','diplomacy',{target_id:s.id,status:'neutral'},s.status==='war')}${button('宣战','diplomacy',{target_id:s.id,status:'war'},s.status==='war')}</div>`:''}</div>`).join('')}</section>`);
     const panel=document.createElement('div');panel.className='family-management';panel.innerHTML=sections.join('');root.appendChild(panel);
     window.renderOrganizationFinance?.(panel.querySelector('.family-finances') || panel, family.finance);
@@ -49,6 +50,7 @@
       if(payload.action==='gift_equipment')payload.item_id=group.querySelector('[data-family-item]').value;
       if(payload.action==='send_sect')payload.sect_id=group.querySelector('[data-family-sect]').value;
       if(payload.action==='fund')payload.amount=Number(panel.querySelector('[data-family-funds]').value);
+      if(payload.action==='rename')payload.name=panel.querySelector('[data-family-name]').value;
       if(payload.action==='diplomacy' && payload.status==='war' && window.openGameConfirm) {
         openGameConfirm({title:'家族宣战',body:'将以家族身份向该势力宣战，确认后请前往战争界面指挥。',confirmText:'确认宣战',onConfirm:()=>act(payload)});
       } else if(payload.action==='expel' && window.openGameConfirm) {

@@ -32,7 +32,7 @@ def main():
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                  'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
+                  'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')
     evidence_file = ROOT / f'build/exe-{RELEASE_ID}-verification.json'
@@ -56,7 +56,7 @@ def main():
         'validation': [
             'Commodity-backed military supplies, delayed depot requisitions, caravan atlas, estate locating and opportunity conversions verified',
             'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',
-            'Category navigation with search and persistent favorites, illustrated dossiers and registry-backed heavens debug workbench verified',
+            'Organization inheritance, contribution-backed requisitions, outsider clan succession, owner-funded local teleport arrays and temporary activity navigation verified',
             'Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} automated regression tests passed',
             'Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',

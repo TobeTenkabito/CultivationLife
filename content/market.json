@@ -4108,6 +4108,545 @@
       "content_id": "talisman_cinnabar",
       "tier": 1,
       "price": 10
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_1",
+      "tier": 1,
+      "price": 120
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_2",
+      "tier": 2,
+      "price": 1500
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_3",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_4",
+      "tier": 4,
+      "price": 26000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_5",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_6",
+      "tier": 2,
+      "price": 1500
+    },
+    {
+      "world": "human",
+      "kind": "technique",
+      "content_id": "TECH_HUMAN_HERITAGE_7",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_1",
+      "tier": 1,
+      "price": 120
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_2",
+      "tier": 2,
+      "price": 1500
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_3",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_4",
+      "tier": 4,
+      "price": 26000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_5",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_6",
+      "tier": 2,
+      "price": 1500
+    },
+    {
+      "world": "demon",
+      "kind": "technique",
+      "content_id": "TECH_DEMON_HERITAGE_7",
+      "tier": 3,
+      "price": 6000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_1",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_2",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_3",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_4",
+      "tier": 8,
+      "price": 7000000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_5",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_6",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "spirit",
+      "kind": "technique",
+      "content_id": "TECH_SPIRIT_HERITAGE_7",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_1",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_2",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_3",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_4",
+      "tier": 8,
+      "price": 7000000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_5",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_6",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "true_demon",
+      "kind": "technique",
+      "content_id": "TECH_TRUE_DEMON_HERITAGE_7",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_1",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_2",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_3",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_4",
+      "tier": 8,
+      "price": 7000000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_5",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_6",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "technique",
+      "content_id": "TECH_MONSTER_REALM_HERITAGE_7",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_1",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_2",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_3",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_4",
+      "tier": 8,
+      "price": 7000000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_5",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_6",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "technique",
+      "content_id": "TECH_PHANTOM_UNDERWORLD_HERITAGE_7",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_1",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_2",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_3",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_4",
+      "tier": 8,
+      "price": 7000000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_5",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_6",
+      "tier": 6,
+      "price": 300000
+    },
+    {
+      "world": "hell",
+      "kind": "technique",
+      "content_id": "TECH_HELL_HERITAGE_7",
+      "tier": 7,
+      "price": 1100000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_1",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_2",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_3",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_4",
+      "tier": 12,
+      "price": 36000000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_5",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_6",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "celestial",
+      "kind": "technique",
+      "content_id": "TECH_CELESTIAL_HERITAGE_7",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_1",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_2",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_3",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_4",
+      "tier": 12,
+      "price": 36000000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_5",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_6",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "asura",
+      "kind": "technique",
+      "content_id": "TECH_ASURA_HERITAGE_7",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_1",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_2",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_3",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_4",
+      "tier": 12,
+      "price": 36000000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_5",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_6",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "nether",
+      "kind": "technique",
+      "content_id": "TECH_NETHER_HERITAGE_7",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_1",
+      "tier": 9,
+      "price": 120000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_2",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_3",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_4",
+      "tier": 12,
+      "price": 36000000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_5",
+      "tier": 11,
+      "price": 4500000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_6",
+      "tier": 10,
+      "price": 720000000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "technique",
+      "content_id": "TECH_REINCARNATION_HERITAGE_7",
+      "tier": 11,
+      "price": 4500000000
     }
   ]
 }

@@ -12,6 +12,19 @@ def validate_economy(value, merchants=None, document=None):
             raise ValueError('经济存档结构或数值无效，原文件已保留')
     require(isinstance(value, dict) and value.get('schema_version') == 1)
     require(type(value.get('issued',0)) is int and value.get('issued',0)>=0)
+    aliases=value.get('organization_aliases',{})
+    require(isinstance(aliases,dict))
+    for source,target in aliases.items():
+        require(isinstance(source,str) and isinstance(target,str))
+        require(source.startswith('organization:sect:') and target=='organization:family:'+source.removeprefix('organization:sect:'))
+        require(target in value.get('organizations',{}) and source not in value.get('organizations',{}))
+    arrays=value.get('teleport_arrays',{})
+    require(isinstance(arrays,dict) and len(arrays)<=1000)
+    for key,row in arrays.items():
+        require(isinstance(row,dict) and row.get('world') in value['worlds'])
+        require(isinstance(row.get('location'),str) and key==f"{row['world']}:{row['location']}")
+        require(row.get('owner_kind') in {'sect','family'} and isinstance(row.get('owner_id'),str) and bool(row['owner_id']))
+        require(type(row.get('built_year')) is int and row['built_year']>=0)
     if 'consumption_policy' in value:
         require(value['consumption_policy'] == 2 and type(value.get('policy_year')) is int and value['policy_year'] >= 0)
     if 'demand_policy' in value:
