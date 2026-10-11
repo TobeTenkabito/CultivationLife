@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from ...ports import SavePort
+from ...ports import SavePort, MapPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +162,7 @@ class IntrigueRecruitmentDependencies:
 
 @dataclass(frozen=True, slots=True)
 class IntrigueResolutionsDependencies:
+    _get_maps: Callable[[], MapPort]
     _get_PERSONALITY_LABELS: Callable[[], Any]
     _get_PLAYER_ID: Callable[[], Any]
     _get_RESOLUTION_LABELS: Callable[[], Any]
@@ -198,6 +199,10 @@ class IntrigueResolutionsDependencies:
         return self._get_PERSONALITY_LABELS()
 
     @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
+
+    @property
     def PLAYER_ID(self) -> Any:
         return self._get_PLAYER_ID()
 
@@ -216,6 +221,7 @@ class IntrigueResolutionsDependencies:
 
 @dataclass(frozen=True, slots=True)
 class IntrigueRuntimeDependencies:
+    _get_maps: Callable[[], MapPort]
     _get_PLAYER_ID: Callable[[], Any]
     _get_RESOLUTION_LABELS: Callable[[], Any]
     _get_STYLE_LABELS: Callable[[], Any]
@@ -236,6 +242,10 @@ class IntrigueRuntimeDependencies:
     _sect_members: Callable[..., Any]
     _war_relation: Callable[..., Any]
     _world_supports: Callable[..., Any]
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
 
     @property
     def PLAYER_ID(self) -> Any:

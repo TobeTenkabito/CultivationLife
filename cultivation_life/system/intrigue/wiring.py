@@ -252,6 +252,7 @@ def bind_resolutions(
     _get_STYLE_LABELS: Callable[[], Any],
 ) -> IntrigueResolutionsDependencies:
     return IntrigueResolutionsDependencies(
+        _get_maps=lambda: host.maps,
         _get_PERSONALITY_LABELS=_get_PERSONALITY_LABELS,
         _get_PLAYER_ID=_get_PLAYER_ID,
         _get_RESOLUTION_LABELS=_get_RESOLUTION_LABELS,
@@ -322,6 +323,7 @@ def bind_runtime(
     _get_STYLE_LABELS: Callable[[], Any],
 ) -> IntrigueRuntimeDependencies:
     return IntrigueRuntimeDependencies(
+        _get_maps=lambda: host.maps,
         _get_PLAYER_ID=_get_PLAYER_ID,
         _get_RESOLUTION_LABELS=_get_RESOLUTION_LABELS,
         _get_STYLE_LABELS=_get_STYLE_LABELS,

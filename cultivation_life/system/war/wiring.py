@@ -199,6 +199,7 @@ def bind_war_actions(host, *, decode_rng: Callable[..., Any]) -> WarActionsDepen
 
 def bind_war_presentation(host, *, _get_WAR_TERM_DEFS: Callable[..., Any]) -> WarPresentationDependencies:
     return WarPresentationDependencies(
+        _get_maps=lambda: host.maps,
         _allied_powers=lambda *args, **kwargs: host._allied_powers(*args, **kwargs),
         _ensure_war_shape=lambda *args, **kwargs: host._ensure_war_shape(*args, **kwargs),
         _find_npc=lambda *args, **kwargs: host._find_npc(*args, **kwargs),

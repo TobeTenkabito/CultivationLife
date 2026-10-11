@@ -327,7 +327,7 @@ class DemonicSystemTests(unittest.TestCase):
         self.assertEqual(experts["曾沧海"]["realm_name"], "合体中期")
         self.assertEqual(
             {row["name"] for row in shown["faction"]["available"]},
-            {"天魔宫", "万魂渊", "黑日神殿"},
+            {"天魔宫", "万魂渊", "黑日神殿", "夜羽玄宗", "沉沙魔殿"},
         )
         self.assertTrue(shown["spirit_ranking"]["available"])
         self.assertEqual(shown["spirit_ranking"]["title"], "真魔界天榜前二十")
@@ -564,10 +564,10 @@ class DemonicSystemTests(unittest.TestCase):
         shown = self.engine.propose_sect_diplomacy(game_id, "corpse_hall", "neutral")
         self.assertTrue(any(row["event_id"] == "SYS_PLAYER_SECT_VOTE" for row in shown["history"]))
 
-    def test_demon_world_starts_with_two_factions(self):
+    def test_demon_world_starts_with_four_factions_including_remote_sects(self):
         created = self.engine.create_game("宗门魔", "supreme_fire", "demonic", 4420, start_world="demon")
         faction = self.engine.get_game(created["id"])["faction"]
-        self.assertEqual({row["name"] for row in faction["available"]}, {"血狱魔宗", "阴尸殿"})
+        self.assertEqual({row["name"] for row in faction["available"]}, {"血狱魔宗", "阴尸殿", "赤砾魔门", "玄潭血宗"})
 
     def test_player_breakthrough_pill_is_blocked_for_demonic_path(self):
         game_id, game = self.demonic_game()

@@ -145,6 +145,9 @@ class MapCatalog(MapDefinition):
         return {
             "world":world, "world_name":world_name, "current":current,
             "current_name":self._locations[world][current]["name"], "locations":locations,
+            "roads": [{"from":node,"to":neighbor,"years":years}
+                      for node,neighbors in self._graphs[world].items()
+                      for neighbor,years in neighbors if node < neighbor],
             "current_qi_gain_efficiencies":self.qi_gain_efficiencies(world, current),
             "regional_market":True, "regional_treasure":True,
         }

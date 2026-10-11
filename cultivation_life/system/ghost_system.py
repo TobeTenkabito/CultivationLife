@@ -361,13 +361,13 @@ class GhostSystemMixin:
         ensure_faction_sites(game)
         factions = [*game.sects.values(), *([game.family] if game.family else [])]
         from ..content_registry import RACE_DEFINITIONS
-        import hashlib
         safe = [row for row in data.get("locations", []) if not row.get("min_realm_index", 0)]
         race_sites = {}
         for race_id, definition in RACE_DEFINITIONS.items():
             if safe and game.player.world in definition.get("worlds", []):
-                index = int.from_bytes(hashlib.sha256(f"{game.player.world}:{race_id}".encode()).digest()[:4], "big") % len(safe)
-                race_sites.setdefault(safe[index]["id"], []).append({"id": race_id, "name": definition["name"], "kind": "race", "owned": False})
+                from .organization_relocation import race_site
+                site=race_site(game,self.maps,game.player.world,race_id)
+                race_sites.setdefault(site, []).append({"id": race_id, "name": definition["name"], "kind": "race", "owned": False})
         for location in data.get("locations", []):
             location["factions"] = [{"id": f.id, "name": f.name, "kind": f.kind,
                                       "owned": f.founded_by_player}
@@ -405,6 +405,8 @@ class GhostSystemMixin:
                 } for row in arrays]
         from .teleport_system import public_teleport
         data['teleport'] = public_teleport(game, self.maps)
+        from .territory.presentation import augment
+        augment(game,self.maps,data)
         return data
 
     def _public_ghost_system(self, game: GameState) -> dict[str, Any]:

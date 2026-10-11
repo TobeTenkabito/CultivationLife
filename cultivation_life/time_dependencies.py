@@ -95,6 +95,7 @@ class TimeSettlementDependencies:
     _advance_player_bounties: Callable[..., Any]
     _record_era_summary: Callable[..., Any]
     _maybe_tianji_intelligence_event: Callable[..., str | None] | None = None
+    _settle_territory_time: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

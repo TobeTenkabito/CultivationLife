@@ -388,6 +388,54 @@
       },
       "reincarnation_hall": {
         "ghost": 1.0
+      },
+      "remote_human_1": {
+        "dao": 1.0
+      },
+      "remote_human_2": {
+        "dao": 1.0
+      },
+      "remote_demon_1": {
+        "demonic": 1.0
+      },
+      "remote_demon_2": {
+        "demonic": 1.0
+      },
+      "remote_spirit_1": {
+        "dao": 1.0
+      },
+      "remote_spirit_2": {
+        "dao": 1.0
+      },
+      "remote_true_demon_1": {
+        "demonic": 1.0
+      },
+      "remote_true_demon_2": {
+        "demonic": 1.0
+      },
+      "remote_hell_1": {
+        "ghost": 1.0
+      },
+      "remote_hell_2": {
+        "ghost": 1.0
+      },
+      "remote_celestial_1": {
+        "dao": 1.0
+      },
+      "remote_celestial_2": {
+        "dao": 1.0
+      },
+      "remote_asura_1": {
+        "demonic": 1.0
+      },
+      "remote_asura_2": {
+        "demonic": 1.0
+      },
+      "remote_reincarnation_1": {
+        "ghost": 1.0
+      },
+      "remote_reincarnation_2": {
+        "ghost": 1.0
       }
     }
   },
@@ -2644,6 +2692,1174 @@
         }
       ],
       "allegiance_race": null
+    },
+    {
+      "id": "remote_human_1",
+      "name": "望川剑院",
+      "world": "human",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_human_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_human_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 4,
+          "layer": 5,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_15"
+        },
+        {
+          "id": "remote_human_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 3,
+          "layer": 3,
+          "age": 192,
+          "lifespan": 550,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_15"
+        },
+        {
+          "id": "remote_human_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 2,
+          "layer": 3,
+          "age": 98,
+          "lifespan": 280,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_15"
+        },
+        {
+          "id": "remote_human_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 1,
+          "layer": 3,
+          "age": 62,
+          "lifespan": 180,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_human_2",
+      "name": "青岚药宗",
+      "world": "human",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_human_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_human_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 4,
+          "layer": 5,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_18"
+        },
+        {
+          "id": "remote_human_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 3,
+          "layer": 3,
+          "age": 192,
+          "lifespan": 550,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_18"
+        },
+        {
+          "id": "remote_human_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 2,
+          "layer": 3,
+          "age": 98,
+          "lifespan": 280,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_18"
+        },
+        {
+          "id": "remote_human_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 1,
+          "layer": 3,
+          "age": 62,
+          "lifespan": 180,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "human",
+          "location_id": "expanse_human_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_demon_1",
+      "name": "赤砾魔门",
+      "world": "demon",
+      "allegiance_race": "blood_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_demon_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_demon_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 4,
+          "layer": 5,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_15"
+        },
+        {
+          "id": "remote_demon_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 3,
+          "layer": 3,
+          "age": 192,
+          "lifespan": 550,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_15"
+        },
+        {
+          "id": "remote_demon_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 2,
+          "layer": 3,
+          "age": 98,
+          "lifespan": 280,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_15"
+        },
+        {
+          "id": "remote_demon_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 1,
+          "layer": 3,
+          "age": 62,
+          "lifespan": 180,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_demon_2",
+      "name": "玄潭血宗",
+      "world": "demon",
+      "allegiance_race": "blood_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_demon_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_demon_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 4,
+          "layer": 5,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_18"
+        },
+        {
+          "id": "remote_demon_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 3,
+          "layer": 3,
+          "age": 192,
+          "lifespan": 550,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_18"
+        },
+        {
+          "id": "remote_demon_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 2,
+          "layer": 3,
+          "age": 98,
+          "lifespan": 280,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_18"
+        },
+        {
+          "id": "remote_demon_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 1,
+          "layer": 3,
+          "age": 62,
+          "lifespan": 180,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "blood_demon",
+          "world": "demon",
+          "location_id": "expanse_demon_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_spirit_1",
+      "name": "听潮道院",
+      "world": "spirit",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_spirit_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_spirit_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_15"
+        },
+        {
+          "id": "remote_spirit_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_15"
+        },
+        {
+          "id": "remote_spirit_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_15"
+        },
+        {
+          "id": "remote_spirit_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_spirit_2",
+      "name": "栖霞灵宗",
+      "world": "spirit",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_spirit_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_spirit_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_18"
+        },
+        {
+          "id": "remote_spirit_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_18"
+        },
+        {
+          "id": "remote_spirit_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_18"
+        },
+        {
+          "id": "remote_spirit_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "spirit",
+          "location_id": "expanse_spirit_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_true_demon_1",
+      "name": "沉沙魔殿",
+      "world": "true_demon",
+      "allegiance_race": "heaven_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_true_demon_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_true_demon_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_15"
+        },
+        {
+          "id": "remote_true_demon_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_15"
+        },
+        {
+          "id": "remote_true_demon_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_15"
+        },
+        {
+          "id": "remote_true_demon_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_true_demon_2",
+      "name": "夜羽玄宗",
+      "world": "true_demon",
+      "allegiance_race": "heaven_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_true_demon_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_true_demon_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_18"
+        },
+        {
+          "id": "remote_true_demon_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_18"
+        },
+        {
+          "id": "remote_true_demon_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_18"
+        },
+        {
+          "id": "remote_true_demon_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "heaven_demon",
+          "world": "true_demon",
+          "location_id": "expanse_true_demon_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_hell_1",
+      "name": "铁霜鬼院",
+      "world": "hell",
+      "allegiance_race": "human",
+      "path": "ghost",
+      "kind": "sect",
+      "location_id": "expanse_hell_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_hell_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_15"
+        },
+        {
+          "id": "remote_hell_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_15"
+        },
+        {
+          "id": "remote_hell_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_15"
+        },
+        {
+          "id": "remote_hell_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_hell_2",
+      "name": "归灯冥府",
+      "world": "hell",
+      "allegiance_race": "human",
+      "path": "ghost",
+      "kind": "sect",
+      "location_id": "expanse_hell_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_hell_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 7,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_18"
+        },
+        {
+          "id": "remote_hell_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 6,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_18"
+        },
+        {
+          "id": "remote_hell_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 5,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_18"
+        },
+        {
+          "id": "remote_hell_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 4,
+          "layer": 3,
+          "age": 525,
+          "lifespan": 1500,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "hell",
+          "location_id": "expanse_hell_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_celestial_1",
+      "name": "远岫仙宗",
+      "world": "celestial",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_celestial_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_celestial_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_15"
+        },
+        {
+          "id": "remote_celestial_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_15"
+        },
+        {
+          "id": "remote_celestial_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_15"
+        },
+        {
+          "id": "remote_celestial_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_celestial_2",
+      "name": "云汀道院",
+      "world": "celestial",
+      "allegiance_race": "human",
+      "path": "dao",
+      "kind": "sect",
+      "location_id": "expanse_celestial_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_celestial_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_18"
+        },
+        {
+          "id": "remote_celestial_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_18"
+        },
+        {
+          "id": "remote_celestial_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_18"
+        },
+        {
+          "id": "remote_celestial_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "dao",
+          "race": "human",
+          "world": "celestial",
+          "location_id": "expanse_celestial_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_asura_1",
+      "name": "赤砂战宗",
+      "world": "asura",
+      "allegiance_race": "ancient_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_asura_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_asura_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_15"
+        },
+        {
+          "id": "remote_asura_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_15"
+        },
+        {
+          "id": "remote_asura_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_15"
+        },
+        {
+          "id": "remote_asura_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_asura_2",
+      "name": "霜戟武府",
+      "world": "asura",
+      "allegiance_race": "ancient_demon",
+      "path": "demonic",
+      "kind": "sect",
+      "location_id": "expanse_asura_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_asura_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_18"
+        },
+        {
+          "id": "remote_asura_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_18"
+        },
+        {
+          "id": "remote_asura_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_18"
+        },
+        {
+          "id": "remote_asura_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "demonic",
+          "race": "ancient_demon",
+          "world": "asura",
+          "location_id": "expanse_asura_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_reincarnation_1",
+      "name": "渡影禅院",
+      "world": "reincarnation",
+      "allegiance_race": "human",
+      "path": "ghost",
+      "kind": "sect",
+      "location_id": "expanse_reincarnation_15",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#4b8078",
+      "npcs": [
+        {
+          "id": "remote_reincarnation_1_member_0",
+          "name": "陆望川",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_15"
+        },
+        {
+          "id": "remote_reincarnation_1_member_1",
+          "name": "沈照岚",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_15"
+        },
+        {
+          "id": "remote_reincarnation_1_member_2",
+          "name": "顾远行",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_15"
+        },
+        {
+          "id": "remote_reincarnation_1_member_3",
+          "name": "秦清禾",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_15"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
+    },
+    {
+      "id": "remote_reincarnation_2",
+      "name": "回灯道院",
+      "world": "reincarnation",
+      "allegiance_race": "human",
+      "path": "ghost",
+      "kind": "sect",
+      "location_id": "expanse_reincarnation_18",
+      "description": "扎根偏远地域，依靠当地采办与门人经营维持山门，沿相邻地域经营商路与护持地方。",
+      "color": "#a47c56",
+      "npcs": [
+        {
+          "id": "remote_reincarnation_2_member_0",
+          "name": "陆照岚",
+          "title": "宗主",
+          "realm_index": 10,
+          "layer": 5,
+          "age": 4200,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_18"
+        },
+        {
+          "id": "remote_reincarnation_2_member_1",
+          "name": "沈远行",
+          "title": "护法长老",
+          "realm_index": 9,
+          "layer": 3,
+          "age": 2100,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_18"
+        },
+        {
+          "id": "remote_reincarnation_2_member_2",
+          "name": "顾清禾",
+          "title": "巡边执事",
+          "realm_index": 8,
+          "layer": 3,
+          "age": 900,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_18"
+        },
+        {
+          "id": "remote_reincarnation_2_member_3",
+          "name": "秦望川",
+          "title": "内门弟子",
+          "realm_index": 7,
+          "layer": 3,
+          "age": 300,
+          "lifespan": null,
+          "spirit_root": "supreme_earth",
+          "path": "ghost",
+          "race": "human",
+          "world": "reincarnation",
+          "location_id": "expanse_reincarnation_18"
+        }
+      ],
+      "npc_economy": {
+        "settlement_years": 5,
+        "estate_limit": 1
+      }
     }
   ]
 }

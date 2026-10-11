@@ -130,6 +130,27 @@ def test_competition_pays_for_native_supply_and_cannot_create_imports(economy, f
     GameState.from_dict(snapshot)
 
 
+def test_settlement_stock_index_matches_live_holdings(economy,monkeypatch):
+    engine,game=economy;market=local_market(game)
+    game,identity=buy(engine,game,'shop')
+    estate=game.economy_v2['estates'][identity]
+    items=list(market['commodities'])[:3]
+    for i,item in enumerate(items):
+        estate['stock'][item]=i+1
+        market_power.record_trade(game,market,item,'player','buy',20)
+    original=market_power.indicators;seen=[]
+    def compare(game,market,item,data,*,stocks=None):
+        assert stocks==market_power.holdings(game,market,item)
+        expected=original(game,market,item,data)
+        actual=original(game,market,item,data,stocks=stocks)
+        assert actual==expected
+        seen.append(item)
+        return actual
+    monkeypatch.setattr(market_power,'indicators',compare)
+    market_power.settle(game,market,1)
+    assert set(items)<=set(seen)
+
+
 def test_paid_supply_enters_local_stock_once_and_pressure_decays(economy):
     engine, game = economy
     market = local_market(game)

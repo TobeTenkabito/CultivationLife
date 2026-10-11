@@ -10,10 +10,11 @@ from ...economy_content import BASE_PRICES
 from .ledger import account, balance, transfer_value
 from .state import ensure_state, ensure_regional_market, reprice, commodity_catalog
 from .local_market import quote
+from .estate_management import settlement_interval
 from .organization_accounts import key, faction_record, register, pay, procure
 
 
-def ensure_organizations(game):
+def ensure_organizations(game, maps=None):
     ensure_state(game)
     adopted = 'organizations' not in game.economy_v2
     before = len(game.economy_v2.setdefault('organizations', {}))
@@ -32,7 +33,11 @@ def ensure_organizations(game):
             register(game, 'upper', world, world)
     if game.player.world == 'celestial':
         register(game, 'yaochi', 'yaochi', 'celestial')
-    return adopted or before != len(game.economy_v2['organizations'])
+    changed = adopted or before != len(game.economy_v2['organizations'])
+    if maps is not None:
+        from ..territory.runtime import activate
+        changed = activate(game, maps) or changed
+    return changed
 
 
 def _entity(game, row):
@@ -158,10 +163,10 @@ def settle_institution(game, row, years):
 
 
 def advance_organizations(game, maps):
-    ensure_organizations(game)
+    ensure_organizations(game, maps)
     for row in game.economy_v2['organizations'].values():
         years = game.player.age - row['last_year']
-        if years <= 0:
+        if years < settlement_interval(game, row):
             continue
         row.update(income=0, expense=0, shortfall=0, produced=0, benefit_due=0, benefit_paid=0)
         if row['kind'] in {'sect', 'family'}:

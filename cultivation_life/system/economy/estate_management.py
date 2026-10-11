@@ -1,11 +1,24 @@
 """Bounded organization investment and local stewards using real market orders."""
-from ...content_registry import WORLD_SYSTEMS
+from ...content_registry import WORLD_SYSTEMS, FACTION_DEFINITIONS
 from .ledger import balance
 from .enterprise_state import estates, owner_allowed, payer
 from .enterprise_rules import recipes, KINDS
 from .enterprise_market import market_at
 from .state import commodity_catalog
 from .local_market import quote
+
+
+def settlement_interval(game, row):
+    """Bound autonomous small-settlement aggregation to five actual years."""
+    if row['kind'] != 'sect' or game.player.faction_id == row['identity']:
+        return 1
+    interval = FACTION_DEFINITIONS.get(row['identity'], {}).get('npc_economy', {}).get('settlement_years', 1)
+    if interval <= 1:
+        return 1
+    from .industry import participating_wars
+    if owner_allowed(game, 'sect', row['identity'], row['world']) or participating_wars(game, row['identity'], row['world']):
+        return 1
+    return min(5, max(1, int(interval)))
 
 
 def recruitment_ready(game, entity):
@@ -22,6 +35,10 @@ def recruitment_ready(game, entity):
 
 def plan(game, maps, row):
     """A resident steward configures at most one real batch per annual tick."""
+    # Paid batches have fixed inputs/output; reassess after they finish.
+    if row['job']:
+        row.update(enabled=True, auto_sell=True)
+        return
     market = market_at(game, maps, row)
     options = recipes(row['world'], commodity_catalog(row['world']))
     cash = balance(game, payer(row))
@@ -58,6 +75,14 @@ def invest_surplus(game, maps, entity, finance):
     from .industry import participating_wars
     if participating_wars(game,entity.id,entity.world):
         return
+    initial_limit = FACTION_DEFINITIONS.get(entity.id, {}).get('npc_economy', {}).get('estate_limit')
+    if initial_limit is not None:
+        members = sum(finance.get('workforce', {}).values())
+        limit = min(5, initial_limit + max(0, members - 4) // 4)
+        owned = sum(e['owner_kind'] == kind and e['owner_id'] == entity.id
+                    for e in estates(game).values())
+        if owned >= limit:
+            return
     from ..faction_geography import faction_site
     from .enterprise_acquisition import acquire, price
     location = faction_site(entity)['id']

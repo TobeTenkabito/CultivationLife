@@ -45,6 +45,10 @@ def build(game,maps,identity,existing):
     site=maps.location(p.world,p.location_id)
     if not site or site.get('min_realm_index',0)>p.realm_index: raise ValueError('当前地图不允许建阵')
     if p.location_id in existing: raise ValueError('当地已有传送阵，不能重复建造')
+    from .territory.rules import enabled
+    if enabled() and entity is not game.family:
+        from .territory.state import validate_projection
+        validate_projection(game,maps,entity,p.location_id)
     organizations.register(game,depot.owner_kind(game,entity),entity.id,entity.world)
     ensure_regional_market(game,maps,p.world,p.location_id)
     plan=estimate(game,entity)
@@ -66,4 +70,12 @@ def build(game,maps,identity,existing):
     if stores: depot.record(stores,game,'当地建阵消耗原府库矿材，未占用申请预留物资')
     game.economy_v2.setdefault('teleport_arrays',{})[f'{p.world}:{p.location_id}']=dict(
         world=p.world,location=p.location_id,owner_id=entity.id,owner_kind=depot.owner_kind(game,entity),built_year=p.age)
+    if enabled() and entity is not game.family:
+        from .territory.state import ensure, state
+        book=ensure(game,maps,p.world)
+        row=book.setdefault(p.location_id,{}).setdefault(entity.id,dict(value=40.,outpost=False,policy=''))
+        row['value']=max(40.,row['value'])
+        state(game).setdefault('suppressed_arrays',{}).pop(f'{p.world}:{p.location_id}:{entity.id}',None)
+        from .territory.state import refresh_bonuses
+        refresh_bonuses(game,p.world)
     return f'{entity.name}实付{plan["total"]}灵石并消耗当地矿材，在{site["name"]}建成传送阵。通行仍遵守本界路线与境界限制。'

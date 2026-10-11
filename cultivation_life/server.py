@@ -633,6 +633,8 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("npc_id", ""), payload.get("position_id", ""),
                     int(payload.get("years", 1) or 1), payload.get("reason", ""),
                 )
+            elif operation == "organization-action":
+                result = ENGINE.organization_action(game_id,payload)
             elif operation == "intrigue-guest":
                 result = ENGINE.intrigue_guest_action(
                     game_id, payload.get("kind", ""), payload.get("action", ""), payload.get("npc_id", "")

@@ -75,10 +75,18 @@ events and deaths inside unit hooks do not add new early returns: the establishe
 batch still settles. Only the profile's market-clock guard is applied at the end.
 The optional event hook runs once, after bounties and before summary/clocks.
 """
+    if units <= 0 and (elapsed_years is None or elapsed_years <= 0):
+        return
+    if units > 0 and policy.intelligence_per_unit and deps._maybe_tianji_intelligence_event is None:
+        raise RuntimeError("普通行动结算缺少神机情报回调")
+    elapsed = game.player.age - start_age if elapsed_years is None else elapsed_years
+    # Geographic changes are a single endpoint approximation for the elapsed
+    # action/travel batch. Do not replay yearly politics or rewrite player age.
+    # Resumed activities may have elapsed years without another rounded unit.
+    if elapsed > 0 and deps._settle_territory_time is not None:
+        deps._settle_territory_time(game, rng)
     if units <= 0:
         return
-    if policy.intelligence_per_unit and deps._maybe_tianji_intelligence_event is None:
-        raise RuntimeError("普通行动结算缺少神机情报回调")
 
     def artifact():
         result = deps._advance_natal_artifact(game, action, units)
@@ -104,7 +112,6 @@ The optional event hook runs once, after bounties and before summary/clocks.
     deps._advance_player_bounties(game, rng)
     if after_units is not None:
         after_units()
-    elapsed = game.player.age - start_age if elapsed_years is None else elapsed_years
     if elapsed >= 5:
         deps._record_era_summary(game, start_age, news)
     if not policy.market_clocks_require_alive or game.player.alive:

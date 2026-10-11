@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **2.10.0**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
+维护基线：本体 **2.11.0**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
 
 ## 如何理解覆盖范围
 
@@ -33,6 +33,7 @@
 | 控制台指令 | 正式操作入口 | 类型 |
 | --- | --- | --- |
 | `action advance <action> <units>` | `advance` | simulation |
+| `organization action <action> <kind> <owner_id> <location_id> [policy] [rival_id] [goal]` | `organization-action` | simulation |
 | `event choose <choice_id>` | `choice` | simulation |
 | `npc contact <npc_id> <action>` | `npc-contact` | simulation |
 | `relationship violence <kind> <target_id> [capture]` | `relationship-violence` | simulation |

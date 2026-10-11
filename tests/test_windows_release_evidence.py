@@ -61,7 +61,7 @@ def write_success_logs(root):
             f'exe-{rid}-verification.log': 'EXE verified: old binary\nEXE verified: old binary'}
     logs.update({f'{check}-ui-{rid}.log': 'passed'
                  for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                               'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console',
+                               'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console',
                                'economy-governance', 'economy-enterprises', 'economy-expansion', 'events')})
     for name, text in logs.items():
         (root / 'build' / name).write_text(text)
@@ -101,13 +101,14 @@ def test_packaging_uses_the_verified_binary(release, monkeypatch):
     assert not (target/'cultivation_life/engine').exists()
 
 
-def test_organization_ui_failure_cannot_publish(release, monkeypatch):
+@pytest.mark.parametrize('check',['organizations','territory'])
+def test_required_ui_failure_cannot_publish(release, monkeypatch,check):
     root, receipt = release
     write_success_logs(root)
     (root / f'build/exe-{package_windows.RELEASE_ID}-verification.json').write_text(json.dumps(receipt))
-    (root / f'build/organizations-ui-{package_windows.RELEASE_ID}.log').write_text('Traceback: organization action failed')
+    (root / f'build/{check}-ui-{package_windows.RELEASE_ID}.log').write_text('Traceback: action failed')
     monkeypatch.setattr(package_windows, 'ROOT', root)
-    with pytest.raises(RuntimeError, match='UI check must pass: organizations'):
+    with pytest.raises(RuntimeError, match=f'UI check must pass: {check}'):
         package_windows.main()
     assert not list((root / 'dist').glob('*.zip'))
     assert not (root / 'launcher.exe').exists()

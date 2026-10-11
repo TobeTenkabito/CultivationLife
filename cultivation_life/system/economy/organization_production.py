@@ -24,11 +24,19 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
         for side in ('attacker','defender') for identity in deployed_ids(war,side)
         if identity not in war.get('escaped',{}).get(side,()) and identity not in war.get('voisinage_suppressed',())}
     groups=Counter();working=Counter()
+    positions=game.intrigue_state.get('factions',{}).get(f'sect:{entity.id}',{}).get('positions',{}) if row['kind']=='sect' else {}
+    elder_ids={positions.get(role) for role in ('foreign_elder','war_elder')}
+    effective_elder=False
     for npc in entity.npcs:
         if not is_free(npc) or npc.world != entity.world:continue
         groups[npc.realm_index]+=1
         if (npc.world,npc.id) not in deployed and not research_assignment(game,npc.id):
             working[npc.realm_index]+=1
+            effective_elder=effective_elder or (npc.id in elder_ids and npc.realm_index>=3)
+    p=game.player
+    if 'player' in elder_ids and p.alive and p.world==world and not p.imprisonment and not p.ghost_captor and not game.active_trial:
+        effective_elder=effective_elder or (p.realm_index>=3 and (world,'player') not in deployed and not research_assignment(game,'player'))
+    row['territory_elder_factor']=.7 if effective_elder else 1.
     tier = WORLD_SYSTEMS['world_profiles'][world]['tier']
     row['expected_upkeep'] = sum(count*(25*tier+rank**2*8) for rank,count in groups.items())
     row['workforce'] = {str(k):v for k,v in sorted(groups.items())}
@@ -43,6 +51,8 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
         and e['world'] == world and e['enabled'] for e in game.economy_v2.get('estates', {}).values())
     capacity /= 1 + estate_count
     capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1)
+    from ..territory.rules import enabled
+    capacity *= 1 + (row.get('territory_production_bonus',0.) if enabled() else 0.)
     from .basket_rules import index, purpose_candidates, raw_candidates
     from .basket_production import produce as workshop_produce
     credit = min(10**12, row.get('production_credit', 0) + capacity * years)

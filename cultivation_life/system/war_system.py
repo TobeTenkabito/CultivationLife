@@ -30,6 +30,8 @@ from .faction_geography import war_site, can_enter_faction
 
 
 WAR_TERM_DEFS = {
+    "remove_influence": ("移除指定地区影响力", 25),
+    "destroy_outpost": ("捣毁指定地区据点", 5),
     "economic_rights": ("接管当地产业与市税", 55),
     "execute": ("处死指定修士", 30),
     "alliance": ("确立同盟", 18),

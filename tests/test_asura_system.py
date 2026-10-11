@@ -48,7 +48,7 @@ class AsuraSystemTests(unittest.TestCase):
         self.assertTrue(WORLD_SYSTEMS["world_profiles"]["asura"]["enabled"])
         self.assertEqual(len(self.engine.maps.worlds["asura"]["locations"]), 23)
         asura_factions = [sect for sect in self.engine._new_sects().values() if sect.world == "asura"]
-        self.assertEqual({sect.name for sect in asura_factions}, {"修罗战庭", "血月魔宫", "寂灭海宗", "修罗王庭"})
+        self.assertEqual({sect.name for sect in asura_factions}, {"修罗战庭", "血月魔宫", "寂灭海宗", "修罗王庭", "霜戟武府", "赤砂战宗"})
         self.assertEqual(next(s for s in asura_factions if s.id == 'asura_royal_court').kind, 'institution')
         self.assertTrue({
             "asura_blood_crystal", "heavenly_demon_heart_marrow", "war_soul_banner",
@@ -82,7 +82,7 @@ class AsuraSystemTests(unittest.TestCase):
         self.assertIsNone(shown["pending_event"])
         self.assertTrue(shown["market"]["available"])
         self.assertEqual(shown["map"]["world_name"], "修罗界")
-        self.assertEqual(len(shown["faction"]["available"]), 3)
+        self.assertEqual(len(shown["faction"]["available"]), 5)
 
         self.engine.manage_secret_art(game_id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game_id, "true_demon")

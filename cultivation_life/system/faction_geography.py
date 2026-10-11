@@ -6,7 +6,7 @@ import hashlib
 from ..content_registry import CONTENT_DOCUMENTS, REALMS
 
 
-def faction_site(faction):
+def faction_site(faction, *, persist=True):
     world = CONTENT_DOCUMENTS["maps.json"]["worlds"][faction.world]
     locations = world["locations"]
     current = next((row for row in locations if row["id"] == faction.location_id), None)
@@ -21,7 +21,8 @@ def faction_site(faction):
     preferred = [row for row in safe if any(word in row.get("name", "") for word in preferences)]
     pool = preferred or safe
     index = int.from_bytes(hashlib.sha256(faction.id.encode()).digest()[:4], "big") % len(pool)
-    faction.location_id = pool[index]["id"]
+    if persist:
+        faction.location_id = pool[index]["id"]
     return pool[index]
 
 

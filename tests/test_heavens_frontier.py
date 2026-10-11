@@ -332,8 +332,10 @@ def test_actual_road_and_recon_route_roundtrip_uses_one_npc_year_per_elapsed_yea
     # This exact-duration test needs a surviving authorizer. A DLC changes the
     # unrelated random accident stream; revocation/death have separate tests.
     # Keep both real annual loops, settlement and all ordinary age processing.
-    with (patch.object(ready[0], '_advance_guixu_calendar', return_value=False),
-          patch.object(ready[0], '_advance_npc_cultivation', return_value=None),
+    # These stubs need no call history. Mock retained every loaded GameState
+    # across the long real route and unnecessarily kept gigabytes of snapshots.
+    with (patch.object(ready[0], '_advance_guixu_calendar', new=lambda *args, **kwargs:False),
+          patch.object(ready[0], '_advance_npc_cultivation', new=lambda *args, **kwargs:None),
           patch.dict(FACTION_SYSTEMS['npc_cultivation'], accident_death_chance=0)):
         while frontier.get(load(real))['status'] == 'active' and count < 160:
             issue(real,'frontier_wait')

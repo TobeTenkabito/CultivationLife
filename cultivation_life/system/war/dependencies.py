@@ -231,6 +231,7 @@ class WarActionsDependencies:
 
 @dataclass(frozen=True, slots=True)
 class WarPresentationDependencies:
+    _get_maps: Callable[[], MapPort]
     _allied_powers: Callable[..., Any]
     _ensure_war_shape: Callable[..., Any]
     _find_npc: Callable[..., Any]
@@ -248,6 +249,10 @@ class WarPresentationDependencies:
     @property
     def WAR_TERM_DEFS(self) -> Any:
         return self._get_WAR_TERM_DEFS()
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
 
 
 @dataclass(frozen=True, slots=True)

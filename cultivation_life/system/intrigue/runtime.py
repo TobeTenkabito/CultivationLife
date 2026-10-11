@@ -110,6 +110,9 @@ def _advance_intrigue_unit(deps: IntrigueRuntimeDependencies, game: GameState, r
             if controller and eligible_voters and rng.random() < .16:
                 style = deps._intrigue_governance_style(game, controller)
                 resolution_type = {"internal": "mass_recruitment", "balance": "investment", "diplomacy": "form_alliance", "military": "declare_war"}[style]
+                from ..economy.estate_management import recruitment_ready
+                if resolution_type=='declare_war' and not recruitment_ready(game,sect):
+                    resolution_type='investment'
                 target_id = ""
                 if resolution_type in {"form_alliance", "declare_war"}:
                     possible = [row.id for row in candidates if row.id != sect.id and row.world == sect.world]

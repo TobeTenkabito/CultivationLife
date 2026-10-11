@@ -32,7 +32,8 @@ def release_inputs(tmp_path):
             f'quick-start-ui-{rid}.log': 'Quick-start regression passed',
             f'start-layout-ui-{rid}.log': 'Start layout passed',
             f'true-form-ui-{rid}.log': 'Release 251 UI passed:',
-            f'world-life-ui-{rid}.log': 'Release 250 UI passed:', f'civilizations-ui-{rid}.log':'passed'}
+            f'world-life-ui-{rid}.log': 'Release 250 UI passed:', f'civilizations-ui-{rid}.log':'passed',
+            f'territory-ui-{rid}.log':'Territory UI passed:'}
     phases = ('civilizations-i-only','civilizations-ii-only','civilizations-neither','heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
@@ -40,7 +41,7 @@ def release_inputs(tmp_path):
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
+                 for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -69,6 +70,8 @@ def release_inputs(tmp_path):
     ('collection', 'Full regression suite must pass'),
     ('phase', 'android-experience-'),
     ('organizations', 'Android organizations portrait must pass'),
+    ('territory', 'Android territory portrait must pass'),
+    ('territory-browser', 'Territory browser checks must pass'),
     ('heavens', 'Heavens portrait must pass'),
     ('heavens-browser', 'Eleven-world UI acceptance must pass'),
     ('heavens-workbench', 'Heavens workbench UI must pass'),
@@ -93,6 +96,8 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
         'collection': (f'release-{rid}-tests.log', '1574 passed in 268.76s\nERROR collecting tests'),
         'phase': (f'android-experience-{rid}.log', 'status=passed\nstatus=failed'),
         'organizations': (f'android-organizations-portrait-{rid}.log', 'status=failed'),
+        'territory': (f'android-territory-portrait-{rid}.log', 'status=failed'),
+        'territory-browser': (f'territory-ui-{rid}.log', 'Territory UI passed: Traceback'),
         'debug-console': (f'android-debug-console-portrait-{rid}.log', 'status=failed'),
         'start-layout': (f'android-start-layout-portrait-{rid}.log', 'status=failed'),
         'start-browser': (f'start-layout-ui-{rid}.log', 'Traceback: failed'),
