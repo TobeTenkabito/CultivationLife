@@ -1240,6 +1240,23 @@ function renderIntrigue(system) {
   if (!enabled) { window.UtilityPanels?.close('intrigue'); content.innerHTML = ''; return; }
   content.innerHTML = '';
   $('#intrigue-heading').textContent = `${(system.sections || []).length} 个相关势力 · 一人一票`;
+  if (game?.map?.territory) {
+    const territory = document.createElement('section'); territory.className = 'atlas-entry';
+    const title = document.createElement('strong'); title.textContent = '山川形势 · 地方经营';
+    const hint = document.createElement('p'); hint.textContent = '查看各宗地图影响、地区政策与地方决议；选定地域后议事。';
+    const links = document.createElement('div'); links.className = 'atlas-entry-links';
+    for (const [view, label] of [['influence','查看势力影响地图'],['decisions','地方政策与决议'],['guide','影响力机制说明']]) {
+      const link = document.createElement('button'); link.type = 'button'; link.textContent = label;
+      link.dataset.territoryEntry = view;
+      link.onclick = () => {
+        const home = game.map.locations.find(p => p.influences?.some(r => r.owned && r.headquarters));
+        window.UtilityPanels?.open('map');
+        window.MapDirectory?.openTerritory(view, view === 'decisions' ? home?.id : null);
+      };
+      links.append(link);
+    }
+    territory.append(title, hint, links); content.append(territory);
+  }
   const locked = () => !!game?.pending_event || !!game?.imprisonment || !game?.player?.alive;
 
   if ((system.player_guest_roles || []).length) {

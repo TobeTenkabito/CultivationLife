@@ -293,25 +293,38 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     python(assetText("territory-2110.py")+"\nfrom cultivation_life import server\nprepare(server.ENGINE,"+JSONObject.quote(id)+")");
                     async("loadGame("+JSONObject.quote(id)+")");
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();UtilityPanels.close('map');true");async("GameThemes.saved");
-                    tapSelector("[data-panel-target=map]");waitForJs("!!document.querySelector('#map-atlas svg')","Native road atlas did not load");
+                    tapSelector("[data-panel-target=map]");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#map-atlas').classList.contains('hidden')")),"Native text map should open separately");
+                    tapSelector("#map-view-tabs [aria-controls=map-atlas]");
+                    waitForJs("!!document.querySelector('#map-atlas svg') && !document.querySelector('#map-atlas').classList.contains('hidden')","Native road atlas did not load");
                     String destination=(String)js("game.map.current");
                     python("from cultivation_life import server\nserver._territory_native_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
                     tapSelector("[data-atlas-location="+JSONObject.quote(destination)+"]");
                     python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._territory_native_before");
-                    tapSelector(".atlas-decisions>summary");tapSelector("[data-organization-action=build_outpost]");
+                    tapSelector("[data-atlas-view=decisions]");tapSelector("[data-organization-action=build_outpost]");
                     waitForJs("!busy && game.map.territory.locations.some(r=>r.outpost)","Native paid outpost did not complete");
                     python(assetText("territory-2110.py")+"\nfrom cultivation_life import server\nassert_outpost(server.ENGINE,"+JSONObject.quote(id)+")");
-                    tapSelector(".atlas-decisions>summary");js("document.querySelector('[aria-label=地方政策]').value='patrol';true");
+                    js("document.querySelector('[aria-label=地方政策]').value='patrol';true");
                     tapSelector("[data-organization-action=territory_policy]");waitForJs("!busy && game.map.locations.find(r=>r.current).influences.some(r=>r.owned && r.policy==='patrol')","Native policy vote failed");
                     capture("territory-map-"+theme+"-"+arguments.getString("orientation","portrait"));
                     tapSelector(".atlas-relocations>summary");js("document.querySelector('.atlas-relocation-form select').value="+JSONObject.quote(destination)+";true");
                     tapSelector(".atlas-relocation-form button");waitForJs("!busy && game.map.locations.find(r=>r.current).influences.some(r=>r.owned && r.headquarters)","Native headquarters vote failed");
                     python(assetText("territory-2110.py")+"\nfrom cultivation_life import server\nassert_relocated(server.ENGINE,"+JSONObject.quote(id)+")");
+                    python("from cultivation_life import server\nserver._territory_native_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+                    for(String view:new String[]{"guide","decisions","influence"}) {
+                        tapSelector("[data-panel-target=intrigue]");
+                        tapSelector("[data-territory-entry="+view+"]");
+                        check(Boolean.TRUE.equals(js("document.querySelector('[data-atlas-view="+view+"]').getAttribute('aria-pressed')==='true' && !document.querySelector('#map-atlas').classList.contains('hidden') && document.querySelector('#map-locations').classList.contains('hidden')")),"Native DLC shortcut opened wrong subpage");
+                    }
+                    tapSelector("[data-atlas-display=list]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.atlas-region-meter progress').length>0")),"Native influence list missing");
+                    capture("territory-list-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._territory_native_before");
                     check(Boolean.TRUE.equals(js("document.documentElement.scrollWidth<=innerWidth+1")),"Native territory atlas overflow");
                     async("loadGame("+JSONObject.quote(id)+")");
                     check(Boolean.TRUE.equals(js("game.map.locations.find(r=>r.current).influences.some(r=>r.owned && r.value===100)")),"Native relocated headquarters did not persist");
                 }
-                result.putString("territory_scope","Four themes, real SVG taps without state writes, local material outpost, policy majority, same-world relocation and persistence");
+                result.putString("territory_scope","Four themes, independent atlas subpage, real SVG taps and three DLC shortcuts without state writes, influence list, local material outpost, policy majority, same-world relocation and persistence");
             } else if(phase.equals("organizations")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'势力原生验收',spirit_root:'supreme_earth',path:'dao',seed:290,custom_start:{world:'human',realm_index:4,sect:'new',sect_name:'验收宗'}})});return g.id;})()");

@@ -1,6 +1,6 @@
 /* A dedicated atlas ledger for temporary gatherings and permanent offices. */
 (() => {
-  let world = null, mode = 'terrain', category = 'all', selected = null;
+  let world = null, gameId = null, mode = 'terrain', category = 'all', selected = null, openTerritory = null;
   const node = (tag, text, cls = '') => {
     const el = document.createElement(tag); el.className = cls;
     if (text != null) el.textContent = text;
@@ -10,7 +10,7 @@
     const el = node('button', text, cls); el.type = 'button'; el.onclick = action; return el;
   };
   function render(map, auction, state) {
-    if (world !== map.world) { world = map.world; mode = 'terrain'; category = 'all'; selected = null; }
+    if (world !== map.world || gameId !== state?.id) { world = map.world; gameId = state?.id; mode = 'terrain'; category = 'all'; selected = null; }
     const places = map.locations || [];
     if (!places.some(place => place.id === selected)) selected = null;
     const entries = new Map(places.map(place => [place.id, []]));
@@ -62,16 +62,23 @@
     const directory = document.querySelector('#map-directory');
     const scrollTop = () => document.querySelector('#map-card').scrollTo({top:0, behavior:'instant'});
     const switchMode = value => { mode = value; draw(); scrollTop(); };
+    openTerritory = (view = 'influence', location = null) => {
+      window.MapAtlas?.open(view, location); switchMode('atlas');
+    };
     function draw() {
       tabs.replaceChildren();
-      [['terrain','地域地图'],['directory','活动与据点'], ...(map.economy?.available ? [['economy','本地市场']] : [])].forEach(([id, title]) => {
+      [['terrain','地域地图'], ['atlas','可视地图'], ['directory','活动与据点'], ...(map.economy?.available ? [['economy','本地市场']] : [])].forEach(([id, title]) => {
         const tab = button(title, () => switchMode(id));
         tab.setAttribute('aria-pressed', String(mode === id));
-        tab.setAttribute('aria-controls', id === 'terrain' ? 'map-locations' : id === 'economy' ? 'map-economy' : 'map-directory');
+        tab.setAttribute('aria-controls', id === 'atlas' ? 'map-atlas' : id === 'terrain' ? 'map-locations' : id === 'economy' ? 'map-economy' : 'map-directory');
         tabs.append(tab);
       });
       terrain.classList.toggle('hidden', mode !== 'terrain');
-      document.querySelector('#map-atlas')?.classList.toggle('hidden',mode !== 'terrain');
+      document.querySelector('#map-atlas')?.classList.toggle('hidden', mode !== 'atlas');
+      const description = document.querySelector('#map-description');
+      description.textContent = mode === 'atlas'
+        ? '点选地域查看道路与宗门影响；政策与决议、机制说明在页签中查看。看图不消耗时间。'
+        : '地域地图查看行程；可视地图查看山川与宗门影响。移动沿最短路线消耗时间，旅途中世界与人物继续演化。';
       directory.classList.toggle('hidden', mode !== 'directory');
       document.querySelector('#map-economy').classList.toggle('hidden', mode !== 'economy' || !map.economy?.available);
       directory.replaceChildren();
@@ -142,5 +149,5 @@
       return strip;
     };
   }
-  window.MapDirectory = {render};
+  window.MapDirectory = {render, openTerritory:(...args)=>openTerritory?.(...args)};
 })();

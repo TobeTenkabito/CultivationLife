@@ -90,9 +90,11 @@ def main():
 
                 for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
+                    page.evaluate('GameThemes.saved')
                     for width in (1440, 412, 932):
                         print(f'Asura theme {theme}, width {width}',flush=True)
                         page.set_viewport_size({'width':width,'height':430 if width==932 else 915 if width==412 else 1000})
+                        page.wait_for_function('(width)=>GameNavigation.isCompact()===(width<=900)',arg=width)
                         page.evaluate("UtilityPanels.open('asura-veins')")
                         for title in ['conversion','body','veins','route','domain','powers']:
                             navigation_locator(page,f'[data-panel-target=asura-{title}]').click()

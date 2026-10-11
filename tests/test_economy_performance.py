@@ -81,11 +81,39 @@ def test_candidate_computes_guard_once_for_all_goods_and_refreshes_each_call(tmp
     state.advance_economy(game)
     # A guard benchmark can change when loaded DLC/content changes. It is shared
     # only inside this selection, never cached across commands or save files.
-    with patch.object(caravans, 'guard_required', wraps=caravans.guard_required) as guard:
+    with patch.object(caravans, 'guard_required', wraps=caravans.guard_required) as guard, \
+         patch.object(caravans, 'arrays', wraps=caravans.arrays) as network:
         caravans._candidate(game, engine.maps, alliance, fleet)
-        assert guard.call_count == 1
+        assert guard.call_count == network.call_count == 1
         caravans._candidate(game, engine.maps, alliance, fleet)
-        assert guard.call_count == 2
+        assert guard.call_count == network.call_count == 2
+
+
+def test_candidate_shares_buy_quotes_only_inside_one_search(tmp_path):
+    engine = GameEngine(ROOT, tmp_path)
+    game = engine._load(engine.create_game('报价边界验收', 'supreme_metal', 'dao', 315,
+                                           preset_id='true_immortal')['id'])
+    fleet = next(iter(game.economy_v2['transport']['worlds'][game.player.world]['fleets'].values()))
+    alliance = caravans.owner_sites(game, engine.maps, fleet)
+    game.player.age += 1
+    state.advance_economy(game)
+    state.ensure_regional_market(game,engine.maps,fleet['world'],fleet['location'])
+    source = game.economy_v2['markets'][f'{fleet["world"]}:{fleet["location"]}']
+    identities = {id(row) for row in source['commodities'].values()}
+    def calls(mock):
+        return [(id(call.args[0]), call.args[2]) for call in mock.call_args_list
+                if call.args[1] == 'buy' and id(call.args[0]) in identities]
+    with patch.object(caravans, 'quote', wraps=caravans.quote) as quoting:
+        caravans._candidate(game, engine.maps, alliance, fleet)
+        first = calls(quoting)
+        assert first and len(first) == len(set(first))
+        # Stock changes are observed by the next dispatch, including its fresh
+        # source prices and quantity choices. No quote cache survives a search.
+        for row in source['commodities'].values():
+            row['stock'] = 0
+        quoting.reset_mock()
+        assert caravans._candidate(game, engine.maps, alliance, fleet) is None
+        assert not calls(quoting)
 
 
 @pytest.mark.parametrize('units', [1, 3])
