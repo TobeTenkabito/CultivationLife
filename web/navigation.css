@@ -1,6 +1,8 @@
-/* Six stationary categories replace both scrolling rails. */
-#strategy-dock.navigation-grid{grid-auto-flow:row}
-#strategy-dock.navigation-grid button[data-dlc]::before{top:3px;right:3px}
+/* Desktop keeps the original rails; touch and narrow layouts use categories. */
+#navigation-grid{grid-auto-flow:row}
+#navigation-grid button[data-dlc]::before{top:3px;right:3px}
+.navigation-desktop .navigation-bar,[data-desktop-dock][hidden]{display:none!important}
+.navigation-desktop [data-desktop-dock] .navigation-activity::after{content:'';position:absolute;right:4px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--cinnabar)}
 .navigation-bar{position:fixed;z-index:50;left:14px;top:50%;transform:translateY(-50%);display:grid;gap:7px;padding:8px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
 .navigation-bar button{position:relative;width:54px;min-height:52px;display:grid;place-items:center;gap:2px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--pine)}
 .navigation-bar button span{font-size:20px;line-height:1.2}.navigation-bar button small{font-size:11px}.navigation-bar button:hover,.navigation-bar button[aria-expanded=true]{background:var(--pine);color:var(--on-accent)}
@@ -12,25 +14,23 @@ body:not(.in-game) .navigation-bar{display:none}.navigation-open .navigation-bar
 .navigation-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:0 12px;flex:none}.navigation-tabs button{min-height:44px;min-width:0;padding:5px 2px;font-size:12px;border:0;border-radius:8px;background:transparent;color:var(--pine)}.navigation-tabs button[aria-selected=true]{background:var(--pine);color:var(--on-accent)}
 .navigation-search{display:block;padding:8px 16px;flex:none}.navigation-search input{width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);padding:8px 12px;box-sizing:border-box;font:14px var(--serif)}
 .navigation-body{padding:4px 16px 16px;overflow-y:auto;overscroll-behavior:contain;min-height:0}.navigation-body h3{font-size:13px;font-weight:500;color:var(--muted);margin:10px 0 8px}.navigation-note{font-size:12px;color:var(--muted);line-height:1.6;margin:12px 0 0}
-#strategy-dock.navigation-grid{position:static;transform:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:auto;max-width:none;max-height:none;padding:0;margin:10px 0 0;overflow:visible;border:0;border-radius:0;box-shadow:none;background:transparent;backdrop-filter:none}
+#navigation-grid{position:static;transform:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:auto;max-width:none;max-height:none;padding:0;margin:10px 0 0;overflow:visible;border:0;border-radius:0;box-shadow:none;background:transparent;backdrop-filter:none}
 .navigation-entry{display:flex;min-width:0;border:1px solid var(--line);border-radius:11px;overflow:hidden}.navigation-entry[hidden]{display:none!important}
-#strategy-dock.navigation-grid .navigation-entry>button:first-child{display:flex;align-items:center;justify-content:flex-start;gap:8px;flex:1;min-width:0;width:auto;height:auto;min-height:54px;padding:8px 6px;border:0;border-radius:0;box-shadow:none;transform:none;text-align:left}
-#strategy-dock.navigation-grid .navigation-entry>button:first-child span{flex:none;font-size:19px}#strategy-dock.navigation-grid .navigation-entry>button:first-child small{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
-#strategy-dock.navigation-grid .navigation-entry>.navigation-pin{flex:none;width:44px;min-width:44px;height:auto;min-height:44px;border:0;border-radius:0;background:transparent;color:var(--gold);font-size:20px;transform:none}
+#navigation-grid .navigation-entry>button:first-child{display:flex;align-items:center;justify-content:flex-start;gap:8px;flex:1;min-width:0;width:auto;height:auto;min-height:54px;padding:8px 6px;border:0;border-radius:0;box-shadow:none;transform:none;text-align:left}
+#navigation-grid .navigation-entry>button:first-child span{flex:none;font-size:19px}#navigation-grid .navigation-entry>button:first-child small{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+#navigation-grid .navigation-entry>.navigation-pin{flex:none;width:44px;min-width:44px;height:auto;min-height:44px;border:0;border-radius:0;background:transparent;color:var(--gold);font-size:20px;transform:none}
 .navigation-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.navigation-shortcut{min-height:54px;display:flex;align-items:center;gap:9px;padding:9px 11px;min-width:0;background:color-mix(in srgb,var(--tone-green) 8%,transparent);border:1px solid var(--line);border-radius:11px;color:var(--pine);text-align:left}.navigation-shortcut span{font-size:20px;flex:none}.navigation-shortcut small{font-size:12px;line-height:1.5;overflow-wrap:anywhere}.navigation-shortcut:disabled{opacity:.4}.navigation-shortcut:hover{background:var(--pine);color:var(--on-accent)}
-@media(max-width:900px),(max-height:520px){
- .utility-panel.panel-open{transform:none!important}
- .navigation-bar{left:10px;right:10px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom));transform:none;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:5px;width:auto;border-radius:16px}
- .navigation-bar button{width:auto;min-width:0;min-height:48px;border:0;gap:1px}.navigation-bar button span{font-size:18px}.navigation-bar button small{font-size:11px}
- .in-game .shell{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
- .utility-panel,.utility-panel.left-panel,#map-card.utility-panel{left:12px!important;right:12px!important;top:12px!important;bottom:auto!important;width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 92px)!important;min-width:0!important}
-}
+.navigation-compact .utility-panel.panel-open{transform:none!important}
+.navigation-compact .navigation-bar{left:10px;right:10px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom));transform:none;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:5px;width:auto;border-radius:16px}
+.navigation-compact .navigation-bar button{width:auto;min-width:0;min-height:48px;border:0;gap:1px}.navigation-compact .navigation-bar button span{font-size:18px}.navigation-compact .navigation-bar button small{font-size:11px}
+.navigation-compact.in-game .shell{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.navigation-compact .utility-panel,.navigation-compact .utility-panel.left-panel,.navigation-compact #map-card.utility-panel{left:12px!important;right:12px!important;top:12px!important;bottom:auto!important;width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 92px)!important;min-width:0!important}
 @media(max-width:460px){
- #strategy-dock.navigation-grid,.navigation-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #navigation-grid,.navigation-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
  .navigation-heading{padding:12px 16px 6px}.navigation-heading h2{font-size:20px}
 }
 @media(orientation:landscape) and (max-height:520px){
  .navigation-menu{width:min(840px,calc(100vw - 24px))}.navigation-heading{padding:8px 16px 4px}.navigation-heading small{display:none}.navigation-heading h2{font-size:18px}
  .navigation-search{padding:4px 16px}.navigation-menu .navigation-search input{min-height:40px;font-size:14px}
- #strategy-dock.navigation-grid,.navigation-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #navigation-grid,.navigation-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
 }

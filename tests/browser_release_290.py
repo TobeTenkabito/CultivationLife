@@ -29,7 +29,7 @@ def main():
                         for width,height in [(1440,1000),(360,800),(412,915),(915,412)]:
                             made=engine.create_game('势力验收','supreme_earth','dao',290,custom_start=dict(world='human',realm_index=4,sect='new',sect_name='验收宗'))
                             identity=made['id'];fixture.prepare(engine,identity)
-                            page=browser.new_page(viewport=dict(width=width,height=height));errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+                            page=browser.new_page(viewport=dict(width=width,height=height),has_touch=width<1000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('!!configData && !busy')
                             page.evaluate('(t)=>document.querySelector(`[data-theme-picker=start] [data-theme-choice=${t}]`).click()',theme)
                             page.evaluate('async id=>loadGame(id)',identity)
@@ -58,17 +58,31 @@ def main():
                             assert engine._load(identity).economy_v2['teleport_arrays']
                             page.screenshot(path=str(output/f'{theme}-{width}-array.png'))
                             fixture.activities(engine,identity,'scheduled');load()
-                            assert page.locator('[data-navigation-category=economy]').evaluate('b=>b.classList.contains("navigation-notice")')
-                            page.locator('[data-navigation-category=common]').click()
-                            assert page.locator('#navigation-current-events [data-navigation-shortcut]').count()==2
-                            page.locator('#navigation-current-events [data-navigation-shortcut=auction]').click()
+                            compact=page.evaluate('GameNavigation.isCompact()')
+                            if compact:
+                                assert page.locator('[data-navigation-category=economy]').evaluate('b=>b.classList.contains("navigation-notice")')
+                                page.locator('[data-navigation-category=common]').click()
+                                assert page.locator('#navigation-current-events [data-navigation-shortcut]').count()==2
+                                page.locator('#navigation-current-events [data-navigation-shortcut=auction]').click()
+                            else:
+                                assert page.locator('#strategy-dock [data-panel-target=auction].navigation-activity').is_visible()
+                                assert page.locator('#strategy-dock [data-panel-target=exchange].navigation-activity').is_visible()
+                                page.locator('#strategy-dock [data-panel-target=auction]').click()
                             page.wait_for_selector('#auction-card.panel-open');assert '预告' in page.locator('#auction-title').inner_text()
-                            fixture.activities(engine,identity,'open');load();page.locator('[data-navigation-category=common]').click()
-                            page.locator('#navigation-current-events [data-navigation-shortcut=exchange]').click()
+                            fixture.activities(engine,identity,'open');load()
+                            if compact:
+                                page.locator('[data-navigation-category=common]').click()
+                                page.locator('#navigation-current-events [data-navigation-shortcut=exchange]').click()
+                            else:
+                                page.locator('#strategy-dock [data-panel-target=exchange]').click()
                             page.wait_for_selector('#exchange-card.panel-open');assert '剩余' in page.locator('#exchange-description').inner_text()
-                            fixture.activities(engine,identity,'closed');load();page.locator('[data-navigation-category=common]').click()
-                            assert page.locator('#navigation-current-events').count()==0
-                            page.locator('#navigation-close').click()
+                            fixture.activities(engine,identity,'closed');load()
+                            if compact:
+                                page.locator('[data-navigation-category=common]').click()
+                                assert page.locator('#navigation-current-events').count()==0
+                                page.locator('#navigation-close').click()
+                            else:
+                                assert not page.locator('#strategy-dock .navigation-activity').count()
                             fixture.clan(engine,identity);load();navigation_locator(page,'[data-panel-target=family]').click()
                             page.locator('[data-family]:not(:disabled)').filter(has_text='申请加入').first.click();settle()
                             assert engine._load(identity).family_state['membership']['kin'] is False
