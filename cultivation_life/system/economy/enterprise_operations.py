@@ -124,6 +124,13 @@ def advance_estates(game, maps):
         years = game.player.age - row['last_year']
         if years <= 0:
             continue
+        if row['owner_kind'] == 'sect':
+            from .estate_management import settlement_interval
+            finance = game.economy_v2.get('organizations', {}).get(payer(row))
+            interval = settlement_interval(game, finance) if finance else 1
+            finished = row['job'] and game.player.age >= row['job']['finish']
+            if years < interval and not finished:
+                continue
         row['last_year'] = game.player.age
         row['revision'] += 1
         if row['owner_kind'] == 'background':
@@ -137,9 +144,6 @@ def advance_estates(game, maps):
                 continue
         if row['owner_kind'] == 'player' and row['owner_id'] != game.id:
             continue  # Lost ownership authority never copies the estate to a new world.
-        if row.get('entrusted'):
-            from .estate_management import plan
-            plan(game, maps, row)
         market = market_at(game, maps, row)
         due = min(10**12, row['arrears'] + annual_maintenance(row,market) * years)
         source = cash_ready(game, row)
@@ -153,6 +157,15 @@ def advance_estates(game, maps):
             put(row, job['item'], job['quantity'])
             row['produced'] += job['quantity']
             log(row, game.player.age, f'实物完工入库 {job["quantity"]} 件')
+        if row.get('entrusted'):
+            # Liquidate the old recipe before selecting the next batch.
+            row['auto_sell'] = True
+            sell_stock(game, row, market)
+            old_recipe = recipes(row['world'], commodity_catalog(row['world'])).get(row['recipe'], {})
+            unsold = row['stock'].get(old_recipe.get('output'), 0)
+            if row['job'] or not unsold:
+                from .estate_management import plan
+                plan(game, maps, row)
         if not row['enabled']:
             continue
         if row['auto_sell']:

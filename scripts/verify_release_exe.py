@@ -145,7 +145,23 @@ def verify(with_dlc):
             assert all(row['world'] == 'human' for row in transport['fleets'].values())
             organizations = freight_raw['economy_v2']['organizations']
             assert organizations and any(row['produced'] > 0 for row in organizations.values())
-            assert all(row['last_year'] == freight_raw['player']['age'] for row in organizations.values())
+            # Content-declared autonomous small sects may aggregate five years;
+            # every other organization, player authority and war stays annual.
+            definitions = {r['id']:r for r in json.loads((ROOT/'content/factions.json').read_text(encoding='utf-8'))['factions']}
+            if with_dlc:
+                for path in (ROOT/'dlc').glob('*/content/factions.json'):
+                    definitions.update({r['id']:r for r in json.loads(path.read_text(encoding='utf-8')).get('factions',[])})
+            for row in organizations.values():
+                identity = row['identity']
+                interval = definitions.get(identity,{}).get('npc_economy',{}).get('settlement_years',1) if row['kind']=='sect' else 1
+                entity = freight_raw.get('sects',{}).get(identity,{})
+                controlled = freight_raw['intrigue_state'].get('factions',{}).get(f"sect:{identity}",{}).get('controller_id')=='player'
+                fighting = any(w.get('kind')=='sect' and w.get('world')==row['world'] and w.get('status') in {'active','peace_ready'}
+                    and identity in {w.get('attacker_id'),w.get('defender_id'),*(r['id'] for side in ('attacker','defender') for r in w.get('coalitions',{}).get(side,[]))}
+                    for w in freight_raw.get('wars',[]))
+                if freight_raw['player'].get('faction_id')==identity or entity.get('founded_by_player') or controlled or fighting:
+                    interval=1
+                assert 0 <= freight_raw['player']['age']-row['last_year'] < min(5,interval), row
             assert not any(key.startswith('organization:') for key in freight_raw['economy_v2']['accounts'])
             with urllib.request.urlopen(base + '/organization-finance.js', timeout=5) as response:
                 assert b'renderOrganizationFinance' in response.read()

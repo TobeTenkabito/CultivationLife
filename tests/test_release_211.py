@@ -224,14 +224,20 @@ def test_faction_relocation_updates_address_but_not_player_or_absent_people(loca
     dead.alive = False
     living = faction.npcs[1]
     player_before = copy.deepcopy(game.player.to_dict())
-    for invalid in ('lost', 'rift', 'unknown'):
+    for invalid in ('lost', 'rift', 'unknown', 'spirit'):
         before = copy.deepcopy(game.to_dict())
         with pytest.raises(ValueError, match='主界面'):
             engine._intrigue_apply_resolution(game, record, 'relocate', invalid, random.Random(1))
         assert game.to_dict() == before
-    engine._intrigue_apply_resolution(game, record, 'relocate', 'spirit', random.Random(1))
-    assert faction.world == living.world == 'spirit'
+    # A headquarters vote is local relocation, never a free NPC ascension.
+    from cultivation_life.system.faction_geography import faction_site
+    headquarters=faction_site(faction,persist=False)['id']
+    destination=next(loc for loc,_ in engine.maps._graphs['human'][headquarters]
+                     if not engine.maps.location('human',loc).get('min_realm_index',0))
+    engine._intrigue_apply_resolution(game, record, 'relocate', destination, random.Random(1))
+    assert faction.world == living.world == 'human'
     assert faction.location_id == living.location_id
-    engine.maps.location('spirit', faction.location_id)
+    assert faction.location_id==destination
+    engine.maps.location('human', faction.location_id)
     assert dead.world == 'human'
     assert game.player.to_dict() == player_before

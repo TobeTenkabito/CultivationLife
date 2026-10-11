@@ -79,6 +79,7 @@ def bind_elapsed_year(host) -> ElapsedYearDependencies:
 def bind_settlement(host, *, travel: bool = False) -> TimeSettlementDependencies:
     contract = ElapsedTravelDependencies if travel else TimeSettlementDependencies
     return contract(
+        _settle_territory_time=lambda *args, **kwargs: host._settle_territory_time(*args, **kwargs),
         _maybe_tianji_intelligence_event=(None if travel else
             lambda *args, **kwargs: host._maybe_tianji_intelligence_event(*args, **kwargs)),
         _advance_auction_clock=lambda *args, **kwargs: host._advance_auction_clock(*args, **kwargs),

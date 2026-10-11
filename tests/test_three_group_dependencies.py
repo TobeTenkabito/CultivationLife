@@ -183,11 +183,11 @@ def test_elapsed_travel_reuses_rng_and_does_not_run_clocks_after_death():
                     assert arg is rng
             return []
         return call
-    names = {'_advance_diplomacy_unit', '_advance_concubine_aftermath', '_advance_heavenly_court_unit',
+    names = {'_settle_territory_time', '_advance_diplomacy_unit', '_advance_concubine_aftermath', '_advance_heavenly_court_unit',
              '_advance_intrigue_unit', '_advance_natal_artifact', '_advance_concubine_status', '_advance_player_bounties'}
     deps, unexpected = contract(ElapsedTravelDependencies, **{name: callback(name) for name in names})
     _finish_travel_time(deps, game, game.player.age - 2, 'celestial', 1, [], rng)
-    assert seen == ['_advance_diplomacy_unit', '_advance_concubine_aftermath',
+    assert seen == ['_settle_territory_time'] + ['_advance_diplomacy_unit', '_advance_concubine_aftermath',
                     '_advance_heavenly_court_unit', '_advance_intrigue_unit'] * 2 + [
                     '_advance_natal_artifact', '_advance_concubine_status', '_advance_player_bounties']
     unexpected.assert_not_called()

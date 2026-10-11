@@ -927,9 +927,8 @@ class GameState:
     # NPC arrays are compact, deterministic blueprints keyed by persistent NPC
     # id. They do not consume the player's material instances.
     npc_formations: dict[str, dict[str, Any]] = field(default_factory=dict)
-    # Optional NPC/governance DLC state.  Keeping every political record under
-    # one additive key means disabling the DLC freezes it without rewriting
-    # sect, family, race or legacy save structures.
+    # Optional politics and geographic territory freeze when the DLC is off.
+    # Original faction resources remain the base game's authoritative treasury.
     intrigue_state: dict[str, Any] = field(default_factory=dict)
     # Additive DLC container: old saves default to an empty state and disabling
     # the package freezes it byte-for-byte.

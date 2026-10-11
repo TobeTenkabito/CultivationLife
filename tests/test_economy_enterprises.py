@@ -70,6 +70,29 @@ def test_property_production_cash_and_readonly_reload(economy):
     GameState.from_dict(game.to_dict())
 
 
+def test_entrusted_batch_skips_recipe_scan_until_finished_then_replans(economy,monkeypatch):
+    from cultivation_life.system.economy import estate_management
+    engine,game=economy
+    game,identity=buy(engine,game,'farm')
+    game=estate_act(engine,game,identity,'fund',amount=10000)
+    game=configure(engine,game,identity)
+    game=estate_act(engine,game,identity,'start')
+    row=game.economy_v2['estates'][identity];row['entrusted']=True
+    old_job=copy.deepcopy(row['job']);original=estate_management.recipes
+    calls=[]
+    def track(*args):
+        calls.append(game.player.age)
+        return original(*args)
+    monkeypatch.setattr(estate_management,'recipes',track)
+    game.player.age+=1
+    advance_estates(game,engine.maps)
+    assert not calls and row['job']==old_job
+    game.player.age=old_job['finish']
+    advance_estates(game,engine.maps)
+    assert calls==[old_job['finish']] and row['produced']==old_job['quantity']
+    assert not row['stock'].get(old_job['item'])
+
+
 def test_automatic_budget_reserve_and_paid_job_survive_arrears(economy):
     from cultivation_life.system.economy.enterprise_operations import start_job
     engine,game=economy

@@ -340,12 +340,12 @@ class EngineTests(unittest.TestCase):
         game.player.age = 36
         self.assertEqual(self.engine._mortal_root_completion_chance(game.player), 0.02)
 
-    def test_every_game_initializes_three_sects_per_world_and_sorted_human_rosters(self):
+    def test_every_game_initializes_catalog_and_remote_sects_with_sorted_human_rosters(self):
         created = self.engine.create_game("观山", "supreme_metal", "dao", 109)
         game = self.engine.store.load(created["id"])
         self.assertEqual(set(game.sects), set(FACTION_DEFINITIONS))
-        self.assertEqual(sum(sect.world == "human" for sect in game.sects.values()), 4)
-        self.assertEqual(sum(sect.world == "spirit" for sect in game.sects.values()), 3)
+        self.assertEqual(sum(sect.world == "human" for sect in game.sects.values()), 6)
+        self.assertEqual(sum(sect.world == "spirit" for sect in game.sects.values()), 5)
         spirit_npcs = [
             npc for npc in [*(npc for sect in game.sects.values() for npc in sect.npcs), *game.world_npcs.values()]
             if npc.realm_index == 5 and npc.world == "human"
@@ -1366,13 +1366,13 @@ class EngineTests(unittest.TestCase):
                 self.assertGreaterEqual(player["combat_power"] / player["expected_combat_power"], 0.9)
                 self.assertLessEqual(player["combat_power"] / player["expected_combat_power"], 1.1)
 
-    def test_spirit_world_exposes_three_joinable_sects_with_raced_rosters(self):
+    def test_spirit_world_exposes_five_joinable_sects_with_raced_rosters(self):
         created = self.engine.create_game("灵界门人", "supreme_metal", "dao", 310)
         game = self.engine.store.load(created["id"])
         game.player.world = "spirit"
         game.player.realm_index = 5
         public = self.engine._public_faction(game)
-        self.assertEqual({entry["id"] for entry in public["available"]}, {"taixuan", "wanlingshan", "xinghe"})
+        self.assertEqual({entry["id"] for entry in public["available"]}, {"taixuan", "wanlingshan", "xinghe", "remote_spirit_1", "remote_spirit_2"})
         outcome, _ = self.engine._effect(
             {"type": "join_faction", "faction_id": "taixuan"}, game, {"id": "TEST"}, random.Random(1),
         )

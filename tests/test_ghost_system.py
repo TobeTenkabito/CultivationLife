@@ -41,7 +41,7 @@ class GhostSystemTests(unittest.TestCase):
         self.assertEqual(shown["map"]["current"], "ghost_gate")
         self.assertEqual(
             {row["id"] for row in shown["faction"]["available"]},
-            {"ghost_passage_court", "forgetful_river_archive", "iron_tree_prison_sect"},
+            {"ghost_passage_court", "forgetful_river_archive", "iron_tree_prison_sect", "remote_hell_1", "remote_hell_2"},
         )
         self.assertTrue(shown["spirit_ranking"]["available"])
         self.assertEqual(shown["spirit_ranking"]["title"], "地狱界天榜前二十")

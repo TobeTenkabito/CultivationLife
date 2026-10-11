@@ -3,6 +3,7 @@ from typing import Any
 from ...models import GameState
 from ...content_registry import RACE_DEFINITIONS
 import copy
+from ..territory.rules import enabled as territory_enabled
 from .dependencies import WarPresentationDependencies
 
 
@@ -48,6 +49,9 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
                 })
         public["callable_allies"] = callable_allies
         public["can_call_allies"] = bool(callable_allies)
+        from ..territory.peace import targets as territorial_targets
+        public['territory_targets']={row['id']:territorial_targets(game,deps.maps,war['world'],row['id'])
+                                    for side in ('attacker','defender') for row in war['coalitions'][side]} if war['kind']=='sect' else {}
         public["power_summary"] = {
             side: deps._war_power_profile(game, war, side) for side in ("attacker", "defender")
         }
@@ -90,6 +94,9 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
                 demand["target_power_name"] = deps._war_side_name(game, war["kind"], demand.get("target_power_id", ""))
                 victim = deps._find_npc(game, demand.get("target_id", ""))
                 demand["target_name"] = victim.name if victim else ""
+                if demand.get('term') in {'remove_influence','destroy_outpost'}:
+                    site=deps.maps.location(war['world'],demand.get('target_id',''))
+                    demand['target_name']=site['name'] if site else ''
         wars.append(public)
     return {
         "wars": wars,
@@ -106,5 +113,6 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
                 ),
             }
             for key, value in deps.WAR_TERM_DEFS.items()
+            if key not in {'remove_influence','destroy_outpost'} or territory_enabled()
         },
     }

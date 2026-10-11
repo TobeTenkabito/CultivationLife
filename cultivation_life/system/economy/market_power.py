@@ -54,9 +54,10 @@ def holdings(game, market, item):
     return result
 
 
-def indicators(game, market, item, data):
+def indicators(game, market, item, data, *, stocks=None):
     product = market['commodities'][item]
-    stocks = holdings(game, market, item)
+    if stocks is None:
+        stocks = holdings(game, market, item)
     background = product['target'] * MARKET_SETTINGS['economy_v2']['annual_consumption'] * 5
     supply = sum(data['sellers'].values()) + (0 if product.get('imported') else background)
     demand = sum(data['buyers'].values()) + background
@@ -74,15 +75,22 @@ def indicators(game, market, item, data):
 
 def settle(game, market, years):
     """One bounded response per observed interval, never a remote goods copy."""
+    stock_index = {}
     for estate in game.economy_v2.get('estates', {}).values():
         if (estate['world'], estate['location']) == (market['world'], market['location']):
-            for item in estate['stock']:
+            for item, quantity in estate['stock'].items():
+                if estate['owner_kind'] != 'background' and quantity:
+                    owners = stock_index.setdefault(item, {})
+                    owner = owner_key(estate)
+                    owners[owner] = owners.get(owner, 0) + quantity
                 if item in market['commodities'] and item not in market.get('competition', {}):
                     record_trade(game, market, item, 'background', 'sell', .01)
     extra = {}
     for item, row in market.get('competition', {}).items():
         product = market['commodities'][item]
-        actors = indicators(game, market, item, row)
+        # Estate stocks cannot change during this market-only settlement.
+        # One local index replaces an estate scan for every commodity.
+        actors = indicators(game, market, item, row, stocks=stock_index.get(item, {}))
         leader = actors[0] if actors else None
         tight = product['stock'] < product['target'] * .6
         dominant = leader and leader['power'] >= .6

@@ -173,17 +173,30 @@ def test_restored_resource_enables_npc_voisinage_in_background_combat(config):
     assert npc.transcendence["current"] == 90
 
 
-def test_faction_relocation_settles_resource_before_changing_world(engine_game, config):
+def test_faction_relocation_is_local_and_preserves_real_resource_clock(engine_game, config):
     engine, game = engine_game
     npc = immortal(config)
     settle(npc, game.player.age, config)
-    game.sects["resource_test"] = SectState("resource_test", "迁徙宗门", "celestial", [npc])
+    game.sects["resource_test"] = SectState("resource_test", "迁徙宗门", "celestial", [npc],location_id='expanse_celestial_1')
     game.player.age += 10
     record = {"id": "resource_test", "kind": "sect"}
-    engine._intrigue_apply_resolution(game, record, "relocate", "human", random.Random(1))
+    before=copy.deepcopy(game.to_dict())
+    with pytest.raises(ValueError,match='同界'):
+        engine._intrigue_apply_resolution(game, record, "relocate", "human", random.Random(1))
+    assert game.to_dict()==before
+    from cultivation_life.system.organization_relocation import validate
+    destinations=[]
+    for location in engine.maps.worlds['celestial']['locations']:
+        try:validate(game,engine.maps,'sect','resource_test',location['id'])
+        except ValueError:continue
+        destinations.append(location['id'])
+    assert destinations
+    resource=copy.deepcopy(npc.transcendence)
+    engine._intrigue_apply_resolution(game, record, "relocate", destinations[0], random.Random(1))
+    assert npc.transcendence==resource and game.sects['resource_test'].npcs[0] is npc
     settle(npc, game.player.age + 100, config)
-    assert npc.world == "human"
-    assert npc.transcendence["current"] == 300
+    assert npc.world == "celestial" and npc.location_id==destinations[0]
+    assert npc.transcendence["current"] == 1000
 
 
 def test_owner_binding_debits_family_record_not_stale_duplicate(engine_game, config):

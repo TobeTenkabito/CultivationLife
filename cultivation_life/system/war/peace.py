@@ -39,7 +39,16 @@ def _generate_ai_peace_offer(deps: WarPeaceDependencies, game: GameState, war: d
     target_power = deps._war_entity_power(game, war, recipient, target_power_id)
     ratio = winner_power / max(1.0, target_power)
     from ..economy.war_assets import eligible
-    if war["kind"] == "sect" and budget >= deps.WAR_TERM_DEFS["annex"][1]:
+    goal=war.get('territory_goal',{})
+    territorial_added=False
+    if war['kind']=='sect' and goal.get('target_id')==target_power_id and goal.get('term') in {'remove_influence','destroy_outpost'}:
+        from ..territory.peace import validate as validate_goal
+        try:validate_goal(game,deps.maps,war['world'],target_power_id,goal['term'],goal.get('location',''))
+        except ValueError:pass
+        else:territorial_added=add(goal['term'],target_id=goal['location'])
+    if territorial_added:
+        pass
+    elif war["kind"] == "sect" and budget >= deps.WAR_TERM_DEFS["annex"][1]:
         if ratio >= float(deps._war_rules().get("annex_power_ratio", 2.5)):
             add("annex")
         elif ratio >= float(deps._war_rules().get("dissolve_power_ratio", 1.35)):
@@ -110,7 +119,11 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
     loser_name = deps._war_side_name(game, war["kind"], loser_id)
     relation = deps._war_relation(game, war["kind"], winner_id, loser_id)
     detail = "双方恢复和平"
-    if term == "execute":
+    if term in {'remove_influence','destroy_outpost'}:
+        if war['kind']!='sect': raise ValueError('地方条款仅适用于宗门战争')
+        from ..territory.peace import apply as territorial_peace
+        detail=territorial_peace(game,deps.maps,war['world'],loser_id,term,target_id)
+    elif term == "execute":
         candidates = deps._available_warriors(game, war, loser, loser_id)
         victim = deps._find_npc(game, target_id) if target_id else (candidates[0] if candidates else None)
         if not victim or victim not in candidates:
@@ -189,6 +202,8 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
         from ..economy.war_assets import transfer
         detail += '；' + transfer(game, deps.maps, war, winner_id, loser_id)
         loser_sect.extinct = True
+        from ..territory.state import clear_faction
+        clear_faction(game,loser_id)
         own_id = game.player.faction_id
         if own_id == winner_id and term == "annex":
             game.player.milestones["annexed_faction"] = 1
@@ -254,7 +269,7 @@ def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, 
     selected_power = selected_power or war[f"{loser}_id"]
     if selected_power not in deps._coalition_ids(war, loser):
         raise ValueError("和谈目标不属于战败阵营")
-    if selected_power != war[f"{loser}_id"] and term != "white_peace":
+    if selected_power != war[f"{loser}_id"] and term not in {"white_peace", "destroy_outpost"}:
         cost = int(round(cost * float(deps._war_rules().get("ally_term_cost_multiplier", 1.25))))
     if not concede and term != "white_peace" and effective_score < cost:
         raise ValueError(f"当前战争分数 {effective_score:.0f}，不足以提出该条款（需要 {cost}）")
@@ -262,6 +277,10 @@ def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, 
         from ..economy.war_assets import eligible
         if not eligible(game, war, war[f'{beneficiary}_id'], selected_power):
             raise ValueError('产业和市税接管仅适用于同界存续的宗门或家族')
+    if term in {'remove_influence','destroy_outpost'}:
+        if war['kind']!='sect': raise ValueError('地方条款仅适用于宗门战争')
+        from ..territory.peace import validate as validate_territory
+        validate_territory(game,deps.maps,war['world'],selected_power,term,target_id)
     if deps._intrigue_enabled():
         own_id = str(war[f"{player_side}_id"])
         opposing_id = str(war[f"{'defender' if player_side == 'attacker' else 'attacker'}_id"])

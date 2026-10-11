@@ -2,7 +2,9 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v2.10.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v2.11.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+
+v2.11.0 新增地方影响与政策、据点、地区战争条件和组织同界迁址；地图道路与各方影响可视化，各界偏远山门补充。Windows 沿用桌面侧栏，Android 使用分类导航。详细规则见游戏百科与[开发说明](docs/territory-development.md)。
 
 v2.6.0 新增百鬼夜行十二魂因、三条归真道路与 36 种魂相；上界本体邻域统一为初成、化境、大成各四层与至臻。妖鬼前两劫存活五轮，末劫击杀两名各继承自身 100% 属性的敌人，复制邻域最高化境四层。
 
@@ -24,7 +26,7 @@ v2.1.1 修复威名／族群敌意串界、即时交互耗时与炼体超额扣�
 
 ### Android 12
 
-当前安卓发行版本为 2.10.0-android.48，携带四套独立主题与九个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；最近发行的设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包及验收范围以 `dist/` 内当前发行清单为准。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓发行版本为 2.11.0-android.49，携带四套独立主题与九个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；最近发行的设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包及验收范围以 `dist/` 内当前发行清单为准。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 
@@ -101,10 +103,10 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | --- | --- | --- |
 | [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.2.1 | 煞元转化、魔脉、八部凝身、魔域神通与心魔劫 |
 | [诸法无我：众生为镜](dlc/buddhist-dharma/README.md) | 1.0.0 | 三阶段法会、地图信众、寺庙、正负业力、六项加持与佛修双飞升路线 |
-| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.15.1 | 妖修本源、血脉进化、族血规则与八源本相铸域 |
+| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.15.2 | 妖修本源、血脉进化、族血规则与八源本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.0 | 独立生态、氏族、王庭与万灵志 |
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/README.md) | 3.9.1 | 鬼修魂魄、魂蚀、往生与轮回 |
-| [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.3.0 | NPC 性格、势力职位、客卿、议案与内政 |
+| [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.4.0 | NPC 性格、势力职位、客卿、议案与内政 |
 | [圣人之道：内圣外王](dlc/sage-way/README.md) | 1.4.0 | 学说、教化、门人、经典、外王之策与儒修剧情 |
 | [归墟之潮：九死一生](dlc/guixu-tide/README.md) | 2.6.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
 | [神机百变：巧夺天工](dlc/tianji-artifacts/README.md) | 2.2.0 | 天工神机榜、分层情报、动态材料、仿制与重铸 |

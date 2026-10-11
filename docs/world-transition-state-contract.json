@@ -2,7 +2,7 @@
   "version": 1,
   "economy_ownership_notes": {
     "economy_v2.demand_policy / demand_policy_year / markets.*.goods_policy / basket_credit / resource_use": "商品细化政策仅对结构 10 在采用年生效，不追扣过去；已有地区新增材料从零库存加入，原实物与既付批次不变。basket_credit 为原市场最多 96 个用途品阶小数，不保存物资；resource_use 仅原地址本年已完成公共采集数量，最多 108 种、逐年重置。私人产权占用本地资源份额，公共生产不读取或恢复私人矿藏和丹源；运行时索引最多 64 个市场，不复制库存。",
-    "economy_v2.markets.*.household_year": "原市场背景居民五真实年聚合采购的起始年；稀疏访问按当前库存结算完整区间，不逐年制造历史。采用时从当前年开始，不追扣旧消费；NPC 供养、产业、战争、事件仍逐年执行，玩家即时交易不受五年节拍限制。",
+    "economy_v2.markets.*.household_year": "原市场背景居民五真实年聚合采购的起始年；稀疏访问按当前库存结算完整区间，不逐年制造历史。采用时从当前年开始，不追扣旧消费；个人当年福利、产业到期完工、战争、事件保持真实年度时钟，内容标明的偏远小宗门可五年汇总经营。玩家即时交易不受五年节拍限制。",
     "economy_v2.organizations.*.breakthrough_support / longevity_support / provision_year / supply_budget_credit": "原组织真实府库与境界组供养。突破覆盖率本年有效；真实消耗的延寿药力按同界成员平均，由原年度生命周期应用。迁址清除覆盖率。supply_budget_credit 是基础供养预算及已实收经营盈余形成的支出额度；上限取百年基础预算与四件同阶标准法宝参照价较大值，最高一万亿，始终受原府库实款及三年基本养护储备限制，不是新增现金账户；迁址清零。",
     "SectNpc.economic_lifespan_bonus / economic_provision_year / economy_v2.personal.longevity_used / medicine_year": "寿元药耐性随原人物保留，不随地点重置。NPC 本年药力只应用一次，终身额外寿元不超过有限寿元境界天然上限的 10%，长生境界不加寿。玩家药耐性归原 personal，延寿累计同样受 10% 上限约束，养元丹每真实年一次；仅同阶标准丹药生效。具体使用经原 use_item 和人物年度生命周期，不复制 NPC 或为每人建钱包。",
     "economy_v2.estates.kind hunt / native site profile": "猎场同原药田矿区使用固定 world/location/kind 唯一产权、仓库、在制订单和真实账户。丹源与矿藏最多 5000 件，开工扣除，转卖、升级或战争交接不恢复。天然材料资格由原地址固定两种同阶本界材料，不保存资源副本；扩建只提高仓储与批量。普通旧许可证保留，原个人灵田药龄实例不加入商业产权。",
@@ -43,7 +43,13 @@
     "GameState.family_state.membership": "玩家所属唯一原家族的本家/外姓资格，缺省仅表示既有本家身份。加入外姓时将同一NPC家族实体从sects交接为family，保留编号、NPC、固定资产和真实府库；存活玩家本家本人、后裔及在外亲族计入血缘，不以当地NPC空册判绝嗣。",
     "economy_v2.organization_aliases / accounts.study:<kind>:<id>": "家族交接别名只定位原财务账户，不持余额、不复制现金；在途义务继续从原组织结算。研习账户保存已经实付的劳务所得，组织基本养护实付款的15%留作门人共同津贴，升级实付回原府库。无逐人钱包，无补发旧工资；停付即停止付费研习。",
     "economy_v2.teleport_arrays": "固定world/location的本地阵台，归原建造组织。只允许有控制权的当地成员通过原teleport_action构建，原府库支付施工费与真实本地采购，原当地非预留库存消耗；不遥取异地物资。只接入原同界传送系统，许可/禁制/实例约束不变。",
-    "economy_v2.depots.*.requests.*.contribution_reserved / contribution_join_age": "原宗门申请占用玩家原次入宗贡献；退回仅限原组织且原次入宗年龄匹配，领取只消耗一次。旧结构10既存申请不追扣；府库物品仍保留原地址和原预留，不跨界携带。"
+    "economy_v2.depots.*.requests.*.contribution_reserved / contribution_join_age": "原宗门申请占用玩家原次入宗贡献；退回仅限原组织且原次入宗年龄匹配，领取只消耗一次。旧结构10既存申请不追扣；府库物品仍保留原地址和原预留，不跨界携带。",
+    "intrigue_state.territory.holdings / adopted / suppressed_arrays / fee_cursors / settlement_years / ai_decade / ai_cursor / history": "地理全局子状态，按world/location/原宗门ID唯一登记，关DLC冻结，不随玩家移动。原驻地固定100，设施保底来自原固定阵和真实据点；首次采用登记当前年份、现有设施及实际手续费游标，无历史补发。settlement_years按原组织账户ID记录最近真实结算年份，公共行动／旅行期末汇总真实区间，连续单位合并处理，不伪改年龄或逐年补跑地方变迁；重复提交不付费，关闭期间不追缴。和约移除记录停用该地原宗门阵，旧山门不重播种。history最多40条，NPC每次有真实时间的期末结算至多选一宗提案，按每个日历十年段至多一次限额，不回放跳过的十年段，不复制人物、库存或现金。",
+    "economy_v2.organization_sites.race_sites / initial_arrays / retired_arrays / votes": "本体地理状态：种族议事中心按world:race唯一登记，迁址票决最多20条；既有固定阵的初始所有者按world:location登记，宗门增减不重分阵产，灭亡后不转赠其他宗门。实际和约停用按world:location:原所有者登记，关DLC不复活旧阵；重建须经原有实物付费入口。DLC关闭只读保留阵产，不因关闭移交；仍可同界投票。不改玩家world/location，不集中散居族人，不随跨界复制中心。",
+    "economy_v2.organizations.*.territory_due / territory_paid / territory_income / territory_years / territory_production_bonus / territory_elder_factor": "原组织本期经营统计；territory_years为期末实际结算年数，维护保留三年基本养护后由原现金实付，欠费衰减且不复制债；实际手续费按期末本地影响份额实转，生产帮助封顶20%，为地方状态变更时刷新的派生比例，仍须真实原料、资源额度、劳务和成交。有效长老复用原境界工作汇总，不新增逐NPC年度结算。",
+    "economy_v2.organization_sites.territory_enabled": "本体原地理记录内的DLC启用标记，仅用于识别关闭后重启；关DLC不写冻结的intrigue_state.territory，重新启用时将原组织地方结算时钟及费用游标设为当前实际年，不追扣禁用区间。",
+    "wars.*.territory_goal": "原战争地点目标，宗门、地图、条款分别登记；同界存在性和影响现状在正式宣战及和约前复核。玩家不因此移动；强制撤离复用原组织迁址，固定资源不搬走，盟友捣毁据点仍固定5分。",
+    "economy_v2.organizations.*.last_year / estates.*.last_year": "原组织及固定产业的实际结算年，归原身份与地址。内容指定的偏远NPC小宗门最多五实际年汇总结算，玩家入门、取得经营权或宗门参战改为逐年；个人本年福利不补发入门前俸禄。原NPC产业若批次到期当年完工，否则最多五年汇总经营与维护欠费，费用按原last_year完整区间实付，不复制钱或物资。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",

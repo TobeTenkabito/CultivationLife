@@ -73,6 +73,14 @@ def _intrigue_resolve(
 ) -> dict[str, Any]:
     if resolution_type not in deps.RESOLUTION_LABELS:
         raise ValueError("未知重大决议")
+    from ..territory.actions import ACTIONS, validate
+    if resolution_type in ACTIONS:
+        if kind!='sect':raise ValueError('地方影响力决议仅适用于宗门')
+        validate(game,deps.maps,game.sects.get(faction_id),resolution_type,target_id,
+                 (context or {}).get('policy',''),(context or {}).get('rival_id',''))
+    if resolution_type=='relocate':
+        from ..organization_relocation import validate as validate_relocation
+        validate_relocation(game,deps.maps,kind,faction_id,target_id)
     record = deps._ensure_intrigue_faction(game, kind, faction_id)
     ballots: list[dict[str, Any]] = []
     if deps._intrigue_has_decision_authority(game, kind, faction_id) and player_vote is not None:
@@ -80,6 +88,12 @@ def _intrigue_resolve(
     voters = {npc.id: npc for npc in deps._intrigue_members(game, kind, faction_id)}
     for guest in deps._intrigue_guest_npcs(game, kind, faction_id):
         voters.setdefault(guest.id, guest)
+    if resolution_type in ACTIONS or resolution_type=='relocate':
+        from ..organization_relocation import candidates
+        entity=deps._intrigue_entity(game,kind,faction_id)
+        world=entity.world if entity else game.player.world
+        eligible={n.id for n in candidates(game,kind,faction_id,world)}
+        voters={identity:npc for identity,npc in voters.items() if identity in eligible}
     for npc in voters.values():
         if not deps._intrigue_has_decision_authority(game, kind, faction_id, npc.id):
             continue
@@ -133,6 +147,14 @@ def _intrigue_apply_resolution(
     target_id: str, rng: random.Random, *, context: dict[str, Any] | None = None,
 ) -> None:
     kind, faction_id = str(record["kind"]), str(record["id"])
+    from ..territory.actions import ACTIONS, apply
+    if resolution_type in ACTIONS:
+        return apply(game,deps.maps,game.sects.get(faction_id),resolution_type,target_id,rng,
+                     (context or {}).get('policy',''),(context or {}).get('rival_id',''))
+    if resolution_type=='relocate':
+        from ..organization_relocation import relocate
+        relocate(game,deps.maps,kind,faction_id,target_id)
+        return
     if resolution_type in {"declare_war", "make_peace", "form_alliance", "break_alliance"}:
         status = {"declare_war": "war", "make_peace": "truce", "form_alliance": "alliance", "break_alliance": "neutral"}[resolution_type]
         relations = game.race_relations if kind == "race" else game.sect_relations
@@ -145,6 +167,18 @@ def _intrigue_apply_resolution(
         deps._set_diplomatic_relation(game, relation, status, faction_id, target_id, kind,
                                        {"war": -75.0, "truce": -5.0, "alliance": 80.0, "neutral": 0.0}[status],
                                        initiated_by_player=bool((context or {}).get("initiated_by_player")))
+        if resolution_type=='declare_war' and kind=='sect' and not (context or {}).get('initiated_by_player'):
+            from ..territory.peace import targets
+            from ..territory.state import snapshot
+            war=deps._active_war(game,kind,faction_id,target_id)
+            if war:
+                book=snapshot(game,deps.maps,war['world'])
+                border=[r for r in targets(game,deps.maps,war['world'],target_id)
+                        if any(faction_id in book.get(n,{}) for n,_ in deps.maps._graphs[war['world']][r['id']])]
+                if border:
+                    goal=rng.choice(border)
+                    war['territory_goal']=dict(term='destroy_outpost' if goal['outpost'] else 'remove_influence',location=goal['id'],target_id=target_id)
+                    war['location_id']=goal['id']
     elif resolution_type == "mass_recruitment" and kind in {"sect", "family"}:
         entity = deps._intrigue_entity(game, kind, faction_id)
         if not entity:
@@ -179,23 +213,6 @@ def _intrigue_apply_resolution(
             register(game, kind, faction_id, entity.world)
             pay(game, f'background:{entity.world}', key(kind, faction_id), 25, '组织投资经营结算')
         record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 4)
-    elif resolution_type == "relocate" and kind in {"sect", "family"}:
-        from ..combat.npc_lifecycle import move_world
-        profile = WORLD_SYSTEMS.get('world_profiles', {}).get(target_id, {})
-        if not profile.get('enabled') or profile.get('tier', 0) <= 0:
-            raise ValueError('迁址须选择已开放的主界面，不能将势力直接迁入未知空间')
-        entity = deps._intrigue_entity(game, kind, faction_id)
-        if entity:
-            planned = copy.copy(entity)
-            planned.world, planned.location_id = target_id, None
-            location = faction_site(planned)['id']
-            origin = entity.world
-            entity.world = target_id
-            entity.location_id = location
-            for npc in entity.npcs:
-                if npc.alive and npc.world == origin:
-                    move_world(npc, target_id, game.player.age, WORLD_SYSTEMS.get("transcendent_combat", {}))
-                    npc.location_id = location
     elif resolution_type == "policy" and target_id in deps.STYLE_LABELS:
         record["policy"] = target_id
     elif resolution_type == "intervene_war":

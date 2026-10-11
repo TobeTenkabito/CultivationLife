@@ -71,6 +71,7 @@
         tabs.append(tab);
       });
       terrain.classList.toggle('hidden', mode !== 'terrain');
+      document.querySelector('#map-atlas')?.classList.toggle('hidden',mode !== 'terrain');
       directory.classList.toggle('hidden', mode !== 'directory');
       document.querySelector('#map-economy').classList.toggle('hidden', mode !== 'economy' || !map.economy?.available);
       directory.replaceChildren();

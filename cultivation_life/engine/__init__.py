@@ -223,7 +223,11 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from ..system.economy.organizations import ensure_organizations
         changed = merchant_state._ensure_merchant(self._dependencies.merchant.state, game)
         changed = ensure_caravans(game, self.maps) or changed
-        return ensure_organizations(game) or changed
+        return ensure_organizations(game, self.maps) or changed
+
+    def _settle_territory_time(self, game, rng):
+        from ..system.territory.runtime import settle_unit
+        return settle_unit(self, game, rng)
 
     def _merchant_alliance(self, game, world, alliance_id):
         return merchant_state._merchant_alliance(game, world, alliance_id)
@@ -799,6 +803,55 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         from ..system.monster_civilizations.presentation import project
         return project(self.store.load(game_id), options)
 
+    def organization_action(self, game_id: str, payload: dict) -> dict[str, Any]:
+        import copy
+        from .transactions import accept_committed_game
+        from ..system.economy.local_market import require_access
+        from ..system.organization_relocation import base_vote, entity_for, validate as validate_relocation
+        from ..system.organization_heritage import decision
+        from ..system.territory.actions import ACTIONS, validate, construction_plan
+        from ..system.territory.rules import enabled
+        from ..system.territory.peace import validate as validate_goal
+        self.assert_ghost_operation_allowed(game_id,'organization-action')
+        self.assert_guixu_operation_allowed(game_id,'organization-action')
+        self.assert_buddhist_operation_allowed(game_id,'organization-action')
+        game=copy.deepcopy(self._load(game_id));require_access(game)
+        kind=payload.get('kind','sect');identity=payload.get('owner_id','')
+        entity=entity_for(game,kind,identity);action=payload.get('action','');location=payload.get('location_id','')
+        if kind not in {'sect','family','race'}:raise ValueError('未知组织类型')
+        if action=='relocate':
+            validate_relocation(game,self.maps,kind,identity,location)
+            if enabled():
+                if not self._intrigue_has_decision_authority(game,kind,identity):raise ValueError('没有该组织的迁址决策权')
+            else:
+                rng=decode_rng(game.seed,game.rng_state)
+                base_vote(game,self.maps,kind,identity,location,rng)
+        else:
+            if not enabled() or kind!='sect' or not entity or not decision(game,entity):raise ValueError('须开启合纵连横并持本界宗门决策权')
+            if action=='territory_war':
+                rival=payload.get('rival_id','');goal=payload.get('goal','remove_influence')
+                validate_goal(game,self.maps,entity.world,rival,goal,location)
+                if self._active_war(game,'sect',identity,rival):raise ValueError('双方已在交战，不能重复宣战')
+                action='declare_war'
+            else:
+                if action not in ACTIONS:raise ValueError('未知地方行动')
+                validate(game,self.maps,entity,action,location,payload.get('policy',''),payload.get('rival_id',''))
+                if action=='build_outpost':
+                    if game.player.location_id!=location:raise ValueError('建据点须在目标地图办理')
+                    if not construction_plan(game,self.maps,entity,location)['can_build']:raise ValueError('当地资材或府库灵石不足')
+        if enabled():
+            rng=decode_rng(game.seed,game.rng_state)
+            result=self._intrigue_resolve(game,kind,identity,action,payload.get('rival_id','') if action=='declare_war' else location,True,'player',rng,
+                                         context=dict(policy=payload.get('policy',''),rival_id=payload.get('rival_id','')))
+            if action=='declare_war' and result['result']=='passed':
+                war=self._active_war(game,'sect',identity,payload.get('rival_id',''))
+                if war:
+                    war['territory_goal']=dict(term=payload.get('goal','remove_influence'),location=location,target_id=payload['rival_id'])
+                    war['location_id']=location
+        game.rng_state=encode_rng(rng);game.updated_at=now_iso()
+        self.store.save(game);accept_committed_game(self,game)
+        return self.present(game)
+
     def civilizations_action(self, game_id: str, action: str, options: dict | None = None) -> dict[str, Any]:
         import copy
         from ..system.monster_civilizations.actions import apply
@@ -1192,7 +1245,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         advance_time(game, elapsed, unit)
         if game.player.alive:
             settle_elapsed_time(self._dependencies.advancement.settlement, game, rng, news,
-                action='soul_contemplate', units=completed_action_units(progress['elapsed'], unit)-settled_before, start_age=start_age, policy=ACTION_TIME)
+                action='soul_contemplate', units=completed_action_units(progress['elapsed'], unit)-settled_before, start_age=start_age, policy=ACTION_TIME, elapsed_years=elapsed)
         if progress['elapsed'] >= progress['required'] and game.player.alive and not game.pending_event:
             soul.require(game.player)
             holder.pop('contemplation', None)

@@ -1372,7 +1372,7 @@ function renderIntrigue(system) {
     const vote = document.createElement('form'); vote.className = 'intrigue-resolution-form';
     const voteTitle = document.createElement('b'); voteTitle.textContent = '发起重大决议';
     const type = document.createElement('select');
-    Object.entries(system.resolution_types || {}).filter(([id]) => id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','relocate','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    Object.entries(system.resolution_types || {}).filter(([id]) => !['expand_influence','build_outpost','territory_policy','territory_spar','territory_harass','relocate'].includes(id) && id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
     const target = document.createElement('select');
     const playerChoice = document.createElement('select'); [['1','投赞成票'],['0','投反对票']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;playerChoice.appendChild(option);});
     const refreshTargets = () => {
@@ -1904,16 +1904,19 @@ function renderWars(system) {
     const heading = document.createElement('b'); heading.textContent = '提出和谈条件';
     const term = document.createElement('select');
     Object.entries(terms).forEach(([id, def]) => {
-      if (war.kind !== 'sect' && ['dissolve', 'annex', 'economic_rights'].includes(id)) return;
+      if (war.kind !== 'sect' && ['dissolve', 'annex', 'economic_rights','remove_influence','destroy_outpost'].includes(id)) return;
       const powerRequirement = def.power_ratio ? `，总战力比至少 ${def.power_ratio}` : '';
       const option = document.createElement('option'); option.value = id; option.textContent = `${def.name}${def.cost ? `（需战争分数 ${def.cost}${powerRequirement}）` : ''}`; term.appendChild(option);
     });
     const targetPower = document.createElement('select'); targetPower.className = 'conditional-power';
     const enemySide = war.player_side === 'attacker' ? 'defender' : 'attacker';
-    (war.coalitions?.[enemySide] || []).forEach(power => { const option = document.createElement('option'); option.value = power.id; option.textContent = `和谈对象：${power.name}${power.role === 'leader' ? '' : '（盟友条款成本 +25%）'}`; targetPower.appendChild(option); });
+    (war.coalitions?.[enemySide] || []).forEach(power => { const option = document.createElement('option'); option.value = power.id; option.textContent = `和谈对象：${power.name}${power.role === 'leader' ? '' : '（盟友；捣毁据点仍需 5 分，其余成本 +25%）'}`; targetPower.appendChild(option); });
     const target = document.createElement('select'); target.className = 'conditional-target';
     const fillTargets = () => {
       target.innerHTML = '';
+      if(['remove_influence','destroy_outpost'].includes(term.value)){
+        (war.territory_targets?.[targetPower.value]||[]).filter(r=>term.value!=='destroy_outpost'||r.outpost).forEach(r=>{const option=document.createElement('option');option.value=r.id;option.textContent=`${r.name}${r.headquarters?'（驻地，将强制迁移）':''}`;target.append(option);});return;
+      }
       (war.roster?.[enemySide] || []).filter(npc => npc.alive && npc.owner_id === targetPower.value).forEach(npc => { const option = document.createElement('option'); option.value = npc.id; option.textContent = `处死 ${npc.name}`; target.appendChild(option); });
     };
     const third = document.createElement('select'); third.className = 'conditional-third';
@@ -1922,7 +1925,7 @@ function renderWars(system) {
     Object.entries(game?.governance?.diplomacy_statuses || {}).filter(([id]) => id !== 'war').forEach(([id, name]) => { const option = document.createElement('option'); option.value = id; option.textContent = `改为${name}`; thirdStatus.appendChild(option); });
     const demand = document.createElement('button'); demand.type = 'submit'; demand.textContent = '以战果提出条件';
     const concede = document.createElement('button'); concede.type = 'button'; concede.textContent = '出卖本方利益求和'; concede.className = 'danger';
-    const sync = () => { target.classList.toggle('hidden', term.value !== 'execute'); third.classList.toggle('hidden', term.value !== 'change_relation'); thirdStatus.classList.toggle('hidden', term.value !== 'change_relation'); };
+    const sync = () => {fillTargets();const territorial=['remove_influence','destroy_outpost'].includes(term.value);target.classList.toggle('hidden', term.value !== 'execute'&&!territorial); third.classList.toggle('hidden', term.value !== 'change_relation'); thirdStatus.classList.toggle('hidden', term.value !== 'change_relation');concede.disabled=territorial; };
     targetPower.onchange = fillTargets; fillTargets();
     term.onchange = sync; sync();
     form.append(heading, term, targetPower, target, third, thirdStatus, demand, concede);
@@ -2630,6 +2633,8 @@ function renderMap(map, auction) {
   $('#map-current').textContent = `当前：${map.current_name}`;
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
+  let atlas=document.querySelector('#map-atlas');if(!atlas){atlas=document.createElement('section');atlas.id='map-atlas';list.before(atlas);}
+  window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),()=>busy||!game||!!game.pending_event||!game.player.alive);
   const tp=map.teleport;
   for(const plan of tp?.construction||[]){
     const box=document.createElement('details');box.className='teleport-controls';
@@ -3926,6 +3931,7 @@ function renderEvent() {
 }
 
 function renderButtons() {
+  window.MapAtlas?.syncBusy();
   document.querySelectorAll('.exploration-action').forEach(b=>b.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||b.dataset.unavailable==='1');
   document.querySelectorAll('[data-action]').forEach(button => {
     const guixuSession = game?.guixu_tide?.session;

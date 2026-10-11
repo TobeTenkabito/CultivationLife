@@ -72,7 +72,7 @@ def main():
                     assert page.get_by_role('button',name='进入因果遗址',exact=True).is_disabled()
                     nav('异象')
                     no_other_details()
-                    assert page.locator('.heavens-destination').count()==2
+                    assert page.locator('.heavens-destination').count()==3
                     nav('诸界')
                     assert page.get_by_label('选择界域',exact=True).locator('option').count()==11
                     assert page.locator('.heavens-destination').count()==1
@@ -121,7 +121,7 @@ def main():
                                 assert page.locator('#heavens-card').evaluate('el=>el.scrollHeight<=el.clientHeight+1')
                                 if width==393:
                                     card=page.locator('#heavens-card').bounding_box()
-                                    dock=page.locator('.strategy-dock.settings-dock').bounding_box()
+                                    dock=page.locator('#navigation-bar').bounding_box()
                                     assert card['y']+card['height']<=dock['y'], (theme,card,dock)
                                 page.screenshot(path=str(output/f'{theme}-{width}-{slug}.png'))
                             nav('行程')

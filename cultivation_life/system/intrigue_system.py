@@ -42,6 +42,11 @@ STYLE_LABELS = {
     "military": "军事型",
 }
 RESOLUTION_LABELS = {
+    "expand_influence": "投放地方影响力",
+    "build_outpost": "新建地方据点",
+    "territory_policy": "地方治理政策",
+    "territory_spar": "边界论道比试",
+    "territory_harass": "边界袭扰",
     "declare_war": "宣战",
     "make_peace": "停战",
     "form_alliance": "缔结联盟",
