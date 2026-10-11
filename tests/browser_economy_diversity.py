@@ -85,6 +85,7 @@ def main():
                             assert engine.store._path(game.id).read_bytes()==saved
                             navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
+                            page.locator('.economy-overview > summary').click()
                             box=page.locator('#enterprise-panel');box.locator(':scope > summary').click()
                             page.get_by_label('购置产业',exact=True).select_option('hunt')
                             page.locator('[data-estate-action=buy]').click()

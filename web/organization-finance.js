@@ -9,18 +9,18 @@
     section.append(title);
     const metrics = document.createElement('div');
     metrics.className = 'family-metrics';
-    for (const [label, value] of [['最近结算收入', data.income], ['已付开支', data.expense], ['供养缺口', data.shortfall], ['福利应付', data.benefit_due], ['福利实付', data.benefit_paid]]) {
+    for (const [label, value] of [['最近结算收入', data.income], ['已付开支', data.expense], ['经营养护实付', data.operating_paid], ['供养缺口', data.shortfall], ['福利应付', data.benefit_due], ['福利实付', data.benefit_paid]]) {
       const row = document.createElement('span'), name = document.createElement('small'), amount = document.createElement('b');
       name.textContent = label; amount.textContent = num(value); row.append(name, amount); metrics.append(row);
     }
     section.append(metrics);
     const note = document.createElement('p');
     note.className = 'muted';
-    note.textContent = `按实际年数结算，府库不足时减少支付。物资保障 ${Math.round((data.supply_coverage??1)*100)}%，累计实际消费 ${num(data.supplies_consumed)} 件。${data.product ? `驻地产出：${data.product}，最近售出 ${num(data.produced)} 件。` : ''}`;
+    note.textContent = `按实际年数结算。优先基本养护，经营有盈余时再用于阵法、设施与事务劳务，并保留三年基本养护储备；资金不足时收缩额外开支。物资保障 ${Math.round((data.supply_coverage??1)*100)}%，累计实际消费 ${num(data.supplies_consumed)} 件。${data.product ? `驻地产出：${data.product}，最近售出 ${num(data.produced)} 件。` : ''}`;
     section.append(note); root.append(section);
     if (data.industry_level !== undefined) {
       const industry = document.createElement('p');
-      industry.textContent = `产业扩建 ${data.industry_level} / 10 级 · 门内聚合产能 ${num(data.labor_capacity)} / 年 · 基础供养 ${num(data.expected_upkeep)} / 年`;
+      industry.textContent = `产业扩建 ${data.industry_level} / 10 级 · 门内年产能力参考值 ${num(data.labor_capacity)} · 基础供养 ${num(data.expected_upkeep)} 灵石 / 年`;
       section.append(industry);
     }
   };

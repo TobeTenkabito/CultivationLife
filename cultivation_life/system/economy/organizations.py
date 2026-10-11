@@ -11,7 +11,7 @@ from .ledger import account, balance, transfer_value
 from .state import ensure_state, ensure_regional_market, reprice, commodity_catalog
 from .local_market import quote
 from .estate_management import settlement_interval
-from .organization_accounts import key, faction_record, register, pay, procure
+from .organization_accounts import key, faction_record, register, pay, procure, operating_services
 
 
 def ensure_organizations(game, maps=None):
@@ -97,11 +97,16 @@ def settle_faction(game, maps, row, years):
     from .organization_consumption import consume
     market = game.economy_v2['markets'][f'{world}:{entity.location_id}']
     reserve = int(row.get('expected_upkeep', 0)*.65*3)
+    # An active, profitable operation also pays coordination, formation service
+    # and shared facilities. This is a flow expense, never a levy on old savings.
+    # The three-year basic reserve takes priority; unfunded optional service is
+    # curtailed immediately and never becomes family debt.
+    operating_services(game,row,row['income']-row['expense'])
     # Save actual surplus for rare high-grade goods. A low service-price cap
     # must not make a perfectly funded organization unable to buy one artifact.
     rank=max((int(r) for r in row.get('workforce',{})),default=1)
     cap=min(10**12,max(int(row.get('expected_upkeep',0)*.35*100),BASE_PRICES[max(1,rank)-1]*36))
-    envelope=int(due*.35)+int(max(0,row['income']-row['expense'])*.25)
+    envelope=int(due*.35)+int(max(0,row['income']-row['expense'])*.40)
     allowance=min(cap,row.get('supply_budget_credit',0)+envelope)
     budget=min(allowance,max(0,balance(game,source)-reserve))
     supplies=consume(game,market,entity,row,years,budget)
@@ -168,7 +173,7 @@ def advance_organizations(game, maps):
         years = game.player.age - row['last_year']
         if years < settlement_interval(game, row):
             continue
-        row.update(income=0, expense=0, shortfall=0, produced=0, benefit_due=0, benefit_paid=0)
+        row.update(income=0, expense=0, shortfall=0, produced=0, benefit_due=0, benefit_paid=0,operating_due=0,operating_paid=0)
         if row['kind'] in {'sect', 'family'}:
             settle_faction(game, maps, row, years)
         else:
@@ -193,7 +198,8 @@ def public_finance(game, kind, identity):
         industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.),
         workforce=dict(row.get('workforce', {})), labor_capacity=row.get('labor_capacity', 0),
         expected_upkeep=row.get('expected_upkeep', 0), supply_coverage=row.get('supply_coverage',1),
-        supply_expense=row.get('supply_expense',0),supplies_consumed=row.get('supplies_consumed',0))
+        supply_expense=row.get('supply_expense',0),supplies_consumed=row.get('supplies_consumed',0),
+        operating_due=row.get('operating_due',0),operating_paid=row.get('operating_paid',0))
 
 
 def welfare(game, entity):

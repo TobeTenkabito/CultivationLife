@@ -1,19 +1,53 @@
-/* Local trade lives in the atlas. Rendering and navigation never submit actions. */
+/* A single local market view moves between the atlas and market; no extra settlement. */
 (() => {
-  let search = '', selectedQuantity = '1', address = null;
+  let search = '', regexMode = false, selectedQuantity = '1', address = null;
+  let context = null, dirty = true, content = null, marketView = 'shelves';
+  let worker = null, timeout = null, debounce = null, searchGeneration = 0;
+  function cancelSearch() {
+    searchGeneration++; worker?.terminate(); worker=null;
+    clearTimeout(timeout); clearTimeout(debounce);
+  }
   const el = (tag, text, cls='') => {
     const node = document.createElement(tag); node.className = cls;
     if (text != null) node.textContent = text;
     return node;
   };
   const money = value => Number(value).toLocaleString('zh-CN', {maximumFractionDigits: 2});
-  const setBusy = busy => document.querySelectorAll('#map-economy button[data-trade], #map-economy button[data-governance]').forEach(button => {
+  const setBusy = busy => document.querySelectorAll('#local-market-content button[data-trade], #local-market-content button[data-governance]').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1';
   });
-  function render(market, game, submit, enterpriseSubmit) {
-    const root = document.querySelector('#map-economy'); root.replaceChildren();
+  function prepare(market, game, submit, enterpriseSubmit) {
+    cancelSearch(); context = [market,game,submit,enterpriseSubmit]; dirty = true;
+    const available = !!market?.available;
+    document.querySelector('[data-market-view="local"]')?.classList.toggle('hidden',!available);
+    if(!available && marketView==='local') selectMarket('shelves');
+    if(content && content.parentElement && !content.parentElement.classList.contains('hidden') && content.closest('.panel-open')) attach(content.parentElement.id==='market-local'?'market':'map');
+  }
+  function attach(host) {
+    const target = document.querySelector(host==='market'?'#market-local':'#map-economy');
+    if(!target || !context)return;
+    if(!content){content=el('div');content.id='local-market-content';}
+    if(content.parentElement!==target) target.append(content);
+    if(dirty){dirty=false;build(...context);}
+  }
+  function selectMarket(value) {
+    marketView=value;
+    document.querySelector('#market-content')?.classList.toggle('hidden',value!=='shelves');
+    document.querySelector('#market-local')?.classList.toggle('hidden',value!=='local');
+    document.querySelectorAll('[data-market-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.marketView===value)));
+    if(value==='local')attach('market');
+  }
+  document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('[data-market-view]').forEach(b=>b.addEventListener('click',()=>selectMarket(b.dataset.marketView))));
+  window.addEventListener('game:panel-open',({detail})=>{
+    if(detail.name==='market' && marketView==='local')attach('market');
+    if(detail.name==='map' && !document.querySelector('#map-economy')?.classList.contains('hidden'))attach('map');
+  });
+  function build(market, game, submit, enterpriseSubmit) {
+    cancelSearch(); const root=content;
+    const overviewOpen=address===`${game.id}:${market?.market_id}` && !!root.querySelector('.economy-overview')?.open;
+    root.replaceChildren();
     if (!market?.available) return;
-    if (address !== market.market_id) { address = market.market_id; search = ''; }
+    if (address !== `${game.id}:${market.market_id}`) { address = `${game.id}:${market.market_id}`; search = ''; regexMode=false; }
     const head = el('div', null, 'economy-heading');
     head.append(el('h3', `${market.name} · 本地市场`), el('span', `世界历 ${market.year} 年`));
     const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
@@ -31,16 +65,18 @@
     if (!market.caravans?.length) freight.append(el('p', '当前没有涉及本地的商队运输。'));
     if (market.suppliers?.length) freight.append(el('p', `近期已建模组织与商队的最大供给占比：${Math.round(market.suppliers[0].share * 100)}%。此比例不含背景作坊；新增产出和外来商队会稀释集中度。`));
     const tools = el('div',null,'economy-tools');
-    const input = el('input'); input.type='search'; input.placeholder='查找商品'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
+    const input = el('input'); input.type='search'; input.maxLength=80; input.placeholder='查找商品，例如：矿|草|丹'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
+    const regex = el('button','正则');regex.type='button';regex.setAttribute('aria-pressed',String(regexMode));regex.title='开启后支持 ^、$、字符组与 |；关闭后按商品名称查找';
+    const feedback = el('p',null,'muted economy-search-feedback');feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
     const quantity = el('select'); quantity.setAttribute('aria-label','本地市场交易数量');
     for (const value of ['1','10','100']) { const option=el('option',`每笔 ${value} 件`); option.value=value; quantity.append(option); }
-    quantity.value=selectedQuantity; tools.append(input,quantity);
+    quantity.value=selectedQuantity; tools.append(input,regex,quantity);
     const note = el('p',`交易手续费 ${Math.round(market.fee_rate*100)}%；买入显示含费总额，卖出显示扣费实得。收购价低于售价。`, 'muted');
     const list = el('div',null,'economy-goods');
-    function draw() {
+    function draw(rows=market.rows.filter(row=>row.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())),searching=false) {
       list.replaceChildren();
+      list.setAttribute('aria-busy',String(searching));
       const wallet = game.market?.spirit_stones || 0, count=Number(selectedQuantity);
-      const rows=market.rows.filter(row=>row.name.includes(search));
       rows.forEach(row=>{
         const card=el('article',null,'economy-good'); card.dataset.itemId=row.id;
         card.dataset.supply=row.status==='紧缺'?'scarce':row.status==='充足'?'surplus':'normal';
@@ -61,15 +97,35 @@
         }
         card.append(actions);list.append(card);
       });
-      if (!rows.length) list.append(el('p','没有符合条件的商品。','muted'));
+      if (!rows.length && !searching) list.append(el('p','没有符合条件的商品。','muted'));
       setBusy(document.body.classList.contains('busy'));
     }
-    input.oninput=()=>{search=input.value;draw();};
-    quantity.onchange=()=>{selectedQuantity=quantity.value;draw();};
-    root.append(head,intro,metrics,macro,freight);
-    renderCompetition(root,market,enterpriseSubmit);
-    window.EnterprisePanel?.render(root,market.enterprises,enterpriseSubmit);
-    root.append(tools,note,list);draw();
+    function filter() {
+      cancelSearch();feedback.textContent='';
+      if(!regexMode || !search){draw();return;}
+      draw([],true);feedback.textContent='正在检索…';
+      const generation=searchGeneration;
+      function fail(message){if(generation!==searchGeneration)return;cancelSearch();feedback.textContent=message;draw([]);}
+      try {worker=new Worker('/local-market-search-worker.js');}
+      catch(_){fail('当前环境无法使用正则搜索，请关闭正则后按名称查找。');return;}
+      timeout=setTimeout(()=>fail('检索启动超时，请重新检索。'),3000);
+      worker.onerror=()=>fail('检索无法启动，请关闭正则后按名称查找。');
+      worker.onmessage=({data})=>{
+        if(generation!==searchGeneration)return;
+        if(data.ready){clearTimeout(timeout);timeout=setTimeout(()=>fail('表达式过于复杂，请缩小匹配范围后重试。'),250);worker.postMessage({pattern:search,names:market.rows.map(r=>r.name)});return;}
+        if(data.error){fail(data.error);return;}
+        cancelSearch();feedback.textContent=`找到 ${data.indices.length} 种商品`;draw(data.indices.map(i=>market.rows[i]));
+      };
+    }
+    input.oninput=()=>{search=input.value;cancelSearch();if(regexMode){draw([],true);feedback.textContent='正在检索…';debounce=setTimeout(filter,180);}else filter();};
+    regex.onclick=()=>{regexMode=!regexMode;regex.setAttribute('aria-pressed',String(regexMode));filter();};
+    quantity.onchange=()=>{selectedQuantity=quantity.value;filter();};
+    const overview=el('details',null,'economy-overview');
+    overview.open=overviewOpen;
+    overview.append(el('summary','市场概况与经营'),metrics,macro,freight);
+    renderCompetition(overview,market,enterpriseSubmit);
+    window.EnterprisePanel?.render(overview,market.enterprises,enterpriseSubmit);
+    root.append(head,intro,tools,feedback,note,overview,list);filter();
   }
   function renderCompetition(root,market,submit) {
     const data=market.competition;if(!data)return;
@@ -101,5 +157,5 @@
     if(!data.rows.length)list.append(el('p','成交后逐步形成商品商势记录。','muted'));
     box.append(list);root.append(box);
   }
-  window.LocalEconomy={render,setBusy};
+  window.LocalEconomy={prepare,attach,setBusy};
 })();

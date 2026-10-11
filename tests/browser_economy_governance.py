@@ -54,6 +54,7 @@ def main():
                             if card.get_attribute('open') is None:card.locator(':scope > summary').click()
                             assert page.locator('.war-economic-receipt').is_visible()
                             navigation_locator(page,'[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
+                            page.locator('.economy-overview > summary').click()
                             box=page.locator('#market-governance')
                             def expand():
                                 if box.get_attribute('open') is None:box.locator(':scope > summary').click()

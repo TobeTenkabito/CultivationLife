@@ -25,11 +25,11 @@ def recruitment_ready(game, entity):
     kind = 'family' if entity is game.family else 'sect'
     address = f'organization:{kind}:{entity.id}'
     row = game.economy_v2.get('organizations', {}).get(address, {})
-    from .organization_production import workforce
+    from .organization_production import workforce, annual_upkeep
     tier = WORLD_SYSTEMS['world_profiles'][entity.world]['tier']
     upkeep = row.get('expected_upkeep')
     if upkeep is None:
-        upkeep = sum(n * (25 * tier + rank ** 2 * 8) for rank, n in workforce(entity).items())
+        upkeep = annual_upkeep(workforce(entity), tier)
     return not row.get('shortfall') and game.intrigue_state.get('factions', {}).get(f'{kind}:{entity.id}', {}).get('resources', 0) >= (upkeep + 100 * tier) * 3
 
 
@@ -46,16 +46,23 @@ def plan(game, maps, row):
         org = game.economy_v2.get('organizations', {}).get(payer(row), {})
         cash = max(0, cash - org.get('expected_upkeep', 0) * 3)
     budget = cash // 10
+    dealer_cash = balance(game,f'market:{market["id"]}')
     candidates = []
     from .resource_access import permits
     for identity, recipe in options.items():
         if recipe['kind'] != row['kind'] or not permits(row,recipe):
             continue
         product = market['commodities'][recipe['output']]
+        room = max(0,int(product['target']*1.5-product['stock']))
+        if recipe['quantity'] > room:
+            continue
+        sale = quote(product,'sell',recipe['quantity'])
+        if sale['gross'] > dealer_cash:
+            continue
         cost = max(1, int(product['price'] * recipe['quantity'] * recipe['labor'] + .999))
         cost += sum(quote(market['commodities'][k], 'buy', q)['total'] for k, q in recipe['inputs'].items())
-        revenue = quote(product, 'sell', recipe['quantity'])['total']
-        if revenue > cost and cost <= budget:
+        revenue = sale['total']
+        if revenue >= cost*1.05 and cost <= budget:
             candidates.append(((revenue - cost) / recipe['years'], identity))
     if not row['job'] and candidates:
         row['recipe'] = max(candidates)[1]

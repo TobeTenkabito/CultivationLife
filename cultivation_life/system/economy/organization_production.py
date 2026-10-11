@@ -13,6 +13,12 @@ def workforce(entity):
     return Counter(n.realm_index for n in entity.npcs if is_free(n) and n.world == entity.world)
 
 
+def annual_upkeep(groups, tier):
+    """Aggregate member care follows the same realm/world scale as their work."""
+    return sum(count * (25*tier + rank**2*8 + rank**3*tier)
+               for rank, count in groups.items())
+
+
 def produce(game, maps, entity, row, *, years=1, extra=False):
     world, location = entity.world, faction_site(entity)['id']
     ensure_regional_market(game, maps, world, location)
@@ -38,7 +44,7 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
         effective_elder=effective_elder or (p.realm_index>=3 and (world,'player') not in deployed and not research_assignment(game,'player'))
     row['territory_elder_factor']=.7 if effective_elder else 1.
     tier = WORLD_SYSTEMS['world_profiles'][world]['tier']
-    row['expected_upkeep'] = sum(count*(25*tier+rank**2*8) for rank,count in groups.items())
+    row['expected_upkeep'] = annual_upkeep(groups, tier)
     row['workforce'] = {str(k):v for k,v in sorted(groups.items())}
     row['workforce_year'] = game.player.age
     capacity = sum(count * (60 + 60 * rank ** 3) for rank,count in working.items()) * 5 ** (tier-1)
@@ -50,7 +56,9 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     estate_count = sum(e['owner_kind'] == row['kind'] and e['owner_id'] == entity.id
         and e['world'] == world and e['enabled'] for e in game.economy_v2.get('estates', {}).values())
     capacity /= 1 + estate_count
-    capacity *= (1 + row.get('industry_level', 0) * .25) * row.get('industry_utilization', 1)
+    # Unpaid expansion maintenance suspends its bonus, not the ordinary labor
+    # that can earn the money needed to recover from a temporary cash shortage.
+    capacity *= 1 + row.get('industry_level', 0) * .25 * row.get('industry_utilization', 1)
     from ..territory.rules import enabled
     capacity *= 1 + (row.get('territory_production_bonus',0.) if enabled() else 0.)
     from .basket_rules import index, purpose_candidates, raw_candidates

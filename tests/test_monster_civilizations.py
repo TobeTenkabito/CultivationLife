@@ -36,6 +36,16 @@ def test_read_view_does_not_activate_or_save(engine):
     assert engine.store._path(game.id).read_bytes()==before
     core.advance_year(game);assert game.monster_civilization_state=={}
 
+
+@pytest.mark.parametrize('path',['dao','demonic','buddhist','monster'])
+def test_navigation_is_only_available_to_monster_path(engine,path):
+    game=make(engine);game.player.path=path
+    before=copy.deepcopy(game.to_dict());rng=copy.deepcopy(game.rng_state)
+    marker=core.marker(game)
+    assert marker['ui_available']==(path=='monster')
+    assert marker['available'] and marker['supported']
+    assert game.to_dict()==before and game.rng_state==rng
+
 @pytest.mark.parametrize('world',['unknown_world',0,'celestial'])
 def test_invalid_requested_world_does_not_fall_back_to_human(engine,world):
     game=make(engine);before=engine.store._path(game.id).read_bytes()

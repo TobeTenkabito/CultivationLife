@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-11，本体 **v2.11.1**。Gradle 配置的版本名为 **2.11.1-android.50**，versionCode **50**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-11，本体 **v2.11.2**。Gradle 配置的版本名为 **2.11.2-android.51**，versionCode **51**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 **当前源码存档结构为 10，旧结构 1–9 明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构 1–9 的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
@@ -37,6 +37,8 @@ Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在�
 ## 发布证明与验收
 
 `prepareGameAssets` 依赖 `copyGamePython`，核对暂存源码后生成 APK 内 `assets/game-build.json`。证明覆盖后端、内容、网页、DLC、Android 主源码与相关构建脚本。源码变动后旧 APK 证明失效，不能靠历史成功日志重新发布。
+
+v2.11.2 按用户明确要求沿用上一轮422项领域／跨界测试及10个浏览器程序，不重复运行，也不标记为本轮全仓回归。新产物另验版本、签名、Lint、源码对应关系、已安装APK哈希，以及横竖屏四主题的市场搜索、实际购买和妖修入口；Windows验收新EXE的带DLC／不带DLC运行。沿用证据与新验收分别记入当前发行清单。
 
 正式构建后按 `scripts/package_android.py` 要求准备对应版本的回归、界面、设备、签名、版本、Lint、跨端存档及已安装 APK 哈希日志，再执行：
 

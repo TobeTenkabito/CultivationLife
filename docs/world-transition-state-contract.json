@@ -1,6 +1,7 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "economy_v2.organizations.*.operating_due / operating_paid / estate_cost_credit": "经营养护应付、实付归原组织最近结算记录，不是现金或可复制物资；依据实际新增经营盈余支付，保留三年基本养护，不追扣旧府库、不形成家族额外欠债。estate_cost_credit 为原府库已付而未收回的产权工料、劳务和仓储成本，仅一个非现金余额，组织内实物转仓共享，产权或战争转属不复制到新所有者；组织迁址保留原身份已付成本，旧界固定产业、库存与订单仍留原地点。首次采用仅确认已有未收回成本；查询不初始化，真实支付与销售入口才更新。",
     "economy_v2.demand_policy / demand_policy_year / markets.*.goods_policy / basket_credit / resource_use": "商品细化政策仅对结构 10 在采用年生效，不追扣过去；已有地区新增材料从零库存加入，原实物与既付批次不变。basket_credit 为原市场最多 96 个用途品阶小数，不保存物资；resource_use 仅原地址本年已完成公共采集数量，最多 108 种、逐年重置。私人产权占用本地资源份额，公共生产不读取或恢复私人矿藏和丹源；运行时索引最多 64 个市场，不复制库存。",
     "economy_v2.markets.*.household_year": "原市场背景居民五真实年聚合采购的起始年；稀疏访问按当前库存结算完整区间，不逐年制造历史。采用时从当前年开始，不追扣旧消费；个人当年福利、产业到期完工、战争、事件保持真实年度时钟，内容标明的偏远小宗门可五年汇总经营。玩家即时交易不受五年节拍限制。",
     "economy_v2.organizations.*.breakthrough_support / longevity_support / provision_year / supply_budget_credit": "原组织真实府库与境界组供养。突破覆盖率本年有效；真实消耗的延寿药力按同界成员平均，由原年度生命周期应用。迁址清除覆盖率。supply_budget_credit 是基础供养预算及已实收经营盈余形成的支出额度；上限取百年基础预算与四件同阶标准法宝参照价较大值，最高一万亿，始终受原府库实款及三年基本养护储备限制，不是新增现金账户；迁址清零。",

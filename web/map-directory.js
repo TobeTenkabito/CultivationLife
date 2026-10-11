@@ -81,6 +81,7 @@
         : '地域地图查看行程；可视地图查看山川与宗门影响。移动沿最短路线消耗时间，旅途中世界与人物继续演化。';
       directory.classList.toggle('hidden', mode !== 'directory');
       document.querySelector('#map-economy').classList.toggle('hidden', mode !== 'economy' || !map.economy?.available);
+      if(mode==='economy')window.LocalEconomy?.attach('map');
       directory.replaceChildren();
       const intro = node('div', null, 'map-directory-intro');
       intro.append(node('strong', '坊间见闻 · 商旅名录'), node('p', '会期、战事与各方驻地，依所在地域收录。'));
@@ -114,7 +115,7 @@
           copy.append(node('strong', entry.title), node('p', entry.detail));
           row.append(node('span', entry.seal, 'map-directory-seal'), copy);
           if(entry.kind==='estate'&&place.current)row.append(button('管理产业',()=>{
-            switchMode('economy');const panel=document.querySelector('#enterprise-panel');if(panel)panel.open=true;
+            switchMode('economy');const panel=document.querySelector('#local-market-content #enterprise-panel');if(panel){panel.closest('.economy-overview').open=true;panel.open=true;}
             const target=[...document.querySelectorAll('[data-estate-id]')].find(n=>n.dataset.estateId===entry.estateId);
             if(target){target.open=true;target.scrollIntoView({block:'start'});}
           }));

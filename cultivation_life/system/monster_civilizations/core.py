@@ -21,7 +21,7 @@ def executable(game):
 def marker(game):
     state = game.monster_civilization_state
     revision = state.get('revision', 0) if not state or state.get('schema_version')==1 else 0
-    return dict(available=bool(config()), supported=executable(game),
+    return dict(available=bool(config()), ui_available=bool(config()) and game.player.path == 'monster', supported=executable(game),
                 local=game.player.world in config().get('worlds', {}), revision=revision)
 
 

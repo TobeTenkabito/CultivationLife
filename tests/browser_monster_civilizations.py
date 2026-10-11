@@ -73,7 +73,7 @@ def main():
                     page.screenshot(path=str(output/'court.png'));page.close()
                     # Actual clicks through every page of the entire retained journal.
                     from cultivation_life.system.monster_civilizations import core
-                    made=engine.create_game('史册分页验收','supreme_earth','dao',2100,custom_start=dict(world='human',realm_index=4));fixture.prepare(engine,made['id'])
+                    made=engine.create_game('史册分页验收','supreme_earth','monster',2100,custom_start=dict(world='human',realm_index=4),monster_species_id='fox');fixture.prepare(engine,made['id'])
                     stored=engine.store.load(made['id']);core.activate(stored)
                     for i in range(192):core.fact(stored,'human','observation',stored.player.location_id,f'史事{i:03}',[core.PLAYER],'observed')
                     engine.store.save(stored)
