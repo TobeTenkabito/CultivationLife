@@ -5,9 +5,11 @@ from ..system.guixu_system import guixu_content_available
 from ..system.monster_bloodline_system import bloodline_content_available
 from ..system.sage_system import sage_content_available
 from ..system.tianji_system import tianji_content_available
+from ..system.monster_civilizations.core import config as civilizations_config
 
 
 CHECKS = {
+    'official.monster-civilizations': lambda: bool(civilizations_config()),
     'official.asura-manifestation': asura_available,
     'official.buddhist-dharma': lambda: bool(buddhist_config().get('enabled')),
     'official.guixu-tide': guixu_content_available,

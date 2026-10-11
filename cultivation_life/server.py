@@ -233,7 +233,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise NotFoundError('请先通过开发者控制台进入独立调试副本')
             # Heavens queries/settings/escrow cleanup remain usable while captive;
             # participation has its own stricter actor checks in the domain.
-            if operation not in {'heavens-view', 'heavens-preview', 'heavens-command'}:
+            if operation not in {'heavens-view', 'heavens-preview', 'heavens-command', 'civilizations-view'}:
                 ENGINE.assert_ghost_operation_allowed(game_id, operation)
                 ENGINE.assert_guixu_operation_allowed(game_id, operation)
                 ENGINE.assert_buddhist_operation_allowed(game_id, operation)
@@ -241,6 +241,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
             elif operation == 'heavens-view':
                 result = ENGINE.heavens_view(game_id, payload.get('view', 'known'), payload.get('target_id'))
+            elif operation == 'civilizations-view':
+                result = ENGINE.civilizations_view(game_id, payload)
+            elif operation == 'civilizations-action':
+                result = ENGINE.civilizations_action(game_id, str(payload.get('action', '')), payload)
             elif operation == 'heavens-preview':
                 result = ENGINE.heavens_preview(game_id, payload.get('action'),
                                                 payload.get('target_id'), payload.get('options'))

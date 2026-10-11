@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **1.58.0**，存档结构 **8**。当前共有 **180 个命令/工具**，其中 **137 个现有角色操作入口**已具名接入。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
+维护基线：本体 **2.10.0**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
 
 ## 如何理解覆盖范围
 
@@ -8,6 +8,7 @@
 
 | 系统 | 已覆盖的操作链 | 发现当前选项 |
 | --- | --- | --- |
+| 万灵图志 | 只读图志、当地考察、护育、氏族与王庭事务 | `civilizations view`、`help civilizations action` |
 | 开局与现场 | 复制存档、新建隔离角色、固定种子、命名快照、恢复、差异、复现导入导出 | `scenario list`、`save list`、`debug sessions` |
 | 玩家与修炼 | 数据修改、正常行动、修为/炼体/神识突破、秘法、道统、元府 | `player fields`、`game view /breakthrough`、`game view /secret_arts` |
 | 功法、物品、本命法宝 | 使用、装备、升级、玉简合并、变身、本命法宝绑定与养成 | `game view /player/known_techniques`、`game view /natal_artifact` |

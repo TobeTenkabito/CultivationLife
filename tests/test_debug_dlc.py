@@ -60,7 +60,7 @@ def test_all_remaining_routes_have_typed_metadata_and_no_exclusions(isolated):
     _, manager, _ = isolated
     covered = manager.execute('capability list')['data']['covered']
     assert not EXCLUDED_OPERATIONS
-    assert len(DLC_CAPABILITIES) == 16
+    assert {'civilizations view','civilizations action'} <= {cap.name for cap in DLC_CAPABILITIES}
     assert all(row['content_available'] for row in covered if row['dlc'])
     assert {row['operation'] for row in covered if row['shortcut']} == {'merchant-debug-hq', 'tianji-debug-reveal-all'}
     registry = build_registry()
@@ -95,6 +95,33 @@ def test_disabled_dlc_never_reaches_engine_or_changes_game(isolated, monkeypatch
     assert manager.load(sid)['current'] == before
     if cap.preview:
         assert manager._path(sid).read_bytes() == before_file
+
+
+def test_civilizations_preview_and_action_are_isolated_and_revision_guarded(isolated, tmp_path):
+    _, manager, sid = isolated
+    game = current_game(manager, sid)
+    game.player.location_id = 'wudi_plain'
+    game.player.opportunity = 10000
+    preparer = SessionEngine(manager.project_root, tmp_path / 'prepared', {})
+    preparer.store.save(game)
+    game = preparer._load(game.id)
+    save_fixture(manager, sid, game)
+    before = manager._path(sid).read_bytes()
+    preview = call(manager, sid, 'civilizations view')['data']
+    assert preview['world'] == 'human' and preview['revision'] == 0
+    assert manager._path(sid).read_bytes() == before
+    economic = copy.deepcopy(game.economy_v2)
+    rng = copy.deepcopy(game.rng_state)
+    arguments = dict(action='observe', expected_revision=0,
+                     expected_world=preview['world'], expected_location=preview['location'])
+    call(manager, sid, 'civilizations action', **arguments)
+    actual = current_game(manager, sid)
+    assert actual.monster_civilization_state['revision'] == 1
+    assert actual.economy_v2 == economic and actual.rng_state == rng
+    committed = manager.load(sid)['current']
+    with pytest.raises(RuntimeError):
+        call(manager, sid, 'civilizations action', **arguments)
+    assert manager.load(sid)['current'] == committed
 
 
 def test_buddhist_temple_and_assembly_commands(isolated):

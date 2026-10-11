@@ -692,6 +692,7 @@ function render(data) {
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
   window.ImmortalAperturePanel?.render(data.aperture || {}, payload=>mutate(`/api/games/${data.id}/aperture-action`,payload),{pending:!!data.pending_event,alive:data.player.alive});
   window.UpperInstitutionPanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-institution`,payload));
+  window.MonsterCivilizationsPanel?.render(data,payload=>api(`/api/games/${data.id}/civilizations-view`,{method:'POST',body:JSON.stringify(payload)}),payload=>mutate(`/api/games/${data.id}/civilizations-action`,payload));
   window.UpperVoisinagePanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));

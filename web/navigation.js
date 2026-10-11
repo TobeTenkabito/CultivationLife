@@ -6,7 +6,7 @@
     craft: {name:'百艺', mark:'艺', panels:['inventory','spirit-field','puppet-workshop','captive','crafting','formation','talisman','natal-artifact','tianji']},
     economy: {name:'经营', mark:'营', panels:['personal-economy','market','merchant','auction','exchange','faction','intrigue','upper-institution','heavenly-court','war']},
     people: {name:'同道', mark:'缘', panels:['relationship','world-npc','ranking','family','race','buddhist','sage','ghost-attachment','ghost-parade','yaochi','daomen']},
-    worlds: {name:'诸界', mark:'界', panels:['map','heavens','guixu','world-route']},
+    worlds: {name:'诸界', mark:'界', panels:['map','heavens','civilizations','guixu','world-route']},
   };
   const defaults=['inventory','map','market','relationship','faction','personal-economy'];
   const entries=new Map(), tabs=[], shortcuts=[];

@@ -762,6 +762,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         result['spatial'] = spatial.public(game)
         result['talismans'] = talismans.public(game)
         result['heavens'] = heavens_operations.project(game, 'known', deps=self._dependencies.heavens)
+        from ..system.monster_civilizations.core import marker
+        result['monster_civilizations'] = marker(game)
         spatial_limit = spatial.cultivation_block_reason(game)
         if spatial_limit:
             result['breakthrough'].update(ready=False, enabled=False, met=False, reason=spatial_limit)
@@ -792,6 +794,23 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         if games is not None:
             games[game_id] = game
         return game
+
+    def civilizations_view(self, game_id: str, options: dict | None = None) -> dict[str, Any]:
+        from ..system.monster_civilizations.presentation import project
+        return project(self.store.load(game_id), options)
+
+    def civilizations_action(self, game_id: str, action: str, options: dict | None = None) -> dict[str, Any]:
+        import copy
+        from ..system.monster_civilizations.actions import apply
+        from .transactions import accept_committed_game
+        self.assert_ghost_operation_allowed(game_id, 'civilizations-action')
+        self.assert_guixu_operation_allowed(game_id, 'civilizations-action')
+        self.assert_buddhist_operation_allowed(game_id, 'civilizations-action')
+        game = copy.deepcopy(self._load(game_id))
+        apply(game, action, options or {})
+        self.store.save(game)
+        accept_committed_game(self, game)
+        return self.present(game)
 
     def heavens_view(self, game_id: str, view: str = 'known', target_id: str | None = None) -> dict[str, Any]:
         return heavens_operations.view(self._dependencies.heavens, game_id, view, target_id)

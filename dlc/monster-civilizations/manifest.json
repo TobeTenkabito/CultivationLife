@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.monster-civilizations",
+  "name": "万灵争衡：百族兴衰",
+  "version": "1.0.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 120,
+  "requires": [],
+  "description": "独立生态、氏族传承、万妖宫王庭与万灵志；血脉祖源可选联动。"
+}

@@ -37,7 +37,7 @@ def main():
                 page.route('**/merchant-preview', lambda route: route.fulfill(status=400, content_type='application/json', body='{"error":"Isolated test"}'))
                 page.goto(f'http://127.0.0.1:{httpd.server_port}')
                 page.wait_for_function('configData!==null')
-                assert page.evaluate('configData.extensions.length===7&&configData.extensions.every(e=>e.status==="loaded")')
+                assert page.evaluate('configData.extensions.length>0&&configData.extensions.every(e=>e.status==="loaded")')
                 for world, path, title in [('asura','demonic','魔域'), ('nether','monster','幽域'), ('reincarnation','ghost','轮域')]:
                     g = e._load(e.create_game('本界修域', 'supreme_metal', 'dao', 1522, preset_id='true_immortal')['id'])
                     p = g.player

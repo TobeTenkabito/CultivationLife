@@ -306,7 +306,8 @@
     "created_with_game_version": "history",
     "last_saved_with_game_version": "history",
     "version": "history",
-    "map_war_last_encounter_unit": "clock"
+    "map_war_last_encounter_unit": "clock",
+    "monster_civilization_state": "global"
   },
   "true_form_ownership_notes": {
     "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
@@ -317,5 +318,8 @@
     "Player.world_voisinages.*.levels": "结构 10：统一初成四层、化境四层、大成四层、至臻共十三阶。旧结构 1–9 拒绝加载，不映射、不覆盖原档。",
     "GameState.active_trial": "妖鬼劫战保存引劫快照、真实损伤与元力、待完成进化与祖谱；仅胜利提交进化。照魂保存所选魂因，正常时间账本推进一次后提交归真道路。",
     "Player.world_voisinages.reincarnation.contemplation": "本魂个人参悟的魂因、已结算年数和初始所需年数；被事件中断可续修，切换魂因拒绝，完成后删除，不重复计算行动单位结算。不属于可迁移世界资源。"
+  },
+  "monster_civilization_ownership_notes": {
+    "GameState.monster_civilization_state": "独立 DLC 文化与生态记录按原 world/location 分域，不携带人物、物资、账户或改变玩家 world；显式考察激活，关闭冻结，不补算。种群为非 NPC 聚合数、邻接迁徙两端守恒；氏族仅引用权威人物 ID，分支并族转移份额和成员，祖源编号永久保留。观察快照归发现者，历史有界；王庭绑定原万妖宫人物和 5/4/3/2/1 票重，无财政写入，离界及独立空间冻结政治。"
   }
 }

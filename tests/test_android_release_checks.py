@@ -32,15 +32,15 @@ def release_inputs(tmp_path):
             f'quick-start-ui-{rid}.log': 'Quick-start regression passed',
             f'start-layout-ui-{rid}.log': 'Start layout passed',
             f'true-form-ui-{rid}.log': 'Release 251 UI passed:',
-            f'world-life-ui-{rid}.log': 'Release 250 UI passed:'}
-    phases = ('heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
+            f'world-life-ui-{rid}.log': 'Release 250 UI passed:', f'civilizations-ui-{rid}.log':'passed'}
+    phases = ('civilizations-i-only','civilizations-ii-only','civilizations-neither','heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
               'debug-console-portrait', 'debug-console-landscape',
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
+                 for phase in ('civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')

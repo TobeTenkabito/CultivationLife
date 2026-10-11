@@ -1,6 +1,7 @@
 (() => {
   const panelNames = ['immortal-conversion', 'heavens', 'asura-conversion', 'asura-body', 'asura-veins', 'asura-route', 'asura-domain', 'asura-powers', 'talisman', 'puppet-workshop', 'upper-institution', 'golden-light', 'yaochi', 'combat-plan', 'map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'personal-economy', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'doctrine', 'immortal-veins', 'immortal-body', 'immortal-aperture', 'spirit-voisinage', 'upper-voisinage', 'voisinage', 'daomen', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
   const pending = new Map();
+  panelNames.push('civilizations');
 
   // The latest authoritative response replaces any unopened presentation work.
   // Only DOM creation is deferred; server preparation and settlement are unchanged.

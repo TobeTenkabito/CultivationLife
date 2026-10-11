@@ -130,9 +130,13 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     def advance_war_finance(actual):
         assert actual is game and seen == []
     war_finance=Mock(side_effect=advance_war_finance)
+    def civilizations(actual):
+        assert actual is game and seen == ANNUAL_ORDER[:9]
+    civilizations_hook=Mock(side_effect=civilizations)
     deps, unexpected = contract(WorldYearDependencies,
         **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers,
-        advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance)
+        advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance,
+        advance_civilizations=civilizations_hook)
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
@@ -141,6 +145,10 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     assert news == [name for name in seen if name in list_hooks]
     freight.assert_called_once_with(game)
     war_finance.assert_called_once_with(game)
+    if stop is None or stop >= 9:
+        civilizations_hook.assert_called_once_with(game)
+    else:
+        civilizations_hook.assert_not_called()
     if stop is None or stop >= 9:
         researchers.assert_called_once_with(game)
     else:

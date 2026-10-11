@@ -1,6 +1,6 @@
 # Debug DLC 指令与验证范围
 
-维护基线：本体 **1.58.0**，存档结构 **8**。当前共 **180 个控制台命令 / Agent 工具**，具名接入全部 **137 个角色 POST 操作入口**。其中 DLC 专属及调试捷径共 **17 个入口**；其中 15 个是正式玩法入口，2 个是已有 Debug 捷径。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
+维护基线：本体 **2.10.0**，仅支持存档结构 **10**。当前命令、角色入口及 DLC 门禁以 `help`、`capability list` 的注册表输出为准。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
 
 ## 调用约定
 
@@ -14,8 +14,14 @@
 
 ## DLC 专属与调试入口
 
+万灵扩展新增 `civilizations view`（只读预览）与 `civilizations action`（正式规则模拟）。先读取图志返回的 `revision`，再用它作为操作参数 `expected_revision`；这与调试会话的请求版本分别校验。未开启 DLC2 时拒绝，不自动开包，不绕过当地资格或机缘代价。所有操作只写独立副本。
+
+`civilizations action` 的可选 `expected_world`、`expected_location` 应取自本次图志，防止换地点后误用旧页面。
+
 | 指令 | 正式入口 | 操作 / 参数要点 | 选项来源 |
 | --- | --- | --- | --- |
+| `civilizations view` | `civilizations-view` | 可选 `world`、`page`、`query`、`kind`，只读 | 已知界面与图志 |
+| `civilizations action` | `civilizations-action` | `action`、万灵 `expected_revision`；可选 `target_id`、`name`、`expected_world`、`expected_location` | `civilizations view` |
 | `buddhist action` | `buddhist-action` | `action`；可选 `blessing`、`authority`、`technique` | `game view /buddhist_system`、已学功法 |
 | `guixu action` | `guixu-action` | `action`；可选 `dungeon_id`、`target_layer_id`、`actor_id`、`pool_entry_id`、`confirm_betrayal`、`offer_stones` | `game view /guixu_tide` |
 | `asura action` | `asura` | `action`；可选 `target_id`、`body_ids`、`name` | `game view /asura` |

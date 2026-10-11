@@ -89,6 +89,15 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('civilizations view', 'civilizations-view',
+        (S('world',required=False,choices=('human','monster_realm','phantom_underworld','nether')),
+         I('page',0,15),S('query',required=False),S('kind',required=False)),
+        lambda e,g,p:e.civilizations_view(g,p),preview=True,dlc='official.monster-civilizations'),
+    Capability('civilizations action','civilizations-action',
+        (S('action',choices=('observe','protect','guide','found','join','leave','invite','contest','law','branch','alliance','merge','revive','regime')),
+         I('expected_revision',required=True),S('target_id',required=False),S('name',required=False),
+         S('expected_world',required=False,choices=('human','monster_realm','phantom_underworld','nether')),S('expected_location',required=False)),
+        lambda e,g,p:e.civilizations_action(g,p['action'],p),dlc='official.monster-civilizations'),
     Capability('heavens view', 'heavens-view',
         (S('view', required=False, choices=('known', 'opportunities', 'tasks', 'history')), S('target_id', required=False)),
         lambda e, g, p: e.heavens_view(g, p.get('view', 'known'), target_id=p.get('target_id')), preview=True),
