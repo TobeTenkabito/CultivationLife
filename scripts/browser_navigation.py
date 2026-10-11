@@ -1,6 +1,8 @@
-"""Use the actual category controls before clicking an existing feature button."""
+"""Use a visible desktop control or reveal it through the compact categories."""
 def navigation_locator(page, selector):
     target=page.locator(selector)
+    if target.is_visible():
+        return target
     group=target.evaluate('node=>node.dataset.navigationGroup')
     if group:
         if page.locator('#navigation-menu').evaluate('node=>node.open'):

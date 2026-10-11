@@ -10,7 +10,10 @@
   };
   const defaults=['inventory','map','market','relationship','faction','personal-economy'];
   const entries=new Map(), tabs=[], shortcuts=[];
-  let dialog, grid, common, search, heading, hint, category='common', bar, initialized=false;
+  let dialog, grid, common, search, heading, hint, category='common', bar, initialized=false, compact;
+  const narrow=matchMedia('(max-width:900px)'), touchLandscape=matchMedia('(max-height:520px) and (pointer:coarse)');
+  const mobileHost=!!window.AndroidGame||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  let docks=[];
   let pins=defaults, recent=[];
   let revision=0, saveQueue=Promise.resolve();
   try {
@@ -86,6 +89,7 @@
     if(!initialized)return;
     for(const [id,row] of entries){
       row.button.classList.toggle('navigation-active',id!=='battle-report'&&document.getElementById(`${id}-card`)?.classList.contains('panel-open'));
+      row.button.classList.toggle('navigation-activity',eligible(row)&&!!row.button.dataset.activityState);
     }
     for(const row of shortcuts){const source=entries.get(row.id);row.button.disabled=!eligible(source)||source.button.disabled;row.button.querySelector('small').textContent=title(source);}
     if(dialog.open){renderCommon();filter();}
@@ -97,14 +101,34 @@
     }
   }
   function open(key='common'){
-    if(!initialized||!groups[key]||document.querySelector('#game-screen.hidden'))return;
+    if(!initialized||!compact||!groups[key]||document.querySelector('#game-screen.hidden'))return;
     category=key;search.value='';renderCommon();filter();
     if(!dialog.open)dialog.showModal();refresh();
     dialog.querySelector(`[data-navigation-tab="${key}"]`)?.focus({preventScroll:true});
   }
-  function reveal(id){const row=entries.get(id);if(eligible(row))open(row.group);}
+  function reveal(id){const row=entries.get(id);if(!eligible(row))return;if(compact)open(row.group);else row.button.scrollIntoView({block:'nearest',inline:'nearest'});}
+  function syncLayout(){
+    const next=mobileHost||narrow.matches||touchLandscape.matches;
+    if(next===compact)return;
+    const focused=document.activeElement, wasOpen=dialog.open;
+    close({restoreFocus:false});compact=next;
+    for(const row of entries.values()){
+      if(compact)row.wrapper.insertBefore(row.button,row.pin);
+      else row.anchor.after(row.button);
+    }
+    docks.forEach(dock=>dock.hidden=compact);
+    document.body.classList.toggle('navigation-compact',compact);
+    document.body.classList.toggle('navigation-desktop',!compact);
+    refresh();
+    if(!compact&&wasOpen){
+      const target=[...entries.values()].find(row=>row.button===focused)||[...entries.values()].find(row=>row.group===category&&eligible(row)&&!row.button.disabled);
+      target?.button.focus({preventScroll:true});
+    }
+  }
   function init(){
     if(initialized)return;
+    docks=[...document.querySelectorAll('.strategy-dock')];
+    docks.forEach(dock=>dock.dataset.desktopDock='true');
     const original=[...document.querySelectorAll('.strategy-dock [data-panel-target],#battle-report-open')];
     dialog=el('dialog',null,'navigation-menu');dialog.id='navigation-menu';dialog.setAttribute('aria-labelledby','navigation-heading');
     const header=el('header',null,'navigation-heading'), copy=el('div');
@@ -118,17 +142,17 @@
       const tab=el('button',group.name);tab.type='button';tab.dataset.navigationTab=key;tab.setAttribute('role','tab');tab.onclick=()=>{category=key;search.value='';filter();refresh();};categoryTabs.append(tab);tabs.push(tab);
     }
     const label=el('label',null,'navigation-search');search=el('input');search.type='search';search.id='navigation-search';search.maxLength=80;search.placeholder='搜索功能，例如：灵域、坊市、存档';search.setAttribute('aria-label','搜索已开放功能');search.oninput=filter;label.append(search);
-    const body=el('div',null,'navigation-body');common=el('div');grid=el('nav',null,'strategy-dock navigation-grid');grid.id='strategy-dock';grid.setAttribute('aria-label','已开放功能');hint=el('p',null,'navigation-note');hint.setAttribute('role','status');
+    const body=el('div',null,'navigation-body');common=el('div');grid=el('nav',null,'strategy-dock navigation-grid');grid.id='navigation-grid';grid.setAttribute('aria-label','已开放功能');hint=el('p',null,'navigation-note');hint.setAttribute('role','status');
     for(const button of original){
       const id=button.dataset.panelTarget||'battle-report';
       const group=Object.keys(groups).find(key=>groups[key].panels.includes(id));
       if(!group)throw new Error(`Navigation category missing: ${id}`);
+      const anchor=document.createComment(`navigation:${id}`);button.before(anchor);
       const wrapper=el('div',null,'navigation-entry'),pin=el('button');pin.type='button';pin.className='navigation-pin';pin.dataset.navigationPin=id;
       pin.onclick=()=>{if(pins.includes(id))pins=pins.filter(x=>x!==id);else if(pins.length<8)pins.push(id);else{hint.textContent='常用已有八项，请先取消一个星标。';return;}save();renderCommon();filter();};
       button.dataset.navigationGroup=group;button.addEventListener('click',()=>{remember(id);close({restoreFocus:false});});
-      wrapper.append(button,pin);grid.append(wrapper);entries.set(id,{button,wrapper,pin,group});
+      wrapper.append(button,pin);grid.append(wrapper);entries.set(id,{button,wrapper,pin,group,anchor});
     }
-    document.querySelectorAll('.strategy-dock').forEach(n=>n.remove());
     body.append(common,grid,hint);dialog.append(header,categoryTabs,label,body);
     document.querySelector('#game-screen').append(bar,dialog);
     pins=pins.filter(id=>entries.has(id));recent=recent.filter(id=>entries.has(id));initialized=true;
@@ -138,7 +162,8 @@
       const index=tabs.indexOf(document.activeElement);if(index<0)return;event.preventDefault();const next=tabs[(index+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length];next.click();next.focus();
     }});
     const observer=new MutationObserver(()=>document.body.classList.toggle('navigation-open',dialog.open));observer.observe(dialog,{attributes:true,attributeFilter:['open']});
-    refresh();
+    syncLayout();
+    narrow.addEventListener('change',syncLayout);touchLandscape.addEventListener('change',syncLayout);
   }
   const initialRevision=revision;
   const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{
@@ -146,5 +171,5 @@
     pins=saved.navigation.pins;recent=saved.navigation.recent;
     if(initialized){pins=pins.filter(id=>entries.has(id));recent=recent.filter(id=>entries.has(id));refresh();}
   }).catch(()=>{});
-  window.GameNavigation={init,open,close,reveal,refresh,ready,get saved(){return saveQueue;},isOpen:()=>!!dialog?.open};
+  window.GameNavigation={init,open,close,reveal,refresh,ready,get saved(){return saveQueue;},isOpen:()=>!!dialog?.open,isCompact:()=>!!compact};
 })();

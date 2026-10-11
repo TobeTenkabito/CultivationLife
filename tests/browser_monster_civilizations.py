@@ -24,7 +24,7 @@ def main():
                     for theme in 'abdf':
                         for width,height in [(1440,1000),(360,800),(412,915),(915,412)]:
                             made=engine.create_game('万灵点击验收','supreme_earth','monster',2100,custom_start=dict(world='monster_realm',realm_index=7),monster_species_id='fox');identity=made['id'];fixture.prepare(engine,identity)
-                            page=browser.new_page(viewport=dict(width=width,height=height));errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+                            page=browser.new_page(viewport=dict(width=width,height=height),has_touch=width<1000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('!!configData&&!busy')
                             page.evaluate('(t)=>document.querySelector(`[data-theme-picker=start] [data-theme-choice=${t}]`).click()',theme)
                             page.evaluate('async id=>loadGame(id)',identity)
