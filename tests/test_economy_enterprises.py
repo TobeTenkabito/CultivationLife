@@ -121,6 +121,43 @@ def test_automatic_budget_reserve_and_paid_job_survive_arrears(economy):
     assert GameState.from_dict(game.to_dict())
 
 
+@pytest.mark.parametrize('block',['cash','stock'])
+def test_automatic_output_needs_a_funded_local_buyer_without_affecting_manual_orders(economy,block):
+    from cultivation_life.system.economy.enterprise_operations import start_job
+    from cultivation_life.system.economy.enterprise_market import market_at
+    engine,game=economy;game,key=buy(engine,game,'farm')
+    game=estate_act(engine,game,key,'fund',amount=10000)
+    game=configure(engine,game,key,expense_limit=100000,reserve_cash=100)
+    row=game.economy_v2['estates'][key];market=market_at(game,engine.maps,row)
+    recipe=recipes(row['world'],commodity_catalog(row['world']))[row['recipe']]
+    if block=='cash':
+        dealer=f'market:{market["id"]}'
+        transfer_value(game,dealer,'background:human',balance(game,dealer),'收购资金用尽')
+        message='收购资金'
+    else:
+        product=market['commodities'][recipe['output']]
+        product['stock']=product['target']*2+1000
+        message='库存已充裕'
+    snapshot=copy.deepcopy(game.to_dict());before=cash(game)
+    with pytest.raises(ValueError,match=message):start_job(game,engine.maps,row,automatic=True)
+    assert game.to_dict()==snapshot and cash(game)==before
+    start_job(game,engine.maps,row)
+    assert row['job'] and cash(game)==before
+
+
+def test_entrusted_unsold_output_is_not_rolled_into_more_speculative_batches(economy):
+    engine,game=economy;game,key=buy(engine,game,'farm')
+    game=estate_act(engine,game,key,'fund',amount=10000)
+    game=configure(engine,game,key,enabled=True,sell_limit=10**12)
+    game=estate_act(engine,game,key,'start')
+    row=game.economy_v2['estates'][key];row['entrusted']=True
+    job=copy.deepcopy(row['job']);before=cash(game)
+    game.player.age=job['finish'];advance_estates(game,engine.maps)
+    assert row['stock'][job['item']]==job['quantity'] and row['job'] is None
+    assert not row['enabled'] and not row['auto_buy'] and row['auto_sell']
+    assert cash(game)==before
+
+
 def test_missing_inputs_stale_revision_and_remote_actions_atomic(economy):
     engine, game = economy
     game, key = buy(engine, game, 'farm')

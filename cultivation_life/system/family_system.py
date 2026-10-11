@@ -290,7 +290,8 @@ class FamilySystemMixin:
                 game.family_state['gather_age'] = player.age
                 amount = finance.produce(game, self.maps, family, fiscal, extra=True)
                 fiscal['income'] += amount
-                summary = f'家族组织经营采集，本地市场实际收购所得{amount}灵石。'
+                services = finance.operating_services(game,fiscal,amount)
+                summary = f'家族组织经营采集，实际收购所得{amount}灵石，经营养护支出{services}灵石。'
             else:
                 if not npc or npc not in family.npcs:
                     raise ValueError('该修士不在族籍')

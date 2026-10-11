@@ -41,6 +41,7 @@ def main():
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',game.id);navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
+                            page.locator('.economy-overview > summary').click()
                             def expand(locator):
                                 if locator.get_attribute('open') is None:locator.locator(':scope > summary').click()
                             box=page.locator('#enterprise-panel');expand(box)

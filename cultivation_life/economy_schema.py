@@ -137,7 +137,7 @@ def validate_economy(value, merchants=None, document=None):
             require(isinstance(row.get('history'), list) and len(row['history']) <= 12)
             require(nonnegative(row.get('production_credit', 0)))
             require(nonnegative(row.get('supply_coverage',1)) and row.get('supply_coverage',1) <= 1)
-            for field in ('supplies_consumed','supply_expense','supply_budget_credit'):
+            for field in ('supplies_consumed','supply_expense','supply_budget_credit','operating_due','operating_paid','estate_cost_credit'):
                 require(type(row.get(field,0)) is int and row.get(field,0) >= 0)
             require(isinstance(row.get('demand_credit',{}),dict) and len(row.get('demand_credit',{})) <= 104)
             require(all(nonnegative(n) and n < 1 for n in row.get('demand_credit',{}).values()))

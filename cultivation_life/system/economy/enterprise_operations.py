@@ -6,6 +6,7 @@ from .enterprise_state import estates, payer, cash_ready, put, take, used, log, 
 from .ledger import balance, transfer_value
 from .local_market import quote
 from .state import ensure_regional_market, commodity_catalog, reprice
+from .organization_accounts import estate_cost, estate_sale
 
 
 
@@ -25,6 +26,7 @@ def market_trade(game, row, market, item, number, side):
         product['stock'] -= number
         from .market_power import record_trade
         record_trade(game, market, item, f'estate:{row["id"]}', 'buy', number)
+        estate_cost(game,row,bill['total'])
         row['expense'] += bill['total']
     else:
         if balance(game, dealer) < bill['gross']:
@@ -33,7 +35,9 @@ def market_trade(game, row, market, item, number, side):
         transfer_value(game, dealer, key, bill['total'], '产业仓库实货销售')
         transfer_value(game, dealer, operator, bill['fee'], '产业销售手续费')
         product['stock'] += number
+        services=estate_sale(game,row,bill['total'])
         row['income'] += bill['total']
+        row['expense'] += services
         from .industry import supplier_delivery
         supplier_delivery(market, f'estate:{row["id"]}', number, game=game, item=item)
     product['volume'] += number
@@ -84,7 +88,13 @@ def start_job(game, maps, row, *, automatic=False):
         available = max(0, balance(game,source)-reserve)
         if total > min(available, limit):
             raise ValueError('保留养护储备或本次自动经营支出上限不足，暂停投产')
-        if quote(market['commodities'][recipe['output']], 'sell', count)['total'] < total*1.05:
+        product=market['commodities'][recipe['output']]
+        sale=quote(product,'sell',count)
+        if sale['gross'] > balance(game,f'market:{market["id"]}'):
+            raise ValueError('当地收购资金不足以承接本批成品，暂停自动投产')
+        if count > max(0,int(product['target']*1.5-product['stock'])):
+            raise ValueError('当地同类商品库存已充裕，暂停自动投产')
+        if sale['total'] < total*1.05:
             raise ValueError('预期利润不足工料成本的 5%，暂停自动投产')
     for item, number in missing.items():
         if number:
@@ -92,6 +102,7 @@ def start_job(game, maps, row, *, automatic=False):
     for item, number in inputs.items():
         take(row, item, number)
     transfer_value(game, source, f'background:{row["world"]}', wage, '产业工匠、种植或采掘劳务')
+    estate_cost(game,row,wage)
     row['expense'] += wage
     if row['kind'] in {'mine','hunt'}:
         row['reserve'] -= count
@@ -149,6 +160,7 @@ def advance_estates(game, maps):
         source = cash_ready(game, row)
         paid = min(due, balance(game, source))
         transfer_value(game, source, f'background:{row["world"]}', paid, '产业年度仓储及场地养护')
+        estate_cost(game,row,paid)
         row['expense'] += paid
         row['arrears'] = due - paid
         if row['job'] and game.player.age >= row['job']['finish']:
@@ -166,6 +178,9 @@ def advance_estates(game, maps):
             if row['job'] or not unsold:
                 from .estate_management import plan
                 plan(game, maps, row)
+            else:
+                row['enabled']=False
+                row['auto_buy']=False
         if not row['enabled']:
             continue
         if row['auto_sell']:

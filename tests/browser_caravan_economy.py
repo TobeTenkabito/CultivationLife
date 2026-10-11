@@ -75,6 +75,7 @@ def main():
                             page.screenshot(path=str(output/f'{theme}-{width}-merchant.png'))
                             navigation_locator(page,'[data-panel-target=map]').click()
                             page.get_by_role('button',name='本地市场',exact=True).click()
+                            page.locator('.economy-overview > summary').click()
                             page.locator('.economy-freight summary').click()
                             assert page.locator('.economy-freight').is_visible()
                             page.wait_for_function('getComputedStyle(document.querySelector("#map-card")).opacity==="1" && document.querySelector("#map-card").scrollWidth<=document.querySelector("#map-card").clientWidth+1')

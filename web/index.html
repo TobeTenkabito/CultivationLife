@@ -199,6 +199,11 @@
         </article>
         <article id="market-card" class="paper market-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙坊市">
           <div class="section-title"><div><p class="eyebrow">互通有无</p><h2 id="market-title">修仙坊市</h2></div><div class="market-heading-actions"><strong id="market-wallet"></strong><button id="market-toggle" type="button">关闭</button></div></div>
+          <nav id="market-view-tabs" class="economy-tools" aria-label="坊市分类">
+            <button type="button" data-market-view="shelves" aria-pressed="true" aria-controls="market-content">精选货架</button>
+            <button type="button" data-market-view="local" aria-pressed="false" aria-controls="market-local" class="hidden">本地市场</button>
+          </nav>
+          <section id="market-local" class="hidden" aria-label="坊市本地市场"></section>
           <div id="market-content">
             <section id="immortal-market-content" class="immortal-content hidden"></section>
             <p id="market-description" class="muted"></p>

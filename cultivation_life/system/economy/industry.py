@@ -27,8 +27,14 @@ def settle_industry(game, maps, entity, row, years):
     source = f'organization:{row["kind"]}:{entity.id}'
     wars = participating_wars(game, entity.id, world)
     level = row.get('industry_level', 0)
-    due = round(100 * (level + 1) * years) if level else 0
-    paid = min(due, balance(game, source))
+    from ...content_registry import WORLD_SYSTEMS
+    tier = WORLD_SYSTEMS['world_profiles'][world]['tier']
+    due = round(100 * 5**(tier-1) * (level + 1) * years) if level else 0
+    # Expansion service must not take cash already needed for members' basic
+    # care. The last authoritative histogram supplies this reserve without a
+    # second pass over NPCs; new output can restore the expansion next interval.
+    reserve = int(row.get('expected_upkeep',0)*.65*max(3,years))
+    paid = min(due, max(0,balance(game,source)-reserve))
     transfer_value(game, source, f'background:{world}', paid, '组织产业原料与设备养护')
     row['expense'] += paid
     row['industry_utilization'] = paid / due if due else 1.

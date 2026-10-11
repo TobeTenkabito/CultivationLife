@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **2.11.1**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
+维护基线：本体 **2.11.2**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
 
 ## 如何理解覆盖范围
 

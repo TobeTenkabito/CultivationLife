@@ -131,7 +131,7 @@
     if(owner!==data.id){owner=data.id;world='';selectedRegion='';page=0;view=null;generation++;tab='ecology';}
     else if(game?.player.world!==data.player.world||game?.player.location_id!==data.player.location_id)selectedRegion='';
     game=data;query=fetchView;act=perform;
-    const available=!!data.monster_civilizations?.available;
+    const available=!!data.monster_civilizations?.ui_available;
     document.getElementById('civilizations-card')?.classList.toggle('hidden',!available);
     document.querySelector('[data-panel-target="civilizations"]')?.classList.toggle('hidden',!available);
     if(!available){window.UtilityPanels?.close('civilizations');view=null;generation++;return;}

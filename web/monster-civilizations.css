@@ -6,3 +6,9 @@
 @media(max-width:620px){.mc-grid,.mc-clan-tree{grid-template-columns:1fr}.mc-atlas-head{padding:12px}.mc-atlas-head p{flex-basis:100%;order:3}.mc-tabs{gap:4px}.mc-tabs button{padding:8px 5px;font-size:.9rem}.mc-region,.mc-clan{padding:12px}.mc-vote-track span{font-size:.68rem}.mc-actions button{flex:1 1 auto}.mc-bloc small{font-size:.75rem}.mc-form{gap:6px}}
 .mc-grid{grid-template-columns:1fr;max-width:720px;margin-inline:auto}
 .mc-clan.current{border-color:var(--pine)}
+/* The expansion keeps its own visual seal in both desktop and compact navigation. */
+[data-panel-target="civilizations"],[data-navigation-shortcut="civilizations"]{border:1px solid var(--pine)!important;border-radius:16px 5px 16px 5px!important;background:linear-gradient(135deg,color-mix(in srgb,var(--pine) 18%,var(--surface)),var(--surface))!important;box-shadow:inset 3px 0 var(--pine)}
+[data-panel-target="civilizations"]>span,[data-navigation-shortcut="civilizations"]>span{border:1px solid var(--pine);border-radius:50%;color:var(--pine)}
+#civilizations-card button{border-radius:12px 4px 12px 4px;border-color:color-mix(in srgb,var(--pine) 65%,var(--line));background:color-mix(in srgb,var(--pine) 9%,var(--surface));min-height:44px}
+#civilizations-card button:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+#civilizations-card .mc-tabs button::before,#civilizations-card .mc-actions button::before,#civilizations-card .mc-form button::before{content:'';display:inline-block;width:5px;height:5px;border:1px solid var(--pine);transform:rotate(45deg);margin-right:7px;vertical-align:2px}

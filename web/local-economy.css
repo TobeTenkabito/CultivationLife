@@ -1,4 +1,4 @@
-#map-economy { min-width: 0; }
+#map-economy, #market-local { min-width: 0; }
 .caravan-atlas { margin-top:14px; min-width:0; }
 .caravan-atlas-heading { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .caravan-atlas-heading span { color:var(--muted); font-size:.85em; }
@@ -16,12 +16,16 @@
 .caravan-map-roster { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; max-height:160px; overflow:auto; }
 .caravan-map-roster button { font-size:.82em; text-align:left; padding:8px 12px; }
 .caravan-map-roster button[aria-pressed=true] { border-color:var(--pine); box-shadow:inset 0 -2px var(--pine); }
-#map-economy .economy-good[data-supply=scarce] { border-left-color:#b34c36; }
-#map-economy .economy-good[data-supply=surplus] { border-left-color:#3d8578; }
-#map-economy .economy-heading .supply-badge { border:1px solid currentColor; border-radius:20px; padding:3px 9px; font-weight:700; }
-#map-economy [data-supply=scarce] .supply-badge { color:#b34c36; background:#b34c3612; }
-#map-economy [data-supply=surplus] .supply-badge { color:#3d8578; background:#3d857812; }
-#map-economy [data-supply=normal] .supply-badge { color:var(--muted); }
+#local-market-content .economy-good[data-supply=scarce] { border-left-color:#b34c36; }
+#local-market-content .economy-good[data-supply=surplus] { border-left-color:#3d8578; }
+#local-market-content .economy-heading .supply-badge { border:1px solid currentColor; border-radius:20px; padding:3px 9px; font-weight:700; }
+#local-market-content [data-supply=scarce] .supply-badge { color:#b34c36; background:#b34c3612; }
+#local-market-content [data-supply=surplus] .supply-badge { color:#3d8578; background:#3d857812; }
+#local-market-content [data-supply=normal] .supply-badge { color:var(--muted); }
+#market-view-tabs{margin:16px 0}#market-view-tabs button{min-height:44px;flex:1}#market-view-tabs [aria-pressed=true],.economy-tools [aria-pressed=true]{border-color:var(--pine);box-shadow:inset 0 -2px var(--pine)}
+.economy-search-feedback{min-height:1.5em;margin:8px 0}.economy-tools input[type=search]{flex:1;min-width:150px;min-height:44px}.economy-tools button,.economy-tools select{min-height:44px}
+.economy-overview{padding:12px;border:1px solid var(--line);border-radius:10px;margin:12px 0}.economy-overview>summary{cursor:pointer;min-height:24px}.economy-metrics strong{font-size:1rem}
+#market-card .market-heading-actions{flex-wrap:wrap;justify-content:flex-end}#market-toggle{min-width:60px;white-space:nowrap}#market-wallet{font-size:.9em;font-variant-numeric:tabular-nums}
 .economy-good > progress { width:100%; height:7px; accent-color:var(--pine); margin:12px 0 6px; }
 .economy-good[data-supply=scarce] > progress { accent-color:#b34c36; }
 .economy-good .supply-detail { font-size:.8em; line-height:1.7; }

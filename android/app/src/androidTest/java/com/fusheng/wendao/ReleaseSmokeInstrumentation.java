@@ -250,6 +250,42 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("[data-civilization-action=observe]");waitForJs("!!document.querySelector('.mc-species') && !busy","Independent real observation");
                 }
                 result.putString("civilizations_matrix_scope","Signed native actual restart with original loader and user preference switches: "+phase);
+            } else if(phase.equals("market-release")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'新版市场安装包验收',spirit_root:'supreme_earth',path:'dao',seed:315,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
+                python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\nadd_item(g.player,'spirit_stone',100000000)\ne.store.save(g)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("!game.monster_civilizations.ui_available && document.querySelector('[data-panel-target=civilizations]').classList.contains('hidden')")),"Non-monster DLC entry must be hidden");
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=market]");
+                    tapSelector("[data-market-view=local]");
+                    js("window.__search=document.querySelector('[aria-label=\"查找本地商品\"]');__search.value='矿|草|丹';__search.dispatchEvent(new Event('input',{bubbles:true}));true");
+                    if(Boolean.TRUE.equals(js("document.querySelector('#local-market-content .economy-tools button').getAttribute('aria-pressed')!=='true'"))) tapSelector("#local-market-content .economy-tools button");
+                    waitForJs("document.querySelector('.economy-search-feedback').textContent.startsWith('找到')","APK worker regex did not complete");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.economy-good').length>0 && Array.from(document.querySelectorAll('.economy-good b')).every(n=>/矿|草|丹/u.test(n.textContent))")),"APK regex results mismatch");
+                    js("__search.value='[';__search.dispatchEvent(new Event('input',{bubbles:true}));true");
+                    waitForJs("document.querySelector('.economy-search-feedback').textContent.includes('正则表达式无效')","APK regex error recovery");
+                    js("__search.value='矿|草|丹';__search.dispatchEvent(new Event('input',{bubbles:true}));true");
+                    waitForJs("document.querySelector('.economy-search-feedback').textContent.startsWith('找到')","APK search did not recover");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#market-card').scrollWidth<=document.querySelector('#market-card').clientWidth+1")),"APK market overflow");
+                    capture("market-release-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    js("window.__marketRevision=game.map.economy.revision;window.__marketItem=document.querySelector('.economy-good [data-trade=buy]:not(:disabled)').closest('.economy-good').dataset.itemId;window.__marketStock=game.map.economy.rows.find(r=>r.id===__marketItem).stock;true");
+                    tapSelector(".economy-good [data-trade=buy]:not(:disabled)");
+                    waitForJs("!busy && game.map.economy.revision>__marketRevision && game.map.economy.rows.find(r=>r.id===__marketItem).stock===__marketStock-1","APK actual purchase");
+                    tapSelector("[data-panel-target=map]");
+                    tapSelector("#map-view-tabs button[aria-controls=map-economy]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#local-market-content').length===1 && !!document.querySelector('#map-economy #local-market-content') && document.querySelector('[aria-label=\"查找本地商品\"]').value==='矿|草|丹'")),"APK shared market state");
+                }
+                String monster=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'新版灵纹验收',spirit_root:'supreme_earth',path:'monster',monster_species_id:'fox',seed:315,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
+                async("loadGame("+JSONObject.quote(monster)+")");
+                check(Boolean.TRUE.equals(js("game.monster_civilizations.ui_available && !document.querySelector('[data-panel-target=civilizations]').classList.contains('hidden')")),"Monster DLC entry missing");
+                tapSelector("[data-panel-target=civilizations]");
+                waitForJs("!!document.querySelector('.mc-tabs')","Packaged atlas load");
+                check(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('.mc-tabs button'),'::before').width==='5px'")),"Packaged DLC seal stylesheet missing");
+                capture("market-release-dlc-"+arguments.getString("orientation","portrait"));
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("document.querySelector('[data-panel-target=civilizations]').classList.contains('hidden') && !document.querySelector('#civilizations-card').classList.contains('panel-open')")),"APK path switch leaves expansion open");
+                result.putString("market_release_scope","New signed APK: four themes, actual native market taps and purchases, regex Worker/error recovery, shared map inventory, path visibility and distinct DLC stylesheet");
             } else if(phase.equals("economic-force")) {
                 python(assetText("economic-force-272.py"));
                 result.putString("economic_force_scope","1666 packaged catalog entries; fresh and stale schema-10 equipment actual damage against golden light in all eleven worlds");

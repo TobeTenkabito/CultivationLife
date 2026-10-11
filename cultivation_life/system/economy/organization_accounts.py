@@ -63,3 +63,60 @@ def procure(game, source, world, amount, reason, *, partial=False):
     return pay(game, source, f'background:{world}', amount, reason)
 
 
+def operating_services(game, row, surplus):
+    """Scale optional services to new earnings and protect existing reserves."""
+    source = key(row['kind'], row['identity'])
+    reserve = int(row.get('expected_upkeep', 0)*.65*3)
+    due = max(0,surplus)*40//100
+    paid = procure(game,source,row['world'],
+        min(due,max(0,balance(game,source)-reserve)),
+        '经营盈余用于阵法运转、共用设施与事务劳务',partial=True)
+    row['operating_due'] = row.get('operating_due',0)+due
+    row['operating_paid'] = row.get('operating_paid',0)+paid
+    row['expense'] += paid
+    return paid
+
+
+def _estate_finance(game, estate):
+    if estate['owner_kind'] not in {'sect','family'}:
+        return None
+    aliases=game.economy_v2.get('organization_aliases',{})
+    address=key(estate['owner_kind'],estate['owner_id'])
+    address=aliases.get(address,address)
+    row=game.economy_v2.get('organizations',{}).get(address)
+    if row is not None and 'estate_cost_credit' not in row:
+        # Adopt only already-paid, unrecovered costs, never historical profit.
+        # One aggregate credit per original treasury also handles transfers
+        # between its own estates without attributing costs to individual goods.
+        owned=(e for e in game.economy_v2.get('estates',{}).values()
+               if aliases.get(key(e['owner_kind'],e['owner_id']),key(e['owner_kind'],e['owner_id']))==address)
+        row['estate_cost_credit']=max(0,sum(e['expense']-e['income'] for e in owned))
+    return row
+
+
+def estate_cost(game, estate, amount):
+    """Call before increasing the estate's expense; only actual paid costs count."""
+    row=_estate_finance(game,estate)
+    if row is not None:
+        row['estate_cost_credit']+=amount
+
+
+def estate_sale(game, estate, receipt):
+    """Recover paid inputs/maintenance first, then service new operating profit."""
+    row=_estate_finance(game,estate)
+    if row is None:
+        return 0
+    surplus=max(0,receipt-row['estate_cost_credit'])
+    row['estate_cost_credit']=max(0,row['estate_cost_credit']-receipt)
+    if not surplus:
+        return 0
+    row['income']+=surplus
+    paid=operating_services(game,row,surplus)
+    reserve=int(row.get('expected_upkeep',0)*.65*3)
+    row['supply_budget_credit']=min(10**12,max(0,balance(game,key(row['kind'],row['identity']))-reserve),
+        row.get('supply_budget_credit',0)+int((surplus-paid)*.40))
+    if row['history'] and row['history'][-1][0]==game.player.age:
+        row['history'][-1][1:]=[row['income'],row['expense']]
+    return paid
+
+
