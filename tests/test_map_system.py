@@ -74,6 +74,49 @@ class MapCatalogTests(unittest.TestCase):
         self.assertIn("必然身死道消", formerly_blocked.warning)
         self.assertEqual(self.catalog.travel_plan("human", "wudi_plain", "lancang_sea", 4).status, "ok")
 
+    def test_cached_roads_preserve_all_pairs_against_independent_distances(self):
+        # Floyd–Warshall is independent of the cached single-source algorithm.
+        for world, graph in self.catalog._graphs.items():
+            nodes = list(graph)
+            distances = {(a,b): 0 if a == b else float('inf') for a in nodes for b in nodes}
+            for a, edges in graph.items():
+                for b, cost in edges:
+                    distances[a,b] = min(distances[a,b], cost)
+            for mid in nodes:
+                for a in nodes:
+                    for b in nodes:
+                        distances[a,b] = min(distances[a,b], distances[a,mid]+distances[mid,b])
+            for a in nodes:
+                for b in nodes:
+                    if a == b: continue
+                    plan = self.catalog.travel_plan(world,a,b,8)
+                    self.assertEqual(plan.base_years,distances[a,b])
+                    self.assertEqual(plan.route[0],a)
+                    self.assertEqual(plan.route[-1],b)
+                    self.assertEqual(sum(dict(graph[x])[y] for x,y in zip(plan.route,plan.route[1:])),plan.base_years)
+
+    def test_cached_roads_recheck_live_gate_speed_and_multiplier(self):
+        catalog = MapCatalog(CONTENT_DOCUMENTS['maps.json'])
+        original = catalog.travel_plan('human','wudi_plain','lancang_sea',1)
+        fast = catalog.travel_plan('human','wudi_plain','lancang_sea',4,.05)
+        slow = catalog.travel_plan('human','wudi_plain','lancang_sea',4,10)
+        self.assertEqual(original.status,'lethal')
+        self.assertEqual(fast.status,'ok')
+        self.assertLess(fast.years,slow.years)
+        self.assertEqual(original.route,fast.route)
+        catalog.location('human','lancang_sea')['min_realm_index'] = 12
+        self.assertEqual(catalog.travel_plan('human','wudi_plain','lancang_sea',4).status,'lethal')
+
+    def test_revalidated_content_discards_cached_roads(self):
+        import copy
+        catalog = MapCatalog(copy.deepcopy(CONTENT_DOCUMENTS['maps.json']))
+        original = catalog.travel_plan('human','wudi_plain','lancang_sea',4)
+        for row in catalog.worlds['human']['routes']:
+            row['years'] *= 2
+        catalog._validate(None)
+        updated = catalog.travel_plan('human','wudi_plain','lancang_sea',4)
+        self.assertEqual(updated.base_years,original.base_years*2)
+
     def test_entry_warnings_use_realm_names_in_every_world(self):
         for world, geography in self.catalog.worlds.items():
             for target in geography['locations']:

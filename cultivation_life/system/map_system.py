@@ -4,6 +4,7 @@ import hashlib
 import heapq
 import json
 import math
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -24,6 +25,46 @@ class TravelPlan:
 
 class MapCatalog(MapDefinition):
     """加载地图内容，并负责寻路、境界限制与地域内容分流。"""
+
+    def __init__(self, document, expected_worlds=None):
+        # Cache static roads only. Realm gates and travel speed stay live below;
+        # neither game state nor a teleport network belongs in this cache.
+        self._route_cache = OrderedDict()
+        super().__init__(document, expected_worlds)
+
+    def _validate(self, expected_worlds):
+        super()._validate(expected_worlds)
+        self._route_cache.clear()
+
+    def _routes_from(self, world, origin):
+        key = (world, origin)
+        cached = self._route_cache.get(key)
+        if cached is not None:
+            self._route_cache.move_to_end(key)
+            return cached
+        distances = {origin: 0}
+        previous = {}
+        queue = [(0, origin)]
+        while queue:
+            distance, node = heapq.heappop(queue)
+            if distance != distances.get(node):
+                continue
+            for neighbor, cost in self._graphs[world][node]:
+                candidate = distance + cost
+                if candidate < distances.get(neighbor, 10**18):
+                    distances[neighbor] = candidate
+                    previous[neighbor] = node
+                    heapq.heappush(queue, (candidate, neighbor))
+        routes = {}
+        for destination, years in distances.items():
+            route = [destination]
+            while route[-1] != origin:
+                route.append(previous[route[-1]])
+            routes[destination] = (years, tuple(reversed(route)))
+        self._route_cache[key] = routes
+        if len(self._route_cache) > 256:
+            self._route_cache.popitem(last=False)
+        return routes
 
     @classmethod
     def load(cls, path: Path, expected_worlds: set[str] | None = None) -> "MapCatalog":
@@ -59,28 +100,10 @@ class MapCatalog(MapDefinition):
         target = self.location(world, destination)
         if origin == destination:
             raise MapContentError("你已经身在此地")
-        distances: dict[str, int] = {origin: 0}
-        previous: dict[str, str] = {}
-        queue: list[tuple[int, str]] = [(0, origin)]
-        while queue:
-            distance, node = heapq.heappop(queue)
-            if distance != distances.get(node):
-                continue
-            if node == destination:
-                break
-            for neighbor, cost in self._graphs[world][node]:
-                candidate = distance + cost
-                if candidate < distances.get(neighbor, 10**18):
-                    distances[neighbor] = candidate
-                    previous[neighbor] = node
-                    heapq.heappush(queue, (candidate, neighbor))
-        if destination not in distances:
+        routes = self._routes_from(world, origin)
+        if destination not in routes:
             raise MapContentError("目前没有通往目标地图的路线")
-        route = [destination]
-        while route[-1] != origin:
-            route.append(previous[route[-1]])
-        route.reverse()
-        base_years = distances[destination]
+        base_years, route = routes[destination]
         speed = float(self.settings["travel_speed_by_realm"][str(max(0, min(12, realm_index)))])
         years = max(1, math.ceil(base_years * speed * max(0.05, float(travel_multiplier))))
         required = int(target.get("min_realm_index", 0))

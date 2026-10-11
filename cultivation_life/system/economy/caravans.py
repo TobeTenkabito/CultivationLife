@@ -58,14 +58,14 @@ def ensure_caravans(game, maps, *, _world=None, _linked=True):
     return True
 
 
-def route_quote(game, maps, world, origin, destination, value):
+def route_quote(game, maps, world, origin, destination, value, *, _network=None):
     """Commercial array access is paid by cargo; no player permit or movement."""
     realm = max(1, int(WORLD_SYSTEMS['world_profiles'][world].get('npc_realm_cap', 5)) - 2)
     normal = maps.travel_plan(world, origin, destination, realm)
     if normal.status != 'ok':
         return None
     years, via, operator = normal.years, None, None
-    network = arrays(game, maps, world)
+    network = arrays(game, maps, world) if _network is None else _network
     if origin in network:
         for node in sorted(network):
             if not separated(maps, world, origin, node):
@@ -99,9 +99,10 @@ def _history(region, year, fleet, message):
 def _candidate_items(source, target):
     """Keep the original price/stock/ID tie order without sorting all goods."""
     goods, other = source['commodities'], target['commodities']
-    return heapq.nlargest(12, (item for item in goods if item in other),
-        key=lambda item: (other[item]['price'] / goods[item]['price'],
-                          goods[item]['stock'] / goods[item]['target'], item))
+    ranked = ((other[item]['price'] / row['price'],
+               row['stock'] / row['target'], item)
+              for item, row in goods.items() if item in other)
+    return [item for _, _, item in heapq.nlargest(12, ranked)]
 
 
 def _candidate(game, maps, alliance, fleet):
@@ -123,11 +124,15 @@ def _candidate(game, maps, alliance, fleet):
     war_sites = {w.get('location_id') for w in game.wars
                  if w.get('status') in {'active', 'peace_ready'} and w.get('world') == world}
     best = None
+    # A search cannot trade or change array ownership. Reuse only within this
+    # search; the next fleet observes the previous fleet's actual purchases.
+    network = arrays(game, maps, world)
+    purchases = {}
     for destination in sites:
         if destination == origin:
             continue
         target = _market(game, world, destination)
-        geography = route_quote(game, maps, world, origin, destination, 1)
+        geography = route_quote(game, maps, world, origin, destination, 1, _network=network)
         if not geography:
             continue
         risk = min(.9, geography['risk'] + guard_risk)
@@ -141,12 +146,17 @@ def _candidate(game, maps, alliance, fleet):
             for quantity in sorted({maximum, maximum // 2, maximum // 4}, reverse=True):
                 if quantity <= 0:
                     continue
-                purchase = quote(row, 'buy', quantity)
+                purchase = purchases.get((item, quantity))
+                if purchase is None:
+                    purchase = quote(row, 'buy', quantity)
+                    purchases[item, quantity] = purchase
                 transport_cost = max(1, math.ceil(purchase['total'] * .003 * geography['normal_years']))
                 cost = purchase['total'] + transport_cost
+                if cost > budget:
+                    continue
                 sale = quote(other, 'sell', quantity)
                 expected = math.floor(sale['total'] * (1 - risk * .55)) - cost
-                if cost > budget or sale['gross'] > buyer_funds or expected <= max(2, cost * .02):
+                if sale['gross'] > buyer_funds or expected <= max(2, cost * .02):
                     continue
                 score = expected / geography['years']
                 if best is None or score > best['score']:

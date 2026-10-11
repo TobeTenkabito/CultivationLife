@@ -19,12 +19,15 @@ def main():
             with sync_playwright() as pw:
                 browser=pw.chromium.launch();page=browser.new_page(viewport={'width':412,'height':915})
                 page.on('pageerror',lambda e:errors.append(str(e)))
-                page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData!==null')
+                page.goto(f'http://127.0.0.1:{httpd.server_port}')
+                page.wait_for_function("configData!==null && !!window.TutorialGuide && typeof document.querySelector('#start-screen [data-tutorial-open]').onclick==='function'")
                 for theme in 'abdf':
                     page.evaluate('showStart()')
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=start] [data-theme-choice=${t}]`).click()',theme);page.evaluate('GameThemes.saved')
                     if theme=='a':
-                        page.locator('#start-screen [data-tutorial-open]').click();page.locator('#tutorial-enabled').check();page.locator('#tutorial-start').click()
+                        page.locator('#start-screen [data-tutorial-open]').click()
+                        page.wait_for_selector('#tutorial-dialog[open]')
+                        page.locator('#tutorial-enabled').check();page.locator('#tutorial-start').click()
                         page.locator('[name=name]').fill('亲手问道');page.locator('#new-game-form [type=submit]').click()
                     else:
                         page.evaluate("async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'操作验收',spirit_root:'supreme_wood',path:'dao',seed:1481,tutorial_enabled:true})});await loadGame(g.id);}")

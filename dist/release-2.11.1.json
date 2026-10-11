@@ -1,8 +1,8 @@
 {
-  "base_version": "2.11.0",
+  "base_version": "2.11.1",
   "platform": "Windows",
-  "exe_sha256": "49cd78a1331283d2970028c63b29ea7a7e8a8d2eac22c958d88f895a301fd5cb",
-  "inputs_sha256": "43681a44d93b32d99469c369bed2890cf581ef95501076eae7368a191af5c3c9",
+  "exe_sha256": "c1be7e0701e44cf04fd13be0dd1932d5bc46256781da3ec88f03a5155be8bf38",
+  "inputs_sha256": "cab4ca8e8abd419b4ff5986aa97f917a16f7c9b98385289889fbd285d0ec5641",
   "dlc_versions": {
     "asura-manifestation": "1.2.1",
     "buddhist-dharma": "1.0.0",
@@ -30,11 +30,11 @@
     "Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified",
     "Organization inheritance, contribution-backed requisitions, outsider clan succession, owner-funded local teleport arrays and temporary activity navigation verified",
     "Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes",
-    "3948 automated regression tests passed",
+    "3952 automated regression tests passed",
     "Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed",
     "Exact executable hash verified in isolated directories with and without optional DLC",
     "Release inputs match the fingerprint recorded by EXE verification"
   ],
   "android_release": "Not included in this Windows release",
-  "root_launcher_updated": false
+  "root_launcher_updated": true
 }

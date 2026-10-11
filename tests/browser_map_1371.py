@@ -23,7 +23,7 @@ def main():
         saved.player.world = 'spirit'
         saved.player.location_id = engine.maps.worlds['spirit']['default']
         engine.store.save(saved)
-        with patch.object(server_module, 'ENGINE', engine):
+        with patch.object(server_module, 'ENGINE', engine), patch.object(server_module, 'PERSISTENCE_ROOT', Path(directory)):
             httpd = ThreadingHTTPServer(('127.0.0.1', 0), server_module.Handler)
             threading.Thread(target=httpd.serve_forever, daemon=True).start()
             try:
@@ -43,7 +43,8 @@ def main():
                       game.auction_system={available:true,location_id:id,status:'scheduled',actions_until_open:2};
                       game.exchange_system={available:true,location_id:id,status:'open'};
                       renderMap(game.map,game.auction_system);
-                      return {id,name:place.name};
+                      const merchants=game.merchant_system.alliances.reduce((count,a)=>count+Number(a.hq===id)+(a.offices||[]).filter(o=>o.location_id===id).length,0);
+                      return {id,name:place.name,merchants,records:3+merchants+(place.factions||[]).length+(place.wars||[]).length+(place.ground_formations||[]).length};
                     }''')
                     navigation_locator(page,'[data-panel-target="map"]').click()
                     card = page.locator('#map-card')
@@ -58,8 +59,8 @@ def main():
                     assert directory.locator('.map-directory-entry').count() == 3
                     assert '2个时间单位后开幕' in directory.inner_text()
                     card.get_by_role('button', name='全部', exact=True).click()
-                    assert directory.locator('.map-directory-entry').count() == 6
-                    assert directory.locator('.map-directory-entry.merchant').count() == 3
+                    assert directory.locator('.map-directory-entry').count() == place['records']
+                    assert directory.locator('.map-directory-entry.merchant').count() == place['merchants']
                     xuanji = directory.locator('.map-directory-entry.merchant').filter(has_text='璇玑商盟')
                     assert '本界总部' in xuanji.text_content() and '分总部' not in xuanji.text_content()
                     assert directory.locator('select').count() == 0
