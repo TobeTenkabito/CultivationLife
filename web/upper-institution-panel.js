@@ -37,6 +37,7 @@
     jobs.append(el('p',`资材兑换需机构支付 ${fmt(d.material_stone_cost)} 灵石采购费；府库不足时暂缓兑换。`,'muted'));
     jobs.append(button('100 功勋 → 250,000 灵石','stones','',!d.joined||d.merit<100||d.treasury<250000),button(`${d.material_merit} 功勋 → 本界筑域材料一份`,'material','',!d.joined||d.merit<d.material_merit||d.treasury<d.material_stone_cost));
     if(oligarchy){
+      if(game.monster_civilizations?.available){const atlas=el('button','万灵王庭 · 诸族正统');atlas.type='button';atlas.onclick=()=>window.MonsterCivilizationsPanel?.open('court');root.append(atlas);}
       const council=section('council','祖族议权',d.seat_active?'持有代言资格':'祖族授席，无定期选举');
       council.append(el('p','五门阀议权依次为 5、4、3、2、1，总计十五。取得代言资格后没有固定任期，但本族支持低于五十时失去资格。法令须至少八议权支持；空缺不赞成，玩家未主动提案时弃权。支持达到七十的门阀愿意支持你的政见。'));
       d.people.forEach((person,i)=>{const r=el('section',null,'doctrine-book');r.append(el('h3',`${person.title} · ${d.seat_active&&d.bloc===i?'你':person.present?person.name:'席位空缺'}`),el('p',`议权 ${d.weights[i]}/15 · 支持 ${d.support[i]}/100${d.bloc===i?' · 所选门阀':''}`),el('p',`授席条件：累计功绩 ${d.seat_merit[i]}、支持 ${d.seat_support[i]}、第 ${d.weights[i]>=4?10:9} 阶修为。`),button('选择依附此族','bloc',String(i),!d.joined||d.bloc===i||d.seat_active||!!d.job),button('争取支持 · 60 功勋','lobby',String(i),!d.joined||d.merit<60||d.support[i]>=100));council.append(r);});

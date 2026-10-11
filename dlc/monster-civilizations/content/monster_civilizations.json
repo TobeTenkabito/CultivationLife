@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "taxa": {
+    "deer": {
+      "name": "青角灵鹿",
+      "role": "grazer"
+    },
+    "wolf": {
+      "name": "苍背山狼",
+      "role": "predator"
+    },
+    "birds": {
+      "name": "巡林灵羽",
+      "role": "grazer"
+    },
+    "insects": {
+      "name": "鸣泉灵虫",
+      "role": "grazer"
+    },
+    "trees": {
+      "name": "古木灵植",
+      "role": "plant"
+    },
+    "scales": {
+      "name": "玄鳞灵族",
+      "role": "predator"
+    },
+    "foxes": {
+      "name": "梦泽灵狐",
+      "role": "predator"
+    },
+    "apes": {
+      "name": "山岳灵猿",
+      "role": "grazer"
+    },
+    "shells": {
+      "name": "寒潭介族",
+      "role": "grazer"
+    },
+    "fish": {
+      "name": "逐潮灵鱼",
+      "role": "grazer"
+    }
+  },
+  "worlds": {
+    "human": {
+      "regions": [
+        "wudi_plain",
+        "muling_desert",
+        "lanjiang_steppe",
+        "whisper_archipelago",
+        "mirror_lake",
+        "frost_reed_marsh"
+      ],
+      "taxa": [
+        "deer",
+        "wolf",
+        "birds",
+        "insects",
+        "trees"
+      ]
+    },
+    "monster_realm": {
+      "regions": [
+        "myriad_beast_city",
+        "ancestral_mountain",
+        "azure_scale_sea",
+        "qingqiu_mist_marsh",
+        "starfall_grass_sea",
+        "myriad_insect_cavern"
+      ],
+      "taxa": [
+        "scales",
+        "birds",
+        "apes",
+        "foxes",
+        "shells",
+        "insects",
+        "fish",
+        "trees"
+      ]
+    },
+    "phantom_underworld": {
+      "regions": [
+        "moonbeast_plain",
+        "myriad_spirit_forest",
+        "sky_bone_ridge",
+        "nine_tail_dream_city",
+        "mirror_moon_sandbar",
+        "moon_insect_cavern"
+      ],
+      "taxa": [
+        "scales",
+        "birds",
+        "apes",
+        "foxes",
+        "shells",
+        "insects",
+        "fish",
+        "trees"
+      ]
+    },
+    "nether": {
+      "regions": [
+        "ancestral_beast_garden",
+        "world_tree_crown",
+        "primal_chaos_wilds",
+        "dragon_origin_sea",
+        "phoenix_nirvana_field",
+        "first_dream_court"
+      ],
+      "taxa": [
+        "scales",
+        "birds",
+        "apes",
+        "foxes",
+        "shells",
+        "insects",
+        "fish",
+        "trees"
+      ]
+    }
+  },
+  "blocs": [
+    {
+      "id": "scale",
+      "name": "鳞祖",
+      "official_id": "myriad_beast_palace_0",
+      "weight": 5
+    },
+    {
+      "id": "feather",
+      "name": "羽祖",
+      "official_id": "myriad_beast_palace_1",
+      "weight": 4
+    },
+    {
+      "id": "beast",
+      "name": "兽祖",
+      "official_id": "myriad_beast_palace_2",
+      "weight": 3
+    },
+    {
+      "id": "shell",
+      "name": "介祖",
+      "official_id": "myriad_beast_palace_3",
+      "weight": 2
+    },
+    {
+      "id": "plant",
+      "name": "灵植门阀",
+      "official_id": "myriad_beast_palace_4",
+      "weight": 1
+    }
+  ],
+  "cases": {
+    "abundance": "丰年：灵机温润，食源充沛。",
+    "depleted": "猎场枯竭：生灵稀少，需减少猎取。",
+    "predators": "猛兽过盛：捕食争夺加剧。",
+    "dispersal": "族群离散：栖地拥挤，生灵沿邻接道路迁徙。",
+    "forest": "古木复苏：植被茂盛，栖地趋于稳定。",
+    "recovery": "栖地恢复：护育开始见效。"
+  }
+}

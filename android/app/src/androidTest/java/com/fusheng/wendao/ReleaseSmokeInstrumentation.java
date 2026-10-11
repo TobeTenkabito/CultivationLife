@@ -206,7 +206,19 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     @Override public void onStart() {
         Bundle result=new Bundle();
+        File dlcPreferences=null;byte[] previousDlcPreferences=null;
         try {
+            String requested=arguments.getString("phase","initial");
+            if(requested.startsWith("civilizations-")) {
+                dlcPreferences=new File(getTargetContext().getFilesDir(),"game/data/extension_preferences.json");
+                if(dlcPreferences.isFile())previousDlcPreferences=java.nio.file.Files.readAllBytes(dlcPreferences.toPath());
+                File directory=dlcPreferences.getParentFile();check(directory.isDirectory()||directory.mkdirs(),"Test preference directory");
+                JSONObject enabled=new JSONObject();
+                enabled.put("official.monster-bloodlines",requested.equals("civilizations-i-only"));
+                enabled.put("official.monster-civilizations",requested.equals("civilizations-ii-only"));
+                JSONObject document=new JSONObject();document.put("schema_version",1);document.put("enabled",enabled);
+                java.nio.file.Files.write(dlcPreferences.toPath(),document.toString().getBytes(StandardCharsets.UTF_8));
+            }
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
@@ -222,14 +234,59 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                       "Release page configuration did not load",120000);
             async("GameThemes.ready");
             String baseVersion=getTargetContext().getPackageManager().getPackageInfo(getTargetContext().getPackageName(),0).versionName.split("-android")[0];
-            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.length===8 && configData.extensions.every(e=>e.status==='loaded')")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
+            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.some(e=>e.id==='official.monster-civilizations') && configData.extensions.every(e=>e.status==='loaded'"+(requested.startsWith("civilizations-")?"||e.status==='disabled'":"")+")")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("economic-force")) {
+            if(phase.startsWith("civilizations-")) {
+                boolean second=phase.equals("civilizations-ii-only"), first=phase.equals("civilizations-i-only");
+                check(Boolean.TRUE.equals(js("configData.extensions.some(e=>e.id==='official.monster-civilizations'&&e.status==='loaded')==="+second+"&&configData.extensions.some(e=>e.id==='official.monster-bloodlines'&&e.status==='loaded')==="+first)),"Independent package loading");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'独立万灵验收',spirit_root:'supreme_earth',path:'dao',seed:2100,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.monster_civilizations.available==="+second)),"Independent atlas availability");
+                if(second) {
+                    tapSelector("[data-panel-target=civilizations]");waitForJs("!!document.querySelector('.mc-region')","Independent atlas load");
+                    tapSelector("[data-civilization-action=observe]");waitForJs("!!document.querySelector('.mc-species') && !busy","Independent real observation");
+                }
+                result.putString("civilizations_matrix_scope","Signed native actual restart with original loader and user preference switches: "+phase);
+            } else if(phase.equals("economic-force")) {
                 python(assetText("economic-force-272.py"));
                 result.putString("economic_force_scope","1666 packaged catalog entries; fresh and stale schema-10 equipment actual damage against golden light in all eleven worlds");
+            } else if(phase.equals("civilizations")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'万灵原生验收',spirit_root:'supreme_earth',path:'monster',monster_species_id:'fox',seed:2100,custom_start:{world:'monster_realm',realm_index:7}})});return g.id;})()");
+                    python(assetText("civilizations-2100.py")+"\nfrom cultivation_life import server\nprepare(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();UtilityPanels.close('civilizations');true");async("GameThemes.saved");
+                    tapSelector("[data-panel-target=civilizations]");
+                    waitForJs("!!document.querySelector('.mc-region')","Atlas did not load");
+                    tapSelector("[data-civilization-action=observe]");
+                    waitForJs("!!document.querySelector('.mc-species') && !busy","Observation did not complete");
+                    tapSelector("[data-civilization-action=protect]");waitForJs("!busy","Protection stayed busy");
+                    waitForJs("document.querySelector('#civilizations-content').textContent.includes('现有护育安排')","Protection view not refreshed");
+                    String currentRegion=(String)js("document.querySelector('.mc-region').dataset.region");
+                    String otherRegion=(String)js("Array.from(document.querySelector('[aria-label=栖地记录]').options).find(o=>o.value!=="+JSONObject.quote(currentRegion)+").value");
+                    python("from cultivation_life import server\nserver._mc_picker_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+                    tapSelector("[data-civilization-region="+JSONObject.quote(otherRegion)+"]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.mc-region').length===1 && !document.querySelector('[data-civilization-action=observe]')")),"Remote report must not expose local action");
+                    tapSelector("[data-civilization-region="+JSONObject.quote(currentRegion)+"]");
+                    check(Boolean.TRUE.equals(js("!!document.querySelector('.mc-region.current')")),"Current habitat report not restored");
+                    python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._mc_picker_before");
+                    tapSelector("[data-civilization-tab=clans]");
+                    js("document.querySelector('[aria-label=新氏族名称]').value='青丘原生氏';true");
+                    tapSelector("[data-civilization-action=found]");
+                    waitForJs("document.querySelector('.mc-clan-tree')?.textContent.includes('青丘原生氏') && !busy","Clan founding did not complete");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.mc-clan-tree').firstElementChild.classList.contains('current')")),"Own clan controls should come first");
+                    check(Boolean.TRUE.equals(js("document.documentElement.scrollWidth<=innerWidth+1")),"Atlas mobile overflow");
+                    capture("civilizations-clan-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-civilization-tab=journal]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.mc-timeline li').length>0")),"Known journal empty");
+                    tapSelector("[data-civilization-tab=ecology]");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#civilizations-content svg').length>0")),"Ecology visualization missing");
+                    capture("civilizations-ecology-"+theme+"-"+arguments.getString("orientation","portrait"));
+                }
+                result.putString("civilizations_scope","Four themes, native portrait/landscape real observation, protection, interactive habitat selection without movement or save writes, first-position own clan, founding, known journal and discovery-limited visual ecology");
             } else if(phase.equals("organizations")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'势力原生验收',spirit_root:'supreme_earth',path:'dao',seed:290,custom_start:{world:'human',realm_index:4,sect:'new',sect_name:'验收宗'}})});return g.id;})()");
@@ -1412,6 +1469,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             }
             result.putString("status","passed");result.putString("phase",phase);
             result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : "Signed release APK, Android 12, offline upgrade preservation and four themes");
+            if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
@@ -1420,6 +1478,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("failure-1520");
             } catch(Throwable ignored) { /* Screenshot assertions must not mask the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString());
+            try{if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}}catch(Exception restore){result.putString("restore_error",restore.toString());}
             finish(Activity.RESULT_CANCELED,result);
         }
     }

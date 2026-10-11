@@ -21,6 +21,7 @@ class Quiet(server.Handler):
 
 def verify_matrix(page, config):
     packages = page.evaluate('TutorialHandbook.packages')
+    positions = {row[0]: i for i, row in enumerate(packages)}
     reports = []
     for mask in range(1 << len(packages)):
         extensions = [dict(id=id_, name=name, kind='dlc', enabled=bool(mask & (1 << i)),
@@ -43,10 +44,10 @@ def verify_matrix(page, config):
         route_text = json.dumps(by_id['routes'], ensure_ascii=False)
         assert '妖界与幻冥界都是二级' in route_text
         assert '魔气必须达到 8 级' in route_text
-        assert ('没有本体替代' in route_text) == (not bool(mask & 1))
-        assert ('不按灵气与阴气经验分流' in route_text) == (not bool(mask & 64))
+        assert ('没有本体替代' in route_text) == (not bool(mask & (1 << positions['monster'])))
+        assert ('不按灵气与阴气经验分流' in route_text) == (not bool(mask & (1 << positions['buddhist'])))
         intelligence = by_id['commissions']['sections'][-1][1]
-        assert ('每颗星有一次线索尝试' in intelligence) == bool(mask & 16)
+        assert ('每颗星有一次线索尝试' in intelligence) == bool(mask & (1 << positions['tianji']))
     # Enabled preferences are not necessarily loaded: errors/pending restart stay inactive.
     for status in ('disabled', 'error', 'incompatible'):
         cfg = {**config, 'extensions': [dict(id=p[1], name=p[2], kind='dlc',

@@ -211,6 +211,12 @@ class ContentRegistry:
 
         def validate(documents: dict[str, dict[str, Any]]) -> "ContentRegistry":
             registry = cls._from_documents(documents)
+            if 'monster_civilizations.json' in documents:
+                from .monster_civilization_content import validate_content
+                try:
+                    validate_content(documents['monster_civilizations.json'], documents['maps.json'])
+                except (ValueError, KeyError, TypeError) as error:
+                    raise ContentError(f'万灵内容不合法：{error}') from error
             if "achievements.json" in documents:
                 from .achievement_definitions import load_achievement_definitions
 

@@ -32,7 +32,7 @@ def main():
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                  'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
+                  'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')
     evidence_file = ROOT / f'build/exe-{RELEASE_ID}-verification.json'

@@ -61,7 +61,7 @@ def write_success_logs(root):
             f'exe-{rid}-verification.log': 'EXE verified: old binary\nEXE verified: old binary'}
     logs.update({f'{check}-ui-{rid}.log': 'passed'
                  for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                               'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console',
+                               'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console',
                                'economy-governance', 'economy-enterprises', 'economy-expansion', 'events')})
     for name, text in logs.items():
         (root / 'build' / name).write_text(text)

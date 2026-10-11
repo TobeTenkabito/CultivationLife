@@ -36,8 +36,11 @@ def main():
     require('status=passed' in log(f'android-upper-voisinage-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-upper-voisinage-{RELEASE_ID}.log'), 'Android upper voisinage checks must pass')
     require('roundtrip passed' in log(f'save-crossplatform-{RELEASE_ID}.log'), 'Cross-platform save roundtrip must pass')
     require('status=passed' in log(f'android-fusion-{RELEASE_ID}.log') and 'status=failed' not in log(f'android-fusion-{RELEASE_ID}.log'), 'Android fusion checks must pass')
+    for phase in ('civilizations-i-only','civilizations-ii-only','civilizations-neither'):
+        result=log(f'android-{phase}-{RELEASE_ID}.log')
+        require('status=passed' in result and 'status=failed' not in result, f'Android independent DLC check must pass: {phase}')
     for orientation in ('portrait', 'landscape'):
-        for phase in ('organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
+        for phase in ('civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion'):
             result = log(f'android-{phase}-{orientation}-{RELEASE_ID}.log')
             require('status=passed' in result and 'status=failed' not in result, f'Android {phase} {orientation} must pass')
         result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')
@@ -50,6 +53,7 @@ def main():
         require('status=passed' in result and 'status=failed' not in result, f'Android Asura {orientation} checks must pass')
         result = log(f'android-debug-console-{orientation}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android Debug console {orientation} checks must pass')
+    require('passed' in log(f'civilizations-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'civilizations-ui-{RELEASE_ID}.log'), 'Civilizations browser checks must pass')
     require('Verifies' in log(f'android-signature-{RELEASE_ID}.log'), 'Android APK signature must verify')
     metadata = log(f'android-metadata-{RELEASE_ID}.log')
     require(f"versionCode='{VERSION_CODE}'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata, 'Android version metadata must match the release')
@@ -125,7 +129,7 @@ def main():
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
         for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
-                     'war-logistics.md', 'organizations-290.md',
+                     'war-logistics.md', 'organizations-290.md', 'monster-civilizations-development.md',
                      'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md',
                      'world-transition-development.md', 'world-transition-audit.md', 'world-transition-state-contract.json'):
             package.write(ROOT/'docs'/name, 'docs/'+name)

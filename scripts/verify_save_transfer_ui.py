@@ -35,6 +35,10 @@ def main():
         clan=next(s for s in game.sects.values() if s.kind=='family' and s.location_id==game.player.location_id and s.world=='human')
         engine.family_action(game.id,'join',dict(target_id=clan.id))
         game=engine._load(game.id)
+        from cultivation_life.system.monster_civilizations import core
+        if game.player.world in core.config().get('worlds', {}):
+            core.activate(game)
+            engine.store.save(game)
         original = json.loads(engine.store._path(game.id).read_bytes())
         httpd = ThreadingHTTPServer(('127.0.0.1', 0), QuietHandler)
         threading.Thread(target=httpd.serve_forever, daemon=True).start()

@@ -15,6 +15,7 @@ REGISTRY_DOCUMENTS = (
 )
 CORE_DOCUMENTS = (*REGISTRY_DOCUMENTS, "maps.json")
 OPTIONAL_DOCUMENTS = (
+    "monster_civilizations.json",
     "monster_bloodlines.json", "achievements.json", "crafting.json", "formations.json",
     "sage_way.json", "guixu_tide.json", "buddhist_way.json", "doctrines.json", "monster_true_forms.json", "ghost_soul_forms.json",
 )

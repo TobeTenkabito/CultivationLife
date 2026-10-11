@@ -28,6 +28,8 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     deps._advance_monster_bloodline_year(game)
     deps._annual_demonic_update(game, rng)
     deps._annual_spirit_field_update(p)
+    if deps.advance_civilizations:
+        deps.advance_civilizations(game)
     if not p.alive or game.pending_event:
         return False
     deps._resolve_breakthroughs(game, rng)
@@ -71,6 +73,8 @@ def _advance_world_year(
         return False
     era_news.extend(deps._annual_sect_update(game, rng))
     era_news.extend(deps._annual_world_npc_update(game, rng))
+    if deps.advance_civilizations:
+        deps.advance_civilizations(game)
     if deps.advance_researchers:
         deps.advance_researchers(game)
     deps._annual_demonic_update(game, rng)

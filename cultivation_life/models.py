@@ -946,6 +946,7 @@ class GameState:
     tianji_state: dict[str, Any] = field(default_factory=dict)
     doctrine_state: dict[str, Any] = field(default_factory=dict)
     yaochi_state: dict[str, Any] = field(default_factory=dict)
+    monster_civilization_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
         "combat_popup": True,
         "achievement_popup": True,
@@ -962,6 +963,8 @@ class GameState:
 
     def __post_init__(self):
         validate_heavens_state(self.heavens_state)
+        from .monster_civilization_content import validate_state
+        validate_state(self.monster_civilization_state)
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
         from .spatial_people import bind as bind_spatial_people
@@ -1032,6 +1035,7 @@ class GameState:
             "heavens_state": decode_heavens_state(self.heavens_state),
             "tianji_state": self.tianji_state,
             "yaochi_state": self.yaochi_state,
+            "monster_civilization_state": copy.deepcopy(self.monster_civilization_state),
             "doctrine_state": self.doctrine_state,
             "settings": self.settings,
             "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
@@ -1120,6 +1124,7 @@ class GameState:
             tianji_state=copy.deepcopy(value.get("tianji_state", {}))
             if isinstance(value.get("tianji_state", {}), dict) else {},
             yaochi_state=copy.deepcopy(value.get('yaochi_state', {})) if isinstance(value.get('yaochi_state', {}), dict) else {},
+            monster_civilization_state=copy.deepcopy(value.get('monster_civilization_state', {})),
             doctrine_state=copy.deepcopy(value.get("doctrine_state", {}))
             if isinstance(value.get("doctrine_state", {}), dict) else {},
             settings={
