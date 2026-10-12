@@ -217,7 +217,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         File root=new File(getTargetContext().getExternalFilesDir(null),"verification");
         check(root.isDirectory() || root.mkdirs(),"Screenshot directory unavailable: "+root);
         try(FileOutputStream out=new FileOutputStream(new File(root,name+".png"))) {
-            bitmap.compress(Bitmap.CompressFormat.PNG,100,out);
+            check(bitmap.compress(Bitmap.CompressFormat.PNG,100,out),"Native screenshot encoding");
+            out.getFD().sync();
         }
         bitmap.recycle();
         android.util.Log.i("ReleaseSmoke", "Capture complete: " + name);
@@ -266,7 +267,42 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.startsWith("civilizations-")) {
+            if(phase.equals("maps-2131")) {
+                int mapCases=0;
+                for(String world:new String[]{"human","demon","spirit","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
+                    int rank=(world.equals("human")||world.equals("demon"))?4:(world.equals("celestial")||world.equals("asura")||world.equals("nether")||world.equals("reincarnation"))?9:7;
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'立体山海原生验收',spirit_root:'supreme_earth',path:'dao',seed:2131,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+rank+"}})});return g.id;})()");
+                    python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.settings['silent_events']=True\ng.settings['combat_popup']=False\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    for(String theme:new String[]{"a","b","d","f"}) {
+                        js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();UtilityPanels.close('map');true");async("GameThemes.saved");
+                        tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-atlas]");tapSelector("[data-atlas-mode='3d']");
+                        check(Boolean.TRUE.equals(js("document.querySelectorAll('.atlas-scene [data-atlas-location]').length===game.map.locations.length && document.querySelectorAll('[data-atlas-road]').length===game.map.roads.length")),"All real locations and roads are visible");
+                        python("from cultivation_life import server\nserver._maps_native_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+                        String yaw=(String)js("document.querySelector('.atlas-scene').dataset.yaw");tapSelector("[aria-label='向右旋转地图']");
+                        check(!yaw.equals(js("document.querySelector('.atlas-scene').dataset.yaw")),"Native map rotation");
+                        tapSelector("[aria-label='复位地图视角']");check(yaw.equals(js("document.querySelector('.atlas-scene').dataset.yaw")),"Native camera reset");
+                        tapSelector("[aria-label='放大地图']");check(Boolean.TRUE.equals(js("Number(document.querySelector('.atlas-scene').dataset.zoom)>1")),"Native zoom");tapSelector("[aria-label='复位地图视角']");
+                        String destination=(String)js("game.map.locations.find(n=>!n.current && !n.min_realm_index).id");tapSelector("[data-atlas-location="+JSONObject.quote(destination)+"] .atlas-dot");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#map-atlas .atlas-detail').dataset.selectedLocation==="+JSONObject.quote(destination)+" && document.querySelectorAll('.scene-road.route').length===game.map.locations.find(n=>n.id==="+JSONObject.quote(destination)+").route_ids.length-1")),"Native selection highlights authoritative itinerary");
+                        tapSelector("[data-atlas-mode=flat]");check(Boolean.TRUE.equals(js("!document.querySelector('.atlas-scene') && !!document.querySelector('#map-atlas svg')")),"Native planar fallback");tapSelector("[data-atlas-mode='3d']");
+                        js("(()=>{window.__mapFuture=JSON.parse(JSON.stringify(game.map));const p=JSON.parse(JSON.stringify(__mapFuture.locations[0]));p.id='native-future';p.name='新生山海';p.current=false;delete p.atlas;__mapFuture.locations.push(p);__mapFuture.roads.push({from:__mapFuture.current,to:p.id,years:3});MapAtlas.render(__mapFuture,game,()=>{},()=>false);return true;})()");
+                        check(Boolean.TRUE.equals(js("!!document.querySelector('[data-atlas-location=native-future]') && document.querySelectorAll('[data-atlas-road]').length===game.map.roads.length+1")),"Native new-location fallback");
+                        js("renderMap(game.map,game.auction_system);busy=true;MapAtlas.syncBusy();true");check(Boolean.TRUE.equals(js("document.querySelector('#map-atlas .atlas-detail [data-atlas-unavailable]').disabled")),"Map remains disabled while busy");js("busy=false;MapAtlas.syncBusy();true");
+                        python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._maps_native_before");
+                        tapSelector("[aria-label='定位当前地域']");check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('.atlas-scene .current .atlas-dot'),r=e.getBoundingClientRect(),p=e.closest('.utility-panel'),h=p.querySelector(':scope > .section-title').getBoundingClientRect();return r.bottom>h.bottom && r.top<Math.min(p.getBoundingClientRect().bottom,innerHeight);})()")),"Native locate reveals current marker below sticky heading");check(Boolean.TRUE.equals(js("document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Native map remains inside panel");
+                        capture("maps-2131-"+world+"-"+theme+"-"+arguments.getString("orientation","portrait"));mapCases++;
+                    }
+                    if(world.equals("human")) {
+                        js("window.__mapAge=game.player.age;window.__mapOrigin=game.player.world;true");
+                        tapSelector("#map-atlas .atlas-detail [data-atlas-unavailable]");waitForJs("!busy && game.player.age>__mapAge","Native map travel must consume time",60000);
+                        check(Boolean.TRUE.equals(js("game.player.world===__mapOrigin")),"Same-world map travel retains world");
+                    }
+                    js("UtilityPanels.close('map');true");
+                }
+                result.putInt("maps_cases",mapCases);
+                result.putString("maps_scope","Eleven worlds and four themes; native rotation, zoom, reset, selection, true routes, planar fallback, future locations, immutable saves, busy guard and actual travel");
+            } else if(phase.startsWith("civilizations-")) {
                 boolean second=phase.equals("civilizations-ii-only"), first=phase.equals("civilizations-i-only");
                 check(Boolean.TRUE.equals(js("configData.extensions.some(e=>e.id==='official.monster-civilizations'&&e.status==='loaded')==="+second+"&&configData.extensions.some(e=>e.id==='official.monster-bloodlines'&&e.status==='loaded')==="+first)),"Independent package loading");
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'独立万灵验收',spirit_root:'supreme_earth',path:'monster',monster_species_id:'fox',seed:2100,custom_start:{world:'human',realm_index:4}})});return g.id;})()");

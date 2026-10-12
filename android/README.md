@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-11，本体 **v2.13.0**。Gradle 配置的版本名为 **2.13.0-android.53**，versionCode **53**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-13，本体 **v2.13.1**。Gradle 配置的版本名为 **2.13.1-android.54**，versionCode **54**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 **当前源码存档结构为 10，旧结构 1–9 明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构 1–9 的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
@@ -53,3 +53,5 @@ python scripts/package_android.py
 设备专项入口为 `tests/android_acceptance_1392.py --serial <测试模拟器序号>`、`tests/android_dlc_lifecycle_1392.py` 和独立 instrumentation 阶段。脚本历史编号是稳定文件名；运行前核对当前场景与断言。测试只在专用测试模拟器执行，Debug 包名带 `.debug`，与正式存档隔离。覆盖安装验证必须使用相同正式签名。
 
 本地服务绑定随机 loopback 端口，使用进程会话令牌并校验 Host / Origin。WebView 限制同源，不申请存储权限；发布包关闭 WebView 调试。请求串行结算，慢连接读写不占用存档锁。错误处理与日志约定见 [项目说明](../README.md)。
+
+本体2.13.1按用户要求只执行地图相关专项回归；十一界、四主题、横竖屏原生地图操作与新签名产物分别验证。专项发行入口为 `python scripts/package_map_release.py`，范围与源码/产物凭据写入发行清单，不标记为全仓回归。

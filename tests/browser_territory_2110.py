@@ -38,8 +38,8 @@ def main():
                             assert page.locator('[data-atlas-view=decisions]').is_visible()
                             page.screenshot(path=str(output/f'{theme}-{width}-first-map.png'))
                             before=engine.store._path(identity).read_bytes()
-                            page.locator(f'[data-atlas-location="{prepared["source"]}"]').click()
-                            assert page.locator('.atlas-detail').get_attribute('data-selected-location')==prepared['source']
+                            page.locator(f'[data-atlas-location="{prepared["source"]}"] .atlas-dot').click()
+                            assert page.locator('#map-atlas .atlas-detail').get_attribute('data-selected-location')==prepared['source']
                             assert engine.store._path(identity).read_bytes()==before
                             page.locator('[aria-label="地图地点"]').select_option(prepared['destination'])
                             page.locator('[data-atlas-view=decisions]').click()

@@ -75,6 +75,7 @@
       });
       terrain.classList.toggle('hidden', mode !== 'terrain');
       document.querySelector('#map-atlas')?.classList.toggle('hidden', mode !== 'atlas');
+      if(mode!=='atlas')window.MapAtlas?.pauseScene();
       const description = document.querySelector('#map-description');
       description.textContent = mode === 'atlas'
         ? '点选地域查看道路与宗门影响；政策与决议在页签中查看。看图不消耗时间。'

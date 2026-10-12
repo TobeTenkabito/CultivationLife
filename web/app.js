@@ -2666,7 +2666,7 @@ function renderMap(map, auction) {
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
   let atlas=document.querySelector('#map-atlas');if(!atlas){atlas=document.createElement('section');atlas.id='map-atlas';list.before(atlas);}
-  window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),()=>busy||!game||!!game.pending_event||!game.player.alive);
+  window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive);
   const tp=map.teleport;
   for(const plan of tp?.construction||[]){
     const box=document.createElement('details');box.className='teleport-controls';
